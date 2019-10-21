@@ -10,6 +10,7 @@
 #include "CappedWeakPlaneCosseratStressUpdate.h"
 
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CappedWeakPlaneCosseratStressUpdate);
 
@@ -160,7 +161,7 @@ RankTwoTensor
 CappedWeakPlaneCosseratStressUpdate::dqdstress(const RankTwoTensor & stress) const
 {
   RankTwoTensor deriv = RankTwoTensor();
-  const Real q = std::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
+  const Real q = MathUtils::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
   if (q > 0.0)
   {
     deriv(0, 2) = stress(0, 2) / q;
@@ -180,7 +181,7 @@ CappedWeakPlaneCosseratStressUpdate::d2qdstress2(const RankTwoTensor & stress) c
 {
   RankFourTensor d2 = RankFourTensor();
 
-  const Real q = std::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
+  const Real q = MathUtils::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
   if (q == 0.0)
     return d2;
 

@@ -9,6 +9,7 @@
 
 #include "InclusionProperties.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", InclusionProperties);
 
@@ -70,14 +71,14 @@ InclusionProperties::computeQpProperties()
     // Outside the inclusion
     Real l = 0.5 * (x * x + y * y - _a * _a - _b * _b // Parameter l called lambda in the paper
                     +
-                    std::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
+                    MathUtils::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
                               4 * (_a * _a - _b * _b) * y * y));
     Real rho_a = _a / sqrt(_a * _a + l);
     Real rho_b = _b / sqrt(_b * _b + l);
     Real m_x = x / (_a * _a + l);
     Real m_y = y / (_b * _b + l);
-    Real n_x = m_x / std::sqrt(m_x * m_x + m_y * m_y);
-    Real n_y = m_y / std::sqrt(m_x * m_x + m_y * m_y);
+    Real n_x = m_x / MathUtils::sqrt(m_x * m_x + m_y * m_y);
+    Real n_y = m_y / MathUtils::sqrt(m_x * m_x + m_y * m_y);
     Real T_6 = rho_a * rho_a + rho_b * rho_b - 4 * rho_a * rho_a * n_x * n_x -
                4 * rho_b * rho_b * n_y * n_y - 4;
 

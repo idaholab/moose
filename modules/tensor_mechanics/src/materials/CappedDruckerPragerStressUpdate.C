@@ -10,6 +10,7 @@
 #include "CappedDruckerPragerStressUpdate.h"
 
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CappedDruckerPragerStressUpdate);
 
@@ -103,7 +104,7 @@ void
 CappedDruckerPragerStressUpdate::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
 {
   p = stress.trace();
-  q = std::sqrt(stress.secondInvariant());
+  q = MathUtils::sqrt(stress.secondInvariant());
 }
 
 void
@@ -142,7 +143,7 @@ CappedDruckerPragerStressUpdate::yieldFunctionValues(Real p,
   Real aaa;
   Real bbb;
   _dp.bothAB(intnl[0], aaa, bbb);
-  yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * bbb - aaa;
+  yf[0] = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * bbb - aaa;
 
   if (_stress_return_type == StressReturnType::no_tension)
     yf[1] = std::numeric_limits<Real>::lowest();
@@ -173,7 +174,7 @@ CappedDruckerPragerStressUpdate::computeAllQ(Real p,
   _dp.donlyB(intnl[0], _dp.dilation, dtanpsi);
 
   // yield function values
-  all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * bbb - aaa;
+  all_q[0].f = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * bbb - aaa;
   if (_stress_return_type == StressReturnType::no_tension)
     all_q[1].f = std::numeric_limits<Real>::lowest();
   else
@@ -193,7 +194,7 @@ CappedDruckerPragerStressUpdate::computeAllQ(Real p,
   if (_small_smoother2 == 0.0)
     all_q[0].df[1] = 1.0;
   else
-    all_q[0].df[1] = q / std::sqrt(Utility::pow<2>(q) + _small_smoother2);
+    all_q[0].df[1] = q / MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2);
   all_q[1].df[1] = 0.0;
   all_q[2].df[1] = 0.0;
 
@@ -216,7 +217,7 @@ CappedDruckerPragerStressUpdate::computeAllQ(Real p,
   if (_small_smoother2 == 0.0)
     all_q[0].dg[1] = 1.0;
   else
-    all_q[0].dg[1] = q / std::sqrt(Utility::pow<2>(q) + _small_smoother2);
+    all_q[0].dg[1] = q / MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2);
   all_q[1].dg[1] = 0.0;
   all_q[2].dg[1] = 0.0;
 
@@ -407,7 +408,7 @@ CappedDruckerPragerStressUpdate::dqdstress(const RankTwoTensor & stress) const
   const Real j2 = stress.secondInvariant();
   if (j2 == 0.0)
     return RankTwoTensor();
-  return 0.5 * stress.dsecondInvariant() / std::sqrt(j2);
+  return 0.5 * stress.dsecondInvariant() / MathUtils::sqrt(j2);
 }
 
 RankFourTensor
@@ -419,7 +420,7 @@ CappedDruckerPragerStressUpdate::d2qdstress2(const RankTwoTensor & stress) const
 
   const RankTwoTensor dj2 = stress.dsecondInvariant();
   return -0.25 * dj2.outerProduct(dj2) / std::pow(j2, 1.5) +
-         0.5 * stress.d2secondInvariant() / std::sqrt(j2);
+         0.5 * stress.d2secondInvariant() / MathUtils::sqrt(j2);
 }
 
 void

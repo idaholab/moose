@@ -10,6 +10,7 @@
 #include "CappedMohrCoulombStressUpdate.h"
 #include "libmesh/utility.h"
 #include "ElasticityTensorTools.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CappedMohrCoulombStressUpdate);
 
@@ -381,7 +382,7 @@ CappedMohrCoulombStressUpdate::initializeVarsV(const std::vector<Real> & trial_s
                              0.5 * (stress_params[2] + stress_params[0]) * sinphi - cohcos;
       if (new_mc_yf <= _f_tol && new_compressive_yf <= _f_tol)
       {
-        gaE = std::sqrt(dist_mod) * (trial_stress_params[2] - stress_params[2]);
+        gaE = MathUtils::sqrt(dist_mod) * (trial_stress_params[2] - stress_params[2]);
         found_solution = true;
       }
     }
@@ -431,7 +432,7 @@ CappedMohrCoulombStressUpdate::initializeVarsV(const std::vector<Real> & trial_s
                              0.5 * (stress_params[2] + stress_params[0]) * sinphi - cohcos;
       if (new_mc_yf <= _f_tol && new_tensile_yf <= _f_tol)
       {
-        gaE = std::sqrt(dist_mod) * (-trial_stress_params[0] + stress_params[0]);
+        gaE = MathUtils::sqrt(dist_mod) * (-trial_stress_params[0] + stress_params[0]);
         found_solution = true;
       }
     }

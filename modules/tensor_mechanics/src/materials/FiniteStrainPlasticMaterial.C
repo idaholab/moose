@@ -9,6 +9,7 @@
 
 #include "FiniteStrainPlasticMaterial.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainPlasticMaterial);
 
@@ -317,7 +318,7 @@ RankTwoTensor
 FiniteStrainPlasticMaterial::dyieldFunction_dstress(const RankTwoTensor & sig)
 {
   RankTwoTensor deriv = sig.dsecondInvariant();
-  deriv *= std::sqrt(3.0 / sig.secondInvariant()) / 2.0;
+  deriv *= MathUtils::sqrt(3.0 / sig.secondInvariant()) / 2.0;
   return deriv;
 }
 
@@ -342,7 +343,7 @@ FiniteStrainPlasticMaterial::internalPotential()
 Real
 FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 {
-  return std::sqrt(3 * stress.secondInvariant());
+  return MathUtils::sqrt(3 * stress.secondInvariant());
 }
 
 // Jacobian for stress update algorithm

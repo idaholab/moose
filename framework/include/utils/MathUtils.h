@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseError.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -196,6 +197,14 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
   if (x == 1.0)
     return 1.0;
   return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
+}
+
+template <typename T>
+Real
+sqrt(T x)
+{
+  mooseAssert(x >= 0.0, "Cannot take square root of negative value");
+  return std::sqrt(x);
 }
 
 } // namespace MathUtils

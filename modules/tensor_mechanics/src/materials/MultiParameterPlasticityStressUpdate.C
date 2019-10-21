@@ -10,6 +10,7 @@
 #include "MultiParameterPlasticityStressUpdate.h"
 #include "Conversion.h" // for stringify
 #include "MooseEnum.h"  // for enum
+#include "MathUtils.h"
 
 // libMesh includes
 #include "libmesh/utility.h" // for Utility::pow
@@ -615,9 +616,9 @@ MultiParameterPlasticityStressUpdate::lineSearch(Real & res2,
         if (disc < 0)
           tmp_lam = 0.5 * lam;
         else if (b <= 0)
-          tmp_lam = (-b + std::sqrt(disc)) / (3.0 * a);
+          tmp_lam = (-b + MathUtils::sqrt(disc)) / (3.0 * a);
         else
-          tmp_lam = -slope / (b + std::sqrt(disc));
+          tmp_lam = -slope / (b + MathUtils::sqrt(disc));
       }
       if (tmp_lam > 0.5 * lam)
         tmp_lam = 0.5 * lam;

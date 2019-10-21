@@ -9,6 +9,7 @@
 
 #include "InteractionIntegralBenchmarkBC.h"
 #include "Function.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegralBenchmarkBC);
 
@@ -71,15 +72,15 @@ InteractionIntegralBenchmarkBC::computeQpValue()
   Real disp(0.0);
 
   if (_component == 0)
-    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) *
+    disp = 1 / (2 * _mu) * MathUtils::sqrt(_r / (2 * libMesh::pi)) *
            (ki_val * ct2 * (_kappa - 1 + 2 * st2 * st2) +
             kii_val * st2 * (_kappa + 1 + 2 * ct2 * ct2));
   else if (_component == 1)
-    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) *
+    disp = 1 / (2 * _mu) * MathUtils::sqrt(_r / (2 * libMesh::pi)) *
            (ki_val * st2 * (_kappa + 1 - 2 * ct2 * ct2) -
             kii_val * ct2 * (_kappa - 1 - 2 * st2 * st2));
   else if (_component == 2)
-    disp = 1 / _mu * std::sqrt(2 * _r / libMesh::pi) * kiii_val * st2;
+    disp = 1 / _mu * MathUtils::sqrt(2 * _r / libMesh::pi) * kiii_val * st2;
 
   return disp;
 }

@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "RankTwoTensor.h"
+#include "MathUtils.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
@@ -531,8 +532,8 @@ CrackFrontDefinition::orderEndNodes(std::vector<dof_id_type> & end_nodes)
     if (MooseUtils::absoluteFuzzyGreaterThan(node1(i), 0.0, _tol))
       ++num_positive_coor1;
   }
-  dist_from_origin0 = std::sqrt(dist_from_origin0);
-  dist_from_origin1 = std::sqrt(dist_from_origin1);
+  dist_from_origin0 = MathUtils::sqrt(dist_from_origin0);
+  dist_from_origin1 = MathUtils::sqrt(dist_from_origin1);
 
   bool switch_ends = false;
   if (num_positive_coor1 > num_positive_coor0)

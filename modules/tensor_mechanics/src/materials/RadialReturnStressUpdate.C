@@ -11,6 +11,7 @@
 
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
+#include "MathUtils.h"
 
 template <>
 InputParameters
@@ -78,7 +79,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
   // compute the effective trial stress
   Real dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
-  Real effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
+  Real effective_trial_stress = MathUtils::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
   // Set the value of 3 * shear modulus for use as a reference residual value
   _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
@@ -120,16 +121,16 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
     {
       // mu = _three_shear_modulus / 3.0;
       // norm_dev_stress = ||s_n+1||
-      // effective_trial_stress = von mises trial stress = std::sqrt(3.0 / 2.0) * ||s_n+1^trial||
+      // effective_trial_stress = von mises trial stress = MathUtils::sqrt(3.0 / 2.0) * ||s_n+1^trial||
       // scalar_effective_inelastic_strain = Delta epsilon^cr_n+1
       // deriv = derivative of scalar_effective_inelastic_strain w.r.t. von mises stress
-      // deriv = std::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
+      // deriv = MathUtils::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
 
       mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
 
       const RankTwoTensor deviatoric_stress = stress_new.deviatoric();
       const Real norm_dev_stress =
-          std::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
+          MathUtils::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
       mooseAssert(norm_dev_stress != 0.0, "Norm of the deviatoric is zero");
 
       const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
@@ -137,7 +138,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
       const Real deriv =
           computeStressDerivative(effective_trial_stress, scalar_effective_inelastic_strain);
       const Real scalar_one = _three_shear_modulus * scalar_effective_inelastic_strain /
-                              std::sqrt(1.5) / norm_dev_stress;
+                              MathUtils::sqrt(1.5) / norm_dev_stress;
 
       tangent_operator = scalar_one * _deviatoric_projection_four +
                          (_three_shear_modulus * deriv - scalar_one) * flow_direction_dyad;

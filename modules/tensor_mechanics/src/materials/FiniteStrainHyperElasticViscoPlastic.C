@@ -9,6 +9,7 @@
 
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainHyperElasticViscoPlastic);
 
@@ -531,7 +532,7 @@ FiniteStrainHyperElasticViscoPlastic::computeNorm(const std::vector<Real> & var)
   Real val = 0.0;
   for (unsigned int i = 0; i < var.size(); ++i)
     val += Utility::pow<2>(var[i]);
-  return std::sqrt(val);
+  return MathUtils::sqrt(val);
 }
 
 void

@@ -9,6 +9,7 @@
 
 #include "ComputeInterfaceStress.h"
 #include "RankTwoTensor.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeInterfaceStress);
 
@@ -84,7 +85,7 @@ ComputeInterfaceStress::computeQpProperties()
     const Real nx = (*_grad_v[i])[_qp](0);
     const Real ny = (*_grad_v[i])[_qp](1);
     const Real nz = (*_grad_v[i])[_qp](2);
-    const Real s = _stress[i] / std::sqrt(grad_norm_sq);
+    const Real s = _stress[i] / MathUtils::sqrt(grad_norm_sq);
 
     S(0, 0) += (ny * ny + nz * nz) * s;
     S(0, 1) += -nx * ny * s;

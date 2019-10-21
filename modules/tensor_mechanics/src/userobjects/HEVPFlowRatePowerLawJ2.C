@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HEVPFlowRatePowerLawJ2.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", HEVPFlowRatePowerLawJ2);
 
@@ -136,5 +137,5 @@ HEVPFlowRatePowerLawJ2::computeEqvStress(const RankTwoTensor & pk2_dev,
 {
   RankTwoTensor sdev = pk2_dev * ce;
   Real val = sdev.doubleContraction(sdev.transpose());
-  return std::sqrt(1.5 * val);
+  return MathUtils::sqrt(1.5 * val);
 }

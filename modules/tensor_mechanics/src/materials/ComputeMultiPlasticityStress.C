@@ -10,6 +10,7 @@
 #include "ComputeMultiPlasticityStress.h"
 #include "MultiPlasticityDebugger.h"
 #include "MatrixTools.h"
+#include "MathUtils.h"
 
 #include "MooseException.h"
 #include "RotationMatrix.h" // for rotVecToZ
@@ -1492,9 +1493,9 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
         if (disc < 0)
           tmp_lam = 0.5 * lam;
         else if (b <= 0)
-          tmp_lam = (-b + std::sqrt(disc)) / (3.0 * a);
+          tmp_lam = (-b + MathUtils::sqrt(disc)) / (3.0 * a);
         else
-          tmp_lam = -slope / (b + std::sqrt(disc));
+          tmp_lam = -slope / (b + MathUtils::sqrt(disc));
       }
       if (tmp_lam > 0.5 * lam)
         tmp_lam = 0.5 * lam;

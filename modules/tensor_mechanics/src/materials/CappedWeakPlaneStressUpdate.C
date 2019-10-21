@@ -10,6 +10,7 @@
 #include "CappedWeakPlaneStressUpdate.h"
 
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CappedWeakPlaneStressUpdate);
 
@@ -121,7 +122,7 @@ CappedWeakPlaneStressUpdate::computePQ(const RankTwoTensor & stress, Real & p, R
 {
   p = stress(2, 2);
   // Because the following is not explicitly symmeterised, it is useful for the Cosserat case too
-  q = std::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
+  q = MathUtils::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
 }
 
 void
@@ -264,7 +265,7 @@ CappedWeakPlaneStressUpdate::yieldFunctionValues(Real p,
                                                  const std::vector<Real> & intnl,
                                                  std::vector<Real> & yf) const
 {
-  yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
+  yf[0] = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
           _cohesion.value(intnl[0]);
 
   if (_stress_return_type == StressReturnType::no_tension)
@@ -285,7 +286,7 @@ CappedWeakPlaneStressUpdate::computeAllQ(Real p,
                                          std::vector<yieldAndFlow> & all_q) const
 {
   // yield function values
-  all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
+  all_q[0].f = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
                _cohesion.value(intnl[0]);
   if (_stress_return_type == StressReturnType::no_tension)
     all_q[1].f = std::numeric_limits<Real>::lowest();
@@ -306,7 +307,7 @@ CappedWeakPlaneStressUpdate::computeAllQ(Real p,
   if (_small_smoother2 == 0.0)
     all_q[0].df[1] = 1.0;
   else
-    all_q[0].df[1] = q / std::sqrt(Utility::pow<2>(q) + _small_smoother2);
+    all_q[0].df[1] = q / MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2);
   all_q[1].df[1] = 0.0;
   all_q[2].df[1] = 0.0;
 
@@ -329,7 +330,7 @@ CappedWeakPlaneStressUpdate::computeAllQ(Real p,
   if (_small_smoother2 == 0.0)
     all_q[0].dg[1] = 1.0;
   else
-    all_q[0].dg[1] = q / std::sqrt(Utility::pow<2>(q) + _small_smoother2);
+    all_q[0].dg[1] = q / MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2);
   all_q[1].dg[1] = 0.0;
   all_q[2].dg[1] = 0.0;
 
@@ -499,7 +500,7 @@ RankTwoTensor
 CappedWeakPlaneStressUpdate::dqdstress(const RankTwoTensor & stress) const
 {
   RankTwoTensor deriv = RankTwoTensor();
-  const Real q = std::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
+  const Real q = MathUtils::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
   if (q > 0.0)
   {
     deriv(2, 0) = deriv(0, 2) = 0.5 * stress(2, 0) / q;
@@ -519,7 +520,7 @@ CappedWeakPlaneStressUpdate::d2qdstress2(const RankTwoTensor & stress) const
 {
   RankFourTensor d2 = RankFourTensor();
 
-  const Real q = std::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
+  const Real q = MathUtils::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
   if (q == 0.0)
     return d2;
 

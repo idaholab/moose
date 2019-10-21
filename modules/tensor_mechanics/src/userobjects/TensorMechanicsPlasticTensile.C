@@ -10,6 +10,7 @@
 #include "TensorMechanicsPlasticTensile.h"
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensile);
 
@@ -74,13 +75,13 @@ TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const InputParamete
 {
   if (_lode_cutoff < 0)
     mooseError("tensile_lode_cutoff must not be negative");
-  _ccc = (-std::cos(3.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / std::sqrt(3.0)) -
-          3.0 * _sin3tt * (std::sin(_tt) + std::cos(_tt) / std::sqrt(3.0))) /
+  _ccc = (-std::cos(3.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / MathUtils::sqrt(3.0)) -
+          3.0 * _sin3tt * (std::sin(_tt) + std::cos(_tt) / MathUtils::sqrt(3.0))) /
          (18.0 * Utility::pow<3>(std::cos(3.0 * _tt)));
-  _bbb = (std::sin(6.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / std::sqrt(3.0)) -
-          6.0 * std::cos(6.0 * _tt) * (std::sin(_tt) + std::cos(_tt) / std::sqrt(3.0))) /
+  _bbb = (std::sin(6.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / MathUtils::sqrt(3.0)) -
+          6.0 * std::cos(6.0 * _tt) * (std::sin(_tt) + std::cos(_tt) / MathUtils::sqrt(3.0))) /
          (18.0 * Utility::pow<3>(std::cos(3.0 * _tt)));
-  _aaa = -std::sin(_tt) / std::sqrt(3.0) - _bbb * _sin3tt - _ccc * Utility::pow<2>(_sin3tt) +
+  _aaa = -std::sin(_tt) / MathUtils::sqrt(3.0) - _bbb * _sin3tt - _ccc * Utility::pow<2>(_sin3tt) +
          std::cos(_tt);
 }
 
@@ -94,7 +95,7 @@ TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, Real 
     // the non-edge-smoothed version
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
-    return mean_stress + std::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress)) -
+    return mean_stress + MathUtils::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress)) -
            tensile_strength(intnl);
   }
   else
@@ -102,7 +103,7 @@ TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, Real 
     // the edge-smoothed version
     Real kk = _aaa + _bbb * sin3Lode + _ccc * Utility::pow<2>(sin3Lode);
     Real sibar2 = stress.secondInvariant();
-    return mean_stress + std::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk)) -
+    return mean_stress + MathUtils::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk)) -
            tensile_strength(intnl);
   }
 }
@@ -120,7 +121,7 @@ TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stre
     std::vector<Real> eigvals;
     std::vector<RankTwoTensor> deigvals;
     stress.dsymmetricEigenvalues(eigvals, deigvals);
-    Real denom = std::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress));
+    Real denom = MathUtils::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress));
     return dmean_stress + (0.5 * dsmooth(stress) * dmean_stress +
                            (eigvals[2] - mean_stress) * (deigvals[2] - dmean_stress)) /
                               denom;
@@ -132,7 +133,7 @@ TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stre
     RankTwoTensor dkk = (_bbb + 2.0 * _ccc * sin3Lode) * stress.dsin3Lode(_lode_cutoff);
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
-    Real denom = std::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk));
+    Real denom = MathUtils::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk));
     return dmean_stress + (0.5 * dsmooth(stress) * dmean_stress +
                            0.5 * dsibar2 * Utility::pow<2>(kk) + sibar2 * kk * dkk) /
                               denom;
@@ -169,7 +170,7 @@ TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stre
     stress.dsymmetricEigenvalues(eigvals, deigvals);
     stress.d2symmetricEigenvalues(d2eigvals);
 
-    Real denom = std::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress));
+    Real denom = MathUtils::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress));
     Real denom3 = Utility::pow<3>(denom);
     RankTwoTensor numer_part = deigvals[2] - dmean_stress;
     RankTwoTensor numer_full =
@@ -206,7 +207,7 @@ TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stre
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
     RankFourTensor d2sibar2 = stress.d2secondInvariant();
 
-    Real denom = std::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk));
+    Real denom = MathUtils::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk));
     Real denom3 = Utility::pow<3>(denom);
     Real d2smooth_over_denom = d2smooth(stress) / denom;
     RankTwoTensor numer_full =

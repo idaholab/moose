@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MixedModeEquivalentK.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", MixedModeEquivalentK);
 
@@ -38,6 +39,6 @@ MixedModeEquivalentK::MixedModeEquivalentK(const InputParameters & parameters)
 Real
 MixedModeEquivalentK::getValue()
 {
-  return std::sqrt(_ki_value * _ki_value + _kii_value * _kii_value +
+  return MathUtils::sqrt(_ki_value * _ki_value + _kii_value * _kii_value +
                    1 / (1 - _poissons_ratio) * _kiii_value * _kiii_value);
 }

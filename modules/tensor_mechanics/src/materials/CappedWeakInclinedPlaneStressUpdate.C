@@ -10,6 +10,7 @@
 #include "CappedWeakInclinedPlaneStressUpdate.h"
 #include "RotationMatrix.h" // for rotVecToZ
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CappedWeakInclinedPlaneStressUpdate);
 
@@ -106,7 +107,7 @@ CappedWeakInclinedPlaneStressUpdate::computePQ(const RankTwoTensor & stress,
   RankTwoTensor rotated_stress = stress;
   rotated_stress.rotate(_rot_n_to_z);
   p = rotated_stress(2, 2);
-  q = std::sqrt(Utility::pow<2>(rotated_stress(0, 2)) + Utility::pow<2>(rotated_stress(1, 2)));
+  q = MathUtils::sqrt(Utility::pow<2>(rotated_stress(0, 2)) + Utility::pow<2>(rotated_stress(1, 2)));
 }
 
 void

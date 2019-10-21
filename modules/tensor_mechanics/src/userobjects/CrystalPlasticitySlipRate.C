@@ -9,6 +9,7 @@
 
 #include "CrystalPlasticitySlipRate.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 #include <fstream>
 
@@ -84,7 +85,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
     // Normalize the vectors
     Real mag;
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
-    mag = std::sqrt(mag);
+    mag = MathUtils::sqrt(mag);
 
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       _no(i * LIBMESH_DIM + j) = vec[j] / mag;
@@ -97,7 +98,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
 
     // Normalize the vectors
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
-    mag = std::sqrt(mag);
+    mag = MathUtils::sqrt(mag);
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       _mo(i * LIBMESH_DIM + j) = vec[j] / mag;

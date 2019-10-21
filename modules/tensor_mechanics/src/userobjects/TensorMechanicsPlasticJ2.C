@@ -9,6 +9,7 @@
 
 #include "TensorMechanicsPlasticJ2.h"
 #include "RankFourTensor.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticJ2);
 
@@ -49,7 +50,7 @@ TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const InputParameters & param
 Real
 TensorMechanicsPlasticJ2::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
-  return std::sqrt(3.0 * stress.secondInvariant()) - yieldStrength(intnl);
+  return MathUtils::sqrt(3.0 * stress.secondInvariant()) - yieldStrength(intnl);
 }
 
 RankTwoTensor
@@ -59,7 +60,7 @@ TensorMechanicsPlasticJ2::dyieldFunction_dstress(const RankTwoTensor & stress, R
   if (sII == 0.0)
     return RankTwoTensor();
   else
-    return 0.5 * std::sqrt(3.0 / sII) * stress.dsecondInvariant();
+    return 0.5 * MathUtils::sqrt(3.0 / sII) * stress.dsecondInvariant();
 }
 
 Real
@@ -81,8 +82,8 @@ TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, R
   if (sII == 0)
     return RankFourTensor();
 
-  RankFourTensor dfp = 0.5 * std::sqrt(3.0 / sII) * stress.d2secondInvariant();
-  Real pre = -0.25 * std::sqrt(3.0) * std::pow(sII, -1.5);
+  RankFourTensor dfp = 0.5 * MathUtils::sqrt(3.0 / sII) * stress.d2secondInvariant();
+  Real pre = -0.25 * MathUtils::sqrt(3.0) * std::pow(sII, -1.5);
   RankTwoTensor dII = stress.dsecondInvariant();
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
@@ -205,7 +206,7 @@ TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_
   Real h = 3 * mu + dyieldStrength(intnl);
   RankTwoTensor sij = stress.deviatoric();
   Real sII = stress.secondInvariant();
-  Real equivalent_stress = std::sqrt(3.0 * sII);
+  Real equivalent_stress = MathUtils::sqrt(3.0 * sII);
   Real zeta = cumulative_pm[0] / (1.0 + 3.0 * mu * cumulative_pm[0] / equivalent_stress);
 
   return E_ijkl - 3.0 * mu * mu / sII / h * sij.outerProduct(sij) -

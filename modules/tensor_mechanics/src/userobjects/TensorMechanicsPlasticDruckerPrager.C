@@ -10,6 +10,7 @@
 #include "TensorMechanicsPlasticDruckerPrager.h"
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
 
@@ -81,13 +82,13 @@ TensorMechanicsPlasticDruckerPrager::yieldFunction(const RankTwoTensor & stress,
   Real aaa;
   Real bbb;
   bothAB(intnl, aaa, bbb);
-  return std::sqrt(stress.secondInvariant()) + stress.trace() * bbb - aaa;
+  return MathUtils::sqrt(stress.secondInvariant()) + stress.trace() * bbb - aaa;
 }
 
 RankTwoTensor
 TensorMechanicsPlasticDruckerPrager::df_dsig(const RankTwoTensor & stress, Real bbb) const
 {
-  return 0.5 * stress.dsecondInvariant() / std::sqrt(stress.secondInvariant()) +
+  return 0.5 * stress.dsecondInvariant() / MathUtils::sqrt(stress.secondInvariant()) +
          stress.dtrace() * bbb;
 }
 
@@ -123,7 +124,7 @@ TensorMechanicsPlasticDruckerPrager::dflowPotential_dstress(const RankTwoTensor 
                                                             Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
-  dr_dstress = 0.5 * stress.d2secondInvariant() / std::sqrt(stress.secondInvariant());
+  dr_dstress = 0.5 * stress.d2secondInvariant() / MathUtils::sqrt(stress.secondInvariant());
   dr_dstress += -0.5 * 0.5 * stress.dsecondInvariant().outerProduct(stress.dsecondInvariant()) /
                 std::pow(stress.secondInvariant(), 1.5);
   return dr_dstress;
@@ -191,16 +192,16 @@ TensorMechanicsPlasticDruckerPrager::donlyB(Real intnl, int fd, Real & dbbb) con
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 - s) + s * ds / Utility::pow<2>(3.0 - s));
+      dbbb = 2.0 / MathUtils::sqrt(3.0) * (ds / (3.0 - s) + s * ds / Utility::pow<2>(3.0 - s));
       break;
     case 1: // inner_tip
-      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 + s) - s * ds / Utility::pow<2>(3.0 + s));
+      dbbb = 2.0 / MathUtils::sqrt(3.0) * (ds / (3.0 + s) - s * ds / Utility::pow<2>(3.0 + s));
       break;
     case 2: // lode_zero
       dbbb = ds / 3.0;
       break;
     case 3: // inner_edge
-      dbbb = ds / std::sqrt(9.0 + 3.0 * Utility::pow<2>(s)) -
+      dbbb = ds / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(s)) -
              3 * s * s * ds / std::pow(9.0 + 3.0 * Utility::pow<2>(s), 1.5);
       break;
     case 4: // native
@@ -233,17 +234,17 @@ TensorMechanicsPlasticDruckerPrager::dbothAB(Real intnl, Real & daaa, Real & dbb
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      daaa = 2.0 * std::sqrt(3.0) *
+      daaa = 2.0 * MathUtils::sqrt(3.0) *
              (dC * cosphi / (3.0 - sinphi) + C * dcosphi / (3.0 - sinphi) +
               C * cosphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
-      dbbb = 2.0 / std::sqrt(3.0) *
+      dbbb = 2.0 / MathUtils::sqrt(3.0) *
              (dsinphi / (3.0 - sinphi) + sinphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
       break;
     case 1: // inner_tip
-      daaa = 2.0 * std::sqrt(3.0) *
+      daaa = 2.0 * MathUtils::sqrt(3.0) *
              (dC * cosphi / (3.0 + sinphi) + C * dcosphi / (3.0 + sinphi) -
               C * cosphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
-      dbbb = 2.0 / std::sqrt(3.0) *
+      dbbb = 2.0 / MathUtils::sqrt(3.0) *
              (dsinphi / (3.0 + sinphi) - sinphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
       break;
     case 2: // lode_zero
@@ -251,11 +252,11 @@ TensorMechanicsPlasticDruckerPrager::dbothAB(Real intnl, Real & daaa, Real & dbb
       dbbb = dsinphi / 3.0;
       break;
     case 3: // inner_edge
-      daaa = 3.0 * dC * cosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) +
-             3.0 * C * dcosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
+      daaa = 3.0 * dC * cosphi / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) +
+             3.0 * C * dcosphi / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
              3.0 * C * cosphi * 3.0 * sinphi * dsinphi /
                  std::pow(9.0 + 3.0 * Utility::pow<2>(sinphi), 1.5);
-      dbbb = dsinphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
+      dbbb = dsinphi / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
              3.0 * sinphi * sinphi * dsinphi / std::pow(9.0 + 3.0 * Utility::pow<2>(sinphi), 1.5);
       break;
     case 4: // native
@@ -274,20 +275,20 @@ TensorMechanicsPlasticDruckerPrager::initializeAandB(Real intnl, Real & aaa, Rea
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      aaa = 2.0 * std::sqrt(3.0) * C * cosphi / (3.0 - sinphi);
-      bbb = 2.0 * sinphi / std::sqrt(3.0) / (3.0 - sinphi);
+      aaa = 2.0 * MathUtils::sqrt(3.0) * C * cosphi / (3.0 - sinphi);
+      bbb = 2.0 * sinphi / MathUtils::sqrt(3.0) / (3.0 - sinphi);
       break;
     case 1: // inner_tip
-      aaa = 2.0 * std::sqrt(3.0) * C * cosphi / (3.0 + sinphi);
-      bbb = 2.0 * sinphi / std::sqrt(3.0) / (3.0 + sinphi);
+      aaa = 2.0 * MathUtils::sqrt(3.0) * C * cosphi / (3.0 + sinphi);
+      bbb = 2.0 * sinphi / MathUtils::sqrt(3.0) / (3.0 + sinphi);
       break;
     case 2: // lode_zero
       aaa = C * cosphi;
       bbb = sinphi / 3.0;
       break;
     case 3: // inner_edge
-      aaa = 3.0 * C * cosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
-      bbb = sinphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
+      aaa = 3.0 * C * cosphi / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
+      bbb = sinphi / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
       break;
     case 4: // native
       aaa = C;
@@ -303,16 +304,16 @@ TensorMechanicsPlasticDruckerPrager::initializeB(Real intnl, int fd, Real & bbb)
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      bbb = 2.0 * s / std::sqrt(3.0) / (3.0 - s);
+      bbb = 2.0 * s / MathUtils::sqrt(3.0) / (3.0 - s);
       break;
     case 1: // inner_tip
-      bbb = 2.0 * s / std::sqrt(3.0) / (3.0 + s);
+      bbb = 2.0 * s / MathUtils::sqrt(3.0) / (3.0 + s);
       break;
     case 2: // lode_zero
       bbb = s / 3.0;
       break;
     case 3: // inner_edge
-      bbb = s / std::sqrt(9.0 + 3.0 * Utility::pow<2>(s));
+      bbb = s / MathUtils::sqrt(9.0 + 3.0 * Utility::pow<2>(s));
       break;
     case 4: // native
       const Real c =

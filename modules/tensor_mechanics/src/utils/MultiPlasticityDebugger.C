@@ -10,6 +10,7 @@
 #include "MultiPlasticityDebugger.h"
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 template <>
 InputParameters
@@ -197,7 +198,7 @@ MultiPlasticityDebugger::checkJacobian(const RankFourTensor & E_inv,
       L2_numer += Utility::pow<2>(jac[row][col] - fdjac[row][col]);
       L2_denom += Utility::pow<2>(jac[row][col] + fdjac[row][col]);
     }
-  Moose::err << "\nRelative L2norm = " << std::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
+  Moose::err << "\nRelative L2norm = " << MathUtils::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
 
   Moose::err << "\nHand-coded Jacobian:\n";
   for (unsigned row = 0; row < jac.size(); ++row)
@@ -487,7 +488,7 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
       L2_denom += Utility::pow<2>(jac_coded[row][col] + jac_fd[row][col]);
     }
   Moose::err << "Relative L2norm of the hand-coded and finite-difference Jacobian is "
-             << std::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
+             << MathUtils::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
 
   std::vector<Real> fd_times_x;
   fd_times_x.assign(orig_rhs.size(), 0);
@@ -511,7 +512,7 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
     L2_numer += Utility::pow<2>(orig_rhs[i] - fd_times_x[i]);
     L2_denom += Utility::pow<2>(orig_rhs[i] + fd_times_x[i]);
   }
-  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
+  Moose::err << "\nRelative L2norm of these is " << MathUtils::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
 }
 
 void

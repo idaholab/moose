@@ -10,6 +10,7 @@
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPragerHyperbolic);
 
@@ -64,13 +65,13 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::yieldFunction(const RankTwoTensor
   Real aaa;
   Real bbb;
   bothAB(intnl, aaa, bbb);
-  return std::sqrt(stress.secondInvariant() + _smoother2) + stress.trace() * bbb - aaa;
+  return MathUtils::sqrt(stress.secondInvariant() + _smoother2) + stress.trace() * bbb - aaa;
 }
 
 RankTwoTensor
 TensorMechanicsPlasticDruckerPragerHyperbolic::df_dsig(const RankTwoTensor & stress, Real bbb) const
 {
-  return 0.5 * stress.dsecondInvariant() / std::sqrt(stress.secondInvariant() + _smoother2) +
+  return 0.5 * stress.dsecondInvariant() / MathUtils::sqrt(stress.secondInvariant() + _smoother2) +
          stress.dtrace() * bbb;
 }
 
@@ -79,7 +80,7 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::dflowPotential_dstress(const Rank
                                                                       Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
-  dr_dstress = 0.5 * stress.d2secondInvariant() / std::sqrt(stress.secondInvariant() + _smoother2);
+  dr_dstress = 0.5 * stress.d2secondInvariant() / MathUtils::sqrt(stress.secondInvariant() + _smoother2);
   dr_dstress += -0.5 * 0.5 * stress.dsecondInvariant().outerProduct(stress.dsecondInvariant()) /
                 std::pow(stress.secondInvariant() + _smoother2, 1.5);
   return dr_dstress;
@@ -158,12 +159,12 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & t
     dll = daaa - dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) +
           bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow);
     residual = bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - aaa +
-               std::sqrt(J2trial / Utility::pow<2>(1 + dpm[0] * mu / ll) + _smoother2);
+               MathUtils::sqrt(J2trial / Utility::pow<2>(1 + dpm[0] * mu / ll) + _smoother2);
     jac = dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) -
           bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow) - daaa +
           0.5 * J2trial * (-2.0) * (mu / ll - dpm[0] * mu * dll / ll / ll) /
               Utility::pow<3>(1 + dpm[0] * mu / ll) /
-              std::sqrt(J2trial / Utility::pow<2>(1.0 + dpm[0] * mu / ll) + _smoother2);
+              MathUtils::sqrt(J2trial / Utility::pow<2>(1.0 + dpm[0] * mu / ll) + _smoother2);
     dpm[0] += -residual / jac;
     if (iter > _max_iters) // not converging
       return false;
@@ -221,7 +222,7 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::consistentTangentOperator(
   const Real bbb_flow_mod = bbb_flow + cumulative_pm[0] * dbbb_flow;
   const Real J2 = stress.secondInvariant();
   const RankTwoTensor sij = stress.deviatoric();
-  const Real sq = std::sqrt(J2 + _smoother2);
+  const Real sq = MathUtils::sqrt(J2 + _smoother2);
 
   const Real one_over_h =
       1.0 / (-dyieldFunction_dintnl(stress, intnl) + mu * J2 / Utility::pow<2>(sq) +

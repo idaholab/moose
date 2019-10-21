@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsPlasticIsotropicSD.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticIsotropicSD);
 
@@ -32,7 +33,7 @@ TensorMechanicsPlasticIsotropicSD::TensorMechanicsPlasticIsotropicSD(
     _c(getParam<Real>("c")),
     _associative(getParam<bool>("associative"))
 {
-  _a = 1.0 / (_b + std::pow(1.0 / std::sqrt(27.0) - _c / 27.0, 1.0 / 3.0));
+  _a = 1.0 / (_b + std::pow(1.0 / MathUtils::sqrt(27.0) - _c / 27.0, 1.0 / 3.0));
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
       for (unsigned k = 0; k < 3; ++k)

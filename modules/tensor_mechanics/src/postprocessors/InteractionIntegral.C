@@ -16,6 +16,7 @@
 #include "libmesh/quadrature.h"
 #include "DerivativeMaterialInterface.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 MooseEnum
 InteractionIntegral::qFunctionType()
@@ -308,7 +309,7 @@ InteractionIntegral::computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor 
   Real ctt2 = std::cos(tt2);
   Real ct2sq = Utility::pow<2>(ct2);
   Real ct2cu = Utility::pow<3>(ct2);
-  Real sqrt2PiR = std::sqrt(2.0 * libMesh::pi * _r);
+  Real sqrt2PiR = MathUtils::sqrt(2.0 * libMesh::pi * _r);
 
   // Calculate auxiliary stress tensor
   aux_stress.zero();

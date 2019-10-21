@@ -13,6 +13,7 @@
 #include "NonlinearSystem.h"
 #include "MooseVariable.h"
 #include "Function.h"
+#include "MathUtils.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
@@ -329,17 +330,17 @@ ComputeIncrementalBeamStrain::computeQpStrain()
         _total_rotation[0] * ((*_rot_eigenstrain[i])[_qp] - (*_rot_eigenstrain_old[i])[_qp]);
   }
 
-  Real c1_paper = std::sqrt(_material_stiffness[0](0));
-  Real c2_paper = std::sqrt(_material_stiffness[0](1));
+  Real c1_paper = MathUtils::sqrt(_material_stiffness[0](0));
+  Real c2_paper = MathUtils::sqrt(_material_stiffness[0](1));
 
   Real effec_stiff_1 = std::max(c1_paper, c2_paper);
 
-  Real effec_stiff_2 = 2 / (c2_paper * std::sqrt(A_avg / Iz_avg));
+  Real effec_stiff_2 = 2 / (c2_paper * MathUtils::sqrt(A_avg / Iz_avg));
 
   _effective_stiffness[_qp] = std::max(effec_stiff_1, _original_length[0] / effec_stiff_2);
 
   if (_prefactor_function)
-    _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
+    _effective_stiffness[_qp] *= MathUtils::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
 }
 
 void

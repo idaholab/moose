@@ -9,6 +9,7 @@
 
 #include "ComputeFiniteStrain.h"
 #include "Assembly.h"
+#include "MathUtils.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
@@ -163,7 +164,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 
       // cos theta_a
       const Real C1 =
-          std::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
+          MathUtils::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
                     2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
 
       Real C2;
@@ -179,7 +180,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
                                    72.0 * Utility::pow<3>(p) + 5.0 * Utility::pow<4>(p)) /
                  (512.0 * Utility::pow<4>(p));
       const Real C3 =
-          0.5 * std::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
+          0.5 * MathUtils::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
                           Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
@@ -209,9 +210,9 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
       Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
 
-      const Real lambda1 = std::sqrt(e_value[0]);
-      const Real lambda2 = std::sqrt(e_value[1]);
-      const Real lambda3 = std::sqrt(e_value[2]);
+      const Real lambda1 = MathUtils::sqrt(e_value[0]);
+      const Real lambda2 = MathUtils::sqrt(e_value[1]);
+      const Real lambda3 = MathUtils::sqrt(e_value[2]);
 
       N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
       N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));

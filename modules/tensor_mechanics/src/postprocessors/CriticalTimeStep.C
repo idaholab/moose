@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CriticalTimeStep.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", CriticalTimeStep);
 
@@ -57,7 +58,7 @@ CriticalTimeStep::execute()
   // of each element. Since critical time step is computed across all elements and
   // a minimum is then taken, this is okay.
   _critical_time =
-      std::min(_factor * _current_elem->hmin() * std::sqrt(dens) / (_effective_stiffness[0]),
+      std::min(_factor * _current_elem->hmin() * MathUtils::sqrt(dens) / (_effective_stiffness[0]),
                _critical_time);
 }
 

@@ -9,6 +9,7 @@
 
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
+#include "MathUtils.h"
 
 template <>
 InputParameters
@@ -48,6 +49,6 @@ ComputeElasticityTensorBase::computeQpProperties()
   if (_prefactor_function)
   {
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
-    _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
+    _effective_stiffness[_qp] *= MathUtils::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
   }
 }

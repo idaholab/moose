@@ -10,6 +10,7 @@
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneShear);
 
@@ -84,7 +85,7 @@ Real
 TensorMechanicsPlasticWeakPlaneShear::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   // note that i explicitly symmeterise in preparation for Cosserat
-  return std::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
+  return MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
                    Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress)) +
          stress(2, 2) * tan_phi(intnl) - cohesion(intnl);
 }
@@ -95,7 +96,7 @@ TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress,
 {
   RankTwoTensor deriv; // the constructor zeroes this
 
-  Real tau = std::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
+  Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
                        Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
   // note that i explicitly symmeterise in preparation for Cosserat
   if (tau == 0.0)
@@ -140,7 +141,7 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
                                                              Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
-  Real tau = std::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
+  Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
                        Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
   if (tau == 0.0)
     return dr_dstress;
@@ -298,7 +299,7 @@ TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> 
   // norm(1) = df/dsig(2,1) = df/dsig(1,2)
   // norm(2) = df/dsig(2,2)
   std::vector<Real> norm(3, 0.0);
-  const Real tau = std::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
+  const Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
                              Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0));
   if (tau > 0.0)
   {

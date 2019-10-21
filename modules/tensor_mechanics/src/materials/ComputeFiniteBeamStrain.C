@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "NonlinearSystem.h"
 #include "MooseVariable.h"
+#include "MathUtils.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
@@ -43,15 +44,15 @@ ComputeFiniteBeamStrain::computeRotation()
 
   // Second - calculate the incremental rotation matrix using Euler angles
   const Real intermediate_length_1 =
-      std::sqrt(Utility::pow<2>(_original_length[0] + delta_disp_local(0)) +
+      MathUtils::sqrt(Utility::pow<2>(_original_length[0] + delta_disp_local(0)) +
                 Utility::pow<2>(delta_disp_local(2)));
   const Real cos_alpha = (_original_length[0] + delta_disp_local(0)) / intermediate_length_1;
-  const Real sin_alpha = std::sqrt(1.0 - Utility::pow<2>(cos_alpha));
+  const Real sin_alpha = MathUtils::sqrt(1.0 - Utility::pow<2>(cos_alpha));
 
   const Real intermediate_length_2 =
-      std::sqrt(Utility::pow<2>(intermediate_length_1) + Utility::pow<2>(delta_disp_local(1)));
+      MathUtils::sqrt(Utility::pow<2>(intermediate_length_1) + Utility::pow<2>(delta_disp_local(1)));
   const Real sin_beta = delta_disp_local(1) / intermediate_length_2;
-  const Real cos_beta = std::sqrt(1.0 - Utility::pow<2>(sin_beta));
+  const Real cos_beta = MathUtils::sqrt(1.0 - Utility::pow<2>(sin_beta));
 
   const RealVectorValue rotation_d_1(cos_alpha * cos_beta, sin_beta, sin_alpha * cos_beta);
   const RealVectorValue rotation_d_2(-cos_alpha * sin_beta, cos_beta, -sin_alpha * sin_beta);

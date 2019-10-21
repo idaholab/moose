@@ -15,6 +15,7 @@
 #include "libmesh/point.h"
 #include "RankTwoTensor.h"
 #include "MooseError.h"
+#include "MathUtils.h"
 
 namespace RankTwoScalarTools
 {
@@ -46,8 +47,8 @@ component(const RankTwoTensorTempl<T> & r2tensor, unsigned int i, unsigned int j
     direction(i) = 1.0;
   else
   {
-    direction(i) = std::sqrt(0.5);
-    direction(j) = std::sqrt(0.5);
+    direction(i) = MathUtils::sqrt(0.5);
+    direction(j) = MathUtils::sqrt(0.5);
   }
 
   return r2tensor(i, j);
@@ -65,7 +66,7 @@ vonMisesStress(const RankTwoTensorTempl<T> & stress)
 {
   RankTwoTensorTempl<T> dev_stress = stress.deviatoric();
 
-  return std::sqrt(1.5 * dev_stress.doubleContraction(dev_stress));
+  return MathUtils::sqrt(1.5 * dev_stress.doubleContraction(dev_stress));
 }
 
 /*
@@ -76,7 +77,7 @@ template <typename T>
 T
 effectiveStrain(const RankTwoTensorTempl<T> & strain)
 {
-  return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
+  return MathUtils::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
 }
 
 /*

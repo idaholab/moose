@@ -9,6 +9,7 @@
 
 #include "FiniteStrainCPSlipRateRes.h"
 #include "libmesh/utility.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainCPSlipRateRes);
 
@@ -262,7 +263,7 @@ FiniteStrainCPSlipRateRes::calcResidNorm()
   Real rnorm = 0.0;
   for (unsigned int i = 0; i < _nss; ++i)
     rnorm += Utility::pow<2>(_resid(i));
-  rnorm = std::sqrt(rnorm) / _nss;
+  rnorm = MathUtils::sqrt(rnorm) / _nss;
 
   return rnorm;
 }
