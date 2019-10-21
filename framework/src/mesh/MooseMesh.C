@@ -2129,7 +2129,8 @@ MooseMesh::init()
     {
       TIME_SECTION(_read_recovered_mesh_timer);
       CONSOLE_TIMED_PRINT("Rcovering mesh");
-      getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
+      getMesh().read(_app.getRestartRecoverFileBase() + "_mesh." +
+                     _app.getRestartRecoverFileSuffix());
     }
 
     getMesh().allow_renumbering(allow_renumbering_later);

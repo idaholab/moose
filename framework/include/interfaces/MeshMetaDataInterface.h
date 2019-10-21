@@ -29,6 +29,10 @@ protected:
   template <typename T>
   T getMeshProperty(const std::string & name) const;
 
+  std::size_t metaDataSize() const { return _mgi_mesh_props.n_parameters(); }
+
+  bool metaDataEmpty() const { return metaDataSize() == 0; }
+
 private:
   friend class MeshGenerator;
   Parameters & metaData() const { return _mgi_mesh_props; }

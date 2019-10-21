@@ -645,8 +645,7 @@ enum class MortarType : unsigned int
  */
 enum class RESTARTABLE_FILTER : unsigned char
 {
-  RECOVERABLE,
-  MESH_META_DATA
+  RECOVERABLE
 };
 
 enum ConstraintJacobianType

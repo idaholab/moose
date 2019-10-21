@@ -265,7 +265,7 @@ validParams<MooseApp>()
 }
 
 MooseApp::MooseApp(InputParameters parameters)
-  : Restartable(*this, parameters.get<std::string>("_app_name"), "App", 0),
+  : Restartable(*this, parameters.get<std::string>("_app_name")),
     ConsoleStreamInterface(*this),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
@@ -301,7 +301,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _recover_suffix("cpr"),
+    _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
@@ -438,7 +438,6 @@ MooseApp::MooseApp(InputParameters parameters)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
 
   _mesh_meta_data = &declareRestartableData<Parameters>("meta_data");
-  registerRestartableNameWithFilter("meta_data", Moose::RESTARTABLE_FILTER::MESH_META_DATA);
 }
 
 void
@@ -773,7 +772,7 @@ MooseApp::setupOptions()
       // If the argument following --recover is non-existent or begins with
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
-        _recover_base = recover_following_arg;
+        _restart_recover_base = recover_following_arg;
     }
 
     // Optionally get command line argument following --recoversuffix
@@ -781,7 +780,7 @@ MooseApp::setupOptions()
     // recovery and restart files.
     if (isParamValid("recoversuffix"))
     {
-      _recover_suffix = getParam<std::string>("recoversuffix");
+      _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
     _parser.parse(_input_filename);
@@ -920,9 +919,9 @@ MooseApp::isUseSplit() const
 }
 
 bool
-MooseApp::hasRecoverFileBase()
+MooseApp::hasRestartRecoverFileBase()
 {
-  return !_recover_base.empty();
+  return !_restart_recover_base.empty();
 }
 
 void
@@ -934,9 +933,6 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
   {
     case RESTARTABLE_FILTER::RECOVERABLE:
       _recoverable_data_names.insert(name);
-      break;
-    case RESTARTABLE_FILTER::MESH_META_DATA:
-      _mesh_meta_data_names.insert(name);
       break;
     default:
       mooseError("Unknown filter");
@@ -1140,13 +1136,25 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 void
 MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
-                                  THREAD_ID tid)
+                                  THREAD_ID tid,
+                                  bool mesh_meta_data)
 {
-  auto & restartable_data = _restartable_data[tid];
-  auto insert_pair = restartable_data.emplace(name, std::move(data));
+  if (!mesh_meta_data)
+  {
+    auto & restartable_data = _restartable_data[tid];
+    auto insert_pair = restartable_data.emplace(name, std::move(data));
 
-  if (!insert_pair.second)
-    mooseError("Attempted to declare restartable twice with the same name: ", name);
+    if (!insert_pair.second)
+      mooseError("Attempted to declare restartable twice with the same name: ", name);
+  }
+  else
+  {
+    auto insert_pair = _mesh_meta_data_map.emplace(name, std::move(data));
+
+    if (!insert_pair.second)
+      mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
+                 name);
+  }
 }
 
 void

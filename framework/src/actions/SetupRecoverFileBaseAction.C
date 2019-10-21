@@ -37,18 +37,17 @@ SetupRecoverFileBaseAction::act()
 
   if (_current_task == "setup_recover_file_base")
   {
-    _app.setRecoverFileBase(MooseUtils::convertLatestCheckpoint(_app.getRecoverFileBase()));
+    _app.setRestartRecoverFileBase(
+        MooseUtils::convertLatestCheckpoint(_app.getRestartRecoverFileBase()));
 
     // Set the recover file base in the App
-    _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n\n";
+    mooseInfo("Using ", _app.getRestartRecoverFileBase(), " for recovery.");
   }
   else // recover_mesh_meta_data
   {
     RestartableDataIO restartable(_app);
-    auto recover_file_base = _app.getRecoverFileBase();
 
-    restartable.readRestartableDataHeader(recover_file_base + ".rd");
-
-    restartable.readRestartableData(_app.getRestartableData(), _app.getMeshMetaData());
+    if (restartable.readRestartableDataHeader(false))
+      restartable.readRestartableData(_app.getMeshMetaData(), DataNames());
   }
 }

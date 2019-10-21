@@ -52,7 +52,7 @@ public:
 
   /**
    */
-  Restartable(const MooseMesh & mesh);
+  Restartable(MooseApp & app, const std::string & app_name);
 
   /**
    * This class constructor is used for non-Moose-based objects like interfaces. A name for the
@@ -283,10 +283,7 @@ Restartable::declareRecoverableData(const std::string & data_name)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRestartableNameWithFilterOnApp(full_name,
-                                         _store_in_mesh_meta_data
-                                             ? Moose::RESTARTABLE_FILTER::MESH_META_DATA
-                                             : Moose::RESTARTABLE_FILTER::RECOVERABLE);
+  registerRestartableNameWithFilterOnApp(full_name, Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
   return declareRestartableDataWithContext<T>(data_name, nullptr);
 }
@@ -297,10 +294,7 @@ Restartable::declareRecoverableData(const std::string & data_name, const T & ini
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRestartableNameWithFilterOnApp(full_name,
-                                         _store_in_mesh_meta_data
-                                             ? Moose::RESTARTABLE_FILTER::MESH_META_DATA
-                                             : Moose::RESTARTABLE_FILTER::RECOVERABLE);
+  registerRestartableNameWithFilterOnApp(full_name, Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }

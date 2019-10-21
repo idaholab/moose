@@ -41,10 +41,6 @@ MeshMetaDataDependenceAction::act()
   Point end_point = Point(getMeshProperty<Real>("xmax"), 0, 0);
   auto num_elem_x = getMeshProperty<unsigned int>("num_elements_x");
 
-  std::cout << "start_point: " << start_point << '\n';
-  std::cout << "end_point: " << end_point << '\n';
-  std::cout << "num_elem_x: " << num_elem_x << '\n';
-
   // Using that information, let's add a VectorPostprocessor based upon the attribute.
   // Note: This is not the way a user should do this, we have VectorPostprocessors that
   // automatically along a line of elements.

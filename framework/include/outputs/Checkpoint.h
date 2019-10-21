@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "FileOutput.h"
 #include "RestartableDataIO.h"
+#include "MeshMetaDataInterface.h"
 
 #include <deque>
 
@@ -35,12 +36,15 @@ struct CheckpointFileNames
 
   /// Filename for restartable data filename
   std::string restart;
+
+  /// Filename for restartable data filename
+  std::string restart_mesh_meta_data;
 };
 
 /**
  *
  */
-class Checkpoint : public FileOutput
+class Checkpoint : public FileOutput, public MeshMetaDataInterface
 {
 public:
   /**
@@ -58,7 +62,12 @@ public:
    * Retrieve the checkpoint output directory
    * @return String containing the checkpoint output directory
    */
-  std::string directory();
+  std::string directory() const;
+
+  std::string getMeshFileSuffix(bool is_binary)
+  {
+    return is_binary ? BINARY_MESH_SUFFIX : ASCII_MESH_SUFFIX;
+  }
 
 protected:
   /**
@@ -85,12 +94,15 @@ private:
   /// Reference to the restartable data
   const RestartableDataMaps & _restartable_data;
 
-  /// Reference to the recoverable data
-  const DataNames & _recoverable_data_names;
+  /// Reference to the mesh meta data
+  const RestartableDataMap & _mesh_meta_data;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
+
+  static constexpr auto ASCII_MESH_SUFFIX = "_mesh.cpa";
+  static constexpr auto BINARY_MESH_SUFFIX = "_mesh.cpr";
 };

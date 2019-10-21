@@ -358,33 +358,36 @@ public:
   /**
    * Return true if the recovery file base is set
    */
-  bool hasRecoverFileBase();
+  bool hasRestartRecoverFileBase();
 
   /**
    * The file_base for the recovery file.
    */
-  std::string getRecoverFileBase() { return _recover_base; }
+  std::string getRestartRecoverFileBase() { return _restart_recover_base; }
 
   /**
    * mutator for recover_base (set by RecoverBaseAction)
    */
-  void setRecoverFileBase(std::string recover_base)
+  void setRestartRecoverFileBase(const std::string & file_base)
   {
-    if (recover_base.empty())
-      _recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
+    if (file_base.empty())
+      _restart_recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
     else
-      _recover_base = recover_base;
+      _restart_recover_base = file_base;
   }
 
   /**
    * The suffix for the recovery file.
    */
-  std::string getRecoverFileSuffix() { return _recover_suffix; }
+  std::string getRestartRecoverFileSuffix() { return _restart_recover_suffix; }
 
   /**
    * mutator for recover_suffix
    */
-  void setRecoverFileSuffix(std::string recover_suffix) { _recover_suffix = recover_suffix; }
+  void setRestartRecoverFileSuffix(std::string file_suffix)
+  {
+    _restart_recover_suffix = file_suffix;
+  }
 
   /**
    *  Whether or not this simulation should only run half its transient (useful for testing
@@ -475,7 +478,8 @@ public:
    */
   void registerRestartableData(const std::string & name,
                                std::unique_ptr<RestartableDataValue> data,
-                               THREAD_ID tid);
+                               THREAD_ID tid,
+                               bool mesh_meta_data);
 
   /**
    * Return reference to the restatable data object
@@ -484,12 +488,15 @@ public:
   const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
 
   /**
+   * Return reference to the recoverable mesh meta data object.
+   */
+  const RestartableDataMap & getMeshMetaData() const { return _mesh_meta_data_map; }
+
+  /**
    * Return a reference to the recoverable data object
    * @return A const reference to the recoverable data
    */
   const DataNames & getRecoverableData() const { return _recoverable_data_names; }
-
-  const DataNames & getMeshMetaData() const { return _mesh_meta_data_names; }
 
   /**
    * Create a Backup from the current App. A Backup contains all the data necessary to be able to
@@ -863,11 +870,11 @@ protected:
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;
 
-  /// The base name to recover from.  If blank then we will find the newest recovery file.
-  std::string _recover_base;
+  /// The base name to restart/recover from.  If blank then we will find the newest checkpoint file.
+  std::string _restart_recover_base;
 
-  /// The file suffix to recover from.  If blank then we will use "cpr" for binary CheckpointIO.
-  std::string _recover_suffix;
+  /// The file suffix to restart/recover from.  If blank then we will use the binary restart suffix.
+  std::string _restart_recover_suffix;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
@@ -914,18 +921,18 @@ private:
   RestartableDataMaps _restartable_data;
 
   /**
-   * Data names that will only be read from the restart file during RECOVERY.
-   * e.g. these names are _excluded_ during restart.
-   */
-  DataNames _recoverable_data_names;
-
-  /**
-   * Data names specifically associated with the mesh (meta-data) that will read from the restart
+   * Data specifically associated with the mesh (meta-data) that will read from the restart
    * file early during the simulation setup so that they are available to Actions and other objects
    * that need them during the setup process. Most of the restartable data isn't made available
    * until all objects have been created and all Actions have been executed (i.e. initialSetup).
    */
-  DataNames _mesh_meta_data_names;
+  RestartableDataMap _mesh_meta_data_map;
+
+  /**
+   * Data names that will only be read from the restart file during RECOVERY.
+   * e.g. these names are _excluded_ during restart.
+   */
+  DataNames _recoverable_data_names;
 
   friend MeshMetaDataInterface::MeshMetaDataInterface(MooseApp &);
   Parameters & meshMetaData() const { return *_mesh_meta_data; }

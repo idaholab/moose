@@ -32,8 +32,8 @@ Restartable::Restartable(const MooseObject * moose_object,
 {
 }
 
-Restartable::Restartable(const MooseMesh & mesh)
-  : Restartable(mesh.getMooseApp(), mesh.name(), "MeshMetaData", 0)
+Restartable::Restartable(MooseApp & app, const std::string & app_name)
+  : Restartable(app, app_name, "MeshMetaData", 0)
 {
   _store_in_mesh_meta_data = true;
 }
@@ -55,7 +55,7 @@ Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
-  _restartable_app.registerRestartableData(name, std::move(data), tid);
+  _restartable_app.registerRestartableData(name, std::move(data), tid, _store_in_mesh_meta_data);
 }
 
 void
