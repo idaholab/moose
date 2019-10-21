@@ -1,0 +1,73 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [./group]
+    requirement = 'The system shall be able to use automatic differntiation to compute a soft block bouncing on a soft plank problem on a second order 2D mesh using tensor mechanics and mortar contact'
+    [./small]
+      skip = 'second order with mortar method is not ready yet'
+      detail = 'using the small strain formulation.'
+      type = 'CSVDiff'
+      input = 'small.i'
+      csvdiff = 'small.csv'
+      heavy = true
+    [../]
+    [./finite]
+      skip = 'second order with mortar method is not ready yet'
+      detail = 'using the finite strain formulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite.csv'
+      heavy = true
+    [../]
+    [./finite_scaling]
+      skip = 'second order with mortar method is not ready yet'
+      #skip = 'automatic_scaling not ready for use with mortar method and tensor mechanics'
+      detail = 'using the finite strain formulation with automatic scaling.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      cli_args = 'Executioner/automatic_scaling=true Executioner/compute_scaling_once=false name=finite_scaling'
+      csvdiff = 'finite_scaling.csv'
+      heavy = true
+    [../]
+    [./finite_rr]
+      skip = 'second order with mortar method is not ready yet'
+      detail = 'using the finite strain formulation and reference residual.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr.csv'
+      heavy = true
+    [../]
+  [../]
+  [./stiff]
+    requirement = 'The system shall be able to use automatic differntiation to compute a block bouncing on a plank problem on a second order 2D mesh using tensor mechanics and mortar contact and finite strain'
+    [./stiff_stiff]
+      skip = 'second order with mortar method is not ready yet'
+      detail = 'using with a stiff block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_stiff.csv'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff Executioner/l_max_its=30'
+      heavy = true
+    [../]
+    [./soft_stiff]
+      skip = 'second order with mortar method is not ready yet'
+      #skip = 'differing stiffness not ready yet'
+      detail = 'using with a soft block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'soft_stiff.csv'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff Executioner/l_max_its=30'
+      heavy = true
+    [../]
+    [./stiff_soft]
+      skip = 'second order with mortar method is not ready yet'
+      #skip = 'differing stiffness not ready yet'
+      detail = 'using with a stiff block and a soft plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_soft.csv'
+      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=30'
+      heavy = true
+    [../]
+  [../]
+[]
