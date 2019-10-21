@@ -423,7 +423,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     oss << "Failed to converge, function norm is NaN\n";
     reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
-  else if (fnorm < abstol && (it || !force_iteration))
+  else if (fnorm < abstol && !force_iteration)
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
     reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
@@ -435,7 +435,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
   }
 
-  if (it && reason == MooseNonlinearConvergenceReason::ITERATING)
+  if (reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     if (checkConvergenceIndividVars(fnorm, abstol, rtol, ref_resid))
     {

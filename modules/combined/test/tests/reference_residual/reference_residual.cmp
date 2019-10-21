@@ -3,7 +3,6 @@ COORDINATES absolute 1.e-6
 TIME STEPS relative 1.e-6 floor 0.0
 
 GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
-	nonlinear_its relative 0.5 #Timestep 1: 5 iters, timestep 2: 1  This allows large variation in the 1st step, but not in the 2nd
 	ref_resid_t    # min:               0 @ t1	max:    0.0030935922 @ t3
 	ref_resid_x    # min:               0 @ t1	max:    0.0061990214 @ t2
 	ref_resid_y    # min:               0 @ t1	max:     0.032165928 @ t3
