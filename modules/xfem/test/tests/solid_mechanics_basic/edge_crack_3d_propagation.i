@@ -29,14 +29,24 @@
   [./cut_mesh]
     type = MeshCut3DUserObject
     mesh_file = mesh_edge_crack.xda
-    function_x = null
-    function_y = null
-    function_z = null
+    size_control = 0.1
+    n_step_growth = 1
+    function_x = growth_func_x
+    function_y = growth_func_y
+    function_z = growth_func_z
   [../]
 []
 
 [Functions]
-  [./null]
+  [./growth_func_x]
+    type = ParsedFunction
+    value = 1
+  [../]
+  [./growth_func_y]
+    type = ParsedFunction
+    value = 0
+  [../]
+  [./growth_func_z]
     type = ParsedFunction
     value = 0
   [../]
@@ -72,22 +82,6 @@
    order = CONSTANT
     family = MONOMIAL
   [../]
-[]
-
-[DomainIntegral]
-  integrals = 'Jintegral InteractionIntegralKI'
-  crack_front_points = '0.4 0.5 0.0
-                        0.4 0.5 0.1
-                        0.4 0.5 0.2'
-  crack_direction_method = CrackDirectionVector
-  crack_direction_vector = '1 0 0'
-  radius_inner = '0.2'
-  radius_outer = '0.4'
-  poissons_ratio = 0.3
-  youngs_modulus = 207000
-  block = 0
-  solid_mechanics = true
-  incremental = true
 []
 
 [SolidMechanics]
@@ -211,11 +205,12 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 1.0
+  end_time = 5.0
+  max_xfem_update = 1
 []
 
 [Outputs]
-  file_base = edge_crack_3d_mesh_out
+  file_base = edge_crack_3d_propagation_out
   execute_on = 'timestep_end'
   exodus = true
   [./console]
