@@ -31,14 +31,17 @@ void
 NumericalFlux3EqnCentered::calcFlux(const std::vector<Real> & U1,
                                     const std::vector<Real> & U2,
                                     const Real & /*nLR_dot_d*/,
-                                    std::vector<Real> & flux) const
+                                    std::vector<Real> & FL,
+                                    std::vector<Real> & FR) const
 {
   const std::vector<Real> flux1 = computeFlux(U1);
   const std::vector<Real> flux2 = computeFlux(U2);
 
-  flux.resize(THM3Eqn::N_EQ);
+  FL.resize(THM3Eqn::N_EQ);
   for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
-    flux[i] = 0.5 * (flux1[i] + flux2[i]);
+    FL[i] = 0.5 * (flux1[i] + flux2[i]);
+
+  FR = FL;
 }
 
 std::vector<Real>
@@ -69,14 +72,19 @@ void
 NumericalFlux3EqnCentered::calcJacobian(const std::vector<Real> & U1,
                                         const std::vector<Real> & U2,
                                         const Real & /*nLR_dot_d*/,
-                                        DenseMatrix<Real> & jac1,
-                                        DenseMatrix<Real> & jac2) const
+                                        DenseMatrix<Real> & dFL_dUL,
+                                        DenseMatrix<Real> & dFL_dUR,
+                                        DenseMatrix<Real> & dFR_dUL,
+                                        DenseMatrix<Real> & dFR_dUR) const
 {
-  jac1 = computeJacobian(U1);
-  jac2 = computeJacobian(U2);
+  dFL_dUL = computeJacobian(U1);
+  dFL_dUR = computeJacobian(U2);
 
-  jac1 *= 0.5;
-  jac2 *= 0.5;
+  dFL_dUL *= 0.5;
+  dFL_dUR *= 0.5;
+
+  dFR_dUL = dFL_dUL;
+  dFR_dUR = dFL_dUR;
 }
 
 DenseMatrix<Real>

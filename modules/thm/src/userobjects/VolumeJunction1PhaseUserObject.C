@@ -92,7 +92,7 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
   UJi[THM3Eqn::CONS_VAR_AREA] = _A[0];
 
   _flux[c] =
-      _numerical_flux_uo[c]->getFlux(_current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
+      _numerical_flux_uo[c]->getFlux(_current_side, _current_elem->id(), true, UJi, Ui, nJi_dot_di);
 
   Real vJ, dvJ_drhoV;
   THM::v_from_rhoA_A(_rhoV[0], _volume, vJ, dvJ_drhoV);
@@ -198,7 +198,7 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
 
   // Compute flux Jacobian w.r.t. scalar variables
   const DenseMatrix<Real> dflux_dUJi = _numerical_flux_uo[c]->getJacobian(
-      true, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
+      true, true, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
   for (unsigned int i = 0; i < _n_flux_eq; i++)
   {
     _flux_jacobian_scalar_vars[c](i, VolumeJunction1Phase::RHOV_INDEX) =
@@ -215,7 +215,7 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
 
   // Compute flux Jacobian w.r.t. flow channel variables
   _flux_jacobian_flow_channel_vars[c] = _numerical_flux_uo[c]->getJacobian(
-      false, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
+      true, false, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
 
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
   {

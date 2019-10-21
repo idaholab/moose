@@ -138,23 +138,33 @@ JunctionOneToOne1PhaseUserObject::finalize()
   _solutions[1][THM3Eqn::CONS_VAR_RHOUA] *= n_direction1;
 
   _fluxes[0] = _numerical_flux.getFlux(
-      _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
+      _local_side_ids[0], _elem_ids[0], true, _solutions[0], _solutions[1], _normal[0]);
 
-  _fluxes[1] = _fluxes[0];
+  _fluxes[1] = _numerical_flux.getFlux(
+      _local_side_ids[0], _elem_ids[0], false, _solutions[0], _solutions[1], _normal[0]);
   _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= n_direction1;
   _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= n_direction1;
 
   _flux_jacobians[0][0] = _numerical_flux.getJacobian(
-      true, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
+      true, true, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
   _flux_jacobians[0][1] = _numerical_flux.getJacobian(
-      false, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
+      true, false, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
 
   // Perform chain rule for reference frame transformation
   _flux_jacobians[0][1](THM3Eqn::CONS_VAR_RHOA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
   _flux_jacobians[0][1](THM3Eqn::CONS_VAR_RHOUA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
   _flux_jacobians[0][1](THM3Eqn::CONS_VAR_RHOEA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
 
-  _flux_jacobians[1] = _flux_jacobians[0];
+  _flux_jacobians[1][0] = _numerical_flux.getJacobian(
+      false, true, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
+  _flux_jacobians[1][1] = _numerical_flux.getJacobian(
+      false, false, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
+
+  // Perform chain rule for reference frame transformation
+  _flux_jacobians[1][1](THM3Eqn::CONS_VAR_RHOA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
+  _flux_jacobians[1][1](THM3Eqn::CONS_VAR_RHOUA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
+  _flux_jacobians[1][1](THM3Eqn::CONS_VAR_RHOEA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;
+
   for (unsigned int j = 0; j < THM3Eqn::N_EQ; j++)
   {
     _flux_jacobians[1][0](THM3Eqn::CONS_VAR_RHOA, j) *= n_direction1;

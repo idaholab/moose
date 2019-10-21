@@ -52,17 +52,19 @@ NumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
-  const std::vector<Real> & flux =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+  const std::vector<Real> & flux_elem =
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, _normals[_qp](0));
+  const std::vector<Real> & flux_neig =
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, _normals[_qp](0));
 
   Real re = 0.0;
   switch (type)
   {
     case Moose::Element:
-      re = flux[_equation_index] * _test[_i][_qp];
+      re = flux_elem[_equation_index] * _test[_i][_qp];
       break;
     case Moose::Neighbor:
-      re = -flux[_equation_index] * _test_neighbor[_i][_qp];
+      re = -flux_neig[_equation_index] * _test_neighbor[_i][_qp];
       break;
   }
   return re;
@@ -81,26 +83,29 @@ NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, 
   std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
-  const DenseMatrix<Real> & fjac1 = _numerical_flux.getJacobian(
-      true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
-
-  const DenseMatrix<Real> & fjac2 = _numerical_flux.getJacobian(
-      false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+  const DenseMatrix<Real> & dF1_dU1 = _numerical_flux.getJacobian(
+      true, true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+  const DenseMatrix<Real> & dF1_dU2 = _numerical_flux.getJacobian(
+      true, false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+  const DenseMatrix<Real> & dF2_dU1 = _numerical_flux.getJacobian(
+      false, true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+  const DenseMatrix<Real> & dF2_dU2 = _numerical_flux.getJacobian(
+      false, false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
 
   Real re = 0.0;
   switch (type)
   {
     case Moose::ElementElement:
-      re = fjac1(_equation_index, _jmap.at(jvar)) * _phi[_j][_qp] * _test[_i][_qp];
+      re = dF1_dU1(_equation_index, _jmap.at(jvar)) * _phi[_j][_qp] * _test[_i][_qp];
       break;
     case Moose::ElementNeighbor:
-      re = fjac2(_equation_index, _jmap.at(jvar)) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+      re = dF1_dU2(_equation_index, _jmap.at(jvar)) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
       break;
     case Moose::NeighborElement:
-      re = -fjac1(_equation_index, _jmap.at(jvar)) * _phi[_j][_qp] * _test_neighbor[_i][_qp];
+      re = -dF2_dU1(_equation_index, _jmap.at(jvar)) * _phi[_j][_qp] * _test_neighbor[_i][_qp];
       break;
     case Moose::NeighborNeighbor:
-      re = -fjac2(_equation_index, _jmap.at(jvar)) * _phi_neighbor[_j][_qp] *
+      re = -dF2_dU2(_equation_index, _jmap.at(jvar)) * _phi_neighbor[_j][_qp] *
            _test_neighbor[_i][_qp];
       break;
   }
