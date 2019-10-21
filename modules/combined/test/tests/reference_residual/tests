@@ -23,6 +23,7 @@
   [../]
   [./test_scaling]
     type = 'Exodiff'
+    custom_cmp = 'reference_residual.cmp'
     input = 'reference_residual.i'
     exodiff = 'reference_residual_out.e'
     cli_args = 'Variables/disp_x/scaling=2
