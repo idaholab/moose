@@ -127,9 +127,7 @@ JunctionOneToOne1PhaseUserObject::threadJoin(const UserObject & uo)
 void
 JunctionOneToOne1PhaseUserObject::finalize()
 {
-  // Check area and direction compatibility
-  if (!MooseUtils::absoluteFuzzyEqual(_areas[0], _areas[1]))
-    mooseError(_junction_name, ": The connected channels must have equal area at the junction.");
+  // Check direction compatibility
   if (!THM::areParallelVectors(_directions[0], _directions[1]))
     mooseError(_junction_name, ": The connected channels must be parallel at the junction.");
 
