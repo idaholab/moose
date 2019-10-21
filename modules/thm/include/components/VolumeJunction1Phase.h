@@ -60,4 +60,9 @@ protected:
   const VariableName _temperature_var_name;
   /// velocity variable name for junction
   const VariableName _velocity_var_name;
+
+  /// Form loss coefficient
+  const Real & _K;
+  /// Reference area
+  const Real & _A_ref;
 };

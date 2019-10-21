@@ -87,6 +87,8 @@
     normals = '-1 -1'
     numerical_flux_names = 'numerical_flux1 numerical_flux2'
     execute_on = 'initial linear nonlinear'
+    K = 0
+    A_ref = 1.1
   [../]
 []
 
