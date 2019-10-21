@@ -38,6 +38,15 @@
     requirement = 'The Jacobian for the AD split Cahn-Hilliard problem shall be perfect'
   [../]
 
+  [./SplitCHWRes]
+    type = 'Exodiff'
+    input = 'SplitCHWRes.i'
+    exodiff = 'SplitCHWRes_out.e'
+    issues = '#14140'
+    design = '/SplitCHWRes.md'
+    requirement = 'MOOSE shall provide a kernel option to implement transport terms for the off-diagonal Onsager matrix components'
+  [../]
+
   [./AllenCahn]
     type = 'Exodiff'
     input = 'AllenCahn.i'
