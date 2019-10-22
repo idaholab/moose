@@ -135,7 +135,6 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
     EXPECT_EQ(std::string(vec_mat_mult[2]), "0+a11*b13+a12*b23+a13*b33");
 
     vec_mat_mult = b_matrix * a_vec;
-    std::cout << vec_mat_mult[0] << std::endl;
     EXPECT_EQ(std::string(vec_mat_mult[0]), "0+b11*a11+b12*a12+b13*a13");
     EXPECT_EQ(std::string(vec_mat_mult[1]), "0+b21*a11+b22*a12+b23*a13");
     EXPECT_EQ(std::string(vec_mat_mult[2]), "0+b31*a11+b32*a12+b33*a13");
