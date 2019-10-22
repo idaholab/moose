@@ -46,7 +46,7 @@ void
 Sampler::init()
 {
   if (_initialized)
-    mooseError("Do not call this.");
+    mooseError("The Sampler::init() method is called automatically and should not be called.");
 
   if (_n_rows == 0)
     mooseError("The number of rows cannot be zero.");

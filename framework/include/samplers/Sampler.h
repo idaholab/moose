@@ -28,7 +28,7 @@ InputParameters validParams<Sampler>();
  * the sample data to objects. The sampler is designed to handle any number of random number
  * generators.
  *
- * The main methods in this object is the getSamples/getLocalSamples methods which returns the
+ * The main methods in this object is the getSamples/getLocalSamples methods which return the
  * distribution samples. These methods will return the same results for each call regardless of the
  * number of calls.
  *
@@ -141,8 +141,6 @@ private:
    * set methods can be called within the constructors of child objects, see
    * FEProblemBase::addSampler method.
    *
-   * This method is for internal use by MOOSE, it should not be called otherwise.
-   *
    * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
    */
   void init();
@@ -153,8 +151,6 @@ private:
   /**
    * Store the state of the MooseRandom generator so that new calls to getSamples/getLocalSamples
    * methods will create new numbers. This also handles sample data cache, if enabled.
-   *
-   * This method is for internal use by MOOSE, it should not be called otherwise.
    *
    * The execute() method is called in the init() method of this class and
    * FEProblemBase::executeSamplers; it should not be called elsewhere.

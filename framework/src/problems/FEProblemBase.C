@@ -3366,10 +3366,11 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
       _displaced_problem->setCurrentlyComputingJacobian(true);
   }
 
-  // Samplers; EXEC_INITIAL is not called because the Sampler::init() method called after
-  // construction make the first execute() call. This ensures that the random number generator
-  // object is the correct state prior to any other object (e.g., Transfers) attempts to extract
-  // data from the Sampler.
+  // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
+  // construction makes the first Sampler::execute() call. This ensures that the random number
+  // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
+  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here then
+  // it is not in the correct state for other objects.
   if (exec_type != EXEC_INITIAL)
     executeSamplers(exec_type);
 
