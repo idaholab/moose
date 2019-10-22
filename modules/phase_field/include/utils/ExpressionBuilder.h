@@ -667,6 +667,105 @@ public:
   BINARYFUNC_OP_IMPLEMENT(!=, NOTEQ)
 };
 
+class EBMatrix
+{
+public:
+  EBMatrix();
+  EBMatrix(std::vector<std::vector<EBTerm> > FunctionMatrix);
+  EBMatrix(unsigned int i, unsigned int j);
+  EBMatrix(const RealTensorValue & rhs);
+  EBMatrix(EBTerm r, EBTerm s, EBTerm t, EBTerm u, EBTerm v,
+           EBTerm w, EBTerm x, EBTerm y, EBTerm x) // Easier implementation of 3x3
+
+  operator std::vector<std::vector<std::string> >() const;
+  friend EBMatrix & operator*(const EBMatrix & lhs, const EBMatrix & rhs);
+  friend EBMatrix & operator*(const Real & lhs, const EBMatrix & rhs);
+  friend EBMatrix & operator*(const EBMatrix & lhs, const Real & rhs);
+  friend EBMatrix & operator*(const EBTerm & lhs, const EBMatrix & rhs);
+  friend EBMatrix & operator*(const EBMatrix & lhs, const EBTerm & rhs);
+  friend EBMatrix & operator/(const EBMatrix & lhs, const EBTerm & rhs);
+  friend EBMatrix & operator/(const EBMatrix & lhs, const Real & rhs);
+  friend EBMatrix & operator+(const EBMatrix & lhs, const EBMatrix & rhs);
+  friend EBMatrix & operator-(const EBMatrix & lhs, const EBMatrix & rhs);
+  EBMatrix & operator+=(const EBMatrix & rhs);
+  EBMatrix & operator-();
+  std::vector<EBTerm> & operator[](unsigned int i);
+  const std::vector<EBTerm> & operator[](unsigned int i) const;
+  EBMatrix transpose();
+
+  unsigned int rowNum() const;
+  unsigned int colNum() const;
+  void setSize(const unsigned int i, const unsigned int j); //Erases the entire matrix
+
+  void checkMultSize(const EBMatrix & lhs, const EBMatrix & rhs);
+  static void checkAddSize(const EBMatrix & lhs, const EBMatrix & rhs);
+
+  void simplify()
+  {
+    for(unsigned int i = 0; i < _rowNum; ++i)
+      for(unsigned int j = 0; j < _colNum; ++j)
+        FunctionMatrix[i][j].simplify();
+  }
+
+private:
+  void checkSize();
+
+  std::vector<std::vector<EBTerm> > FunctionMatrix; // Row then column
+  unsigned int _rowNum;
+  unsigned int _colNum;
+};
+
+class EBVector //3D vectors only, else use EBMatrix
+{
+public:
+  EBVector();
+  EBVector(Real i, Real j, Real k)
+  {
+    FunctionVector.push_back(EBTerm(i));
+    FunctionVector.push_back(EBTerm(j));
+    FunctionVector.push_back(EBTerm(k));
+  }
+  EBVector(EBTerm i, EBTerm j, EBTerm k)
+  {
+    FunctionVector.push_back(i);
+    FunctionVector.push_back(j);
+    FunctionVector.push_back(k);
+  }
+  EBVector(std::vector<EBTerm> FunctionVector);
+  EBVector(std::vector<std::string> FunctionNameVector);
+
+  typedef std::vector<EBVector> EBVectorVector;
+  static EBVectorVector CreateEBVectorVector(const std::string & var_name, unsigned int _op_num);
+
+  EBVector & operator=(const RealVectorValue & rhs);
+  operator std::vector<std::string>() const;
+  friend EBTerm & operator*(const EBVector & lhs, const EBVector & rhs); // This defines a dot product
+  friend EBVector & operator*(const EBVector & lhs, const Real & rhs);
+  friend EBVector & operator*(const Real & lhs, const EBVector & rhs);
+  friend EBVector & operator*(const EBTerm & lhs, const EBVector & rhs);
+  friend EBVector & operator*(const EBVector & lhs, const EBTerm & rhs);
+  friend EBVector & operator*(const EBVector & lhs, const EBMatrix & rhs); // We assume the vector is 1 x 3 here
+  friend EBVector & operator*(const EBMatrix & lhs, const EBVector & rhs); // We assume the vector is 3 x 1 here
+  friend EBVector & operator/(const EBVector & lhs, const Real & rhs);
+  friend EBVector & operator/(const EBVector & lhs, const EBTerm & rhs);
+  friend EBVector & operator+(const EBVector & lhs, const EBVector & rhs);
+  friend EBVector & operator-(const EBVector & lhs, const EBVector & rhs);
+  EBVector & operator+=(const EBVector & rhs);
+  EBVector & operator-();
+  EBTerm & operator[](unsigned int i);
+  const EBTerm & operator[](unsigned int i) const;
+
+  static EBVector cross(const EBVector & lhs, const EBVector & rhs);
+  EBTerm norm();
+  void push_back(EBTerm term);
+
+private:
+  void checkSize(std::vector<std::string> FunctionVector);
+  void checkSize(std::vector<EBTerm> FunctionVector);
+
+  std::vector<EBTerm> FunctionVector;
+};
+
 // convenience function for numeric exponent
 template <typename T>
 ExpressionBuilder::EBTerm
@@ -699,4 +798,3 @@ ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(
   else
     return substitute(*match_node);
 }
-
