@@ -89,7 +89,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       for (unsigned i = 0; i < _nargs; ++i)
       {
         if (_arg_param_numbers[i] < 0)
-          _variable_names[i] = _arg_names[i];
+          _variable_names[i] = _arg_param_names[i];
         else
           _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
       }
