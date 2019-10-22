@@ -1,0 +1,31 @@
+        COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0
+
+GLOBAL VARIABLES relative 5.5e-6 floor 1e-10
+	junction:T
+	junction:p
+	junction:rhoEV
+	junction:rhoV
+	junction:rhouV
+	junction:rhovV
+	junction:rhowV
+	junction:vel
+
+NODAL VARIABLES relative 5.5e-6 floor 1e-10
+	A_linear
+	T_solid
+
+ELEMENT VARIABLES relative 5.5e-6 floor 1e-10
+	A
+	H
+	P_hf
+	T
+	e
+	p
+	rho
+	v
+	vel    floor 4e-8
+	rhoA
+	rhoEA
+	rhouA  floor 4e-9
