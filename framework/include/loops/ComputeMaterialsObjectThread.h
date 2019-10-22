@@ -40,6 +40,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
 
   void join(const ComputeMaterialsObjectThread & /*y*/);
 
@@ -58,6 +59,12 @@ protected:
   /// version of the ADMaterial for doing stateful stuff
   const MaterialWarehouse & _materials;
 
+  /// This is populated using _fe_problem.getResidualInterfaceMaterialsWarehouse because it has the
+  /// union of traditional interface materials and the residual version of AD interface
+  /// materials. We don't need the Jacobian version of the ADInterfaceMaterial for doing stateful
+  /// stuff
+  const MaterialWarehouse & _interface_materials;
+
   const MaterialWarehouse & _discrete_materials;
 
   std::vector<std::unique_ptr<Assembly>> & _assembly;
@@ -67,4 +74,3 @@ protected:
   const bool _has_bnd_stateful_props;
   const bool _has_neighbor_stateful_props;
 };
-

@@ -28,6 +28,8 @@
 #include <iomanip>
 #include <ostream>
 
+namespace MathUtils
+{
 template <>
 void
 mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v)
@@ -40,6 +42,7 @@ void
 mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v)
 {
   v.zero();
+}
 }
 
 template <typename T>
