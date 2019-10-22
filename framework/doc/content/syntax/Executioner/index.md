@@ -28,10 +28,10 @@ Executioner block.
 
 Regardless of solve type, NEWTON or PJFNK, preconditioning is an import part of any simulation
 (see [Preconditioning/index.md]). By default block diagonal preconditioning is used for all
-solves, with one exception. If "solve_type" is set to NEWTON and the Preconditioning block is
+solves, with two exceptions. If "solve_type" is set to NEWTON or LINEAR and the Preconditioning block is
 not defined, single matrix preconditioning (SMP) is used (see [SingleMatrixPreconditioner.md])
-with all entries enabled ("full=true"). For NEWTON solves, the auto creation of an SMP objects can be disabled by setting
-"auto_preconditioning=false" within the Executioner block (see [CreateExecutionerAction.md]).
+with all entries enabled ("full=true"). For NEWTON and LINEAR solves, the auto creation of an SMP objects can be
+disabled by setting "auto_preconditioning=false" within the Executioner block (see [CreateExecutionerAction.md]).
 
 
 
