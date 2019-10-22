@@ -260,4 +260,22 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  # unequal area
+  [./numerical_flux_3eqn_hllc_unequal_area]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = "
+      JacobianTest1PhaseRDG/ic_option=riemann_L
+      JacobianTest1PhaseRDG/A_function=A_fn
+      JacobianTest1PhaseRDG/use_elem_area=true
+      Functions/A_fn/type=PiecewiseConstant
+      Functions/A_fn/axis=x
+      Functions/A_fn/x='0.0 0.5'
+      Functions/A_fn/y='0.5 3.0'
+      UserObjects/flux/use_approximate_jacobian=false"
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
 []

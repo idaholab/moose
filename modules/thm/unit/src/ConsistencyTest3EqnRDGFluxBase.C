@@ -21,8 +21,8 @@ ConsistencyTest3EqnRDGFluxBase::test()
   U[THM3Eqn::CONS_VAR_RHOEA] = rho * E * _A;
   U[THM3Eqn::CONS_VAR_AREA] = _A;
 
-  std::vector<Real> F_computed;
-  _flux->calcFlux(U, U, _nLR_dot_d, F_computed);
+  std::vector<Real> FL_computed, FR_computed;
+  _flux->calcFlux(U, U, _nLR_dot_d, FL_computed, FR_computed);
 
   std::vector<Real> F_expected(THM3Eqn::N_EQ, 0.0);
   F_expected[THM3Eqn::EQ_MASS] = rho * vel * _A;
@@ -30,5 +30,8 @@ ConsistencyTest3EqnRDGFluxBase::test()
   F_expected[THM3Eqn::EQ_ENERGY] = vel * (rho * E + p) * _A;
 
   for (unsigned int i = 0; i < THM3Eqn::N_EQ; ++i)
-    REL_TEST(F_computed[i], F_expected[i], REL_TOL_CONSISTENCY);
+  {
+    REL_TEST(FL_computed[i], F_expected[i], REL_TOL_CONSISTENCY);
+    REL_TEST(FR_computed[i], F_expected[i], REL_TOL_CONSISTENCY);
+  }
 }

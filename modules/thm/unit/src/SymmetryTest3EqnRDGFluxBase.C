@@ -18,16 +18,19 @@ SymmetryTest3EqnRDGFluxBase::test()
     const std::vector<Real> UL = computeConservativeSolution(WL);
     const std::vector<Real> UR = computeConservativeSolution(WR);
 
-    std::vector<Real> FLR;
-    _flux->calcFlux(UL, UR, _nLR_dot_d, FLR);
+    std::vector<Real> FLR, FRL;
+    _flux->calcFlux(UL, UR, _nLR_dot_d, FLR, FRL);
     flux_regions.insert(_flux->getLastRegionIndex());
 
-    std::vector<Real> FRL;
-    _flux->calcFlux(UR, UL, -_nLR_dot_d, FRL);
+    std::vector<Real> FRL_flipped, FLR_flipped;
+    _flux->calcFlux(UR, UL, -_nLR_dot_d, FRL_flipped, FLR_flipped);
     flux_regions.insert(_flux->getLastRegionIndex());
 
     for (unsigned int i = 0; i < THM3Eqn::N_EQ; ++i)
-      REL_TEST(FLR[i], FRL[i], REL_TOL_CONSISTENCY);
+    {
+      REL_TEST(FLR[i], FRL_flipped[i], REL_TOL_CONSISTENCY);
+      REL_TEST(FRL[i], FLR_flipped[i], REL_TOL_CONSISTENCY);
+    }
   }
 
   // Check that all of the regions in the flux have been tested.

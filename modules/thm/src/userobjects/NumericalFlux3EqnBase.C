@@ -47,6 +47,7 @@ NumericalFlux3EqnBase::threadJoin(const UserObject &)
 const std::vector<Real> &
 NumericalFlux3EqnBase::getFlux(const unsigned int iside,
                                const dof_id_type ielem,
+                               bool res_side_is_left,
                                const std::vector<Real> & UL,
                                const std::vector<Real> & UR,
                                const Real & nLR_dot_d) const
@@ -56,13 +57,18 @@ NumericalFlux3EqnBase::getFlux(const unsigned int iside,
     _cached_flux_elem_id = ielem;
     _cached_flux_side_id = iside;
 
-    calcFlux(UL, UR, nLR_dot_d, _F);
+    calcFlux(UL, UR, nLR_dot_d, _FL, _FR);
   }
-  return _F;
+
+  if (res_side_is_left)
+    return _FL;
+  else
+    return _FR;
 }
 
 const DenseMatrix<Real> &
-NumericalFlux3EqnBase::getJacobian(bool get_left_jacobian,
+NumericalFlux3EqnBase::getJacobian(bool res_side_is_left,
+                                   bool jac_side_is_left,
                                    const unsigned int iside,
                                    const dof_id_type ielem,
                                    const std::vector<Real> & UL,
@@ -74,11 +80,21 @@ NumericalFlux3EqnBase::getJacobian(bool get_left_jacobian,
     _cached_jacobian_elem_id = ielem;
     _cached_jacobian_side_id = iside;
 
-    calcJacobian(UL, UR, nLR_dot_d, _dF_dUL, _dF_dUR);
+    calcJacobian(UL, UR, nLR_dot_d, _dFL_dUL, _dFL_dUR, _dFR_dUL, _dFR_dUR);
   }
 
-  if (get_left_jacobian)
-    return _dF_dUL;
+  if (res_side_is_left)
+  {
+    if (jac_side_is_left)
+      return _dFL_dUL;
+    else
+      return _dFL_dUR;
+  }
   else
-    return _dF_dUR;
+  {
+    if (jac_side_is_left)
+      return _dFR_dUL;
+    else
+      return _dFR_dUR;
+  }
 }

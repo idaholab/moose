@@ -192,24 +192,33 @@ GateValve1PhaseUserObject::finalize()
     }
     U_flow2[THM3Eqn::CONS_VAR_RHOUA] *= d1_dot_d2;
 
-    _fluxes[0] =
-        _numerical_flux.getFlux(_local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
+    _fluxes[0] = _numerical_flux.getFlux(
+        _local_side_ids[0], _elem_ids[0], true, U_flow1, U_flow2, n1_dot_d1);
 
-    _fluxes[1] = _fluxes[0];
+    _fluxes[1] = _numerical_flux.getFlux(
+        _local_side_ids[0], _elem_ids[0], false, U_flow1, U_flow2, n1_dot_d1);
     _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= d1_dot_d2;
     _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= d1_dot_d2;
 
     _flux_jacobians[0][0] = _numerical_flux.getJacobian(
-        true, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
+        true, true, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
     _flux_jacobians[0][1] = _numerical_flux.getJacobian(
-        false, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
+        true, false, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
 
     _flux_jacobians[0][0].scale(A_flow / A1);
     _flux_jacobians[0][1].scale(A_flow / A2);
     for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
       _flux_jacobians[0][1](i, THM3Eqn::CONS_VAR_RHOUA) *= d1_dot_d2;
 
-    _flux_jacobians[1] = _flux_jacobians[0];
+    _flux_jacobians[1][0] = _numerical_flux.getJacobian(
+        false, true, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
+    _flux_jacobians[1][1] = _numerical_flux.getJacobian(
+        false, false, _local_side_ids[0], _elem_ids[0], U_flow1, U_flow2, n1_dot_d1);
+
+    _flux_jacobians[1][0].scale(A_flow / A1);
+    _flux_jacobians[1][1].scale(A_flow / A2);
+    for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
+      _flux_jacobians[1][1](i, THM3Eqn::CONS_VAR_RHOUA) *= d1_dot_d2;
     for (unsigned int j = 0; j < THM3Eqn::N_EQ; j++)
     {
       _flux_jacobians[1][0](THM3Eqn::CONS_VAR_RHOA, j) *= d1_dot_d2;
