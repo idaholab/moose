@@ -27,7 +27,6 @@ validParams<EBCoupledVarTest>()
 EBCoupledVarTest::EBCoupledVarTest(const InputParameters & parameters)
   : DerivativeParsedMaterialHelper(parameters), _op_num(coupledComponents("v")), _vals(_op_num)
 {
-  EBTerm newest("v");
   std::string new_name;
   for (unsigned int i = 0; i < _op_num; ++i)
   {

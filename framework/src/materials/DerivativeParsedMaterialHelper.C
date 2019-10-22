@@ -110,8 +110,10 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   // current derivative starts off of the parent function
   Derivative current;
   current._darg_names = parent_derivative._darg_names;
+
   // the moose variable name goes into the derivative property name
   current._darg_names.push_back(_arg_names[var]);
+
   current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
 
   // execute derivative
@@ -208,9 +210,9 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   Derivative root;
   root._F = _func_F;
   root._mat_prop = nullptr;
+
   for (unsigned int i = 0; i < _nargs; ++i)
     recurseDerivative(i, 1, root);
-
   // increase the parameter buffer to provide storage for the material property derivatives
   _func_params.resize(_nargs + _mat_prop_descriptors.size());
 }
@@ -228,15 +230,20 @@ DerivativeParsedMaterialHelper::initQpStatefulProperties()
 void
 DerivativeParsedMaterialHelper::computeQpProperties()
 {
+  std::vector<Real> _coupled_var_vals(10);
+  Real a;
+
   // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs / 10; ++i)
   {
-    if (_tol[i] < 0.0)
-      _func_params[i] = (*_args[i])[_qp];
-    else
+    for (unsigned int j = 0; j < 10; j++)
     {
-      Real a = (*_args[i])[_qp];
-      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      getCoupledFuncParams(_coupled_var_vals, i);
+      a = _coupled_var_vals[j];
+      if (_tol[i] < 0.0)
+        _func_params[10 * i + j] = a;
+      else
+        _func_params[10 * i + j] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
   }
 

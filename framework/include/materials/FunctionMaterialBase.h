@@ -52,6 +52,8 @@ protected:
 
   /// Coupled variables for function arguments
   std::vector<const VariableValue *> _args;
+  std::vector<const VariableGradient *> _grad_args;
+  std::vector<const VariableSecond *> _second_args;
 
   /**
    * Name of the function value material property and used as a base name to

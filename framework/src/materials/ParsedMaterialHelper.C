@@ -62,6 +62,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
                                     const std::vector<std::string> & tol_names,
                                     const std::vector<Real> & tol_values)
 {
+  std::string expression = function_expression;
   // build base function object
   _func_F = ADFunctionPtr(new ADFunction());
 
@@ -77,27 +78,39 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       if (!_func_F->AddConstant(acd, _pars.defaultCoupledValue(acd)))
         mooseError("Invalid constant name in parsed function object");
 
+  _variable_names.resize(_nargs * 10);
+  std::vector<std::string> temp_arg_names(_nargs * 10);
   // set variable names based on map_mode
   switch (_map_mode)
   {
     case USE_MOOSE_NAMES:
       for (unsigned int i = 0; i < _nargs; ++i)
-        _variable_names[i] = _arg_names[i];
+        getVariableNames(expression, _arg_names[i], temp_arg_names, i);
       break;
 
     case USE_PARAM_NAMES:
+<<<<<<< HEAD
+      _variable_names.resize(_nargs * 10);
+=======
+>>>>>>> f29640c62d... Fix Error of Fix
       for (unsigned i = 0; i < _nargs; ++i)
       {
         if (_arg_param_numbers[i] < 0)
-          _variable_names[i] = _arg_param_names[i];
+          getVariableNames(expression, _arg_param_names[i], temp_arg_names, i);
         else
-          _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
+          getVariableNames(expression,
+                           _arg_param_names[i] + std::to_string(_arg_param_numbers[i]),
+                           temp_arg_names,
+                           i);
       }
       break;
 
     default:
       mooseError("Unnknown variable mapping mode");
   }
+
+  _arg_names = temp_arg_names;
+  _nargs *= 10;
 
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
@@ -139,9 +152,9 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   variables.erase(0, 1);
 
   // build the base function
-  if (_func_F->Parse(function_expression, variables) >= 0)
+  if (_func_F->Parse(expression, variables) >= 0)
     mooseError("Invalid function\n",
-               function_expression,
+               expression,
                '\n',
                variables,
                "\nin ParsedMaterialHelper.\n",
@@ -152,6 +165,52 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // perform next steps (either optimize or take derivatives and then optimize)
   functionsPostParse();
+}
+
+void
+ParsedMaterialHelper::getVariableNames(std::string & expression,
+                                       const std::string & var_name,
+                                       std::vector<std::string> & temp_arg_names,
+                                       unsigned int index)
+{
+  temp_arg_names[10 * index] = _arg_names[index];
+  temp_arg_names[10 * index + 1] = _arg_names[index] + "x";
+  temp_arg_names[10 * index + 2] = _arg_names[index] + "y";
+  temp_arg_names[10 * index + 3] = _arg_names[index] + "z";
+  temp_arg_names[10 * index + 4] = _arg_names[index] + "xx";
+  temp_arg_names[10 * index + 5] = _arg_names[index] + "xy";
+  temp_arg_names[10 * index + 6] = _arg_names[index] + "xz";
+  temp_arg_names[10 * index + 7] = _arg_names[index] + "yy";
+  temp_arg_names[10 * index + 8] = _arg_names[index] + "yz";
+  temp_arg_names[10 * index + 9] = _arg_names[index] + "zz";
+  _variable_names[10 * index] = var_name;
+  _variable_names[10 * index + 1] = var_name + "x";
+  _variable_names[10 * index + 2] = var_name + "y";
+  _variable_names[10 * index + 3] = var_name + "z";
+  _variable_names[10 * index + 4] = var_name + "xx";
+  _variable_names[10 * index + 5] = var_name + "xy";
+  _variable_names[10 * index + 6] = var_name + "xz";
+  _variable_names[10 * index + 7] = var_name + "yy";
+  _variable_names[10 * index + 8] = var_name + "yz";
+  _variable_names[10 * index + 9] = var_name + "zz";
+  replaceDuplicates(expression, "yx");
+  replaceDuplicates(expression, "zx");
+  replaceDuplicates(expression, "zy");
+}
+
+void
+ParsedMaterialHelper::replaceDuplicates(std::string & expression, const std::string & to_replace)
+{
+
+  std::size_t variable_location = expression.find(to_replace);
+  char temp;
+  while (variable_location != std::string::npos)
+  {
+    temp = expression[variable_location];
+    expression[variable_location] = expression[variable_location + 1];
+    expression[variable_location + 1] = temp;
+    variable_location = expression.find(to_replace);
+  }
 }
 
 void
@@ -184,17 +243,20 @@ ParsedMaterialHelper::initQpStatefulProperties()
 void
 ParsedMaterialHelper::computeQpProperties()
 {
+  std::vector<Real> _coupled_var_vals(10);
   Real a;
 
   // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs / 10; ++i)
   {
-    if (_tol[i] < 0.0)
-      _func_params[i] = (*_args[i])[_qp];
-    else
+    for (unsigned int j = 0; j < 10; j++)
     {
-      a = (*_args[i])[_qp];
-      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      getCoupledFuncParams(_coupled_var_vals, i);
+      a = _coupled_var_vals[j];
+      if (_tol[i] < 0.0)
+        _func_params[10 * i + j] = a;
+      else
+        _func_params[10 * i + j] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
   }
 
@@ -206,4 +268,19 @@ ParsedMaterialHelper::computeQpProperties()
   // set function value
   if (_prop_F)
     (*_prop_F)[_qp] = evaluate(_func_F);
+}
+
+void
+ParsedMaterialHelper::getCoupledFuncParams(std::vector<Real> & _coupled_var_vals, unsigned int i)
+{
+  _coupled_var_vals[0] = (*this->_args[i])[this->_qp];
+  _coupled_var_vals[1] = ((*this->_grad_args[i])[this->_qp])(0);
+  _coupled_var_vals[2] = ((*this->_grad_args[i])[this->_qp])(1);
+  _coupled_var_vals[3] = ((*this->_grad_args[i])[this->_qp])(2);
+  _coupled_var_vals[4] = ((*this->_second_args[i])[this->_qp])(0, 0);
+  _coupled_var_vals[5] = ((*this->_second_args[i])[this->_qp])(0, 1);
+  _coupled_var_vals[6] = ((*this->_second_args[i])[this->_qp])(0, 2);
+  _coupled_var_vals[7] = ((*this->_second_args[i])[this->_qp])(1, 1);
+  _coupled_var_vals[8] = ((*this->_second_args[i])[this->_qp])(1, 2);
+  _coupled_var_vals[9] = ((*this->_second_args[i])[this->_qp])(2, 2);
 }

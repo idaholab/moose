@@ -77,6 +77,8 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
 
       // get variable value
       _args.push_back(&coupledValue(*it, j));
+      _grad_args.push_back(&coupledGradient(*it, j));
+      _second_args.push_back(&coupledSecond(*it, j));
     }
   }
 

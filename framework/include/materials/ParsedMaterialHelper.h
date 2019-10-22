@@ -48,6 +48,11 @@ public:
                      const std::vector<Real> & tol_values);
 
 protected:
+  void getVariableNames(std::string & expression,
+                        const std::string & var_name,
+                        std::vector<std::string> & temp_arg_names,
+                        unsigned int index);
+  void replaceDuplicates(std::string & expression, const std::string & to_replace);
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
@@ -56,6 +61,8 @@ protected:
 
   // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
+
+  void getCoupledFuncParams(std::vector<Real> & _coupled_var_vals, unsigned int i);
 
   /// The undiffed free energy function parser object.
   ADFunctionPtr _func_F;
@@ -80,4 +87,3 @@ protected:
    */
   const VariableNameMappingMode _map_mode;
 };
-
