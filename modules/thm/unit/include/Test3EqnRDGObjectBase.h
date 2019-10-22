@@ -30,7 +30,7 @@ protected:
     const std::string class_name = "IdealGasFluidProperties";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("gamma") = 1.4;
-    params.set<Real>("R") = 0.71428571428571428571;
+    params.set<Real>("molar_mass") = 11.640243719999999;
     _fe_problem->addUserObject(class_name, _fp_name, params);
     return _fe_problem->getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
   }
