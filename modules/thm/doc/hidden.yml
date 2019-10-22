@@ -292,6 +292,7 @@
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/BoundaryFlux7EqnNCGGhostMassFlowRateTemperature
+- /UserObjects/BoundaryFlux7EqnNCGGhostPressure
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
 - /UserObjects/HeatFluxFromHeatStructure3EqnUserObject
