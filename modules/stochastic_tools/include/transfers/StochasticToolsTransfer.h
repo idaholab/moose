@@ -50,7 +50,6 @@ public:
   void setGlobalMultiAppIndex(dof_id_type index) { _global_index = index; }
 
 protected:
-
   /// Index for tracking the global index when using batch mode operation
   dof_id_type _global_index = 0;
 };

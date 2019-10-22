@@ -49,8 +49,8 @@ SobolSampler::sampleSetUp()
   for (dof_id_type i = 0; i < _num_rows_per_matrix; ++i)
     for (dof_id_type j = 0; j < getNumberOfCols(); ++j)
     {
-      _a_matrix(i, j) = _distributions[j]->quantile(this->rand(0));
-      _b_matrix(i, j) = _distributions[j]->quantile(this->rand(1));
+      _a_matrix(i, j) = _distributions[j]->quantile(this->getRand(0));
+      _b_matrix(i, j) = _distributions[j]->quantile(this->getRand(1));
     }
 }
 

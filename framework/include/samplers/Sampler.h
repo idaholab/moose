@@ -93,7 +93,7 @@ protected:
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
-  double rand(unsigned int index = 0);
+  double getRand(unsigned int index = 0);
 
   /**
    * Base class must override this method to supply the sample distribution data.

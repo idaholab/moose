@@ -138,11 +138,11 @@ Sampler::advanceGenerators(dof_id_type count)
 {
   for (dof_id_type i = 0; i < count; ++i)
     for (std::size_t j = 0; j < _generator.size(); ++j)
-      rand(j);
+      getRand(j);
 }
 
 double
-Sampler::rand(const unsigned int index)
+Sampler::getRand(const unsigned int index)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
   return _generator.rand(index);

@@ -32,7 +32,7 @@ Real
 TestSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   if (_use_rand)
-    return rand();
+    return getRand();
   else
     return ((row_index + 1) * 10) + col_index;
 }
