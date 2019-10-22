@@ -17,110 +17,153 @@ class ExpressionBuilderMatrixVectorTest : public ::testing::Test, public Express
 
 TEST_F(ExpressionBuilderMatrixVectorTest, test)
 {
+  // Testing Matrix Operatrions
+
   EBTerm r("r"), s("s"), t("t"), u("u"), v("v"), w("w"), x("x"), y("y"), z("z");
   EBTerm a("a"), b("b"), c("c"), d("d"), e("e"), f("f"), g("g"), h("h"), i("i");
 
-  EBMatrix lower_letters(r,s,t,u,v,w,x,y,z);
-  EBMatrix upper_letters(a,b,c,d,e,f,g,h,i);
+  EBMatrix lower_letters(r, s, t, u, v, w, x, y, z);
+  EBMatrix upper_letters(a, b, c, d, e, f, g, h, i);
 
-  // Test using functions in terms
+  // Test Matrix Multiplication
   {
-    G((x, y)) = f;
-    H((x)) = -G((x, b)) + c % b;
-
-    EXPECT_EQ(std::string(H), "-(x^2+4^1+3*4*-1)+8.9%4");
-    EXPECT_EQ(G.args(), "x,y");
+    EBMatrix mult_mat = lower_letters * upper_letters;
+    std::cout << mult_mat[0][0] << std::endl;
+    std::cout << mult_mat[0][0] << std::endl;
+    std::cout << mult_mat[0][1] << std::endl;
+    std::cout << mult_mat[0][2] << std::endl;
+    std::cout << mult_mat[1][0] << std::endl;
+    std::cout << mult_mat[1][1] << std::endl;
+    std::cout << mult_mat[1][2] << std::endl;
+    std::cout << mult_mat[2][0] << std::endl;
+    std::cout << mult_mat[2][1] << std::endl;
+    std::cout << mult_mat[2][2] << std::endl;
   }
 
-  // Test substitution subtleties (this would return x^x if substitution were performed
-  // sequentially, which they are not.. ..because that would be dumb!)
+  // Test Matrix Addition and Subtraction
   {
-    G((x, y)) = pow(x, y);
-    H((x, y, z)) = x * y * z;
-    EXPECT_EQ(std::string(G), "x^y");
-    EXPECT_EQ(std::string(G((y, x))), "y^x");
-    EXPECT_EQ(std::string(H((z, y, x))), "z*y*x");
+    EBMatrix add_mat = lower_letters * upper_letters;
+    std::cout << add_mat[0][0] << std::endl;
+    std::cout << add_mat[0][0] << std::endl;
+    std::cout << add_mat[0][1] << std::endl;
+    std::cout << add_mat[0][2] << std::endl;
+    std::cout << add_mat[1][0] << std::endl;
+    std::cout << add_mat[1][1] << std::endl;
+    std::cout << add_mat[1][2] << std::endl;
+    std::cout << add_mat[2][0] << std::endl;
+    std::cout << add_mat[2][1] << std::endl;
+    std::cout << add_mat[2][2] << std::endl;
+
+    EBMatrix sub_mat = lower_letters * upper_letters;
+    std::cout << sub_mat[0][0] << std::endl;
+    std::cout << sub_mat[0][0] << std::endl;
+    std::cout << sub_mat[0][1] << std::endl;
+    std::cout << sub_mat[0][2] << std::endl;
+    std::cout << sub_mat[1][0] << std::endl;
+    std::cout << sub_mat[1][1] << std::endl;
+    std::cout << sub_mat[1][2] << std::endl;
+    std::cout << sub_mat[2][0] << std::endl;
+    std::cout << sub_mat[2][1] << std::endl;
+    std::cout << sub_mat[2][2] << std::endl;
   }
 
-  // Test single bracket syntax
+  // Test Scalar Multiplication of a Matrix
   {
-    G(x, y, z) = x * y * z;
-    H(u, v, w, x, y, z) = u + v + w + x + y + z;
+    EBMatrix scal_mult_mat = 2 * lower_letters;
+    std::cout << scal_mult_mat[0][0] << std::endl;
+    std::cout << scal_mult_mat[0][2] << std::endl;
+    std::cout << scal_mult_mat[0][1] << std::endl;
+    std::cout << scal_mult_mat[1][0] << std::endl;
+    std::cout << scal_mult_mat[1][1] << std::endl;
+    std::cout << scal_mult_mat[1][2] << std::endl;
+    std::cout << scal_mult_mat[2][0] << std::endl;
+    std::cout << scal_mult_mat[2][1] << std::endl;
+    std::cout << scal_mult_mat[2][2] << std::endl;
 
-    EXPECT_EQ(std::string(G(a, b, c)), "1*4*8.9");
-    EXPECT_EQ(std::string(H(a, b, c, a, b, c)), "1+4+8.9+1+4+8.9");
-    EXPECT_EQ(std::string(G(a, b, c) + H(a, b, c, a, b, c)), "1*4*8.9+1+4+8.9+1+4+8.9");
-
-    H(u, v, w, x, y, z) = u + v + w + G(y, x, x);
-    EXPECT_EQ(std::string(H(a, b, c, x, y, z)), "1+4+8.9+y*x*x");
+    scal_mult_mat = a * lower_letters;
+    std::cout << scal_mult_mat[0][0] << std::endl;
+    std::cout << scal_mult_mat[0][1] << std::endl;
+    std::cout << scal_mult_mat[0][2] << std::endl;
+    std::cout << scal_mult_mat[1][0] << std::endl;
+    std::cout << scal_mult_mat[1][1] << std::endl;
+    std::cout << scal_mult_mat[1][2] << std::endl;
+    std::cout << scal_mult_mat[2][0] << std::endl;
+    std::cout << scal_mult_mat[2][1] << std::endl;
+    std::cout << scal_mult_mat[2][2] << std::endl;
   }
 
-  // Test associativity
+  // Test Matrix transpose
   {
-    EBTerm def = x - y - z;
-    EBTerm left = (x - y) - z;
-    EBTerm right = x - (y - z);
-
-    EXPECT_EQ(std::string(def), "x-y-z");
-    EXPECT_EQ(std::string(left), "x-y-z");
-    EXPECT_EQ(std::string(right), "x-(y-z)");
+    EBMatrix transp_mat = lower_letters.transpose();
+    std::cout << transp_mat[0][0] << std::endl;
+    std::cout << transp_mat[0][1] << std::endl;
+    std::cout << transp_mat[0][2] << std::endl;
+    std::cout << transp_mat[1][0] << std::endl;
+    std::cout << transp_mat[1][1] << std::endl;
+    std::cout << transp_mat[1][2] << std::endl;
+    std::cout << transp_mat[2][0] << std::endl;
+    std::cout << transp_mat[2][1] << std::endl;
+    std::cout << transp_mat[2][2] << std::endl;
   }
 
-  // test comparison operators
-  {
-    EBTerm comp1 = (x < y) + (x > y);
-    EBTerm comp2 = (x <= y) + (x >= y);
-    EBTerm comp3 = (x == y) + (x != y);
+  // Testing Vector operations
 
-    EXPECT_EQ(std::string(comp1), "(x<y)+(x>y)");
-    EXPECT_EQ(std::string(comp2), "(x<=y)+(x>=y)");
-    EXPECT_EQ(std::string(comp3), "(x=y)+(x!=y)");
+  EBVector abc_vec(a, b, c);
+  EBVector rst_vec(r, s, t);
+  // Test Dot Product
+  {
+    std::cout << abc_vec * rst_vec << std::endl;
   }
 
-  // test binary functions
+  // Test Scalar Multiplication
   {
-    EBTerm comp4 = atan2(x, y);
-    EXPECT_EQ(std::string(comp4), "atan2(x,y)");
+    EBVector scal_mult_vec = a * rst_vec;
+    std::cout << scal_mult_vec[0] << std::endl;
+    std::cout << scal_mult_vec[1] << std::endl;
+    std::cout << scal_mult_vec[2] << std::endl;
+
+    scal_mult_vec = 2 * rst_vec;
+    std::cout << scal_mult_vec[0] << std::endl;
+    std::cout << scal_mult_vec[1] << std::endl;
+    std::cout << scal_mult_vec[2] << std::endl;
   }
 
-  // test ifexpr
+  // Test Vector Matrix Multiplication
   {
-    EBTerm if1 = conditional(x < 2 * y, x * x + y, y * y + x);
-    EXPECT_EQ(std::string(if1),
-              "if"
-              "(x<2*y,x*x+y,y*y+x)");
+    EBVector vec_mat_mult = rst_vec * upper_letters;
+    std::cout << vec_mat_mult[0] << std::endl;
+    std::cout << vec_mat_mult[1] << std::endl;
+    std::cout << vec_mat_mult[2] << std::endl;
+
+    vec_mat_mult = upper_letters * rst_vec;
+    std::cout << vec_mat_mult[0] << std::endl;
+    std::cout << vec_mat_mult[1] << std::endl;
+    std::cout << vec_mat_mult[2] << std::endl;
   }
 
-  // test temp id node stringify
+  // Test Vector Addition and Subtraction
   {
-    EBTerm temp1;
-    EBTerm temp2;
-    EXPECT_NE(std::string(temp1), std::string(temp2));
+    EBVector add_vec = abc_vec + rst_vec;
+    std::cout << add_vec[0] << std::endl;
+    std::cout << add_vec[1] << std::endl;
+    std::cout << add_vec[2] << std::endl;
+
+    EBVector sub_vec = abc_vec - rst_vec;
+    std::cout << sub_vec[0] << std::endl;
+    std::cout << sub_vec[1] << std::endl;
+    std::cout << sub_vec[2] << std::endl;
   }
 
-  // test substitution
+  // Test Cross product
   {
-    // plog substitution
-    EBTerm u = log(x / a);
-    u.substitute(EBLogPlogSubstitution(b));
-    EXPECT_EQ(std::string(u), "plog(x/1,4)");
+    EBVector cross_prod = EBVector::cross(abc_vec, rst_vec);
+    std::cout << cross_prod[0] << std::endl;
+    std::cout << cross_prod[1] << std::endl;
+    std::cout << cross_prod[2] << std::endl;
+  }
 
-    // single substitution in a ternary
-    EBTerm v = conditional(x < y, x * y, x / y);
-    v.substitute(EBTermSubstitution(x, a));
-    EXPECT_EQ(std::string(v),
-              "if"
-              "(1<y,1*y,1/y)");
-
-    // substitution list
-    EBTerm w = conditional(x < y, x * y, x / y);
-    EBSubstitutionRuleList s(2);
-    EBTermSubstitution s0(x, y), s1(y, a);
-    s[0] = &s0;
-    s[1] = &s1;
-    w.substitute(s);
-    EXPECT_EQ(std::string(w),
-              "if"
-              "(y<1,y*1,y/1)");
+  // Test Vector Normalization
+  {
+    std::cout << abc_vec.norm() << std::endl;
   }
 }

@@ -57,7 +57,8 @@ ExpressionBuilder::EBTempIDNode::stringify() const
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
-  const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
+  const char * name[] = {
+      "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh", "sqrt"};
   std::ostringstream s;
   s << name[_type] << '(' << *_subnode << ')';
   return s.str();
@@ -256,6 +257,7 @@ UNARY_FUNC_IMPLEMENT(log10, LOG10)
 UNARY_FUNC_IMPLEMENT(exp, EXP)
 UNARY_FUNC_IMPLEMENT(sinh, SINH)
 UNARY_FUNC_IMPLEMENT(cosh, COSH)
+UNARY_FUNC_IMPLEMENT(sqrt, SQRT)
 
 #define BINARY_FUNC_IMPLEMENT(op, OP)                                                              \
   ExpressionBuilder::EBTerm op(const ExpressionBuilder::EBTerm & left,                             \
@@ -475,12 +477,11 @@ ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode &
     return NULL;
 }
 
-
 /******************************
-*
-*  EBMatrix and EBVector after this point
-*
-********************************/
+ *
+ *  EBMatrix and EBVector after this point
+ *
+ ********************************/
 
 ExpressionBuilder::EBMatrix::EBMatrix()
 {
@@ -489,7 +490,8 @@ ExpressionBuilder::EBMatrix::EBMatrix()
   setSize(0, 0);
 }
 
-ExpressionBuilder::EBMatrix::EBMatrix(std::vector<std::vector <ExpressionBuilder::EBTerm> > FunctionMatrix)
+ExpressionBuilder::EBMatrix::EBMatrix(
+    std::vector<std::vector<ExpressionBuilder::EBTerm>> FunctionMatrix)
 {
   this->FunctionMatrix = FunctionMatrix;
   _rowNum = FunctionMatrix.size();
@@ -497,14 +499,19 @@ ExpressionBuilder::EBMatrix::EBMatrix(std::vector<std::vector <ExpressionBuilder
   checkSize();
 }
 
-ExpressionBuilder::EBMatrix::EBMatrix(unsigned int i, unsigned int j)
-{
-  setSize(i,j);
-}
+ExpressionBuilder::EBMatrix::EBMatrix(unsigned int i, unsigned int j) { setSize(i, j); }
 
-ExpressionBuilder::EBMatrix::EBMatrix(EBTerm r, EBTerm s, EBTerm t, EBTerm u, EBTerm v, EBTerm w, EBTerm x, EBTerm y, EBTerm x)
+ExpressionBuilder::EBMatrix::EBMatrix(const EBTerm r,
+                                      const EBTerm s,
+                                      const EBTerm t,
+                                      const EBTerm u,
+                                      const EBTerm v,
+                                      const EBTerm w,
+                                      const EBTerm x,
+                                      const EBTerm y,
+                                      const EBTerm z)
 {
-  setSize(3,3);
+  setSize(3, 3);
   this->FunctionMatrix[0][0] = r;
   this->FunctionMatrix[0][1] = s;
   this->FunctionMatrix[0][2] = t;
@@ -518,89 +525,65 @@ ExpressionBuilder::EBMatrix::EBMatrix(EBTerm r, EBTerm s, EBTerm t, EBTerm u, EB
 
 ExpressionBuilder::EBMatrix::EBMatrix(const RealTensorValue & rhs)
 {
-  this->setSize(3,3);
-  for(unsigned int i = 0; i < 3; ++i)
-    for(unsigned int j = 0; j < 3; ++j)
-      (*this)[i][j] = EBTerm(rhs(i,j));
+  this->setSize(3, 3);
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      (*this)[i][j] = EBTerm(rhs(i, j));
 }
 
-ExpressionBuilder::EBMatrix &
-operator*(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBMatrix & rhs)
+ExpressionBuilder::EBMatrix & operator*(const ExpressionBuilder::EBMatrix & lhs,
+                                        const ExpressionBuilder::EBMatrix & rhs)
 {
   ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->checkMultSize(lhs,rhs);
-  result->setSize(lhs.rowNum(),rhs.colNum());
-  for(unsigned int i = 0; i < lhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < rhs.rowNum(); ++j)
-      for(unsigned int k = 0; k < rhs.colNum(); ++ k)
+  result->checkMultSize(lhs, rhs);
+  result->setSize(lhs.rowNum(), rhs.colNum());
+  for (unsigned int i = 0; i < lhs.rowNum(); ++i)
+    for (unsigned int j = 0; j < rhs.rowNum(); ++j)
+      for (unsigned int k = 0; k < rhs.colNum(); ++k)
         (*result)[i][k] = (*result)[i][k] + lhs[i][j] * rhs[j][k];
   return *result;
 }
 
-ExpressionBuilder::EBMatrix &
-operator*(const Real & lhs, const ExpressionBuilder::EBMatrix & rhs)
+ExpressionBuilder::EBMatrix & operator*(const Real & lhs, const ExpressionBuilder::EBMatrix & rhs)
 {
   ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->setSize(rhs.rowNum(),rhs.colNum());
-  for(unsigned int i = 0; i < rhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < rhs.colNum(); ++j)
+  result->setSize(rhs.rowNum(), rhs.colNum());
+  for (unsigned int i = 0; i < rhs.rowNum(); ++i)
+    for (unsigned int j = 0; j < rhs.colNum(); ++j)
       (*result)[i][j] = lhs * rhs[i][j];
   return *result;
 }
 
-ExpressionBuilder::EBMatrix &
-operator*(const ExpressionBuilder::EBMatrix & lhs, const Real & rhs)
+ExpressionBuilder::EBMatrix & operator*(const ExpressionBuilder::EBMatrix & lhs, const Real & rhs)
 {
   return rhs * lhs;
 }
 
-ExpressionBuilder::EBMatrix &
-operator*(const ExpressionBuilder::EBTerm & lhs, const ExpressionBuilder::EBMatrix & rhs)
+ExpressionBuilder::EBMatrix & operator*(const ExpressionBuilder::EBTerm & lhs,
+                                        const ExpressionBuilder::EBMatrix & rhs)
 {
   ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->setSize(rhs.rowNum(),rhs.colNum());
-  for(unsigned int i = 0; i < rhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < rhs.colNum(); ++j)
+  result->setSize(rhs.rowNum(), rhs.colNum());
+  for (unsigned int i = 0; i < rhs.rowNum(); ++i)
+    for (unsigned int j = 0; j < rhs.colNum(); ++j)
       (*result)[i][j] = lhs * rhs[i][j];
   return *result;
 }
 
-ExpressionBuilder::EBMatrix &
-operator*(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBTerm & rhs)
+ExpressionBuilder::EBMatrix & operator*(const ExpressionBuilder::EBMatrix & lhs,
+                                        const ExpressionBuilder::EBTerm & rhs)
 {
   return rhs * lhs;
-}
-
-ExpressionBuilder::EBMatrix &
-operator/(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBTerm & rhs)
-{
-  ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->setSize(lhs.rowNum(),lhs.colNum());
-  for(unsigned int i = 0; i < lhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < lhs.colNum(); ++j)
-      (*result)[i][j] = lhs[i][j] / rhs;
-  return *result;
-}
-
-ExpressionBuilder::EBMatrix &
-operator/(const ExpressionBuilder::EBMatrix & lhs, const Real & rhs)
-{
-  ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->setSize(lhs.rowNum(),lhs.colNum());
-  for(unsigned int i = 0; i < lhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < lhs.colNum(); ++j)
-      (*result)[i][j] = (1/rhs) * lhs[i][j];
-  return *result;
 }
 
 ExpressionBuilder::EBMatrix &
 operator+(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBMatrix & rhs)
 {
   ExpressionBuilder::EBMatrix * result = new ExpressionBuilder::EBMatrix();
-  result->checkAddSize(rhs,lhs);
-  result->setSize(rhs.rowNum(),rhs.colNum());
-  for(unsigned int i = 0; i < rhs.rowNum(); ++i)
-    for(unsigned int j = 0; j < rhs.colNum(); ++j)
+  result->checkAddSize(rhs, lhs);
+  result->setSize(rhs.rowNum(), rhs.colNum());
+  for (unsigned int i = 0; i < rhs.rowNum(); ++i)
+    for (unsigned int j = 0; j < rhs.colNum(); ++j)
       (*result)[i][j] = rhs[i][j] + lhs[i][j];
   return *result;
 }
@@ -611,13 +594,13 @@ operator-(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBMa
   return lhs + (-1 * rhs);
 }
 
-ExpressionBuilder::EBMatrix::operator std::vector<std::vector<std::string> >() const
+ExpressionBuilder::EBMatrix::operator std::vector<std::vector<std::string>>() const
 {
-  std::vector<std::vector<std::string> > sVec;
-  for(unsigned int i = 0; i < _rowNum; ++i)
+  std::vector<std::vector<std::string>> sVec;
+  for (unsigned int i = 0; i < _rowNum; ++i)
   {
     std::vector<std::string> tempVec;
-    for(unsigned int j = 0; j < _colNum; ++j)
+    for (unsigned int j = 0; j < _colNum; ++j)
       tempVec.push_back((*this)[i][j]);
     sVec.push_back(tempVec);
   }
@@ -636,20 +619,21 @@ ExpressionBuilder::EBMatrix::operator-()
   return (-1) * (*this);
 }
 
-std::vector <ExpressionBuilder::EBTerm> &
-ExpressionBuilder::EBMatrix::operator[](unsigned int i)
+std::vector<ExpressionBuilder::EBTerm> & ExpressionBuilder::EBMatrix::operator[](unsigned int i)
 {
-  if(i > _rowNum)
-  {} //MooseError
+  if (i > _rowNum)
+  {
+  } // MooseError
 
   return FunctionMatrix[i];
 }
 
-const std::vector <ExpressionBuilder::EBTerm> &
-ExpressionBuilder::EBMatrix::operator[](unsigned int i) const
+const std::vector<ExpressionBuilder::EBTerm> & ExpressionBuilder::EBMatrix::
+operator[](unsigned int i) const
 {
-  if(i > _rowNum)
-  {} //MooseError
+  if (i > _rowNum)
+  {
+  } // MooseError
 
   return FunctionMatrix[i];
 }
@@ -657,8 +641,8 @@ ExpressionBuilder::EBMatrix::operator[](unsigned int i) const
 ExpressionBuilder::EBMatrix
 ExpressionBuilder::EBMatrix::transpose()
 {
-  for(unsigned int i = 0; i < _rowNum; ++i)
-    for(unsigned int j = i + 1; j < _colNum; ++j)
+  for (unsigned int i = 0; i < _rowNum; ++i)
+    for (unsigned int j = i + 1; j < _colNum; ++j)
     {
       ExpressionBuilder::EBTerm temp = (*this)[i][j];
       (*this)[i][j] = (*this)[j][i];
@@ -670,9 +654,10 @@ ExpressionBuilder::EBMatrix::transpose()
 void
 ExpressionBuilder::EBMatrix::checkSize()
 {
-  for(unsigned int i = 0; i < _rowNum; ++i)
-    if(FunctionMatrix[i].size() != _colNum)
-    {} //MooseError
+  for (unsigned int i = 0; i < _rowNum; ++i)
+    if (FunctionMatrix[i].size() != _colNum)
+    {
+    } // MooseError
 }
 
 unsigned int
@@ -693,30 +678,35 @@ ExpressionBuilder::EBMatrix::setSize(const unsigned int i, const unsigned int j)
   _rowNum = i;
   _colNum = j;
   FunctionMatrix.resize(i);
-  for(unsigned int k = 0; k < i; k++)
-    for(unsigned int l = 0; l < j; ++l)
+  for (unsigned int k = 0; k < i; k++)
+    for (unsigned int l = 0; l < j; ++l)
       FunctionMatrix[k].push_back(EBTerm(0));
 }
 
 void
-ExpressionBuilder::EBMatrix::checkMultSize(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBMatrix & rhs)
+ExpressionBuilder::EBMatrix::checkMultSize(const ExpressionBuilder::EBMatrix & lhs,
+                                           const ExpressionBuilder::EBMatrix & rhs)
 {
-  if(lhs.colNum() != rhs.rowNum())
-  {} //MooseError
+  if (lhs.colNum() != rhs.rowNum())
+  {
+  } // MooseError
 }
 
 void
-ExpressionBuilder::EBMatrix::checkAddSize(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBMatrix & rhs)
+ExpressionBuilder::EBMatrix::checkAddSize(const ExpressionBuilder::EBMatrix & lhs,
+                                          const ExpressionBuilder::EBMatrix & rhs)
 {
-  if(lhs.colNum() != rhs.colNum())
-  {} //MooseError
-  if(lhs.rowNum() != rhs.rowNum())
-  {} //MooseError
+  if (lhs.colNum() != rhs.colNum())
+  {
+  } // MooseError
+  if (lhs.rowNum() != rhs.rowNum())
+  {
+  } // MooseError
 }
 
 ExpressionBuilder::EBVector::EBVector()
 {
-  for(int i = 0; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
   {
     FunctionVector.push_back(EBTerm(0));
   }
@@ -731,7 +721,7 @@ ExpressionBuilder::EBVector::EBVector(std::vector<EBTerm> FunctionVector)
 ExpressionBuilder::EBVector::EBVector(std::vector<std::string> FunctionNameVector)
 {
   checkSize(FunctionNameVector);
-  for(int i = 0; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
     this->FunctionVector.push_back(EBTerm(FunctionNameVector[i].c_str()));
 }
 
@@ -739,7 +729,7 @@ ExpressionBuilder::EBVector &
 ExpressionBuilder::EBVector::operator=(const RealVectorValue & rhs)
 {
   EBVector * result = new EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
   {
     (*result)[i] = EBTerm(rhs(i));
   }
@@ -747,10 +737,11 @@ ExpressionBuilder::EBVector::operator=(const RealVectorValue & rhs)
 }
 
 ExpressionBuilder::EBVector::EBVectorVector
-ExpressionBuilder::EBVector::CreateEBVectorVector(const std::string & var_name, unsigned int _op_num)
+ExpressionBuilder::EBVector::CreateEBVectorVector(const std::string & var_name,
+                                                  unsigned int _op_num)
 {
   EBVectorVector vec;
-  for(unsigned int i = 0; i < _op_num; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
   {
     EBVector temp;
     EBTerm tempx((var_name + std::to_string(i) + "x").c_str());
@@ -767,99 +758,81 @@ ExpressionBuilder::EBVector::CreateEBVectorVector(const std::string & var_name, 
 ExpressionBuilder::EBVector::operator std::vector<std::string>() const
 {
   std::vector<std::string> sVec;
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     sVec.push_back((*this)[i]);
   return sVec;
 }
 
-ExpressionBuilder::EBTerm &
-operator*(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBVector & rhs)
+ExpressionBuilder::EBTerm & operator*(const ExpressionBuilder::EBVector & lhs,
+                                      const ExpressionBuilder::EBVector & rhs)
 {
   ExpressionBuilder::EBTerm * result = new ExpressionBuilder::EBTerm(0);
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     *result = *result + lhs[i] * rhs[i];
   return *result;
 }
 
-ExpressionBuilder::EBVector &
-operator*(const ExpressionBuilder::EBVector & lhs, const Real & rhs)
+ExpressionBuilder::EBVector & operator*(const ExpressionBuilder::EBVector & lhs, const Real & rhs)
 {
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     (*result)[i] = rhs * lhs[i];
   return *result;
 }
 
-ExpressionBuilder::EBVector &
-operator*(const Real & lhs, const ExpressionBuilder::EBVector & rhs)
+ExpressionBuilder::EBVector & operator*(const Real & lhs, const ExpressionBuilder::EBVector & rhs)
 {
   return rhs * lhs;
 }
 
-ExpressionBuilder::EBVector &
-operator*(const ExpressionBuilder::EBTerm & lhs, const ExpressionBuilder::EBVector & rhs)
+ExpressionBuilder::EBVector & operator*(const ExpressionBuilder::EBTerm & lhs,
+                                        const ExpressionBuilder::EBVector & rhs)
 {
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     (*result)[i] = rhs[i] * lhs;
   return *result;
 }
 
-ExpressionBuilder::EBVector &
-operator*(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBTerm & rhs)
+ExpressionBuilder::EBVector & operator*(const ExpressionBuilder::EBVector & lhs,
+                                        const ExpressionBuilder::EBTerm & rhs)
 {
   return rhs * lhs;
 }
 
 ExpressionBuilder::EBVector &
-operator*(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBMatrix & rhs) // We assume the vector is 1 x 3 here
+operator*(const ExpressionBuilder::EBVector & lhs,
+          const ExpressionBuilder::EBMatrix & rhs) // We assume the vector is 1 x 3 here
 {
-  if(rhs.rowNum() != 3)
-  {} // MooseError
+  if (rhs.rowNum() != 3)
+  {
+  } // MooseError
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
-    for(unsigned int j =0; j < 3; ++j)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
       (*result)[i] = (*result)[i] + lhs[j] * rhs[j][i];
   return *result;
 }
 
 ExpressionBuilder::EBVector &
-operator*(const ExpressionBuilder::EBMatrix & lhs, const ExpressionBuilder::EBVector & rhs) // We assume the vector is 3 x 1 here
+operator*(const ExpressionBuilder::EBMatrix & lhs,
+          const ExpressionBuilder::EBVector & rhs) // We assume the vector is 3 x 1 here
 {
-  if(lhs.colNum() != 3)
-  {} // MooseError
+  if (lhs.colNum() != 3)
+  {
+  } // MooseError
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
-    for(unsigned int j =0; j < 3; ++j)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
       (*result)[i] = (*result)[i] + lhs[i][j] * rhs[j];
   return *result;
-}
-
-ExpressionBuilder::EBVector &
-operator/(const ExpressionBuilder::EBVector & lhs, const Real & rhs)
-{
-  ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
-  {
-    (*result)[i] = (1/rhs) * lhs[i];
-  }
-  return *result;
-}
-
-ExpressionBuilder::EBVector &
-operator/(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBTerm & rhs)
-{
-  ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
-    (*result)[i] = lhs[i] / rhs;
-  return (*result);
 }
 
 ExpressionBuilder::EBVector &
 operator+(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBVector & rhs)
 {
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
-  for(unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     (*result)[i] = lhs[i] + rhs[i];
   return *result;
 }
@@ -882,20 +855,19 @@ ExpressionBuilder::EBVector::operator-()
   return (-1) * (*this);
 }
 
-ExpressionBuilder::EBTerm &
-ExpressionBuilder::EBVector::operator[](unsigned int i)
+ExpressionBuilder::EBTerm & ExpressionBuilder::EBVector::operator[](unsigned int i)
 {
   return FunctionVector[i];
 }
 
-const ExpressionBuilder::EBTerm &
-ExpressionBuilder::EBVector::operator[](unsigned int i) const
+const ExpressionBuilder::EBTerm & ExpressionBuilder::EBVector::operator[](unsigned int i) const
 {
   return FunctionVector[i];
 }
 
 ExpressionBuilder::EBVector
-ExpressionBuilder::EBVector::cross(const ExpressionBuilder::EBVector & lhs, const ExpressionBuilder::EBVector & rhs)
+ExpressionBuilder::EBVector::cross(const ExpressionBuilder::EBVector & lhs,
+                                   const ExpressionBuilder::EBVector & rhs)
 {
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
   (*result)[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
@@ -914,20 +886,23 @@ void
 ExpressionBuilder::EBVector::push_back(EBTerm term)
 {
   FunctionVector.push_back(term);
-  if(FunctionVector.size() > 3)
-  {} //MooseError
+  if (FunctionVector.size() > 3)
+  {
+  } // MooseError
 }
 
 void
 ExpressionBuilder::EBVector::checkSize(std::vector<EBTerm> FunctionVector)
 {
-  if(FunctionVector.size() != 3)
-  {} // MooseError
+  if (FunctionVector.size() != 3)
+  {
+  } // MooseError
 }
 
 void
 ExpressionBuilder::EBVector::checkSize(std::vector<std::string> FunctionVector)
 {
-  if(FunctionVector.size() != 3)
-  {} // MooseError
+  if (FunctionVector.size() != 3)
+  {
+  } // MooseError
 }
