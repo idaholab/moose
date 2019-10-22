@@ -64,17 +64,17 @@
     requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using a rectangular cutting plane by RectangleCutUserObject'
     design = 'RectangleCutUserObject.md'
   [../]
-  [./edge_crack_3d_mesh]
+  [./edge_crack_3d_propagation]
     type = Exodiff
-    input = edge_crack_3d_mesh.i
-    exodiff = 'edge_crack_3d_mesh_out.e'
+    input = edge_crack_3d_propagation.i
+    exodiff = 'edge_crack_3d_propagation_out.e edge_crack_3d_propagation_out.e-s002 edge_crack_3d_propagation_out.e-s003'
     abs_zero = 1e-8
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically 2D cutting mesh by MeshCut3DUserObject'
+    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut3DUserObject'
     design = 'MeshCut3DUserObject.md'
-  [../]  
+  [../]
   [./elliptical_crack]
     type = Exodiff
     input = elliptical_crack.i

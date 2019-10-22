@@ -30,6 +30,7 @@ class MeshCut3DUserObject : public GeometricCutUserObject
 public:
   MeshCut3DUserObject(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
