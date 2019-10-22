@@ -1,0 +1,11 @@
+[Tests]
+  [./czm_3DC_load_Noemal]
+    type = Exodiff
+    input = czm_3DC_load.i
+    exodiff = czm_3DC_load_out.e
+    issues = '#11546'
+    requirement = 'This tests a simple exponential cohesive law'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
