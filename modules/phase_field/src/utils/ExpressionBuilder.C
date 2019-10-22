@@ -622,8 +622,7 @@ ExpressionBuilder::EBMatrix::operator-()
 std::vector<ExpressionBuilder::EBTerm> & ExpressionBuilder::EBMatrix::operator[](unsigned int i)
 {
   if (i > _rowNum)
-  {
-  } // MooseError
+    mooseError("Accessing element outside of bounds");
 
   return FunctionMatrix[i];
 }
@@ -632,8 +631,7 @@ const std::vector<ExpressionBuilder::EBTerm> & ExpressionBuilder::EBMatrix::
 operator[](unsigned int i) const
 {
   if (i > _rowNum)
-  {
-  } // MooseError
+    mooseError("Accessing element outside of bounds");
 
   return FunctionMatrix[i];
 }
@@ -656,8 +654,7 @@ ExpressionBuilder::EBMatrix::checkSize()
 {
   for (unsigned int i = 0; i < _rowNum; ++i)
     if (FunctionMatrix[i].size() != _colNum)
-    {
-    } // MooseError
+      mooseError("All Matrix columns should be the same size");
 }
 
 unsigned int
@@ -688,8 +685,7 @@ ExpressionBuilder::EBMatrix::checkMultSize(const ExpressionBuilder::EBMatrix & l
                                            const ExpressionBuilder::EBMatrix & rhs)
 {
   if (lhs.colNum() != rhs.rowNum())
-  {
-  } // MooseError
+    mooseError("Wrong sized matrices from Matrix multiplication");
 }
 
 void
@@ -697,11 +693,10 @@ ExpressionBuilder::EBMatrix::checkAddSize(const ExpressionBuilder::EBMatrix & lh
                                           const ExpressionBuilder::EBMatrix & rhs)
 {
   if (lhs.colNum() != rhs.colNum())
-  {
-  } // MooseError
+    mooseError("Wrong sized matrices from Matrix addition");
+
   if (lhs.rowNum() != rhs.rowNum())
-  {
-  } // MooseError
+    mooseError("Wrong sized matrices from Matrix addition");
 }
 
 ExpressionBuilder::EBVector::EBVector()
@@ -805,8 +800,8 @@ operator*(const ExpressionBuilder::EBVector & lhs,
           const ExpressionBuilder::EBMatrix & rhs) // We assume the vector is 1 x 3 here
 {
   if (rhs.rowNum() != 3)
-  {
-  } // MooseError
+    mooseError("Vectors should have 3 elements");
+
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
@@ -819,8 +814,8 @@ operator*(const ExpressionBuilder::EBMatrix & lhs,
           const ExpressionBuilder::EBVector & rhs) // We assume the vector is 3 x 1 here
 {
   if (lhs.colNum() != 3)
-  {
-  } // MooseError
+    mooseError("Vectors should have 3 elements");
+
   ExpressionBuilder::EBVector * result = new ExpressionBuilder::EBVector;
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
@@ -887,22 +882,19 @@ ExpressionBuilder::EBVector::push_back(EBTerm term)
 {
   FunctionVector.push_back(term);
   if (FunctionVector.size() > 3)
-  {
-  } // MooseError
+    mooseError("Vectors should have 3 elements");
 }
 
 void
 ExpressionBuilder::EBVector::checkSize(std::vector<EBTerm> FunctionVector)
 {
   if (FunctionVector.size() != 3)
-  {
-  } // MooseError
+    mooseError("Vectors should have 3 elements");
 }
 
 void
 ExpressionBuilder::EBVector::checkSize(std::vector<std::string> FunctionVector)
 {
   if (FunctionVector.size() != 3)
-  {
-  } // MooseError
+    mooseError("Vectors should have 3 elements");
 }

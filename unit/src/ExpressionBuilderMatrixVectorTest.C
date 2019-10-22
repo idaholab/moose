@@ -19,60 +19,61 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 {
   // Testing Matrix Operatrions
 
-  EBTerm r("r"), s("s"), t("t"), u("u"), v("v"), w("w"), x("x"), y("y"), z("z");
-  EBTerm a("a"), b("b"), c("c"), d("d"), e("e"), f("f"), g("g"), h("h"), i("i");
+  EBTerm a1("a11"), a2("a12"), a3("a13"), a4("a21"), a5("a22"), a6("a23"), a7("a31"), a8("a32"),
+      a9("a33");
+  EBTerm b1("b11"), b2("b12"), b3("b13"), b4("b21"), b5("b22"), b6("b23"), b7("b31"), b8("b32"),
+      b9("b33");
 
-  EBMatrix lower_letters(r, s, t, u, v, w, x, y, z);
-  EBMatrix upper_letters(a, b, c, d, e, f, g, h, i);
+  EBMatrix a_matrix(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+  EBMatrix b_matrix(b1, b2, b3, b4, b5, b6, b7, b8, b9);
 
   // Test Matrix Multiplication
   {
-    EBMatrix mult_mat = lower_letters * upper_letters;
-    std::cout << mult_mat[0][0] << std::endl;
-    std::cout << mult_mat[0][0] << std::endl;
-    std::cout << mult_mat[0][1] << std::endl;
-    std::cout << mult_mat[0][2] << std::endl;
-    std::cout << mult_mat[1][0] << std::endl;
-    std::cout << mult_mat[1][1] << std::endl;
-    std::cout << mult_mat[1][2] << std::endl;
-    std::cout << mult_mat[2][0] << std::endl;
-    std::cout << mult_mat[2][1] << std::endl;
-    std::cout << mult_mat[2][2] << std::endl;
+    EBMatrix mult_mat = a_matrix * b_matrix;
+    EXPECT_EQ(std::string(mult_mat[0][0],"0+a11*b11+a12*b21+b13*b31");
+    EXPECT_EQ(std::string(mult_mat[0][1],"0+a11*b12+a12*b22+a13*b32");
+    EXPECT_EQ(std::string(mult_mat[0][2],"0+a11*b13+a12*b23+a13*b33");
+    EXPECT_EQ(std::string(mult_mat[1][0],"0+a21*b11+a22*b21+a23*b31");
+    EXPECT_EQ(std::string(mult_mat[1][1],"0+a21*b12+a22*b22+a23*b32");
+    EXPECT_EQ(std::string(mult_mat[1][2],"0+a21*b13+a22*b23+a23*b33");
+    EXPECT_EQ(std::string(mult_mat[2][0],"0+a31*b11+a32*b21+a33*b31");
+    EXPECT_EQ(std::string(mult_mat[2][1],"0+a31*b12+a32*b22+a33*b32");
+    EXPECT_EQ(std::string(mult_mat[2][2],"0+a31*b13+a32*b23+a33*b33");
   }
 
   // Test Matrix Addition and Subtraction
   {
-    EBMatrix add_mat = lower_letters * upper_letters;
+    EBMatrix add_mat = a_matrix + b_matrix;
     std::cout << add_mat[0][0] << std::endl;
-    std::cout << add_mat[0][0] << std::endl;
-    std::cout << add_mat[0][1] << std::endl;
-    std::cout << add_mat[0][2] << std::endl;
-    std::cout << add_mat[1][0] << std::endl;
-    std::cout << add_mat[1][1] << std::endl;
-    std::cout << add_mat[1][2] << std::endl;
-    std::cout << add_mat[2][0] << std::endl;
-    std::cout << add_mat[2][1] << std::endl;
-    std::cout << add_mat[2][2] << std::endl;
+    EXPECT_EQ(std::string(add_mat[0][0],"0+a11+b11");
+    EXPECT_EQ(std::string(add_mat[0][1],"0+a12+b12");
+    EXPECT_EQ(std::string(add_mat[0][2],"0+a13+b13");
+    EXPECT_EQ(std::string(add_mat[1][0],"0+a21+b21");
+    EXPECT_EQ(std::string(add_mat[1][1],"0+a22+b22");
+    EXPECT_EQ(std::string(add_mat[1][2],"0+a23+b23");
+    EXPECT_EQ(std::string(add_mat[2][0],"0+a31+b31");
+    EXPECT_EQ(std::string(add_mat[2][1],"0+a32+b32");
+    EXPECT_EQ(std::string(add_mat[2][2],"0+a33+b33");
 
-    EBMatrix sub_mat = lower_letters * upper_letters;
+    EBMatrix sub_mat = a_matrix - b_matrix;
     std::cout << sub_mat[0][0] << std::endl;
-    std::cout << sub_mat[0][0] << std::endl;
-    std::cout << sub_mat[0][1] << std::endl;
-    std::cout << sub_mat[0][2] << std::endl;
-    std::cout << sub_mat[1][0] << std::endl;
-    std::cout << sub_mat[1][1] << std::endl;
-    std::cout << sub_mat[1][2] << std::endl;
-    std::cout << sub_mat[2][0] << std::endl;
-    std::cout << sub_mat[2][1] << std::endl;
-    std::cout << sub_mat[2][2] << std::endl;
+    EXPECT_EQ(std::string(sub_mat[0][0],"0+a11-b11");
+    EXPECT_EQ(std::string(sub_mat[0][1],"0+a12-b12");
+    EXPECT_EQ(std::string(sub_mat[0][2],"0+a13-b13");
+    EXPECT_EQ(std::string(sub_mat[1][0],"0+a21-b21");
+    EXPECT_EQ(std::string(sub_mat[1][1],"0+a22-b22");
+    EXPECT_EQ(std::string(sub_mat[1][2],"0+a23-b23");
+    EXPECT_EQ(std::string(sub_mat[2][0],"0+a31-b31");
+    EXPECT_EQ(std::string(sub_mat[2][1],"0+a32-b32");
+    EXPECT_EQ(std::string(sub_mat[2][2],"0+a33-b33");
   }
 
   // Test Scalar Multiplication of a Matrix
   {
-    EBMatrix scal_mult_mat = 2 * lower_letters;
+    EBMatrix scal_mult_mat = 2 * b_matrix;
     std::cout << scal_mult_mat[0][0] << std::endl;
-    std::cout << scal_mult_mat[0][2] << std::endl;
     std::cout << scal_mult_mat[0][1] << std::endl;
+    std::cout << scal_mult_mat[0][2] << std::endl;
     std::cout << scal_mult_mat[1][0] << std::endl;
     std::cout << scal_mult_mat[1][1] << std::endl;
     std::cout << scal_mult_mat[1][2] << std::endl;
@@ -80,7 +81,7 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
     std::cout << scal_mult_mat[2][1] << std::endl;
     std::cout << scal_mult_mat[2][2] << std::endl;
 
-    scal_mult_mat = a * lower_letters;
+    scal_mult_mat = a1 * b_matrix;
     std::cout << scal_mult_mat[0][0] << std::endl;
     std::cout << scal_mult_mat[0][1] << std::endl;
     std::cout << scal_mult_mat[0][2] << std::endl;
@@ -94,7 +95,7 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Test Matrix transpose
   {
-    EBMatrix transp_mat = lower_letters.transpose();
+    EBMatrix transp_mat = a_matrix.transpose();
     std::cout << transp_mat[0][0] << std::endl;
     std::cout << transp_mat[0][1] << std::endl;
     std::cout << transp_mat[0][2] << std::endl;
@@ -108,21 +109,21 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Testing Vector operations
 
-  EBVector abc_vec(a, b, c);
-  EBVector rst_vec(r, s, t);
+  EBVector a_vec(a1, a2, a3);
+  EBVector b_vec(b1, b2, b3);
   // Test Dot Product
   {
-    std::cout << abc_vec * rst_vec << std::endl;
+    std::cout << a_vec * b_vec << std::endl;
   }
 
   // Test Scalar Multiplication
   {
-    EBVector scal_mult_vec = a * rst_vec;
+    EBVector scal_mult_vec = a1 * b_vec;
     std::cout << scal_mult_vec[0] << std::endl;
     std::cout << scal_mult_vec[1] << std::endl;
     std::cout << scal_mult_vec[2] << std::endl;
 
-    scal_mult_vec = 2 * rst_vec;
+    scal_mult_vec = 2 * b_vec;
     std::cout << scal_mult_vec[0] << std::endl;
     std::cout << scal_mult_vec[1] << std::endl;
     std::cout << scal_mult_vec[2] << std::endl;
@@ -130,12 +131,12 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Test Vector Matrix Multiplication
   {
-    EBVector vec_mat_mult = rst_vec * upper_letters;
+    EBVector vec_mat_mult = a_vec * b_matrix;
     std::cout << vec_mat_mult[0] << std::endl;
     std::cout << vec_mat_mult[1] << std::endl;
     std::cout << vec_mat_mult[2] << std::endl;
 
-    vec_mat_mult = upper_letters * rst_vec;
+    vec_mat_mult = b_matrix * a_vec;
     std::cout << vec_mat_mult[0] << std::endl;
     std::cout << vec_mat_mult[1] << std::endl;
     std::cout << vec_mat_mult[2] << std::endl;
@@ -143,12 +144,12 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Test Vector Addition and Subtraction
   {
-    EBVector add_vec = abc_vec + rst_vec;
+    EBVector add_vec = a_vec + b_vec;
     std::cout << add_vec[0] << std::endl;
     std::cout << add_vec[1] << std::endl;
     std::cout << add_vec[2] << std::endl;
 
-    EBVector sub_vec = abc_vec - rst_vec;
+    EBVector sub_vec = a_vec - b_vec;
     std::cout << sub_vec[0] << std::endl;
     std::cout << sub_vec[1] << std::endl;
     std::cout << sub_vec[2] << std::endl;
@@ -156,7 +157,7 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Test Cross product
   {
-    EBVector cross_prod = EBVector::cross(abc_vec, rst_vec);
+    EBVector cross_prod = EBVector::cross(a_vec, b_vec);
     std::cout << cross_prod[0] << std::endl;
     std::cout << cross_prod[1] << std::endl;
     std::cout << cross_prod[2] << std::endl;
@@ -164,6 +165,6 @@ TEST_F(ExpressionBuilderMatrixVectorTest, test)
 
   // Test Vector Normalization
   {
-    std::cout << abc_vec.norm() << std::endl;
+    std::cout << a_vec.norm() << std::endl;
   }
 }
