@@ -10,7 +10,7 @@
 #include "ParsedMaterialHelper.h"
 
 #include "libmesh/quadrature.h"
-
+#include <iostream>
 template <>
 InputParameters
 validParams<ParsedMaterialHelper>()
@@ -88,23 +88,10 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     case USE_PARAM_NAMES:
       for (unsigned i = 0; i < _nargs; ++i)
       {
-<<<<<<< HEAD
         if (_arg_param_numbers[i] < 0)
-        {
-          _variable_names[i] = _arg_param_names[i];
-          std::cout << _arg_param_names[i];
-        }
-        else
-        {
-          std::cout << _arg_param_names[i];
-          _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
-        }
-=======
-        if(_arg_param_numbers[i] < 0)
           _variable_names[i] = _arg_names[i];
         else
           _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
->>>>>>> This adds the ability to use vectors of coupled variables in ExpressionBuilder     closes #14184
       }
       break;
 
