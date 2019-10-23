@@ -37,7 +37,6 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 
     s.registerActionSyntax("JacobianTest1PhaseAction", "JacobianTest1Phase");
     s.registerActionSyntax("JacobianTest2PhaseAction", "JacobianTest2Phase");
-    s.registerActionSyntax("JacobianTest2PhaseNCGAction", "JacobianTest2PhaseNCG");
     s.registerActionSyntax("JacobianTestGeneralAction", "JacobianTestGeneral");
     s.registerActionSyntax("JacobianTest1PhaseRDGAction", "JacobianTest1PhaseRDG");
     s.registerActionSyntax("JacobianTest2PhaseRDGBaseAction", "JacobianTest2PhaseRDG");
@@ -50,6 +49,13 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
     s.registerActionSyntax("JacobianTest2PhaseRiemannSolverAction",
                            "JacobianTest2PhaseRiemannSolver");
     s.registerActionSyntax("JacobianTest2PhaseWaveSpeedsAction", "JacobianTest2PhaseWaveSpeeds");
+
+    s.registerActionSyntax("JacobianTest2PhaseNCGAction", "JacobianTest2PhaseNCG");
+    s.registerActionSyntax("JacobianTest2PhaseNCGWaveSpeedsAction",
+                           "JacobianTest2PhaseNCGWaveSpeeds");
+    s.registerActionSyntax("JacobianTest2PhaseNCGRDGInterfacialVariablesAction",
+                           "JacobianTest2PhaseNCGRDGInterfacialVariables");
+
     s.registerActionSyntax("ClosureTest1PhaseAction", "ClosureTest1Phase");
     s.registerActionSyntax("ClosureTest2PhaseAction", "ClosureTest2Phase");
   }
