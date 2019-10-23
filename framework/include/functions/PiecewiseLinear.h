@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Piecewise.h"
+#include "PiecewiseBase.h"
 
 // Forward declarations
 class PiecewiseLinear;
@@ -21,12 +21,15 @@ InputParameters validParams<PiecewiseLinear>();
  * Function which provides a piecewise continuous linear interpolation
  * of a provided (x,y) point data set.
  */
-class PiecewiseLinear : public Piecewise
+class PiecewiseLinear : public PiecewiseBase
 {
 public:
   static InputParameters validParams();
 
   PiecewiseLinear(const InputParameters & parameters);
+
+  /// helper object to perform the linear interpolation of the function data
+  std::unique_ptr<LinearInterpolation> _linear_interp;
 
   /**
    * Get the value of the function (based on time only)
