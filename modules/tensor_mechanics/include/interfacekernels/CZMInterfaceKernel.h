@@ -33,17 +33,12 @@ protected:
   /// the displacement component this kernel is operating on (0=x, 1=y, 2 =z)
   const unsigned int _disp_index;
 
-  /// coupled displacement componenets values
-  const VariableValue & _disp_1;
-  const VariableValue & _disp_1_neighbor;
-  const VariableValue & _disp_2;
-  const VariableValue & _disp_2_neighbor;
+  /// number of displacement components
+  const unsigned int _ndisp;
 
   /// coupled displacement componenets variables ID
-  unsigned int _disp_1_var;
-  unsigned int _disp_1_neighbor_var;
-  unsigned int _disp_2_var;
-  unsigned int _disp_2_neighbor_var;
+  std::vector<unsigned int> _disp_var;
+  std::vector<unsigned int> _disp_neighbor_var;
 
   /// variables containg the names of the material properties representing the
   /// reidual's and jacobian's coefficients. Derivates are assumed to be taken
@@ -53,6 +48,6 @@ protected:
   const std::string _throw_exception;
 
   // values of the residual's and jacobian's cofficients
-  const MaterialProperty<RealVectorValue> & _ResidualMP;
-  const MaterialProperty<RankTwoTensor> & _JacobianMP;
+  const MaterialProperty<RealVectorValue> & _traction;
+  const MaterialProperty<RankTwoTensor> & _traction_derivative;
 };

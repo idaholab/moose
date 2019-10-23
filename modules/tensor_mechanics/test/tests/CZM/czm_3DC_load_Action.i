@@ -47,6 +47,11 @@
   [../]
 []
 
+[CohesiveZoneModel]
+  boundary = 'interface'
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 
 [BCs]
   [./bottom_x]
@@ -105,32 +110,7 @@
   [../]
 []
 
-[InterfaceKernels]
-  [./interface_x]
-    type = CZMInterfaceKernel
-    variable = disp_x
-    neighbor_var = disp_x
-    displacements = 'disp_x disp_y disp_z'
-    disp_index = 0
-    boundary = 'interface'
-  [../]
-  [./interface_y]
-    type = CZMInterfaceKernel
-    variable = disp_y
-    neighbor_var = disp_y
-    displacements = 'disp_x disp_y disp_z'
-    disp_index = 1
-    boundary = 'interface'
-  [../]
-  [./interface_z]
-    type = CZMInterfaceKernel
-    variable = disp_z
-    neighbor_var = disp_z
-    disp_index = 2
-    displacements = 'disp_x disp_y disp_z'
-    boundary = 'interface'
-  [../]
-[]
+
 
 [Materials]
   [./Elasticity_tensor]

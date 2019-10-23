@@ -66,6 +66,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
 
+  registerSyntax("CohesiveZoneModelAction", "CohesiveZoneModel");
+  // registerSyntaxTask("CohesiveZoneModelAction", "CohesiveZoneModel", "add_czm_kernel");
+
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
 }

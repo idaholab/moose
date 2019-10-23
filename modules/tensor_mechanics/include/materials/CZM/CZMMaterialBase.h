@@ -23,22 +23,11 @@ public:
 
 protected:
   virtual void computeQpProperties() override;
-  virtual void initQpStatefulProperties() override;
 
   const MooseArray<Point> & _normals;
-
-  const VariableValue & _disp_x;
-  const VariableValue & _disp_x_neigh;
-  const VariableValue & _disp_y;
-  const VariableValue & _disp_y_neigh;
-  const VariableValue & _disp_z;
-  const VariableValue & _disp_z_neigh;
-  const VariableValue & _disp_x_dot;
-  const VariableValue & _disp_x_neigh_dot;
-  const VariableValue & _disp_y_dot;
-  const VariableValue & _disp_y_neigh_dot;
-  const VariableValue & _disp_z_dot;
-  const VariableValue & _disp_z_neigh_dot;
+  const unsigned int _ndisp;
+  std::vector<const VariableValue *> _disp;
+  std::vector<const VariableValue *> _disp_neighbor;
 
   virtual RealVectorValue computeLocalTraction() const = 0;
   virtual RankTwoTensor computeLocalTractionDerivatives() const = 0;
@@ -49,29 +38,11 @@ protected:
   /// the disaplcement jump in natural element coordiantes
   MaterialProperty<RealVectorValue> & _displacement_jump_local;
 
-  /// the dispalcement jump rate in global coordiantes
-  MaterialProperty<RealVectorValue> & _displacement_jump_dot;
-
-  /// the disaplcement jump rate in natural element coordiantes
-  MaterialProperty<RealVectorValue> & _displacement_jump_dot_local;
-
-  /// the old disaplcement jump in global coordinates
-  const MaterialProperty<RealVectorValue> & _displacement_jump_old;
-
-  /// the disaplcement jump in natural element coordiantes at the previous time step
-  const MaterialProperty<RealVectorValue> & _displacement_jump_local_old;
-
   /// the value of the Traction in global coordiantes
   MaterialProperty<RealVectorValue> & _traction;
 
   /// the value of the Traction in natural element coordiantes
   MaterialProperty<RealVectorValue> & _traction_local;
-
-  /// the value of the Traction in global coordiantes
-  const MaterialProperty<RealVectorValue> & _traction_old;
-
-  /// the value of the Traction in natural element coordiantes
-  const MaterialProperty<RealVectorValue> & _traction_local_old;
 
   /// the value of the traction derivatives in global coordiantes
   MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives;
