@@ -31,9 +31,6 @@ public:
 
   virtual SparseMatrix<Number> & addMatrix(TagID tag) override;
 
-  template <template <typename> class MatrixType>
-  SparseMatrix<Number> & addMatrix(TagID tag);
-
   virtual void solve() override;
 
   void init() override;
@@ -109,32 +106,4 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-
-  /// \p TagID for the scaling matrix
-  TagID _scaling_matrix_tag;
 };
-
-template <template <typename> class MatrixType>
-SparseMatrix<Number> &
-NonlinearSystem::addMatrix(TagID tag)
-{
-  if (!_subproblem.matrixTagExists(tag))
-    mooseError("Cannot add a tagged matrix with matrix_tag, ",
-               tag,
-               ", that tag does not exist in System ",
-               name());
-
-  if (hasMatrix(tag))
-    return getMatrix(tag);
-
-  auto matrix_name = _subproblem.matrixTagName(tag);
-
-  SparseMatrix<Number> * mat = &_transient_sys.add_matrix<MatrixType>(matrix_name);
-
-  if (_tagged_matrices.size() < tag + 1)
-    _tagged_matrices.resize(tag + 1);
-
-  _tagged_matrices[tag] = mat;
-
-  return *mat;
-}

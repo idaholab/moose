@@ -189,10 +189,6 @@ typedef subdomain_id_type SubdomainID;
 typedef unsigned int MooseObjectID;
 typedef unsigned int THREAD_ID;
 typedef unsigned int TagID;
-namespace Moose
-{
-extern const TagID INVALID_TAG_ID;
-}
 typedef unsigned int PerfID;
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;

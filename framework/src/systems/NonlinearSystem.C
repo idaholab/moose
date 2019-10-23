@@ -95,8 +95,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
-    _use_coloring_finite_difference(false),
-    _scaling_matrix_tag(Moose::INVALID_TAG_ID)
+    _use_coloring_finite_difference(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -125,11 +124,8 @@ NonlinearSystem::init()
   NonlinearSystemBase::init();
 
   if (_automatic_scaling)
-  {
     // Add diagonal matrix that will be used for computing scaling factors
-    _scaling_matrix_tag = _subproblem.addMatrixTag("scaling_matrix");
-    addMatrix<DiagonalMatrix>(_scaling_matrix_tag);
-  }
+    _transient_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
 }
 
 SparseMatrix<Number> &
@@ -420,11 +416,11 @@ NonlinearSystem::computeScalingJacobian()
 
   TIME_SECTION(_compute_scaling_jacobian_timer);
 
-  mooseAssert(_scaling_matrix_tag != Moose::INVALID_TAG_ID,
+  mooseAssert(_transient_sys.have_matrix("scaling_matrix"),
               "The scaling matrix has not been created. There must have been an issue in "
               "initialization of the NonlinearSystem");
 
-  auto & scaling_matrix = getMatrix(_scaling_matrix_tag);
+  auto & scaling_matrix = _transient_sys.get_matrix("scaling_matrix");
 
   _computing_scaling_jacobian = true;
   _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, scaling_matrix);
