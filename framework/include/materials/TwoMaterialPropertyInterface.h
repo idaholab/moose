@@ -27,10 +27,16 @@ public:
                                const std::set<BoundaryID> & boundary_ids);
 
   /**
-   * Retrieve the property named "name"
+   * Retrieve the property deduced from the name \p name
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyTempl(const std::string & name);
+
+  /**
+   * Retrieve the property named "name" without any deduction
+   */
+  template <typename T>
+  const MaterialProperty<T> & getNeighborMaterialPropertyByNameTempl(const std::string & name);
 
   /**
    * Retrieve the ADMaterialProperty named "name"
@@ -59,8 +65,26 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl(const std::string
   const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
-  else
-    return _neighbor_material_data->getProperty<T>(prop_name);
+
+  return this->getNeighborMaterialPropertyByNameTempl<T>(prop_name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl(const std::string & name)
+{
+  checkExecutionStage();
+  checkMaterialProperty(name);
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  // Update the boolean flag.
+  _get_material_property_called = true;
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  return _neighbor_material_data->getProperty<T>(name);
 }
 
 template <typename T>

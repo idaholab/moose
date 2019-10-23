@@ -30,4 +30,7 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   const Real _penalty;
+
+  std::string _jump_prop_name;
+  const MaterialProperty<Real> * _jump;
 };

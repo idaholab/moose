@@ -974,6 +974,8 @@ private:
   /// longer accessible
   bool _popped_final_mesh_generator;
 
+  bool _profiling = false;
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;

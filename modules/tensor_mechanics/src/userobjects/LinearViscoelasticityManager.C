@@ -62,7 +62,7 @@ LinearViscoelasticityManager::execute()
 void
 LinearViscoelasticityManager::initialize()
 {
-  std::shared_ptr<Material> test =
+  std::shared_ptr<MaterialBase> test =
       _mi_feproblem.getMaterial(_viscoelastic_model_name, _material_data_type, _mi_tid, true);
 
   if (!test)

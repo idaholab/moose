@@ -111,6 +111,7 @@
 
 #define getNeighborMaterialProperty this->template getNeighborMaterialPropertyTempl
 #define getNeighborADMaterialProperty this->template getNeighborADMaterialPropertyTempl
+#define getNeighborMaterialPropertyByName this->template getNeighborMaterialPropertyByNameTempl
 
 // Restartable
 

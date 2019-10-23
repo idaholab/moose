@@ -18,4 +18,13 @@
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall support Vector Finite Elements in 3D."
   [../]
+  [./test_jump_material]
+    type = 'Exodiff'
+    input = 'coupled_value_coupled_flux_with_jump_material.i'
+    exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
+    mesh_mode = REPLICATED
+    issues = "#12066"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall use with interface material in 3D."
+  [../]
 []

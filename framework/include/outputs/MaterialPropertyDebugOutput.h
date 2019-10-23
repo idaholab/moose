@@ -14,7 +14,7 @@
 
 // Forward declerations
 class MaterialPropertyDebugOutput;
-class Material;
+class MaterialBase;
 
 template <>
 InputParameters validParams<MaterialPropertyDebugOutput>();
@@ -48,9 +48,9 @@ protected:
   /**
    * Builds a output streams for the properties in each material object
    * @param output The output stream to populate
-   * @param materials Vector of pointers to the Material objects of interest
+   * @param materials Vector of pointers to the MaterialBase objects of interest
    */
   void printMaterialProperties(std::stringstream & output,
-                               const std::vector<std::shared_ptr<Material>> & materials) const;
+                               const std::vector<std::shared_ptr<MaterialBase>> & materials) const;
 };
 

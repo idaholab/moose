@@ -40,6 +40,6 @@ private:
   MaterialProperty<Real> & _p;
   std::vector<unsigned int> _prop_ids;
   unsigned int _max_iterations;
-  Material & _discrete;
+  MaterialBase & _discrete;
 };
 

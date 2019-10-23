@@ -678,6 +678,15 @@ public:
                                  const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters);
+  virtual void addInterfaceMaterial(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
+  virtual void addADResidualInterfaceMaterial(const std::string & kernel_name,
+                                              const std::string & name,
+                                              InputParameters & parameters);
+  virtual void addADJacobianInterfaceMaterial(const std::string & kernel_name,
+                                              const std::string & name,
+                                              InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -692,6 +701,8 @@ public:
   reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
   reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void
+  reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   /*
    * Swap back underlying data storing stateful material properties
    */
@@ -1416,6 +1427,7 @@ public:
    * @return Boolean indicating whether material properties need to be stored
    */
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+  bool needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
   bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid);
   ///@}
 
@@ -1442,18 +1454,27 @@ public:
   const MaterialWarehouse & getResidualMaterialsWarehouse() const { return _residual_materials; }
   const MaterialWarehouse & getJacobianMaterialsWarehouse() const { return _jacobian_materials; }
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
+  const MaterialWarehouse & getResidualInterfaceMaterialsWarehouse() const
+  {
+    return _residual_interface_materials;
+  }
 
   /**
-   * Return a pointer to a Material object.  If no_warn is true, suppress
+   * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
    * warning about retrieving a material reference potentially during the
    * material's calculation.
    *
    * This will return enabled or disabled objects, the main purpose is for iterative materials.
    */
-  std::shared_ptr<Material> getMaterial(std::string name,
-                                        Moose::MaterialDataType type,
-                                        THREAD_ID tid = 0,
-                                        bool no_warn = false);
+  std::shared_ptr<MaterialBase> getMaterial(std::string name,
+                                            Moose::MaterialDataType type,
+                                            THREAD_ID tid = 0,
+                                            bool no_warn = false);
+
+  std::shared_ptr<MaterialBase> getInterfaceMaterial(std::string name,
+                                                     Moose::MaterialDataType type,
+                                                     THREAD_ID tid = 0,
+                                                     bool no_warn = false);
 
   /*
    * Return a pointer to the MaterialData
@@ -1779,7 +1800,13 @@ protected:
                                          // materials and the residual copy of an ADMaterial
   MaterialWarehouse _jacobian_materials; // Jacobian materials. This is the union of traditional
                                          // materials and the Jacobian copy of an ADMaterial
-  MaterialWarehouse _discrete_materials; // Materials that the user must compute
+  MaterialWarehouse _residual_interface_materials; // Residual interface materials. This is the
+                                                   // union of traditional interface materials and
+                                                   // the residual copy of an ADInterfaceMaterial
+  MaterialWarehouse _jacobian_interface_materials; // Jacobian materials. This is the union of
+                                                   // traditional interface materials and the
+                                                   // Jacobian copy of an ADInterface Material
+  MaterialWarehouse _discrete_materials;           // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 
@@ -1825,6 +1852,9 @@ protected:
   /// Cache for calculating materials on side
   std::vector<std::unordered_map<BoundaryID, bool>> _bnd_mat_side_cache;
 
+  /// Cache for calculating materials on interface
+  std::vector<std::unordered_map<BoundaryID, bool>> _interface_mat_side_cache;
+
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
@@ -1855,7 +1885,7 @@ protected:
    * @see checkProblemIntegrity
    */
   void checkDependMaterialsHelper(
-      const std::map<SubdomainID, std::vector<std::shared_ptr<Material>>> & materials_map);
+      const std::map<SubdomainID, std::vector<std::shared_ptr<MaterialBase>>> & materials_map);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
