@@ -11,20 +11,16 @@
 
 #include "PiecewiseLinearBase.h"
 
-// Forward declarations
-class PiecewiseLinear;
+class CoarsendPiecewiseLinear;
 
 template <>
-InputParameters validParams<PiecewiseLinear>();
+InputParameters validParams<CoarsendPiecewiseLinear>();
 
 /**
- * Function which provides a piecewise continuous linear interpolation
- * of a provided (x,y) point data set.
+ * Perform a point reduction of the tabulated data upon initialization.
  */
-class PiecewiseLinear : public PiecewiseLinearBase
+class CoarsendPiecewiseLinear : public PiecewiseLinearBase
 {
 public:
-  static InputParameters validParams();
-
-  PiecewiseLinear(const InputParameters & parameters);
+  CoarsendPiecewiseLinear(const InputParameters & parameters);
 };
