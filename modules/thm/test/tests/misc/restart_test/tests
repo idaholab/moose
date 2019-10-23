@@ -4,6 +4,7 @@
     input = 'part1.i'
     exodiff = 'part1_out.e'
     recover = false
+    custom_cmp = 'restart.cmp'
   [../]
 
   [./part2]
@@ -13,6 +14,7 @@
     abs_zero = 1e-7
     prereq = 'part1'
     recover = false
+    custom_cmp = 'restart.cmp'
   [../]
 
   [./part2_ics]
@@ -21,5 +23,6 @@
     exodiff = 'part2_ics_out.e'
     prereq = 'part1'
     recover = false
+    custom_cmp = 'restart.cmp'
   [../]
 []
