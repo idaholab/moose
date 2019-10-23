@@ -291,6 +291,7 @@
 - /ScalarKernels/ODECoefTimeDerivative
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
+- /UserObjects/BoundaryFlux7EqnNCGGhostMassFlowRateTemperature
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
 - /UserObjects/HeatFluxFromHeatStructure3EqnUserObject
