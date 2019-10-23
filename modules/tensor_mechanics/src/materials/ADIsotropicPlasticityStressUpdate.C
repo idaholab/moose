@@ -241,3 +241,6 @@ ADIsotropicPlasticityStressUpdate<JACOBIAN>::computeYieldStress(
                      ") is less than zero");
   }
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADIsotropicPlasticityStressUpdate);
