@@ -1,0 +1,71 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [./soft]
+    requirement = 'The system shall be able to use automatic differntiation to compute a soft block bouncing on a soft plank problem on a second order 2DRz mesh using tensor mechanics and mortar contact'
+    [./small]
+      detail = 'using the small strain formulation.'
+      type = 'CSVDiff'
+      input = 'small.i'
+      csvdiff = 'small.csv'
+      heavy = true
+    [../]
+    [./finite]
+      skip = 'Finite strain not ready for use here'
+      detail = 'using the finite strain formulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite.csv'
+      heavy = true
+    [../]
+    [./finite_scaling]
+      skip = 'Finite strain not ready for use here'
+      #skip = 'automatic_scaling not ready for use with mortar method and tensor mechanics'
+      detail = 'using the finite strain formulation with automatic scaling.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      cli_args = 'Executioner/automatic_scaling=true Executioner/compute_scaling_once=false name=finite_scaling'
+      csvdiff = 'finite_scaling.csv'
+      heavy = true
+    [../]
+    [./finite_rr]
+      skip = 'Finite strain not ready for use here'
+      detail = 'using the finite strain formulation and reference residual.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr.csv'
+      heavy = true
+    [../]
+  [../]
+  [./stiff]
+    requirement = 'The system shall be able to use automatic differntiation to compute a block bouncing on a plank problem on a second order 2DRz mesh using tensor mechanics and mortar contact and finite strain'
+    [./stiff_stiff]
+      skip = 'Finite strain not ready for use here'
+      detail = 'using with a stiff block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_stiff.csv'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff Executioner/l_max_its=30'
+      heavy = true
+    [../]
+    [./soft_stiff]
+      skip = 'Finite strain not ready for use here'
+      #skip = 'soft_stiff without AD not ready yet'
+      detail = 'using with a soft block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'soft_stiff.csv'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff Executioner/l_max_its=30'
+      heavy = true
+    [../]
+    [./stiff_soft]
+      skip = 'Finite strain not ready for use here'
+      detail = 'using with a stiff block and a soft plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_soft.csv'
+      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=30'
+      heavy = true
+    [../]
+  [../]
+[]

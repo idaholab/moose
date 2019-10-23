@@ -57,7 +57,7 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'stiff_stiff.csv'
-      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff Executioner/l_max_its=30'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
     [../]
     [./soft_stiff]
