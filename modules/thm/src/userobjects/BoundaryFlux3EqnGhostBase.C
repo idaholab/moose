@@ -30,7 +30,7 @@ BoundaryFlux3EqnGhostBase::calcFlux(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  flux = _numerical_flux.getFlux(iside, ielem, U1, U2, normal(0));
+  flux = _numerical_flux.getFlux(iside, ielem, true, U1, U2, normal(0));
 }
 
 void
@@ -42,8 +42,8 @@ BoundaryFlux3EqnGhostBase::calcJacobian(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  const auto & pdF_pdU1 = _numerical_flux.getJacobian(true, iside, ielem, U1, U2, normal(0));
-  const auto & dF_dU2 = _numerical_flux.getJacobian(false, iside, ielem, U1, U2, normal(0));
+  const auto & pdF_pdU1 = _numerical_flux.getJacobian(true, true, iside, ielem, U1, U2, normal(0));
+  const auto & dF_dU2 = _numerical_flux.getJacobian(true, false, iside, ielem, U1, U2, normal(0));
 
   // compute dF/dU1 = pdF/pdU1 + dF/dU2 * dU2/dU1
   J = getGhostCellSolutionJacobian(U1);

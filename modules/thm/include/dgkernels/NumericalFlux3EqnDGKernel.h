@@ -38,8 +38,9 @@ protected:
    */
   std::map<unsigned int, unsigned int> getIndexMapping() const;
 
-  /// linear area
-  const VariableValue & _A_linear;
+  /// Area
+  const VariableValue & _A_elem;
+  const VariableValue & _A_neig;
 
   // reconstructed variable values in this cell
   const MaterialProperty<Real> & _rhoA1;
