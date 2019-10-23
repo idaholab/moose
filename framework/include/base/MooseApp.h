@@ -258,17 +258,6 @@ public:
   Executioner * getExecutioner() const { return _executioner.get(); }
 
   /**
-   * Retrieve the Executioner for this App
-   */
-  std::shared_ptr<Executioner> & executioner()
-  {
-    mooseDeprecated("executioner() is deprecated. Use getExecutioner(), this interface will be "
-                    "removed after 10/01/2018");
-
-    return _executioner;
-  }
-
-  /**
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
@@ -324,16 +313,6 @@ public:
    * and false otherwise.
    */
   bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
-
-  /**
-   * Deprecated.  Call getDistributedMeshOnCommandLine() instead.
-   */
-  bool getParallelMeshOnCommandLine() const
-  {
-    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call "
-                    "getDistributedMeshOnCommandLine() instead.");
-    return getDistributedMeshOnCommandLine();
-  }
 
   /**
    * Whether or not this is a "recover" calculation.
