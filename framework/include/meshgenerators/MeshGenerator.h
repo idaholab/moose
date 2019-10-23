@@ -51,6 +51,10 @@ public:
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
 protected:
+  /**
+   * Method for writing out attributes to the mesh meta-data store, which can be retrieved from
+   * most other MOOSE systems and is recoverable.
+   */
   template <typename T>
   void setProperty(const std::string & name, const T & value);
 
@@ -84,6 +88,7 @@ private:
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 
+  /// A reference to the meta-data storage object, accessed through the setProperty API.
   Parameters & _mesh_meta_data;
 };
 

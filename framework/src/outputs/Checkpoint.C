@@ -53,6 +53,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _mesh_meta_data(_app.getMeshMetaData()),
+    foo(false),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
 }
@@ -100,7 +101,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
   curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
   curr_file_struct.restart_mesh_meta_data =
-      current_file + _restartable_data_io.getRestartableMeshDataExt();
+      current_file + _restartable_data_io.getRestartableDataExt();
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -115,7 +116,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
 
   // Write out the restartable mesh meta data if there is any (only on processor zero)
-  if (metaDataSize() && processor_id() == 0)
+  if (metaDataSize() && processor_id() == 0 && !foo)
     _restartable_data_io.writeRestartableData(curr_file_struct.restart_mesh_meta_data,
                                               _mesh_meta_data);
 

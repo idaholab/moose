@@ -87,8 +87,6 @@ public:
 
   std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
 
-  std::string getRestartableMeshDataExt() const { return RESTARTABLE_MESH_DATA_EXT; }
-
 private:
   /**
    * Serializes the data into the stream object.
@@ -132,7 +130,6 @@ private:
   const PerfID _restart_data_timer;
 
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
-  static constexpr auto RESTARTABLE_MESH_DATA_EXT = ".mrd";
   static constexpr auto ES_BINARY_EXT = ".xdr";
   static constexpr auto ES_ASCII_EXT = ".xda";
 };

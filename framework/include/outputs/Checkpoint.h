@@ -64,6 +64,9 @@ public:
    */
   std::string directory() const;
 
+  /**
+   * Method to return the file suffix (ASCII or binary) for the Checkpoint format.
+   */
   std::string getMeshFileSuffix(bool is_binary)
   {
     return is_binary ? BINARY_MESH_SUFFIX : ASCII_MESH_SUFFIX;
@@ -96,6 +99,8 @@ private:
 
   /// Reference to the mesh meta data
   const RestartableDataMap & _mesh_meta_data;
+
+  bool foo;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;

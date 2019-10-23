@@ -820,7 +820,7 @@ MooseApp::setupOptions()
 }
 
 void
-MooseApp::setInputFileName(std::string input_filename)
+MooseApp::setInputFileName(const std::string & input_filename)
 {
   _input_filename = input_filename;
 }
@@ -919,7 +919,7 @@ MooseApp::isUseSplit() const
 }
 
 bool
-MooseApp::hasRestartRecoverFileBase()
+MooseApp::hasRestartRecoverFileBase() const
 {
   return !_restart_recover_base.empty();
 }
@@ -1018,7 +1018,7 @@ MooseApp::run()
 }
 
 void
-MooseApp::setOutputPosition(Point p)
+MooseApp::setOutputPosition(const Point & p)
 {
   _output_position_set = true;
   _output_position = p;
@@ -1087,7 +1087,7 @@ MooseApp::getCheckpointFiles() const
 }
 
 void
-MooseApp::setStartTime(const Real time)
+MooseApp::setStartTime(Real time)
 {
   _start_time_set = true;
   _start_time = time;
@@ -1693,7 +1693,7 @@ MooseApp::getMeshGeneratorMesh(bool check_unique)
 }
 
 void
-MooseApp::setRestart(const bool & value)
+MooseApp::setRestart(bool value)
 {
   _restart = value;
 
@@ -1701,7 +1701,7 @@ MooseApp::setRestart(const bool & value)
 }
 
 void
-MooseApp::setRecover(const bool & value)
+MooseApp::setRecover(bool value)
 {
   _recover = value;
 }

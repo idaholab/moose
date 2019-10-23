@@ -51,6 +51,11 @@ public:
   Restartable(const MooseObject * moose_object, const std::string & system_name, THREAD_ID tid);
 
   /**
+   * Class constructor
+   *
+   * This constructor is used specifically for declaring data that will be written to a the mesh
+   * meta-data store, which is restored independently and early during the simulation. This
+   * constructor should only be used by the MooseApp object.
    */
   Restartable(MooseApp & app, const std::string & app_name);
 

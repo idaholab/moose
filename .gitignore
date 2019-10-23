@@ -163,9 +163,6 @@ framework/contrib/asio/
 *.rd
 *.rd-*
 
-# Restartable Mest Meta Data
-*.mrd
-
 # Checkpoint Files
 *.cpa
 *.cpr
