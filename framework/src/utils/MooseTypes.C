@@ -9,6 +9,7 @@
 
 #include "MooseTypes.h"
 #include "libmesh/elem.h"
+#include "libmesh/libmesh.h"
 
 namespace Moose
 {
