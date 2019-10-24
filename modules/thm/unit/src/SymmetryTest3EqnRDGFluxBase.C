@@ -15,8 +15,11 @@ SymmetryTest3EqnRDGFluxBase::test()
     const auto & WL = W_pair.first;
     const auto & WR = W_pair.second;
 
-    const std::vector<Real> UL = computeConservativeSolution(WL);
-    const std::vector<Real> UR = computeConservativeSolution(WR);
+    const Real AL = 1.0;
+    const Real AR = 1.5;
+
+    const std::vector<Real> UL = computeConservativeSolution(WL, AL);
+    const std::vector<Real> UR = computeConservativeSolution(WR, AR);
 
     std::vector<Real> FLR, FRL;
     _flux->calcFlux(UL, UR, _nLR_dot_d, FLR, FRL);
@@ -28,8 +31,8 @@ SymmetryTest3EqnRDGFluxBase::test()
 
     for (unsigned int i = 0; i < THM3Eqn::N_EQ; ++i)
     {
-      REL_TEST(FLR[i], FRL_flipped[i], REL_TOL_CONSISTENCY);
-      REL_TEST(FRL[i], FLR_flipped[i], REL_TOL_CONSISTENCY);
+      REL_TEST(FLR[i], FLR_flipped[i], REL_TOL_CONSISTENCY);
+      REL_TEST(FRL[i], FRL_flipped[i], REL_TOL_CONSISTENCY);
     }
   }
 

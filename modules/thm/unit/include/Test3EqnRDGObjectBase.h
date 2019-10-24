@@ -16,7 +16,6 @@ public:
       _fp_name("fp"),
       _fp(getFluidPropertiesObject()),
 
-      _A(2.0),
       _nLR_dot_d(1.0)
   {
   }
@@ -39,8 +38,9 @@ protected:
    * Computes the conservative solution from the primitive solution
    *
    * @param[in] W   Primitive solution vector: {p, T, vel}
+   * @param[in] A   Cross-sectional area
    */
-  std::vector<Real> computeConservativeSolution(const std::vector<Real> & W) const;
+  std::vector<Real> computeConservativeSolution(const std::vector<Real> & W, const Real & A) const;
 
   /**
    * Creates the flux object to be tested
@@ -57,8 +57,6 @@ protected:
   /// Fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 
-  /// Cross-sectional area
-  const Real _A;
   /// Dot product of normal from L to R with direction vector
   const Real _nLR_dot_d;
 
