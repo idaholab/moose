@@ -96,7 +96,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       break;
 
     default:
-      mooseError("Unnknown variable mapping mode");
+      mooseError("Unknown variable mapping mode.");
   }
 
   // tolerance vectors

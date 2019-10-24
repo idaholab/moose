@@ -18,8 +18,6 @@
   ymax = 1000 # maximum y-coordinate of the mesh
   zmin = 0
   zmax = 0
-  elem_type = QUAD4 # Type of elements used in the mesh
-  uniform_refine = 3 # Initial uniform refinement of the mesh
 
   parallel_type = replicated # Periodic BCs
 []
@@ -34,8 +32,6 @@
   [./voronoi]
     type = PolycrystalVoronoi
     grain_num = 2
-    rand_seed = 42
-    coloring_algorithm = bt # We must use bt to force the UserObject to assign one grain to each op
   [../]
 []
 
@@ -56,31 +52,10 @@
   [../]
 []
 
-[AuxVariables]
-#active = ''
-  # Dependent variables
-  [./bnds]
-    # Variable used to visualize the grain boundaries in the simulation
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
   [./PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
-[]
-
-[AuxKernels]
-#active = ''
-  # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
-    # AuxKernel that calculates the GB term
-    type = BndsCalcAux
-    variable = bnds
-    execute_on = timestep_end
   [../]
 []
 
@@ -109,47 +84,11 @@
   [../]
 []
 
-[Postprocessors]
-  active = 'dt '
-  # Scalar postprocessors
-  [./dt]
-    # Outputs the current time step
-    type = TimestepSize
-  [../]
-[]
-
 [Executioner]
-  type = Transient # Type of executioner, here it is transient with an adaptive time step
-  scheme = bdf2 # Type of time integration (2nd order backward euler), defaults to 1st order backward euler
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
-  petsc_options_value = 'hypre    boomeramg      101                ds'
-
-  l_max_its = 30 # Max number of linear iterations
-  l_tol = 1e-4 # Relative tolerance for linear solves
-  nl_max_its = 40 # Max number of nonlinear iterations
-  nl_abs_tol = 1e-11 # Relative tolerance for nonlienar solves
-  nl_rel_tol = 1e-8 # Absolute tolerance for nonlienar solves
-
-  start_time = 0.0
-  end_time = 4000
-
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 25 # Initial time step.  In this simulation it changes.
-    optimal_iterations = 6 #Time step will adapt to maintain this number of nonlinear iterations
-  [../]
-
-  [./Adaptivity]
-    # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-    initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
-    coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 4 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  [../]
+  type = Transient
+  start_time = 0
+  end_time = 10
+  dt = 1
 []
 
 [Outputs]
