@@ -84,12 +84,7 @@ CZMMaterialBase::rotateVector(const RealVectorValue v,
   if (inverse)
     R_loc = R_loc.transpose();
 
-  RealVectorValue vrot;
-
-  for (unsigned int i = 0; i < 3; i++)
-    for (unsigned int j = 0; j < 3; j++)
-      vrot(i) += v(j) * R_loc(i, j);
-  return vrot;
+  return R_loc * v;
 }
 
 RankTwoTensor

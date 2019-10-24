@@ -113,43 +113,16 @@ Real
 CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
 
-  // set the off diag index depending on the coupled variable ID (jvar) and
-  // on the displacement index this kernel is working on (_disp_index)
-  std::vector<unsigned int> indeces(_ndisp, 0);
-  indeces[0] = _disp_index;
-  switch (_disp_index)
-  {
-    case (0):
-      indeces[1] = 1;
-      if (_ndisp == 3)
-        indeces[2] = 2;
+  // find the displacement component assocaite to jvar
+  unsigned int off_diag_component;
+  for (off_diag_component = 0; off_diag_component < _ndisp; off_diag_component++)
+    if (_disp_var[off_diag_component] == jvar)
       break;
-    case (1):
-      indeces[1] = 0;
-      if (_ndisp == 3)
-        indeces[2] = 2;
-      break;
-    case (2):
-      indeces[1] = 0;
-      if (_ndisp == 3)
-        indeces[2] = 1;
-      break;
-    default:
-      mooseError("wrong _disp_index");
-      break;
-  }
 
-  // retrieve the off diagonal index
-  unsigned int OffDiagIndex = 3;
-  // set index to a non existing values if OffDiagIndex
-  // does not change a segfault error will appear
-  if (jvar == _disp_var[1] || jvar == _disp_neighbor_var[1])
-    OffDiagIndex = indeces[1];
+  mooseAssert(off_diag_component < _ndisp,
+              "CZMInterfaceKernel::computeQpOffDiagJacobian wrong offdiagonal variable");
 
-  else if ((jvar == _disp_var[2] || jvar == _disp_neighbor_var[2]) && (_ndisp == 3))
-    OffDiagIndex = indeces[2];
-
-  Real jac = _traction_derivative[_qp](_disp_index, OffDiagIndex);
+  Real jac = _traction_derivative[_qp](_disp_index, off_diag_component);
 
   switch (type)
   {
