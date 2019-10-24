@@ -124,25 +124,25 @@ name = 'finite_rr'
 
 [BCs]
   [./left_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = block_right
     value = 0
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = block_right
     function = '-t'

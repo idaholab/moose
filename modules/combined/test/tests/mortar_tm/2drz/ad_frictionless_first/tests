@@ -18,7 +18,6 @@
       heavy = true
     [../]
     [./finite_scaling]
-      skip = 'automatic_scaling not ready for use with mortar method and tensor mechanics'
       detail = 'using the finite strain formulation with automatic scaling.'
       type = 'CSVDiff'
       input = 'finite.i'
@@ -41,7 +40,7 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'stiff_stiff.csv'
-      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff Executioner/l_max_its=30'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
     [../]
     [./soft_stiff]
@@ -49,7 +48,7 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'soft_stiff.csv'
-      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff Executioner/l_max_its=30'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
     [../]
     [./stiff_soft]
@@ -57,7 +56,7 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'stiff_soft.csv'
-      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=30'
+      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=10'
       heavy = true
     [../]
   [../]

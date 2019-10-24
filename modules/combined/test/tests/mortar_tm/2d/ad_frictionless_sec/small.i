@@ -105,25 +105,25 @@ name = 'small'
 
 [BCs]
   [./left_x]
-    type = ADPresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
-    type = ADPresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = block_right
     function = '-0.04*sin(4*t)+0.02'
   [../]
   [./right_y]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = block_right
     function = '-t'

@@ -17,15 +17,6 @@
       csvdiff = 'small.csv'
       heavy = true
     [../]
-    [./finite_refined]
-      skip = 'uniform_refine not ready for use with mortar method'
-      detail = 'using the finite strain formulation and uniform_refine.'
-      type = 'CSVDiff'
-      input = 'finite.i'
-      cli_args = 'Mesh/uniform_refine=1 name=finite_refined'
-      csvdiff = 'finite_refined.csv'
-      heavy = true
-    [../]
     [./finite]
       detail = 'using the finite strain formulation.'
       type = 'CSVDiff'
@@ -34,7 +25,6 @@
       heavy = true
     [../]
     [./finite_scaling]
-      skip = 'automatic_scaling not ready for use with mortar method and tensor mechanics'
       detail = 'using the finite strain formulation with automatic scaling.'
       type = 'CSVDiff'
       input = 'finite.i'
@@ -61,12 +51,11 @@
       heavy = true
     [../]
     [./soft_stiff]
-      skip = 'soft_stiff without AD not ready yet'
       detail = 'using with a soft block and a stiff plank.'
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'soft_stiff.csv'
-      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff Executioner/l_max_its=30'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
     [../]
     [./stiff_soft]
