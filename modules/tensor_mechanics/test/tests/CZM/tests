@@ -1,10 +1,19 @@
 [Tests]
-  [./czm_3DC_load_Noemal]
+  [./czm_3DC_load_Normal]
     type = Exodiff
-    input = czm_3DC_load.i
-    exodiff = czm_3DC_load_out.e
+    input = czm_3DC_load_only_normal.i
+    exodiff = czm_3DC_load_only_normal_out.e
     issues = '#11546'
-    requirement = 'This tests a simple exponential cohesive law'
+    requirement = 'This tests a simple exponential cohesive law. The max theoretical value traction of 100 MPa should occur at a normal disaplcement Du=1'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+  [./czm_3DC_load_Normal_Action]
+    type = Exodiff
+    input = czm_3DC_load_only_normal_Action.i
+    exodiff = czm_3DC_load_only_normal_Action_out.e
+    issues = '#11546'
+    requirement = 'This tests a id the same as "czm_3DC_load_Normal" but using the action to setup the problem. The max theoretical value traction of 100 MPa should occur at a normal disaplcement Du=1'
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
