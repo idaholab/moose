@@ -1,5 +1,5 @@
 #
-# This test checks the generalized plane strain using small strain formulation.
+# This test checks the generalized plane strain using incremental small strain formulation.
 # The model consists of two sets of line elements. One undergoes a temperature rise of 100 with
 # the other seeing a temperature rise of 300.  Young's modulus is 3600, and
 # Poisson's ratio is 0.2.  The thermal expansion coefficient is 1e-8.  All
@@ -83,7 +83,7 @@
   [./TensorMechanics]
   [../]
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
   [../]
 []
@@ -177,26 +177,20 @@
   [../]
 
   [./strain]
-    type = ComputeAxisymmetric1DSmallStrain
-    eigenstrain_names = eigenstrain
+    type = ComputeAxisymmetric1DIncrementalStrain
+    eigenstrain_names = thermal_eigenstrain
   [../]
 
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
+    eigenstrain_name = thermal_eigenstrain
     thermal_expansion_coeff = 1e-8
     temperature = temp
     stress_free_temperature = 580
-    eigenstrain_name = eigenstrain
   [../]
 
   [./stress]
-    type = ComputeLinearElasticStress
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    thermal_conductivity = 1.0
-    specific_heat = 1.0
+    type = ComputeStrainIncrementBasedStress
   [../]
 []
 
@@ -206,7 +200,7 @@
   line_search = 'none'
 
   l_max_its = 50
-  l_tol = 1e-08
+  l_tol = 1e-6
   nl_max_its = 15
   nl_abs_tol = 1e-10
   start_time = 0

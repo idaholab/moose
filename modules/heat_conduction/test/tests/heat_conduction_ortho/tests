@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'heat_conduction_ortho.i'
+    exodiff = 'heat_conduction_ortho_out.e'
+    max_parallel = 1
+    design = 'AnisoHeatConductionMaterial.md'
+    issues = '#2674'
+    requirement = 'The system shall allow the use of an anisotropic heat conduction material set by postprocessors.'
+  [../]
+[]

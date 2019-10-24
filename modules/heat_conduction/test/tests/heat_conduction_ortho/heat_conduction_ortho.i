@@ -8,95 +8,70 @@
 # for z: 100/10   = 1e+1
 #
 
-
-[Mesh]#Comment
+[Mesh]
   file = heat_conduction_ortho.e
-[] # Mesh
+[]
 
 [Variables]
-
   [./temp]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
-[] # Variables
+[]
 
 [Kernels]
-
   [./heat]
     type = AnisoHeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [BCs]
-
   [./temps]
     type = DirichletBC
     variable = temp
     boundary = 1
     value = 0
   [../]
-
   [./neum]
     type = NeumannBC
     variable = temp
     boundary = 2
     value = 100
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./heat]
     type = AnisoHeatConductionMaterial
     block = 1
-
     specific_heat = 0.116
     thermal_conductivity_x_pp = tcx
     thermal_conductivity_y_pp = tcy
     thermal_conductivity_z_pp = tcz
   [../]
-
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 0.283
+    prop_names = 'density'
+    prop_values = 0.283
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Steady
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
-
-
   line_search = 'none'
-
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-10
-
-
   l_max_its = 20
-
-[] # Executioner
+[]
 
 [Outputs]
   exodus = true
   hide = 'tcx tcy tcz'
-[] # Outputs
+[]
 
 [Postprocessors]
   [./tcx]

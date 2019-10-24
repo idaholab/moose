@@ -1,7 +1,17 @@
 #
-# This test checks the generalized plane strain using finite strain formulation.
-# since we constrain all the nodes against movement and the applied thermal strain
-# is very small, the results are the same as small and incremental small strain formulations
+# This test checks the generalized plane strain using small strain formulation.
+# The model consists of two sets of line elements. One undergoes a temperature rise of 100 with
+# the other seeing a temperature rise of 300.  Young's modulus is 3600, and
+# Poisson's ratio is 0.2.  The thermal expansion coefficient is 1e-8.  All
+# nodes are constrained against movement.
+#
+# For plane strain case, i.e., without constraining the strain_yy to be uniform,
+# the stress solution would be [-6e-3, -6e-3, -6e-3] and [-18e-3, -18e-3, -18e-3] (xx, yy, zz).
+# The generalized plane strain kernels work to balance the force in y direction.
+#
+# With out of plane strain of 3e-6, the stress solution becomes
+# [-3e-3, 6e-3, -3e-3] and [-15e-3, -6e-3, -15e-3] (xx, yy, zz).  This gives
+# a domain integral of out-of-plane stress to be zero.
 #
 
 [GlobalParams]
@@ -73,7 +83,7 @@
   [./TensorMechanics]
   [../]
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
   [../]
 []
@@ -167,7 +177,7 @@
   [../]
 
   [./strain]
-    type = ComputeAxisymmetric1DFiniteStrain
+    type = ComputeAxisymmetric1DSmallStrain
     eigenstrain_names = eigenstrain
   [../]
 
@@ -180,13 +190,7 @@
   [../]
 
   [./stress]
-    type = ComputeFiniteStrainElasticStress
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    thermal_conductivity = 1.0
-    specific_heat = 1.0
+    type = ComputeLinearElasticStress
   [../]
 []
 
