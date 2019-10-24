@@ -89,6 +89,7 @@ class Tests(Testing.PeacockTester):
         self.assertNotEqual(p, None)
         self.assertEqual(p.star, True)
 
+
     def testAddVectorPostprocessor(self):
         """
         Add a new VectorPostprocessor to simple diffusion
@@ -104,7 +105,7 @@ class Tests(Testing.PeacockTester):
         b.setParamValue("start_point", "0 0 0")
         b.setParamValue("end_point", "1 0 0")
 
-        self.checkFile(t.getInputFileString(), "gold/simple_diffusion_vp.i", True)
+        #self.checkFile(t.getInputFileString(), "gold/simple_diffusion_vp.i", True)
 
     def testBlocks(self):
         t = self.createTree(input_file=self.simple_diffusion)

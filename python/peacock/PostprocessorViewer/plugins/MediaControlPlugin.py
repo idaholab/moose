@@ -94,9 +94,9 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         self.timeChanged.emit(self._times[self._current_step])
 
 def main(filenames):
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin, PostprocessorSelectPlugin, MediaControlPlugin])
     widget.onSetFilenames(filenames)
     widget.show()

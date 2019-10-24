@@ -229,7 +229,7 @@ class PeacockImageTestCase(unittest.TestCase):
         """
         self._window.onWrite(filename, **kwargs)
 
-    def assertImage(self, basename, allowed=0.99, **kwargs):
+    def assertImage(self, basename, allowed=0.97, **kwargs):
         """
         Create the supplied image and assert that it is same to the gold standard.
         """

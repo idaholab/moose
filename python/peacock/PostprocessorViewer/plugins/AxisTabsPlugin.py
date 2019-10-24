@@ -91,9 +91,9 @@ class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
 
 def main(filenames):
 
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     import mooseutils
 
     widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxisTabsPlugin, PostprocessorSelectPlugin])

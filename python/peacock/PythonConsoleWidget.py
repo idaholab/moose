@@ -88,7 +88,7 @@ class QPythonConsole(QObject, MooseWidget):
         sys.stderr = output
         try:
             # push the line to the interpreter
-            self.more = self.console.push(str(line).decode("utf-8"))
+            self.more = self.console.push(str(line))
         finally:
             sys.stdout = old_stdout
             sys.stderr = old_stderr

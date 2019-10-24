@@ -332,8 +332,8 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     """
     Create widgets for running LineGroupWidget
     """
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
     import matplotlib.pyplot as plt
     import numpy as np
     import itertools
@@ -370,7 +370,7 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
 if __name__ == '__main__':
     import sys
     import mooseutils
-    from peacock.PostprocessorViewer.PostprocessorDataWidget import PostprocessorDataWidget
+    from ..PostprocessorDataWidget import PostprocessorDataWidget
 
     app = QtWidgets.QApplication(sys.argv)
     filename = '../../../tests/input/white_elephant_jan_2016.csv'

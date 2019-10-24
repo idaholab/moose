@@ -80,18 +80,18 @@ def main(size=None):
     Run window widget alone
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from plugins.VTKWindowPlugin import VTKWindowPlugin
-    from plugins.FilePlugin import FilePlugin
-    from plugins.BlockPlugin import BlockPlugin
-    from plugins.GoldDiffPlugin import GoldDiffPlugin
-    from plugins.ColorbarPlugin import ColorbarPlugin
-    from plugins.MeshPlugin import MeshPlugin
-    from plugins.BackgroundPlugin import BackgroundPlugin
-    from plugins.ClipPlugin import ClipPlugin
-    from plugins.ContourPlugin import ContourPlugin
-    from plugins.OutputPlugin import OutputPlugin
-    from plugins.CameraPlugin import CameraPlugin
-    from plugins.MediaControlPlugin import MediaControlPlugin
+    from .plugins.VTKWindowPlugin import VTKWindowPlugin
+    from .plugins.FilePlugin import FilePlugin
+    from .plugins.BlockPlugin import BlockPlugin
+    from .plugins.GoldDiffPlugin import GoldDiffPlugin
+    from .plugins.ColorbarPlugin import ColorbarPlugin
+    from .plugins.MeshPlugin import MeshPlugin
+    from .plugins.BackgroundPlugin import BackgroundPlugin
+    from .plugins.ClipPlugin import ClipPlugin
+    from .plugins.ContourPlugin import ContourPlugin
+    from .plugins.OutputPlugin import OutputPlugin
+    from .plugins.CameraPlugin import CameraPlugin
+    from .plugins.MediaControlPlugin import MediaControlPlugin
 
     plugins = [lambda: VTKWindowPlugin(size=size),
                FilePlugin,

@@ -206,8 +206,8 @@ def main(size=None):
     Run the BlockPlugin all by its lonesome.
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from VTKWindowPlugin import VTKWindowPlugin
-    from FilePlugin import FilePlugin
+    from .VTKWindowPlugin import VTKWindowPlugin
+    from .FilePlugin import FilePlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size),
                                           FilePlugin,
                                           BlockPlugin])

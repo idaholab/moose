@@ -185,8 +185,8 @@ def main(filenames, reader=mooseutils.VectorPostprocessorReader):
     """
     Run FigurePlugin by itself.
     """
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
 
     widget = PostprocessorViewer(reader, timeout=None, plugins=[FigurePlugin, PostprocessorSelectPlugin])
     widget.onSetFilenames(filenames)

@@ -55,7 +55,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # Toggle the mesh
         self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
         self._window._window.resetCamera() # needed since vtk7.0.0
-        self.assertImage('testViewMeshToggle.png', allowed=0.98) # lines are slightly different across platforms
+        self.assertImage('testViewMeshToggle.png', allowed=0.97) # lines are slightly different across platforms
 
         # Test that toggling representation disable/enables mesh view
         self._widget.MeshPlugin.Representation.setCurrentIndex(1)

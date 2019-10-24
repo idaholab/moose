@@ -116,7 +116,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         subprocess.call(['python', name], stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
         self.assertTrue(os.path.exists('output.png'))
         differ = mooseutils.ImageDiffer(os.path.join('gold', 'output.png'), 'output.png', allowed=0.99)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail(), "{} does not match the gold file.".format(name))
 
         # Test pdf output

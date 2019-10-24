@@ -302,8 +302,8 @@ def main(*args):
     """
     Create a LineSettingsWidget for testing.
     """
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
 
     # Load the viewer
     widget = PostprocessorViewer(plugins=[FigurePlugin])

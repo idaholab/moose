@@ -396,9 +396,9 @@ def main(size=None):
     """
     Run the VTKFilePlugin all by its lonesome.
     """
-    from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from VTKWindowPlugin import VTKWindowPlugin
-    from FilePlugin import FilePlugin
+    from ..ExodusPluginManager import ExodusPluginManager
+    from .VTKWindowPlugin import VTKWindowPlugin
+    from .FilePlugin import FilePlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ColorbarPlugin])
     widget.show()
 

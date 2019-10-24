@@ -85,9 +85,9 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
 
 def main(filenames):
 
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
-    from MediaControlPlugin import MediaControlPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from .MediaControlPlugin import MediaControlPlugin
 
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, timeout=None, plugins=[OutputPlugin, PostprocessorSelectPlugin, MediaControlPlugin])
     widget.onSetFilenames(filenames)
