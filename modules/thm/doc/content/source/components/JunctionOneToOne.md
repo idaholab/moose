@@ -6,7 +6,6 @@ This component implements a junction that has no volume. It assumes the followin
 regarding the connected flow channels:
 
 - There are exactly 2 connected flow channels
-- The connected flow channels must have the same cross-sectional area at the junction
 - The connected flow channels must be parallel
 
 If any of the above conditions are not met, then one must use either a volumetric junction
