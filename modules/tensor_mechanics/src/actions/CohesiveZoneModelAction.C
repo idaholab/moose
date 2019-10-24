@@ -57,13 +57,11 @@ CohesiveZoneModelAction::act()
       std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
       InputParameters params = _factory.getValidParams(kernel_name);
-      std::vector<VariableName> disp_i;
-      disp_i.push_back(displacements[i]);
 
       params.set<bool>("use_displaced_mesh") = false;
       params.set<unsigned int>("disp_index") = i;
       params.set<NonlinearVariableName>("variable") = displacements[i];
-      params.set<std::vector<VariableName>>("neighbor_var") = disp_i;
+      params.set<std::vector<VariableName>>("neighbor_var") = {displacements[i]};
       params.set<std::vector<VariableName>>("displacements") = _displacements;
       params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
 

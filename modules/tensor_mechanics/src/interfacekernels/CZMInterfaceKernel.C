@@ -39,7 +39,6 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _disp_neighbor_var(_ndisp),
     // residual and jacobian coefficients are material properties and represents
     // the residual and jacobain of the traction sepration law wrt the displacement jump.
-
     _traction(getMaterialPropertyByName<RealVectorValue>("traction")),
     _traction_derivative(getMaterialPropertyByName<RankTwoTensor>("traction_spatial_derivatives"))
 {

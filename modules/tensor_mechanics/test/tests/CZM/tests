@@ -4,17 +4,61 @@
     input = czm_3DC_load_only_normal.i
     exodiff = czm_3DC_load_only_normal_out.e
     issues = '#11546'
-    requirement = 'This tests a simple exponential cohesive law. The max theoretical value traction of 100 MPa should occur at a normal disaplcement Du=1'
+    requirement = 'This tests a simple exponential cohesive law. '
+    'The max theoretical  traction value of 100 MPa should occur at a normal dispalcement Du_z=1'
     mesh_mode = 'REPLICATED'
     recover = false
+    method = '!dbg' # issue 12033
+  [../]
+  [./czm_3DC_load_shear_x]
+    type = Exodiff
+    input = czm_3DC_load_shear_x.i
+    exodiff = czm_3DC_load_shear_x_out.e
+    issues = '#11546'
+    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.7/sqrt(2)=0.494974746830583'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+  [../]
+  [./czm_3DC_load_shear_y]
+    type = Exodiff
+    input = czm_3DC_load_shear_y.i
+    exodiff = czm_3DC_load_shear_y_out.e
+    issues = '#11546'
+    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.7/sqrt(2)=0.494974746830583'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+  [../]
+  [./czm_3DC_load_complex]
+    type = Exodiff
+    input = czm_3DC_load_complex.i
+    exodiff = czm_3DC_load_complex_out.e
+    issues = '#11546'
+    requirement = 'This tests a simple exponential cohesive law under complex loading.' 'The algebraic sum of the traction component should be 100 MPa and should occur at  Du_x_y_z=(0.2,0.4,0.6)'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
   [../]
   [./czm_3DC_load_Normal_Action]
     type = Exodiff
     input = czm_3DC_load_only_normal_Action.i
     exodiff = czm_3DC_load_only_normal_Action_out.e
     issues = '#11546'
-    requirement = 'This tests a id the same as "czm_3DC_load_Normal" but using the action to setup the problem. The max theoretical value traction of 100 MPa should occur at a normal disaplcement Du=1'
+    requirement = 'This tests a id the same as "czm_3DC_load_Normal" but using the action' 'to setup the problem. The max theoretical traction value of 100 MPa should occur at '
+    'a normal dispalcement Du_z=1'
     mesh_mode = 'REPLICATED'
     recover = false
+    method = '!dbg' # issue 12033
+  [../]
+  [./czm_3DC_load_complex_Action]
+    type = Exodiff
+    input = czm_3DC_load_complex_Action.i
+    exodiff = czm_3DC_load_complex_Action_out.e
+    issues = '#11546'
+    requirement = 'This tests a simple exponential cohesive law under complex loading.' 'The algebraic sum of the traction component should be 100 MPa and should occur at  Du_x_y_z=(0.2,0.4,0.6). This test also check the correctness of the action for complex load'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
   [../]
 []
