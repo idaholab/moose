@@ -55,6 +55,8 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
                            "JacobianTest2PhaseNCGWaveSpeeds");
     s.registerActionSyntax("JacobianTest2PhaseNCGRDGInterfacialVariablesAction",
                            "JacobianTest2PhaseNCGRDGInterfacialVariables");
+    s.registerActionSyntax("JacobianTest2PhaseNCGRiemannSolverAction",
+                           "JacobianTest2PhaseNCGRiemannSolver");
 
     s.registerActionSyntax("ClosureTest1PhaseAction", "ClosureTest1Phase");
     s.registerActionSyntax("ClosureTest2PhaseAction", "ClosureTest2Phase");
