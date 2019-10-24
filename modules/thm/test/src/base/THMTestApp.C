@@ -50,6 +50,8 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
                            "JacobianTest2PhaseRiemannSolver");
     s.registerActionSyntax("JacobianTest2PhaseWaveSpeedsAction", "JacobianTest2PhaseWaveSpeeds");
 
+    s.registerActionSyntax("JacobianTest2PhaseNCGNumericalFluxAction",
+                           "JacobianTest2PhaseNCGNumericalFlux");
     s.registerActionSyntax("JacobianTest2PhaseNCGAction", "JacobianTest2PhaseNCG");
     s.registerActionSyntax("JacobianTest2PhaseNCGWaveSpeedsAction",
                            "JacobianTest2PhaseNCGWaveSpeeds");
