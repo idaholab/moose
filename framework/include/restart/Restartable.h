@@ -51,15 +51,6 @@ public:
   Restartable(const MooseObject * moose_object, const std::string & system_name, THREAD_ID tid);
 
   /**
-   * Class constructor
-   *
-   * This constructor is used specifically for declaring data that will be written to a the mesh
-   * meta-data store, which is restored independently and early during the simulation. This
-   * constructor should only be used by the MooseApp object.
-   */
-  Restartable(MooseApp & app, const std::string & app_name);
-
-  /**
    * This class constructor is used for non-Moose-based objects like interfaces. A name for the
    * storage as well as a system name must be passed in along with the thread ID explicitly.
    */
@@ -108,9 +99,30 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param context Context pointer that will be passed to the load and store functions
+   * @param read_only Tell the system not to error if a duplicate parameter is declared
    */
   template <typename T>
-  T & declareRestartableDataWithContext(const std::string & data_name, void * context);
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        void * context,
+                                        bool read_only = false);
+
+  /**
+   * Declare a piece of data as "restartable".
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param prefix The prefix to prepend to the data_name, to retrieve data from another object.
+   * @param context Context pointer that will be passed to the load and store functions
+   * @param read_only Tell the system not to error if a duplicate parameter is declared
+   */
+  template <typename T>
+  T & declareRestartableDataWithPrefixOverrideAndContext(const std::string & data_name,
+                                                         const std::string & prefix,
+                                                         void * context,
+                                                         bool read_only = false);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -189,9 +201,10 @@ protected:
 
 private:
   /// Helper function for actually registering the restartable data.
-  void registerRestartableDataOnApp(const std::string & name,
-                                    std::unique_ptr<RestartableDataValue> data,
-                                    THREAD_ID tid);
+  RestartableDataValue & registerRestartableDataOnApp(const std::string & name,
+                                                      std::unique_ptr<RestartableDataValue> data,
+                                                      THREAD_ID tid,
+                                                      bool read_only);
 
   /// Helper function for actually registering the restartable data.
   void registerRestartableNameWithFilterOnApp(const std::string & name,
@@ -211,7 +224,7 @@ private:
 
   /// Used to register data names with different filters on the MooseApp for selectively using
   /// different data in different scenarios
-  bool _store_in_mesh_meta_data;
+  const bool _store_in_mesh_meta_data;
 };
 
 template <typename T>
@@ -230,15 +243,29 @@ Restartable::declareRestartableDataTempl(const std::string & data_name, const T 
 
 template <typename T>
 T &
-Restartable::declareRestartableDataWithContext(const std::string & data_name, void * context)
+Restartable::declareRestartableDataWithContext(const std::string & data_name,
+                                               void * context,
+                                               bool read_only)
 {
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  return declareRestartableDataWithPrefixOverrideAndContext<T>(
+      data_name, _restartable_name, context, read_only);
+}
+
+template <typename T>
+T &
+Restartable::declareRestartableDataWithPrefixOverrideAndContext(const std::string & data_name,
+                                                                const std::string & prefix,
+                                                                void * context,
+                                                                bool read_only)
+{
+  std::string full_name = _restartable_system_name + "/" + prefix + "/" + data_name;
   auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
-  T & restartable_data_ref = data_ptr->get();
 
-  registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid);
+  // See comment in overloaded version of this function with "init_value"
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+      registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid, read_only));
 
-  return restartable_data_ref;
+  return restartable_data_ref.get();
 }
 
 template <typename T>
@@ -248,13 +275,17 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
                                                void * context)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+
+  // Here we will create the RestartableData even though we may not use this instance.
+  // If it's already in use, the App will return a reference to the existing instance and we'll
+  // return that one instead. We might refactor this to have the app create the RestartableData
+  // at a later date.
   auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
-  data_ptr->set() = init_value;
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+      registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid, false));
 
-  T & restartable_data_ref = data_ptr->get();
-  registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid);
-
-  return restartable_data_ref;
+  restartable_data_ref.set() = init_value;
+  return restartable_data_ref.get();
 }
 
 template <typename T>

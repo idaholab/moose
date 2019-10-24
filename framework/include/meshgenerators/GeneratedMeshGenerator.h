@@ -29,9 +29,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// Helper method for writing out mesh attributes to the meta-data store
-  void setMeshMetaData();
-
   /// The dimension of the mesh
   MooseEnum _dim;
 

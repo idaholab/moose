@@ -12,7 +12,6 @@
 // MOOSE includes
 #include "FileOutput.h"
 #include "RestartableDataIO.h"
-#include "MeshMetaDataInterface.h"
 
 #include <deque>
 
@@ -44,7 +43,7 @@ struct CheckpointFileNames
 /**
  *
  */
-class Checkpoint : public FileOutput, public MeshMetaDataInterface
+class Checkpoint : public FileOutput
 {
 public:
   /**
@@ -99,8 +98,6 @@ private:
 
   /// Reference to the mesh meta data
   const RestartableDataMap & _mesh_meta_data;
-
-  bool foo;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;

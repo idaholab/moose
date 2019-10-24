@@ -14,6 +14,16 @@
 #include "MooseObject.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MeshMetaDataInterface.h"
+
+namespace
+{
+bool
+storeInMeshHelper(const std::string & system_name)
+{
+  return system_name == MeshMetaDataInterface::SYSTEM;
+}
+}
 
 Restartable::Restartable(const MooseObject * moose_object, const std::string & system_name)
   : Restartable(moose_object->getMooseApp(),
@@ -32,12 +42,6 @@ Restartable::Restartable(const MooseObject * moose_object,
 {
 }
 
-Restartable::Restartable(MooseApp & app, const std::string & app_name)
-  : Restartable(app, app_name, "MeshMetaData", 0)
-{
-  _store_in_mesh_meta_data = true;
-}
-
 Restartable::Restartable(MooseApp & moose_app,
                          const std::string & name,
                          const std::string & system_name,
@@ -46,16 +50,18 @@ Restartable::Restartable(MooseApp & moose_app,
     _restartable_name(name),
     _restartable_system_name(system_name),
     _restartable_tid(tid),
-    _store_in_mesh_meta_data(false)
+    _store_in_mesh_meta_data(storeInMeshHelper(system_name))
 {
 }
 
-void
+RestartableDataValue &
 Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
-                                          THREAD_ID tid)
+                                          THREAD_ID tid,
+                                          bool read_only)
 {
-  _restartable_app.registerRestartableData(name, std::move(data), tid, _store_in_mesh_meta_data);
+  return _restartable_app.registerRestartableData(
+      name, std::move(data), tid, _store_in_mesh_meta_data, read_only);
 }
 
 void

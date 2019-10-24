@@ -22,11 +22,7 @@ validParams<MeshGenerator>()
 }
 
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
-  : MooseObject(parameters),
-    MeshMetaDataInterface(_app),
-    Restartable(this, "MeshGenerators"),
-    _mesh(_app.actionWarehouse().mesh()),
-    _mesh_meta_data(metaData())
+  : MooseObject(parameters), MeshMetaDataInterface(this), _mesh(_app.actionWarehouse().mesh())
 {
 }
 

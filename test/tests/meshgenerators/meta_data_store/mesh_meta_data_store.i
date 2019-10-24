@@ -17,6 +17,7 @@
 [AutoLineSamplerTest]
   # Add a line sampler on the variable right at the nodes based on the GeneratedMeshGenerator
   variable = u
+  mesh_generator = 'gmg'
 []
 
 [Kernels]

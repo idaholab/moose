@@ -22,7 +22,6 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MemberTemplateMacros.h"
-#include "Restartable.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -59,7 +58,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public Restartable, public ConsoleStreamInterface, public libMesh::ParallelObject
+class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -473,10 +472,11 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  void registerRestartableData(const std::string & name,
-                               std::unique_ptr<RestartableDataValue> data,
-                               THREAD_ID tid,
-                               bool mesh_meta_data);
+  RestartableDataValue & registerRestartableData(const std::string & name,
+                                                 std::unique_ptr<RestartableDataValue> data,
+                                                 THREAD_ID tid,
+                                                 bool mesh_meta_data,
+                                                 bool read_only);
 
   /**
    * Return reference to the restatable data object
@@ -717,6 +717,11 @@ public:
    */
   void meshReinitForRMs();
 
+  /**
+   * Function to check the integrity of the MeshMetaData data structure
+   */
+  void checkMeshMetaDataIntegrity() const;
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -930,23 +935,6 @@ private:
    * e.g. these names are _excluded_ during restart.
    */
   DataNames _recoverable_data_names;
-
-  /**
-   * The restartable mesh meta data. This Parameters object can be written to by MeshGenerators to
-   * store attributes about the mesh during a recover operation. It is a Pointer because it uses
-   * the normal Restartable interface for declaring and storing the data. It is _always_ initialized
-   * though during the constructor.
-   */
-  Parameters * _mesh_meta_data;
-
-  ///@{
-  /**
-   * Friend declaration to allow MeshGenerators (through the MeshMetaDataInterface) writable access
-   * to the raw paramater mesh meta data store.
-   */
-  friend MeshMetaDataInterface::MeshMetaDataInterface(MooseApp &);
-  Parameters & meshMetaData() const { return *_mesh_meta_data; }
-  ///@}
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType

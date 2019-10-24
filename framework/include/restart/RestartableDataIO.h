@@ -60,7 +60,7 @@ public:
    * Read restartable data header to verify that we are restarting on the correct number of
    * processors and threads.
    */
-  bool readRestartableDataHeader(bool per_proc);
+  bool readRestartableDataHeader(bool per_proc_id, const std::string & suffix = "");
 
   /**
    * Read the restartable data.

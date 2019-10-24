@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseObject.h"
-#include "Restartable.h"
 #include "MeshMetaDataInterface.h"
 
 // Included so mesh generators don't need to include this when constructing MeshBase objects
@@ -29,7 +28,7 @@ InputParameters validParams<MeshGenerator>();
 /**
  * MeshGenerators are objects that can modify or add to an existing mesh.
  */
-class MeshGenerator : public MooseObject, public MeshMetaDataInterface, public Restartable
+class MeshGenerator : public MooseObject, public MeshMetaDataInterface
 {
 public:
   /**
@@ -52,11 +51,14 @@ public:
 
 protected:
   /**
-   * Method for writing out attributes to the mesh meta-data store, which can be retrieved from
+   * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
    * most other MOOSE systems and is recoverable.
    */
   template <typename T>
-  void setProperty(const std::string & name, const T & value);
+  T & declareMeshProperty(const std::string & data_name);
+
+  template <typename T>
+  T & declareMeshProperty(const std::string & data_name, const T & init_value);
 
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
@@ -87,14 +89,18 @@ private:
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
-
-  /// A reference to the meta-data storage object, accessed through the setProperty API.
-  Parameters & _mesh_meta_data;
 };
 
 template <typename T>
-void
-MeshGenerator::setProperty(const std::string & name, const T & value)
+T &
+MeshGenerator::declareMeshProperty(const std::string & data_name)
 {
-  _mesh_meta_data.set<T>(name) = value;
+  return declareMeshPropertyInternal<T>(data_name);
+}
+
+template <typename T>
+T &
+MeshGenerator::declareMeshProperty(const std::string & data_name, const T & value)
+{
+  return declareMeshPropertyInternal<T>(data_name, value);
 }

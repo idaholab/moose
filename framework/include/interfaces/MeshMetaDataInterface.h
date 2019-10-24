@@ -12,10 +12,12 @@
 #include "MooseObject.h"
 #include "MooseError.h"
 #include "InputParameters.h"
+#include "Restartable.h"
 
 #include <string>
 
 class MooseApp;
+class MeshGenerator;
 
 /**
  * The Interface used to retrieve mesh meta data (attributes) set by the MeshGenerator system.
@@ -23,36 +25,49 @@ class MooseApp;
  * re-created during a recover operation. This data is read from files early during the simulation
  * setup an d can be used to make decisions about how to setup the rest of the problem.
  */
-class MeshMetaDataInterface
+class MeshMetaDataInterface : private Restartable
 {
 public:
-  MeshMetaDataInterface(MooseApp & app);
+  /// The suffix appended when writing the restartable data file.
+  static constexpr auto FILE_SUFFIX = "_mesh";
+
+  /// The system name used when initializing the Restartable interface
+  static constexpr auto SYSTEM = "MeshMetaData";
+
+  /// The data name used when initializing the Restartable interface for non-MeshGenerator objects.
+  static constexpr auto NAME = "<empty>";
 
 protected:
   /**
-   * Method for determining whether a property with the given type and name exists in the mesh
-   * meta-data store.
+   * Interface for all objects reading MeshMetaData. The name of the object gets a bogus prefix,
+   * which is not intended to be used for storing data. Instead this value is overridden during
+   * retrieval.
    */
-  template <typename T>
-  bool hasMeshProperty(const std::string & name) const;
+  MeshMetaDataInterface(const MooseObject * moose_object);
+
+  /**
+   * Interface for MeshGenerators: This interface initializes the Restartable interface with the
+   * generator name for prefixing purposes.
+   */
+  MeshMetaDataInterface(const MeshGenerator * mesh_gen_object);
+
+  /**
+   * This class constructor is used for non-Moose-based objects like interfaces. A name for the
+   * storage as well as a system name must be passed in along with the thread ID explicitly.
+   */
+  MeshMetaDataInterface(MooseApp & moose_app);
+
+  const MeshGeneratorName & getMeshGeneratorPrefix(const std::string & name);
 
   /**
    * Method for retrieving a property with the given type and name exists in the mesh meta-data
    * store. This method will throw an error if the property does not exist.
    */
   template <typename T>
-  T getMeshProperty(const std::string & name) const;
-
-  /**
-   * Returns the total number of mesh attributes stored in the meta-data store.
-   */
-  std::size_t metaDataSize() const { return _mgi_mesh_props.n_parameters(); }
-
-  /**
-   * Convenience method reporting whether any attributes are stored in the meta-data store or not.
-   * If there are no attributed stores, no file is written through the Checkpoint format.
-   */
-  bool metaDataEmpty() const { return metaDataSize() == 0; }
+  const T & getMeshProperty(const std::string & data_name, const std::string & prefix)
+  {
+    return declareRestartableDataWithPrefixOverrideAndContext<T>(data_name, prefix, nullptr, true);
+  }
 
 private:
   /**
@@ -60,30 +75,15 @@ private:
    * declaration to grant access to the MeshGenerators to access the meta-data.
    */
   friend class MeshGenerator;
-  Parameters & metaData() const { return _mgi_mesh_props; }
+  template <typename T>
+  T & declareMeshPropertyInternal(const std::string & data_name)
+  {
+    return declareRestartableDataWithContext<T>(data_name, nullptr, false);
+  }
 
-  /// A writable reference to the meta-data store.
-  Parameters & _mgi_mesh_props;
+  template <typename T>
+  T & declareMeshPropertyInternal(const std::string & data_name, const T & value)
+  {
+    return declareRestartableDataWithContext<T>(data_name, value, nullptr);
+  }
 };
-
-template <typename T>
-bool
-MeshMetaDataInterface::hasMeshProperty(const std::string & name) const
-{
-  return _mgi_mesh_props.have_parameter<T>(name);
-}
-
-template <typename T>
-T
-MeshMetaDataInterface::getMeshProperty(const std::string & name) const
-{
-  if (!hasMeshProperty<T>(name))
-    mooseError("Property \"",
-               name,
-               "\" with type \"",
-               demangle(typeid(T).name()),
-               "\" doesn't exist in this mesh meta-data instance:\n",
-               _mgi_mesh_props);
-
-  return _mgi_mesh_props.get<T>(name);
-}

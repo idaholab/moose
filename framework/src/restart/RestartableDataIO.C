@@ -111,7 +111,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
     for (const auto & it : restartable_data)
     {
       std::ostringstream data;
-      it.second->store(data);
+      it.second.value->store(data);
 
       // Store the size of the data then the data
       unsigned int data_size = static_cast<unsigned int>(data.tellp());
@@ -173,7 +173,7 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
       if (current_pair == restartable_data.end())
         mooseError("restartable_data missing ", current_name, "\n");
 
-      current_pair->second->load(stream);
+      current_pair->second.value->load(stream);
     }
     else
     {
@@ -219,10 +219,10 @@ RestartableDataIO::deserializeSystems(std::istream & stream)
 }
 
 bool
-RestartableDataIO::readRestartableDataHeader(bool per_proc)
+RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string & suffix)
 {
   unsigned int n_threads = libMesh::n_threads();
-  unsigned int n_files = per_proc ? n_threads : 1;
+  unsigned int n_files = per_proc_id ? n_threads : 1;
 
   processor_id_type n_procs = _moose_app.n_processors();
   processor_id_type proc_id = _moose_app.processor_id();
@@ -233,9 +233,9 @@ RestartableDataIO::readRestartableDataHeader(bool per_proc)
   for (unsigned int tid = 0; tid < n_files; tid++)
   {
     std::ostringstream file_name_stream;
-    file_name_stream << recover_file_base + RESTARTABLE_DATA_EXT;
+    file_name_stream << recover_file_base + suffix + RESTARTABLE_DATA_EXT;
 
-    if (per_proc)
+    if (per_proc_id)
     {
       file_name_stream << "-" << proc_id;
       if (n_threads > 1)
@@ -244,7 +244,7 @@ RestartableDataIO::readRestartableDataHeader(bool per_proc)
 
     std::string file_name = file_name_stream.str();
 
-    bool throw_on_error = per_proc;
+    bool throw_on_error = per_proc_id;
     if (!MooseUtils::checkFileReadable(file_name, false, throw_on_error))
       return false;
 

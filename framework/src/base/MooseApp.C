@@ -265,8 +265,7 @@ validParams<MooseApp>()
 }
 
 MooseApp::MooseApp(InputParameters parameters)
-  : Restartable(*this, parameters.get<std::string>("_app_name")),
-    ConsoleStreamInterface(*this),
+  : ConsoleStreamInterface(*this),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
@@ -436,8 +435,6 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
-
-  _mesh_meta_data = &declareRestartableData<Parameters>("meta_data");
 }
 
 void
@@ -1133,28 +1130,36 @@ MooseApp::libNameToAppName(const std::string & library_name) const
   return MooseUtils::underscoreToCamelCase(app_name, true);
 }
 
-void
+RestartableDataValue &
 MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid,
-                                  bool mesh_meta_data)
+                                  bool mesh_meta_data,
+                                  bool read_only)
 {
-  if (!mesh_meta_data)
-  {
-    auto & restartable_data = _restartable_data[tid];
-    auto insert_pair = restartable_data.emplace(name, std::move(data));
+  // Select the data store for saving this piece of restartable data (mesh or everything else)
+  auto & data_ref = mesh_meta_data ? _mesh_meta_data_map : _restartable_data[tid];
 
-    if (!insert_pair.second)
-      mooseError("Attempted to declare restartable twice with the same name: ", name);
-  }
-  else
-  {
-    auto insert_pair = _mesh_meta_data_map.emplace(name, std::move(data));
+  auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
 
-    if (!insert_pair.second)
-      mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
-                 name);
+  // Does the storage for this data already exist?
+  if (!insert_pair.second)
+  {
+    auto & data = insert_pair.first->second;
+
+    // Are we really declaring or just trying to get a reference to the data?
+    if (!read_only)
+    {
+      if (data.declared)
+        mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
+                   name);
+      else
+        // The data wasn't previously declared, but now it is!
+        data.declared = true;
+    }
   }
+
+  return *insert_pair.first->second.value;
 }
 
 void
@@ -2023,4 +2028,24 @@ MooseApp::meshReinitForRMs()
 {
   for (auto & rm : _relationship_managers)
     rm->mesh_reinit();
+}
+
+void
+MooseApp::checkMeshMetaDataIntegrity() const
+{
+  std::vector<std::string> not_declared;
+
+  for (const auto & pair : _mesh_meta_data_map)
+    if (!pair.second.declared)
+      not_declared.push_back(pair.first);
+
+  if (!not_declared.empty())
+  {
+    std::ostringstream oss;
+    std::copy(
+        not_declared.begin(), not_declared.end(), infix_ostream_iterator<std::string>(oss, ", "));
+
+    mooseError("The following Mesh meta-data properties were retrieved but never declared: ",
+               oss.str());
+  }
 }

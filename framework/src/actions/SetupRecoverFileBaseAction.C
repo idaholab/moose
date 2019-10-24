@@ -45,9 +45,13 @@ SetupRecoverFileBaseAction::act()
   }
   else // recover_mesh_meta_data
   {
+    // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
+    // generators have run.
+    _app.checkMeshMetaDataIntegrity();
+
     RestartableDataIO restartable(_app);
 
-    if (restartable.readRestartableDataHeader(false))
+    if (restartable.readRestartableDataHeader(false, MeshMetaDataInterface::FILE_SUFFIX))
       restartable.readRestartableData(_app.getMeshMetaData(), DataNames());
   }
 }

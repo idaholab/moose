@@ -17,6 +17,7 @@
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"
 #include "MooseMesh.h"
+#include "MeshMetaDataInterface.h"
 
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
@@ -46,14 +47,12 @@ validParams<Checkpoint>()
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
-    MeshMetaDataInterface(_app),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
     _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _mesh_meta_data(_app.getMeshMetaData()),
-    foo(false),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
 }
@@ -100,8 +99,8 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   curr_file_struct.checkpoint = current_file + getMeshFileSuffix(_binary);
   curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
   curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
-  curr_file_struct.restart_mesh_meta_data =
-      current_file + _restartable_data_io.getRestartableDataExt();
+  curr_file_struct.restart_mesh_meta_data = current_file + MeshMetaDataInterface::FILE_SUFFIX +
+                                            _restartable_data_io.getRestartableDataExt();
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -116,7 +115,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
 
   // Write out the restartable mesh meta data if there is any (only on processor zero)
-  if (metaDataSize() && processor_id() == 0 && !foo)
+  if (processor_id() == 0 && !_mesh_meta_data.empty())
     _restartable_data_io.writeRestartableData(curr_file_struct.restart_mesh_meta_data,
                                               _mesh_meta_data);
 
