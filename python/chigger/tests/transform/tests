@@ -23,6 +23,7 @@
     cli_args = '--rotate 90 0 0 --name rotate_x.png'
     imagediff = 'rotate_x.png'
     python = 3
+    platform = LINUX
   [../]
   [./rotate_y]
     type = ImageDiff
@@ -30,6 +31,7 @@
     cli_args = '--rotate 0 90 0 --name rotate_y.png'
     imagediff = 'rotate_y.png'
     python = 3
+    platform = LINUX
   [../]
   [./rotate_z]
     type = ImageDiff

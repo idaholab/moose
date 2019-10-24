@@ -5,6 +5,7 @@
     command = simple.py
     imagediff = 'simple.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./simple_camera]

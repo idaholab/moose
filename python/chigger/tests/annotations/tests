@@ -5,6 +5,7 @@
     command = image_annotation.py
     imagediff = 'image_annotation.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./logo]
@@ -13,6 +14,7 @@
     command = logo_annotation.py
     imagediff = 'logo_annotation.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./text]
@@ -37,5 +39,6 @@
     command = time_annotation_change.py
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
     python = 3
+    platform = LINUX
   [../]
 []

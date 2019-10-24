@@ -5,6 +5,7 @@
     imagediff = 'none_0.png none_1.png'
     allowed_linux = 0.97
     python = 3
+    platform = LINUX
   [../]
 
   [./min]
@@ -14,6 +15,7 @@
     allowed_linux = 0.97
     allowed_darwin = 0.97
     python = 3
+    platform = LINUX
   [../]
 
   [./max]
@@ -21,6 +23,7 @@
     command = max.py
     imagediff = 'max_0.png max_1.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./minmax]
@@ -28,6 +31,7 @@
     command = minmax.py
     imagediff = 'minmax_0.png minmax_1.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./range]
@@ -35,6 +39,7 @@
     command = range.py
     imagediff = 'range_0.png range_1.png'
     python = 3
+    platform = LINUX
   [../]
 
   [./auto]
@@ -42,5 +47,6 @@
     command = auto.py
     imagediff = 'auto_1.png auto_3.png auto_5.png'
     python = 3
+    platform = LINUX
   [../]
 []

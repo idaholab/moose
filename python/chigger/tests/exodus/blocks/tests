@@ -50,18 +50,20 @@
       command = nodesets.py
       imagediff = 'nodesets.png'
       allowed_linux = 0.97
+      python = 3
+      platform = LINUX
 
       detail = "defined nodesets;"
-      python = 3
     []
     [all_nodesets]
       type = ImageDiff
       command = all_nodesets.py
       imagediff = 'all_nodesets.png'
       allowed_linux = 0.90
+      python = 3
+      platform = LINUX
 
       detail = "all nodesets;"
-      python = 3
     []
     [none]
       type = ImageDiff
@@ -76,6 +78,7 @@
       command = combo.py
       imagediff = 'combo.png'
       allowed_linux = 0.95
+      platform = LINUX
 
       detail = "subdomains, boundaries, and nodesets specified; and"
       python = 3
