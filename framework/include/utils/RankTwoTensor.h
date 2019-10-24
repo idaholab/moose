@@ -40,6 +40,8 @@ template <typename>
 class TensorValue;
 }
 
+namespace MathUtils
+{
 template <typename T>
 void mooseSetToZero(T & v);
 
@@ -56,6 +58,7 @@ void mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v);
  */
 template <>
 void mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v);
+}
 
 /**
  * RankTwoTensorTempl is designed to handle the Stress or Strain Tensor for a fully anisotropic

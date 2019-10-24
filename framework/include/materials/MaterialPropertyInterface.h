@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 #include "MaterialData.h"
 #include "MemberTemplateMacros.h"
+#include "MathUtils.h"
 
 // Forward declarations
 class InputParameters;
@@ -135,23 +136,23 @@ public:
    * Check if block and boundary restrictions of a given material are compatible with the current
    * material. Error out otherwise.
    */
-  void checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete);
+  void checkBlockAndBoundaryCompatibility(std::shared_ptr<MaterialBase> discrete);
 
   ///@{
   /**
-   * Return a Material reference - usable for computing directly.
+   * Return a MaterialBase reference - usable for computing directly.
    *
    * @param name The name of the input parameter or explicit material name.
    * @param no_warn If true, suppress warning about retrieving the material
    * potentially during its calculation. If you don't know what this is/means,
    * then you don't need it.
    */
-  Material & getMaterial(const std::string & name);
-  Material & getMaterialByName(const std::string & name, bool no_warn = false);
+  MaterialBase & getMaterial(const std::string & name);
+  MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   template <ComputeStage>
-  Material & getMaterial(const std::string & name);
+  MaterialBase & getMaterial(const std::string & name);
   template <ComputeStage>
-  Material & getMaterialByName(const std::string & name, bool no_warn = false);
+  MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
   ///@{
@@ -240,6 +241,11 @@ protected:
   const ADMaterialPropertyObject<T> * defaultADMaterialProperty(const std::string & name);
 
   /**
+   * Check and throw an error if the execution has progressed past the construction stage
+   */
+  void checkExecutionStage();
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -264,9 +270,6 @@ protected:
   std::set<unsigned int> _material_property_dependencies;
 
 private:
-  /// Check and throw an error if the execution has progressed past the construction stage
-  void checkExecutionStage();
-
   /// BoundaryRestricted flag
   const bool _mi_boundary_restricted;
 
@@ -276,29 +279,6 @@ private:
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
 };
-
-/**
- * Helper function templates to set a variable to zero.
- * Specializations may have to be implemented (for examples see
- * RankTwoTensor, RankFourTensor).
- */
-template <typename T>
-inline void
-mooseSetToZero(T & v)
-{
-  /**
-   * The default for non-pointer types is to assign zero.
-   * This should either do something sensible, or throw a compiler error.
-   * Otherwise the T type is designed badly.
-   */
-  v = 0;
-}
-template <typename T>
-inline void
-mooseSetToZero(T *&)
-{
-  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
-}
 
 template <typename T>
 const MaterialProperty<T> &
@@ -523,7 +503,7 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
 
   // set values for all qpoints to zero
   for (unsigned int qp = 0; qp < nqp; ++qp)
-    mooseSetToZero<T>(zero[qp]);
+    MathUtils::mooseSetToZero<T>(zero[qp]);
 
   return zero;
 }

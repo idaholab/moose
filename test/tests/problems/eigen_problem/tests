@@ -110,4 +110,21 @@
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
+
+  [./ne_coupled_picard_eigen_master]
+    type = 'CSVDiff'
+    input = 'ne_coupled_picard.i'
+    csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.12.0'
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master"
+  []
+
+  [./ne_coupled_picard_eigen_sub]
+    type = 'CSVDiff'
+    input = 'ne_coupled_picard_subT.i'
+    csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
+    slepc_version = '>=3.12.0'
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app"
+  []
+
 []

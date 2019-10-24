@@ -194,6 +194,9 @@ protected:
   /// Heal the mesh
   bool _heal_always;
 
+  /// Time step information needed to advance a 3D crack only at the real beginning of a time step
+  unsigned int _last_step_initialized;
+
   ///@{Containers with information about all 2D and 3D elements marked for cutting by this object
   std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo2D>> _marked_elems_2d;
   std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo3D>> _marked_elems_3d;
@@ -204,4 +207,3 @@ protected:
   void deserialize(std::vector<std::string> & serialized_buffers);
   ///@}
 };
-

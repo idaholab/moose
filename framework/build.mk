@@ -42,6 +42,11 @@ ifneq (x$(MOOSE_NO_PERF_GRAPH), x)
   libmesh_CXXFLAGS += -DMOOSE_NO_PERF_GRAPH
 endif
 
+ifneq ($(GPERF_DIR), )
+    libmesh_CXXFLAGS += -DHAVE_GPERFTOOLS -I$(GPERF_DIR)/include
+    libmesh_LDFLAGS += -L$(GPERF_DIR)/lib -ltcmalloc_and_profiler
+endif
+
 # Make.common used to provide an obj-suffix which was related to the
 # machine in question (from config.guess, i.e. @host@ in
 # contrib/utils/Make.common.in) and the $(METHOD).
@@ -87,6 +92,7 @@ all:
 header_symlinks:
 
 unity_files:
+
 
 #
 # C++ rules

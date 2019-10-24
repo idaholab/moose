@@ -36,6 +36,8 @@ class RankTwoTensorTempl;
 template <typename>
 class RankFourTensorTempl;
 
+namespace MathUtils
+{
 template <typename T>
 void mooseSetToZero(T & v);
 
@@ -47,6 +49,7 @@ template <>
 void mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v);
 template <>
 void mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v);
+}
 
 /**
  * RankFourTensorTempl is designed to handle any N-dimensional fourth order tensor, C.

@@ -48,3 +48,8 @@
 [Executioner]
   type = Steady
 []
+
+[Outputs]
+  exodus = true
+  execute_on = 'timestep_end'
+[]

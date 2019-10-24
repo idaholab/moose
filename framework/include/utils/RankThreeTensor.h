@@ -36,6 +36,8 @@ class RankTwoTensorTempl;
 template <typename>
 class RankFourTensorTempl;
 
+namespace MathUtils
+{
 template <typename T>
 void mooseSetToZero(T & v);
 
@@ -47,6 +49,7 @@ template <>
 void mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v);
 template <>
 void mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v);
+}
 
 /**
  * RankThreeTensor is designed to handle any N-dimensional third order tensor, r.

@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef HAVE_GPERFTOOLS
+#include "gperftools/profiler.h"
+#endif
+
 // MOOSE includes
 #include "MooseRevision.h"
 #include "AppFactory.h"
@@ -324,6 +328,17 @@ MooseApp::MooseApp(InputParameters parameters)
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _popped_final_mesh_generator(false)
 {
+
+#ifdef HAVE_GPERFTOOLS
+  if (std::getenv("MOOSE_PARALLEL_PROFILE"))
+  {
+    static std::string profile_file =
+        std::getenv("MOOSE_PARALLEL_PROFILE") + std::to_string(_comm->rank()) + ".prof";
+    _profiling = true;
+    ProfilerStart(profile_file.c_str());
+  }
+#endif
+
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
@@ -430,6 +445,10 @@ MooseApp::checkRegistryLabels()
 
 MooseApp::~MooseApp()
 {
+#ifdef HAVE_GPERFTOOLS
+  if (_profiling)
+    ProfilerStop();
+#endif
   _action_warehouse.clear();
   _executioner.reset();
   _the_warehouse.reset();

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseError.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -198,4 +199,26 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
   return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
 }
 
+/**
+ * Helper function templates to set a variable to zero.
+ * Specializations may have to be implemented (for examples see
+ * RankTwoTensor, RankFourTensor).
+ */
+template <typename T>
+inline void
+mooseSetToZero(T & v)
+{
+  /**
+   * The default for non-pointer types is to assign zero.
+   * This should either do something sensible, or throw a compiler error.
+   * Otherwise the T type is designed badly.
+   */
+  v = 0;
+}
+template <typename T>
+inline void
+mooseSetToZero(T *&)
+{
+  mooseError("mooseSetToZero does not accept pointers");
+}
 } // namespace MathUtils

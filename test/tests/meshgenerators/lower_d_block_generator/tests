@@ -1,12 +1,23 @@
 [Tests]
-  [./lower_d_block_generator_test]
-    type = 'Exodiff'
-    input = 'lower_d_block_generator.i'
-    exodiff = 'lower_d_block_generator_out.e'
-    requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
+  design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
+  issues = '#11640'
+  [./mesh]
+    requirement = 'The system shall be able to create different subdomains'
+    [./ids]
+      type = 'Exodiff'
+      input = 'ids.i'
+      exodiff = 'ids_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using boundary ids.'
+    [../]
+    [./names]
+      type = 'Exodiff'
+      input = 'names.i'
+      exodiff = 'names_out.e'
+      detail = 'using boundary names.'
+      mesh_mode = 'REPLICATED'
+      recover = false
+    [../]
   [../]
 []

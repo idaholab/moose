@@ -11,6 +11,7 @@
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
@@ -30,7 +31,7 @@ validParams<LowerDBlockFromSidesetGenerator>()
   params.addParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");
   params.addParam<SubdomainName>("new_block_name",
                                  "The lower dimensional block name to create (optional)");
-  params.addRequiredParam<std::vector<boundary_id_type>>(
+  params.addRequiredParam<std::vector<BoundaryName>>(
       "sidesets", "The sidesets from which to create the new block");
 
   params.addClassDescription("Adds lower dimensional elements on the specified sidesets.");
@@ -41,7 +42,7 @@ validParams<LowerDBlockFromSidesetGenerator>()
 LowerDBlockFromSidesetGenerator::LowerDBlockFromSidesetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _sidesets(getParam<std::vector<boundary_id_type>>("sidesets"))
+    _sideset_names(getParam<std::vector<BoundaryName>>("sidesets"))
 {
 }
 
@@ -104,7 +105,9 @@ LowerDBlockFromSidesetGenerator::generate()
                 return a_elem_id < b_elem_id;
             });
 
-  std::set<boundary_id_type> sidesets(_sidesets.begin(), _sidesets.end());
+  auto sideset_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _sideset_names, true);
+  std::set<boundary_id_type> sidesets(sideset_ids.begin(), sideset_ids.end());
+
   std::vector<ElemSideDouble> element_sides_on_boundary;
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))

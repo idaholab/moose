@@ -1,0 +1,10 @@
+[Tests]
+  design = 'syntax/Executioner/index.md'
+  [./linear_with_full_smp]
+    type = 'Exodiff'
+    input = 'linear_with_full_smp.i'
+    exodiff = 'linear_with_full_smp_out.e'
+    requirement = "MOOSE shall correctly evaluate Jacobians with coupled problems and the LINEAR solve type"
+    issues = '#14065'
+  [../]
+[]

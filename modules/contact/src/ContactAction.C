@@ -190,8 +190,8 @@ ContactAction::addMortarContact()
       master_params.set<SubdomainName>("new_block_name") = master_subdomain_name;
       slave_params.set<SubdomainName>("new_block_name") = slave_subdomain_name;
 
-      master_params.set<std::vector<BoundaryID>>("sidesets") = {_mesh->getBoundaryID(_master)};
-      slave_params.set<std::vector<BoundaryID>>("sidesets") = {_mesh->getBoundaryID(_slave)};
+      master_params.set<std::vector<BoundaryName>>("sidesets") = {_master};
+      slave_params.set<std::vector<BoundaryName>>("sidesets") = {_slave};
 
       _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", master_name, master_params);
       _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", slave_name, slave_params);

@@ -56,4 +56,3 @@ protected:
   std::vector<std::unique_ptr<Assembly>> & _assembly;
   bool _need_internal_side_material;
 };
-

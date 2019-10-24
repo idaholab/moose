@@ -27,6 +27,8 @@
 #include <iomanip>
 #include <ostream>
 
+namespace MathUtils
+{
 template <>
 void
 mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
@@ -38,6 +40,7 @@ void
 mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
 {
   v.zero();
+}
 }
 
 template <typename T>
