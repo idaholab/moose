@@ -61,6 +61,7 @@
       input = 'verification.i'
       csvdiff = 'verification_1e-5_out.csv'
       heavy = true
+      rel_err = 1e-4
       petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
       max_parallel = 1

@@ -58,13 +58,5 @@
       cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
     [../]
-    [./stiff_soft]
-      detail = 'using with a stiff block and a soft plank.'
-      type = 'CSVDiff'
-      input = 'finite.i'
-      csvdiff = 'stiff_soft.csv'
-      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=30'
-      heavy = true
-    [../]
   [../]
 []

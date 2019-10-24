@@ -65,15 +65,5 @@
       heavy = true
       ad_mode = sparse
     [../]
-    [./stiff_soft]
-      skip = 'stiff_soft with second order 2DRz mesh and non-AD not ready'
-      detail = 'using with a stiff block and a soft plank.'
-      type = 'CSVDiff'
-      input = 'finite.i'
-      csvdiff = 'stiff_soft.csv'
-      cli_args = 'E_block=1e9 E_plank=1e7 name=stiff_soft Executioner/l_max_its=30'
-      heavy = true
-      ad_mode = sparse
-    [../]
   [../]
 []
