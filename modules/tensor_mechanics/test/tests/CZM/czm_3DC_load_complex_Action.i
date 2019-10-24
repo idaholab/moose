@@ -3,12 +3,10 @@
     type = FileMeshGenerator
     file = coh3D_3Blocks.e
   []
-
   [./breakmesh]
     input = msh
     type = BreakMeshByBlockGenerator
   [../]
-
   [./bottom_block_1]
     input = breakmesh
     type = SideSetsAroundSubdomainGenerator
@@ -30,14 +28,11 @@
     new_boundary = 'top_3'
     normal = '0 0 1'
   [../]
-
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
-
-
 
 [Modules/TensorMechanics/Master]
   [./all]
@@ -46,7 +41,6 @@
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
   [../]
 []
-
 
 [BCs]
   [./bottom_x]
@@ -129,18 +123,18 @@
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
- [Preconditioning]
-   [./SMP]
-     type = SMP
-     full = true
-   [../]
- []
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
-  # Preconditisoned JFNK (default)
   type = Transient
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  # petsc_options_value = 'hypre     boomerang'
   solve_type = NEWTON
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-6
@@ -152,13 +146,14 @@
   end_time = 1
   dtmin = 0.1
   line_search = none
-  # num_steps = 1
 []
+
 [Outputs]
   [./out]
     type = Exodus
   [../]
 []
+
 [Postprocessors]
   [./sxx_3G]
     type = ElementAverageValue

@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Assembly.h"
 #include "CZM_3DCMaterial.h"
-#include "RotationMatrix.h"
 
 registerMooseObject("TensorMechanicsApp", CZM_3DCMaterial);
 

@@ -29,8 +29,6 @@
   displacements = 'disp_x disp_y'
 []
 
-
-
 [Modules/TensorMechanics/Master]
   [./all]
     strain = SMALL
@@ -38,7 +36,6 @@
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
   [../]
 []
-
 
 [BCs]
   [./bottom_x]
@@ -91,18 +88,18 @@
     displacements = 'disp_x disp_y'
   [../]
 []
- [Preconditioning]
-   [./SMP]
-     type = SMP
-     full = true
-   [../]
- []
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
-  # Preconditisoned JFNK (default)
   type = Transient
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  # petsc_options_value = 'hypre     boomerang'
   solve_type = NEWTON
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-6
@@ -114,13 +111,14 @@
   end_time = 5
   dtmin = 0.2
   line_search = none
-  # num_steps = 1
 []
+
 [Outputs]
   [./out]
     type = Exodus
   [../]
 []
+
 [Postprocessors]
   [./sxx_2G]
     type = ElementAverageValue
