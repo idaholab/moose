@@ -40,13 +40,6 @@ protected:
   std::vector<unsigned int> _disp_var;
   std::vector<unsigned int> _disp_neighbor_var;
 
-  /// variables containg the names of the material properties representing the
-  /// reidual's and jacobian's coefficients. Derivates are assumed to be taken
-  /// wrt to the displacement jump.
-  const std::string _residual;
-  const std::string _jacobian;
-  const std::string _throw_exception;
-
   // values of the residual's and jacobian's cofficients
   const MaterialProperty<RealVectorValue> & _traction;
   const MaterialProperty<RankTwoTensor> & _traction_derivative;
