@@ -29,9 +29,10 @@ paramErrorPrefix(const InputParameters & params, const std::string & param)
   return prefix;
 }
 
-template <>
+defineLegacyParams(MooseObject);
+
 InputParameters
-validParams<MooseObject>()
+MooseObject::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<bool>("enable", true, "Set the enabled status of the MooseObject.");

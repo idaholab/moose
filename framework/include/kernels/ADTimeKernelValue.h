@@ -21,6 +21,8 @@ class ADTimeKernelValueTempl : public ADKernelValueTempl<T, compute_stage>
 public:
   ADTimeKernelValueTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /// Holds the time derivatives at the quadrature points
   const ADTemplateVariableValue & _u_dot;

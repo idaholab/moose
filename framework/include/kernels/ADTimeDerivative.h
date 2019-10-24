@@ -23,6 +23,8 @@ class ADTimeDerivative : public ADTimeKernelValue<compute_stage>
 public:
   ADTimeDerivative(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal precomputeQpResidual() override;
 

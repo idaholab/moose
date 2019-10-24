@@ -21,6 +21,7 @@ class ADDiffusion : public ADKernelGrad<compute_stage>
 {
 public:
   ADDiffusion(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

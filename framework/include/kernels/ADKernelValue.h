@@ -32,6 +32,8 @@ class ADKernelValueTempl : public ADKernelTempl<T, compute_stage>
 public:
   ADKernelValueTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

@@ -74,6 +74,8 @@ class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
 public:
   ADKernelTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

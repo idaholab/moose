@@ -11,11 +11,17 @@
 
 registerADMooseObject("MooseApp", ADTimeDerivative);
 
-defineADValidParams(
-    ADTimeDerivative,
-    ADTimeKernelValue,
-    params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
-                               "\\frac{\\partial u_h}{\\partial t})$."););
+defineADLegacyParams(ADTimeDerivative);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADTimeDerivative<compute_stage>::validParams()
+{
+  InputParameters params = ADTimeKernelValue<compute_stage>::validParams();
+  params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
+                             "\\frac{\\partial u_h}{\\partial t})$.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADTimeDerivative<compute_stage>::ADTimeDerivative(const InputParameters & parameters)

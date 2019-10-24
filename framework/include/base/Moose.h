@@ -113,6 +113,18 @@ namespace Moose
 {
 
 /**
+ * Set to true (the default) to print the stack trace with error and warning
+ * messages - false to omit it.
+ */
+extern bool show_trace;
+
+/**
+ * Set to false (the default) to display an error message only once for each error call code
+ * location (as opposed to every time the code is executed).
+ */
+extern bool show_multiple;
+
+/**
  * Perflog to be used by applications.
  * If the application prints this in the end they will get performance info.
  */

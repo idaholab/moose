@@ -32,6 +32,8 @@ class ADKernelStabilizedTempl : public ADKernelTempl<T, compute_stage>
 public:
   ADKernelStabilizedTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeADOffDiagJacobian() override;

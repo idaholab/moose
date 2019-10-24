@@ -60,6 +60,8 @@ class KernelBase : public MooseObject,
 public:
   KernelBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual ~KernelBase();
 
   /// Compute this Kernel's contribution to the residual

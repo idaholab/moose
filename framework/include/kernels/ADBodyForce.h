@@ -32,6 +32,8 @@ class ADBodyForce : public ADKernelValue<compute_stage>
 public:
   ADBodyForce(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal precomputeQpResidual() override;
 
