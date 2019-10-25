@@ -1040,7 +1040,25 @@ FEProblemBase::timestepSetup()
       mesh_refinement.uniformly_coarsen();
       if (_displaced_mesh)
         displaced_mesh_refinement->uniformly_coarsen();
-      meshChangedHelper();
+
+      // Mark this as an intermediate change because we do not yet want to reinit_systems. E.g. we
+      // need things to happen in the following order for the undisplaced problem:
+      // 1) EquationSystems::reinit_solutions. This will restrict the solution vectors and then
+      //    contract the mesh
+      // 2) MooseMesh::meshChanged. This will update the node/side lists and other
+      //    things which needs to happen after the contraction
+      // 3) GeometricSearchData::reinit. Once the node/side lists are updated we can perform our
+      //    geometric searches which will aid in determining sparsity patterns
+      meshChangedHelper(/*intermediate_change=*/true);
+
+      // 4) Now that all the geometric searches have been done, we're ready to update the sparsity
+      //    pattern
+      _eq.reinit_systems();
+
+      // Note that in meshChangedHelper we actually did a full EquationSystems::reinit (e.g. both
+      // reinit_solutions and reinit_systems) for the displaced problem. This is safe to do because
+      // there are no sparsity patterns we have to worry about computing: the displaced systems
+      // are ExplicitSystems, e.g. they have no matrices associated with them
     }
   }
 
