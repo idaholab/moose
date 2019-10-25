@@ -848,14 +848,14 @@ DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type
 void
 DisplacedProblem::meshChanged()
 {
+  // mesh changed
+  _eq.reinit();
   _mesh.meshChanged();
-
-  _geometric_search_data.reinit();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
 
-  _eq.reinit();
+  _geometric_search_data.reinit();
 }
 
 void
