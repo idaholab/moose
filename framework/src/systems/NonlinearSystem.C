@@ -18,11 +18,13 @@
 #include "ComputeFDResidualFunctor.h"
 #include "TimedPrint.h"
 #include "MooseVariableScalar.h"
+#include "MooseTypes.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/diagonal_matrix.h"
 #include "libmesh/default_coupling.h"
 
 namespace Moose
@@ -115,6 +117,16 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 }
 
 NonlinearSystem::~NonlinearSystem() {}
+
+void
+NonlinearSystem::init()
+{
+  NonlinearSystemBase::init();
+
+  if (_automatic_scaling)
+    // Add diagonal matrix that will be used for computing scaling factors
+    _transient_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
+}
 
 SparseMatrix<Number> &
 NonlinearSystem::addMatrix(TagID tag)
@@ -400,120 +412,99 @@ NonlinearSystem::converged()
 void
 NonlinearSystem::computeScalingJacobian()
 {
-#ifdef LIBMESH_HAVE_PETSC
-  if (dynamic_cast<PetscMatrix<Real> *>(_transient_sys.matrix))
+  _console << "\nPerforming automatic scaling calculation\n\n";
+
+  TIME_SECTION(_compute_scaling_jacobian_timer);
+
+  mooseAssert(_transient_sys.have_matrix("scaling_matrix"),
+              "The scaling matrix has not been created. There must have been an issue in "
+              "initialization of the NonlinearSystem");
+
+  auto & scaling_matrix = _transient_sys.get_matrix("scaling_matrix");
+
+  _computing_scaling_jacobian = true;
+  _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, scaling_matrix);
+  _computing_scaling_jacobian = false;
+
+  // container for repeated access of element global dof indices
+  std::vector<dof_id_type> dof_indices;
+
+  auto & field_variables = _vars[0].fieldVariables();
+  auto & scalar_variables = _vars[0].scalars();
+
+  std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
+  auto & dof_map = dofMap();
+
+  // Compute our scaling factors for the spatial field variables
+  for (const auto & elem : *mesh().getActiveLocalElementRange())
   {
-#if !PETSC_VERSION_LESS_THAN(3, 9, 0)
-    _console << "\nPerforming automatic scaling calculation\n\n";
-
-    TIME_SECTION(_compute_scaling_jacobian_timer);
-
-    auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(_transient_sys.matrix);
-
-    if (!petsc_matrix.local_m())
-      mooseError("MOOSE doesn't currently support automatic scaling when there are any processes "
-                 "owning zero dofs. Check back soon :-)");
-
-    _computing_scaling_jacobian = true;
-    _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *_transient_sys.matrix);
-    _computing_scaling_jacobian = false;
-
-    // container for repeated access of element global dof indices
-    std::vector<dof_id_type> dof_indices;
-
-    auto & field_variables = _vars[0].fieldVariables();
-    auto & scalar_variables = _vars[0].scalars();
-
-    std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
-    auto & dof_map = dofMap();
-
-    // limit dereferencing
-    auto & diagonal = *_pmat_diagonal;
-
-    // fill our diagonal vector
-    petsc_matrix.get_diagonal(diagonal);
-
-    // Compute our scaling factors for the spatial field variables
-    for (const auto & elem : *mesh().getActiveLocalElementRange())
+    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
     {
-      for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      {
-        auto & field_variable = *field_variables[i];
-        dof_map.dof_indices(elem, dof_indices, field_variable.number());
-        for (auto dof_index : dof_indices)
-          if (dof_map.local_index(dof_index))
-          {
-            // For now we will use the diagonal for determining scaling
-            auto mat_value = diagonal(dof_index);
-            inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
-          }
-      }
-    }
-
-    auto offset = field_variables.size();
-
-    // Compute scalar factors for scalar variables
-    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    {
-      auto & scalar_variable = *scalar_variables[i];
-      dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
+      auto & field_variable = *field_variables[i];
+      dof_map.dof_indices(elem, dof_indices, field_variable.number());
       for (auto dof_index : dof_indices)
         if (dof_map.local_index(dof_index))
         {
           // For now we will use the diagonal for determining scaling
-          auto mat_value = diagonal(dof_index);
-          inverse_scaling_factors[offset + i] =
-              std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
+          auto mat_value = scaling_matrix(dof_index, dof_index);
+          inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
         }
     }
-
-    // Get the maximum value across processes
-    _communicator.max(inverse_scaling_factors);
-
-    // We have to make sure that our scaling values are not zero
-    for (auto & scaling_factor : inverse_scaling_factors)
-      if (scaling_factor < std::numeric_limits<Real>::epsilon())
-        scaling_factor = 1;
-
-    if (_verbose)
-    {
-      _console << "Automatic scaling factors:\n";
-      auto original_flags = _console.flags();
-      auto original_precision = _console.precision();
-      _console.unsetf(std::ios_base::floatfield);
-      _console.precision(6);
-
-      for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      {
-        auto & field_variable = *field_variables[i];
-        _console << "  " << field_variable.name() << ": " << 1.0 / inverse_scaling_factors[i]
-                 << "\n";
-      }
-      for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-      {
-        auto & scalar_variable = *scalar_variables[i];
-        _console << "  " << scalar_variable.name() << ": "
-                 << 1.0 / inverse_scaling_factors[offset + i] << "\n";
-      }
-      _console << "\n\n";
-
-      // restore state
-      _console.flags(original_flags);
-      _console.precision(original_precision);
-    }
-
-    // Now set the scaling factors for the variables
-    applyScalingFactors(inverse_scaling_factors);
-    if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
-      displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
-
-    // Now it's essential that we reset the sparsity pattern of the matrix
-    petsc_matrix.reset_preallocation();
-#endif
   }
-  else
-    mooseError(
-        "Automatic scaling has been requested but you are not using a PetscMatrix. Please contact "
-        "the MOOSE development team at moose-users@googlegroups.com if you encounter this error");
-#endif
+
+  auto offset = field_variables.size();
+
+  // Compute scalar factors for scalar variables
+  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+  {
+    auto & scalar_variable = *scalar_variables[i];
+    dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
+    for (auto dof_index : dof_indices)
+      if (dof_map.local_index(dof_index))
+      {
+        // For now we will use the diagonal for determining scaling
+        auto mat_value = scaling_matrix(dof_index, dof_index);
+        inverse_scaling_factors[offset + i] =
+            std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
+      }
+  }
+
+  // Get the maximum value across processes
+  _communicator.max(inverse_scaling_factors);
+
+  // We have to make sure that our scaling values are not zero
+  for (auto & scaling_factor : inverse_scaling_factors)
+    if (scaling_factor < std::numeric_limits<Real>::epsilon())
+      scaling_factor = 1;
+
+  if (_verbose)
+  {
+    _console << "Automatic scaling factors:\n";
+    auto original_flags = _console.flags();
+    auto original_precision = _console.precision();
+    _console.unsetf(std::ios_base::floatfield);
+    _console.precision(6);
+
+    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+    {
+      auto & field_variable = *field_variables[i];
+      _console << "  " << field_variable.name() << ": " << 1.0 / inverse_scaling_factors[i] << "\n";
+    }
+    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+    {
+      auto & scalar_variable = *scalar_variables[i];
+      _console << "  " << scalar_variable.name() << ": "
+               << 1.0 / inverse_scaling_factors[offset + i] << "\n";
+    }
+    _console << "\n\n";
+
+    // restore state
+    _console.flags(original_flags);
+    _console.precision(original_precision);
+  }
+
+  // Now set the scaling factors for the variables
+  applyScalingFactors(inverse_scaling_factors);
+  if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
+    displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
 }

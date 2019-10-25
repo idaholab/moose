@@ -2,7 +2,7 @@
   [./rom]
     issues = '#14046'
     design = 'ADLAROMANCEStressUpdateBase.md'
-    requirement = 'The system shall compute a creep rate based on a reduced order model in:'
+    requirement = 'The system shall compute a creep rate based on a reduced order model in'
     [./3d]
       type = 'CSVDiff'
       input = '3d.i'
@@ -16,7 +16,7 @@
       input = '3d.i'
       prereq = 'rom/3d'
       method = 'opt'
-      ratio_tol = 5e-4
+      ratio_tol = 7e-4
       cli_args = 'Executioner/num_steps=2'
       difference_tol = 1
       run_sim = True

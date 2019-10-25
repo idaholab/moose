@@ -214,12 +214,6 @@ NonlinearSystemBase::init()
 
   if (_need_residual_copy)
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
-
-  if (_automatic_scaling)
-    // We don't need libMesh to do projections since we will always be filling this vector from the
-    // diagonal of the preconditioning matrix, hence false for our second argument. We also do not
-    // need ghosting
-    _pmat_diagonal = &addVector("pmat_diagonal", false, PARALLEL);
 }
 
 void
@@ -2245,29 +2239,28 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
     auto & jacobian = getMatrix(tag);
 #ifdef LIBMESH_HAVE_PETSC
-// Necessary for speed
+    // Necessary for speed
+    if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
+    {
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
+      MatSetOption(petsc_matrix->mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(
-        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+      // In Petsc 3.0.0, MatSetOption has three args...the third arg
+      // determines whether the option is set (true) or unset (false)
+      MatSetOption(petsc_matrix->mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #else
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                 PETSC_TRUE);
-#endif
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-#else
-    if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_NEW_NONZERO_ALLOCATION_ERR,
-                   PETSC_FALSE);
-#endif
-
-#endif
+      MatSetOption(petsc_matrix->mat(),
+                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   PETSC_TRUE);
+#endif // PETSC_VERSION
+#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    }
+#endif // PETSC_VERSION
+#endif // LIBMESH_HAVE_PETSC
   }
+
   // jacobianSetup /////
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -2293,9 +2286,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
-    // We would like to compute ScalarKernels and block NodalKernels up front because we want these
-    // included whether we are computing an ordinary Jacobian or a Jacobian for determining variable
-    // scaling factors
+    // We would like to compute ScalarKernels and block NodalKernels up front because we want
+    // these included whether we are computing an ordinary Jacobian or a Jacobian for
+    // determining variable scaling factors
     computeScalarKernelsJacobians(tags);
 
     // Block restricted Nodal Kernels
@@ -2316,11 +2309,11 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
     if (_computing_scaling_jacobian)
     {
-      // Only compute Jacobians corresponding to the diagonals of volumetric compute objects because
-      // this typically gives us a good representation of the physics. NodalBCs and Constraints can
-      // introduce dramatically different scales (often order unity). IntegratedBCs and/or
-      // InterfaceKernels may use penalty factors. DGKernels may be ok, but they are almost always
-      // used in conjunction with Kernels
+      // Only compute Jacobians corresponding to the diagonals of volumetric compute objects
+      // because this typically gives us a good representation of the physics. NodalBCs and
+      // Constraints can introduce dramatically different scales (often order unity).
+      // IntegratedBCs and/or InterfaceKernels may use penalty factors. DGKernels may be ok, but
+      // they are almost always used in conjunction with Kernels
       ComputeJacobianForScalingThread cj(_fe_problem, tags);
       Threads::parallel_reduce(elem_range, cj);
       unsigned int n_threads = libMesh::n_threads();
@@ -2377,7 +2370,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
-
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
@@ -2471,8 +2463,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
 
     // reinit scalar variables again. This reinit does not re-fill any of the scalar variable
-    // solution arrays because that was done above. It only will reorder the derivative information
-    // for AD calculations to be suitable for NodalBC calculations
+    // solution arrays because that was done above. It only will reorder the derivative
+    // information for AD calculations to be suitable for NodalBC calculations
     for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
       _fe_problem.reinitScalars(tid, true);
 
@@ -2621,21 +2613,21 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(
-        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+      // In Petsc 3.0.0, MatSetOption has three args...the third arg
+      // determines whether the option is set (true) or unset (false)
+      MatSetOption(
+          static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #else
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                 PETSC_TRUE);
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   PETSC_TRUE);
 #endif
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 #else
-    if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_NEW_NONZERO_ALLOCATION_ERR,
-                   PETSC_TRUE);
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_NEW_NONZERO_ALLOCATION_ERR,
+                     PETSC_TRUE);
 #endif
 
 #endif
@@ -2686,9 +2678,8 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
             for (const auto & bc : bcs)
               if (bc->variable().number() == ivar && bc->shouldApply())
               {
-                // The first zero is for the variable number... there is only one variable in each
-                // mini-system
-                // The second zero only works with Lagrange elements!
+                // The first zero is for the variable number... there is only one variable in
+                // each mini-system The second zero only works with Lagrange elements!
                 zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
               }
           }

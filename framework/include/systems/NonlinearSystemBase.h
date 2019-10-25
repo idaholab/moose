@@ -913,8 +913,13 @@ protected:
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;
 
-  /// A vector to be filled by the preconditioning matrix diagonal
-  NumericVector<Number> * _pmat_diagonal;
+  /// Whether to automatically scale the variables
+  bool _automatic_scaling;
+
+  /// Whether the scaling factors should only be computed once at the beginning of the simulation
+  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
+  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
+  bool _compute_scaling_once;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints
@@ -936,14 +941,6 @@ private:
   std::unordered_map<std::pair<BoundaryID, BoundaryID>,
                      ComputeMortarFunctor<ComputeStage::JACOBIAN>>
       _displaced_mortar_jacobian_functors;
-
-  /// Whether to automatically scale the variables
-  bool _automatic_scaling;
-
-  /// Whether the scaling factors should only be computed once at the beginning of the simulation
-  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
-  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
-  bool _compute_scaling_once;
 
 #ifndef MOOSE_SPARSE_AD
   /// The required size of the derivative storage array

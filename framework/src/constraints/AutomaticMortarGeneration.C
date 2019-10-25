@@ -210,12 +210,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     Elem * current_mortar_segment = nullptr;
     for (const auto & mortar_segment_candidate : mortar_segment_set)
     {
-      // Test whether new_pt lies in the element by checking
-      // whether the sum of the distances from the endpoints to
-      // the new point is approximately equal to the distance
-      // between the endpoints.
-      Point a = mortar_segment_candidate->point(0), b = mortar_segment_candidate->point(1);
-      if (std::abs((a - new_pt).norm() + (b - new_pt).norm() - (b - a).norm()) < TOLERANCE)
+      MortarSegmentInfo * info;
+      try
+      {
+        info = &msm_elem_to_info.at(mortar_segment_candidate);
+      }
+      catch (std::out_of_range &)
+      {
+        mooseError("MortarSegmentInfo not found for the mortar segment candidate");
+      }
+      if (info->xi1_a < xi1 && xi1 < info->xi1_b)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;
