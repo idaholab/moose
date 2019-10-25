@@ -34,7 +34,8 @@
   using ADMaterial<compute_stage>::_mesh;                                                          \
   using ADMaterial<compute_stage>::isBoundaryMaterial;                                             \
   using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
-  using ADMaterial<compute_stage>::_displacements
+  using ADMaterial<compute_stage>::_displacements;                                                 \
+  using ADMaterial<compute_stage>::getPostprocessorValueOld
 
 // forward declarations
 template <ComputeStage>
