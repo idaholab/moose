@@ -32,6 +32,8 @@ class ADKernelGradTempl : public ADKernelTempl<T, compute_stage>
 public:
   ADKernelGradTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeADOffDiagJacobian() override;

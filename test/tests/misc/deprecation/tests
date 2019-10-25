@@ -27,7 +27,7 @@
     type = 'RunException'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=ExpiredKernel'
-    expect_err = 'ERROR.*Expired on Mon Jan'
+    expect_err = 'ERROR.*Deprecated code'
     allow_deprecated = False
 
     requirement = 'The system shall produce an error when the --no-deprecated-flag is passed and deprecated code is executed.'

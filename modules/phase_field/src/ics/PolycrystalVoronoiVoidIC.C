@@ -19,7 +19,7 @@
 InputParameters
 PolycrystalVoronoiVoidIC::actionParameters()
 {
-  InputParameters params = validParams<MultiSmoothCircleIC>();
+  InputParameters params = ::validParams<MultiSmoothCircleIC>();
 
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
 

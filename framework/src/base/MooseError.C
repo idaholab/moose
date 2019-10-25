@@ -15,6 +15,7 @@
 
 namespace moose
 {
+
 namespace internal
 {
 
@@ -33,7 +34,7 @@ std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color)
 {
   std::ostringstream oss;
-  oss << "\n\n" << color << "\n\n" << title << "\n" << msg << COLOR_DEFAULT << "\n\n";
+  oss << "\n" << color << "\n" << title << "\n" << msg << COLOR_DEFAULT << "\n";
   return oss.str();
 }
 
@@ -66,7 +67,7 @@ mooseErrorRaw(std::string msg, const std::string prefix)
   }
 
   oss.str("");
-  if (libMesh::global_n_processors() == 1)
+  if (Moose::show_trace && libMesh::global_n_processors() == 1)
     print_trace(oss);
 
   msg = oss.str();

@@ -44,9 +44,11 @@ GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameter
 void
 GeneralizedPlaneStrain::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); ++_i)
-    re(_i) += _gps.returnResidual(_scalar_var_id);
+  prepareVectorTag(_assembly, _var.number());
+  for (_i = 0; _i < _local_re.size(); ++_i)
+    _local_re(_i) += _gps.returnResidual(_scalar_var_id);
+
+  accumulateTaggedLocalResidual();
 }
 
 /**
@@ -57,7 +59,9 @@ GeneralizedPlaneStrain::computeResidual()
 void
 GeneralizedPlaneStrain::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); ++_i)
-    ke(_i, _i) += _gps.returnJacobian(_scalar_var_id);
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
+  for (_i = 0; _i < _local_ke.m(); ++_i)
+    _local_ke(_i, _i) += _gps.returnJacobian(_scalar_var_id);
+
+  accumulateTaggedLocalMatrix();
 }

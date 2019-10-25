@@ -46,16 +46,6 @@
     issues = "#10093"
     design = "PorousFlowAddMaterialJoiner.md"
   [../]
-  [./addjoiner_exception]
-    type = RunException
-    input = addjoiner_exception.i
-    expect_err = 'PorousFlowJoiner materials are no longer required in the input file'
-    cli_args = --error-deprecated
-    threading = '!pthreads'
-    requirement = "The system shall produce an error when attempting to add materials to the simulation when using the PorousFlowFullySaturated Action and the --error-deprecated flag is also supplied."
-    issues = "#10093"
-    design = "PorousFlowAddMaterialJoiner.md"
-  [../]
   [./addmaterials]
     type = RunApp
     input = addmaterials.i

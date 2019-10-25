@@ -11,13 +11,19 @@
 
 registerADMooseObject("MooseApp", ADVectorDiffusion);
 
-defineADValidParams(
-    ADVectorDiffusion,
-    ADVectorKernel,
-    params.addClassDescription(
-        "The Laplacian operator ($-\\nabla \\cdot \\nabla \\vec{u}$), with the weak "
-        "form of $(\\nabla \\vec{\\phi_i}, \\nabla \\vec{u_h})$. The Jacobian is computed using "
-        "automatic differentiation"););
+defineADLegacyParams(ADVectorDiffusion);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADVectorDiffusion<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorKernel<compute_stage>::validParams();
+  params.addClassDescription(
+      "The Laplacian operator ($-\\nabla \\cdot \\nabla \\vec{u}$), with the weak "
+      "form of $(\\nabla \\vec{\\phi_i}, \\nabla \\vec{u_h})$. The Jacobian is computed using "
+      "automatic differentiation");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADVectorDiffusion<compute_stage>::ADVectorDiffusion(const InputParameters & parameters)

@@ -13,18 +13,23 @@
 
 registerADMooseObject("MooseApp", ADBodyForce);
 
-defineADValidParams(
-    ADBodyForce,
-    ADKernelValue,
-    params.addClassDescription(
-        "Demonstrates the multiple ways that scalar values can be introduced "
-        "into kernels, e.g. (controllable) constants, functions, and "
-        "postprocessors. Implements the weak form $(\\psi_i, -f)$.");
-    params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
-    params.addParam<FunctionName>("function", "1", "A function that describes the body force");
-    params.addParam<PostprocessorName>(
-        "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
-    params.declareControllable("value"););
+defineADLegacyParams(ADBodyForce);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADBodyForce<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription("Demonstrates the multiple ways that scalar values can be introduced "
+                             "into kernels, e.g. (controllable) constants, functions, and "
+                             "postprocessors. Implements the weak form $(\\psi_i, -f)$.");
+  params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
+  params.addParam<FunctionName>("function", "1", "A function that describes the body force");
+  params.addParam<PostprocessorName>(
+      "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
+  params.declareControllable("value");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADBodyForce<compute_stage>::ADBodyForce(const InputParameters & parameters)

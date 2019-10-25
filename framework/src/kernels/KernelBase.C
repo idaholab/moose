@@ -17,17 +17,18 @@
 
 #include "libmesh/threads.h"
 
-template <>
+defineLegacyParams(KernelBase);
+
 InputParameters
-validParams<KernelBase>()
+KernelBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<RandomInterface>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<MaterialPropertyInterface>();
-  params += validParams<TaggingInterface>();
+  auto params = MooseObject::validParams();
+  params += ::validParams<TransientInterface>();
+  params += ::validParams<BlockRestrictable>();
+  params += ::validParams<RandomInterface>();
+  params += ::validParams<MeshChangedInterface>();
+  params += ::validParams<MaterialPropertyInterface>();
+  params += ::validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");

@@ -54,6 +54,8 @@ public:
 
   virtual ~MooseObject() = default;
 
+  static InputParameters validParams();
+
   /**
    * Get the type of this object.
    * @return the name of the type of this object
@@ -212,7 +214,9 @@ template <typename... Args>
 [[noreturn]] void
 MooseObject::paramError(const std::string & param, Args... args) const
 {
+  Moose::show_trace = false;
   mooseError(paramErrorMsg(param, std::forward<Args>(args)...));
+  Moose::show_trace = true;
 }
 
 template <typename... Args>
