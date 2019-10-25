@@ -17,7 +17,7 @@ class CZMInterfaceKernel;
 template <>
 InputParameters validParams<CZMInterfaceKernel>();
 
-/// DG kernel implementing CZM for a 3D traction sepration law based on
+/// DG kernel implementing CZM for a 1D/2D/3D traction sepration law based on
 /// the displacement jump. This kernel operates only on a single displacement
 /// compenent. One kernel is needed for each dispalcement jump component
 class CZMInterfaceKernel : public InterfaceKernel
@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
   /// the displacement component this kernel is operating on (0=x, 1=y, 2 =z)
-  const unsigned int _disp_index;
+  const unsigned int _component;
 
   /// number of displacement components
   const unsigned int _ndisp;
@@ -40,7 +40,7 @@ protected:
   std::vector<unsigned int> _disp_var;
   std::vector<unsigned int> _disp_neighbor_var;
 
-  // values of the residual's and jacobian's cofficients
+  // values of the traction and traction derivatives used
   const MaterialProperty<RealVectorValue> & _traction;
   const MaterialProperty<RankTwoTensor> & _traction_derivative;
 };

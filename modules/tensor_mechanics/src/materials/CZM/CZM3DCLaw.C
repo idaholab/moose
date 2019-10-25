@@ -7,65 +7,69 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CZM_3DCMaterial.h"
+#include "CZM3DCLaw.h"
 
-registerMooseObject("TensorMechanicsApp", CZM_3DCMaterial);
+registerMooseObject("TensorMechanicsApp", CZM3DCLaw);
 
 template <>
 InputParameters
-validParams<CZM_3DCMaterial>()
+validParams<CZM3DCLaw>()
 {
   InputParameters params = validParams<CZMMaterialBase>();
   params.addClassDescription("3DC cohseive law model, no damage");
-  params.addRequiredParam<std::vector<Real>>(
-      "DeltaU0",
-      "a vector containing the displacement value at which maximum"
-      " traction occurs for the normal(1st) and tangential(2nd) "
-      " direction.");
-  params.addRequiredParam<std::vector<Real>>("MaxAllowableTraction",
-                                             "a vector containing the maximum allowed traction"
-                                             "for the normal(1st) and tangential(2nd) direction.");
+  params.addRequiredParam<Real>(
+      "normal_gap_at_maximum_normal_traction",
+      "the value of normal gap at which maximum normal traction is achieved");
+  params.addRequiredParam<Real>(
+      "tangential_gap_at_maximum_shear_traction",
+      "the value of tangential gap at which maximum shear traction is achieved");
+  params.addRequiredParam<Real>("maximum_normal_traction",
+                                "The maximum normal traction the interface can sustain");
+  params.addRequiredParam<Real>("maximum_shear_traction",
+                                "The maximum shear traction the interface can sustain");
   params.addClassDescription("Simple Exponential cohseive law model, with damage");
   return params;
 }
 
-CZM_3DCMaterial::CZM_3DCMaterial(const InputParameters & parameters)
-  : CZMMaterialBase(parameters),
-    _deltaU0(getParam<std::vector<Real>>("DeltaU0")),
-    _maxAllowableTraction(getParam<std::vector<Real>>("MaxAllowableTraction"))
-
+CZM3DCLaw::CZM3DCLaw(const InputParameters & parameters)
+  : CZMMaterialBase(parameters), _deltaU0(3, 0), _maxAllowableTraction(3, 0)
 {
-  // check inputs
-  if (_deltaU0.size() != 2)
-    mooseError("CZMLaw3DC: the parameter DeltaU0 requires 2 components, " +
-               std::to_string(_deltaU0.size()) + " provided.");
-  if (_maxAllowableTraction.size() != 2)
-    mooseError("CZMLaw3DC: the parameter MaxAllowableTraction"
-               "requires 2 components," +
-               std::to_string(_maxAllowableTraction.size()) + " provided.");
 
-  // copying component 2 of _deltaU0 and _maxAllowableTraction to ease
-  // calculations
-  const_cast<std::vector<Real> &>(_deltaU0).push_back(_deltaU0[1]);
-  const_cast<std::vector<Real> &>(_maxAllowableTraction).push_back(_maxAllowableTraction[1]);
+  const_cast<std::vector<Real> &>(_deltaU0)[0] =
+      getParam<Real>("normal_gap_at_maximum_normal_traction");
+  const_cast<std::vector<Real> &>(_maxAllowableTraction)[0] =
+      getParam<Real>("maximum_normal_traction");
+
+  for (unsigned int i = 1; i < 3; i++)
+  {
+    const_cast<std::vector<Real> &>(_deltaU0)[i] =
+        getParam<Real>("tangential_gap_at_maximum_shear_traction") * std::sqrt(2);
+    const_cast<std::vector<Real> &>(_maxAllowableTraction)[i] =
+        getParam<Real>("maximum_shear_traction");
+  }
+  // const_cast<std::vector<Real> &>(_deltaU0).push_back(_deltaU0[1]);
+  // const_cast<std::vector<Real> &>(_maxAllowableTraction).push_back(_maxAllowableTraction[1]);
 }
 
 RealVectorValue
-CZM_3DCMaterial::computeLocalTraction() const
+CZM3DCLaw::computeTraction()
 {
   RealVectorValue traction_local;
 
+  // just a temporaty container for auxiliary calcualtions
+  Real aa;
+
   // convention N, T, S
-  Real temp, X, expX, A_i, B_i;
+  Real X, expX, A_i, B_i;
 
   X = 0;
   for (unsigned int i = 0; i < 3; i++)
   {
-    temp = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    aa = _displacement_jump_local[_qp](i) / _deltaU0[i];
     if (i > 0)
-      temp *= temp; // square for shear component
+      aa *= aa; // square for shear component
 
-    X += temp;
+    X += aa;
   }
 
   expX = std::exp(-X);
@@ -74,11 +78,11 @@ CZM_3DCMaterial::computeLocalTraction() const
   {
 
     if (i == 0)
-      temp = std::exp(1);
+      aa = std::exp(1);
     else
-      temp = std::sqrt(2 * std::exp(1));
+      aa = std::sqrt(2 * std::exp(1));
 
-    A_i = _maxAllowableTraction[i] * temp;
+    A_i = _maxAllowableTraction[i] * aa;
     B_i = _displacement_jump_local[_qp](i) / _deltaU0[i];
 
     traction_local(i) = A_i * B_i * expX;
@@ -88,7 +92,7 @@ CZM_3DCMaterial::computeLocalTraction() const
 }
 
 RankTwoTensor
-CZM_3DCMaterial::computeLocalTractionDerivatives() const
+CZM3DCLaw::computeTractionDerivatives()
 {
   RankTwoTensor traction_spatial_derivatives_local;
 
@@ -104,19 +108,22 @@ CZM_3DCMaterial::computeLocalTractionDerivatives() const
   // dTi_duj = A_i * ( dBi_duj * exp(-X) + B_i * exp(-X) * dX_duj  )
   //         = A_i * ( exp(-X) * (dBi_duj + B_i * dX_duj ) )
 
+  // just a temporaty container for auxiliary calcualtions
+  Real aa;
+
   // convention N, T, S
   unsigned int i, j;
-  Real expX, temp, X;
+  Real expX, X;
 
   // compute X and the exponential term
-  temp = 0;
+  aa = 0;
   X = 0;
   for (i = 0; i < 3; i++)
   {
-    temp = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    aa = _displacement_jump_local[_qp](i) / _deltaU0[i];
     if (i > 0)
-      temp *= temp;
-    X += temp;
+      aa *= aa;
+    X += aa;
   }
   expX = std::exp(-X);
 

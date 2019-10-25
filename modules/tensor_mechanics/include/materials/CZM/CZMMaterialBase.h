@@ -24,13 +24,21 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  /// normal to the interface
   const MooseArray<Point> & _normals;
+
+  /// number of displacement components
   const unsigned int _ndisp;
+
+  /// the coupled displacement and neighbor displacement values
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableValue *> _disp_neighbor;
 
-  virtual RealVectorValue computeLocalTraction() const = 0;
-  virtual RankTwoTensor computeLocalTractionDerivatives() const = 0;
+  /// method returning the traction in local coordinates
+  virtual RealVectorValue computeTraction() = 0;
+
+  /// method returning the traction derivitaves wrt to local coordinates
+  virtual RankTwoTensor computeTractionDerivatives() = 0;
 
   /// the dispalcement jump in global coordiantes
   MaterialProperty<RealVectorValue> & _displacement_jump;

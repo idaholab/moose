@@ -22,9 +22,4 @@ public:
   CohesiveZoneModelAction(const InputParameters & params);
 
   void act() override;
-
-protected:
-  const std::vector<VariableName> _displacements;
-  const unsigned int _ndisp;
-  const std::vector<BoundaryName> _boundary_names;
 };

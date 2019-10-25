@@ -1,6 +1,6 @@
 # CZM 3DC traction separation law
 
-!syntax description /Materials/CZM_3DCMaterial
+!syntax description /Materials/CZM3DCLaw
 
 ##Description
 
@@ -31,8 +31,8 @@ note that the above parameters accept only two values: one for the opening direc
 !listing modules/tensor_mechanics/test/tests/CZM/czm_3DC_load_complex.i block=Materials/czm_3dc
 
 
-!syntax parameters /Materials/CZM_3DCMaterial
+!syntax parameters /Materials/CZM3DCLaw
 
-!syntax inputs /Materials/CZM_3DCMaterial
+!syntax inputs /Materials/CZM3DCLaw
 
-!syntax children /Materials/CZM_3DCMaterial
+!syntax children /Materials/CZM3DCLaw

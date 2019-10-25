@@ -39,19 +39,14 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
     _traction_spatial_derivatives_local(
         declareProperty<RankTwoTensor>("traction_spatial_derivatives_local"))
 {
-  if (_ndisp > 3 || _ndisp < 2)
-    mooseError("the CZM material requires 2 or 3 disaplcment variables");
+  if (_ndisp > 3 || _ndisp < 1)
+    mooseError("the CZM material requires 1, 2 or 3 dispalcment variables");
 
   // intializing disaplcement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp[i] = &coupledValue("displacements", i);
     _disp_neighbor[i] = &coupledNeighborValue("displacements", i);
-  }
-  for (unsigned int i = _ndisp; i < 3; ++i)
-  {
-    _disp[i] = &_zero;
-    _disp_neighbor[i] = &_zero;
   }
 }
 
@@ -62,14 +57,22 @@ CZMMaterialBase::computeQpProperties()
   RealTensorValue RotationGlobal2Local =
       RotationMatrix::rotVec1ToVec2(_normals[_qp], RealVectorValue(1, 0, 0));
 
-  for (unsigned int i = 0; i < 3; i++)
+  // computing the actual displacemnt jump
+  for (unsigned int i = 0; i < _ndisp; i++)
     _displacement_jump[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
+  for (unsigned int i = _ndisp; i < 3; i++)
+    _displacement_jump[_qp](i) = 0;
 
+  // rotate the disaplcement jump to local coordiante system
   _displacement_jump_local[_qp] = rotateVector(_displacement_jump[_qp], RotationGlobal2Local);
 
-  _traction_local[_qp] = computeLocalTraction();
-  _traction_spatial_derivatives_local[_qp] = computeLocalTractionDerivatives();
+  // compute local traction
+  _traction_local[_qp] = computeTraction();
 
+  // compute local traction derivatives wrt to the displacement jump
+  _traction_spatial_derivatives_local[_qp] = computeTractionDerivatives();
+
+  // rotate local traction and derivatives to the global reference
   _traction[_qp] = rotateVector(_traction_local[_qp], RotationGlobal2Local, /*inverse =*/true);
   _traction_spatial_derivatives[_qp] = rotateTensor2(
       _traction_spatial_derivatives_local[_qp], RotationGlobal2Local, /*inverse =*/true);

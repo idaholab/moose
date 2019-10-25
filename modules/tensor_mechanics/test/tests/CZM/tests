@@ -9,29 +9,29 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_shear_x]
     type = Exodiff
     input = czm_3DC_load_shear_x.i
     exodiff = czm_3DC_load_shear_x_out.e
     issues = '#11546'
-    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.7/sqrt(2)=0.494974746830583'
+    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.5'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_shear_y]
     type = Exodiff
     input = czm_3DC_load_shear_y.i
     exodiff = czm_3DC_load_shear_y_out.e
     issues = '#11546'
-    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.7/sqrt(2)=0.494974746830583'
+    requirement = 'This tests a simple exponential cohesive law. The max theoretical' 'traction value of 70 MPa should occur at a tangential displacement' 'Du_y=0.5'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_complex]
     type = Exodiff
@@ -42,7 +42,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_Normal_Action]
     type = Exodiff
@@ -54,7 +54,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_complex_Action]
     type = Exodiff
@@ -65,7 +65,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_Normal_2D]
     type = Exodiff
@@ -76,7 +76,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_Normal_2D_Action]
     type = Exodiff
@@ -87,6 +87,28 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM_3DCMaterial.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+  [../]
+  [./czm_3DC_load_Normal_1D]
+    type = Exodiff
+    input = czm_3DC_load_only_normal_1D.i
+    exodiff = czm_3DC_load_only_normal_1D_out.e
+    issues = '#11546'
+    requirement = 'This test checks that the cohesive model can work also with a 1D mesh.'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
+  [../]
+  [./czm_3DC_load_Normal_1D_Action]
+    type = Exodiff
+    input = czm_3DC_load_only_normal_1D_Action.i
+    exodiff = czm_3DC_load_only_normal_1D_Action_out.e
+    issues = '#11546'
+    requirement = 'This test checks that the cohesive model can work also with a 1D mesh.'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+    design = 'source/materials/CZM/CZM3DCLaw.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
 []

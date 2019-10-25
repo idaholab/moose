@@ -81,10 +81,12 @@
     block = '1 2'
   [../]
   [./czm_3dc]
-    type = CZM_3DCMaterial
+    type = CZM3DCLaw
     boundary = 'interface'
-    MaxAllowableTraction = '100 70'
-    DeltaU0 = '1 0.7'
+    normal_gap_at_maximum_normal_traction = 1
+    tangential_gap_at_maximum_shear_traction = 0.5
+    maximum_normal_traction = 100
+    maximum_shear_traction = 70
     displacements = 'disp_x disp_y'
   [../]
 []

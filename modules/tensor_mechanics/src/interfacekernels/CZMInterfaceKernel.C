@@ -16,12 +16,12 @@ InputParameters
 validParams<CZMInterfaceKernel>()
 {
   InputParameters params = validParams<InterfaceKernel>();
-  params.addRequiredParam<unsigned int>("disp_index",
+  params.addRequiredParam<unsigned int>("component",
                                         "the component of the "
                                         "displacement vector this kernel is working on:"
-                                        " disp_index == 0, ==> X"
-                                        " disp_index == 1, ==> Y"
-                                        " disp_index == 2, ==> Z");
+                                        " component == 0, ==> X"
+                                        " component == 1, ==> Y"
+                                        " component == 2, ==> Z");
 
   params.addRequiredCoupledVar("displacements", "the string containing dispalcement variables");
 
@@ -33,12 +33,10 @@ validParams<CZMInterfaceKernel>()
 
 CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
   : InterfaceKernel(parameters),
-    _disp_index(getParam<unsigned int>("disp_index")),
+    _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _disp_neighbor_var(_ndisp),
-    // residual and jacobian coefficients are material properties and represents
-    // the residual and jacobain of the traction sepration law wrt the displacement jump.
     _traction(getMaterialPropertyByName<RealVectorValue>("traction")),
     _traction_derivative(getMaterialPropertyByName<RankTwoTensor>("traction_spatial_derivatives"))
 {
@@ -59,7 +57,7 @@ Real
 CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 {
 
-  Real r = _traction[_qp](_disp_index);
+  Real r = _traction[_qp](_component);
 
   switch (type)
   {
@@ -81,28 +79,26 @@ Real
 CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 {
   // retrieve the diagonal jacobain coefficient dependning on the disaplcement
-  // component (_disp_index) this kernel is working on
-  Real jac = _traction_derivative[_qp](_disp_index, _disp_index);
+  // component (_component) this kernel is working on
+  Real jac = _traction_derivative[_qp](_component, _component);
 
   switch (type)
   {
-    // (1) and (-1) terms in parenthesis are the derivatives of \deltaU with respect to slave and
-    // master variables to make the code easier to understand the trailing + and - signs are
-    // inherited directly from the reidual equation
-    case Moose::ElementElement:
-      jac *= -_test[_i][_qp] * _phi[_j][_qp] * (-1);
+
+    case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
+      jac *= _test[_i][_qp] * _phi[_j][_qp];
       break;
 
-    case Moose::ElementNeighbor:
-      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
+    case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
+      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
 
-    case Moose::NeighborElement:
-      jac *= _test_neighbor[_i][_qp] * _phi[_j][_qp] * (-1);
+    case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
+      jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
       break;
 
-    case Moose::NeighborNeighbor:
-      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
+    case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
+      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
   }
 
@@ -122,30 +118,25 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
   mooseAssert(off_diag_component < _ndisp,
               "CZMInterfaceKernel::computeQpOffDiagJacobian wrong offdiagonal variable");
 
-  Real jac = _traction_derivative[_qp](_disp_index, off_diag_component);
+  Real jac = _traction_derivative[_qp](_component, off_diag_component);
 
   switch (type)
   {
-    // (1) and (-1) terms in parenthesis are the derivatives of \deltaU with respect to slave and
-    // master variables
-    case Moose::ElementElement:
-      jac *= -_test[_i][_qp] * _phi[_j][_qp] * (-1);
+
+    case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
+      jac *= _test[_i][_qp] * _phi[_j][_qp];
       break;
 
-    case Moose::ElementNeighbor:
-      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
+    case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
+      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
 
-    case Moose::NeighborElement:
-      jac *= _test_neighbor[_i][_qp] * _phi[_j][_qp] * (-1);
+    case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
+      jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
       break;
 
-    case Moose::NeighborNeighbor:
+    case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
       jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
-      break;
-
-    default:
-      mooseError("unknown type of jacobian");
       break;
   }
   return jac;

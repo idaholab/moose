@@ -10,20 +10,21 @@
 #pragma once
 
 #include "CZMMaterialBase.h"
-class CZM_3DCMaterial;
+class CZM3DCLaw;
 template <>
-InputParameters validParams<CZM_3DCMaterial>();
+InputParameters validParams<CZM3DCLaw>();
 /**
- *
- */
-class CZM_3DCMaterial : public CZMMaterialBase
+ * Implementation of a simple non-stateful exponential traction separetion law
+ * Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
+ **/
+class CZM3DCLaw : public CZMMaterialBase
 {
 public:
-  CZM_3DCMaterial(const InputParameters & parameters);
+  CZM3DCLaw(const InputParameters & parameters);
 
 protected:
-  virtual RealVectorValue computeLocalTraction() const override;
-  virtual RankTwoTensor computeLocalTractionDerivatives() const override;
+  virtual RealVectorValue computeTraction() override;
+  virtual RankTwoTensor computeTractionDerivatives() override;
 
   const std::vector<Real> _deltaU0;
   const std::vector<Real> _maxAllowableTraction;

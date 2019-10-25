@@ -105,7 +105,7 @@
     variable = disp_x
     neighbor_var = disp_x
     displacements = 'disp_x disp_y disp_z'
-    disp_index = 0
+    component = 0
     boundary = 'interface'
   [../]
   [./interface_y]
@@ -113,14 +113,14 @@
     variable = disp_y
     neighbor_var = disp_y
     displacements = 'disp_x disp_y disp_z'
-    disp_index = 1
+    component = 1
     boundary = 'interface'
   [../]
   [./interface_z]
     type = CZMInterfaceKernel
     variable = disp_z
     neighbor_var = disp_z
-    disp_index = 2
+    component = 2
     displacements = 'disp_x disp_y disp_z'
     boundary = 'interface'
   [../]
@@ -138,10 +138,12 @@
     block = '1 2 3'
   [../]
   [./czm_3dc]
-    type = CZM_3DCMaterial
+    type = CZM3DCLaw
     boundary = 'interface'
-    MaxAllowableTraction = '100 70'
-    DeltaU0 = '1 0.7'
+    normal_gap_at_maximum_normal_traction = 1
+    tangential_gap_at_maximum_shear_traction = 0.5
+    maximum_normal_traction = 100
+    maximum_shear_traction = 70
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -173,7 +175,6 @@
 [Outputs]
   [./out]
     type = Exodus
-    sync_times = 0.494974746830583
   [../]
 []
 

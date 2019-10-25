@@ -31,13 +31,7 @@ validParams<CohesiveZoneModelAction>()
   return params;
 }
 
-CohesiveZoneModelAction::CohesiveZoneModelAction(const InputParameters & params)
-  : Action(params),
-    _displacements(getParam<std::vector<VariableName>>("displacements")),
-    _ndisp(_displacements.size()),
-    _boundary_names(getParam<std::vector<BoundaryName>>("boundary"))
-{
-}
+CohesiveZoneModelAction::CohesiveZoneModelAction(const InputParameters & params) : Action(params) {}
 
 void
 CohesiveZoneModelAction::act()
@@ -50,22 +44,22 @@ CohesiveZoneModelAction::act()
 
   if (_current_task == "add_interface_kernel")
   {
-    // Create pressure BCs
     for (unsigned int i = 0; i < displacements.size(); ++i)
     {
       // Create unique kernel name for each of the components
       std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
-      InputParameters params = _factory.getValidParams(kernel_name);
+      InputParameters paramsk = _factory.getValidParams(kernel_name);
 
-      params.set<bool>("use_displaced_mesh") = false;
-      params.set<unsigned int>("disp_index") = i;
-      params.set<NonlinearVariableName>("variable") = displacements[i];
-      params.set<std::vector<VariableName>>("neighbor_var") = {displacements[i]};
-      params.set<std::vector<VariableName>>("displacements") = _displacements;
-      params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
+      paramsk.set<bool>("use_displaced_mesh") = false;
+      paramsk.set<unsigned int>("component") = i;
+      paramsk.set<NonlinearVariableName>("variable") = displacements[i];
+      paramsk.set<std::vector<VariableName>>("neighbor_var") = {displacements[i]};
+      paramsk.set<std::vector<VariableName>>("displacements") = displacements;
+      paramsk.set<std::vector<BoundaryName>>("boundary") =
+          getParam<std::vector<BoundaryName>>("boundary");
 
-      _problem->addInterfaceKernel(kernel_name, unique_kernel_name, params);
+      _problem->addInterfaceKernel(kernel_name, unique_kernel_name, paramsk);
     }
   }
 }
