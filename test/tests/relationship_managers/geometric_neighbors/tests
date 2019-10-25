@@ -4,6 +4,7 @@
   [./geometric_edge_neighbor]
     type = 'Exodiff'
     input = 'geometric_edge_neighbors.i'
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     exodiff = 'geometric_edge_neighbors_out.e'
     petsc_version = '>3.8'
 
@@ -16,10 +17,9 @@
   [./geometric_edge_neighbor_3D]
     type = 'Exodiff'
     input = 'geometric_edge_neighbors.i'
-    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_neighbors_3D_out'
+    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_neighbors_3D_out Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     exodiff = 'geometric_edge_neighbors_3D_out.e'
     petsc_version = '>3.8'
-    platform = 'DARWIN'
 
     min_parallel = 3
     max_parallel = 3
