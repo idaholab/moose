@@ -148,9 +148,13 @@ ADComputeFiniteStrain<compute_stage>::computeQpIncrements(ADRankTwoTensor & tota
       const auto p = trFhatinv_1 * trFhatinv_1 / 4.0;
 
       // cos theta_a
-      const auto C1 =
-          std::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
-                    2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
+      const ADReal C1_squared =
+          p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
+          2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q);
+      mooseAssert(C1_squared >= 0.0,
+                  "Cannot take square root of a negative number. This may happen when elements "
+                  "become heavily distorted.");
+      const ADReal C1 = std::sqrt(C1_squared);
 
       ADReal C2;
       if (q > 0.01)
@@ -166,9 +170,12 @@ ADComputeFiniteStrain<compute_stage>::computeQpIncrements(ADRankTwoTensor & tota
                   5.0 * Utility::pow<4>(p)) /
                  (512.0 * Utility::pow<4>(p));
 
-      const auto C3 =
-          0.5 * std::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
-                          Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
+      const ADReal C3_test =
+          (p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) / Utility::pow<3>(p + q);
+      mooseAssert(C3_test >= 0.0,
+                  "Cannot take square root of a negative number. This may happen when elements "
+                  "become heavily distorted.");
+      const ADReal C3 = 0.5 * std::sqrt(C3_test); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
       // 93, so we transpose it before storing
