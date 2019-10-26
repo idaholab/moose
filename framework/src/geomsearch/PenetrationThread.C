@@ -128,7 +128,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
-        const std::vector<Point> slave_pos = fe_side->get_xyz();
+        const std::vector<Point> & slave_pos = fe_side->get_xyz();
 
         // Prerequest other data we'll need in findContactPoint
         fe_side->get_phi();
