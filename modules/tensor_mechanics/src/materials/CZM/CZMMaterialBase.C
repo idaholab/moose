@@ -64,7 +64,7 @@ CZMMaterialBase::computeQpProperties()
     _displacement_jump_global[_qp](i) = 0;
 
   // rotate the disaplcement jump to local coordiante system
-  _displacement_jump[_qp] = rotateVector(_displacement_jump_global[_qp], RotationGlobal2Local);
+  _displacement_jump[_qp] = RotationGlobal2Local * _displacement_jump_global[_qp];
 
   // compute local traction_global
   _traction[_qp] = computeTraction();
@@ -73,33 +73,7 @@ CZMMaterialBase::computeQpProperties()
   _traction_spatial_derivatives[_qp] = computeTractionDerivatives();
 
   // rotate local traction_global and derivatives to the global reference
-  _traction_global[_qp] = rotateVector(_traction[_qp], RotationGlobal2Local, /*inverse =*/true);
-  _traction_spatial_derivatives_global[_qp] =
-      rotateTensor2(_traction_spatial_derivatives[_qp], RotationGlobal2Local, /*inverse =*/true);
-}
-
-RealVectorValue
-CZMMaterialBase::rotateVector(const RealVectorValue v,
-                              const RealTensorValue R,
-                              const bool inverse /*= false*/)
-{
-  RealTensorValue R_loc = R;
-  if (inverse)
-    R_loc = R_loc.transpose();
-
-  return R_loc * v;
-}
-
-RankTwoTensor
-CZMMaterialBase::rotateTensor2(const RankTwoTensor T,
-                               const RealTensorValue R,
-                               const bool inverse /*= false*/)
-{
-  RealTensorValue R_loc = R;
-  if (inverse)
-    R_loc = R_loc.transpose();
-
-  RankTwoTensor trot = T;
-  trot.rotate(R_loc);
-  return trot;
+  _traction_global[_qp] = RotationGlobal2Local.transpose() * _traction[_qp];
+  _traction_spatial_derivatives_global[_qp] = _traction_spatial_derivatives[_qp];
+  _traction_spatial_derivatives_global[_qp].rotate(RotationGlobal2Local.transpose());
 }

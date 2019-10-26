@@ -65,15 +65,4 @@ protected:
 
   /// the value of the traction derivatives in natural element coordiantes
   MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives;
-
-  /// Rotate a vector "T" via the rotation matrix "R".
-  /// inverse rotation is achieved by setting "inverse" = true
-  RealVectorValue rotateVector(const RealVectorValue /*V*/,
-                               const RealTensorValue /*R*/,
-                               const bool inverse = false);
-
-  /// Rotate a rank2 tensor "T" via the rotation matrix "R".
-  /// inverse rotation is achieved by setting "inverse" = true
-  RankTwoTensor
-  rotateTensor2(const RankTwoTensor /*T*/, const RealTensorValue /*R*/, const bool inverse = false);
 };
