@@ -31,13 +31,13 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
     _ndisp(coupledComponents("displacements")),
     _disp(_ndisp),
     _disp_neighbor(_ndisp),
+    _displacement_jump_global(declareProperty<RealVectorValue>("displacement_jump_global")),
     _displacement_jump(declareProperty<RealVectorValue>("displacement_jump")),
-    _displacement_jump_local(declareProperty<RealVectorValue>("displacement_jump_local")),
+    _traction_global(declareProperty<RealVectorValue>("traction_global")),
     _traction(declareProperty<RealVectorValue>("traction")),
-    _traction_local(declareProperty<RealVectorValue>("traction_local")),
-    _traction_spatial_derivatives(declareProperty<RankTwoTensor>("traction_spatial_derivatives")),
-    _traction_spatial_derivatives_local(
-        declareProperty<RankTwoTensor>("traction_spatial_derivatives_local"))
+    _traction_spatial_derivatives_global(
+        declareProperty<RankTwoTensor>("traction_spatial_derivatives_global")),
+    _traction_spatial_derivatives(declareProperty<RankTwoTensor>("traction_spatial_derivatives"))
 {
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 dispalcment variables");
@@ -59,23 +59,23 @@ CZMMaterialBase::computeQpProperties()
 
   // computing the actual displacemnt jump
   for (unsigned int i = 0; i < _ndisp; i++)
-    _displacement_jump[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
+    _displacement_jump_global[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
   for (unsigned int i = _ndisp; i < 3; i++)
-    _displacement_jump[_qp](i) = 0;
+    _displacement_jump_global[_qp](i) = 0;
 
   // rotate the disaplcement jump to local coordiante system
-  _displacement_jump_local[_qp] = rotateVector(_displacement_jump[_qp], RotationGlobal2Local);
+  _displacement_jump[_qp] = rotateVector(_displacement_jump_global[_qp], RotationGlobal2Local);
 
-  // compute local traction
-  _traction_local[_qp] = computeTraction();
+  // compute local traction_global
+  _traction[_qp] = computeTraction();
 
-  // compute local traction derivatives wrt to the displacement jump
-  _traction_spatial_derivatives_local[_qp] = computeTractionDerivatives();
+  // compute local traction_global derivatives wrt to the displacement jump
+  _traction_spatial_derivatives[_qp] = computeTractionDerivatives();
 
-  // rotate local traction and derivatives to the global reference
-  _traction[_qp] = rotateVector(_traction_local[_qp], RotationGlobal2Local, /*inverse =*/true);
-  _traction_spatial_derivatives[_qp] = rotateTensor2(
-      _traction_spatial_derivatives_local[_qp], RotationGlobal2Local, /*inverse =*/true);
+  // rotate local traction_global and derivatives to the global reference
+  _traction_global[_qp] = rotateVector(_traction[_qp], RotationGlobal2Local, /*inverse =*/true);
+  _traction_spatial_derivatives_global[_qp] = rotateTensor2(
+      _traction_spatial_derivatives[_qp], RotationGlobal2Local, /*inverse =*/true);
 }
 
 RealVectorValue

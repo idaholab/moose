@@ -14,7 +14,15 @@ class CZMMaterialBase;
 template <>
 InputParameters validParams<CZMMaterialBase>();
 /**
- *
+ * This is the base Material class for implemnting traction separation laws.
+ * The respoinasbility of this class is to rotate the dispalcement jump from global to local
+ * coordinates and traction and its derivative back from local to global coordinates.
+ * Local coordaintes refernce system assume (opening, tangential1, tangential2) cooridantes order.
+ * Note that tangential1, tangential2 are arbitrry and therefore therefore the interface assume an
+ * inplane isotropic behavior. By subclassing computeTraction and computeTractionDerivatives
+ * different traction sepration laws can be implemented. CZMLaws should always be implemented in 3D
+ * even if they are going to be used in 2D or 1D simulations. This class assume small deformations
+ * and a traction sepration law being a function only of the displacement jump.
  */
 class CZMMaterialBase : public InterfaceMaterial
 {
@@ -34,29 +42,29 @@ protected:
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableValue *> _disp_neighbor;
 
-  /// method returning the traction in local coordinates
+  /// method returning the traction in the interface coordinate system.
   virtual RealVectorValue computeTraction() = 0;
 
-  /// method returning the traction derivitaves wrt to local coordinates
+  /// method returning the traction derivitaves wrt to local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() = 0;
 
   /// the dispalcement jump in global coordiantes
-  MaterialProperty<RealVectorValue> & _displacement_jump;
+  MaterialProperty<RealVectorValue> & _displacement_jump_global;
 
   /// the disaplcement jump in natural element coordiantes
-  MaterialProperty<RealVectorValue> & _displacement_jump_local;
+  MaterialProperty<RealVectorValue> & _displacement_jump;
 
   /// the value of the Traction in global coordiantes
-  MaterialProperty<RealVectorValue> & _traction;
+  MaterialProperty<RealVectorValue> & _traction_global;
 
   /// the value of the Traction in natural element coordiantes
-  MaterialProperty<RealVectorValue> & _traction_local;
+  MaterialProperty<RealVectorValue> & _traction;
 
   /// the value of the traction derivatives in global coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives;
+  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives_global;
 
   /// the value of the traction derivatives in natural element coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives_local;
+  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives;
 
   /// Rotate a vector "T" via the rotation matrix "R".
   /// inverse rotation is achieved by setting "inverse" = true

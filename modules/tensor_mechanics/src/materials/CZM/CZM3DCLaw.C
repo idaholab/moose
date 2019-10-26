@@ -65,7 +65,7 @@ CZM3DCLaw::computeTraction()
   X = 0;
   for (unsigned int i = 0; i < 3; i++)
   {
-    aa = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    aa = _displacement_jump[_qp](i) / _deltaU0[i];
     if (i > 0)
       aa *= aa; // square for shear component
 
@@ -83,7 +83,7 @@ CZM3DCLaw::computeTraction()
       aa = std::sqrt(2 * std::exp(1));
 
     A_i = _maxAllowableTraction[i] * aa;
-    B_i = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    B_i = _displacement_jump[_qp](i) / _deltaU0[i];
 
     traction_local(i) = A_i * B_i * expX;
   }
@@ -120,7 +120,7 @@ CZM3DCLaw::computeTractionDerivatives()
   X = 0;
   for (i = 0; i < 3; i++)
   {
-    aa = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    aa = _displacement_jump[_qp](i) / _deltaU0[i];
     if (i > 0)
       aa *= aa;
     X += aa;
@@ -146,7 +146,7 @@ CZM3DCLaw::computeTractionDerivatives()
     A_i *= _maxAllowableTraction[i];
 
     // compute B_i
-    B_i = _displacement_jump_local[_qp](i) / _deltaU0[i];
+    B_i = _displacement_jump[_qp](i) / _deltaU0[i];
 
     for (j = 0; j < 3; j++)
     {
@@ -160,7 +160,7 @@ CZM3DCLaw::computeTractionDerivatives()
       if (j == 0) // alpha = 1
         dX_duj = 1. / _deltaU0[j];
       else // alpha = 2
-        dX_duj = 2. * _displacement_jump_local[_qp](j) / (_deltaU0[j] * _deltaU0[j]);
+        dX_duj = 2. * _displacement_jump[_qp](j) / (_deltaU0[j] * _deltaU0[j]);
 
       traction_spatial_derivatives_local(i, j) =
           A_i * expX * (dBi_dui - B_i * dX_duj); // the minus sign is due to exp(-X)

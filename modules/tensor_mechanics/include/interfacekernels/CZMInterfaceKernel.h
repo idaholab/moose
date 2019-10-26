@@ -41,6 +41,6 @@ protected:
   std::vector<unsigned int> _disp_neighbor_var;
 
   // values of the traction and traction derivatives used
-  const MaterialProperty<RealVectorValue> & _traction;
+  const MaterialProperty<RealVectorValue> & _traction_global;
   const MaterialProperty<RankTwoTensor> & _traction_derivative;
 };

@@ -37,8 +37,9 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _disp_neighbor_var(_ndisp),
-    _traction(getMaterialPropertyByName<RealVectorValue>("traction")),
-    _traction_derivative(getMaterialPropertyByName<RankTwoTensor>("traction_spatial_derivatives"))
+    _traction_global(getMaterialPropertyByName<RealVectorValue>("traction_global")),
+    _traction_derivative(
+        getMaterialPropertyByName<RankTwoTensor>("traction_spatial_derivatives_global"))
 {
   if (!parameters.isParamValid("boundary"))
   {
@@ -57,11 +58,11 @@ Real
 CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 {
 
-  Real r = _traction[_qp](_component);
+  Real r = _traction_global[_qp](_component);
 
   switch (type)
   {
-    // [test_slave-test_master]*T where T repsents the traction.
+    // [test_slave-test_master]*T where T represents the traction.
     // the + and - signs below are in accordance with this convention
     case Moose::Element:
       r *= -_test[_i][_qp];
