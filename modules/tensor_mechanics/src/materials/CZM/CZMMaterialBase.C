@@ -74,8 +74,8 @@ CZMMaterialBase::computeQpProperties()
 
   // rotate local traction_global and derivatives to the global reference
   _traction_global[_qp] = rotateVector(_traction[_qp], RotationGlobal2Local, /*inverse =*/true);
-  _traction_spatial_derivatives_global[_qp] = rotateTensor2(
-      _traction_spatial_derivatives[_qp], RotationGlobal2Local, /*inverse =*/true);
+  _traction_spatial_derivatives_global[_qp] =
+      rotateTensor2(_traction_spatial_derivatives[_qp], RotationGlobal2Local, /*inverse =*/true);
 }
 
 RealVectorValue
