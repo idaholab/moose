@@ -1,280 +1,11 @@
-% ---------------------------------------------------------------------------- %
-% $Id: SANDreport.cls,v 1.79 2007/12/13 21:27:14 rolf Exp $
-%
-% We start out with the standard LaTeX document class "article" or "report" and
-% modify it so it conforms to the Sandia Technical report style.
-% The modifications are based on "Guide to Preparing SAND Reports",
-% SAND98-0730, edited by Tamara K. Locke, and the newer "Guide to
-% Preparing SAND Reports and Other Communication Products", SAND2002-2068P.
-%
-% Get the latest version and more at
-%    http://www.cs.sandia.gov/~rolf/SANDreport
-%
-% Rolf Riesen, December 13, 2007.
-%
-%
-% 06/14/2002 v1.01
-%     Make distribution list wider. Spaces between area codes and phone numbers
-%
-% 06/17/2002 v1.02
-%     Use \raggedright for main title
-%
-% 06/19/2002 v1.03
-%     Set tocdepth to 2 to only list sections and subsections in TOC
-%
-% 08/07/2002 v1.04
-%     Added a Makefile based on one Mike Heroux provided
-%     Allow for distribution lists that span more than one page and
-%     typeset the distribution in two columns
-%
-% 11/25/2002 v1.05
-%     Some changes from Daniel Segalman to conform to the new guide
-%     (SAND2002-2068P):
-%     - Adjust top margin of the title page to conform to the MS Word
-%         template (this may or may not be correct depending on your
-%         latex/dvips initial setup. Use texconfig to setup paper and
-%         dvips).
-%     - Added the word "Printed" before the date on front page
-%     - Classification category is no longer needed on page 3; get
-%         rid of \SANDdistcategory
-%     - Added "National Nuclear Security Administration" on title page
-%     - Changed NTIS URL on page 2
-%
-%     If "strict" is not used, we'll number sections to two decimal
-%     places (1.2.3)
-%
-% 02/13/2003 v1.06
-%     New DOEbwlogo.eps from Tim Draelos. This one is smaller and has some
-%     incompatible junk removed.
-%
-% 10/16/2003 v1.7
-%     Using \ifthenelse in the addcontentsline command interfered with
-%     the subfigure class. James Gruetzner and Todd Pitts provided a fix.
-%
-%     Philippe Pebay reports that the color package needs to be imported
-%     before the graphicx package. This class file uses the graphicx package,
-%     so Philippe could not use the color package because graphicx was already
-%     loaded when his \usepackage command got executed.
-%
-% 11/19/2003 v1.8
-%     Make it work using the report class. Put "report" as an option into
-%     \documentclass[report]{SANDreport} to activate it. There were some other
-%     fixes and clean-up s as well. Mainly in the table of contents.
-%     - Changed NTIS URL on page 2
-%     - Added fleqn to \LoadClass
-%     - Can't get the report title to repeat on the first chapter page.
-%         Left it off for now.
-%     - The table of contents formatting for report class is more or less like
-%         report.cls. For article, we try to make it look like the guideline.
-%
-% 01/19/2004 v1.9
-%     - The distribution list at the end of a SAND report was modifying the
-%         description environment which interfered with its regular use. Created
-%         a separate environment to fix that.
-%     - If in "report", list chapters and sections in TOC
-%     - With the jpg option, load the jpg versions of the DOE and Sandia
-%         logos. This makes it possible to use pdftex which doesn't
-%         understand Postscript.
-%
-% 02/25/2004 v1.10
-%     - It is now SANDIA REPORT, no longer SAND REPORT. Central Technical Files
-%         now wants three copies. See the distribution examples. (Info from
-%         Philippe Pebay)
-%     - Added new commands for markings used in OUO, export controlled, and
-%         other reports not labeled "Unlimited Release". Thanks to Mark
-%         Ackermann for providing an OUO example.
-%     - In report style, the page numbers restarted after the title page. Fixed!
-%     - Big clean-up.
-%
-% 05/14/2004 v1.11
-%     - Had to comment out a line in fancyhdr.sty for pdflatex to work.
-%         Don't know why.
-%
-% 05/21/2004 v1.12
-%     - Added the options [FIGBOTCAP,normal,bf,tight] to the subfigure
-%         package in the example files from a suggestion by Philippe P. Pebay.
-%     - Added the CA and NM options to insert the respective standard distributions.
-%
-% 08/07/2004 v1.13
-%     - Use pdf versions of logos. Makes the "jpg" option obsolete. Suggestion
-%         and logos by Richard Lehoucq.
-%     - Making SANDreport.cls compatible with the hyperref package
-%     - Added SANDmath.tex from Philippe Pebay
-%
-% 08/18/2004 v1.14
-%     - \begin{SANDdistribution} now takes an optional argument (CA or NM). The
-%         respective \documentclass options are no longer valid. Several new
-%         commands are available within the SANDdistribution environment to
-%         automate distributions for special cases such as CRADA, LDRD,
-%         Classified, Patent, etc.
-%     - The distribution list is now better formatted.
-%     - Fixed a bug with \SANDreleaseType discovered by Mark Ackermann
-%     - Added the command \SANDmarkTop
-%
-% 05/20/2005 v1.15
-%     - A small change in the distribution list (D. Chavez in the LDRD office
-%         moved) Thanks to Brandon Rohrer.
-%
-% 12/05/2005 v1.16
-%     - New org numbers reflect new corporate structure 9616->4536, etc. Thanks
-%         to Philip Sackinger for doing this.
-%     - Philip also found out what the newest distribution rules for NM are.
-%     - In the example files, deleted a misleading comment about secnumdepth in
-%         the appendix. Thanks to John Mitchell for spotting this.
-%     - New SANDmath.tex from Philippe Pebay: (ver. 1.2)
-%         + add support for discrete intervals
-%         + fix some comments
-%         + replace incorrect \RequirePackage's by \usepackage'
-%     - Also from Philippe Pebay: CA distribution list changes.
-%     - Abstract will start on title page, even with report style. Thanks to
-%         Daniel Dolan for noticing it and making suggestions to fix it.
-%     - Put the title just above the first chapter in the report style
-%
-% 12/09/2005 v1.17
-%    - Fixed a bug introduced in the last version: The \cleardoublepage is
-%        only supposed to happen for chapters in the main body of a report,
-%        and it needs to happen before the page number is entered into the TOC.
-%    - Fixed several new and old bugs that dealt with markings
-%    - Fixed text on usage page about marking commands.
-%
-% 12/09/2005 v1.18
-%    - Make it work with hyperref again....
-%
-% 12/19/2005 v1.19
-%    - There were still problems with the hyperref package. Fixed it so that
-%        the page markings on the back cover are now correct.
-%
-% 12/21/2005 v1.20
-%    - Updated the distribution list according to version 2.0 of the Guide
-%
-% 03/22/2006 v1.21
-%    - Introduced \SANDrePrintDate and \begin{SANDreDistribution}
-%    - Put a page number (2) on the back cover
-%    - No institution in \SANDauthor{} in example files
-%    - Move the SNL logo on the cover towards the bottom of the page
-%    - Add a back cover with the SNL logo at the bottom of the back
-%    - Use \cleardouble page and add comment to example files to make
-%        sure TOC always starts on an odd page.
-%    - Don't put title on first page of body text (above introduction)
-%        anymore. (Changed from Ver 1.0, Sep. 2002 to Ver 2.0, Dec. 2005 of the guide.)
-%    - For article, start every section on a new page (report already does this)
-%    - Fixed URLs for DOE report ordering
-%    - \SANDmarkCover now takes only one argument! This makes it easier to draw a
-%        box around the statement and configure it as needed. See MarkOUO.tex for
-%        an example. Thanks to John Foster for the example.
-%    - Print small class file version number at bottom of inside back cover
-%    - Change by Daniel Dolan to make it work and look consistent with the mathptmx
-%        package. This leaves the Helvetica fonts on the cover alone, but lets him
-%        have the body of the report in Times.
-%    - From Debbie Johnson (Creative Arts):
-%        - In example files, use First Name, Middle Initial, Last Name on cover and title page
-%        - In example files, on cover, put author names on one line
-%        - Mail Stop for Central Technical Files is MS9018. (This was an error in the example
-%            file, not the class itself.)
-%        - Back cover was shifted right too far.
-%        - Move chapter headings up a bit.
-%        - Use the geometry package to get the margins right
-%
-% 06/10/2006 v1.22
-%    - Remove "Unclassified" from "Unclassified Unlimited Release" (Thanks Brett Bader and Mike Heroux)
-%    - Confirmed that M2497 is correct mail stop for classified reports to Central Technical
-%          Files. (Thanks Debbie Johnson)
-%    - Make the distribution list single column. This makes it easier to print labels.
-%    - D. Chavez, LDRD Office mail-stop changed from 0188 to 0123. (Thanks Brett Bader)
-%    - In examples, added \phantomsection and moved \addcontentsline{toc}{section}{References}
-%        just before the \bibliography{...} command. This helps putting the right page number
-%        into the TOC and also with hyperlinking. (Thanks Tammy Kolda)
-%    - Clarified usage of \SANDnum{} on Web page. (Thanks Tammy Kolda)
-%    - More usage and LaTeX tips on Web page. (Thanks Tammy Kolda)
-%    - Newer distributions have a fancyhdr.sty that works. Removed it.
-%
-% 06/26/2006 v1.23
-%    - Tammy Kolda found a bug when using amsmath. Seems to have been a problem with
-%        white space in the redefinition of \section. LaTeX would stop when building the TOC.
-%
-% 08/17/2006 v1.24
-%    - Changed tar file extension from .tgz to .tar.gz Some winzip versions under
-%        Windows don't seem to like the former. (Rich Lehoucq)
-%    - Org. Number for Central Technical Files changed from 8945-1 to 8944 (Tammy and Debbie)
-%
-% 09/19/2006 v1.25
-%    - David Wilson discovered that markings in report style also activated chapter
-%        name headings, which are unwanted and sometimes overlap with the markings.
-%
-% 10/03/2006 v1.26
-%    - Some Web page error fixes from Daniel Dunlavy
-%    - Mike Eldred suggested to keep internal distributions on a single line
-%
-% 10/03/2006 v1.27
-%    - Forgot to extend the width of external distributions
-%
-% 12/13/2008 v1.28
-%    - No change: Org. Number for Central Technical Files is 8944 (confirmed by Beth Watkins)
-%    - Mark the OUO examples as sample to avoid misunderstandings (Roger Suppona)
-%    - Paragraph indent is set to 0 for cover pages, but never restored (Daniel Dolan)
-%    - Use "Lorem ipsum" instead of "bla bla bla" in the examples (Stephanie Phillips)
-%        (There is a LaTeX package, lipsum.sty, that does it, but it is not always installed.
-%        Therefore, I included the text verbaitm, instead of generating it.)
-%    - If the report is an OUO document, some text on the back cover needs to disappear.
-%         Thanks to Marcia Cooper for discovering it, and providing the necessary LaTeX code.
-%    - A lot of changes from Michael Kaneshige to better match the formatting of the official
-%         SAND report template:
-%         1. Removed the odd-even margin asymmetry - made the textwidth 6.5 in and
-%	    both margins 1 in.  This is consistent with the official cover
-%	    templates, although it's not the standard LaTeX way of formatting double
-%	    sided documents.  If the document gets bound, the LaTeX way is better,
-%	    but a lot of documents exist only electronically now.
-%
-%	  2. Added more space to \topmiddlewidth and subtracted it from
-%	    \topleftwidth and \toprightwidth so that "official Use Only / Export
-%	    Controlled Information" would not get broken across lines on the title
-%	    page.
-%
-%	  3. Reduced the \vspace between the title and authors from 0.75in to
-%	    0.375in.  This is specific to my document, but with everything we were
-%	    required to add, and a moderate length title, LaTeX was generating a
-%	    blank first page because the cover page was overfilled.
-%
-%	  4. On the back cover, I centered the text block and reduced the minipage
-%	    width to make it look more like the official covers.
-%
-%	  5. The word "NOTICE" on the back cover was significantly larger than the
-%	    other text, which was not consistent with the official covers.  I
-%	    removed the \fontsize command that was causing this, and it looks more
-%	    consistent with the official covers.
-%
-%	  6. On the title page, the top block (SAND#, OUO/ECI, Printed...) was not
-%	    centered because there were topleft and topmiddle boxes, but no topright
-%	    box.  I think this was inherited from the report.cls and article.cls
-%	    classes, but to fix the asymmetry, I inserted a topright box the same as
-%	    the topleft box.  It would seem to work just as well to remove both
-%	    topleft and topright boxes, since they contain nothing, but to be
-%	    conservative, I didn't remove anything.
-%
-%	  7. Most of MarkOUO.tex has to be edited by the user, but the "Official
-%	    Use Only" (SANDmarkTopBottom) should be fairly generic.  To make it look
-%	    more like the official covers, I made it bold, 12 pt, all caps.  In
-%	    addition, I reformatted the OUO box from tabular with multicolumn
-%	    columns, hlines and vertical bars, to a minipage inside a framebox.  I
-%	    think this is smoother.
-%
-%    - The Technical Library has a new org number again: 4536 --> 9536 (Ann Smaple via Bill Hart)
-%        Also changed NM tech library org to 8944, but I am mostly guessing here...
-%        Added  (1 electronic and 1 hardcopy) for housekeeping copies and reduce spacing
-%        between distribution entries. (Ann Smaple via Bill Hart)
-%    - Central Technical Files doesn't seem to want unclassified reports anymore. (Several)
-
-
-
-% ******************************************************************************
 % Package definitions
 %
     % The version and date of this file
-    \newcommand\SANDreportVersionOnly{ v1.28 }		% leave the spaces before and after version
-    \newcommand\SANDreportVersionDate{2007/12/13}	% Date has to bis this format!
+    \newcommand\INLreportVersionOnly{ v1.28 }		% leave the spaces before and after version
+    \newcommand\INLreportVersionDate{2007/12/13}	% Date has to bis this format!
 
-    \typeout{Using Sandia Technical Report class: \SANDreportVersionDate, \SANDreportVersionOnly Rolf Riesen}
-    \newcommand\SANDreportVersion{\SANDreportVersionDate \SANDreportVersionOnly}
+    \typeout{Using INL Technical Report class: \INLreportVersionDate, \INLreportVersionOnly}
+    \newcommand\INLreportVersion{\INLreportVersionDate \INLreportVersionOnly}
 
     % We need LaTeX 2e or better
     \NeedsTeXFormat{LaTeX2e}
@@ -286,19 +17,19 @@
     \RequirePackage[printwatermark]{xwatermark}
 
     % Variables
-    \newboolean{relaxedSAND}
-    \newboolean{strictSAND}
-    \newboolean{reportSAND}
-    \newboolean{SANDmainProvided}
-    \newboolean{SANDnumProvided}
-    \newboolean{SANDprintDateProvided}
-    \newboolean{SANDrePrintDateProvided}
-    \newboolean{SANDauthorProvided}
-    \newboolean{SANDsupersedProvided}
-    \newboolean{SANDdistributionProvided}
-    \newboolean{SANDreleaseTypeProvided}
+    \newboolean{relaxedINL}
+    \newboolean{strictINL}
+    \newboolean{reportINL}
+    \newboolean{INLmainProvided}
+    \newboolean{INLnumProvided}
+    \newboolean{INLprintDateProvided}
+    \newboolean{INLrePrintDateProvided}
+    \newboolean{INLauthorProvided}
+    \newboolean{INLsupersedProvided}
+    \newboolean{INLdistributionProvided}
+    \newboolean{INLreleaseTypeProvided}
     \newboolean{inAppendix}
-    \newboolean{SANDmarkingsRequired}
+    \newboolean{INLmarkingsRequired}
     \newboolean{MarkCover}
     \newboolean{MarkBack}
     \newboolean{MarkTitle}
@@ -306,17 +37,17 @@
     \newboolean{MarkBottom}
     \newboolean{distCA}
     \newboolean{distNM}
-    \newboolean{SANDdraft}
+    \newboolean{INLdraft}
 
 
     % Added 1/11/07 M. Cooper to remove additional text unnecessary for OUO documents on pg 2.
-    \newboolean{SANDnoticeOUO}
+    \newboolean{INLnoticeOUO}
 
     % Counters
-    \newcounter{SANDprintingCnt}
-    \setcounter{SANDprintingCnt}{1}
-    \newcounter{SANDreDistCnt}
-    \setcounter{SANDreDistCnt}{1}
+    \newcounter{INLprintingCnt}
+    \setcounter{INLprintingCnt}{1}
+    \newcounter{INLreDistCnt}
+    \setcounter{INLreDistCnt}{1}
 
 
     % We need calc to divide by 3 in setlength and other calculations
@@ -327,52 +58,52 @@
 
 
     % Specify what this file provides
-    \ProvidesPackage{INLreport}[\SANDreportVersion]
-    \ProvidesFile{INLreport.cls}[\SANDreportVersion]
+    \ProvidesPackage{INLreport}[\INLreportVersion]
+    \ProvidesFile{INLreport.cls}[\INLreportVersion]
 
 
     % We understand three options: "relax", "strict", and "report"
     % Using "relax" make the document look more LaTeXy
-    % If no option are given, then we follow the format of SAND2002-2068P
+    % If no option are given, then we follow the format of INL2002-2068P
     % Using "strict" tries to follow the guideline even more closely
     % Specifying "report" uses the report class instead of the article class
     %
     \DeclareOption{relax}{
-	\typeout{Option "relax": Relaxing some of the SAND98-0730 requirements}
-	\setboolean{relaxedSAND}{true}
+	\typeout{Option "relax": Relaxing some of the INL98-0730 requirements}
+	\setboolean{relaxedINL}{true}
     }
     \DeclareOption{strict}{
-	\typeout{Option "strict": Follow the SAND98-0730 requirements more strictly}
-	\setboolean{strictSAND}{true}
+	\typeout{Option "strict": Follow the INL98-0730 requirements more strictly}
+	\setboolean{strictINL}{true}
     }
-    \ifthenelse{\boolean{relaxedSAND} \and \boolean{strictSAND}}   {
-	\ClassWarning{SANDreport.cls}{Both, "strict" and "relax" options given}
+    \ifthenelse{\boolean{relaxedINL} \and \boolean{strictINL}}   {
+	\ClassWarning{INLreport.cls}{Both, "strict" and "relax" options given}
     }{
     }
     \DeclareOption{report}{
 	\typeout{Option "report": Using the report class as a base.}
-	\setboolean{reportSAND}{true}
+	\setboolean{reportINL}{true}
     }
     \DeclareOption{CA}{
-	\ClassError{SANDreport.cls}{"CA" option is obsolete}{Use
-	\@backslashchar begin{SANDdistribution}[CA] instead.}
+	\ClassError{INLreport.cls}{"CA" option is obsolete}{Use
+	\@backslashchar begin{INLdistribution}[CA] instead.}
     }
     \DeclareOption{NM}{
-	\ClassError{SANDreport.cls}{"NM" option is obsolete}{Use
-	\@backslashchar begin{SANDdistribution}[NM] instead.}
+	\ClassError{INLreport.cls}{"NM" option is obsolete}{Use
+	\@backslashchar begin{INLdistribution}[NM] instead.}
     }
 
 
     % Added 1/11/07 M. Cooper to remove additional text unnecessary for OUO documents on pg 2.
     \DeclareOption{OUO}{
 	\typeout{Option "OUO": Formatting page 2 for OUO reports}
-	\setboolean{SANDnoticeOUO}{true}
+	\setboolean{INLnoticeOUO}{true}
     }
 
     % We're based on the standard article or report class and assume certain
     % options. Set those, and pass all others to the article class
-    \ProcessOptions % We need to do it here so we get "reportSAND", and then again
-    \ifthenelse{\boolean{reportSAND}}   {
+    \ProcessOptions % We need to do it here so we get "reportINL", and then again
+    \ifthenelse{\boolean{reportINL}}   {
 	\DeclareOption*{\PassOptionsToClass{\CurrentOption}{report}}
 	\ProcessOptions % Repeat it here, otherwise LaTeX gets confused
 	\LoadClass[letterpaper,oneside,final,fleqn]{report}
@@ -384,11 +115,11 @@
 
 
     %
-    % Setup for letter paper (This IS a SAND report!)
+    % Setup for letter paper (This IS a INL report!)
     %
     \RequirePackage{geometry}
     % \geometry{pdftex, showframe, inner=1.5in, textwidth=6in, textheight=9in}
-    % Changed textwidth to 6.5in and inner to 1in to more closely match official SAND cover templates - MJK, 1/12/07
+    % Changed textwidth to 6.5in and inner to 1in to more closely match official INL cover templates - MJK, 1/12/07
     %\geometry{pdftex, inner=1in, textwidth=6.5in, textheight=9in}
 
 
@@ -400,39 +131,39 @@
     \AtBeginDocument{
 
 	% Do some usage checking
-	\ifthenelse{\boolean{SANDnumProvided}}   {
+	\ifthenelse{\boolean{INLnumProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDnum
-		not provided}{Insert \@backslashchar SANDnum in the preamble
+	    \ClassError{INLreport.cls}{\@backslashchar INLnum
+		not provided}{Insert \@backslashchar INLnum in the preamble
 		of your document}
 	}
-	\ifthenelse{\boolean{SANDauthorProvided}}   {
+	\ifthenelse{\boolean{INLauthorProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDauthor
-		not provided}{Insert \@backslashchar SANDauthor in the preamble
+	    \ClassError{INLreport.cls}{\@backslashchar INLauthor
+		not provided}{Insert \@backslashchar INLauthor in the preamble
 		of your document}
 	}
-	\ifthenelse{\boolean{SANDprintDateProvided}}   {
+	\ifthenelse{\boolean{INLprintDateProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDprintDate
-		not provided}{Insert \@backslashchar SANDprintDate in the
+	    \ClassError{INLreport.cls}{\@backslashchar INLprintDate
+		not provided}{Insert \@backslashchar INLprintDate in the
 		preamble of your document}
 	}
-	\ifthenelse{\boolean{SANDreleaseTypeProvided}}   {
+	\ifthenelse{\boolean{INLreleaseTypeProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}
-        {\@backslashchar SANDlimitedRelease not provided}
-        {Insert \@backslashchar SANDlimitedRelease in the preamble of your document}
+	    \ClassError{INLreport.cls}
+        {\@backslashchar INLlimitedRelease not provided}
+        {Insert \@backslashchar INLlimitedRelease in the preamble of your document}
 	}
 
-  \ifthenelse{\boolean{SANDdraft}}{%
+  \ifthenelse{\boolean{INLdraft}}{%
     \g@addto@macro{\@title}{\space (DRAFT)}%
     \newwatermark[allpages,color=gray!33,angle=53,scale=4,xpos=-20,ypos=0]{DRAFT}%
   }{}
 
 	% Save the title, it will be cleared by \maketitle, but we need it later
-	\newsavebox{\SANDtitletempbox}
-	\sbox{\SANDtitletempbox}{\parbox{\textwidth - 1.5in}{
+	\newsavebox{\INLtitletempbox}
+	\sbox{\INLtitletempbox}{\parbox{\textwidth - 1.5in}{
 	    \centering \LARGE \bf \@title \par}
 	}
 
@@ -457,7 +188,7 @@
 	\addtolength{\toprightwidth}{-6em}
 
 
-	\ifthenelse{\boolean{SANDsupersedProvided}}   {
+	\ifthenelse{\boolean{INLsupersedProvided}}   {
 	    \setlength{\topheight}{1.5in}
 	}{
 	    \setlength{\topheight}{1.0in}
@@ -495,7 +226,7 @@
 	%
 	% Print the cover pages
 	%
-	\SANDmarks{cover}
+	\INLmarks{cover}
 	\newlength{\coverindent}
 	\setlength{\coverindent}{1em}
 	\newlength{\parindentsave}
@@ -512,16 +243,16 @@
 	    INL REPORT
 	    \vspace{0.125in}\\
 	    \CoverFont{m}{12}{14pt}
-	    \SANDnumVar\\
-	    \SANDreleaseTypeVar\\
-	    \ifthenelse{\boolean{SANDrePrintDateProvided}}   {
-		Printed \SANDrePrintDateVar
+	    \INLnumVar\\
+	    \INLreleaseTypeVar\\
+	    \ifthenelse{\boolean{INLrePrintDateProvided}}   {
+		Printed \INLrePrintDateVar
 	    }{
-		Printed \SANDprintDateVar
+		Printed \INLprintDateVar
 	    }
-	    \ifthenelse{\boolean{SANDsupersedProvided}}   {
+	    \ifthenelse{\boolean{INLsupersedProvided}}   {
 		\vspace{0.125in}\\
-		\SANDsupersedVar
+		\INLsupersedVar
 	    }{
 		\\
 	    }
@@ -534,7 +265,7 @@
 	    }
 
 
-            % Changed this space from 0.75in to 0.375in to match official SAND covers, and provide more space to prevent
+            % Changed this space from 0.75in to 0.375in to match official INL covers, and provide more space to prevent
 	    % overfilling the page - MJK, 1/12/07
 	    \vspace{0.375in}
 	    \CoverFont{m}{12}{14pt}
@@ -573,7 +304,7 @@
 	% Back cover
 	%
 	\newpage
-	% Added centering and reduced minipage width to match official SAND covers better - MJK, 1/12/07
+	% Added centering and reduced minipage width to match official INL covers better - MJK, 1/12/07
 	\begin{center}
 	\begin{minipage}[t]{5.5in}
 	    \fontencoding{OT1}
@@ -586,7 +317,7 @@
 	    United States Department of Energy by Battelle Energy Alliance.
 	    \vspace{\baselineskip}
 
-            % Removed \fontsize{11}{13} to make NOTICE simply bold, to match official SAND covers better, MJK - 1/12/07
+            % Removed \fontsize{11}{13} to make NOTICE simply bold, to match official INL covers better, MJK - 1/12/07
 	    {\fontseries{b}\selectfont NOTICE:}
 	    This report was prepared
 	    as an account of work sponsored by an agency of
@@ -611,7 +342,7 @@
 	    \vspace{\baselineskip}
 
 	    % Added 1/11/07 M. Cooper to remove additional text unnecessary for OUO documents on pg 2.
-	    \ifthenelse{\boolean{SANDnoticeOUO}}{}{
+	    \ifthenelse{\boolean{INLnoticeOUO}}{}{
 	    Printed in the United States of America. This report has
 	    been reproduced directly from the best available copy.
 	    \vspace{\baselineskip}
@@ -627,7 +358,7 @@
 	% Restore the original paragraph indent
 	\setlength{\parindent}{\parindentsave}
 
-	\SANDmarks{back}
+	\INLmarks{back}
     }
 
 
@@ -638,49 +369,49 @@
     % ------------------------------------------------------------------------ %
     % Here we define the mandatory declarations
     %
-    \newcommand{\SANDnum}[1]{
-	\newcommand{\SANDnumVar}{#1}
-	\setboolean{SANDnumProvided}{true}
+    \newcommand{\INLnum}[1]{
+	\newcommand{\INLnumVar}{#1}
+	\setboolean{INLnumProvided}{true}
     }
 
-    \newcommand{\SANDauthor}[1]{
-	\newcommand{\SANDauthorVar}{#1}
-	\setboolean{SANDauthorProvided}{true}
+    \newcommand{\INLauthor}[1]{
+	\newcommand{\INLauthorVar}{#1}
+	\setboolean{INLauthorProvided}{true}
     }
 
-    \newcommand{\SANDprintDate}[1]{
-	\newcommand{\SANDprintDateVar}{#1}
-	\setboolean{SANDprintDateProvided}{true}
+    \newcommand{\INLprintDate}[1]{
+	\newcommand{\INLprintDateVar}{#1}
+	\setboolean{INLprintDateProvided}{true}
     }
 
 
     % This one is optional
-    \newsavebox{\SANDrePrintDistBox}
-    \newsavebox{\SANDrePrintDistBoxSecond}
-    \newsavebox{\SANDrePrintDistBoxThird}
-    \newsavebox{\SANDrePrintDistBoxFourth}
-    \newsavebox{\SANDrePrintDistBoxFifth}
-    \newcommand{\SANDrePrintDateVar}{}
+    \newsavebox{\INLrePrintDistBox}
+    \newsavebox{\INLrePrintDistBoxSecond}
+    \newsavebox{\INLrePrintDistBoxThird}
+    \newsavebox{\INLrePrintDistBoxFourth}
+    \newsavebox{\INLrePrintDistBoxFifth}
+    \newcommand{\INLrePrintDateVar}{}
 
-    \newcommand{\SANDrePrintDate}[1]{
-	\renewcommand{\SANDrePrintDateVar}{#1}
-	\setboolean{SANDrePrintDateProvided}{true}
-	\stepcounter{SANDprintingCnt}
-	\ifthenelse{\value{SANDprintingCnt} = 2}   {
-	    \sbox{\SANDrePrintDistBoxSecond}{Second Printing, (#1):}
+    \newcommand{\INLrePrintDate}[1]{
+	\renewcommand{\INLrePrintDateVar}{#1}
+	\setboolean{INLrePrintDateProvided}{true}
+	\stepcounter{INLprintingCnt}
+	\ifthenelse{\value{INLprintingCnt} = 2}   {
+	    \sbox{\INLrePrintDistBoxSecond}{Second Printing, (#1):}
 	}{
-	    \ifthenelse{\value{SANDprintingCnt} = 3}   {
-		\sbox{\SANDrePrintDistBoxThird}{Third Printing, (#1):}
+	    \ifthenelse{\value{INLprintingCnt} = 3}   {
+		\sbox{\INLrePrintDistBoxThird}{Third Printing, (#1):}
 	    }{
-		\ifthenelse{\value{SANDprintingCnt} = 4}   {
-		    \sbox{\SANDrePrintDistBoxFourth}{Fourth Printing, (#1):}
+		\ifthenelse{\value{INLprintingCnt} = 4}   {
+		    \sbox{\INLrePrintDistBoxFourth}{Fourth Printing, (#1):}
 		}{
-		    \ifthenelse{\value{SANDprintingCnt} = 5}   {
-			\sbox{\SANDrePrintDistBoxFifth}{Fifth Printing, (#1):}
+		    \ifthenelse{\value{INLprintingCnt} = 5}   {
+			\sbox{\INLrePrintDistBoxFifth}{Fifth Printing, (#1):}
 		    }{
-			\ClassError{SANDreport.cls}{\@backslashchar SANDreDistribution
+			\ClassError{INLreport.cls}{\@backslashchar INLreDistribution
 			    used more than four times!}{Do you really have more than
-			    five printings? If so, you need to amend SANDreport.cls}
+			    five printings? If so, you need to amend INLreport.cls}
 		    }
 		}
 	    }
@@ -690,13 +421,13 @@
 
     % Used to need the title at the top of the first section/chapter, but that is
     % not required anymore.  Make sure we start on an odd page.
-    \newcommand{\SANDmain}{
+    \newcommand{\INLmain}{
 	\cleardoublepage
-	\setboolean{SANDmainProvided}{true}
+	\setboolean{INLmainProvided}{true}
     }
 
 
-    \ifthenelse{\boolean{reportSAND}}   {
+    \ifthenelse{\boolean{reportINL}}   {
 	%
 	% new 1
 	% Once we have left the preamble and are in the body of the text,
@@ -707,8 +438,8 @@
 	%
 	\renewcommand\chapter{%						% \chapter from report.cls
 	    %\if@openright\cleardoublepage\else\clearpage\fi		% deleted
-	    \ifSANDmainProvided\cleardoublepage\else\clearpage\fi	% new 1
-	    \SANDmarks{body}						% new 2
+	    \ifINLmainProvided\cleardoublepage\else\clearpage\fi	% new 1
+	    \INLmarks{body}						% new 2
 	    % \thispagestyle{plain}%					% deleted
 	    \global\@topnum\z@						% \chapter from report.cls
 	    \@afterindentfalse						% \chapter from report.cls
@@ -774,43 +505,43 @@
     % Distribution page at the end
     % We have to create our own description environment, so we don't
     % disturb the original one.
-    \newlength{\SANDdistwidth}			% Max width of distribution lines
-    \setlength{\SANDdistwidth}{0.8\textwidth}
-    \newlength{\SANDMSdistwidth}		% Width of field for MS number
-    \setlength{\SANDMSdistwidth}{9ex}
+    \newlength{\INLdistwidth}			% Max width of distribution lines
+    \setlength{\INLdistwidth}{0.8\textwidth}
+    \newlength{\INLMSdistwidth}		% Width of field for MS number
+    \setlength{\INLMSdistwidth}{9ex}
 
-    \newcommand{\SANDdescriptionlabel}[1]{
+    \newcommand{\INLdescriptionlabel}[1]{
 	    \makebox[3em][r]{#1}
     }
-    \newenvironment{SANDdescription}{
+    \newenvironment{INLdescription}{
 	\list{}
-	{\labelwidth\z@ \itemindent-\leftmargin \let\makelabel\SANDdescriptionlabel}
+	{\labelwidth\z@ \itemindent-\leftmargin \let\makelabel\INLdescriptionlabel}
     }{
 	\endlist
     }
 
-    \newenvironment{SANDdistribution}[1][nothing]{
-	\setboolean{SANDdistributionProvided}{true}
+    \newenvironment{INLdistribution}[1][nothing]{
+	\setboolean{INLdistributionProvided}{true}
 
 	\newboolean{distCRADA}
 	\newboolean{distPatent}
 	\newboolean{distLDRD}
 	\newboolean{distClassified}
-	\newcommand{\SANDdistCRADA}{
+	\newcommand{\INLdistCRADA}{
 	    \setboolean{distCRADA}{true}
 	}
 
-	\newcommand{\SANDdistPatent}{
+	\newcommand{\INLdistPatent}{
 	    \setboolean{distPatent}{true}
 	}
 
-	\newcommand{\SANDdistLDRD}{
+	\newcommand{\INLdistLDRD}{
 	    \setboolean{distLDRD}{true}
 	}
 
-	\newcommand{\SANDdistClassified}{
+	\newcommand{\INLdistClassified}{
 	    \setboolean{distClassified}{true}
-	    \SANDdistInternalM{2}{M2497}{Central Technical Files}{8944}
+	    \INLdistInternalM{2}{M2497}{Central Technical Files}{8944}
 	}
 
 
@@ -833,28 +564,28 @@
 	{\Large DISTRIBUTION:}
 	\normalsize
 	\raggedbottom
-	\begin{SANDdescription}
+	\begin{INLdescription}
     }{
 	\ifthenelse{\boolean{distCA}}   {
 	    % Insert the standard CA distribution
 	    \ifthenelse{\boolean{distClassified}}   {
-		\SANDdistInternal{2}{9018}{Central Technical Files}{8944 (1 electronic and 1 hardcopy)}
+		\INLdistInternal{2}{9018}{Central Technical Files}{8944 (1 electronic and 1 hardcopy)}
 	    }{}
-	    \SANDdistInternal{2}{0899}{Technical Library}{8944 (1 electronic and 1 hardcopy)}
+	    \INLdistInternal{2}{0899}{Technical Library}{8944 (1 electronic and 1 hardcopy)}
 
 	    % If this report has a Patent Caution or Patent Interest
 	    \ifthenelse{\boolean{distPatent}}   {
-		\SANDdistInternal{1}{0161}{Legal Intellectual Property}{11500}
+		\INLdistInternal{1}{0161}{Legal Intellectual Property}{11500}
 	    }{}
 
 	    % If this report is for CRADA work
 	    \ifthenelse{\boolean{distCRADA}}   {
-		\SANDdistInternal{1}{0115}{OFA/NFE Agreements}{10112}
+		\INLdistInternal{1}{0115}{OFA/NFE Agreements}{10112}
 	    }{}
 
 	    % If this report is for LDRD work
 	    \ifthenelse{\boolean{distLDRD}}   {
-		\SANDdistInternal{1}{0123}{D. Chavez, LDRD Office}{1011}
+		\INLdistInternal{1}{0123}{D. Chavez, LDRD Office}{1011}
 	    }{}
 
 	}{}
@@ -862,29 +593,29 @@
 	\ifthenelse{\boolean{distNM}}   {
 	    % Insert the standard NM distribution
 	    \ifthenelse{\boolean{distClassified}}   {
-		\SANDdistInternalM{2}{2497}{Central Technical Files}{8944 (1 electronic and 1 hardcopy)}
+		\INLdistInternalM{2}{2497}{Central Technical Files}{8944 (1 electronic and 1 hardcopy)}
 	    }{}
 
-	   % \SANDdistInternal{2}{0899}{Technical Library}{9536 (1 electronic and 1 hardcopy)}
+	   % \INLdistInternal{2}{0899}{Technical Library}{9536 (1 electronic and 1 hardcopy)}
 
 	    % If this report has a Patent Caution or Patent Interest
 	    \ifthenelse{\boolean{distPatent}}   {
-		\SANDdistInternal{1}{0161}{Legal Intellectual Property}{11500}
+		\INLdistInternal{1}{0161}{Legal Intellectual Property}{11500}
 	    }{}
 
 	    % If this report is for CRADA work
 	    \ifthenelse{\boolean{distCRADA}}   {
-		\SANDdistInternal{1}{0115}{OFA/NFE Agreements}{10112}
+		\INLdistInternal{1}{0115}{OFA/NFE Agreements}{10112}
 	    }{}
 
 	    % If this report is for LDRD work
 	    \ifthenelse{\boolean{distLDRD}}   {
-		\SANDdistInternal{1}{0123}{D. Chavez, LDRD Office}{1011}
+		\INLdistInternal{1}{0123}{D. Chavez, LDRD Office}{1011}
 	    }{}
 
 	}{}
 
-	\end{SANDdescription}
+	\end{INLdescription}
     }
 
 
@@ -892,79 +623,79 @@
     %
     % The distribution list for a reprint
     % No housekeeping copies are needed.
-    \newenvironment{SANDreDistribution}{
-	\ifthenelse{\boolean{SANDrePrintDateProvided}}   {
-	    \setboolean{SANDdistributionProvided}{true}
+    \newenvironment{INLreDistribution}{
+	\ifthenelse{\boolean{INLrePrintDateProvided}}   {
+	    \setboolean{INLdistributionProvided}{true}
 
-	    \stepcounter{SANDreDistCnt}
-	    \ifthenelse{\value{SANDreDistCnt} = 2}   {
-		\sbox{\SANDrePrintDistBox}{\usebox{\SANDrePrintDistBoxSecond}}
+	    \stepcounter{INLreDistCnt}
+	    \ifthenelse{\value{INLreDistCnt} = 2}   {
+		\sbox{\INLrePrintDistBox}{\usebox{\INLrePrintDistBoxSecond}}
 	    }{
-		\ifthenelse{\value{SANDreDistCnt} = 3}   {
-		    \sbox{\SANDrePrintDistBox}{\usebox{\SANDrePrintDistBoxThird}}
+		\ifthenelse{\value{INLreDistCnt} = 3}   {
+		    \sbox{\INLrePrintDistBox}{\usebox{\INLrePrintDistBoxThird}}
 		}{
-		    \ifthenelse{\value{SANDreDistCnt} = 4}   {
-			\sbox{\SANDrePrintDistBox}{\usebox{\SANDrePrintDistBoxFourth}}
+		    \ifthenelse{\value{INLreDistCnt} = 4}   {
+			\sbox{\INLrePrintDistBox}{\usebox{\INLrePrintDistBoxFourth}}
 		    }{
-			\ifthenelse{\value{SANDreDistCnt} = 5}   {
-			    \sbox{\SANDrePrintDistBox}{\usebox{\SANDrePrintDistBoxFifth}}
+			\ifthenelse{\value{INLreDistCnt} = 5}   {
+			    \sbox{\INLrePrintDistBox}{\usebox{\INLrePrintDistBoxFifth}}
 			}{
-			    \ClassError{SANDreport.cls}{\@backslashchar SANDreDistribution
+			    \ClassError{INLreport.cls}{\@backslashchar INLreDistribution
 				used more than four times!}{Do you really have more than
-				five printings? If so, you need to amend SANDreport.cls}
+				five printings? If so, you need to amend INLreport.cls}
 			}
 		    }
 		}
 	    }
 
-	    \usebox{\SANDrePrintDistBox}
+	    \usebox{\INLrePrintDistBox}
 	    \normalsize
 	    \raggedbottom
-	    \begin{SANDdescription}
+	    \begin{INLdescription}
 	}{
 	}
     }{
-	\ifthenelse{\boolean{SANDrePrintDateProvided}}   {
-	    \end{SANDdescription}
+	\ifthenelse{\boolean{INLrePrintDateProvided}}   {
+	    \end{INLdescription}
 	}{
 	}
     }
 
 
-    \newcommand{\SANDdistInternal}[4]{
-	\ifthenelse{\boolean{SANDdistributionProvided}}   {
+    \newcommand{\INLdistInternal}[4]{
+	\ifthenelse{\boolean{INLdistributionProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDdistribution
-		not (yet) provided}{\@backslashchar SANDdistribution must
-		be used before any \@backslashchar SANDdistInternal}
+	    \ClassError{INLreport.cls}{\@backslashchar INLdistribution
+		not (yet) provided}{\@backslashchar INLdistribution must
+		be used before any \@backslashchar INLdistInternal}
 	}
-	\item[#1] \parbox[t]{\SANDdistwidth}{\makebox[\SANDMSdistwidth][l]{MS \hfill #2}%
+	\item[#1] \parbox[t]{\INLdistwidth}{\makebox[\INLMSdistwidth][l]{MS \hfill #2}%
 		\hspace{2em} \raggedright #3, #4}
 	\vspace{-1.5ex}
     }
 
 
     % Use a mail channel
-    \newcommand{\SANDdistInternalM}[4]{
-	\ifthenelse{\boolean{SANDdistributionProvided}}   {
+    \newcommand{\INLdistInternalM}[4]{
+	\ifthenelse{\boolean{INLdistributionProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDdistribution
-		not (yet) provided}{\@backslashchar SANDdistribution must
-		be used before any \@backslashchar SANDdistInternal}
+	    \ClassError{INLreport.cls}{\@backslashchar INLdistribution
+		not (yet) provided}{\@backslashchar INLdistribution must
+		be used before any \@backslashchar INLdistInternal}
 	}
-	\item[#1] \parbox[t]{\SANDdistwidth}{\makebox[\SANDMSdistwidth][l]{#2}\hspace{2em} \raggedright #3, #4}
+	\item[#1] \parbox[t]{\INLdistwidth}{\makebox[\INLMSdistwidth][l]{#2}\hspace{2em} \raggedright #3, #4}
 	\vspace{-1.5ex}
     }
 
 
-    \newcommand{\SANDdistExternal}[2]{
-	\ifthenelse{\boolean{SANDdistributionProvided}}   {
+    \newcommand{\INLdistExternal}[2]{
+	\ifthenelse{\boolean{INLdistributionProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDdistribution
-		not (yet) provided}{\@backslashchar SANDdistribution must
-		be used before any \@backslashchar SANDdistExternal}
+	    \ClassError{INLreport.cls}{\@backslashchar INLdistribution
+		not (yet) provided}{\@backslashchar INLdistribution must
+		be used before any \@backslashchar INLdistExternal}
 	}
-	\item[#1] \parbox[t]{\SANDdistwidth}{#2}
+	\item[#1] \parbox[t]{\INLdistwidth}{#2}
 	\vspace{-1.5ex}
     }
 
@@ -973,25 +704,25 @@
     % ------------------------------------------------------------------------ %
     % And now some optional declarations
     %
-    \newcommand{\SANDsupersed}[2]{
-	\newsavebox{\SANDsupersedtempbox}
-	\newcommand{\SANDsupersedVar}{
+    \newcommand{\INLsupersed}[2]{
+	\newsavebox{\INLsupersedtempbox}
+	\newcommand{\INLsupersedVar}{
 	    Supersedes #1 \\
 	    Dated #2
 	}
-	\sbox{\SANDsupersedtempbox}{
+	\sbox{\INLsupersedtempbox}{
 	    \begin{tabular}{c}
 		Supersedes #1 \\
 		dated #2
 	    \end{tabular}
 	}
-	\setboolean{SANDsupersedProvided}{true}
+	\setboolean{INLsupersedProvided}{true}
     }
 
 
     % Distribution category is no longer needed
-    \newcommand{\SANDdistcategory}[1]{
-	\ClassWarning{SANDreport.cls}{Distribution category is no longer needed!}
+    \newcommand{\INLdistcategory}[1]{
+	\ClassWarning{INLreport.cls}{Distribution category is no longer needed!}
     }
 
 
@@ -1033,26 +764,26 @@
     %
     % The user marking commands
     %
-    \newcommand{\SANDlimitedRelease}[1]{
+    \newcommand{\INLlimitedRelease}[1]{
       \ifthenelse{\boolean{#1}}
         {
-          \newcommand{\SANDreleaseTypeVar}{Limited Release}
+          \newcommand{\INLreleaseTypeVar}{Limited Release}
           \newcommand{\MarkCoverVar}{Approved for limited release; further dissemination limited to distribution list.}
         }
         {
-          \newcommand{\SANDreleaseTypeVar}{Unlimited Release}
+          \newcommand{\INLreleaseTypeVar}{Unlimited Release}
           \newcommand{\MarkCoverVar}{Approved for public release; further dissemination unlimited.}
         }
-      \setboolean{SANDreleaseTypeProvided}{true}
+      \setboolean{INLreleaseTypeProvided}{true}
     }
 
-    \newcommand{\SANDmarkBottomCover}[1]{
+    \newcommand{\INLmarkBottomCover}[1]{
 	\renewcommand{\MarkBotCoverVar}{#1}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
     }
 
-    \newcommand{\SANDmarkTopBottom}[1]{
+    \newcommand{\INLmarkTopBottom}[1]{
 	\renewcommand{\MarkBotBodyVar}{#1}
 	\renewcommand{\MarkTopBodyVar}{#1}
 	\renewcommand{\MarkBotBackVar}{#1}
@@ -1065,11 +796,11 @@
 	\setboolean{MarkBack}{true}
 	\setboolean{MarkBody}{true}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
 	\setboolean{MarkBottom}{true}
     }
 
-    \newcommand{\SANDmarkTop}[1]{
+    \newcommand{\INLmarkTop}[1]{
 	\renewcommand{\MarkTopBodyVar}{#1}
 	\renewcommand{\MarkTopBackVar}{#1}
 	\renewcommand{\MarkTopTitleVar}{#1}
@@ -1078,10 +809,10 @@
 	\setboolean{MarkBack}{true}
 	\setboolean{MarkBody}{true}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
     }
 
-    \newcommand{\SANDmarkBottom}[1]{
+    \newcommand{\INLmarkBottom}[1]{
 	\renewcommand{\MarkBotBodyVar}{#1}
 	\renewcommand{\MarkBotBackVar}{#1}
 	\renewcommand{\MarkBotTitleVar}{#1}
@@ -1090,11 +821,11 @@
 	\setboolean{MarkBack}{true}
 	\setboolean{MarkBody}{true}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
 	\setboolean{MarkBottom}{true}
     }
 
-    \newcommand{\SANDmarkTopBottomCoverBackTitle}[1]{
+    \newcommand{\INLmarkTopBottomCoverBackTitle}[1]{
 	\renewcommand{\MarkTopCoverVar}{#1}
 	\renewcommand{\MarkBotCoverVar}{#1}
 	\renewcommand{\MarkTopBackVar}{#1}
@@ -1104,28 +835,28 @@
 	\setboolean{MarkTitle}{true}
 	\setboolean{MarkBack}{true}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
 	\setboolean{MarkBottom}{true}
     }
 
-    \newcommand{\SANDmarkTopBottomCoverTitle}[1]{
+    \newcommand{\INLmarkTopBottomCoverTitle}[1]{
 	\renewcommand{\MarkBotTitleVar}{#1}
 	\renewcommand{\MarkTopTitleVar}{#1}
 	\renewcommand{\MarkBotCoverVar}{#1}
 	\renewcommand{\MarkTopCoverVar}{#1}
 	\setboolean{MarkTitle}{true}
 	\setboolean{MarkCover}{true}
-	\setboolean{SANDmarkingsRequired}{true}
+	\setboolean{INLmarkingsRequired}{true}
 	\setboolean{MarkBottom}{true}
     }
 
 
     %
     % Internal command used to activate markings depending on what part of
-    % the document we are currently processing; e.g. \SANDmarks{body}
+    % the document we are currently processing; e.g. \INLmarks{body}
     %
-    \newcommand{\SANDmarks}[1]{
-	\ifthenelse{\boolean{SANDmarkingsRequired}}   {
+    \newcommand{\INLmarks}[1]{
+	\ifthenelse{\boolean{INLmarkingsRequired}}   {
 	    \fancyfoot{} % Clear all foot markings
 	    \fancyhead{} % Clear all head markings
 
@@ -1205,7 +936,7 @@
 	    }
 	}{
 	    %
-	    % If not SANDmarkingsRequired
+	    % If not INLmarkingsRequired
 	    %
 	    \pagestyle{plain}% The default when we have no markings
 
@@ -1226,17 +957,17 @@
 	    }
 
 	}
-    }  % end of \SANDmarks{}
+    }  % end of \INLmarks{}
 
 
-    \newcommand{\SANDmarkCoverTitle}[2]{
-	\ClassError{SANDreport.cls}{\@backslashchar SANDmarkCoverTitle doesn't work yet; sorry.}{Don't
+    \newcommand{\INLmarkCoverTitle}[2]{
+	\ClassError{INLreport.cls}{\@backslashchar INLmarkCoverTitle doesn't work yet; sorry.}{Don't
 	know where to put the text on the title page.}
 	\sbox{\MarkTitletempbox}{{\bf #1\\}{#2}}
 	\renewcommand{\MarkCoverVar}{{{\CoverFont{b}{12}{12pt}#1}\\ {\CoverFont{m}{8}{10pt}}{#2}}}
     }
 
-    \newcommand{\SANDmarkCover}[1]{
+    \newcommand{\INLmarkCover}[1]{
 	\renewcommand{\MarkCoverVar}{{\CoverFont{m}{8}{10pt}}{#1}}
     }
 
@@ -1247,7 +978,7 @@
 % and tables.
 %
 
-    \ifthenelse{\boolean{reportSAND}}   {
+    \ifthenelse{\boolean{reportINL}}   {
 	\renewcommand\bibname{References}
 	\setcounter{tocdepth}{3}
     }{
@@ -1268,7 +999,7 @@
 	    % We are in the Appendix
 	    \ifthenelse{\equal{#1}{toc}}   {
 		% And we are attempting to add something to the TOC
-		\ifreportSAND
+		\ifreportINL
 		    \ifthenelse{\equal{#2}{chapter}}   {
 			% It is a chapter, so we're OK
 			\addtocontents{#1}{\protect\contentsline{#2}{#3}{\thepage}}
@@ -1311,7 +1042,7 @@
     %
     \renewcommand{\@dotsep}{2.27}
 
-    \ifthenelse{\boolean{reportSAND}}   {
+    \ifthenelse{\boolean{reportINL}}   {
     }{
 	% For article.sty
 	% We don't want blank lines between entries and no boldface.
@@ -1321,7 +1052,7 @@
 	    \setlength\parskip{0ex}
 	    \ifnum \c@tocdepth >\z@
 	    \addpenalty\@secpenalty
-	    \ifthenelse{\boolean{relaxedSAND}}   {
+	    \ifthenelse{\boolean{relaxedINL}}   {
 		\addvspace{1.0em \@plus\p@}
 	    }{
 	    }
@@ -1330,7 +1061,7 @@
 		\parindent \z@ \rightskip \@pnumwidth
 		\parfillskip -\@pnumwidth
 		\leavevmode
-		\ifthenelse{\boolean{relaxedSAND}}   {
+		\ifthenelse{\boolean{relaxedINL}}   {
 		    \bfseries
 		}{
 		}
@@ -1359,7 +1090,7 @@
 	\setcounter{figure}{0}
 	\setcounter{table}{0}
 
-	\ifthenelse{\boolean{reportSAND}}   {
+	\ifthenelse{\boolean{reportINL}}   {
 	    \setcounter{chapter}{0}
 	    \gdef\@chapapp{\appendixname}
 	    \gdef\thechapter{\@Alph\c@chapter}
@@ -1373,7 +1104,7 @@
 	    \addtocontents{toc}{\protect\subsection*{\appendixname}}
 	}
 
-	\ifthenelse{\boolean{strictSAND}}   {
+	\ifthenelse{\boolean{strictINL}}   {
 	    \setcounter{secnumdepth}{2}
 	}{
 	    \setcounter{secnumdepth}{3}
@@ -1387,20 +1118,20 @@
 % We want unnumbered section/chapter headings
 %
 
-    \ifthenelse{\boolean{reportSAND}}   {
-	\ifthenelse{\boolean{strictSAND}}   {
-	    % The samples in SAND98-0730 don't number sections.
+    \ifthenelse{\boolean{reportINL}}   {
+	\ifthenelse{\boolean{strictINL}}   {
+	    % The samples in INL98-0730 don't number sections.
 	    \setcounter{secnumdepth}{0}
 	}{
-	    % The report SAND98-0730 itself does, though ;-)
+	    % The report INL98-0730 itself does, though ;-)
 	    \setcounter{secnumdepth}{3}
 	}
     }{% else
-	\ifthenelse{\boolean{strictSAND}}   {
-	    % The samples in SAND98-0730 don't number sections.
+	\ifthenelse{\boolean{strictINL}}   {
+	    % The samples in INL98-0730 don't number sections.
 	    \setcounter{secnumdepth}{0}
 	}{
-	    % The report SAND98-0730 itself does, though ;-)
+	    % The report INL98-0730 itself does, though ;-)
 	    \setcounter{secnumdepth}{3}
 	}
     }
@@ -1412,19 +1143,19 @@
 % and the text small
 %
 
-    \newlength{\SANDcaptionwidth}
-    \setlength{\SANDcaptionwidth}{4in}
-    \newsavebox{\SANDtempbox}
+    \newlength{\INLcaptionwidth}
+    \setlength{\INLcaptionwidth}{4in}
+    \newsavebox{\INLtempbox}
     \renewcommand{\@makecaption}[2]{
 	\par\vspace{\abovecaptionskip}
-	\sbox{\SANDtempbox}{{\bf #1. }\ #2}
-	\ifthenelse{\lengthtest{\wd\SANDtempbox < \SANDcaptionwidth}}   {
+	\sbox{\INLtempbox}{{\bf #1. }\ #2}
+	\ifthenelse{\lengthtest{\wd\INLtempbox < \INLcaptionwidth}}   {
 	    \begin{center}
 		{\bf #1. }\small #2
 	    \end{center}
 	}{
 	    \begin{center}
-		\parbox[t]{\SANDcaptionwidth}{{\bf #1. }\small #2}
+		\parbox[t]{\INLcaptionwidth}{{\bf #1. }\small #2}
 	    \end{center}
 	}
     }
@@ -1436,12 +1167,12 @@
 % change a few things. We do report.cls first.
 %
 
-    \ifthenelse{\boolean{reportSAND}}   {
+    \ifthenelse{\boolean{reportINL}}   {
 	% We need to redo \maketitle for the report class.
-	% Omit the date and add the SAND number and so on.
+	% Omit the date and add the INL number and so on.
 	% We also need to redo the titlepage environment to not
 	% issue a newpage command, so the abstract can go there
-	% if it is short enough. (SAND reports are supposed to have
+	% if it is short enough. (INL reports are supposed to have
 	% an abstract!)
 
 	%
@@ -1451,7 +1182,7 @@
 	    \renewcommand\maketitle{%					% \maketitle from report.cls
 		\doCover{}
 		\begin{titlepage}%					% \maketitle from report.cls
-		    \SANDmarks{title}
+		    \INLmarks{title}
 		    {
 			\begin{center}
 			% use framebox instead of makebox for debugging
@@ -1463,16 +1194,16 @@
 			\makebox[\topmiddlewidth][c]{
 			    \begin{minipage}[c][\topheight][t]{\topmiddlewidth}
 			    \begin{center}
-				\SANDnumVar\\
-				\SANDreleaseTypeVar\\
-				Printed \SANDprintDateVar\\
-				\ifthenelse{\boolean{SANDrePrintDateProvided}}   {
-				    Reprinted \SANDrePrintDateVar\\
+				\INLnumVar\\
+				\INLreleaseTypeVar\\
+				Printed \INLprintDateVar\\
+				\ifthenelse{\boolean{INLrePrintDateProvided}}   {
+				    Reprinted \INLrePrintDateVar\\
 				}{
 				}
-				\ifthenelse{\boolean{SANDsupersedProvided}}   {
+				\ifthenelse{\boolean{INLsupersedProvided}}   {
 				    \bigskip
-				    \usebox{\SANDsupersedtempbox}\\
+				    \usebox{\INLsupersedtempbox}\\
 				}{
 				}
 			    \end{center}
@@ -1531,13 +1262,13 @@
 	    }
 	\else
 	    % {---------------------- I doubt we ever get here ------------------------}
-	    \ClassError{SANDreport.cls}{\@backslashchar maketitle definition outside
-		a title page.}{The SANDreport class cannot handle this case.}
+	    \ClassError{INLreport.cls}{\@backslashchar maketitle definition outside
+		a title page.}{The INLreport class cannot handle this case.}
 	\fi
 
 	%
 	% \titlepage in the report class resets the page
-	% number, which is not correct for SANDIA Reports.
+	% number, which is not correct for INLIA Reports.
 	% It also sets the page style to empty.
 	\if@compatibility						% titlepage from report.cls
 	\renewenvironment{titlepage}					% titlepage from report.cls
@@ -1585,8 +1316,8 @@
 		{\par\vfil\null}					% new version
 	\else								% abstract from report.cls
 	    % {---------------------- We should never get here ------------------------}
-	    \ClassError{SANDreport.cls}{Abstract definition outside
-		a title page.}{The SANDreport class cannot handle this case.}
+	    \ClassError{INLreport.cls}{Abstract definition outside
+		a title page.}{The INLreport class cannot handle this case.}
 	\fi								% abstract from report.cls
 
     }{
@@ -1596,7 +1327,7 @@
 
 
 	%
-	% In \@maketitle, we omit the \@date and insert the SAND number and so on
+	% In \@maketitle, we omit the \@date and insert the INL number and so on
 	%
 	\renewcommand{\@maketitle}{
 	    \doCover{}
@@ -1612,16 +1343,16 @@
 		\makebox[\topmiddlewidth][c]{				% new
 		    \begin{minipage}[c][\topheight][t]{\topmiddlewidth}	% new
 		    \begin{center}					% new
-			\SANDnumVar\\					% new
-			\SANDreleaseTypeVar\\				% new
-			Printed \SANDprintDateVar\\			% new
-			\ifthenelse{\boolean{SANDrePrintDateProvided}}   {	% new
-			    Reprinted \SANDrePrintDateVar\\		% new
+			\INLnumVar\\					% new
+			\INLreleaseTypeVar\\				% new
+			Printed \INLprintDateVar\\			% new
+			\ifthenelse{\boolean{INLrePrintDateProvided}}   {	% new
+			    Reprinted \INLrePrintDateVar\\		% new
 			}{						% new
 			}						% new
-			\ifthenelse{\boolean{SANDsupersedProvided}}   {	% new
+			\ifthenelse{\boolean{INLsupersedProvided}}   {	% new
 			    \bigskip					% new
-			    \usebox{\SANDsupersedtempbox}\\		% new
+			    \usebox{\INLsupersedtempbox}\\		% new
 			}{						% new
 			}						% new
 		    \end{center}					% new
@@ -1677,7 +1408,7 @@
 		\global\@topnum\z@					% \maketitle from article.cls
 		\@maketitle						% \maketitle from article.cls
 	    \fi								% \maketitle from article.cls
-	    \SANDmarks{title}						% new
+	    \INLmarks{title}						% new
 	    \@thanks							% \maketitle from article.cls
 	    \endgroup							% \maketitle from article.cls
 	    \setcounter{footnote}{0}%					% \maketitle from article.cls
@@ -1713,7 +1444,7 @@
 		\par						% \newpage from latex.ltx
 		\vfil						% \newpage from latex.ltx
 		\penalty -\@M					% \newpage from latex.ltx
-		\SANDmarks{body}				% new
+		\INLmarks{body}				% new
 	    }							% \newpage from latex.ltx
 	}								% \maketitle from article.sty
     }
@@ -1726,23 +1457,23 @@
 
     \AtEndDocument{
 	% Do some more usage checking
-	\ifthenelse{\boolean{SANDmainProvided}}   {
+	\ifthenelse{\boolean{INLmainProvided}}   {
 	}{
-	    \ClassError{SANDreport.cls}{\@backslashchar SANDmain
-		not provided}{Add \@backslashchar SANDmain before your
+	    \ClassError{INLreport.cls}{\@backslashchar INLmain
+		not provided}{Add \@backslashchar INLmain before your
 		introduction (first) section of your document}
 	}
 
 
 	%
-	% Put the Sandia Logo on the back page
+	% Put the INL Logo on the back page
 	%
 
 	\cleardoublepage	% We're on the inside end page now
 	\mbox{}			% Some invisible text
 	\vfill
-	\hfill {\CoverFont{m}{6}{6pt} \SANDreportVersionOnly}
-	\setboolean{SANDmarkingsRequired}{false}
+	\hfill {\CoverFont{m}{6}{6pt} \INLreportVersionOnly}
+	\setboolean{INLmarkingsRequired}{false}
 	\thispagestyle{empty}
 	\pagestyle{empty}
 	\newpage		% Now we're on the outside of the end page
