@@ -11,15 +11,20 @@
 
 #include "Action.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
 
-class ContactPressureVarAction : public Action
+class ContactPressureAuxAction : public Action
 {
 public:
-  ContactPressureVarAction(const InputParameters & params);
+  ContactPressureAuxAction(const InputParameters & params);
 
   virtual void act();
+
+private:
+  const BoundaryName _master;
+  const BoundaryName _slave;
+  const MooseEnum _order;
 };
 
 template <>
-InputParameters validParams<ContactPressureVarAction>();
-
+InputParameters validParams<ContactPressureAuxAction>();

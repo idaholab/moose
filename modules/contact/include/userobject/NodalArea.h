@@ -41,4 +41,3 @@ protected:
 
 template <>
 InputParameters validParams<NodalArea>();
-

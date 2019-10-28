@@ -57,4 +57,3 @@ public:
    */
   virtual void getConnectedDofIndices();
 };
-

@@ -37,4 +37,3 @@ protected:
   bool _include_all_contact_nodes;
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
-

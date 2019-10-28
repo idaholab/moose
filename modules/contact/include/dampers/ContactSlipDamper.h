@@ -66,4 +66,3 @@ protected:
   typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator
       pl_iterator;
 };
-
