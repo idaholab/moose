@@ -185,15 +185,14 @@ def addBetterDate(options):
 def runCMD(cmd_opts):
     a_proc = subprocess.Popen(cmd_opts,
                               stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              encoding='utf-8')
+                              stderr=subprocess.PIPE)
 
     retstr = a_proc.communicate()
     if not a_proc.poll() == 0:
-        print('Error:', retstr[1])
+        print('Error:', retstr[1].decode())
         sys.exit(1)
     else:
-        return retstr[0]
+        return retstr[0].decode()
 
 def exit_error(error_list):
     print('\n\tThere were errors running build_coverage:\n')
