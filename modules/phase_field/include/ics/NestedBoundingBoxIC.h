@@ -28,7 +28,7 @@ public:
   NestedBoundingBoxIC(const InputParameters & parameters);
 
 protected:
-  virtual Real value_assign(const Point & p);
+  virtual Real value_assign(const Point & p) override;
 
   /// values outside all the boxes
   const Real _outside;

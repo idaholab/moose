@@ -26,8 +26,11 @@ validParams<NestedBoundingBoxIC>()
 NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
   : SmoothMultiBoundingBoxBaseIC(parameters),
     _outside(getParam<Real>("outside"))
+{
+}
 
-        Real NestedBoundingBoxIC::value_assign(const Point & p)
+Real
+NestedBoundingBoxIC::value_assign(const Point & p)
 {
   for (unsigned int b = 0; b < _nbox; ++b)
   {
@@ -40,8 +43,8 @@ NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
           Real f_in = 1.0;
           for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
             if (_c1[b](i) != _c2[b](i))
-              f_in *= 0.5 * (std::tanh(2.0 * libMesh::PI * (p(i) - _c1[b](i)) / _int_width) -
-                             std::tanh(2.0 * libMesh::PI * (p(i) - _c2[b](i)) / _int_width));
+              f_in *= 0.5 * (std::tanh(2.0 * libMesh::pi * (p(i) - _c1[b](i)) / _int_width) -
+                             std::tanh(2.0 * libMesh::pi * (p(i) - _c2[b](i)) / _int_width));
           if (b == _nbox - 1)
             value = _outside + (_inside[b] - _outside) * f_in;
           else

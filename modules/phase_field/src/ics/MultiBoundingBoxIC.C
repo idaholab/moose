@@ -9,6 +9,7 @@
 
 #include "MultiBoundingBoxIC.h"
 #include "MooseMesh.h"
+#include <string>
 
 registerMooseObject("PhaseFieldApp", MultiBoundingBoxIC);
 
@@ -41,8 +42,11 @@ MultiBoundingBoxIC::MultiBoundingBoxIC(const InputParameters & parameters)
     _dim(_fe_problem.mesh().dimension()),
     _inside(getParam<std::vector<Real>>("inside")),
     _outside(getParam<Real>("outside"))
+{
+}
 
-        Real MultiBoundingBoxIC::value(const Point & p)
+Real
+MultiBoundingBoxIC::value(const Point & p)
 {
   Real value = _outside;
 
