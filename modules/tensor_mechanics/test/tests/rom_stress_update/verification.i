@@ -7,13 +7,6 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y disp_z'
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
-[]
-
 [AuxVariables]
   [./temperature]
   [../]
@@ -130,7 +123,6 @@
     add_variables = true
     generate_output = 'vonmises_stress'
     use_automatic_differentiation = true
-    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -317,6 +309,5 @@
 
 [Outputs]
   csv = true
-  exodus = true
   file_base = 'verification_1e-3_out'
 []
