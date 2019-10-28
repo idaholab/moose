@@ -127,8 +127,7 @@ def verifyCoverage(options):
                                         '--summary',
                                         options.outfile],
                                        stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       encoding='utf-8')
+                                       stderr=subprocess.PIPE)
 
     summary_output = ' '.join(summary_command.communicate())
     coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
