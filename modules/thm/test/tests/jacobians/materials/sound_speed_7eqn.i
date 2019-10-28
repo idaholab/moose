@@ -20,11 +20,16 @@
 []
 
 [Kernels]
-  [./test_kernel]
+  [./test_kernel_liquid]
     type = MaterialDerivativeTestKernel
     variable = beta
-    # The following parameters are provided by tests file:
-    #   material_property
-    #   args
+    material_property = c_liquid
+    args = 'beta arhoA_liquid arhouA_liquid arhoEA_liquid'
+  [../]
+  [./test_kernel_vapor]
+    type = MaterialDerivativeTestKernel
+    variable = beta
+    material_property = c_vapor
+    args = 'beta arhoA_vapor arhouA_vapor arhoEA_vapor'
   [../]
 []

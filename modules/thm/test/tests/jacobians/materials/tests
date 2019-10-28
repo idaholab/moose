@@ -1,19 +1,9 @@
 [Tests]
-  [./acoustic_impedance_liquid]
+  [./acoustic_impedance_7eqn]
     type = 'PetscJacobianTester'
     input = 'acoustic_impedance_7eqn.i'
-    cli_args = 'Kernels/test_kernel/material_property=Z_liquid Kernels/test_kernel/args="beta arhoA_liquid arhouA_liquid arhoEA_liquid"'
-    ratio_tol = 5e-3
-    difference_tol = 5e5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./acoustic_impedance_vapor]
-    type = 'PetscJacobianTester'
-    input = 'acoustic_impedance_7eqn.i'
-    cli_args = 'Kernels/test_kernel/material_property=Z_vapor Kernels/test_kernel/args="beta arhoA_vapor arhouA_vapor arhoEA_vapor"'
-    ratio_tol = 5e-3
-    difference_tol = 5e5
+    ratio_tol = 2e-3
+    difference_tol = 2.5e3
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -73,6 +63,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./pressure_7eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'pressure_7eqn.i'
+    ratio_tol = 2e-7
+    difference_tol = 250
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./pressure_relaxation_rate]
     type = 'PetscJacobianTester'
     input = 'pressure_relaxation_rate.i'
@@ -93,7 +91,7 @@
     type = 'PetscJacobianTester'
     input = 'specific_internal_energy_7eqn.i'
     ratio_tol = 5e-8
-    difference_tol = 5e-8
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -108,8 +106,8 @@
   [./specific_volume_7eqn]
     type = 'PetscJacobianTester'
     input = 'specific_volume_7eqn.i'
-    ratio_tol = 5e-9
-    difference_tol = 5e-12
+    ratio_tol = 1e-9
+    difference_tol = 1e-9
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -121,19 +119,9 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./sound_speed_liquid]
+  [./sound_speed]
     type = 'PetscJacobianTester'
     input = 'sound_speed_7eqn.i'
-    cli_args = 'Kernels/test_kernel/material_property=c_liquid Kernels/test_kernel/args="beta arhoA_liquid arhouA_liquid arhoEA_liquid"'
-    ratio_tol = 5e-3
-    difference_tol = 10
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./sound_speed_vapor]
-    type = 'PetscJacobianTester'
-    input = 'sound_speed_7eqn.i'
-    cli_args = 'Kernels/test_kernel/material_property=c_vapor Kernels/test_kernel/args="beta arhoA_vapor arhouA_vapor arhoEA_vapor"'
     ratio_tol = 5e-3
     difference_tol = 10
     max_threads = 1
@@ -159,7 +147,7 @@
     type = 'PetscJacobianTester'
     input = 'velocity_7eqn.i'
     ratio_tol = 5e-8
-    difference_tol = 5e-12
+    difference_tol = 5e-10
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -184,6 +172,14 @@
     input = 'temperature_3eqn.i'
     ratio_tol = 2e-8
     difference_tol = 3e-10
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./temperature_7eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'temperature_7eqn.i'
+    ratio_tol = 2e-8
+    difference_tol = 5e-6
     max_threads = 1
     allow_test_objects = true
   [../]

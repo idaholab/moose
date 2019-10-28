@@ -20,10 +20,17 @@
 []
 
 [Kernels]
-  [./test_kernel]
+  [./test_kernel_liquid]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = rho_liquid
     args = 'beta arhoA_liquid'
+  [../]
+
+  [./test_kernel_vapor]
+    type = MaterialDerivativeTestKernel
+    variable = beta
+    material_property = rho_vapor
+    args = 'beta arhoA_vapor'
   [../]
 []
