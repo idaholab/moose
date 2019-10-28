@@ -57,9 +57,10 @@
       detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters'
     [../]
     [./verification_heavy]
-      type = 'CSVDiff'
+      type = 'Exodiff'
       input = 'verification.i'
-      csvdiff = 'verification_1e-5_out.csv'
+      exodiff = 'verification_1e-5_out.e'
+      custom_cmp = 'verification-heavy.cmp'
       heavy = true
       petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
