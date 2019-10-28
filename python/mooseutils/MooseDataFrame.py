@@ -10,7 +10,7 @@
 import os
 import pandas
 
-import message
+from . import message
 
 class MooseDataFrame(object):
     """
@@ -21,18 +21,42 @@ class MooseDataFrame(object):
     """
 
     NOCHANGE = 0
-    INVALID = 1
-    OLDFILE = 2
-    UPDATED = 3
+    UPDATED = 1
+    INVALID = 2
+    OLDFILE = 3
 
-    def __init__(self, filename, index=None, run_start_time=None):
+    def __init__(self, filename, index=None, run_start_time=None, update=True, peacock_index=False):
 
-        self.filename = filename
-        self.modified = None
-        self.data = pandas.DataFrame()
+        self._filename = filename
+        self._data = pandas.DataFrame()
+        self._modified = None
         self._index = index
+        self._add_peacock_index = peacock_index
         self._run_start_time = run_start_time
-        self.update()
+        if update:
+            self.update()
+
+    @property
+    def modified(self):
+        if self._modified is None:
+            return os.path.getmtime(self._filename)
+        return self._modified
+
+    @property
+    def exists(self):
+        return os.path.exists(self._filename)
+
+    @property
+    def filesize(self):
+        return os.path.getsize(self._filename)
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def filename(self):
+        return self._filename
 
     def __getitem__(self, key):
         """
@@ -41,9 +65,9 @@ class MooseDataFrame(object):
         Args:
             key[str|list]: The key(s) to extract.
         """
-        if self.data.empty:
+        if self._data.empty:
             return pandas.Series()
-        return self.data[key]
+        return self._data[key]
 
     def __contains__(self, key):
         """
@@ -51,18 +75,18 @@ class MooseDataFrame(object):
         """
         return (key in self.data)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return False if the data is empty.
         """
-        return not self.data.empty
+        return not self._data.empty
 
     def clear(self):
         """
         Remove existing data.
         """
-        self.modified = None
-        self.data = pandas.DataFrame()
+        self._modified = None
+        self._data = pandas.DataFrame()
 
     def update(self):
         """
@@ -70,29 +94,33 @@ class MooseDataFrame(object):
         """
         retcode = MooseDataFrame.NOCHANGE
 
-        file_exists = os.path.exists(self.filename)
-        if file_exists and (os.path.getmtime(self.filename) < self._run_start_time):
+        file_exists = self.exists
+        if file_exists and (self._run_start_time is not None) and (os.path.getmtime(self._filename) < self._run_start_time):
             self.clear()
-            message.mooseDebug("The csv file {} exists but is old compared to the run start time.".format(self.filename), debug=True)
+            message.mooseDebug("The csv file {} exists but is old ({}) compared to the run start time ({}).".format(self.filename, os.path.getmtime(self._filename), self._run_start_time), debug=True)
             retcode = MooseDataFrame.OLDFILE
 
-        elif not os.path.exists(self.filename):
+        elif not file_exists:
             self.clear()
-            message.mooseDebug("The csv file {} does not exist.".format(self.filename))
+            message.mooseDebug("The csv file {} does not exist.".format(self._filename))
             retcode = MooseDataFrame.INVALID
 
         else:
-            modified = os.path.getmtime(self.filename)
-            if modified != self.modified:
+            modified = os.path.getmtime(self._filename)
+            if modified != self._modified:
                 retcode = MooseDataFrame.UPDATED
                 try:
-                    self.modified = modified
-                    self.data = pandas.read_csv(self.filename)
+                    self._modified = modified
+                    self._data = pandas.read_csv(self._filename)
                     if self._index:
-                        self.data.set_index(self._index, inplace=True)
-                    message.mooseDebug("Reading csv file: {}".format(self.filename))
+                        self._data.set_index(self._index, inplace=True)
+
+                    if self._add_peacock_index:
+                        self._data.insert(0, 'index (Peacock)',
+                                          pandas.Series(self._data.index, index=self._data.index))
+                    message.mooseDebug("Reading csv file: {}".format(self._filename))
                 except:
                     self.clear()
-                    message.mooseDebug("Unable to read file {} it likely does not contain data.".format(self.filename))
+                    message.mooseDebug("Unable to read file {} it likely does not contain data.".format(self._filename))
 
         return retcode

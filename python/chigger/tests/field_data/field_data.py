@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -12,4 +12,4 @@
 import chigger
 reader = chigger.exodus.ExodusReader('../input/step10_micro_out.e')
 reader.update()
-print reader.getGlobalData('k_eff')
+print(reader.getGlobalData('k_eff'))

@@ -20,4 +20,4 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--pedantic-checks', '-i', 'output_clobber_simple')
         e = cm.exception
-        self.assertIn('Diagnostic analysis', e.output)
+        self.assertIn('Diagnostic analysis', e.output.decode('utf-8'))

@@ -31,7 +31,7 @@ class StyleExtension(command.CommandExtension):
         renderer.add('StyleToken', RenderStyleToken())
 
         if isinstance(renderer, renderers.LatexRenderer):
-            renderer.addPackage(u'xcolor')
+            renderer.addPackage('xcolor')
 
 
 class StyleCommand(command.CommandComponent):

@@ -11,7 +11,7 @@ import re
 from PyQt5 import QtWidgets
 import peacock
 import mooseutils
-from plugins.ExodusPlugin import ExodusPlugin
+from .plugins.ExodusPlugin import ExodusPlugin
 
 class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
 
@@ -37,8 +37,8 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
 
         # Compile output from the plugins
         output = dict()
-        for plugin in self._plugins.itervalues():
-            for key, value in plugin.repr().iteritems():
+        for plugin in self._plugins.values():
+            for key, value in plugin.repr().items():
                 if key in output:
                     output[key] += value
                 else:
@@ -80,18 +80,18 @@ def main(size=None):
     Run window widget alone
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from plugins.VTKWindowPlugin import VTKWindowPlugin
-    from plugins.FilePlugin import FilePlugin
-    from plugins.BlockPlugin import BlockPlugin
-    from plugins.GoldDiffPlugin import GoldDiffPlugin
-    from plugins.ColorbarPlugin import ColorbarPlugin
-    from plugins.MeshPlugin import MeshPlugin
-    from plugins.BackgroundPlugin import BackgroundPlugin
-    from plugins.ClipPlugin import ClipPlugin
-    from plugins.ContourPlugin import ContourPlugin
-    from plugins.OutputPlugin import OutputPlugin
-    from plugins.CameraPlugin import CameraPlugin
-    from plugins.MediaControlPlugin import MediaControlPlugin
+    from .plugins.VTKWindowPlugin import VTKWindowPlugin
+    from .plugins.FilePlugin import FilePlugin
+    from .plugins.BlockPlugin import BlockPlugin
+    from .plugins.GoldDiffPlugin import GoldDiffPlugin
+    from .plugins.ColorbarPlugin import ColorbarPlugin
+    from .plugins.MeshPlugin import MeshPlugin
+    from .plugins.BackgroundPlugin import BackgroundPlugin
+    from .plugins.ClipPlugin import ClipPlugin
+    from .plugins.ContourPlugin import ContourPlugin
+    from .plugins.OutputPlugin import OutputPlugin
+    from .plugins.CameraPlugin import CameraPlugin
+    from .plugins.MediaControlPlugin import MediaControlPlugin
 
     plugins = [lambda: VTKWindowPlugin(size=size),
                FilePlugin,

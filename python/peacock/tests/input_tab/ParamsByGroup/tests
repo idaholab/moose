@@ -3,5 +3,6 @@
     type = PythonUnitTest
     input = test_ParamsByGroup.py
     display_required = True
+    python = 3
   [../]
 []

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -17,4 +17,4 @@ data = list()
 for i in range(3):
     reader.update(timestep=i)
     data.append(reader.getGlobalData('k_eff'))
-print data
+print(data)

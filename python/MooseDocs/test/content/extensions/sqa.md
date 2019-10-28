@@ -10,9 +10,9 @@
 
 ## Verification and Validation
 
-!sqa verification category=demo
+!!sqa verification category=demo
 
-!sqa validation category=demo
+!!sqa validation category=demo
 
 ## Cross-Reference
 

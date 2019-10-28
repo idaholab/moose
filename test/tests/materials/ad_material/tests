@@ -70,7 +70,7 @@
     cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/file_base=default_ad_material_out'
     requirement = 'We shall be able to set default values for AD material properties'
     issues = "#5658"
-  []
+  [../]
   [default_material_value_jac]
     type = 'PetscJacobianTester'
     input = 'ad_material.i'
@@ -80,5 +80,5 @@
     issues = '#5658'
     ratio_tol = 1e-7
     difference_tol = 1e-5
-  []
+  [../]
 []

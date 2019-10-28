@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -40,7 +40,6 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         """
         Remove local copy of files.
         """
-
         for f in glob.glob(self._pattern):
             fname = os.path.basename(f)
             if os.path.exists(fname):
@@ -54,20 +53,18 @@ class TestVectorPostprocessorReader(unittest.TestCase):
 
         # Load the data
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
-        self.assertEqual(data.filename, os.path.basename(self._pattern))
+        self.assertEqual(data._pattern, os.path.basename(self._pattern))
+        self.assertEqual(data.filename, 'vpp_005.csv')
         self.assertTrue(data._timedata)
         self.assertTrue(data)
 
         # Check axis organized correctly
-        self.assertEqual(data.data.shape, (3,6,3))
-
-        # Check that times are loaded
-        self.assertEqual(list(data.data.keys().values), [1,3,7])
+        self.assertEqual(data.data.data.shape, (7,3))
+        self.assertEqual(data.times(), [1,3,7,13])
 
         # Check data
         y = data['y']
-        self.assertEqual(y[3][4], 8)
-        self.assertEqual(y[7][4], 16)
+        self.assertEqual(y[6], 4096)
 
     def testBasicNoTime(self):
         """
@@ -76,20 +73,20 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.copyfiles(copytime=False)
 
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
-        self.assertEqual(data.filename, os.path.basename(self._pattern))
+        self.assertEqual(data._pattern, os.path.basename(self._pattern))
+        self.assertEqual(data.filename, 'vpp_005.csv')
         self.assertFalse(data._timedata)
         self.assertTrue(data)
 
         # Check axis organized correctly
-        self.assertEqual(data.data.shape, (3,6,3))
+        self.assertEqual(data.data.data.shape, (7,3))
 
         # Check that times are loaded
-        self.assertEqual(list(data.data.keys().values), [0,1,2])
+        self.assertEqual(data.times(), [0,1,2,5])
 
         # Check data
         y = data['y']
-        self.assertEqual(y[1][4], 8)
-        self.assertEqual(y[2][4], 16)
+        self.assertEqual(y[6], 4096)
 
     def testEmptyUpdateRemove(self):
         """
@@ -98,7 +95,8 @@ class TestVectorPostprocessorReader(unittest.TestCase):
 
         # Create object w/o data
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
-        self.assertEqual(data.filename, os.path.basename(self._pattern))
+        self.assertEqual(data._pattern, os.path.basename(self._pattern))
+        self.assertEqual(data.filename, None)
         self.assertFalse(data._timedata)
         self.assertFalse(data)
 
@@ -109,18 +107,16 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.assertTrue(data)
 
         # Check axis organized correctly
-        self.assertEqual(data.data.shape, (3,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,3,7])
+        self.assertEqual(data.data.data.shape, (7,3))
+        self.assertEqual(list(data.times()), [1,3,7,13])
         y = data['y']
-        self.assertEqual(y[3][4], 8)
-        self.assertEqual(y[7][4], 16)
+        self.assertEqual(y[6], 4096)
 
         # Remove data
         self.tearDown()
         data.update()
         self.assertFalse(data._timedata)
         self.assertFalse(data)
-        self.assertTrue(data['y'].empty)
 
     def testOldData(self):
         """
@@ -131,7 +127,8 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.copyfiles()
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
         self.assertTrue(data)
-        self.assertEqual(data.data.shape, (3,6,3))
+        self.assertEqual(data.data.data.shape, (7,3))
+        self.assertEqual(data.times(), [1,3,7,13])
 
         # Make the last file old
         time.sleep(2) # wait so new files have newer modified times
@@ -141,19 +138,24 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         # Update and make certain data structure is smaller
         data.update()
         self.assertTrue(data)
-        self.assertEqual(data.data.shape, (2,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,3])
+        self.assertEqual(data.times(), [1,3])
+        self.assertEqual(data.data.data.shape, (6,3))
+        self.assertEqual(data.filename, 'vpp_001.csv')
 
         # Test data
         y = data['y']
-        self.assertEqual(y[3][4], 8)
+        self.assertEqual(y[3], 6)
 
         # Touch 3 so that, it should show up then
         time.sleep(1)
         mooseutils.touch('vpp_002.csv')
         data.update()
         self.assertTrue(data)
-        self.assertEqual(data.data.shape, (3,6,3))
+        self.assertEqual(data.filename, 'vpp_002.csv')
+        self.assertEqual(data.data.data.shape, (6,3))
+
+        y = data['y']
+        self.assertEqual(y[3], 9)
 
     def testRemoveData(self):
         """
@@ -164,7 +166,9 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.copyfiles()
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
         self.assertTrue(data)
-        self.assertEqual(data.data.shape, (3,6,3))
+        self.assertEqual(data.filename, 'vpp_005.csv')
+        self.assertEqual(data.data.data.shape, (7,3))
+        self.assertEqual(data.times(), [1,3,7,13])
 
         # Remove the middle file
         os.remove('vpp_001.csv')
@@ -172,13 +176,9 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         # Update and check results
         data.update()
         self.assertTrue(data)
-        self.assertEqual(data.data.shape, (2,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,7])
-
-        # Test data
-        y = data['y']
-        self.assertEqual(y[1][4], 4)
-        self.assertEqual(y[7][4], 16)
+        self.assertEqual(data.filename, 'vpp_005.csv')
+        self.assertEqual(data.data.data.shape, (7,3))
+        self.assertEqual(data.times(), [1,7,13])
 
     def testTimeAccess(self):
         """
@@ -186,31 +186,37 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         """
         self.copyfiles()
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
+        self.assertEqual(data.times(), [1,3,7,13])
         self.assertTrue(data)
 
         # Test that newest data is returned
-        y = data('y')
-        self.assertEqual(y[4], 16)
+        self.assertEqual(data.filename, 'vpp_005.csv')
+        y = data['y']
+        self.assertEqual(y[6], 4096)
 
         # Test that older data can be loaded
-        y = data('y', time=3)
-        self.assertEqual(y[4], 8)
+        data.update(time=3)
+        self.assertEqual(data.filename, 'vpp_001.csv')
+        y = data['y']
+        self.assertEqual(y[5], 10)
 
         # Test that bisect returns value even if time is exactly correct
-        y = data('y', time=3.3)
-        self.assertEqual(y[4], 8)
+        data.update(time=7.3)
+        self.assertEqual(data.filename, 'vpp_002.csv')
+        y = data['y']
+        self.assertEqual(y[5], 25)
 
         # Test that beyond end returns newest
-        y = data('y', time=9999)
-        self.assertEqual(y[4], 16)
+        data.update(time=9999)
+        self.assertEqual(data.filename, 'vpp_005.csv')
+        y = data['y']
+        self.assertEqual(y[6], 4096)
 
         # Test time less than beginning returns first
-        y = data('y', time=0.5)
-        self.assertEqual(y[4], 4)
-
-        # Test that disabling bisect returns empty
-        y = data('y', time=3.3, exact=True)
-        self.assertTrue(y.empty)
+        data.update(time=0.5)
+        self.assertEqual(data.filename, 'vpp_000.csv')
+        y = data['y']
+        self.assertEqual(y[5], 5)
 
     def testVariables(self):
         """
@@ -219,8 +225,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.copyfiles()
         data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
         self.assertTrue(data)
-        self.assertIn('x', data.variables())
-        self.assertIn('y', data.variables())
+        self.assertEqual(data.variables(), ['index (Peacock)', 'x', 'y'])
 
     def testRepr(self):
         """
@@ -236,8 +241,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         output, imports = data.repr()
 
         # Append testing content
-        output += ["print 'SHAPE:', data.data.shape"]
-        output += ["print 'VALUE:', data['y'][3][4]"]
+        output += ["print(data['y'][6])"]
 
         # Write the test script
         script = '{}_repr.py'.format(self.__class__.__name__)
@@ -247,11 +251,10 @@ class TestVectorPostprocessorReader(unittest.TestCase):
 
         # Run script
         self.assertTrue(os.path.exists(script))
-        out = subprocess.check_output(['python', script])
+        out = mooseutils.check_output(['python', script])
 
         # Test for output
-        self.assertIn('SHAPE: (3, 6, 3)', out)
-        self.assertIn('VALUE: 8', out)
+        self.assertIn('4096', out)
 
         # Remove the script
         os.remove(script)

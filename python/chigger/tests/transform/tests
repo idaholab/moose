@@ -3,51 +3,62 @@
     type = ImageDiff
     command = scale.py
     imagediff = 'scale.png'
+    python = 3
   [../]
   [./test_2d]
     type = ImageDiff
     command = scale_2d.py
     imagediff = 'scale_2d.png'
+    python = 3
   [../]
   [./rotate_none]
     type = ImageDiff
     command = rotate.py
     imagediff = 'rotate.png'
+    python = 3
   [../]
   [./rotate_x]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 90 0 0 --name rotate_x.png'
     imagediff = 'rotate_x.png'
+    python = 3
+    platform = LINUX
   [../]
   [./rotate_y]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 0 90 0 --name rotate_y.png'
     imagediff = 'rotate_y.png'
+    python = 3
+    platform = LINUX
   [../]
   [./rotate_z]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 0 0 90 --name rotate_z.png'
     imagediff = 'rotate_z.png'
+    python = 3
   [../]
   [./translate_x]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 2 0 0 --name translate_x.png'
     imagediff = 'translate_x.png'
+    python = 3
   [../]
   [./translate_y]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 0 2 0 --name translate_y.png'
     imagediff = 'translate_y.png'
+    python = 3
   [../]
   [./translate_z_scale_and_rotate]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 0 0 2 --rotate 0 90 0 --scale 0.5 0.5 0.5 --name translate_z.png'
     imagediff = 'translate_z.png'
+    python = 3
   [../]
 []

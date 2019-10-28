@@ -176,7 +176,7 @@ class Preferences(object):
         self._widgets[widget._name] = widget
 
     def widgets(self):
-        return self._widgets.values()
+        return list(self._widgets.values())
 
     def widget(self, key):
         return self._widgets[key]

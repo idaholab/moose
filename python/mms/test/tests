@@ -3,52 +3,53 @@
   design = 'mms.md'
   [spatial]
     type = CheckFiles
-    sympy = True
     command = mms_spatial.py
     check_files = 'mms_spatial.png'
     requirement = "The system shall include a tool for creating spatial convergence plots using method of manufactured solutions."
     valgrind = none
+    required_python_packages = 'sympy'
   []
   [spatial_csv]
     type = CSVDiff
-    sympy = True
     command = mms_spatial.py
     recover = false # this is not running a MooseApp, recover doesn't make any sense
     csvdiff = 'mms_spatial_first.csv mms_spatial_second.csv'
     requirement = "The system shall include a tool for writing spatial convergence data to a file using method of manufactured solutions."
     prereq = spatial
     valgrind = none
+    required_python_packages = 'sympy'
   []
   [temporal]
     type = CheckFiles
-    sympy = True
     command = mms_temporal.py
     check_files = 'mms_temporal.png'
     requirement = "The system shall include a tool for creating temporal convergence plots using method of manufactured solutions."
     valgrind = none
+    required_python_packages = 'sympy'
   []
   [temporal_csv]
     type = CSVDiff
-    sympy = True
     command = mms_temporal.py
     recover = false # this is not running a MooseApp, recover doesn't make any sense
     csvdiff = 'mms_temporal_first.csv mms_temporal_second.csv'
     requirement = "The system shall include a tool for writing temporal convergence data to a file using method of manufactured solutions."
     prereq = temporal
     valgrind = none
+    required_python_packages = 'sympy'
   []
   [exact]
     type = RunApp
-    sympy = True
     command = mms_exact.py
     expect_out = 'type = ParsedFunction'
     requirement = "The system shall include a tool to output solution and forcing functions."
     valgrind = none
+    required_python_packages = 'sympy'
   []
   [evaluate]
     type = PythonUnitTest
     input = test_mms.py
-    sympy = true
     requirement = "The system shall include a tool for computing forcing functions for the method of manufactured solutions."
+    python = 3
+    required_python_packages = 'sympy'
   []
 []

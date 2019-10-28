@@ -5,20 +5,24 @@
     type = PythonUnitTest
     input = test_components.py
     requirement = "MooseDocs shall include a TokenComponent and RenderComponent objects for creating extensions."
+    required_python_packages = 'mock'
   []
   [lexer]
     type = PythonUnitTest
     input = test_lexers.py
     requirement = "MooseDocs shall include lexer object capable of recursively processing text."
+    required_python_packages = 'anytree'
   []
   [reader]
     type = PythonUnitTest
     input = test_readers.py
     requirement = "MooseDocs shall include reader object for reading files."
+    required_python_packages = 'anytree'
   []
   [translator]
     type = PythonUnitTest
     input = test_translator.py
     requirement = "MooseDocs shall include a translator for converting documentation formats."
+    required_python_packages = 'anytree'
   []
 []

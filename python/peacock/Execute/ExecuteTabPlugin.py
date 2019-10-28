@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -13,9 +13,9 @@ from peacock.base.TabPlugin import TabPlugin
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from peacock.utils import ExeFinder
-from ExecuteOptionsPlugin import ExecuteOptionsPlugin
-from ExecuteRunnerPlugin import ExecuteRunnerPlugin
-from ConsoleOutputViewerPlugin import ConsoleOutputViewerPlugin
+from .ExecuteOptionsPlugin import ExecuteOptionsPlugin
+from .ExecuteRunnerPlugin import ExecuteRunnerPlugin
+from .ConsoleOutputViewerPlugin import ConsoleOutputViewerPlugin
 from peacock.Input.ExecutableInfo import ExecutableInfo
 import os
 

@@ -6,8 +6,8 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
-import Testing
+import functools
+from . import Testing
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 

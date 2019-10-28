@@ -10,7 +10,7 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -75,7 +75,7 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             options, sub_options = self._clipper.options().toScriptString()
             output['filters'] = ['clipper = chigger.filters.PlaneClipper()']
             output['filters'] += ['clipper.setOptions({})'.format(', '.join(options))]
-            for key, value in sub_options.iteritems():
+            for key, value in sub_options.items():
                 output['filters'] += ['clipper.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output

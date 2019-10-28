@@ -19,8 +19,8 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
-Image = tokens.newToken('Image', src=u'', tex=u'')
-Video = tokens.newToken('Video', src=u'', tex=u'',
+Image = tokens.newToken('Image', src='', tex='')
+Video = tokens.newToken('Video', src='', tex='',
                         controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtensionBase(command.CommandExtension):
@@ -32,8 +32,8 @@ class MediaExtensionBase(command.CommandExtension):
         width = style.get('width', None)
         if width:
             if width.endswith('%'):
-                width = u'{}\\textwidth'.format(int(width[:-1])/100.)
-            args.append(latex.Bracket(string=u'width={}'.format(width), escape=False))
+                width = '{}\\textwidth'.format(int(width[:-1])/100.)
+            args.append(latex.Bracket(string='width={}'.format(width), escape=False))
 
         if style.get('text-align', None) == 'center':
             env = latex.Environment(parent, 'center')
@@ -53,7 +53,7 @@ class MediaExtension(MediaExtensionBase):
     @staticmethod
     def defaultConfig():
         config = components.Extension.defaultConfig()
-        config['prefix'] = (u'Figure', "The caption prefix (e.g., Fig.).")
+        config['prefix'] = ('Figure', "The caption prefix (e.g., Fig.).")
         return config
 
     def extend(self, reader, renderer):
@@ -131,7 +131,7 @@ class RenderImage(components.RenderComponent):
         src = token['src']
         if not src.startswith('http'):
             node = self.translator.findPage(src)
-            src = unicode(node.relativeSource(page))
+            src = str(node.relativeSource(page))
 
         return html.Tag(parent, 'img', token, src=src)
 
@@ -168,7 +168,7 @@ class RenderVideo(components.RenderComponent):
         src = token['src']
         if not src.startswith('http'):
             node = self.translator.findPage(src)
-            src = unicode(node.relativeSource(page))
+            src = str(node.relativeSource(page))
 
         tstart = token['tstart']
         tstop = token['tstop']
@@ -206,8 +206,8 @@ class RenderVideo(components.RenderComponent):
 
         img = self.extension.latexImage(parent, token, page, src)
         if token['src'].startswith('http'):
-            latex.String(img.parent, content=u'\\newline(', escape=False)
+            latex.String(img.parent, content='\\newline(', escape=False)
             latex.Command(img.parent, 'url', string=token['src'])
-            latex.String(img.parent, content=u')')
+            latex.String(img.parent, content=')')
 
         return parent

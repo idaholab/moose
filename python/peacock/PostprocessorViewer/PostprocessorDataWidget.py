@@ -40,9 +40,13 @@ class PostprocessorDataWidget(QtCore.QObject):
             self._timer.setInterval(timer)
 
     def __call__(self, keys, **kwargs):
-        return self._reader(keys, **kwargs)
+        if hasattr(self._reader, 'times'):
+            self._reader.update(**kwargs)
+        else:
+            self._reader.update()
+        return self._reader[keys]
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._reader)
 
     def setTimerActive(self, active):
@@ -52,7 +56,10 @@ class PostprocessorDataWidget(QtCore.QObject):
             self._timer.stop()
 
     def times(self):
-        return self._reader.times()
+        attr = getattr(self._reader, 'times', None)
+        if attr:
+            return attr()
+        return []
 
     def filename(self):
         return self._reader.filename

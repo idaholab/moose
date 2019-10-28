@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import glob
-from ExodusReader import ExodusReader
+from .ExodusReader import ExodusReader
 from .. import base
 
 class MultiAppExodusReader(base.ChiggerObject):

@@ -8,10 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Module for defining tree structures for various MooseDocs operations."""
-import base
-import html
-import tokens
-import pages
+from . import base
+from . import html
+from . import tokens
+from . import pages
 
 # TODO: move these to common
-from app_syntax import app_syntax
+from .app_syntax import app_syntax

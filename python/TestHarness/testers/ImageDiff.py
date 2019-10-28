@@ -23,7 +23,7 @@ class ImageDiff(FileTester):
         params.addParam('allowed_darwin', "Absolute zero cuttoff used for Mac OS (Darwin) machines, if not provided 'allowed' is used.")
         # We don't want to check for any errors on the screen with this. If there are any real errors then the image test will fail.
         params['errors'] = []
-        params['display_required'] = True
+        params['display_required'] = False
         return params
 
     def __init__(self, name, params):

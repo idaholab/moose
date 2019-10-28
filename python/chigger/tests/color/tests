@@ -3,5 +3,6 @@
     type = ImageDiff
     command = color.py
     imagediff = color.png
+    python = 3
   [../]
 []

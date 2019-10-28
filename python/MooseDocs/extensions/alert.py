@@ -17,12 +17,12 @@ from MooseDocs.tree import tokens, html, latex
 def make_extension(**kwargs):
     return AlertExtension(**kwargs)
 
-AlertToken = tokens.newToken('AlertToken', brand=u'')
-AlertTitle = tokens.newToken('AlertTitle', brand=u'', prefix=True)
-AlertContent = tokens.newToken('AlertContent', brand=u'', icon=True)
+AlertToken = tokens.newToken('AlertToken', brand='')
+AlertTitle = tokens.newToken('AlertTitle', brand='', prefix=True)
+AlertContent = tokens.newToken('AlertContent', brand='', icon=True)
 
 # LaTeX alert environment that uses tcolorbox package
-ALERT_LATEX = u"""\\setlength\\intextsep{0pt}
+ALERT_LATEX = """\\setlength\\intextsep{0pt}
 \\NewDocumentEnvironment{alert}{O{#2}moO{white}}{%
   \\ifthenelse{\\isempty{#1}}{%
       \\IfValueT{#3}{\\tcbset{title=#3}}
@@ -62,10 +62,10 @@ class AlertExtension(command.CommandExtension):
             renderer.addPackage('wrapfig')
             renderer.addPackage('graphicx')
 
-            renderer.addPreamble(u'\\definecolor{alert-error}{RGB}{153,0,0}')
-            renderer.addPreamble(u'\\definecolor{alert-note}{RGB}{0,88,151}')
-            renderer.addPreamble(u'\\definecolor{alert-warning}{RGB}{220,200,100}')
-            renderer.addPreamble(u'\\definecolor{alert-construction}{RGB}{255,114,33}')
+            renderer.addPreamble('\\definecolor{alert-error}{RGB}{153,0,0}')
+            renderer.addPreamble('\\definecolor{alert-note}{RGB}{0,88,151}')
+            renderer.addPreamble('\\definecolor{alert-warning}{RGB}{220,200,100}')
+            renderer.addPreamble('\\definecolor{alert-construction}{RGB}{255,114,33}')
             renderer.addPreamble(ALERT_LATEX)
 
         if isinstance(renderer, HTMLRenderer):
@@ -130,12 +130,12 @@ class RenderAlertToken(components.RenderComponent):
 
         c_icon = token(1)['icon'] and (token['brand'] == 'construction')
         if c_icon:
-            latex.Command(parent, 'tcbset', string=u'height from=1in to 200in', escape=False)
+            latex.Command(parent, 'tcbset', string='height from=1in to 200in', escape=False)
 
         env = latex.Environment(parent, 'alert', args=args)
 
         if c_icon:
-            latex.Command(parent, 'tcbset', string=u'height from=0in to 200in', escape=False)
+            latex.Command(parent, 'tcbset', string='height from=0in to 200in', escape=False)
 
         token(0).parent = None
         return env
@@ -162,10 +162,10 @@ class RenderAlertContent(components.RenderComponent):
         if token['icon'] and (token['brand'] == 'construction'):
             src = 'media/framework/under-construction.png'
             wrapfig = latex.Environment(parent, 'wrapfigure',
-                                        args=[latex.Brace(string=u'l'),
-                                              latex.Brace(string=u'1in', escape=False)])
+                                        args=[latex.Brace(string='l'),
+                                              latex.Brace(string='1in', escape=False)])
             latex.Command(wrapfig, 'includegraphics',
-                          args=[latex.Bracket(string=u'height=0.6in', escape=False)],
+                          args=[latex.Bracket(string='height=0.6in', escape=False)],
                           string=src)
         return parent
 
@@ -179,11 +179,11 @@ class RenderAlertTitle(components.RenderComponent):
         title = html.Tag(parent, 'div', class_='card-title moose-alert-title')
         if token.get('prefix'):
             brand = token['brand']
-            if brand == u'construction':
-                brand = u'under construction'
+            if brand == 'construction':
+                brand = 'under construction'
             prefix = html.Tag(title, 'span', string=brand, class_='moose-alert-title-brand')
             if token.children:
-                html.String(prefix, content=u':')
+                html.String(prefix, content=':')
 
         return title
 

@@ -1,22 +1,22 @@
 \documentclass{report}
-\usepackage[urlcolor=blue,filecolor=blue,linkcolor=blue,colorlinks=true,citecolor=blue]{hyperref}
-\usepackage{xcolor}
-\usepackage{tcolorbox}
-\usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{listings}
 \usepackage{soul}
-\usepackage[margin=1in]{geometry}
+\usepackage[linkcolor=blue,citecolor=blue,filecolor=blue,urlcolor=blue,colorlinks=true]{hyperref}
 \usepackage[labelsep=period]{caption}
-\usepackage{xifthen}
-\usepackage{tabulary}
-\usepackage{fontawesome}
-\usepackage{amsfonts}
-\usepackage[content={Draft mode enabled in the graph extension.}]{draftfigure}
-\usepackage{xparse}
+\usepackage{xcolor}
 \usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tabulary}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{xparse}
+\usepackage{xifthen}
 \usepackage{wrapfig}
+\usepackage{amsfonts}
 \usepackage[round]{natbib}
+\usepackage{fontawesome}
+\usepackage[content={Draft mode enabled in the graph extension.}]{draftfigure}
+\usepackage[margin=1in]{geometry}
 \usepackage{parskip}\setlength{\parindent}{0pt}
 \lstset{basicstyle=\ttfamily,columns=fullflexible,frame=single,breaklines=true,showstringspaces=false,showspaces=false,postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},}
 \tcbuselibrary{skins}
@@ -97,8 +97,8 @@ title=Example~\thetcbcounter: #2,#1}
   \end{minipage}
 }
 
-\NewDocumentCommand{\pf}{mm}{\frac{\partial #1}{\partial #2}}
 \NewDocumentCommand{\RR}{}{\mathbb{R}}
+\NewDocumentCommand{\pf}{mm}{\frac{\partial #1}{\partial #2}}
 \begin{document}
 
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/index.tex}
@@ -129,5 +129,5 @@ title=Example~\thetcbcounter: #2,#1}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/template.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/folder/index.tex}
 \bibliographystyle{unsrtnat}
-\bibliography{${MOOSE_DIR}/framework/doc/content/bib/sqa_framework.bib,${MOOSE_DIR}/framework/doc/content/bib/moose.bib}
+\bibliography{${MOOSE_DIR}/framework/doc/content/bib/moose.bib,${MOOSE_DIR}/framework/doc/content/bib/sqa_framework.bib}
 \end{document}

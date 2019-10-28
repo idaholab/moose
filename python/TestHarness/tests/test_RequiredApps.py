@@ -15,6 +15,6 @@ class TestHarnessTester(TestHarnessTestCase):
         Test that the required_apps check works
         """
         output = self.runTests('--no-color', '-i', 'required_apps')
-        self.assertRegexpMatches(output, r'test_harness\.bad_app.*? \[APP DOESNOTEXIST NOT REGISTERED IN EXECUTABLE\] SKIP')
-        self.assertRegexpMatches(output, r'test_harness\.good_app.*? OK')
-        self.checkStatus(output, passed=1, skipped=1)
+        self.assertRegexpMatches(output.decode('utf-8'), r'test_harness\.bad_app.*? \[APP DOESNOTEXIST NOT REGISTERED IN EXECUTABLE\] SKIP')
+        self.assertRegexpMatches(output.decode('utf-8'), r'test_harness\.good_app.*? OK')
+        self.checkStatus(output.decode('utf-8'), passed=1, skipped=1)

@@ -716,7 +716,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
         // restricted
         // in any way by the user.
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
-        std::string moose_obj_name = moose_obj->first; // Create a copy because it is modified later
+        std::string moose_obj_name = moose_obj->first;
 
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted

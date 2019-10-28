@@ -10,7 +10,7 @@
 #pylint: enable=missing-docstring
 import cgi
 import anytree
-from base import NodeBase
+from .base import NodeBase
 
 class Tag(NodeBase):
     """
@@ -29,13 +29,13 @@ class Tag(NodeBase):
         kwargs.setdefault('close', True)
         kwargs.setdefault('string', None)
         if token is not None:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', u'')))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', u'')))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', u'')))
+            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', '')))
+            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', '')))
+            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', '')))
         else:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', u''))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', u''))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', u''))
+            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', ''))
+            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', ''))
+            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', ''))
         super(Tag, self).__init__(name=name, parent=parent, **kwargs)
 
         string = self.attributes.pop('string', None)
@@ -65,18 +65,18 @@ class Tag(NodeBase):
         skip_list = ('close', 'string')
         for key, value in self.iteritems():
             if value and (key not in skip_list):
-                attr_list.append(u'{}="{}"'.format(key, unicode(value).strip()))
+                attr_list.append('{}="{}"'.format(key, str(value).strip()))
 
-        attr = u' '.join(attr_list)
+        attr = ' '.join(attr_list)
         if attr:
-            out += u'<{} {}>'.format(self.name, attr)
+            out += '<{} {}>'.format(self.name, attr)
         else:
-            out += u'<{}>'.format(self.name)
+            out += '<{}>'.format(self.name)
 
         for child in self.children:
             out += child.write()
         if self.get('close'): #pylint: disable=no-member
-            out += u'</{}>'.format(self.name)
+            out += '</{}>'.format(self.name)
         return out
 
     def text(self):
@@ -87,7 +87,7 @@ class Tag(NodeBase):
         for node in anytree.PreOrderIter(self):
             if node.name == 'String':
                 strings.append(node['content'])
-        return u' '.join(strings)
+        return ' '.join(strings)
 
     def copy(self, _parent=None):
         """Copy the tree from this node."""
@@ -101,16 +101,16 @@ class String(NodeBase):
     A node for containing string content.
     """
     def __init__(self, parent=None, **kwargs):
-        kwargs.setdefault('content', u'')
-        kwargs.setdefault('escape', u'')
+        kwargs.setdefault('content', '')
+        kwargs.setdefault('escape', '')
         super(String, self).__init__('String', parent, **kwargs)
 
         if self.get('content') is None:
-            self.set('content', u'')
+            self.set('content', '')
 
     def write(self):
         if self.get('escape'):
-            return cgi.escape(self.get('content'), quote=True)
+            return cgi.escape(str(self.get('content')), quote=True)
         else:
             return self.get('content')
 

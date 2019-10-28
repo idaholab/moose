@@ -14,7 +14,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that --recover returns two passing statuses (part1 and the OK)
         """
-        output = self.runTests('-i', 'always_ok', '--recover')
+        output = self.runTests('-i', 'always_ok', '--recover').decode('utf-8')
 
         self.assertIn('PART1', output)
         self.assertIn('RECOVER', output)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -30,9 +30,6 @@ class TestMooseDataFrame(unittest.TestCase):
         """
         Test that if a file exists it is loaded w/o error.
         """
-
-        #x_key = 'air_temp_low_24_hour_set_1'
-        #y_key = 'snow_depth_set_1'
 
         # Test basic read
         data = mooseutils.MooseDataFrame(self._filename)

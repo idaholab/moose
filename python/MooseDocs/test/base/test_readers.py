@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -27,7 +27,7 @@ class WordComponent(components.TokenComponent):
             raise Exception("testing")
         return Word(parent)
 
-Letter = tokens.newToken('Letter', content=u'')
+Letter = tokens.newToken('Letter', content='')
 class LetterComponent(components.TokenComponent):
     RE = re.compile('(?P<content>\w)')
     def createToken(self, parent, info, page):
@@ -40,7 +40,7 @@ class TestReader(unittest.TestCase):
         reader = readers.Reader(lexers.RecursiveLexer('block', 'inline'))
         reader.add('block', WordComponent())
         reader.add('inline', LetterComponent())
-        reader.tokenize(root, u'foo bar', None)
+        reader.tokenize(root, 'foo bar', None)
         self.assertEqual(root(0).name, 'Word')
         self.assertEqual(root(0)(0).name, 'Letter')
         self.assertEqual(root(0)(1).name, 'Letter')
@@ -61,12 +61,12 @@ class TestReader(unittest.TestCase):
         MooseDocs.LOG_LEVEL = logging.DEBUG
         reader = readers.Reader(lexers.RecursiveLexer('foo'))
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.tokenize([], u'', None)
-        self.assertIn("The argument 'root'", e.exception.message)
+            reader.tokenize([], '', None)
+        self.assertIn("The argument 'root'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.tokenize(tokens.Token(), [], None)
-        self.assertIn("The argument 'content'", e.exception.message)
+        self.assertIn("The argument 'content'", str(e.exception))
         MooseDocs.LOG_LEVEL = logging.INFO
 
     def testAddExceptions(self):
@@ -74,16 +74,16 @@ class TestReader(unittest.TestCase):
         reader = readers.Reader(lexers.RecursiveLexer('foo'))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.add([], u'', '')
-        self.assertIn("The argument 'group'", e.exception.message)
+            reader.add([], '', '')
+        self.assertIn("The argument 'group'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.add('foo', u'', '')
-        self.assertIn("The argument 'component'", e.exception.message)
+            reader.add('foo', '', '')
+        self.assertIn("The argument 'component'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.add('foo', components.TokenComponent(), [])
-        self.assertIn("The argument 'location'", e.exception.message)
+        self.assertIn("The argument 'location'", str(e.exception))
         MooseDocs.LOG_LEVEL = logging.INFO
 
     def testTokenizeException(self):
@@ -91,15 +91,15 @@ class TestReader(unittest.TestCase):
         reader = readers.Reader(lexers.RecursiveLexer('block', 'inline'))
         reader.add('block', WordComponent())
         reader.add('inline', LetterComponent())
-        reader.tokenize(root, u'throw bar', pages.Page('foo', source='foo'))
+        reader.tokenize(root, 'throw bar', pages.Page('foo', source='foo'))
         self.assertEqual(root(0).name, 'ErrorToken')
         self.assertEqual(root(1).name, 'Word')
         self.assertEqual(root(1)(0).name, 'Letter')
         self.assertEqual(root(1)(1).name, 'Letter')
         self.assertEqual(root(1)(2).name, 'Letter')
-        self.assertEqual(root(1)(0)['content'], u'b')
-        self.assertEqual(root(1)(1)['content'], u'a')
-        self.assertEqual(root(1)(2)['content'], u'r')
+        self.assertEqual(root(1)(0)['content'], 'b')
+        self.assertEqual(root(1)(1)['content'], 'a')
+        self.assertEqual(root(1)(2)['content'], 'r')
 
 class TestMarkdownReader(unittest.TestCase):
     def testBasic(self):
@@ -107,7 +107,7 @@ class TestMarkdownReader(unittest.TestCase):
         reader = readers.MarkdownReader()
         reader.add('block', WordComponent())
         reader.add('inline', LetterComponent())
-        reader.tokenize(root, u'foo bar', pages.Page('foo', source='foo'))
+        reader.tokenize(root, 'foo bar', pages.Page('foo', source='foo'))
 
         self.assertEqual(root(0).name, 'Word')
         self.assertEqual(root(0)(0).name, 'Letter')

@@ -10,7 +10,7 @@
 """Wrapper for hit parser."""
 import os
 import hit
-import message
+from . import message
 
 # The 'HitNode' object is used within the TestHarness, which should operate without any
 # special python libraries. However, the 'anytree' package is used by various utilities within the
@@ -198,7 +198,7 @@ def hit_load(filename):
     if os.path.exists(filename):
         with open(filename, 'r') as fid:
             content = fid.read()
-    elif isinstance(filename, (str, unicode)):
+    elif isinstance(filename, str):
         content = filename
     else:
         message.mooseError("Unable to load the hit file ", filename)
@@ -230,5 +230,5 @@ def hit_parse(root, hit_node, filename):
 if __name__ == '__main__':
     filename = '../../test/tests/kernels/simple_diffusion/simple_diffusion.i'
     root = hit_load(filename)
-    print root
-    print root.render()
+    print(root)
+    print(root.render())

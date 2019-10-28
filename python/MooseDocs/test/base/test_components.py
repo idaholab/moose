@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -57,8 +57,8 @@ class TestTokenComponent(unittest.TestCase):
             self.assertIn(key, defaults)
             self.assertIsInstance(defaults[key], tuple)
             self.assertEqual(len(defaults[key]), 2)
-            self.assertEqual(defaults[key][0], u'')
-            self.assertIsInstance(defaults[key][1], unicode)
+            self.assertEqual(defaults[key][0], '')
+            self.assertIsInstance(defaults[key][1], str)
 
     def testExceptions(self):
         """
@@ -77,7 +77,7 @@ class TestTokenComponent(unittest.TestCase):
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             TestToken()
-        self.assertIn("must return a dict", e.exception.message)
+        self.assertIn("must return a dict", str(e.exception))
 
     def testCreateToken(self):
         """

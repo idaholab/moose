@@ -87,7 +87,7 @@ class XMLDiffer(object):
 
         # Print the output
         if kwargs.pop('output', False):
-            print '\n'.join(output)
+            print('\n'.join(output))
 
         # Return the text, as a single string
         return '\n'.join(output)
@@ -164,7 +164,7 @@ class XMLDiffer(object):
             if not any(results):
 
                 # Filter out errors (elem.text failure)
-                errors = filter(None, errors)
+                errors = [_f for _f in errors if _f]
 
                 # If no errors exist there was no block or block with identical attributes located
                 if len(errors) == 0:
@@ -218,18 +218,18 @@ class XMLDiffer(object):
         result = True
 
         # Loop through each attribute of the master object
-        for key0, value0 in elem0.attrib.iteritems():
+        for key0, value0 in elem0.attrib.items():
 
             # If this key is one of the attributes we're ignoring, then ignore it!
             if key0 in self._ignored_attributes:
                 continue
 
             # Attribute is missing from the slave object, match fails
-            if not elem1.attrib.has_key(key0):
+            if key0 not in elem1.attrib:
                 return  False
 
             # If the slave object has the same attribute, perform a comparison
-            elif elem1.attrib.has_key(key0):
+            elif key0 in elem1.attrib:
                 value1 = elem1.attrib[key0]
 
                 # Attempt to perform a numeric comparison
@@ -264,8 +264,8 @@ class XMLDiffer(object):
         # Convert the text to a list of strings
         text0 = elem0.text.replace('\n', '').strip().split(' ')
         text1 = elem1.text.replace('\n', '').strip().split(' ')
-        text0 = filter(None, text0)
-        text1 = filter(None, text1)
+        text0 = [_f for _f in text0 if _f]
+        text1 = [_f for _f in text1 if _f]
 
         # Check that the lengths are the same
         if len(text0) != len(text1):
@@ -277,7 +277,7 @@ class XMLDiffer(object):
             err = XMLError(err, msg)
             return (False, err)
 
-        for i in xrange(len(text0)):
+        for i in range(len(text0)):
             value, rel_diff = self._isClose(text0[i], text1[i])
 
             if not value:
@@ -328,7 +328,7 @@ class XMLDiffer(object):
     # @return Attribute message string
     def _getAttrib(self, elem):
         msg = []
-        for k, v in elem.attrib.iteritems():
+        for k, v in elem.attrib.items():
             msg.append('  ' + k + ' = ' + v)
         return msg
 
@@ -343,6 +343,6 @@ if __name__ == '__main__':
 
     d = XMLDiffer(file1, file2, ignored_attributes=['header_type'])
     if not d.fail():
-        print 'Files are the same\n'
+        print('Files are the same\n')
     else:
-        print d.message()
+        print(d.message())

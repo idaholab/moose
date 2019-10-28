@@ -19,5 +19,5 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'cyclic_tests')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, r'tests/test_harness.testC.*? FAILED \(Cyclic or Invalid Dependency Detected!\)')
-        self.assertRegexpMatches(e.output, r'tests/test_harness.test[A|B].*? \[SKIPPED DEPENDENCY\] SKIP')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.testC.*? FAILED \(Cyclic or Invalid Dependency Detected!\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.test[A|B].*? \[SKIPPED DEPENDENCY\] SKIP')

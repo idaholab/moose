@@ -9,10 +9,10 @@
 
 import collections
 from PyQt5 import QtWidgets
-from MooseWidget import MooseWidget
-from Plugin import Plugin
 import mooseutils
-from PreferenceWidget import PreferenceWidget
+from .MooseWidget import MooseWidget
+from .Plugin import Plugin
+from .PreferenceWidget import PreferenceWidget
 
 class PluginManager(MooseWidget):
     """
@@ -185,9 +185,9 @@ class PluginManager(MooseWidget):
     def fixLayoutWidth(self, layout):
         # Set the width of the left-side widgets to that the VTK window gets the space
         width = 0
-        for child in self._plugins.itervalues():
+        for child in self._plugins.values():
             if child.mainLayoutName() == layout:
                 width = max(child.sizeHint().width(), width)
-        for child in self._plugins.itervalues():
+        for child in self._plugins.values():
             if child.mainLayoutName() == layout:
                 child.setFixedWidth(width)

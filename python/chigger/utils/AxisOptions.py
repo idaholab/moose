@@ -10,7 +10,7 @@
 
 import vtk
 import mooseutils
-from Options import Options
+from .Options import Options
 
 VTK_NOTATION_ENUM = [
     vtk.vtkAxis.STANDARD_NOTATION,

@@ -176,7 +176,7 @@ def fparser(expr, assign_to=None, **kwargs):
 
 def print_fparser(expr, **kwargs):
     """Prints an FParser representation of the given expression."""
-    print(fparser(expr, **kwargs))
+    print(str(fparser(expr, **kwargs)))
 
 def build_hit(expr, name, **kwargs):
     """
@@ -207,4 +207,5 @@ def build_hit(expr, name, **kwargs):
 
 def print_hit(*args, **kwargs):
     """Prints a hit block containing a ParsedFunction of the given expression"""
-    print(build_hit(*args, **kwargs))
+    root = build_hit(*args, **kwargs)
+    print(root.render())

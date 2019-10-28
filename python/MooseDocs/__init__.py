@@ -19,8 +19,8 @@ except ImportError as e:
     MSG = "MooseDocs requires anytree (http://anytree.readthedocs.io/en/latest/index.html)\n"
     MSG += "version 2.4.0 or greater. If you are using the MOOSE environment package\n"
     MSG += "you can upgrade by running the following command.\n"
-    MSG += "    pip install --upgrade --user anytree"
-    print MSG
+    MSG += "    pip3 install --upgrade --user anytree"
+    print(MSG)
     sys.exit(1)
 
 import mooseutils
@@ -43,7 +43,7 @@ FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.webm', '.ogv', '.m
 # Setup MOOSE_DIR/ROOT_DIR
 MOOSE_DIR = os.getenv('MOOSE_DIR', None)
 if MOOSE_DIR is None:
-    print "The MOOSE_DIR environment must be set, this should be set within moosedocs.py."
+    print("The MOOSE_DIR environment must be set, this should be set within moosedocs.py.")
     sys.exit(1)
 
 # List all files with git, this is done here to avoid running this command many times

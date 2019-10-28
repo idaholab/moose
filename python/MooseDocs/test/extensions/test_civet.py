@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
@@ -8,14 +8,14 @@ logging.basicConfig()
 
 class TestInlineCivet(MooseDocsTestCase):
     EXTENSIONS = [core, command, civet]
-    TEXT = u"[!civet!results owner=idaholab repo=moose](Results)"
+    TEXT = "[!civet!results owner=idaholab repo=moose](Results)"
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
         self.assertToken(ast(0)(0), 'Link', size=1)
-        self.assertToken(ast(0)(0)(0), 'Word', size=0, content=u'Results')
+        self.assertToken(ast(0)(0)(0), 'Word', size=0, content='Results')
 
         url = ast(0)(0)['url']
         self.assertIn('https://civet.inl.gov/sha_events/idaholab/moose/', url)

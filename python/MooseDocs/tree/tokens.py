@@ -79,7 +79,7 @@ class Token(NodeBase):
     def info(self, value):
         self._info = value
 
-    def text(self, sep=u' '):
+    def text(self, sep=' '):
         """
         Convert String objects into a single string.
         """
@@ -109,6 +109,6 @@ class Token(NodeBase):
                     attributes=self.attributes,
                     children=[child.toDict() for child in self.children])
 
-String = newToken(u'String', content=u'')
-ErrorToken = newToken(u'ErrorToken', message=u'', traceback=None)
-DisabledToken = newToken(u'DisabledToken')
+String = newToken('String', content='')
+ErrorToken = newToken('ErrorToken', message='', traceback=None)
+DisabledToken = newToken('DisabledToken')

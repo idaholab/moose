@@ -34,7 +34,7 @@ class ListingExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['prefix'] = (u'Listing', "The caption prefix (e.g., Fig.).")
+        config['prefix'] = ('Listing', "The caption prefix (e.g., Fig.).")
         config['modal-link'] = (True, "Insert modal links with complete files.")
         return config
 
@@ -52,14 +52,14 @@ class ListingExtension(command.CommandExtension):
             renderer.addPackage('listings')
             renderer.addPackage('xcolor')
 
-            renderer.addPreamble(u"\\lstset{"
-                                 u"basicstyle=\\ttfamily,"
-                                 u"columns=fullflexible,"
-                                 u"frame=single,"
-                                 u"breaklines=true,"
-                                 u"showstringspaces=false,"
-                                 u"showspaces=false,"
-                                 u"postbreak=\\mbox{\\textcolor{red}{$\\hookrightarrow$}\\space},}")
+            renderer.addPreamble("\\lstset{"
+                                 "basicstyle=\\ttfamily,"
+                                 "columns=fullflexible,"
+                                 "frame=single,"
+                                 "breaklines=true,"
+                                 "showstringspaces=false,"
+                                 "showspaces=false,"
+                                 "postbreak=\\mbox{\\textcolor{red}{$\\hookrightarrow$}\\space},}")
 
 class LocalListingCommand(command.CommandComponent):
     COMMAND = 'listing'
@@ -70,7 +70,7 @@ class LocalListingCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
         settings.update(common.extractContentSettings())
-        settings['max-height'] = (u'350px', "The default height for listing content.")
+        settings['max-height'] = ('350px', "The default height for listing content.")
         settings['language'] = (None, "The language to use for highlighting, if not supplied it " \
                                       "will be inferred from the extension (if possible).")
         return settings
@@ -137,12 +137,12 @@ class FileListingCommand(LocalListingCommand):
             # Create modal for display the files a popup
             code = core.Code(None, language=lang, content=content)
             link = floats.create_modal_link(flt,
-                                            url=unicode(rel_filename),
+                                            url=str(rel_filename),
                                             content=code,
-                                            title=unicode(filename),
-                                            string=u'({})'.format(rel_filename))
+                                            title=str(filename),
+                                            string='({})'.format(rel_filename))
             link.name = 'ListingLink'
-            link['data-tooltip'] = unicode(rel_filename)
+            link['data-tooltip'] = str(rel_filename)
 
         return parent
 
@@ -188,7 +188,7 @@ class InputListingCommand(FileListingCommand):
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
-            out.append(unicode(node.render()))
+            out.append(str(node.render()))
         return '\n'.join(out)
 
 def get_listing_options(token):
@@ -201,7 +201,7 @@ def get_listing_options(token):
         lang = None
 
     if lang:
-        latex.String(opts, content=u"language={},".format(lang))
+        latex.String(opts, content="language={},".format(lang))
 
     return [opts]
 
@@ -215,17 +215,17 @@ class RenderListing(floats.RenderFloat):
         cap = token(0)
         key = cap['key']
         if key:
-            latex.String(opts[0], content=u"label={},".format(key))
+            latex.String(opts[0], content="label={},".format(key))
 
         tok = tokens.Token()
         cap.copyToToken(tok)
         if key:
-            latex.String(opts[0], content=u"caption=")
+            latex.String(opts[0], content="caption=")
         else:
-            latex.String(opts[0], content=u"title=")
+            latex.String(opts[0], content="title=")
 
         if not cap.children:
-            latex.String(opts[0], content=u"\\mbox{}", escape=False)
+            latex.String(opts[0], content="\\mbox{}", escape=False)
         else:
             self.translator.renderer.render(latex.Brace(opts[0]), tok, page)
 

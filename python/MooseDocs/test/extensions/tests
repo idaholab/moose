@@ -5,40 +5,48 @@
     type = PythonUnitTest
     input = test_core.py
     requirement = "The documentation system shall include basic support for a markdown-like syntax."
+    required_python_packages = 'anytree'
   []
   [comment]
     type = PythonUnitTest
     input = test_comment.py
     requirement = "The documentation system shall support comments within markdown syntax."
+    required_python_packages = 'anytree'
   []
   [acronym]
     type = PythonUnitTest
     input = test_acronym.py
     requirement = "The documentation system shall support acronyms within markdown syntax."
     issues = '#6699 #13611'
+    required_python_packages = 'anytree'
   []
   [sqa]
     type = PythonUnitTest
     input = test_sqa.py
     requirement = "The documentation system shall include tools for building software quality documents."
     issues = '#6699 #12049'
+    required_python_packages = 'anytree'
+    python = 3
   []
   [autolink]
     type = PythonUnitTest
     input = test_autolink.py
     requirement = "The documentation system shall include tools for automatically cross-linking files."
     issues = '#6699 #13567'
+    required_python_packages = 'anytree'
   []
   [civet]
     type = PythonUnitTest
     input = test_civet.py
     requirement = "The documentation system shall include tools for linking to continuous integration testing results."
     issues = '#12049'
+    required_python_packages = 'anytree'
   []
   [content]
     type = PythonUnitTest
     input = test_content.py
     requirement = "The documentation system shall include tools for listing and linking to content within and across documents."
     issues = '#9638'
+    required_python_packages = 'anytree'
   []
 []

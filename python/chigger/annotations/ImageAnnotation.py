@@ -11,7 +11,7 @@
 import math
 import vtk
 
-from ImageAnnotationSource import ImageAnnotationSource
+from .ImageAnnotationSource import ImageAnnotationSource
 from .. import base
 
 class ImageAnnotation(base.ChiggerResult):

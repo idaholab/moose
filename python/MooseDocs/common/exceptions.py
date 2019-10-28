@@ -25,4 +25,4 @@ class MooseDocsException(Exception):
         msg = message.format(*args)
         if kwargs.pop('log', False):
             LOG.exception(msg)
-        Exception.__init__(self, msg.encode('utf-8'))
+        Exception.__init__(self, str(msg))

@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QStackedWidget
 from PyQt5.QtCore import pyqtSignal
 from peacock.base.MooseWidget import MooseWidget
 from peacock.utils import WidgetUtils
-from ParamsByGroup import ParamsByGroup
+from .ParamsByGroup import ParamsByGroup
 
 class ParamsByType(QWidget, MooseWidget):
     """

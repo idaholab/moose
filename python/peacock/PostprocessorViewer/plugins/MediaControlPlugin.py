@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -11,9 +11,9 @@
 import sys
 import bisect
 from PyQt5 import QtWidgets, QtCore
-from PostprocessorPlugin import PostprocessorPlugin
 import mooseutils
 import peacock
+from .PostprocessorPlugin import PostprocessorPlugin
 
 class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBase, PostprocessorPlugin):
     """
@@ -94,9 +94,9 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         self.timeChanged.emit(self._times[self._current_step])
 
 def main(filenames):
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin, PostprocessorSelectPlugin, MediaControlPlugin])
     widget.onSetFilenames(filenames)
     widget.show()

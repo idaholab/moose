@@ -1,14 +1,28 @@
 CXX ?= g++
+PYTHON_VERSION := $(shell python -c 'import sys;print(sys.version_info[0])')
+UNAME := $(shell uname)
 
-# some systems have python2 but no python2-config command - fall back to python-config for them
-pyconfig := python2-config
-ifeq (, $(shell which python2-config 2>/dev/null))
-  pyconfig := python-config
+ifeq ($(PYTHON_VERSION), 2)
+	pyconfig := python2-config
+else
+	pyconfig := python3-config
 endif
+
+ifeq (, $(shell which $(pyconfig) 2>/dev/null))
+	pyconfig := python-config
+endif
+
+ifeq ($(UNAME), Darwin)
+	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+else
+	DYNAMIC_LOOKUP := ""
+endif
+
+$(info Building hit for python $(PYTHON_VERSION) with $(pyconfig))
 
 PYTHONPREFIX ?= `$(pyconfig) --prefix`
 PYTHONCFLAGS ?= `$(pyconfig) --cflags`
-PYTHONLDFLAGS ?= `$(pyconfig) --ldflags`
+HITCPP := hit$(PYTHON_VERSION).cpp
 
 hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc braceexpr.cc -o $@
@@ -18,13 +32,13 @@ rewrite: rewrite.cc parse.cc lex.cc lex.h parse.h
 
 bindings: hit.so
 
-hit.so: parse.cc lex.cc hit.cpp
-	$(CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(PYTHONLDFLAGS) $^ -o $@
+hit.so: parse.cc lex.cc braceexpr.cc $(HITCPP)
+	$(CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ -o $@
 
-hit.cpp: hit.pyx chit.pxd
-	cython --cplus $<
+$(HITCPP): hit.pyx chit.pxd
+	cython -$(PYTHON_VERSION) -o $@ --cplus $<
 
-.PRECIOUS: hit.cpp
+.PRECIOUS: $(HITCPP)
 
 .PHONY: clean bindings
 

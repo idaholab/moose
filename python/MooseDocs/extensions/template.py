@@ -21,8 +21,8 @@ from MooseDocs.tree import tokens
 
 LOG = logging.getLogger(__name__)
 
-TemplateItem = tokens.newToken('TemplateItem', key=u'')
-TemplateField = tokens.newToken('TemplateField', key=u'', required=True)
+TemplateItem = tokens.newToken('TemplateItem', key='')
+TemplateField = tokens.newToken('TemplateField', key='', required=True)
 TemplateSubField = tokens.newToken('TemplateSubField')
 
 def make_extension(**kwargs):
@@ -74,7 +74,7 @@ class TemplateExtension(include.IncludeExtension):
         """
         Helper for applying template args (e.g., {{app}})
         """
-        if not isinstance(content, (str, unicode)):
+        if not isinstance(content, (str, str)):
             return content
 
         template_args = self.get('args', dict())
@@ -88,7 +88,7 @@ class TemplateExtension(include.IncludeExtension):
                 raise exceptions.MooseDocsException(msg, key)
             return arg
 
-        content = re.sub(ur'{{(?P<key>.*?)}}', sub, content)
+        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
         return content
 
 
@@ -117,8 +117,7 @@ class TemplateLoadCommand(command.CommandComponent):
 
         location = self.translator.findPage(settings['file'])
         self.extension.addDependency(location)
-        with codecs.open(location.source, 'r', encoding='utf-8') as fid:
-            content = fid.read()
+        content = common.read(location.source)
 
         content = self.extension.applyTemplateArguments(content, **t_args)
         self.reader.tokenize(parent, content, page, line=info.line)
@@ -217,29 +216,29 @@ class RenderTemplateField(components.RenderComponent):
 
         filename = page.local
         key = token['key']
-        err = alert.AlertToken(None, brand=u'error')
+        err = alert.AlertToken(None, brand='error')
         alert_title = alert.AlertTitle(err,
-                                       brand=u'error',
-                                       string=u'Missing Template Item: "{}"'.format(key))
-        alert_content = alert.AlertContent(err, brand=u'error')
+                                       brand='error',
+                                       string='Missing Template Item: "{}"'.format(key))
+        alert_content = alert.AlertContent(err, brand='error')
         token.copyToToken(alert_content)
 
         if modal_flag:
             modal_content = tokens.Token(None)
             core.Paragraph(modal_content,
-                           string=u"The document must include the \"{0}\" template item, this can "\
-                           u"be included by add adding the following to the markdown " \
-                           u"file ({1}):".format(key, filename))
+                           string="The document must include the \"{0}\" template item, this can "\
+                           "be included by add adding the following to the markdown " \
+                           "file ({1}):".format(key, filename))
 
             core.Code(modal_content,
-                      content=u"!template! item key={0}\nInclude text (in MooseDocs format) " \
-                      u"regarding the \"{0}\" template item here.\n" \
-                      u"!template-end!".format(key))
+                      content="!template! item key={0}\nInclude text (in MooseDocs format) " \
+                      "regarding the \"{0}\" template item here.\n" \
+                      "!template-end!".format(key))
 
             link = floats.create_modal_link(alert_title,
-                                            title=u'Missing Template Item "{}"'.format(key),
+                                            title='Missing Template Item "{}"'.format(key),
                                             content=modal_content)
-            materialicon.Icon(link, icon=u'help_outline',
+            materialicon.Icon(link, icon='help_outline',
                               class_='small',
                               style='float:right;color:white;margin-bottom:5px;')
 

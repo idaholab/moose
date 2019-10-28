@@ -3,5 +3,7 @@
     type = ImageDiff
     command = offscreen.py
     imagediff = 'offscreen.png'
+    python = 3
+    platform = LINUX
   [../]
 []

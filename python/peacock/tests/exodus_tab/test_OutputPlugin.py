@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -75,7 +75,7 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
 
         # Diff the image from the script
         differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail())
 
     def testPNG(self):
@@ -86,7 +86,7 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
         self._window.onResultOptionsChanged({'variable':'diffused'})
         self._widget.OutputPlugin.write.emit(imagename)
         differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail())
 
     def testLiveScript(self):

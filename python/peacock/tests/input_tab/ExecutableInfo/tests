@@ -3,5 +3,6 @@
     type = PythonUnitTest
     input = test_ExecutableInfo.py
     display_required = True
+    python = 3
   [../]
 []

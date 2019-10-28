@@ -4,6 +4,8 @@
     type = ImageDiff
     command = simple.py
     imagediff = 'simple.png'
+    python = 3
+    platform = LINUX
   [../]
 
   [./simple_camera]
@@ -11,5 +13,6 @@
     type = ImageDiff
     command = simple_camera.py
     imagediff = 'simple_camera.png'
+    python = 3
   [../]
 []

@@ -9,9 +9,9 @@
 
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
 import mooseutils
-from AxisSettingsWidget import AxisSettingsWidget
+from .PostprocessorPlugin import PostprocessorPlugin
+from .AxisSettingsWidget import AxisSettingsWidget
 
 class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
 
@@ -91,9 +91,9 @@ class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
 
 def main(filenames):
 
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     import mooseutils
 
     widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxisTabsPlugin, PostprocessorSelectPlugin])

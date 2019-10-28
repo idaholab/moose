@@ -76,7 +76,7 @@ class NodeBase(anytree.NodeMixin):
 
     def iteritems(self):
         """Return dict key, value iterators."""
-        return self.__attributes.iteritems()
+        return self.__attributes.items()
 
     def __repr__(self):
         """
@@ -134,7 +134,7 @@ class NodeBase(anytree.NodeMixin):
         """Return the number of children."""
         return len(self.children)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         When __len__ is defined it is used for bool operations.
 
@@ -143,6 +143,10 @@ class NodeBase(anytree.NodeMixin):
         to make sure that it always returns True when queried as a boolean.
         """
         return True
+
+    def __nonzero__(self):
+        # PYTHON2
+        return self.__bool__()
 
     def get(self, key, default=None):
         """

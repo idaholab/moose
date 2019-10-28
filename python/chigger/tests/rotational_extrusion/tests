@@ -6,5 +6,6 @@
     design = 'chigger/index.md'
     issues = '#12128'
     requirement = "Chigger shall include the ability to rotate and extrude a 2D ExodusII result."
+    python = 3
   [../]
 []

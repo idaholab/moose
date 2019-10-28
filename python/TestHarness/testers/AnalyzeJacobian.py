@@ -54,7 +54,7 @@ class AnalyzeJacobian(FileTester):
 
         # Check for built application
         if not options.dry_run and not os.path.exists(command):
-            print 'Application not found: ' + str(specs['executable'])
+            print('Application not found: ' + str(specs['executable']))
             sys.exit(1)
 
         mesh_options = ' -m %s' % options.method

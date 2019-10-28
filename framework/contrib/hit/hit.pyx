@@ -1,9 +1,11 @@
-
+import sys
 cimport chit
 
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.vector cimport vector
+
+PYTHON2 = sys.version_info[0] == 2
 
 class NodeType(object):
     All = 'All'
@@ -44,18 +46,18 @@ cdef chit.Kind _kind_enum(kind):
     raise RuntimeError('unknown Field::Kind ' + kind)
 
 cpdef NewField(name, kind, val):
-    cppname = <string> name.encode('utf-8')
-    cppval = <string> val.encode('utf-8')
+    cppname = <string> name if PYTHON2 else <string> name.encode('utf-8')
+    cppval = <string> val if PYTHON2 else <string> val.encode('utf-8')
     cdef chit.Node* f = <chit.Node*> new chit.Field(cppname, _kind_enum(kind), cppval)
     return _initpynode(f)
 
 cpdef NewSection(path):
-    cpath = <string> path.encode('utf-8')
+    cpath = <string> path if PYTHON2 else <string> path.encode('utf-8')
     cdef chit.Node* f = <chit.Node*> new chit.Section(cpath)
     return _initpynode(f)
 
 cpdef NewComment(text, is_inline=False):
-    ctext = <string> text.encode('utf-8')
+    ctext = <string> text if PYTHON2 else <string> text.encode('utf-8')
     cdef chit.Node* f = <chit.Node*> new chit.Comment(ctext, <cbool>is_inline)
     return _initpynode(f)
 
@@ -119,16 +121,18 @@ cdef class Node:
         return self.render()
 
     def render(self, indent=0, indent_text='  ', maxlen=0):
-        cindent = <string> indent_text.encode('utf-8')
-        return self._cnode.render(indent, cindent, maxlen)
+        cindent = <string> indent_text if PYTHON2 else <string> indent_text.encode('utf-8')
+        return self._cnode.render(indent, cindent, maxlen) if PYTHON2 else self._cnode.render(indent, cindent, maxlen).decode('utf-8')
 
     def line(self):
         return int(self._cnode.line())
 
     def path(self):
-        return str(self._cnode.path())
+        return self._cnode.path() if PYTHON2 else self._cnode.path().decode('utf-8')
+
     def fullpath(self):
-        return str(self._cnode.fullpath())
+        return self._cnode.fullpath() if PYTHON2 else self._cnode.fullpath().decode('utf-8')
+
     def type(self):
         t = <int>self._cnode.type()
         if t == <int>chit.NTField:
@@ -145,7 +149,7 @@ cdef class Node:
     def kind(self):
         if self.type() != NodeType.Field:
             return FieldKind.NotField
-        
+
         f = <chit.Field *> self._cnode
         k = <int>f.kind()
         if k == <int>chit.Int:
@@ -161,17 +165,17 @@ cdef class Node:
     def raw(self):
         if self.type() != NodeType.Field:
             return None
-        return str(self._cnode.strVal())
+        return self._cnode.strVal() if PYTHON2 else self._cnode.strVal().decode('utf-8')
 
     def find(self, path):
-        cpath = <string> path.encode('utf-8')
+        cpath = <string> path if PYTHON2 else <string> path.encode('utf-8')
         n = self._cnode.find(cpath)
         if n == NULL:
             return None
         return _initpynode(n)
 
     def param(self, path=''):
-        cpath = <string> path.encode('utf-8')
+        cpath = <string> path if PYTHON2 else <string> path.encode('utf-8')
         n = self._cnode.find(cpath)
         if path != '' and n == NULL:
             return None
@@ -190,7 +194,7 @@ cdef class Node:
             return float(f.floatVal())
         elif k == FieldKind.Bool:
             return bool(f.boolVal())
-        return str(f.strVal())
+        return f.strVal() if PYTHON2 else f.strVal().decode('utf-8')
 
     def walk(self, walker, node_type=NodeType.All):
         if self.type() == node_type or node_type == NodeType.All:
@@ -220,10 +224,16 @@ cdef _initpynode(chit.Node* n, own=False):
     pyn = Node(own=own)
     pyn._cnode = n
     return pyn
-    
-def parse(fname, input):
-    cdef chit.Node* node = chit.parse(fname, input)
-    return _initpynode(node, own=True)
+
+if PYTHON2:
+    def parse(fname, input):
+        cdef chit.Node* node = chit.parse(fname, input)
+        return _initpynode(node, own=True)
+else:
+    def parse(fname, input):
+        cdef chit.Node* node = chit.parse(fname.encode('utf-8'), input.encode('utf-8'))
+        return _initpynode(node, own=True)
+
 
 cpdef explode(Node n):
     n._cnode = chit.explode(n._cnode)
@@ -231,4 +241,3 @@ cpdef explode(Node n):
 
 cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)
-

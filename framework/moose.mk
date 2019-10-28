@@ -35,19 +35,31 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
+python_version 	:= $(shell python -c 'import sys;print(sys.version_info[0])')
+pyhit_srcfiles  := $(hit_DIR)/hit$(python_version).cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
-# some systems have python2 but no python2-config command - fall back to python-config for them
-pyconfig := python2-config
-ifeq (, $(shell which python2-config 2>/dev/null))
-  pyconfig := python-config
+# some systems have python2/3 but no python2/3-config command - fall back to python-config for them
+ifeq ($(python_version), 2)
+	pyconfig := python2-config
+else
+	pyconfig := python3-config
+endif
+
+ifeq (, $(shell which $(pyconfig) 2>/dev/null))
+	pyconfig := python-config
+endif
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+else
+	DYNAMIC_LOOKUP :=
 endif
 
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` `$(pyconfig) --ldflags` $^ -o $(pyhit_LIB))'
-
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` $(DYNAMIC_LOOKUP) $^ -o $(pyhit_LIB))'
 #
 # gtest
 #

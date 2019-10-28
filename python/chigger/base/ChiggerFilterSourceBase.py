@@ -11,7 +11,7 @@
 import copy
 import vtk
 import mooseutils
-from ChiggerSourceBase import ChiggerSourceBase
+from .ChiggerSourceBase import ChiggerSourceBase
 
 class ChiggerFilterSourceBase(ChiggerSourceBase):
     """

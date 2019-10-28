@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import unittest
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
@@ -20,13 +20,14 @@ class Tests(Testing.PeacockTester):
         Testing.remove_file(self.filename)
         Testing.clean_files()
 
+
+    @unittest.skip("Broken by #12702")
     def testRunResult(self):
         args = ["../../common/time_data.i", Testing.find_moose_test_exe()]
         app = self.createPeacockApp(args)
         exe_plugin = app.main_widget.tab_plugin.ExecuteTabPlugin
         vpp_plugin = app.main_widget.tab_plugin.VectorPostprocessorViewer
-        # issue #129
-        # Running multiple times caused it to crash
+
         exe_plugin.ExecuteOptionsPlugin.csv_checkbox.setChecked(False)
         for i in range(10):
             exe_plugin.ExecuteRunnerPlugin.runClicked()

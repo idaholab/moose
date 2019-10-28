@@ -6,11 +6,11 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 """Auto python property creation."""
+import sys
 import collections
 import inspect
-from MooseException import MooseException
+from .MooseException import MooseException
 
 class Property(object):
     """
@@ -36,12 +36,12 @@ class Property(object):
         self.__default = default
 
         if (ptype is not None) and (not isinstance(ptype, type)):
-            msg = "The supplied property type (ptype) must be of type 'type', but '{}' provided."
-            raise MooseException(msg, type(ptype).__name__)
+            msg = "The supplied property '{}' type (ptype) must be of type 'type', but '{}' provided."
+            raise MooseException(msg, name, type(ptype).__name__)
 
         if (ptype is not None) and (default is not None) and (not isinstance(default, ptype)):
-            msg = "The default for property must be of type '{}', but '{}' was provided."
-            raise MooseException(msg, ptype.__name__, type(default).__name__)
+            msg = "The default for property '{}' must be of type '{}', but '{}' was provided."
+            raise MooseException(msg, name, ptype.__name__, type(default).__name__)
 
     @property
     def name(self):
@@ -201,7 +201,7 @@ class AutoPropertyMixin(object):
             self.__properties[prop.name] = prop.default
 
         # Update the properties from the key value pairs
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             key = key.strip('_')
             if value is None:
                 continue
@@ -222,7 +222,7 @@ class AutoPropertyMixin(object):
     def __setstate__(self, state):
         """Re-create the properties after a pickle load."""
         self.__dict__ = state
-        for key, value in self.__properties.iteritems():
+        for key, value in self.__properties.items():
             setattr(self, key, value)
 
     def __getitem__(self, key):
