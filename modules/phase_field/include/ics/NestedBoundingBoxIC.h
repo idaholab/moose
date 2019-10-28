@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include "InitialCondition.h"
-#include "MultiBoundingBoxIC.h"
+#include "SmoothMultiBoundingBoxBaseIC.h"
 
 // Forward Declarations
 class NestedBoundingBoxIC;
@@ -18,14 +17,19 @@ class NestedBoundingBoxIC;
 template <>
 InputParameters validParams<NestedBoundingBoxIC>();
 
-class NestedBoundingBoxIC : public MultiBoundingBoxIC
+/**
+ * NestedBoundingBoxIC creates several nested boxes defined by their coordinates in the domain.
+ * If int_width > zero, the border of the boxes smoothly transitions from
+ * the invalue to the outvalue.
+ */
+class NestedBoundingBoxIC : public SmoothMultiBoundingBoxBaseIC
 {
 public:
   NestedBoundingBoxIC(const InputParameters & parameters);
 
-  virtual Real value(const Point & p) override;
-
 protected:
-  /// value of interfacial width
-  const Real _int_width;
+  virtual Real value_assign(const Point & p);
+
+  /// values outside all the boxes
+  const Real _outside;
 };
