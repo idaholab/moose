@@ -40,13 +40,14 @@ def execute(infile, outfile, n_samples, processors, test_type):
 if __name__ == '__main__':
 
     # Used for docs
-    #rows = 1e8
-    #procs = [1,2,4,8,16]
+    rows = 1e8
+    procs = [1,2,4,8,16]
 
     # Used for testing
-    rows = 1e7
-    procs = [1,2,4]
+    #rows = 1e7
+    #procs = [1,2,4]
 
     execute('distribute.i', 'distribute_none', 1, procs, 'getSamples')
     execute('distribute.i', 'distribute_off', rows, procs, 'getSamples')
     execute('distribute.i', 'distribute_on', rows, procs, 'getLocalSamples')
+    execute('distribute.i', 'distribute_row', rows, procs, 'getNextLocalRow')

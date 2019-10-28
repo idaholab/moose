@@ -10,14 +10,24 @@
       input = threads.i
       min_threads = 2
       allow_test_objects = true
-      detail = "with threads and"
+      detail = "with threads,"
     []
     [mpi]
       type = RunApp
       input = mpi.i
       min_parallel = 2
       allow_test_objects = true
-      detail = " MPI."
+      detail = " MPI, and"
+    []
+
+    [iter]
+      type = RunApp
+      input = global_vs_local.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=rand_global_vs_next'
+      max_parallel = 1 # by design, see SamplerTester
+
+      detail = "that operates with a row-based iteration scheme."
     []
   []
 

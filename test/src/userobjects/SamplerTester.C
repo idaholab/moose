@@ -18,8 +18,8 @@ validParams<SamplerTester>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
-  MooseEnum test_type(
-      "mpi thread base_global_vs_local rand_global_vs_local getSamples getLocalSamples");
+  MooseEnum test_type("mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getSamples "
+                      "getLocalSamples getNextLocalRow");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
 }
@@ -41,6 +41,41 @@ SamplerTester::execute()
   if (_test_type == "getLocalSamples")
     _samples = _sampler.getLocalSamples();
 
+  if (_test_type == "getNextLocalRow")
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+      std::vector<Real> row = _sampler.getNextLocalRow();
+
+  if (_test_type == "rand_global_vs_next")
+  {
+    mooseAssert(n_processors() == 1, "This test only works on one processor.");
+
+    // Get the full set of samples
+    DenseMatrix<Real> global = _sampler.getSamples();
+
+    // Iterate through some
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < 7; ++i)
+    {
+      std::vector<Real> row = _sampler.getNextLocalRow();
+      for (unsigned int j = 0; j < 8; j++)
+      {
+        assertEqual(row[j], global(i, j));
+      }
+    }
+
+    // Get the samples again
+    DenseMatrix<Real> local = _sampler.getLocalSamples();
+
+    // Continue iteration
+    for (dof_id_type i = 7; i < _sampler.getLocalRowEnd(); ++i)
+    {
+      std::vector<Real> row = _sampler.getNextLocalRow();
+      for (unsigned int j = 0; j < 8; j++)
+      {
+        assertEqual(row[j], global(i, j));
+      }
+    }
+  }
+
   if (_test_type == "rand_global_vs_local")
   {
     DenseMatrix<Real> global = _sampler.getSamples();
@@ -52,6 +87,15 @@ SamplerTester::execute()
       assertEqual(local.m(), 14);
       assertEqual(local.n(), 8);
       assertEqual(global, local);
+
+      for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+      {
+        std::vector<Real> row = _sampler.getNextLocalRow();
+        for (unsigned int j = 0; j < 8; j++)
+        {
+          assertEqual(row[j], global(i, j));
+        }
+      }
     }
 
     else if (n_processors() == 2)
@@ -72,6 +116,15 @@ SamplerTester::execute()
           assertEqual(local(5, i), global(5, i));
           assertEqual(local(6, i), global(6, i));
         }
+
+        for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+        {
+          std::vector<Real> row = _sampler.getNextLocalRow();
+          for (unsigned int j = 0; j < 8; j++)
+          {
+            assertEqual(row[j], global(i, j));
+          }
+        }
       }
 
       else if (processor_id() == 1)
@@ -87,6 +140,15 @@ SamplerTester::execute()
           assertEqual(local(4, i), global(11, i));
           assertEqual(local(5, i), global(12, i));
           assertEqual(local(6, i), global(13, i));
+        }
+
+        for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+        {
+          std::vector<Real> row = _sampler.getNextLocalRow();
+          for (unsigned int j = 0; j < 8; j++)
+          {
+            assertEqual(row[j], global(i, j));
+          }
         }
       }
     }
@@ -107,6 +169,15 @@ SamplerTester::execute()
           assertEqual(local(3, i), global(3, i));
           assertEqual(local(4, i), global(4, i));
         }
+
+        for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+        {
+          std::vector<Real> row = _sampler.getNextLocalRow();
+          for (unsigned int j = 0; j < 8; j++)
+          {
+            assertEqual(row[j], global(i, j));
+          }
+        }
       }
 
       else if (processor_id() == 1)
@@ -121,6 +192,15 @@ SamplerTester::execute()
           assertEqual(local(3, i), global(8, i));
           assertEqual(local(4, i), global(9, i));
         }
+
+        for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+        {
+          std::vector<Real> row = _sampler.getNextLocalRow();
+          for (unsigned int j = 0; j < 8; j++)
+          {
+            assertEqual(row[j], global(i, j));
+          }
+        }
       }
 
       else if (processor_id() == 2)
@@ -133,6 +213,15 @@ SamplerTester::execute()
           assertEqual(local(1, i), global(11, i));
           assertEqual(local(2, i), global(12, i));
           assertEqual(local(3, i), global(13, i));
+        }
+
+        for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+        {
+          std::vector<Real> row = _sampler.getNextLocalRow();
+          for (unsigned int j = 0; j < 8; j++)
+          {
+            assertEqual(row[j], global(i, j));
+          }
         }
       }
     }

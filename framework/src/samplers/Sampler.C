@@ -37,7 +37,8 @@ Sampler::Sampler(const InputParameters & parameters)
     DistributionInterface(this),
     _seed(getParam<unsigned int>("seed")),
     _n_rows(0),
-    _n_cols(0)
+    _n_cols(0),
+    _next_local_row_requires_state_restore(true)
 {
   setNumberOfRandomSeeds(1);
 }
@@ -54,13 +55,15 @@ Sampler::init()
   if (_n_rows == 0)
     mooseError("The number of columns cannot be zero.");
 
-  // TODO: When Sampler is updated to a threaded GeneralUserObject, this partitioning must
-  //       also include threads
+  // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
   MooseUtils::linearPartitionItems(
       _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
 
   // See FEProblemBase::execute
   execute();
+
+  // Set the next row iterator index
+  _next_local_row = _local_row_begin;
 
   _initialized = true;
 }
@@ -96,6 +99,7 @@ Sampler::execute()
 DenseMatrix<Real>
 Sampler::getSamples()
 {
+  _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp();
   DenseMatrix<Real> output(_n_rows, _n_cols);
@@ -107,11 +111,39 @@ Sampler::getSamples()
 DenseMatrix<Real>
 Sampler::getLocalSamples()
 {
+  _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp();
   DenseMatrix<Real> output(_n_local_rows, _n_cols);
   computeLocalSampleMatrix(output);
   sampleTearDown();
+  return output;
+}
+
+std::vector<Real>
+Sampler::getNextLocalRow()
+{
+  if (_next_local_row_requires_state_restore)
+  {
+    _generator.restoreState();
+    sampleSetUp();
+    advanceGenerators(_next_local_row * _n_cols);
+    _next_local_row_requires_state_restore = false;
+  }
+
+  std::vector<Real> output(_n_cols);
+  for (dof_id_type j = 0; j < _n_cols; ++j)
+    output[j] = computeSample(_next_local_row, j);
+  _next_local_row++;
+
+  if (_next_local_row == _local_row_end)
+  {
+    advanceGenerators((_n_rows - _local_row_end) * _n_cols);
+    sampleTearDown();
+    _next_local_row = _local_row_begin;
+    _next_local_row_requires_state_restore = true;
+  }
+
   return output;
 }
 

@@ -52,6 +52,23 @@ public:
   ///@}
 
   /**
+   * Return the "next" local row. This is designed to be used within a loop using the
+   * getLocalRowBegin/End methods as such:
+   *
+   * for (dof_id_type i = getLocalRowBegin(); i < getLocalRowEnd(); ++i)
+   *     std::vector<Real> row = getNextLocalRow();
+   *
+   * Calls to getNextLocalRow() will continue to return the next row of data until the last local
+   * row has been reached, it will then start again at the beginning if called again. Also, calls
+   * to getNextLocalRow() can be partial, followed by call(s) to getSamples or getLocalSamples.
+   * Continued calls to getNextLocalRow() will still continue to give the next row as if the
+   * other get calls were not made. However, when this occurs calls to restore and advance the
+   * generators are made after each call got getSamples or getLocalSamples, so this generally
+   * should be avoided.
+   */
+  std::vector<Real> getNextLocalRow();
+
+  /**
    * Return the number of samples.
    * @return The total number of rows that exist in all DenseMatrix values from the
    * getSamples/getLocalSamples methods.
@@ -126,15 +143,21 @@ protected:
   virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix);
   ///@}
 
-private:
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
    *
    * TODO: This should be updated if the If the random number generator is updated to type that
    * supports native advancing.
    */
-  void advanceGenerators(dof_id_type count);
+  virtual void advanceGenerators(dof_id_type count);
 
+  /**
+   * Method for manually setting the local row index for iteration of sample rows using
+   * getNextLocalRow method.
+   */
+  void setNextLocalRowIndex(dof_id_type index = 0);
+
+private:
   /**
    * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
    * the DenseMatrix rows for parallel distribution. A separate method is required so that the
@@ -181,6 +204,12 @@ private:
 
   /// Total number of columns in the sample matrix
   dof_id_type _n_cols;
+
+  /// Iterator index for getNextLocalRow method
+  dof_id_type _next_local_row;
+
+  /// Flag for restoring state during getNextLocalRow iteration
+  bool _next_local_row_requires_state_restore;
 
   /// Flag to indicate if the init method for this class was called
   bool _initialized = false;
