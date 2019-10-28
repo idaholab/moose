@@ -119,11 +119,11 @@ class TestrPostprocessorReader(unittest.TestCase):
 
         # Run script
         self.assertTrue(os.path.exists(script))
-        out = subprocess.check_output(['python', script], encoding='utf-8')
+        out = subprocess.check_output(['python', script])
 
         # Test for output
-        self.assertIn('SHAPE: (742, 8)', out)
-        self.assertIn('VALUE: 51', out)
+        self.assertIn('SHAPE: (742, 8)', out.decode())
+        self.assertIn('VALUE: 51', out.decode())
 
         # Remove the script
         os.remove(script)

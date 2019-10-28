@@ -51,7 +51,7 @@
     type = PythonUnitTest
     input = test_yaml_load.py
     requirement = "MOOSE python utilities shall include a tool for reading YAML files."
-    required_python_packages = pyyaml
+    required_python_packages = yaml
   []
   [AutoPropertyMixin]
     type = PythonUnitTest

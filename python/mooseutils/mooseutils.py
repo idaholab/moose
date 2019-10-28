@@ -414,13 +414,13 @@ def shellCommand(command, cwd=None):
     of an otherwise successful command.
     """
     with open(os.devnull, 'w') as devnull:
-        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=devnull, cwd=cwd, encoding='utf-8')
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=devnull, cwd=cwd)
         p.wait()
         retcode = p.returncode
         if retcode != 0:
             raise Exception("Exception raised while running the command: %s in directory %s" % (command, cwd))
 
-        return p.communicate()[0]
+        return p.communicate()[0].decode()
 
 def check_output(cmd, **kwargs):
     if sys.version_info[0] == 2:
