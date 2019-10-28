@@ -5,8 +5,7 @@
 
 This class implements traction equilibrium across an interface. Specifically this is a small deformation implementation (geometrical quantities, such as surface normal, are always referred to the initial configuration). A `CZMInterfaceKernel`  acts only on one displacement component and therefore the user must setup N kernel one for each dimension of the problem.
 The `CZMInterfaceKernel` use the traction and traction's spatial derivatives provided by a `CZMMaterial` to compute the appropriate residual and Jacobian.
-The responsibility of the `CZMInterfaceKernel` is to integrate the traction over the interface to compute the Nodal Force and to assemble the proper Jacobian.
-I
+The responsibility of the `CZMInterfaceKernel` is to integrate the traction at a quadrature point over the proper area and to assemble the proper Jacobian.
 
 
 ### Residual

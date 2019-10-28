@@ -47,8 +47,6 @@ CZM3DCLaw::CZM3DCLaw(const InputParameters & parameters)
     const_cast<std::vector<Real> &>(_maxAllowableTraction)[i] =
         getParam<Real>("maximum_shear_traction");
   }
-  // const_cast<std::vector<Real> &>(_deltaU0).push_back(_deltaU0[1]);
-  // const_cast<std::vector<Real> &>(_maxAllowableTraction).push_back(_maxAllowableTraction[1]);
 }
 
 RealVectorValue
