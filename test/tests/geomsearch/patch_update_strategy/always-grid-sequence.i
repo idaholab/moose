@@ -7,12 +7,15 @@
 []
 
 [Problem]
+  type = ReferenceResidualProblem
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
   num_grid_sequences = 1
+  solution_variables = 'u'
 []
 
 [Variables]
   [./u]
-    block = right
   [../]
 []
 
@@ -37,10 +40,7 @@
     type = CoefDiffusion
     variable = u
     coef = 1
-  [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
+    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -78,27 +78,22 @@
 
 [BCs]
   [./top]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = u
-    boundary = righttop
-    value = 1
+    boundary = 'lefttop righttop'
+    function = 't'
   [../]
   [./bottom]
     type = DirichletBC
     variable = u
-    boundary = rightbottom
+    boundary = 'leftbottom rightbottom'
     value = 0
   [../]
 []
 
-[Problem]
-  type = FEProblem
-  kernel_coverage_check = false
-[]
-
 [Executioner]
   type = Transient
-  num_steps = 30
+  num_steps = 3
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -106,4 +101,14 @@
 
 [Outputs]
   exodus = true
+[]
+
+[Postprocessors]
+  [num_nl]
+    type = NumNonlinearIterations
+  []
+  [total_nl]
+    type = CumulativeValuePostprocessor
+    postprocessor = num_nl
+  []
 []

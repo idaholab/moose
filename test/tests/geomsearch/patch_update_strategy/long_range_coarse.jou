@@ -11,8 +11,10 @@ sideset 10 curve 2 # leftleft
 sideset 11 curve 4 # leftright
 sideset 12 curve 6 # rightleft
 sideset 13 curve 8 # rightright
-sideset 14 curve 7
-sideset 15 curve 5
+sideset 14 curve 7 # rightbottom
+sideset 15 curve 5 # righttop
+sideset 16 curve 1 # lefttop
+sideset 17 curve 3 # leftbottom
 
 sideset 10 name 'leftleft'
 sideset 11 name 'leftright'
@@ -20,6 +22,8 @@ sideset 12 name 'rightleft'
 sideset 13 name 'rightright'
 sideset 14 name 'rightbottom'
 sideset 15 name 'righttop'
+sideset 16 name 'lefttop'
+sideset 17 name 'leftbottom'
 
 mesh curve all
 mesh surface all
