@@ -7,6 +7,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./acoustic_impedance_7eqn_ncg]
+    type = 'PetscJacobianTester'
+    input = 'acoustic_impedance_7eqn_ncg.i'
+    ratio_tol = 2e-7
+    difference_tol = 0.3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./constant_material]
     type = 'PetscJacobianTester'
     input = 'constant_material.i'
@@ -71,6 +79,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./pressure_7eqn_ncg_material]
+    type = 'PetscJacobianTester'
+    input = 'pressure_7eqn_ncg.i'
+    ratio_tol = 2e-7
+    difference_tol = 250
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./pressure_relaxation_rate]
     type = 'PetscJacobianTester'
     input = 'pressure_relaxation_rate.i'
@@ -127,6 +143,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./sound_speed_7eqn_ncg]
+    type = 'PetscJacobianTester'
+    input = 'sound_speed_7eqn_ncg.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./velocity_relaxation_rate]
     type = 'PetscJacobianTester'
     input = 'velocity_relaxation_rate.i'
@@ -167,6 +191,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./enthalpy_7eqn_ncg]
+    type = 'PetscJacobianTester'
+    input = 'enthalpy_7eqn_ncg.i'
+    ratio_tol = 2e-8
+    difference_tol = 0.03
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./temperature_3eqn_material]
     type = 'PetscJacobianTester'
     input = 'temperature_3eqn.i'
@@ -183,6 +215,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./temperature_7eqn_ncg_material]
+    type = 'PetscJacobianTester'
+    input = 'temperature_7eqn_ncg.i'
+    ratio_tol = 1e-8
+    difference_tol = 3e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./total_enthalpy_3eqn]
     type = 'PetscJacobianTester'
     input = 'total_enthalpy_3eqn.i'
@@ -196,6 +236,14 @@
     input = 'total_enthalpy_7eqn.i'
     ratio_tol = 5e-3
     difference_tol = 5e3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./total_enthalpy_7eqn_ncg]
+    type = 'PetscJacobianTester'
+    input = 'total_enthalpy_7eqn_ncg.i'
+    ratio_tol = 2e-8
+    difference_tol = 0.03
     max_threads = 1
     allow_test_objects = true
   [../]
