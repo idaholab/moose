@@ -71,7 +71,6 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
     _PoD(getParam<Real>("PoD")),
     _has_PoD(isParamValid("PoD")),
-    _is_horizontal(_gravity_angle_type == HORIZONTAL || _gravity_angle_type == MOSTLY_HORIZONTAL),
     _stabilization_uo_name(getParam<UserObjectName>("stabilization")),
     _temperature_mode(false),
     _n_heat_transfer_connections(0)
