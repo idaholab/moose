@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoarsendPiecewiseLinear.h"
+#include "CoarsenedPiecewiseLinear.h"
 #include "PointReduction.h"
 #include "TimedPrint.h"
 
-registerMooseObject("MooseApp", CoarsendPiecewiseLinear);
+registerMooseObject("MooseApp", CoarsenedPiecewiseLinear);
 
 template <>
 InputParameters
-validParams<CoarsendPiecewiseLinear>()
+validParams<CoarsenedPiecewiseLinear>()
 {
   InputParameters params = validParams<PiecewiseLinearBase>();
   params.addClassDescription("Perform a point reduction of the tabulated data upon initialization, "
@@ -36,7 +36,7 @@ validParams<CoarsendPiecewiseLinear>()
   return params;
 }
 
-CoarsendPiecewiseLinear::CoarsendPiecewiseLinear(const InputParameters & parameters)
+CoarsenedPiecewiseLinear::CoarsenedPiecewiseLinear(const InputParameters & parameters)
   : PiecewiseLinearBase(parameters)
 {
   const Real x_scale = getParam<Real>("x_scale");

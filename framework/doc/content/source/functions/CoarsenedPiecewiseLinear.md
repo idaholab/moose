@@ -1,10 +1,10 @@
 # PiecewiseLinear
 
-!syntax description /Functions/CoarsendPiecewiseLinear
+!syntax description /Functions/CoarsenedPiecewiseLinear
 
 ## Description
 
-The `CoarsendPiecewiseLinear` performs preprocessing and linear interpolation
+The `CoarsenedPiecewiseLinear` performs preprocessing and linear interpolation
 on an x/y data set. The object  acts like
 [`PiecewiseLinear`](/PiecewiseLinear.md)  except that it reduces the number of
 function point at the start of the simulation. It uses the
@@ -15,8 +15,8 @@ for data reduction.
 
 !listing test/tests/misc/check_error/function_file_test1.i block=Functions
 
-!syntax parameters /Functions/CoarsendPiecewiseLinear
+!syntax parameters /Functions/CoarsenedPiecewiseLinear
 
-!syntax inputs /Functions/CoarsendPiecewiseLinear
+!syntax inputs /Functions/CoarsenedPiecewiseLinear
 
-!syntax children /Functions/CoarsendPiecewiseLinear
+!syntax children /Functions/CoarsenedPiecewiseLinear

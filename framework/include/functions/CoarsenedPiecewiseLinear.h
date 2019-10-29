@@ -11,16 +11,16 @@
 
 #include "PiecewiseLinearBase.h"
 
-class CoarsendPiecewiseLinear;
+class CoarsenedPiecewiseLinear;
 
 template <>
-InputParameters validParams<CoarsendPiecewiseLinear>();
+InputParameters validParams<CoarsenedPiecewiseLinear>();
 
 /**
  * Perform a point reduction of the tabulated data upon initialization.
  */
-class CoarsendPiecewiseLinear : public PiecewiseLinearBase
+class CoarsenedPiecewiseLinear : public PiecewiseLinearBase
 {
 public:
-  CoarsendPiecewiseLinear(const InputParameters & parameters);
+  CoarsenedPiecewiseLinear(const InputParameters & parameters);
 };
