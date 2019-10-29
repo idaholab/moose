@@ -18,6 +18,32 @@
 
 // C++ includes
 #include <cstdlib>
+#include <tuple>
+#include <type_traits>
+
+// these functions allow streaming tuples to ostreams
+template <size_t n, typename... T>
+typename std::enable_if<(n >= sizeof...(T))>::type
+print_tuple(std::ostream &, const std::tuple<T...> &)
+{
+}
+template <size_t n, typename... T>
+typename std::enable_if<(n < sizeof...(T))>::type
+print_tuple(std::ostream & os, const std::tuple<T...> & tup)
+{
+  if (n != 0)
+    os << ", ";
+  os << std::get<n>(tup);
+  print_tuple<n + 1>(os, tup);
+}
+template <typename... T>
+std::ostream &
+operator<<(std::ostream & os, const std::tuple<T...> & tup)
+{
+  os << "[";
+  print_tuple<0>(os, tup);
+  return os << "]";
+}
 
 /// Application abort macro. Uses MPI_Abort if available, std::abort otherwise
 #if defined(LIBMESH_HAVE_MPI)
