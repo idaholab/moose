@@ -202,7 +202,8 @@ class RenderCardContent(components.RenderComponent):
         if title is not None:
             title = title.copy()
             title.parent = div
-            title(0)(0)(0)['content'] = 'close'
+            if title(0)(0)(0):
+                title(0)(0)(0)['content'] = 'close'
         return div
 
 class RenderGallery(components.RenderComponent):
