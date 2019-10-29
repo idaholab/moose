@@ -18,8 +18,9 @@ validParams<SamplerTester>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
-  MooseEnum test_type("mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getSamples "
-                      "getLocalSamples getNextLocalRow");
+  MooseEnum test_type(
+      "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getSamples "
+      "getLocalSamples getNextLocalRow");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
 }

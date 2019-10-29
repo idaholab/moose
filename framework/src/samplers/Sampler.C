@@ -28,6 +28,24 @@ Sampler::validParams()
 
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
+
+  // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
+  // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
+  // for size definition, so as start the limits will be based around the max of unsigned int. Note,
+  // the values here are the limits of the number of items in the complete container. dof_id_type
+  // is used just in case in the future we need more.
+  params.addParam<dof_id_type>(
+      "limit_get_samples",
+      std::numeric_limits<unsigned int>::max(),
+      "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
+  params.addParam<dof_id_type>(
+      "limit_get_local_samples",
+      std::numeric_limits<unsigned int>::max(),
+      "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
+  params.addParam<dof_id_type>(
+      "limit_get_next_local_row",
+      std::numeric_limits<unsigned int>::max(),
+      "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   return params;
 }
 
@@ -38,7 +56,11 @@ Sampler::Sampler(const InputParameters & parameters)
     _seed(getParam<unsigned int>("seed")),
     _n_rows(0),
     _n_cols(0),
-    _next_local_row_requires_state_restore(true)
+    _next_local_row_requires_state_restore(true),
+    _initialized(false),
+    _limit_get_samples(getParam<dof_id_type>("limit_get_samples")),
+    _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
+    _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row"))
 {
   setNumberOfRandomSeeds(1);
 }
@@ -99,6 +121,12 @@ Sampler::execute()
 DenseMatrix<Real>
 Sampler::getSamples()
 {
+  if (_n_rows * _n_cols > _limit_get_samples)
+    paramError("limit_get_samples",
+               "The number of entries in the DenseMatrix (",
+               _n_rows * _n_cols,
+               ") exceeds the allowed limit.");
+
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp();
@@ -111,6 +139,12 @@ Sampler::getSamples()
 DenseMatrix<Real>
 Sampler::getLocalSamples()
 {
+  if (_n_local_rows * _n_cols > _limit_get_local_samples)
+    paramError("limit_get_local_samples",
+               "The number of entries in the DenseMatrix (",
+               _n_local_rows * _n_cols,
+               ") exceeds the allowed limit.");
+
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp();
@@ -129,6 +163,12 @@ Sampler::getNextLocalRow()
     sampleSetUp();
     advanceGenerators(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
+
+    if (_n_cols > _limit_get_next_local_row)
+      paramError("limit_get_next_local_row",
+                 "The number of entries in the std::vector (",
+                 _n_cols,
+                 ") exceeds the allowed limit.");
   }
 
   std::vector<Real> output(_n_cols);

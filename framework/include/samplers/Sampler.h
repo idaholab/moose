@@ -212,5 +212,14 @@ private:
   bool _next_local_row_requires_state_restore;
 
   /// Flag to indicate if the init method for this class was called
-  bool _initialized = false;
+  bool _initialized;
+
+  /// Max number of entries for matrix returned by getSamples
+  const dof_id_type _limit_get_samples;
+
+  /// Max number of entries for matrix returned by getLocalSamples
+  const dof_id_type _limit_get_local_samples;
+
+  /// Max number of entries for matrix returned by getNextLocalRow
+  const dof_id_type _limit_get_next_local_row;
 };
