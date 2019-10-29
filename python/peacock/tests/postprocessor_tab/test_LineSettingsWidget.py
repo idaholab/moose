@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -120,7 +120,7 @@ class TestLineSettingsWidget(Testing.PeacockImageTestCase):
         """
         self.click()
         output, imports = self._toggle.repr()
-        exact = "axes0.plot(x, y, marker='', linewidth=1, color=[0.0, 0.0, 1.0], markersize=1, linestyle='-', label='data')"
+        exact = "axes0.plot(x, y, label='data', linestyle='-', linewidth=1, color=[0, 0, 1], marker='', markersize=1)"
         self.assertEqual(output[1], exact)
 
 if __name__ == '__main__':

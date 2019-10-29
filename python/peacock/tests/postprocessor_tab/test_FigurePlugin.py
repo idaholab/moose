@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -48,7 +48,7 @@ class TestFigurePlugin(Testing.PeacockImageTestCase):
         Draws on left axis.
         """
         ax = self._window.axes()[0]
-        ax.plot(self._reader('air_temp_low_24_hour_set_1'), '-b')
+        ax.plot(self._reader['air_temp_low_24_hour_set_1'], '-b')
         self._window.draw()
         self.assertImage('testPlotLeft.png')
 
@@ -57,7 +57,7 @@ class TestFigurePlugin(Testing.PeacockImageTestCase):
         Draws right axis.
         """
         ax = self._window.axes()[1]
-        ax.plot(self._reader('air_temp_high_24_hour_set_1'), '-r')
+        ax.plot(self._reader['air_temp_high_24_hour_set_1'], '-r')
         self._window.draw()
         self.assertImage('testPlotRight.png')
 
@@ -66,10 +66,10 @@ class TestFigurePlugin(Testing.PeacockImageTestCase):
         Draws on both.
         """
         ax = self._window.axes()[0]
-        ax.plot(self._reader('air_temp_low_24_hour_set_1'), '-b')
+        ax.plot(self._reader['air_temp_low_24_hour_set_1'], '-b')
 
         ax = self._window.axes()[1]
-        ax.plot(self._reader('air_temp_high_24_hour_set_1'), '-r')
+        ax.plot(self._reader['air_temp_high_24_hour_set_1'], '-r')
 
         self._window.draw()
         self.assertImage('testPlotDual.png')
@@ -80,7 +80,7 @@ class TestFigurePlugin(Testing.PeacockImageTestCase):
         """
 
         ax = self._window.axes()[0]
-        ax.plot(self._reader('snow_water_equiv_set_1'), '-b')
+        ax.plot(self._reader['snow_water_equiv_set_1'], '-b')
         self._window.draw()
         self.assertImage('testClearPlot.png')
 
@@ -104,7 +104,7 @@ class TestFigurePlugin(Testing.PeacockImageTestCase):
 
         # Plot data on right and make sure axes1 appears
         ax = self._window.axes()[1]
-        ax.plot(self._reader('air_temp_high_24_hour_set_1'), '-r')
+        ax.plot(self._reader['air_temp_high_24_hour_set_1'], '-r')
         output, imports = self._window.repr()
         self.assertIn(ax1, output)
 

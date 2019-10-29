@@ -10,8 +10,8 @@
 from PyQt5 import QtCore, QtWidgets
 import sys
 import chigger
-from ExodusPlugin import ExodusPlugin
-from BlockSelectorWidget import BlockSelectorWidget
+from .ExodusPlugin import ExodusPlugin
+from .BlockSelectorWidget import BlockSelectorWidget
 
 class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -151,7 +151,7 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Check if current blocks on the widget are the same as exist on the reader.
         """
         blk_info = reader.getBlockInformation()[btype]
-        blocks = [blk.name for blk in blk_info.itervalues()]
+        blocks = [blk.name for blk in blk_info.values()]
         current = [qobject.StandardItemModel.item(i).data(QtCore.Qt.UserRole) for i in range(1, qobject.StandardItemModel.rowCount())]
         return set(blocks) != set(current)
 
@@ -206,8 +206,8 @@ def main(size=None):
     Run the BlockPlugin all by its lonesome.
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from VTKWindowPlugin import VTKWindowPlugin
-    from FilePlugin import FilePlugin
+    from .VTKWindowPlugin import VTKWindowPlugin
+    from .FilePlugin import FilePlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size),
                                           FilePlugin,
                                           BlockPlugin])

@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from LabelExodusSource import LabelExodusSource
+from .LabelExodusSource import LabelExodusSource
 from .. import base
 
 class LabelExodusResult(base.ChiggerResult):

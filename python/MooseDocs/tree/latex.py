@@ -10,8 +10,8 @@
 #pylint: enable=missing-docstring
 import re
 import copy
-from base import NodeBase
 from MooseDocs.common import exceptions
+from .base import NodeBase
 
 def parse_style(token):
     """Helper for converting style entries into a dict."""
@@ -44,7 +44,7 @@ def escape(text):
 
     regex_list = []
     for key in sorted(conv.keys(), key=lambda item: - len(item)): #pylint: disable=consider-iterating-dictionary
-        regex_list.append(re.escape(unicode(key)))
+        regex_list.append(re.escape(str(key)))
     regex = re.compile('|'.join(regex_list))
     return regex.sub(lambda match: conv[match.group()], text)
 
@@ -111,8 +111,8 @@ class Command(LatexBase):
     If children do not exist then the braces are not included (e.g., \foo).
     """
     def __init__(self, parent, name, **kwargs):
-        kwargs.setdefault('start', u'')
-        kwargs.setdefault('end', u'')
+        kwargs.setdefault('start', '')
+        kwargs.setdefault('end', '')
         kwargs.setdefault('args', [])
         kwargs.setdefault('optional', False)
         LatexBase.__init__(self, name, parent, **kwargs)
@@ -136,11 +136,11 @@ class Environment(LatexBase):
     Class for LaTeX environment: \\begin{foo}...\\end{foo}
     """
     def __init__(self, parent, name, **kwargs):
-        kwargs.setdefault('start', u'\n')
-        kwargs.setdefault('end', u'\n')
+        kwargs.setdefault('start', '\n')
+        kwargs.setdefault('end', '\n')
         kwargs.setdefault('args', [])
-        kwargs.setdefault('after_begin', u'\n')
-        kwargs.setdefault('before_end', u'\n')
+        kwargs.setdefault('after_begin', '\n')
+        kwargs.setdefault('before_end', '\n')
         LatexBase.__init__(self, name, parent, **kwargs)
 
     def write(self):
@@ -161,7 +161,7 @@ class String(NodeBase):
     A node for containing string content, the parent must always be a Tag.
     """
     def __init__(self, parent=None, **kwargs):
-        kwargs.setdefault('content', u'')
+        kwargs.setdefault('content', '')
         kwargs.setdefault('escape', True)
         NodeBase.__init__(self, 'String', parent, **kwargs)
 
@@ -177,6 +177,6 @@ class String(NodeBase):
 def create_settings(*args, **kwargs):
     """Creates token with key, value pairs settings application."""
     args = list(args)
-    args += ["{}={}".format(k, v) for k, v in kwargs.iteritems()]
-    opt = Bracket(None, escape=False, string=u",".join(args))
+    args += ["{}={}".format(k, v) for k, v in kwargs.items()]
+    opt = Bracket(None, escape=False, string=",".join(args))
     return opt

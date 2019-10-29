@@ -2,5 +2,7 @@
   [./command_line]
     type = PythonUnitTest
     input = test_chigger.py
+
+    python = 3
   [../]
 []

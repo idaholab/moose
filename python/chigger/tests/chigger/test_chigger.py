@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -24,7 +24,7 @@ class TestChiggerCommandUtility(unittest.TestCase):
         cmd = [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
                                             'scripts', 'chigger'))]
         cmd += list(args)
-        return subprocess.check_output(cmd)
+        return subprocess.check_output(cmd, encoding="utf-8")
 
     def testInfo(self):
         """

@@ -4,5 +4,6 @@
     input = test_InputFileEditorWithMesh.py
     separate = True
     display_required = True
+    python = 3
   [../]
 []

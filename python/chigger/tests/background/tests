@@ -3,10 +3,12 @@
     type = ImageDiff
     command = background.py
     imagediff = background.png
+    python = 3
   [../]
   [./gradient]
     type = ImageDiff
     command = gradient.py
     imagediff = gradient.png
+    python = 3
   [../]
 []

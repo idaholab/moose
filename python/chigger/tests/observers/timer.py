@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -17,4 +17,4 @@ observer = chigger.observers.TimerObserver(count=3, terminate=True)
 window = chigger.RenderWindow(mug, size=[300,300], observers=[observer])
 window.start()
 
-print 'count =', observer.count()
+print('count =', observer.count())

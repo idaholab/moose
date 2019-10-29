@@ -135,7 +135,7 @@ An example is shown below:
 | 6. Prepare test cases | Business analysts/testers with help from the service developers |
 | 7. Conduct test, record results, and communicate to the developers | Independent testers |
 | 8. Make corrections and updates to the processes | Developers assigned to each process |
-| 9. Repeat Step 2–8 (for each iteration) | (blank) |
+| 9. Repeat Step 2--8 (for each iteration) | (blank) |
 | 10. Review and approve final results of the test | Reviewers and approvers as defined in Section 3 |
 
 !template-end!

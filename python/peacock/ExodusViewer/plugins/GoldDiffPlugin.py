@@ -10,8 +10,8 @@
 import subprocess
 import os
 from PyQt5 import QtCore, QtWidgets
-from ExodusPlugin import ExodusPlugin
-from VTKWindowPlugin import VTKWindowPlugin
+from .ExodusPlugin import ExodusPlugin
+from .VTKWindowPlugin import VTKWindowPlugin
 import mooseutils
 
 class ExternalVTKWindowPlugin(VTKWindowPlugin):
@@ -323,9 +323,9 @@ def main(size=None):
     """
     Run the VTKFilePlugin all by its lonesome.
     """
-    from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from VTKWindowPlugin import VTKWindowPlugin
-    from FilePlugin import FilePlugin
+    from ..ExodusPluginManager import ExodusPluginManager
+    from .VTKWindowPlugin import VTKWindowPlugin
+    from .FilePlugin import FilePlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, lambda: GoldDiffPlugin(size=size)])
     widget.show()
     return widget, widget.VTKWindowPlugin

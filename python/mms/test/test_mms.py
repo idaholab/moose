@@ -71,26 +71,26 @@ class TestMMS(unittest.TestCase):
         try:
             mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['R'], h='k*x*x')
         except SyntaxError as e:
-            self.assertIn("name 'R'", e.message)
+            self.assertIn("name 'R'", str(e))
 
         try:
             mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['x'], h='k*x*x')
         except SyntaxError as e:
-            self.assertIn("name 'x'", e.message)
+            self.assertIn("name 'x'", str(e))
 
         try:
             mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['t'], h='k*x*x')
         except SyntaxError as e:
-            self.assertIn("name 't'", e.message)
+            self.assertIn("name 't'", str(e))
 
         try:
             mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['e_k'], h='k*x*x')
         except SyntaxError as e:
-            self.assertIn("name 'e_k'", e.message)
+            self.assertIn("name 'e_k'", str(e))
 
     def testHit(self):
         f,s = mms.evaluate('a*div(k*grad(u))', 'x**3', scalars=['k', 'a'])
-        n = str(mms.build_hit(f, 'force', a=42))
+        n = mms.build_hit(f, 'force', a=42).render()
 
         self.assertIn('[force]', n)
         self.assertIn('type = ParsedFunction', n)

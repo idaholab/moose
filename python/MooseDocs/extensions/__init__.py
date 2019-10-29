@@ -8,21 +8,21 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import alert
-import appsyntax
-import autolink
-import bibtex
-import command
-import core
-import devel
-import floats
-import common
-import include
-import media
-import package
-import sqa
-import table
-import materialicon
-import layout
-import config
-import style
+from . import alert
+from . import appsyntax
+from . import autolink
+from . import bibtex
+from . import command
+from . import core
+from . import devel
+from . import floats
+from . import common
+from . import include
+from . import media
+from . import package
+from . import sqa
+from . import table
+from . import materialicon
+from . import layout
+from . import config
+from . import style

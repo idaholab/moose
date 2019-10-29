@@ -12,7 +12,7 @@ import types
 import vtk
 
 from PyQt5 import QtWidgets, QtCore
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 from peacock.utils.TextSubWindow import TextSubWindow
 

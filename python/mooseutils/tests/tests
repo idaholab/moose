@@ -17,18 +17,24 @@
     type = PythonUnitTest
     input = test_MooseDataFrame.py
     requirement = "MOOSE python utilities shall include tools for reading CSV data via pandas.DataFrame."
+
+    python = 3
   []
   [postprocessors]
     type = PythonUnitTest
     input = test_PostprocessorReader.py
     buffer = True
     requirement = "MOOSE python utilities shall include tools for reading postprocessor data."
+
+    python = 3
   []
   [vector_postprocessors]
     type = PythonUnitTest
     input = test_VectorPostprocessorReader.py
     separate = True
     requirement = "MOOSE python utilities shall include tools for reading vector postprocessor data."
+
+    python = 3
   []
   [camel]
     type = PythonUnitTest
@@ -39,11 +45,13 @@
     type = PythonUnitTest
     input = test_hit_load.py
     requirement = "MOOSE python utilities shall include a tool for reading hit files."
+    required_python_packages = anytree
   []
   [yaml_load]
     type = PythonUnitTest
     input = test_yaml_load.py
     requirement = "MOOSE python utilities shall include a tool for reading YAML files."
+    required_python_packages = yaml
   []
   [AutoPropertyMixin]
     type = PythonUnitTest

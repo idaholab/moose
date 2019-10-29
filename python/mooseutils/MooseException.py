@@ -13,3 +13,7 @@ class MooseException(Exception):
     """
     def __init__(self, message, *args):
         Exception.__init__(self, message.format(*args))
+
+    @property
+    def message(self):
+        return str(self)

@@ -3,11 +3,13 @@
     type = RunApp
     command = time_timestep.py
     expect_out = "Both \'time\' \(1.0\) and \'timestep\' \(1\) are set, \'timestep\' is being used."
+    python = 3
   [../]
 
   [./result_given_file]
     type = RunException
     command = result_given_file.py
     expect_err = "The supplied object of type str is not supported, only ExodusReader and MultiAppExodusReader objects may be utilized."
+    python = 3
   [../]
 []

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import unittest
 from PyQt5 import QtCore, QtWidgets
 from peacock import PeacockApp
 from peacock.utils import Testing
@@ -47,6 +47,7 @@ class TestPostprocessorState(Testing.PeacockImageTestCase):
         execute.ExecuteRunnerPlugin.runner.process.waitForFinished()
         Testing.process_events(t=1)
 
+    @unittest.skip("Broken by #12702")
     def testState(self):
         """
         Tests that re-executing doesn't change the state of the exodus viewer.
@@ -73,6 +74,7 @@ class TestPostprocessorState(Testing.PeacockImageTestCase):
         self.selectTab(vpp)
         self.assertImage("testDefault.png")
 
+    @unittest.skip("Broken by #12702")
     def testTabChange(self):
         """
         Tests that changing tabs disables data update

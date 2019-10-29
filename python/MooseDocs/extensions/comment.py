@@ -14,7 +14,7 @@ from MooseDocs.tree import tokens
 def make_extension(**kwargs):
     return CommentExtension(**kwargs)
 
-Comment = tokens.newToken(u'Comment', content=u'')
+Comment = tokens.newToken('Comment', content='')
 
 class CommentExtension(components.Extension):
     """

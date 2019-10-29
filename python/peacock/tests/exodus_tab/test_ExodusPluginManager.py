@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -57,7 +57,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         Tests the file loads.
         """
-        self.assertImage('testInitial.png')
+        self.assertImage('testInitial.png', allowed=0.97)
 
     def testWidget(self):
         """
@@ -170,7 +170,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
 
         # Diff the image from the script
         differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail())
 
 if __name__ == '__main__':

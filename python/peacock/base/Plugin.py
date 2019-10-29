@@ -8,9 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets
-from MooseWidget import MooseWidget
 import mooseutils
-from Preferences import Preferences
+from .MooseWidget import MooseWidget
+from .Preferences import Preferences
 
 class Plugin(MooseWidget):
     """
@@ -54,7 +54,7 @@ class Plugin(MooseWidget):
         """
         super(Plugin, self).setup()
 
-        for key, widget in self._preferences._widgets.iteritems():
+        for key, widget in self._preferences._widgets.items():
             name = key.split('/')[-1]
             name = '_prefCallback{}{}'.format(name[0].upper(), name[1:])
             callback = getattr(self, name, None)
@@ -69,7 +69,7 @@ class Plugin(MooseWidget):
             other[Plugin]: A plugin object to connect.
         """
         if self is not other:
-            for name, signal in self.signals().iteritems():
+            for name, signal in self.signals().items():
                 slot_name = 'on' + name[0].upper() + name[1:]
                 if hasattr(other, slot_name):
                     mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name,

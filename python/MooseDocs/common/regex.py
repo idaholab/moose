@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
-from exceptions import MooseDocsException
+from .exceptions import MooseDocsException
 
 def regex(pattern, content, flags=None):
     """

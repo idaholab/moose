@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -27,7 +27,7 @@ def shellCommand(command, cwd=None):
         if retcode != 0:
             raise Exception("Exception raised while running the command: " + command + " in directory: " + cwd)
 
-        return p.communicate()[0]
+        return p.communicate()[0].decode('utf-8')
 
 class VersionInfo:
     def __init__(self):

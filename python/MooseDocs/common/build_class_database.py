@@ -14,6 +14,7 @@ import re
 import mooseutils
 
 import MooseDocs
+from .read import read
 
 #: Locates class definitions in header files
 DEFINITION_RE = re.compile(r'class\s*(?P<class>\w+)\b[^;]')
@@ -79,9 +80,7 @@ def _locate_filenames(directories, ext):
 def _process(objects, filenames, regex, func):
     """Process regex"""
     for filename in filenames:
-        with open(filename, 'r') as fid:
-            content = fid.read()
-
+        content = read(filename)
         for match in regex.finditer(content):
             func(objects, filename, match)
 

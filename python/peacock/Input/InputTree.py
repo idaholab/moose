@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,11 +8,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from InputFile import InputFile
-import mooseutils
-import InputTreeWriter
 import os
 import hit
+import mooseutils
+from .InputFile import InputFile
+from . import InputTreeWriter
 
 class InputTree(object):
     """

@@ -85,7 +85,7 @@ def check(translator,
 
     # Dump the complete syntax for the application
     if dump:
-        print app_syntax
+        print(app_syntax)
 
     # The default build for any application creates the test app (e.g., FrogTestApp), therefore
     # the actual application name must be captured from this name to properly generate stub pages.

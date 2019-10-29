@@ -9,9 +9,9 @@
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
-from PeacockMainWindow import PeacockMainWindow
+from . PeacockMainWindow import PeacockMainWindow
 import argparse, os, sys
-from peacock.utils import qtutils
+from .utils import qtutils
 
 class PeacockApp(object):
     """

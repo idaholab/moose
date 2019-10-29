@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # This script checks and can optionally update MOOSE source files.
 # You should always run this script without the "-u" option

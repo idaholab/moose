@@ -3,6 +3,6 @@
     type = PythonUnitTest
     input = writers.py
     buffer = True
-    display_required = True
+    python = 3
   [../]
 []

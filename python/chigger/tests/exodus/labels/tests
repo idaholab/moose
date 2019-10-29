@@ -4,7 +4,8 @@
     command = points.py
     imagediff = 'points.png'
     allowed_linux = 0.96
-    allowed_darwin = 0.97
+    python = 3
+    platform = LINUX
   [../]
 
   [./cells]
@@ -12,12 +13,15 @@
     command = cells.py
     imagediff = 'cells.png'
     allowed_linux = 0.96
-    allowed_darwin = 0.97
+    python = 3
+    platform = LINUX
   [../]
 
   [./variable]
     type = ImageDiff
     command = variable.py
     imagediff = 'variable.png'
+    python = 3
+    platform = LINUX
   [../]
 []

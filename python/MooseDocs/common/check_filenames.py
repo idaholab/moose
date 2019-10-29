@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from project_find import project_find
+from .project_find import project_find
 from . import exceptions
 
 def check_filenames(filename):

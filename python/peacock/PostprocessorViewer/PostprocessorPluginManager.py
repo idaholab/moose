@@ -42,7 +42,7 @@ class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         imports = []
 
         # Build script from plugins
-        for plugin in self._plugins.itervalues():
+        for plugin in self._plugins.values():
             out, imp = plugin.repr()
             output += out
             mooseutils.unique_list(imports, imp)
@@ -53,12 +53,12 @@ def main():
     """
     Run plot widget alone
     """
-    from plugins.FigurePlugin import FigurePlugin
-    from plugins.MediaControlPlugin import MediaControlPlugin
-    from plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
-    from plugins.AxesSettingsPlugin import AxesSettingsPlugin
-    from plugins.AxisTabsPlugin import AxisTabsPlugin
-    from plugins.OutputPlugin import OutputPlugin
+    from .plugins.FigurePlugin import FigurePlugin
+    from .plugins.MediaControlPlugin import MediaControlPlugin
+    from .plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from .plugins.AxesSettingsPlugin import AxesSettingsPlugin
+    from .plugins.AxisTabsPlugin import AxisTabsPlugin
+    from .plugins.OutputPlugin import OutputPlugin
 
     widget = PostprocessorPluginManager(plugins=[FigurePlugin, MediaControlPlugin, PostprocessorSelectPlugin, AxesSettingsPlugin, AxisTabsPlugin, OutputPlugin])
     widget.FigurePlugin.setFixedSize(QtCore.QSize(600,600))
@@ -68,7 +68,7 @@ def main():
 
 if __name__ == '__main__':
     import sys
-    from PostprocessorDataWidget import PostprocessorDataWidget
+    from .PostprocessorDataWidget import PostprocessorDataWidget
 
     app = QtWidgets.QApplication(sys.argv)
 

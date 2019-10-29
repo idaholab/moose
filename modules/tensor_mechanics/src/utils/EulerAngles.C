@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "libmesh/ignore_warnings.h"
 #include "EulerAngles.h"
 #include "MooseRandom.h"
 
@@ -83,3 +84,4 @@ EulerAngles::random(MooseRandom & random)
   Phi = std::acos(1.0 - 2.0 * random.rand(0)) / libMesh::pi * 180.0;
   phi2 = random.rand(0) * 360;
 }
+#include "libmesh/restore_warnings.h"

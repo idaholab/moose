@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,11 +8,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 import collections
 import subprocess
-from hit_load import hit_load
-from mooseutils import git_root_dir, colorText
+from .mooseutils import git_root_dir, colorText
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
@@ -50,13 +50,14 @@ def check_requirement(filename):
                 messages.append("    'issues' parameter in block '{}' must not be used within a group.".format(grandchild.name))
 
     if messages:
-        print 'ERROR in {}'.format(filename)
-        print '\n'.join(messages) + '\n'
+        print('ERROR in {}'.format(filename))
+        print('\n'.join(messages) + '\n')
         return 1
     return 0
 
 def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['tests'], skip=[]):
     """Check that test specifications that were modified include requirements."""
+    from .hit_load import hit_load
 
     # Fetch
     cmd = ['git', 'fetch', remote]
@@ -93,14 +94,14 @@ def sqa_check_requirement_duplicates(working_dir=os.getcwd(), specs=['tests'], s
                         requirements[req.strip()].append((filename, child.fullpath, child.line('requirement')))
 
     count = 0
-    for key, value in requirements.iteritems():
+    for key, value in requirements.items():
         if len(value) > 1:
             if count == 0:
-                print colorText('Duplicate Requirements Found:\n', 'YELLOW')
+                print(colorText('Duplicate Requirements Found:\n', 'YELLOW'))
             count += 1
             if len(key) > 80:
-                print colorText('{}...'.format(key[:80]), 'YELLOW')
+                print(colorText('{}...'.format(key[:80]), 'YELLOW'))
             for filename, path, line in value:
-                print '    {}:{}'.format(filename, line)
+                print('    {}:{}'.format(filename, line))
 
     return count

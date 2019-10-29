@@ -9,18 +9,17 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-class NodalAreaVarAction : public Action
+class NodalAreaAction : public MooseObjectAction
 {
 public:
-  NodalAreaVarAction(const InputParameters & params);
+  NodalAreaAction(const InputParameters & params);
 
   virtual void act();
 };
 
 template <>
-InputParameters validParams<NodalAreaVarAction>();
-
+InputParameters validParams<NodalAreaAction>();

@@ -9,8 +9,8 @@
 
 from sympy import * # use star so all functions are available to supplied strings
 from sympy.vector import divergence, gradient, Vector, CoordSys3D
-from fparser import print_fparser
-from moosefunction import print_moose
+from mms.fparser import print_fparser
+from mms.moosefunction import print_moose
 
 def evaluate(pde, soln, variable='u',
              scalars=set(),
@@ -86,7 +86,7 @@ def evaluate(pde, soln, variable='u',
                          locals()['{}_z'.format(_vf_)]*R.k
 
     # Define known functions
-    for _f_, _v_ in kwargs.iteritems():
+    for _f_, _v_ in kwargs.items():
         _check_reserved(_f_)
         locals()[_f_] = eval(_v_)
         if isinstance(locals()[_f_], Vector):
@@ -122,8 +122,9 @@ def evaluate(pde, soln, variable='u',
 def _check_reserved(var):
     """Error checking for input variables."""
     if var == 'R':
-        raise SyntaxError("The variable name 'R' is reserved, it represents the coordinate system," \
-                          " see sympy.vector.CoordSys3D.")
+        msg = "The variable name 'R' is reserved, it represents the coordinate system, " \
+              "see sympy.vector.CoordSys3D."
+        raise SyntaxError(msg)
 
     elif var in ['x', 'y', 'z']:
         msg = "The variable name '{0}' is reserved, it represents the {0} spatial direction " \

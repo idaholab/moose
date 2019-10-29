@@ -3,41 +3,48 @@
     type = ImageDiff
     command = clip.py
     imagediff = 'clip.png'
+    python = 3
   [../]
 
   [./plane_elem_var]
     type = ImageDiff
     command = clip_elem.py
     imagediff = 'clip_elem.png'
+    python = 3
   [../]
 
   [./clip_z]
     type = ImageDiff
     command = clip_z.py
     imagediff = 'clip_z.png'
+    python = 3
   [../]
 
   [./dual]
     type = ImageDiff
     command = dual.py
     imagediff = dual.png
+    python = 3
   [../]
 
   [./box]
     type = ImageDiff
     command = box_clip.py
     imagediff = 'box_clip.png'
+    python = 3
   [../]
 
   [./dynamic]
     type = ImageDiff
     command = clip_change.py
     imagediff = 'clip_change0.png clip_change1.png clip_change2.png'
+    python = 3
   [../]
 
   [./multiple]
     type = ImageDiff
     command = multiple_clips.py
     imagediff = 'multiple_clips.png'
+    python = 3
   [../]
 []

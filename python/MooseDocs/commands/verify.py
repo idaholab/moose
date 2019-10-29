@@ -18,9 +18,9 @@ import MooseDocs
 try:
     import bs4
 except ImportError:
-    print "The BeutifulSoup package (bs4) is required for the verify command, " \
-          "it may be downloaded by running the following:\n" \
-          "    pip install --user bs4"
+    print("The BeutifulSoup package (bs4) is required for the verify command",
+          "it may be downloaded by running the following:\n",
+          "\tpip install --user bs4")
     sys.exit(1)
 
 def command_line_options(subparser, parent):
@@ -51,8 +51,8 @@ def insert_moose_dir(content):
 
 def replace_uuid4(content):
     """Replace uuid.uuid4() numbers."""
-    return re.sub(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                  r'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content)
+    return re.sub('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                  'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content, flags=re.UNICODE)
 
 def replace_package_file(content):
     """Replace the package filename with something consistent."""
@@ -66,7 +66,7 @@ def update_gold_helper(gold, out_content):
     """Update the gold files."""
     if os.path.exists(gold):
         with open(gold, 'w') as fid:
-            print "WRITING GOLD: {}".format(gold)
+            print("WRITING GOLD: {}".format(gold))
             fid.write(out_content)
 
 def compare(out_fname, out_dir, gold_dir, update_gold=False):
@@ -76,8 +76,8 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
     gold_fname = out_fname.replace(out_dir, gold_dir)
 
     # Read the content to be tested
-    with open(out_fname, 'r') as fid:
-        out_content = prepare_content(fid.read())
+    out_content = MooseDocs.common.read(out_fname)
+    out_content = prepare_content(out_content)
 
     # Update gold content
     if update_gold:
@@ -104,11 +104,11 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
                                        gold_fname=gold_fname,
                                        color=True, num_lines=2)
         if diff:
-            print mooseutils.colorText("DIFF: {} != {}".format(out_fname, gold_fname), 'YELLOW')
-            print diff.encode('utf-8')
+            print(mooseutils.colorText("DIFF: {} != {}".format(out_fname, gold_fname), 'YELLOW'))
+            print(str(diff))
             errno = 1
         else:
-            print mooseutils.colorText("PASS: {} == {}".format(out_fname, gold_fname), 'GREEN')
+            print(mooseutils.colorText("PASS: {} == {}".format(out_fname, gold_fname), 'GREEN'))
 
     return errno
 

@@ -7,6 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+import sys
 import uuid
 import logging
 
@@ -67,7 +68,7 @@ class BibtexExtension(command.CommandExtension):
                 db = parse_file(bfile)
             except UndefinedMacro as e:
                 msg = "The BibTeX file %s has an undefined macro:\n%s"
-                LOG.warning(msg, bfile, e.message)
+                LOG.warning(msg, bfile, e)
 
             #TODO: https://bitbucket.org/pybtex-devs/pybtex/issues/93/
             #      databaseadd_entries-method-not-considering
@@ -113,7 +114,7 @@ class BibtexExtension(command.CommandExtension):
             renderer.addPackage('natbib', 'round')
 
 BibtexCite = tokens.newToken('BibtexCite', keys=[])
-BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style=u'')
+BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style='')
 class BibtexReferenceComponent(command.CommandComponent):
     COMMAND = ('cite', 'citet', 'citep', 'nocite')
     SUBCOMMAND = None
@@ -131,8 +132,8 @@ class BibtexCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['style'] = (u'plain', "The BibTeX style (plain, unsrt, alpha, unsrtalpha).")
-        config['title'] = (u'References', "The section title for the references.")
+        config['style'] = ('plain', "The BibTeX style (plain, unsrt, alpha, unsrtalpha).")
+        config['title'] = ('References', "The section title for the references.")
         config['title-level'] = (2, "The heading level for the section title for the references.")
         return config
 
@@ -153,7 +154,7 @@ class RenderBibtexCite(components.RenderComponent):
 
         citep = cite == 'citep'
         if citep:
-            html.String(parent, content=u'(')
+            html.String(parent, content='(')
 
         num_keys = len(token['keys'])
         for i, key in enumerate(token['keys']):
@@ -192,25 +193,27 @@ class RenderBibtexCite(components.RenderComponent):
                 author = '{} and {}'.format(a0, a1)
             else:
                 author = ' '.join(a[0].last_names)
-            author = LatexNodes2Text().latex_to_text(author)
 
-            form = u'{}, {}' if citep else u'{} ({})'
+            if sys.version_info[0] == 3:
+                author = LatexNodes2Text().latex_to_text(author)
+
+            form = '{}, {}' if citep else '{} ({})'
             html.Tag(parent, 'a', href='#{}'.format(key),
                      string=form.format(author, entry.fields['year']))
 
             if citep:
                 if num_keys > 1 and i != num_keys - 1:
-                    html.String(parent, content=u'; ')
+                    html.String(parent, content='; ')
             else:
                 if num_keys == 2 and i == 0:
-                    html.String(parent, content=u' and ')
+                    html.String(parent, content=' and ')
                 elif num_keys > 2 and i == num_keys - 2:
-                    html.String(parent, content=u', and ')
+                    html.String(parent, content=', and ')
                 elif num_keys > 2 and i != num_keys - 1:
-                    html.String(parent, content=u', ')
+                    html.String(parent, content=', ')
 
         if citep:
-            html.String(parent, content=u')')
+            html.String(parent, content=')')
 
         return parent
 
@@ -218,7 +221,7 @@ class RenderBibtexCite(components.RenderComponent):
         self.createHTML(parent, token, page)
 
     def createLatex(self, parent, token, page):
-        latex.Command(parent, token['cite'], string=u','.join(token['keys']), escape=False)
+        latex.Command(parent, token['cite'], string=','.join(token['keys']), escape=False)
         return parent
 
 class RenderBibtexBibliography(components.RenderComponent):
@@ -257,7 +260,7 @@ class RenderBibtexBibliography(components.RenderComponent):
                      style="padding-left:10px;",
                      class_='modal-trigger moose-bibtex-modal',
                      href="#{}".format(m_id),
-                     string=u'[BibTeX]')
+                     string='[BibTeX]')
 
             modal = html.Tag(child, 'div', class_='modal', id_=m_id)
             content = html.Tag(modal, 'div', class_='modal-content')

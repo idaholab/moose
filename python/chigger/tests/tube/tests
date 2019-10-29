@@ -4,5 +4,6 @@
     type = ImageDiff
     command = tube.py
     imagediff = 'tube.png'
+    python = 3
   [../]
 []

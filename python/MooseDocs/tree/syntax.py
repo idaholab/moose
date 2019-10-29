@@ -18,8 +18,8 @@ LOG = logging.getLogger(__name__)
 @mooseutils.addProperty('hidden', default=False, ptype=bool)
 @mooseutils.addProperty('removed', default=False, ptype=bool)
 @mooseutils.addProperty('parameters', ptype=dict)
-@mooseutils.addProperty('description', ptype=unicode)
-@mooseutils.addProperty('alias', ptype=unicode)
+@mooseutils.addProperty('description', ptype=str)
+@mooseutils.addProperty('alias', ptype=str)
 class SyntaxNodeBase(NodeBase, mooseutils.AutoPropertyMixin):
     """
     Node for MOOSE syntax that serves as the parent for actions/objects.

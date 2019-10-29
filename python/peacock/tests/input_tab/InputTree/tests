@@ -12,6 +12,7 @@
       test_case = Tests.testInputFileOnly
 
       detail = " the ability to read and display application input files;"
+      python = 3
     []
 
     [testTransient]
@@ -21,6 +22,7 @@
       test_case = Tests.testTransient
 
       detail = "support for input files with transient solves;"
+      python = 3
     []
 
     [testLCF]
@@ -30,6 +32,7 @@
       test_case = Tests.testLCF
 
       detail = "support for input files with a linear combination function;"
+      python = 3
     []
 
     [testFSP]
@@ -39,6 +42,7 @@
       test_case = Tests.testFSP
 
       detail = "support for input files with a field split preconditioner;"
+      python = 3
     []
 
     [testSimpleDiffusion]
@@ -48,6 +52,7 @@
       test_case = Tests.testSimpleDiffusion
 
       detail = "the ability to read and write a complete input file;"
+      python = 3
     []
 
     [testChangingInputFiles]
@@ -57,6 +62,7 @@
       test_case = Tests.testChangingInputFiles
 
       detail = "the ability to change input files;"
+      python = 3
     []
 
     [testTreeWithOnlyApp]
@@ -66,6 +72,7 @@
       test_case = Tests.testTreeWithOnlyApp
 
       detail = "the ability to open without an input file;"
+      python = 3
     []
 
     [testAddVectorPostprocessor]
@@ -75,6 +82,7 @@
       test_case = Tests.testAddVectorPostprocessor
 
       detail = "the capability to add input file blocks graphically;"
+      python = 3
     []
 
     [testBlocks]
@@ -84,6 +92,7 @@
       test_case = Tests.testBlocks
 
       detail = "supports the creation of input file blocks; and"
+      python = 3
     []
 
     [testIncompatible]
@@ -93,6 +102,7 @@
       test_case = Tests.testIncompatible
 
       detail = "handles incompatible parameter changes without failure."
+      python = 3
     []
   []
 []

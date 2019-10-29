@@ -33,7 +33,7 @@ class NavigationExtension(components.Extension):
     def defaultConfig():
         config = components.Extension.defaultConfig()
         config['menu'] = (dict(), "Navigation items, this can either be a *.menu.md file or dict. "\
-                          "The former creates a 'mega menu' and the later uses dropdowns.")
+                          "The former creates a 'mega men' and the later uses dropdowns.")
         config['search'] = (True, "Enable/disable the search bar.")
         config['google-cse'] = (None, "Enable Google search by supplying the Google 'search engine ID'.")
         config['home'] = ('', "The homepage for the website.")
@@ -91,7 +91,7 @@ class NavigationExtension(components.Extension):
                 title = head.text()
 
             id_ = head.get('id')
-            if id_ == u'':
+            if id_ == '':
                 id_ = head.text('-').lower()
             index.append(dict(title=title, text=head.text(), bookmark=id_))
         meta.getData('search').extend(index)
@@ -169,8 +169,8 @@ class NavigationExtension(components.Extension):
         name = self.get('name', None)
         if name is not None:
             a = html.Tag(None, 'a', class_='left moose-logo hide-on-med-and-down',
-                         href=unicode(self.get('home', '#!')),
-                         string=unicode(name))
+                         href=str(self.get('home', '#!')),
+                         string=str(name))
             nav.insert(0, a)
 
     def _addRepo(self, nav, page): #pylint: disable=no-self-use
@@ -215,15 +215,15 @@ class NavigationExtension(components.Extension):
         if long_name is not None:
             html.Tag(head, 'title', string=long_name)
         elif name is not None:
-            html.Tag(head, 'title', string=u'{}|{}'.format(page_name, name))
+            html.Tag(head, 'title', string='{}|{}'.format(page_name, name))
         else:
-            html.Tag(head, 'title', string=unicode(page_name))
+            html.Tag(head, 'title', string=str(page_name))
 
     def _addSearch(self, parent, page):
 
         # Search button
         btn = html.Tag(parent, 'a', class_="modal-trigger", href="#moose-search")
-        html.Tag(btn, 'i', string=u'search', class_="material-icons")
+        html.Tag(btn, 'i', string='search', class_="material-icons")
 
         # Search Modal window
         div = html.Tag(anytree.search.find_by_attr(parent.root, 'header'), 'div',
@@ -243,7 +243,7 @@ class NavigationExtension(components.Extension):
                      type_='text',
                      id_="moose-search-box",
                      onkeyup="mooseSearch()",
-                     placeholder=unicode(self.get('home')))
+                     placeholder=self.get('home'))
             result_wrapper = html.Tag(row, 'div')
             html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
 
@@ -294,20 +294,20 @@ class NavigationExtension(components.Extension):
                                           os.path.dirname(page.local)).replace('.md', '.html')
                     a = html.Tag(div, 'a', href=url,
                                  class_="breadcrumb",
-                                 string=unicode(current.name))
+                                 string=current.name)
                 else:
                     span = html.Tag(div, 'span', class_="breadcrumb")
-                    html.String(span, content=unicode(current.name))
+                    html.String(span, content=current.name)
 
             elif isinstance(current, pages.File) and current.name != 'index.md':
                 url = os.path.relpath(current.local,
                                       os.path.dirname(page.local)).replace('.md', '.html')
                 a = html.Tag(div, 'a', href=url, class_="breadcrumb")
-                html.String(a, content=unicode(os.path.splitext(current.name)[0]))
+                html.String(a, content=os.path.splitext(current.name)[0])
 
         if not page.local.endswith('index.md'):
             html.Tag(div, 'a', href='#', class_="breadcrumb",
-                     string=unicode(os.path.splitext(page.name)[0]))
+                     string=os.path.splitext(page.name)[0])
 
     def _addSections(self, container, page): #pylint: disable=unused-argument
         """
@@ -319,7 +319,7 @@ class NavigationExtension(components.Extension):
                                collapsible.
         """
         collapsible = self.get('collapsible-sections')
-        if isinstance(collapsible, unicode):
+        if isinstance(collapsible, str):
             collapsible = eval(collapsible)
 
         section = container
@@ -390,25 +390,25 @@ class NavigationExtension(components.Extension):
     def _createNavigation(self, ul, page, mega=True):
         """Helper for creating navigation lists."""
 
-        for key, value in self.get('menu', dict()).iteritems(): #pylint: disable=no-member
+        for key, value in self.get('menu', dict()).items(): #pylint: disable=no-member
 
             li = html.Tag(ul, 'li')
             if isinstance(value, str) and value.endswith('menu.md') and mega:
                 li['class'] = 'moose-mega-menu-trigger'
-                a = html.Tag(li, 'a', string=unicode(key))
-                html.Tag(a, 'i', class_='material-icons right', string=u'arrow_drop_down')
+                a = html.Tag(li, 'a', string=key)
+                html.Tag(a, 'i', class_='material-icons right', string='arrow_drop_down')
                 self._addMegaMenu(li, value, page)
 
             elif isinstance(value, str):
                 href = value if value.startswith('http') else self._findPath(page, value)
-                html.Tag(li, 'a', href=href, string=unicode(key))
+                html.Tag(li, 'a', href=href, string=key)
 
             elif isinstance(value, dict):
                 id_ = uuid.uuid4()
-                a = html.Tag(li, 'a', class_='dropdown-trigger', href='#!', string=unicode(key))
+                a = html.Tag(li, 'a', class_='dropdown-trigger', href='#!', string=str(key))
                 a['data-target'] = id_
                 a['data-constrainWidth'] = 'false'
-                html.Tag(a, 'i', class_='material-icons right', string=u'arrow_drop_down')
+                html.Tag(a, 'i', class_='material-icons right', string='arrow_drop_down')
                 self._buildDropdown(ul.parent.parent, page, id_, value)
 
             else:
@@ -433,10 +433,10 @@ class NavigationExtension(components.Extension):
     def _buildDropdown(self, parent, page, tag_id, items):
         """Creates sublist for dropdown navigation."""
         ul = html.Tag(parent, 'ul', id_=tag_id, class_='dropdown-content')
-        for key, value in items.iteritems():
+        for key, value in items.items():
             li = html.Tag(ul, 'li')
             href = value if value.startswith('http') else self._findPath(page, value)
-            html.Tag(li, 'a', href=href, string=unicode(key))
+            html.Tag(li, 'a', href=href, string=str(key))
 
     def _findPath(self, page, path):
         """Locates page based on supplied path."""

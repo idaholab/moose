@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -63,7 +63,7 @@ class TestAddVariableAndBlock(Testing.PeacockAppImageTestCase):
         b1 = input_.InputFileEditorPlugin.tree.getBlockInfo("/MeshModifiers")
         b1.included = True
         input_.InputFileEditorPlugin.block_tree.copyBlock(b1)
-        b2 = b1.children.values()[0]
+        b2 = list(b1.children.values())[0]
         b2.setBlockType('SubdomainBoundingBox')
         b2.addParameter(ParameterInfo(None, 'bottom_left'))
         b2.setParamValue('bottom_left', '0.25 0.25 0')

@@ -1,9 +1,5 @@
 import os
 from mooseutils import colorText, git_ls_files, git_root_dir
-try:
-    from hit_load import hit_load
-except:
-    raise ImportError('hit package failed to load, but it is required.')
 
 class SQAStats(object):
     """Data wrapper for SQA statistic information."""
@@ -49,6 +45,8 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
         specs: The filename(s) to consider
         working_dir: The working directory, if not supplied the root directory of the repository is used
     """
+    from .hit_load import hit_load
+
     tests_with_missing_requirements = set()
     working_dir = git_root_dir(os.getcwd()) if working_dir is None else working_dir
     data = SQAStats(location)

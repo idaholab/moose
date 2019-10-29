@@ -6,6 +6,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+from __future__ import print_function
 
 import os
 import copy
@@ -73,7 +74,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     # Run input file and build up output
     x = []
     y = []
-    for step in xrange(0, num_refinements):
+    for step in range(0, num_refinements):
         a = copy.copy(cli_args)
         if rtype == SPATIAL:
             a.append('Mesh/uniform_refine={}'.format(step))
@@ -87,7 +88,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
             if csv is None:
                 fcsv = '{}.csv'.format(fbase)
 
-        print 'Running:', executable, ' '.join(a)
+        print('Running:', executable, ' '.join(a))
         out = mooseutils.run_executable(executable, a, mpi=mpi, suppress_output=not console)
 
         # Check that CSV file exists

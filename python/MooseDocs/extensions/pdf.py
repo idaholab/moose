@@ -113,21 +113,21 @@ class PDFExtension(command.CommandExtension):
         """
 
         main = base.NodeBase(None, None)
-        latex.Command(main, 'documentclass', string=u'report', end='')
-        for package, options in self.translator.renderer.getPackages().iteritems():
+        latex.Command(main, 'documentclass', string='report', end='')
+        for package, options in self.translator.renderer.getPackages().items():
             args = []
             if options[0] or options[1]:
                 args = [self._getOptions(*options)]
 
             latex.Command(main, 'usepackage', args=args, string=package, start='\n', end='')
 
-        latex.String(main, content=u'\\setlength{\\parindent}{0pt}', start=u'\n', escape=False)
+        latex.String(main, content='\\setlength{\\parindent}{0pt}', start='\n', escape=False)
 
         for preamble in self.translator.renderer.getPreamble():
             latex.String(main, content='\n' + preamble, escape=False)
 
         # New Commands
-        for cmd in self.translator.renderer.getNewCommands().itervalues():
+        for cmd in self.translator.renderer.getNewCommands().values():
             cmd.parent = main
 
         doc = latex.Environment(main, 'document', end='\n')
@@ -135,13 +135,13 @@ class PDFExtension(command.CommandExtension):
             page = node['page']
             if self.translator.getMetaData(page, 'active'):
                 cmd = latex.Command(doc, 'input', start='\n')
-                latex.String(cmd, content=unicode(page.destination), escape=False)
+                latex.String(cmd, content=str(page.destination), escape=False)
 
         # BibTeX
         bib_files = [n.source for n in self.translator.content if n.source.endswith('.bib')]
         if bib_files:
-            latex.Command(doc, 'bibliographystyle', start='\n', string=u'unsrtnat')
-            latex.Command(doc, 'bibliography', string=u','.join(bib_files), start='\n',
+            latex.Command(doc, 'bibliographystyle', start='\n', string='unsrtnat')
+            latex.Command(doc, 'bibliography', string=','.join(bib_files), start='\n',
                           escape=False)
 
         return main
@@ -211,9 +211,9 @@ class PDFExtension(command.CommandExtension):
         txt = []
         for key in args:
             txt.append(key)
-        for key, value in kwargs.iteritems():
-            txt.append(u'{}={}'.format(key, str(value)))
-        return latex.Bracket(string=u','.join(txt), escape=False)
+        for key, value in kwargs.items():
+            txt.append('{}={}'.format(key, str(value)))
+        return latex.Bracket(string=','.join(txt), escape=False)
 
     @staticmethod
     def processLatexOutput(output, nodes):
@@ -261,7 +261,7 @@ class PDFExtension(command.CommandExtension):
             elif char == ')':
                 node = node.parent
             else:
-                node.content += char
+                node.content += str(char)
         return root
 
     @staticmethod
@@ -269,23 +269,23 @@ class PDFExtension(command.CommandExtension):
         """Create a tree structure from the supplied page objects."""
 
         tree = dict()
-        root = base.NodeBase(u'', None)
-        tree[(u'',)] = root
+        root = base.NodeBase('', None)
+        tree[('',)] = root
 
         # Sort
         nodes = sorted(files, key=lambda f: f.local)
 
         # Build directories
         for node in nodes:
-            key = tuple([u''] + node.local.split(os.sep))[:-1]
-            for i in xrange(1, len(key) + 1):
+            key = tuple([''] + node.local.split(os.sep))[:-1]
+            for i in range(1, len(key) + 1):
                 k = key[:i]
                 if k not in tree:
                     tree[k] = base.NodeBase(k[-1], tree[k[:-1]])
 
         # Insert pages
         for node in nodes:
-            key = tuple([u''] + node.local.split(os.sep))
+            key = tuple([''] + node.local.split(os.sep))
             if key[-1] == 'index.md':
                 tree[key[:-1]]['page'] = node
             else:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,19 +9,19 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import peacock
-from ExodusPluginManager import ExodusPluginManager
-from plugins.VTKWindowPlugin import VTKWindowPlugin
-from plugins.FilePlugin import FilePlugin
-from plugins.GoldDiffPlugin import GoldDiffPlugin
-from plugins.ColorbarPlugin import ColorbarPlugin
-from plugins.MeshPlugin import MeshPlugin
-from plugins.BackgroundPlugin import BackgroundPlugin
-from plugins.ClipPlugin import ClipPlugin
-from plugins.ContourPlugin import ContourPlugin
-from plugins.OutputPlugin import OutputPlugin
-from plugins.CameraPlugin import CameraPlugin
-from plugins.MediaControlPlugin import MediaControlPlugin
-from plugins.BlockPlugin import BlockPlugin
+from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
+from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
+from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
+from peacock.ExodusViewer.plugins.GoldDiffPlugin import GoldDiffPlugin
+from peacock.ExodusViewer.plugins.ColorbarPlugin import ColorbarPlugin
+from peacock.ExodusViewer.plugins.MeshPlugin import MeshPlugin
+from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
+from peacock.ExodusViewer.plugins.ClipPlugin import ClipPlugin
+from peacock.ExodusViewer.plugins.ContourPlugin import ContourPlugin
+from peacock.ExodusViewer.plugins.OutputPlugin import OutputPlugin
+from peacock.ExodusViewer.plugins.CameraPlugin import CameraPlugin
+from peacock.ExodusViewer.plugins.MediaControlPlugin import MediaControlPlugin
+from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
 
 class ExodusViewer(peacock.base.ViewerBase):
     """

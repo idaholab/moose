@@ -3,17 +3,20 @@
     type = ImageDiff
     command = orientation.py
     imagediff = 'orientation.png'
+    python = 3
   [../]
 
   [./scale]
     type = ImageDiff
     command = scale.py
     imagediff = 'scale.png'
+    python = 3
   [../]
 
   [./rotation]
     type = ImageDiff
     command = rotation.py
     imagediff = 'rotation.png'
+    python = 3
   [../]
 []

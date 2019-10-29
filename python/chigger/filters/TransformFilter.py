@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from ChiggerFilterBase import ChiggerFilterBase
+from .ChiggerFilterBase import ChiggerFilterBase
 class TransformFilter(ChiggerFilterBase):
     """
     Filter for computing and visualizing contours.

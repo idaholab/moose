@@ -6,8 +6,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
-from __future__ import print_function
+import sys
 import os
 import re
 import collections
@@ -17,7 +16,10 @@ import subprocess
 import time
 import cProfile as profile
 import pstats
-import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    from io import StringIO
 
 def colorText(string, color, **kwargs):
     """
@@ -58,7 +60,7 @@ def colorText(string, color, **kwargs):
         color_codes['CYAN']  = '\033[36m'
         color_codes['MAGENTA'] = '\033[35m'
 
-    if colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
+    if colored and not ('BITTEN_NOCOLOR' in os.environ and os.environ['BITTEN_NOCOLOR'] == 'true'):
         if html:
             string = string.replace('<r>', color_codes['BOLD']+color_codes['RED'])
             string = string.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
@@ -139,7 +141,7 @@ def find_moose_executable_recursive(loc=os.getcwd(), **kwargs):
     Inputs: see 'find_moose_executable'
     """
     loc = loc.split(os.path.sep)
-    for i in xrange(len(loc), 0, -1):
+    for i in range(len(loc), 0, -1):
         current = os.path.sep + os.path.join(*loc[0:i])
         executable = find_moose_executable(current, show_error=False)
         if executable is not None:
@@ -180,15 +182,18 @@ def runExe(app_path, args):
 
     proc = subprocess.Popen(popen_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     data = proc.communicate()
-    stdout_data = data[0].decode("utf-8")
+    if sys.version_info[0] == 2:
+        stdout_data = data[0]
+    else:
+        stdout_data = data[0].decode("utf-8")
     return stdout_data
 
-def check_configuration(packages):
+def check_configuration(packages, message=True):
     """
     Check that the supplied packages exist.
 
     Return:
-        [int]: 0 = Success; 1 = Missing package(s)
+        [list]: A list of missing packages.
     """
     missing = []
     for package in packages:
@@ -197,16 +202,14 @@ def check_configuration(packages):
         except ImportError:
             missing.append(package)
 
-    if missing:
-        print("The following packages are missing but required:")
-        for m in missing:
-            print(' '*4, '-', m)
-        print('It may be possible to install them using "pip", but you likely need to ' \
-              'the MOOSE environment package on your system.\n')
-        print('Using pip:\n    pip install package-name-here --user')
-        return 1
+    if missing and message:
+        msg = "The following packages are missing but required: {0}\n"
+        msg += "These packages are included in the MOOSE environment package, but it may also\n"
+        msg += "to install them using 'pip':\n"
+        msg += "    pip install {0} --user')"
+        print(msg.format(', '.join(missing)))
 
-    return 0
+    return missing
 
 def touch(fname):
     """
@@ -250,7 +253,7 @@ def make_chunks(local, num=multiprocessing.cpu_count()):
         num[int]: The number of chunks (defaults to number of threads available)
     """
     k, m = divmod(len(local), num)
-    return (local[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in xrange(num))
+    return (local[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(num))
 
 def camel_to_space(text):
     """
@@ -274,9 +277,9 @@ def text_diff(text, gold):
     """
 
     # Convert to line
-    if isinstance(text, (str, unicode)):
+    if isinstance(text, str):
         text = text.splitlines(True)
-    if isinstance(gold, (str, unicode)):
+    if isinstance(gold, str):
         gold = gold.splitlines(True)
 
     # Perform diff
@@ -344,22 +347,21 @@ def git_commit(working_dir=os.getcwd()):
     """
     Return the current SHA from git.
     """
-    out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=working_dir)
+    out = check_output(['git', 'rev-parse', 'HEAD'], cwd=working_dir)
     return out.strip(' \n')
 
 def git_commit_message(sha, working_dir=os.getcwd()):
     """
     Return the the commit message for the supplied SHA
     """
-    out = subprocess.check_output(['git', 'show', '-s', '--format=%B', sha], cwd=working_dir)
+    out = check_output(['git', 'show', '-s', '--format=%B', sha], cwd=working_dir)
     return out.strip(' \n')
 
 def git_merge_commits(working_dir=os.getcwd()):
     """
     Return the current SHAs for a merge.
     """
-    out = subprocess.check_output(['git', 'log', '-1', '--merges', '--pretty=format:%P'],
-                                  cwd=working_dir)
+    out = check_output(['git', 'log', '-1', '--merges', '--pretty=format:%P'], cwd=working_dir)
     return out.strip(' \n').split(' ')
 
 def git_ls_files(working_dir=os.getcwd()):
@@ -367,8 +369,8 @@ def git_ls_files(working_dir=os.getcwd()):
     Return a list of files via 'git ls-files'.
     """
     out = set()
-    for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
-        out.add(os.path.abspath(os.path.join(working_dir, fname)))
+    for fname in check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
+            out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 
 def list_files(working_dir=os.getcwd()):
@@ -386,9 +388,8 @@ def git_root_dir(working_dir=os.getcwd()):
     Return the top-level git directory by running 'git rev-parse --show-toplevel'.
     """
     try:
-        return subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
-                                       cwd=working_dir,
-                                       stderr=subprocess.STDOUT).strip('\n')
+        return check_output(['git', 'rev-parse', '--show-toplevel'],
+                            cwd=working_dir, stderr=subprocess.STDOUT).strip('\n')
     except subprocess.CalledProcessError:
         print("The supplied directory is not a git repository: {}".format(working_dir))
     except OSError:
@@ -400,7 +401,7 @@ def run_profile(function, *args, **kwargs):
     start = time.time()
     out = pr.runcall(function, *args, **kwargs)
     print('Total Time:', time.time() - start)
-    s = StringIO.StringIO()
+    s = StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
     ps.print_stats()
     print(s.getvalue())
@@ -419,4 +420,10 @@ def shellCommand(command, cwd=None):
         if retcode != 0:
             raise Exception("Exception raised while running the command: %s in directory %s" % (command, cwd))
 
-        return p.communicate()[0]
+        return p.communicate()[0].decode()
+
+def check_output(cmd, **kwargs):
+    if sys.version_info[0] == 2:
+        return subprocess.check_output(cmd, **kwargs)
+    else:
+        return subprocess.check_output(cmd, encoding='utf-8', **kwargs)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -20,14 +20,14 @@ class TestCheckType(unittest.TestCase):
 
         with self.assertRaises(Exception) as e:
             common.check_type('foo', 42, types.FunctionType)
-        self.assertEqual("The argument 'foo' must be callable but <type 'int'> was provided.",
-                         e.exception.message)
+        self.assertEqual("The argument 'foo' must be callable but <class 'int'> was provided.",
+                         str(e.exception))
 
         with self.assertRaises(Exception) as e:
             common.check_type('foo', 42, list)
 
-        gold = "The argument 'foo' must be of type <type 'list'> but <type 'int'> was provided."
-        self.assertIn(gold, e.exception.message)
+        gold = "The argument 'foo' must be of type <class 'list'> but <class 'int'> was provided."
+        self.assertIn(gold, str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

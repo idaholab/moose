@@ -4,6 +4,8 @@
     type = ImageDiff
     command = image_annotation.py
     imagediff = 'image_annotation.png'
+    python = 3
+    platform = LINUX
   [../]
 
   [./logo]
@@ -11,6 +13,8 @@
     type = ImageDiff
     command = logo_annotation.py
     imagediff = 'logo_annotation.png'
+    python = 3
+    platform = LINUX
   [../]
 
   [./text]
@@ -18,6 +22,7 @@
     type = ImageDiff
     command = text_annotation.py
     imagediff = 'text_annotation.png'
+    python = 3
   [../]
 
   [./time]
@@ -25,6 +30,7 @@
     type = ImageDiff
     command = time_annotation.py
     imagediff = 'time_annotation.png'
+    python = 3
   [../]
 
   [./time_change]
@@ -32,5 +38,7 @@
     type = ImageDiff
     command = time_annotation_change.py
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
+    python = 3
+    platform = LINUX
   [../]
 []

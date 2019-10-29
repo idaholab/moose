@@ -29,30 +29,30 @@ def make_extension(**kwargs):
     return CoreExtension(**kwargs)
 
 
-Section = tokens.newToken(u'Section')
-Word = tokens.newToken(u'Word', content=u'')
-Space = tokens.newToken(u'Space', count=1)
-Break = tokens.newToken(u'Break', count=1)
-Punctuation = tokens.newToken(u'Punctuation', content=u'')
-Number = tokens.newToken(u'Number', content=u'')
-Code = tokens.newToken(u'Code', content=u'', language=u'text', escape=True)
-Heading = tokens.newToken(u'Heading', level=1)
-Paragraph = tokens.newToken(u'Paragraph')
-OrderedList = tokens.newToken(u'OrderedList', browser_default=True, start=1)
-UnorderedList = tokens.newToken(u'UnorderedList', browser_default=True)
-ListItem = tokens.newToken(u'ListItem')
-Link = tokens.newToken(u'Link', url=u'')
-Shortcut = tokens.newToken(u'Shortcut', key=u'', link=u'', prefix=u'')
-ShortcutLink = tokens.newToken(u'ShortcutLink', key=u'')
-Monospace = tokens.newToken(u'Monospace', content=u'')
-Strong = tokens.newToken(u'Strong')
-Emphasis = tokens.newToken(u'Emphasis')
-Underline = tokens.newToken(u'Underline')
-Strikethrough = tokens.newToken(u'Strikethrough')
-Quote = tokens.newToken(u'Quote')
-Superscript = tokens.newToken(u'Superscript')
-Subscript = tokens.newToken(u'Subscript')
-LineBreak = tokens.newToken(u'LineBreak')
+Section = tokens.newToken('Section')
+Word = tokens.newToken('Word', content='')
+Space = tokens.newToken('Space', count=1)
+Break = tokens.newToken('Break', count=1)
+Punctuation = tokens.newToken('Punctuation', content='')
+Number = tokens.newToken('Number', content='')
+Code = tokens.newToken('Code', content='', language='text', escape=True)
+Heading = tokens.newToken('Heading', level=1)
+Paragraph = tokens.newToken('Paragraph')
+OrderedList = tokens.newToken('OrderedList', browser_default=True, start=1)
+UnorderedList = tokens.newToken('UnorderedList', browser_default=True)
+ListItem = tokens.newToken('ListItem')
+Link = tokens.newToken('Link', url='')
+Shortcut = tokens.newToken('Shortcut', key='', link='', prefix='')
+ShortcutLink = tokens.newToken('ShortcutLink', key='')
+Monospace = tokens.newToken('Monospace', content='')
+Strong = tokens.newToken('Strong')
+Emphasis = tokens.newToken('Emphasis')
+Underline = tokens.newToken('Underline')
+Strikethrough = tokens.newToken('Strikethrough')
+Quote = tokens.newToken('Quote')
+Superscript = tokens.newToken('Superscript')
+Subscript = tokens.newToken('Subscript')
+LineBreak = tokens.newToken('LineBreak')
 
 class CoreExtension(components.Extension):
     """
@@ -91,40 +91,40 @@ class CoreExtension(components.Extension):
         reader.addInline(SpaceInline())
 
         # Render components
-        renderer.add(u'Heading', RenderHeading())
-        renderer.add(u'Code', RenderCode())
-        renderer.add(u'ShortcutLink', RenderShortcutLink())
-        renderer.add(u'Shortcut', RenderShortcut())
-        renderer.add(u'Monospace', RenderMonospace())
-        renderer.add(u'Break', RenderBreak())
-        renderer.add(u'LineBreak', RenderLineBreak())
-        renderer.add(u'ErrorToken', RenderError())
+        renderer.add('Heading', RenderHeading())
+        renderer.add('Code', RenderCode())
+        renderer.add('ShortcutLink', RenderShortcutLink())
+        renderer.add('Shortcut', RenderShortcut())
+        renderer.add('Monospace', RenderMonospace())
+        renderer.add('Break', RenderBreak())
+        renderer.add('LineBreak', RenderLineBreak())
+        renderer.add('ErrorToken', RenderError())
 
-        renderer.add(u'Link', RenderLink())
-        renderer.add(u'Paragraph', RenderParagraph())
-        renderer.add(u'UnorderedList', RenderUnorderedList())
-        renderer.add(u'OrderedList', RenderOrderedList())
-        renderer.add(u'ListItem', RenderListItem())
-        renderer.add(u'Quote', RenderQuote())
-        renderer.add(u'Strong', RenderStrong())
-        renderer.add(u'Underline', RenderUnderline())
-        renderer.add(u'Emphasis', RenderEmphasis())
-        renderer.add(u'Strikethrough', RenderStrikethrough())
-        renderer.add(u'Superscript', RenderSuperscript())
-        renderer.add(u'Subscript', RenderSubscript())
-        renderer.add(u'Punctuation', RenderPunctuation())
-        renderer.add(u'DisabledToken', RenderDisabled())
-        renderer.add(u'Space', RenderSpace())
+        renderer.add('Link', RenderLink())
+        renderer.add('Paragraph', RenderParagraph())
+        renderer.add('UnorderedList', RenderUnorderedList())
+        renderer.add('OrderedList', RenderOrderedList())
+        renderer.add('ListItem', RenderListItem())
+        renderer.add('Quote', RenderQuote())
+        renderer.add('Strong', RenderStrong())
+        renderer.add('Underline', RenderUnderline())
+        renderer.add('Emphasis', RenderEmphasis())
+        renderer.add('Strikethrough', RenderStrikethrough())
+        renderer.add('Superscript', RenderSuperscript())
+        renderer.add('Subscript', RenderSubscript())
+        renderer.add('Punctuation', RenderPunctuation())
+        renderer.add('DisabledToken', RenderDisabled())
+        renderer.add('Space', RenderSpace())
 
-        renderer.add(u'Word', RenderString())
-        renderer.add(u'Number', RenderString())
-        renderer.add(u'String', RenderString())
+        renderer.add('Word', RenderString())
+        renderer.add('Number', RenderString())
+        renderer.add('String', RenderString())
 
         #TODO: Make a generic preamble method?
         if isinstance(renderer, renderers.LatexRenderer):
-            renderer.addPackage(u'amsmath')
-            renderer.addPackage(u'soul')
-            renderer.addPackage(u'hyperref',
+            renderer.addPackage('amsmath')
+            renderer.addPackage('soul')
+            renderer.addPackage('hyperref',
                                 linkcolor='blue',
                                 citecolor='blue',
                                 filecolor='blue',
@@ -144,7 +144,7 @@ class CodeBlock(components.TokenComponent):
     @staticmethod
     def defaultSettings():
         settings = components.TokenComponent.defaultSettings()
-        settings['language'] = (u'text', "The code language to use for highlighting.")
+        settings['language'] = ('text', "The code language to use for highlighting.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -164,9 +164,9 @@ class QuoteBlock(components.TokenComponent):
     def createToken(self, parent, info, page):
         content = []
         for line in info['quote'].rstrip('\n').split('\n'):
-            if line == u'>':
+            if line == '>':
                 content.append('')
-            elif line.startswith(u'> '):
+            elif line.startswith('> '):
                 content.append(line[2:])
             else:
                 raise Exception(repr(line))
@@ -224,7 +224,7 @@ class UnorderedListBlock(ListBlock):
                     r'(?=\n{3,}|\n*\Z|\n{2}^[^-\s])',  # stop with 2 empty or 1 not with marker
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
     ITEM_RE = re.compile(r'^- (?P<item>.*?)(?=\Z|^- )', flags=re.MULTILINE|re.DOTALL|re.UNICODE)
-    TOKEN = u'UnorderedList'
+    TOKEN = 'UnorderedList'
 
 class OrderedListBlock(ListBlock):
     """Ordered lists."""
@@ -234,7 +234,7 @@ class OrderedListBlock(ListBlock):
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
     ITEM_RE = re.compile(r'^[0-9]+\. (?P<item>.*?)(?=\Z|^[0-9]+\. )',
                          flags=re.MULTILINE|re.DOTALL|re.UNICODE)
-    TOKEN = u'OrderedList'
+    TOKEN = 'OrderedList'
 
     #TODO: figure out how to handle settings???
     #TODO: combine regex for ordered/unordered
@@ -353,24 +353,24 @@ class FormatInline(components.TokenComponent):
 
         # Sub/super script must have word before the rest cannot
         if (tok == '^') or (tok == '@'):
-            if not parent.children or (not parent.children[-1].name == u'Word'):
+            if not parent.children or (not parent.children[-1].name == 'Word'):
                 return None
-        elif parent.children and (parent.children[-1].name == u'Word'):
+        elif parent.children and (parent.children[-1].name == 'Word'):
             return None
 
-        if tok == u'@':
+        if tok == '@':
             return Subscript(parent)
-        elif tok == u'^':
+        elif tok == '^':
             return Superscript(parent)
-        elif tok == u'=':
+        elif tok == '=':
             return Underline(parent)
-        elif tok == u'*':
+        elif tok == '*':
             return Emphasis(parent)
-        elif tok == u'+':
+        elif tok == '+':
             return Strong(parent)
-        elif tok == u'~':
+        elif tok == '~':
             return Strikethrough(parent)
-        elif tok == u'`':
+        elif tok == '`':
             return Monospace(parent, content=info['inline'], recursive=False)
 
 ####################################################################################################
@@ -383,7 +383,7 @@ class RenderHeading(components.RenderComponent):
 
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
         if not token.get('id'):
-            token.set('id', token.text(u'-').lower())
+            token.set('id', token.text('-').lower())
         return html.Tag(parent, 'h{}'.format(token['level']), token)
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
@@ -395,7 +395,7 @@ class RenderHeading(components.RenderComponent):
         if id_:
             latex.Command(sec, 'label', string=id_)
         else:
-            latex.Command(sec, 'label', string=token.text(u'-').lower())
+            latex.Command(sec, 'label', string=token.text('-').lower())
         return sec
 
 class RenderCode(components.RenderComponent):
@@ -481,10 +481,10 @@ class RenderMonospace(components.RenderComponent):
 
 class RenderBreak(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
-        return html.String(parent, content=u' ')
+        return html.String(parent, content=' ')
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
-        return latex.String(parent, content=u' ')
+        return latex.String(parent, content=' ')
 
 class RenderLineBreak(components.RenderComponent):
     def createHTML(self, parent, token, page):
@@ -561,10 +561,10 @@ class RenderString(components.RenderComponent):
 
 class RenderSpace(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
-        return html.String(parent, content=u' '*token['count'])
+        return html.String(parent, content=' '*token['count'])
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use
-        return latex.String(parent, content=u' '*token['count'])
+        return latex.String(parent, content=' '*token['count'])
 
 class RenderQuote(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
@@ -633,10 +633,10 @@ class RenderSubscript(components.RenderComponent):
 class RenderPunctuation(RenderString):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
         content = token['content']
-        if content == u'--':
-            return html.String(parent, content=u'&ndash;')
-        elif content == u'---':
-            return html.String(parent, content=u'&mdash;')
+        if content == '--':
+            return html.String(parent, content='&ndash;')
+        elif content == '---':
+            return html.String(parent, content='&mdash;')
 
         return RenderString.createHTML(self, parent, token, page)
 
@@ -657,13 +657,13 @@ class RenderError(components.RenderComponent):
         modal = html.Tag(parent.root, 'div', id_=id_, class_="modal")
         content = html.Tag(modal, 'div', class_="modal-content")
         head = html.Tag(content, 'h2')
-        html.String(head, content=u'Tokenize Error')
+        html.String(head, content='Tokenize Error')
         p = html.Tag(content, 'p')
 
-        html.String(p, content=unicode(token['message']))
+        html.String(p, content=str(token['message']))
         html.Tag(p, 'br', close=False)
         if token.info:
-            html.String(p, content=u'{}:{}'.format(page.local, token.info.line))
+            html.String(p, content='{}:{}'.format(page.local, token.info.line))
         html.Tag(p, 'br', close=False)
 
         if token.info:
@@ -673,7 +673,7 @@ class RenderError(components.RenderComponent):
 
         footer = html.Tag(modal, 'div', class_="modal-footer grey lighten-3")
         done = html.Tag(footer, 'a', class_="modal-action modal-close btn-flat")
-        html.String(done, content=u"Done")
+        html.String(done, content="Done")
 
         trace = token.get('traceback', None)
         if trace is not None:

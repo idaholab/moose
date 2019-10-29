@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -15,7 +15,7 @@ class TestExceptions(unittest.TestCase):
     def testMooseDocsException(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             raise exceptions.MooseDocsException("{}", 'foo')
-        self.assertEqual('foo', e.exception.message)
+        self.assertEqual('foo', str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

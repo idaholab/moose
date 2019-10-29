@@ -10,7 +10,7 @@
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from peacock.ExodusViewer.plugins.ExodusPlugin import ExodusPlugin
-from MeshBlockSelectorWidget import MeshBlockSelectorWidget
+from .MeshBlockSelectorWidget import MeshBlockSelectorWidget
 
 class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

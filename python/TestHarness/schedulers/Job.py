@@ -169,7 +169,7 @@ class Job(object):
 
     def addMetaData(self, **kwargs):
         """ Allow derived methods to store additional data which ends up in the data storage file """
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             self.__meta_data[key] = value
 
     def getMetaData(self):

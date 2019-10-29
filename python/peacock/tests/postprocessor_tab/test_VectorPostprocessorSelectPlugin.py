@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -117,7 +117,6 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
         self.assertIn("data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test_*.csv')", output)
         self.assertIn("x = data('index (Peacock)')", output)
         self.assertIn("y = data('y')", output)
-        self.assertIn("axes0.plot(x, y, marker='', linewidth=1, color=[0.698, 0.875, 0.541, 1.0], markersize=1, linestyle='-', label='y')", output)
         self.assertIn("data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test2_*.csv')", output)
 
 if __name__ == '__main__':

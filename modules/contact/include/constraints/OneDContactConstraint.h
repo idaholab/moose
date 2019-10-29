@@ -46,4 +46,3 @@ protected:
 
   bool _jacobian_update;
 };
-

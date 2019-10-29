@@ -12,7 +12,7 @@ import sys
 import glob
 from PyQt5 import QtCore, QtWidgets
 import peacock
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 from peacock.ExodusViewer.plugins.ExodusFilterProxyModel import ExodusFilterProxyModel
 
 class ExodusComboBox(QtWidgets.QComboBox):
@@ -136,7 +136,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Check that the variable names have not changed, update if they have.
         """
         variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
-        names = [var.name for var in variables.itervalues()]
+        names = [var.name for var in variables.values()]
         current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
         if names != current:
             self._initVariableList(reader)
@@ -148,7 +148,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
         self.VariableList.blockSignals(True)
         self.VariableList.clear()
-        for vinfo in variables.itervalues():
+        for vinfo in variables.values():
             self.VariableList.addItem(vinfo.name, vinfo)
 
         # Set the current variable from existing state or the first item

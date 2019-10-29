@@ -7,11 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, pkgutil
+import platform, re, os, sys, pkgutil
+import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
-from tempfile import TemporaryFile
+from tempfile import SpooledTemporaryFile
 import subprocess
 from signal import SIGTERM
 
@@ -83,7 +84,8 @@ class Tester(MooseObject):
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('sympy', False, "If True, sympy is required.")
+        params.addParam('python',        None, "Restrict the test to s specific version of python (2 or 3).")
+        params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
@@ -287,8 +289,8 @@ class Tester(MooseObject):
 
         self.process = None
         try:
-            f = TemporaryFile()
-            e = TemporaryFile()
+            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
+            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
 
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
@@ -365,7 +367,7 @@ class Tester(MooseObject):
 
     def getRedirectedOutputFiles(self, options):
         """ return a list of redirected output """
-        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
+        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
 
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
@@ -419,10 +421,10 @@ class Tester(MooseObject):
             return False
 
         # Are we running only tests in a specific group?
-        if options.group <> 'ALL' and options.group not in self.specs['group']:
+        if options.group != 'ALL' and options.group not in self.specs['group']:
             self.setStatus(self.silent)
             return False
-        if options.not_group <> '' and options.not_group in self.specs['group']:
+        if options.not_group != '' and options.not_group in self.specs['group']:
             self.setStatus(self.silent)
             return False
 
@@ -559,16 +561,24 @@ class Tester(MooseObject):
 
         # Check to make sure environment variable exists
         for var in self.specs['env_vars']:
-            if not os.environ.has_key(var):
+            if not os.environ.get(var):
                 reasons['env_vars'] = 'ENV VAR NOT SET'
 
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
 
-        # Check for sympy
-        if self.specs['sympy'] and pkgutil.find_loader('sympy') is None:
-            reasons['python_package_required'] = 'NO SYMPY'
+        # Check python version
+        py_version = self.specs['python']
+        if (py_version is not None) and (sys.version_info[0] != py_version):
+            reasons['python'] = 'PYTHON != {}'.format(py_version)
+
+        # Check python packages
+        py_packages = self.specs['required_python_packages']
+        if py_packages is not None:
+            missing = mooseutils.check_configuration(py_packages.split(), message=False)
+            if missing:
+                reasons['python_packages_required'] = ', '.join(['no {}'.format(p) for p in missing])
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
@@ -578,7 +588,7 @@ class Tester(MooseObject):
 
         if len(set(reasons.keys()) - caveat_list) > 0:
             tmp_reason = []
-            for key, value in reasons.iteritems():
+            for key, value in reasons.items():
                 if key.lower() not in caveat_list:
                     tmp_reason.append(value)
 

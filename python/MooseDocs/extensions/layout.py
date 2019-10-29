@@ -16,7 +16,7 @@ from MooseDocs.tree import tokens, html, latex
 def make_extension(**kwargs):
     return LayoutExtension(**kwargs)
 
-ColumnToken = tokens.newToken('ColumnToken', width=u'', small=12, medium=12, large=12)
+ColumnToken = tokens.newToken('ColumnToken', width='', small=12, medium=12, large=12)
 RowToken = tokens.newToken('RowToken')
 
 class LayoutExtension(command.CommandExtension):
@@ -86,7 +86,7 @@ class ColumnCommand(command.CommandComponent):
 
         icon = self.settings.get('icon', None)
         if icon:
-            materialicon.Icon(col, icon=unicode(icon), class_='moose-col-icon')
+            materialicon.Icon(col, icon=str(icon), class_='moose-col-icon')
 
         return col
 

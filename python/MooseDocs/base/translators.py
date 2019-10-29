@@ -23,10 +23,10 @@ import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import mixins, exceptions
 from MooseDocs.tree import pages
-from components import Extension
-from readers import Reader
-from renderers import Renderer
-from executioners import ParallelBarrier
+from .components import Extension
+from .readers import Reader
+from .renderers import Renderer
+from .executioners import ParallelBarrier
 
 LOG = logging.getLogger('MooseDocs.Translator')
 
@@ -177,14 +177,14 @@ class Translator(mixins.ConfigObject):
            nodes = self.findPages(lambda p: p.name == 'foo')
 
         Inputs:
-            name[str|unicode|lambda]: The partial name to search against or the function to use
-                                      to test for matches.
+            name[str|lambda]: The partial name to search against or the function to use
+                              to test for matches.
             exact[bool]: (False) When True an exact path match is required.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('name', arg, (str, unicode, types.FunctionType))
+            common.check_type('name', arg, (str, types.FunctionType))
 
-        if isinstance(arg, (str, unicode)):
+        if isinstance(arg, str):
             items = self.__page_cache.get(arg, None)
             if items is None:
                 func = lambda p: (p.local == arg) or \
@@ -245,7 +245,7 @@ class Translator(mixins.ConfigObject):
             self.__markdown_file_list.add(local)
             parts = local.split(os.path.sep)
             n = len(parts)
-            for i in xrange(n, 0, -1):
+            for i in range(n, 0, -1):
                 self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
 
     def init(self):

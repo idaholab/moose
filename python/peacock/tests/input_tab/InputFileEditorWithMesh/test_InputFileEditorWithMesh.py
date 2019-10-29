@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -335,15 +335,15 @@ class Tests(BaseTests):
         other_image = "meshrender_3d.png"
         w.MeshViewerPlugin.onCameraChanged((0.2, 0.5, 0.8), (-30, 10, -20), (0, 5, 0))
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .98))
+        self.assertFalse(Testing.gold_diff(other_image, .93))
 
         w.setInputFile(sdiffusion)
         w.vtkwin.onWrite(sdiffusion_image)
-        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+        self.assertFalse(Testing.gold_diff(sdiffusion_image, .93))
 
         w.setInputFile(other)
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .98))
+        self.assertFalse(Testing.gold_diff(other_image, .93))
 
 if __name__ == '__main__':
     Testing.run_tests()

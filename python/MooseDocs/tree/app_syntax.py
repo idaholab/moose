@@ -26,6 +26,7 @@ LOG = logging.getLogger(__name__)
 REGISTER_PAIRS = [('Postprocessor', 'UserObjects/*'),
                   ('AuxKernel', 'Bounds/*')]
 
+
 def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
@@ -39,20 +40,20 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
-        tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
+        tree = mooseutils.json_parse(raw)
 
     except Exception as e: #pylint: disable=broad-except
-        LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e.message)
+        LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e)
         sys.exit(1)
 
     root = SyntaxNode('', None)
-    for key, value in tree['blocks'].iteritems():
+    for key, value in tree['blocks'].items():
         node = SyntaxNode(key, root)
         __syntax_tree_helper(node, value)
 
     hidden = set()
     if isinstance(hide, dict):
-        for value in hide.itervalues():
+        for value in hide.values():
             hidden.update(value)
     elif isinstance(hide, (list, set)):
         hidden.update(hide)
@@ -65,7 +66,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     # Remove
     removed = set()
     if isinstance(remove, dict):
-        for value in remove.itervalues():
+        for value in remove.values():
             removed.update(value)
     elif isinstance(remove, (list, set)):
         removed.update(remove)
@@ -83,9 +84,9 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     # Alias
     if alias:
         for node in anytree.PreOrderIter(root):
-            for k, v in alias.iteritems():
+            for k, v in alias.items():
                 if node.fullpath == k:
-                    node.alias = unicode(v)
+                    node.alias = str(v)
 
     return root
 
@@ -111,7 +112,7 @@ def __syntax_tree_helper(parent, item):
         return
 
     if 'actions' in item:
-        for key, action in item['actions'].iteritems():
+        for key, action in item['actions'].items():
             if ('parameters' in action) and action['parameters'] and \
             ('isObjectAction' in action['parameters']):
                 MooseObjectActionNode(key, parent, action)
@@ -122,14 +123,14 @@ def __syntax_tree_helper(parent, item):
         __syntax_tree_helper(parent, item['star'])
 
     if ('types' in item) and item['types']:
-        for key, obj in item['types'].iteritems():
+        for key, obj in item['types'].items():
             __add_moose_object_helper(key, parent, obj)
 
     if ('subblocks' in item) and item['subblocks']:
-        for k, v in item['subblocks'].iteritems():
+        for k, v in item['subblocks'].items():
             node = SyntaxNode(k, parent)
             __syntax_tree_helper(node, v)
 
     if ('subblock_types' in item) and item['subblock_types']:
-        for k, v in item['subblock_types'].iteritems():
+        for k, v in item['subblock_types'].items():
             __add_moose_object_helper(k, parent, v)

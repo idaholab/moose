@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -42,6 +42,7 @@ if __name__ == '__main__':
     cmd = ['git', 'fetch', opt.remote]
     subprocess.call(cmd)
 
+    opt.skip += 'python'
     count = mooseutils.sqa_check(opt.directory, opt.remote, opt.branch, opt.specs, opt.skip)
 
     if opt.duplicates:

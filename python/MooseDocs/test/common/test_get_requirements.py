@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -138,7 +138,7 @@ class TestGetRequirements(unittest.TestCase):
         loc = [os.getcwd()]
         req = common.get_requirements(loc, ['demo2'])
         self.assertEqual(len(req), 0)
-        # TODO: In Python3 performing assert on log messages is possible, it is a pain in 2
+        # TODO: In python performing assert on log messages is possible, it is a pain in 2
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

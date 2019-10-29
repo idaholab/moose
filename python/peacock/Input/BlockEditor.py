@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -11,11 +11,11 @@
 from PyQt5.QtWidgets import QWidget, QSplitter, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
-from CommentEditor import CommentEditor
-from ParamsTable import ParamsTable
-from ParamsByGroup import ParamsByGroup
-from ParamsByType import ParamsByType
 from peacock.base.MooseWidget import MooseWidget
+from .CommentEditor import CommentEditor
+from .ParamsTable import ParamsTable
+from .ParamsByGroup import ParamsByGroup
+from .ParamsByType import ParamsByType
 
 class BlockEditor(QWidget, MooseWidget):
     """

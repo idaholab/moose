@@ -83,7 +83,7 @@ public:
 class BraceExpander : public Walker
 {
 public:
-  BraceExpander(const std::string & fname) : fname(fname) {}
+  BraceExpander(const std::string & fname = "") : fname(fname) {}
   void registerEvaler(const std::string & name, Evaler & ev);
   virtual void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n);
   std::string expand(Field * n, const std::string & input);

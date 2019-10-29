@@ -3,5 +3,6 @@
     type = PythonUnitTest
     input = test_check_vectorpostprocessor.py
     display_required = True
+    python = 3
   [../]
 []

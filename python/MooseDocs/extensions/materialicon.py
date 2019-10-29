@@ -15,7 +15,7 @@ from MooseDocs.extensions import command, core
 def make_extension(**kwargs):
     return MaterialIconExtension(**kwargs)
 
-Icon = tokens.newToken('Icon', icon=u'', faicon=u'')
+Icon = tokens.newToken('Icon', icon='', faicon='')
 
 class MaterialIconExtension(command.CommandExtension):
     "Adds ability to include material icons."""
