@@ -92,7 +92,7 @@ public:
 
       reset(1, *tmp, std::forward<Args>(args)...);
 
-      return std::move(tmp);
+      return tmp;
     }
   }
 
