@@ -921,6 +921,14 @@ MooseApp::hasRestartRecoverFileBase() const
   return !_restart_recover_base.empty();
 }
 
+bool
+MooseApp::hasRecoverFileBase() const
+{
+  mooseDeprecated("MooseApp::hasRecoverFileBase is deprecated, use "
+                  "MooseApp::hasRestartRecoverFileBase() instead.");
+  return !_restart_recover_base.empty();
+}
+
 void
 MooseApp::registerRestartableNameWithFilter(const std::string & name,
                                             Moose::RESTARTABLE_FILTER filter)
