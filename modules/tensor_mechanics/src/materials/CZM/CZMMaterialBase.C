@@ -35,9 +35,9 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
     _displacement_jump(declareProperty<RealVectorValue>("displacement_jump")),
     _traction_global(declareProperty<RealVectorValue>("traction_global")),
     _traction(declareProperty<RealVectorValue>("traction")),
-    _traction_spatial_derivatives_global(
-        declareProperty<RankTwoTensor>("traction_spatial_derivatives_global")),
-    _traction_spatial_derivatives(declareProperty<RankTwoTensor>("traction_spatial_derivatives"))
+    _traction_jump_derivatives_global(
+        declareProperty<RankTwoTensor>("traction_jump_derivatives_global")),
+    _traction_jump_derivatives(declareProperty<RankTwoTensor>("traction_jump_derivatives"))
 {
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 dispalcment variables");
@@ -70,10 +70,10 @@ CZMMaterialBase::computeQpProperties()
   _traction[_qp] = computeTraction();
 
   // compute local traction_global derivatives wrt to the displacement jump
-  _traction_spatial_derivatives[_qp] = computeTractionDerivatives();
+  _traction_jump_derivatives[_qp] = computeTractionDerivatives();
 
   // rotate local traction_global and derivatives to the global reference
   _traction_global[_qp] = RotationGlobal2Local.transpose() * _traction[_qp];
-  _traction_spatial_derivatives_global[_qp] = _traction_spatial_derivatives[_qp];
-  _traction_spatial_derivatives_global[_qp].rotate(RotationGlobal2Local.transpose());
+  _traction_jump_derivatives_global[_qp] = _traction_jump_derivatives[_qp];
+  _traction_jump_derivatives_global[_qp].rotate(RotationGlobal2Local.transpose());
 }

@@ -60,9 +60,9 @@ protected:
   /// the value of the Traction in natural element coordiantes
   MaterialProperty<RealVectorValue> & _traction;
 
-  /// the value of the traction derivatives in global coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives_global;
+  /// the traction's derivatives wrt to the displacement jump in global coordiantes
+  MaterialProperty<RankTwoTensor> & _traction_jump_derivatives_global;
 
-  /// the value of the traction derivatives in natural element coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_spatial_derivatives;
+  /// the traction's derivatives wrt to the displacement jump in natural element coordiantes
+  MaterialProperty<RankTwoTensor> & _traction_jump_derivatives;
 };

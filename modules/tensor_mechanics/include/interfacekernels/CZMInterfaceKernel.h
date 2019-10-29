@@ -42,5 +42,5 @@ protected:
 
   // values of the traction and traction derivatives used
   const MaterialProperty<RealVectorValue> & _traction_global;
-  const MaterialProperty<RankTwoTensor> & _traction_derivative;
+  const MaterialProperty<RankTwoTensor> & _traction_jump_derivatives;
 };

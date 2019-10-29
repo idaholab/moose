@@ -92,7 +92,7 @@ CZM3DCLaw::computeTraction()
 RankTwoTensor
 CZM3DCLaw::computeTractionDerivatives()
 {
-  RankTwoTensor traction_spatial_derivatives_local;
+  RankTwoTensor traction_jump_derivatives_local;
 
   // this function compute partial derivates of Tn[0][:], Tt[1][:], Ts[2][:]
   // w.r.t. dun, dut, dus
@@ -160,10 +160,10 @@ CZM3DCLaw::computeTractionDerivatives()
       else // alpha = 2
         dX_duj = 2. * _displacement_jump[_qp](j) / (_deltaU0[j] * _deltaU0[j]);
 
-      traction_spatial_derivatives_local(i, j) =
+      traction_jump_derivatives_local(i, j) =
           A_i * expX * (dBi_dui - B_i * dX_duj); // the minus sign is due to exp(-X)
     }
   }
 
-  return traction_spatial_derivatives_local;
+  return traction_jump_derivatives_local;
 }

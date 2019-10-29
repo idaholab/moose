@@ -38,8 +38,8 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _disp_var(_ndisp),
     _disp_neighbor_var(_ndisp),
     _traction_global(getMaterialPropertyByName<RealVectorValue>("traction_global")),
-    _traction_derivative(
-        getMaterialPropertyByName<RankTwoTensor>("traction_spatial_derivatives_global"))
+    _traction_jump_derivatives(
+        getMaterialPropertyByName<RankTwoTensor>("traction_jump_derivatives_global"))
 {
   if (!parameters.isParamValid("boundary"))
   {
@@ -81,7 +81,7 @@ CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 {
   // retrieve the diagonal jacobain coefficient dependning on the disaplcement
   // component (_component) this kernel is working on
-  Real jac = _traction_derivative[_qp](_component, _component);
+  Real jac = _traction_jump_derivatives[_qp](_component, _component);
 
   switch (type)
   {
@@ -119,7 +119,7 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
   mooseAssert(off_diag_component < _ndisp,
               "CZMInterfaceKernel::computeQpOffDiagJacobian wrong offdiagonal variable");
 
-  Real jac = _traction_derivative[_qp](_component, off_diag_component);
+  Real jac = _traction_jump_derivatives[_qp](_component, off_diag_component);
 
   switch (type)
   {
