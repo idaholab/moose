@@ -1,0 +1,423 @@
+% This file contains various \newcommands, typically for mathematical symbols.
+
+\usepackage{amsmath}
+
+%===============================================================================
+% FORMATTING
+%===============================================================================
+
+% brackets
+\newcommand{\pr}[1]{\left(#1\right)}  % parentheses
+\newcommand{\sq}[1]{\left[#1\right]}  % square brackets
+\newcommand{\ang}[1]{\left\langle#1\right\rangle}  % angle brackets
+\newcommand{\abs}[1]{\left|#1\right|} % absolute value brackets
+
+% formatting
+\newcommand{\mbold}[1]{\boldsymbol#1}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\cancel}[1]{\colorbox{red!50}{$\displaystyle#1$}} % cancelled term
+
+% Units after a number
+\newcommand{\units}[1]{\,\mathrm{#1}}
+
+% equation punctuation and spacing
+\newcommand{\eqc}{\,,}          % comma
+\newcommand{\eqp}{\,.}          % period
+\newcommand{\eqsep}{\eqc\qquad} % comma followed by space, separating parts of an equation
+
+% derivatives
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pdt}[1]{\pd{#1}{t}}
+\newcommand{\pdx}[1]{\pd{#1}{x}}
+\newcommand{\ddt}[1]{\frac{{\rm d}#1}{{\rm d}t}}
+\newcommand{\divergence}{\mbold{\nabla}\! \cdot \!}
+\newcommand{\grad}{\mbold{\nabla}}
+
+% integrals
+\newcommand{\integral}[3]{\int\limits_{#1}#2~{\rm d}#3}
+\newcommand{\doubleintegral}[3]{\iint\limits_{#1}#2~{\rm d}#3}
+\newcommand{\surfaceintegral}[3]{\oint\limits_{#1}#2~{\rm d}#3}
+\newcommand{\intonedcelli}[1]{\integral{\Delta x_i}{#1}{x}}
+\newcommand{\intx}[1]{\integral{X}{#1}{X}}
+\newcommand{\intsurface}[1]{\doubleintegral{A}{#1}{A}}
+
+% set theory
+\newcommand{\union}{\cup} % union
+\newcommand{\unionlimits}[2]{\bigcup\limits_{#1}^{#2}} % union, with limits
+
+% Inverse trig functions
+\newcommand{\acos}{\cos^{-1}}
+
+% fractions
+\newcommand{\half}{\frac{1}{2}}
+
+% tikz
+\newcommand{\pointsize}{0.05} % point size
+\newcommand{\myarrowhead}{-{latex[length=1.5mm, width=1mm]}} % arrow head
+
+% misc
+\newcommand{\average}[1]{\overline{#1}}   % average
+\newcommand{\tmpquantity}[1]{\tilde{#1}}  % temporary
+\newcommand{\perunitlength}[1]{#1'}       % per unit length modifier
+\newcommand{\otherwise}{\mbox{otherwise}} % otherwise
+
+% linear algebra
+\newcommand{\transpose}{\text{T}} % transpose of a matrix
+
+%===============================================================================
+% SYMBOLS
+%===============================================================================
+
+% continuous system
+\newcommand{\sol}{\mathbf{u}}          % conservative solution
+\newcommand{\primitivesol}{\mathbf{w}} % primitive solution
+\newcommand{\fluxletter}{f}            % conservative flux letter
+\newcommand{\flux}{\mathbf{\fluxletter}} % conservative flux vector
+\newcommand{\nonconsfluxletter}{h}     % non-conservative flux letter
+\newcommand{\nonconsflux}{\mathbf{\nonconsfluxletter}}  % non-conservative "flux"
+\newcommand{\src}{\mathbf{s}}          % source
+\newcommand{\approxsol}{\sol_h}        % approximate solution
+\newcommand{\diffusiveflux}{J}         % diffusive flux
+\newcommand{\diffcoef}{D}              % diffusion coefficient
+\newcommand{\solmultid}{\mathcal{U}}         % solution vector in multi-dimensional context
+\newcommand{\consfluxtensor}{\mathcal{F}}    % conservative flux tensor
+\newcommand{\nonconsfluxtensor}{\mathcal{H}} % non-conservative flux tensor
+
+% discrete system
+\newcommand{\U}{\mathbf{U}}   % conservative variables
+\newcommand{\W}{\mathbf{W}}   % primitive variables
+\newcommand{\F}{\mathbf{F}}   % flux
+\newcommand{\Src}{\mathbf{S}} % source
+
+% nonlinear system
+\newcommand{\res}{\mathbf{r}} % residual
+\newcommand{\J}{\mathbf{J}}   % Jacobian
+
+% FEM
+\newcommand{\test}{\varphi} % FEM test function
+\newcommand{\femvolintegral}[1]{\pr{#1 \eqc \test_i}_{\domain}}              % FEM volumetric integral against test function
+\newcommand{\femgradvolintegralx}[1]{\pr{#1 \eqc \pdx{\test_i}}_{\domain}}   % FEM volumetric integral against test function gradient (1-D)
+\newcommand{\femsurfintegralx}[1]{\ang{#1 \eqc \test_i\normalx}_{\boundary}} % FEM surface integral against test function (1-D)
+
+% FVM
+\newcommand{\slope}[1]{{\bf \Delta}#1}               % FVM slope
+\newcommand{\limitedslope}[1]{\overline{\slope{#1}}} % FVM limited slope
+\newcommand{\reconstructed}[1]{\overline{#1}} % slope-reconstructed
+\newcommand{\numericalflux}{\mathcal{F}}      % numerical flux
+
+% subscripts/superscripts
+\newcommand{\liq}{\ell}               % liquid
+\newcommand{\vap}{v}                  % vapor
+\newcommand{\vapi}[1]{{\vap,#1}}      % vapor mixture component i
+\newcommand{\liqtovap}{{\liq\rightarrow\vap}} % transfer from liquid to vapor
+\newcommand{\total}{\text{tot}}       % total
+\newcommand{\masseq}{\text{mass}}     % mass
+\newcommand{\momentumeq}{\text{momentum}} % momentum
+\newcommand{\energyeq}{\text{energy}} % energy
+\newcommand{\inlet}{\text{in}}        % inlet
+\newcommand{\outlet}{\text{out}}      % outlet
+\newcommand{\internal}{\text{int}}    % internal
+\newcommand{\external}{\text{ext}}    % external
+\newcommand{\junc}{\text{J}}          % junction
+\newcommand{\pump}{\text{p}}          % pump
+\newcommand{\bnd}{\text{b}}           % boundary value
+\newcommand{\interfacial}{\text{int}} % interfacial
+\newcommand{\wall}{\text{wall}}       % wall
+\newcommand{\flow}{\text{flow}}       % flow
+\newcommand{\conv}{\text{conv}}       % convective
+\newcommand{\boil}{\text{boil}}       % boiling
+\newcommand{\film}{\text{film}}       % film
+\newcommand{\drop}{\text{drop}}       % droplet
+\newcommand{\sat}{\text{sat}}         % saturation
+\newcommand{\fric}{\text{friction}}   % friction
+\newcommand{\loss}{\text{form}}       % form loss
+\newcommand{\onephase}{{1\Phi}}       % 1-phase
+\newcommand{\twophase}{{2\Phi}}       % 2-phase
+\newcommand{\lam}{\text{lam}}         % laminar flow
+\newcommand{\turb}{\text{turb}}       % turbulent flow
+\newcommand{\BS}{\text{BS}}           % bubbly/slug
+\newcommand{\DB}{\text{DB}}           % dispersed bubble
+\newcommand{\LB}{\text{LB}}           % large bubble
+\newcommand{\AM}{\text{AM}}           % annular mist
+\newcommand{\IA}{\text{IA}}           % inverted annular
+\newcommand{\IS}{\text{IS}}           % inverted slug
+\newcommand{\DF}{\text{DF}}           % dispersed flow
+\newcommand{\NC}{\text{NC}}           % natural circulation
+\newcommand{\FC}{\text{FC}}           % forced convection
+\newcommand{\ONB}{\text{ONB}}         % onset of nucleate boiling
+\newcommand{\NB}{\text{NB}}           % nucleate boiling
+\newcommand{\ileft}{{i-1/2}}          % left face of cell i
+\newcommand{\iright}{{i+1/2}}         % right face of cell i
+\newcommand{\leftside}{\text{L}}      % left side
+\newcommand{\rightside}{\text{R}}     % right side
+\newcommand{\midside}{\text{M}}       % middle side
+\newcommand{\num}{\text{num}}     % numerator
+\newcommand{\den}{\text{den}} % denominator
+
+% special sums and ranges
+\newcommand{\vaporsum}[2]{\sum\limits_{#1=#2}^{\nncgs}} % sum over vapors
+\newcommand{\vaporrange}[2]{#1=#2,\ldots,\nncgs}        % range of vapor indices
+\newcommand{\speciessum}[1][i]{\sum\limits_{#1=1}^{\nspecies}} % sum over species in a mixture
+
+% spatial variables
+\newcommand{\position}{\mathbf{r}} % position vector
+\newcommand{\xleft}{x_\ileft}    % position of left face of cell i
+\newcommand{\xright}{x_\iright}  % position of right face of cell i
+\newcommand{\normalletter}{n}    % letter for normal vector
+\newcommand{\normal}{\mathbf{\normalletter}} % normal vector
+\newcommand{\normalx}{\normalletter_x}       % component of normal vector in x direction
+\newcommand{\normaly}{\normalletter_y}       % component of normal vector in y direction
+\newcommand{\normalz}{\normalletter_z}       % component of normal vector in z direction
+\newcommand{\unitx}{\hat{\mathbf{e}}_x} % unit vector in x direction
+\newcommand{\unity}{\hat{\mathbf{e}}_y} % unit vector in y direction
+\newcommand{\unitz}{\hat{\mathbf{e}}_z} % unit vector in z direction
+\newcommand{\directionletter}{d} % letter for direction of a 1-D channel
+\newcommand{\direction}{\mathbf{\directionletter}} % direction vector for a 1-D channel
+
+% geometry
+\newcommand{\area}{A}        % cross-sectional area
+\newcommand{\Aint}{a_\interfacial} % interfacial area
+\newcommand{\perimeter}{P}   % perimeter
+\newcommand{\length}{L}      % length
+\newcommand{\Pwet}{\perimeter_\text{wet}} % wetted perimeter
+\newcommand{\Pheat}{\perimeter_\text{hf}} % heat flux perimeter
+\newcommand{\surfacearea}{S} % surface area
+\newcommand{\Dh}{d_h}        % hydraulic_diameter
+
+% domain
+\newcommand{\domain}{\Omega}
+\newcommand{\boundary}{\Gamma}
+\newcommand{\domainintegral}[1]{\left(#1\right)_\domain}
+\newcommand{\boundaryintegral}[1]{\left<#1\right>_\boundary}
+\newcommand{\internalboundaryintegral}[1]{\left<#1\right>_{\boundary_\internal}}
+\newcommand{\externalboundaryintegral}[1]{\left<#1\right>_{\boundary_\external}}
+
+% node sets
+\newcommand{\nodeset}{\mathcal{I}}          % set of nodes
+\newcommand{\nodesetin}{\nodeset_\inlet}    % set of nodes corresponding to inlets
+\newcommand{\juncnodeset}{{\nodeset_\junc}} % junction
+\newcommand{\juncnodesetin}{{\juncnodeset^\inlet}} % junction inlets
+
+% numbers of things
+\newcommand{\numberof}{N}
+\newcommand{\nnodes}{\numberof_\text{node}}
+\newcommand{\npipes}{\numberof_\text{pipe}}
+\newcommand{\njunctions}{\numberof_\text{junction}}
+\newcommand{\nncgs}{\numberof_\text{NCG}}
+\newcommand{\nspecies}{\numberof_\text{species}} % number of species in a mixture
+
+% relaxation
+\newcommand{\prelax}{\mu}       % pressure relaxation
+\newcommand{\velrelax}{\lambda} % velocity relaxation
+
+% volume and surface fraction
+\newcommand{\volume}{V}             % volume
+\newcommand{\vf}{\alpha}            % volume fraction
+\newcommand{\vfliq}{\vf_\liq}       % liquid volume fraction
+\newcommand{\vfvap}{\vf_\vap}       % vapor volume fraction
+\newcommand{\surfacefraction}{\chi} % surface fraction
+
+% mass/moles
+\newcommand{\mass}{m}         % mass
+\newcommand{\massfrac}{\xi}   % mass fraction
+\newcommand{\nmole}{n}        % number of moles
+\newcommand{\molarfrac}{\psi} % molar fraction
+\newcommand{\vecMoleFrac}{\mathbf{\molarfrac}} % molar fraction vector
+\newcommand{\molarMass}{\mathit{M}} % molar mass
+
+% gravity
+\newcommand{\gravityx}{g_x}
+
+% density
+\newcommand{\density}{\rho}
+\newcommand{\microdensity}{\hat{\density}} % for mixtures, density w.r.t. a sub-volume
+\newcommand{\rholiq}{\density_\liq}
+\newcommand{\rhovap}{\density_\vap}
+\newcommand{\rhoint}{\density_\interfacial}
+
+% specific volume
+\newcommand{\specvol}{v}
+
+% specific internal energy
+\newcommand{\specintenergy}{e}
+
+% velocity
+\newcommand{\vel}{u}
+\newcommand{\velx}{u}
+\newcommand{\vely}{v}
+\newcommand{\velz}{w}
+\newcommand{\velocityvector}{\mathbf{\vel}}
+\newcommand{\veln}{\hat{\vel}}
+\newcommand{\velk}[1]{\vel_{#1}}
+\newcommand{\velliq}{\vel_\liq}
+\newcommand{\velvap}{\vel_\vap}
+\newcommand{\velint}{\velk{\interfacial}}
+\newcommand{\velbarint}{\bar{\vel}_\interfacial}
+
+% sound speed
+\newcommand{\soundspeed}{c}
+\newcommand{\speedOfSound}{\soundspeed}
+
+% pressure
+\newcommand{\pressure}{p}
+\newcommand{\pliq}{\pressure_\liq}
+\newcommand{\pvap}{\pressure_\vap}
+\newcommand{\pint}{\pressure_\interfacial}
+\newcommand{\pbarint}{\bar{\pressure}_\interfacial}
+
+% temperature
+\newcommand{\temperature}{T}
+\newcommand{\Tliq}{\temperature_\liq}
+\newcommand{\Tvap}{\temperature_\vap}
+\newcommand{\Twall}{\temperature_\wall}
+\newcommand{\Tsat}{\temperature_\sat}
+\newcommand{\Tint}{\temperature_\interfacial}
+
+% total energy
+\newcommand{\totalenergy}{E}
+\newcommand{\Eliq}{\totalenergy_\liq}
+\newcommand{\Evap}{\totalenergy_\vap}
+
+% enthalpy
+\newcommand{\specEnthalpy}{h}
+\newcommand{\enthalpy}{\specEnthalpy}
+\newcommand{\hliq}{\enthalpy_\liq}
+\newcommand{\hvap}{\enthalpy_\vap}
+\newcommand{\hsat}{\enthalpy_\sat}
+\newcommand{\hintvap}{\enthalpy^\interfacial_\vap}
+
+% total (stagnation) enthalpy
+\newcommand{\totalenthalpy}{H}
+\newcommand{\Hint}{\totalenthalpy^\interfacial}
+\newcommand{\Hintvap}{\Hint_\vap}
+\newcommand{\Hliq}{\totalenthalpy_\liq}
+\newcommand{\Hvap}{\totalenthalpy_\vap}
+
+% heat
+\newcommand{\heat}{Q} % linear heat term [W/m]
+\newcommand{\heatwall}{\heat^\wall}
+\newcommand{\heatwallvap}{\heatwall_\vap}
+\newcommand{\heatwallconvliq}{\heat^{\wall,\conv}_\liq}
+\newcommand{\heatwallboilliq}{\heat^{\wall,\boil}_\liq}
+\newcommand{\heatflux}{q}
+\newcommand{\qwall}{\heatflux^\wall}
+\newcommand{\qwallboil}{\heatflux^{\wall,\boil}}
+\newcommand{\qwallboilliq}{\qwallboil_\liq}
+\newcommand{\qwallvap}{\qwall_\vap}
+\newcommand{\qint}{\heat^\interfacial}
+\newcommand{\qintvap}{\qint_\vap}
+\newcommand{\htc}{\mathrm{h}}
+\newcommand{\htcwall}{\htc^\wall}
+\newcommand{\heatfluxpartition}{\kappa}
+
+% heat capacities
+\newcommand{\specIsobaricHeatCap}{c_p}
+\newcommand{\specIsochoricHeatCap}{c_v}
+
+% entropy
+\newcommand{\specEntropy}{s}
+
+% free energy
+\newcommand{\specHelmholtzFreeEnergy}{f} % Helmholtz free energy
+
+% mass transfer
+\newcommand{\masssource}{S} % mass transfer rate per unit length
+\newcommand{\masstransfer}{\Gamma}
+\newcommand{\masstransferint}{\masstransfer^\interfacial_\liqtovap} % interfacial
+\newcommand{\masstransferwall}{\masstransfer^\wall_\liqtovap} % wall
+\newcommand{\fboil}{f_\boil} % wall boiling fraction
+
+% friction factor
+\newcommand{\friction}{f} % friction factor
+\newcommand{\fFanning}{f_\text{Fanning}} % Fanning friction factor
+\newcommand{\fDarcy}{f_\text{Darcy}}     % Darcy friction factor
+\newcommand{\fWall}{f_\wall}             % Wall friction factor
+\newcommand{\fWallk}[1]{f_{\wall, #1}}   % Wall friction factor of phase k
+\newcommand{\fWallliq}{\fWallk{\liq}}    % Wall friction factor of liquid phase
+\newcommand{\fWallvap}{\fWallk{\vap}}    % Wall friction factor of vapor phase
+\newcommand{\CWall}{C_\wall}             % Wall drag coef.
+\newcommand{\CWallk}[1]{C_{\wall, #1}}   % Wall drag coef. of phase k
+\newcommand{\CWallliq}{\CWallk{\liq}}    % Wall drag coef. of liquid phase
+\newcommand{\CWallvap}{\CWallk{\vap}}    % Wall drag coef. of vapor phase
+\newcommand{\hWall}{h_\wall}             % Wall drag coef.
+\newcommand{\hWallk}[1]{h_{\wall, #1}}   % Wall drag coef. of phase k
+\newcommand{\hWallliq}{\hWallk{\liq}}    % Wall drag coef. of liquid phase
+\newcommand{\hWallvap}{\hWallk{\vap}}    % Wall drag coef. of vapor phase
+
+% form loss
+\newcommand{\formloss}{K} % form loss coefficient
+\newcommand{\formlosslinear}{\formloss'} % form loss coefficient per unit length
+\newcommand{\formlosslineark}[1]{\formlosslinear_{#1}} % phase-k form loss coefficient per unit length
+
+% two-phase multipliers
+\newcommand{\twophasemult}{\phi}
+\newcommand{\twophasemultfrictionk}[1]{\twophasemult_{#1}^\fric} % friction
+\newcommand{\twophasemultformlossk}[1]{\twophasemult_{#1}^\loss} % form loss
+
+% forces
+\newcommand{\forceterm}{F} % linear force density
+\newcommand{\Fwallfriction}{\forceterm^\fric_\wall} % wall friction force per unit length
+\newcommand{\Fwallfrictionk}[1]{\forceterm^\fric_{\wall,#1}} % wall friction force per unit length for a phase
+\newcommand{\Fwallfrictionliq}{\Fwallfrictionk{\liq}} % liquid wall friction force per unit length
+\newcommand{\Fwallfrictionvap}{\Fwallfrictionk{\vap}} % vapor wall friction force per unit length
+\newcommand{\Fintfriction}{\forceterm^\fric_{\interfacial,\liqtovap}} % interfacial friction force per unit length
+\newcommand{\Fformloss}{\forceterm^\loss} % form loss force per unit length
+\newcommand{\Fformlossk}[1]{\Fformloss_{#1}} % phase-k form loss force per unit length
+\newcommand{\Fformlossliq}{\Fformlossk{\liq}} % liquid form loss force per unit length
+\newcommand{\Fformlossvap}{\Fformlossk{\vap}} % vapor form loss force per unit length
+
+% 7-equation model solution variables
+\newcommand{\arhoA}{\pr{\vf\density\area}}
+\newcommand{\arhouA}{\pr{\vf\density\vel\area}}
+\newcommand{\arhoEA}{\pr{\vf\density\totalenergy\area}}
+
+% shear stress
+\newcommand{\shear}{\tau} % shear stress
+
+% general source terms
+\newcommand{\vfsource}{\Phi} % volume fraction source per unit length
+
+% Dimensionless numbers
+\newcommand{\Ca}{\mathrm{Ca}} % capillary number
+\newcommand{\We}{\mathrm{We}} % Weber number
+\newcommand{\La}{\mathrm{La}} % Laplace number
+\newcommand{\Nu}{\mathrm{Nu}} % Nusselt number
+\newcommand{\Gr}{\mathrm{Gr}} % Grashof number
+\newcommand{\Ri}{\mathrm{Ri}} % Richardson number
+\newcommand{\Pe}{\textrm{P\'e}} % Peclet number
+
+% Loading fraction
+\newcommand{\LF}{\mathrm{LF}}
+
+% wave speed
+\newcommand{\wavespeed}{S} % wave speed for Riemann solvers
+\newcommand{\wavespeedn}{\hat{\wavespeed}} % wave speed for Riemann solvers in the Riemann solver reference frame
+\newcommand{\twavespeed}{\tilde{\wavespeed}} % tentative wave speed for Riemann solvers
+\newcommand{\twavespeedn}{\hat{\twavespeed}} % tentative wave speed for Riemann solvers in the Riemann solver reference frame
+
+% styles
+\newcommand{\ddfrac}[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+\newcommand{\partialDerivative}[3]{\pr{\ddfrac{\partial#1}{\partial#2}}_{#3}}
+
+% Equations of state
+\newcommand{\specGasConst}{R}
+\newcommand{\univGasConst}{\bar{\specGasConst}}
+\newcommand{\redHelmholtz}{\phi}
+\newcommand{\idealPart}{\mathrm{o}}
+\newcommand{\residualPart}{\mathrm{r}}
+\newcommand{\redHelmholtzId}{\redHelmholtz^{\idealPart}}
+\newcommand{\redHelmholtzRes}{\redHelmholtz^{\residualPart}}
+\newcommand{\redDensity}{\delta}
+\newcommand{\invredTemp}{\tau}
+\newcommand{\compIndex}{i}
+\newcommand{\numMixComp}{\nspecies}
+\newcommand{\compIndexI}{\mathrm{I}}
+\newcommand{\compIndexII}{\mathrm{II}}
+\newcommand{\term}{X}
+\newcommand{\termI}{\term_\compIndexI}
+\newcommand{\termII}{\term_\compIndexII}
+\newcommand{\compsum}[1][i]{\sum\limits_{#1=1}^{\numMixComp}}
+\newcommand{\subscrPureComp}{_{\mathrm{o}i}}
+\newcommand{\anyProperty}{Z}
+\newcommand{\anyMassSpecProperty}{z}
+\newcommand{\anyTransProperty}{z}
