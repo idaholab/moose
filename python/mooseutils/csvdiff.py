@@ -45,7 +45,7 @@ class CSVTools:
             # Exceptions occur if you try to parse a .e file
             try:
                 lines = text.split('\n')
-                headers = lines.pop(0).split(',')
+                headers = [x.strip() for x in lines.pop(0).split(',')]
                 table = {}
                 for header in headers:
                     table[header] = []
