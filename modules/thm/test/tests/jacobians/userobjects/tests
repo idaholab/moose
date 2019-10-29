@@ -86,6 +86,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./boundary_flux_7eqn_ncg_ghost_density_velocity]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ncg_ghost_density_velocity.i'
+    ratio_tol = 1e-7
+    difference_tol = 500
+    max_threads = 1
+    allow_test_objects = true
+  [../]
 
   # pressure boundary flux
   [./boundary_flux_3eqn_ghost_pressure]
