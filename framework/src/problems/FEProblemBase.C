@@ -1026,13 +1026,21 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
-  if (_t_step > 1)
+  if (_t_step > 1 && _num_grid_sequences)
   {
     MeshRefinement mesh_refinement(_mesh);
     std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
     if (_displaced_mesh)
     {
       displaced_mesh_refinement = libmesh_make_unique<MeshRefinement>(*_displaced_mesh);
+
+      // If the DisplacedProblem is active, undisplace the DisplacedMesh
+      // in preparation for refinement.  We can't safely refine the
+      // DisplacedMesh directly, since the Hilbert keys computed on the
+      // inconsistenly-displaced Mesh are different on different
+      // processors, leading to inconsistent Hilbert keys.  We must do
+      // this before the undisplaced Mesh is refined, so that the
+      // element and node numbering is still consistent.
       _displaced_problem->undisplaceMesh();
     }
     for (MooseIndex(_num_grid_sequences) i = 0; i < _num_grid_sequences; ++i)
@@ -1043,23 +1051,33 @@ FEProblemBase::timestepSetup()
 
       // Mark this as an intermediate change because we do not yet want to reinit_systems. E.g. we
       // need things to happen in the following order for the undisplaced problem:
-      // 1) EquationSystems::reinit_solutions. This will restrict the solution vectors and then
-      //    contract the mesh
-      // 2) MooseMesh::meshChanged. This will update the node/side lists and other
-      //    things which needs to happen after the contraction
-      // 3) GeometricSearchData::reinit. Once the node/side lists are updated we can perform our
-      //    geometric searches which will aid in determining sparsity patterns
+      // u1) EquationSystems::reinit_solutions. This will restrict the solution vectors and then
+      //     contract the mesh
+      // u2) MooseMesh::meshChanged. This will update the node/side lists and other
+      //     things which needs to happen after the contraction
+      // u3) GeometricSearchData::reinit. Once the node/side lists are updated we can perform our
+      //     geometric searches which will aid in determining sparsity patterns
+      //
+      // We do these things for the displaced problem (if it exists)
+      // d1) EquationSystems::reinit. Restrict the displaced problem vector copies and then contract
+      //     the mesh. It's safe to do a full reinit with the displaced because there are no
+      //     matrices that sparsity pattern calculations will be conducted for
+      // d2) MooseMesh::meshChanged. This will update the node/side lists and other
+      //     things which needs to happen after the contraction
+      // d3) UpdateDisplacedMeshThread::operator(). Re-displace the mesh using the *displaced*
+      //     solution vector copy because we don't know the state of the reference solution vector.
+      //     It's safe to use the displaced copy because we are outside of a non-linear solve,
+      //     and there is no concern about differences between solution and current_local_solution
+      // d4) GeometricSearchData::reinit. With the node/side lists updated and the mesh
+      //     re-displaced, we can perform our geometric searches, which will aid in determining the
+      //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
+      //     NonlinearSystem held by this
       meshChangedHelper(/*intermediate_change=*/true);
-
-      // 4) Now that all the geometric searches have been done, we're ready to update the sparsity
-      //    pattern
-      _eq.reinit_systems();
-
-      // Note that in meshChangedHelper we actually did a full EquationSystems::reinit (e.g. both
-      // reinit_solutions and reinit_systems) for the displaced problem. This is safe to do because
-      // there are no sparsity patterns we have to worry about computing: the displaced systems
-      // are ExplicitSystems, e.g. they have no matrices associated with them
     }
+
+    // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
+    //     we're ready to update the sparsity pattern
+    _eq.reinit_systems();
   }
 
   if (_line_search)
@@ -6486,11 +6504,14 @@ FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
 void
 FEProblemBase::uniformRefine()
 {
+  // ResetDisplacedMeshThread::onNode looks up the reference mesh by ID, so we need to make sure we
+  // undisplace before adapting the reference mesh
+  if (_displaced_problem)
+    _displaced_problem->undisplaceMesh();
+
   Adaptivity::uniformRefine(&_mesh, 1);
   if (_displaced_problem)
-  {
-    _displaced_problem->undisplaceMesh();
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
-  }
-  meshChangedHelper();
+
+  meshChangedHelper(/*intermediate_change=*/false);
 }
