@@ -1,11 +1,13 @@
 # Tests correct calculation of properties derivatives in PorousFlowFluidState
-# for conditions for two phases, including salt as a nonlinear variable
+# for nonisothermal two phase conditions, including salt as a nonlinear variable
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  [../]
 []
 
 [GlobalParams]
@@ -19,6 +21,8 @@
   [./zi]
   [../]
   [./xnacl]
+  [../]
+  [./temperature]
   [../]
 []
 
@@ -43,6 +47,12 @@
     max = 0.15
     variable = xnacl
     seed = 1
+  [../]
+  [./temperature]
+    type = RandomIC
+    min = 20
+    max = 80
+    variable = temperature
   [../]
 []
 
@@ -77,12 +87,20 @@
     variable = xnacl
     fluid_component = 2
   [../]
+  [./energy]
+    type = PorousFlowEnergyTimeDerivative
+    variable = temperature
+  [../]
+  [./heat]
+    type = PorousFlowHeatAdvection
+    variable = temperature
+  [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pgas zi xnacl'
+    porous_flow_vars = 'pgas zi xnacl temperature'
     number_fluid_phases = 2
     number_fluid_components = 3
   [../]
@@ -114,12 +132,13 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = 50
+    temperature = temperature
   [../]
   [./brineco2]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
+    temperature = temperature
     temperature_unit = Celsius
     xnacl = xnacl
     capillary_pressure = pc
@@ -143,6 +162,11 @@
     type = PorousFlowPorosityConst
     porosity = 0.1
   [../]
+  [./rock_heat]
+    type = PorousFlowMatrixInternalEnergy
+    specific_heat_capacity = 1000
+    density = 2500
+  [../]
 []
 
 [Executioner]
@@ -151,6 +175,7 @@
   dt = 1
   end_time = 1
   nl_abs_tol = 1e-12
+  automatic_scaling = true
 []
 
 [Preconditioning]
