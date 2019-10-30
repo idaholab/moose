@@ -30,6 +30,11 @@ SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
 void
 SetupRecoverFileBaseAction::act()
 {
+  // Even during a normal run, we still need to check integrity of the data store to make
+  // sure that all requested properties have been declared.
+  if (_current_task == "recover_mesh_meta_data")
+    _app.checkMeshMetaDataIntegrity();
+
   // Do nothing if the App is not recovering
   // Don't look for a checkpoint file unless we're the ultimate master app
   if (!_app.isRecovering() || !_app.isUltimateMaster())
@@ -47,7 +52,6 @@ SetupRecoverFileBaseAction::act()
   {
     // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
     // generators have run.
-    _app.checkMeshMetaDataIntegrity();
 
     RestartableDataIO restartable(_app);
 

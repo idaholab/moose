@@ -81,30 +81,20 @@ validParams<GeneratedMeshGenerator>()
 GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<unsigned int>("nx")),
-    _ny(getParam<unsigned int>("ny")),
-    _nz(getParam<unsigned int>("nz")),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
+    _nx(declareMeshProperty("num_elements_x", getParam<unsigned int>("nx"))),
+    _ny(declareMeshProperty("num_elements_y", getParam<unsigned int>("ny"))),
+    _nz(declareMeshProperty("num_elements_z", getParam<unsigned int>("nz"))),
+    _xmin(declareMeshProperty("xmin", getParam<Real>("xmin"))),
+    _xmax(declareMeshProperty("xmax", getParam<Real>("xmax"))),
+    _ymin(declareMeshProperty("ymin", getParam<Real>("ymin"))),
+    _ymax(declareMeshProperty("ymax", getParam<Real>("ymax"))),
+    _zmin(declareMeshProperty("zmin", getParam<Real>("zmin"))),
+    _zmax(declareMeshProperty("zmax", getParam<Real>("zmax"))),
     _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z"))
 {
-  declareMeshProperty("num_elements_x", _nx);
-  declareMeshProperty("num_elements_y", _ny);
-  declareMeshProperty("num_elements_z", _nz);
-  declareMeshProperty("xmin", _xmin);
-  declareMeshProperty("xmax", _xmax);
-  declareMeshProperty("ymin", _ymin);
-  declareMeshProperty("ymax", _ymax);
-  declareMeshProperty("zmin", _zmin);
-  declareMeshProperty("zmax", _zmax);
-
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
 }

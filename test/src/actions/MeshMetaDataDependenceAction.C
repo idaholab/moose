@@ -28,6 +28,10 @@ validParams<MeshMetaDataDependenceAction>()
       "mesh_generator",
       "The name of the generator to use as the prefix for mesh meta data properties.");
 
+  params.addParam<bool>("test_request_invalid_property",
+                        false,
+                        "Set to true to have this object request a property that isn't available");
+
   return params;
 }
 
@@ -38,6 +42,10 @@ MeshMetaDataDependenceAction::MeshMetaDataDependenceAction(const InputParameters
     _xmin_prop(getMeshProperty<Real>("xmin", _generator_prefix)),
     _xmax_prop(getMeshProperty<Real>("xmax", _generator_prefix))
 {
+  // For testing only
+  if (getParam<bool>("test_request_invalid_property"))
+    getMeshProperty<Real>("nonexistent_property",
+                          _generator_prefix); // No need to catch reference here
 }
 
 void

@@ -11,6 +11,11 @@
 
 #include "Action.h"
 
+/**
+ * This is a test class that is used to verify that Recoverable Mesh MetaData is available early
+ * (e.g. around the time the MeshGenerators would normally be executed) so that Actions and other
+ * objects can use that data.
+ */
 class MeshMetaDataDependenceAction : public Action
 {
 public:
