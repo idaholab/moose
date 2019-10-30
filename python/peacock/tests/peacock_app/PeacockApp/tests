@@ -34,6 +34,7 @@
     test_case = Tests.testResults
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application Exodus result."
     prereq = PeacockAppWithInput
+    platform = linux
     python = 3
   []
   [ResultsNoOption]

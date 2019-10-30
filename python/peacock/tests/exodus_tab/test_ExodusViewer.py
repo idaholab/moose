@@ -75,21 +75,13 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results (2)')
         self.assertTrue(self._widget.cornerWidget().CloseButton.isEnabled())
 
-        if sys.platform == 'darwin':
-            self.assertImage('testInitial.png')
-
         # Change camera on cloned tab
         self._widget.currentWidget().VTKWindowPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847),
                                                                      (9.2960, -0.4218, 12.6685),
                                                                      (0.0000, 0.0000, 0.1250))
-        if sys.platform == 'darwin':
-            self.assertImage('testClone.png')
-
         # Switch to first tab
         self._widget.setCurrentIndex(0)
         self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results')
-        if sys.platform == 'darwin':
-            self.assertImage('testInitial.png')
 
         # Close the first tab
         self._widget.cornerWidget().close.emit()
