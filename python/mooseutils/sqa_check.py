@@ -69,9 +69,9 @@ def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['
     # Check requirements on changed tests specs
     count = 0
     cmd = ['git', 'merge-base', '{}/{}'.format(remote, branch), 'HEAD']
-    sha = subprocess.check_output(cmd).strip()
+    sha = subprocess.check_output(cmd).decode().strip()
     cmd = ['git', 'diff', sha, '--name-only']
-    for filename in subprocess.check_output(cmd).split('\n'):
+    for filename in subprocess.check_output(cmd).decode().split('\n'):
         fullname = os.path.join(root, filename)
         if os.path.isfile(fullname) and (os.path.basename(filename) in specs) and \
            not any(s in filename for s in skip):
