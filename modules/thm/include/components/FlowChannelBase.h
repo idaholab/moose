@@ -57,7 +57,6 @@ public:
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
   SubdomainName getSubdomainName() const;
-  virtual bool isHorizontal() const { return _is_horizontal; }
 
   /**
    * Gets heat transfer geometry
@@ -171,11 +170,6 @@ protected:
   BoundaryID _nodeset_id;
   /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
-
-  /// Flag that flow channel is "horizontal"; else "vertical". The flow channel
-  /// is considered "horizontal" if the angle between the flow channel orientation
-  /// vector and gravity vector is between 45 degrees and 135 degrees.
-  const bool _is_horizontal;
 
   /// The name of the user object that will set up stabilization
   UserObjectName _stabilization_uo_name;

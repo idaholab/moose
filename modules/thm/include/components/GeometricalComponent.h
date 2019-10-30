@@ -16,16 +16,6 @@ class GeometricalComponent : public Component
 public:
   GeometricalComponent(const InputParameters & parameters);
 
-  /// Enum for angle between gravity vector and channel orientation vector
-  enum EGravityAngleType
-  {
-    ZERO_GRAVITY,      ///< Gravitational acceleration magnitude is zero
-    HORIZONTAL,        ///< Flow channel is perpendicular to gravity vector
-    VERTICAL,          ///< Flow channel is parallel to gravity vector
-    MOSTLY_HORIZONTAL, ///< Flow channel is mostly perpendicular to gravity vector
-    MOSTLY_VERTICAL    ///< Flow channel is mostly parallel to gravity vector
-  };
-
   virtual Point getPosition() const { return _position; }
   virtual RealVectorValue getDirection() const { return _dir; }
   virtual Real getRotation() const { return _rotation; }
@@ -53,13 +43,6 @@ public:
    * @return gravity angle for this component
    */
   virtual const Real & getGravityAngle() const { return _gravity_angle; }
-
-  /**
-   * Gets the gravity angle type for this component
-   *
-   * @return gravity angle type for this component
-   */
-  virtual const EGravityAngleType & getGravityAngleType() const { return _gravity_angle_type; }
 
   const std::vector<unsigned int> & getNodeIDs() const;
 
@@ -108,16 +91,6 @@ protected:
 
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
-  /**
-   * Determines the gravity angle type for a given gravity angle
-   *
-   * To determine if the conditions correspond to zero gravity, the gravitational
-   * acceleration magnitude member data of this component is checked.
-   *
-   * @param[in] gravity_angle   Angle between orientation vector and gravity vector, in degrees
-   */
-  EGravityAngleType determineGravityAngleType(const Real & gravity_angle) const;
-
   /// Physical position in the space
   const Point & _position;
 
@@ -126,9 +99,6 @@ protected:
 
   /// Angle between orientation vector and gravity vector, in degrees
   const Real _gravity_angle;
-
-  /// Enum for angle between gravity vector and channel orientation vector
-  const EGravityAngleType _gravity_angle_type;
 
   /// Rotation of the component around x-axis in non-displaced space
   const Real & _rotation;
