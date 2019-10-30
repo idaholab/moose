@@ -94,12 +94,11 @@ void
 MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
-  DenseMatrix<Real> matrix = _sampler.getLocalSamples();
 
-  if (matrix.n() != _param_names.size())
+  if (_sampler.getNumberOfCols() != _param_names.size())
     paramError("param_names",
                "The number of columns (",
-               matrix.n(),
+               _sampler.getNumberOfCols(),
                ") must match the number of parameters (",
                _param_names.size(),
                ").");
@@ -110,14 +109,15 @@ MultiAppCommandLineControl::execute()
 
   if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
   {
-    for (unsigned int row = 0; row < matrix.m(); ++row)
+    for (dof_id_type row = _sampler.getLocalRowBegin(); row < _sampler.getLocalRowEnd(); ++row)
     {
+      std::vector<Real> data = _sampler.getNextLocalRow();
       std::ostringstream oss;
-      for (unsigned int col = 0; col < matrix.n(); ++col)
+      for (std::size_t col = 0; col < data.size(); ++col)
       {
         if (col > 0)
           oss << ";";
-        oss << _param_names[col] << "=" << Moose::stringify(matrix(row, col));
+        oss << _param_names[col] << "=" << Moose::stringify(data[col]);
       }
 
       cli_args.push_back(oss.str());
@@ -126,7 +126,7 @@ MultiAppCommandLineControl::execute()
   else
   {
     std::ostringstream oss;
-    for (unsigned int col = 0; col < matrix.n(); ++col)
+    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
     {
       if (col > 0)
         oss << ";";
