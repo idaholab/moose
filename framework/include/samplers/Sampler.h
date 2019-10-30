@@ -46,6 +46,9 @@ public:
   ///@{
   /**
    * Return the sampled complete or distributed sample data.
+   *
+   * Use these with caution as they can result in a large amount of memory use, the prefered
+   * method for accessing Stampler data is the getNextLocalRow() method.
    */
   DenseMatrix<Real> getSamples();
   DenseMatrix<Real> getLocalSamples();
@@ -57,6 +60,8 @@ public:
    *
    * for (dof_id_type i = getLocalRowBegin(); i < getLocalRowEnd(); ++i)
    *     std::vector<Real> row = getNextLocalRow();
+   *
+   * This is the prefered method for accessing Sampler data.
    *
    * Calls to getNextLocalRow() will continue to return the next row of data until the last local
    * row has been reached, it will then start again at the beginning if called again. Also, calls

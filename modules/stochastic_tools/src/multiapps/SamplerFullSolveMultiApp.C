@@ -118,8 +118,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       {
         // The app is being reset for the next loop, thus the batch index must be indexed as such
         _local_batch_app_index = i + 1;
-        for (std::size_t app = 0; app < _total_num_apps; app++)
-          resetApp(app, target_time);
+        resetApp(_local_batch_app_index, target_time);
         initialSetup();
       }
     }
@@ -154,21 +153,17 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
   // Since we only store param_names in cli_args, we need to find the values for each param from
   // sampler data and combine them to get full command line option strings.
-  DenseMatrix<Real> matrix = _sampler.getLocalSamples();
-  std::ostringstream oss;
+  std::vector<Real> row = _sampler.getNextLocalRow();
 
+  std::ostringstream oss;
   const std::vector<std::string> & cli_args_name =
       MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
 
-  for (unsigned int col = 0; col < matrix.n(); ++col)
+  for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
   {
     if (col > 0)
       oss << ";";
-
-    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
-      oss << cli_args_name[col] << "=" << Moose::stringify(matrix(_local_batch_app_index, col));
-    else
-      oss << cli_args_name[col] << "=" << Moose::stringify(matrix(local_app, col));
+    oss << cli_args_name[col] << "=" << Moose::stringify(row[col]);
   }
   return oss.str();
 }
