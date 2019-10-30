@@ -109,6 +109,10 @@ protected:
   const MaterialProperty<RealGradient> & _gradT_qp;
   /// Derivative of temperature wrt PorousFlow variables
   const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
+  /// Moose variable number of the temperature
+  const unsigned int _temperature_varnum;
+  /// PorousFlow variable number of the temperature
+  const unsigned int _Tvar;
   /// Mass fraction matrix
   MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
   /// Gradient of the mass fraction matrix (only defined at the qps)
@@ -128,6 +132,10 @@ protected:
   MaterialProperty<std::vector<Real>> & _fluid_enthalpy;
   /// Derivative of the fluid enthalpy for each phase wrt PorousFlow variables
   MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_enthalpy_dvar;
+  /// Internal energy of each phase
+  MaterialProperty<std::vector<Real>> & _fluid_internal_energy;
+  /// Derivative of the fluid internal energy for each phase wrt PorousFlow variables
+  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_internal_energy_dvar;
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
