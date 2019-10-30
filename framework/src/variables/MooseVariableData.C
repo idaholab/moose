@@ -1390,13 +1390,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
 
       if (_need_ad_second_u)
-      {
-        if (_displaced)
-          mooseError("Support for second order shape function derivatives on the displaced mesh "
-                     "has not been added yet!");
-        else
-          _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
-      }
+        // Note that this will not carry any derivatives with respect to displacements because those
+        // calculations have not yet been implemented in Assembly
+        _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
 
       if (_need_ad_u_dot && _time_integrator)
         _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
