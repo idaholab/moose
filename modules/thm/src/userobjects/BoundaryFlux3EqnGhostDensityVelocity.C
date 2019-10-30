@@ -122,14 +122,6 @@ BoundaryFlux3EqnGhostDensityVelocity::getGhostCellSolutionJacobian(
   const Real drhoEA_b_drhouA = rhoA_b * dE_b_drhouA;
   const Real drhoEA_b_drhoEA = rhoA_b * dE_b_drhoEA;
 
-  // compute ghost solution
-
-  std::vector<Real> U_ghost(THM3Eqn::N_CONS_VAR);
-  U_ghost[THM3Eqn::CONS_VAR_RHOA] = _rho * A;
-  U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rho * _vel * A;
-  U_ghost[THM3Eqn::CONS_VAR_RHOEA] = _rho * E_b * A;
-  U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
-
   // compute ghost solution Jacobian
 
   DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
