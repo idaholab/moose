@@ -57,19 +57,10 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
 }
 
 void
-SamplerTransfer::getLocalRow(const dof_id_type row_index, std::vector<Real> & row) const
-{
-  row.resize(_samples.n());
-  for (unsigned int i = 0; i < _samples.n(); ++i)
-    row[i] = _samples(row_index, i);
-}
-
-void
 SamplerTransfer::execute()
 {
   mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(),
               "The number of MultiApps and the number of sample rows must be the same.");
-  _samples = _sampler_ptr->getLocalSamples();
 
   // Loop over all sub-apps
   for (dof_id_type row_index = _sampler_ptr->getLocalRowBegin();
@@ -83,8 +74,7 @@ SamplerTransfer::execute()
     SamplerReceiver * ptr = getReceiver(row_index);
 
     // Populate the row of data to transfer
-    std::vector<Real> row;
-    getLocalRow(row_index - _sampler_ptr->getLocalRowBegin(), row);
+    std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
     // Perform the transfer
     ptr->transfer(_parameter_names, row);
@@ -94,7 +84,6 @@ SamplerTransfer::execute()
 void
 SamplerTransfer::initializeToMultiapp()
 {
-  _samples = _sampler_ptr->getLocalSamples();
   _global_index = _sampler_ptr->getLocalRowBegin();
 }
 
@@ -103,8 +92,7 @@ SamplerTransfer::executeToMultiapp()
 {
   SamplerReceiver * ptr = getReceiver(processor_id());
 
-  std::vector<Real> row;
-  getLocalRow(_global_index - _sampler_ptr->getLocalRowBegin(), row);
+  std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
   ptr->transfer(_parameter_names, row);
 
@@ -114,7 +102,6 @@ SamplerTransfer::executeToMultiapp()
 void
 SamplerTransfer::finalizeToMultiapp()
 {
-  _samples.resize(0, 0);
 }
 
 SamplerReceiver *

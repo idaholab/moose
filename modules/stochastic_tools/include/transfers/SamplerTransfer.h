@@ -57,14 +57,6 @@ protected:
   /// The name of the SamplerReceiver Control object on the sub-application
   const std::string & _receiver_name;
 
-  /// Storage for data returned from Sampler object
-  DenseMatrix<Real> _samples;
-
   /// Current global index for batch execution
   dof_id_type _global_index;
-
-  /**
-   * Extract single row of Sampler data given the local index.
-   */
-  void getLocalRow(const dof_id_type row_index, std::vector<Real> & row) const;
 };
