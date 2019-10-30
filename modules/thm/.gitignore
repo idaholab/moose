@@ -47,6 +47,9 @@ temp_print_trace.*
 *.msmp-*
 *.muds
 # Latex garbage
+*.xwm
+*.ilg
+*.ind
 *.lot
 *.lof
 *.poly
