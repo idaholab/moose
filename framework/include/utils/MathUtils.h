@@ -221,4 +221,13 @@ mooseSetToZero(T *&)
 {
   mooseError("mooseSetToZero does not accept pointers");
 }
+
+template <>
+inline void
+mooseSetToZero(std::vector<Real> & vec)
+{
+  for (auto & v : vec)
+    v = 0.;
+}
+
 } // namespace MathUtils
