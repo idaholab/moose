@@ -3,7 +3,7 @@
     type = ImageDiff
     command = line_source.py
     imagediff = 'line_source.png'
-    allowed_linux = 0.975
+    allowed_darwin = 0.96
     python = 3
   [../]
   [./line_data]
