@@ -137,7 +137,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 }
 
 std::vector<std::shared_ptr<StochasticToolsTransfer>>
-SamplerTransientMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction)
+SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION direction)
 {
   std::vector<std::shared_ptr<StochasticToolsTransfer>> output;
   const ExecuteMooseObjectWarehouse<Transfer> & warehouse =

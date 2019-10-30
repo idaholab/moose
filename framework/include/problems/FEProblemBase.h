@@ -960,20 +960,20 @@ public:
    * Get Transfers by ExecFlagType and direction
    */
   std::vector<std::shared_ptr<Transfer>> getTransfers(ExecFlagType type,
-                                                      MultiAppTransfer::DIRECTION direction) const;
+                                                      Transfer::DIRECTION direction) const;
 
   /**
    * Return the complete warehouse for MultiAppTransfer object for the given direction
    */
   const ExecuteMooseObjectWarehouse<Transfer> &
-  getMultiAppTransferWarehouse(MultiAppTransfer::DIRECTION direction) const;
+  getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const;
 
   /**
    * Execute MultiAppTransfers associate with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
    */
-  void execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction);
+  void execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType

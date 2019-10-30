@@ -26,13 +26,6 @@ validParams<MultiAppTransfer>()
   InputParameters params = validParams<Transfer>();
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
 
-  MultiMooseEnum possible_directions(MultiAppTransfer::possibleDirections());
-  params.addRequiredParam<MultiMooseEnum>(
-      "direction",
-      possible_directions,
-      "Whether this Transfer will be 'to' or 'from' a MultiApp, or "
-      "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.");
-
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -56,9 +49,6 @@ validParams<MultiAppTransfer>()
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
-    _direction(possibleDirections()),
-    _current_direction(possibleDirections()),
-    _directions(getParam<MultiMooseEnum>("direction")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {

@@ -57,5 +57,5 @@ private:
    * Helper for getting StochasticToolsTransfer objects.
    */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
-  getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
+  getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
 };
