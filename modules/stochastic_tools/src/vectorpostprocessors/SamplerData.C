@@ -25,14 +25,17 @@ validParams<SamplerData>()
   params += validParams<SamplerInterface>();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
+
   // The execute method computes the complete vectors on all processes, so broadcasting the data
   // is not required.
-  params.set<bool>("_is_broadcast") = false;
+  // params.set<bool>("_is_broadcast") = false;
 
-  // Flag for using getSamples or getLocalSamples, by default getLocalSamples is used. This option
-  // is mainly for testing to make sure the methods return the same values.
-  params.addParam<bool>(
-      "use_local_samples", true, "Toggle the use of getLocalSamples (true) or getSamples (false).");
+  // Control for
+  MooseEnum method("get_samples get_local_samples get_next_local_row", "get_next_local_row");
+  params.addParam<MooseEnum>(
+      "sampler_method",
+      method,
+      "Control the method of data retrival from the Sampler object; this is mainly for testing.");
 
   return params;
 }
@@ -41,17 +44,18 @@ SamplerData::SamplerData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
     _sampler(getSampler("sampler")),
-    _use_local_samples(getParam<bool>("use_local_samples"))
+    _sampler_method(getParam<MooseEnum>("sampler_method"))
 {
-  for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
+  for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
     _sample_vectors.push_back(
-        &declareVector(getParam<SamplerName>("sampler") + "_" + std::to_string(i)));
+        &declareVector(getParam<SamplerName>("sampler") + "_" + std::to_string(j)));
 }
 
 void
 SamplerData::initialize()
 {
-  dof_id_type n = _use_local_samples ? _sampler.getNumberOfLocalRows() : _sampler.getNumberOfRows();
+  dof_id_type n = (_sampler_method == "get_samples") ? _sampler.getNumberOfRows()
+                                                     : _sampler.getNumberOfLocalRows();
   for (auto & ppv_ptr : _sample_vectors)
     ppv_ptr->resize(n, 0);
 }
@@ -59,18 +63,37 @@ SamplerData::initialize()
 void
 SamplerData::execute()
 {
-  DenseMatrix<Real> data = _use_local_samples ? _sampler.getLocalSamples() : _sampler.getSamples();
-  for (unsigned int j = 0; j < data.n(); ++j)
+  if (_sampler_method == "get_samples")
   {
-    for (unsigned int i = 0; i < data.m(); ++i)
-      (*_sample_vectors[j])[i] = data(i, j);
+    DenseMatrix<Real> data = _sampler.getSamples();
+    for (unsigned int j = 0; j < data.n(); ++j)
+      for (unsigned int i = 0; i < data.m(); ++i)
+        (*_sample_vectors[j])[i] = data(i, j);
+  }
+
+  else if (_sampler_method == "get_local_samples")
+  {
+    DenseMatrix<Real> data = _sampler.getLocalSamples();
+    for (unsigned int j = 0; j < data.n(); ++j)
+      for (unsigned int i = 0; i < data.m(); ++i)
+        (*_sample_vectors[j])[i] = data(i, j);
+  }
+
+  else if (_sampler_method == "get_next_local_row")
+  {
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+    {
+      std::vector<Real> data = _sampler.getNextLocalRow();
+      for (std::size_t j = 0; j < data.size(); ++j)
+        (*_sample_vectors[j])[i - _sampler.getLocalRowBegin()] = data[j];
+    }
   }
 }
 
 void
 SamplerData::finalize()
 {
-  if (_use_local_samples)
+  if (_sampler_method != "get_samples")
     for (auto & ppv_ptr : _sample_vectors)
       _communicator.gather(0, *ppv_ptr);
 }
@@ -78,7 +101,7 @@ SamplerData::finalize()
 void
 SamplerData::threadJoin(const UserObject & /*uo*/)
 {
-  /// TODO: Use this when the Sampler objects become threaded GeneralUserObjects
+  /// TODO: Use this when the Sampler objects become threaded
   /*
   if (_use_local_samples)
   {

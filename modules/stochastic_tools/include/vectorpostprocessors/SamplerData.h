@@ -37,6 +37,6 @@ protected:
   /// The sampler to extract data
   Sampler & _sampler;
 
-  /// Flag for using getLocalSamples/getSamples
-  const bool _use_local_samples;
+  /// The method of data retrival from the Sample
+  const MooseEnum & _sampler_method;
 };
