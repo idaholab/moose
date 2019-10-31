@@ -9,6 +9,7 @@
 
 import subprocess
 import os
+import vtk
 from PyQt5 import QtCore, QtWidgets
 from .ExodusPlugin import ExodusPlugin
 from .VTKWindowPlugin import VTKWindowPlugin

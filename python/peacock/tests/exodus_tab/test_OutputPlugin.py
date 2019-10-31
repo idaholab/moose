@@ -74,9 +74,10 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
         self.assertTrue(os.path.exists(imagename))
 
         # Diff the image from the script
-        differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
-        print(differ.message())
-        self.assertFalse(differ.fail())
+        if self._window.devicePixelRatio() == 1:
+            differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
+            print(differ.message())
+            self.assertFalse(differ.fail())
 
     def testPNG(self):
         """
