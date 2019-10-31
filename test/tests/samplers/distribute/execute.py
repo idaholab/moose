@@ -39,15 +39,12 @@ def execute(infile, outfile, n_samples, processors, test_type):
 
 if __name__ == '__main__':
 
-    # Used for docs
-    rows = 1e8
-    procs = [1,2,4,8,16]
+    parser = argparse.ArgumentParser(description="Memory data for Sampler sample data methods.")
+    parser.add_argument('-r', '--rows', default=1e5, type=int, help="The number of rows (default: 1e5).")
+    parser.add_argument('-p', '--processors', default=[1,4], type=int, nargs='+', help="List of number of processors to use (default: [1,4]).")
+    args = parser.parse_args()
 
-    # Used for testing
-    #rows = 1e7
-    #procs = [1,2,4]
-
-    execute('distribute.i', 'distribute_none', 1, procs, 'getSamples')
-    execute('distribute.i', 'distribute_off', rows, procs, 'getSamples')
-    execute('distribute.i', 'distribute_on', rows, procs, 'getLocalSamples')
-    execute('distribute.i', 'distribute_row', rows, procs, 'getNextLocalRow')
+    execute('distribute.i', 'distribute_none', 1, args.processors, 'getSamples')
+    execute('distribute.i', 'distribute_off', args.rows, args.processors, 'getSamples')
+    execute('distribute.i', 'distribute_on', args.rows, args.processors, 'getLocalSamples')
+    execute('distribute.i', 'distribute_row', args.rows, args.processors, 'getNextLocalRow')
