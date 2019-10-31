@@ -36,15 +36,15 @@ Sampler::validParams()
   // is used just in case in the future we need more.
   params.addParam<dof_id_type>(
       "limit_get_samples",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_local_samples",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_next_local_row",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   return params;
 }
