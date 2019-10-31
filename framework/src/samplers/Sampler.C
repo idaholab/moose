@@ -31,20 +31,20 @@ Sampler::validParams()
 
   // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
   // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
-  // for size definition, so as start the limits will be based around the max of unsigned int. Note,
+  // for size definition, so as start the limits will be based at 10% the max of unsigned int. Note,
   // the values here are the limits of the number of items in the complete container. dof_id_type
   // is used just in case in the future we need more.
   params.addParam<dof_id_type>(
       "limit_get_samples",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_local_samples",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_next_local_row",
-      std::numeric_limits<unsigned int>::max(),
+      0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   return params;
 }
@@ -68,13 +68,15 @@ Sampler::Sampler(const InputParameters & parameters)
 void
 Sampler::init()
 {
+  // The init() method is private so it is un-likely to be called, but just in case the following
+  // was added to help avoid future mistakes.
   if (_initialized)
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
   if (_n_rows == 0)
     mooseError("The number of rows cannot be zero.");
 
-  if (_n_rows == 0)
+  if (_n_cols == 0)
     mooseError("The number of columns cannot be zero.");
 
   // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
@@ -125,7 +127,9 @@ Sampler::getSamples()
     paramError("limit_get_samples",
                "The number of entries in the DenseMatrix (",
                _n_rows * _n_cols,
-               ") exceeds the allowed limit.");
+               ") exceeds the allowed limit of ",
+               _limit_get_samples,
+               ".");
 
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
@@ -143,7 +147,9 @@ Sampler::getLocalSamples()
     paramError("limit_get_local_samples",
                "The number of entries in the DenseMatrix (",
                _n_local_rows * _n_cols,
-               ") exceeds the allowed limit.");
+               ") exceeds the allowed limit of ",
+               _limit_get_local_samples,
+               ".");
 
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
@@ -168,7 +174,9 @@ Sampler::getNextLocalRow()
       paramError("limit_get_next_local_row",
                  "The number of entries in the std::vector (",
                  _n_cols,
-                 ") exceeds the allowed limit.");
+                 ") exceeds the allowed limit of ",
+                 _limit_get_next_local_row,
+                 ".");
   }
 
   std::vector<Real> output(_n_cols);

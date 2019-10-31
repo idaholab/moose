@@ -24,4 +24,5 @@ protected:
 
 private:
   const bool _use_rand;
+  const MooseEnum _error_test;
 };
