@@ -75,17 +75,20 @@ WeibullDistribution::quantile(const Real & p,
 Real
 WeibullDistribution::pdf(const Real & x) const
 {
+  TIME_SECTION(_perf_pdf);
   return pdf(x, _a, _b, _c);
 }
 
 Real
 WeibullDistribution::cdf(const Real & x) const
 {
+  TIME_SECTION(_perf_cdf);
   return cdf(x, _a, _b, _c);
 }
 
 Real
 WeibullDistribution::quantile(const Real & p) const
 {
+  TIME_SECTION(_perf_quantile);
   return quantile(p, _a, _b, _c);
 }

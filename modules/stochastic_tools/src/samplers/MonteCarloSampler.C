@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MonteCarloSampler.h"
+#include "Distribution.h"
 
 registerMooseObject("StochasticToolsApp", MonteCarloSampler);
 

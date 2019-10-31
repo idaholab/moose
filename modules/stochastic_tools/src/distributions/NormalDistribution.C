@@ -60,17 +60,20 @@ NormalDistribution::quantile(const Real & p, const Real & mean, const Real & std
 Real
 NormalDistribution::pdf(const Real & x) const
 {
+  TIME_SECTION(_perf_pdf);
   return pdf(x, _mean, _standard_deviation);
 }
 
 Real
 NormalDistribution::cdf(const Real & x) const
 {
+  TIME_SECTION(_perf_cdf);
   return cdf(x, _mean, _standard_deviation);
 }
 
 Real
 NormalDistribution::quantile(const Real & p) const
 {
+  TIME_SECTION(_perf_quantile);
   return quantile(p, _mean, _standard_deviation);
 }

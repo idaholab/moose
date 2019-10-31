@@ -16,7 +16,7 @@
 #include "MooseRandom.h"
 #include "SetupInterface.h"
 #include "DistributionInterface.h"
-#include "Distribution.h"
+#include "PerfGraphInterface.h"
 
 template <>
 InputParameters validParams<Sampler>();
@@ -41,7 +41,10 @@ InputParameters validParams<Sampler>();
  * access to the critical portions of this object while making it extensible. Please consider
  * carefully the impacts of altering the API.
  */
-class Sampler : public MooseObject, public SetupInterface, public DistributionInterface
+class Sampler : public MooseObject,
+                public SetupInterface,
+                public DistributionInterface,
+                PerfGraphInterface
 {
 public:
   static InputParameters validParams();
@@ -251,4 +254,13 @@ private:
 
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
+
+  ///@{
+  /// PrefGraph timers
+  const PerfID _perf_get_samples;
+  const PerfID _perf_get_local_samples;
+  const PerfID _perf_get_next_local_row;
+  const PerfID _perf_advance_generator;
+  const PerfID _perf_get_rand;
+  ///@}
 };

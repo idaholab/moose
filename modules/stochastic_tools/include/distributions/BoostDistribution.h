@@ -80,6 +80,7 @@ BoostDistribution<T>::pdf(const Real & x) const
 {
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  TIME_SECTION(_perf_pdf);
   return boost::math::pdf(*_distribution_unique_ptr, x);
 #else
   return x; // unreachable
@@ -92,6 +93,7 @@ BoostDistribution<T>::cdf(const Real & x) const
 {
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  TIME_SECTION(_perf_cdf);
   return boost::math::cdf(*_distribution_unique_ptr, x);
 #else
   return x; // unreachable
@@ -104,6 +106,7 @@ BoostDistribution<T>::quantile(const Real & y) const
 {
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  TIME_SECTION(_perf_quantile);
   return boost::math::quantile(*_distribution_unique_ptr, y);
 #else
   return y; // unreachable
@@ -116,9 +119,9 @@ BoostDistribution<T>::median() const
 {
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  TIME_SECTION(_perf_median);
   return boost::math::median(*_distribution_unique_ptr);
 #else
   return 0; // unreachable
 #endif
 }
-

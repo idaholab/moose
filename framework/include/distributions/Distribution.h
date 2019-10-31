@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "PerfGraphInterface.h"
 
 class Distribution;
 
@@ -19,7 +20,7 @@ InputParameters validParams<Distribution>();
 /**
  * All Distributions should inherit from this class
  */
-class Distribution : public MooseObject
+class Distribution : public MooseObject, public PerfGraphInterface
 {
 public:
   static InputParameters validParams();
@@ -44,5 +45,13 @@ public:
    * Compute the median of the distribution
    */
   virtual Real median() const;
-};
 
+protected:
+  ///@{
+  /// PerfGraph entries
+  const PerfID _perf_pdf;
+  const PerfID _perf_cdf;
+  const PerfID _perf_quantile;
+  const PerfID _perf_median;
+  ///@}
+};

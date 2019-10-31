@@ -31,20 +31,20 @@ Sampler::validParams()
 
   // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
   // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
-  // for size definition, so as start the limits will be based at 10% the max of unsigned int. Note,
+  // for size definition, so as start the limits will be based the max of unsigned int. Note,
   // the values here are the limits of the number of items in the complete container. dof_id_type
   // is used just in case in the future we need more.
   params.addParam<dof_id_type>(
       "limit_get_samples",
-      0.1 * std::numeric_limits<unsigned int>::max(),
+      std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_local_samples",
-      0.1 * std::numeric_limits<unsigned int>::max(),
+      std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   params.addParam<dof_id_type>(
       "limit_get_next_local_row",
-      0.1 * std::numeric_limits<unsigned int>::max(),
+      std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getSamples method.");
   return params;
 }
@@ -53,6 +53,7 @@ Sampler::Sampler(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     DistributionInterface(this),
+    PerfGraphInterface(this),
     _seed(getParam<unsigned int>("seed")),
     _n_rows(0),
     _n_cols(0),
@@ -60,7 +61,12 @@ Sampler::Sampler(const InputParameters & parameters)
     _initialized(false),
     _limit_get_samples(getParam<dof_id_type>("limit_get_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
-    _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row"))
+    _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
+    _perf_get_samples(registerTimedSection("getSamples", 1)),
+    _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
+    _perf_get_next_local_row(registerTimedSection("getNextLocalRow", 1)),
+    _perf_advance_generator(registerTimedSection("advanceGenerators", 2)),
+    _perf_get_rand(registerTimedSection("getRand", 5))
 {
   setNumberOfRandomSeeds(1);
 }
@@ -89,6 +95,7 @@ Sampler::init()
   // Set the next row iterator index
   _next_local_row = _local_row_begin;
 
+  // Mark class as initialized, which locks out certain methods
   _initialized = true;
 }
 
@@ -123,6 +130,8 @@ Sampler::execute()
 DenseMatrix<Real>
 Sampler::getSamples()
 {
+  TIME_SECTION(_perf_get_samples);
+
   if (_n_rows * _n_cols > _limit_get_samples)
     paramError("limit_get_samples",
                "The number of entries in the DenseMatrix (",
@@ -143,6 +152,8 @@ Sampler::getSamples()
 DenseMatrix<Real>
 Sampler::getLocalSamples()
 {
+  TIME_SECTION(_perf_get_local_samples);
+
   if (_n_local_rows * _n_cols > _limit_get_local_samples)
     paramError("limit_get_local_samples",
                "The number of entries in the DenseMatrix (",
@@ -163,6 +174,8 @@ Sampler::getLocalSamples()
 std::vector<Real>
 Sampler::getNextLocalRow()
 {
+  TIME_SECTION(_perf_get_next_local_row);
+
   if (_next_local_row_requires_state_restore)
   {
     _generator.restoreState();
@@ -232,6 +245,8 @@ Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
 void
 Sampler::advanceGenerators(dof_id_type count)
 {
+  TIME_SECTION(_perf_advance_generator);
+
   for (dof_id_type i = 0; i < count; ++i)
     for (std::size_t j = 0; j < _generator.size(); ++j)
       getRand(j);
@@ -241,6 +256,8 @@ double
 Sampler::getRand(const unsigned int index)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  TIME_SECTION(_perf_get_rand);
+
   return _generator.rand(index);
 }
 
