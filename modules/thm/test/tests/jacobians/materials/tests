@@ -25,7 +25,8 @@
   [../]
   [./density_3eqn_material]
     type = 'PetscJacobianTester'
-    input = 'density_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=rho Kernels/test_kernel/args='rhoA' JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-9
     difference_tol = 5e-10
     max_threads = 1
@@ -47,14 +48,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./internal_energy_3eqn_material]
-    type = 'PetscJacobianTester'
-    input = 'internal_energy_3eqn.i'
-    ratio_tol = 3e-8
-    difference_tol = 2e-7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./linear_test_material]
     type = 'PetscJacobianTester'
     input = 'linear_test_material.i'
@@ -65,7 +58,8 @@
   [../]
   [./pressure_3eqn_material]
     type = 'PetscJacobianTester'
-    input = 'pressure_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=p"
     ratio_tol = 1e-8
     difference_tol = 8e-4
     max_threads = 1
@@ -97,7 +91,8 @@
   [../]
   [./specific_internal_energy_3eqn]
     type = 'PetscJacobianTester'
-    input = 'specific_internal_energy_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=e JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 5e-7
     max_threads = 1
@@ -113,7 +108,8 @@
   [../]
   [./specific_volume_3eqn]
     type = 'PetscJacobianTester'
-    input = 'specific_volume_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=v JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 5e-14
     max_threads = 1
@@ -161,7 +157,8 @@
   [../]
   [./velocity_3eqn]
     type = 'PetscJacobianTester'
-    input = 'velocity_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=v Kernels/test_kernel/args='rhoA rhouA' JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 5e-8
     max_threads = 1
@@ -177,7 +174,8 @@
   [../]
   [./enthalpy_3eqn]
     type = 'PetscJacobianTester'
-    input = 'enthalpy_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=h JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 1e-7
     difference_tol = 5e-5
     max_threads = 1
@@ -201,7 +199,8 @@
   [../]
   [./temperature_3eqn_material]
     type = 'PetscJacobianTester'
-    input = 'temperature_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=T"
     ratio_tol = 2e-8
     difference_tol = 3e-10
     max_threads = 1
@@ -225,7 +224,8 @@
   [../]
   [./total_enthalpy_3eqn]
     type = 'PetscJacobianTester'
-    input = 'total_enthalpy_3eqn.i'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=H JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 1e-5
     max_threads = 1
