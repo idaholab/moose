@@ -15,7 +15,7 @@
 
 #include "DualRealOps.h"
 
-registerMooseObject("ContactTestApp", TangentialNodalLMMechanicalContact);
+registerMooseObject("ContactApp", TangentialNodalLMMechanicalContact);
 
 template <>
 InputParameters

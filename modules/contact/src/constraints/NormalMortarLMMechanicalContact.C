@@ -10,7 +10,7 @@
 #include "NormalMortarLMMechanicalContact.h"
 #include "SubProblem.h"
 
-registerADMooseObject("ContactTestApp", NormalMortarLMMechanicalContact);
+registerADMooseObject("ContactApp", NormalMortarLMMechanicalContact);
 
 defineADValidParams(
     NormalMortarLMMechanicalContact,

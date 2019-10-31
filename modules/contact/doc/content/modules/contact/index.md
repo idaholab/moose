@@ -88,7 +88,7 @@ discretization technique for solving mechanical contact. Some results are summar
 
  The `contact/test/tests/bouncing-block-contact` directory provides a series of
 input files testing different algorithms for solving both normal and tangential
-frictional contact. Mortar contact can also be specified using the `Contact` block 
+frictional contact. Mortar contact can also be specified using the `Contact` block
 similar to pure node-face discretization contact. For normal mortar contact:
 
 !listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
@@ -98,7 +98,7 @@ For normal and tangential (frictional) mortar contact:
 !listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
 
 
-### Frictionless contact algorithm comparison
+### Frictionless contact algorithm comparison id=frictionless_table
 
 | Lagrange multiplier | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
 | ------------------- | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
@@ -182,7 +182,7 @@ The number of nodes in contact is 11
  8 Nonlinear |R| = 4.432194e-04
 ```
 
-### Frictional contact algorithm comparison
+### Frictional contact algorithm comparison id=frictional_table
 
 | LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations | CLI PETSc options |
 | --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- | --- |
