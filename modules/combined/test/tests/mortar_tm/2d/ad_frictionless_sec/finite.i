@@ -35,8 +35,8 @@ name = 'finite'
     dim = 2
     xmin = 0.31
     xmax = 0.91
-    ymin = 9.2
-    ymax = 10.0
+    ymin = 7.7
+    ymax = 8.5
     nx = 3
     ny = 4
     elem_type = ${elem}
@@ -60,10 +60,10 @@ name = 'finite'
   [./block_sidesets]
     type = SideSetsFromPointsGenerator
     input = block_rename
-    points = '0.6  9.2  0
-              0.91 9.5  0
-              0.6  10.0 0
-              0.31 9.5  0'
+    points = '0.6  7.7  0
+              0.91 8.0  0
+              0.6  8.5 0
+              0.31 8.0  0'
     new_boundary = 'block_bottom block_right block_top block_left'
   [../]
 []
@@ -121,7 +121,7 @@ name = 'finite'
     type = ADFunctionDirichletBC
     variable = disp_x
     boundary = block_right
-    function = '-0.04*sin(4*t)+0.02'
+    function = '-0.04*sin(4*(t+1.5))+0.02'
   [../]
   [./right_y]
     type = ADFunctionDirichletBC
@@ -156,7 +156,7 @@ name = 'finite'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
-  end_time = 15
+  end_time = 13.5
   dt = 0.1
   dtmin = 0.1
   timestep_tolerance = 1e-6

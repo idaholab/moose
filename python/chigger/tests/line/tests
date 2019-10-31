@@ -3,7 +3,8 @@
     type = ImageDiff
     command = line.py
     imagediff = 'line.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.94
     requirement = 'Chigger shall provide a line plot widget'
     design = ''
     issues = '#7451'
@@ -14,7 +15,8 @@
     type = ImageDiff
     command = single_point.py
     imagediff = 'single_point.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.94
     requirement = 'Chigger shall provide a scatter plot widget'
     design = ''
     issues = '#7451'
@@ -82,7 +84,8 @@
     type = ImageDiff
     command = secondary.py
     imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.95
     requirement = 'Chigger shall provide a capability for multiple curves and secondary axis in a graph'
     design = ''
     issues = '#7451'

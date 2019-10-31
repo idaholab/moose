@@ -101,8 +101,14 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
                            QtWidgets.QSizePolicy.MinimumExpanding)
 
         # Create the QVTK interactor
-        if self.devicePixelRatio() > 1:
-            self.__qvtkinteractor = RetinaQVTKRenderWindowInteractor(self)
+        if (self.devicePixelRatio() > 1):
+            if (vtk.vtkVersion.GetVTKMajorVersion() > 7) and (size is not None):
+                size[0] = int(size[0]/self.devicePixelRatio())
+                size[1] = int(size[1]/self.devicePixelRatio())
+                self.__qvtkinteractor = QVTKRenderWindowInteractor(self)
+            else:
+                self.__qvtkinteractor = RetinaQVTKRenderWindowInteractor(self)
+
         else:
             self.__qvtkinteractor = QVTKRenderWindowInteractor(self)
 
