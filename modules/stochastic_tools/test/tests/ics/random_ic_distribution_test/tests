@@ -3,34 +3,19 @@
   design = '/RandomIC.md'
 
   [generate]
+    type = 'CSVDiff'
+    input = 'random_ic_distribution_test.i'
+    csvdiff = 'random_ic_distribution_test_initial_histo_0000.csv'
+    mesh_mode = 'replicated' # sensitive to difference in partitioning
+
     requirement = 'The system shall generate parallel agnostic random initial conditions using a '
-                  'distribution object'
-
-    [test]
-      type = 'CSVDiff'
-      input = 'random_ic_distribution_test.i'
-      csvdiff = 'random_ic_distribution_test_initial_histo_0000.csv'
-      mesh_mode = 'replicated' # sensitive to difference in partitioning
-
-      detail = 'without and'
-    []
-    [threaded]
-      type = 'CSVDiff'
-      input = 'random_ic_distribution_test.i'
-      csvdiff = 'random_ic_distribution_test_initial_histo_0000.csv'
-      prereq = 'generate/test'
-      min_threads = 2
-      mesh_mode = 'replicated' # sensitive to difference in partitioning
-
-      detail = 'with threading.'
-    []
-
+                  'distribution function.'
   []
   [test_err_distribution_and_min_max]
     type = 'RunException'
     input = 'random_ic_distribution_test.i'
     cli_args = 'ICs/u_aux/min=0 ICs/u_aux/max=1'
-    prereq = 'generate/threaded'
+    prereq = 'generate'
     expect_err = "Cannot use together with 'min' or 'max' parameter"
 
     requirement = 'The system shall generate an error the random initial condition is used with both '
