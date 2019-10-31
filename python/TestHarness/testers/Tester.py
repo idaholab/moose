@@ -583,7 +583,7 @@ class Tester(MooseObject):
 
         # Check for programs
         programs = self.specs['requires']
-        if programs is not None:
+        if (programs is not None) and (sys.version_info[0] == 3):
             missing = []
             for prog in programs.split():
                 if shutil.which(prog) is None:
