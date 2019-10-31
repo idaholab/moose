@@ -69,6 +69,7 @@
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelBarrier executioner."
     python = 3
+    requires = 'pdflatex'
   []
   [latex_serial]
     type = RunCommand

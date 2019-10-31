@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, sys, pkgutil
+import platform, re, os, sys, pkgutil, shutil
 import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
@@ -86,6 +86,7 @@ class Tester(MooseObject):
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('python',        None, "Restrict the test to s specific version of python (2 or 3).")
         params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
+        params.addParam('requires', None, "A list of programs required for the test to operate, as tested with shutil.which.")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
@@ -579,6 +580,16 @@ class Tester(MooseObject):
             missing = mooseutils.check_configuration(py_packages.split(), message=False)
             if missing:
                 reasons['python_packages_required'] = ', '.join(['no {}'.format(p) for p in missing])
+
+        # Check for programs
+        programs = self.specs['requires']
+        if programs is not None:
+            missing = []
+            for prog in programs.split():
+                if shutil.which(prog) is None:
+                    missing.append(prog)
+            if missing:
+                reasons['requires'] = ', '.join(['no {}'.format(p) for p in missing])
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
