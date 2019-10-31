@@ -45,6 +45,7 @@ public:
   Real getSurfaceTemperature(BoundaryID id) const;
   Real getSurfaceRadiosity(BoundaryID id) const;
   Real getSurfaceEmissivity(BoundaryID id) const;
+  Real getViewFactor(BoundaryID from_id, BoundaryID to_id) const;
   std::set<BoundaryID> getSurfaceIDs() const;
   ///@}
 
@@ -99,6 +100,6 @@ protected:
   /// the set of adiabatic boundaries
   std::set<unsigned int> _adiabatic_side_ids;
 
-  /// the view factors which are set by setVuewFactors by derived classes
+  /// the view factors which are set by setViewFactors by derived classes
   std::vector<std::vector<Real>> _view_factors;
 };

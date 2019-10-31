@@ -320,3 +320,13 @@ GrayLambertSurfaceRadiationBase::getSurfaceEmissivity(BoundaryID id) const
     return 1;
   return _emissivity[_side_id_index.find(id)->second];
 }
+
+Real
+GrayLambertSurfaceRadiationBase::getViewFactor(BoundaryID from_id, BoundaryID to_id) const
+{
+  if (_side_id_index.find(from_id) == _side_id_index.end())
+    return 0;
+  if (_side_id_index.find(to_id) == _side_id_index.end())
+    return 0;
+  return _view_factors[_side_id_index.find(from_id)->second][_side_id_index.find(to_id)->second];
+}

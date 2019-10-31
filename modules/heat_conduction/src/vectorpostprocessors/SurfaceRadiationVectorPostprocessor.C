@@ -19,21 +19,27 @@ InputParameters
 validParams<SurfaceRadiationVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
-  params.addClassDescription("VectorPostprocessor for accessing information stored in surface radiation user object");
+  params.addClassDescription(
+      "VectorPostprocessor for accessing information stored in surface radiation user object");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
-  MultiMooseEnum information_type("temperature=0 heat_flux_density=1 radiosity=2 emissivity=3", "temperature");
-  params.addParam<MultiMooseEnum>("information", information_type, "The type of information to obtain from surface radiation user object");
+  MultiMooseEnum information_type("temperature=0 heat_flux_density=1 radiosity=2 emissivity=3",
+                                  "temperature");
+  params.addParam<MultiMooseEnum>(
+      "information",
+      information_type,
+      "The type of information to obtain from surface radiation user object");
   return params;
 }
 
-SurfaceRadiationVectorPostprocessor::SurfaceRadiationVectorPostprocessor(const InputParameters & parameters)
+SurfaceRadiationVectorPostprocessor::SurfaceRadiationVectorPostprocessor(
+    const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-  _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
-  _information_types(getParam<MultiMooseEnum>("information")),
-  _n_data(_information_types.size()),
-  _data(_n_data),
-  _surface_ids(declareVector("subdomain_id"))
+    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
+    _information_types(getParam<MultiMooseEnum>("information")),
+    _n_data(_information_types.size()),
+    _data(_n_data),
+    _surface_ids(declareVector("subdomain_id"))
 {
   for (unsigned int j = 0; j < _n_data; ++j)
     _data[j] = &declareVector(_information_types[j]);

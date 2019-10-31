@@ -41,6 +41,11 @@
     surface_radiation_object_name = gray_lambert
     information = 'temperature emissivity radiosity heat_flux_density'
   [../]
+
+  [./view_factors]
+    type = ViewfactorVectorPostprocessor
+    surface_radiation_object_name = gray_lambert
+  [../]
 []
 
 [Postprocessors]
