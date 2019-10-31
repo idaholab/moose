@@ -13,7 +13,12 @@
   [../]
   [./acoustic_impedance_7eqn_ncg]
     type = 'PetscJacobianTester'
-    input = 'acoustic_impedance_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=Z_liquid
+      Kernels/test_vapor/material_property=Z_vapor
+      Kernels/test_ncg/material_property=Z_vapor
+      JacobianTest2PhaseNCG/snes_test_err=1e-12"
     ratio_tol = 2e-7
     difference_tol = 0.3
     max_threads = 1
@@ -87,7 +92,12 @@
   [../]
   [./pressure_7eqn_ncg_material]
     type = 'PetscJacobianTester'
-    input = 'pressure_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=p_liquid
+      Kernels/test_vapor/material_property=p_vapor
+      Kernels/test_ncg/material_property=p_vapor
+      JacobianTest2PhaseNCG/snes_test_err=1e-12"
     ratio_tol = 2e-7
     difference_tol = 250
     max_threads = 1
@@ -167,7 +177,12 @@
   [../]
   [./sound_speed_7eqn_ncg]
     type = 'PetscJacobianTester'
-    input = 'sound_speed_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=c_liquid
+      Kernels/test_vapor/material_property=c_vapor
+      Kernels/test_ncg/material_property=c_vapor
+      JacobianTest2PhaseNCG/snes_test_err=1e-12"
     ratio_tol = 5e-8
     difference_tol = 5e-5
     max_threads = 1
@@ -227,7 +242,11 @@
   [../]
   [./enthalpy_7eqn_ncg]
     type = 'PetscJacobianTester'
-    input = 'enthalpy_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=h_liquid
+      Kernels/test_vapor/material_property=h_vapor
+      Kernels/test_ncg/material_property=h_vapor"
     ratio_tol = 2e-8
     difference_tol = 0.03
     max_threads = 1
@@ -256,7 +275,12 @@
   [../]
   [./temperature_7eqn_ncg_material]
     type = 'PetscJacobianTester'
-    input = 'temperature_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=T_liquid
+      Kernels/test_vapor/material_property=T_vapor
+      Kernels/test_ncg/material_property=T_vapor
+      JacobianTest2PhaseNCG/snes_test_err=1e-12"
     ratio_tol = 1e-8
     difference_tol = 3e-6
     max_threads = 1
@@ -285,7 +309,11 @@
   [../]
   [./total_enthalpy_7eqn_ncg]
     type = 'PetscJacobianTester'
-    input = 'total_enthalpy_7eqn_ncg.i'
+    input = 'fluid_properties_7eqn_ncg.i'
+    cli_args = "
+      Kernels/test_liquid/material_property=H_liquid
+      Kernels/test_vapor/material_property=H_vapor
+      Kernels/test_ncg/material_property=H_vapor"
     ratio_tol = 2e-8
     difference_tol = 0.03
     max_threads = 1
