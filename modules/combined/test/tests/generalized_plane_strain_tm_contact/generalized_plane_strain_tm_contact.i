@@ -249,6 +249,12 @@
     specific_heat = 300.0
     block = '1 2'
   [../]
+
+  [./density]
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = '1'
+  [../]
 []
 
 [Executioner]

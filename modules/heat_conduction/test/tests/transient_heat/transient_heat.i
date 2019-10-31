@@ -45,9 +45,10 @@
     specific_heat = 1
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 1
+    prop_names = density
+    prop_values = 1
   [../]
 []
 
