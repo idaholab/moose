@@ -8,7 +8,7 @@ template <>
 InputParameters validParams<PIDControl>();
 
 /**
- * This block represents a proportional–integral–derivative controller (PID controller). It
+ * This block represents a proportional-integral-derivative controller (PID controller). It
  * continuously calculates an error value e(t) as the difference between a desired setpoint and a
  * measured process variable and applies a correction based on proportional, integral, and
  * derivative terms.

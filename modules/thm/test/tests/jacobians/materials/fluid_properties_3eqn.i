@@ -1,11 +1,8 @@
-# Tests the derivatives of the density material property for the 3-equation model.
-
 [JacobianTest1Phase]
   A = 10
   p = 1e5
   T = 300
   vel = 2
-  snes_test_err = 1e-8
   fp_1phase = fp_1phase
 []
 
@@ -24,7 +21,7 @@
   [./test_kernel]
     type = MaterialDerivativeTestKernel
     variable = rhoA
-    material_property = rho
-    args = 'rhoA'
+    material_property = <none>
+    args = 'rhoA rhouA rhoEA'
   [../]
 []
