@@ -18,7 +18,6 @@
 - /AuxScalarKernels/VolumeJunction1PhasePressureAux
 - /AuxScalarKernels/VolumeJunction1PhaseVelocityMagnitudeAux
 - /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
-- /AuxScalarKernels/VolumeJunctionOldPressureAux
 
 - /BCs/BoundaryFlux7EqnNCGBC
 - /BCs/ConvectionHeatTransferBC
@@ -54,7 +53,6 @@
 - /BCs/OneDMomentumStaticPressureReverseBC
 - /BCs/OneDStagnationPandTBase
 - /BCs/OneDVolumeFractionVaporBC
-- /BCs/VolumeJunctionOldBC
 
 - /ClosureTest1Phase
 - /ClosureTest1Phase/ClosureTest1PhaseAction
@@ -125,8 +123,6 @@
 - /Components/SolidWall
 - /Components/SupersonicInlet
 - /Components/TestSetupStatusComponent
-- /Components/VolumeJunctionOld
-- /Components/VolumeJunctionOldBase
 - /Components/THMCreateMeshAction
 
 - /Constraints/JunctionConstraint

@@ -337,13 +337,4 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-
-  [./volume_junction_old_bc]
-    type = 'PetscJacobianTester'
-    input = 'volume_junction_old_bc.i'
-    ratio_tol = 2e-4
-    difference_tol = 6.2e4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
 []
