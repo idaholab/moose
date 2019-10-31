@@ -83,12 +83,21 @@ Steady::execute()
 #endif // LIBMESH_ENABLE_AMR
     _problem.timestepSetup();
 
-    _last_solve_converged = _picard_solve.solve();
+    auto grid_sequencing_steps = _problem.numGridSequences();
 
-    if (!lastSolveConverged())
+    for (decltype(grid_sequencing_steps) grid_step = 0; grid_step <= grid_sequencing_steps;
+         ++grid_step)
     {
-      _console << "Aborting as solve did not converge\n";
-      break;
+      _last_solve_converged = _picard_solve.solve();
+
+      if (!lastSolveConverged())
+      {
+        _console << "Aborting as solve did not converge\n";
+        break;
+      }
+
+      if (grid_step != grid_sequencing_steps)
+        _problem.uniformRefine();
     }
 
     _problem.computeIndicators();

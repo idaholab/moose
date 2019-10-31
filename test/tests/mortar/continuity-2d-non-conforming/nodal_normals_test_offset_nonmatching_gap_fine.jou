@@ -1,9 +1,3 @@
-# This script meshes a unit square which is split by a finite width
-# gap at x=1/4 with a non-conforming mesh on both sides.
-
-# cd '/Users/petejw/code/peterson_git/cubit/nodal_normals'
-# play "nodal_normals_test_offset_nonmatching_gap.jou"
-
 # Clear any existing model
 reset
 
