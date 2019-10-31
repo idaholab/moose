@@ -22,19 +22,24 @@ template <>
 InputParameters validParams<Sampler>();
 
 /**
- * This is the base class for Samplers.
+ * This is the base class for Samplers as used within the Stochastic Tools module.
  *
  * A sampler is responsible for sampling distributions and providing an API for providing
  * the sample data to objects. The sampler is designed to handle any number of random number
  * generators.
  *
- * The main methods in this object is the getSamples/getLocalSamples methods which return the
- * distribution samples. These methods will return the same results for each call regardless of the
- * number of calls.
+ * The main methods in this object is the getNextLocalRow/getSamples/getLocalSamples methods which
+ * return the distribution samples. These methods will return the same results for each call
+ * regardless of the number of calls, with getNextLocalRow being the exception because it is
+ * designed be used in an iterative approach.
  *
  * Samplers support the use of "execute_on", which when called results in new set of random numbers,
  * thus after execute() calls to getSamples/getLocalSamples() methods will now produce a new set of
  * random numbers from calls prior to the execute() call.
+ *
+ * Not for MOOSE developers: Great care was taken to design the structure of this class to limit
+ * access to the critical portions of this object while making it extensible. Please consider
+ * carefully the impacts of altering the API.
  */
 class Sampler : public MooseObject, public SetupInterface, public DistributionInterface
 {
@@ -42,6 +47,14 @@ public:
   static InputParameters validParams();
 
   Sampler(const InputParameters & parameters);
+
+  // The public members define the API that is exposed to application developers that are using
+  // Sampler objects to perform calculations, so be very carefull when adding items here since
+  // they are exposed to any other object via the SamplerInterface.
+  //
+  // It is also important to point out that when Sampler objects, when used, are not const. This is
+  // due to the fact that calling the various get methods below must store various pieces of data as
+  // well as control the state of the random number generators.
 
   ///@{
   /**
@@ -68,7 +81,7 @@ public:
    * to getNextLocalRow() can be partial, followed by call(s) to getSamples or getLocalSamples.
    * Continued calls to getNextLocalRow() will still continue to give the next row as if the
    * other get calls were not made. However, when this occurs calls to restore and advance the
-   * generators are made after each call got getSamples or getLocalSamples, so this generally
+   * generators are made after each call to getSamples or getLocalSamples, so this generally
    * should be avoided.
    */
   std::vector<Real> getNextLocalRow();
@@ -91,9 +104,12 @@ public:
   ///@}
 
 protected:
+  // The following methods are the basic methods that should be utilized my most application
+  // developers that are creatign a custom Sampler.
+
   ///@{
   /**
-   * These methods should be called within the constructor of child classes to define the size of
+   * These methods must be called within the constructor of child classes to define the size of
    * the matrix to be created.
    */
   void setNumberOfRows(dof_id_type n_rows);
@@ -136,6 +152,9 @@ protected:
   virtual void sampleTearDown(){};
   ///@}
 
+  // The following methods are advanced methods that should not be needed by application developers,
+  // but exist for special cases.
+
   ///@{
   /**
    * Methods to populate the global or local sample matrix.
@@ -148,6 +167,17 @@ protected:
   virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix);
   ///@}
 
+  ///@{
+  /**
+   * Method to populate a complete row of sample data.
+   * @param i The global row index to compute
+   * @param data The correctly sized vector of sample value to poplulate
+
+   * This method should not be called directly, it is automatically called by the public
+   * getSamples(), getLocalSamples(), or getNextLocalRow() methods.
+   */
+  virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data);
+
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
    *
@@ -155,12 +185,6 @@ protected:
    * supports native advancing.
    */
   virtual void advanceGenerators(dof_id_type count);
-
-  /**
-   * Method for manually setting the local row index for iteration of sample rows using
-   * getNextLocalRow method.
-   */
-  void setNextLocalRowIndex(dof_id_type index = 0);
 
 private:
   /**

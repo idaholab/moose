@@ -180,8 +180,8 @@ Sampler::getNextLocalRow()
   }
 
   std::vector<Real> output(_n_cols);
-  for (dof_id_type j = 0; j < _n_cols; ++j)
-    output[j] = computeSample(_next_local_row, j);
+  computeSampleRow(_next_local_row, output);
+  mooseAssert(output.size() == _n_cols, "The row of sample data is not sized correctly.");
   _next_local_row++;
 
   if (_next_local_row == _local_row_end)
@@ -199,8 +199,12 @@ void
 Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
 {
   for (dof_id_type i = 0; i < _n_rows; ++i)
-    for (dof_id_type j = 0; j < _n_cols; ++j)
-      matrix(i, j) = computeSample(i, j);
+  {
+    std::vector<Real> row(_n_cols, 0);
+    computeSampleRow(i, row);
+    mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    std::copy(row.begin(), row.end(), matrix.get_values().begin() + i * _n_cols);
+  }
 }
 
 void
@@ -208,9 +212,21 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 {
   advanceGenerators(_local_row_begin * _n_cols);
   for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
-    for (dof_id_type j = 0; j < _n_cols; ++j)
-      matrix(i - _local_row_begin, j) = computeSample(i, j);
+  {
+    std::vector<Real> row(_n_cols, 0);
+    computeSampleRow(i, row);
+    mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    std::copy(
+        row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
+  }
   advanceGenerators((_n_rows - _local_row_end) * _n_cols);
+}
+
+void
+Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
+{
+  for (dof_id_type j = 0; j < _n_cols; ++j)
+    data[j] = computeSample(i, j);
 }
 
 void
