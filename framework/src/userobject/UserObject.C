@@ -51,6 +51,7 @@ UserObject::UserObject(const InputParameters & parameters)
     FunctionInterface(this),
     DistributionInterface(this),
     Restartable(this, "UserObjects"),
+    MeshMetaDataInterface(this),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
     PerfGraphInterface(this),

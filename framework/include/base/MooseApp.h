@@ -466,7 +466,7 @@ public:
   std::string libNameToAppName(const std::string & library_name) const;
 
   /**
-   * Return the loaded library filenames in a std::vector
+   * Return the loaded library filenames in a std::set
    */
   std::set<std::string> getLoadedLibraryPaths() const;
 
@@ -490,8 +490,8 @@ public:
                                                  bool read_only);
 
   /**
-   * Return reference to the restatable data object
-   * @return A const reference to the restatable data object
+   * Return reference to the restartable data object
+   * @return A const reference to the restartable data object
    */
   const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
 

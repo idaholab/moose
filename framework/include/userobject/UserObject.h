@@ -16,6 +16,7 @@
 #include "MooseObject.h"
 #include "MooseTypes.h"
 #include "Restartable.h"
+#include "MeshMetaDataInterface.h"
 #include "ScalarCoupleable.h"
 #include "SetupInterface.h"
 #include "PerfGraphInterface.h"
@@ -36,12 +37,13 @@ InputParameters validParams<UserObject>();
  */
 class UserObject : public MooseObject,
                    public SetupInterface,
-                   public FunctionInterface,
-                   public DistributionInterface,
-                   public Restartable,
-                   public MeshChangedInterface,
-                   public ScalarCoupleable,
-                   public PerfGraphInterface
+                   protected FunctionInterface,
+                   protected DistributionInterface,
+                   protected Restartable,
+                   protected MeshMetaDataInterface,
+                   protected MeshChangedInterface,
+                   protected ScalarCoupleable,
+                   protected PerfGraphInterface
 {
 public:
   UserObject(const InputParameters & params);
@@ -152,4 +154,3 @@ protected:
 private:
   UserObject * _primary_thread_copy = nullptr;
 };
-

@@ -11,6 +11,7 @@
 
 #include "MooseObject.h"
 #include "MeshMetaDataInterface.h"
+#include "MooseApp.h"
 
 // Included so mesh generators don't need to include this when constructing MeshBase objects
 #include "MooseMesh.h"
@@ -95,12 +96,26 @@ template <typename T>
 T &
 MeshGenerator::declareMeshProperty(const std::string & data_name)
 {
-  return declareMeshPropertyInternal<T>(data_name);
+  std::string full_name =
+      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+
+  // Here we will create the RestartableData even though we may not use this instance.
+  // If it's already in use, the App will return a reference to the existing instance and we'll
+  // return that one instead. We might refactor this to have the app create the RestartableData
+  // at a later date.
+  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, nullptr);
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+      _app.registerRestartableData(full_name, std::move(data_ptr), 0, true, false));
+
+  return restartable_data_ref.get();
 }
 
 template <typename T>
 T &
-MeshGenerator::declareMeshProperty(const std::string & data_name, const T & value)
+MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init_value)
 {
-  return declareMeshPropertyInternal<T>(data_name, value);
+  T & data = declareMeshProperty<T>(data_name);
+  data = init_value;
+
+  return data;
 }

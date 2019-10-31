@@ -13,16 +13,15 @@
 #include "MeshGenerator.h"
 
 MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * moose_object)
-  : Restartable(moose_object->getMooseApp(), NAME, SYSTEM, 0)
+  : _meta_data_app(moose_object->getMooseApp())
 {
 }
 
-MeshMetaDataInterface::MeshMetaDataInterface(const MeshGenerator * mesh_gen_object)
-  : Restartable(mesh_gen_object->getMooseApp(), mesh_gen_object->name(), SYSTEM, 0)
-{
-}
+MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app) : _meta_data_app(moose_app) {}
 
-MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app)
-  : Restartable(moose_app, NAME, SYSTEM, 0)
+RestartableDataValue &
+MeshMetaDataInterface::registerMetaDataOnApp(const std::string & name,
+                                             std::unique_ptr<RestartableDataValue> data)
 {
+  return _meta_data_app.registerRestartableData(name, std::move(data), 0, true, true);
 }

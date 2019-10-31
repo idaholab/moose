@@ -12,7 +12,7 @@
 #include "MooseObject.h"
 #include "MooseError.h"
 #include "InputParameters.h"
-#include "Restartable.h"
+#include "RestartableData.h"
 
 #include <string>
 
@@ -25,7 +25,7 @@ class MeshGenerator;
  * re-created during a recover operation. This data is read from files early during the simulation
  * setup an d can be used to make decisions about how to setup the rest of the problem.
  */
-class MeshMetaDataInterface : private Restartable
+class MeshMetaDataInterface
 {
 public:
   /// The suffix appended when writing the restartable data file.
@@ -46,44 +46,41 @@ protected:
   MeshMetaDataInterface(const MooseObject * moose_object);
 
   /**
-   * Interface for MeshGenerators: This interface initializes the Restartable interface with the
-   * generator name for prefixing purposes.
-   */
-  MeshMetaDataInterface(const MeshGenerator * mesh_gen_object);
-
-  /**
    * This class constructor is used for non-Moose-based objects like interfaces. A name for the
    * storage as well as a system name must be passed in along with the thread ID explicitly.
    */
   MeshMetaDataInterface(MooseApp & moose_app);
-
-  const MeshGeneratorName & getMeshGeneratorPrefix(const std::string & name);
 
   /**
    * Method for retrieving a property with the given type and name exists in the mesh meta-data
    * store. This method will throw an error if the property does not exist.
    */
   template <typename T>
-  const T & getMeshProperty(const std::string & data_name, const std::string & prefix)
-  {
-    return declareRestartableDataWithPrefixOverrideAndContext<T>(data_name, prefix, nullptr, true);
-  }
+  const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
 
 private:
-  /**
-   * MeshGenerators are the only objects that may write to the mesh meta-data store. We use a friend
-   * declaration to grant access to the MeshGenerators to access the meta-data.
-   */
-  friend class MeshGenerator;
-  template <typename T>
-  T & declareMeshPropertyInternal(const std::string & data_name)
-  {
-    return declareRestartableDataWithContext<T>(data_name, nullptr, false);
-  }
+  /// Helper function for actually registering the restartable data.
+  RestartableDataValue & registerMetaDataOnApp(const std::string & name,
+                                               std::unique_ptr<RestartableDataValue> data);
 
-  template <typename T>
-  T & declareMeshPropertyInternal(const std::string & data_name, const T & value)
-  {
-    return declareRestartableDataWithContext<T>(data_name, value, nullptr);
-  }
+  /// Reference to the application
+  MooseApp & _meta_data_app;
 };
+
+template <typename T>
+const T &
+MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std::string & prefix)
+
+{
+  std::string full_name = std::string(SYSTEM) + "/" + prefix + "/" + data_name;
+  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, nullptr);
+
+  // Here we will create the RestartableData even though we may not use this instance.
+  // If it's already in use, the App will return a reference to the existing instance and we'll
+  // return that one instead. We might refactor this to have the app create the RestartableData
+  // at a later date.
+  auto & restartable_data_ref =
+      static_cast<RestartableData<T> &>(registerMetaDataOnApp(full_name, std::move(data_ptr)));
+
+  return restartable_data_ref.get();
+}
