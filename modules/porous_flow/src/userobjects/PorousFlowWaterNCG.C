@@ -233,6 +233,10 @@ PorousFlowWaterNCG::gasProperties(const DualReal & pressure,
 
   // Enthalpy of the gas phase is a weighted sum of the individual enthalpies
   gas.enthalpy = Yncg * ncg_enthalpy + (1.0 - Yncg) * vapor_enthalpy;
+
+  //  Internal energy of the gas phase (e = h - pv)
+  mooseAssert(gas.density.value() > 0.0, "Gas density must be greater than zero");
+  gas.internal_energy = gas.enthalpy - pressure / gas.density;
 }
 
 void
@@ -260,6 +264,10 @@ PorousFlowWaterNCG::liquidProperties(const DualReal & pressure,
 
   const DualReal Xncg = liquid.mass_fraction[_gas_fluid_component];
   liquid.enthalpy = (1.0 - Xncg) * water_enthalpy + Xncg * (ncg_enthalpy + hdis);
+
+  //  Internal energy of the liquid phase (e = h - pv)
+  mooseAssert(liquid.density.value() > 0.0, "Liquid density must be greater than zero");
+  liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
 DualReal

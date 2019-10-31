@@ -92,14 +92,19 @@ gas constant.
 ### Variables
 
 This class requires pressure of the gas phase and the total mass fraction of NCG summed over all
-phases (see [compositional flash](/compositional_flash.md) for details).
+phases (see [compositional flash](/compositional_flash.md) for details) for isothermal simulations.
+For nonisothermal simulations, the temperature must also be provided as a nonlinear variable.
 
 !alert note
 These variables must be listed as PorousFlow variables in the PorousFlowDictator UserObject
 
-In the simplest case, two variables (gas porepressure and total NCG mass fraction) are required. The number of components in the PorousFlowDictator must be set equal to two.
+In the isothermal case, two variables (gas porepressure and total NCG mass fraction) are required. The number of components in the PorousFlowDictator must be set equal to two.
 
 !listing modules/porous_flow/test/tests/fluidstate/theis.i block=UserObjects/dictator
+
+In the nonisothermal case, three variables (gas porepressure, total NCG mass fraction and temperature) are required. The number of components in the PorousFlowDictator is still two.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_nonisothermal.i block=UserObjects/dictator
 
 ### UserObjects
 
@@ -116,7 +121,14 @@ Swapping NCG's is as simple as changing the `gas_fp` parameter in this UserObjec
 
 The [`PorousFlowFluidState`](/PorousFlowFluidState.md) material provides all phase pressures, saturation, densities, viscosities etc, as well as all mass fractions of all fluid components in all fluid phases in a single material using the formulation provided in the [`PorousFlowWaterNCG`](/PorousFlowWaterNCG.md) UserObject.
 
+For isothermal simulations, this material will look like
+
 !listing modules/porous_flow/test/tests/fluidstate/theis.i block=Materials/waterncg
+
+For nonisothermal simulations, the temperature variable must also be supplied to ensure that
+all the derivatives with respect to the temperature variable are computed for the Jacobian.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_nonisothermal.i block=Materials/waterncg
 
 ## Initial condition
 
@@ -138,7 +150,7 @@ admits a similarity solution $\zeta = r^2/t$, where $r$ is the radial distance f
 injection well, and $t$ is time. This similarity solution holds even when complicated physics
 such as mutual solubility is included.
 
-An example of a 1D radial injection problem is included in the test suite with CO$_2$ as the
+An example of an isothermal 1D radial injection problem is included in the test suite with CO$_2$ as the
 NCG.
 
 !listing modules/porous_flow/test/tests/fluidstate/theis.i
@@ -156,5 +168,10 @@ Postprocessors), and also the case where $t$ is fixed (evaluated using a VectorP
        id=theis
        style=width:80%;margin-left:10px;
        caption=Similarity solution for 1D radial injection example
+
+An nonisothermal example of the above problem, where cold CO$_2$ is injected into a warm aquifer,
+is also provided in the test suite.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_nonisothermal.i
 
 !bibtex bibliography

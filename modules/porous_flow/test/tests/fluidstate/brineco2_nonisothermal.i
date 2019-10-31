@@ -1,8 +1,3 @@
-# Tests correct calculation of properties in PorousFlowWaterNCG.
-# This test is run three times, with the initial condition of z (the total mass
-# fraction of NCG in all phases) varied to give either a single phase liquid, a
-# single phase gas, or two phases.
-
 [Mesh]
   [./mesh]
     type = GeneratedMeshGenerator
@@ -16,14 +11,20 @@
 
 [Variables]
   [./pgas]
-    initial_condition = 1e6
+    initial_condition = 20e6
   [../]
   [./z]
-     initial_condition = 0.005
+     initial_condition = 0.2
+  [../]
+  [./temperature]
+    initial_condition = 70
   [../]
 []
 
 [AuxVariables]
+  [./xnacl]
+    initial_condition = 0.1
+  [../]
   [./pressure_gas]
     order = CONSTANT
     family = MONOMIAL
@@ -220,12 +221,16 @@
     variable = z
     fluid_component = 1
   [../]
+  [./heat]
+    type = TimeDerivative
+    variable = temperature
+  [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pgas z'
+    porous_flow_vars = 'pgas z temperature'
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
@@ -234,9 +239,9 @@
     pc = 0
   [../]
   [./fs]
-    type = PorousFlowWaterNCG
-    water_fp = water
-    gas_fp = co2
+    type = PorousFlowBrineCO2
+    brine_fp = brine
+    co2_fp = co2
     capillary_pressure = pc
   [../]
 []
@@ -246,8 +251,8 @@
     [./co2]
       type = CO2FluidProperties
     [../]
-    [./water]
-      type = Water97FluidProperties
+    [./brine]
+      type = BrineFluidProperties
     [../]
   [../]
 []
@@ -255,13 +260,14 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = 50
   [../]
-  [./waterncg]
+  [./brineco2]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
+    temperature = temperature
     temperature_unit = Celsius
+    xnacl = xnacl
     capillary_pressure = pc
     fluid_state = fs
   [../]
@@ -378,6 +384,6 @@
 []
 
 [Outputs]
-  exodus = true
-  file_base = waterncg_liquid
+  csv = true
+  execute_on = timestep_end
 []

@@ -1,8 +1,3 @@
-# Tests correct calculation of properties in PorousFlowWaterNCG.
-# This test is run three times, with the initial condition of z (the total mass
-# fraction of NCG in all phases) varied to give either a single phase liquid, a
-# single phase gas, or two phases.
-
 [Mesh]
   [./mesh]
     type = GeneratedMeshGenerator
@@ -19,7 +14,10 @@
     initial_condition = 1e6
   [../]
   [./z]
-     initial_condition = 0.005
+    initial_condition = 0.25
+  [../]
+  [./temperature]
+    initial_condition = 70
   [../]
 []
 
@@ -220,12 +218,16 @@
     variable = z
     fluid_component = 1
   [../]
+  [./heat]
+    type = TimeDerivative
+    variable = temperature
+  [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pgas z'
+    porous_flow_vars = 'pgas z '
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
@@ -255,12 +257,13 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = 50
+    temperature = temperature
   [../]
   [./waterncg]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
+    temperature = temperature
     temperature_unit = Celsius
     capillary_pressure = pc
     fluid_state = fs
@@ -333,10 +336,6 @@
     type = ElementIntegralVariablePostprocessor
     variable = internal_energy_gas
   [../]
-  [./x1_water]
-    type = ElementIntegralVariablePostprocessor
-    variable = x1_water
-  [../]
   [./x0_water]
     type = ElementIntegralVariablePostprocessor
     variable = x0_water
@@ -378,6 +377,6 @@
 []
 
 [Outputs]
-  exodus = true
-  file_base = waterncg_liquid
+  csv = true
+  execute_on = timestep_end
 []
