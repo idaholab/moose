@@ -5,7 +5,7 @@
     nx = 12
     ny = 10
     xmin = 4
-    xmax = 16
+    xmax = 7
   []
 []
 
@@ -50,7 +50,7 @@
 [Executioner]
   type = Transient
   num_steps = 20
-  dt = 0.1
+  dt = 1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
