@@ -21,3 +21,7 @@
 ## Some/All of my tests fail
 
 - Please see our [Failing Tests](help/troubleshooting.md#failingtests) troubleshooting section.
+
+## GCC not completly functional warning
+
+- Please see our [MacOS Catalina Caveats](help/troubleshooting.md#catalinacaveats) section.
