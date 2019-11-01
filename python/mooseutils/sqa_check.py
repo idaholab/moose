@@ -16,6 +16,7 @@ from .mooseutils import git_root_dir, colorText
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
+    from .hit_load import hit_load
 
     messages = []
     root = hit_load(filename)
