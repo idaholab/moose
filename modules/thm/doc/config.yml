@@ -39,7 +39,7 @@ Extensions:
         home: https://hpcsc.inl.gov/ssl/THM/site/
         menu:
             Documentation:
-                Tutorial: tutorial.md
+                Tutorial: thm_tutorial.md
                 Complete Syntax Listing: syntax/index.md
             Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
 
