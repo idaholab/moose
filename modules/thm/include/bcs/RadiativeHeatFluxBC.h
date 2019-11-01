@@ -1,0 +1,23 @@
+#pragma once
+
+#include "RadiativeHeatFluxBCBase.h"
+
+class RadiativeHeatFluxBC;
+
+template <>
+InputParameters validParams<RadiativeHeatFluxBC>();
+
+/**
+ * Radiative heat transfer boundary condition for a plate heat structure
+ */
+class RadiativeHeatFluxBC : public RadiativeHeatFluxBCBase
+{
+public:
+  RadiativeHeatFluxBC(const InputParameters & parameters);
+
+protected:
+  virtual Real coefficient() const override;
+
+  /// View factor function
+  const Function & _view_factor_fn;
+};

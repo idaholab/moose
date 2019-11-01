@@ -1,0 +1,14 @@
+[Tests]
+  [./energy_conservation_cylindrical]
+    type = 'CSVDiff'
+    input = 'cylindrical.i'
+    csvdiff = 'cylindrical_out.csv'
+    abs_zero = 1e-6
+  [../]
+  [./energy_conservation_plate]
+    type = 'CSVDiff'
+    input = 'plate.i'
+    csvdiff = 'plate_out.csv'
+    abs_zero = 1e-6
+  [../]
+[]
