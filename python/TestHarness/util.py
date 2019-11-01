@@ -23,8 +23,16 @@ MOOSE_OPTIONS = {
                     { 'SPARSE'    : '1',
                       'NONSPARSE' : '0'
                     }
+                  },
+
+    'libpng' :    { 're_option' : r'#define\s+MOOSE_HAVE_LIBPNG\s+(\d+)',
+                    'default'   : 'FALSE',
+                    'options'   :
+                    { 'TRUE'    : '1',
+                      'FALSE'   : '0'
+                    }
                   }
-                }
+}
 
 
 LIBMESH_OPTIONS = {
