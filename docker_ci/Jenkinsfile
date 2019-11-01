@@ -26,7 +26,7 @@ pipeline {
                 sh '''
                 # Setup for getting submodule commit hashes
                 git submodule init
-                sub_rev() { git submodule status $1 | awk '{print $1}' ; }
+                e
                 
                 # Build MOOSE image with max cores and compatible submodules
                 docker build \
@@ -92,7 +92,7 @@ pipeline {
                     slackSend color: 'good', message: "Successful build of MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
                 } catch (Exception e)
                 {
-                    echo "Slack notifications not configured." // Slack not required to build
+                    echo "Slack notifications not configured." + e.toString() // Slack not required to build
                 }
             }
         }
@@ -109,7 +109,7 @@ pipeline {
                     slackSend color: 'danger', message: "Failed to build MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
                 } catch (Exception e)
                 {
-                    echo "Slack notifications not configured." // Slack not required to build
+                    echo "Slack notifications not configured." + e.toString() // Slack not required to build
                 }
             }
         }
