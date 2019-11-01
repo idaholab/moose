@@ -927,8 +927,22 @@ FEProblemBase::initialSetup()
 
   // Call initialSetup on the transfers
   _transfers.initialSetup();
-  _to_multi_app_transfers.initialSetup();
-  _from_multi_app_transfers.initialSetup();
+
+  // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
+  const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
+  for (const auto & transfer : to_multi_app_objects)
+  {
+    transfer->setCurrentDirection(Transfer::DIRECTION::TO_MULTIAPP);
+    transfer->initialSetup();
+  }
+
+  // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
+  const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
+  for (const auto & transfer : from_multi_app_objects)
+  {
+    transfer->setCurrentDirection(Transfer::DIRECTION::FROM_MULTIAPP);
+    transfer->initialSetup();
+  }
 
   if (!_app.isRecovering())
   {
@@ -3839,7 +3853,7 @@ FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 }
 
 void
-FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction)
+FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction)
 {
   bool to_multiapp = direction == MultiAppTransfer::TO_MULTIAPP;
   std::string string_direction = to_multiapp ? " To " : " From ";
@@ -3855,7 +3869,10 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
              << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
+    {
+      transfer->setCurrentDirection(direction);
       transfer->execute();
+    }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
@@ -3868,7 +3885,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
 }
 
 std::vector<std::shared_ptr<Transfer>>
-FEProblemBase::getTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction) const
+FEProblemBase::getTransfers(ExecFlagType type, Transfer::DIRECTION direction) const
 {
   const MooseObjectWarehouse<Transfer> & wh = direction == MultiAppTransfer::TO_MULTIAPP
                                                   ? _to_multi_app_transfers[type]
@@ -3877,7 +3894,7 @@ FEProblemBase::getTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direc
 }
 
 const ExecuteMooseObjectWarehouse<Transfer> &
-FEProblemBase::getMultiAppTransferWarehouse(MultiAppTransfer::DIRECTION direction) const
+FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
 {
   if (direction == MultiAppTransfer::TO_MULTIAPP)
     return _to_multi_app_transfers;
@@ -4100,9 +4117,9 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
       std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
-    if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
+    if (multi_app_transfer->directions().contains(MultiAppTransfer::TO_MULTIAPP))
       _to_multi_app_transfers.addObject(multi_app_transfer);
-    else
+    if (multi_app_transfer->directions().contains(MultiAppTransfer::FROM_MULTIAPP))
       _from_multi_app_transfers.addObject(multi_app_transfer);
   }
   else

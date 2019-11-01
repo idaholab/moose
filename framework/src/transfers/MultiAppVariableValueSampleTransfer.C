@@ -43,6 +43,8 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -58,7 +60,7 @@ MultiAppVariableValueSampleTransfer::execute()
 {
   _console << "Beginning VariableValueSampleTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {
