@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#1927'
+  design = 'CoupledDirectionalMeshHeightInterpolation.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'coupled_directional_mesh_height_interpolation.i'
+    exodiff = 'coupled_directional_mesh_height_interpolation_out.e'
+    requirement = 'The system shall compute an aux variable that couples to some other value and modulates it by the mesh height in a direction.'
+  [../]
+[]

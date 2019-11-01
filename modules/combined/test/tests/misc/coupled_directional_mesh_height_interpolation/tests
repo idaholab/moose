@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'coupled_directional_mesh_height_interpolation.i'
-    exodiff = 'coupled_directional_mesh_height_interpolation_out.e'
-  [../]
-[]

@@ -1,0 +1,10 @@
+[Tests]
+  [./composite]
+    type = 'Exodiff'
+    input = 'composite.i'
+    exodiff = 'composite_out.e'
+    issues = '#5850'
+    design = 'CompositeElasticityTensor.md'
+    requirement = 'The system shall provide a method for assembleing an elasticity tensor from multiple tensor contributions weighted by material properties.'
+  [../]
+[]

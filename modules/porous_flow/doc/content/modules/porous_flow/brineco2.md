@@ -117,18 +117,25 @@ so it is suggested that tabulated versions of both CO$_2$ and brine proeprties a
 
 This class requires pressure of the gas phase, the total mass fraction of CO$_2$ summed over all
 phases (see [compositional flash](/compositional_flash.md) for details), and the mass fraction
-of salt in the brine.
+of salt in the brine, for isothermal simulations. For nonisothermal simulations, temperature must
+also be provided as a nonlinear variable.
 
 !alert note
 These variables must be listed as PorousFlow variables in the PorousFlowDictator UserObject
 
-In the general case, three variables (gas porepressure, total CO$_2$ mass fraction and salt mass fraction) are provided. As a result, the number of components in the PorousFlowDictator
-must be set equal to three.
+In the general isothermal case, three variables (gas porepressure, total CO$_2$ mass fraction and salt mass fraction)
+are provided, one for each of the three possible fluid components (water, salt and CO$_2$). As a result, the
+number of components in the PorousFlowDictator must be set equal to three.
 
 !listing modules/porous_flow/test/tests/fluidstate/theis_brineco2.i block=UserObjects/dictator
 
-The salt mass fraction can be treated as a constant, in which case only gas porepressure and
-total CO$_2$ mass fraction are required, and the number of fluid components is two.
+For nonisothermal cases, temperature must also be provided to ensure that all of the derivatives with
+respect to the temperature variable are calculated.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_brineco2_nonisothermal.i block=UserObjects/dictator
+
+Optionally, the salt mass fraction can be treated as a constant, in which case only gas porepressure and
+total CO$_2$ mass fraction are required for the isothermal case, and the number of fluid components is two.
 
 !listing modules/porous_flow/test/tests/fluidstate/brineco2.i block=UserObjects/dictator
 
@@ -145,6 +152,11 @@ thermophysical description of the model given pressure, temperature and salt mas
 The [`PorousFlowFluidState`](/PorousFlowFluidState.md) material provides all phase pressures, saturation, densities, viscosities etc, as well as all mass fractions of all fluid components in all fluid phases in a single material using the formulation provided in the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
 
 !listing modules/porous_flow/test/tests/fluidstate/brineco2.i block=Materials/brineco2
+
+For nonisothermal simulations, the temperature variable must also be supplied to ensure that
+all the derivatives with respect to the temperature variable are computed for the Jacobian.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_brineco2_nonisothermal.i block=Materials/brineco2
 
 ## Initial condition
 
@@ -187,5 +199,10 @@ Postprocessors), and also the case where $t$ is fixed (evaluated using a VectorP
        caption=Similarity solution for 1D radial injection example
 
 As these results show, the similarity solution holds for this problem.
+
+An nonisothermal example of the above problem, where cold CO$_2$ is injected into a warm aquifer,
+is also provided in the test suite.
+
+!listing modules/porous_flow/test/tests/fluidstate/theis_brineco2_nonisothermal.i
 
 !bibtex bibliography

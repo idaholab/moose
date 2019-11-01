@@ -260,6 +260,9 @@ PorousFlowBrineCO2::gasProperties(const DualReal & pressure,
   gas.density = co2_density;
   gas.viscosity = co2_viscosity;
   gas.enthalpy = co2_enthalpy;
+
+  mooseAssert(gas.density.value() > 0.0, "Gas density must be greater than zero");
+  gas.internal_energy = gas.enthalpy - pressure / gas.density;
 }
 
 void
@@ -299,6 +302,9 @@ PorousFlowBrineCO2::liquidProperties(const DualReal & pressure,
   liquid.density = liquid_density;
   liquid.viscosity = liquid_viscosity;
   liquid.enthalpy = liquid_enthalpy;
+
+  mooseAssert(liquid.density.value() > 0.0, "Liquid density must be greater than zero");
+  liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
 DualReal

@@ -128,8 +128,19 @@ PenetrationThread::operator()(const NodeIdRange & range)
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
+        const std::vector<Point> & slave_pos = fe_side->get_xyz();
+
+        // Prerequest other data we'll need in findContactPoint
+        fe_side->get_phi();
+        fe_side->get_dphi();
+        fe_side->get_dxyzdxi();
+        fe_side->get_d2xyzdxi2();
+        fe_side->get_d2xyzdxideta();
+        fe_side->get_dxyzdeta();
+        fe_side->get_d2xyzdeta2();
+        fe_side->get_d2xyzdxideta();
+
         fe_side->reinit(info->_side, &points);
-        const std::vector<Point> slave_pos = fe_side->get_xyz();
         Moose::findContactPoint(*info,
                                 fe_elem,
                                 fe_side,
@@ -1677,6 +1688,17 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
 
     FEBase * fe_elem = _fes[_tid][elem->dim()];
     FEBase * fe_side = _fes[_tid][side->dim()];
+
+    // Prerequest the data we'll need in findContactPoint
+    fe_side->get_phi();
+    fe_side->get_dphi();
+    fe_side->get_xyz();
+    fe_side->get_dxyzdxi();
+    fe_side->get_d2xyzdxi2();
+    fe_side->get_d2xyzdxideta();
+    fe_side->get_dxyzdeta();
+    fe_side->get_d2xyzdeta2();
+    fe_side->get_d2xyzdxideta();
 
     // Optionally check to see whether face is reasonable candidate based on an
     // estimate of how closely it is likely to project to the face
