@@ -37,6 +37,28 @@ AC_DEFINE_UNQUOTED(AD_MAX_DOFS_PER_ELEM, [$derivative_size], [The size of the de
 
 AC_MSG_RESULT([configuring with derivative backing array size of $derivative_size])
 
+AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+if test x$PKG_CONFIG != x; then
+  AC_SUBST(LIBPNG)
+  if $PKG_CONFIG --exists libpng; then
+     AS_MESSAGE(checking system for libpng)
+     LIBPNG_LIBS=`$PKG_CONFIG --libs libpng`
+     LIBPNG_INCLUDES=`$PKG_CONFIG --cflags-only-I libpng`
+
+     AC_DEFINE(HAVE_LIBPNG, 1, [Whether or not libpng was detected on the system])
+     AC_MSG_RESULT(configuring with libpng support)
+  else
+     AC_MSG_RESULT(configuring without libpng support)
+  fi
+fi
+
+AC_SUBST([LIBPNG_LIBS])
+AC_SUBST([LIBPNG_INCLUDES])
+
+AC_CONFIG_FILES(conf_vars.mk)
+
+#AC_CHECK_LIB([png], [png_create_write_struct_2])
+
 AC_OUTPUT
 
 AC_MSG_RESULT(---------------------------------------------)

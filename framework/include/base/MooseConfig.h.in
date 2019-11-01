@@ -3,6 +3,9 @@
 /* The size of the derivative backing array */
 #undef AD_MAX_DOFS_PER_ELEM
 
+/* Whether or not libpng was detected on the system */
+#undef HAVE_LIBPNG
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
