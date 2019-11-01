@@ -330,4 +330,43 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ExpressionsAreOkay'
     design = 'SONDefinitionFormatter.md'
   [../]
+
+  [./definition_block_type_maxoccurs_nolimit_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?ValEnums=\[ "AuxVariables" \]'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
+    design = 'SONDefinitionFormatter.md'
+  [../]
+
+  [./definition_functionname_type_maxoccurs_nolimit_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'x_forcing_func\'{.*?\'value\'{.*?MaxOccurs=NoLimit.*?}.*?} % end parameter x_forcing_func'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
+    design = 'SONDefinitionFormatter.md'
+  [../]
+
+  [./definition_array_type_minoccurs_zero_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'active\'{.*?\'value\'{.*?MinOccurs=0.*?}.*?} % end parameter active'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
+    design = 'SONDefinitionFormatter.md'
+  [../]
 []

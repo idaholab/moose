@@ -108,8 +108,8 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // add MinOccurs : optional because nothing available to specify block requirement
   addLine("MinOccurs=0");
 
-  // add MaxOccurs : if a StarBlock then no limit / otherwise maximum one occurrence
-  addLine(is_starblock ? "MaxOccurs=NoLimit" : "MaxOccurs=1");
+  // add MaxOccurs : NoLimit because more than one block of the same name is allowed
+  addLine("MaxOccurs=NoLimit");
 
   // ensure block has one string declarator node and if this is not a StarBlock then
   // also ensure that the block [./declarator] is the expected block_decl from above
@@ -246,7 +246,8 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     std::string cpp_type = param["cpp_type"].asString();
     std::string basic_type = param["basic_type"].asString();
     bool is_array = false;
-    if (cpp_type == "FunctionExpression" || basic_type.compare(0, 6, "Array:") == 0)
+    if (cpp_type == "FunctionExpression" || cpp_type == "FunctionName" ||
+        basic_type.compare(0, 6, "Array:") == 0)
       is_array = true;
     pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &cpp_type);
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
@@ -292,7 +293,7 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     _level++;
 
     // *** MinOccurs / MaxOccurs of parameter's value
-    addLine("MinOccurs=1");
+    addLine(is_array ? "MinOccurs=0" : "MinOccurs=1");
     addLine(is_array ? "MaxOccurs=NoLimit" : "MaxOccurs=1");
 
     // *** ValType of parameter's value
