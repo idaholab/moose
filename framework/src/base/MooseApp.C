@@ -300,7 +300,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _recover_suffix("cpr"),
+    _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
@@ -769,7 +769,7 @@ MooseApp::setupOptions()
       // If the argument following --recover is non-existent or begins with
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
-        _recover_base = recover_following_arg;
+        _restart_recover_base = recover_following_arg;
     }
 
     // Optionally get command line argument following --recoversuffix
@@ -777,7 +777,7 @@ MooseApp::setupOptions()
     // recovery and restart files.
     if (isParamValid("recoversuffix"))
     {
-      _recover_suffix = getParam<std::string>("recoversuffix");
+      _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
     _parser.parse(_input_filename);
@@ -817,7 +817,7 @@ MooseApp::setupOptions()
 }
 
 void
-MooseApp::setInputFileName(std::string input_filename)
+MooseApp::setInputFileName(const std::string & input_filename)
 {
   _input_filename = input_filename;
 }
@@ -916,15 +916,32 @@ MooseApp::isUseSplit() const
 }
 
 bool
-MooseApp::hasRecoverFileBase()
+MooseApp::hasRestartRecoverFileBase() const
 {
-  return !_recover_base.empty();
+  return !_restart_recover_base.empty();
+}
+
+bool
+MooseApp::hasRecoverFileBase() const
+{
+  mooseDeprecated("MooseApp::hasRecoverFileBase is deprecated, use "
+                  "MooseApp::hasRestartRecoverFileBase() instead.");
+  return !_restart_recover_base.empty();
 }
 
 void
-MooseApp::registerRecoverableData(std::string name)
+MooseApp::registerRestartableNameWithFilter(const std::string & name,
+                                            Moose::RESTARTABLE_FILTER filter)
 {
-  _recoverable_data.insert(name);
+  using Moose::RESTARTABLE_FILTER;
+  switch (filter)
+  {
+    case RESTARTABLE_FILTER::RECOVERABLE:
+      _recoverable_data_names.insert(name);
+      break;
+    default:
+      mooseError("Unknown filter");
+  }
 }
 
 std::shared_ptr<Backup>
@@ -1006,7 +1023,7 @@ MooseApp::run()
 }
 
 void
-MooseApp::setOutputPosition(Point p)
+MooseApp::setOutputPosition(const Point & p)
 {
   _output_position_set = true;
   _output_position = p;
@@ -1075,7 +1092,7 @@ MooseApp::getCheckpointFiles() const
 }
 
 void
-MooseApp::setStartTime(const Real time)
+MooseApp::setStartTime(Real time)
 {
   _start_time_set = true;
   _start_time = time;
@@ -1121,16 +1138,36 @@ MooseApp::libNameToAppName(const std::string & library_name) const
   return MooseUtils::underscoreToCamelCase(app_name, true);
 }
 
-void
-MooseApp::registerRestartableData(std::string name,
+RestartableDataValue &
+MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
-                                  THREAD_ID tid)
+                                  THREAD_ID tid,
+                                  bool mesh_meta_data,
+                                  bool read_only)
 {
-  auto & restartable_data = _restartable_data[tid];
-  auto insert_pair = moose_try_emplace(restartable_data, name, std::move(data));
+  // Select the data store for saving this piece of restartable data (mesh or everything else)
+  auto & data_ref = mesh_meta_data ? _mesh_meta_data_map : _restartable_data[tid];
 
+  auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
+
+  // Does the storage for this data already exist?
   if (!insert_pair.second)
-    mooseError("Attempted to declare restartable twice with the same name: ", name);
+  {
+    auto & data = insert_pair.first->second;
+
+    // Are we really declaring or just trying to get a reference to the data?
+    if (!read_only)
+    {
+      if (data.declared)
+        mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
+                   name);
+      else
+        // The data wasn't previously declared, but now it is!
+        data.declared = true;
+    }
+  }
+
+  return *insert_pair.first->second.value;
 }
 
 void
@@ -1669,7 +1706,7 @@ MooseApp::getMeshGeneratorMesh(bool check_unique)
 }
 
 void
-MooseApp::setRestart(const bool & value)
+MooseApp::setRestart(bool value)
 {
   _restart = value;
 
@@ -1677,7 +1714,7 @@ MooseApp::setRestart(const bool & value)
 }
 
 void
-MooseApp::setRecover(const bool & value)
+MooseApp::setRecover(bool value)
 {
   _recover = value;
 }
@@ -1999,4 +2036,24 @@ MooseApp::meshReinitForRMs()
 {
   for (auto & rm : _relationship_managers)
     rm->mesh_reinit();
+}
+
+void
+MooseApp::checkMeshMetaDataIntegrity() const
+{
+  std::vector<std::string> not_declared;
+
+  for (const auto & pair : _mesh_meta_data_map)
+    if (!pair.second.declared)
+      not_declared.push_back(pair.first);
+
+  if (!not_declared.empty())
+  {
+    std::ostringstream oss;
+    std::copy(
+        not_declared.begin(), not_declared.end(), infix_ostream_iterator<std::string>(oss, ", "));
+
+    mooseError("The following Mesh meta-data properties were retrieved but never declared: ",
+               oss.str());
+  }
 }

@@ -67,6 +67,7 @@ RestartableTypesChecker::execute()
   dataStore(oss, _map_data, this);
   dataStore(oss, _dense_vector_data, this);
   dataStore(oss, _dense_matrix_data, this);
+  dataStore(oss, _raw_parameters, this);
 
   send_buffers[0] = oss.str();
 
@@ -102,6 +103,7 @@ RestartableTypesChecker::execute()
     dataLoad(iss, _map_data, this);
     dataLoad(iss, _dense_vector_data, this);
     dataLoad(iss, _dense_matrix_data, this);
+    dataLoad(iss, _raw_parameters, this);
     dataLoad(iss, *this, this);
 
     // Finally confirm that the data is sane
@@ -172,6 +174,16 @@ RestartableTypesChecker::checkData()
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
       if (_dense_matrix_data(i, j) != static_cast<Real>(i + j + 1))
         mooseError("Error reading restartable DenseMatrix data!");
+
+  if (_raw_parameters.n_parameters() != 3)
+    mooseError("Error reading restartable Parameters size");
+  if (!_raw_parameters.have_parameter<int>("i") || _raw_parameters.get<int>("i") != 42)
+    mooseError("Error reading int Parameter");
+  if (!_raw_parameters.have_parameter<unsigned int>("j") ||
+      _raw_parameters.get<unsigned int>("j") != 55)
+    mooseError("Error reading unsigned int Parameter");
+  if (!_raw_parameters.have_parameter<Real>("Pi") || _raw_parameters.get<Real>("Pi") != 3.14159)
+    mooseError("Error reading unsigned Real Parameter");
 }
 
 void

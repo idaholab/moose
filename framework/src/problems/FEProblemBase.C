@@ -11,7 +11,7 @@
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
-#include "Resurrector.h"
+#include "RestartableDataIO.h"
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
@@ -195,6 +195,8 @@ validParams<FEProblemBase>()
                                         "by objects which compute residuals and Jacobians "
                                         "(Kernels, BCs, etc.) by setting tags on them.");
 
+  params.addPrivateParam<MooseMesh *>("mesh");
+
   return params;
 }
 
@@ -366,7 +368,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _bnd_mat_side_cache.resize(n_threads);
   _interface_mat_side_cache.resize(n_threads);
 
-  _resurrector = libmesh_make_unique<Resurrector>(*this);
+  _restart_io = libmesh_make_unique<RestartableDataIO>(*this);
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
@@ -378,7 +380,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   {
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
     restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
-    _console << "\nUsing " << restart_file_base << " for restart.\n\n";
     setRestartFile(restart_file_base);
   }
 
@@ -635,23 +636,26 @@ FEProblemBase::initialSetup()
 #endif
   }
 
-  // Perform output related setups
-  _app.getOutputWarehouse().initialSetup();
-
-  // Flush all output to _console that occur during construction and initialization of objects
-  _app.getOutputWarehouse().mooseConsole();
-
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
   {
-    _resurrector->setRestartFile(_app.getRecoverFileBase());
-    if (_app.getRecoverFileSuffix() == "cpa")
-      _resurrector->setRestartSuffix("xda");
+    if (_app.getRestartRecoverFileSuffix() == "cpa")
+      _restart_io->useAsciiExtension();
   }
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
   {
     CONSOLE_TIMED_PRINT("Restarting from file");
-    _resurrector->restartFromFile();
+
+    _restart_io->readRestartableDataHeader(true);
+    _restart_io->restartEquationSystemsObject();
+
+    /**
+     * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
+     * this now. Material Properties aren't sized properly at this point and fail across the board,
+     * there are a few other misc tests that fail too.
+     *
+     * _restart_io->readRestartableData();
+     */
   }
   else
   {
@@ -664,6 +668,12 @@ FEProblemBase::initialSetup()
       _aux->copyVars(*reader);
     }
   }
+
+  // Perform output related setups
+  _app.getOutputWarehouse().initialSetup();
+
+  // Flush all output to _console that occur during construction and initialization of objects
+  _app.getOutputWarehouse().mooseConsole();
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() &&
@@ -887,7 +897,7 @@ FEProblemBase::initialSetup()
     {
       CONSOLE_TIMED_PRINT("Restoring restart data");
 
-      _resurrector->restartRestartableData();
+      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
     }
 
     // We may have just clobbered initial conditions that were explicitly set
@@ -6098,9 +6108,14 @@ void
 FEProblemBase::setRestartFile(const std::string & file_name)
 {
   _app.setRestart(true);
-  _resurrector->setRestartFile(file_name);
-  if (_app.getRecoverFileSuffix() == "cpa")
-    _resurrector->setRestartSuffix("xda");
+
+  if (!_app.isRecovering())
+  {
+    _app.setRestartRecoverFileBase(file_name);
+    mooseInfo("Restart file ", file_name, " is NOT being used since we are performing recovery.");
+  }
+  else
+    mooseInfo("Using ", file_name, " for restart.");
 }
 
 std::vector<VariableName>

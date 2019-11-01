@@ -23,7 +23,6 @@ InputParameters
 validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
-  params.addPrivateParam<MooseMesh *>("mesh");
 
   params.addParam<bool>(
       "default_ghosting",

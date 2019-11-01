@@ -51,7 +51,7 @@ class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
-class Resurrector;
+class RestartableDataIO;
 class Assembly;
 class JacobianBlock;
 class Control;
@@ -1934,7 +1934,7 @@ protected:
   bool _has_initialized_stateful;
 
   /// Object responsible for restart (read/write)
-  std::unique_ptr<Resurrector> _resurrector;
+  std::unique_ptr<RestartableDataIO> _restart_io;
 
   /// true if the Jacobian is constant
   bool _const_jacobian;

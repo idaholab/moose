@@ -182,6 +182,7 @@ addActionTypes(Syntax & syntax)
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
+  registerTask("recover_mesh_meta_data", true);
 
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
@@ -260,6 +261,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"
+                           "(recover_mesh_meta_data)"
                            "(set_mesh_base)"
                            "(check_copy_nodal_vars)"
                            "(add_partitioner)"

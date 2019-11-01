@@ -40,7 +40,7 @@ void MooseMatView(SparseMatrix<Number> & mat);
  * stating the minimum required compiler versions.
  */
 #ifndef LIBMESH_HAVE_CXX11
-#error MOOSE requires a C++11 compatible compiler (GCC >= 4.8.4, Clang >= 3.4.0, Intel >= 20130607). Please update your compiler and try again.
+#error MOOSE requires a C++11 compatible compiler (GCC >= 4.8.4, Clang >= 3.5.1). Please update your compiler and try again.
 #endif
 
 /**
