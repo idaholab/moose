@@ -5,6 +5,7 @@
     imagediff = 'vector_magnitude.png'
     allowed_linux = 0.975
     python = 3
+    display_required = true
   [../]
 
   [./x_component]
@@ -13,6 +14,7 @@
     imagediff = 'vector_x.png'
     allowed_linux = 0.965
     python = 3
+    display_required = true
   [../]
 
   [./y_component]
@@ -21,5 +23,6 @@
     imagediff = 'vector_y.png'
     allowed_linux = 0.965
     python = 3
+    display_required = true
   [../]
 []

@@ -6,6 +6,7 @@
     allowed_linux = 0.95
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./line_sample]
@@ -16,6 +17,7 @@
     allowed_linux = 0.92
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./line_sample_elem]
@@ -25,6 +27,7 @@
     allowed_linux = 0.97
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./line_sample_error]

@@ -8,6 +8,7 @@
     requirement = "Chigger shall include a colorbar object that can be oriented vertically."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./standalone_horiz]
@@ -16,6 +17,7 @@
     imagediff = 'colorbar_horiz.png'
     requirement = "Chigger shall include a colorbar object that can be oriented horizontally."
     python = 3
+    display_required = true
   [../]
 
   [./exdous_default]
@@ -25,6 +27,7 @@
     requirement = "Chigger shall include a colorbar object that captures range and colormap data from an Exodus result."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./left]
@@ -34,6 +37,7 @@
     requirement = "The chigger colorbar shall support placing the tick marks on the left-side of a vertical oriented colorbar."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./top]
@@ -42,6 +46,7 @@
     imagediff = 'colorbar_top.png'
     requirement = "The chigger colorbar shall support placing the tick marks on the top of a horizontal oriented colorbar."
     python = 3
+    display_required = true
   [../]
 
   [./bottom]
@@ -50,6 +55,7 @@
     imagediff = 'colorbar_bottom.png'
     requirement = "The chigger colorbar shall support placing the tick marks on the bottom of a horizontal oriented colorbar."
     python = 3
+    display_required = true
   [../]
 
   [./common]
@@ -59,6 +65,7 @@
     requirement = "Chigger shall include a colorbar object oriented vertically that captures range and colormap data from two Exodus results."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./common_horiz]
@@ -68,6 +75,7 @@
     requirement = "Chigger shall include a colorbar object oriented horizontally that captures range and colormap data from two Exodus results."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./dual]
@@ -77,6 +85,7 @@
     requirement = "Chigger shall support vertical colorbars associated with Exodus results within a viewport."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./dual_horiz]
@@ -86,6 +95,7 @@
     requirement = "Chigger shall support horizontal colorbars associated with Exodus results within a viewport."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./font]
@@ -95,6 +105,7 @@
     requirement = "The chigger colorbar shall support the ability to change the font size of the tick labels."
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./zero_range]
@@ -103,6 +114,7 @@
     imagediff = 'zero_range.png'
     requirement = "The chigger colorbar shall handle range values that do not differ in value."
     python = 3
+    display_required = true
   [../]
 
   [./precision_with_wrong_notation]
@@ -112,5 +124,6 @@
     match_literal = true
     requirement = "The chigger colorbar shall error when the 'notation' and 'precision' settings are incongruent."
     python = 3
+    display_required = true
   [../]
 []

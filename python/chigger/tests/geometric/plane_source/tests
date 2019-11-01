@@ -4,5 +4,6 @@
     command = plane_source.py
     imagediff = 'plane_source.png'
     python = 3
+    display_required = true
   [../]
 []
