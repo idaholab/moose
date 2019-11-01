@@ -2,8 +2,13 @@
 This pipeline builds a Docker image of MOOSE, runs the standard suite of tests,
 and pushes the image to the registry prescribed by $DOCKER_TAG.  A second push 
 is also done, with the tag suffix set to the commit hash of the MOOSE working 
-tree.  For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
-parameter in Jenkins.
+tree.
+
+For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
+parameter in Jenkins.  Additionally, $DISTRO_NAME and $DISTRO_VERSION need to
+be defined, e.g. Ubuntu and 18.04, respectively.  Supported package managers 
+are apt and yum.  Distros that should work include Ubuntu, Debian, CentOS, 
+and Amazon Linux.
 */
 
 pipeline {
@@ -25,6 +30,8 @@ pipeline {
                 
                 # Build MOOSE image with max cores and compatible submodules
                 docker build \
+                --build-arg DISTRO_NAME=$DISTRO_NAME \
+                --build-arg DISTRO_VERSION=$DISTRO_VERSION \
                 --build-arg MOOSE_JOBS=$(grep -c ^processor /proc/cpuinfo) \
                 --build-arg PETSC_REV=$(sub_rev petsc) \
                 --build-arg LIBMESH_REV=$(sub_rev libmesh) \
@@ -70,5 +77,42 @@ pipeline {
                 '''
             }
         }
+    }
+
+    post {
+        success {
+            script {
+                try {
+                    // Want to display commit hash, distro, and build link
+                    def COMMIT = sh 'git rev-parse HEAD'
+                    def DISTRO_NAME = env.DISTRO_NAME
+                    def BUILD_URL = env.BUILD_URL                    
+
+                    // Send message build was successful
+                    slackSend color: 'good', message: "Successful build of MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+                } catch (Exception e)
+                {
+                    echo "Slack notifications not configured." // Slack not required to build
+                }
+            }
+        }
+
+        failure {
+            script {
+                try {
+                    // Want to display commit hash, distro, and build link
+                    def COMMIT = sh 'git rev-parse HEAD'
+                    def DISTRO_NAME = env.DISTRO_NAME
+                    def BUILD_URL = env.BUILD_URL                    
+
+                    // Send message build failed
+                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+                } catch (Exception e)
+                {
+                    echo "Slack notifications not configured." // Slack not required to build
+                }
+            }
+        }
+
     }
 }

@@ -9,45 +9,29 @@
 # To build a MOOSE image, there is one optional argument and two required 
 # arguments to be set using the --build-arg flag.  
 #
+# DISTRO_NAME: Optional.  Linux distribution (ubuntu, centos)
+# DISTRO_VERSION: Optional with above (18.04, 7 respectively)
 # MOOSE_JOBS: Optional.  Sets number of cores for running make.
 # PETSC_REV: Commit hash of submodule petsc.
 # LIBMESH_REV: Commit hash of submodule libmesh.
 #-----------------------------------------------------------------------------#
+ARG DISTRO_NAME=ubuntu
+ARG DISTRO_VERSION=18.04
 
-FROM ubuntu
+FROM ${DISTRO_NAME}:${DISTRO_VERSION}
 
 WORKDIR /opt
 
 ARG MOOSE_JOBS=1
 
 #-----------------------------------------------------------------------------#
-# Install aptitutde packages and clear cache
+# Install managed packages and clear cache
 #-----------------------------------------------------------------------------#
-RUN export DEBIAN_FRONTEND=noninteractive ; \
-apt-get update -y ; \
-apt-get install -y \
-build-essential \
-gfortran \
-tcl \
-git \
-m4 \
-freeglut3 \
-doxygen \
-libblas-dev \
-liblapack-dev \
-libx11-dev \
-libnuma-dev \
-libcurl4-gnutls-dev \
-zlib1g-dev \
-libhwloc-dev \
-python \
-python-dev \
-cmake \
-curl \
-bison \
-flex \
-libboost-all-dev ; \
-rm -rf /var/lib/apt/lists/*
+
+COPY docker_ci/*.sh ./
+
+RUN chmod +x *.sh ; \
+./install_packages.sh
 
 #-----------------------------------------------------------------------------#
 # Install mpich-3.3 to system path
@@ -92,7 +76,7 @@ WORKDIR ${MOOSE_DIR}
 ARG PETSC_REV
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
-git -C petsc checkout ${PETSC_REV} ; \
+cd petsc && git checkout ${PETSC_REV} && cd .. ; \
 PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ; \
 rm -rf petsc/* petsc/.* || true
 
@@ -105,8 +89,10 @@ ARG LIBMESH_REV
 ENV LIBMESH_DIR=/usr/local
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
 RUN git clone https://github.com/libMesh/libmesh.git ; \
-git -C libmesh checkout ${LIBMESH_REV} ; \
-git -C libmesh submodule update --init ; \
+cd libmesh ; \
+git checkout ${LIBMESH_REV} ; \
+git submodule update --init ; \
+cd .. ; \
 ./scripts/update_and_rebuild_libmesh.sh ; \
 rm -rf libmesh/* libmesh/.* || true
 
