@@ -126,7 +126,7 @@ MooseParsedFunctionWrapper::initialize()
       {
         val = MooseUtils::convert<Real>(_vals_input[i], true);
       }
-      catch (std::exception & e)
+      catch (const std::invalid_argument & e)
       {
         mooseError("'No postprocessor, scalar variable, or function with the name '",
                    _vals_input[i],
