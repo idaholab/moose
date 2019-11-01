@@ -150,3 +150,61 @@ name of your app will appear instead of "MOOSE" for your individual application:
 
 #endif // MOOSE_REVISION_H
 ```
+
+## Working with MOOSE's build system
+
+MOOSE uses the the tried and true Unix standard build tools, [GNU Make](https://www.gnu.org/software/make/)
+and [GNU Autoconf](https://www.gnu.org/software/autoconf/). These tools are ubiquitous, reliable, and stable,
+where many other build systems are not. We believe that usability of tool includes the build process as well
+as the run-time experience and that philosophy shows in the way we've structured the Makefiles for building
+MOOSE-based applications.
+
+MOOSE now includes a standard `configure` script for changing select configuration options in MOOSE and
+for finding optional libraries only necessary within MOOSE (not libMesh). If you find yourself needing to
+add a new library or new variable the best way to learn is to look at what we already have and go from there.
+
+!alert note
+It's important to remember that running configure in MOOSE is completely optional. This is to maintain
+the status quo of not changing the developer workflow since MOOSE has historically not had a configure script.
+Additionally it means that users building a MOOSE-based applications will not have to go into the framework
+directory to run configure prior to building their application.
+
+### Building GNU Autotools
+
+In general, we recommend that you do not install the GNU Autotools from your package manager. The reason for
+this is that different versions of the tools can make drastic changes to the generated outputs. libMesh has
+solved this problem by distributing the GNU Autotools with its source. To build libMesh's autotools, simply
+change directory into libMesh's root (normally `moose/libmesh`) and run the bootstrap script. This will
+build and install the autotools into libMesh's contrib directory:
+
+```
+moose/libmesh/contrib/autotools/bin
+```
+
+You'll probably want to add the path above to your PATH.
+
+### Adding a new C-Preprocessor variable in MooseConfig.h
+
+To add a new variable to MooseConfig.h, you'll first want to add the variable to configure.ac using one
+of the variable definition macros such as "AC_DEFINE". After that, you'll run `autoheader` followed by
+`autoconf`.
+
+### Adding a new "make" variable
+
+If you want to add an optional dependency to MOOSE that isn't already being handled by the libMesh build
+system, you'll want likely want to use the "AC_SUBST" macros after adding the appropriate logic to define
+those variables. You'll then edit the `conf_var.mk.in` file. Note: Since MOOSE doesn't use automake,
+we don't generate a complete Makefile from running configure, rather we just optionally include "conf_var.mk"
+into our normal Makefile when it exists. This makes it so that running "configure" is an optional step
+when building MOOSE or a MOOSE-based application.
+
+### File list
+
+- `framework/configure.ac` - This is the input file that is processed by "autoconf" to create the configure
+  script. If you modify this file you will need to rerun `autoconf` to regenerate the `configure` script.
+  If you defined a new variable (e.g. with AC_DEFINE), you will need to run `autoheader` then `autoconf`.
+
+- `framework/include/base/MooseConfig.h.in` - This file is auto-generated from running `autoheader`.
+
+- `framework/conf_var.mk.in` - This file is where you put your new expansion expressions. Typically these
+  are in the form of "@VARAIBLE@".
