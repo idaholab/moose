@@ -59,3 +59,7 @@ For development of MOOSE-based applications see [Application Development](applic
 [Code Standards](code_standards.md)
 
 [Tagging](tagging.md)
+
+## Build System
+
+[Working with MOOSE build system](build_system.md)
