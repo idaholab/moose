@@ -48,7 +48,10 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
     _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
     _reduction_type(getParam<MooseEnum>("reduction_type"))
 {
-  if (_direction == FROM_MULTIAPP)
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
+
+  if (_current_direction == FROM_MULTIAPP)
     if (!_reduction_type.isValid())
       mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = "
                  "from_multiapp");
@@ -59,7 +62,7 @@ MultiAppPostprocessorTransfer::execute()
 {
   _console << "Beginning PostprocessorTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {

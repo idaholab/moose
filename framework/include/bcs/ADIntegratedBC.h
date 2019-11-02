@@ -60,6 +60,9 @@ protected:
 
   /// The AD version of coord
   const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_coord;
+
+  /// Whether this object is acting on the displaced mesh
+  const bool _use_displaced_mesh;
 };
 
 template <ComputeStage compute_stage>

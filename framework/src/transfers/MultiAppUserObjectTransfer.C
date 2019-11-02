@@ -81,7 +81,7 @@ MultiAppUserObjectTransfer::execute()
 {
   _console << "Beginning MultiAppUserObjectTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {

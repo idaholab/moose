@@ -48,6 +48,9 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
         getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
     _use_nearestpoint_pps(false)
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
+
   if (_preserve_transfer)
   {
     /*
@@ -58,7 +61,7 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
       paramError("variable",
                  " Support single variable only when the conservative capability is on ");
 
-    if (_direction == TO_MULTIAPP)
+    if (_current_direction == TO_MULTIAPP)
     {
       if (_from_postprocessors_to_be_preserved.size() != _multi_app->numGlobalApps() &&
           _from_postprocessors_to_be_preserved.size() != 1)
@@ -69,7 +72,7 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
         paramError("to_postprocessors_to_be_preserved",
                    "Number of to-postprocessors should equal to 1");
     }
-    else if (_direction == FROM_MULTIAPP)
+    else if (_current_direction == FROM_MULTIAPP)
     {
       if (_from_postprocessors_to_be_preserved.size() != 1)
         paramError("from_postprocessors_to_be_preserved",
@@ -99,7 +102,7 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
 void
 MultiAppFieldTransfer::initialSetup()
 {
-  if (_direction == TO_MULTIAPP)
+  if (_current_direction == TO_MULTIAPP)
     for (auto & to_var : _to_var_names)
       variableIntegrityCheck(to_var);
   else
@@ -108,7 +111,7 @@ MultiAppFieldTransfer::initialSetup()
 
   if (_preserve_transfer)
   {
-    if (_from_postprocessors_to_be_preserved.size() == 1 && _direction == TO_MULTIAPP)
+    if (_from_postprocessors_to_be_preserved.size() == 1 && _current_direction == TO_MULTIAPP)
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
       auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
@@ -126,7 +129,7 @@ MultiAppFieldTransfer::initialSetup()
       }
     }
 
-    if (_to_postprocessors_to_be_preserved.size() == 1 && _direction == FROM_MULTIAPP)
+    if (_to_postprocessors_to_be_preserved.size() == 1 && _current_direction == FROM_MULTIAPP)
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
@@ -153,7 +156,7 @@ MultiAppFieldTransfer::postExecute()
   {
     _console << "Beginning Conservative transfers " << name() << std::endl;
 
-    if (_direction == TO_MULTIAPP)
+    if (_current_direction == TO_MULTIAPP)
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
@@ -177,7 +180,7 @@ MultiAppFieldTransfer::postExecute()
         }
     }
 
-    else if (_direction == FROM_MULTIAPP)
+    else if (_current_direction == FROM_MULTIAPP)
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
@@ -217,13 +220,13 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
                                                             PostprocessorName & to_postprocessor)
 {
   PostprocessorValue from_adjuster = 0;
-  if (from_problem && _direction == FROM_MULTIAPP)
+  if (from_problem && _current_direction == FROM_MULTIAPP)
     from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
   else
     from_adjuster = 0;
 
   /* Everyone on master side should know this value, and use it to scale the solution */
-  if (_direction == FROM_MULTIAPP)
+  if (_current_direction == FROM_MULTIAPP)
   {
     /* In this case, only one subapp has value, and other subapps' must be zero.
      *  We should see the maximum value.
@@ -245,7 +248,7 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
 
   PostprocessorValue to_adjuster = 0;
   // Compute to-postproessor to have the adjuster
-  if (_direction == TO_MULTIAPP)
+  if (_current_direction == TO_MULTIAPP)
   {
     to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
     to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
@@ -257,8 +260,8 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
   auto var_num = to_sys.variable_number(_to_var_name);
   auto sys_num = to_sys.number();
   auto & pps = static_cast<const NearestPointIntegralVariablePostprocessor &>(
-      _direction == FROM_MULTIAPP ? (to_problem.getUserObjectBase(to_postprocessor))
-                                  : (from_problem->getUserObjectBase(from_postprocessor)));
+      _current_direction == FROM_MULTIAPP ? (to_problem.getUserObjectBase(to_postprocessor))
+                                          : (from_problem->getUserObjectBase(from_postprocessor)));
   auto & to_solution = to_var.sys().solution();
   auto & to_mesh = to_problem.mesh().getMesh();
   bool is_nodal = to_sys.variable_type(var_num).family == LAGRANGE;
@@ -271,7 +274,7 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
         continue;
 
       Real scale = 1;
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
       {
         auto ii = pps.nearestPointIndex(*node);
         if (ii != i)
@@ -303,7 +306,7 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
         continue;
 
       Real scale = 1;
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
       {
         unsigned int ii = pps.nearestPointIndex(elem->centroid());
         if (ii != i)
@@ -344,7 +347,7 @@ MultiAppFieldTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
     from_adjuster = 0;
 
   /* Everyone on master side should know this value, and use it to scale the solution */
-  if (_direction == FROM_MULTIAPP)
+  if (_current_direction == FROM_MULTIAPP)
   {
     /* In this case, only one subapp has value, and other subapps' must be zero.
      *  We should see the maximum value.

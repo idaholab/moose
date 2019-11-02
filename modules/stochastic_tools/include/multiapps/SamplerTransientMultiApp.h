@@ -63,7 +63,7 @@ private:
    * a few lines of copied code is better for now.
    */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
-  getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
+  getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
 
   /// Storage for batch-restore mode; the outer vector if for the local stochastic data and the
   /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included

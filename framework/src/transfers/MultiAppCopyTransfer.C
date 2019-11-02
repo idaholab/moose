@@ -41,6 +41,8 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
     _to_var_name(getParam<VariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -65,7 +67,7 @@ MultiAppCopyTransfer::transferDofObject(libMesh::DofObject * to_object,
 void
 MultiAppCopyTransfer::initialSetup()
 {
-  if (_direction == TO_MULTIAPP)
+  if (_current_direction == TO_MULTIAPP)
   {
     FEProblemBase & from_problem = _multi_app->problemBase();
     checkVariable(from_problem, _from_var_name, "source_variable");
@@ -75,7 +77,7 @@ MultiAppCopyTransfer::initialSetup()
         checkVariable(_multi_app->appProblemBase(i), _to_var_name, "variable");
   }
 
-  else if (_direction == FROM_MULTIAPP)
+  else if (_current_direction == FROM_MULTIAPP)
   {
     FEProblemBase & to_problem = _multi_app->problemBase();
     checkVariable(to_problem, _to_var_name, "variable");
@@ -133,7 +135,7 @@ MultiAppCopyTransfer::execute()
 {
   _console << "Beginning MultiAppCopyTransfer " << name() << std::endl;
 
-  if (_direction == TO_MULTIAPP)
+  if (_current_direction == TO_MULTIAPP)
   {
     FEProblemBase & from_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
@@ -141,7 +143,7 @@ MultiAppCopyTransfer::execute()
         transfer(_multi_app->appProblemBase(i), from_problem);
   }
 
-  else if (_direction == FROM_MULTIAPP)
+  else if (_current_direction == FROM_MULTIAPP)
   {
     FEProblemBase & to_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)

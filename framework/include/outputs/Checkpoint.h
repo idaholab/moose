@@ -35,6 +35,9 @@ struct CheckpointFileNames
 
   /// Filename for restartable data filename
   std::string restart;
+
+  /// Filename for restartable data filename
+  std::string restart_mesh_meta_data;
 };
 
 /**
@@ -58,7 +61,15 @@ public:
    * Retrieve the checkpoint output directory
    * @return String containing the checkpoint output directory
    */
-  std::string directory();
+  std::string directory() const;
+
+  /**
+   * Method to return the file suffix (ASCII or binary) for the Checkpoint format.
+   */
+  std::string getMeshFileSuffix(bool is_binary)
+  {
+    return is_binary ? BINARY_MESH_SUFFIX : ASCII_MESH_SUFFIX;
+  }
 
 protected:
   /**
@@ -83,14 +94,17 @@ private:
   bool _parallel_mesh;
 
   /// Reference to the restartable data
-  const RestartableDatas & _restartable_data;
+  const RestartableDataMaps & _restartable_data;
 
-  /// Reference to the recoverable data
-  std::set<std::string> & _recoverable_data;
+  /// Reference to the mesh meta data
+  const RestartableDataMap & _mesh_meta_data;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
+
+  static constexpr auto ASCII_MESH_SUFFIX = "_mesh.cpa";
+  static constexpr auto BINARY_MESH_SUFFIX = "_mesh.cpr";
 };

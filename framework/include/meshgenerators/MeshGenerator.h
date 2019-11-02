@@ -10,12 +10,14 @@
 #pragma once
 
 #include "MooseObject.h"
-#include "Restartable.h"
+#include "MeshMetaDataInterface.h"
+#include "MooseApp.h"
 
 // Included so mesh generators don't need to include this when constructing MeshBase objects
 #include "MooseMesh.h"
 
 #include "libmesh/mesh_base.h"
+#include "libmesh/parameters.h"
 
 // Forward declarations
 class MeshGenerator;
@@ -27,7 +29,7 @@ InputParameters validParams<MeshGenerator>();
 /**
  * MeshGenerators are objects that can modify or add to an existing mesh.
  */
-class MeshGenerator : public MooseObject, public Restartable
+class MeshGenerator : public MooseObject, public MeshMetaDataInterface
 {
 public:
   /**
@@ -39,6 +41,7 @@ public:
 
   /**
    * Generate / modify the mesh
+   *
    */
   virtual std::unique_ptr<MeshBase> generate() = 0;
 
@@ -48,6 +51,16 @@ public:
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
 protected:
+  /**
+   * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
+   * most other MOOSE systems and is recoverable.
+   */
+  template <typename T>
+  T & declareMeshProperty(const std::string & data_name);
+
+  template <typename T>
+  T & declareMeshProperty(const std::string & data_name, const T & init_value);
+
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
    * Mesh that MeshGenerator is going to create.
@@ -79,3 +92,30 @@ private:
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 };
 
+template <typename T>
+T &
+MeshGenerator::declareMeshProperty(const std::string & data_name)
+{
+  std::string full_name =
+      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+
+  // Here we will create the RestartableData even though we may not use this instance.
+  // If it's already in use, the App will return a reference to the existing instance and we'll
+  // return that one instead. We might refactor this to have the app create the RestartableData
+  // at a later date.
+  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, nullptr);
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+      _app.registerRestartableData(full_name, std::move(data_ptr), 0, true, false));
+
+  return restartable_data_ref.get();
+}
+
+template <typename T>
+T &
+MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init_value)
+{
+  T & data = declareMeshProperty<T>(data_name);
+  data = init_value;
+
+  return data;
+}

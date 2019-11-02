@@ -639,6 +639,15 @@ enum class MortarType : unsigned int
   Lower = static_cast<unsigned int>(Moose::ElementType::Lower)
 };
 
+/**
+ * The filter type applied to a particular piece of "restartable" data. These filters
+ * will be applied during deserialization to include or exclude data as appropriate.
+ */
+enum class RESTARTABLE_FILTER : unsigned char
+{
+  RECOVERABLE
+};
+
 enum ConstraintJacobianType
 {
   SlaveSlave = ElementElement,

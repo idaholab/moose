@@ -37,6 +37,12 @@ validParams<Transfer>()
   params += validParams<SetupInterface>();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
+  MultiMooseEnum possible_directions(Transfer::possibleDirections());
+  params.addRequiredParam<MultiMooseEnum>(
+      "direction",
+      possible_directions,
+      "Whether this Transfer will be 'to' or 'from' a MultiApp, or "
+      "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.");
   params.registerBase("Transfer");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -52,8 +58,22 @@ Transfer::Transfer(const InputParameters & parameters)
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid"))
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _direction(possibleDirections()),
+    _current_direction(possibleDirections()),
+    _directions(getParam<MultiMooseEnum>("direction"))
 {
+  if (_directions.size() == 0)
+    paramError("direction", "At least one direction is required");
+
+  // If we have just one direction in _directions, set it now so that it can be used in the
+  // constructor
+  if (_directions.size() == 1)
+  {
+    auto only_direction = _directions.get(0);
+    _current_direction = only_direction;
+    _direction = only_direction;
+  }
 }
 
 /**

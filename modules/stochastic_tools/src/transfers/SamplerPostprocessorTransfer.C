@@ -29,8 +29,8 @@ validParams<SamplerPostprocessorTransfer>()
                                                    "The name of the VectorPostprocessor in "
                                                    "the MultiApp to transfer values "
                                                    "from/to.");
-  params.set<MooseEnum>("direction") = "from_multiapp";
-  params.suppressParameter<MooseEnum>("direction");
+  params.set<MultiMooseEnum>("direction") = "from_multiapp";
+  params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
 

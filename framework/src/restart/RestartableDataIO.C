@@ -19,23 +19,33 @@
 #include <stdio.h>
 #include <fstream>
 
-RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem) : _fe_problem(fe_problem)
+RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem)
+  : RestartableDataIO(fe_problem.getMooseApp(), &fe_problem)
 {
-  _in_file_handles.resize(libMesh::n_threads());
+}
+
+RestartableDataIO::RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_problem_ptr)
+  : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"),
+    _moose_app(moose_app),
+    _fe_problem_ptr(fe_problem_ptr),
+    _is_header_read(false),
+    _use_binary_ext(true),
+    _restart_es_timer(registerTimedSection("restartEquationSystems", 3)),
+    _restart_data_timer(registerTimedSection("readRestartableData", 3))
+
+{
 }
 
 void
-RestartableDataIO::writeRestartableData(std::string base_file_name,
-                                        const RestartableDatas & restartable_datas,
-                                        std::set<std::string> & /*_recoverable_data*/)
+RestartableDataIO::writeRestartableDataPerProc(const std::string & base_file_name,
+                                               const RestartableDataMaps & restartable_datas)
+
 {
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type proc_id = _fe_problem.processor_id();
+  processor_id_type proc_id = _moose_app.processor_id();
 
   for (unsigned int tid = 0; tid < n_threads; tid++)
   {
-    std::ofstream out;
-
     std::ostringstream file_name_stream;
     file_name_stream << base_file_name;
 
@@ -45,23 +55,33 @@ RestartableDataIO::writeRestartableData(std::string base_file_name,
       file_name_stream << "-" << tid;
 
     std::string file_name = file_name_stream.str();
-    out.open(file_name.c_str(), std::ios::out | std::ios::binary);
-    if (out.fail())
-      mooseError("Unable to open file ", file_name);
-
-    serializeRestartableData(restartable_datas[tid], out);
-
-    out.close();
+    writeRestartableData(file_name, restartable_datas[tid]);
   }
 }
 
 void
-RestartableDataIO::serializeRestartableData(
-    const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
-    std::ostream & stream)
+RestartableDataIO::writeRestartableData(const std::string & file_name,
+                                        const RestartableDataMap & restartable_data)
+
+{
+  std::ofstream out;
+
+  out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+  if (out.fail())
+    mooseError("Unable to open file ", file_name);
+
+  serializeRestartableData(restartable_data, out);
+
+  out.close();
+}
+
+void
+RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartable_data,
+                                            std::ostream & stream)
+
 {
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type n_procs = _fe_problem.n_processors();
+  processor_id_type n_procs = _moose_app.n_processors();
 
   const unsigned int file_version = 2;
 
@@ -91,7 +111,7 @@ RestartableDataIO::serializeRestartableData(
     for (const auto & it : restartable_data)
     {
       std::ostringstream data;
-      it.second->store(data);
+      it.second.value->store(data);
 
       // Store the size of the data then the data
       unsigned int data_size = static_cast<unsigned int>(data.tellp());
@@ -109,12 +129,11 @@ RestartableDataIO::serializeRestartableData(
 }
 
 void
-RestartableDataIO::deserializeRestartableData(
-    const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
-    std::istream & stream,
-    const std::set<std::string> & recoverable_data)
+RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restartable_data,
+                                              std::istream & stream,
+                                              const DataNames & filter_names)
 {
-  bool recovering = _fe_problem.getMooseApp().isRecovering();
+  bool recovering = _moose_app.isRecovering();
 
   std::vector<std::string> ignored_data;
 
@@ -127,15 +146,9 @@ RestartableDataIO::deserializeRestartableData(
 
   for (unsigned int i = 0; i < n_data; i++)
   {
-    std::string data_name;
-    char ch = 0;
-    do
-    {
-      stream.read(&ch, 1);
-      if (ch != '\0')
-        data_name += ch;
-    } while (ch != '\0');
-    data_names[i] = data_name;
+    std::getline(stream, data_names[i], '\0');
+    if (!stream)
+      mooseError("Error while reading stream");
   }
 
   // Grab this processor's block size
@@ -149,32 +162,24 @@ RestartableDataIO::deserializeRestartableData(
     unsigned int data_size = 0;
     stream.read((char *)&data_size, sizeof(data_size));
 
-    // Determine if the current data is recoverable
+    // Determine if the current name is in the filter set
     bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
-    bool is_data_recoverable = recoverable_data.find(current_name) != recoverable_data.end();
-    if (is_data_restartable // Only restore values if they're currently being used
-        &&
-        (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or
-                                              // this hasn't been specified to be recovery only data
-
+    bool is_data_in_filter = filter_names.find(current_name) != filter_names.end();
+    if (is_data_restartable      // Only restore values if they're currently being used and
+        && (recovering ||        // Only read this value if we're either recovering or
+            !is_data_in_filter)) // the data isn't specifically filtered out
     {
-      // Moose::out<<"Loading "<<current_name<<std::endl;
-
-      try
-      {
-        auto & current_data = restartable_data.at(current_name);
-        current_data->load(stream);
-      }
-      catch (...)
-      {
+      auto current_pair = restartable_data.find(current_name);
+      if (current_pair == restartable_data.end())
         mooseError("restartable_data missing ", current_name, "\n");
-      }
+
+      current_pair->second.value->load(stream);
     }
     else
     {
       // Skip this piece of data and do not report if restarting and recoverable data is not used
       stream.seekg(data_size, std::ios_base::cur);
-      if (recovering && !is_data_recoverable)
+      if (recovering && !is_data_in_filter)
         ignored_data.push_back(current_name);
     }
   }
@@ -197,36 +202,51 @@ RestartableDataIO::deserializeRestartableData(
 void
 RestartableDataIO::serializeSystems(std::ostream & stream)
 {
-  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), nullptr);
-  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), nullptr);
+  mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
+
+  storeHelper(
+      stream, static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase()), nullptr);
+  storeHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
 }
 
 void
 RestartableDataIO::deserializeSystems(std::istream & stream)
 {
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), nullptr);
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), nullptr);
+  mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
+
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase()), nullptr);
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
 }
 
-void
-RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
+bool
+RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string & suffix)
 {
   unsigned int n_threads = libMesh::n_threads();
-  processor_id_type n_procs = _fe_problem.n_processors();
-  processor_id_type proc_id = _fe_problem.processor_id();
+  unsigned int n_files = per_proc_id ? n_threads : 1;
 
-  for (unsigned int tid = 0; tid < n_threads; tid++)
+  processor_id_type n_procs = _moose_app.n_processors();
+  processor_id_type proc_id = _moose_app.processor_id();
+
+  _in_file_handles.resize(n_files);
+
+  std::string recover_file_base = _moose_app.getRestartRecoverFileBase();
+  for (unsigned int tid = 0; tid < n_files; tid++)
   {
     std::ostringstream file_name_stream;
-    file_name_stream << base_file_name;
-    file_name_stream << "-" << proc_id;
+    file_name_stream << recover_file_base + suffix + RESTARTABLE_DATA_EXT;
 
-    if (n_threads > 1)
-      file_name_stream << "-" << tid;
+    if (per_proc_id)
+    {
+      file_name_stream << "-" << proc_id;
+      if (n_threads > 1)
+        file_name_stream << "-" << tid;
+    }
 
     std::string file_name = file_name_stream.str();
 
-    MooseUtils::checkFileReadable(file_name);
+    bool throw_on_error = per_proc_id;
+    if (!MooseUtils::checkFileReadable(file_name, false, throw_on_error))
+      return false;
 
     const unsigned int file_version = 2;
 
@@ -264,27 +284,42 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
     if (this_n_threads != n_threads)
       mooseError("Cannot restart using a different number of threads!");
   }
+
+  _is_header_read = true;
+
+  return true;
 }
 
 void
-RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas,
-                                       const std::set<std::string> & recoverable_data)
+RestartableDataIO::readRestartableData(const RestartableDataMaps & restartable_datas,
+                                       const DataNames & recoverable_data)
 {
-  unsigned int n_threads = libMesh::n_threads();
-  std::vector<std::string> ignored_data;
+  TIME_SECTION(_restart_data_timer);
 
-  for (unsigned int tid = 0; tid < n_threads; tid++)
+  if (!_is_header_read)
+    mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
+               "readRestartableData()");
+
+  for (unsigned int tid = 0; tid < _in_file_handles.size(); tid++)
   {
     const auto & restartable_data = restartable_datas[tid];
 
-    if (!_in_file_handles[tid].get() || !_in_file_handles[tid]->is_open())
-      mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
-                 "readRestartableData()");
-
-    deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
-
-    _in_file_handles[tid]->close();
+    readRestartableData(restartable_data, recoverable_data, tid);
   }
+}
+void
+
+RestartableDataIO::readRestartableData(const RestartableDataMap & restartable_data,
+                                       const DataNames & recoverable_data,
+                                       unsigned int tid)
+{
+  if (!_in_file_handles[tid].get() || !_in_file_handles[tid]->is_open())
+    mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
+               "readRestartableData()");
+
+  deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
+
+  _in_file_handles[tid]->close();
 }
 
 std::shared_ptr<Backup>
@@ -294,14 +329,14 @@ RestartableDataIO::createBackup()
 
   serializeSystems(backup->_system_data);
 
-  const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
+  const auto & restartable_data_maps = _moose_app.getRestartableData();
 
   unsigned int n_threads = libMesh::n_threads();
 
   backup->_restartable_data.resize(n_threads);
 
   for (unsigned int tid = 0; tid < n_threads; tid++)
-    serializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid]);
+    serializeRestartableData(restartable_data_maps[tid], *backup->_restartable_data[tid]);
 
   return backup;
 }
@@ -318,7 +353,7 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
 
   deserializeSystems(backup->_system_data);
 
-  const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
+  const auto & restartable_data_maps = _moose_app.getRestartableData();
 
   for (unsigned int tid = 0; tid < n_threads; tid++)
   {
@@ -335,14 +370,50 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
     backup->_restartable_data[tid]->read((char *)&this_n_procs, sizeof(this_n_procs));
     backup->_restartable_data[tid]->read((char *)&this_n_threads, sizeof(this_n_threads));
 
-    std::set<std::string> & recoverable_data = _fe_problem.getMooseApp().getRecoverableData();
+    const auto & recoverable_data_names = _moose_app.getRecoverableData();
 
-    if (for_restart) // When doing restart - make sure we don't read data that is only for
-                     // recovery...
+    if (for_restart) // When doing restart - make sure we don't read data that is only for recovery
       deserializeRestartableData(
-          restartable_datas[tid], *backup->_restartable_data[tid], recoverable_data);
+          restartable_data_maps[tid], *backup->_restartable_data[tid], recoverable_data_names);
     else
       deserializeRestartableData(
-          restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
+          restartable_data_maps[tid], *backup->_restartable_data[tid], DataNames());
   }
+}
+
+void
+RestartableDataIO::useAsciiExtension()
+{
+  _use_binary_ext = false;
+}
+
+void
+RestartableDataIO::restartEquationSystemsObject()
+{
+  TIME_SECTION(_restart_es_timer);
+
+  if (!_is_header_read)
+    mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
+               "restartEquationSystemsObject()");
+
+  std::string file_name(_moose_app.getRestartRecoverFileBase() +
+                        (_use_binary_ext ? ES_BINARY_EXT : ES_ASCII_EXT));
+  MooseUtils::checkFileReadable(file_name);
+
+  unsigned int read_flags = EquationSystems::READ_DATA;
+  if (!_fe_problem_ptr->skipAdditionalRestartData())
+    read_flags |= EquationSystems::READ_ADDITIONAL_DATA;
+
+  // Set libHilbert renumbering flag to false.  We don't support
+  // N-to-M restarts regardless, and if we're *never* going to do
+  // N-to-M restarts then libHilbert is just unnecessary computation
+  // and communication.
+  const bool renumber = false;
+
+  // DECODE or READ based on suffix.
+  // MOOSE doesn't currently use partition-agnostic renumbering, since
+  // it can break restarts when multiple nodes are at the same point
+  _fe_problem_ptr->es().read(file_name, read_flags, renumber);
+
+  _fe_problem_ptr->getNonlinearSystemBase().update();
 }

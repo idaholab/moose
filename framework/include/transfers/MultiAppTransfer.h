@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Transfer.h"
-#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 
 #include "libmesh/bounding_box.h"
 
@@ -37,18 +37,6 @@ class MultiAppTransfer : public Transfer
 public:
   MultiAppTransfer(const InputParameters & parameters);
 
-  enum DIRECTION
-  {
-    TO_MULTIAPP,
-    FROM_MULTIAPP
-  };
-
-  /// Used to construct InputParameters
-  static MooseEnum directions() { return MooseEnum("to_multiapp from_multiapp"); }
-
-  /// The direction this Transfer is going in
-  int direction() { return _direction; }
-
   /**
    * Utility to verify that the variable in the destination system exists.
    */
@@ -63,9 +51,6 @@ public:
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _multi_app;
-
-  /// Whether we're transferring to or from the MultiApp
-  const MooseEnum _direction;
 
   /**
    * This method will fill information into the convenience member variables

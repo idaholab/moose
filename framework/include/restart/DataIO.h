@@ -21,6 +21,8 @@
 #include "MooseADWrapper.h"
 
 #include "libmesh/parallel.h"
+#include "libmesh/parameters.h"
+
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
@@ -342,11 +344,11 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
 
 // Specializations (defined in .C)
 template <>
-void dataStore(std::ostream & stream, Real & v, void * /*context*/);
+void dataStore(std::ostream & stream, Real & v, void * context);
 template <>
-void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
+void dataStore(std::ostream & stream, std::string & v, void * context);
 template <>
-void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/);
+void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, const Elem *& e, void * context);
 template <>
@@ -365,6 +367,8 @@ template <>
 void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
 template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
+template <>
+void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
 
 template <std::size_t N>
 inline void
@@ -639,6 +643,8 @@ template <>
 void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
 template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
+template <>
+void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
 
 template <std::size_t N>
 inline void

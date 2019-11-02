@@ -8,6 +8,9 @@ LIBMESH_DIR       ?= $(MOOSE_DIR)/libmesh/installed
 # Default number of parallel jobs to use for run_tests
 MOOSE_JOBS        ?= 8
 
+# Include variables defined by MOOSE configure if it's been run
+-include $(FRAMEWORK_DIR)/conf_vars.mk
+
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
 ifeq (x$(METHOD),x)
@@ -68,15 +71,9 @@ png_LIB         :=
 # There is a linking problem where we have undefined symbols in the png library on Linux
 # systems that we have not resolved. We won't attempt to use libpng with static
 ifneq ($(libmesh_static),yes)
-  ifneq (, $(shell which pkg-config 2>/dev/null))
-    RET_CODE := $(shell pkg-config --libs libpng 2>/dev/null 1>&2; echo $$?)
-
-    ifeq (0,$(RET_CODE))
-      png_LIB = $(shell pkg-config --libs libpng)
-      libmesh_CXXFLAGS += $(shell pkg-config --cflags-only-I libpng)
-      libmesh_CXXFLAGS += -DMOOSE_HAVE_LIBPNG
-    endif
-  endif
+  # See conf_vars.mk
+  png_LIB          := $(libPNG_LIBS)
+  libmesh_CXXFLAGS += $(libPNG_INCLUDE)
 endif
 
 # If $(libmesh_CXX) is an mpiXXX compiler script, use -show

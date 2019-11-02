@@ -11,6 +11,7 @@
 
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
+#include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
 #include "MemberTemplateMacros.h"
@@ -36,13 +37,14 @@ InputParameters validParams<Action>();
  * Base class for actions.
  */
 class Action : public ConsoleStreamInterface,
+               public MeshMetaDataInterface,
                public PerfGraphInterface,
                public libMesh::ParallelObject
 {
 public:
   Action(InputParameters parameters);
 
-  virtual ~Action() {}
+  virtual ~Action() = default;
 
   /**
    * The method called externally that causes the action to act()

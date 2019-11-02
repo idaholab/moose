@@ -15,8 +15,7 @@ template <>
 InputParameters
 validParams<Problem>()
 {
-  InputParameters params = emptyInputParameters();
-  params += validParams<MooseObject>();
+  InputParameters params = validParams<MooseObject>();
 
   params.registerBase("Problem");
   return params;

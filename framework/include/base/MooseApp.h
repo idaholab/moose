@@ -31,6 +31,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <unordered_set>
 
 // Forward declarations
 class Executioner;
@@ -144,16 +145,25 @@ public:
    */
   virtual void setupOptions();
 
+  /**
+   * Return a writable reference to the ActionWarehouse associated with this app
+   */
   ActionWarehouse & actionWarehouse() { return _action_warehouse; }
 
+  /**
+   * Returns a writable reference to the parser
+   */
   Parser & parser() { return _parser; }
 
+  /**
+   * Returns a writable reference to the syntax object.
+   */
   Syntax & syntax() { return _syntax; }
 
   /**
    * Set the input file name.
    */
-  void setInputFileName(std::string input_file_name);
+  void setInputFileName(const std::string & input_file_name);
 
   /**
    * Returns the input file name that was set with setInputFileName
@@ -163,7 +173,10 @@ public:
   /**
    * Override the selection of the output file base name.
    */
-  void setOutputFileBase(std::string output_file_base) { _output_file_base = output_file_base; }
+  void setOutputFileBase(const std::string & output_file_base)
+  {
+    _output_file_base = output_file_base;
+  }
 
   /**
    * Override the selection of the output file base name.
@@ -173,7 +186,7 @@ public:
   /**
    * Tell the app to output in a specific position.
    */
-  void setOutputPosition(Point p);
+  void setOutputPosition(const Point & p);
 
   /**
    * Get all checkpoint directories
@@ -205,7 +218,7 @@ public:
    *
    * @param time The start time for the simulation.
    */
-  void setStartTime(const Real time);
+  void setStartTime(Real time);
 
   /**
    * @return Whether or not a start time has been programmatically set using setStartTime()
@@ -221,7 +234,7 @@ public:
    * Each App has it's own local time.  The "global" time of the whole problem might be
    * different.  This offset is how far off the local App time is from the global time.
    */
-  void setGlobalTimeOffset(const Real offset) { _global_time_offset = offset; }
+  void setGlobalTimeOffset(Real offset) { _global_time_offset = offset; }
 
   /**
    * Each App has it's own local time.  The "global" time of the whole problem might be
@@ -256,42 +269,34 @@ public:
   Executioner * getExecutioner() const { return _executioner.get(); }
 
   /**
-   * Retrieve the Executioner for this App
-   */
-  std::shared_ptr<Executioner> & executioner()
-  {
-    mooseDeprecated("executioner() is deprecated. Use getExecutioner(), this interface will be "
-                    "removed after 10/01/2018");
-
-    return _executioner;
-  }
-
-  /**
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
 
   /**
-   * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
+   * Returns a writable Boolean indicating whether this app will use a Nonlinear or Eigen System.
    */
   bool & useNonlinear() { return _use_nonlinear; }
 
   /**
-   * Set a Boolean indicating whether this app will use an eigenvalue executioner.
+   * Returns a writable Boolean indicating whether this app will use an eigenvalue executioner.
    */
   bool & useEigenvalue() { return _use_eigen_value; }
 
   /**
-   * Retrieve the Factory associated with this App.
+   * Retrieve a writable reference to the Factory associated with this App.
    */
   Factory & getFactory() { return _factory; }
 
-  processor_id_type processor_id() { return cast_int<processor_id_type>(_comm->rank()); }
-
   /**
-   * Retrieve the ActionFactory associated with this App.
+   * Retrieve a writable reference to the ActionFactory associated with this App.
    */
   ActionFactory & getActionFactory() { return _action_factory; }
+
+  /**
+   * Returns the MPI processor ID of the current processor.
+   */
+  processor_id_type processor_id() const { return _comm->rank(); }
 
   /**
    * Get the command line
@@ -301,7 +306,7 @@ public:
   std::shared_ptr<CommandLine> commandLine() const { return _command_line; }
 
   /**
-   * This method is here so we can determine whether or not we need to
+   * Returns a writable Boolean to determine whether or not we need to
    * use a separate reader to read the mesh BEFORE we create the mesh.
    */
   bool & setFileRestart() { return _initial_from_file; }
@@ -324,16 +329,6 @@ public:
   bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
 
   /**
-   * Deprecated.  Call getDistributedMeshOnCommandLine() instead.
-   */
-  bool getParallelMeshOnCommandLine() const
-  {
-    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call "
-                    "getDistributedMeshOnCommandLine() instead.");
-    return getDistributedMeshOnCommandLine();
-  }
-
-  /**
    * Whether or not this is a "recover" calculation.
    */
   bool isRecovering() const;
@@ -353,42 +348,56 @@ public:
    */
   bool isUseSplit() const;
 
+  ///@{
   /**
    * Return true if the recovery file base is set
    */
-  bool hasRecoverFileBase();
+  bool hasRestartRecoverFileBase() const;
+  bool hasRecoverFileBase() const;
+  ///@}
 
+  ///@{
   /**
    * The file_base for the recovery file.
    */
-  std::string getRecoverFileBase() { return _recover_base; }
+  std::string getRestartRecoverFileBase() const { return _restart_recover_base; }
+  std::string getRecoverFileBase() const
+  {
+    mooseDeprecated("MooseApp::getRecoverFileBase is deprecated, use "
+                    "MooseApp::getRestartRecoverFileBase() instead.");
+    return _restart_recover_base;
+  }
+  ///@}
 
   /**
    * mutator for recover_base (set by RecoverBaseAction)
    */
-  void setRecoverFileBase(std::string recover_base)
+  void setRestartRecoverFileBase(const std::string & file_base)
   {
-    if (recover_base.empty())
-      _recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
+    if (file_base.empty())
+      _restart_recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
     else
-      _recover_base = recover_base;
+      _restart_recover_base = file_base;
   }
 
   /**
    * The suffix for the recovery file.
    */
-  std::string getRecoverFileSuffix() { return _recover_suffix; }
+  std::string getRestartRecoverFileSuffix() const { return _restart_recover_suffix; }
 
   /**
    * mutator for recover_suffix
    */
-  void setRecoverFileSuffix(std::string recover_suffix) { _recover_suffix = recover_suffix; }
+  void setRestartRecoverFileSuffix(const std::string & file_suffix)
+  {
+    _restart_recover_suffix = file_suffix;
+  }
 
   /**
    *  Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
-  bool halfTransient() { return _half_transient; }
+  bool halfTransient() const { return _half_transient; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -398,7 +407,7 @@ public:
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
    */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers)
+  void setOutputFileNumbers(const std::map<std::string, unsigned int> & numbers)
   {
     _output_file_numbers = numbers;
   }
@@ -410,7 +419,10 @@ public:
    *
    * @see MultiApp TransientMultiApp
    */
-  std::map<std::string, unsigned int> & getOutputFileNumbers() { return _output_file_numbers; }
+  const std::map<std::string, unsigned int> & getOutputFileNumbers() const
+  {
+    return _output_file_numbers;
+  }
 
   /**
    * Get the OutputWarehouse objects
@@ -454,7 +466,7 @@ public:
   std::string libNameToAppName(const std::string & library_name) const;
 
   /**
-   * Return the loaded library filenames in a std::vector
+   * Return the loaded library filenames in a std::set
    */
   std::set<std::string> getLoadedLibraryPaths() const;
 
@@ -471,21 +483,28 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  void registerRestartableData(std::string name,
-                               std::unique_ptr<RestartableDataValue> data,
-                               THREAD_ID tid);
+  RestartableDataValue & registerRestartableData(const std::string & name,
+                                                 std::unique_ptr<RestartableDataValue> data,
+                                                 THREAD_ID tid,
+                                                 bool mesh_meta_data,
+                                                 bool read_only);
 
   /**
-   * Return reference to the restatable data object
-   * @return A const reference to the restatable data object
+   * Return reference to the restartable data object
+   * @return A const reference to the restartable data object
    */
-  const RestartableDatas & getRestartableData() { return _restartable_data; }
+  const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
+
+  /**
+   * Return reference to the recoverable mesh meta data object.
+   */
+  const RestartableDataMap & getMeshMetaData() const { return _mesh_meta_data_map; }
 
   /**
    * Return a reference to the recoverable data object
    * @return A const reference to the recoverable data
    */
-  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+  const DataNames & getRecoverableData() const { return _recoverable_data_names; }
 
   /**
    * Create a Backup from the current App. A Backup contains all the data necessary to be able to
@@ -621,15 +640,15 @@ public:
    * Sets the restart/recover flags
    * @param state The state to set the flag to
    */
-  void setRestart(const bool & value);
-  void setRecover(const bool & value);
+  void setRestart(bool value);
+  void setRecover(bool value);
   ///@}
 
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
 
   /// Returns whether FPE trapping is turned on (either because of debug or user requested)
-  inline bool getFPTrapFlag() const { return _trap_fpe; }
+  bool getFPTrapFlag() const { return _trap_fpe; }
 
   /**
    * WARNING: This is an internal method for MOOSE, if you need the add new ExecFlagTypes then
@@ -709,11 +728,16 @@ public:
    */
   void meshReinitForRMs();
 
+  /**
+   * Function to check the integrity of the MeshMetaData data structure
+   */
+  void checkMeshMetaDataIntegrity() const;
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
-  bool hasCachedBackup() { return _cached_backup.get(); }
+  bool hasCachedBackup() const { return _cached_backup.get(); }
 
   /**
    * Restore from a cached backup
@@ -737,14 +761,14 @@ protected:
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
    *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
+   * Register a piece of restartable data that will be used in a filter in/out during
+   * deserialization. Note however that this data will always be written to the restart file.
    *
    * @param name The full (unique) name.
+   * @param filter The filter name where to direct the name
    */
-  void registerRecoverableData(std::string name);
+  void registerRestartableNameWithFilter(const std::string & name,
+                                         Moose::RESTARTABLE_FILTER filter);
 
   /**
    * Runs post-initialization error checking that cannot be run correctly unless the simulation
@@ -753,7 +777,7 @@ protected:
   void errorCheck();
 
   /// The name of this object
-  std::string _name;
+  const std::string _name;
 
   /// Parameters of this object
   InputParameters _pars;
@@ -859,11 +883,11 @@ protected:
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;
 
-  /// The base name to recover from.  If blank then we will find the newest recovery file.
-  std::string _recover_base;
+  /// The base name to restart/recover from.  If blank then we will find the newest checkpoint file.
+  std::string _restart_recover_base;
 
-  /// The file suffix to recover from.  If blank then we will use "cpr" for binary CheckpointIO.
-  std::string _recover_suffix;
+  /// The file suffix to restart/recover from.  If blank then we will use the binary restart suffix.
+  std::string _restart_recover_suffix;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
@@ -907,10 +931,21 @@ private:
   void createMinimalApp();
 
   /// Where the restartable data is held (indexed on tid)
-  RestartableDatas _restartable_data;
+  RestartableDataMaps _restartable_data;
 
-  /// Data names that will only be read from the restart file during RECOVERY
-  std::set<std::string> _recoverable_data;
+  /**
+   * Data specifically associated with the mesh (meta-data) that will read from the restart
+   * file early during the simulation setup so that they are available to Actions and other objects
+   * that need them during the setup process. Most of the restartable data isn't made available
+   * until all objects have been created and all Actions have been executed (i.e. initialSetup).
+   */
+  RestartableDataMap _mesh_meta_data_map;
+
+  /**
+   * Data names that will only be read from the restart file during RECOVERY.
+   * e.g. these names are _excluded_ during restart.
+   */
+  DataNames _recoverable_data_names;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType
@@ -919,6 +954,7 @@ private:
     REGALL
   };
 
+  /// The combined warehouse for storing any MooseObject based object
   std::unique_ptr<TheWarehouse> _the_warehouse;
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
@@ -955,17 +991,17 @@ private:
   ExecFlagEnum _execute_flags;
 
   /// Timers
-  PerfID _setup_timer;
-  PerfID _setup_options_timer;
-  PerfID _run_input_file_timer;
-  PerfID _execute_timer;
-  PerfID _execute_executioner_timer;
-  PerfID _restore_timer;
-  PerfID _run_timer;
-  PerfID _execute_mesh_modifiers_timer;
-  PerfID _execute_mesh_generators_timer;
-  PerfID _restore_cached_backup_timer;
-  PerfID _create_minimal_app_timer;
+  const PerfID _setup_timer;
+  const PerfID _setup_options_timer;
+  const PerfID _run_input_file_timer;
+  const PerfID _execute_timer;
+  const PerfID _execute_executioner_timer;
+  const PerfID _restore_timer;
+  const PerfID _run_timer;
+  const PerfID _execute_mesh_modifiers_timer;
+  const PerfID _execute_mesh_generators_timer;
+  const PerfID _restore_cached_backup_timer;
+  const PerfID _create_minimal_app_timer;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;

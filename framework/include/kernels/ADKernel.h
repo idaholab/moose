@@ -27,9 +27,12 @@
   using ADKernelTempl<type, compute_stage>::_u;                                                    \
   using ADKernelTempl<type, compute_stage>::_var;                                                  \
   using ADKernelTempl<type, compute_stage>::_grad_test;                                            \
+  using ADKernelTempl<type, compute_stage>::_regular_grad_test;                                    \
   using ADKernelTempl<type, compute_stage>::_grad_u;                                               \
   using ADKernelTempl<type, compute_stage>::_ad_JxW;                                               \
+  using ADKernelTempl<type, compute_stage>::_JxW;                                                  \
   using ADKernelTempl<type, compute_stage>::_ad_coord;                                             \
+  using ADKernelTempl<type, compute_stage>::_coord;                                                \
   using ADKernelTempl<type, compute_stage>::_local_re;                                             \
   using ADKernelTempl<type, compute_stage>::_local_ke;                                             \
   using ADKernelTempl<type, compute_stage>::_qrule;                                                \
@@ -45,6 +48,8 @@
   using ADKernelTempl<type, compute_stage>::_dt;                                                   \
   using ADKernelTempl<type, compute_stage>::_phi;                                                  \
   using ADKernelTempl<type, compute_stage>::_grad_phi;                                             \
+  using ADKernelTempl<type, compute_stage>::_regular_grad_phi;                                     \
+  using ADKernelTempl<type, compute_stage>::_use_displaced_mesh;                                   \
   using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
   using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
   using ADKernelTempl<type, compute_stage>::prepareMatrixTag;                                      \
@@ -109,6 +114,9 @@ protected:
   /// gradient of the test function
   const typename VariableTestGradientType<T, compute_stage>::type & _grad_test;
 
+  // gradient of the test function without possible displacement derivatives
+  const typename OutputTools<T>::VariableTestGradient & _regular_grad_test;
+
   /// Holds the solution at current quadrature points
   const ADTemplateVariableValue & _u;
 
@@ -132,4 +140,10 @@ protected:
 
   /// The current gradient of the shape functions
   const typename VariablePhiGradientType<T, compute_stage>::type & _grad_phi;
+
+  /// The current gradient of the shape functions without possible displacement derivatives
+  const typename OutputTools<T>::VariablePhiGradient & _regular_grad_phi;
+
+  /// Whether this object is acting on the displaced mesh
+  const bool _use_displaced_mesh;
 };
