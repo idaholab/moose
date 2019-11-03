@@ -47,9 +47,8 @@
       #skip = 'not ready'
       detail = 'using with a stiff block and a stiff plank.'
       type = 'CSVDiff'
-      input = 'finite.i'
+      input = 'stiff_stiff.i'
       csvdiff = 'stiff_stiff.csv'
-      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
     [../]
     [./soft_stiff]
