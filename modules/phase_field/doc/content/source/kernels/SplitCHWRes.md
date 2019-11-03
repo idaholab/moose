@@ -16,8 +16,8 @@ variable.
 ## Off-diagonal Onsager Matrix
 
 The terms containing the off-diagonal components of the Onsager
-phenomenologicsal transport coefficients model the driving force resulting from
-coupled order paraemters. These terms are implemented using this kernel by
+phenomenological transport coefficients model the driving force resulting from
+coupled order parameters. These terms are implemented using this kernel by
 specifying a different coupled chemical potential variable $w$ than the kernel
 variable using the `w` parameter.
 \begin{equation}

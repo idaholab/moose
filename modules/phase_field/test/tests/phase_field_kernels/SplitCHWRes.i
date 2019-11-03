@@ -1,7 +1,7 @@
 #
 # Test the split parsed function free enery Cahn-Hilliard Bulk kernel
-# with two concentration variables and cuopling through off-diagonal Onsager
-# matrix coeffiecints
+# with two concentration variables and coupling through off-diagonal Onsager
+# matrix coefficients
 #
 
 [Mesh]
