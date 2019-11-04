@@ -25,6 +25,9 @@ class NodalNormalBC : public NodalBC
 {
 public:
   NodalNormalBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   virtual void computeResidual() override;
 
 protected:
@@ -34,4 +37,3 @@ protected:
   /// Normal at the node (it is pre-computed by user object subsystem)
   Point _normal;
 };
-

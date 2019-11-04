@@ -14,12 +14,13 @@
 
 #include "libmesh/numeric_vector.h"
 
-template <>
+defineLegacyParams(PresetNodalBC);
+
 InputParameters
-validParams<PresetNodalBC>()
+PresetNodalBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  return p;
+  InputParameters params = NodalBC::validParams();
+  return params;
 }
 
 PresetNodalBC::PresetNodalBC(const InputParameters & parameters) : NodalBC(parameters) {}

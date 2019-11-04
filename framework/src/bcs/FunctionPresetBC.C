@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionPresetBC);
 
-template <>
+defineLegacyParams(FunctionPresetBC);
+
 InputParameters
-validParams<FunctionPresetBC>()
+FunctionPresetBC::validParams()
 {
-  InputParameters params = validParams<PresetNodalBC>();
+  InputParameters params = PresetNodalBC::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addClassDescription(
       "The same as FunctionDirichletBC except the value is applied before the solve begins");

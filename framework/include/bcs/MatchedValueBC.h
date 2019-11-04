@@ -25,6 +25,8 @@ class MatchedValueBC : public NodalBC
 public:
   MatchedValueBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
@@ -34,4 +36,3 @@ protected:
   /// The id of the coupled variable
   unsigned int _v_num;
 };
-
