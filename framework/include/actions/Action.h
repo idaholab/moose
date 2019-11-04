@@ -44,6 +44,8 @@ class Action : public ConsoleStreamInterface,
 public:
   Action(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual ~Action() = default;
 
   /**

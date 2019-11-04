@@ -21,6 +21,8 @@ class CopyNodalVarsAction : public Action
 public:
   CopyNodalVarsAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

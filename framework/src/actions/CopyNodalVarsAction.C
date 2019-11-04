@@ -24,11 +24,12 @@ registerMooseAction("MooseApp", CopyNodalVarsAction, "copy_nodal_vars");
 
 registerMooseAction("MooseApp", CopyNodalVarsAction, "copy_nodal_aux_vars");
 
-template <>
+defineLegacyParams(CopyNodalVarsAction);
+
 InputParameters
-validParams<CopyNodalVarsAction>()
+CopyNodalVarsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::string>(
       "initial_from_file_timestep",
       "LATEST",

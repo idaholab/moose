@@ -23,6 +23,8 @@ class SplitMeshAction : public Action
 public:
   SplitMeshAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

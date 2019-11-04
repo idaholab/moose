@@ -24,6 +24,8 @@ class SetupPredictorAction : public MooseObjectAction
 public:
   SetupPredictorAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

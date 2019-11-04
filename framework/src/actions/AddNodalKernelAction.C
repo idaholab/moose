@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddNodalKernelAction, "add_nodal_kernel");
 
-template <>
+defineLegacyParams(AddNodalKernelAction);
+
 InputParameters
-validParams<AddNodalKernelAction>()
+AddNodalKernelAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddNodalKernelAction::AddNodalKernelAction(InputParameters params) : MooseObjectAction(params) {}

@@ -27,6 +27,8 @@ class DisplayGhostingAction : public Action
 public:
   DisplayGhostingAction(InputParameters params);
 
+  static InputParameters validParams();
+
 protected:
   virtual void act() override;
 

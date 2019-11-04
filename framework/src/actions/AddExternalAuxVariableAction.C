@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddExternalAuxVariableAction, "add_external_aux_variables");
 
-template <>
+defineLegacyParams(AddExternalAuxVariableAction);
+
 InputParameters
-validParams<AddExternalAuxVariableAction>()
+AddExternalAuxVariableAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 AddExternalAuxVariableAction::AddExternalAuxVariableAction(InputParameters params) : Action(params)

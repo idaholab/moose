@@ -23,6 +23,8 @@ class MooseObjectAction : public Action
 public:
   MooseObjectAction(InputParameters params);
 
+  static InputParameters validParams();
+
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
 
@@ -48,4 +50,3 @@ protected:
   /// The parameters for the object to be created
   InputParameters _moose_object_pars;
 };
-

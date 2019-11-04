@@ -14,11 +14,12 @@ registerMooseAction("MooseApp", AddScalarKernelAction, "add_scalar_kernel");
 
 registerMooseAction("MooseApp", AddScalarKernelAction, "add_aux_scalar_kernel");
 
-template <>
+defineLegacyParams(AddScalarKernelAction);
+
 InputParameters
-validParams<AddScalarKernelAction>()
+AddScalarKernelAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddScalarKernelAction::AddScalarKernelAction(InputParameters params) : MooseObjectAction(params) {}

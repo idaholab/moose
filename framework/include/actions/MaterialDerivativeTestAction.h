@@ -26,6 +26,8 @@ class MaterialDerivativeTestAction : public Action, public DerivativeMaterialPro
 public:
   MaterialDerivativeTestAction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

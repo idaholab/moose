@@ -19,11 +19,12 @@
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "create_problem_default");
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "determine_system_type");
 
-template <>
+defineLegacyParams(CreateProblemDefaultAction);
+
 InputParameters
-validParams<CreateProblemDefaultAction>()
+CreateProblemDefaultAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addPrivateParam<bool>("_solve");
   return params;
 }

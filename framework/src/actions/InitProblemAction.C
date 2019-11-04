@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", InitProblemAction, "init_problem");
 
-template <>
+defineLegacyParams(InitProblemAction);
+
 InputParameters
-validParams<InitProblemAction>()
+InitProblemAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

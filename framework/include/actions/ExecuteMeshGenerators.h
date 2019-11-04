@@ -21,6 +21,8 @@ class ExecuteMeshGenerators : public Action
 public:
   ExecuteMeshGenerators(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

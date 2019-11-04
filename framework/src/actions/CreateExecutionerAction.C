@@ -18,11 +18,12 @@
 
 registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
 
-template <>
+defineLegacyParams(CreateExecutionerAction);
+
 InputParameters
-validParams<CreateExecutionerAction>()
+CreateExecutionerAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addParam<bool>(
       "auto_preconditioning",
       true,

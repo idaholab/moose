@@ -20,11 +20,12 @@ unsigned int SetupPreconditionerAction::_count = 0;
 
 registerMooseAction("MooseApp", SetupPreconditionerAction, "add_preconditioning");
 
-template <>
+defineLegacyParams(SetupPreconditionerAction);
+
 InputParameters
-validParams<SetupPreconditionerAction>()
+SetupPreconditionerAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
 
   return params;
 }

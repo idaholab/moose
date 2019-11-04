@@ -15,11 +15,12 @@ registerMooseAction("MooseApp", EmptyAction, "ready_to_init");
 
 registerMooseAction("MooseApp", EmptyAction, "finish_input_file_output");
 
-template <>
+defineLegacyParams(EmptyAction);
+
 InputParameters
-validParams<EmptyAction>()
+EmptyAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

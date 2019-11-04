@@ -24,6 +24,8 @@ class EmptyAction : public Action
 public:
   EmptyAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

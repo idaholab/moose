@@ -21,11 +21,12 @@
 
 registerMooseAction("MooseApp", CouplingFunctorCheckAction, "coupling_functor_check");
 
-template <>
+defineLegacyParams(CouplingFunctorCheckAction);
+
 InputParameters
-validParams<CouplingFunctorCheckAction>()
+CouplingFunctorCheckAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameters)

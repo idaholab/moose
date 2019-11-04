@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddTransferAction, "add_transfer");
 
-template <>
+defineLegacyParams(AddTransferAction);
+
 InputParameters
-validParams<AddTransferAction>()
+AddTransferAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Action for creating Transfer objects.");
   return params;
 }

@@ -31,6 +31,8 @@ class AddPeriodicBCAction : public Action
 public:
   AddPeriodicBCAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

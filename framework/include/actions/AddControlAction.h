@@ -33,6 +33,8 @@ public:
    */
   AddControlAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

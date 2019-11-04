@@ -29,6 +29,8 @@ public:
    */
   AddAuxVariableAction(InputParameters params);
 
+  static InputParameters validParams();
+
   /**
    * Returns available families for AuxVariables
    * @return MooseEnum with the valid familes for AuxVariables

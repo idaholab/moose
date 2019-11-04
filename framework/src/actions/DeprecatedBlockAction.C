@@ -11,11 +11,12 @@
 
 registerMooseAction("MooseApp", DeprecatedBlockAction, "deprecated_block");
 
-template <>
+defineLegacyParams(DeprecatedBlockAction);
+
 InputParameters
-validParams<DeprecatedBlockAction>()
+DeprecatedBlockAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addParam<bool>("DEPRECATED", "*** WARNING: This block is deprecated - DO NOT USE ***");
   return params;

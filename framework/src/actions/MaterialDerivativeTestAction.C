@@ -24,11 +24,12 @@ registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_kernel");
 
 registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_preconditioning");
 
-template <>
+defineLegacyParams(MaterialDerivativeTestAction);
+
 InputParameters
-validParams<MaterialDerivativeTestAction>()
+MaterialDerivativeTestAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action for setting up the necessary objects for debugging material property derivatives.");
   params.addParam<std::vector<VariableName>>("args",

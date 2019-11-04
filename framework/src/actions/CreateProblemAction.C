@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", CreateProblemAction, "create_problem");
 
-template <>
+defineLegacyParams(CreateProblemAction);
+
 InputParameters
-validParams<CreateProblemAction>()
+CreateProblemAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addParam<std::string>("type", "FEProblem", "Problem type");
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   return params;

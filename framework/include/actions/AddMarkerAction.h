@@ -21,6 +21,8 @@ class AddMarkerAction : public MooseObjectAction
 public:
   AddMarkerAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

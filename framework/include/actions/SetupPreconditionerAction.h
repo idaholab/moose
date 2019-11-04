@@ -24,6 +24,8 @@ class SetupPreconditionerAction : public MooseObjectAction
 public:
   SetupPreconditionerAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

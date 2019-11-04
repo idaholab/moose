@@ -45,11 +45,12 @@ registerMooseAction("MooseApp", MaterialOutputAction, "add_output_aux_variables"
 
 registerMooseAction("MooseApp", MaterialOutputAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(MaterialOutputAction);
+
 InputParameters
-validParams<MaterialOutputAction>()
+MaterialOutputAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

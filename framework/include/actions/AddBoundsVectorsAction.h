@@ -21,6 +21,8 @@ class AddBoundsVectorsAction : public Action
 public:
   AddBoundsVectorsAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

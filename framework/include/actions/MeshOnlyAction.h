@@ -23,6 +23,8 @@ class MeshOnlyAction : public Action
 public:
   MeshOnlyAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

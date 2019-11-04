@@ -26,11 +26,12 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
 
-template <>
+defineLegacyParams(SetupMeshCompleteAction);
+
 InputParameters
-validParams<SetupMeshCompleteAction>()
+SetupMeshCompleteAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

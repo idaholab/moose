@@ -16,11 +16,12 @@
 
 registerMooseAction("MooseApp", AddElementalFieldAction, "add_elemental_field_variable");
 
-template <>
+defineLegacyParams(AddElementalFieldAction);
+
 InputParameters
-validParams<AddElementalFieldAction>()
+AddElementalFieldAction::validParams()
 {
-  InputParameters params = validParams<AddVariableAction>();
+  InputParameters params = AddVariableAction::validParams();
   params.addClassDescription("Adds elemental auxiliary variable for adaptivity system.");
   params.ignoreParameter<std::string>("type");
 

@@ -13,11 +13,12 @@
 
 registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrator");
 
-template <>
+defineLegacyParams(SetupTimeIntegratorAction);
+
 InputParameters
-validParams<SetupTimeIntegratorAction>()
+SetupTimeIntegratorAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 
