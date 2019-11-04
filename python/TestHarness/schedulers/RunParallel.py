@@ -39,11 +39,6 @@ class RunParallel(Scheduler):
         if job.isFinished():
             return
 
-        # If we are doing recover tests
-        if self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
-            self.setSuccessfulMessage(tester)
-            return
-
         # Allow derived proccessResults to process the output and set a failing status (if it failed)
         job_output = job.getOutput()
         output = tester.processResults(tester.getMooseDir(), self.options, job_output)
