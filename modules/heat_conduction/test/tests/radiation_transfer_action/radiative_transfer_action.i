@@ -77,7 +77,8 @@
     sidesets = '4 5 6 7'
     emissivity = '0.9 0.8 0.4 1'
     n_patches = '2 2 2 3'
-    #partitioners = 'metis metis metis metis'
+    partitioners = 'centroid centroid centroid centroid'
+    centroid_partitioner_directions = 'x y y x'
     final_mesh_generator = rename
     temperature = temperature
     adiabatic_sidesets = '7'
