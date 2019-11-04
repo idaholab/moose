@@ -25,8 +25,7 @@ validParams<IsolatedBoundingBoxIC>()
 }
 
 IsolatedBoundingBoxIC::IsolatedBoundingBoxIC(const InputParameters & parameters)
-  : SmoothMultiBoundingBoxBaseIC(parameters),
-    _outside(getParam<Real>("outside"))
+  : SmoothMultiBoundingBoxBaseIC(parameters), _outside(getParam<Real>("outside"))
 {
 }
 

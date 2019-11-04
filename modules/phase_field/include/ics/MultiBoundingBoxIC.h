@@ -47,4 +47,3 @@ protected:
   /// values outside the boxes
   const Real _outside;
 };
-
