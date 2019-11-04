@@ -157,6 +157,8 @@
       type = Exodiff
       input = HexPolycrystalIC.i
       exodiff = HexPolycrystalIC_out.e
+      # Testing optimal hex coloring with a backtracking algorithm
+      method = '!DBG'
 
       detail = 'hexagonal structure, and'
     []
