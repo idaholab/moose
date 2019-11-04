@@ -28,6 +28,8 @@ class Material : public MaterialBase, public Coupleable, public MaterialProperty
 public:
   Material(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeProperties() override;
 
   ///@{

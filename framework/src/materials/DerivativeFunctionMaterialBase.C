@@ -11,11 +11,13 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DerivativeFunctionMaterialBase);
+
 InputParameters
-validParams<DerivativeFunctionMaterialBase>()
+DerivativeFunctionMaterialBase::validParams()
 {
-  InputParameters params = validParams<FunctionMaterialBase>();
+
+  InputParameters params = FunctionMaterialBase::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy) and its "
                              "derivatives w.r.t. the coupled variables");
   params.addDeprecatedParam<bool>("third_derivatives",

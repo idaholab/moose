@@ -13,11 +13,13 @@
 
 registerMooseObject("MooseApp", DerivativeSumMaterial);
 
-template <>
+defineLegacyParams(DerivativeSumMaterial);
+
 InputParameters
-validParams<DerivativeSumMaterial>()
+DerivativeSumMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
+
+  InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("Meta-material to sum up multiple derivative materials");
   params.addParam<std::vector<std::string>>(
       "sum_materials",

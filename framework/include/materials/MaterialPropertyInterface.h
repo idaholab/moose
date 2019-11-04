@@ -22,9 +22,6 @@ class InputParameters;
 class MaterialPropertyInterface;
 class MooseObject;
 
-template <typename T>
-InputParameters validParams();
-
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
 
@@ -44,6 +41,8 @@ public:
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);
+
+  static InputParameters validParams();
 
   ///@{
   /**

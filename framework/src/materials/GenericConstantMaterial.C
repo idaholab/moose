@@ -13,11 +13,13 @@
 
 registerMooseObject("MooseApp", GenericConstantMaterial);
 
-template <>
+defineLegacyParams(GenericConstantMaterial);
+
 InputParameters
-validParams<GenericConstantMaterial>()
+GenericConstantMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
   params.addRequiredParam<std::vector<Real>>("prop_values",

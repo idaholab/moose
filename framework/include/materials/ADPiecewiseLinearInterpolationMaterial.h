@@ -30,6 +30,8 @@ class ADPiecewiseLinearInterpolationMaterial : public ADMaterial<compute_stage>,
 public:
   ADPiecewiseLinearInterpolationMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
 

@@ -10,12 +10,14 @@
 // MOOSE includes
 #include "InterfaceMaterial.h"
 
-template <>
+defineLegacyParams(InterfaceMaterial);
+
 InputParameters
-validParams<InterfaceMaterial>()
+InterfaceMaterial::validParams()
 {
-  InputParameters params = validParams<MaterialBase>();
-  params += validParams<TwoMaterialPropertyInterface>();
+
+  InputParameters params = MaterialBase::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
   params.set<bool>("_interface") = true;
   params.set<Moose::MaterialDataType>("_material_data_type") = Moose::INTERFACE_MATERIAL_DATA;
   return params;

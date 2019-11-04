@@ -11,12 +11,14 @@
 
 registerMooseObject("MooseApp", DerivativeParsedMaterial);
 
-template <>
+defineLegacyParams(DerivativeParsedMaterial);
+
 InputParameters
-validParams<DerivativeParsedMaterial>()
+DerivativeParsedMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
-  params += validParams<ParsedMaterialBase>();
+
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
+  params += ParsedMaterialBase::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   return params;
 }

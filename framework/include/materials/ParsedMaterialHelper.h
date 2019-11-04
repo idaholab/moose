@@ -36,6 +36,8 @@ public:
 
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
+  static InputParameters validParams();
+
   void functionParse(const std::string & function_expression);
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,

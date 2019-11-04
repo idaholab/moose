@@ -64,6 +64,8 @@ class MaterialBase : public MooseObject,
 public:
   MaterialBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Initialize stateful properties (if material has some)
    */

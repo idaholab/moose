@@ -10,12 +10,14 @@
 // MOOSE includes
 #include "Material.h"
 
-template <>
+defineLegacyParams(Material);
+
 InputParameters
-validParams<Material>()
+Material::validParams()
 {
-  InputParameters params = validParams<MaterialBase>();
-  params += validParams<MaterialPropertyInterface>();
+
+  InputParameters params = MaterialBase::validParams();
+  params += MaterialPropertyInterface::validParams();
   MooseEnum const_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "none");
   params.addParam<MooseEnum>(
       "constant_on",

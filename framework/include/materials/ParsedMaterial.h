@@ -27,5 +27,7 @@ class ParsedMaterial : public ParsedMaterialHelper, public ParsedMaterialBase
 {
 public:
   ParsedMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 };
 

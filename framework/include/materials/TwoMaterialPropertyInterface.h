@@ -26,6 +26,8 @@ public:
                                const std::set<SubdomainID> & blocks_ids,
                                const std::set<BoundaryID> & boundary_ids);
 
+  static InputParameters validParams();
+
   /**
    * Retrieve the property deduced from the name \p name
    */
