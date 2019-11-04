@@ -1,0 +1,10 @@
+[Tests]
+  [./sideset_info]
+    type = 'CSVDiff'
+    input = 'sideset_info.i'
+    csvdiff = 'out_side_info_0001.csv'
+    issues = '#14275'
+    design = 'SidesetInfoVectorPostprocessor.md'
+    requirement = 'The system shall allow outputting relevant information about sidesets'
+  [../]
+[]
