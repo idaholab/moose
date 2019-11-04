@@ -6,7 +6,7 @@
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
-    compiler = '!GCC'
+    petsc_version = '>=3.9.4'
   [../]
 
   [./radiative_transfer_no_action]
@@ -14,6 +14,6 @@
     input = ' radiative_transfer_no_action.i'
     exodiff = 'radiative_transfer_no_action_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
-    compiler = '!GCC'
+    petsc_version = '>=3.9.4'
   [../]
 []
