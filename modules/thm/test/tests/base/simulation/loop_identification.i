@@ -51,6 +51,9 @@
   initial_T_vapor = 454
   initial_vel_vapor = 0
   initial_alpha_vapor = 0.5
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -90,7 +93,7 @@
     fp = fp_liquid
   [../]
   [./j1]
-    type = SimpleJunction
+    type = JunctionOneToOne
     connections = 'pipe1:out corechannel:in'
   [../]
   [./corechannel]
@@ -104,7 +107,7 @@
     fp = fp_liquid
   [../]
   [./j2]
-    type = SimpleJunction
+    type = JunctionOneToOne
     connections = 'corechannel:out pipe2:in'
   [../]
   [./pipe2]
@@ -118,7 +121,7 @@
     fp = fp_liquid
   [../]
   [./j3]
-    type = SimpleJunction
+    type = JunctionOneToOne
     connections = 'pipe2:out hx:primary:in'
   [../]
   [./hx:primary]
@@ -132,7 +135,7 @@
     fp = fp_liquid
   [../]
   [./j4]
-    type = SimpleJunction
+    type = JunctionOneToOne
     connections = 'hx:primary:out pipe1:in'
   [../]
 
