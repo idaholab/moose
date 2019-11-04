@@ -17,9 +17,6 @@ TEST_F(LinearFluidPropertiesTest, test)
 
   const Real v = 1 / rho;
 
-  // TODO: const Real s_from_v_e = _fp->s_from_v_e(v, e);
-  // TODO: const Real s = s_from_v_e;
-
   // p
   REL_TEST(_fp->p_from_v_e(v, e), p, REL_TOL_CONSISTENCY);
   // TODO: REL_TEST(_fp->p_from_h_s(h, s), p, REL_TOL_CONSISTENCY);
@@ -54,28 +51,31 @@ TEST_F(LinearFluidPropertiesTest, test)
   DERIV_TEST(_fp->c_from_v_e, v, e, REL_TOL_DERIVATIVE);
 
   // cp
-  // TODO: const Real cp = _fp->cp_from_v_e(v, e);
-  // TODO: REL_TEST(cp, cp_saved, REL_TOL_SAVED_VALUE);
+  const Real cp = _fp->cp_from_v_e(v, e);
+  REL_TEST(cp, 0., REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
 
   // cv
-  // TODO: const Real cv = _fp->cv_from_v_e(v, e);
-  // TODO: REL_TEST(cv, cv_saved, REL_TOL_SAVED_VALUE);
+  const Real cv = _fp->cv_from_v_e(v, e);
+  REL_TEST(cv, 1000, REL_TOL_SAVED_VALUE);
 
   // mu
-  // TODO: const Real mu = _fp->mu_from_v_e(v, e);
-  // TODO: REL_TEST(mu, mu_saved, REL_TOL_SAVED_VALUE);
+  const Real mu = _fp->mu_from_v_e(v, e);
+  REL_TEST(mu, 0.3, REL_TOL_SAVED_VALUE);
 
   // k
-  // TODO: const Real k = _fp->k_from_v_e(v, e);
-  // TODO: REL_TEST(k, k_saved, REL_TOL_SAVED_VALUE);
+  const Real k = _fp->k_from_v_e(v, e);
+  REL_TEST(k, 0.89, REL_TOL_SAVED_VALUE);
 
   // s
   // TODO: REL_TEST(s, s_saved, REL_TOL_SAVED_VALUE);
   // TODO: REL_TEST(_fp->s_from_h_p(h, p), s, REL_TOL_CONSISTENCY);
+  NOT_IMPLEMENTED_TEST_VALUE(_fp->s_from_p_T);
   NOT_IMPLEMENTED_TEST_VALUE(_fp->s_from_v_e);
   NOT_IMPLEMENTED_TEST_VALUE(_fp->s_from_h_p);
   // TODO: DERIV_TEST(_fp->s_from_v_e, p, rho, REL_TOL_DERIVATIVE);
   // TODO: DERIV_TEST(_fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
+  NOT_IMPLEMENTED_TEST_DERIV(_fp->s_from_p_T);
   NOT_IMPLEMENTED_TEST_DERIV(_fp->s_from_v_e);
   NOT_IMPLEMENTED_TEST_DERIV(_fp->s_from_h_p);
 
@@ -88,6 +88,21 @@ TEST_F(LinearFluidPropertiesTest, test)
   DERIV_TEST(_fp->h_from_p_T, p, T, 5e-3);
 
   // beta
-  // TODO: const Real beta = _fp->beta_from_p_T(p, T);
-  // TODO: REL_TEST(beta, beta_saved, REL_TOL_SAVED_VALUE);
+  const Real beta = _fp->beta_from_p_T(p, T);
+  REL_TEST(beta, 123, REL_TOL_SAVED_VALUE);
+
+  // molar mass
+  try
+  {
+    _fp->molarMass();
+  }
+  catch (const std::exception & x)
+  {
+    std::string msg(x.what());
+    EXPECT_TRUE(msg.find("not implemented") != std::string::npos);
+  }
+
+  // Pr
+  const Real Pr = _fp->Pr(rho, T);
+  REL_TEST(Pr, 0.76, REL_TOL_SAVED_VALUE);
 }
