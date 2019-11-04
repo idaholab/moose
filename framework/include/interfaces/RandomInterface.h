@@ -40,6 +40,8 @@ public:
 
   ~RandomInterface();
 
+  static InputParameters validParams();
+
   /**
    * This interface should be called from a derived class to enable random number
    * generation in this object.

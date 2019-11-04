@@ -46,6 +46,8 @@ public:
    */
   OutputInterface(const InputParameters & parameters, bool build_list = true);
 
+  static InputParameters validParams();
+
   /**
    * Builds hide lists for output objects NOT listed in the 'outputs' parameter
    * @param variable_names A set of variables for which the 'outputs' parameter controls

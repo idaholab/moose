@@ -34,6 +34,8 @@ public:
   TaggingInterface(const MooseObject * moose_object);
   virtual ~TaggingInterface();
 
+  static InputParameters validParams();
+
   void useVectorTag(const TagName & tag_name);
 
   void useMatrixTag(const TagName & tag_name);

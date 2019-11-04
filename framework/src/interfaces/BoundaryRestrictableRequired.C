@@ -11,10 +11,12 @@
 
 #include "InputParameters.h"
 
-template <>
+defineLegacyParams(BoundaryRestrictableRequired);
+
 InputParameters
-validParams<BoundaryRestrictableRequired>()
+BoundaryRestrictableRequired::validParams()
 {
+
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 

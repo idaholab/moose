@@ -198,7 +198,7 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
                    "command line");
     }
 
-    auto new_pars = validParams<FileMesh>();
+    auto new_pars = ::validParams<FileMesh>();
 
     // Keep existing parameters where possible
     new_pars.applyParameters(_moose_object_pars);

@@ -26,9 +26,6 @@ validParams<MooseObjectAction>()
   return params;
 }
 
-template <>
-InputParameters validParams<MooseObject>();
-
 MooseObjectAction::MooseObjectAction(InputParameters params)
   : Action(params),
     _type(getParam<std::string>("type")),
@@ -39,7 +36,7 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
                            ? (Registry::isADObj(_type + "<RESIDUAL>")
                                   ? _factory.getValidParams(_type + "<RESIDUAL>")
                                   : _factory.getValidParams(_type))
-                           : validParams<MooseObject>())
+                       : MooseObject::validParams())
 {
   _moose_object_pars.blockFullpath() = params.blockFullpath();
 }

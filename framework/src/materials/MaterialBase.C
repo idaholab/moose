@@ -23,10 +23,10 @@ MaterialBase::validParams()
 {
 
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<BoundaryRestrictable>();
-  params += ::validParams<TransientInterface>();
-  params += ::validParams<RandomInterface>();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += TransientInterface::validParams();
+  params += RandomInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -46,7 +46,7 @@ MaterialBase::validParams()
   params.addPrivateParam<bool>("_interface", false);
 
   // Outputs
-  params += ::validParams<OutputInterface>();
+  params += OutputInterface::validParams();
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.addParam<std::vector<std::string>>(
       "output_properties",

@@ -11,9 +11,10 @@
 
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(PerfGraphInterface);
+
 InputParameters
-validParams<PerfGraphInterface>()
+PerfGraphInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
   return params;

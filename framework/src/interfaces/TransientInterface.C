@@ -10,10 +10,12 @@
 #include "TransientInterface.h"
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(TransientInterface);
+
 InputParameters
-validParams<TransientInterface>()
+TransientInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
   params.addParam<bool>(
       "implicit",
