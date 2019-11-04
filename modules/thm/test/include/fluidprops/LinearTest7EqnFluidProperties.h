@@ -26,6 +26,9 @@ public:
   virtual Real T_sat(Real p) const override;
   virtual Real dT_sat_dp(Real p) const override;
 
+  virtual Real sigma_from_T(Real T) const override;
+  virtual Real dsigma_dT_from_T(Real T) const override;
+
   virtual bool supportsPhaseChange() const override { return false; }
 
 protected:
@@ -35,4 +38,6 @@ protected:
   const Real _drho_int_dp_int;
   /// Derivative of interfacial density w.r.t. interfacial temperature
   const Real _drho_int_dT_int;
+  /// Derivative of surface tension w.r.t. temperature
+  const Real _dsigma_dT;
 };
