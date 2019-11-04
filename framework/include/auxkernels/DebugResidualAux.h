@@ -22,6 +22,8 @@ InputParameters validParams<DebugResidualAux>();
 class DebugResidualAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DebugResidualAux(const InputParameters & parameters);
 
 protected:

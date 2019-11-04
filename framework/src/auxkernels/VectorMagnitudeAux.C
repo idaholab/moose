@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", VectorMagnitudeAux);
 
-template <>
+defineLegacyParams(VectorMagnitudeAux);
+
 InputParameters
-validParams<VectorMagnitudeAux>()
+VectorMagnitudeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates a field representing the magnitude of three coupled "
                              "variables using an Euclidean norm.");
   params.addRequiredCoupledVar("x", "x-component of the vector");

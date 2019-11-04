@@ -25,6 +25,8 @@ InputParameters validParams<NormalizationAux>();
 class NormalizationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NormalizationAux(const InputParameters & parameters);
 
 protected:

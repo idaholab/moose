@@ -26,6 +26,8 @@ InputParameters validParams<MaterialRankFourTensorAux>();
 class MaterialRankFourTensorAux : public MaterialAuxBase<RankFourTensor>
 {
 public:
+  static InputParameters validParams();
+
   MaterialRankFourTensorAux(const InputParameters & parameters);
 
 protected:

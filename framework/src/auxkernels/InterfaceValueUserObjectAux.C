@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", InterfaceValueUserObjectAux);
 
-template <>
+defineLegacyParams(InterfaceValueUserObjectAux);
+
 InputParameters
-validParams<InterfaceValueUserObjectAux>()
+InterfaceValueUserObjectAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
                                           "The name of the interface user object to use");
   params.addClassDescription("Get stored value from the specified InterfaceQpValueUserObject.");

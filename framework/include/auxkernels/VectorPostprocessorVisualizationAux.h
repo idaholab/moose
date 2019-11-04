@@ -24,6 +24,8 @@ InputParameters validParams<VectorPostprocessorVisualizationAux>();
 class VectorPostprocessorVisualizationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorPostprocessorVisualizationAux(const InputParameters & parameters);
 
 protected:

@@ -21,6 +21,8 @@ InputParameters validParams<GapValueAux>();
 class GapValueAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   GapValueAux(const InputParameters & parameters);
 
 protected:

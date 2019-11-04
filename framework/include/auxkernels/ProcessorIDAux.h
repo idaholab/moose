@@ -20,6 +20,8 @@ InputParameters validParams<ProcessorIDAux>();
 class ProcessorIDAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ProcessorIDAux(const InputParameters & parameters);
 
 protected:

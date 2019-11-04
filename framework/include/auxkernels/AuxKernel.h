@@ -71,6 +71,8 @@ class AuxKernelTempl : public MooseObject,
                        protected VectorPostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   AuxKernelTempl(const InputParameters & parameters);
 
   /**

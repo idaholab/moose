@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionAux);
 
-template <>
+defineLegacyParams(FunctionAux);
+
 InputParameters
-validParams<FunctionAux>()
+FunctionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
                              "sampling a function through space and time.");
   params.addRequiredParam<FunctionName>("function", "The function to use as the value");

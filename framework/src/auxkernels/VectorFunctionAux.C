@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorFunctionAux);
 
-template <>
+defineLegacyParams(VectorFunctionAux);
+
 InputParameters
-validParams<VectorFunctionAux>()
+VectorFunctionAux::validParams()
 {
-  InputParameters params = validParams<VectorAuxKernel>();
+  InputParameters params = VectorAuxKernel::validParams();
   params.addClassDescription(
       "Auxiliary Kernel that creates and updates a vector field variable by "
       "sampling a Function object, via the vectorValue method, through space and time.");

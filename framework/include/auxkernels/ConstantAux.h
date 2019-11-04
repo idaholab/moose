@@ -23,6 +23,8 @@ InputParameters validParams<ConstantAux>();
 class ConstantAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ConstantAux(const InputParameters & parameters);
 
 protected:

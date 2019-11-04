@@ -20,19 +20,22 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(AuxKernel);
+defineLegacyParams(VectorAuxKernel);
+
+template <typename ComputeValueType>
 InputParameters
-validParams<AuxKernel>()
+AuxKernelTempl<ComputeValueType>::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<RandomInterface>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<BlockRestrictable>();
+  params += ::validParams<BoundaryRestrictable>();
+  params += ::validParams<RandomInterface>();
+  params += ::validParams<MeshChangedInterface>();
+  params += ::validParams<MaterialPropertyInterface>();
 
   // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
-  params += validParams<SetupInterface>();
+  params += ::validParams<SetupInterface>();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
@@ -55,15 +58,9 @@ validParams<AuxKernel>()
 
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("AuxKernel");
-  return params;
-}
 
-template <>
-InputParameters
-validParams<VectorAuxKernel>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.registerBase("VectorAuxKernel");
+  if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(VectorAuxKernel).name())
+    params.registerBase("VectorAuxKernel");
   return params;
 }
 

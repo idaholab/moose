@@ -11,12 +11,13 @@
 
 registerMooseObject("MooseApp", VectorVariableComponentAux);
 
-template <>
+defineLegacyParams(VectorVariableComponentAux);
+
 InputParameters
-validParams<VectorVariableComponentAux>()
+VectorVariableComponentAux::validParams()
 {
   MooseEnum component("x=0 y=1 z=2");
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Creates a field consisting of one component of a coupled vector variable.");
   params.addRequiredCoupledVar("vector_variable",

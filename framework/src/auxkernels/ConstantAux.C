@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantAux);
 
-template <>
+defineLegacyParams(ConstantAux);
+
 InputParameters
-validParams<ConstantAux>()
+ConstantAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates a constant field in the domain.");
   params.addParam<Real>("value", 0.0, "Some constant value that can be read from the input file");
   params.declareControllable("value");

@@ -24,6 +24,8 @@ InputParameters validParams<MaterialRealDenseMatrixAux>();
 class MaterialRealDenseMatrixAux : public MaterialAuxBase<DenseMatrix<Real>>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for this AuxKernel

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", DiffusionFluxAux);
 
-template <>
+defineLegacyParams(DiffusionFluxAux);
+
 InputParameters
-validParams<DiffusionFluxAux>()
+DiffusionFluxAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   MooseEnum component("x y z");
   params.addClassDescription("Compute components of flux vector for diffusion problems "
                              "$(\\vv{J} = -D \\nabla C)$.");

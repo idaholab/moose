@@ -27,6 +27,8 @@ InputParameters validParams<SolutionAux>();
 class SolutionAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   SolutionAux(const InputParameters & parameters);
 
   /**

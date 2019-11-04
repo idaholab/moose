@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ElementLengthAux);
 
-template <>
+defineLegacyParams(ElementLengthAux);
+
 InputParameters
-validParams<ElementLengthAux>()
+ElementLengthAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam(
       "method", MooseEnum("min max"), "The size calculation to perform ('min' or 'max').");
   params.addClassDescription(

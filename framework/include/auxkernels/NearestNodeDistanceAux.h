@@ -24,6 +24,8 @@ InputParameters validParams<NearestNodeDistanceAux>();
 class NearestNodeDistanceAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NearestNodeDistanceAux(const InputParameters & parameters);
 
 protected:

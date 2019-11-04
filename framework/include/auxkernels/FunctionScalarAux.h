@@ -23,6 +23,8 @@ InputParameters validParams<FunctionScalarAux>();
 class FunctionScalarAux : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   FunctionScalarAux(const InputParameters & parameters);
 
 protected:

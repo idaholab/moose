@@ -24,6 +24,8 @@ InputParameters validParams<MaterialStdVectorRealGradientAux>();
 class MaterialStdVectorRealGradientAux : public MaterialStdVectorAuxBase<RealGradient>
 {
 public:
+  static InputParameters validParams();
+
   MaterialStdVectorRealGradientAux(const InputParameters & parameters);
 
 protected:

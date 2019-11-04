@@ -22,6 +22,8 @@ InputParameters validParams<GhostingAux>();
 class GhostingAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   GhostingAux(const InputParameters & parameters);
 
 protected:

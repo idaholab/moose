@@ -25,6 +25,8 @@ InputParameters validParams<VariableTimeIntegrationAux>();
 class VariableTimeIntegrationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   VariableTimeIntegrationAux(const InputParameters & parameters);
 
 protected:

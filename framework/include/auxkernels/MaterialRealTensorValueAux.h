@@ -24,6 +24,8 @@ InputParameters validParams<MaterialRealTensorValueAux>();
 class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for this AuxKernel

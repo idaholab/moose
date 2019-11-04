@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SelfAux);
 
-template <>
+defineLegacyParams(SelfAux);
+
 InputParameters
-validParams<SelfAux>()
+SelfAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

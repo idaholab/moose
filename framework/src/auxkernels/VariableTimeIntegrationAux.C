@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VariableTimeIntegrationAux);
 
-template <>
+defineLegacyParams(VariableTimeIntegrationAux);
+
 InputParameters
-validParams<VariableTimeIntegrationAux>()
+VariableTimeIntegrationAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("variable_to_integrate", "The variable to be integrated");
   params.addParam<Real>("coefficient", 1.0, "A simple coefficient");
   params.addParam<unsigned int>(

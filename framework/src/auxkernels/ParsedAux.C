@@ -11,12 +11,13 @@
 
 registerMooseObject("MooseApp", ParsedAux);
 
-template <>
+defineLegacyParams(ParsedAux);
+
 InputParameters
-validParams<ParsedAux>()
+ParsedAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = AuxKernel::validParams();
+  params += ::validParams<FunctionParserUtils>();
   params.addClassDescription("Parsed function AuxKernel.");
 
   params.addRequiredCustomTypeParam<std::string>(
