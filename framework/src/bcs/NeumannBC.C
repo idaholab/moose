@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", NeumannBC);
 
-template <>
+defineLegacyParams(NeumannBC);
+
 InputParameters
-validParams<NeumannBC>()
+NeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
   params.declareControllable("value");
   params.addClassDescription("Imposes the integrated boundary condition "

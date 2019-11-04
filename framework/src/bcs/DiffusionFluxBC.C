@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", DiffusionFluxBC);
 
-template <>
+defineLegacyParams(DiffusionFluxBC);
+
 InputParameters
-validParams<DiffusionFluxBC>()
+DiffusionFluxBC::validParams()
 {
-  InputParameters params = validParams<FluxBC>();
+  InputParameters params = FluxBC::validParams();
   params.addClassDescription(
       "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
       "Does not impose a boundary condition; instead computes the boundary "

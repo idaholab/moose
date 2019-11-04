@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionGradientNeumannBC);
 
-template <>
+defineLegacyParams(FunctionGradientNeumannBC);
+
 InputParameters
-validParams<FunctionGradientNeumannBC>()
+FunctionGradientNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<FunctionName>("exact_solution", "The exact solution.");
   params.addParam<Real>("coeff", 1, "The diffusion, thermal conductivity, etc. coefficient");
   params.addClassDescription("Imposes the integrated boundary condition "

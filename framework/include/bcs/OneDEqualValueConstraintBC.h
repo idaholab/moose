@@ -27,6 +27,8 @@ class OneDEqualValueConstraintBC : public IntegratedBC
 public:
   OneDEqualValueConstraintBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -37,4 +39,3 @@ protected:
   unsigned int _component;
   Real _vg;
 };
-

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionNeumannBC);
 
-template <>
+defineLegacyParams(FunctionNeumannBC);
+
 InputParameters
-validParams<FunctionNeumannBC>()
+FunctionNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<FunctionName>("function", "The function.");
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "

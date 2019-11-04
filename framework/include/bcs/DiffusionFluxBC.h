@@ -33,8 +33,9 @@ class DiffusionFluxBC : public FluxBC
 public:
   DiffusionFluxBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealGradient computeQpFluxResidual() override;
   virtual RealGradient computeQpFluxJacobian() override;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConvectiveFluxBC);
 
-template <>
+defineLegacyParams(ConvectiveFluxBC);
+
 InputParameters
-validParams<ConvectiveFluxBC>()
+ConvectiveFluxBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.set<Real>("rate") = 7500;
   params.set<Real>("initial") = 500;
   params.set<Real>("final") = 500;

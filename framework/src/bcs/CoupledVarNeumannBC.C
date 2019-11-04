@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CoupledVarNeumannBC);
 
-template <>
+defineLegacyParams(CoupledVarNeumannBC);
+
 InputParameters
-validParams<CoupledVarNeumannBC>()
+CoupledVarNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the gradient on the boundary.");
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=v$, "
