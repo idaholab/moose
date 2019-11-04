@@ -60,6 +60,8 @@
     type = PatchSidesetGenerator
     sideset = 4
     n_patches = 2
+    partitioner = centroid
+    centroid_partitioner_direction = x
     input = rename
   [../]
 
@@ -67,6 +69,8 @@
     type = PatchSidesetGenerator
     sideset = 5
     n_patches = 2
+    partitioner = centroid
+    centroid_partitioner_direction = y
     input = split_inner_bottom
   [../]
 
@@ -74,6 +78,8 @@
     type = PatchSidesetGenerator
     sideset = 6
     n_patches = 2
+    partitioner = centroid
+    centroid_partitioner_direction = y
     input = split_inner_left
   [../]
 
@@ -81,6 +87,8 @@
     type = PatchSidesetGenerator
     sideset = 7
     n_patches = 3
+    partitioner = centroid
+    centroid_partitioner_direction = x
     input = split_inner_right
   [../]
 []
