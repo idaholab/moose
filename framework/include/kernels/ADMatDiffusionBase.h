@@ -35,8 +35,6 @@ template <ComputeStage compute_stage, typename T>
 class ADMatDiffusionBase : public ADKernelGrad<compute_stage>
 {
 public:
-  static InputParameters validParams();
-
   ADMatDiffusionBase(const InputParameters & parameters);
 
   static InputParameters validParams()

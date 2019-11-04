@@ -21,8 +21,8 @@ InputParameters
 ScalarKernel::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
-  params += TaggingInterface::validParams();
+  params += ::validParams<TransientInterface>();
+  params += ::validParams<TaggingInterface>();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this kernel operates on");
 

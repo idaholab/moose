@@ -23,7 +23,7 @@ InputParameters
 ParsedODEKernel::validParams()
 {
   InputParameters params = ODEKernel::validParams();
-  params += FunctionParserUtils::validParams();
+  params += ::validParams<FunctionParserUtils>();
   params.addClassDescription("Parsed ODE function kernel.");
 
   params.addRequiredParam<std::string>("function", "function expression");
