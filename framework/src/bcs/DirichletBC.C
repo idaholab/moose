@@ -20,7 +20,7 @@ DirichletBC::validParams()
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
-                        "is a constant, controllable value.");
+                             "is a constant, controllable value.");
   return params;
 }
 

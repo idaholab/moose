@@ -18,7 +18,7 @@ ArrayDirichletBC::validParams()
 {
   InputParameters params = ArrayNodalBC::validParams();
   params.addRequiredParam<RealEigenVector>("values",
-                                      "The values the components must take on the boundary");
+                                           "The values the components must take on the boundary");
   params.declareControllable("values");
   params.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
