@@ -26,6 +26,8 @@ class ArrayDirichletBC : public ArrayNodalBC
 public:
   ArrayDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealEigenVector computeQpResidual() override;
 

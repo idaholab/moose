@@ -21,6 +21,8 @@ class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 public:
   ArrayPenaltyDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealEigenVector computeQpResidual() override;
   virtual RealEigenVector computeQpJacobian() override;

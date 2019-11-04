@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayPenaltyDirichletBC);
 
-template <>
+defineLegacyParams(ArrayPenaltyDirichletBC);
+
 InputParameters
-validParams<ArrayPenaltyDirichletBC>()
+ArrayPenaltyDirichletBC::validParams()
 {
-  InputParameters params = validParams<ArrayIntegratedBC>();
+  InputParameters params = ArrayIntegratedBC::validParams();
   params.addParam<Real>("penalty", 4, "Penalty scalar");
   params.addRequiredParam<RealEigenVector>("value", "Boundary value of the array variable");
   params.addClassDescription(

@@ -21,6 +21,8 @@ class ArrayVacuumBC : public ArrayIntegratedBC
 public:
   ArrayVacuumBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealEigenVector computeQpResidual() override;
   virtual RealEigenVector computeQpJacobian() override;
