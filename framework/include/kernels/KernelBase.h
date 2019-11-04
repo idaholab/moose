@@ -58,9 +58,9 @@ class KernelBase : public MooseObject,
                    public TaggingInterface
 {
 public:
-  KernelBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  KernelBase(const InputParameters & parameters);
 
   virtual ~KernelBase();
 

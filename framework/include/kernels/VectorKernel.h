@@ -20,6 +20,8 @@ InputParameters validParams<VectorKernel>();
 class VectorKernel : public KernelBase, public MooseVariableInterface<RealVectorValue>
 {
 public:
+  static InputParameters validParams();
+
   VectorKernel(const InputParameters & parameters);
 
   /// Compute this VectorKernel's contribution to the residual

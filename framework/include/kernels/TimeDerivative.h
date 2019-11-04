@@ -20,6 +20,8 @@ InputParameters validParams<TimeDerivative>();
 class TimeDerivative : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   TimeDerivative(const InputParameters & parameters);
 
   virtual void computeJacobian() override;

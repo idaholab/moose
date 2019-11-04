@@ -30,9 +30,9 @@ template <typename T, ComputeStage compute_stage>
 class ADKernelGradTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
-  ADKernelGradTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADKernelGradTempl(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

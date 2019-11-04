@@ -20,8 +20,9 @@ template <ComputeStage compute_stage>
 class ADDiffusion : public ADKernelGrad<compute_stage>
 {
 public:
-  ADDiffusion(const InputParameters & parameters);
   static InputParameters validParams();
+
+  ADDiffusion(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

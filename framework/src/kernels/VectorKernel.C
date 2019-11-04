@@ -17,11 +17,12 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(VectorKernel);
+
 InputParameters
-validParams<VectorKernel>()
+VectorKernel::validParams()
 {
-  InputParameters params = validParams<KernelBase>();
+  InputParameters params = KernelBase::validParams();
   params.registerBase("VectorKernel");
   return params;
 }

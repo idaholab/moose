@@ -19,9 +19,9 @@ template <typename T, ComputeStage compute_stage>
 class ADTimeKernelValueTempl : public ADKernelValueTempl<T, compute_stage>
 {
 public:
-  ADTimeKernelValueTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADTimeKernelValueTempl(const InputParameters & parameters);
 
 protected:
   /// Holds the time derivatives at the quadrature points

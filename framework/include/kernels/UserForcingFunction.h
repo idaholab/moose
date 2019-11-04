@@ -17,6 +17,8 @@
 class UserForcingFunction : public BodyForce
 {
 public:
+  static InputParameters validParams();
+
   UserForcingFunction(const InputParameters & parameters);
 
 protected:

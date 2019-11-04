@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", ParsedODEKernel);
 
-template <>
+defineLegacyParams(ParsedODEKernel);
+
 InputParameters
-validParams<ParsedODEKernel>()
+ParsedODEKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = ODEKernel::validParams();
+  params += FunctionParserUtils::validParams();
   params.addClassDescription("Parsed ODE function kernel.");
 
   params.addRequiredParam<std::string>("function", "function expression");

@@ -25,9 +25,9 @@ InputParameters validParams<AnisotropicDiffusion>();
 class AnisotropicDiffusion : public Kernel
 {
 public:
-  AnisotropicDiffusion(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AnisotropicDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

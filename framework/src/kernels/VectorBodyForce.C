@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorBodyForce);
 
-template <>
+defineLegacyParams(VectorBodyForce);
+
 InputParameters
-validParams<VectorBodyForce>()
+VectorBodyForce::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Demonstrates the multiple ways that scalar values can be introduced "
       "into kernels, e.g. (controllable) constants, functions, and "

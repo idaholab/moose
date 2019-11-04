@@ -30,9 +30,9 @@ template <ComputeStage compute_stage>
 class ADBodyForce : public ADKernelValue<compute_stage>
 {
 public:
-  ADBodyForce(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADBodyForce(const InputParameters & parameters);
 
 protected:
   virtual ADReal precomputeQpResidual() override;

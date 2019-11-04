@@ -30,9 +30,9 @@ template <typename T, ComputeStage compute_stage>
 class ADKernelStabilizedTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
-  ADKernelStabilizedTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADKernelStabilizedTempl(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

@@ -21,9 +21,9 @@ template <ComputeStage compute_stage>
 class ADVectorTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
 {
 public:
-  ADVectorTimeDerivative(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADVectorTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
