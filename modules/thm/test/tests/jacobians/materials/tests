@@ -163,6 +163,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./surface_tension]
+    type = 'PetscJacobianTester'
+    input = 'surface_tension.i'
+    ratio_tol = 5e-14
+    difference_tol = 5e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./sound_speed_7eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_7eqn.i'
