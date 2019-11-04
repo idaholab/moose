@@ -27,6 +27,8 @@ InputParameters validParams<NodalEqualValueConstraint>();
 class NodalEqualValueConstraint : public NodalScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   NodalEqualValueConstraint(const InputParameters & parameters);
 
   virtual void computeResidual() override;

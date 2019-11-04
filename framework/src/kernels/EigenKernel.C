@@ -19,11 +19,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(EigenKernel);
+
 InputParameters
-validParams<EigenKernel>()
+EigenKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<bool>(
       "eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
   params.addParam<PostprocessorName>(

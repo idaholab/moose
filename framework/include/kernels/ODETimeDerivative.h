@@ -20,6 +20,8 @@ InputParameters validParams<ODETimeDerivative>();
 class ODETimeDerivative : public ODETimeKernel
 {
 public:
+  static InputParameters validParams();
+
   ODETimeDerivative(const InputParameters & parameters);
 
 protected:

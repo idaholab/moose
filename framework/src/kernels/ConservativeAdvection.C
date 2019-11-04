@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ConservativeAdvection);
 
-template <>
+defineLegacyParams(ConservativeAdvection);
+
 InputParameters
-validParams<ConservativeAdvection>()
+ConservativeAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                              "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");

@@ -18,11 +18,12 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ArrayKernel);
+
 InputParameters
-validParams<ArrayKernel>()
+ArrayKernel::validParams()
 {
-  InputParameters params = validParams<KernelBase>();
+  InputParameters params = KernelBase::validParams();
   params.registerBase("ArrayKernel");
   return params;
 }

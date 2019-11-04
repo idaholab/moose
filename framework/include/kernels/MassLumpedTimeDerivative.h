@@ -20,6 +20,8 @@ InputParameters validParams<MassLumpedTimeDerivative>();
 class MassLumpedTimeDerivative : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   MassLumpedTimeDerivative(const InputParameters & parameters);
 
   virtual void computeJacobian() override;

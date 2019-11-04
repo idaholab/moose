@@ -24,6 +24,8 @@ InputParameters validParams<ArrayTimeKernel>();
 class ArrayTimeKernel : public ArrayKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayTimeKernel(const InputParameters & parameters);
 
 protected:

@@ -15,11 +15,10 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 
-template <>
 InputParameters
-validParams<NodalScalarKernel>()
+NodalScalarKernel::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addParam<std::vector<dof_id_type>>("nodes", "Supply nodes using node ids");
   params.addParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs  from the mesh where this nodal kernel applies");

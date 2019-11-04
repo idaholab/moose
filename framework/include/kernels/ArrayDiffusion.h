@@ -19,6 +19,8 @@ InputParameters validParams<ArrayDiffusion>();
 class ArrayDiffusion : public ArrayKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayDiffusion(const InputParameters & parameters);
 
 protected:

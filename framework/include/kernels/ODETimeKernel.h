@@ -24,6 +24,8 @@ InputParameters validParams<ODETimeKernel>();
 class ODETimeKernel : public ODEKernel
 {
 public:
+  static InputParameters validParams();
+
   ODETimeKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;

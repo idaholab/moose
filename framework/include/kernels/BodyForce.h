@@ -29,6 +29,8 @@ InputParameters validParams<BodyForce>();
 class BodyForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   BodyForce(const InputParameters & parameters);
 
 protected:

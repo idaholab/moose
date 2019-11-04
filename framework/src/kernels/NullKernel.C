@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", NullKernel);
 
-template <>
+defineLegacyParams(NullKernel);
+
 InputParameters
-validParams<NullKernel>()
+NullKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Kernel that sets a zero residual.");
   params.addParam<Real>(
       "jacobian_fill",

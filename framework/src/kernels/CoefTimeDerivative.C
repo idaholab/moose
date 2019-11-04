@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CoefTimeDerivative);
 
-template <>
+defineLegacyParams(CoefTimeDerivative);
+
 InputParameters
-validParams<CoefTimeDerivative>()
+CoefTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addParam<Real>("Coefficient", 1, "The coefficient for the time derivative kernel");
   return params;
 }
