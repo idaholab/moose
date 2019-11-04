@@ -24,6 +24,8 @@ InputParameters validParams<AxisymmetricCenterlineAverageValue>();
 class AxisymmetricCenterlineAverageValue : public SideAverageValue
 {
 public:
+  static InputParameters validParams();
+
   AxisymmetricCenterlineAverageValue(const InputParameters & parameters);
 
 protected:

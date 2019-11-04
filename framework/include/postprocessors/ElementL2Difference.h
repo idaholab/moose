@@ -23,6 +23,8 @@ InputParameters validParams<ElementL2Difference>();
 class ElementL2Difference : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementL2Difference(const InputParameters & parameters);
 
   virtual Real getValue() override;

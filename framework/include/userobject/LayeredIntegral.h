@@ -26,6 +26,8 @@ InputParameters validParams<LayeredIntegral>();
 class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {
 public:
+  static InputParameters validParams();
+
   LayeredIntegral(const InputParameters & parameters);
 
   /**

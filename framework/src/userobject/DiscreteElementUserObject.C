@@ -9,11 +9,12 @@
 
 #include "DiscreteElementUserObject.h"
 
-template <>
+defineLegacyParams(DiscreteElementUserObject);
+
 InputParameters
-validParams<DiscreteElementUserObject>()
+DiscreteElementUserObject::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
 
   // UOs of this type should not be executed by MOOSE, but only called directly by the user
   params.set<ExecFlagEnum>("execute_on") = EXEC_CUSTOM;

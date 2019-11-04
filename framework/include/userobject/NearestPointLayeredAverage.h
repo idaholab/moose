@@ -31,6 +31,8 @@ class NearestPointLayeredAverage
   : public NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>
 {
 public:
+  static InputParameters validParams();
+
   NearestPointLayeredAverage(const InputParameters & parameters);
 };
 

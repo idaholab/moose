@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NumLinearIterations);
 
-template <>
+defineLegacyParams(NumLinearIterations);
+
 InputParameters
-validParams<NumLinearIterations>()
+NumLinearIterations::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", GeometrySphere);
 
-template <>
+defineLegacyParams(GeometrySphere);
+
 InputParameters
-validParams<GeometrySphere>()
+GeometrySphere::validParams()
 {
-  InputParameters params = validParams<GeometryBase>();
+  InputParameters params = GeometryBase::validParams();
   params.addClassDescription("Snap nodes to the surface of a sphere on adaptivity");
   params.addParam<Point>("center", "Sphere center");
   params.addParam<Real>("radius", "Sphere radius");

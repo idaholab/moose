@@ -11,11 +11,12 @@
 #include "MooseMesh.h"
 #include "libmesh/mesh_base.h"
 
-template <>
+defineLegacyParams(GeometryBase);
+
 InputParameters
-validParams<GeometryBase>()
+GeometryBase::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Snap refined nodes on a given boundary to a given geometry");
   params.addParam<std::vector<BoundaryName>>(
       "boundary", "List of boundaries whose nodes are snapped to a given geometry");

@@ -33,6 +33,8 @@ InputParameters validParams<ComparisonPostprocessor>();
 class ComparisonPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ComparisonPostprocessor(const InputParameters & parameters);
 
 protected:

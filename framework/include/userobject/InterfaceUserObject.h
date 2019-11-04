@@ -36,6 +36,8 @@ class InterfaceUserObject : public UserObject,
                             public PostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   InterfaceUserObject(const InputParameters & parameters);
 
 protected:

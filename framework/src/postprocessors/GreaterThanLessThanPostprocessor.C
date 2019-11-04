@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", GreaterThanLessThanPostprocessor);
 
-template <>
+defineLegacyParams(GreaterThanLessThanPostprocessor);
+
 InputParameters
-validParams<GreaterThanLessThanPostprocessor>()
+GreaterThanLessThanPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to conduct a comparison for");
   params.addParam<SubdomainName>("subdomain", "The subdomain that the variable lives on");

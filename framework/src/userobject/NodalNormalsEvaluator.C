@@ -17,11 +17,12 @@ Threads::spin_mutex nodal_normals_evaluator_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsEvaluator);
 
-template <>
+defineLegacyParams(NodalNormalsEvaluator);
+
 InputParameters
-validParams<NodalNormalsEvaluator>()
+NodalNormalsEvaluator::validParams()
 {
-  InputParameters params = validParams<NodalUserObject>();
+  InputParameters params = NodalUserObject::validParams();
   params.set<bool>("_dual_restrictable") = true;
   params.set<std::vector<SubdomainName>>("block") = {"ANY_BLOCK_ID"};
   return params;

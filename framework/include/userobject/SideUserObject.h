@@ -35,6 +35,8 @@ class SideUserObject : public UserObject,
                        protected PostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   SideUserObject(const InputParameters & parameters);
 
 protected:

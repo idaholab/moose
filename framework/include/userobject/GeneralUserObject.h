@@ -35,6 +35,8 @@ class GeneralUserObject : public UserObject,
                           protected VectorPostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   GeneralUserObject(const InputParameters & parameters);
 
   const std::set<std::string> & getRequestedItems() override;

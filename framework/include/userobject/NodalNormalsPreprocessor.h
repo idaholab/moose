@@ -29,6 +29,8 @@ InputParameters validParams<NodalNormalsPreprocessor>();
 class NodalNormalsPreprocessor : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   NodalNormalsPreprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

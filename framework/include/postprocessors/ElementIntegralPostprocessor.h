@@ -26,6 +26,8 @@ InputParameters validParams<ElementIntegralPostprocessor>();
 class ElementIntegralPostprocessor : public ElementPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

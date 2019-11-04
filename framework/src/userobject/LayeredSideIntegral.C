@@ -11,12 +11,13 @@
 
 registerMooseObject("MooseApp", LayeredSideIntegral);
 
-template <>
+defineLegacyParams(LayeredSideIntegral);
+
 InputParameters
-validParams<LayeredSideIntegral>()
+LayeredSideIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralVariableUserObject>();
-  params += validParams<LayeredBase>();
+  InputParameters params = SideIntegralVariableUserObject::validParams();
+  params += LayeredBase::validParams();
   return params;
 }
 

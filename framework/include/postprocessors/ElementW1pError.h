@@ -37,6 +37,8 @@ InputParameters validParams<ElementW1pError>();
 class ElementW1pError : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementW1pError(const InputParameters & parameters);
 
   virtual Real getValue() override;

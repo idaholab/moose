@@ -9,11 +9,12 @@
 
 #include "ShapeSideUserObject.h"
 
-template <>
+defineLegacyParams(ShapeSideUserObject);
+
 InputParameters
-validParams<ShapeSideUserObject>()
+ShapeSideUserObject::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   params += ShapeUserObject<SideUserObject>::validParams();
   return params;
 }

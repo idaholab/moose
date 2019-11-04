@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementIntegralVariablePostprocessor);
 
-template <>
+defineLegacyParams(ElementIntegralVariablePostprocessor);
+
 InputParameters
-validParams<ElementIntegralVariablePostprocessor>()
+ElementIntegralVariablePostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }

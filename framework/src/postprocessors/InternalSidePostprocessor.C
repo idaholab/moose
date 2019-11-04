@@ -9,12 +9,13 @@
 
 #include "InternalSidePostprocessor.h"
 
-template <>
+defineLegacyParams(InternalSidePostprocessor);
+
 InputParameters
-validParams<InternalSidePostprocessor>()
+InternalSidePostprocessor::validParams()
 {
-  InputParameters params = validParams<InternalSideUserObject>();
-  params += validParams<Postprocessor>();
+  InputParameters params = InternalSideUserObject::validParams();
+  params += Postprocessor::validParams();
   return params;
 }
 

@@ -21,6 +21,8 @@ InputParameters validParams<DiscreteElementUserObject>();
 class DiscreteElementUserObject : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   DiscreteElementUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;

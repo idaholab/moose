@@ -25,6 +25,8 @@ InputParameters validParams<LayeredSideAverage>();
 class LayeredSideAverage : public LayeredSideIntegral
 {
 public:
+  static InputParameters validParams();
+
   LayeredSideAverage(const InputParameters & parameters);
 
   virtual void initialize() override;

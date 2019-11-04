@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ElementH1SemiError);
 
-template <>
+defineLegacyParams(ElementH1SemiError);
+
 InputParameters
-validParams<ElementH1SemiError>()
+ElementH1SemiError::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }

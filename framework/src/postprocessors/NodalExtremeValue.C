@@ -14,15 +14,16 @@
 
 registerMooseObject("MooseApp", NodalExtremeValue);
 
-template <>
+defineLegacyParams(NodalExtremeValue);
+
 InputParameters
-validParams<NodalExtremeValue>()
+NodalExtremeValue::validParams()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1", "max");
 
   // Define the parameters
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
   params.addParam<MooseEnum>("value_type",
                              type_options,
                              "Type of extreme value to return. 'max' "

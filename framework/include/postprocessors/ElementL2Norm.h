@@ -20,6 +20,8 @@ InputParameters validParams<ElementL2Norm>();
 class ElementL2Norm : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementL2Norm(const InputParameters & parameters);
 
   virtual Real getValue() override;

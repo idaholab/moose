@@ -20,6 +20,8 @@ InputParameters validParams<NumVars>();
 class NumVars : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumVars(const InputParameters & parameters);
 
   virtual void initialize() override {}

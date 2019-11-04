@@ -26,6 +26,8 @@ InputParameters validParams<SideAverageValue>();
 class SideAverageValue : public SideIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SideAverageValue(const InputParameters & parameters);
 
   virtual void initialize() override;

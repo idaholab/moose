@@ -24,6 +24,8 @@ InputParameters validParams<NodalProxyMaxValue>();
 class NodalProxyMaxValue : public NodalVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalProxyMaxValue(const InputParameters & parameters);
 
   virtual void initialize() override;

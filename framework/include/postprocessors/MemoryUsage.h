@@ -24,6 +24,8 @@ InputParameters validParams<MemoryUsage>();
 class MemoryUsage : public GeneralPostprocessor, public MemoryUsageReporter
 {
 public:
+  static InputParameters validParams();
+
   MemoryUsage(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

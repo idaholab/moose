@@ -20,6 +20,8 @@ InputParameters validParams<VariableResidual>();
 class VariableResidual : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   VariableResidual(const InputParameters & parameters);
 
   virtual void initialize() override;

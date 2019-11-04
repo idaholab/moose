@@ -9,12 +9,13 @@
 
 #include "GeneralPostprocessor.h"
 
-template <>
+defineLegacyParams(GeneralPostprocessor);
+
 InputParameters
-validParams<GeneralPostprocessor>()
+GeneralPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  params += validParams<Postprocessor>();
+  InputParameters params = GeneralUserObject::validParams();
+  params += Postprocessor::validParams();
   return params;
 }
 

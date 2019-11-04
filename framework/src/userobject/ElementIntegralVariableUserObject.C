@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementIntegralVariableUserObject);
 
-template <>
+defineLegacyParams(ElementIntegralVariableUserObject);
+
 InputParameters
-validParams<ElementIntegralVariableUserObject>()
+ElementIntegralVariableUserObject::validParams()
 {
-  InputParameters params = validParams<ElementIntegralUserObject>();
+  InputParameters params = ElementIntegralUserObject::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }

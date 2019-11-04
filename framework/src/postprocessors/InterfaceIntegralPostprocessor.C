@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(InterfaceIntegralPostprocessor);
+
 InputParameters
-validParams<InterfaceIntegralPostprocessor>()
+InterfaceIntegralPostprocessor::validParams()
 {
-  InputParameters params = validParams<InterfacePostprocessor>();
+  InputParameters params = InterfacePostprocessor::validParams();
   params.addClassDescription(
       "Postprocessor class adding basic capabilities to compute an integral over an interface. "
       "This class is still abstract, refer to InterfaceIntegralVariableValuePostprocessor for a "

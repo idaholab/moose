@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionElementIntegral);
 
-template <>
+defineLegacyParams(FunctionElementIntegral);
+
 InputParameters
-validParams<FunctionElementIntegral>()
+FunctionElementIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
 
   params.addRequiredParam<FunctionName>("function", "Name of function to integrate");
 

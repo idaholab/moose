@@ -29,6 +29,8 @@ InputParameters validParams<LinearCombinationPostprocessor>();
 class LinearCombinationPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   LinearCombinationPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

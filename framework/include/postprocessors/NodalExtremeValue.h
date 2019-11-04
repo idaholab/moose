@@ -22,6 +22,8 @@ InputParameters validParams<NodalExtremeValue>();
 class NodalExtremeValue : public NodalVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /// What type of extreme value we are going to compute
   enum ExtremeType
   {

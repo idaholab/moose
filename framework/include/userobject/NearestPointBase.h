@@ -55,6 +55,8 @@ template <typename UserObjectType, typename BaseType>
 class NearestPointBase : public BaseType
 {
 public:
+  static InputParameters validParams();
+
   NearestPointBase(const InputParameters & parameters);
   ~NearestPointBase();
 

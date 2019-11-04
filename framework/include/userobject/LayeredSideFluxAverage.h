@@ -25,6 +25,8 @@ InputParameters validParams<LayeredSideFluxAverage>();
 class LayeredSideFluxAverage : public LayeredSideAverage
 {
 public:
+  static InputParameters validParams();
+
   LayeredSideFluxAverage(const InputParameters & parameters);
 
 protected:

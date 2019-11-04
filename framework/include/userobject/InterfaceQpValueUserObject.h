@@ -24,6 +24,8 @@ InputParameters validParams<InterfaceQpValueUserObject>();
 class InterfaceQpValueUserObject : public InterfaceValueUserObject
 {
 public:
+  static InputParameters validParams();
+
   InterfaceQpValueUserObject(const InputParameters & parameters);
   virtual ~InterfaceQpValueUserObject();
 

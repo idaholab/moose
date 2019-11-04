@@ -20,6 +20,8 @@ InputParameters validParams<VariableInnerProduct>();
 class VariableInnerProduct : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   VariableInnerProduct(const InputParameters & parameters);
 
 protected:

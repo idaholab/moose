@@ -22,6 +22,8 @@ InputParameters validParams<NodalPostprocessor>();
 class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalPostprocessor(const InputParameters & parameters);
 
   /**

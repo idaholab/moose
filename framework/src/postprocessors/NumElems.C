@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NumElems);
 
-template <>
+defineLegacyParams(NumElems);
+
 InputParameters
-validParams<NumElems>()
+NumElems::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum filt("active total", "active");
   params.addParam<MooseEnum>(
       "elem_filter",

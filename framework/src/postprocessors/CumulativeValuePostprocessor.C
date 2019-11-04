@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CumulativeValuePostprocessor);
 
-template <>
+defineLegacyParams(CumulativeValuePostprocessor);
+
 InputParameters
-validParams<CumulativeValuePostprocessor>()
+CumulativeValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
   return params;
 }

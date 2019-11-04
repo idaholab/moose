@@ -15,6 +15,8 @@
 class ThreadedGeneralUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ThreadedGeneralUserObject(const InputParameters & parameters);
   virtual ~ThreadedGeneralUserObject() = default;
   virtual void threadJoin(const UserObject &) override;

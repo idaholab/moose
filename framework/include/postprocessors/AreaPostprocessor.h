@@ -23,6 +23,8 @@ InputParameters validParams<AreaPostprocessor>();
 class AreaPostprocessor : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   AreaPostprocessor(const InputParameters & parameters);
 
   virtual void threadJoin(const UserObject & y) override;

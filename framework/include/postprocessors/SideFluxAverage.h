@@ -20,6 +20,8 @@ InputParameters validParams<SideFluxAverage>();
 class SideFluxAverage : public SideFluxIntegral
 {
 public:
+  static InputParameters validParams();
+
   SideFluxAverage(const InputParameters & parameters);
 
   virtual void initialize() override;

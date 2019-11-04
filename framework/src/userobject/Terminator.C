@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", Terminator);
 
-template <>
+defineLegacyParams(Terminator);
+
 InputParameters
-validParams<Terminator>()
+Terminator::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredCustomTypeParam<std::string>(
       "expression",
       "FunctionExpression",

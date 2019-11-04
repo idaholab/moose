@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SideFluxIntegral);
 
-template <>
+defineLegacyParams(SideFluxIntegral);
+
 InputParameters
-validParams<SideFluxIntegral>()
+SideFluxIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralVariablePostprocessor>();
+  InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");

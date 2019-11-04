@@ -43,6 +43,8 @@ class ElementUserObject : public UserObject,
                           public RandomInterface
 {
 public:
+  static InputParameters validParams();
+
   ElementUserObject(const InputParameters & parameters);
 
 protected:

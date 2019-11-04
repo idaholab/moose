@@ -21,6 +21,8 @@ InputParameters validParams<SidePostprocessor>();
 class SidePostprocessor : public SideUserObject, public Postprocessor
 {
 public:
+  static InputParameters validParams();
+
   SidePostprocessor(const InputParameters & parameters);
 
   /**
