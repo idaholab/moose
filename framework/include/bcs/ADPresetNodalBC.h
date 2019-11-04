@@ -32,6 +32,8 @@ public:
 
   void computeValue(NumericVector<Number> & current_solution);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpResidual() override;
   virtual ADReal computeQpValue() = 0;

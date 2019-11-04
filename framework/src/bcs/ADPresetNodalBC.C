@@ -14,10 +14,17 @@
 
 #include "libmesh/numeric_vector.h"
 
-defineADValidParams(ADPresetNodalBC,
-                    ADNodalBC,
-                    params.addClassDescription(
-                        "Nodal boundary condition base class with preset solution vector values."));
+defineADLegacyParams(ADPresetNodalBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADPresetNodalBC<compute_stage>::validParams()
+{
+  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  params.addClassDescription(
+      "Nodal boundary condition base class with preset solution vector values.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADPresetNodalBC<compute_stage>::ADPresetNodalBC(const InputParameters & parameters)

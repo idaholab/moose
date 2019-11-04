@@ -27,6 +27,8 @@ class ADVectorFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
 public:
   ADVectorFunctionDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADRealVectorValue computeQpResidual() override;
 
