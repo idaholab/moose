@@ -30,6 +30,8 @@ class BlockWeightedPartitioner : public PetscExternalPartitioner
 public:
   BlockWeightedPartitioner(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual std::unique_ptr<Partitioner> clone() const override;
 
   virtual dof_id_type computeElementWeight(Elem & elm) override;

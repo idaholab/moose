@@ -30,6 +30,8 @@ public:
   LibmeshPartitioner(const InputParameters & params);
   virtual ~LibmeshPartitioner();
 
+  static InputParameters validParams();
+
   virtual std::unique_ptr<Partitioner> clone() const;
   virtual void partition(MeshBase & mesh, const unsigned int n);
   virtual void partition(MeshBase & mesh);
@@ -44,4 +46,3 @@ protected:
   const std::vector<std::vector<SubdomainName>> & _subdomain_blocks;
   MooseMesh & _mesh;
 };
-

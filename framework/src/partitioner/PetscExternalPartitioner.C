@@ -21,11 +21,12 @@ registerMooseObject("MooseApp", PetscExternalPartitioner);
 
 #include <memory>
 
-template <>
+defineLegacyParams(PetscExternalPartitioner);
+
 InputParameters
-validParams<PetscExternalPartitioner>()
+PetscExternalPartitioner::validParams()
 {
-  InputParameters params = validParams<MoosePartitioner>();
+  InputParameters params = MoosePartitioner::validParams();
 
   MooseEnum partPackage("parmetis ptscotch chaco party hierarch", "parmetis", false);
 

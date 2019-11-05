@@ -28,6 +28,8 @@ class PetscExternalPartitioner : public MoosePartitioner
 public:
   PetscExternalPartitioner(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual std::unique_ptr<Partitioner> clone() const override;
 
   virtual dof_id_type computeElementWeight(Elem & elm);

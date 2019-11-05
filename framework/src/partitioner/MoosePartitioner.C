@@ -10,11 +10,12 @@
 #include "MoosePartitioner.h"
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(MoosePartitioner);
+
 InputParameters
-validParams<MoosePartitioner>()
+MoosePartitioner::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("MoosePartitioner");
   return params;

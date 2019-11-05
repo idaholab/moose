@@ -28,5 +28,6 @@ class MoosePartitioner : public libMesh::Partitioner, public MooseObject, public
 {
 public:
   MoosePartitioner(const InputParameters & params);
-};
 
+  static InputParameters validParams();
+};
