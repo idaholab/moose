@@ -23,6 +23,8 @@ class SpiralAnnularMesh : public MooseMesh
 {
 public:
   SpiralAnnularMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   SpiralAnnularMesh(const SpiralAnnularMesh & /* other_mesh */) = default;
 
   // No copy

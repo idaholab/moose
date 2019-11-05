@@ -19,12 +19,13 @@
 
 registerMooseObject("MooseApp", ImageMesh);
 
-template <>
+defineLegacyParams(ImageMesh);
+
 InputParameters
-validParams<ImageMesh>()
+ImageMesh::validParams()
 {
-  InputParameters params = validParams<GeneratedMesh>();
-  params += validParams<FileRangeBuilder>();
+  InputParameters params = GeneratedMesh::validParams();
+  params += FileRangeBuilder::validParams();
   params.addClassDescription("Generated mesh with the aspect ratio of a given image stack.");
 
   // Add ImageMesh-specific params

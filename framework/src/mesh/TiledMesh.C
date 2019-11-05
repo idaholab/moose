@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", TiledMesh);
 
-template <>
+defineLegacyParams(TiledMesh);
+
 InputParameters
-validParams<TiledMesh>()
+TiledMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
 
   params.addParam<Real>("x_width", 0, "The tile width in the x direction");

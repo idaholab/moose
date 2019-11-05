@@ -47,11 +47,12 @@ extern "C"
 
 registerMooseObject("MooseApp", DistributedGeneratedMesh);
 
-template <>
+defineLegacyParams(DistributedGeneratedMesh);
+
 InputParameters
-validParams<DistributedGeneratedMesh>()
+DistributedGeneratedMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
 
   params.addParam<bool>("verbose", false, "Turn on verbose printing for the mesh generation");
 

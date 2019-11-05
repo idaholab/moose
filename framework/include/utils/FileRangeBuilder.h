@@ -39,6 +39,8 @@ class FileRangeBuilder
 {
 public:
   FileRangeBuilder(const InputParameters & params);
+  static InputParameters validParams();
+
   virtual ~FileRangeBuilder() = default;
 
   std::string fileSuffix() { return _file_suffix; }
@@ -52,4 +54,3 @@ protected:
   std::string _file_suffix;
   std::vector<std::string> _filenames;
 };
-

@@ -25,6 +25,8 @@ class ConcentricCircleMesh : public MooseMesh
 public:
   ConcentricCircleMesh(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   ConcentricCircleMesh(const ConcentricCircleMesh & /* other_mesh */) = default;
 
   ConcentricCircleMesh & operator=(const ConcentricCircleMesh & other_mesh) = delete;
