@@ -86,6 +86,12 @@ wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
   return Nu * k / Dh;
 }
 
+Real
+Dean(Real Re, Real doD)
+{
+  return Re * std::sqrt(doD);
+}
+
 void
 vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, Real & dvel_darhouA)
 {
