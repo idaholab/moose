@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", PointValue);
 
-template <>
+defineLegacyParams(PointValue);
+
 InputParameters
-validParams<PointValue>()
+PointValue::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on.");
   params.addRequiredParam<Point>("point",

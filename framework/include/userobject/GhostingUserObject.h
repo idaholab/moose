@@ -31,6 +31,8 @@ InputParameters validParams<GhostingUserObject>();
 class GhostingUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GhostingUserObject(const InputParameters & parameters);
 
   virtual void initialSetup() override;

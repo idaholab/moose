@@ -20,6 +20,8 @@ InputParameters validParams<NumLinearIterations>();
 class NumLinearIterations : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumLinearIterations(const InputParameters & parameters);
 
   virtual void initialize() override {}

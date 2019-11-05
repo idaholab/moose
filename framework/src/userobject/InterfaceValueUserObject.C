@@ -10,11 +10,12 @@
 #include "InterfaceValueUserObject.h"
 #include "InterfaceValueTools.h"
 
-template <>
+defineLegacyParams(InterfaceValueUserObject);
+
 InputParameters
-validParams<InterfaceValueUserObject>()
+InterfaceValueUserObject::validParams()
 {
-  InputParameters params = validParams<InterfaceUserObject>();
+  InputParameters params = InterfaceUserObject::validParams();
   params.addParam<MooseEnum>("interface_value_type",
                              InterfaceValueTools::InterfaceAverageOptions(),
                              "Type of scalar output");

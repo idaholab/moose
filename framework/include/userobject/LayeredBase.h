@@ -40,6 +40,8 @@ InputParameters validParams<LayeredBase>();
 class LayeredBase : private Restartable
 {
 public:
+  static InputParameters validParams();
+
   LayeredBase(const InputParameters & parameters);
 
   /**

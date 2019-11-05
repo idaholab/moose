@@ -28,6 +28,8 @@ class ElementIntegralArrayVariablePostprocessor : public ElementIntegralPostproc
                                                   public MooseVariableInterface<RealEigenVector>
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralArrayVariablePostprocessor(const InputParameters & parameters);
 
 protected:

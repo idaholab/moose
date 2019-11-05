@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", VerifyNodalUniqueID);
 
-template <>
+defineLegacyParams(VerifyNodalUniqueID);
+
 InputParameters
-validParams<VerifyNodalUniqueID>()
+VerifyNodalUniqueID::validParams()
 {
-  InputParameters params = validParams<NodalUserObject>();
+  InputParameters params = NodalUserObject::validParams();
   return params;
 }
 

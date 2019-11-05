@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementIntegralMaterialProperty);
 
-template <>
+defineLegacyParams(ElementIntegralMaterialProperty);
+
 InputParameters
-validParams<ElementIntegralMaterialProperty>()
+ElementIntegralMaterialProperty::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
   return params;
 }

@@ -28,6 +28,8 @@ class SideIntegralVariablePostprocessor : public SideIntegralPostprocessor,
                                           public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   SideIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:

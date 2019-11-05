@@ -27,6 +27,8 @@ InputParameters validParams<PerfGraphData>();
 class PerfGraphData : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PerfGraphData(const InputParameters & parameters);
 
   virtual void initialize() override {}

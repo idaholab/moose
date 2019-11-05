@@ -36,6 +36,8 @@ class InternalSideUserObject : public UserObject,
                                public PostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   InternalSideUserObject(const InputParameters & parameters);
 
 protected:

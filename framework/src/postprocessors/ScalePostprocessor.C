@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ScalePostprocessor);
 
-template <>
+defineLegacyParams(ScalePostprocessor);
+
 InputParameters
-validParams<ScalePostprocessor>()
+ScalePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("value", "The postprocessor to be scaled");
   params.addParam<Real>("scaling_factor", 1.0, "The scaling factor");
 

@@ -19,6 +19,8 @@ InputParameters validParams<NumRelationshipManagers>();
 class NumRelationshipManagers : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumRelationshipManagers(const InputParameters & parameters);
 
   virtual void initialize() override {}

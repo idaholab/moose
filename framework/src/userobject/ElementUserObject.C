@@ -14,15 +14,16 @@
 
 #include "libmesh/elem.h"
 
-template <>
+defineLegacyParams(ElementUserObject);
+
 InputParameters
-validParams<ElementUserObject>()
+ElementUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<MaterialPropertyInterface>();
-  params += validParams<TransientInterface>();
-  params += validParams<RandomInterface>();
+  InputParameters params = UserObject::validParams();
+  params += ::validParams<BlockRestrictable>();
+  params += ::validParams<MaterialPropertyInterface>();
+  params += ::validParams<TransientInterface>();
+  params += ::validParams<RandomInterface>();
   return params;
 }
 

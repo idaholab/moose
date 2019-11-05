@@ -25,6 +25,8 @@ InputParameters validParams<CumulativeValuePostprocessor>();
 class CumulativeValuePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   CumulativeValuePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

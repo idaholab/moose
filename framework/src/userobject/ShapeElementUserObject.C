@@ -9,11 +9,12 @@
 
 #include "ShapeElementUserObject.h"
 
-template <>
+defineLegacyParams(ShapeElementUserObject);
+
 InputParameters
-validParams<ShapeElementUserObject>()
+ShapeElementUserObject::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params += ShapeUserObject<ElementUserObject>::validParams();
   return params;
 }

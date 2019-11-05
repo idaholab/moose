@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", NumVars);
 
-template <>
+defineLegacyParams(NumVars);
+
 InputParameters
-validParams<NumVars>()
+NumVars::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   MooseEnum system_enum("NL AUX ALL", "ALL");
   params.addParam<MooseEnum>("system",

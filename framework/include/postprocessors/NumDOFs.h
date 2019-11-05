@@ -27,6 +27,8 @@ InputParameters validParams<NumDOFs>();
 class NumDOFs : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumDOFs(const InputParameters & parameters);
 
   virtual void initialize() override {}

@@ -31,5 +31,7 @@ class NearestPointLayeredSideAverage
   : public NearestPointBase<LayeredSideAverage, SideIntegralVariableUserObject>
 {
 public:
+  static InputParameters validParams();
+
   NearestPointLayeredSideAverage(const InputParameters & parameters);
 };

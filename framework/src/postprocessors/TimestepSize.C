@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", TimestepSize);
 
-template <>
+defineLegacyParams(TimestepSize);
+
 InputParameters
-validParams<TimestepSize>()
+TimestepSize::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Reports the timestep size");
   return params;
 }

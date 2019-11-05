@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NumNonlinearIterations);
 
-template <>
+defineLegacyParams(NumNonlinearIterations);
+
 InputParameters
-validParams<NumNonlinearIterations>()
+NumNonlinearIterations::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<bool>(
       "accumulate_over_step",
       false,

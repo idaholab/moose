@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementL2Norm);
 
-template <>
+defineLegacyParams(ElementL2Norm);
+
 InputParameters
-validParams<ElementL2Norm>()
+ElementL2Norm::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   return params;
 }
 

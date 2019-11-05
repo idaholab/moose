@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", NodalL2Error);
 
-template <>
+defineLegacyParams(NodalL2Error);
+
 InputParameters
-validParams<NodalL2Error>()
+NodalL2Error::validParams()
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
 
   return params;

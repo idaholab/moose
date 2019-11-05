@@ -28,6 +28,8 @@ InputParameters validParams<ElementIntegralUserObject>();
 class ElementIntegralUserObject : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -22,6 +22,8 @@ InputParameters validParams<NodalL2Error>();
 class NodalL2Error : public NodalVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalL2Error(const InputParameters & parameters);
 
   virtual void initialize() override;

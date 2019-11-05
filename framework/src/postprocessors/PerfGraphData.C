@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", PerfGraphData);
 
-template <>
+defineLegacyParams(PerfGraphData);
+
 InputParameters
-validParams<PerfGraphData>()
+PerfGraphData::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   MooseEnum data_type("SELF CHILDREN TOTAL SELF_AVG CHILDREN_AVG TOTAL_AVG SELF_PERCENT "
                       "CHILDREN_PERCENT TOTAL_PERCENT CALLS");

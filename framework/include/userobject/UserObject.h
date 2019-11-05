@@ -46,6 +46,8 @@ class UserObject : public MooseObject,
                    protected PerfGraphInterface
 {
 public:
+  static InputParameters validParams();
+
   UserObject(const InputParameters & params);
   virtual ~UserObject() = default;
 

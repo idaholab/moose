@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(SideIntegralUserObject);
+
 InputParameters
-validParams<SideIntegralUserObject>()
+SideIntegralUserObject::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   return params;
 }
 

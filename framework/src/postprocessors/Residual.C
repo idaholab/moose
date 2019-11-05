@@ -15,13 +15,14 @@
 
 registerMooseObject("MooseApp", Residual);
 
-template <>
+defineLegacyParams(Residual);
+
 InputParameters
-validParams<Residual>()
+Residual::validParams()
 {
   MooseEnum residual_types("FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET", "FINAL");
 
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<MooseEnum>("residual_type",
                              residual_types,
                              "Type of residual to be reported.  Choices are: " +

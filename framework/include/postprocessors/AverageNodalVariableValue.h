@@ -20,6 +20,8 @@ InputParameters validParams<AverageNodalVariableValue>();
 class AverageNodalVariableValue : public NodalVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   AverageNodalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementAverageSecondTimeDerivative);
 
-template <>
+defineLegacyParams(ElementAverageSecondTimeDerivative);
+
 InputParameters
-validParams<ElementAverageSecondTimeDerivative>()
+ElementAverageSecondTimeDerivative::validParams()
 {
-  InputParameters params = validParams<ElementAverageValue>();
+  InputParameters params = ElementAverageValue::validParams();
   params.addClassDescription("Computes the element averaged second derivative of variable");
   return params;
 }

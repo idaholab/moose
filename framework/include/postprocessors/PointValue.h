@@ -26,6 +26,8 @@ InputParameters validParams<PointValue>();
 class PointValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PointValue(const InputParameters & parameters);
 
   virtual void initialize() override {}

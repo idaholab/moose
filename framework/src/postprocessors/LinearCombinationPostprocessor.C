@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LinearCombinationPostprocessor);
 
-template <>
+defineLegacyParams(LinearCombinationPostprocessor);
+
 InputParameters
-validParams<LinearCombinationPostprocessor>()
+LinearCombinationPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addRequiredParam<std::vector<PostprocessorName>>("pp_names", "List of post-processors");
   params.addRequiredParam<std::vector<Real>>(

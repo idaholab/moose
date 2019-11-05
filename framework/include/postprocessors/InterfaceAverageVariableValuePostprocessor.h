@@ -26,6 +26,8 @@ class InterfaceAverageVariableValuePostprocessor
   : public InterfaceIntegralVariableValuePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InterfaceAverageVariableValuePostprocessor(const InputParameters & parameters);
   virtual Real getValue() override;
 };

@@ -22,6 +22,8 @@ InputParameters validParams<FunctionElementIntegral>();
 class FunctionElementIntegral : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   FunctionElementIntegral(const InputParameters & parameters);
 
 protected:

@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", MemoryUsage);
 
-template <>
+defineLegacyParams(MemoryUsage);
+
 InputParameters
-validParams<MemoryUsage>()
+MemoryUsage::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Memory usage statistics for the running simulation.");
   MooseEnum mem_type("physical_memory virtual_memory page_faults", "physical_memory");
   params.addParam<MooseEnum>("mem_type", mem_type, "Memory metric to report.");

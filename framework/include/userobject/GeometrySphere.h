@@ -22,6 +22,8 @@ InputParameters validParams<GeometrySphere>();
 class GeometrySphere : public GeometryBase
 {
 public:
+  static InputParameters validParams();
+
   GeometrySphere(const InputParameters & parameters);
 
 protected:

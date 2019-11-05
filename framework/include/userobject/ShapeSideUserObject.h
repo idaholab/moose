@@ -29,6 +29,8 @@ InputParameters validParams<ShapeSideUserObject>();
 class ShapeSideUserObject : public ShapeUserObject<SideUserObject>
 {
 public:
+  static InputParameters validParams();
+
   ShapeSideUserObject(const InputParameters & parameters);
 };
 

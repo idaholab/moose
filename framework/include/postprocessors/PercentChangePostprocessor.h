@@ -24,6 +24,8 @@ InputParameters validParams<PercentChangePostprocessor>();
 class PercentChangePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PercentChangePostprocessor(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void execute() override;

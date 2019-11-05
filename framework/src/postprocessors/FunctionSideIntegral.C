@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionSideIntegral);
 
-template <>
+defineLegacyParams(FunctionSideIntegral);
+
 InputParameters
-validParams<FunctionSideIntegral>()
+FunctionSideIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addParam<FunctionName>(
       "function",
       1.0,

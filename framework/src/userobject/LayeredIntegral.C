@@ -13,12 +13,13 @@
 
 registerMooseObject("MooseApp", LayeredIntegral);
 
-template <>
+defineLegacyParams(LayeredIntegral);
+
 InputParameters
-validParams<LayeredIntegral>()
+LayeredIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariableUserObject>();
-  params += validParams<LayeredBase>();
+  InputParameters params = ElementIntegralVariableUserObject::validParams();
+  params += LayeredBase::validParams();
   return params;
 }
 

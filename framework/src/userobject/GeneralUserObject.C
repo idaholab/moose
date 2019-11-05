@@ -9,12 +9,13 @@
 
 #include "GeneralUserObject.h"
 
-template <>
+defineLegacyParams(GeneralUserObject);
+
 InputParameters
-validParams<GeneralUserObject>()
+GeneralUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = UserObject::validParams();
+  params += ::validParams<MaterialPropertyInterface>();
   params.addParam<bool>(
       "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
   params.addParamNamesToGroup("force_preaux", "Advanced");

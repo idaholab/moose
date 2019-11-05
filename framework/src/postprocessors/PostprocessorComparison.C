@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PostprocessorComparison);
 
-template <>
+defineLegacyParams(PostprocessorComparison);
+
 InputParameters
-validParams<PostprocessorComparison>()
+PostprocessorComparison::validParams()
 {
-  InputParameters params = validParams<ComparisonPostprocessor>();
+  InputParameters params = ComparisonPostprocessor::validParams();
 
   params.addRequiredParam<PostprocessorName>("value_a",
                                              "The first post-processor or value in the comparison");

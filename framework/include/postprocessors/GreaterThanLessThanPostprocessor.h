@@ -25,6 +25,8 @@ InputParameters validParams<GreaterThanLessThanPostprocessor>();
 class GreaterThanLessThanPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GreaterThanLessThanPostprocessor(const InputParameters & parameters);
 
   void initialize() override;

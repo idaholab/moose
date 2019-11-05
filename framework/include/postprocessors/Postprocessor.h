@@ -29,6 +29,8 @@ InputParameters validParams<Postprocessor>();
 class Postprocessor : public OutputInterface
 {
 public:
+  static InputParameters validParams();
+
   Postprocessor(const InputParameters & parameters);
 
   /**

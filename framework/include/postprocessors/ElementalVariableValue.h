@@ -27,6 +27,8 @@ InputParameters validParams<ElementalVariableValue>();
 class ElementalVariableValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override {}

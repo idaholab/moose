@@ -21,6 +21,8 @@ InputParameters validParams<InternalSidePostprocessor>();
 class InternalSidePostprocessor : public InternalSideUserObject, public Postprocessor
 {
 public:
+  static InputParameters validParams();
+
   InternalSidePostprocessor(const InputParameters & parameters);
 };
 

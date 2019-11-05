@@ -36,6 +36,8 @@ InputParameters validParams<RelativeDifferencePostprocessor>();
 class RelativeDifferencePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RelativeDifferencePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

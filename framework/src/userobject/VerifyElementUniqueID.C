@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", VerifyElementUniqueID);
 
-template <>
+defineLegacyParams(VerifyElementUniqueID);
+
 InputParameters
-validParams<VerifyElementUniqueID>()
+VerifyElementUniqueID::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   return params;
 }
 

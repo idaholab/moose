@@ -21,6 +21,8 @@ InputParameters validParams<VerifyElementUniqueID>();
 class VerifyElementUniqueID : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   VerifyElementUniqueID(const InputParameters & parameters);
 
   virtual void initialize() override;

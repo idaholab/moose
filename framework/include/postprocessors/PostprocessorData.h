@@ -20,6 +20,8 @@ class FEProblemBase;
 class PostprocessorData : public Restartable
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

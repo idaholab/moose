@@ -9,11 +9,12 @@
 
 #include "SideIntegralVariableUserObject.h"
 
-template <>
+defineLegacyParams(SideIntegralVariableUserObject);
+
 InputParameters
-validParams<SideIntegralVariableUserObject>()
+SideIntegralVariableUserObject::validParams()
 {
-  InputParameters params = validParams<SideIntegralUserObject>();
+  InputParameters params = SideIntegralUserObject::validParams();
   params.addRequiredCoupledVar("variable",
                                "The name of the variable that this boundary condition applies to");
   return params;

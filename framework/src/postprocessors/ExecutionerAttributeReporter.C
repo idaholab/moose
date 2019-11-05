@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ExecutionerAttributeReporter);
 
-template <>
+defineLegacyParams(ExecutionerAttributeReporter);
+
 InputParameters
-validParams<ExecutionerAttributeReporter>()
+ExecutionerAttributeReporter::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   // Parameter for passing in a pointer the attribute being reported (see
   // Executioner::addAttributeReporter)

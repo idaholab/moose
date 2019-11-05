@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", DifferencePostprocessor);
 
-template <>
+defineLegacyParams(DifferencePostprocessor);
+
 InputParameters
-validParams<DifferencePostprocessor>()
+DifferencePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("value1", "First value");
   params.addRequiredParam<PostprocessorName>("value2", "Second value");
 

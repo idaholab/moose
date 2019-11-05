@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NumNodes);
 
-template <>
+defineLegacyParams(NumNodes);
+
 InputParameters
-validParams<NumNodes>()
+NumNodes::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addClassDescription(
       "Returns the total number of nodes in a simulation (works with DistributedMesh)");
