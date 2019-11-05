@@ -12,10 +12,10 @@ and Amazon Linux.
 */
 
 pipeline {
-    agent none
+    agent any
 
     environment {
-        SLACK_SFX = "on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+        SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
         SLACK_ERR = "Slack not configured.\n"
     }
     
@@ -24,9 +24,7 @@ pipeline {
         // Run 'docker build' on the Dockerfile in this repository
         // with args for core count and submodule commit hashes
         stage('Build Image')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Setup for getting submodule commit hashes
@@ -47,9 +45,7 @@ pipeline {
         
         // Pipes output from MOOSE tests into a readable, accessible file
         stage('Run Tests')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Run tests and pipe to accessible log file
@@ -61,9 +57,7 @@ pipeline {
         
         // Pushes given tag to registry and also for the current MOOSE commit
         stage('Push to Docker Registry')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Get Docker repo prefix and tag string for current revision
@@ -86,14 +80,9 @@ pipeline {
     post {
         success {
             script {
-                try {      
-                    MOOSE_COMMIT = sh(
-                        script: 'git rev-parse HEAD',
-                        returnStdout: true
-                    )
-
+                try {   
                     // Send message build was successful
-                    slackSend color: 'good', message: "Successful build of MOOSE rev ${MOOSE_COMMIT} ${SLACK_SFX}"
+                    slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
@@ -109,7 +98,7 @@ pipeline {
                     )
 
                     // Send message build failed
-                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${MOOSE_COMMIT} ${SLACK_SFX}"
+                    slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
