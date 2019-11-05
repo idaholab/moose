@@ -29,6 +29,7 @@ pipeline {
                 sh '''
                 # Setup for getting submodule commit hashes
                 git submodule init
+                sub_rev() { git submodule status $1 | awk '{print $1}' ; }
                 
                 # Build MOOSE image with max cores and compatible submodules
                 docker build \
