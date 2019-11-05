@@ -20,13 +20,14 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
-template <>
+defineLegacyParams(OversampleOutput);
+
 InputParameters
-validParams<OversampleOutput>()
+OversampleOutput::validParams()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<AdvancedOutput>();
+  InputParameters params = AdvancedOutput::validParams();
   params.addParam<unsigned int>("refinements",
                                 0,
                                 "Number of uniform refinements for oversampling "

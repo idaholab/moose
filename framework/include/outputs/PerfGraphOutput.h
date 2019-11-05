@@ -24,6 +24,8 @@ InputParameters validParams<PerfGraphOutput>();
 class PerfGraphOutput : public Output
 {
 public:
+  static InputParameters validParams();
+
   PerfGraphOutput(const InputParameters & parameters);
 
 protected:

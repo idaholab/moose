@@ -45,6 +45,8 @@ class Output : public MooseObject,
                public PerfGraphInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    *

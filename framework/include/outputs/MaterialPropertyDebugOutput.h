@@ -27,6 +27,8 @@ InputParameters validParams<MaterialPropertyDebugOutput>();
 class MaterialPropertyDebugOutput : public Output
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Object input parameters

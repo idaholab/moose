@@ -24,6 +24,8 @@ InputParameters validParams<VTKOutput>();
 class VTKOutput : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Object parameters

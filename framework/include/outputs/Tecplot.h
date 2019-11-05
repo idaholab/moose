@@ -24,6 +24,8 @@ InputParameters validParams<Tecplot>();
 class Tecplot : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

@@ -14,12 +14,13 @@
 
 registerMooseObject("MooseApp", CSV);
 
-template <>
+defineLegacyParams(CSV);
+
 InputParameters
-validParams<CSV>()
+CSV::validParams()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<TableOutput>();
+  InputParameters params = TableOutput::validParams();
   params.addClassDescription("Output for postprocessors, vector postprocessors, and scalar "
                              "variables using comma seperated values (CSV).");
   params.addParam<bool>("sort_columns", false, "Toggle the sorting of columns alphabetically.");

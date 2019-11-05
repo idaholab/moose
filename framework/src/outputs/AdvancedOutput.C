@@ -78,12 +78,13 @@ addAdvancedOutputParams(InputParameters & params)
 }
 }
 
-template <>
+defineLegacyParams(AdvancedOutput);
+
 InputParameters
-validParams<AdvancedOutput>()
+AdvancedOutput::validParams()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<FileOutput>();
+  InputParameters params = FileOutput::validParams();
   addAdvancedOutputParams(params);
   return params;
 }

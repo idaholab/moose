@@ -24,6 +24,8 @@ InputParameters validParams<XDA>();
 class XDA : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class consturctor
    */

@@ -24,12 +24,13 @@
 
 registerMooseObject("MooseApp", Checkpoint);
 
-template <>
+defineLegacyParams(Checkpoint);
+
 InputParameters
-validParams<Checkpoint>()
+Checkpoint::validParams()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<FileOutput>();
+  InputParameters params = FileOutput::validParams();
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
   // Typical checkpoint options

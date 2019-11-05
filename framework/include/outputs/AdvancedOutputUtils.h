@@ -143,6 +143,8 @@ public:
 class OutputDataWarehouse : public OutputMapWrapper<OutputData>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Populate the OutputData structures for all output types that are 'variable' based
    */
