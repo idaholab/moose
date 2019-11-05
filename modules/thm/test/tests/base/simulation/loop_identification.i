@@ -58,7 +58,7 @@
 
 [FluidProperties]
   [./fp_2phase]
-    type = StiffenedGas7EqnFluidProperties
+    type = StiffenedGasTwoPhaseFluidProperties
   [../]
   [./fp_liquid]
     type = StiffenedGasFluidProperties
