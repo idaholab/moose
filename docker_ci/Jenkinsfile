@@ -87,8 +87,13 @@ pipeline {
         success {
             script {
                 try {      
+                    MOOSE_COMMIT = sh(
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    )
+
                     // Send message build was successful
-                    slackSend color: 'good', message: "Successful build of MOOSE rev ${GIT_COMMIT} ${SLACK_SFX}"
+                    slackSend color: 'good', message: "Successful build of MOOSE rev ${MOOSE_COMMIT} ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
@@ -97,9 +102,14 @@ pipeline {
 
         failure {
             script {
-                try {                
+                try {        
+                    MOOSE_COMMIT = sh(
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    )
+
                     // Send message build failed
-                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${GIT_COMMIT} ${SLACK_SFX}"
+                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${MOOSE_COMMIT} ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
