@@ -13,6 +13,11 @@ and Amazon Linux.
 
 pipeline {
     agent none
+
+    environment {
+        SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+        SLACK_ERR = "Slack not configured.\n"
+    }
     
     stages {
         
@@ -81,34 +86,22 @@ pipeline {
     post {
         success {
             script {
-                try {
-                    // Want to display commit hash, distro, and build link
-                    def COMMIT = sh 'git rev-parse HEAD'
-                    def DISTRO_NAME = env.DISTRO_NAME
-                    def BUILD_URL = env.BUILD_URL                    
-
+                try {      
                     // Send message build was successful
-                    slackSend color: 'good', message: "Successful build of MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
-                } catch (Exception e)
-                {
-                    echo "Slack notifications not configured." + e.toString() // Slack not required to build
+                    slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
+                } catch (Exception e) {
+                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
             }
         }
 
         failure {
             script {
-                try {
-                    // Want to display commit hash, distro, and build link
-                    def COMMIT = sh 'git rev-parse HEAD'
-                    def DISTRO_NAME = env.DISTRO_NAME
-                    def BUILD_URL = env.BUILD_URL                    
-
+                try {                
                     // Send message build failed
-                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
-                } catch (Exception e)
-                {
-                    echo "Slack notifications not configured." + e.toString() // Slack not required to build
+                    slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
+                } catch (Exception e) {
+                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
             }
         }
