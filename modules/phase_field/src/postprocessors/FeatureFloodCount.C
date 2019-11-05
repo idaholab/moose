@@ -17,6 +17,7 @@
 #include "Assembly.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "TimedPrint.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_tools.h"
@@ -357,6 +358,7 @@ void
 FeatureFloodCount::execute()
 {
   TIME_SECTION(_execute_timer);
+  CONSOLE_TIMED_PRINT("Flooding Features");
 
   // Iterate only over boundaries if restricted
   if (_is_boundary_restricted)
@@ -679,6 +681,7 @@ void
 FeatureFloodCount::finalize()
 {
   TIME_SECTION(_finalize_timer);
+  CONSOLE_TIMED_PRINT("Finalizing Feature Identification");
 
   // Gather all information on processor zero and merge
   communicateAndMerge();
