@@ -83,7 +83,7 @@ Extensions:
             /FluidProperties/TwoPhaseFluidPropertiesIndependent: /Modules/FluidProperties/TwoPhaseFluidPropertiesIndependent
             /FluidProperties/Water97FluidProperties: /Modules/FluidProperties/Water97FluidProperties
             /FluidProperties/IdealRealGasMixtureFluidProperties: /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
-            /FluidProperties/LinearTest7EqnFluidProperties: /Modules/FluidProperties/LinearTest7EqnFluidProperties
+            /FluidProperties/LinearTestTwoPhaseFluidProperties: /Modules/FluidProperties/LinearTestTwoPhaseFluidProperties
         includes:
             - ${MOOSE_DIR}/framework/include
             - ${MOOSE_DIR}/modules/fluid_properties/include

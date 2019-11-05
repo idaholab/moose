@@ -155,7 +155,7 @@
 - /FluidProperties/AddFluidPropertiesAction
 - /FluidProperties/AirWater7EqnFluidProperties
 - /FluidProperties/LinearFluidProperties
-- /FluidProperties/LinearTest7EqnFluidProperties
+- /FluidProperties/LinearTestTwoPhaseFluidProperties
 - /FluidProperties/StiffenedGasTwoPhaseFluidProperties
 - /FluidProperties/IdealRealTwoPhaseNCGFluidProperties
 - /FluidProperties/LinearTestFluidProperties
