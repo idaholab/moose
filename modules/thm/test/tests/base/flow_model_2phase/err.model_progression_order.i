@@ -20,7 +20,7 @@
 
 [FluidProperties]
   [./eos]
-    type = StiffenedGas7EqnFluidProperties
+    type = StiffenedGasTwoPhaseFluidProperties
   [../]
 []
 

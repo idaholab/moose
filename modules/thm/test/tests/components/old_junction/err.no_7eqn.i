@@ -12,7 +12,7 @@
 
 [FluidProperties]
   [./fp]
-    type = StiffenedGas7EqnFluidProperties
+    type = StiffenedGasTwoPhaseFluidProperties
   [../]
 []
 

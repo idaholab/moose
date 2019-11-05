@@ -1,7 +1,7 @@
-#include "StiffenedGas7EqnFluidPropertiesTest.h"
+#include "StiffenedGasTwoPhaseFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
-TEST_F(StiffenedGas7EqnFluidPropertiesTest, test)
+TEST_F(StiffenedGasTwoPhaseFluidPropertiesTest, test)
 {
   {
     Real p = 101325; // Pa
