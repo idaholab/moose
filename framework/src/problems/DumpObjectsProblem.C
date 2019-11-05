@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", DumpObjectsProblem);
 
-template <>
+defineLegacyParams(DumpObjectsProblem);
+
 InputParameters
-validParams<DumpObjectsProblem>()
+DumpObjectsProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.addClassDescription("Single purpose problem object that does not run the given input but "
                              "allows deconstructing actions into their series of underlying Moose "
                              "objects and variables.");

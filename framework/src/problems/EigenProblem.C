@@ -26,11 +26,12 @@
 
 registerMooseObject("MooseApp", EigenProblem);
 
-template <>
+defineLegacyParams(EigenProblem);
+
 InputParameters
-validParams<EigenProblem>()
+EigenProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.addParam<bool>("negative_sign_eigen_kernel",
                         true,
                         "Whether or not to use a negative sign for eigenvalue kernels. "

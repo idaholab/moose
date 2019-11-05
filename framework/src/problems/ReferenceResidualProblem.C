@@ -23,11 +23,12 @@
 
 registerMooseObject("MooseApp", ReferenceResidualProblem);
 
-template <>
+defineLegacyParams(ReferenceResidualProblem);
+
 InputParameters
-validParams<ReferenceResidualProblem>()
+ReferenceResidualProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
   params.addClassDescription("Problem that checks for convergence relative to "
                              "a user-supplied reference quantity rather than "
                              "the initial residual");

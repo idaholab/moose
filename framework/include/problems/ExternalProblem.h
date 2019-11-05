@@ -21,6 +21,8 @@ class ExternalProblem : public FEProblemBase
 public:
   ExternalProblem(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   enum class Direction : unsigned char
   {
     TO_EXTERNAL_APP,

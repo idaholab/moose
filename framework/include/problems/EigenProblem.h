@@ -28,6 +28,8 @@ class EigenProblem : public FEProblemBase
 public:
   EigenProblem(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void solve() override;
 
   virtual bool converged() override;

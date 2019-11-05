@@ -40,6 +40,8 @@ class DisplacedProblem : public SubProblem
 public:
   DisplacedProblem(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }

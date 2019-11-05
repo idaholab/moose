@@ -61,6 +61,8 @@ class SubProblem : public Problem
 {
 public:
   SubProblem(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~SubProblem();
 
   virtual EquationSystems & es() = 0;

@@ -24,6 +24,8 @@ class ReferenceResidualProblem : public FEProblem
 {
 public:
   ReferenceResidualProblem(const InputParameters & params);
+
+  static InputParameters validParams();
   virtual ~ReferenceResidualProblem();
 
   virtual void initialSetup() override;
