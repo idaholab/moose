@@ -10,11 +10,12 @@
 #include "RelationshipManager.h"
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(RelationshipManager);
+
 InputParameters
-validParams<RelationshipManager>()
+RelationshipManager::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   /**
    * Param to indicate whether all necessary GeometricRelationshipManagers can be attached during

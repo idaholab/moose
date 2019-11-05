@@ -29,6 +29,8 @@ class MooseGhostPointNeighbors : public FunctorRelationshipManager
 public:
   MooseGhostPointNeighbors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 

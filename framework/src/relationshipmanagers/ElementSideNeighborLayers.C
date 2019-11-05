@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
-template <>
+defineLegacyParams(ElementSideNeighborLayers);
+
 InputParameters
-validParams<ElementSideNeighborLayers>()
+ElementSideNeighborLayers::validParams()
 {
-  InputParameters params = validParams<FunctorRelationshipManager>();
+  InputParameters params = FunctorRelationshipManager::validParams();
 
   params.addRangeCheckedParam<unsigned short>(
       "layers",
