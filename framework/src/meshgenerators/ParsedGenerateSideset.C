@@ -21,12 +21,13 @@
 
 registerMooseObject("MooseApp", ParsedGenerateSideset);
 
-template <>
+defineLegacyParams(ParsedGenerateSideset);
+
 InputParameters
-validParams<ParsedGenerateSideset>()
+ParsedGenerateSideset::validParams()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = SideSetsGeneratorBase::validParams();
+  params += FunctionParserUtils::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",

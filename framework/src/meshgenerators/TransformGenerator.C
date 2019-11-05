@@ -13,13 +13,14 @@
 
 registerMooseObject("MooseApp", TransformGenerator);
 
-template <>
+defineLegacyParams(TransformGenerator);
+
 InputParameters
-validParams<TransformGenerator>()
+TransformGenerator::validParams()
 {
   MooseEnum transforms("TRANSLATE=1 ROTATE=2 SCALE=3");
 
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Applies a linear transform to the entire mesh.");

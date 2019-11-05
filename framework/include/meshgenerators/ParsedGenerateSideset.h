@@ -29,6 +29,8 @@ class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParse
 public:
   ParsedGenerateSideset(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

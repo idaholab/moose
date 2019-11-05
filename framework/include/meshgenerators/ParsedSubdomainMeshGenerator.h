@@ -26,6 +26,8 @@ class ParsedSubdomainMeshGenerator : public MeshGenerator, public FunctionParser
 public:
   ParsedSubdomainMeshGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

@@ -20,11 +20,12 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/elem.h"
 
-template <>
+defineLegacyParams(SideSetsGeneratorBase);
+
 InputParameters
-validParams<SideSetsGeneratorBase>()
+SideSetsGeneratorBase::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addParam<Real>(
       "variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
   params.addParam<bool>("fixed_normal",

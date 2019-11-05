@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", RenameBoundaryGenerator);
 
-template <>
+defineLegacyParams(RenameBoundaryGenerator);
+
 InputParameters
-validParams<RenameBoundaryGenerator>()
+RenameBoundaryGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<std::vector<boundary_id_type>>(

@@ -21,11 +21,12 @@
 
 registerMooseObject("MooseApp", LowerDBlockFromSidesetGenerator);
 
-template <>
+defineLegacyParams(LowerDBlockFromSidesetGenerator);
+
 InputParameters
-validParams<LowerDBlockFromSidesetGenerator>()
+LowerDBlockFromSidesetGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");

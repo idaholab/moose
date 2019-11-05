@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
 
-template <>
+defineLegacyParams(PatternedMeshGenerator);
+
 InputParameters
-validParams<PatternedMeshGenerator>()
+PatternedMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   params.addRangeCheckedParam<Real>(

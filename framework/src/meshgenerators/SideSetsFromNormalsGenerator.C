@@ -26,11 +26,12 @@
 
 registerMooseObject("MooseApp", SideSetsFromNormalsGenerator);
 
-template <>
+defineLegacyParams(SideSetsFromNormalsGenerator);
+
 InputParameters
-validParams<SideSetsFromNormalsGenerator>()
+SideSetsFromNormalsGenerator::validParams()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
+  InputParameters params = SideSetsGeneratorBase::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription(

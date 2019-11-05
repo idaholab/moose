@@ -25,6 +25,8 @@ class SubdomainIDGenerator : public MeshGenerator
 public:
   SubdomainIDGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

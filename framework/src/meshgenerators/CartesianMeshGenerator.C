@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", CartesianMeshGenerator);
 
-template <>
+defineLegacyParams(CartesianMeshGenerator);
+
 InputParameters
-validParams<CartesianMeshGenerator>()
+CartesianMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
 

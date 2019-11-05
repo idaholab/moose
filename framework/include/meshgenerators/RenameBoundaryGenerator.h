@@ -25,6 +25,8 @@ class RenameBoundaryGenerator : public MeshGenerator
 public:
   RenameBoundaryGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

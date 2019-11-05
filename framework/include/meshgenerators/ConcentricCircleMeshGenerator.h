@@ -25,6 +25,8 @@ class ConcentricCircleMeshGenerator : public MeshGenerator
 public:
   ConcentricCircleMeshGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
