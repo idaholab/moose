@@ -195,7 +195,6 @@ FEProblemBase::validParams()
                                         "Extra matrices to add to the system that can be filled "
                                         "by objects which compute residuals and Jacobians "
                                         "(Kernels, BCs, etc.) by setting tags on them.");
-  params.addParam<unsigned>("num_grid_sequences", 0, "The number of grid sequences to perform");
 
   params.addPrivateParam<MooseMesh *>("mesh");
 
@@ -331,7 +330,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_old_requested(false),
     _u_dotdot_old_requested(false),
     _has_mortar(false),
-    _num_grid_sequences(getParam<unsigned>("num_grid_sequences"))
+    _num_grid_steps(0)
 {
   _time = 0.0;
   _time_old = 0.0;
@@ -679,7 +678,7 @@ FEProblemBase::initialSetup()
   _app.getOutputWarehouse().mooseConsole();
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
-  if ((_adaptivity.isOn() || _num_grid_sequences) &&
+  if ((_adaptivity.isOn() || _num_grid_steps) &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
        _neighbor_material_props.hasStatefulProperties()))
   {
@@ -1026,7 +1025,7 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
-  if (_t_step > 1 && _num_grid_sequences)
+  if (_t_step > 1 && _num_grid_steps)
   {
     MeshRefinement mesh_refinement(_mesh);
     std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
@@ -1043,7 +1042,7 @@ FEProblemBase::timestepSetup()
       // element and node numbering is still consistent.
       _displaced_problem->undisplaceMesh();
     }
-    for (MooseIndex(_num_grid_sequences) i = 0; i < _num_grid_sequences; ++i)
+    for (MooseIndex(_num_grid_steps) i = 0; i < _num_grid_steps; ++i)
     {
       mesh_refinement.uniformly_coarsen();
       if (_displaced_mesh)
@@ -5868,7 +5867,7 @@ FEProblemBase::checkProblemIntegrity()
   // Check materials
   {
 #ifdef LIBMESH_ENABLE_AMR
-    if ((_adaptivity.isOn() || _num_grid_sequences) &&
+    if ((_adaptivity.isOn() || _num_grid_steps) &&
         (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
          _neighbor_material_props.hasStatefulProperties()))
     {

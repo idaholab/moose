@@ -83,10 +83,7 @@ Steady::execute()
 #endif // LIBMESH_ENABLE_AMR
     _problem.timestepSetup();
 
-    auto grid_sequencing_steps = _problem.numGridSequences();
-
-    for (decltype(grid_sequencing_steps) grid_step = 0; grid_step <= grid_sequencing_steps;
-         ++grid_step)
+    for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
     {
       _last_solve_converged = _picard_solve.solve();
 
@@ -96,7 +93,7 @@ Steady::execute()
         break;
       }
 
-      if (grid_step != grid_sequencing_steps)
+      if (grid_step != _num_grid_steps)
         _problem.uniformRefine();
     }
 

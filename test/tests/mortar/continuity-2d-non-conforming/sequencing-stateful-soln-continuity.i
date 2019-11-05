@@ -18,10 +18,6 @@
   [../]
 []
 
-[Problem]
-  num_grid_sequences = 1
-[]
-
 [Variables]
   [./T]
     block = '1 2'
@@ -124,6 +120,7 @@
   nl_abs_tol = 1e-12
   petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
+  num_grids = 2
 []
 
 [Outputs]

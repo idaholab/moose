@@ -159,10 +159,6 @@ offset = 1e-2
   [../]
 []
 
-[Problem]
-  num_grid_sequences = 4
-[]
-
 [Executioner]
   type = Transient
   end_time = 200
@@ -177,11 +173,7 @@ offset = 1e-2
   nl_max_its = 20
   line_search = 'none'
   nl_abs_tol = 1e-10
-
-  # [./Predictor]
-  #   type = SimplePredictor
-  #   scale = 1.0
-  # [../]
+  num_grids = 5
 []
 
 [Debug]

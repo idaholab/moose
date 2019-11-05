@@ -10,7 +10,6 @@
   type = ReferenceResidualProblem
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
-  num_grid_sequences = 1
   solution_variables = 'u'
 []
 
@@ -97,6 +96,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  num_grids = 2
 []
 
 [Outputs]

@@ -178,11 +178,6 @@ offset = 1e-2
   nl_max_its = 20
   line_search = 'none'
   nl_abs_tol = 1e-10
-
-  # [./Predictor]
-  #   type = SimplePredictor
-  #   scale = 1.0
-  # [../]
 []
 
 [Debug]

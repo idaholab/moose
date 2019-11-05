@@ -53,7 +53,8 @@ Executioner::Executioner(const InputParameters & parameters)
     _feproblem_solve(this),
     _picard_solve(this),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
@@ -85,6 +86,7 @@ Executioner::Executioner(const InputParameters & parameters)
                         (_fe_problem.solverParams()._type != Moose::ST_JFNK));
 
   nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
+  _fe_problem.numGridSteps(_num_grid_steps);
 }
 
 Problem &
