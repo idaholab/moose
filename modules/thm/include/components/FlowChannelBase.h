@@ -24,8 +24,17 @@ public:
     PIPE,      ///< pipe geometry
     ROD_BUNDLE ///< rod bundle geometry
   };
+  /// Pipe type
+  enum EPipeType
+  {
+    STRAIGHT,
+    CURVED,
+    DOWNCOMER
+  };
   /// Map of convective heat transfer geometry type to enum
   static const std::map<std::string, EConvHeatTransGeom> _heat_transfer_geom_to_enum;
+  /// Map of pipe type to enum
+  static const std::map<std::string, EPipeType> _pipe_type_to_enum;
 
   virtual void buildMesh() override;
   virtual void addVariables() override;
@@ -38,6 +47,14 @@ public:
    * @returns MooseEnum for convective heat transfer geometry type
    */
   static MooseEnum getConvHeatTransGeometry(const std::string & name);
+
+  /**
+   * Gets a MooseEnum for pipe type
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for pipe type
+   */
+  static MooseEnum getPipeType(const std::string & name);
 
   // Flow channel specific interface ----
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
