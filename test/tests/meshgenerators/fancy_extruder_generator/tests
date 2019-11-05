@@ -4,7 +4,6 @@
     input = 'gen_extrude.i'
     cli_args = '--mesh-only'
     exodiff = 'gen_extrude_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
