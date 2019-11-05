@@ -25,10 +25,11 @@ class CentroidMultiApp : public TransientMultiApp, public BlockRestrictable
 public:
   CentroidMultiApp(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * fill in _positions with the positions of the sub-aps
    */
   virtual void fillPositions() override;
 };
-
