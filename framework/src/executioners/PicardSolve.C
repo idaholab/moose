@@ -17,9 +17,10 @@
 #include "Console.h"
 #include "EigenExecutionerBase.h"
 
-template <>
+defineLegacyParams(PicardSolve);
+
 InputParameters
-validParams<PicardSolve>()
+PicardSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 

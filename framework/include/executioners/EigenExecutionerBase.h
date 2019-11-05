@@ -33,6 +33,8 @@ public:
    */
   EigenExecutionerBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void init() override;
 
   /**
@@ -166,4 +168,3 @@ protected:
                  unsigned int iter,
                  const PostprocessorValue * solution_diff);
 };
-

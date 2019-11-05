@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", InversePowerMethod);
 
-template <>
+defineLegacyParams(InversePowerMethod);
+
 InputParameters
-validParams<InversePowerMethod>()
+InversePowerMethod::validParams()
 {
-  InputParameters params = validParams<EigenExecutionerBase>();
+  InputParameters params = EigenExecutionerBase::validParams();
   params.addClassDescription("Inverse power method for Eigen value problems.");
   params.addParam<PostprocessorName>(
       "xdiff", "", "To evaluate |x-x_previous| for power iterations");

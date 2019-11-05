@@ -39,6 +39,8 @@ public:
    */
   Steady(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void init() override;
 
   virtual void execute() override;
@@ -59,4 +61,3 @@ protected:
 private:
   bool _last_solve_converged;
 };
-

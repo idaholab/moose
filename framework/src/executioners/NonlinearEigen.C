@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", NonlinearEigen);
 
-template <>
+defineLegacyParams(NonlinearEigen);
+
 InputParameters
-validParams<NonlinearEigen>()
+NonlinearEigen::validParams()
 {
-  InputParameters params = validParams<EigenExecutionerBase>();
+  InputParameters params = EigenExecutionerBase::validParams();
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
   params.addParam<Real>("source_abs_tol", 1e-06, "Absolute tolernance on residual norm");
   params.addParam<Real>(
