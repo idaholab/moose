@@ -10,14 +10,4 @@
 
     requirement = 'The system shall support an attribute (scalar value) reporter through the "Execution" system.'
   [../]
-
-  [./use_error]
-    # Tests that an the correct error is given if ExeuctionAttributeReporter is defined in input file
-    type = 'RunException'
-    input = 'execution_attribute_reporter_error.i'
-    expect_err = 'Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter'
-    match_literal = true
-
-    requirement = 'The system shall report an error when the special "attribute reporting" Postprocessor is added manually to the simulation.'
-  [../]
 []

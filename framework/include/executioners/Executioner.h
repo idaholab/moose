@@ -121,14 +121,13 @@ public:
 
 protected:
   /**
-   * Adds a postprocessor to report a Real class attribute
+   * Adds a postprocessor that the executioner can directly assign values to
    * @param name The name of the postprocessor to create
-   * @param attribute The Real class attribute to report
-   * @param execute_on When to execute the postprocessor that is created
+   * @param initial_value The initial value of the postprocessor value
+   * @return Reference to the postprocessor data that to be used by this executioner
    */
-  virtual void addAttributeReporter(const std::string & name,
-                                    Real & attribute,
-                                    const std::string execute_on = "");
+  virtual PostprocessorValue & addAttributeReporter(const std::string & name,
+                                                    Real initial_value = 0);
 
   FEProblemBase & _fe_problem;
 
