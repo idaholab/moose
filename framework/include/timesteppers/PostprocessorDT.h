@@ -23,6 +23,8 @@ InputParameters validParams<PostprocessorDT>();
 class PostprocessorDT : public TimeStepper, public PostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   PostprocessorDT(const InputParameters & parameters);
 
 protected:

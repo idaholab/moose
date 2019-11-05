@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", LStableDirk2);
 
-template <>
+defineLegacyParams(LStableDirk2);
+
 InputParameters
-validParams<LStableDirk2>()
+LStableDirk2::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
   return params;
 }
 

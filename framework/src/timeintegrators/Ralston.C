@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", Ralston);
 
-template <>
+defineLegacyParams(Ralston);
+
 InputParameters
-validParams<Ralston>()
+Ralston::validParams()
 {
-  InputParameters params = validParams<ExplicitRK2>();
+  InputParameters params = ExplicitRK2::validParams();
 
   return params;
 }

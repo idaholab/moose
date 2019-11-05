@@ -12,11 +12,12 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(TimeStepper);
+
 InputParameters
-validParams<TimeStepper>()
+TimeStepper::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addParam<bool>(
       "reset_dt", false, "Use when restarting a calculation to force a change in dt.");
   params.addRangeCheckedParam<Real>(

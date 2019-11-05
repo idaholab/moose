@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", SolutionTimeAdaptiveDT);
 
-template <>
+defineLegacyParams(SolutionTimeAdaptiveDT);
+
 InputParameters
-validParams<SolutionTimeAdaptiveDT>()
+SolutionTimeAdaptiveDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addParam<Real>(
       "percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>(

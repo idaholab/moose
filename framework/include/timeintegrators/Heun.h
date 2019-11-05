@@ -30,6 +30,8 @@ InputParameters validParams<Heun>();
 class Heun : public ExplicitRK2
 {
 public:
+  static InputParameters validParams();
+
   Heun(const InputParameters & parameters);
 
 protected:

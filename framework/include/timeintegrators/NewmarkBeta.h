@@ -23,6 +23,8 @@ InputParameters validParams<NewmarkBeta>();
 class NewmarkBeta : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   NewmarkBeta(const InputParameters & parameters);
   virtual ~NewmarkBeta();
 

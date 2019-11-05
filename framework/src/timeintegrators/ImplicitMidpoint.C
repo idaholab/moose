@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ImplicitMidpoint);
 
-template <>
+defineLegacyParams(ImplicitMidpoint);
+
 InputParameters
-validParams<ImplicitMidpoint>()
+ImplicitMidpoint::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

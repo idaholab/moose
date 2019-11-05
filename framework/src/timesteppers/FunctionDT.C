@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", FunctionDT);
 
-template <>
+defineLegacyParams(FunctionDT);
+
 InputParameters
-validParams<FunctionDT>()
+FunctionDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   // TODO: This will be required when time_t and time_dt is removed
   params.addParam<FunctionName>(
       "function", "The name of the time-dependent function that prescribes the time step size.");

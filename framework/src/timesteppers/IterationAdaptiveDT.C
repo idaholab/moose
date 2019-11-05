@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", IterationAdaptiveDT);
 
-template <>
+defineLegacyParams(IterationAdaptiveDT);
+
 InputParameters
-validParams<IterationAdaptiveDT>()
+IterationAdaptiveDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addClassDescription("Adjust the timestep based on the number of iterations");
   params.addParam<int>("optimal_iterations",
                        "The target number of nonlinear iterations for adaptive timestepping");

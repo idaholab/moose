@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PostprocessorDT);
 
-template <>
+defineLegacyParams(PostprocessorDT);
+
 InputParameters
-validParams<PostprocessorDT>()
+PostprocessorDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor",
                                              "The name of the postprocessor that computes the dt");
   params.addParam<Real>("dt", "Initial value of dt");

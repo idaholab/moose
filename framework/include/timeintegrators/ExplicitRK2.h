@@ -59,6 +59,8 @@ InputParameters validParams<ExplicitRK2>();
 class ExplicitRK2 : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ExplicitRK2(const InputParameters & parameters);
 
   virtual void preSolve() override;

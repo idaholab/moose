@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantDT);
 
-template <>
+defineLegacyParams(ConstantDT);
+
 InputParameters
-validParams<ConstantDT>()
+ConstantDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addRequiredParam<Real>("dt", "Size of the time step");
 
   // The addRangeCheckedParam and addClassDescription are used in MOOSE documentation, if you

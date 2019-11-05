@@ -24,6 +24,8 @@ InputParameters validParams<SolutionTimeAdaptiveDT>();
 class SolutionTimeAdaptiveDT : public TimeStepper
 {
 public:
+  static InputParameters validParams();
+
   SolutionTimeAdaptiveDT(const InputParameters & parameters);
   virtual ~SolutionTimeAdaptiveDT();
 

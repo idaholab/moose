@@ -26,6 +26,8 @@ InputParameters validParams<TimeStepper>();
 class TimeStepper : public MooseObject, public Restartable, public ScalarCoupleable
 {
 public:
+  static InputParameters validParams();
+
   TimeStepper(const InputParameters & parameters);
   virtual ~TimeStepper();
 

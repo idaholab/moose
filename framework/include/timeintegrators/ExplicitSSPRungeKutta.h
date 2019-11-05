@@ -22,6 +22,8 @@ InputParameters validParams<ExplicitSSPRungeKutta>();
 class ExplicitSSPRungeKutta : public ExplicitTimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ExplicitSSPRungeKutta(const InputParameters & parameters);
 
   virtual void computeTimeDerivatives() override;

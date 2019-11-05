@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", AStableDirk4);
 
-template <>
+defineLegacyParams(AStableDirk4);
+
 InputParameters
-validParams<AStableDirk4>()
+AStableDirk4::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
   params.addParam<bool>("safe_start", true, "If true, use LStableDirk4 to bootstrap this method.");
   return params;
 }

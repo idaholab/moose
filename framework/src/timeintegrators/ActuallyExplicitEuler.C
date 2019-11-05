@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
 
-template <>
+defineLegacyParams(ActuallyExplicitEuler);
+
 InputParameters
-validParams<ActuallyExplicitEuler>()
+ActuallyExplicitEuler::validParams()
 {
-  InputParameters params = validParams<ExplicitTimeIntegrator>();
+  InputParameters params = ExplicitTimeIntegrator::validParams();
 
   params.addClassDescription(
       "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
