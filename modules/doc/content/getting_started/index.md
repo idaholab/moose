@@ -15,6 +15,7 @@ your operating system/platform and follow the instructions:
   - [getting_started/installation/ubuntu.md]
   - [getting_started/installation/mint.md]
   - [getting_started/installation/fedora.md]
+  - [getting_started/installation/opensuse.md]
   - [getting_started/installation/centos.md]
 
 - [getting_started/installation/windows10.md]
