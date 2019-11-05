@@ -41,6 +41,8 @@ public:
 
   virtual Real value(const Point & p) override;
 
+  static InputParameters validParams();
+
 protected:
   /// The lower bound of the random number range
   const Real _min;
@@ -51,4 +53,3 @@ protected:
   /// Distribution object optionally used to define distribution of random numbers
   Distribution const * _distribution;
 };
-

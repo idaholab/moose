@@ -42,6 +42,8 @@ public:
 
   void initialSetup() override;
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Generate a uniformly distributed random number on the interval from 0 to 1
@@ -74,4 +76,3 @@ private:
   /// Random numbers per node (currently limited to a single value at a time)
   std::map<dof_id_type, Real> _node_numbers;
 };
-

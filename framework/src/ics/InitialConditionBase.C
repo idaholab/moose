@@ -11,13 +11,14 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 
-template <>
+defineLegacyParams(InitialConditionBase);
+
 InputParameters
-validParams<InitialConditionBase>()
+InitialConditionBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<BlockRestrictable>();
+  params += ::validParams<BoundaryRestrictable>();
 
   params.addRequiredParam<VariableName>("variable",
                                         "The variable this initial condition is "

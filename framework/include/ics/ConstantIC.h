@@ -37,9 +37,10 @@ class ConstantIC : public InitialCondition
 public:
   ConstantIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(const Point & p) override;
 
 protected:
   const Real _value;
 };
-

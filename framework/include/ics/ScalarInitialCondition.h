@@ -50,6 +50,8 @@ public:
 
   virtual ~ScalarInitialCondition();
 
+  static InputParameters validParams();
+
   MooseVariableScalar & variable() { return _var; }
 
   /**
