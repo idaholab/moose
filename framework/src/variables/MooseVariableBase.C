@@ -23,13 +23,14 @@
 // Users should never actually create this object
 registerMooseObject("MooseApp", MooseVariableBase);
 
-template <>
+defineLegacyParams(MooseVariableBase);
+
 InputParameters
-validParams<MooseVariableBase>()
+MooseVariableBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<OutputInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += BlockRestrictable::validParams();
+  params += OutputInterface::validParams();
 
   MooseEnum order(
       "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH ELEVENTH TWELFTH "

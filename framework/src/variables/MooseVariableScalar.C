@@ -21,11 +21,12 @@
 
 registerMooseObject("MooseApp", MooseVariableScalar);
 
-template <>
+defineLegacyParams(MooseVariableScalar);
+
 InputParameters
-validParams<MooseVariableScalar>()
+MooseVariableScalar::validParams()
 {
-  auto params = validParams<MooseVariableBase>();
+  auto params = MooseVariableBase::validParams();
   params.addClassDescription("Moose wrapper class around scalar variables");
   params.set<MooseEnum>("family") = "SCALAR";
   return params;

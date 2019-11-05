@@ -9,11 +9,12 @@
 
 #include "MooseVariableFE.h"
 
-template <>
+defineLegacyParams(MooseVariableFEBase);
+
 InputParameters
-validParams<MooseVariableFEBase>()
+MooseVariableFEBase::validParams()
 {
-  return validParams<MooseVariableBase>();
+  return MooseVariableBase::validParams();
 }
 
 MooseVariableFEBase::MooseVariableFEBase(const InputParameters & parameters)

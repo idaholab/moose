@@ -39,6 +39,8 @@ class MooseVariableBase : public MooseObject, public BlockRestrictable, public O
 public:
   MooseVariableBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Get variable number coming from libMesh
    * @return the libmesh variable number
