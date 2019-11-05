@@ -42,6 +42,8 @@ class Sampler : public MooseObject, public SetupInterface, public DistributionIn
 public:
   Sampler(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Simple object for storing the sampler location (see SamplerTransientMultiApp and
    * SamplerFullSolveMultiApp).
