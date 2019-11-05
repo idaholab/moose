@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ConditionalFunctionEnableControl);
 
-template <>
+defineLegacyParams(ConditionalFunctionEnableControl);
+
 InputParameters
-validParams<ConditionalFunctionEnableControl>()
+ConditionalFunctionEnableControl::validParams()
 {
-  InputParameters params = validParams<ConditionalEnableControl>();
+  InputParameters params = ConditionalEnableControl::validParams();
 
   params.addRequiredParam<FunctionName>("conditional_function",
                                         "The function to give a true or false value");
