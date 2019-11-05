@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantPointSource);
 
-template <>
+defineLegacyParams(ConstantPointSource);
+
 InputParameters
-validParams<ConstantPointSource>()
+ConstantPointSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   params.declareControllable("value");
