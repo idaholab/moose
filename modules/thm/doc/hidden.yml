@@ -119,7 +119,6 @@
 - /Components/PipeConnectable
 - /Components/PrescribedReactorPower
 - /Components/TotalPower
-- /Components/SimpleJunction
 - /Components/SolidWall
 - /Components/SupersonicInlet
 - /Components/TestSetupStatusComponent
