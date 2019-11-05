@@ -19,10 +19,19 @@
 const std::map<std::string, FlowChannelBase::EConvHeatTransGeom>
     FlowChannelBase::_heat_transfer_geom_to_enum{{"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}};
 
+const std::map<std::string, FlowChannelBase::EPipeType> FlowChannelBase::_pipe_type_to_enum{
+    {"STRAIGHT", STRAIGHT}, {"CURVED", CURVED}, {"DOWNCOMER", DOWNCOMER}};
+
 MooseEnum
 FlowChannelBase::getConvHeatTransGeometry(const std::string & name)
 {
   return THM::getMooseEnum<EConvHeatTransGeom>(name, _heat_transfer_geom_to_enum);
+}
+
+MooseEnum
+FlowChannelBase::getPipeType(const std::string & name)
+{
+  return THM::getMooseEnum<EPipeType>(name, _pipe_type_to_enum);
 }
 
 template <>
@@ -31,6 +40,13 @@ THM::stringToEnum(const std::string & s)
 {
   return stringToEnum<FlowChannelBase::EConvHeatTransGeom>(
       s, FlowChannelBase::_heat_transfer_geom_to_enum);
+}
+
+template <>
+FlowChannelBase::EPipeType
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<FlowChannelBase::EPipeType>(s, FlowChannelBase::_pipe_type_to_enum);
 }
 
 template <>
