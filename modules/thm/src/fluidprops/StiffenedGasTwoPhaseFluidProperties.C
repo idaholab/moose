@@ -1,13 +1,16 @@
-#include "StiffenedGas7EqnFluidProperties.h"
+#include "StiffenedGasTwoPhaseFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
 
-const Real StiffenedGas7EqnFluidProperties::_P_critical = 22.09E+6;
+const Real StiffenedGasTwoPhaseFluidProperties::_P_critical = 22.09E+6;
 
-registerMooseObject("THMApp", StiffenedGas7EqnFluidProperties);
+registerMooseObject("THMApp", StiffenedGasTwoPhaseFluidProperties);
+registerMooseObjectAliased("THMApp",
+                           StiffenedGasTwoPhaseFluidProperties,
+                           "StiffenedGas7EqnFluidProperties");
 
 template <>
 InputParameters
-validParams<StiffenedGas7EqnFluidProperties>()
+validParams<StiffenedGasTwoPhaseFluidProperties>()
 {
   InputParameters params = validParams<TwoPhaseFluidProperties>();
   params += validParams<NaNInterface>();
@@ -35,10 +38,13 @@ validParams<StiffenedGas7EqnFluidProperties>()
   params.addParam<Real>("rho_c", 322.0, "");
   params.addParam<Real>("e_c", 2702979.84310559, "");
 
+  params.addClassDescription("Two-phase stiffened gas fluid properties");
+
   return params;
 }
 
-StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputParameters & parameters)
+StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
+    const InputParameters & parameters)
   : TwoPhaseFluidProperties(parameters),
     NaNInterface(this),
 
@@ -130,25 +136,25 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
 }
 
 Real
-StiffenedGas7EqnFluidProperties::p_critical() const
+StiffenedGasTwoPhaseFluidProperties::p_critical() const
 {
   return _P_critical;
 }
 
 Real
-StiffenedGas7EqnFluidProperties::T_sat(Real pressure) const
+StiffenedGasTwoPhaseFluidProperties::T_sat(Real pressure) const
 {
   return _ipol_temp.sample(pressure);
 }
 
 Real
-StiffenedGas7EqnFluidProperties::p_sat(Real temperature) const
+StiffenedGasTwoPhaseFluidProperties::p_sat(Real temperature) const
 {
   return _ipol_pressure.sample(temperature);
 }
 
 Real
-StiffenedGas7EqnFluidProperties::compute_p_sat(const Real & T) const
+StiffenedGasTwoPhaseFluidProperties::compute_p_sat(const Real & T) const
 {
   // start from 0 C saturation pressure; starting from large value sometimes diverges
   Real p_sat = 611.0;
@@ -158,7 +164,7 @@ StiffenedGas7EqnFluidProperties::compute_p_sat(const Real & T) const
   {
     // check for maximum iteration
     if (iter > _newton_max_iter)
-      mooseError("StiffenedGas7EqnFluidProperties::compute_p_sat: ",
+      mooseError("StiffenedGasTwoPhaseFluidProperties::compute_p_sat: ",
                  "Newton solve did not converge after ",
                  _newton_max_iter,
                  " iterations.");
@@ -178,7 +184,7 @@ StiffenedGas7EqnFluidProperties::compute_p_sat(const Real & T) const
 }
 
 Real
-StiffenedGas7EqnFluidProperties::dT_sat_dp(Real pressure) const
+StiffenedGasTwoPhaseFluidProperties::dT_sat_dp(Real pressure) const
 {
   return _ipol_temp.sampleDerivative(pressure);
 }

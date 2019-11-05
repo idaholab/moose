@@ -4,19 +4,19 @@
 #include "LinearInterpolation.h"
 #include "NaNInterface.h"
 
-class StiffenedGas7EqnFluidProperties;
+class StiffenedGasTwoPhaseFluidProperties;
 class StiffenedGasFluidProperties;
 
 template <>
-InputParameters validParams<StiffenedGas7EqnFluidProperties>();
+InputParameters validParams<StiffenedGasTwoPhaseFluidProperties>();
 
 /**
- * Stiffened gas for two phase 7-equation formulation
+ * Two-phase stiffened gas fluid properties
  */
-class StiffenedGas7EqnFluidProperties : public TwoPhaseFluidProperties, public NaNInterface
+class StiffenedGasTwoPhaseFluidProperties : public TwoPhaseFluidProperties, public NaNInterface
 {
 public:
-  StiffenedGas7EqnFluidProperties(const InputParameters & parameters);
+  StiffenedGasTwoPhaseFluidProperties(const InputParameters & parameters);
 
   virtual Real p_critical() const override;
   virtual Real T_sat(Real pressure) const override;
