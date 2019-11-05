@@ -22,11 +22,12 @@
 // Define the input parameters
 registerMooseObject("MooseApp", MultiAppScalarToAuxScalarTransfer);
 
-template <>
+defineLegacyParams(MultiAppScalarToAuxScalarTransfer);
+
 InputParameters
-validParams<MultiAppScalarToAuxScalarTransfer>()
+MultiAppScalarToAuxScalarTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
       "Transfers data between a scalar non-linear variable and a scalar auxiliary variable.");
   params.addRequiredParam<VariableName>("source_variable",

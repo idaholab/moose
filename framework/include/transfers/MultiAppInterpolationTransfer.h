@@ -28,6 +28,8 @@ class MultiAppInterpolationTransfer : public MultiAppFieldTransfer
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:
@@ -49,4 +51,3 @@ protected:
   MooseEnum _interp_type;
   Real _radius;
 };
-

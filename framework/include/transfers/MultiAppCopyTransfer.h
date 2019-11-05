@@ -30,6 +30,8 @@ class MultiAppCopyTransfer : public MultiAppTransfer
 public:
   MultiAppCopyTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Performs basic error checking that the variable exists on MultiApp.
    */

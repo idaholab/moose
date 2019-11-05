@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", MultiAppVariableValueSamplePostprocessorTransfer);
 
-template <>
+defineLegacyParams(MultiAppVariableValueSamplePostprocessorTransfer);
+
 InputParameters
-validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
+MultiAppVariableValueSamplePostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
       "Transfers the value of a variable within the master application at each sub-application "
       "position and transfers the value to a postprocessor on the sub-application(s).");

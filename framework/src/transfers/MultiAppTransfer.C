@@ -19,11 +19,12 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
 
-template <>
+defineLegacyParams(MultiAppTransfer);
+
 InputParameters
-validParams<MultiAppTransfer>()
+MultiAppTransfer::validParams()
 {
-  InputParameters params = validParams<Transfer>();
+  InputParameters params = Transfer::validParams();
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
 
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be

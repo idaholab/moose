@@ -37,6 +37,8 @@ class MultiAppTransfer : public Transfer
 public:
   MultiAppTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Utility to verify that the variable in the destination system exists.
    */
