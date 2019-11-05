@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", Heun);
 
-template <>
+defineLegacyParams(Heun);
+
 InputParameters
-validParams<Heun>()
+Heun::validParams()
 {
-  InputParameters params = validParams<ExplicitRK2>();
+  InputParameters params = ExplicitRK2::validParams();
 
   return params;
 }

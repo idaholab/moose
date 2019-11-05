@@ -50,6 +50,8 @@ InputParameters validParams<ExplicitTVDRK2>();
 class ExplicitTVDRK2 : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ExplicitTVDRK2(const InputParameters & parameters);
 
   virtual void preSolve() override;

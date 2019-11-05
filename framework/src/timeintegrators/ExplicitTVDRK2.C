@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ExplicitTVDRK2);
 
-template <>
+defineLegacyParams(ExplicitTVDRK2);
+
 InputParameters
-validParams<ExplicitTVDRK2>()
+ExplicitTVDRK2::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

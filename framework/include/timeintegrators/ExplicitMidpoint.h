@@ -30,6 +30,8 @@ InputParameters validParams<ExplicitMidpoint>();
 class ExplicitMidpoint : public ExplicitRK2
 {
 public:
+  static InputParameters validParams();
+
   ExplicitMidpoint(const InputParameters & parameters);
   virtual ~ExplicitMidpoint() {}
 

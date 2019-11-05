@@ -21,6 +21,8 @@ InputParameters validParams<LogConstantDT>();
 class LogConstantDT : public TimeStepper
 {
 public:
+  static InputParameters validParams();
+
   LogConstantDT(const InputParameters & parameters);
 
 protected:

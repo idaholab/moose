@@ -23,6 +23,8 @@ InputParameters validParams<TimeSequenceStepperBase>();
 class TimeSequenceStepperBase : public TimeStepper
 {
 public:
+  static InputParameters validParams();
+
   TimeSequenceStepperBase(const InputParameters & parameters);
 
   void setupSequence(const std::vector<Real> & times);

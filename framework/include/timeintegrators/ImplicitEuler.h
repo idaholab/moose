@@ -22,6 +22,8 @@ InputParameters validParams<ImplicitEuler>();
 class ImplicitEuler : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ImplicitEuler(const InputParameters & parameters);
   virtual ~ImplicitEuler();
 

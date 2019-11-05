@@ -15,11 +15,12 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-template <>
+defineLegacyParams(TimeIntegrator);
+
 InputParameters
-validParams<TimeIntegrator>()
+TimeIntegrator::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.registerBase("TimeIntegrator");
   return params;
 }

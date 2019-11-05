@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ExplicitMidpoint);
 
-template <>
+defineLegacyParams(ExplicitMidpoint);
+
 InputParameters
-validParams<ExplicitMidpoint>()
+ExplicitMidpoint::validParams()
 {
-  InputParameters params = validParams<ExplicitRK2>();
+  InputParameters params = ExplicitRK2::validParams();
 
   return params;
 }

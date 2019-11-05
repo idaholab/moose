@@ -43,6 +43,8 @@ InputParameters validParams<TimeIntegrator>();
 class TimeIntegrator : public MooseObject, public Restartable
 {
 public:
+  static InputParameters validParams();
+
   TimeIntegrator(const InputParameters & parameters);
 
   /**

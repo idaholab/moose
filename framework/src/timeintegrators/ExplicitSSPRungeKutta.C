@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", ExplicitSSPRungeKutta);
 
-template <>
+defineLegacyParams(ExplicitSSPRungeKutta);
+
 InputParameters
-validParams<ExplicitSSPRungeKutta>()
+ExplicitSSPRungeKutta::validParams()
 {
-  InputParameters params = validParams<ExplicitTimeIntegrator>();
+  InputParameters params = ExplicitTimeIntegrator::validParams();
 
   MooseEnum orders("1=1 2 3");
   params.addRequiredParam<MooseEnum>("order", orders, "Order of time integration");

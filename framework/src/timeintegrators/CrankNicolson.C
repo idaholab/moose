@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", CrankNicolson);
 
-template <>
+defineLegacyParams(CrankNicolson);
+
 InputParameters
-validParams<CrankNicolson>()
+CrankNicolson::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

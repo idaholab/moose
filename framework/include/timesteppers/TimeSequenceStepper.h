@@ -23,6 +23,8 @@ InputParameters validParams<TimeSequenceStepper>();
 class TimeSequenceStepper : public TimeSequenceStepperBase
 {
 public:
+  static InputParameters validParams();
+
   TimeSequenceStepper(const InputParameters & parameters);
 
   virtual void init() override;

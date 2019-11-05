@@ -23,6 +23,8 @@ InputParameters validParams<ExodusTimeSequenceStepper>();
 class ExodusTimeSequenceStepper : public TimeSequenceStepperBase
 {
 public:
+  static InputParameters validParams();
+
   ExodusTimeSequenceStepper(const InputParameters & parameters);
 
 protected:

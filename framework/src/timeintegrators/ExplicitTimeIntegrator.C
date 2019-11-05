@@ -16,11 +16,12 @@
 // libMesh includes
 #include "libmesh/enum_convergence_flags.h"
 
-template <>
+defineLegacyParams(ExplicitTimeIntegrator);
+
 InputParameters
-validParams<ExplicitTimeIntegrator>()
+ExplicitTimeIntegrator::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   MooseEnum solve_type("consistent lumped lump_preconditioned", "consistent");
 

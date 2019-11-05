@@ -29,6 +29,8 @@ InputParameters validParams<ExplicitTimeIntegrator>();
 class ExplicitTimeIntegrator : public TimeIntegrator, public MeshChangedInterface
 {
 public:
+  static InputParameters validParams();
+
   ExplicitTimeIntegrator(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -97,6 +99,8 @@ protected:
 class LumpedPreconditioner : public Preconditioner<Real>
 {
 public:
+  static InputParameters validParams();
+
   LumpedPreconditioner(const NumericVector<Real> & diag_inverse)
     : Preconditioner(diag_inverse.comm()), _diag_inverse(diag_inverse)
   {

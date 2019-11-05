@@ -46,6 +46,8 @@ InputParameters validParams<ImplicitMidpoint>();
 class ImplicitMidpoint : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ImplicitMidpoint(const InputParameters & parameters);
 
   virtual int order() override { return 2; }
