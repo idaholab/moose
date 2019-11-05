@@ -10,11 +10,12 @@
 #include "LineSearch.h"
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(LineSearch);
+
 InputParameters
-validParams<LineSearch>()
+LineSearch::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.registerBase("LineSearch");
   return params;
 }

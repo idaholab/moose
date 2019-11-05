@@ -22,6 +22,8 @@ class LineSearch : public MooseObject
 public:
   LineSearch(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * zeros the nonlinear iteration count
    */
@@ -44,4 +46,3 @@ protected:
   /// number of non-linear iterations
   size_t _nl_its;
 };
-
