@@ -76,6 +76,8 @@ struct TopResidualDebugOutputTopResidualData
 class TopResidualDebugOutput : public PetscOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Object input parameters

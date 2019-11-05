@@ -26,6 +26,8 @@ InputParameters validParams<SolutionHistory>();
 class SolutionHistory : public FileOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    *

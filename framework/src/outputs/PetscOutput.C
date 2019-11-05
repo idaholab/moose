@@ -15,11 +15,12 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 
-template <>
+defineLegacyParams(PetscOutput);
+
 InputParameters
-validParams<PetscOutput>()
+PetscOutput::validParams()
 {
-  InputParameters params = validParams<Output>();
+  InputParameters params = Output::validParams();
 
 // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
 #ifdef LIBMESH_HAVE_PETSC

@@ -25,15 +25,16 @@
 
 registerMooseObject("MooseApp", Console);
 
-template <>
+defineLegacyParams(Console);
+
 InputParameters
-validParams<Console>()
+Console::validParams()
 {
   // Enum for selecting the fit mode for the table when printed to the screen
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Get the parameters from the base class
-  InputParameters params = validParams<TableOutput>();
+  InputParameters params = TableOutput::validParams();
   params.addClassDescription("Object for screen output.");
 
   params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");

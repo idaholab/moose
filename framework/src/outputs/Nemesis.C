@@ -21,12 +21,13 @@
 
 registerMooseObject("MooseApp", Nemesis);
 
-template <>
+defineLegacyParams(Nemesis);
+
 InputParameters
-validParams<Nemesis>()
+Nemesis::validParams()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput>();
+  InputParameters params = AdvancedOutput::validParams();
   params += AdvancedOutput::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class

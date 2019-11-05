@@ -18,12 +18,13 @@
 #include <unistd.h>
 #include <ctime>
 
-template <>
+defineLegacyParams(FileOutput);
+
 InputParameters
-validParams<FileOutput>()
+FileOutput::validParams()
 {
   // Create InputParameters object for this stand-alone object
-  InputParameters params = validParams<PetscOutput>();
+  InputParameters params = PetscOutput::validParams();
   params.addParam<std::string>("file_base",
                                "The desired solution output name without an extension");
   params.addParam<bool>(

@@ -28,6 +28,8 @@ InputParameters validParams<VariableResidualNormsDebugOutput>();
 class VariableResidualNormsDebugOutput : public PetscOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Object input parameters

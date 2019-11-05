@@ -26,6 +26,8 @@ InputParameters validParams<Gnuplot>();
 class Gnuplot : public TableOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    *

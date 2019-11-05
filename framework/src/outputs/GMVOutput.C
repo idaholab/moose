@@ -15,12 +15,13 @@
 
 registerMooseObjectAliased("MooseApp", GMVOutput, "GMV");
 
-template <>
+defineLegacyParams(GMVOutput);
+
 InputParameters
-validParams<GMVOutput>()
+GMVOutput::validParams()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
+  InputParameters params = OversampleOutput::validParams();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");

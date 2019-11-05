@@ -24,6 +24,8 @@ InputParameters validParams<ControlOutput>();
 class ControlOutput : public Output
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

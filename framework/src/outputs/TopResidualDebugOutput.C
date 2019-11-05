@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", TopResidualDebugOutput);
 
-template <>
+defineLegacyParams(TopResidualDebugOutput);
+
 InputParameters
-validParams<TopResidualDebugOutput>()
+TopResidualDebugOutput::validParams()
 {
-  InputParameters params = validParams<PetscOutput>();
+  InputParameters params = PetscOutput::validParams();
   params.addClassDescription("Debug output object for displaying the top contributing residuals.");
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block

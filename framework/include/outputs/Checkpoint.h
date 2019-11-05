@@ -46,6 +46,8 @@ struct CheckpointFileNames
 class Checkpoint : public FileOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters

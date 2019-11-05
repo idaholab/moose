@@ -30,6 +30,8 @@ InputParameters validParams<Exodus>();
 class Exodus : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   enum class OutputDimension : int
   {
     DEFAULT,
