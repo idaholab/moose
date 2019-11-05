@@ -28,6 +28,8 @@ class ElemElemConstraint : public Constraint,
 public:
   ElemElemConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * reinit element-element constraint
    */

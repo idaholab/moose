@@ -49,6 +49,8 @@ class MortarConstraintBase : public Constraint,
 public:
   MortarConstraintBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Method for computing the residual
    * @param has_master Whether the mortar segment element projects onto the master face

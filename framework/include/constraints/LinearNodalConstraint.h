@@ -28,6 +28,8 @@ class LinearNodalConstraint : public NodalConstraint
 public:
   LinearNodalConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Computes the residual for the current slave node

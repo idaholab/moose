@@ -26,6 +26,8 @@ class EqualGradientConstraint : public ADMortarConstraint<compute_stage>
 public:
   EqualGradientConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 

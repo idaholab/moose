@@ -19,12 +19,13 @@
 
 #include "libmesh/string_to_enum.h"
 
-template <>
+defineLegacyParams(NodeFaceConstraint);
+
 InputParameters
-validParams<NodeFaceConstraint>()
+NodeFaceConstraint::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
-  InputParameters params = validParams<Constraint>();
+  InputParameters params = Constraint::validParams();
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master",
                                         "The boundary ID associated with the master side");

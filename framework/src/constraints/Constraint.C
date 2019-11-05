@@ -11,14 +11,15 @@
 
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(Constraint);
+
 InputParameters
-validParams<Constraint>()
+Constraint::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   // Add the SetupInterface parameter, 'execute_on', default is 'linear'
-  params += validParams<SetupInterface>();
-  params += validParams<TaggingInterface>();
+  params += SetupInterface::validParams();
+  params += TaggingInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
