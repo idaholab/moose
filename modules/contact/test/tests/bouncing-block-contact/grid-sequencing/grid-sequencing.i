@@ -8,7 +8,6 @@ offset = 1e-2
 [GlobalParams]
   displacements = 'disp_x disp_y'
   diffusivity = 1e0
-  scaling = 1e0
 []
 
 [Mesh]
@@ -18,16 +17,12 @@ offset = 1e-2
 [Variables]
   [./disp_x]
     block = '1 2'
-    # order = SECOND
   [../]
   [./disp_y]
     block = '1 2'
-    # order = SECOND
   [../]
   [./normal_lm]
     block = 3
-    # family = MONOMIAL
-    # order = CONSTANT
   [../]
   [./tangential_lm]
     block = 3
@@ -166,7 +161,7 @@ offset = 1e-2
   dt = 5
   dtmin = .1
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor -snes_ksp_ew'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
@@ -186,10 +181,6 @@ offset = 1e-2
     sync_times = '15'
     sync_only = true
   []
-  # [./dofmap]
-  #   type = DOFMap
-  #   execute_on = 'initial'
-  # [../]
 []
 
 [Preconditioning]

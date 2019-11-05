@@ -13,10 +13,10 @@
   []
   [no_grid_sequencing]
     type = Exodiff
-    input = no-grid-sequencing.i
+    input = grid-sequencing.i
     exodiff = no-grid-sequencing_exo.e
     requirement = 'The system shall be able to produce the same result when not using grid sequencing'
-    cli_args = 'Postprocessors/active=contact'
+    cli_args = 'Postprocessors/active=contact Mesh/uniform_refine=4 Executioner/num_grids=1 Outputs/file_base=no-grid-sequencing_exo'
     # Fix below when I understand duplicate element centroids
     map = False
     partial = True
