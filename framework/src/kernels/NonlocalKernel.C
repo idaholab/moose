@@ -18,11 +18,12 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(NonlocalKernel);
+
 InputParameters
-validParams<NonlocalKernel>()
+NonlocalKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", Reaction);
 
-template <>
+defineLegacyParams(Reaction);
+
 InputParameters
-validParams<Reaction>()
+Reaction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Implements a simple consuming reaction term with weak form $(\\psi_i, u_h)$.");
   return params;

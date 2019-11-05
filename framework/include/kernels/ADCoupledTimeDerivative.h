@@ -24,9 +24,9 @@ template <ComputeStage compute_stage>
 class ADCoupledTimeDerivative : public ADKernelValue<compute_stage>
 {
 public:
-  ADCoupledTimeDerivative(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual ADReal precomputeQpResidual() override;

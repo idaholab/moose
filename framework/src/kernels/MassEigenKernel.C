@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MassEigenKernel);
 
-template <>
+defineLegacyParams(MassEigenKernel);
+
 InputParameters
-validParams<MassEigenKernel>()
+MassEigenKernel::validParams()
 {
-  InputParameters params = validParams<EigenKernel>();
+  InputParameters params = EigenKernel::validParams();
   params.addClassDescription("An eigenkernel with weak form $\\lambda(\\psi_i, -u_h)$ where "
                              "$\\lambda$ is the eigenvalue.");
   return params;

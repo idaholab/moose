@@ -22,6 +22,8 @@ InputParameters validParams<CoefTimeDerivative>();
 class CoefTimeDerivative : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   CoefTimeDerivative(const InputParameters & parameters);
 
 protected:

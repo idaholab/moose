@@ -16,11 +16,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(TimeKernel);
+
 InputParameters
-validParams<TimeKernel>()
+TimeKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";

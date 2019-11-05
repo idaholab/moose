@@ -11,9 +11,10 @@
 
 registerMooseObject("MooseApp", MaterialDerivativeRankTwoTestKernel);
 
-template <>
+defineLegacyParams(MaterialDerivativeRankTwoTestKernel);
+
 InputParameters
-validParams<MaterialDerivativeRankTwoTestKernel>()
+MaterialDerivativeRankTwoTestKernel::validParams()
 {
   InputParameters params = MaterialDerivativeTestKernelBase<RankTwoTensor>::validParams();
   params.addClassDescription(

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", Diffusion);
 
-template <>
+defineLegacyParams(Diffusion);
+
 InputParameters
-validParams<Diffusion>()
+Diffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
                              "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
   return params;

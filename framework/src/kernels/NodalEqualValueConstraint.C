@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", NodalEqualValueConstraint);
 
-template <>
+defineLegacyParams(NodalEqualValueConstraint);
+
 InputParameters
-validParams<NodalEqualValueConstraint>()
+NodalEqualValueConstraint::validParams()
 {
-  InputParameters params = validParams<NodalScalarKernel>();
+  InputParameters params = NodalScalarKernel::validParams();
   params.addRequiredCoupledVar("var", "Variable(s) to put the constraint on");
   return params;
 }

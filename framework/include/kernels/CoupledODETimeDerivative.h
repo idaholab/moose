@@ -20,6 +20,8 @@ InputParameters validParams<CoupledODETimeDerivative>();
 class CoupledODETimeDerivative : public ODETimeKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledODETimeDerivative(const InputParameters & parameters);
 
 protected:

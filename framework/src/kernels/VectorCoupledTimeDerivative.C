@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorCoupledTimeDerivative);
 
-template <>
+defineLegacyParams(VectorCoupledTimeDerivative);
+
 InputParameters
-validParams<VectorCoupledTimeDerivative>()
+VectorCoupledTimeDerivative::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Time derivative Kernel that acts on a coupled vector variable. Weak form: "
       "$(\\vec{\\psi}_i, \\frac{\\partial \\vec{v_h}}{\\partial t})$.");

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayReaction);
 
-template <>
+defineLegacyParams(ArrayReaction);
+
 InputParameters
-validParams<ArrayReaction>()
+ArrayReaction::validParams()
 {
-  InputParameters params = validParams<ArrayKernel>();
+  InputParameters params = ArrayKernel::validParams();
   params.addParam<MaterialPropertyName>("reaction_coefficient",
                                         "The name of the reactivity, "
                                         "can be scalar, vector, or matrix.");

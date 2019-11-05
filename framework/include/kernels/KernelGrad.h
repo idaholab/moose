@@ -27,6 +27,8 @@ InputParameters validParams<KernelGrad>();
 class KernelGrad : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Factory constructor initializes all internal references needed for residual computation.
    *

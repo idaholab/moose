@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", TimeDerivative);
 
-template <>
+defineLegacyParams(TimeDerivative);
+
 InputParameters
-validParams<TimeDerivative>()
+TimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
   params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");

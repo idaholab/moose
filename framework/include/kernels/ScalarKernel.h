@@ -44,6 +44,8 @@ class ScalarKernel : public MooseObject,
                      public TaggingInterface
 {
 public:
+  static InputParameters validParams();
+
   ScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() = 0;

@@ -26,12 +26,11 @@ template <typename T>
 class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   MatDiffusionBase(const InputParameters & parameters);
 
   virtual void initialSetup();
-
-  /// in class templates this function has to be a static member
-  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual();
@@ -62,7 +61,7 @@ template <typename T>
 InputParameters
 MatDiffusionBase<T>::validParams()
 {
-  InputParameters params = ::validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addDeprecatedParam<MaterialPropertyName>(
       "D_name",
       "The name of the diffusivity",

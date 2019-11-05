@@ -23,6 +23,8 @@ InputParameters validParams<CoupledTimeDerivative>();
 class CoupledTimeDerivative : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledTimeDerivative(const InputParameters & parameters);
 
 protected:

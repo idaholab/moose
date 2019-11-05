@@ -21,6 +21,8 @@ InputParameters validParams<ArrayKernel>();
 class ArrayKernel : public KernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
+  static InputParameters validParams();
+
   ArrayKernel(const InputParameters & parameters);
 
   /// Compute this ArrayKernel's contribution to the residual

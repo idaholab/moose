@@ -11,9 +11,10 @@
 
 registerMooseObject("MooseApp", MaterialDerivativeTestKernel);
 
-template <>
+defineLegacyParams(MaterialDerivativeTestKernel);
+
 InputParameters
-validParams<MaterialDerivativeTestKernel>()
+MaterialDerivativeTestKernel::validParams()
 {
   InputParameters params = MaterialDerivativeTestKernelBase<Real>::validParams();
   params.addClassDescription("Class used for testing derivatives of a scalar material property.");

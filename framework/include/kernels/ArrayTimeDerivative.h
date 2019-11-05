@@ -20,6 +20,8 @@ InputParameters validParams<ArrayTimeDerivative>();
 class ArrayTimeDerivative : public ArrayTimeKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayTimeDerivative(const InputParameters & parameters);
 
 protected:

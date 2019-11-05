@@ -23,6 +23,8 @@ InputParameters validParams<VectorDiffusion>();
 class VectorDiffusion : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorDiffusion(const InputParameters & parameters);
 
 protected:

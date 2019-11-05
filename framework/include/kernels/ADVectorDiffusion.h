@@ -20,9 +20,9 @@ template <ComputeStage compute_stage>
 class ADVectorDiffusion : public ADVectorKernel<compute_stage>
 {
 public:
-  ADVectorDiffusion(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADVectorDiffusion(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

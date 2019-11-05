@@ -9,15 +9,14 @@
 
 #include "ArrayTimeKernel.h"
 
-template <>
-InputParameters
-validParams<ArrayTimeKernel>()
-{
-  InputParameters params = validParams<ArrayKernel>();
+defineLegacyParams(ArrayTimeKernel);
 
+InputParameters
+ArrayTimeKernel::validParams()
+{
+  InputParameters params = ArrayKernel::validParams();
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
-
   return params;
 }
 

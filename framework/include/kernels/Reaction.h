@@ -20,6 +20,8 @@ InputParameters validParams<Reaction>();
 class Reaction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Reaction(const InputParameters & parameters);
 
 protected:

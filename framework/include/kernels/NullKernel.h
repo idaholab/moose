@@ -22,6 +22,8 @@ InputParameters validParams<NullKernel>();
 class NullKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NullKernel(const InputParameters & parameters);
 
 protected:

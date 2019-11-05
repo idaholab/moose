@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayDiffusion);
 
-template <>
+defineLegacyParams(ArrayDiffusion);
+
 InputParameters
-validParams<ArrayDiffusion>()
+ArrayDiffusion::validParams()
 {
-  InputParameters params = validParams<ArrayKernel>();
+  InputParameters params = ArrayKernel::validParams();
   params.addParam<MaterialPropertyName>("diffusion_coefficient",
                                         "The name of the diffusivity, "
                                         "can be scalar, vector, or matrix.");

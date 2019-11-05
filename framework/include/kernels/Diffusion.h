@@ -23,6 +23,8 @@ InputParameters validParams<Diffusion>();
 class Diffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Diffusion(const InputParameters & parameters);
 
 protected:

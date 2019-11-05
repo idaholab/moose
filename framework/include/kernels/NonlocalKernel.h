@@ -27,6 +27,8 @@ InputParameters validParams<NonlocalKernel>();
 class NonlocalKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NonlocalKernel(const InputParameters & parameters);
 
   /**

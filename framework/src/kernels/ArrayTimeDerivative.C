@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayTimeDerivative);
 
-template <>
+defineLegacyParams(ArrayTimeDerivative);
+
 InputParameters
-validParams<ArrayTimeDerivative>()
+ArrayTimeDerivative::validParams()
 {
-  InputParameters params = validParams<ArrayTimeKernel>();
+  InputParameters params = ArrayTimeKernel::validParams();
   params.addClassDescription("Array time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
   params.addParam<MaterialPropertyName>("time_derivative_coefficient",

@@ -15,13 +15,14 @@
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
-template <>
+defineLegacyParams(ScalarKernel);
+
 InputParameters
-validParams<ScalarKernel>()
+ScalarKernel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<TransientInterface>();
+  params += ::validParams<TaggingInterface>();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this kernel operates on");
 
