@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantRate);
 
-template <>
+defineLegacyParams(ConstantRate);
+
 InputParameters
-validParams<ConstantRate>()
+ConstantRate::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addRequiredParam<Real>("rate", "The constant rate in 'du/dt = rate'");
   params.declareControllable("rate");
   return params;

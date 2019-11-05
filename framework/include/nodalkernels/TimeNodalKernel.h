@@ -29,6 +29,8 @@ public:
    */
   TimeNodalKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeResidual() override;
 

@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", UserForcingFunctionNodalKernel);
 
-template <>
+defineLegacyParams(UserForcingFunctionNodalKernel);
+
 InputParameters
-validParams<UserForcingFunctionNodalKernel>()
+UserForcingFunctionNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function");
   return params;
 }

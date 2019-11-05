@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CoupledForceNodalKernel);
 
-template <>
+defineLegacyParams(CoupledForceNodalKernel);
+
 InputParameters
-validParams<CoupledForceNodalKernel>()
+CoupledForceNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Adds a force proportional to the value of the coupled variable");
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addParam<Real>(

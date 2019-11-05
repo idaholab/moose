@@ -24,6 +24,8 @@ class ReactionNodalKernel : public NodalKernel
 public:
   ReactionNodalKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;

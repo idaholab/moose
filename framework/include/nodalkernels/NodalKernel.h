@@ -68,6 +68,8 @@ public:
    */
   NodalKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Gets the variable this is active on
    * @return the variable
