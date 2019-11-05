@@ -1,6 +1,6 @@
 [Tests]
-  design = "source/materials/LinearElasticTruss.md source/kernels/StressDivergenceTensorsTruss.md LineElementAction.md"
-  issues = "#6789 #2460 #10313"
+  design = "source/materials/LinearElasticTruss.md source/kernels/StressDivergenceTensorsTruss.md LineElementAction.md source/materials/PlasticTruss.md"
+  issues = "#6789 #2460 #10313 #14304"
   [./truss_3d]
     type = 'Exodiff'
     input = 'truss_3d.i'
@@ -70,5 +70,37 @@
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
     requirement = "The LineElementAction shall produce an error if rotational variables are"
                   " provided as input for truss elements."
+  [../]
+  [./tensile]
+    type = 'Exodiff'
+    input = 'truss_plastic.i'
+    cli_args = 'Outputs/file_base=truss_plastic_tensile_out'
+    exodiff = 'truss_plastic_tensile_out.e'
+    requirement = "The system shall accurately model the inelastic response"
+                  " of the truss elements under tension"
+  [../]
+  [./tensile_nohardening]
+    type = 'Exodiff'
+    input = 'truss_plastic.i'
+    cli_args = 'Outputs/file_base=truss_nohardening_tension_out Materials/truss/hardening_constant=0.0'
+    exodiff = 'truss_nohardening_tension_out.e'
+    requirement = "The system shall accurately model the plastic response"
+                  " of the truss elements in the absence of hardenning."
+  [../]
+  [./compressive]
+    type = 'Exodiff'
+    input = 'truss_plastic.i'
+    cli_args = 'Outputs/file_base=truss_plastic_compression_out BCs/load/function=-t'
+    exodiff = 'truss_plastic_compression_out.e'
+    requirement = "The system shall accurately model the inelastic response"
+                  " of the truss elements under compression."
+  [../]
+  [./compressive_nohardening]
+    type = 'Exodiff'
+    input = 'truss_plastic.i'
+    cli_args = 'Outputs/file_base=truss_nohardening_compression_out BCs/load/function=-t Materials/truss/hardening_constant=0.0'
+    exodiff = 'truss_nohardening_compression_out.e'
+    requirement = "The system shall accurately model the inelastic response"
+                  " of the truss elements under compression in the absence of hardenning."
   [../]
 []
