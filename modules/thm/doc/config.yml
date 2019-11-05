@@ -5,12 +5,12 @@ Content:
         root_dir: ${ROOT_DIR}/test/doc/content
     framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - application_usage/command_line_usage.md
     fluid_properties:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
-        content:
-            - /**
-            - ~syntax/Modules/index.md
-            - ~syntax/Modules/FluidProperties/index.md
     misc:
         root_dir: ${MOOSE_DIR}/modules/misc/doc/content
     heat_conduction:
@@ -41,7 +41,9 @@ Extensions:
             Documentation:
                 Tutorial: thm_tutorial.md
                 Complete Syntax Listing: syntax/index.md
-            Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
+            Status:
+                Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
+                Code Coverage: https://hpcsc.inl.gov/ssl/THM/coverage/
 
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
