@@ -1,0 +1,9 @@
+[Tests]
+  design = 'MooseApp.md'
+  issues = '#9659'
+  [./test]
+    type = Exodiff
+    input = 'test.i'
+    requirement = 'The system allow coupling between variables on or off displaced meshes.'
+  [../]
+[]
