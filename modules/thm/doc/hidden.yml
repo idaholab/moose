@@ -163,7 +163,6 @@
 - /Functions/ConstantTimesAreaFunction
 - /Functions/GeneralizedCircumference
 
-- /HeatStructureMaterials
 - /HeatStructureMaterials/AddHeatStructureMaterialAction
 - /HeatStructureMaterials/SolidMaterialProperties
 
