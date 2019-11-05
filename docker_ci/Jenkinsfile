@@ -15,7 +15,7 @@ pipeline {
     agent none
 
     environment {
-        SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+        SLACK_SFX = "on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
         SLACK_ERR = "Slack not configured.\n"
     }
     
@@ -88,7 +88,7 @@ pipeline {
             script {
                 try {      
                     // Send message build was successful
-                    slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
+                    slackSend color: 'good', message: "Successful build of MOOSE rev ${GIT_COMMIT} ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
@@ -99,7 +99,7 @@ pipeline {
             script {
                 try {                
                     // Send message build failed
-                    slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
+                    slackSend color: 'danger', message: "Failed to build MOOSE rev ${GIT_COMMIT} ${SLACK_SFX}"
                 } catch (Exception e) {
                     echo "${SLACK_ERR}" + e.toString() // Slack not required to build
                 }
