@@ -19,11 +19,12 @@
 
 registerMooseObjectAliased("MooseApp", SingleMatrixPreconditioner, "SMP");
 
-template <>
+defineLegacyParams(SingleMatrixPreconditioner);
+
 InputParameters
-validParams<SingleMatrixPreconditioner>()
+SingleMatrixPreconditioner::validParams()
 {
-  InputParameters params = validParams<MoosePreconditioner>();
+  InputParameters params = MoosePreconditioner::validParams();
 
   params.addParam<std::vector<NonlinearVariableName>>(
       "off_diag_row",

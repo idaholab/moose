@@ -30,6 +30,8 @@ public:
    */
   FieldSplitPreconditioner(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * top split
    */

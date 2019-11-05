@@ -15,11 +15,12 @@
 
 #include "libmesh/numeric_vector.h"
 
-template <>
+defineLegacyParams(MoosePreconditioner);
+
 InputParameters
-validParams<MoosePreconditioner>()
+MoosePreconditioner::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
 
   MooseEnum pc_side("left right symmetric default", "default");

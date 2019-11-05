@@ -35,6 +35,8 @@ class MoosePreconditioner : public MooseObject, public Restartable, public PerfG
 {
 public:
   MoosePreconditioner(const InputParameters & params);
+
+  static InputParameters validParams();
   virtual ~MoosePreconditioner() = default;
 
   /**
