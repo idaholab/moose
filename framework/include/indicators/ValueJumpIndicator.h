@@ -21,7 +21,8 @@ class ValueJumpIndicator : public InternalSideIndicator
 public:
   ValueJumpIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpIntegral() override;
 };
-

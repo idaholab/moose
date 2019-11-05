@@ -21,7 +21,8 @@ class GradientJumpIndicator : public InternalSideIndicator
 public:
   GradientJumpIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpIntegral() override;
 };
-

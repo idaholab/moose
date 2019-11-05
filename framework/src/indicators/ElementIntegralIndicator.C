@@ -14,11 +14,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ElementIntegralIndicator);
+
 InputParameters
-validParams<ElementIntegralIndicator>()
+ElementIntegralIndicator::validParams()
 {
-  InputParameters params = validParams<ElementIndicator>();
+  InputParameters params = ElementIndicator::validParams();
   return params;
 }
 

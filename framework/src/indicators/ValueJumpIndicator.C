@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ValueJumpIndicator);
 
-template <>
+defineLegacyParams(ValueJumpIndicator);
+
 InputParameters
-validParams<ValueJumpIndicator>()
+ValueJumpIndicator::validParams()
 {
-  InputParameters params = validParams<InternalSideIndicator>();
+  InputParameters params = InternalSideIndicator::validParams();
   params.addClassDescription("Compute the jump of the solution across element bondaries.");
   return params;
 }

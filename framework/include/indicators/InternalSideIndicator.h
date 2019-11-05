@@ -42,6 +42,8 @@ public:
    */
   InternalSideIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Computes the indicator for the current side.
    */
@@ -103,4 +105,3 @@ public:
   // number)
   static const BoundaryID InternalBndId;
 };
-

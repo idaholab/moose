@@ -21,10 +21,11 @@ class LaplacianJumpIndicator : public InternalSideIndicator
 public:
   LaplacianJumpIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpIntegral() override;
 
   const VariableSecond & _second_u;
   const VariableSecond & _second_u_neighbor;
 };
-

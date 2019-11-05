@@ -37,6 +37,8 @@ class ElementIndicator : public Indicator,
 public:
   ElementIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   MooseVariable & _field_var;
 
@@ -61,4 +63,3 @@ protected:
   /// Holds local indicator entries as their accumulated by this ElementIndicator
   DenseVector<Number> _local_indtr;
 };
-
