@@ -35,6 +35,8 @@ class VectorFunctionIC : public VectorInitialCondition
 public:
   VectorFunctionIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual RealVectorValue value(const Point & p) override;
 
 protected:

@@ -30,11 +30,12 @@ valueHelper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real>
 }
 }
 
-template <>
+defineLegacyParams(RandomICBase);
+
 InputParameters
-validParams<RandomICBase>()
+RandomICBase::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
   params.addParam<bool>(
       "legacy_generator",

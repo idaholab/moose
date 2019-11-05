@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ScalarConstantIC);
 
-template <>
+defineLegacyParams(ScalarConstantIC);
+
 InputParameters
-validParams<ScalarConstantIC>()
+ScalarConstantIC::validParams()
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
+  InputParameters params = ScalarInitialCondition::validParams();
   params.set<Real>("value") = 0.0;
   return params;
 }

@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", FunctionScalarIC);
 
-template <>
+defineLegacyParams(FunctionScalarIC);
+
 InputParameters
-validParams<FunctionScalarIC>()
+FunctionScalarIC::validParams()
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
+  InputParameters params = ScalarInitialCondition::validParams();
   params.addRequiredParam<std::vector<FunctionName>>("function", "The initial condition function.");
   return params;
 }

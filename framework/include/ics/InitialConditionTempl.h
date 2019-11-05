@@ -54,6 +54,8 @@ public:
 
   virtual ~InitialConditionTempl();
 
+  static InputParameters validParams();
+
   virtual MooseVariableFEBase & variable() override { return _var; }
 
   virtual void compute() override;

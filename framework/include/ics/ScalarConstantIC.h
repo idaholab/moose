@@ -30,9 +30,10 @@ public:
    */
   ScalarConstantIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value() override;
 
 protected:
   Real _value;
 };
-

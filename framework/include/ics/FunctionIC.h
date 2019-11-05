@@ -33,6 +33,8 @@ class FunctionIC : public InitialCondition
 public:
   FunctionIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Evaluate the function at the current quadrature point and time step.

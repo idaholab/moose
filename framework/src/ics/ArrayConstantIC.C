@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ArrayConstantIC);
 
-template <>
+defineLegacyParams(ArrayConstantIC);
+
 InputParameters
-validParams<ArrayConstantIC>()
+ArrayConstantIC::validParams()
 {
-  InputParameters params = validParams<ArrayInitialCondition>();
+  InputParameters params = ArrayInitialCondition::validParams();
   params.addRequiredParam<RealEigenVector>("value", "The values to be set in IC");
   params.addClassDescription("Sets constant component values for an array field variable.");
   return params;

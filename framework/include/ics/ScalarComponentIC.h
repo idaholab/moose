@@ -24,9 +24,10 @@ class ScalarComponentIC : public ScalarInitialCondition
 public:
   ScalarComponentIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real value();
 
   std::vector<Real> _initial_values;
 };
-

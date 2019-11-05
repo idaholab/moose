@@ -57,6 +57,8 @@ public:
 
   virtual ~InitialConditionBase();
 
+  static InputParameters validParams();
+
   /**
    * retrieves the MOOSE variable that this initial condition acts upon
    */

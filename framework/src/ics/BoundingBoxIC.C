@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", BoundingBoxIC);
 
-template <>
+defineLegacyParams(BoundingBoxIC);
+
 InputParameters
-validParams<BoundingBoxIC>()
+BoundingBoxIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
   params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");
