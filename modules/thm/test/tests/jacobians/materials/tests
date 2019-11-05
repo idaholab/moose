@@ -372,4 +372,12 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./wall_friction_churchill]
+    type = 'PetscJacobianTester'
+    input = 'wall_friction_churchill.i'
+    ratio_tol = 2e-10
+    difference_tol = 2e-10
+    max_threads = 1
+    allow_test_objects = true
+  [../]
 []
