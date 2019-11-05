@@ -55,6 +55,8 @@ class PiecewiseBilinear : public Function
 public:
   PiecewiseBilinear(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   // Necessary for using forward declaration of BilinearInterpolation in std::unique_ptr
   virtual ~PiecewiseBilinear();
 

@@ -12,12 +12,13 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedGradFunction, "ParsedGradFunction");
 
-template <>
+defineLegacyParams(MooseParsedGradFunction);
+
 InputParameters
-validParams<MooseParsedGradFunction>()
+MooseParsedGradFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
-  params += validParams<MooseParsedFunctionBase>();
+  InputParameters params = Function::validParams();
+  params += MooseParsedFunctionBase::validParams();
   params.addParam<std::string>("value", "0", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial with respect to x.");
   params.addParam<std::string>("grad_y", "0", "Partial with respect to y.");

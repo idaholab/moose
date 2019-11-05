@@ -27,6 +27,8 @@ class VectorPostprocessorFunction : public Function, public VectorPostprocessorI
 {
 public:
   VectorPostprocessorFunction(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual Real value(Real /*t*/, const Point & pt) const override;
 
 protected:

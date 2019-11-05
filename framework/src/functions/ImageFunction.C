@@ -12,13 +12,14 @@
 
 registerMooseObject("MooseApp", ImageFunction);
 
-template <>
+defineLegacyParams(ImageFunction);
+
 InputParameters
-validParams<ImageFunction>()
+ImageFunction::validParams()
 {
   // Define the general parameters
-  InputParameters params = validParams<Function>();
-  params += validParams<ImageSampler>();
+  InputParameters params = Function::validParams();
+  params += ImageSampler::validParams();
   params.addClassDescription("Function with values sampled from a given image stack");
   return params;
 }

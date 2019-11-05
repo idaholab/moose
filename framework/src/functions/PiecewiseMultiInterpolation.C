@@ -10,11 +10,12 @@
 #include "PiecewiseMultiInterpolation.h"
 #include "GriddedData.h"
 
-template <>
+defineLegacyParams(PiecewiseMultiInterpolation);
+
 InputParameters
-validParams<PiecewiseMultiInterpolation>()
+PiecewiseMultiInterpolation::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addParam<FileName>(
       "data_file",
       "File holding data for use with PiecewiseMultiInterpolation.  Format: any empty line and any "

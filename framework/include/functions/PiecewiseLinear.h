@@ -26,6 +26,8 @@ class PiecewiseLinear : public Piecewise
 public:
   PiecewiseLinear(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Get the value of the function (based on time only)
    * \param t The time

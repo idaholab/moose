@@ -32,6 +32,8 @@ public:
    */
   MooseParsedVectorFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual RealVectorValue vectorValue(Real t, const Point & p) const override;
 
   virtual RealVectorValue vectorCurl(Real t, const Point & p) const override;

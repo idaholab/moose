@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TestSetupPostprocessorDataActionFunction);
 
-template <>
+defineLegacyParams(TestSetupPostprocessorDataActionFunction);
+
 InputParameters
-validParams<TestSetupPostprocessorDataActionFunction>()
+TestSetupPostprocessorDataActionFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "A postprocessor to test against");
   return params;
 }

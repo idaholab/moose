@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PiecewiseLinear);
 
-template <>
+defineLegacyParams(PiecewiseLinear);
+
 InputParameters
-validParams<PiecewiseLinear>()
+PiecewiseLinear::validParams()
 {
-  InputParameters params = validParams<Piecewise>();
+  InputParameters params = Piecewise::validParams();
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }

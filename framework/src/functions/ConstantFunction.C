@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantFunction);
 
-template <>
+defineLegacyParams(ConstantFunction);
+
 InputParameters
-validParams<ConstantFunction>()
+ConstantFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addParam<Real>("value", 0.0, "The constant value");
   params.declareControllable("value");
   return params;

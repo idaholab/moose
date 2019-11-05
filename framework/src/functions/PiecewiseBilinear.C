@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", PiecewiseBilinear);
 
-template <>
+defineLegacyParams(PiecewiseBilinear);
+
 InputParameters
-validParams<PiecewiseBilinear>()
+PiecewiseBilinear::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addParam<FileName>(
       "data_file", "", "File holding csv data for use with PiecewiseBilinear");
   params.addParam<std::vector<Real>>("x", "The x abscissa values");

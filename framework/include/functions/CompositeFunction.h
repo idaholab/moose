@@ -26,6 +26,8 @@ class CompositeFunction : public Function, protected FunctionInterface
 public:
   CompositeFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(Real t, const Point & pt) const override;
 
 private:
