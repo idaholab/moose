@@ -26,6 +26,8 @@ class MaxIncrement : public ElementDamper
 public:
   MaxIncrement(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpDamping() override;
 

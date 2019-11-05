@@ -16,15 +16,20 @@
 
 registerADMooseObject("MooseApp", ADDGDiffusion);
 
-defineADValidParams(ADDGDiffusion,
-                    ADDGKernel,
-                    // See header file for sigma and epsilon
-                    params.addRequiredParam<Real>("sigma", "sigma");
-                    params.addRequiredParam<Real>("epsilon", "epsilon");
-                    params.addParam<MaterialPropertyName>(
-                        "diff",
-                        1.,
-                        "The diffusion (or thermal conductivity or viscosity) coefficient."););
+defineADLegacyParams(ADDGDiffusion);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADDGDiffusion<compute_stage>::validParams()
+{
+  InputParameters params = ADDGKernel<compute_stage>::validParams();
+  // See header file for sigma and epsilon
+  params.addRequiredParam<Real>("sigma", "sigma");
+  params.addRequiredParam<Real>("epsilon", "epsilon");
+  params.addParam<MaterialPropertyName>(
+      "diff", 1., "The diffusion (or thermal conductivity or viscosity) coefficient.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)

@@ -28,6 +28,8 @@ class ConstantDamper : public GeneralDamper
 public:
   ConstantDamper(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Return the constant damping value.

@@ -34,6 +34,8 @@ class Damper : public MooseObject,
 public:
   Damper(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Check whether damping is below the user-specified minimum value,
    * and throw an exception if it is.

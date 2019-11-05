@@ -12,11 +12,12 @@
 #include "SubProblem.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(Damper);
+
 InputParameters
-validParams<Damper>()
+Damper::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("Damper");
   params.addParam<Real>("min_damping",

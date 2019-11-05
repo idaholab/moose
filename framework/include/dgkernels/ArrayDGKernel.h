@@ -34,6 +34,8 @@ public:
    */
   ArrayDGKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * The variable that this kernel operates on.
    */
