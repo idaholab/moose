@@ -35,6 +35,8 @@ InputParameters validParams<VectorPostprocessor>();
 class VectorPostprocessor : public OutputInterface
 {
 public:
+  static InputParameters validParams();
+
   VectorPostprocessor(const InputParameters & parameters);
 
   virtual ~VectorPostprocessor() = default;

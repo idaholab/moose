@@ -24,6 +24,8 @@ class FEProblemBase;
 class VectorPostprocessorData : public Restartable, public libMesh::ParallelObject
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

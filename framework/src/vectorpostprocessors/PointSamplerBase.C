@@ -15,13 +15,14 @@
 
 #include "libmesh/mesh_tools.h"
 
-template <>
-InputParameters
-validParams<PointSamplerBase>()
-{
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+defineLegacyParams(PointSamplerBase);
 
-  params += validParams<SamplerBase>();
+InputParameters
+PointSamplerBase::validParams()
+{
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+
+  params += SamplerBase::validParams();
 
   params.addRequiredCoupledVar(
       "variable", "The names of the variables that this VectorPostprocessor operates on");

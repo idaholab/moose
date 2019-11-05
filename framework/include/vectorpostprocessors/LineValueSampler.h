@@ -21,6 +21,8 @@ InputParameters validParams<LineValueSampler>();
 class LineValueSampler : public PointSamplerBase
 {
 public:
+  static InputParameters validParams();
+
   LineValueSampler(const InputParameters & parameters);
 
   /**

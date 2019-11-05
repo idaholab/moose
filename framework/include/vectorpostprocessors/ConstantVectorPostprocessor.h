@@ -20,6 +20,8 @@ InputParameters validParams<ConstantVectorPostprocessor>();
 class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ConstantVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

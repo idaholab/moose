@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", SphericalAverage);
 
-template <>
+defineLegacyParams(SphericalAverage);
+
 InputParameters
-validParams<SphericalAverage>()
+SphericalAverage::validParams()
 {
-  InputParameters params = validParams<SpatialAverageBase>();
+  InputParameters params = SpatialAverageBase::validParams();
   return params;
 }
 

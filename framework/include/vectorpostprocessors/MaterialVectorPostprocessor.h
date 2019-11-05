@@ -23,6 +23,8 @@ InputParameters validParams<MaterialVectorPostprocessor>();
 class MaterialVectorPostprocessor : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   MaterialVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override{};

@@ -20,6 +20,8 @@ InputParameters validParams<SidesetInfoVectorPostprocessor>();
 class SidesetInfoVectorPostprocessor : public SideVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SidesetInfoVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

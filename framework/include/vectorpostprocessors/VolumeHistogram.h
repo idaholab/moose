@@ -24,6 +24,8 @@ InputParameters validParams<VolumeHistogram>();
 class VolumeHistogram : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   VolumeHistogram(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -18,9 +18,10 @@
 
 #include "libmesh/point.h"
 
-template <>
+defineLegacyParams(SamplerBase);
+
 InputParameters
-validParams<SamplerBase>()
+SamplerBase::validParams()
 {
   InputParameters params = emptyInputParameters();
 

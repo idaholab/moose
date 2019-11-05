@@ -23,6 +23,8 @@ InputParameters validParams<ElementsAlongPlane>();
 class ElementsAlongPlane : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementsAlongPlane(const InputParameters & parameters);
 
   virtual void initialize() override;

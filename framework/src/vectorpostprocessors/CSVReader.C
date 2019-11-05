@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", CSVReader);
 
-template <>
+defineLegacyParams(CSVReader);
+
 InputParameters
-validParams<CSVReader>()
+CSVReader::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Converts columns of a CSV file into vectors of a VectorPostprocessor.");
   params.addRequiredParam<FileName>("csv_file",

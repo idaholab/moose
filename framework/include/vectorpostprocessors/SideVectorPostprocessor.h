@@ -21,6 +21,8 @@ InputParameters validParams<SideVectorPostprocessor>();
 class SideVectorPostprocessor : public SideUserObject, public VectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SideVectorPostprocessor(const InputParameters & parameters);
 
   /**

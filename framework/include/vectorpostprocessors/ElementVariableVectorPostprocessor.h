@@ -22,6 +22,8 @@ InputParameters validParams<ElementVariableVectorPostprocessor>();
 class ElementVariableVectorPostprocessor : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementVariableVectorPostprocessor(const InputParameters & parameters);
 };
 

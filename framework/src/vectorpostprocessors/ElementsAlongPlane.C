@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ElementsAlongPlane);
 
-template <>
+defineLegacyParams(ElementsAlongPlane);
+
 InputParameters
-validParams<ElementsAlongPlane>()
+ElementsAlongPlane::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<Point>("point", "Point in the plane");
   params.addRequiredParam<Point>("normal", "Normal vector to the plane");

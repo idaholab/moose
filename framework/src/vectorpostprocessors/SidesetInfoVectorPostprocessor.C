@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", SidesetInfoVectorPostprocessor);
 
-template <>
+defineLegacyParams(SidesetInfoVectorPostprocessor);
+
 InputParameters
-validParams<SidesetInfoVectorPostprocessor>()
+SidesetInfoVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideVectorPostprocessor>();
+  InputParameters params = SideVectorPostprocessor::validParams();
   MultiMooseEnum meta_data_types("centroid=0 min=1 max=2 area=3");
   params.addParam<MultiMooseEnum>(
       "meta_data_types", meta_data_types, "Data types that are obtained and written to file.");

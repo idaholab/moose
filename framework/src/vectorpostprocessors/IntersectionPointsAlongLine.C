@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", IntersectionPointsAlongLine);
 
-template <>
+defineLegacyParams(IntersectionPointsAlongLine);
+
 InputParameters
-validParams<IntersectionPointsAlongLine>()
+IntersectionPointsAlongLine::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");
   return params;

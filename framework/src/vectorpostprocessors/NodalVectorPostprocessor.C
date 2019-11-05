@@ -12,12 +12,13 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(NodalVectorPostprocessor);
+
 InputParameters
-validParams<NodalVectorPostprocessor>()
+NodalVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<NodalUserObject>();
-  params += validParams<VectorPostprocessor>();
+  InputParameters params = NodalUserObject::validParams();
+  params += VectorPostprocessor::validParams();
   return params;
 }
 

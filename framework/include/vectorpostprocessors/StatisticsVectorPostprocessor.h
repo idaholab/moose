@@ -24,6 +24,8 @@ InputParameters validParams<StatisticsVectorPostprocessor>();
 class StatisticsVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   StatisticsVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

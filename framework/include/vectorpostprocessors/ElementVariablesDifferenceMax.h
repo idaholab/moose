@@ -29,6 +29,8 @@ InputParameters validParams<ElementVariablesDifferenceMax>();
 class ElementVariablesDifferenceMax : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   // Basic MooseObject cosntructor
   ElementVariablesDifferenceMax(const InputParameters & parameters);
 

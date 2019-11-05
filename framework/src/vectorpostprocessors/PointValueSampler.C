@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", PointValueSampler);
 
-template <>
+defineLegacyParams(PointValueSampler);
+
 InputParameters
-validParams<PointValueSampler>()
+PointValueSampler::validParams()
 {
-  InputParameters params = validParams<PointSamplerBase>();
+  InputParameters params = PointSamplerBase::validParams();
 
   params.addRequiredParam<std::vector<Point>>(
       "points", "The points where you want to evaluate the variables");

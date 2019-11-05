@@ -25,6 +25,8 @@ InputParameters validParams<LineMaterialRealSampler>();
 class LineMaterialRealSampler : public LineMaterialSamplerBase<Real>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * Sets up variables for output based on the properties to be output
