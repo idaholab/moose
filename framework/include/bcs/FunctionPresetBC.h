@@ -27,6 +27,8 @@ class FunctionPresetBC : public PresetNodalBC
 public:
   FunctionPresetBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Evaluate the function at the current quadrature point and timestep.

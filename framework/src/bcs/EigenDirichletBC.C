@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", EigenDirichletBC);
 
-template <>
+defineLegacyParams(EigenDirichletBC);
+
 InputParameters
-validParams<EigenDirichletBC>()
+EigenDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "eigen";
   params.set<MultiMooseEnum>("matrix_tags") = "eigen";

@@ -14,14 +14,18 @@
 
 registerADMooseObject("MooseApp", ADFunctionDirichletBC);
 
-defineADValidParams(
-    ADFunctionDirichletBC,
-    ADNodalBC,
-    params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
-                               "is calculated by a function.");
-    params.addParam<FunctionName>("function",
-                                  0,
-                                  "The function describing the Dirichlet condition"););
+defineADLegacyParams(ADFunctionDirichletBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADFunctionDirichletBC<compute_stage>::validParams()
+{
+  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
+                             "is calculated by a function.");
+  params.addParam<FunctionName>("function", 0, "The function describing the Dirichlet condition");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADFunctionDirichletBC<compute_stage>::ADFunctionDirichletBC(const InputParameters & parameters)

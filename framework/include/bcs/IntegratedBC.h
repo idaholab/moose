@@ -26,6 +26,8 @@ class IntegratedBC : public IntegratedBCBase, public MooseVariableInterface<Real
 public:
   IntegratedBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual MooseVariable & variable() override { return _var; }
 
   virtual void computeResidual() override;

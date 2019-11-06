@@ -11,13 +11,21 @@
 
 registerADMooseObject("MooseApp", ADNeumannBC);
 
-defineADValidParams(
-    ADNeumannBC, ADIntegratedBC, params.addRequiredParam<Real>("value", "Value of the BC");
-    params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
-    params.declareControllable("value");
-    params.addClassDescription("Imposes the integrated boundary condition "
-                               "$\\frac{\\partial u}{\\partial n}=h$, "
-                               "where $h$ is a constant, controllable value."););
+defineADLegacyParams(ADNeumannBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADNeumannBC<compute_stage>::validParams()
+{
+  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
+  params.declareControllable("value");
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=h$, "
+                             "where $h$ is a constant, controllable value.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADNeumannBC<compute_stage>::ADNeumannBC(const InputParameters & parameters)

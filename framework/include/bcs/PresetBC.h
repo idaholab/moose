@@ -25,9 +25,10 @@ class PresetBC : public PresetNodalBC
 public:
   PresetBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpValue() override;
 
   const Real & _value;
 };
-

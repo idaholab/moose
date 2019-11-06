@@ -26,10 +26,11 @@ class DirichletBC : public NodalBC
 public:
   DirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
   /// The value for this BC
   const Real & _value;
 };
-

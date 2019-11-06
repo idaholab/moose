@@ -33,6 +33,8 @@ class SinDirichletBC : public NodalBC
 public:
   SinDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -41,4 +43,3 @@ private:
   Real _final;
   Real _duration;
 };
-

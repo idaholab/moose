@@ -26,6 +26,8 @@ class VectorDirichletBC : public VectorNodalBC
 public:
   VectorDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealVectorValue computeQpResidual() override;
 

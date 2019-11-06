@@ -12,18 +12,24 @@
 
 registerADMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 
-defineADValidParams(
-    ADVectorFunctionDirichletBC,
-    ADVectorNodalBC,
-    params.addClassDescription(
-        "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
-        "components are calculated with functions.");
-    params.addParam<FunctionName>("function",
-                                  "The boundary condition vector function. This cannot be supplied "
-                                  "with the component parameters.");
-    params.addParam<FunctionName>("function_x", 0, "The function for the x component");
-    params.addParam<FunctionName>("function_y", 0, "The function for the y component");
-    params.addParam<FunctionName>("function_z", 0, "The function for the z component"););
+defineADLegacyParams(ADVectorFunctionDirichletBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADVectorFunctionDirichletBC<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorNodalBC<compute_stage>::validParams();
+  params.addClassDescription(
+      "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
+      "components are calculated with functions.");
+  params.addParam<FunctionName>("function",
+                                "The boundary condition vector function. This cannot be supplied "
+                                "with the component parameters.");
+  params.addParam<FunctionName>("function_x", 0, "The function for the x component");
+  params.addParam<FunctionName>("function_y", 0, "The function for the y component");
+  params.addParam<FunctionName>("function_z", 0, "The function for the z component");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADVectorFunctionDirichletBC<compute_stage>::ADVectorFunctionDirichletBC(

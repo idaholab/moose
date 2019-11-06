@@ -9,11 +9,12 @@
 
 #include "NodalNormalBC.h"
 
-template <>
+defineLegacyParams(NodalNormalBC);
+
 InputParameters
-validParams<NodalNormalBC>()
+NodalNormalBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addCoupledVar("nx", "x-component of the normal");
   params.addCoupledVar("ny", "y-component of the normal");
   params.addCoupledVar("nz", "z-component of the normal");

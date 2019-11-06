@@ -22,6 +22,14 @@ defineADBaseValidParams(ADIntegratedBC, IntegratedBCBase, );
 defineADBaseValidParams(ADVectorIntegratedBC, IntegratedBCBase, );
 
 template <typename T, ComputeStage compute_stage>
+InputParameters
+ADIntegratedBCTempl<T, compute_stage>::validParams()
+{
+  InputParameters params = IntegratedBCBase::validParams();
+  return params;
+}
+
+template <typename T, ComputeStage compute_stage>
 ADIntegratedBCTempl<T, compute_stage>::ADIntegratedBCTempl(const InputParameters & parameters)
   : IntegratedBCBase(parameters),
     MooseVariableInterface<T>(this,

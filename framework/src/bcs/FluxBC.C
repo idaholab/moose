@@ -9,11 +9,12 @@
 
 #include "FluxBC.h"
 
-template <>
+defineLegacyParams(FluxBC);
+
 InputParameters
-validParams<FluxBC>()
+FluxBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   return params;
 }
 

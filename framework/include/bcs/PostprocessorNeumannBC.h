@@ -29,10 +29,11 @@ public:
    */
   PostprocessorNeumannBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
   /// Value of grad(u) on the boundary.
   const PostprocessorValue & _value;
 };
-

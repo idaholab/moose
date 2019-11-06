@@ -29,6 +29,8 @@ class NonlocalIntegratedBC : public IntegratedBC
 public:
   NonlocalIntegratedBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * computeJacobian and computeQpOffDiagJacobian methods are almost same
    * as IntegratedBC except for few additional optimization options regarding the integral terms.
@@ -69,4 +71,3 @@ protected:
 
   unsigned int _k;
 };
-

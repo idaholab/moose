@@ -41,6 +41,8 @@ class PenaltyDirichletBC : public IntegratedBC
 public:
   PenaltyDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;

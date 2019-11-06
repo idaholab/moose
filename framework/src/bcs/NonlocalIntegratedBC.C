@@ -18,11 +18,12 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(NonlocalIntegratedBC);
+
 InputParameters
-validParams<NonlocalIntegratedBC>()
+NonlocalIntegratedBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   return params;
 }
 

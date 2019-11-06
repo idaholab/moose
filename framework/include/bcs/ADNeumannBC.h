@@ -26,6 +26,8 @@ class ADNeumannBC : public ADIntegratedBC<compute_stage>
 public:
   ADNeumannBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpResidual() override;
 

@@ -27,6 +27,8 @@ class ArrayIntegratedBC : public IntegratedBCBase, public MooseVariableInterface
 public:
   ArrayIntegratedBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual ArrayMooseVariable & variable() override { return _var; }
 
   virtual void computeResidual() override;

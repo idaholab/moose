@@ -11,16 +11,17 @@
 
 registerMooseObject("MooseApp", DirichletBC);
 
-template <>
+defineLegacyParams(DirichletBC);
+
 InputParameters
-validParams<DirichletBC>()
+DirichletBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<Real>("value", "Value of the BC");
-  p.declareControllable("value");
-  p.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
-                        "is a constant, controllable value.");
-  return p;
+  InputParameters params = NodalBC::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.declareControllable("value");
+  params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
+                             "is a constant, controllable value.");
+  return params;
 }
 
 DirichletBC::DirichletBC(const InputParameters & parameters)

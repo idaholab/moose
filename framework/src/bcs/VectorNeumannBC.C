@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorNeumannBC);
 
-template <>
+defineLegacyParams(VectorNeumannBC);
+
 InputParameters
-validParams<VectorNeumannBC>()
+VectorNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<RealVectorValue>(
       "vector_value", RealVectorValue(), "vector this BC should act in");
   params.addClassDescription("Imposes the integrated boundary condition "

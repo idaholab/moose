@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", WeakGradientBC);
 
-template <>
+defineLegacyParams(WeakGradientBC);
+
 InputParameters
-validParams<WeakGradientBC>()
+WeakGradientBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
       "Does not impose a boundary condition; instead computes the boundary "

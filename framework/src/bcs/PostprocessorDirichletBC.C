@@ -12,14 +12,15 @@
 registerMooseObject("MooseApp", PostprocessorDirichletBC);
 
 // Used by MOOSEDocs: syntax/Postprocessors/index.md
-template <>
+defineLegacyParams(PostprocessorDirichletBC);
+
 InputParameters
-validParams<PostprocessorDirichletBC>()
+PostprocessorDirichletBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<PostprocessorName>("postprocessor",
-                                        "The postprocessor to set the value to on the boundary.");
-  return p;
+  InputParameters params = NodalBC::validParams();
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The postprocessor to set the value to on the boundary.");
+  return params;
 }
 
 PostprocessorDirichletBC::PostprocessorDirichletBC(const InputParameters & parameters)

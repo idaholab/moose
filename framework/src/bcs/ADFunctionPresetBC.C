@@ -12,12 +12,18 @@
 
 registerADMooseObject("MooseApp", ADFunctionPresetBC);
 
-defineADValidParams(
-    ADFunctionPresetBC,
-    ADPresetNodalBC,
-    params.addRequiredParam<FunctionName>("function", "The forcing function.");
-    params.addClassDescription(
-        "The same as ADFunctionDirichletBC except the value is applied before the solve begins"););
+defineADLegacyParams(ADFunctionPresetBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADFunctionPresetBC<compute_stage>::validParams()
+{
+  InputParameters params = ADPresetNodalBC<compute_stage>::validParams();
+  params.addRequiredParam<FunctionName>("function", "The forcing function.");
+  params.addClassDescription(
+      "The same as ADFunctionDirichletBC except the value is applied before the solve begins");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADFunctionPresetBC<compute_stage>::ADFunctionPresetBC(const InputParameters & parameters)

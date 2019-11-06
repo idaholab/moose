@@ -21,6 +21,8 @@ class ADIntegratedBCTempl : public IntegratedBCBase, public MooseVariableInterfa
 public:
   ADIntegratedBCTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual MooseVariableFE<T> & variable() override { return _var; }
 
   void computeResidual() override;

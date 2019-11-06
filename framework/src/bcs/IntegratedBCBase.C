@@ -14,9 +14,15 @@ template <>
 InputParameters
 validParams<IntegratedBCBase>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
-  params += validParams<MaterialPropertyInterface>();
+  return IntegratedBCBase::validParams();
+}
+
+InputParameters
+IntegratedBCBase::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
+  params += ::validParams<RandomInterface>();
+  params += ::validParams<MaterialPropertyInterface>();
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",

@@ -13,13 +13,19 @@
 
 registerADMooseObject("MooseApp", ADFunctionNeumannBC);
 
-defineADValidParams(ADFunctionNeumannBC,
-                    ADIntegratedBC,
-                    params.addRequiredParam<FunctionName>("function", "The function.");
-                    params.addClassDescription(
-                        "Imposes the integrated boundary condition "
-                        "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "
-                        "where $h$ is a (possibly) time and space-dependent MOOSE Function."););
+defineADLegacyParams(ADFunctionNeumannBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADFunctionNeumannBC<compute_stage>::validParams()
+{
+  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  params.addRequiredParam<FunctionName>("function", "The function.");
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "
+                             "where $h$ is a (possibly) time and space-dependent MOOSE Function.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADFunctionNeumannBC<compute_stage>::ADFunctionNeumannBC(const InputParameters & parameters)
