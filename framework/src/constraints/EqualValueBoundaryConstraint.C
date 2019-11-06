@@ -48,11 +48,12 @@ struct CompareElemsByLevel
 
 registerMooseObject("MooseApp", EqualValueBoundaryConstraint);
 
-template <>
+defineLegacyParams(EqualValueBoundaryConstraint);
+
 InputParameters
-validParams<EqualValueBoundaryConstraint>()
+EqualValueBoundaryConstraint::validParams()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  InputParameters params = NodalConstraint::validParams();
   params.addParam<unsigned int>(
       "master",
       std::numeric_limits<unsigned int>::max(),

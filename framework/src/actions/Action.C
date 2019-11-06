@@ -17,9 +17,10 @@
 #include "DisplacedProblem.h"
 #include "RelationshipManager.h"
 
-template <>
+defineLegacyParams(Action);
+
 InputParameters
-validParams<Action>()
+Action::validParams()
 {
   InputParameters params = emptyInputParameters();
 

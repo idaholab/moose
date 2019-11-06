@@ -33,6 +33,8 @@ class AdamsPredictor : public Predictor
 public:
   AdamsPredictor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual int order() override { return _order; }
   virtual void timestepSetup() override;
   virtual bool shouldApply() override;

@@ -16,11 +16,12 @@
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
-template <>
+defineLegacyParams(MeshOnlyAction);
+
 InputParameters
-validParams<MeshOnlyAction>()
+MeshOnlyAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 MeshOnlyAction::MeshOnlyAction(InputParameters params) : Action(params) {}

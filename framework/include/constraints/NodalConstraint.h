@@ -26,6 +26,8 @@ class NodalConstraint : public Constraint,
 public:
   NodalConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Get the list of master nodes
    * @return list of master nodes IDs

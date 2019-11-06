@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PiecewiseConstant);
 
-template <>
+defineLegacyParams(PiecewiseConstant);
+
 InputParameters
-validParams<PiecewiseConstant>()
+PiecewiseConstant::validParams()
 {
-  InputParameters params = validParams<Piecewise>();
+  InputParameters params = Piecewise::validParams();
   MooseEnum direction("left right", "left");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());

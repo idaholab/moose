@@ -11,11 +11,13 @@
 
 registerMooseObject("MooseApp", GenericConstantRankTwoTensor);
 
-template <>
+defineLegacyParams(GenericConstantRankTwoTensor);
+
 InputParameters
-validParams<GenericConstantRankTwoTensor>()
+GenericConstantRankTwoTensor::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "tensor_values", "Vector of values defining the constant rank two tensor");
   params.addRequiredParam<MaterialPropertyName>(

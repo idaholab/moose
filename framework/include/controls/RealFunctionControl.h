@@ -31,6 +31,8 @@ public:
    */
   RealFunctionControl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 private:

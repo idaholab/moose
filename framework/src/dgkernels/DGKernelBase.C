@@ -22,17 +22,18 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DGKernelBase);
+
 InputParameters
-validParams<DGKernelBase>()
+DGKernelBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TwoMaterialPropertyInterface>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += MeshChangedInterface::validParams();
+  params += TaggingInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",

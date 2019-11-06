@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", TiledMeshGenerator);
 
-template <>
+defineLegacyParams(TiledMeshGenerator);
+
 InputParameters
-validParams<TiledMeshGenerator>()
+TiledMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to repeat");
 

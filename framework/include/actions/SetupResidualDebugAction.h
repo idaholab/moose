@@ -25,6 +25,8 @@ class SetupResidualDebugAction : public Action
 public:
   SetupResidualDebugAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

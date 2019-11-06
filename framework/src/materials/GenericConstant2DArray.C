@@ -11,11 +11,13 @@
 
 registerMooseObject("MooseApp", GenericConstant2DArray);
 
-template <>
+defineLegacyParams(GenericConstant2DArray);
+
 InputParameters
-validParams<GenericConstant2DArray>()
+GenericConstant2DArray::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("prop_name",
                                        "The names of the properties this material will have");
   params.addRequiredParam<RealEigenMatrix>("prop_value",

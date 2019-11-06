@@ -14,9 +14,10 @@
 
 registerMooseAction("MooseApp", SetupQuadratureAction, "setup_quadrature");
 
-template <>
+defineLegacyParams(SetupQuadratureAction);
+
 InputParameters
-validParams<SetupQuadratureAction>()
+SetupQuadratureAction::validParams()
 {
   MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP GAUSS_LOBATTO", "GAUSS");
   MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH "
@@ -24,7 +25,7 @@ validParams<SetupQuadratureAction>()
                   "EIGHTTEENTH NINTEENTH TWENTIETH",
                   "AUTO");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addParam<MooseEnum>("type", types, "Type of the quadrature rule");
   params.addParam<MooseEnum>("order", order, "Order of the quadrature");

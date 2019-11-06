@@ -25,6 +25,8 @@ class CoupledForceNodalKernel : public NodalKernel
 public:
   CoupledForceNodalKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;

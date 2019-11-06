@@ -65,6 +65,8 @@ public:
    */
   DGKernelBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual ~DGKernelBase();
 
   /**

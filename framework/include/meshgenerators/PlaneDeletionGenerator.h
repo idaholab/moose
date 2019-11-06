@@ -30,6 +30,8 @@ class PlaneDeletionGenerator : public ElementDeletionGeneratorBase
 public:
   PlaneDeletionGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual bool shouldDelete(const Elem * elem) override;
 

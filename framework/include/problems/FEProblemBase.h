@@ -139,6 +139,8 @@ class FEProblemBase : public SubProblem, public Restartable
 {
 public:
   FEProblemBase(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~FEProblemBase();
 
   virtual EquationSystems & es() override { return _eq; }

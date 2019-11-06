@@ -12,9 +12,10 @@
 #include "MooseApp.h"
 #include "MaterialBase.h"
 
-template <>
+defineLegacyParams(MaterialPropertyInterface);
+
 InputParameters
-validParams<MaterialPropertyInterface>()
+MaterialPropertyInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam<Moose::MaterialDataType>(

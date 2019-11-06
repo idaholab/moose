@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", PiecewiseMultilinear);
 
-template <>
+defineLegacyParams(PiecewiseMultilinear);
+
 InputParameters
-validParams<PiecewiseMultilinear>()
+PiecewiseMultilinear::validParams()
 {
-  InputParameters params = validParams<PiecewiseMultiInterpolation>();
+  InputParameters params = PiecewiseMultiInterpolation::validParams();
   params.addClassDescription(
       "PiecewiseMultilinear performs linear interpolation on 1D, 2D, 3D or 4D "
       "data.  The data_file specifies the axes directions and the function "

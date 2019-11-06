@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ElementSubdomainIDGenerator);
 
-template <>
+defineLegacyParams(ElementSubdomainIDGenerator);
+
 InputParameters
-validParams<ElementSubdomainIDGenerator>()
+ElementSubdomainIDGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",

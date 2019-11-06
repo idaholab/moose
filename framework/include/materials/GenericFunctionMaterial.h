@@ -30,6 +30,8 @@ class GenericFunctionMaterial : public Material
 public:
   GenericFunctionMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;

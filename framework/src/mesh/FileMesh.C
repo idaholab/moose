@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", FileMesh);
 
-template <>
+defineLegacyParams(FileMesh);
+
 InputParameters
-validParams<FileMesh>()
+FileMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
   params.addClassDescription("Read a mesh from a file.");
   return params;

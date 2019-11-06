@@ -16,11 +16,12 @@
 
 registerMooseAction("MooseApp", PartitionerAction, "add_partitioner");
 
-template <>
+defineLegacyParams(PartitionerAction);
+
 InputParameters
-validParams<PartitionerAction>()
+PartitionerAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

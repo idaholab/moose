@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", BoundingValueElementDamper);
 
-template <>
+defineLegacyParams(BoundingValueElementDamper);
+
 InputParameters
-validParams<BoundingValueElementDamper>()
+BoundingValueElementDamper::validParams()
 {
-  InputParameters params = validParams<ElementDamper>();
+  InputParameters params = ElementDamper::validParams();
   params.addParam<Real>("max_value",
                         std::numeric_limits<Real>::max(),
                         "The maximum permissible iterative value for the variable.");

@@ -20,6 +20,8 @@ class TiledMesh : public MooseMesh
 {
 public:
   TiledMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   TiledMesh(const TiledMesh & other_mesh);
 
   virtual std::unique_ptr<MooseMesh> safeClone() const override;

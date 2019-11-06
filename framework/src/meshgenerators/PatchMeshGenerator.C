@@ -25,11 +25,12 @@
 
 registerMooseObject("MooseApp", PatchMeshGenerator);
 
-template <>
+defineLegacyParams(PatchMeshGenerator);
+
 InputParameters
-validParams<PatchMeshGenerator>()
+PatchMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   MooseEnum dims("2=2 3", "2");
   params.addParam<MooseEnum>("dim",
                              dims,

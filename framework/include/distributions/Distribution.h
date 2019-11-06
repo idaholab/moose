@@ -23,6 +23,8 @@ class Distribution : public MooseObject
 {
 public:
   Distribution(const InputParameters & parameters);
+
+  static InputParameters validParams();
   /**
    * Compute the probability with given probability distribution function (PDF) at x
    */

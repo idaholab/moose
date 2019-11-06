@@ -78,6 +78,8 @@ public:
    * Typical "Moose-style" constructor and copy constructor.
    */
   MooseMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   MooseMesh(const MooseMesh & other_mesh);
   MooseMesh() = delete;
   MooseMesh & operator=(const MooseMesh & other_mesh) = delete;

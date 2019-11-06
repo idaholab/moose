@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ProxyRelationshipManager);
 
-template <>
+defineLegacyParams(ProxyRelationshipManager);
+
 InputParameters
-validParams<ProxyRelationshipManager>()
+ProxyRelationshipManager::validParams()
 {
-  InputParameters params = validParams<RelationshipManager>();
+  InputParameters params = RelationshipManager::validParams();
 
   params.addRequiredParam<System *>("other_system",
                                     "The libMesh system to mirror the ghosting from");

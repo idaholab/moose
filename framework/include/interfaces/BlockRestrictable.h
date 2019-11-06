@@ -72,6 +72,8 @@ public:
    */
   BlockRestrictable(const MooseObject * moose_object, bool initialize = true);
 
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * Populates the 'block' input parameters when an object is also boundary restricted,
@@ -257,4 +259,3 @@ BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
   return hasBlockMaterialPropertyHelper(prop_name) &&
          _blk_material_data->haveProperty<T>(prop_name);
 }
-

@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", AddBoundsVectorsAction, "add_bounds_vectors");
 
-template <>
+defineLegacyParams(AddBoundsVectorsAction);
+
 InputParameters
-validParams<AddBoundsVectorsAction>()
+AddBoundsVectorsAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) : Action(params) {}

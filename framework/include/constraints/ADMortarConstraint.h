@@ -23,6 +23,8 @@ class ADMortarConstraint : public MortarConstraintBase
 public:
   ADMortarConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void computeResidual(bool has_master) final;
 
   void computeJacobian(bool has_master) final;

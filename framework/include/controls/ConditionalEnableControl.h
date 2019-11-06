@@ -24,6 +24,8 @@ class ConditionalEnableControl : public Control
 public:
   ConditionalEnableControl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:

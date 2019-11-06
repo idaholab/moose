@@ -36,6 +36,8 @@ public:
    */
   PerfGraphInterface(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   /**
    * For objects that _are_ MooseObjects
    */
@@ -67,4 +69,3 @@ protected:
   /// A prefix to use for all sections
   std::string _prefix;
 };
-

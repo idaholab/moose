@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", SideSetsBetweenSubdomainsGenerator);
 
-template <>
+defineLegacyParams(SideSetsBetweenSubdomainsGenerator);
+
 InputParameters
-validParams<SideSetsBetweenSubdomainsGenerator>()
+SideSetsBetweenSubdomainsGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<SubdomainName>>(

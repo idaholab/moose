@@ -27,6 +27,8 @@ class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 public:
   FunctionMaterialBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * FunctionMaterialBase keeps an internal list of all the variables the derivatives are taken

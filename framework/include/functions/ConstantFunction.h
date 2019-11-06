@@ -24,6 +24,8 @@ class ConstantFunction : public Function
 public:
   ConstantFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(Real t, const Point & p) const override;
 
 protected:

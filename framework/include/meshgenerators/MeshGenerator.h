@@ -39,6 +39,8 @@ public:
    */
   MeshGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Generate / modify the mesh
    *

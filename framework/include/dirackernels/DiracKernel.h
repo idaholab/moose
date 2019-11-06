@@ -58,6 +58,8 @@ class DiracKernel : public MooseObject,
 {
 public:
   DiracKernel(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~DiracKernel() {}
 
   /**

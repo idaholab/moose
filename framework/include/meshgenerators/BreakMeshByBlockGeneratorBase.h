@@ -25,6 +25,8 @@ class BreakMeshByBlockGeneratorBase : public MeshGenerator
 public:
   BreakMeshByBlockGeneratorBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /// the file_name from whence this mesh came
   std::string _file_name;

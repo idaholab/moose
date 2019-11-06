@@ -14,16 +14,17 @@
 #include "MooseVariableFE.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(NodalKernel);
+
 InputParameters
-validParams<NodalKernel>()
+NodalKernel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<RandomInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TransientInterface::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += RandomInterface::validParams();
+  params += TaggingInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");

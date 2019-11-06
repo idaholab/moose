@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", SimplePredictor);
 
-template <>
+defineLegacyParams(SimplePredictor);
+
 InputParameters
-validParams<SimplePredictor>()
+SimplePredictor::validParams()
 {
-  InputParameters params = validParams<Predictor>();
+  InputParameters params = Predictor::validParams();
 
   return params;
 }

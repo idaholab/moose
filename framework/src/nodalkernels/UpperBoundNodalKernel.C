@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", UpperBoundNodalKernel);
 
-template <>
+defineLegacyParams(UpperBoundNodalKernel);
+
 InputParameters
-validParams<UpperBoundNodalKernel>()
+UpperBoundNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Used to prevent a coupled variable from going above a upper bound");
   params.addRequiredCoupledVar(
       "v", "The coupled variable we require to be greater than the upper bound");

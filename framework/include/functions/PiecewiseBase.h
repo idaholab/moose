@@ -28,6 +28,8 @@ class PiecewiseBase : public Function
 public:
   PiecewiseBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup();
   virtual Real functionSize() const;
   virtual Real domain(const int i) const;

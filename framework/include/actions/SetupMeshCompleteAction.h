@@ -21,6 +21,8 @@ class SetupMeshCompleteAction : public Action
 public:
   SetupMeshCompleteAction(InputParameters params);
 
+  static InputParameters validParams();
+
   bool completeSetup(MooseMesh * mesh);
 
   virtual void act() override;

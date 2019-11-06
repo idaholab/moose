@@ -27,6 +27,8 @@ class TiedValueConstraint : public NodeFaceConstraint
 public:
   TiedValueConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpSlaveValue() override;
 

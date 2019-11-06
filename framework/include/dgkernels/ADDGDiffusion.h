@@ -33,6 +33,8 @@ class ADDGDiffusion : public ADDGKernel<compute_stage>
 public:
   ADDGDiffusion(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 

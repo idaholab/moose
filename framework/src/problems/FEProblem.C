@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", FEProblem);
 
-template <>
+defineLegacyParams(FEProblem);
+
 InputParameters
-validParams<FEProblem>()
+FEProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.addClassDescription("A normal (default) Problem object that contains a single "
                              "NonlinearSystem and a single AuxiliarySystem object.");
 

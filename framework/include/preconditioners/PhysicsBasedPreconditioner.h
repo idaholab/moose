@@ -37,6 +37,8 @@ public:
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
   PhysicsBasedPreconditioner(const InputParameters & params);
+
+  static InputParameters validParams();
   virtual ~PhysicsBasedPreconditioner();
 
   /**

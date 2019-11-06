@@ -37,6 +37,8 @@ class DerivativeFunctionMaterialBase : public FunctionMaterialBase
 public:
   DerivativeFunctionMaterialBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeProperties();
 

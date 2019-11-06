@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddDistributionAction, "add_distribution");
 
-template <>
+defineLegacyParams(AddDistributionAction);
+
 InputParameters
-validParams<AddDistributionAction>()
+AddDistributionAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddDistributionAction::AddDistributionAction(InputParameters params) : MooseObjectAction(params) {}

@@ -28,6 +28,8 @@ public:
    */
   ConstantRate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 

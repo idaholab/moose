@@ -28,6 +28,8 @@ public:
   DerivativeParsedMaterialHelper(const InputParameters & parameters,
                                  VariableNameMappingMode map_mode = USE_PARAM_NAMES);
 
+  static InputParameters validParams();
+
 protected:
   struct Derivative;
   struct MaterialPropertyDerivativeRule;

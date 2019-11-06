@@ -27,6 +27,8 @@ class SetupQuadratureAction : public Action
 public:
   SetupQuadratureAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

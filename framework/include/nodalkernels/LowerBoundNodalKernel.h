@@ -25,6 +25,8 @@ class LowerBoundNodalKernel : public NodalKernel
 public:
   LowerBoundNodalKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;

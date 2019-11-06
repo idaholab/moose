@@ -31,6 +31,8 @@ public:
    */
   SolutionFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Extract a value from the solution
    * @param t Time at which to extract

@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", PatternedMesh);
 
-template <>
+defineLegacyParams(PatternedMesh);
+
 InputParameters
-validParams<PatternedMesh>()
+PatternedMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<std::vector<MeshFileName>>("files",
                                                      "The name of the mesh files to read. "
                                                      " They are automatically assigned "

@@ -14,11 +14,12 @@
 
 #include "libmesh/numeric_vector.h"
 
-template <>
+defineLegacyParams(Predictor);
+
 InputParameters
-validParams<Predictor>()
+Predictor::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addRequiredParam<Real>("scale",
                                 "The scale factor for the predictor (can range from 0 to 1)");
   params.addParam<std::vector<Real>>(

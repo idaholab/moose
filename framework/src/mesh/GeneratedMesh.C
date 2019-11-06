@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", GeneratedMesh);
 
-template <>
+defineLegacyParams(GeneratedMesh);
+
 InputParameters
-validParams<GeneratedMesh>()
+GeneratedMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
 
   MooseEnum elem_types(
       "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "

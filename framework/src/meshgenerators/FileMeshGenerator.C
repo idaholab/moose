@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", FileMeshGenerator);
 
-template <>
+defineLegacyParams(FileMeshGenerator);
+
 InputParameters
-validParams<FileMeshGenerator>()
+FileMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshFileName>("file", "The filename to read.");
 

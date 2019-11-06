@@ -17,14 +17,15 @@
 
 registerMooseObject("MooseApp", ImageSubdomainGenerator);
 
-template <>
+defineLegacyParams(ImageSubdomainGenerator);
+
 InputParameters
-validParams<ImageSubdomainGenerator>()
+ImageSubdomainGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Samples an image at the coordinates of each element centroid using "
                              "the resulting value as each element's subdomain ID");
-  params += validParams<MeshBaseImageSampler>();
+  params += MeshBaseImageSampler::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
 

@@ -17,10 +17,12 @@
 #include "SystemBase.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(BlockRestrictable);
+
 InputParameters
-validParams<BlockRestrictable>()
+BlockRestrictable::validParams()
 {
+
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
 

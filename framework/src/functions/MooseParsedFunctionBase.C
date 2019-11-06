@@ -14,9 +14,10 @@
 #include "MooseError.h"
 #include "MooseParsedFunctionWrapper.h"
 
-template <>
+defineLegacyParams(MooseParsedFunctionBase);
+
 InputParameters
-validParams<MooseParsedFunctionBase>()
+MooseParsedFunctionBase::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::string>>(

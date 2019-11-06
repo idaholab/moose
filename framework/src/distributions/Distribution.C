@@ -10,11 +10,12 @@
 #include "Distribution.h"
 #include "MooseRandom.h"
 
-template <>
+defineLegacyParams(Distribution);
+
 InputParameters
-validParams<Distribution>()
+Distribution::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addRequiredParam<std::string>("type", "class/type name identifying the distribution");
   params.registerBase("Distribution");
   return params;

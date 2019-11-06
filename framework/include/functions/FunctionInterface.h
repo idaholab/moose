@@ -46,6 +46,8 @@ public:
    */
   FunctionInterface(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   /**
    * Get a function with a given name
    * @param name The name of the parameter key of the function to retrieve

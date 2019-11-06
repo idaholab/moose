@@ -23,11 +23,12 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ArrayDGKernel);
+
 InputParameters
-validParams<ArrayDGKernel>()
+ArrayDGKernel::validParams()
 {
-  InputParameters params = validParams<DGKernelBase>();
+  InputParameters params = DGKernelBase::validParams();
   return params;
 }
 

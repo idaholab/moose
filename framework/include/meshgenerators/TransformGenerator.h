@@ -23,6 +23,8 @@ class TransformGenerator : public MeshGenerator
 public:
   TransformGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

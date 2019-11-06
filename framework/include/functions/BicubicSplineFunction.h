@@ -26,6 +26,8 @@ class BicubicSplineFunction : public Function, public FunctionInterface
 public:
   BicubicSplineFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(Real t, const Point & p) const override;
 
   virtual Real derivative(const Point & p, unsigned int deriv_var) const;

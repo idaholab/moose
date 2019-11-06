@@ -9,11 +9,12 @@
 
 #include "Function.h"
 
-template <>
+defineLegacyParams(Function);
+
 InputParameters
-validParams<Function>()
+Function::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   params.registerBase("Function");
 

@@ -12,11 +12,13 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(DistributionInterface);
+
 InputParameters
-validParams<DistributionInterface>()
+DistributionInterface::validParams()
 {
-  return emptyInputParameters();
+  InputParameters params = emptyInputParameters();
+  return params;
 }
 
 DistributionInterface::DistributionInterface(const MooseObject * moose_object)

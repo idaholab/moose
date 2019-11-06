@@ -31,6 +31,8 @@ class FunctionParserUtils
 public:
   FunctionParserUtils(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /// Shorthand for an autodiff function parser object.
   typedef FunctionParserADBase<Real> ADFunction;
 
@@ -66,4 +68,3 @@ protected:
   /// Array to stage the parameters passed to the functions when calling Eval.
   std::vector<Real> _func_params;
 };
-

@@ -21,6 +21,8 @@ class DGConvection : public DGKernel
 public:
   DGConvection(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);

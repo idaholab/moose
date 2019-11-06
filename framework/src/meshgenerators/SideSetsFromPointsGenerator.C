@@ -27,11 +27,12 @@
 
 registerMooseObject("MooseApp", SideSetsFromPointsGenerator);
 
-template <>
+defineLegacyParams(SideSetsFromPointsGenerator);
+
 InputParameters
-validParams<SideSetsFromPointsGenerator>()
+SideSetsFromPointsGenerator::validParams()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
+  InputParameters params = SideSetsGeneratorBase::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Adds a new sideset starting at the specified point containing all "

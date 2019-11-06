@@ -52,6 +52,8 @@ class ADMaterial : public Material
 public:
   ADMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * declare the ad property named "prop_name"
    */

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", PiecewiseMulticonstant);
 
-template <>
+defineLegacyParams(PiecewiseMulticonstant);
+
 InputParameters
-validParams<PiecewiseMulticonstant>()
+PiecewiseMulticonstant::validParams()
 {
-  InputParameters params = validParams<PiecewiseMultiInterpolation>();
+  InputParameters params = PiecewiseMultiInterpolation::validParams();
 
   MultiMooseEnum direction("left=0 right=1");
   params.addParam<MultiMooseEnum>(

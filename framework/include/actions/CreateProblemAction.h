@@ -22,6 +22,8 @@ class CreateProblemAction : public MooseObjectAction
 public:
   CreateProblemAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddIndicatorAction, "add_indicator");
 
-template <>
+defineLegacyParams(AddIndicatorAction);
+
 InputParameters
-validParams<AddIndicatorAction>()
+AddIndicatorAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Action for adding Indicator object to a simulation.");
   return params;
 }

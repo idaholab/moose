@@ -23,6 +23,8 @@ class AnnularMesh : public MooseMesh
 {
 public:
   AnnularMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   AnnularMesh(const AnnularMesh & /* other_mesh */) = default;
 
   // No copy

@@ -26,6 +26,8 @@ class PiecewiseConstant : public Piecewise
 public:
   PiecewiseConstant(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Get the value of the function (based on time only)
    * \param t The time

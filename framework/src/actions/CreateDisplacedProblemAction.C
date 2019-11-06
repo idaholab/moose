@@ -20,11 +20,12 @@ registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_geometric_rm"
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_algebraic_rm");
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_coupling_rm");
 
-template <>
+defineLegacyParams(CreateDisplacedProblemAction);
+
 InputParameters
-validParams<CreateDisplacedProblemAction>()
+CreateDisplacedProblemAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::vector<std::string>>(
       "displacements",
       "The variables corresponding to the x y z displacements of the mesh.  If "

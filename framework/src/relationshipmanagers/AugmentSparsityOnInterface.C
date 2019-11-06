@@ -11,11 +11,12 @@ registerMooseObject("MooseApp", AugmentSparsityOnInterface);
 
 using namespace libMesh;
 
-template <>
+defineLegacyParams(AugmentSparsityOnInterface);
+
 InputParameters
-validParams<AugmentSparsityOnInterface>()
+AugmentSparsityOnInterface::validParams()
 {
-  InputParameters params = validParams<RelationshipManager>();
+  InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<BoundaryName>("master_boundary",
                                         "The name of the master boundary sideset.");
   params.addRequiredParam<BoundaryName>("slave_boundary",

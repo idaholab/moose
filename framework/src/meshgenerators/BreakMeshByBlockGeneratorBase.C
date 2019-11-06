@@ -10,11 +10,12 @@
 #include "BreakMeshByBlockGeneratorBase.h"
 #include "InputParameters.h"
 
-template <>
+defineLegacyParams(BreakMeshByBlockGeneratorBase);
+
 InputParameters
-validParams<BreakMeshByBlockGeneratorBase>()
+BreakMeshByBlockGeneratorBase::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addParam<std::string>(
       "interface_name",

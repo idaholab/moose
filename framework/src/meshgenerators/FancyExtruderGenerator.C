@@ -35,11 +35,12 @@
 
 registerMooseObject("MooseApp", FancyExtruderGenerator);
 
-template <>
+defineLegacyParams(FancyExtruderGenerator);
+
 InputParameters
-validParams<FancyExtruderGenerator>()
+FancyExtruderGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 

@@ -13,11 +13,12 @@
 
 registerMooseAction("MooseApp", AddPostprocessorAction, "add_postprocessor");
 
-template <>
+defineLegacyParams(AddPostprocessorAction);
+
 InputParameters
-validParams<AddPostprocessorAction>()
+AddPostprocessorAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

@@ -25,6 +25,8 @@ class OldEqualValueConstraint : public MortarConstraint
 public:
   OldEqualValueConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   Real computeQpResidual(Moose::MortarType mortar_type) final;
   Real computeQpJacobian(Moose::ConstraintJacobianType jacobian_type, unsigned int jvar) final;

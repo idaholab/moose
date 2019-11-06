@@ -23,11 +23,12 @@
 
 registerMooseAction("MooseApp", AddOutputAction, "add_output");
 
-template <>
+defineLegacyParams(AddOutputAction);
+
 InputParameters
-validParams<AddOutputAction>()
+AddOutputAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Action responsible for creating Output objects.");
   return params;
 }

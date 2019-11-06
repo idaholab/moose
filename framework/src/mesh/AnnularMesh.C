@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", AnnularMesh);
 
-template <>
+defineLegacyParams(AnnularMesh);
+
 InputParameters
-validParams<AnnularMesh>()
+AnnularMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRangeCheckedParam<unsigned int>(
       "nr", 1, "nr>0", "Number of elements in the radial direction");
   params.addRequiredRangeCheckedParam<unsigned int>(

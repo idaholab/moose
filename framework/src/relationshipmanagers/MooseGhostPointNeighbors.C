@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", MooseGhostPointNeighbors);
 
-template <>
+defineLegacyParams(MooseGhostPointNeighbors);
+
 InputParameters
-validParams<MooseGhostPointNeighbors>()
+MooseGhostPointNeighbors::validParams()
 {
-  InputParameters params = validParams<FunctorRelationshipManager>();
+  InputParameters params = FunctorRelationshipManager::validParams();
   return params;
 }
 

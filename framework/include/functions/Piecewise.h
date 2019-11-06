@@ -27,6 +27,8 @@ class Piecewise : public PiecewiseBase
 public:
   Piecewise(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Reads data from supplied CSV file.

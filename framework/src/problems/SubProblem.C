@@ -18,11 +18,12 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(SubProblem);
+
 InputParameters
-validParams<SubProblem>()
+SubProblem::validParams()
 {
-  InputParameters params = validParams<Problem>();
+  InputParameters params = Problem::validParams();
 
   params.addParam<bool>(
       "default_ghosting",

@@ -113,11 +113,12 @@ sortMooseVariables(MooseVariableFEBase * a, MooseVariableFEBase * b)
 
 Threads::spin_mutex get_function_mutex;
 
-template <>
+defineLegacyParams(FEProblemBase);
+
 InputParameters
-validParams<FEProblemBase>()
+FEProblemBase::validParams()
 {
-  InputParameters params = validParams<SubProblem>();
+  InputParameters params = SubProblem::validParams();
   params.addParam<unsigned int>("null_space_dimension", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>(
       "transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");

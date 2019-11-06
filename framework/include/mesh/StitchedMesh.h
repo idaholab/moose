@@ -30,6 +30,8 @@ class StitchedMesh : public MooseMesh
 {
 public:
   StitchedMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   StitchedMesh(const StitchedMesh & other_mesh);
 
   virtual std::unique_ptr<MooseMesh> safeClone() const override;

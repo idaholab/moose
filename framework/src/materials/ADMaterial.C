@@ -10,18 +10,14 @@
 // MOOSE includes
 #include "ADMaterial.h"
 
-template <>
+defineADLegacyParams(ADMaterial);
+
+template <ComputeStage compute_stage>
 InputParameters
-validParams<ADMaterial<RESIDUAL>>()
+ADMaterial<compute_stage>::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   return params;
-}
-template <>
-InputParameters
-validParams<ADMaterial<JACOBIAN>>()
-{
-  return validParams<ADMaterial<RESIDUAL>>();
 }
 
 template <ComputeStage compute_stage>

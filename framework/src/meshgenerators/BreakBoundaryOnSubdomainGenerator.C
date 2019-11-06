@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", BreakBoundaryOnSubdomainGenerator);
 
-template <>
+defineLegacyParams(BreakBoundaryOnSubdomainGenerator);
+
 InputParameters
-validParams<BreakBoundaryOnSubdomainGenerator>()
+BreakBoundaryOnSubdomainGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are "

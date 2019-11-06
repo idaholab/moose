@@ -21,6 +21,8 @@ class SetupDampersAction : public Action
 public:
   SetupDampersAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

@@ -26,5 +26,7 @@ class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper, public P
 {
 public:
   DerivativeParsedMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 };
 

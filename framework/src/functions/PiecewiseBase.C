@@ -9,11 +9,12 @@
 
 #include "PiecewiseBase.h"
 
-template <>
+defineLegacyParams(PiecewiseBase);
+
 InputParameters
-validParams<PiecewiseBase>()
+PiecewiseBase::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   MooseEnum axis("x=0 y=1 z=2 0=3 1=4 2=5");
   axis.deprecate("0", "x");

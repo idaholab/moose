@@ -32,6 +32,8 @@ class DGDiffusion : public DGKernel
 public:
   DGDiffusion(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;

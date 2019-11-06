@@ -32,6 +32,8 @@ public:
    * @param params Input parameters for this action object
    */
   MaterialOutputAction(InputParameters params);
+
+  static InputParameters validParams();
   virtual void act() override;
 
 private:

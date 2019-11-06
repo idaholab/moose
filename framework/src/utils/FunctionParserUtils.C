@@ -12,9 +12,10 @@
 // MOOSE includes
 #include "InputParameters.h"
 
-template <>
+defineLegacyParams(FunctionParserUtils);
+
 InputParameters
-validParams<FunctionParserUtils>()
+FunctionParserUtils::validParams()
 {
   InputParameters params = emptyInputParameters();
 

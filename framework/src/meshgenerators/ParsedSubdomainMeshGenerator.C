@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", ParsedSubdomainMeshGenerator);
 
-template <>
+defineLegacyParams(ParsedSubdomainMeshGenerator);
+
 InputParameters
-validParams<ParsedSubdomainMeshGenerator>()
+ParsedSubdomainMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = MeshGenerator::validParams();
+  params += FunctionParserUtils::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",

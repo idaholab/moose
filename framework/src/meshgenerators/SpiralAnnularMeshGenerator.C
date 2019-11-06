@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", SpiralAnnularMeshGenerator);
 
-template <>
+defineLegacyParams(SpiralAnnularMeshGenerator);
+
 InputParameters
-validParams<SpiralAnnularMeshGenerator>()
+SpiralAnnularMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredRangeCheckedParam<Real>(
       "inner_radius", "inner_radius>0.", "The size of the inner circle.");

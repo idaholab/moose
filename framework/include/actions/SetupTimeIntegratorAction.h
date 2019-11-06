@@ -24,6 +24,8 @@ class SetupTimeIntegratorAction : public MooseObjectAction
 public:
   SetupTimeIntegratorAction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

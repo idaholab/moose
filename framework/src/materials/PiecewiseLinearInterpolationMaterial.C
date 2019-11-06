@@ -14,11 +14,13 @@
 
 registerMooseObject("MooseApp", PiecewiseLinearInterpolationMaterial);
 
-template <>
+defineLegacyParams(PiecewiseLinearInterpolationMaterial);
+
 InputParameters
-validParams<PiecewiseLinearInterpolationMaterial>()
+PiecewiseLinearInterpolationMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a property using a piecewise linear interpolation to define "
                              "its dependence on a variable");
   params.addRequiredParam<std::string>("property",

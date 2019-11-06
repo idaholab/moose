@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddMultiAppAction, "add_multi_app");
 
-template <>
+defineLegacyParams(AddMultiAppAction);
+
 InputParameters
-validParams<AddMultiAppAction>()
+AddMultiAppAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription(
       "MooseObjectAction for creating objects from sub-blocks within the MultiApps block.");
   return params;

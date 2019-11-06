@@ -25,6 +25,8 @@ class CouplingFunctorCheckAction : public Action
 public:
   CouplingFunctorCheckAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
 protected:
   void act() override;
 };

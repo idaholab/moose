@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TimeDerivativeNodalKernel);
 
-template <>
+defineLegacyParams(TimeDerivativeNodalKernel);
+
 InputParameters
-validParams<TimeDerivativeNodalKernel>()
+TimeDerivativeNodalKernel::validParams()
 {
-  InputParameters params = validParams<TimeNodalKernel>();
+  InputParameters params = TimeNodalKernel::validParams();
   return params;
 }
 

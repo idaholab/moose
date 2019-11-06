@@ -27,6 +27,8 @@ class StitchedMeshGenerator : public MeshGenerator
 public:
   StitchedMeshGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

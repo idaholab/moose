@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", DynamicObjectRegistrationAction, "dynamic_object_registration");
 
-template <>
+defineLegacyParams(DynamicObjectRegistrationAction);
+
 InputParameters
-validParams<DynamicObjectRegistrationAction>()
+DynamicObjectRegistrationAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addParam<std::vector<std::string>>("register_objects_from",
                                             "The names of other applications from which objects "
