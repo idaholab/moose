@@ -11,12 +11,6 @@
 
 #include "ADKernelValue.h"
 
-// Forward Declaration
-template <ComputeStage>
-class DarcyAdvection;
-
-declareADValidParams(DarcyAdvection);
-
 /**
  * Kernel which implements the convective term in the transient heat
  * conduction equation, and provides coupling with the Darcy pressure
@@ -26,6 +20,8 @@ template <ComputeStage compute_stage>
 class DarcyAdvection : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   DarcyAdvection(const InputParameters & parameters);
 
 protected:

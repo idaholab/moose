@@ -18,11 +18,10 @@
 
 registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "setup_darcy");
 
-template <>
 InputParameters
-validParams<SetupDarcySimulation>()
+SetupDarcySimulation::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<VariableName>("pressure", "pressure", "The pressure variable.");
   params.addParam<VariableName>("temperature", "temperature", "The temperature variable.");
   params.addParam<bool>(

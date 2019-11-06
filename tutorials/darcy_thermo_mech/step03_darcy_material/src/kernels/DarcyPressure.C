@@ -11,11 +11,15 @@
 
 registerADMooseObject("DarcyThermoMechApp", DarcyPressure);
 
-defineADValidParams(
-    DarcyPressure,
-    ADDiffusion,
-    params.addClassDescription("Compute the diffusion term for Darcy pressure ($p$) equation: "
-                               "$-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0$"););
+template <ComputeStage compute_stage>
+InputParameters
+DarcyPressure<compute_stage>::validParams()
+{
+  InputParameters params = ADDiffusion<compute_stage>::validParams();
+  params.addClassDescription("Compute the diffusion term for Darcy pressure ($p$) equation: "
+                             "$-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0$");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)

@@ -15,11 +15,10 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
-template <>
 InputParameters
-validParams<DarcyThermoMechApp>()
+DarcyThermoMechApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   params.set<bool>("automatic_automatic_scaling") = false;
   return params;
 }
