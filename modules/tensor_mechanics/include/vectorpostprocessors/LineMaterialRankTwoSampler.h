@@ -32,6 +32,8 @@ public:
    */
   LineMaterialRankTwoSampler(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Reduce the material property to a scalar for output
    * Call through to RankTwoScalarTools::component() to access the components
@@ -44,4 +46,3 @@ public:
   const unsigned int _i;
   const unsigned int _j;
 };
-

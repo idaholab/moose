@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", LineMaterialRankTwoSampler);
 
-template <>
+defineLegacyParams(LineMaterialRankTwoSampler);
+
 InputParameters
-validParams<LineMaterialRankTwoSampler>()
+LineMaterialRankTwoSampler::validParams()
 {
-  InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
+  InputParameters params = LineMaterialSamplerBase<Real>::validParams();
   params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "index_i",

@@ -38,6 +38,8 @@ public:
    */
   virtual ~CrackDataSampler() {}
 
+  static InputParameters validParams();
+
   /**
    * Initialize, clears the postprocessor vector
    */
@@ -58,4 +60,3 @@ protected:
   /// The vector of PostprocessorValue objects that are used to get the values of the domain integral postprocessors
   std::vector<const PostprocessorValue *> _domain_integral_postprocessor_values;
 };
-

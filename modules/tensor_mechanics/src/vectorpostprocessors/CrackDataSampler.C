@@ -13,13 +13,14 @@
 
 registerMooseObject("TensorMechanicsApp", CrackDataSampler);
 
-template <>
-InputParameters
-validParams<CrackDataSampler>()
-{
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+defineLegacyParams(CrackDataSampler);
 
-  params += validParams<SamplerBase>();
+InputParameters
+CrackDataSampler::validParams()
+{
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+
+  params += SamplerBase::validParams();
 
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "postprocessors", "The postprocessors whose values are to be reported");

@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", LineMaterialRankTwoScalarSampler);
 
-template <>
+defineLegacyParams(LineMaterialRankTwoScalarSampler);
+
 InputParameters
-validParams<LineMaterialRankTwoScalarSampler>()
+LineMaterialRankTwoScalarSampler::validParams()
 {
-  InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
+  InputParameters params = LineMaterialSamplerBase<Real>::validParams();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addParam<MooseEnum>(
       "scalar_type", RankTwoScalarTools::scalarOptions(), "A scalar to output");

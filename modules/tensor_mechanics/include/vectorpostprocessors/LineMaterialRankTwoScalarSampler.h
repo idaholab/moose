@@ -33,6 +33,8 @@ public:
    */
   LineMaterialRankTwoScalarSampler(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Reduce the RankTwoTensor material property to a scalar for output
    * Call through to RankTwoScalarTools::getQuantity to access the full set of options for reducing
@@ -50,4 +52,3 @@ protected:
   const Point _point2;
   Point _direction;
 };
-

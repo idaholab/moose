@@ -48,6 +48,8 @@ public:
 
   virtual ~MultiPlasticityRawComponentAssembler() {}
 
+  static InputParameters validParams();
+
 protected:
   const InputParameters & _params;
 
@@ -329,4 +331,3 @@ private:
                                    const RankFourTensor & Eijkl,
                                    std::vector<bool> & act);
 };
-

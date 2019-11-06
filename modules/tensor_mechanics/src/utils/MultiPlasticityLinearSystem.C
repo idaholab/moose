@@ -16,11 +16,12 @@
 // Following is used to access PETSc's LAPACK routines
 #include <petscblaslapack.h>
 
-template <>
+defineLegacyParams(MultiPlasticityLinearSystem);
+
 InputParameters
-validParams<MultiPlasticityLinearSystem>()
+MultiPlasticityLinearSystem::validParams()
 {
-  InputParameters params = validParams<MultiPlasticityRawComponentAssembler>();
+  InputParameters params = MultiPlasticityRawComponentAssembler::validParams();
   params.addRangeCheckedParam<Real>("linear_dependent",
                                     1E-4,
                                     "linear_dependent>=0 & linear_dependent<1",
