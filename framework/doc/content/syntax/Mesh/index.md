@@ -60,6 +60,9 @@ Here are a couple of examples showing the usage of `--mesh-only`:
 
 # Will do the same but write out mesh_file.e
 ./myapp-opt -i input_file.i --mesh-only mesh_file.e
+
+# Run in parallel and write out parllel checkpoint format (which can be read as a split)
+mpiexec -n 3 ./myapp-opt -i input_file.i Mesh/parallel_type=distributed --mesh-only mesh_file.cpr
 ```
 
 ## Named Entity Support

@@ -44,4 +44,17 @@
     issues = '#12757'
     requirement = 'The system shall support overriding output dimension when necessary to store coordinates in higher planes'
   [../]
+
+  [./mesh_only_checkpoint]
+    type = 'CheckFiles'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/parallel_type=distributed --mesh-only 3d_chimney.cpr'
+    check_files = '3d_chimney.cpr/3/split-3-0.cpr 3d_chimney.cpr/3/split-3-1.cpr 3d_chimney.cpr/3/split-3-2.cpr'
+    min_parallel = 3
+    max_parallel = 3
+    recover = false
+    method = '!dbg'
+    issues = '#14312'
+    requirement = 'The system shall support writing parallel checkpoint files with --mesh-only'
+  [../]
 []
