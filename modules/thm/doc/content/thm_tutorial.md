@@ -17,6 +17,8 @@ To run with multiple threads, use the `--n-threads` argument:
 /path/to/executable -i my_input_file.i --n-threads=4
 ```
 
+See [command line usage](/command_line_usage.md) for more information.
+
 # Output
 
 Output can be in a number of different formats (see [/Outputs/index.md]), but

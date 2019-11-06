@@ -12,4 +12,5 @@ hydraulic applications based on the [MOOSE framework](https://mooseframework.inl
 - Components supporting 1-phase, variable-area, inviscid, compressible flow.
 - Components supporting 2-phase, variable-area, inviscid, compressible flow via
   the "7-equation" model.
+- Components supporting 2-D (Cartesian or axisymmetric) heat conduction.
 - Various classes supporting THM-based applications.
