@@ -23,11 +23,12 @@ registerMooseAction("HeatConductionApp", ThermalContactAction, "add_dirac_kernel
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_material");
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_slave_flux_vector");
 
-template <>
+defineLegacyParams(ThermalContactAction);
+
 InputParameters
-validParams<ThermalContactAction>()
+ThermalContactAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action that controls the creation of all of the necessary objects for "
       "calculation of Thermal Contact");

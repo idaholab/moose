@@ -12,11 +12,12 @@
 
 #include <limits>
 
-template <>
+defineLegacyParams(ViewFactorBase);
+
 InputParameters
-validParams<ViewFactorBase>()
+ViewFactorBase::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   params.addParam<Real>("view_factor_tol",
                         std::numeric_limits<Real>::max(),
                         "Tolerance for checking view factors. Default is to allow everything.");

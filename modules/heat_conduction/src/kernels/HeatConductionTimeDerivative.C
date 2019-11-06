@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionTimeDerivative);
 
-template <>
+defineLegacyParams(HeatConductionTimeDerivative);
+
 InputParameters
-validParams<HeatConductionTimeDerivative>()
+HeatConductionTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addClassDescription(
       "Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
       "the heat equation for quasi-constant specific heat $c_p$ and the density $\\rho$.");

@@ -12,11 +12,12 @@
 
 registerMooseObject("HeatConductionApp", SemiconductorLinearConductivity);
 
-template <>
+defineLegacyParams(SemiconductorLinearConductivity);
+
 InputParameters
-validParams<SemiconductorLinearConductivity>()
+SemiconductorLinearConductivity::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temp", "Variable for temperature in Kelvin.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<Real>("sh_coeff_A", "Steinhart_Hart coefficient A of the material");

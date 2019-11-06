@@ -22,6 +22,8 @@ InputParameters validParams<GapHeatPointSourceMaster>();
 class GapHeatPointSourceMaster : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   GapHeatPointSourceMaster(const InputParameters & parameters);
 
   virtual void addPoints();

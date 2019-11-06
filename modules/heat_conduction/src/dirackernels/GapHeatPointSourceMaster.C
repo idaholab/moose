@@ -16,13 +16,14 @@
 
 registerMooseObject("HeatConductionApp", GapHeatPointSourceMaster);
 
-template <>
+defineLegacyParams(GapHeatPointSourceMaster);
+
 InputParameters
-validParams<GapHeatPointSourceMaster>()
+GapHeatPointSourceMaster::validParams()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addParam<MooseEnum>("order", orders, "The finite element order");

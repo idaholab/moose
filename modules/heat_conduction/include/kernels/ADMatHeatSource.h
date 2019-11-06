@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADMatHeatSource : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADMatHeatSource(const InputParameters & parameters);
 
 protected:

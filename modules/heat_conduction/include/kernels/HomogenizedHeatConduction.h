@@ -19,6 +19,8 @@
 class HomogenizedHeatConduction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   HomogenizedHeatConduction(const InputParameters & parameters);
 
 protected:

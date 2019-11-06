@@ -12,11 +12,12 @@
 
 registerMooseObject("HeatConductionApp", InfiniteCylinderRadiativeBC);
 
-template <>
+defineLegacyParams(InfiniteCylinderRadiativeBC);
+
 InputParameters
-validParams<InfiniteCylinderRadiativeBC>()
+InfiniteCylinderRadiativeBC::validParams()
 {
-  InputParameters params = validParams<RadiativeHeatFluxBCBase>();
+  InputParameters params = RadiativeHeatFluxBCBase::validParams();
   params.addParam<Real>("cylinder_emissivity",
                         1,
                         "Emissivity of the cylinder in radiative heat transfer with the boundary.");

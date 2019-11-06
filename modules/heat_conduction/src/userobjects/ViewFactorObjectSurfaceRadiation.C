@@ -12,11 +12,12 @@
 
 registerMooseObject("HeatConductionApp", ViewFactorObjectSurfaceRadiation);
 
-template <>
+defineLegacyParams(ViewFactorObjectSurfaceRadiation);
+
 InputParameters
-validParams<ViewFactorObjectSurfaceRadiation>()
+ViewFactorObjectSurfaceRadiation::validParams()
 {
-  InputParameters params = validParams<GrayLambertSurfaceRadiationBase>();
+  InputParameters params = GrayLambertSurfaceRadiationBase::validParams();
   params.addRequiredParam<UserObjectName>("view_factor_object_name",
                                           "Name of the ViewFactor userobjects.");
   params.addClassDescription(

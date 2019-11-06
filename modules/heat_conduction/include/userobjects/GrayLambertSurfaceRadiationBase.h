@@ -25,6 +25,8 @@ InputParameters validParams<GrayLambertSurfaceRadiationBase>();
 class GrayLambertSurfaceRadiationBase : public SideUserObject
 {
 public:
+  static InputParameters validParams();
+
   GrayLambertSurfaceRadiationBase(const InputParameters & parameters);
 
   virtual void execute() override;

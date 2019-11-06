@@ -12,11 +12,12 @@
 
 registerMooseObject("HeatConductionApp", ViewFactorPP);
 
-template <>
+defineLegacyParams(ViewFactorPP);
+
 InputParameters
-validParams<ViewFactorPP>()
+ViewFactorPP::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("view_factor_object_name",
                                           "Name of the ViewFactor userobjects.");
   params.addRequiredParam<BoundaryName>("from_boundary",

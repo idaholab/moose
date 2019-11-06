@@ -11,13 +11,18 @@
 
 registerADMooseObject("HeatConductionApp", ADMatHeatSource);
 
-defineADValidParams(
-    ADMatHeatSource,
-    ADKernel,
-    params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
-    params.addParam<MaterialPropertyName>("material_property",
-                                          1.0,
-                                          "Material property describing the body force"););
+defineADLegacyParams(ADMatHeatSource);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADMatHeatSource<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
+  params.addParam<MaterialPropertyName>(
+      "material_property", 1.0, "Material property describing the body force");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMatHeatSource<compute_stage>::ADMatHeatSource(const InputParameters & parameters)

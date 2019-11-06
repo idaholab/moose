@@ -11,15 +11,20 @@
 
 registerADMooseObject("HeatConductionApp", GapConductanceConstraint);
 
-defineADValidParams(
-    GapConductanceConstraint,
-    ADMortarConstraint,
-    params.addClassDescription(
-        "Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
-        "implementation of the thermal contact problem. For more information, see the "
-        "detailed description here: http://tinyurl.com/gmmhbe9");
+defineADLegacyParams(GapConductanceConstraint);
 
-    params.addRequiredParam<Real>("k", "Gap conductance"););
+template <ComputeStage compute_stage>
+InputParameters
+GapConductanceConstraint<compute_stage>::validParams()
+{
+  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  params.addClassDescription(
+      "Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
+      "implementation of the thermal contact problem. For more information, see the "
+      "detailed description here: http://tinyurl.com/gmmhbe9");
+  params.addRequiredParam<Real>("k", "Gap conductance");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 GapConductanceConstraint<compute_stage>::GapConductanceConstraint(

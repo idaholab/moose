@@ -23,6 +23,8 @@ InputParameters validParams<ViewFactorBase>();
 class ViewFactorBase : public SideUserObject
 {
 public:
+  static InputParameters validParams();
+
   ViewFactorBase(const InputParameters & parameters);
 
   ///@{ public interface for obtaining view factors

@@ -14,11 +14,12 @@ registerMooseObject("HeatConductionApp", GrayLambertNeumannBC);
 
 Real GrayLambertNeumannBC::_sigma_stefan_boltzmann = 5.670367e-8;
 
-template <>
+defineLegacyParams(GrayLambertNeumannBC);
+
 InputParameters
-validParams<GrayLambertNeumannBC>()
+GrayLambertNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
   params.addParam<bool>(

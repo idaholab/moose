@@ -12,11 +12,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(HeatConductionApp);
+
 InputParameters
-validParams<HeatConductionApp>()
+HeatConductionApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = ::validParams<MooseApp>();
   return params;
 }
 

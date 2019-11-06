@@ -25,6 +25,8 @@ InputParameters validParams<ElectricalConductivity>();
 class ElectricalConductivity : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ElectricalConductivity(const InputParameters & parameters);
 
 protected:

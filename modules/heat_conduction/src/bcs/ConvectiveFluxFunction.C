@@ -13,11 +13,12 @@
 
 registerMooseObject("HeatConductionApp", ConvectiveFluxFunction);
 
-template <>
+defineLegacyParams(ConvectiveFluxFunction);
+
 InputParameters
-validParams<ConvectiveFluxFunction>()
+ConvectiveFluxFunction::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<FunctionName>("T_infinity", "Function describing far-field temperature");
   params.addRequiredParam<Real>("coefficient", "Heat transfer coefficient");
   params.addParam<FunctionName>("coefficient_function", "Heat transfer coefficient function");

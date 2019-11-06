@@ -25,6 +25,8 @@ InputParameters validParams<PatchSidesetGenerator>();
 class PatchSidesetGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   PatchSidesetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

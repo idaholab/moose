@@ -11,19 +11,23 @@
 
 registerADMooseObject("HeatConductionApp", ADHeatConductionTimeDerivative);
 
-defineADValidParams(
-    ADHeatConductionTimeDerivative,
-    ADTimeDerivative,
-    params.addClassDescription(
-        "AD Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
-        "the heat equation for quasi-constant specific heat $c_p$ and the density $\\rho$.");
-    params.set<bool>("use_displaced_mesh") = true;
-    params.addParam<MaterialPropertyName>("specific_heat",
-                                          "specific_heat",
-                                          "Property name of the specific heat material property");
-    params.addParam<MaterialPropertyName>("density_name",
-                                          "density",
-                                          "Property name of the density material property"););
+defineADLegacyParams(ADHeatConductionTimeDerivative);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADHeatConductionTimeDerivative<compute_stage>::validParams()
+{
+  InputParameters params = ADTimeDerivative<compute_stage>::validParams();
+  params.addClassDescription(
+      "AD Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
+      "the heat equation for quasi-constant specific heat $c_p$ and the density $\\rho$.");
+  params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<MaterialPropertyName>(
+      "specific_heat", "specific_heat", "Property name of the specific heat material property");
+  params.addParam<MaterialPropertyName>(
+      "density_name", "density", "Property name of the density material property");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADHeatConductionTimeDerivative<compute_stage>::ADHeatConductionTimeDerivative(

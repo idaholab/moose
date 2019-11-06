@@ -22,6 +22,8 @@ InputParameters validParams<JouleHeatingHeatGeneratedAux>();
 class JouleHeatingHeatGeneratedAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   JouleHeatingHeatGeneratedAux(const InputParameters & parameters);
 
 protected:

@@ -24,6 +24,8 @@ InputParameters validParams<GrayLambertNeumannBC>();
 class GrayLambertNeumannBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   GrayLambertNeumannBC(const InputParameters & parameters);
 
   static Real _sigma_stefan_boltzmann;

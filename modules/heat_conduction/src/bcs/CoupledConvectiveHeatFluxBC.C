@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", CoupledConvectiveHeatFluxBC);
 
-template <>
+defineLegacyParams(CoupledConvectiveHeatFluxBC);
+
 InputParameters
-validParams<CoupledConvectiveHeatFluxBC>()
+CoupledConvectiveHeatFluxBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by auxiliary variables.");
