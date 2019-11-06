@@ -6,6 +6,7 @@
     allowed_linux = 0.96
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./cells]
@@ -15,6 +16,7 @@
     allowed_linux = 0.96
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./variable]
@@ -23,5 +25,6 @@
     imagediff = 'variable.png'
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 []

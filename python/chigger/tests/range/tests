@@ -6,6 +6,7 @@
     allowed_linux = 0.97
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./min]
@@ -16,6 +17,7 @@
     allowed_darwin = 0.97
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./max]
@@ -24,6 +26,7 @@
     imagediff = 'max_0.png max_1.png'
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./minmax]
@@ -32,6 +35,7 @@
     imagediff = 'minmax_0.png minmax_1.png'
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./range]
@@ -40,6 +44,7 @@
     imagediff = 'range_0.png range_1.png'
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./auto]
@@ -48,5 +53,6 @@
     imagediff = 'auto_1.png auto_3.png auto_5.png'
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 []

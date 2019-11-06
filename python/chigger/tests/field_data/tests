@@ -18,6 +18,7 @@
     command = plot_field_data.py
     imagediff = 'plot_field_data.png'
     python = 3
+    display_required = true
   [../]
 
   [./plot_current_field_data]
@@ -26,5 +27,6 @@
     imagediff = 'plot_current_field_data_0.png plot_current_field_data_4.png plot_current_field_data_9.png'
     allowed_linux = 0.95
     python = 3
+    display_required = true
   [../]
 []

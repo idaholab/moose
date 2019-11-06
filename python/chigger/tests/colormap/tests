@@ -6,6 +6,7 @@
     imagediff = colormap.png
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./number]
@@ -15,6 +16,7 @@
     imagediff = colormap_number.png
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./reverse_matplotlib]
@@ -23,6 +25,7 @@
     imagediff = reverse.png
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./reverse_xml]
@@ -31,6 +34,7 @@
     imagediff = reverse_xml.png
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 
   [./reverse_default]
@@ -39,5 +43,6 @@
     imagediff = reverse_default.png
     python = 3
     platform = LINUX
+    display_required = true
   [../]
 []

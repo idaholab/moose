@@ -1,7 +1,7 @@
 
 ## Modify your Bash Profile
 
-During the installation of one of the above moose-environment packages, you have two opportunities to allow the installer to modify your bash profile. This will allow the moose-environment module system and compiler stack to be made available by default with every new terminal window opened.
+During the installation of the moose-environment package, you have two opportunities to allow the installer to modify your bash profile. This will allow the moose-environment module system and compiler stack to be made available by default with every new terminal window opened.
 
 - The first is available after clicking 'Customize' during the install. While in this pane, check the option "MOOSE Environment", and then continue by clicking 'Install'.
 

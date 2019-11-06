@@ -9,6 +9,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./single_point]
@@ -21,6 +22,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./empty]
@@ -32,6 +34,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./color]
@@ -43,6 +46,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./legend]
@@ -55,6 +59,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./legend_viewport]
@@ -67,6 +72,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./update]
@@ -78,6 +84,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./secondary]
@@ -90,6 +97,7 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 
   [./tracer]
@@ -102,5 +110,6 @@
     design = ''
     issues = '#7451'
     python = 3
+    display_required = true
   [../]
 []

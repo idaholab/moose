@@ -4,5 +4,6 @@
     command = cube_source.py
     imagediff = 'cube_source.png'
     python = 3
+    display_required = true
   [../]
 []

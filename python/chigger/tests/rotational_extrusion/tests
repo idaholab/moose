@@ -7,5 +7,6 @@
     issues = '#12128'
     requirement = "Chigger shall include the ability to rotate and extrude a 2D ExodusII result."
     python = 3
+    display_required = true
   [../]
 []
