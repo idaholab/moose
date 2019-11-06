@@ -4,9 +4,6 @@
 const Real StiffenedGasTwoPhaseFluidProperties::_P_critical = 22.09E+6;
 
 registerMooseObject("THMApp", StiffenedGasTwoPhaseFluidProperties);
-registerMooseObjectAliased("THMApp",
-                           StiffenedGasTwoPhaseFluidProperties,
-                           "StiffenedGas7EqnFluidProperties");
 
 template <>
 InputParameters
