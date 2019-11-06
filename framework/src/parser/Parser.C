@@ -1163,6 +1163,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(SamplerName, string);
       setscalar(TagName, string);
       setscalar(MeshGeneratorName, string);
+      setscalar(ExtraElementIDName, string);
 
       setscalar(PostprocessorName, PostprocessorName);
 
@@ -1222,6 +1223,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(TagName, string);
       setvector(VariableName, VariableName);
       setvector(MeshGeneratorName, string);
+      setvector(ExtraElementIDName, string);
 
       // Double indexed types
       setvectorvector(Real);

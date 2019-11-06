@@ -166,3 +166,24 @@ recycled (because it might be a key to an important map), you should use unique_
 The MooseMesh object has a method for building a map (technically a multimap) of paired periodic nodes in the
 simulation. This map provides a quick lookup of all paired nodes on a periodic boundary. in the 2D and 3D cases
 each corner node will map to 2 or 3 other nodes (respectively).
+
+## Extra integer IDs
+
+Extra integer IDs for all the elements of a mesh can be useful for handling complicated material assignment, performing specific calculations on groups of elements, etc.
+Often times, we do not want to use subdomain IDs for these tasks because otherwise too many subdomains could be needed, and in turn large penalty on run-time performance could be introduced.
+
+MooseMesh[MooseMesh.md] has a parameter `extra_integers` to allow users to introduce more integer IDs for elements each identified with a name in the parameter.
+When this parameter is specified, extra integers will be made available for all elements through `Assembly` in MOOSE objects such as kernels, aux kernels, materials, initial conditions, element user objects, etc.
+To retrieve the integer on an element, one needs to simply call
+```
+getElementID(integer_name_parameter, comp),
+```
+within the initialization list of your constructor.
+`integer_name_parameter` is the name of the parameter in type of `std::vector<ExtraElementIDName>` of this object listing all integer names.
+`comp` is the index into the integer names if multiple are specified for `integer_name_parameter`.
+It is noticed that the returned value of this function call must be in type of `const dof_id_type &`, which is used to refer the value set by MOOSE in `Assembly`.
+The returned reference should be held in a class member variable for later use.
+Based on this ID, one can proceed with any particular operations, for example, choosing a different set of data for evaluating material properties.
+
+IDs can be assigned to the mesh elements with `MeshGenerators` in a similar way to assigning subdomain IDs.
+We note that the element IDs are part of the mesh and will be initialized properly for restart/recover.

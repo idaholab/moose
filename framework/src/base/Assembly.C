@@ -118,6 +118,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
   // _coord_msm
   _fe_msm->get_xyz();
+
+  _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers());
 }
 
 Assembly::~Assembly()
@@ -664,6 +666,9 @@ Assembly::reinitFE(const Elem * elem)
       }
     }
   }
+
+  for (unsigned int i = 0; i < _extra_elem_ids.size(); ++i)
+    _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
 
   if (_xfem != nullptr)
     modifyWeightsDueToXFEM(elem);

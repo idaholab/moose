@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#13764'
+  design = 'syntax/Mesh/index.md'
+  [./mesh_integer]
+    type = 'Exodiff'
+    input = 'multi_element_integer.i'
+    exodiff = 'multi_element_integer_out.e'
+    requirement = "MOOSE shall generate meshes with different set of element integers and properly stitch them."
+  [../]
+[]
