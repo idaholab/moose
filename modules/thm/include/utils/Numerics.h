@@ -153,9 +153,17 @@ Real viscosityNumber(
  * @param Nu Nusselt number
  * @param k Thermal conductivity
  * @param D_h Hydraulic diameter
- * @return Returns the wall heat transfer coefficient
+ * @return the wall heat transfer coefficient
  */
 Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
+
+/**
+ * Compute Dean number
+ * @param Re Reynolds number
+ * @param doD tube diameter to coil diameter ratio
+ * @return Dean number
+ */
+Real Dean(Real Re, Real doD);
 
 /**
  * Computes velocity and its derivatives from alpha*rho*A and alpha*rho*u*A
