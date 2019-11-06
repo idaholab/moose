@@ -11,18 +11,13 @@
 
 #include "ElemSideNeighborLayersTester.h"
 
-// Forward Declarations
-class TwoRMTester;
-
-template <>
-InputParameters validParams<TwoRMTester>();
-
 /**
  * Tests that the same RM can be used twice with the same object
  */
 class TwoRMTester : public ElemSideNeighborLayersTester
 {
 public:
+  static InputParameters validParams();
+
   TwoRMTester(const InputParameters & parameters);
 };
-

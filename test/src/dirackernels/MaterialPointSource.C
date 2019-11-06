@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MaterialPointSource);
 
-template <>
 InputParameters
-validParams<MaterialPointSource>()
+MaterialPointSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
   params.addParam<MaterialPropertyName>(
       "material_prop", "matp", "the name of the material property for the coefficient");

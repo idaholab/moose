@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledEigenKernel);
 
-template <>
 InputParameters
-validParams<CoupledEigenKernel>()
+CoupledEigenKernel::validParams()
 {
-  InputParameters params = validParams<EigenKernel>();
+  InputParameters params = EigenKernel::validParams();
   params.addRequiredCoupledVar("v", "Variable to be coupled in");
   return params;
 }

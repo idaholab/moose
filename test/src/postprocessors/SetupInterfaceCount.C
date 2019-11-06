@@ -27,11 +27,10 @@ setupInterfaceCountParameters()
   return parameters;
 }
 
-template <>
 InputParameters
-validParams<GeneralSetupInterfaceCount>()
+GeneralSetupInterfaceCount::validParams()
 {
-  InputParameters parameters = validParams<GeneralPostprocessor>();
+  InputParameters parameters = GeneralPostprocessor::validParams();
   parameters += setupInterfaceCountParameters();
   return parameters;
 }

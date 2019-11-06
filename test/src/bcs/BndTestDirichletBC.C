@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", BndTestDirichletBC);
 
-template <>
 InputParameters
-validParams<BndTestDirichletBC>()
+BndTestDirichletBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
+  InputParameters p = NodalBC::validParams();
   MooseEnum test("none boundaryNames boundaryIDs hasBoundary isBoundarySubset "
                  "hasBoundaryMaterialProperty_true hasBoundaryMaterialProperty_false",
                  "none",

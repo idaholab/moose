@@ -12,22 +12,14 @@
 #include "NodalBC.h"
 #include "UsrFunc.h"
 
-// Forward Declarations
-class DirichletBCfuncXYZ0;
-
-template <>
-InputParameters validParams<DirichletBCfuncXYZ0>();
-
 /**
  * Implements space-dependent Dirichlet BC.
  */
 class DirichletBCfuncXYZ0 : public NodalBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   DirichletBCfuncXYZ0(const InputParameters & parameters);
 
   /**
@@ -47,4 +39,3 @@ private:
   Real _C0;
   Real _omega0;
 };
-

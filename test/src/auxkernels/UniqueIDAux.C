@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", UniqueIDAux);
 
-template <>
 InputParameters
-validParams<UniqueIDAux>()
+UniqueIDAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

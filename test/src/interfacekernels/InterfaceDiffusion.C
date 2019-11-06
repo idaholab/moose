@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", InterfaceDiffusion);
 
-template <>
 InputParameters
-validParams<InterfaceDiffusion>()
+InterfaceDiffusion::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addParam<MaterialPropertyName>("D", "D", "The diffusion coefficient.");
   params.addParam<MaterialPropertyName>(
       "D_neighbor", "D_neighbor", "The neighboring diffusion coefficient.");

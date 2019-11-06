@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class ImplicitStateful;
-
-template <>
-InputParameters validParams<ImplicitStateful>();
-
 /**
  * Stateful material class that defines a few properties.
  */
 class ImplicitStateful : public Material
 {
 public:
+  static InputParameters validParams();
+
   ImplicitStateful(const InputParameters & parameters);
 
 protected:
@@ -36,4 +32,3 @@ private:
   const MaterialProperty<Real> & _coupled_old;
   const MaterialProperty<Real> & _coupled_older;
 };
-

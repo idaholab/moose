@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DataStructIC);
 
-template <>
 InputParameters
-validParams<DataStructIC>()
+DataStructIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   return params;
 }
 

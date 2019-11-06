@@ -12,14 +12,11 @@
 #include "ADKernel.h"
 
 template <ComputeStage compute_stage>
-class ADCoupledVectorConvection;
-
-declareADValidParams(ADCoupledVectorConvection);
-
-template <ComputeStage compute_stage>
 class ADCoupledVectorConvection : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCoupledVectorConvection(const InputParameters & parameters);
 
 protected:
@@ -32,4 +29,3 @@ private:
   const ADVectorVariableValue & _velocity_vector;
   const ADVectorVariableGradient & _grad_velocity_vector;
 };
-

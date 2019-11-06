@@ -14,6 +14,8 @@
 class ForcingFn : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ForcingFn(const InputParameters & parameters);
 
 protected:
@@ -21,7 +23,3 @@ protected:
 
   virtual Real funcValue();
 };
-
-template <>
-InputParameters validParams<ForcingFn>();
-

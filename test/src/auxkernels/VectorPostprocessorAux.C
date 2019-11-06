@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VectorPostprocessorAux);
 
-template <>
 InputParameters
-validParams<VectorPostprocessorAux>()
+VectorPostprocessorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>("vpp",
                                                    "The VectorPostprocessor to pull values out of");

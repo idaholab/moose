@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "GeneralPostprocessor.h"
 
-// Forward declerations
-class MaxVarNDofsPerElemPP;
-
-template <>
-InputParameters validParams<GeneralPostprocessor>();
-
 /**
  * Testing object to make sure the maximum number of n dofs per element is computed properly
  */
@@ -26,9 +20,10 @@ class MaxVarNDofsPerElemPP : public GeneralPostprocessor
 public:
   MaxVarNDofsPerElemPP(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialize() {}
   virtual void execute() {}
 
   virtual PostprocessorValue getValue();
 };
-

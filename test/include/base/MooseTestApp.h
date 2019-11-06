@@ -11,18 +11,14 @@
 
 #include "MooseApp.h"
 
-class MooseTestApp;
-
-template <>
-InputParameters validParams<MooseTestApp>();
-
 class MooseTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   MooseTestApp(const InputParameters & parameters);
   virtual ~MooseTestApp();
 
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerApps();
 };
-

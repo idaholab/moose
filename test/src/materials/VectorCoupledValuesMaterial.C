@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VectorCoupledValuesMaterial);
 
-template <>
 InputParameters
-validParams<VectorCoupledValuesMaterial>()
+VectorCoupledValuesMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("variable", "Coupled variable");
   return params;
 }

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", CoupledKernelGradBC);
 
-template <>
 InputParameters
-validParams<CoupledKernelGradBC>()
+CoupledKernelGradBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("var2", "Coupled Variable");
   params.addRequiredParam<std::vector<Real>>("vel", "velocity");
   return params;

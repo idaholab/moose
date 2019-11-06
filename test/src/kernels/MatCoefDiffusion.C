@@ -11,13 +11,12 @@
 
 registerMooseObject("MooseTestApp", MatCoefDiffusion);
 
-template <>
 InputParameters
-validParams<MatCoefDiffusion>()
+MatCoefDiffusion::validParams()
 {
   MooseEnum test("none=0 hasMaterialProperty=1", "none", "Select optional test");
 
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<MaterialPropertyName>("conductivity",
                                         "the name of the material property for conductivity");
   params.addParam<MooseEnum>("test", test, "Select the desired test");

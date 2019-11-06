@@ -9,11 +9,10 @@
 
 #include "ElementUOProvider.h"
 
-template <>
 InputParameters
-validParams<ElementUOProvider>()
+ElementUOProvider::validParams()
 {
-  return validParams<GeneralUserObject>();
+  return GeneralUserObject::validParams();
 }
 
 ElementUOProvider::ElementUOProvider(const InputParameters & parameters)

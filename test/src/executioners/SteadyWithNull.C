@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", SteadyWithNull);
 
-template <>
 InputParameters
-validParams<SteadyWithNull>()
+SteadyWithNull::validParams()
 {
-  InputParameters params = validParams<Steady>();
+  InputParameters params = Steady::validParams();
   return params;
 }
 

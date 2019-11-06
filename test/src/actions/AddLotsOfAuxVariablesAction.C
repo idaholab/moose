@@ -34,14 +34,13 @@ const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
 
 registerMooseAction("MooseTestApp", AddLotsOfAuxVariablesAction, "meta_action");
 
-template <>
 InputParameters
-validParams<AddLotsOfAuxVariablesAction>()
+AddLotsOfAuxVariablesAction::validParams()
 {
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");
   params.addParam<MooseEnum>(
       "family", families, "Specifies the family of FE shape functions to use for this variable");

@@ -13,18 +13,14 @@
 #include "Kernel.h"
 #include "Function.h"
 
-// Forward Declarations
-class FuncCoefDiffusion;
-
-template <>
-InputParameters validParams<FuncCoefDiffusion>();
-
 /**
  * A kernel for testing the MooseParsedFunctionInterface
  */
 class FuncCoefDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   FuncCoefDiffusion(const InputParameters & parameters);
 
 protected:

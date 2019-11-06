@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class OptionallyVectorCoupledForce;
-
-template <>
-InputParameters validParams<OptionallyVectorCoupledForce>();
-
 /**
  * Simple class for testing multiple optionally coupled variable values
  */
 class OptionallyVectorCoupledForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   OptionallyVectorCoupledForce(const InputParameters & parameters);
 
 protected:
@@ -34,4 +30,3 @@ private:
   std::vector<unsigned int> _v_var;
   std::vector<const VariableValue *> _v;
 };
-

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MMSImplicitEuler);
 
-template <>
 InputParameters
-validParams<MMSImplicitEuler>()
+MMSImplicitEuler::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   return params;
 }
 

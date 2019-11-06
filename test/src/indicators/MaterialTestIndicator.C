@@ -16,12 +16,11 @@
 
 registerMooseObject("MooseTestApp", MaterialTestIndicator);
 
-template <>
 InputParameters
-validParams<MaterialTestIndicator>()
+MaterialTestIndicator::validParams()
 {
-  InputParameters params = validParams<Indicator>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = Indicator::validParams();
+  params += MaterialPropertyInterface::validParams();
   params.addParam<MaterialPropertyName>(
       "property", "The name of the material property to use for an indicator.");
   return params;

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledAux);
 
-template <>
 InputParameters
-validParams<CoupledAux>()
+CoupledAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   MooseEnum operators("+ - * /", "+");
 

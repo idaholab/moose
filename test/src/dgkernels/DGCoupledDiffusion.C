@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", DGCoupledDiffusion);
 
-template <>
 InputParameters
-validParams<DGCoupledDiffusion>()
+DGCoupledDiffusion::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
   params.addRequiredCoupledVar("v", "The governing variable that controls diffusion of u.");
   return params;
 }

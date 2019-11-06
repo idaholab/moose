@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class UniqueIDAux;
-
-template <>
-InputParameters validParams<UniqueIDAux>();
-
 /**
  * UniqueID auxiliary value
  *
@@ -24,10 +18,8 @@ InputParameters validParams<UniqueIDAux>();
 class UniqueIDAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   UniqueIDAux(const InputParameters & parameters);
 
   virtual ~UniqueIDAux();
@@ -35,4 +27,3 @@ public:
 protected:
   virtual Real computeValue();
 };
-

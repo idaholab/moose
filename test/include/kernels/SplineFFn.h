@@ -12,17 +12,14 @@
 #include "Kernel.h"
 #include "SplineFunction.h"
 
-class SplineFFn;
-
-template <>
-InputParameters validParams<SplineFFn>();
-
 /**
  * Forcing function defined with a spline
  */
 class SplineFFn : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SplineFFn(const InputParameters & parameters);
   virtual ~SplineFFn();
 

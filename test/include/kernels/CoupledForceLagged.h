@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class CoupledForceLagged;
-
-template <>
-InputParameters validParams<CoupledForceLagged>();
-
 /**
  * CoupledForce using values from previous Newton iterate
  */
 class CoupledForceLagged : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledForceLagged(const InputParameters & parameters);
 
 protected:
@@ -35,4 +31,3 @@ protected:
   unsigned int _v_var;
   const VariableValue & _v;
 };
-

@@ -11,15 +11,11 @@
 
 #include "Reaction.h"
 
-// Forward Declarations
-class DeprecatedKernel;
-
-template <>
-InputParameters validParams<DeprecatedKernel>();
-
 class DeprecatedKernel : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   DeprecatedKernel(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
 
   Real _coef;
 };
-

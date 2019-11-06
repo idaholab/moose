@@ -12,17 +12,14 @@
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
 
-class ScalarCoupledPostprocessor;
-
-template <>
-InputParameters validParams<ScalarCoupledPostprocessor>();
-
 /**
 * This postprocessor demonstrates coupling a scalar variable to a postprocessor
 */
 class ScalarCoupledPostprocessor : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ScalarCoupledPostprocessor(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
   const VariableValue & _coupled_scalar;
   const VariableValue & _u;
 };
-

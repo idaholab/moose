@@ -18,6 +18,8 @@
 class SimpleTestShapeElementKernel : public NonlocalKernel
 {
 public:
+  static InputParameters validParams();
+
   SimpleTestShapeElementKernel(const InputParameters & parameters);
 
 protected:
@@ -32,7 +34,3 @@ protected:
 
   const std::vector<dof_id_type> & _var_dofs;
 };
-
-template <>
-InputParameters validParams<SimpleTestShapeElementKernel>();
-

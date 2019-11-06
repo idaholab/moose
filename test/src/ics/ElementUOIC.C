@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ElementUOIC);
 
-template <>
 InputParameters
-validParams<ElementUOIC>()
+ElementUOIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("element_user_object",
                                           "The ElementUOProvider to be coupled into this IC");
 

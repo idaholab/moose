@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", GetTransferUserObject);
 
-template <>
 InputParameters
-validParams<GetTransferUserObject>()
+GetTransferUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

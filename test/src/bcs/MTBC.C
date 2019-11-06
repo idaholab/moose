@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MTBC);
 
-template <>
 InputParameters
-validParams<MTBC>()
+MTBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "the name of the material property we are going to use");
   params.addRequiredParam<Real>("grad", "the value of the gradient");

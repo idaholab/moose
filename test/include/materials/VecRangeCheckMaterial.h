@@ -12,21 +12,16 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 
-// Forward Declarations
-class VecRangeCheckMaterial;
-
-template <>
-InputParameters validParams<VecRangeCheckMaterial>();
-
 /**
  * Simple material to test vector parameter range checking.
  */
 class VecRangeCheckMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   VecRangeCheckMaterial(const InputParameters & parameters);
 
 protected:
   void computeQpProperties();
 };
-

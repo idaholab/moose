@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", DerivativeMaterialInterfaceTestProvider);
 
-template <>
 InputParameters
-validParams<DerivativeMaterialInterfaceTestProvider>()
+DerivativeMaterialInterfaceTestProvider::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   return params;
 }
 

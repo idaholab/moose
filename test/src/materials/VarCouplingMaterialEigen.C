@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VarCouplingMaterialEigen);
 
-template <>
 InputParameters
-validParams<VarCouplingMaterialEigen>()
+VarCouplingMaterialEigen::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
   params.addRequiredParam<std::string>("material_prop_name", "Property name");
   return params;

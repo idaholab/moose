@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MMSReaction);
 
-template <>
 InputParameters
-validParams<MMSReaction>()
+MMSReaction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

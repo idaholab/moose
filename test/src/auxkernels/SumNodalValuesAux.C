@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", SumNodalValuesAux);
 
-template <>
 InputParameters
-validParams<SumNodalValuesAux>()
+SumNodalValuesAux::validParams()
 {
-  InputParameters params = validParams<AuxNodalScalarKernel>();
+  InputParameters params = AuxNodalScalarKernel::validParams();
   params.addRequiredCoupledVar("sum_var", "Variable to be summed");
 
   return params;

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", OnOffNeumannBC);
 
-template <>
 InputParameters
-validParams<OnOffNeumannBC>()
+OnOffNeumannBC::validParams()
 {
-  InputParameters params = validParams<NeumannBC>();
+  InputParameters params = NeumannBC::validParams();
 
   return params;
 }

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TimestepSetupFunction);
 
-template <>
 InputParameters
-validParams<TimestepSetupFunction>()
+TimestepSetupFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   return params;
 }
 

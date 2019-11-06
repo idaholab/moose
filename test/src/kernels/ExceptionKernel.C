@@ -27,11 +27,10 @@ bool ExceptionKernel::_jac_has_thrown = false;
 
 registerMooseObject("MooseTestApp", ExceptionKernel);
 
-template <>
 InputParameters
-validParams<ExceptionKernel>()
+ExceptionKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   MooseEnum when("residual=0 jacobian initial_condition", "residual");
   params.addParam<MooseEnum>("when", when, "When to throw the exception");
   params.addParam<bool>(

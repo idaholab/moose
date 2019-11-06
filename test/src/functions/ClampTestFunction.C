@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", ClampTestFunction);
 
-template <>
 InputParameters
-validParams<ClampTestFunction>()
+ClampTestFunction::validParams()
 {
-  return validParams<Function>();
+  return Function::validParams();
 }
 
 ClampTestFunction::ClampTestFunction(const InputParameters & parameters) : Function(parameters) {}

@@ -12,15 +12,11 @@
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class VectorCoupledGradientTimeDerivative;
-
-template <>
-InputParameters validParams<VectorCoupledGradientTimeDerivative>();
-
 class VectorCoupledGradientTimeDerivative : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorCoupledGradientTimeDerivative(const InputParameters & parameters);
 
 protected:
@@ -34,4 +30,3 @@ protected:
   MooseVariable & _v_var;
   const VariablePhiGradient & _standard_grad_phi;
 };
-

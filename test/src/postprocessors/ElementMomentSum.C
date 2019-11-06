@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", ElementMomentSum);
 
-template <>
 InputParameters
-validParams<ElementMomentSum>()
+ElementMomentSum::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addParam<bool>("use_old", false, "True to coupled old variable");
   return params;
 }

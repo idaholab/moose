@@ -11,17 +11,14 @@
 
 #include "NeumannBC.h"
 
-class MatTestNeumannBC;
-
-template <>
-InputParameters validParams<MatTestNeumannBC>();
-
 /**
  * Neumann boundary condition for testing BoundaryRestrictable class
  */
 class MatTestNeumannBC : public NeumannBC
 {
 public:
+  static InputParameters validParams();
+
   MatTestNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
 
   const MaterialProperty<Real> * _value;
 };
-

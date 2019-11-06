@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DefaultMatPropConsumerMaterial);
 
-template <>
 InputParameters
-validParams<DefaultMatPropConsumerMaterial>()
+DefaultMatPropConsumerMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<std::string>("mat_prop", "prop", "Material property name to fetch");
   return params;
 }

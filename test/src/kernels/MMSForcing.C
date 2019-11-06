@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MMSForcing);
 
-template <>
 InputParameters
-validParams<MMSForcing>()
+MMSForcing::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

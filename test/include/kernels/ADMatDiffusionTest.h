@@ -12,16 +12,12 @@
 #include "ADKernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-template <ComputeStage compute_stage>
-class ADMatDiffusionTest;
-
-declareADValidParams(ADMatDiffusionTest);
-
 template <ComputeStage compute_stage>
 class ADMatDiffusionTest : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADMatDiffusionTest(const InputParameters & parameters);
 
 protected:
@@ -35,4 +31,3 @@ protected:
 
   usingKernelMembers;
 };
-

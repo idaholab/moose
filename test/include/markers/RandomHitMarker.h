@@ -13,13 +13,11 @@
 
 class RandomHitUserObject;
 
-class RandomHitMarker;
-template <>
-InputParameters validParams<RandomHitMarker>();
-
 class RandomHitMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   RandomHitMarker(const InputParameters & parameters);
   virtual ~RandomHitMarker(){};
 
@@ -28,4 +26,3 @@ protected:
 
   const RandomHitUserObject & _random_hits;
 };
-

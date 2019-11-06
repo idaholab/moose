@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MMSConstantAux);
 
-template <>
 InputParameters
-validParams<MMSConstantAux>()
+MMSConstantAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   return params;
 }

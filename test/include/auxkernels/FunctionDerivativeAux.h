@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class FunctionDerivativeAux;
 class Function;
-
-template <>
-InputParameters validParams<FunctionDerivativeAux>();
 
 /**
  * Function auxiliary value
@@ -24,10 +20,8 @@ InputParameters validParams<FunctionDerivativeAux>();
 class FunctionDerivativeAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   FunctionDerivativeAux(const InputParameters & parameters);
 
 protected:

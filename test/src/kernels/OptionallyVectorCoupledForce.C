@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", OptionallyVectorCoupledForce);
 
-template <>
 InputParameters
-validParams<OptionallyVectorCoupledForce>()
+OptionallyVectorCoupledForce::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addCoupledVar("v", {1, 2}, "The two coupled variables which provide the force");
 

@@ -11,11 +11,7 @@
 
 #include "ScalarInitialCondition.h"
 
-class ScalarUOIC;
 class MTUserObject;
-
-template <>
-InputParameters validParams<ScalarUOIC>();
 
 /**
  * Scalar initial condition for setting values from a user object
@@ -23,6 +19,8 @@ InputParameters validParams<ScalarUOIC>();
 class ScalarUOIC : public ScalarInitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ScalarUOIC(const InputParameters & parameters);
 
   virtual Real value() override;

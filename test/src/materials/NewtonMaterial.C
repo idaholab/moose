@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", NewtonMaterial);
 
-template <>
 InputParameters
-validParams<NewtonMaterial>()
+NewtonMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("f_name",
                                        "The name of the property that holds the value of "
                                        "the function for which the root is being "

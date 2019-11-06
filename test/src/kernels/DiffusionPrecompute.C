@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DiffusionPrecompute);
 
-template <>
 InputParameters
-validParams<DiffusionPrecompute>()
+DiffusionPrecompute::validParams()
 {
-  InputParameters p = validParams<KernelGrad>();
+  InputParameters p = KernelGrad::validParams();
   return p;
 }
 

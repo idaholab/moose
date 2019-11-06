@@ -12,18 +12,14 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward declarations
-class OldMaterialAux;
-
-template <>
-InputParameters validParams<OldMaterialAux>();
-
 /**
  * Test class for testing functionality of getMaterialPropertyOld/Older for AuxKernels
  */
 class OldMaterialAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   OldMaterialAux(const InputParameters & parameters);
   virtual ~OldMaterialAux() {}
 
@@ -34,4 +30,3 @@ private:
   const MaterialProperty<Real> & _old;
   const MaterialProperty<Real> & _older;
 };
-

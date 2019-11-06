@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", TestControl);
 
-template <>
 InputParameters
-validParams<TestControl>()
+TestControl::validParams()
 {
-  InputParameters params = validParams<Control>();
+  InputParameters params = Control::validParams();
 
   MooseEnum test_type("real variable point tid_warehouse_error disable_executioner connection "
                       "alias mult execflag_error");

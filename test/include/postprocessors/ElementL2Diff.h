@@ -11,15 +11,11 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-// Forward Declarations
-class ElementL2Diff;
-
-template <>
-InputParameters validParams<ElementL2Diff>();
-
 class ElementL2Diff : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementL2Diff(const InputParameters & parameters);
 
 protected:
@@ -32,4 +28,3 @@ protected:
 
   const VariableValue & _u_old;
 };
-

@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", TestPostprocessor);
 
-template <>
 InputParameters
-validParams<TestPostprocessor>()
+TestPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum test_type("grow use_older_value report_old custom_execute_on");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
   params.addParam<PostprocessorName>("report_name",

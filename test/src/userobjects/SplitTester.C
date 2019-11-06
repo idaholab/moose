@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", SplitTester);
 
-template <>
 InputParameters
-validParams<SplitTester>()
+SplitTester::validParams()
 {
-  return validParams<GeneralUserObject>();
+  return GeneralUserObject::validParams();
 }
 
 SplitTester::SplitTester(const InputParameters & parameters) : GeneralUserObject(parameters) {}

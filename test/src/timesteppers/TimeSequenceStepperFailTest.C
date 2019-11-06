@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TimeSequenceStepperFailTest);
 
-template <>
 InputParameters
-validParams<TimeSequenceStepperFailTest>()
+TimeSequenceStepperFailTest::validParams()
 {
-  InputParameters params = validParams<TimeSequenceStepper>();
+  InputParameters params = TimeSequenceStepper::validParams();
   return params;
 }
 

@@ -11,15 +11,11 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-// Forward Declarations
-class ElementMomentSum;
-
-template <>
-InputParameters validParams<ElementMomentSum>();
-
 class ElementMomentSum : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementMomentSum(const InputParameters & parameters);
 
 protected:
@@ -27,4 +23,3 @@ protected:
 
   const VariableValue & _elemental_sln;
 };
-

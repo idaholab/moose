@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", VectorCurlBC);
 
-template <>
 InputParameters
-validParams<VectorCurlBC>()
+VectorCurlBC::validParams()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
+  InputParameters params = VectorIntegratedBC::validParams();
   params.addRequiredParam<FunctionName>("curl_value", "Value of field curl on the boundary.");
   return params;
 }

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", DGFunctionConvectionDirichletBC);
 
-template <>
 InputParameters
-validParams<DGFunctionConvectionDirichletBC>()
+DGFunctionConvectionDirichletBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("x", "Component of the velocity in the x direction");

@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class MMSReaction;
-
-template <>
-InputParameters validParams<MMSReaction>();
-
 class MMSReaction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MMSReaction(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
 
   unsigned int _mesh_dimension;
 };
-

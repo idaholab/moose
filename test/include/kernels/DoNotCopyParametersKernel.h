@@ -11,20 +11,15 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class DoNotCopyParametersKernel;
-
-template <>
-InputParameters validParams<DoNotCopyParametersKernel>();
-
 class DoNotCopyParametersKernel : public Kernel
 {
 public:
   // This is the wrong constructor, don't to this!
+  static InputParameters validParams();
+
   DoNotCopyParametersKernel(InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-

@@ -11,11 +11,6 @@
 
 #include "NodalBC.h"
 
-class BndTestDirichletBC;
-
-template <>
-InputParameters validParams<BndTestDirichletBC>();
-
 /**
  * Boundary condition of a Dirichlet type
  *
@@ -24,6 +19,8 @@ InputParameters validParams<BndTestDirichletBC>();
 class BndTestDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   BndTestDirichletBC(const InputParameters & parameters);
 
 protected:
@@ -32,4 +29,3 @@ protected:
   /// The value for this BC
   const Real & _value;
 };
-

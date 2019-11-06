@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DiffTensorKernel);
 
-template <>
 InputParameters
-validParams<DiffTensorKernel>()
+DiffTensorKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<FunctionName>("conductivity",
                                         "the name of the thermal conductivity function to utilize");
   return params;

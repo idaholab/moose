@@ -12,15 +12,11 @@
 #include "Kernel.h"
 #include "JvarMapInterface.h"
 
-// Forward Declaration
-class JvarMapTest;
-
-template <>
-InputParameters validParams<JvarMapTest>();
-
 class JvarMapTest : public JvarMapKernelInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   JvarMapTest(const InputParameters & parameters);
 
 protected:

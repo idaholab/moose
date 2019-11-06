@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoeffParamDiffusion);
 
-template <>
 InputParameters
-validParams<CoeffParamDiffusion>()
+CoeffParamDiffusion::validParams()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = Diffusion::validParams();
   params.addRequiredParam<Real>("D", "The diffusivity coefficient.");
   return params;
 }

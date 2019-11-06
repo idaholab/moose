@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", OneSideDiffusion);
 
-template <>
 InputParameters
-validParams<OneSideDiffusion>()
+OneSideDiffusion::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addParam<Real>("D", 1., "The diffusion coefficient.");
   return params;
 }

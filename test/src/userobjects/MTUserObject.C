@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", MTUserObject);
 
-template <>
 InputParameters
-validParams<MTUserObject>()
+MTUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addParam<Real>("scalar", 0, "A scalar value");
   params.addParam<std::vector<Real>>("vector", std::vector<Real>(), "A vector value");
   return params;

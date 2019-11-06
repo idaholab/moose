@@ -12,13 +12,6 @@
 // MOOSE includes
 #include "Material.h"
 
-// Forward declarations
-class NewtonMaterial;
-class Material;
-
-template <>
-InputParameters validParams<NewtonMaterial>();
-
 /**
  * A test object that uses Material to perform a Newton solve of a material property.
  *
@@ -27,6 +20,8 @@ InputParameters validParams<NewtonMaterial>();
 class NewtonMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   NewtonMaterial(const InputParameters & parameters);
   virtual ~NewtonMaterial(){};
 
@@ -42,4 +37,3 @@ private:
   unsigned int _max_iterations;
   MaterialBase & _discrete;
 };
-

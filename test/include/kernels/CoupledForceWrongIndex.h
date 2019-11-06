@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class CoupledForceWrongIndex;
-
-template <>
-InputParameters validParams<CoupledForceWrongIndex>();
-
 /**
  * Accesses multiple coupled values but runs out of bounds
  * for testing graceful termination of Moose in this case
@@ -24,6 +18,8 @@ InputParameters validParams<CoupledForceWrongIndex>();
 class CoupledForceWrongIndex : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledForceWrongIndex(const InputParameters & parameters);
 
 protected:
@@ -35,4 +31,3 @@ private:
   std::vector<unsigned int> _v_var;
   std::vector<const VariableValue *> _v;
 };
-

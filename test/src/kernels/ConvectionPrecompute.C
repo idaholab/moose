@@ -15,11 +15,10 @@ registerMooseObject("MooseTestApp", ConvectionPrecompute);
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-template <>
 InputParameters
-validParams<ConvectionPrecompute>()
+ConvectionPrecompute::validParams()
 {
-  InputParameters params = validParams<KernelValue>();
+  InputParameters params = KernelValue::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }

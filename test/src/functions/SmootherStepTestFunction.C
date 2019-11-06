@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", SmootherStepTestFunction);
 
-template <>
 InputParameters
-validParams<SmootherStepTestFunction>()
+SmootherStepTestFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addParam<bool>(
       "derivative", false, "Flag to calculate the derivative of the polynomial function");
   return params;

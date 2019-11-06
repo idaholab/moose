@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class ElementUOAux;
 class ElementUOProvider;
-
-template <>
-InputParameters validParams<ElementUOAux>();
 
 /**
  * This AuxKernel retrieves values from a ElementUOProvider derived class and returns the reported
@@ -25,6 +21,8 @@ InputParameters validParams<ElementUOAux>();
 class ElementUOAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElementUOAux(const InputParameters & params);
 
 protected:
@@ -34,4 +32,3 @@ protected:
   const std::string _field_name;
   const std::string _field_type;
 };
-

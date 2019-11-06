@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", StripeMesh);
 
-template <>
 InputParameters
-validParams<StripeMesh>()
+StripeMesh::validParams()
 {
-  InputParameters params = validParams<GeneratedMesh>();
+  InputParameters params = GeneratedMesh::validParams();
 
   params.addRequiredParam<unsigned int>("stripes", "Number of stripes in the mesh");
 

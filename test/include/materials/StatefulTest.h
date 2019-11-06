@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class StatefulTest;
-
-template <>
-InputParameters validParams<StatefulTest>();
-
 /**
  * Empty material for use in simple applications that don't need material properties.
  */
 class StatefulTest : public Material
 {
 public:
+  static InputParameters validParams();
+
   StatefulTest(const InputParameters & parameters);
 
 protected:
@@ -41,4 +37,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _properties_old;
   std::vector<const MaterialProperty<Real> *> _properties_older;
 };
-

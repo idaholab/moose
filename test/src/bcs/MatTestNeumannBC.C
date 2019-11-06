@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MatTestNeumannBC);
 
-template <>
 InputParameters
-validParams<MatTestNeumannBC>()
+MatTestNeumannBC::validParams()
 {
-  InputParameters p = validParams<NeumannBC>();
+  InputParameters p = NeumannBC::validParams();
   p.addRequiredParam<std::string>("mat_prop",
                                   "The material property that gives the value of the BC");
   p.addParam<bool>("has_check", false, "Test hasActiveBoundaryObjects method.");

@@ -11,14 +11,11 @@
 
 #include "AuxKernel.h"
 
-class PolyConstantAux;
-
-template <>
-InputParameters validParams<PolyConstantAux>();
-
 class PolyConstantAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PolyConstantAux(const InputParameters & parameters);
 
   virtual ~PolyConstantAux() {}
@@ -26,4 +23,3 @@ public:
 protected:
   virtual Real computeValue();
 };
-

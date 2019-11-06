@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class PointerLoadError;
-
-template <>
-InputParameters validParams<PointerLoadError>();
-
 class TypeWithNoLoad
 {
 public:
@@ -33,6 +28,8 @@ dataStore(std::ostream & stream, TypeWithNoLoad *& v, void * context)
 class PointerLoadError : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PointerLoadError(const InputParameters & params);
   virtual ~PointerLoadError();
 
@@ -46,4 +43,3 @@ public:
 protected:
   TypeWithNoLoad *& _pointer_data;
 };
-

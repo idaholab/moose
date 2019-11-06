@@ -12,12 +12,6 @@
 #include "Kernel.h"
 #include "Material.h"
 
-// Forward Declarations
-class WrongJacobianDiffusion;
-
-template <>
-InputParameters validParams<WrongJacobianDiffusion>();
-
 /**
  * Kernel that allows to construct wrong jacobians, by multiplying a diffusion
  * kernel jacobian and/or residual with an arbitrary prefactor
@@ -25,6 +19,8 @@ InputParameters validParams<WrongJacobianDiffusion>();
 class WrongJacobianDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   WrongJacobianDiffusion(const InputParameters & parameters);
 
 protected:
@@ -50,4 +46,3 @@ private:
   /// prefactor of the Jacobian
   Real _jfactor;
 };
-

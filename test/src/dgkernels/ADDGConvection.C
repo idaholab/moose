@@ -11,10 +11,15 @@
 
 registerADMooseObject("MooseTestApp", ADDGConvection);
 
-defineADValidParams(ADDGConvection,
-                    ADDGKernel,
-                    params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
-                    params.addClassDescription("DG upwinding for the convection"););
+template <ComputeStage compute_stage>
+InputParameters
+ADDGConvection<compute_stage>::validParams()
+{
+  InputParameters params = ADDGKernel<compute_stage>::validParams();
+  params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
+  params.addClassDescription("DG upwinding for the convection");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDGConvection<compute_stage>::ADDGConvection(const InputParameters & parameters)

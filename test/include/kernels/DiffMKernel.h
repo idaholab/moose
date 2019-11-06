@@ -12,15 +12,11 @@
 #include "Kernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class DiffMKernel;
-
-template <>
-InputParameters validParams<DiffMKernel>();
-
 class DiffMKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DiffMKernel(const InputParameters & parameters);
 
 protected:

@@ -18,11 +18,10 @@
 
 registerMooseAction("MooseTestApp", ConvDiffMetaAction, "meta_action");
 
-template <>
 InputParameters
-validParams<ConvDiffMetaAction>()
+ConvDiffMetaAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "variables", "The names of the convection and diffusion variables in the simulation");
 

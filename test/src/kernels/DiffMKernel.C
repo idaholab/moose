@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DiffMKernel);
 
-template <>
 InputParameters
-validParams<DiffMKernel>()
+DiffMKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "mat_prop", "the name of the material property we are going to use");
   params.addParam<Real>("offset", 4.0, "Offset on residual evaluation");

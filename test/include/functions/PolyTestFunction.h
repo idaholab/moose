@@ -11,14 +11,11 @@
 
 #include "Function.h"
 
-class PolyTestFunction;
-
-template <>
-InputParameters validParams<PolyTestFunction>();
-
 class PolyTestFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   PolyTestFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

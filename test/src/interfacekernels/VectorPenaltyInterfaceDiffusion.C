@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VectorPenaltyInterfaceDiffusion);
 
-template <>
 InputParameters
-validParams<VectorPenaltyInterfaceDiffusion>()
+VectorPenaltyInterfaceDiffusion::validParams()
 {
-  InputParameters params = validParams<VectorInterfaceKernel>();
+  InputParameters params = VectorInterfaceKernel::validParams();
   params.addClassDescription("A test VectorInterfaceKernel that imposes the condition: $\\vec{u} - "
                              "\\vec{v} = 0$ across an interface.");
   params.addRequiredParam<Real>(

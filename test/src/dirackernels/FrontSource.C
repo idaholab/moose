@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", FrontSource);
 
-template <>
 InputParameters
-validParams<FrontSource>()
+FrontSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
 
   params.addParam<Real>("value", 1.0, "The value of the strength of the point source.");
   params.addRequiredParam<UserObjectName>(

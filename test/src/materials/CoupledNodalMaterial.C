@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledNodalMaterial);
 
-template <>
 InputParameters
-validParams<CoupledNodalMaterial>()
+CoupledNodalMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("coupled", "Coupled value");
   MooseEnum lag("CURRENT OLD OLDER", "CURRENT", false);
   params.addParam<MooseEnum>("lag", lag, "Determine the time level of the coupled value");

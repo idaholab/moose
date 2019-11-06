@@ -11,12 +11,6 @@
 
 #include "EigenKernel.h"
 
-// Forward Declarations
-class PMassEigenKernel;
-
-template <>
-InputParameters validParams<PMassEigenKernel>();
-
 /**
  * This kernel implements (v, |u|^(p-2) u)/k, where u is the variable, v is the test function
  * and k is the eigenvalue. When p=2, this kernel is equivalent with MassEigenKernel.
@@ -25,6 +19,8 @@ InputParameters validParams<PMassEigenKernel>();
 class PMassEigenKernel : public EigenKernel
 {
 public:
+  static InputParameters validParams();
+
   PMassEigenKernel(const InputParameters & parameters);
 
 protected:
@@ -33,4 +29,3 @@ protected:
 
   Real _p;
 };
-

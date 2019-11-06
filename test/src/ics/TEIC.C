@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TEIC);
 
-template <>
 InputParameters
-validParams<TEIC>()
+TEIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addParam<double>("t_jump", 1.0, "Time when the jump occurs");
   params.addParam<double>("slope", 1.0, "How steep the jump is");
   return params;

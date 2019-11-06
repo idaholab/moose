@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RandomHitUserObject);
 
-template <>
 InputParameters
-validParams<RandomHitUserObject>()
+RandomHitUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<unsigned int>("num_hits", "The number of 'hits' every timestep");
   params.addParam<unsigned int>("seed", 1, "The seed for the random number generator");
   return params;

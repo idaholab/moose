@@ -11,14 +11,11 @@
 
 #include "Function.h"
 
-class ClampTestFunction;
-
-template <>
-InputParameters validParams<ClampTestFunction>();
-
 class ClampTestFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   ClampTestFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

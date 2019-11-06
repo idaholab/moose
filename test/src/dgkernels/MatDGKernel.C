@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", MatDGKernel);
 
-template <>
 InputParameters
-validParams<MatDGKernel>()
+MatDGKernel::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "This is being tested.");
   return params;
 }

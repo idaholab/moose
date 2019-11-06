@@ -18,11 +18,10 @@
 
 #include "MooseTestApp.h"
 
-template <>
 InputParameters
-validParams<MooseTestApp>()
+MooseTestApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   /* MooseTestApp is special because it will have its own
    * binary and we want the default to allow test objects.
    */

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoefDiffusion);
 
-template <>
 InputParameters
-validParams<CoefDiffusion>()
+CoefDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   params.addPrivateParam<Real>("_test_private_param", 12345);
   params.addParam<Real>("non_controllable", "A parameter we cannot control.");

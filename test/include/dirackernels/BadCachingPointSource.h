@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class BadCachingPointSource;
-
-template <>
-InputParameters validParams<BadCachingPointSource>();
-
 /**
  * This DiracKernel tries to cache points using the wrong IDs and
  * throws an error.
@@ -25,6 +19,8 @@ InputParameters validParams<BadCachingPointSource>();
 class BadCachingPointSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   BadCachingPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
@@ -36,4 +32,3 @@ public:
    */
   unsigned int _called;
 };
-

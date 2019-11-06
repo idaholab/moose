@@ -12,21 +12,16 @@
 // MOOSE includes
 #include "GeneralUserObject.h"
 
-// Forward Declarations
-class SplitTester;
-
-template <>
-InputParameters validParams<SplitTester>();
-
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class SplitTester : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   SplitTester(const InputParameters & parameters);
 
   virtual void execute() override;
   virtual void initialize() override{};
   virtual void finalize() override{};
 };
-

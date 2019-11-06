@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", RecomputeMaterial);
 
-template <>
 InputParameters
-validParams<RecomputeMaterial>()
+RecomputeMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("f_name",
                                        "The name of the property that holds the value to "
                                        "of the function for which the root is being "

@@ -11,17 +11,14 @@
 
 #include "Material.h"
 
-class SumMaterial;
-
-template <>
-InputParameters validParams<SumMaterial>();
-
 /**
  * Adds two material properties together
  */
 class SumMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   SumMaterial(const InputParameters & parameters);
   virtual ~SumMaterial();
 
@@ -39,4 +36,3 @@ protected:
   Real _val_mp1;
   Real _val_mp2;
 };
-

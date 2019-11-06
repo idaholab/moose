@@ -12,17 +12,14 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-class DerivativeMaterialInterfaceTestClient;
-
-template <>
-InputParameters validParams<DerivativeMaterialInterfaceTestClient>();
-
 /**
  * Test class that provides a few material properties through DerivativeMaterialInterface
  */
 class DerivativeMaterialInterfaceTestClient : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   DerivativeMaterialInterfaceTestClient(const InputParameters & parameters);
 
   virtual void initialSetup();
@@ -34,4 +31,3 @@ protected:
   const MaterialProperty<Real> &_prop0, &_prop1, &_prop2, &_prop3, &_prop4, &_prop5;
   const MaterialProperty<dof_id_type> & _prop6;
 };
-

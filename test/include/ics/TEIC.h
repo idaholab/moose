@@ -16,12 +16,6 @@
 // System includes
 #include <string>
 
-// Forward Declarations
-class TEIC;
-
-template <>
-InputParameters validParams<TEIC>();
-
 /**
  * ConstantIC just returns a constant value.
  */
@@ -33,6 +27,8 @@ public:
    *
    * @param parameters The parameters object holding data for the class to use.
    */
+  static InputParameters validParams();
+
   TEIC(const InputParameters & parameters);
 
   /**
@@ -46,4 +42,3 @@ protected:
   Real _t_jump;
   Real _slope;
 };
-

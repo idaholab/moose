@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "Action.h"
 
-// Forward declerations
-class ApplyCoupledVariablesTestAction;
-
-template <>
-InputParameters validParams<ApplyCoupledVariablesTestAction>();
-
 /**
  * An action for testing InputParameters::applyParameters
  */
@@ -27,6 +21,8 @@ public:
   /**
    * Class constructor
    */
+  static InputParameters validParams();
+
   ApplyCoupledVariablesTestAction(const InputParameters & params);
 
   /**
@@ -39,4 +35,3 @@ public:
    */
   virtual void act();
 };
-

@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class MaterialMultiPointSource;
-
-template <>
-InputParameters validParams<MaterialMultiPointSource>();
-
 /**
  * Similar to the ConstantPointSource, but evaluates a Material
  * property at the point source location instead of using a constant
@@ -26,6 +20,8 @@ InputParameters validParams<MaterialMultiPointSource>();
 class MaterialMultiPointSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   MaterialMultiPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
@@ -36,4 +32,3 @@ protected:
 
   const MaterialProperty<Real> & _value;
 };
-

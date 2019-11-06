@@ -11,15 +11,11 @@
 
 #include "EigenKernel.h"
 
-// Forward Declarations
-class CoupledEigenKernel;
-
-template <>
-InputParameters validParams<CoupledEigenKernel>();
-
 class CoupledEigenKernel : public EigenKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledEigenKernel(const InputParameters & parameters);
 
 protected:
@@ -27,4 +23,3 @@ protected:
 
   const VariableValue & _v;
 };
-

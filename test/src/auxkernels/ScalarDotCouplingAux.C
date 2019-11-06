@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ScalarDotCouplingAux);
 
-template <>
 InputParameters
-validParams<ScalarDotCouplingAux>()
+ScalarDotCouplingAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable");
 
   return params;

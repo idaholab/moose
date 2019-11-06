@@ -11,7 +11,13 @@
 
 registerADMooseObject("MooseTestApp", ADRobinBC);
 
-defineADValidParams(ADRobinBC, ADIntegratedBC, );
+template <ComputeStage compute_stage>
+InputParameters
+ADRobinBC<compute_stage>::validParams()
+{
+  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADRobinBC<compute_stage>::ADRobinBC(const InputParameters & parameters)

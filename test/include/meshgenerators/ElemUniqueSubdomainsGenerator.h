@@ -12,18 +12,14 @@
 // MOOSE includes
 #include "MeshGenerator.h"
 
-// Forward declerations
-class ElemUniqueSubdomainsGenerator;
-
-template <>
-InputParameters validParams<ElemUniqueSubdomainsGenerator>();
-
 /**
  * MeshGenerator for assigning subdomain IDs of all elements
  */
 class ElemUniqueSubdomainsGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   ElemUniqueSubdomainsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

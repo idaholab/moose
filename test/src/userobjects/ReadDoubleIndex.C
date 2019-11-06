@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ReadDoubleIndex);
 
-template <>
 InputParameters
-validParams<ReadDoubleIndex>()
+ReadDoubleIndex::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<std::vector<std::vector<Real>>>("real_di",
                                                           "A double index field of real numbers.");
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(

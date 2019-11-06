@@ -11,14 +11,11 @@
 
 #include "NodalBC.h"
 
-class MMSCoupledDirichletBC;
-
-template <>
-InputParameters validParams<MMSCoupledDirichletBC>();
-
 class MMSCoupledDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   MMSCoupledDirichletBC(const InputParameters & parameters);
   virtual ~MMSCoupledDirichletBC() {}
 
@@ -28,4 +25,3 @@ protected:
   Real _value; // Multiplier on the boundary
   unsigned int _mesh_dimension;
 };
-

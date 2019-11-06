@@ -9,11 +9,10 @@
 
 #include "DeprecatedParamKernel.h"
 
-template <>
 InputParameters
-validParams<DeprecatedParamKernel>()
+DeprecatedParamKernel::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }

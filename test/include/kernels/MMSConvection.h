@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class MMSConvection;
-
-template <>
-InputParameters validParams<MMSConvection>();
-
 class MMSConvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MMSConvection(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
   Real _y;
   Real _z;
 };
-

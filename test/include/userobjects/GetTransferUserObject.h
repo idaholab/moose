@@ -11,18 +11,13 @@
 
 #include "GeneralUserObject.h"
 
-// Forward Declarations
-class GetTransferUserObject;
-
-template <>
-InputParameters validParams<GetTransferUserObject>();
-
 class GetTransferUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GetTransferUserObject(const InputParameters & parameters);
   virtual void execute() override;
   virtual void initialize() override;
   virtual void finalize() override;
 };
-

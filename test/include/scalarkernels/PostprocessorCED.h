@@ -11,11 +11,6 @@
 
 #include "ScalarKernel.h"
 
-class PostprocessorCED;
-
-template <>
-InputParameters validParams<PostprocessorCED>();
-
 /**
  * This Kernel is part of a test [0] that solves the constrained
  * Neumann problem:
@@ -39,6 +34,8 @@ InputParameters validParams<PostprocessorCED>();
 class PostprocessorCED : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   PostprocessorCED(const InputParameters & parameters);
   virtual ~PostprocessorCED();
 
@@ -57,4 +54,3 @@ protected:
   Real _value;
   const PostprocessorValue & _pp_value;
 };
-

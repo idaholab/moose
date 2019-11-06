@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", ArrayCoupledForce);
 
-template <>
 InputParameters
-validParams<ArrayCoupledForce>()
+ArrayCoupledForce::validParams()
 {
-  InputParameters params = validParams<ArrayKernel>();
+  InputParameters params = ArrayKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addRequiredParam<RealEigenVector>(
       "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");

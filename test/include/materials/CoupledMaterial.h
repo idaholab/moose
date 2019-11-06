@@ -11,17 +11,14 @@
 
 #include "Material.h"
 
-class CoupledMaterial;
-
-template <>
-InputParameters validParams<CoupledMaterial>();
-
 /**
  * A material that couples a material property
  */
 class CoupledMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   CoupledMaterial(const InputParameters & parameters);
 
 protected:
@@ -33,4 +30,3 @@ protected:
 
   const MaterialProperty<Real> & _coupled_mat_prop;
 };
-

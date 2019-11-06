@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", TwoRMTester);
 
-template <>
 InputParameters
-validParams<TwoRMTester>()
+TwoRMTester::validParams()
 {
-  InputParameters params = validParams<ElemSideNeighborLayersTester>();
+  InputParameters params = ElemSideNeighborLayersTester::validParams();
 
   // Our base class had called out some relationship managers that we don't want for this object
   params.clearRelationshipManagers();

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ComputingInitialTest);
 
-template <>
 InputParameters
-validParams<ComputingInitialTest>()
+ComputingInitialTest::validParams()
 {
-  return validParams<Material>();
+  return Material::validParams();
 }
 
 ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters)

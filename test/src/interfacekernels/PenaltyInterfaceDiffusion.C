@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PenaltyInterfaceDiffusion);
 
-template <>
 InputParameters
-validParams<PenaltyInterfaceDiffusion>()
+PenaltyInterfaceDiffusion::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<Real>(
       "penalty", "The penalty that penalizes jump between master and neighbor variables.");
   params.addParam<MaterialPropertyName>(

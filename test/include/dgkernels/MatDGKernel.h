@@ -11,18 +11,14 @@
 
 #include "DGKernel.h"
 
-// Forward Declarations
-class MatDGKernel;
-
-template <>
-InputParameters validParams<MatDGKernel>();
-
 /**
  * This is for testing errors, it does nothing.
  */
 class MatDGKernel : public DGKernel
 {
 public:
+  static InputParameters validParams();
+
   MatDGKernel(const InputParameters & parameters);
 
 protected:
@@ -35,4 +31,3 @@ protected:
 
   const MaterialProperty<Real> & _value;
 };
-

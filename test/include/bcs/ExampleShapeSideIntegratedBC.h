@@ -16,6 +16,8 @@
 class ExampleShapeSideIntegratedBC : public NonlocalIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ExampleShapeSideIntegratedBC(const InputParameters & parameters);
 
 protected:
@@ -39,7 +41,3 @@ protected:
   const std::vector<dof_id_type> & _v_dofs;
   Real _Vb;
 };
-
-template <>
-InputParameters validParams<ExampleShapeSideIntegratedBC>();
-

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ZeroIC);
 
-template <>
 InputParameters
-validParams<ZeroIC>()
+ZeroIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   return params;
 }
 

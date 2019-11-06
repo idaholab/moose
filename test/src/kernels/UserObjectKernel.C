@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", UserObjectKernel);
 
-template <>
 InputParameters
-validParams<UserObjectKernel>()
+UserObjectKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<UserObjectName>("user_object", "The name of user data object to use.");
   return params;
 }

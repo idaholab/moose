@@ -10,13 +10,6 @@
 #pragma once
 
 #include "InterfaceMaterial.h"
-// #include "MaterialProperty.h"
-
-// Forward Declarations
-class InterfaceValueMaterial;
-
-template <>
-InputParameters validParams<InterfaceValueMaterial>();
 
 /**
  * Interface material calculates a variable's jump value across an interface
@@ -24,6 +17,8 @@ InputParameters validParams<InterfaceValueMaterial>();
 class InterfaceValueMaterial : public InterfaceMaterial
 {
 public:
+  static InputParameters validParams();
+
   InterfaceValueMaterial(const InputParameters & parameters);
 
 protected:

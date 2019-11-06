@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class BadAddKernelAction;
-
-template <>
-InputParameters validParams<BadAddKernelAction>();
-
 /**
  * This class is for testing an error condition. It is registered
  * to add kernels but is calling the wrong method on FEProblemBase
@@ -24,8 +19,9 @@ InputParameters validParams<BadAddKernelAction>();
 class BadAddKernelAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   BadAddKernelAction(InputParameters params);
 
   virtual void act();
 };
-

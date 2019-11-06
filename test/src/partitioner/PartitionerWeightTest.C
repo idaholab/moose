@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", PartitionerWeightTest);
 
-template <>
 InputParameters
-validParams<PartitionerWeightTest>()
+PartitionerWeightTest::validParams()
 {
-  InputParameters params = validParams<PetscExternalPartitioner>();
+  InputParameters params = PetscExternalPartitioner::validParams();
 
   params.addClassDescription("Partition mesh using the weighted graph");
 

@@ -11,14 +11,11 @@
 
 #include "VectorIntegratedBC.h"
 
-class VectorCurlBC;
-
-template <>
-InputParameters validParams<VectorCurlBC>();
-
 class VectorCurlBC : public VectorIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   VectorCurlBC(const InputParameters & parameters);
 
 protected:

@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class ExceptionKernel;
-
-template <>
-InputParameters validParams<ExceptionKernel>();
-
 /**
  * Kernel that generates MooseException
  */
 class ExceptionKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ExceptionKernel(const InputParameters & parameters);
 
 protected:

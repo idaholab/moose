@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TestCSVReader);
 
-template <>
 InputParameters
-validParams<TestCSVReader>()
+TestCSVReader::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>("vectorpostprocessor",
                                                    "The vector postprocessor to examine.");

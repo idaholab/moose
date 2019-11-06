@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", OutputTestMaterial);
 
-template <>
 InputParameters
-validParams<OutputTestMaterial>()
+OutputTestMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<std::string>(
       "real_property_name", "real_property", "The name of the scalar real property");
   params.addParam<std::string>(

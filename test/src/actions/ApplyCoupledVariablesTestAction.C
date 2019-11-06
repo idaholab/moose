@@ -14,11 +14,10 @@
 
 registerMooseAction("MooseTestApp", ApplyCoupledVariablesTestAction, "meta_action");
 
-template <>
 InputParameters
-validParams<ApplyCoupledVariablesTestAction>()
+ApplyCoupledVariablesTestAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");

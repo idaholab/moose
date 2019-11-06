@@ -11,14 +11,11 @@
 
 #include "Function.h"
 
-class TimestepSetupFunction;
-
-template <>
-InputParameters validParams<TimestepSetupFunction>();
-
 class TimestepSetupFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   TimestepSetupFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;

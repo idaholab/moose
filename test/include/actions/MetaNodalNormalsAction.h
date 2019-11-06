@@ -14,11 +14,9 @@
 class MetaNodalNormalsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MetaNodalNormalsAction(const InputParameters & params);
 
   virtual void act();
 };
-
-template <>
-InputParameters validParams<MetaNodalNormalsAction>();
-

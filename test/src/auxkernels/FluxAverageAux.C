@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", FluxAverageAux);
 
-template <>
 InputParameters
-validParams<FluxAverageAux>()
+FluxAverageAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addRequiredCoupledVar("coupled", "Coupled variable for calculation of the flux");
   params.addRequiredParam<Real>("diffusivity", "Value to use as the 'diffusivity'");

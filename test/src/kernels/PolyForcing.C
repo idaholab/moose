@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PolyForcing);
 
-template <>
 InputParameters
-validParams<PolyForcing>()
+PolyForcing::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

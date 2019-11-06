@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MaterialDerivativeTestMaterial);
 
-template <>
 InputParameters
-validParams<MaterialDerivativeTestMaterial>()
+MaterialDerivativeTestMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("var1", "First nonlinear variable");
   params.addRequiredCoupledVar("var2", "Second nonlinear variable");
   return params;

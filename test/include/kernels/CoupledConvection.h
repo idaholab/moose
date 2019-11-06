@@ -11,11 +11,6 @@
 
 #include "Kernel.h"
 
-class CoupledConvection;
-
-template <>
-InputParameters validParams<CoupledConvection>();
-
 /**
  * Define the Kernel for a convection operator that looks like:
  *
@@ -25,6 +20,8 @@ InputParameters validParams<CoupledConvection>();
 class CoupledConvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledConvection(const InputParameters & parameters);
 
 protected:
@@ -34,4 +31,3 @@ protected:
 private:
   const VariableGradient & _velocity_vector;
 };
-

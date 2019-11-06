@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", JvarMapTest);
 
-template <>
 InputParameters
-validParams<JvarMapTest>()
+JvarMapTest::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("v0", "First variable vector");
   params.addCoupledVar("v1", "Second variable vector");
   return params;

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MMSCoupledDirichletBC);
 
-template <>
 InputParameters
-validParams<MMSCoupledDirichletBC>()
+MMSCoupledDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
 
   return params;
