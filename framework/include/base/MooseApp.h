@@ -61,6 +61,8 @@ InputParameters validParams<MooseApp>();
 class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
+  static InputParameters validParams();
+
   virtual ~MooseApp();
 
   TheWarehouse & theWarehouse() { return *_the_warehouse; }
