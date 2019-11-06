@@ -25,6 +25,8 @@ InputParameters validParams<VectorMemoryUsage>();
 class VectorMemoryUsage : public GeneralVectorPostprocessor, public MemoryUsageReporter
 {
 public:
+  static InputParameters validParams();
+
   VectorMemoryUsage(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

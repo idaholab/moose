@@ -21,6 +21,8 @@ InputParameters validParams<Eigenvalues>();
 class Eigenvalues : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   Eigenvalues(const InputParameters & parameters);
 
   virtual void initialize() override;

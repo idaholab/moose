@@ -14,11 +14,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(SpatialAverageBase);
+
 InputParameters
-validParams<SpatialAverageBase>()
+SpatialAverageBase::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
   params.addCoupledVar("variable", "Variables to average radially");
   params.addRequiredParam<Real>("radius", "Radius to average out to");

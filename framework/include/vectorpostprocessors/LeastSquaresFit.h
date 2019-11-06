@@ -25,6 +25,8 @@ InputParameters validParams<LeastSquaresFit>();
 class LeastSquaresFit : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters

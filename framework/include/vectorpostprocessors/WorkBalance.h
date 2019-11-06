@@ -24,6 +24,8 @@ InputParameters validParams<WorkBalance>();
 class WorkBalance : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   WorkBalance(const InputParameters & parameters);
 
   enum SystemEnum

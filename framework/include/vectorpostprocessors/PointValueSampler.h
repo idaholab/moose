@@ -21,6 +21,8 @@ InputParameters validParams<PointValueSampler>();
 class PointValueSampler : public PointSamplerBase
 {
 public:
+  static InputParameters validParams();
+
   PointValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;

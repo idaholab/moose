@@ -21,6 +21,8 @@ InputParameters validParams<ElementVectorPostprocessor>();
 class ElementVectorPostprocessor : public ElementUserObject, public VectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementVectorPostprocessor(const InputParameters & parameters);
 
   /**

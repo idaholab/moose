@@ -40,6 +40,8 @@ InputParameters validParams<SamplerBase>();
 class SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   /**
    * @param parameters The parameters for the object
    * @param vpp A pointer to the child object

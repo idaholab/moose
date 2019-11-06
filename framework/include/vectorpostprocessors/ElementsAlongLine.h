@@ -23,6 +23,8 @@ InputParameters validParams<ElementsAlongLine>();
 class ElementsAlongLine : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementsAlongLine(const InputParameters & parameters);
 
   virtual void initialize() override;

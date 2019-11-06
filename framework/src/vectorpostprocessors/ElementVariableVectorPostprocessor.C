@@ -12,11 +12,12 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(ElementVariableVectorPostprocessor);
+
 InputParameters
-validParams<ElementVariableVectorPostprocessor>()
+ElementVariableVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredCoupledVar(
       "variable", "The names of the variables that this VectorPostprocessor operates on");
   return params;

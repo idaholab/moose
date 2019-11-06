@@ -27,6 +27,8 @@ class PointSamplerBase : public GeneralVectorPostprocessor,
                          protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   PointSamplerBase(const InputParameters & parameters);
 
   virtual ~PointSamplerBase() {}

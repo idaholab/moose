@@ -17,15 +17,16 @@
 
 registerMooseObject("MooseApp", ElementValueSampler);
 
-template <>
+defineLegacyParams(ElementValueSampler);
+
 InputParameters
-validParams<ElementValueSampler>()
+ElementValueSampler::validParams()
 {
-  InputParameters params = validParams<ElementVariableVectorPostprocessor>();
+  InputParameters params = ElementVariableVectorPostprocessor::validParams();
 
   params.addClassDescription("Samples values of elemental variable(s).");
 
-  params += validParams<SamplerBase>();
+  params += SamplerBase::validParams();
 
   return params;
 }

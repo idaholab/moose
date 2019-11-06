@@ -23,6 +23,8 @@ InputParameters validParams<ElementValueSampler>();
 class ElementValueSampler : public ElementVariableVectorPostprocessor, protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   ElementValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;

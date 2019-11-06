@@ -24,6 +24,8 @@ InputParameters validParams<NodalValueSampler>();
 class NodalValueSampler : public NodalVariableVectorPostprocessor, protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   NodalValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
