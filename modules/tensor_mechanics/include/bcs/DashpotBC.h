@@ -30,6 +30,8 @@ public:
    */
   DashpotBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -47,4 +49,3 @@ private:
   const VariableValue & _disp_y_dot;
   const VariableValue & _disp_z_dot;
 };
-

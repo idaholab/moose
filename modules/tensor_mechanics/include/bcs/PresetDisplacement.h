@@ -24,6 +24,8 @@ class PresetDisplacement : public PresetNodalBC
 public:
   PresetDisplacement(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpValue();
 

@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", Pressure);
 
-template <>
+defineLegacyParams(Pressure);
+
 InputParameters
-validParams<Pressure>()
+Pressure::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction");
   params.addRequiredParam<unsigned int>("component", "The component for the pressure");
   params.addParam<Real>("factor", 1.0, "The magnitude to use in computing the pressure");

@@ -24,6 +24,8 @@ class CoupledPressureBC : public IntegratedBC
 public:
   CoupledPressureBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -32,4 +34,3 @@ protected:
   /// The values of pressure to be imposed
   const VariableValue & _pressure;
 };
-

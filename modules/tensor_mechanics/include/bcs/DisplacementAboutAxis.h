@@ -31,6 +31,8 @@ class DisplacementAboutAxis : public PresetNodalBC
 public:
   DisplacementAboutAxis(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /// Evaluate the boundary condition at the current quadrature point and timestep.
   virtual Real computeQpValue();

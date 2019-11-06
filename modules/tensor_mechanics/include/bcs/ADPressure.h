@@ -27,6 +27,8 @@ class ADPressure : public ADIntegratedBC<compute_stage>
 public:
   ADPressure(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   ADReal computeQpResidual() override;
 

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", DashpotBC);
 
-template <>
+defineLegacyParams(DashpotBC);
+
 InputParameters
-validParams<DashpotBC>()
+DashpotBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<unsigned int>(
       "component", "The displacement component corresponding the variable this BC acts on.");
   params.addRequiredCoupledVar("disp_x", "Displacement in the x direction");

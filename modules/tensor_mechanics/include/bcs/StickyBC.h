@@ -26,6 +26,8 @@ class StickyBC : public NodalBC
 public:
   StickyBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual bool shouldApply() override;
   virtual Real computeQpResidual() override;
@@ -37,4 +39,3 @@ protected:
   /// The maximum bound
   const Real _max_value;
 };
-

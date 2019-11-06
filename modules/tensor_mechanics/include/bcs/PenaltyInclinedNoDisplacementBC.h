@@ -25,6 +25,8 @@ class PenaltyInclinedNoDisplacementBC : public IntegratedBC
 public:
   PenaltyInclinedNoDisplacementBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -40,4 +42,3 @@ protected:
 private:
   Real _penalty;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", CoupledPressureBC);
 
-template <>
+defineLegacyParams(CoupledPressureBC);
+
 InputParameters
-validParams<CoupledPressureBC>()
+CoupledPressureBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Applies a pressure from a variable on a given boundary in a given direction");
   params.addRequiredRangeCheckedParam<unsigned int>(

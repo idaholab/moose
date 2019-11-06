@@ -25,6 +25,8 @@ class Pressure : public IntegratedBC
 public:
   Pressure(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
 

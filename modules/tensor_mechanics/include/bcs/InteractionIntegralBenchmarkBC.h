@@ -30,6 +30,8 @@ class InteractionIntegralBenchmarkBC : public PresetNodalBC
 public:
   InteractionIntegralBenchmarkBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Evaluate the function at the current quadrature point and timestep.

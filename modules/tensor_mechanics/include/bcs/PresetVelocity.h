@@ -16,6 +16,8 @@ class PresetVelocity : public PresetNodalBC
 public:
   PresetVelocity(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpValue();
 
