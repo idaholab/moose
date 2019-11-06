@@ -12,11 +12,12 @@
 
 registerMooseAction("TensorMechanicsApp", CommonTensorMechanicsAction, "meta_action");
 
-template <>
+defineLegacyParams(CommonTensorMechanicsAction);
+
 InputParameters
-validParams<CommonTensorMechanicsAction>()
+CommonTensorMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsActionBase>();
+  InputParameters params = TensorMechanicsActionBase::validParams();
   return params;
 }
 

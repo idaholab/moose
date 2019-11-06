@@ -21,6 +21,8 @@ class TensorMechanicsAction : public TensorMechanicsActionBase
 public:
   TensorMechanicsAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act();
 
 protected:

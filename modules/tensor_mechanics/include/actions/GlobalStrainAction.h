@@ -21,6 +21,8 @@ class GlobalStrainAction : public Action
 public:
   GlobalStrainAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   void act() override;
 
 protected:

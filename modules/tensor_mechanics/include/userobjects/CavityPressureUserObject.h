@@ -16,6 +16,8 @@ class CavityPressureUserObject : public GeneralUserObject
 public:
   CavityPressureUserObject(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
   virtual void initialize() override;
   virtual void finalize() override {}

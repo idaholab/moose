@@ -32,11 +32,12 @@ registerMooseAction("TensorMechanicsApp", LineElementAction, "add_nodal_kernel")
 
 registerMooseAction("TensorMechanicsApp", LineElementAction, "add_material");
 
-template <>
+defineLegacyParams(LineElementAction);
+
 InputParameters
-validParams<LineElementAction>()
+LineElementAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Sets up variables, stress divergence kernels and materials required "
                              "for a static analysis with beam or truss elements. Also sets up aux "
                              "variables, aux kernels, and consistent or nodal inertia kernels for "

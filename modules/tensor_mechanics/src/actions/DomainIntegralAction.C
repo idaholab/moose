@@ -27,11 +27,12 @@ registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_postprocess
 
 registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_material");
 
-template <>
+defineLegacyParams(DomainIntegralAction);
+
 InputParameters
-validParams<DomainIntegralAction>()
+DomainIntegralAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   addCrackFrontDefinitionParams(params);
   MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII "
                               "InteractionIntegralKIII InteractionIntegralT");

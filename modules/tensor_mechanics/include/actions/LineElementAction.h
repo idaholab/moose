@@ -21,6 +21,8 @@ class LineElementAction : public Action
 public:
   LineElementAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act();
 
   /// Add parameters required for a beam element
@@ -156,4 +158,3 @@ protected:
   /// Set to true if line element is a truss
   bool _truss;
 };
-

@@ -33,11 +33,12 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
         {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
 
-template <>
+defineLegacyParams(TensorMechanicsActionBase);
+
 InputParameters
-validParams<TensorMechanicsActionBase>()
+TensorMechanicsActionBase::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");

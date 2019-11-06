@@ -20,11 +20,12 @@ registerMooseAction("TensorMechanicsApp",
 
 registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
 
-template <>
+defineLegacyParams(DynamicTensorMechanicsAction);
+
 InputParameters
-validParams<DynamicTensorMechanicsAction>()
+DynamicTensorMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsAction>();
+  InputParameters params = TensorMechanicsAction::validParams();
   params.addClassDescription("Set up dynamic stress divergence kernels");
   params.addParam<MaterialPropertyName>("zeta",
                                         0.0,

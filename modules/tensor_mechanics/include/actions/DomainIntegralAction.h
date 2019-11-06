@@ -26,6 +26,8 @@ class DomainIntegralAction : public Action
 public:
   DomainIntegralAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   ~DomainIntegralAction();
 
   virtual void act();
@@ -90,4 +92,3 @@ protected:
   bool _solid_mechanics;
   bool _incremental;
 };
-

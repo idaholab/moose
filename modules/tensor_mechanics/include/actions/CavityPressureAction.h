@@ -21,6 +21,8 @@ class CavityPressureAction : public Action
 public:
   CavityPressureAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
   /// Flag to use automatic differentiation where possible

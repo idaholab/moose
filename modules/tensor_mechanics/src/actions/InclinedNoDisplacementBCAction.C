@@ -14,11 +14,12 @@
 
 registerMooseAction("TensorMechanicsApp", InclinedNoDisplacementBCAction, "add_bc");
 
-template <>
+defineLegacyParams(InclinedNoDisplacementBCAction);
+
 InputParameters
-validParams<InclinedNoDisplacementBCAction>()
+InclinedNoDisplacementBCAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up inclined no displacement boundary conditions");
 
   params.addRequiredParam<std::vector<BoundaryName>>(

@@ -21,6 +21,7 @@ class PoroMechanicsAction : public TensorMechanicsAction
 public:
   PoroMechanicsAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act();
 };
-

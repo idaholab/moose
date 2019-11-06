@@ -16,6 +16,8 @@ class InclinedNoDisplacementBCAction : public Action
 public:
   InclinedNoDisplacementBCAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:
@@ -31,4 +33,3 @@ protected:
 
 template <>
 InputParameters validParams<InclinedNoDisplacementBCAction>();
-

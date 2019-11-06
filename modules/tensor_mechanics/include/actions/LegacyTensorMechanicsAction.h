@@ -21,6 +21,7 @@ class LegacyTensorMechanicsAction : public TensorMechanicsAction
 public:
   LegacyTensorMechanicsAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act();
 };
-

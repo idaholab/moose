@@ -16,6 +16,8 @@ class CavityPressureUOAction : public Action
 public:
   CavityPressureUOAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act();
 };
 

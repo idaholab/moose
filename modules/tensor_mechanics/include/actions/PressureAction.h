@@ -16,6 +16,8 @@ class PressureAction : public Action
 public:
   PressureAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:
@@ -28,4 +30,3 @@ protected:
 
 template <>
 InputParameters validParams<PressureAction>();
-

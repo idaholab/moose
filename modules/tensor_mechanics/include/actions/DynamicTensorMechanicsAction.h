@@ -21,7 +21,8 @@ class DynamicTensorMechanicsAction : public TensorMechanicsAction
 public:
   DynamicTensorMechanicsAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
 protected:
   virtual std::string getKernelType();
 };
-

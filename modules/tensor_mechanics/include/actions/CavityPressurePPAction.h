@@ -16,6 +16,8 @@ class CavityPressurePPAction : public Action
 public:
   CavityPressurePPAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act();
 };
 

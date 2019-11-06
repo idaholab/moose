@@ -21,6 +21,8 @@ class GeneralizedPlaneStrainAction : public Action
 public:
   GeneralizedPlaneStrainAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   void act() override;
 
 protected:
