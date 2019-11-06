@@ -13,7 +13,7 @@ In case of linear elastic material, the axial stress $\sigma_a$ is computed as
 \begin{equation}
 \sigma_a = E \frac{\Delta l}{l_0} \, .
 \end{equation}
-Here, the nonlinear behavior of the truss is implemented using a simple J2 plasticity model with linear hardening. The strain increment is obtained from the total stretch update
+Here, the nonlinear behavior of the truss is implemented using a simple J2 plasticity model that can use either simple linear hardening or a user-defined function to define the hardening behavior. The strain increment is obtained from the total stretch update
 \begin{equation}
 \Delta \varepsilon = \varepsilon  - \varepsilon_{old} \, .
 \end{equation}
@@ -24,15 +24,16 @@ The trial stress is estimated as
 
 The yield condition is determined as
 \begin{equation}
-f = \tilde \sigma^{tr} - E \Delta \varepsilon^p - r -\sigma_y = 0 \, ,
+f = |\tilde \sigma^{tr}| - E \Delta \varepsilon^p - r -\sigma_y = 0 \, ,
 \end{equation}
-where $E$ is the Young's modulus, $r$ is the linear hardening function defined as $r=h \varepsilon^p$ with $h$ being the hardening constant, and $\sigma_y$ is the yield stress. When the trial stress is outside of the yield profile the stresses are brought down using the iterative Newton method. The hardening variable at the beginning of the iterative process is obtained as
+where $E$ is the Young's modulus, $r$ is the hardening function and $\sigma_y$ is the yield stress. When the trial stress is outside of the yield envelop the stresses are brought down using the iterative Newton method.
+In the case of linear hardening, the hardening function is defined as $r=h |\varepsilon^p|$ with $h$ being the hardening constant. In this case, the hardening variable at the beginning of the iterative process is obtained as
 \begin{equation}
 r^{(k)} = r_{old} + h  (\Delta \varepsilon^p)^{(k)} \, .
 \end{equation}
 The plastic strain increment is computed as
 \begin{equation}
-d\Delta \varepsilon^p = \frac{f}{\frac{df}{d\Delta \varepsilon^p}} = \frac{(\tilde \sigma^{tr} - E (\Delta \varepsilon^p)^{(k)} - r^k -\sigma_y)}{E + h} = 0 \, .
+d\Delta \varepsilon^p = \frac{f}{\frac{df}{d\Delta \varepsilon^p}} = \frac{(|\tilde \sigma^{tr}| - E (\Delta \varepsilon^p)^{(k)} - r^k -\sigma_y)}{E + h} = 0 \, .
 \end{equation}
 The plastic strain for the next iteration is updated
 \begin{equation}

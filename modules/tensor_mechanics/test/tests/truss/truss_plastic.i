@@ -35,6 +35,14 @@
   [../]
 []
 
+[Functions]
+  [./hf]
+    type = PiecewiseLinear
+    x = '0    0.0001  0.0003  0.0023'
+    y = '50e6 52e6    54e6    56e6'
+  [../]
+[]
+
 [BCs]
   [./fixx1]
     type = DirichletBC
@@ -114,7 +122,6 @@
   [./truss]
     type = PlasticTruss
     youngs_modulus = 2.0e11
-    hardening_constant = 1e7
     yield_stress = 500e5
     outputs = exodus
   [../]

@@ -33,7 +33,6 @@ protected:
   Real _yield_stress;
   const Real _hardening_constant;
   const Function * _hardening_function;
-  Real _hardening_slope;
 
   /// convergence tolerance
   Real _absolute_tolerance;
@@ -42,9 +41,7 @@ protected:
   const MaterialProperty<Real> & _total_stretch_old;
   MaterialProperty<Real> & _plastic_strain;
   const MaterialProperty<Real> & _plastic_strain_old;
-  const MaterialProperty<Real> & _elastic_strain_old;
   const MaterialProperty<Real> & _stress_old;
-  MaterialProperty<Real> & _strain_increment;
 
   MaterialProperty<Real> & _hardening_variable;
   const MaterialProperty<Real> & _hardening_variable_old;
