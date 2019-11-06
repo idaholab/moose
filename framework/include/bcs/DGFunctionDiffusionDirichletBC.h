@@ -34,9 +34,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

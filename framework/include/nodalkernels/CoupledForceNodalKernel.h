@@ -23,9 +23,9 @@ InputParameters validParams<CoupledForceNodalKernel>();
 class CoupledForceNodalKernel : public NodalKernel
 {
 public:
-  CoupledForceNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CoupledForceNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

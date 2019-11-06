@@ -24,9 +24,9 @@ template <ComputeStage compute_stage>
 class ADPresetBC : public ADPresetNodalBC<compute_stage>
 {
 public:
-  ADPresetBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADPresetBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpValue() override;

@@ -24,9 +24,9 @@ InputParameters validParams<AddRelationshipManager>();
 class AddRelationshipManager : public Action
 {
 public:
-  AddRelationshipManager(InputParameters params);
-
   static InputParameters validParams();
+
+  AddRelationshipManager(InputParameters params);
 
   virtual void act() override;
 };

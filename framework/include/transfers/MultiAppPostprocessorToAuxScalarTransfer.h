@@ -24,9 +24,9 @@ InputParameters validParams<MultiAppPostprocessorToAuxScalarTransfer>();
 class MultiAppPostprocessorToAuxScalarTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
 
   /**
    * Execute the transfer

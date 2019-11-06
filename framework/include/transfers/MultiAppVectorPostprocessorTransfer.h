@@ -25,9 +25,9 @@ InputParameters validParams<MultiAppVectorPostprocessorTransfer>();
 class MultiAppVectorPostprocessorTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppVectorPostprocessorTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppVectorPostprocessorTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

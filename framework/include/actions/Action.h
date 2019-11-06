@@ -42,9 +42,9 @@ class Action : public ConsoleStreamInterface,
                public libMesh::ParallelObject
 {
 public:
-  Action(InputParameters parameters);
-
   static InputParameters validParams();
+
+  Action(InputParameters parameters);
 
   virtual ~Action() = default;
 

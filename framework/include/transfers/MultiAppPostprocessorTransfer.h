@@ -23,9 +23,9 @@ InputParameters validParams<MultiAppPostprocessorTransfer>();
 class MultiAppPostprocessorTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppPostprocessorTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

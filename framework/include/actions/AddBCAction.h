@@ -19,9 +19,9 @@ InputParameters validParams<AddBCAction>();
 class AddBCAction : public MooseObjectAction
 {
 public:
-  AddBCAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddBCAction(InputParameters params);
 
   virtual void act() override;
 };

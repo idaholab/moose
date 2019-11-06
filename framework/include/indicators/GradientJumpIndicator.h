@@ -19,9 +19,9 @@ InputParameters validParams<GradientJumpIndicator>();
 class GradientJumpIndicator : public InternalSideIndicator
 {
 public:
-  GradientJumpIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GradientJumpIndicator(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;

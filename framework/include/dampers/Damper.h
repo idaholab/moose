@@ -32,9 +32,9 @@ class Damper : public MooseObject,
                public MeshChangedInterface
 {
 public:
-  Damper(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Damper(const InputParameters & parameters);
 
   /**
    * Check whether damping is below the user-specified minimum value,

@@ -20,9 +20,9 @@ InputParameters validParams<CartesianMeshGenerator>();
 class CartesianMeshGenerator : public MeshGenerator
 {
 public:
-  CartesianMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CartesianMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

@@ -24,9 +24,9 @@ InputParameters validParams<DirichletBC>();
 class DirichletBC : public NodalBC
 {
 public:
-  DirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

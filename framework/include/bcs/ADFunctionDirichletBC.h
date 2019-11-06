@@ -25,9 +25,9 @@ template <ComputeStage compute_stage>
 class ADFunctionDirichletBC : public ADNodalBC<compute_stage>
 {
 public:
-  ADFunctionDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

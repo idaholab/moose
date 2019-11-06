@@ -33,9 +33,9 @@ InputParameters validParams<Predictor>();
 class Predictor : public MooseObject, public Restartable
 {
 public:
-  Predictor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Predictor(const InputParameters & parameters);
   virtual ~Predictor();
 
   virtual int order() { return 0; }

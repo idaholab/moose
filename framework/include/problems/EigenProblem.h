@@ -26,9 +26,9 @@ InputParameters validParams<EigenProblem>();
 class EigenProblem : public FEProblemBase
 {
 public:
-  EigenProblem(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  EigenProblem(const InputParameters & parameters);
 
   virtual void solve() override;
 

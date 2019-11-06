@@ -19,9 +19,9 @@ InputParameters validParams<AddUserObjectAction>();
 class AddUserObjectAction : public MooseObjectAction
 {
 public:
-  AddUserObjectAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddUserObjectAction(InputParameters params);
 
   virtual void act() override;
 };

@@ -27,9 +27,9 @@ public:
   /**
    * Class constructor
    */
-  AddExternalAuxVariableAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddExternalAuxVariableAction(InputParameters params);
 
   virtual void act() override;
 };

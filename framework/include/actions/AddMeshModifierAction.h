@@ -20,9 +20,9 @@ InputParameters validParams<AddMeshModifierAction>();
 class AddMeshModifierAction : public MooseObjectAction
 {
 public:
-  AddMeshModifierAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddMeshModifierAction(InputParameters params);
 
   virtual void act() override;
 };

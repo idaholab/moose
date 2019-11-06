@@ -30,9 +30,9 @@ InputParameters validParams<ElementPointNeighborLayers>();
 class ElementPointNeighborLayers : public FunctorRelationshipManager
 {
 public:
-  ElementPointNeighborLayers(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ElementPointNeighborLayers(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;

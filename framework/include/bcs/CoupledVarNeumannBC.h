@@ -23,9 +23,9 @@ InputParameters validParams<CoupledVarNeumannBC>();
 class CoupledVarNeumannBC : public IntegratedBC
 {
 public:
-  CoupledVarNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CoupledVarNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

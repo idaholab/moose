@@ -59,9 +59,9 @@ public:
    *
    * @see ImageFunction
    */
-  ImageSampler(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ImageSampler(const InputParameters & parameters);
 
   /**
    * Return the pixel value for the given point

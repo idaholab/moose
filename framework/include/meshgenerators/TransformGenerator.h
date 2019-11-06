@@ -21,9 +21,9 @@ InputParameters validParams<TransformGenerator>();
 class TransformGenerator : public MeshGenerator
 {
 public:
-  TransformGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TransformGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

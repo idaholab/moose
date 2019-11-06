@@ -31,9 +31,9 @@ InputParameters validParams<BoundingBoxIC>();
 class BoundingBoxIC : public InitialCondition
 {
 public:
-  BoundingBoxIC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BoundingBoxIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
 

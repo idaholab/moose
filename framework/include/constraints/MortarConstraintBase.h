@@ -47,9 +47,9 @@ class MortarConstraintBase : public Constraint,
                              public MooseVariableInterface<Real>
 {
 public:
-  MortarConstraintBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MortarConstraintBase(const InputParameters & parameters);
 
   /**
    * Method for computing the residual

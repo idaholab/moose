@@ -26,9 +26,9 @@ InputParameters validParams<ConstantDamper>();
 class ConstantDamper : public GeneralDamper
 {
 public:
-  ConstantDamper(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConstantDamper(const InputParameters & parameters);
 
 protected:
   /**

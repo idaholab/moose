@@ -32,9 +32,9 @@ public:
    * Constructor
    * @param parameters The input parameters for the function
    */
-  Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;
 

@@ -20,9 +20,9 @@ InputParameters validParams<PenaltyDirichletNodalKernel>();
 class PenaltyDirichletNodalKernel : public NodalKernel
 {
 public:
-  PenaltyDirichletNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PenaltyDirichletNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

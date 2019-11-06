@@ -38,9 +38,9 @@ InputParameters validParams<DisplacedProblem>();
 class DisplacedProblem : public SubProblem
 {
 public:
-  DisplacedProblem(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DisplacedProblem(const InputParameters & parameters);
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }

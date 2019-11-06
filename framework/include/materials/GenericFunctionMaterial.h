@@ -28,9 +28,9 @@ InputParameters validParams<GenericFunctionMaterial>();
 class GenericFunctionMaterial : public Material
 {
 public:
-  GenericFunctionMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GenericFunctionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

@@ -19,9 +19,9 @@ InputParameters validParams<DynamicObjectRegistrationAction>();
 class DynamicObjectRegistrationAction : public Action
 {
 public:
-  DynamicObjectRegistrationAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  DynamicObjectRegistrationAction(InputParameters parameters);
 
   virtual void act() override;
 };

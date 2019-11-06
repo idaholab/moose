@@ -32,9 +32,9 @@ public:
    * Class constructor
    * @param params Input parameters for the action
    */
-  SetupPostprocessorDataAction(InputParameters params);
-
   static InputParameters validParams();
+
+  SetupPostprocessorDataAction(InputParameters params);
 
   virtual void act() override;
 };

@@ -26,9 +26,9 @@ public:
   /**
    * Constructor (Comment here for @aeslaughter :-)
    */
-  TimeDerivativeNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TimeDerivativeNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

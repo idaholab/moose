@@ -29,9 +29,9 @@ public:
   /** Constructor
    * @param parameters The input parameters for the function
    */
-  SolutionFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SolutionFunction(const InputParameters & parameters);
 
   /**
    * Extract a value from the solution

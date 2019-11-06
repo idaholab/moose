@@ -21,9 +21,9 @@ InputParameters validParams<MooseObjectAction>();
 class MooseObjectAction : public Action
 {
 public:
-  MooseObjectAction(InputParameters params);
-
   static InputParameters validParams();
+
+  MooseObjectAction(InputParameters params);
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;

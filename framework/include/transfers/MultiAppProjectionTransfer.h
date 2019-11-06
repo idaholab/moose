@@ -28,9 +28,9 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 class MultiAppProjectionTransfer : public MultiAppFieldTransfer
 {
 public:
-  MultiAppProjectionTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppProjectionTransfer(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

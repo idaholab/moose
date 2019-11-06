@@ -24,9 +24,9 @@ InputParameters validParams<CompositeFunction>();
 class CompositeFunction : public Function, protected FunctionInterface
 {
 public:
-  CompositeFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CompositeFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & pt) const override;
 

@@ -24,9 +24,9 @@ class NodalConstraint : public Constraint,
                         public NeighborMooseVariableInterface<Real>
 {
 public:
-  NodalConstraint(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodalConstraint(const InputParameters & parameters);
 
   /**
    * Get the list of master nodes

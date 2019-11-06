@@ -24,9 +24,9 @@ InputParameters validParams<FunctionGradientNeumannBC>();
 class FunctionGradientNeumannBC : public IntegratedBC
 {
 public:
-  FunctionGradientNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FunctionGradientNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

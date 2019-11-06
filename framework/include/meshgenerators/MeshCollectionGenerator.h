@@ -25,9 +25,9 @@ InputParameters validParams<MeshCollectionGenerator>();
 class MeshCollectionGenerator : public MeshGenerator
 {
 public:
-  MeshCollectionGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MeshCollectionGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

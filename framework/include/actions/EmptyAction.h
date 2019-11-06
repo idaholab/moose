@@ -22,9 +22,9 @@ InputParameters validParams<EmptyAction>();
 class EmptyAction : public Action
 {
 public:
-  EmptyAction(InputParameters params);
-
   static InputParameters validParams();
+
+  EmptyAction(InputParameters params);
 
   virtual void act() override;
 };

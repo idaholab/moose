@@ -21,9 +21,9 @@ InputParameters validParams<SplitMeshAction>();
 class SplitMeshAction : public Action
 {
 public:
-  SplitMeshAction(InputParameters params);
-
   static InputParameters validParams();
+
+  SplitMeshAction(InputParameters params);
 
   virtual void act() override;
 };

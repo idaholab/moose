@@ -23,9 +23,9 @@ InputParameters validParams<MatchedValueBC>();
 class MatchedValueBC : public NodalBC
 {
 public:
-  MatchedValueBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MatchedValueBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

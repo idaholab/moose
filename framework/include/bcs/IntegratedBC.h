@@ -24,9 +24,9 @@ InputParameters validParams<IntegratedBC>();
 class IntegratedBC : public IntegratedBCBase, public MooseVariableInterface<Real>
 {
 public:
-  IntegratedBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  IntegratedBC(const InputParameters & parameters);
 
   virtual MooseVariable & variable() override { return _var; }
 

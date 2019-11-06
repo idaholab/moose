@@ -24,9 +24,9 @@ InputParameters validParams<BicubicSplineFunction>();
 class BicubicSplineFunction : public Function, public FunctionInterface
 {
 public:
-  BicubicSplineFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BicubicSplineFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;
 

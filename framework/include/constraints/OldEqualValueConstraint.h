@@ -23,9 +23,9 @@ InputParameters validParams<OldEqualValueConstraint>();
 class OldEqualValueConstraint : public MortarConstraint
 {
 public:
-  OldEqualValueConstraint(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  OldEqualValueConstraint(const InputParameters & parameters);
 
 protected:
   Real computeQpResidual(Moose::MortarType mortar_type) final;

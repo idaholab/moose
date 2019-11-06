@@ -24,9 +24,9 @@ template <ComputeStage compute_stage>
 class ADNeumannBC : public ADIntegratedBC<compute_stage>
 {
 public:
-  ADNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

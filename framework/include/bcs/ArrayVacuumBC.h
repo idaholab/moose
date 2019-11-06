@@ -19,9 +19,9 @@ InputParameters validParams<ArrayVacuumBC>();
 class ArrayVacuumBC : public ArrayIntegratedBC
 {
 public:
-  ArrayVacuumBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ArrayVacuumBC(const InputParameters & parameters);
 
 protected:
   virtual RealEigenVector computeQpResidual() override;

@@ -23,9 +23,9 @@ InputParameters validParams<FiniteDifferencePreconditioner>();
 class FiniteDifferencePreconditioner : public MoosePreconditioner
 {
 public:
-  FiniteDifferencePreconditioner(const InputParameters & params);
-
   static InputParameters validParams();
+
+  FiniteDifferencePreconditioner(const InputParameters & params);
   MooseEnum & finiteDifferenceType() { return _finite_difference_type; }
 
 private:

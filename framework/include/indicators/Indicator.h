@@ -39,9 +39,9 @@ class Indicator : public MooseObject,
                   public MaterialPropertyInterface
 {
 public:
-  Indicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Indicator(const InputParameters & parameters);
 
   virtual ~Indicator(){};
 

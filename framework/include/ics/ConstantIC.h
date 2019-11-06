@@ -35,9 +35,9 @@ InputParameters validParams<ConstantIC>();
 class ConstantIC : public InitialCondition
 {
 public:
-  ConstantIC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConstantIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
 

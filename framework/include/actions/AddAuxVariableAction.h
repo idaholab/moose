@@ -27,9 +27,9 @@ public:
   /**
    * Class constructor
    */
-  AddAuxVariableAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddAuxVariableAction(InputParameters params);
 
   /**
    * Returns available families for AuxVariables

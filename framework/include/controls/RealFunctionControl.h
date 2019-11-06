@@ -29,9 +29,9 @@ public:
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
-  RealFunctionControl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RealFunctionControl(const InputParameters & parameters);
 
   virtual void execute() override;
 

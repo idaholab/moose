@@ -48,9 +48,9 @@ public:
    * Class constructor
    * @param parameters The input parameters for this control object
    */
-  Control(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Control(const InputParameters & parameters);
 
   /**
    * Class destructor

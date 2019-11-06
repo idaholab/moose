@@ -26,9 +26,9 @@ InputParameters validParams<PiecewiseBase>();
 class PiecewiseBase : public Function
 {
 public:
-  PiecewiseBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PiecewiseBase(const InputParameters & parameters);
 
   virtual void initialSetup();
   virtual Real functionSize() const;

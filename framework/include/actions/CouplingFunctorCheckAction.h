@@ -23,9 +23,9 @@ InputParameters validParams<CouplingFunctorCheckAction>();
 class CouplingFunctorCheckAction : public Action
 {
 public:
-  CouplingFunctorCheckAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  CouplingFunctorCheckAction(InputParameters parameters);
 
 protected:
   void act() override;

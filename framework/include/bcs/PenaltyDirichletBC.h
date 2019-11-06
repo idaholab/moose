@@ -39,9 +39,9 @@ InputParameters validParams<PenaltyDirichletBC>();
 class PenaltyDirichletBC : public IntegratedBC
 {
 public:
-  PenaltyDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PenaltyDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

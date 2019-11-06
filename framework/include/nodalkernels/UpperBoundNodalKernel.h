@@ -23,9 +23,9 @@ InputParameters validParams<UpperBoundNodalKernel>();
 class UpperBoundNodalKernel : public NodalKernel
 {
 public:
-  UpperBoundNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  UpperBoundNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

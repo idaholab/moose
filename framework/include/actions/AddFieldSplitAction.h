@@ -20,9 +20,9 @@ class AddFieldSplitAction : public MooseObjectAction
 {
 public:
   // constructor
-  AddFieldSplitAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddFieldSplitAction(InputParameters params);
   // prepare PETSc options
   void act();
 };

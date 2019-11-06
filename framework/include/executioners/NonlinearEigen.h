@@ -20,9 +20,9 @@ InputParameters validParams<NonlinearEigen>();
 class NonlinearEigen : public EigenExecutionerBase
 {
 public:
-  NonlinearEigen(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NonlinearEigen(const InputParameters & parameters);
 
   virtual void init() override;
 

@@ -29,9 +29,9 @@ InputParameters validParams<FunctionParserUtils>();
 class FunctionParserUtils
 {
 public:
-  FunctionParserUtils(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FunctionParserUtils(const InputParameters & parameters);
 
   /// Shorthand for an autodiff function parser object.
   typedef FunctionParserADBase<Real> ADFunction;

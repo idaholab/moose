@@ -26,9 +26,9 @@ InputParameters validParams<OrientedSubdomainBoundingBoxGenerator>();
 class OrientedSubdomainBoundingBoxGenerator : public MeshGenerator, public OrientedBoxInterface
 {
 public:
-  OrientedSubdomainBoundingBoxGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  OrientedSubdomainBoundingBoxGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

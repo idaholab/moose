@@ -23,9 +23,9 @@ InputParameters validParams<TiledMeshGenerator>();
 class TiledMeshGenerator : public MeshGenerator
 {
 public:
-  TiledMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TiledMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

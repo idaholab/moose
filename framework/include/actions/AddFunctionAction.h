@@ -22,9 +22,9 @@ InputParameters validParams<AddFunctionAction>();
 class AddFunctionAction : public MooseObjectAction
 {
 public:
-  AddFunctionAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddFunctionAction(InputParameters params);
 
   virtual void act() override;
 };

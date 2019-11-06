@@ -37,9 +37,9 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Steady(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Steady(const InputParameters & parameters);
 
   virtual void init() override;
 

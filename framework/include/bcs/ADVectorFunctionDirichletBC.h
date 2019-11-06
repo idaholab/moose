@@ -25,9 +25,9 @@ template <ComputeStage compute_stage>
 class ADVectorFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
 {
 public:
-  ADVectorFunctionDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADVectorFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue computeQpResidual() override;

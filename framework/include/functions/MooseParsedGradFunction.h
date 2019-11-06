@@ -33,9 +33,9 @@ public:
    * Class constructor
    * @param parameters The input parameters
    */
-  MooseParsedGradFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MooseParsedGradFunction(const InputParameters & parameters);
 
   /**
    * Destructor necessary for std::unique_ptr usage

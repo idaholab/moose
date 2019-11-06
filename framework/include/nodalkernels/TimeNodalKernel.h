@@ -27,9 +27,9 @@ public:
   /**
    * Constructor initializes the rate
    */
-  TimeNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TimeNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual void computeResidual() override;
