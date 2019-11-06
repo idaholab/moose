@@ -7,7 +7,7 @@ InputParameters
 validParams<HeatTransferFromExternalAppTemperature1Phase>()
 {
   InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
-  params.addParam<FunctionName>("initial_T_wall", "Initial condition for wall temperature");
+  params.addParam<FunctionName>("initial_T_wall", "Initial condition for wall temperature [K]");
   MooseEnum var_type("nodal elemental", "nodal", false);
   params.addParam<MooseEnum>(
       "var_type", var_type, "The type of wall temperature variable (nodal, elemental).");

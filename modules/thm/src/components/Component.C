@@ -10,7 +10,7 @@ validParams<Component>()
 {
   InputParameters params = validParams<THMObject>();
   params.addParam<RealVectorValue>(
-      "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector");
+      "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector [m/s^2]");
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");

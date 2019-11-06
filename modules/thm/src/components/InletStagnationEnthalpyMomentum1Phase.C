@@ -8,9 +8,9 @@ InputParameters
 validParams<InletStagnationEnthalpyMomentum1Phase>()
 {
   InputParameters params = validParams<FlowBoundary>();
-  params.addRequiredParam<Real>("rhou", "Prescribed momentum");
-  params.addRequiredParam<Real>("H", "Prescribed specific total enthalpy");
-  params.addParam<bool>("reversible", false, "true for reversible, false (default) for pure inlet");
+  params.addRequiredParam<Real>("rhou", "Prescribed momentum density [kg/(m^2-s)]");
+  params.addRequiredParam<Real>("H", "Prescribed specific total enthalpy [J/kg]");
+  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
   params.addClassDescription("Boundary condition with prescribed stagnation enthalpy and momentum "
                              "for 1-phase flow channels.");
   return params;

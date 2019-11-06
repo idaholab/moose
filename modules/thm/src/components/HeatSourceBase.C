@@ -8,10 +8,9 @@ InputParameters
 validParams<HeatSourceBase>()
 {
   InputParameters params = validParams<Component>();
-  params.addRequiredParam<std::string>(
-      "hs", "The name of the heat structure component to put the heat source onto");
+  params.addRequiredParam<std::string>("hs", "Heat structure in which to apply heat source");
   params.addRequiredParam<std::vector<std::string>>(
-      "regions", "The names of the heat structure regions where heat generation is to be applied");
+      "regions", "Heat structure regions where heat generation is to be applied");
   params.addClassDescription("Base class for heat source components");
   return params;
 }

@@ -11,8 +11,7 @@ validParams<GateValve>()
 {
   InputParameters params = validParams<FlowJunction>();
 
-  params.addRequiredParam<Real>("open_area_fraction",
-                                "Fraction of possible flow area that is open");
+  params.addRequiredParam<Real>("open_area_fraction", "Fraction of flow area that is open [-]");
 
   params.addClassDescription("Gate valve component");
 

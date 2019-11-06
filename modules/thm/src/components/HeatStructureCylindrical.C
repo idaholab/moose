@@ -11,7 +11,7 @@ InputParameters
 validParams<HeatStructureCylindrical>()
 {
   InputParameters params = validParams<HeatStructureBase>();
-  params.addParam<Real>("inner_radius", 0., "Inner radius of the heat structure");
+  params.addParam<Real>("inner_radius", 0., "Inner radius of the heat structure [m]");
   params.addClassDescription("Cylindrical heat structure");
   return params;
 }

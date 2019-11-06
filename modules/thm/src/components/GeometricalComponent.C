@@ -8,13 +8,13 @@ validParams<GeometricalComponent>()
 {
   InputParameters params = validParams<Component>();
 
-  params.addRequiredParam<Point>("position", "Origin (start) of the component");
+  params.addRequiredParam<Point>("position", "Origin (start) of the component [m]");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the component");
-  params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
+  params.addParam<Real>("rotation", 0., "Rotation of the component [degrees]");
   params.addRequiredParam<std::vector<Real>>(
-      "length", "The lengths of the subsections of the geometric component along the main axis");
+      "length", "Length of each subsection of the geometric component along the main axis [m]");
   params.addRequiredParam<std::vector<unsigned int>>(
-      "n_elems", "The number of elements in each subsection along the main axis");
+      "n_elems", "Number of elements in each subsection along the main axis");
 
   return params;
 }

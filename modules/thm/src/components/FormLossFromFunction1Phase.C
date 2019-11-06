@@ -8,7 +8,7 @@ validParams<FormLossFromFunction1Phase>()
 {
   InputParameters params = validParams<FormLoss1PhaseBase>();
   params.addRequiredParam<FunctionName>("K_prime",
-                                        "Form loss coefficient per unit length function");
+                                        "Form loss coefficient per unit length function [1/m]");
 
   params.addClassDescription(
       "Prescribe a form loss over a 1-phase flow channel given by a function");

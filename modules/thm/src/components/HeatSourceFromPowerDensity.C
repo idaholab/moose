@@ -10,7 +10,7 @@ InputParameters
 validParams<HeatSourceFromPowerDensity>()
 {
   InputParameters params = validParams<HeatSourceBase>();
-  params.addRequiredParam<VariableName>("power_density", "The name of the power density variable");
+  params.addRequiredParam<VariableName>("power_density", "Power density variable");
   params.addClassDescription("Heat source from power density");
   return params;
 }

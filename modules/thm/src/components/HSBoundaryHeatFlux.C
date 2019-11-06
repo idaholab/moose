@@ -10,7 +10,7 @@ validParams<HSBoundaryHeatFlux>()
 {
   InputParameters params = validParams<HSBoundary>();
 
-  params.addRequiredParam<FunctionName>("q_function", "Heat flux function name");
+  params.addRequiredParam<FunctionName>("q", "Heat flux [W/m^2]");
 
   params.addClassDescription("Applies a specified heat flux to a heat structure boundary");
 
@@ -20,7 +20,7 @@ validParams<HSBoundaryHeatFlux>()
 HSBoundaryHeatFlux::HSBoundaryHeatFlux(const InputParameters & params)
   : HSBoundary(params),
 
-    _q_fn_name(getParam<FunctionName>("q_function"))
+    _q_fn_name(getParam<FunctionName>("q"))
 {
 }
 

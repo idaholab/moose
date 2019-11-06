@@ -7,8 +7,8 @@ InputParameters
 validParams<FormLoss1PhaseBase>()
 {
   InputParameters params = validParams<Component>();
-  params.addRequiredParam<std::string>(
-      "flow_channel", "The name of the flow channel where form loss is will be applied");
+  params.addRequiredParam<std::string>("flow_channel",
+                                       "Flow channel where form loss will be applied");
   params.addClassDescription("Base class for prescribing a form loss over a 1-phase flow channel");
 
   return params;

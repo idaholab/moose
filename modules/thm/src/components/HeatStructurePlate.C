@@ -7,7 +7,7 @@ InputParameters
 validParams<HeatStructurePlate>()
 {
   InputParameters params = validParams<HeatStructureBase>();
-  params.addRequiredParam<Real>("depth", "The dimension of plate fuel in the third direction, m");
+  params.addRequiredParam<Real>("depth", "Dimension of plate fuel in the third direction [m]");
   params.addClassDescription("Plate heat structure");
   return params;
 }
