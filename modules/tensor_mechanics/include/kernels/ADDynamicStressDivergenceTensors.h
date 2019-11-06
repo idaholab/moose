@@ -29,6 +29,8 @@ class ADDynamicStressDivergenceTensors : public ADStressDivergenceTensors<comput
 public:
   ADDynamicStressDivergenceTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   ADReal computeQpResidual();
 

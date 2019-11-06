@@ -30,6 +30,8 @@ class InertialTorque : public TimeKernel
 public:
   InertialTorque(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -88,4 +90,3 @@ private:
   /// Derivative of velocity with respect to displacement
   std::vector<Real> _dvel;
 };
-

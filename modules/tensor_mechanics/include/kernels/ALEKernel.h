@@ -23,6 +23,8 @@ class ALEKernel : public DerivativeMaterialInterface<Kernel>
 public:
   ALEKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
@@ -39,4 +41,3 @@ protected:
   const VariableTestGradient & _grad_test_undisplaced;
   ///@}
 };
-

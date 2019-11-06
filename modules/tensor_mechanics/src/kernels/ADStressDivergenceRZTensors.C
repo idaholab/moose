@@ -15,17 +15,23 @@
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
 
-defineADValidParams(
-    ADStressDivergenceRZTensors,
-    ADStressDivergenceTensors,
-    params.addClassDescription(
-        "Calculate stress divergence for an axisymmetric problem in cylindrical coordinates.");
-    params.addRequiredRangeCheckedParam<unsigned int>(
-        "component",
-        "component < 2",
-        "An integer corresponding to the direction the variable this kernel acts in. (0 "
-        "refers to the radial and 1 to the axial displacement.)");
-    params.set<bool>("use_displaced_mesh") = true;);
+defineADLegacyParams(ADStressDivergenceRZTensors);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADStressDivergenceRZTensors<compute_stage>::validParams()
+{
+  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  params.addClassDescription(
+      "Calculate stress divergence for an axisymmetric problem in cylindrical coordinates.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component < 2",
+      "An integer corresponding to the direction the variable this kernel acts in. (0 "
+      "refers to the radial and 1 to the axial displacement.)");
+  params.set<bool>("use_displaced_mesh") = true;
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADStressDivergenceRZTensors<compute_stage>::ADStressDivergenceRZTensors(

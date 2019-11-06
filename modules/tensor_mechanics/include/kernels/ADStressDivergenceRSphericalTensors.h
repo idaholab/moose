@@ -29,6 +29,8 @@ class ADStressDivergenceRSphericalTensors : public ADStressDivergenceTensors<com
 public:
   ADStressDivergenceRSphericalTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   void initialSetup() override;
 
@@ -37,4 +39,3 @@ protected:
 
   usingStressDivergenceTensorsMembers;
 };
-

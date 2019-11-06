@@ -29,6 +29,8 @@ class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Ke
 public:
   PhaseFieldFractureMechanicsOffDiag(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   Real computeQpResidual() override { return 0.0; }
 
@@ -43,4 +45,3 @@ protected:
   const unsigned int _c_var;
   const MaterialProperty<RankTwoTensor> & _d_stress_dc;
 };
-

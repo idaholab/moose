@@ -29,6 +29,8 @@ class ADStressDivergenceRZTensors : public ADStressDivergenceTensors<compute_sta
 public:
   ADStressDivergenceRZTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   void initialSetup() override;
 
@@ -37,4 +39,3 @@ protected:
 
   usingStressDivergenceTensorsMembers;
 };
-

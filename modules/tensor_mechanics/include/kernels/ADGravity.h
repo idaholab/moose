@@ -22,6 +22,8 @@ class ADGravity : public ADKernelValue<compute_stage>
 public:
   ADGravity(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   ADReal precomputeQpResidual() override;
 
@@ -35,4 +37,3 @@ private:
 
   usingKernelValueMembers;
 };
-

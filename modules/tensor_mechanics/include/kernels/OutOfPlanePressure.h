@@ -30,6 +30,8 @@ class OutOfPlanePressure : public Kernel
 public:
   OutOfPlanePressure(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
 

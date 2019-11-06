@@ -22,6 +22,8 @@ class StressDivergenceTensorsTruss : public Kernel
 public:
   StressDivergenceTensorsTruss(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initialSetup() override;
   virtual void computeResidual() override;
@@ -47,4 +49,3 @@ private:
   const VariableValue & _area;
   const std::vector<RealGradient> * _orientation;
 };
-

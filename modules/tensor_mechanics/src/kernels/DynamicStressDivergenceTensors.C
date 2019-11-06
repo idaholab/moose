@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", DynamicStressDivergenceTensors);
 
-template <>
+defineLegacyParams(DynamicStressDivergenceTensors);
+
 InputParameters
-validParams<DynamicStressDivergenceTensors>()
+DynamicStressDivergenceTensors::validParams()
 {
-  InputParameters params = validParams<StressDivergenceTensors>();
+  InputParameters params = StressDivergenceTensors::validParams();
   params.addClassDescription(
       "Residual due to stress related Rayleigh damping and HHT time integration terms ");
   params.addParam<MaterialPropertyName>("zeta",

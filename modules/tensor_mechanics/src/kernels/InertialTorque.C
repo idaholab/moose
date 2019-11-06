@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", InertialTorque);
 
-template <>
+defineLegacyParams(InertialTorque);
+
 InputParameters
-validParams<InertialTorque>()
+InertialTorque::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addClassDescription("Kernel for inertial torque: density * displacement x acceleration");
   params.set<bool>("use_displaced_mesh") = false;
   params.addRequiredRangeCheckedParam<unsigned int>(

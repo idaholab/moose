@@ -30,6 +30,8 @@ class GeneralizedPlaneStrainOffDiag : public DerivativeMaterialInterface<Kernel>
 public:
   GeneralizedPlaneStrainOffDiag(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   Real computeQpResidual() override { return 0; }
 

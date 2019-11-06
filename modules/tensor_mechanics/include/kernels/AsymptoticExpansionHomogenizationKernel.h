@@ -22,6 +22,8 @@ class AsymptoticExpansionHomogenizationKernel : public Kernel
 public:
   AsymptoticExpansionHomogenizationKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
 

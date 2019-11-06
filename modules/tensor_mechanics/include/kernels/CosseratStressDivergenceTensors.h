@@ -27,6 +27,8 @@ class CosseratStressDivergenceTensors : public StressDivergenceTensors
 public:
   CosseratStressDivergenceTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
@@ -36,4 +38,3 @@ protected:
   /// The MOOSE variable numbers of the Cosserat rotation variables
   std::vector<unsigned int> _wc_var;
 };
-

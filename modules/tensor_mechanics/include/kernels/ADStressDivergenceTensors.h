@@ -40,6 +40,8 @@ class ADStressDivergenceTensors : public ADKernel<compute_stage>
 public:
   ADStressDivergenceTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   void initialSetup() override;
 
@@ -63,4 +65,3 @@ protected:
 
   usingKernelMembers;
 };
-

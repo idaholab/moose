@@ -37,6 +37,8 @@ class MomentBalancing : public Kernel
 public:
   MomentBalancing(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -66,4 +68,3 @@ protected:
   /// the moose variable numbers for the displacements
   std::vector<unsigned int> _disp_var;
 };
-

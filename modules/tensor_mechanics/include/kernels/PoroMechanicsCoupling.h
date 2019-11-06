@@ -25,6 +25,8 @@ class PoroMechanicsCoupling : public Kernel
 public:
   PoroMechanicsCoupling(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
 
@@ -42,4 +44,3 @@ private:
 
   unsigned int _component;
 };
-

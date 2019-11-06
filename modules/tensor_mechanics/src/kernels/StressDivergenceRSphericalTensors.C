@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceRSphericalTensors);
 
-template <>
+defineLegacyParams(StressDivergenceRSphericalTensors);
+
 InputParameters
-validParams<StressDivergenceRSphericalTensors>()
+StressDivergenceRSphericalTensors::validParams()
 {
-  InputParameters params = validParams<StressDivergenceTensors>();
+  InputParameters params = StressDivergenceTensors::validParams();
   params.addClassDescription(
       "Calculate stress divergence for a spherically symmetric 1D problem in polar coordinates.");
   params.set<unsigned int>("component") = 0;

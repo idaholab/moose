@@ -23,6 +23,8 @@ class InertialForce : public TimeKernel
 public:
   InertialForce(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
 
@@ -49,4 +51,3 @@ private:
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;
 };
-

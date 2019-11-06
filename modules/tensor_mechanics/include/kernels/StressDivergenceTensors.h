@@ -29,6 +29,8 @@ class StressDivergenceTensors : public ALEKernel
 public:
   StressDivergenceTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
@@ -82,4 +84,3 @@ protected:
   /// Flag for volumetric locking correction
   bool _volumetric_locking_correction;
 };
-

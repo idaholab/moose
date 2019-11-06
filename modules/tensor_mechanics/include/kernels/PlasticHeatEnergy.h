@@ -27,6 +27,8 @@ class PlasticHeatEnergy : public Kernel
 public:
   PlasticHeatEnergy(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -50,4 +52,3 @@ protected:
   /// MOOSE variable number for the displacement variables
   std::vector<unsigned int> _disp_var;
 };
-

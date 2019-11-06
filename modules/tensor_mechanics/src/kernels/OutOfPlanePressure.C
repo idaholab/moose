@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", OutOfPlanePressure);
 
-template <>
+defineLegacyParams(OutOfPlanePressure);
+
 InputParameters
-validParams<OutOfPlanePressure>()
+OutOfPlanePressure::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("Apply pressure in the out-of-plane direction in 2D plane stress or "
                              "generalized plane strain models ");

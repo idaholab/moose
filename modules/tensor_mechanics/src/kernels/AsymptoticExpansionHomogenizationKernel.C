@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", AsymptoticExpansionHomogenizationKernel);
 
-template <>
+defineLegacyParams(AsymptoticExpansionHomogenizationKernel);
+
 InputParameters
-validParams<AsymptoticExpansionHomogenizationKernel>()
+AsymptoticExpansionHomogenizationKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Kernel for asymptotic expansion homogenization for elasticity");
   params.addRequiredRangeCheckedParam<unsigned int>("component",
                                                     "component >= 0 & component < 3",

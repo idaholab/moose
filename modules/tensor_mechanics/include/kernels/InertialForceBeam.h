@@ -24,6 +24,8 @@ class InertialForceBeam : public TimeKernel
 public:
   InertialForceBeam(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeResidual() override;
 
   virtual void computeJacobian() override;
@@ -186,4 +188,3 @@ private:
    **/
   const VariableValue * _du_dotdot_du;
 };
-

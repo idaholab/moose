@@ -25,6 +25,8 @@ class DynamicStressDivergenceTensors : public StressDivergenceTensors
 public:
   DynamicStressDivergenceTensors(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -38,4 +40,3 @@ protected:
   const Real _alpha;
   const bool _static_initialization;
 };
-
