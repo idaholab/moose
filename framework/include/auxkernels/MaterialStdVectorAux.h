@@ -23,6 +23,8 @@ InputParameters validParams<MaterialStdVectorAux>();
 class MaterialStdVectorAux : public MaterialStdVectorAuxBase<Real>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for this object

@@ -24,6 +24,8 @@ InputParameters validParams<TagMatrixAux>();
 class TagMatrixAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TagMatrixAux(const InputParameters & parameters);
 
 protected:

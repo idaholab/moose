@@ -26,6 +26,8 @@ InputParameters validParams<QuotientAux>();
 class QuotientAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   QuotientAux(const InputParameters & parameters);
 
 protected:

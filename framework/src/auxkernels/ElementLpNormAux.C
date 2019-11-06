@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ElementLpNormAux);
 
-template <>
+defineLegacyParams(ElementLpNormAux);
+
 InputParameters
-validParams<ElementLpNormAux>()
+ElementLpNormAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute an elemental field variable (single value per element) equal "
                              "to the Lp-norm of a coupled Variable.");
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1", "The exponent used in the norm.");

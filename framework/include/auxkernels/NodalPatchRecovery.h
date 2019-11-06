@@ -30,6 +30,8 @@ InputParameters validParams<NodalPatchRecovery>();
 class NodalPatchRecovery : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NodalPatchRecovery(const InputParameters & parameters);
   virtual ~NodalPatchRecovery(){};
   /**

@@ -24,6 +24,8 @@ InputParameters validParams<MaterialRealVectorValueAux>();
 class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for this object

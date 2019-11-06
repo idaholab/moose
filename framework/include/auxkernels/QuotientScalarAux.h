@@ -24,6 +24,8 @@ InputParameters validParams<QuotientScalarAux>();
 class QuotientScalarAux : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   QuotientScalarAux(const InputParameters & parameters);
 
 protected:

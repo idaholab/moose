@@ -24,6 +24,8 @@ InputParameters validParams<HardwareIDAux>();
 class HardwareIDAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   HardwareIDAux(const InputParameters & parameters);
 
 protected:

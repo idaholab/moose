@@ -73,6 +73,8 @@ class AuxKernelTempl : public MooseObject,
                        public ElementIDInterface
 {
 public:
+  static InputParameters validParams();
+
   AuxKernelTempl(const InputParameters & parameters);
 
   /**

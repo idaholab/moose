@@ -24,6 +24,8 @@ InputParameters validParams<SpatialUserObjectAux>();
 class SpatialUserObjectAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.

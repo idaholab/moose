@@ -24,6 +24,8 @@ InputParameters validParams<ElementLengthAux>();
 class ElementLengthAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElementLengthAux(const InputParameters & parameters);
 
 protected:

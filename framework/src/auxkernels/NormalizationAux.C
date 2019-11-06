@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", NormalizationAux);
 
-template <>
+defineLegacyParams(NormalizationAux);
+
 InputParameters
-validParams<NormalizationAux>()
+NormalizationAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("source_variable", "The variable to be normalized");
   params.addParam<PostprocessorName>("normalization", "The postprocessor on the source");
   params.addParam<PostprocessorName>("shift", "The postprocessor to shift the source");

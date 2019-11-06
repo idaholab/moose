@@ -24,6 +24,8 @@ InputParameters validParams<VectorVariableComponentAux>();
 class VectorVariableComponentAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Input parameters for the object

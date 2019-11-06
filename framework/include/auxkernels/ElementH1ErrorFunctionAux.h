@@ -27,6 +27,8 @@ InputParameters validParams<ElementH1ErrorFunctionAux>();
 class ElementH1ErrorFunctionAux : public ElementL2ErrorFunctionAux
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param name Object name

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialRealDenseMatrixAux);
 
-template <>
+defineLegacyParams(MaterialRealDenseMatrixAux);
+
 InputParameters
-validParams<MaterialRealDenseMatrixAux>()
+MaterialRealDenseMatrixAux::validParams()
 {
-  InputParameters params = validParams<MaterialAuxBase<>>();
+  InputParameters params = MaterialAuxBase<>::validParams();
   params.addParam<unsigned int>("row", 0, "The row component to consider for this kernel");
   params.addParam<unsigned int>("column", 0, "The column component to consider for this kernel");
   return params;

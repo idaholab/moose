@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ProcessorIDAux);
 
-template <>
+defineLegacyParams(ProcessorIDAux);
+
 InputParameters
-validParams<ProcessorIDAux>()
+ProcessorIDAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates a field showing the processors and partitioning.");
   return params;
 }

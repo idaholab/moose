@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", GhostingAux);
 
-template <>
+defineLegacyParams(GhostingAux);
+
 InputParameters
-validParams<GhostingAux>()
+GhostingAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addRequiredParam<processor_id_type>("pid", "The PID to see the ghosting for");
 

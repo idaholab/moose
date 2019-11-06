@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", BoundsAux);
 
-template <>
+defineLegacyParams(BoundsAux);
+
 InputParameters
-validParams<BoundsAux>()
+BoundsAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<Real>("upper", "The upper bound for the variable");
   params.addParam<Real>("lower", "The lower bound for the variable");
   params.addRequiredCoupledVar("bounded_variable", "The variable to be bounded");

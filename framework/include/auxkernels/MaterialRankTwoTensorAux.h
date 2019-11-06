@@ -26,6 +26,8 @@ InputParameters validParams<MaterialRankTwoTensorAux>();
 class MaterialRankTwoTensorAux : public MaterialAuxBase<RankTwoTensor>
 {
 public:
+  static InputParameters validParams();
+
   MaterialRankTwoTensorAux(const InputParameters & parameters);
 
 protected:

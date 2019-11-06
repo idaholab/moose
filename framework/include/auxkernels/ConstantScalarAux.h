@@ -22,6 +22,8 @@ InputParameters validParams<ConstantScalarAux>();
 class ConstantScalarAux : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   ConstantScalarAux(const InputParameters & parameters);
 
 protected:

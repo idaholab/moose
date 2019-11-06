@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TagMatrixAux);
 
-template <>
+defineLegacyParams(TagMatrixAux);
+
 InputParameters
-validParams<TagMatrixAux>()
+TagMatrixAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");

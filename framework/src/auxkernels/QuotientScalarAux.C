@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", QuotientScalarAux);
 
-template <>
+defineLegacyParams(QuotientScalarAux);
+
 InputParameters
-validParams<QuotientScalarAux>()
+QuotientScalarAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
   params.addCoupledVar("denominator", "The downstairs of the quotient variable");
 

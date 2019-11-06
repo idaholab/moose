@@ -27,6 +27,8 @@ class AuxNodalScalarKernel : public AuxScalarKernel,
                              public MooseVariableDependencyInterface
 {
 public:
+  static InputParameters validParams();
+
   AuxNodalScalarKernel(const InputParameters & parameters);
 
   virtual void compute() override;

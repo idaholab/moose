@@ -10,11 +10,12 @@
 #include "NodalPatchRecovery.h"
 #include "SwapBackSentinel.h"
 
-template <>
+defineLegacyParams(NodalPatchRecovery);
+
 InputParameters
-validParams<NodalPatchRecovery>()
+NodalPatchRecovery::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH");
   params.addParam<MooseEnum>("patch_polynomial_order",
                              orders,

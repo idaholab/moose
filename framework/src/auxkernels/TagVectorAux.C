@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TagVectorAux);
 
-template <>
+defineLegacyParams(TagVectorAux);
+
 InputParameters
-validParams<TagVectorAux>()
+TagVectorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",

@@ -26,6 +26,8 @@ InputParameters validParams<SolutionScalarAux>();
 class SolutionScalarAux : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   SolutionScalarAux(const InputParameters & parameters);
 
   virtual void initialSetup() override;

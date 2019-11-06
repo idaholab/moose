@@ -24,6 +24,8 @@ InputParameters validParams<AuxScalarKernel>();
 class ScalarTagVectorAux : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   ScalarTagVectorAux(const InputParameters & parameters);
 
 protected:

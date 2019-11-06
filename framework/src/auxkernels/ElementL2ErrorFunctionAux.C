@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ElementL2ErrorFunctionAux);
 
-template <>
+defineLegacyParams(ElementL2ErrorFunctionAux);
+
 InputParameters
-validParams<ElementL2ErrorFunctionAux>()
+ElementL2ErrorFunctionAux::validParams()
 {
-  InputParameters params = validParams<ElementLpNormAux>();
+  InputParameters params = ElementLpNormAux::validParams();
   params.addClassDescription("A class for computing the element-wise L^2 (Euclidean) error between "
                              "a function and a coupled variable.");
   params.addRequiredParam<FunctionName>("function", "Function representing the exact solution");

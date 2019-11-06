@@ -24,6 +24,8 @@ InputParameters validParams<ParsedAux>();
 class ParsedAux : public AuxKernel, public FunctionParserUtils
 {
 public:
+  static InputParameters validParams();
+
   ParsedAux(const InputParameters & parameters);
 
 protected:

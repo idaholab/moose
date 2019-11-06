@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialRankTwoTensorAux);
 
-template <>
+defineLegacyParams(MaterialRankTwoTensorAux);
+
 InputParameters
-validParams<MaterialRankTwoTensorAux>()
+MaterialRankTwoTensorAux::validParams()
 {
-  InputParameters params = validParams<MaterialAuxBase<>>();
+  InputParameters params = MaterialAuxBase<>::validParams();
   params.addClassDescription(
       "Access a component of a RankTwoTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ij for the tensor to output");

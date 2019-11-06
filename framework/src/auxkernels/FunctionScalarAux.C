@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionScalarAux);
 
-template <>
+defineLegacyParams(FunctionScalarAux);
+
 InputParameters
-validParams<FunctionScalarAux>()
+FunctionScalarAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<std::vector<FunctionName>>(
       "function", "The functions to set the scalar variable components.");
 

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", SpatialUserObjectAux);
 
-template <>
+defineLegacyParams(SpatialUserObjectAux);
+
 InputParameters
-validParams<SpatialUserObjectAux>()
+SpatialUserObjectAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "user_object",
       "The UserObject UserObject to get values from.  Note that the UserObject "
