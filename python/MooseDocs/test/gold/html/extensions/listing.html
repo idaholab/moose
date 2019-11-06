@@ -6,11 +6,12 @@ void anotherFunction();
 
 registerMooseObject(&quot;MooseApp&quot;, Diffusion);
 
-template &lt;&gt;
+defineLegacyParams(Diffusion);
+
 InputParameters
-validParams&lt;Diffusion&gt;()
+Diffusion::validParams()
 {
-  InputParameters params = validParams&lt;Kernel&gt;();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(&quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak &quot;
                              &quot;form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;);
   return params;
@@ -29,15 +30,14 @@ Diffusion::computeQpJacobian()
 {
   return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
-</code></pre></div><pre class="moose-pre"><code class="language-cpp">template &lt;&gt;
+</code></pre></div><pre class="moose-pre"><code class="language-cpp">
+#include &quot;Diffusion.h&quot;
+
+registerMooseObject(&quot;MooseApp&quot;, Diffusion);
+
+defineLegacyParams(Diffusion);
+
 InputParameters
-validParams&lt;Diffusion&gt;()
-{
-  InputParameters params = validParams&lt;Kernel&gt;();
-  params.addClassDescription(&quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak &quot;
-                             &quot;form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;);
-  return params;
-}
 </code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(framework/src/kernels/Diffusion.C)</a><pre class="moose-pre"><code class="language-text">xxxxx[Mesh]
 xxxxx  type = GeneratedMesh
 xxxxx  dim = 2
