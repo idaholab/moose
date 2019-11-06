@@ -38,6 +38,8 @@ class TorqueReaction : public NodalPostprocessor
 public:
   TorqueReaction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
@@ -55,4 +57,3 @@ protected:
 
   Real _sum;
 };
-

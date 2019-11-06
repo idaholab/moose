@@ -25,6 +25,8 @@ class NodalTranslationalInertia : public TimeNodalKernel
 public:
   NodalTranslationalInertia(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -83,4 +85,3 @@ protected:
   /// du_dotdot_du variable value
   const MooseArray<Number> * _du_dotdot_du;
 };
-

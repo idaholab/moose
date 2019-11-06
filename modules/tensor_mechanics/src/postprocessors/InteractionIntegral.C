@@ -31,11 +31,12 @@ InteractionIntegral::sifModeType()
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegral);
 
-template <>
+defineLegacyParams(InteractionIntegral);
+
 InputParameters
-validParams<InteractionIntegral>()
+InteractionIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Computes the interaction integral for fracture");
   params.addRequiredCoupledVar(
       "displacements",

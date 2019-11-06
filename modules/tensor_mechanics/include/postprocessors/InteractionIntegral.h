@@ -30,6 +30,8 @@ class InteractionIntegral : public ElementIntegralPostprocessor
 public:
   InteractionIntegral(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real getValue();
 
   static MooseEnum qFunctionType();
@@ -84,4 +86,3 @@ private:
 
   const SifMethod _sif_mode;
 };
-

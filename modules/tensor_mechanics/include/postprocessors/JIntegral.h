@@ -29,6 +29,7 @@ class JIntegral : public ElementIntegralPostprocessor
 {
 public:
   JIntegral(const InputParameters & parameters);
+  static InputParameters validParams();
   virtual Real getValue();
 
 protected:
@@ -52,4 +53,3 @@ protected:
   const std::vector<std::vector<Real>> * _phi_curr_elem;
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
 };
-

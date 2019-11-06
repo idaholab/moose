@@ -18,6 +18,8 @@ class CavityPressurePostprocessor : public GeneralPostprocessor
 public:
   CavityPressurePostprocessor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialize() override {}
 
   virtual void execute() override {}

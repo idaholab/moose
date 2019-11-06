@@ -22,6 +22,8 @@ class MixedModeEquivalentK : public GeneralPostprocessor
 public:
   MixedModeEquivalentK(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialize() {}
   virtual void execute() {}
 
@@ -36,4 +38,3 @@ protected:
   const PostprocessorValue & _kiii_value;
   Real _poissons_ratio;
 };
-

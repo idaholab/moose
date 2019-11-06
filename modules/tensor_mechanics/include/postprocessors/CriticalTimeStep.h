@@ -29,6 +29,8 @@ class CriticalTimeStep : public ElementPostprocessor, public GuaranteeConsumer
 public:
   CriticalTimeStep(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void initialSetup() override;

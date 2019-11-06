@@ -27,6 +27,8 @@ class NodalRotationalInertia : public TimeNodalKernel
 public:
   NodalRotationalInertia(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -105,4 +107,3 @@ protected:
   /// du_dotdot_du value
   const VariableValue * _du_dotdot_du;
 };
-

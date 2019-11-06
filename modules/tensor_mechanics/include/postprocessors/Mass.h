@@ -26,8 +26,9 @@ class Mass : public ElementIntegralVariablePostprocessor
 public:
   Mass(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpIntegral();
   const MaterialProperty<Real> & _density;
 };
-

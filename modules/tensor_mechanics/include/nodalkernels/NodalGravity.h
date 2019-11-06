@@ -25,6 +25,8 @@ class NodalGravity : public NodalKernel
 public:
   NodalGravity(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 

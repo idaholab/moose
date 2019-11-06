@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", MaterialTensorIntegral);
 
-template <>
+defineLegacyParams(MaterialTensorIntegral);
+
 InputParameters
-validParams<MaterialTensorIntegral>()
+MaterialTensorIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("This postprocessor computes an element integral of "
                              "a component of a material tensor as specified by "
                              "the user-supplied indices");

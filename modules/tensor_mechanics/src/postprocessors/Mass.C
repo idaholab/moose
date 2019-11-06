@@ -15,11 +15,12 @@
 
 registerMooseObject("TensorMechanicsApp", Mass);
 
-template <>
+defineLegacyParams(Mass);
+
 InputParameters
-validParams<Mass>()
+Mass::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }

@@ -24,6 +24,7 @@ class MaterialTimeStepPostprocessor : public ElementPostprocessor
 {
 public:
   MaterialTimeStepPostprocessor(const InputParameters & parameters);
+  static InputParameters validParams();
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
@@ -59,4 +60,3 @@ protected:
   /// Current quadrature point
   unsigned int _qp;
 };
-
