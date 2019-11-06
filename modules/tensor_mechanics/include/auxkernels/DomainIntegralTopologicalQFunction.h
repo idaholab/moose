@@ -26,6 +26,8 @@ public:
 
   virtual ~DomainIntegralTopologicalQFunction() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual void initialSetup();
   virtual Real computeValue();
@@ -40,4 +42,3 @@ private:
 
 template <>
 InputParameters validParams<DomainIntegralTopologicalQFunction>();
-

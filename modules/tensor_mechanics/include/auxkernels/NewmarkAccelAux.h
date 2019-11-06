@@ -26,6 +26,8 @@ public:
 
   virtual ~NewmarkAccelAux() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
 
@@ -34,4 +36,3 @@ protected:
   const VariableValue & _vel_old;
   Real _beta;
 };
-

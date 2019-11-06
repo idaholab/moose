@@ -28,6 +28,8 @@ public:
 
   virtual ~RadialDisplacementSphereAux() {}
 
+  static InputParameters validParams();
+
 protected:
   /// Compute the value of the radial displacement
   virtual Real computeValue();
@@ -44,4 +46,3 @@ protected:
   /// 3D Cartesian systems.
   RealVectorValue _origin;
 };
-

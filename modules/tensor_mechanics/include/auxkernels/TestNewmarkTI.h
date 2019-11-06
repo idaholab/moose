@@ -27,6 +27,8 @@ public:
 
   virtual ~TestNewmarkTI() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
 
@@ -36,4 +38,3 @@ protected:
   /// Value of the first/second time derivative of dispalcement
   const VariableValue & _value;
 };
-

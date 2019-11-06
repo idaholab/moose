@@ -28,6 +28,8 @@ public:
 
   virtual ~RadialDisplacementCylinderAux() {}
 
+  static InputParameters validParams();
+
 protected:
   /// Compute the value of the radial displacement
   virtual Real computeValue();
@@ -46,4 +48,3 @@ protected:
   /// Point used to define the origin of the cylinder axis for Cartesian systems
   RealVectorValue _origin;
 };
-

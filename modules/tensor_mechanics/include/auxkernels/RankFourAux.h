@@ -30,6 +30,8 @@ public:
 
   virtual ~RankFourAux() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
 
@@ -40,4 +42,3 @@ private:
   const unsigned int _k;
   const unsigned int _l;
 };
-

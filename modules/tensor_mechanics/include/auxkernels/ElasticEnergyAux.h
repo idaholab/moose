@@ -24,6 +24,8 @@ public:
   ElasticEnergyAux(const InputParameters & parameters);
   virtual ~ElasticEnergyAux() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
 
@@ -32,4 +34,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
-

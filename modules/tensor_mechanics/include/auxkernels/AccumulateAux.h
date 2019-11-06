@@ -25,10 +25,11 @@ class AccumulateAux : public AuxKernel
 public:
   AccumulateAux(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
 
   // coupled variable values to be aggregated
   std::vector<const VariableValue *> _values;
 };
-

@@ -29,6 +29,8 @@ public:
   CylindricalRankTwoAux(const InputParameters & parameters);
   virtual ~CylindricalRankTwoAux() {}
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue();
   const MaterialProperty<RankTwoTensor> & _tensor;
@@ -36,4 +38,3 @@ protected:
   const unsigned int _j;
   const Point _center_point;
 };
-

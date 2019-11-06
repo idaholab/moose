@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ElasticEnergyAux);
 
-template <>
+defineLegacyParams(ElasticEnergyAux);
+
 InputParameters
-validParams<ElasticEnergyAux>()
+ElasticEnergyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute the local elastic energy");
   params.addParam<std::string>("base_name", "Mechanical property base name");
   return params;

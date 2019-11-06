@@ -23,6 +23,8 @@ class GeneralizedPlaneStrainReferenceResidual : public AuxScalarKernel
 public:
   GeneralizedPlaneStrainReferenceResidual(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real computeValue() override;
 
   const GeneralizedPlaneStrainUserObject & _gps;

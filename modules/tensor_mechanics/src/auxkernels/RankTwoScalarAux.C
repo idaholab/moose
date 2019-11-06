@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", RankTwoScalarAux);
 
-template <>
+defineLegacyParams(RankTwoScalarAux);
+
 InputParameters
-validParams<RankTwoScalarAux>()
+RankTwoScalarAux::validParams()
 {
-  InputParameters params = validParams<NodalPatchRecovery>();
+  InputParameters params = NodalPatchRecovery::validParams();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");

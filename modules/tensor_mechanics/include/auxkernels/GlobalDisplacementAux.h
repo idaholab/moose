@@ -26,6 +26,8 @@ class GlobalDisplacementAux : public AuxKernel
 public:
   GlobalDisplacementAux(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real computeValue() override;
 
 protected:
