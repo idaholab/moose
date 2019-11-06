@@ -21,8 +21,8 @@ InputParameters
 Sampler::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<SetupInterface>();
-  params += ::validParams<DistributionInterface>();
+  params += SetupInterface::validParams();
+  params += DistributionInterface::validParams();
   params.addClassDescription("A base class for distribution sampling.");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);

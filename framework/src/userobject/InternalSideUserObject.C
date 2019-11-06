@@ -16,9 +16,9 @@ InputParameters
 InternalSideUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<TwoMaterialPropertyInterface>();
-  params += ::validParams<TransientInterface>();
+  params += BlockRestrictable::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
 
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",

@@ -32,7 +32,7 @@ Output::validParams()
 {
   // Get the parameters from the parent object
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<SetupInterface>();
+  params += SetupInterface::validParams();
 
   // Displaced Mesh options
   params.addParam<bool>(

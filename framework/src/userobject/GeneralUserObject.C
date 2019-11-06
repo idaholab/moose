@@ -15,7 +15,7 @@ InputParameters
 GeneralUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<MaterialPropertyInterface>();
+  params += MaterialPropertyInterface::validParams();
   params.addParam<bool>(
       "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
   params.addParamNamesToGroup("force_preaux", "Advanced");

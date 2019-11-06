@@ -23,9 +23,9 @@ InputParameters
 Indicator::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<OutputInterface>();
-  params += ::validParams<MaterialPropertyInterface>();
+  params += BlockRestrictable::validParams();
+  params += OutputInterface::validParams();
+  params += MaterialPropertyInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

@@ -20,10 +20,10 @@ InputParameters
 ElementUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<MaterialPropertyInterface>();
-  params += ::validParams<TransientInterface>();
-  params += ::validParams<RandomInterface>();
+  params += BlockRestrictable::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
+  params += RandomInterface::validParams();
   return params;
 }
 

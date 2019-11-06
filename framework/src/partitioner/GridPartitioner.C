@@ -26,7 +26,7 @@ GridPartitioner::validParams()
 {
   // These two are in this order because they are from different systems
   // so you have to apply _this_ system's second to override the base
-  InputParameters params = ::validParams<GeneratedMesh>();
+  InputParameters params = GeneratedMesh::validParams();
   params += MoosePartitioner::validParams();
 
   // These are suppressed because they're going to get set programmatically

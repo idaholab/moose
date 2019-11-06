@@ -16,7 +16,7 @@ InputParameters
 Postprocessor::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<OutputInterface>();
+  params += OutputInterface::validParams();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_TRANSFER);

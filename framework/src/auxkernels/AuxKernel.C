@@ -28,14 +28,14 @@ InputParameters
 AuxKernelTempl<ComputeValueType>::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<BoundaryRestrictable>();
-  params += ::validParams<RandomInterface>();
-  params += ::validParams<MeshChangedInterface>();
-  params += ::validParams<MaterialPropertyInterface>();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += RandomInterface::validParams();
+  params += MeshChangedInterface::validParams();
+  params += MaterialPropertyInterface::validParams();
 
   // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
-  params += ::validParams<SetupInterface>();
+  params += SetupInterface::validParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};

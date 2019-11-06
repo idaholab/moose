@@ -20,8 +20,8 @@ InputParameters
 AuxScalarKernel::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<SetupInterface>();
-  params += ::validParams<MeshChangedInterface>();
+  params += SetupInterface::validParams();
+  params += MeshChangedInterface::validParams();
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this kernel operates on");
