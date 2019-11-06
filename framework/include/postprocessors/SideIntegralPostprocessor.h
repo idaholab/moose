@@ -26,6 +26,8 @@ InputParameters validParams<SideIntegralPostprocessor>();
 class SideIntegralPostprocessor : public SidePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SideIntegralPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -25,13 +25,14 @@
 
 #include "libmesh/equation_systems.h"
 
-template <>
+defineLegacyParams(Output);
+
 InputParameters
-validParams<Output>()
+Output::validParams()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<SetupInterface>();
 
   // Displaced Mesh options
   params.addParam<bool>(

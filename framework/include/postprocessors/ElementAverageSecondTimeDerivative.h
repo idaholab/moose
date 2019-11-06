@@ -23,6 +23,8 @@ InputParameters validParams<ElementAverageSecondTimeDerivative>();
 class ElementAverageSecondTimeDerivative : public ElementAverageValue
 {
 public:
+  static InputParameters validParams();
+
   ElementAverageSecondTimeDerivative(const InputParameters & parameters);
 
 protected:

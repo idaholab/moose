@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VolumePostprocessor);
 
-template <>
+defineLegacyParams(VolumePostprocessor);
+
 InputParameters
-validParams<VolumePostprocessor>()
+VolumePostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Computes the volume of a specified block");
   return params;
 }

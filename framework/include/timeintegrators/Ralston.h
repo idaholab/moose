@@ -30,6 +30,8 @@ InputParameters validParams<Ralston>();
 class Ralston : public ExplicitRK2
 {
 public:
+  static InputParameters validParams();
+
   Ralston(const InputParameters & parameters);
 
 protected:

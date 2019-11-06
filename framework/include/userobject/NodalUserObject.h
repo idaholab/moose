@@ -41,6 +41,8 @@ class NodalUserObject : public UserObject,
                         public RandomInterface
 {
 public:
+  static InputParameters validParams();
+
   NodalUserObject(const InputParameters & parameters);
 
   virtual void subdomainSetup() override /*final*/;

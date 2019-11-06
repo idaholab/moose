@@ -16,12 +16,13 @@
 
 registerMooseObject("MooseApp", ControlOutput);
 
-template <>
+defineLegacyParams(ControlOutput);
+
 InputParameters
-validParams<ControlOutput>()
+ControlOutput::validParams()
 {
   // Get the base class parameters
-  InputParameters params = validParams<Output>();
+  InputParameters params = Output::validParams();
   params.addClassDescription(
       "Output for displaying objects and parameters associated with the Control system.");
 

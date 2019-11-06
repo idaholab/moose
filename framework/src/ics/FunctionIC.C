@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionIC);
 
-template <>
+defineLegacyParams(FunctionIC);
+
 InputParameters
-validParams<FunctionIC>()
+FunctionIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<FunctionName>("function", "The initial condition function.");
 
   params.addClassDescription("An initial condition that uses a normal function of x, y, z to "

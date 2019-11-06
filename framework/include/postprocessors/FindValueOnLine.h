@@ -27,6 +27,8 @@ InputParameters validParams<FindValueOnLine>();
 class FindValueOnLine : public GeneralPostprocessor, public Coupleable
 {
 public:
+  static InputParameters validParams();
+
   FindValueOnLine(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -43,6 +43,8 @@ InputParameters validParams<LStableDirk2>();
 class LStableDirk2 : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   LStableDirk2(const InputParameters & parameters);
 
   virtual int order() override { return 2; }

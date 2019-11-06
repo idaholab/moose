@@ -23,6 +23,8 @@ InputParameters validParams<NodalNormalsCorner>();
 class NodalNormalsCorner : public SideUserObject
 {
 public:
+  static InputParameters validParams();
+
   NodalNormalsCorner(const InputParameters & parameters);
 
   virtual void initialize() override;

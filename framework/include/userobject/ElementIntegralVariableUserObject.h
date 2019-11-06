@@ -28,6 +28,8 @@ class ElementIntegralVariableUserObject : public ElementIntegralUserObject,
                                           public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralVariableUserObject(const InputParameters & parameters);
 
 protected:

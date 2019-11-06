@@ -20,6 +20,8 @@ InputParameters validParams<EmptyPostprocessor>();
 class EmptyPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   EmptyPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}

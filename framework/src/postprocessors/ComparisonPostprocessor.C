@@ -9,11 +9,12 @@
 
 #include "ComparisonPostprocessor.h"
 
-template <>
+defineLegacyParams(ComparisonPostprocessor);
+
 InputParameters
-validParams<ComparisonPostprocessor>()
+ComparisonPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   MooseEnum comparison_type("equals greater_than_equals less_than_equals greater_than less_than");
   params.addRequiredParam<MooseEnum>("comparison_type",

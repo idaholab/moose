@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", NumResidualEvaluations);
 
-template <>
+defineLegacyParams(NumResidualEvaluations);
+
 InputParameters
-validParams<NumResidualEvaluations>()
+NumResidualEvaluations::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

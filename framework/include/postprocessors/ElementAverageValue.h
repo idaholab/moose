@@ -26,6 +26,8 @@ InputParameters validParams<ElementAverageValue>();
 class ElementAverageValue : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementAverageValue(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", InterfaceAverageVariableValuePostprocessor);
 
-template <>
+defineLegacyParams(InterfaceAverageVariableValuePostprocessor);
+
 InputParameters
-validParams<InterfaceAverageVariableValuePostprocessor>()
+InterfaceAverageVariableValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<InterfaceIntegralVariableValuePostprocessor>();
+  InputParameters params = InterfaceIntegralVariableValuePostprocessor::validParams();
   params.addClassDescription("Computes the average value of a variable on an "
                              "interface. Note that this cannot be used on the "
                              "centerline of an axisymmetric model.");

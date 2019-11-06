@@ -30,6 +30,8 @@ InputParameters validParams<Nemesis>();
 class Nemesis : public AdvancedOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

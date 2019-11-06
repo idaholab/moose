@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VariableInnerProduct);
 
-template <>
+defineLegacyParams(VariableInnerProduct);
+
 InputParameters
-validParams<VariableInnerProduct>()
+VariableInnerProduct::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredCoupledVar(
       "second_variable",
       "The name of the second variable in the inner product (variable, second_variable)");

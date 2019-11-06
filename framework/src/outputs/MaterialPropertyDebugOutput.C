@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", MaterialPropertyDebugOutput);
 
-template <>
+defineLegacyParams(MaterialPropertyDebugOutput);
+
 InputParameters
-validParams<MaterialPropertyDebugOutput>()
+MaterialPropertyDebugOutput::validParams()
 {
-  InputParameters params = validParams<Output>();
+  InputParameters params = Output::validParams();
   params.addClassDescription("Debug output object for displaying material property information.");
 
   // This object only outputs data once, in the constructor, so disable fine control

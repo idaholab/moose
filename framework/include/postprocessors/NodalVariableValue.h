@@ -30,6 +30,8 @@ InputParameters validParams<NodalVariableValue>();
 class NodalVariableValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override {}

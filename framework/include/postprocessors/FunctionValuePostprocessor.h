@@ -25,6 +25,8 @@ InputParameters validParams<FunctionValuePostprocessor>();
 class FunctionValuePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   FunctionValuePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

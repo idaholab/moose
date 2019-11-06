@@ -27,6 +27,8 @@ InputParameters validParams<CrankNicolson>();
 class CrankNicolson : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   CrankNicolson(const InputParameters & parameters);
 
   virtual void init() override;

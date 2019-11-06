@@ -22,6 +22,8 @@ InputParameters validParams<TimeExtremeValue>();
 class TimeExtremeValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /// What type of extreme value we are going to compute
   enum ExtremeType
   {

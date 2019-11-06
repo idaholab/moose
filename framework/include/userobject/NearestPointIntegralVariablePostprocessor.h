@@ -28,6 +28,8 @@ class NearestPointIntegralVariablePostprocessor
                             ElementVariableVectorPostprocessor>
 {
 public:
+  static InputParameters validParams();
+
   NearestPointIntegralVariablePostprocessor(const InputParameters & parameters);
 
   virtual Real spatialValue(const Point & point) const override;

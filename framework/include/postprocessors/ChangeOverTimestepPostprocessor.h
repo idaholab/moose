@@ -23,6 +23,8 @@ InputParameters validParams<ChangeOverTimestepPostprocessor>();
 class ChangeOverTimestepPostprocessor : public ChangeOverTimePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ChangeOverTimestepPostprocessor(const InputParameters & parameters);
 };
 

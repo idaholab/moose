@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", BDF2);
 
-template <>
+defineLegacyParams(BDF2);
+
 InputParameters
-validParams<BDF2>()
+BDF2::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", NodalL2Norm);
 
-template <>
+defineLegacyParams(NodalL2Norm);
+
 InputParameters
-validParams<NodalL2Norm>()
+NodalL2Norm::validParams()
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
   params.set<bool>("unique_node_execute") = true;
   return params;
 }

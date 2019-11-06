@@ -25,6 +25,8 @@ InputParameters validParams<DOFMapOutput>();
 class DOFMapOutput : public FileOutput
 {
 public:
+  static InputParameters validParams();
+
   DOFMapOutput(const InputParameters & parameters);
 
   /**

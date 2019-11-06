@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", AreaPostprocessor);
 
-template <>
+defineLegacyParams(AreaPostprocessor);
+
 InputParameters
-validParams<AreaPostprocessor>()
+AreaPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
 
   params.addClassDescription("Computes the \"area\" or dimension - 1 \"volume\" of a given "
                              "boundary or boundaries in your mesh.");

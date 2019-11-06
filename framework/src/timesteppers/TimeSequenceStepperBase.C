@@ -11,11 +11,12 @@
 #include "FEProblem.h"
 #include "Transient.h"
 
-template <>
+defineLegacyParams(TimeSequenceStepperBase);
+
 InputParameters
-validParams<TimeSequenceStepperBase>()
+TimeSequenceStepperBase::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   return params;
 }
 

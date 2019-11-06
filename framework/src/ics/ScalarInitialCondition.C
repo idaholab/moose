@@ -12,11 +12,12 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(ScalarInitialCondition);
+
 InputParameters
-validParams<ScalarInitialCondition>()
+ScalarInitialCondition::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addParam<VariableName>(
       "variable", "The variable this initial condition is supposed to provide values for.");
 

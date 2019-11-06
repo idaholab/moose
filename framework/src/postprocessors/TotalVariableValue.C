@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TotalVariableValue);
 
-template <>
+defineLegacyParams(TotalVariableValue);
+
 InputParameters
-validParams<TotalVariableValue>()
+TotalVariableValue::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<PostprocessorName>("value", "The name of the postprocessor");
   return params;
 }

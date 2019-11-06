@@ -36,6 +36,8 @@ InputParameters validParams<SolutionUserObject>();
 class SolutionUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   SolutionUserObject(const InputParameters & parameters);
   virtual ~SolutionUserObject(); // empty dtor required for unique_ptr with forward declarations
 

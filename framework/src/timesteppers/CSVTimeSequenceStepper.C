@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CSVTimeSequenceStepper);
 
-template <>
+defineLegacyParams(CSVTimeSequenceStepper);
+
 InputParameters
-validParams<CSVTimeSequenceStepper>()
+CSVTimeSequenceStepper::validParams()
 {
-  InputParameters params = validParams<TimeSequenceStepperBase>();
+  InputParameters params = TimeSequenceStepperBase::validParams();
   params.addRequiredParam<FileName>("file_name",
                                     "name of the file in which the time sequence is read");
   params.addParam<bool>("header",

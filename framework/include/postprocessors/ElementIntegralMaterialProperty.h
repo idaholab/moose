@@ -19,6 +19,8 @@ InputParameters validParams<ElementIntegralMaterialProperty>();
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralMaterialProperty(const InputParameters & parameters);
 
 protected:

@@ -19,6 +19,8 @@ InputParameters validParams<NumElems>();
 class NumElems : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumElems(const InputParameters & parameters);
 
   virtual void initialize() override {}

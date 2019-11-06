@@ -28,6 +28,8 @@ InputParameters validParams<CSVTimeSequenceStepper>();
 class CSVTimeSequenceStepper : public TimeSequenceStepperBase
 {
 public:
+  static InputParameters validParams();
+
   CSVTimeSequenceStepper(const InputParameters & parameters);
 
   virtual void init() override;

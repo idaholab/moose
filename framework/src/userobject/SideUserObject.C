@@ -12,13 +12,14 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(SideUserObject);
+
 InputParameters
-validParams<SideUserObject>()
+SideUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<BoundaryRestrictableRequired>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = UserObject::validParams();
+  params += ::validParams<BoundaryRestrictableRequired>();
+  params += ::validParams<MaterialPropertyInterface>();
   return params;
 }
 

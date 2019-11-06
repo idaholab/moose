@@ -22,6 +22,8 @@ InputParameters validParams<FunctionDT>();
 class FunctionDT : public TimeStepper, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   FunctionDT(const InputParameters & parameters);
 
   virtual void init() override;

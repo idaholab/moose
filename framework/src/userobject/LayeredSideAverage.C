@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LayeredSideAverage);
 
-template <>
+defineLegacyParams(LayeredSideAverage);
+
 InputParameters
-validParams<LayeredSideAverage>()
+LayeredSideAverage::validParams()
 {
-  InputParameters params = validParams<LayeredSideIntegral>();
+  InputParameters params = LayeredSideIntegral::validParams();
 
   return params;
 }

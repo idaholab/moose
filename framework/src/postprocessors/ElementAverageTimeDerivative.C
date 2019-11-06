@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementAverageTimeDerivative);
 
-template <>
+defineLegacyParams(ElementAverageTimeDerivative);
+
 InputParameters
-validParams<ElementAverageTimeDerivative>()
+ElementAverageTimeDerivative::validParams()
 {
-  InputParameters params = validParams<ElementAverageValue>();
+  InputParameters params = ElementAverageValue::validParams();
   params.addClassDescription(
       "Computes a volume integral of the time derivative of a given variable");
   return params;

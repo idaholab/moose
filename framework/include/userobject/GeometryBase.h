@@ -23,6 +23,8 @@ InputParameters validParams<GeometryBase>();
 class GeometryBase : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GeometryBase(const InputParameters & parameters);
 
   virtual void initialize() final;

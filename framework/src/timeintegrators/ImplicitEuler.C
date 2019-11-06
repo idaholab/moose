@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ImplicitEuler);
 
-template <>
+defineLegacyParams(ImplicitEuler);
+
 InputParameters
-validParams<ImplicitEuler>()
+ImplicitEuler::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ElementIntegralPostprocessor);
+
 InputParameters
-validParams<ElementIntegralPostprocessor>()
+ElementIntegralPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
   return params;
 }
 

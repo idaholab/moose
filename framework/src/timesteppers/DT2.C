@@ -26,11 +26,12 @@
 
 registerMooseObject("MooseApp", DT2);
 
-template <>
+defineLegacyParams(DT2);
+
 InputParameters
-validParams<DT2>()
+DT2::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addParam<Real>("dt", 1., "The initial time step size.");
   params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
   params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");

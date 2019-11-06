@@ -24,6 +24,8 @@ InputParameters validParams<FunctionSideIntegral>();
 class FunctionSideIntegral : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   FunctionSideIntegral(const InputParameters & parameters);
 
   virtual void threadJoin(const UserObject & y) override;

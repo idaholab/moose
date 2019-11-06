@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", NewmarkBeta);
 
-template <>
+defineLegacyParams(NewmarkBeta);
+
 InputParameters
-validParams<NewmarkBeta>()
+NewmarkBeta::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
   params.addClassDescription(
       "Computes the first and second time derivative of variable using Newmark-Beta method.");
   params.addRangeCheckedParam<Real>("beta", 0.25, "beta > 0.0", "beta value");

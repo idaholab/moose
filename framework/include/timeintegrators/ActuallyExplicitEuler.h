@@ -23,6 +23,8 @@ InputParameters validParams<ActuallyExplicitEuler>();
 class ActuallyExplicitEuler : public ExplicitTimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ActuallyExplicitEuler(const InputParameters & parameters);
 
   virtual int order() override { return 1; }

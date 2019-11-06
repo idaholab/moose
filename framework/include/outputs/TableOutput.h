@@ -33,6 +33,8 @@ InputParameters validParams<TableOutput>();
 class TableOutput : public AdvancedOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor.
    */

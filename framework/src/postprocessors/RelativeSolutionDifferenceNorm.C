@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", RelativeSolutionDifferenceNorm);
 
-template <>
+defineLegacyParams(RelativeSolutionDifferenceNorm);
+
 InputParameters
-validParams<RelativeSolutionDifferenceNorm>()
+RelativeSolutionDifferenceNorm::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addClassDescription(
       "Computes the relative norm of the solution difference of two consecutive time steps.");

@@ -20,6 +20,8 @@ InputParameters validParams<PerformanceData>();
 class PerformanceData : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PerformanceData(const InputParameters & parameters);
 
   virtual void initialize() override {}

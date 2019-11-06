@@ -22,6 +22,8 @@ InputParameters validParams<TotalVariableValue>();
 class TotalVariableValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TotalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override;

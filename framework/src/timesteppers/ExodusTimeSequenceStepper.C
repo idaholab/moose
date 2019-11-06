@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", ExodusTimeSequenceStepper);
 
-template <>
+defineLegacyParams(ExodusTimeSequenceStepper);
+
 InputParameters
-validParams<ExodusTimeSequenceStepper>()
+ExodusTimeSequenceStepper::validParams()
 {
-  InputParameters params = validParams<TimeSequenceStepperBase>();
+  InputParameters params = TimeSequenceStepperBase::validParams();
   params.addRequiredParam<MeshFileName>(
       "mesh",
       "The name of the mesh file to extract the time sequence from (must be an exodusII file).");

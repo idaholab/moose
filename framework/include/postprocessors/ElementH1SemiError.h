@@ -27,6 +27,8 @@ InputParameters validParams<ElementH1SemiError>();
 class ElementH1SemiError : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementH1SemiError(const InputParameters & parameters);
 
   virtual Real getValue() override;

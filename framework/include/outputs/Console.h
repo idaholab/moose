@@ -24,6 +24,8 @@ InputParameters validParams<Console>();
 class Console : public TableOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ElementW1pError);
 
-template <>
+defineLegacyParams(ElementW1pError);
+
 InputParameters
-validParams<ElementW1pError>()
+ElementW1pError::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1", "The exponent used in the norm.");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;

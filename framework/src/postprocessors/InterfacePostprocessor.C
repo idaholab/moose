@@ -9,12 +9,13 @@
 
 #include "InterfacePostprocessor.h"
 
-template <>
+defineLegacyParams(InterfacePostprocessor);
+
 InputParameters
-validParams<InterfacePostprocessor>()
+InterfacePostprocessor::validParams()
 {
-  InputParameters params = validParams<InterfaceUserObject>();
-  params += validParams<Postprocessor>();
+  InputParameters params = InterfaceUserObject::validParams();
+  params += Postprocessor::validParams();
   params.addClassDescription(
       "Basic class for Interface Postprocessors. All InterfacePostprocessors "
       "should be derived from this class.");

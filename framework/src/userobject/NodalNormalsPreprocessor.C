@@ -22,11 +22,12 @@ Threads::spin_mutex nodal_normals_preprocessor_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsPreprocessor);
 
-template <>
+defineLegacyParams(NodalNormalsPreprocessor);
+
 InputParameters
-validParams<NodalNormalsPreprocessor>()
+NodalNormalsPreprocessor::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>(
       "surface_boundary", "The list of boundary IDs where nodal normals are computed");
   params.addParam<BoundaryName>("corner_boundary",

@@ -12,14 +12,14 @@
 
 registerMooseObject("MooseApp", ArrayFunctionIC);
 
-template <>
+defineLegacyParams(ArrayFunctionIC);
+
 InputParameters
-validParams<ArrayFunctionIC>()
+ArrayFunctionIC::validParams()
 {
-  InputParameters params = validParams<ArrayInitialCondition>();
+  InputParameters params = ArrayInitialCondition::validParams();
   params.addRequiredParam<std::vector<FunctionName>>("function",
                                                      "The initial condition functions.");
-
   params.addClassDescription("An initial condition that uses a normal function of x, y, z to "
                              "produce values (and optionally gradients) for a field variable.");
   return params;

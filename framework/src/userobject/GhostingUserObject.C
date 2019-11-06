@@ -19,11 +19,12 @@ constexpr unsigned int GEOMETRIC_MAP_IDX = 0;
 constexpr unsigned int ALGEBRAIC_MAP_IDX = 1;
 }
 
-template <>
+defineLegacyParams(GhostingUserObject);
+
 InputParameters
-validParams<GhostingUserObject>()
+GhostingUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
 
   params.addParam<std::vector<processor_id_type>>("pids", "The PID(s) to see the ghosting for");
 

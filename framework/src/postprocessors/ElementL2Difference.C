@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ElementL2Difference);
 
-template <>
+defineLegacyParams(ElementL2Difference);
+
 InputParameters
-validParams<ElementL2Difference>()
+ElementL2Difference::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredCoupledVar("other_variable", "The variable to compare to");
 
   params.addClassDescription("Computes the element-wise L2 difference between the current variable "

@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", Tecplot);
 
-template <>
+defineLegacyParams(Tecplot);
+
 InputParameters
-validParams<Tecplot>()
+Tecplot::validParams()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
+  InputParameters params = OversampleOutput::validParams();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");

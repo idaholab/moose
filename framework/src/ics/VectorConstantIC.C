@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorConstantIC);
 
-template <>
+defineLegacyParams(VectorConstantIC);
+
 InputParameters
-validParams<VectorConstantIC>()
+VectorConstantIC::validParams()
 {
-  InputParameters params = validParams<VectorInitialCondition>();
+  InputParameters params = VectorInitialCondition::validParams();
   params.addRequiredParam<Real>("x_value", "The x value to be set in IC");
   params.addParam<Real>("y_value", 0, "The y value to be set in IC");
   params.addParam<Real>("z_value", 0, "The z value to be set in IC");

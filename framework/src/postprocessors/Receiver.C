@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", Receiver);
 
-template <>
+defineLegacyParams(Receiver);
+
 InputParameters
-validParams<Receiver>()
+Receiver::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<Real>("default", "The default value");
   params.addParam<bool>(
       "initialize_old", true, "Initialize the old postprocessor value with the default value");

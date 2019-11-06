@@ -27,6 +27,8 @@ InputParameters validParams<ScalarL2Error>();
 class ScalarL2Error : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ScalarL2Error(const InputParameters & parameters);
 
   virtual void initialize() override;

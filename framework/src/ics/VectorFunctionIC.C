@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorFunctionIC);
 
-template <>
+defineLegacyParams(VectorFunctionIC);
+
 InputParameters
-validParams<VectorFunctionIC>()
+VectorFunctionIC::validParams()
 {
-  InputParameters params = validParams<VectorInitialCondition>();
+  InputParameters params = VectorInitialCondition::validParams();
   params.addParam<FunctionName>("function",
                                 "The initial condition vector function. This cannot be supplied "
                                 "with the component parameters.");
@@ -26,7 +27,6 @@ validParams<VectorFunctionIC>()
       "function_y", "0", "A function that describes the y-component of the initial condition");
   params.addParam<FunctionName>(
       "function_z", "0", "A function that describes the z-component of the initial condition");
-
   params.addClassDescription(
       "Sets component values for a vector field variable based on a vector function.");
   return params;

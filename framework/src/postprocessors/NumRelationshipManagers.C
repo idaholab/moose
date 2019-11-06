@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NumRelationshipManagers);
 
-template <>
+defineLegacyParams(NumRelationshipManagers);
+
 InputParameters
-validParams<NumRelationshipManagers>()
+NumRelationshipManagers::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum rm_type("GEOMETRIC ALGEBRAIC COUPLING ALL", "ALL");
   params.addParam<MooseEnum>(
       "rm_type",

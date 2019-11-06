@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", NodalVariableValue);
 
-template <>
+defineLegacyParams(NodalVariableValue);
+
 InputParameters
-validParams<NodalVariableValue>()
+NodalVariableValue::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("nodeid", "The ID of the node where we monitor");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the variable");

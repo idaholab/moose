@@ -28,6 +28,8 @@ class ElementIntegralVariablePostprocessor : public ElementIntegralPostprocessor
                                              public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:

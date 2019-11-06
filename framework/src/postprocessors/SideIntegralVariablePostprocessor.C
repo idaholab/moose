@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
 
-template <>
+defineLegacyParams(SideIntegralVariablePostprocessor);
+
 InputParameters
-validParams<SideIntegralVariablePostprocessor>()
+SideIntegralVariablePostprocessor::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable",
                                "The name of the variable that this boundary condition applies to");
   return params;

@@ -27,6 +27,8 @@ InputParameters validParams<SideIntegralUserObject>();
 class SideIntegralUserObject : public SideUserObject
 {
 public:
+  static InputParameters validParams();
+
   SideIntegralUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;

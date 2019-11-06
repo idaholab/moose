@@ -26,6 +26,8 @@ InputParameters validParams<NumPicardIterations>();
 class NumPicardIterations : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumPicardIterations(const InputParameters & parameters);
 
   virtual void initialize() override;

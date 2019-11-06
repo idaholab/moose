@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementIntegralArrayVariablePostprocessor);
 
-template <>
+defineLegacyParams(ElementIntegralArrayVariablePostprocessor);
+
 InputParameters
-validParams<ElementIntegralArrayVariablePostprocessor>()
+ElementIntegralArrayVariablePostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable",
                                "The name of the array variable that this object operates on");
   params.addParam<unsigned int>("component", 0, "Component of the array variable to be integrated");

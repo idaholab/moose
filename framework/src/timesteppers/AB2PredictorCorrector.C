@@ -27,11 +27,12 @@
 
 registerMooseObject("MooseApp", AB2PredictorCorrector);
 
-template <>
+defineLegacyParams(AB2PredictorCorrector);
+
 InputParameters
-validParams<AB2PredictorCorrector>()
+AB2PredictorCorrector::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
   params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");
   params.addRequiredParam<Real>("dt", "Initial time step size");

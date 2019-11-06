@@ -24,6 +24,8 @@ InputParameters validParams<NumNonlinearIterations>();
 class NumNonlinearIterations : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumNonlinearIterations(const InputParameters & parameters);
 
   /**

@@ -35,6 +35,8 @@ InputParameters validParams<AB2PredictorCorrector>();
 class AB2PredictorCorrector : public TimeStepper
 {
 public:
+  static InputParameters validParams();
+
   AB2PredictorCorrector(const InputParameters & parameters);
 
   virtual void step() override;

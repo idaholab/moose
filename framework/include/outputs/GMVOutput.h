@@ -24,6 +24,8 @@ InputParameters validParams<GMVOutput>();
 class GMVOutput : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */

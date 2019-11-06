@@ -28,6 +28,8 @@ class SideIntegralVariableUserObject : public SideIntegralUserObject,
                                        public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   SideIntegralVariableUserObject(const InputParameters & parameters);
 
 protected:

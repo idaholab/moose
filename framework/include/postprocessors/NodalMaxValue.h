@@ -24,6 +24,8 @@ InputParameters validParams<NodalMaxValue>();
 class NodalMaxValue : public NodalVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalMaxValue(const InputParameters & parameters);
 
   virtual void initialize() override;

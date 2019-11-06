@@ -23,6 +23,8 @@ class ArrayFunctionIC : public ArrayInitialCondition
 public:
   ArrayFunctionIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * The value of the variable at a point.
