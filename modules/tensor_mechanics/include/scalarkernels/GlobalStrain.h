@@ -29,6 +29,8 @@ class GlobalStrain : public ScalarKernel
 public:
   GlobalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void reinit(){};
   virtual void computeResidual();
   virtual void computeJacobian();

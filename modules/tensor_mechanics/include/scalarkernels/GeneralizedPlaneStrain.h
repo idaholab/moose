@@ -23,6 +23,8 @@ class GeneralizedPlaneStrain : public ScalarKernel
 public:
   GeneralizedPlaneStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void reinit(){};
   virtual void computeResidual();
   virtual void computeJacobian();

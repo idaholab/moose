@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrain);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrain);
+
 InputParameters
-validParams<GeneralizedPlaneStrain>()
+GeneralizedPlaneStrain::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addClassDescription("Generalized Plane Strain Scalar Kernel");
   params.addRequiredParam<UserObjectName>("generalized_plane_strain",
                                           "The name of the GeneralizedPlaneStrainUserObject");

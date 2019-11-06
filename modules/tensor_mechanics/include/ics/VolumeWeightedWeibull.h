@@ -35,6 +35,8 @@ class VolumeWeightedWeibull : public RandomICBase
 public:
   VolumeWeightedWeibull(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(const Point & p) override;
 
 protected:
@@ -45,4 +47,3 @@ protected:
   /// The median value of the strength for specimens having volume equal to the reference volume
   const Real _median;
 };
-
