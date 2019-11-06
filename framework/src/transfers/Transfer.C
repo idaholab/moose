@@ -21,11 +21,12 @@
 
 const Number Transfer::OutOfMeshValue = -999999;
 
-template <>
+defineLegacyParams(Transfer);
+
 InputParameters
-validParams<Transfer>()
+Transfer::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -34,7 +35,7 @@ validParams<Transfer>()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_begin'
-  params += validParams<SetupInterface>();
+  params += ::validParams<SetupInterface>();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
   MultiMooseEnum possible_directions(Transfer::possibleDirections());

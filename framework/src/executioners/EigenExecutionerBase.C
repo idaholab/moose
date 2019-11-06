@@ -17,11 +17,12 @@
 #include "MooseEigenSystem.h"
 #include "UserObject.h"
 
-template <>
+defineLegacyParams(EigenExecutionerBase);
+
 InputParameters
-validParams<EigenExecutionerBase>()
+EigenExecutionerBase::validParams()
 {
-  InputParameters params = validParams<Executioner>();
+  InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for Eigen value problems.");
 
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");

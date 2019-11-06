@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", Eigenvalue);
 
-template <>
+defineLegacyParams(Eigenvalue);
+
 InputParameters
-validParams<Eigenvalue>()
+Eigenvalue::validParams()
 {
-  InputParameters params = validParams<Steady>();
+  InputParameters params = Steady::validParams();
 
   params.addClassDescription("Eigenvalue solves a standard/generalized eigenvaue problem");
 

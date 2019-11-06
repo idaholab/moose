@@ -24,6 +24,8 @@ class PicardSolve : public SolveObject
 public:
   PicardSolve(Executioner * ex);
 
+  static InputParameters validParams();
+
   /**
    * Picard solve the FEProblem.
    * @return True if solver is converged.

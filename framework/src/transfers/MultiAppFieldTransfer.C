@@ -17,11 +17,12 @@
 #include "NearestPointIntegralVariablePostprocessor.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(MultiAppFieldTransfer);
+
 InputParameters
-validParams<MultiAppFieldTransfer>()
+MultiAppFieldTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<std::vector<VariableName>>("source_variable",

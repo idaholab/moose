@@ -43,6 +43,8 @@ public:
   Transfer(const InputParameters & parameters);
   virtual ~Transfer() = default;
 
+  static InputParameters validParams();
+
   /**
    * Execute the transfer.
    */

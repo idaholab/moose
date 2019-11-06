@@ -33,6 +33,8 @@ public:
   GridPartitioner(const InputParameters & params);
   virtual ~GridPartitioner();
 
+  static InputParameters validParams();
+
   virtual std::unique_ptr<Partitioner> clone() const override;
 
 protected:
@@ -40,4 +42,3 @@ protected:
 
   MooseMesh & _mesh;
 };
-

@@ -21,6 +21,8 @@ class AnalyticalIndicator : public ElementIntegralIndicator
 public:
   AnalyticalIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpIntegral() override;
 

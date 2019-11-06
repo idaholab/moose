@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LaplacianJumpIndicator);
 
-template <>
+defineLegacyParams(LaplacianJumpIndicator);
+
 InputParameters
-validParams<LaplacianJumpIndicator>()
+LaplacianJumpIndicator::validParams()
 {
-  InputParameters params = validParams<InternalSideIndicator>();
+  InputParameters params = InternalSideIndicator::validParams();
   params.addClassDescription(
       "Compute the jump of the solution laplacian across element bondaries.");
   return params;

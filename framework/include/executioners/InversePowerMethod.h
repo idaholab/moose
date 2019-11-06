@@ -22,6 +22,8 @@ class InversePowerMethod : public EigenExecutionerBase
 public:
   InversePowerMethod(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void init() override;
 
   virtual void execute() override;
@@ -50,4 +52,3 @@ protected:
   /// flag to indicate if inverse power iteration converged
   bool _last_solve_converged;
 };
-

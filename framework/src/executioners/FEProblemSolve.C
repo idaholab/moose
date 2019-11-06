@@ -12,9 +12,10 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
-template <>
+defineLegacyParams(FEProblemSolve);
+
 InputParameters
-validParams<FEProblemSolve>()
+FEProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 

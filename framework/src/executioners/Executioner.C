@@ -20,13 +20,14 @@
 #include <vector>
 #include <limits>
 
-template <>
+defineLegacyParams(Executioner);
+
 InputParameters
-validParams<Executioner>()
+Executioner::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<FEProblemSolve>();
-  params += validParams<PicardSolve>();
+  InputParameters params = MooseObject::validParams();
+  params += FEProblemSolve::validParams();
+  params += PicardSolve::validParams();
 
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",

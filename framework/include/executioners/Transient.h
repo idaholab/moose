@@ -38,6 +38,8 @@ public:
    */
   Transient(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void init() override;
 
   virtual void execute() override;

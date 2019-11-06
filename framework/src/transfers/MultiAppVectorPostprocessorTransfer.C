@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", MultiAppVectorPostprocessorTransfer);
 
-template <>
+defineLegacyParams(MultiAppVectorPostprocessorTransfer);
+
 InputParameters
-validParams<MultiAppVectorPostprocessorTransfer>()
+MultiAppVectorPostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
   params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",

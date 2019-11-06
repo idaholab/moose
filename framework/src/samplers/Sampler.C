@@ -15,13 +15,14 @@
 #include "MooseRandom.h"
 #include "Distribution.h"
 
-template <>
+defineLegacyParams(Sampler);
+
 InputParameters
-validParams<Sampler>()
+Sampler::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
-  params += validParams<DistributionInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<SetupInterface>();
+  params += ::validParams<DistributionInterface>();
   params.addClassDescription("A base class for distribution sampling.");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);

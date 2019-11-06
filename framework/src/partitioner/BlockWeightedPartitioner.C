@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", BlockWeightedPartitioner);
 
-template <>
+defineLegacyParams(BlockWeightedPartitioner);
+
 InputParameters
-validParams<BlockWeightedPartitioner>()
+BlockWeightedPartitioner::validParams()
 {
-  InputParameters params = validParams<PetscExternalPartitioner>();
+  InputParameters params = PetscExternalPartitioner::validParams();
 
   params.addRequiredParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) that this object will be applied");
