@@ -41,15 +41,15 @@ ElementIDInterface::getElementIDIndex(const std::string & id_parameter_name,
   if (!mesh_base.has_elem_integer(p[comp]))
     mooseError("Mesh does not have an element integer names as ", p[comp]);
 
-  unsigned int id = mesh_base.get_elem_integer_index(p[comp]);
+  auto id = mesh_base.get_elem_integer_index(p[comp]);
 
   return id;
 }
 
-const unsigned int &
+const dof_id_type &
 ElementIDInterface::getElementID(const std::string & id_parameter_name, unsigned int comp) const
 {
-  unsigned int id = getElementIDIndex(id_parameter_name, comp);
+  auto id = getElementIDIndex(id_parameter_name, comp);
 
   auto & _subproblem = *_obj_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
