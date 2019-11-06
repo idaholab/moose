@@ -14,7 +14,4 @@ The following, is required to be installed before you can begin using MOOSE.
 
 - +Download and install [XQuartz](https://www.xquartz.org/)+
 
-- +Install one of our redistributable packages pertaining to your Mac OS version:+
-
-  - High Sierra 10.13: [!package!name arch=osx10.13]
-  - Sierra 10.12: [!package!name arch=osx10.12]
+- +High Sierra 10.13+: [!package!name arch=osx10.13]
