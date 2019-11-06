@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", UniformMarker);
 
-template <>
+defineLegacyParams(UniformMarker);
+
 InputParameters
-validParams<UniformMarker>()
+UniformMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   MooseEnum marker_states = Marker::markerStates();
 
   params.addRequiredParam<MooseEnum>("mark", marker_states, "How to mark elements.");

@@ -14,12 +14,13 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(QuadraturePointMarker);
+
 InputParameters
-validParams<QuadraturePointMarker>()
+QuadraturePointMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = Marker::validParams();
+  params += MaterialPropertyInterface::validParams();
   MooseEnum third_state("DONT_MARK=-1 COARSEN DO_NOTHING REFINE", "DONT_MARK");
   params.addParam<MooseEnum>(
       "third_state",
