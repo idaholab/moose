@@ -105,4 +105,10 @@
     requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces using the ContactAction. The result shall be identical to that obtained by directly specifying individual objects.'
     cli_args = "Executioner/end_time=50 Postprocessors/active=''"
   []
+  [frictionless-nodal-reduced-active-set]
+    type = 'Exodiff'
+    input = 'frictionless-nodal-reduced-active-set.i'
+    exodiff = 'frictionless-nodal-reduced-active-set_exo.e'
+    requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced active residual set scheme in conjunction with a node-face geometric discretization of the contact surface'
+  []
 []
