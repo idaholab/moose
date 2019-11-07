@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class DarcyVelocity;
-
-template <>
-InputParameters validParams<DarcyVelocity>();
-
 /**
  * Auxiliary kernel responsible for computing the Darcy velocity given
  * several fluid properties and the pressure gradient.
@@ -24,6 +18,8 @@ InputParameters validParams<DarcyVelocity>();
 class DarcyVelocity : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DarcyVelocity(const InputParameters & parameters);
 
 protected:

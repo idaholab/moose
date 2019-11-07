@@ -11,11 +11,10 @@
 
 registerMooseObject("DarcyThermoMechApp", DarcyVelocity);
 
-template <>
 InputParameters
-validParams<DarcyVelocity>()
+DarcyVelocity::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   // Declare the options for a MooseEnum.
   // These options will be presented to the user in Peacock and if something other than these
