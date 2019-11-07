@@ -39,6 +39,8 @@ EigenExecutionerBase::validParams()
                               "Normalization");
   params.addParamNamesToGroup("auto_initialization time", "Advanced");
 
+  params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
+
   params.addPrivateParam<bool>("_eigen", true);
 
   return params;
@@ -54,7 +56,7 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase())),
-    _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
+    _eigenvalue(addAttributeReporter("eigenvalue", getParam<Real>("k0"))),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),
     _normalization(isParamValid("normalization")

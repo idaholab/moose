@@ -100,17 +100,16 @@ Executioner::feProblem()
   return _fe_problem;
 }
 
-void
-Executioner::addAttributeReporter(const std::string & name,
-                                  Real & attribute,
-                                  const std::string execute_on)
+PostprocessorValue &
+Executioner::addAttributeReporter(const std::string & name, Real initial_value)
 {
   FEProblemBase * problem = getCheckedPointerParam<FEProblemBase *>(
       "_fe_problem_base",
       "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
-  InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
-  params.set<Real *>("value") = &attribute;
-  if (!execute_on.empty())
-    params.set<ExecFlagEnum>("execute_on") = execute_on;
-  problem->addPostprocessor("ExecutionerAttributeReporter", name, params);
+  InputParameters params = _app.getFactory().getValidParams("Receiver");
+  params.set<Real>("default") = initial_value;
+  problem->addPostprocessor("Receiver", name, params);
+  auto & v = problem->getPostprocessorValue(name);
+  v = initial_value;
+  return v;
 }
