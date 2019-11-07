@@ -22,6 +22,8 @@ class SS316HLAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compu
 public:
   SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /// Returns vector of the functions to use for the conversion of input variables.
   virtual std::vector<std::vector<ROMInputTransform>> getTransform() override;

@@ -23,6 +23,8 @@ class ADStressDivergenceTest : public ADKernel<compute_stage>
 public:
   ADStressDivergenceTest(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpResidual();
 
@@ -31,4 +33,3 @@ protected:
 
   usingKernelMembers;
 };
-

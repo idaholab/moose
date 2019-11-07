@@ -26,6 +26,8 @@ class TestSubblockIndexProvider : public SubblockIndexProvider
 public:
   TestSubblockIndexProvider(const InputParameters & params);
 
+  static InputParameters validParams();
+
   virtual void initialize() override {};
   virtual void execute() override {};
   virtual void finalize() override {};
@@ -40,4 +42,3 @@ public:
    */
   virtual unsigned int getMaxSubblockIndex() const override;
 };
-

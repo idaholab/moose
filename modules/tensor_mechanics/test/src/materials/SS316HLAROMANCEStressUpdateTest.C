@@ -11,33 +11,38 @@
 
 registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
-defineADValidParams(
-    SS316HLAROMANCEStressUpdateTest,
-    ADLAROMANCEStressUpdateBase,
-    params.addClassDescription("LAROMANCE creep update model for SS316H");
+defineADLegacyParams(SS316HLAROMANCEStressUpdateTest);
 
-    // Override defaults for material specific parameters below
-    params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
-                                      5.0e12,
-                                      "initial_mobile_dislocation_density >=1.32776E+12 & "
-                                      "initial_mobile_dislocation_density <= 9.99959E+12",
-                                      "Initial density of mobile (glissile) dislocations (1/m^2)");
-    params.addRangeCheckedParam<Real>(
-        "max_relative_mobile_dislocation_increment",
-        0.5,
-        "max_relative_mobile_dislocation_increment > 0.0",
-        "Maximum increment of density of mobile (glissile) dislocations.");
-    params.addRangeCheckedParam<Real>(
-        "initial_immobile_dislocation_density",
-        5.0e11,
-        "initial_immobile_dislocation_density >= 2.93039E+11 & "
-        "initial_immobile_dislocation_density <= 9.99798E+11",
-        "Immobile (locked) dislocation density initial value (1/m^2).");
-    params.addRangeCheckedParam<Real>(
-        "max_relative_immobile_dislocation_increment",
-        0.5,
-        "max_relative_immobile_dislocation_increment > 0.0",
-        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2)."););
+template <ComputeStage compute_stage>
+InputParameters
+SS316HLAROMANCEStressUpdateTest<compute_stage>::validParams()
+{
+  InputParameters params = ADLAROMANCEStressUpdateBase<compute_stage>::validParams();
+  params.addClassDescription("LAROMANCE creep update model for SS316H");
+
+  // Override defaults for material specific parameters below
+  params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
+                                    5.0e12,
+                                    "initial_mobile_dislocation_density >=1.32776E+12 & "
+                                    "initial_mobile_dislocation_density <= 9.99959E+12",
+                                    "Initial density of mobile (glissile) dislocations (1/m^2)");
+  params.addRangeCheckedParam<Real>(
+      "max_relative_mobile_dislocation_increment",
+      0.5,
+      "max_relative_mobile_dislocation_increment > 0.0",
+      "Maximum increment of density of mobile (glissile) dislocations.");
+  params.addRangeCheckedParam<Real>("initial_immobile_dislocation_density",
+                                    5.0e11,
+                                    "initial_immobile_dislocation_density >= 2.93039E+11 & "
+                                    "initial_immobile_dislocation_density <= 9.99798E+11",
+                                    "Immobile (locked) dislocation density initial value (1/m^2).");
+  params.addRangeCheckedParam<Real>(
+      "max_relative_immobile_dislocation_increment",
+      0.5,
+      "max_relative_immobile_dislocation_increment > 0.0",
+      "Maximum increment of immobile (locked) dislocation density initial value (1/m^2).");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 SS316HLAROMANCEStressUpdateTest<compute_stage>::SS316HLAROMANCEStressUpdateTest(
