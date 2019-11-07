@@ -80,6 +80,7 @@ class CoreExtension(components.Extension):
         reader.addBlock(EndOfFileBlock())
 
         # Inline tokenize components
+        reader.addInline(EscapeCharacter())
         reader.addInline(FormatInline())
         reader.addInline(LinkInline())
         reader.addInline(ShortcutLinkInline())
@@ -372,6 +373,14 @@ class FormatInline(components.TokenComponent):
             return Strikethrough(parent)
         elif tok == '`':
             return Monospace(parent, content=info['inline'], recursive=False)
+
+class EscapeCharacter(components.TokenComponent):
+    RE = re.compile(r'\\(?P<char>[\[\]!])',
+                    flags=re.MULTILINE|re.DOTALL)
+
+    def createToken(self, parent, info, page):
+        Punctuation(parent, content=info['char'])
+        return parent
 
 ####################################################################################################
 # Rendering.

@@ -41,5 +41,24 @@ class TestCore(MooseDocsTestCase):
                          after_begin='\n', before_end='\n', escape=False)
         self.assertLatexString(tex(0)(0), 'int x = 0;', escape=False)
 
+    def testEscapeCharacter(self):
+        text = "No \[link\] and no \!\! comment"
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=14)
+        self.assertToken(ast(0)(0), 'Word', content='No')
+        self.assertToken(ast(0)(1), 'Space', count=1)
+        self.assertToken(ast(0)(2), 'Punctuation', content='[')
+        self.assertToken(ast(0)(3), 'Word', content='link')
+        self.assertToken(ast(0)(4), 'Punctuation', content=']')
+        self.assertToken(ast(0)(5), 'Space', count=1)
+        self.assertToken(ast(0)(6), 'Word', content='and')
+        self.assertToken(ast(0)(7), 'Space', count=1)
+        self.assertToken(ast(0)(8), 'Word', content='no')
+        self.assertToken(ast(0)(9), 'Space', count=1)
+        self.assertToken(ast(0)(10), 'Punctuation', content='!')
+        self.assertToken(ast(0)(11), 'Punctuation', content='!')
+        self.assertToken(ast(0)(12), 'Space', count=1)
+        self.assertToken(ast(0)(13), 'Word', content='comment')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
