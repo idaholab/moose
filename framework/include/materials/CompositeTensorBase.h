@@ -101,7 +101,7 @@ template <class T, class U>
 InputParameters
 CompositeTensorBase<T, U>::validParams()
 {
-  InputParameters params = ::validParams<U>();
+  InputParameters params = U::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("tensors", "Component tensors");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("weights", "Component weights");
   params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");
