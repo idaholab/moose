@@ -11,10 +11,14 @@
 
 registerADMooseObject("DarcyThermoMechApp", DarcyAdvection);
 
-defineADValidParams(DarcyAdvection,
-                    ADKernelValue,
-                    params.addRequiredCoupledVar("pressure",
-                                                 "The variable representing the pressure."););
+template <ComputeStage compute_stage>
+InputParameters
+DarcyAdvection<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addRequiredCoupledVar("pressure", "The variable representing the pressure.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 DarcyAdvection<compute_stage>::DarcyAdvection(const InputParameters & parameters)

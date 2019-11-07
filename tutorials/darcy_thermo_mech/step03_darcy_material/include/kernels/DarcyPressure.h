@@ -12,12 +12,6 @@
 // Including the "ADDiffusion" Kernel so it can be extended
 #include "ADDiffusion.h"
 
-// Forward declare the class being created and the validParams function
-template <ComputeStage>
-class DarcyPressure;
-
-declareADValidParams(DarcyPressure);
-
 /**
  * Computes the residual contribution: K / mu * grad_u * grad_phi.
  *
@@ -29,6 +23,8 @@ template <ComputeStage compute_stage>
 class DarcyPressure : public ADDiffusion<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   DarcyPressure(const InputParameters & parameters);
 
 protected:

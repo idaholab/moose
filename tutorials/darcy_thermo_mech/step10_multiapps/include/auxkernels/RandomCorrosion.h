@@ -13,12 +13,6 @@
 #include "AuxKernel.h"
 #include "libmesh/bounding_box.h"
 
-// Forward declarations
-class RandomCorrosion;
-
-template <>
-InputParameters validParams<RandomCorrosion>();
-
 /**
  * Creates artificial, temperature driven corrosion.
  *
@@ -32,6 +26,8 @@ InputParameters validParams<RandomCorrosion>();
 class RandomCorrosion : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for the RandomCorrosion object.

@@ -12,11 +12,6 @@
 // MOOSE includes
 #include "Action.h"
 
-class SetupDarcySimulation;
-
-template <>
-InputParameters validParams<SetupDarcySimulation>();
-
 /**
  * An action for creating the necessary objects to perform a thermal mechanics problem using
  * Darcy's equation.
@@ -24,6 +19,8 @@ InputParameters validParams<SetupDarcySimulation>();
 class SetupDarcySimulation : public Action
 {
 public:
+  static InputParameters validParams();
+
   SetupDarcySimulation(InputParameters params);
   virtual void act() override;
 

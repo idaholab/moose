@@ -12,11 +12,10 @@
 
 registerMooseObject("DarcyThermoMechApp", PackedColumn);
 
-template <>
 InputParameters
-validParams<PackedColumn>()
+PackedColumn::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   // Parameter for radius of the spheres used to interpolate permeability.
   params.addParam<FunctionName>("radius",

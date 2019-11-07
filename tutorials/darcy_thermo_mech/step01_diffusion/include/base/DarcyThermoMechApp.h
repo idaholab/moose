@@ -11,14 +11,11 @@
 
 #include "MooseApp.h"
 
-class DarcyThermoMechApp;
-
-template <>
-InputParameters validParams<DarcyThermoMechApp>();
-
 class DarcyThermoMechApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   DarcyThermoMechApp(InputParameters parameters);
 
   static void registerApps();
