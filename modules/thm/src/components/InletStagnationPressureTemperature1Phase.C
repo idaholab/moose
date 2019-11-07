@@ -8,9 +8,9 @@ InputParameters
 validParams<InletStagnationPressureTemperature1Phase>()
 {
   InputParameters params = validParams<FlowBoundary>();
-  params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure");
-  params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature");
-  params.addParam<bool>("reversible", false, "true for reversible, false (default) for pure inlet");
+  params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure [Pa]");
+  params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature [K]");
+  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
   params.addClassDescription("Boundary condition with prescribed stagnation pressure and "
                              "temperature for 1-phase flow channels.");
   return params;

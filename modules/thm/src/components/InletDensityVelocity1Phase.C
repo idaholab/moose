@@ -10,7 +10,7 @@ validParams<InletDensityVelocity1Phase>()
   InputParameters params = validParams<FlowBoundary>();
   params.addRequiredParam<Real>("rho", "Prescribed density [kg/m^3]");
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
-  params.addParam<bool>("reversible", false, "true for reversible, false (default) for pure inlet");
+  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
   params.addClassDescription(
       "Boundary condition with prescribed density and velocity for 1-phase flow channels.");
   return params;

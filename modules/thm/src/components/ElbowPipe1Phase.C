@@ -8,9 +8,9 @@ InputParameters
 validParams<ElbowPipe1Phase>()
 {
   InputParameters params = validParams<FlowChannel1Phase>();
-  params.addRequiredParam<Real>("radius", "Radius of the pipe.");
-  params.addRequiredParam<Real>("start_angle", "Angle at which the pipe starts, in degrees");
-  params.addRequiredParam<Real>("end_angle", "Angle at which the pipe ends, in degrees");
+  params.addRequiredParam<Real>("radius", "Radius of the pipe [m]");
+  params.addRequiredParam<Real>("start_angle", "Angle at which the pipe starts [degrees]");
+  params.addRequiredParam<Real>("end_angle", "Angle at which the pipe ends [degrees]");
 
   // Suppress length. Also need to set it to something, because it is required in the parent class
   params.set<std::vector<Real>>("length") = {0.0};

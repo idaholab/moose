@@ -8,9 +8,9 @@ InputParameters
 validParams<InletMassFlowRateTemperature1Phase>()
 {
   InputParameters params = validParams<FlowBoundary>();
-  params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate");
-  params.addRequiredParam<Real>("T", "prescribed temperature (used only in 3eqn model)");
-  params.addParam<bool>("reversible", false, "true for reversible, false (default) for pure inlet");
+  params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
+  params.addRequiredParam<Real>("T", "Prescribed temperature (used only in 3eqn model) [K]");
+  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
   params.addClassDescription("Boundary condition with prescribed mass flow rate and temperature "
                              "for 1-phase flow channels.");
   return params;

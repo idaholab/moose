@@ -14,18 +14,18 @@ validParams<FlowChannel1Phase>()
 {
   InputParameters params = validParams<FlowChannelBase>();
   params.addRequiredParam<FunctionName>(
-      "A", "Area of the flow channel, can be a constant or a function");
-  params.addParam<Real>("roughness", 0.0, "roughness, [m]");
-  params.addParam<FunctionName>("f", "Wall friction");
+      "A", "Area of the flow channel, can be a constant or a function [m^2]");
+  params.addParam<Real>("roughness", 0.0, "Roughness [m]");
+  params.addParam<FunctionName>("f", "Wall friction factor [-]");
 
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannel1Phase::getConvHeatTransGeometry("PIPE"),
                              "Convective heat transfer geometry");
-  params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
+  params.addParam<Real>("PoD", 1, "Pitch to diameter ratio for parallel bundle heat transfer [-]");
 
-  params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel");
-  params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel");
-  params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel");
+  params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel [Pa]");
+  params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel [m/s]");
+  params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel [K]");
 
   params.addClassDescription("1-phase 1D flow channel");
 

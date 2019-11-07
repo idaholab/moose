@@ -10,9 +10,9 @@ validParams<HSBoundaryRadiation>()
 {
   InputParameters params = validParams<HSBoundary>();
 
-  params.addRequiredParam<Real>("emissivity", "Emissivity of flow channel");
-  params.addParam<FunctionName>("view_factor", "1", "View factor function");
-  params.addRequiredParam<FunctionName>("T_ambient", "Temperature of environment");
+  params.addRequiredParam<Real>("emissivity", "Emissivity of flow channel [-]");
+  params.addParam<FunctionName>("view_factor", "1", "View factor function [-]");
+  params.addRequiredParam<FunctionName>("T_ambient", "Temperature of environment [K]");
 
   params.addClassDescription("Radiative heat transfer boundary condition for heat structure");
 

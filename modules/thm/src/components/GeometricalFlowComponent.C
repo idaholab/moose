@@ -10,7 +10,7 @@ validParams<GeometricalFlowComponent>()
 
   params.addClassDescription("Base class for geometrical components that have fluid flow");
 
-  params.addRequiredParam<UserObjectName>("fp", "Name of fluid properties user object");
+  params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
   params.addParam<MooseEnum>(
       "rdg_slope_reconstruction",
       SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum("None"),

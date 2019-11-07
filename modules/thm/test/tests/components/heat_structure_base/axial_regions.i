@@ -35,7 +35,7 @@
     type = HSBoundaryHeatFlux
     boundary = 'hs:region1:outer hs:region2:outer'
     hs = hs
-    q_function = 1000
+    q = 1000
   [../]
 []
 

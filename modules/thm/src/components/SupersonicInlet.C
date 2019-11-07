@@ -9,9 +9,9 @@ InputParameters
 validParams<SupersonicInlet>()
 {
   InputParameters params = validParams<FlowBoundary>();
-  params.addParam<Real>("p", "Prescribed pressure");
-  params.addParam<Real>("T", "Prescribed temperature");
-  params.addParam<Real>("vel", "Prescribed velocity");
+  params.addParam<Real>("p", "Prescribed pressure [Pa]");
+  params.addParam<Real>("T", "Prescribed temperature [K]");
+  params.addParam<Real>("vel", "Prescribed velocity [m/s]");
   return params;
 }
 

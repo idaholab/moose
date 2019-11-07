@@ -11,10 +11,10 @@ InputParameters
 validParams<HeatSourceFromTotalPower>()
 {
   InputParameters params = validParams<HeatSourceBase>();
-  params.addRequiredParam<std::string>("power", "The component name that provides total power");
+  params.addRequiredParam<std::string>("power", "Component that provides total power");
   params.addParam<Real>(
-      "power_fraction", 1., "The fraction of total power that goes into the heat structure");
-  params.addParam<FunctionName>("power_shape_function", "axial power shape of the fuel");
+      "power_fraction", 1., "Fraction of the total power that goes into the heat structure [-]");
+  params.addParam<FunctionName>("power_shape_function", "Axial power shape [-]");
   params.addClassDescription("Heat generation from total power");
   return params;
 }
