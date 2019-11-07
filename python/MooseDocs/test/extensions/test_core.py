@@ -41,6 +41,22 @@ class TestCore(MooseDocsTestCase):
                          after_begin='\n', before_end='\n', escape=False)
         self.assertLatexString(tex(0)(0), 'int x = 0;', escape=False)
 
+    def testLineBreak(self):
+        text = r'Break\\ this'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=3)
+        self.assertToken(ast(0)(0), 'Word', content='Break')
+        self.assertToken(ast(0)(1), 'LineBreak')
+        self.assertToken(ast(0)(2), 'Word', content='this')
+
+        text = r'''Break\\
+this'''
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=3)
+        self.assertToken(ast(0)(0), 'Word', content='Break')
+        self.assertToken(ast(0)(1), 'LineBreak')
+        self.assertToken(ast(0)(2), 'Word', content='this')
+
     def testEscapeCharacter(self):
         text = "No \[link\] and no \!\! comment"
         ast = self.tokenize(text)
@@ -59,6 +75,16 @@ class TestCore(MooseDocsTestCase):
         self.assertToken(ast(0)(11), 'Punctuation', content='!')
         self.assertToken(ast(0)(12), 'Space', count=1)
         self.assertToken(ast(0)(13), 'Word', content='comment')
+
+        for c in ['!', '[', ']', '@', '^', '*', '+', '~', '-']:
+            text = r'foo \{} bar'.format(c)
+            ast = self.tokenize(text)
+            self.assertToken(ast(0), 'Paragraph', size=5)
+            self.assertToken(ast(0)(0), 'Word', content='foo')
+            self.assertToken(ast(0)(1), 'Space', count=1)
+            self.assertToken(ast(0)(2), 'Punctuation', content=c)
+            self.assertToken(ast(0)(3), 'Space', count=1)
+            self.assertToken(ast(0)(4), 'Word', content='bar')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

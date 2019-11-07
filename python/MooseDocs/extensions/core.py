@@ -375,7 +375,7 @@ class FormatInline(components.TokenComponent):
             return Monospace(parent, content=info['inline'], recursive=False)
 
 class EscapeCharacter(components.TokenComponent):
-    RE = re.compile(r'\\(?P<char>[\[\]!])',
+    RE = re.compile(r'\\(?P<char>\[|\]|!|\@|\^|\=|\*|\+|~|-)',
                     flags=re.MULTILINE|re.DOTALL)
 
     def createToken(self, parent, info, page):
