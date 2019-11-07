@@ -76,7 +76,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   }
 
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);
@@ -96,7 +96,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
                _func_F->ErrorMsg());
 
   // on-diagonal derivative
-  _func_dFdu = ADFunctionPtr(new ADFunction(*_func_F));
+  _func_dFdu = std::make_shared<ADFunction>(*_func_F);
 
   if (_func_dFdu->AutoDiff(_var.name()) != -1)
     mooseError("Failed to take first derivative w.r.t. ", _var.name());
@@ -104,7 +104,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   // off-diagonal derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    _func_dFdarg[i] = ADFunctionPtr(new ADFunction(*_func_F));
+    _func_dFdarg[i] = std::make_shared<ADFunction>(*_func_F);
 
     if (_func_dFdarg[i]->AutoDiff(_arg_names[i]) != -1)
       mooseError("Failed to take first derivative w.r.t. ", _arg_names[i]);

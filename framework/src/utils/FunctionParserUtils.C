@@ -118,7 +118,7 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
 
   for (unsigned int i = 0; i < nconst; ++i)
   {
-    ADFunctionPtr expression = ADFunctionPtr(new ADFunction());
+    ADFunctionPtr expression = std::make_shared<ADFunction>();
 
     // set FParser internal feature flags
     setParserFeatureFlags(expression);

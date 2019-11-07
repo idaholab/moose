@@ -48,7 +48,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // base function object
-  _func_F = ADFunctionPtr(std::make_shared<ADFunction>());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);
