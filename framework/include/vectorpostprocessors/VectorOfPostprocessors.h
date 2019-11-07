@@ -26,6 +26,8 @@ InputParameters validParams<VectorOfPostprocessors>();
 class VectorOfPostprocessors : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /**
     * Class constructor
     * @param parameters The input parameters

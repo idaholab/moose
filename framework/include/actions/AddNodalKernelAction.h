@@ -21,6 +21,8 @@ class AddNodalKernelAction : public MooseObjectAction
 public:
   AddNodalKernelAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

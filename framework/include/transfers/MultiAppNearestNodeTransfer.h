@@ -30,6 +30,8 @@ class MultiAppNearestNodeTransfer : public MultiAppFieldTransfer
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:

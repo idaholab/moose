@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", ConcentricCircleMesh);
 
-template <>
+defineLegacyParams(ConcentricCircleMesh);
+
 InputParameters
-validParams<ConcentricCircleMesh>()
+ConcentricCircleMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   MooseEnum portion(
       "full top_right top_left bottom_left bottom_right right_half left_half top_half bottom_half",
       "full");

@@ -24,6 +24,8 @@ class ImageMesh : public GeneratedMesh, public FileRangeBuilder
 {
 public:
   ImageMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   ImageMesh(const ImageMesh & other_mesh);
 
   virtual std::unique_ptr<MooseMesh> safeClone() const override;

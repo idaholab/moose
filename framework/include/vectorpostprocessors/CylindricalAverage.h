@@ -23,6 +23,8 @@ InputParameters validParams<CylindricalAverage>();
 class CylindricalAverage : public SpatialAverageBase
 {
 public:
+  static InputParameters validParams();
+
   CylindricalAverage(const InputParameters & parameters);
 
 protected:

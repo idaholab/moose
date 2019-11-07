@@ -31,6 +31,8 @@ class SideSetsGeneratorBase : public MeshGenerator
 {
 public:
   SideSetsGeneratorBase(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~SideSetsGeneratorBase(); // dtor required for unique_ptr with forward declarations
 
 protected:

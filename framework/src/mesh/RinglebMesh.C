@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", RinglebMesh);
 
-template <>
+defineLegacyParams(RinglebMesh);
+
 InputParameters
-validParams<RinglebMesh>()
+RinglebMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<Real>("gamma", "Gamma parameter");
   params.addRequiredParam<Real>("kmax", "Value of k on the inner wall.");
   params.addRequiredParam<Real>("kmin", "Value of k on the outer wall.");

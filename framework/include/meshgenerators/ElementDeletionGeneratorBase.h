@@ -29,6 +29,8 @@ class ElementDeletionGeneratorBase : public MeshGenerator
 public:
   ElementDeletionGeneratorBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

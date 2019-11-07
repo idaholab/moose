@@ -17,11 +17,12 @@
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_mesh_meta_data");
 
-template <>
+defineLegacyParams(SetupRecoverFileBaseAction);
+
 InputParameters
-validParams<SetupRecoverFileBaseAction>()
+SetupRecoverFileBaseAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

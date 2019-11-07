@@ -21,6 +21,8 @@ class DynamicObjectRegistrationAction : public Action
 public:
   DynamicObjectRegistrationAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

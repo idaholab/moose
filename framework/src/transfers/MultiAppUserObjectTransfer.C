@@ -28,11 +28,12 @@
 
 registerMooseObject("MooseApp", MultiAppUserObjectTransfer);
 
-template <>
+defineLegacyParams(MultiAppUserObjectTransfer);
+
 InputParameters
-validParams<MultiAppUserObjectTransfer>()
+MultiAppUserObjectTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppFieldTransfer::validParams();
   //  MultiAppUserObjectTransfer does not need source variable since it query values from user
   //  objects
   params.suppressParameter<std::vector<VariableName>>("source_variable");

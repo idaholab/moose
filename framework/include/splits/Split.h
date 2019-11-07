@@ -30,6 +30,8 @@ class Split : public MooseObject, public Restartable
 {
 public:
   Split(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~Split() = default;
 
   virtual void setup(const std::string & prefix = "-");

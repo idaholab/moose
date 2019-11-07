@@ -12,9 +12,10 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(SamplerInterface);
+
 InputParameters
-validParams<SamplerInterface>()
+SamplerInterface::validParams()
 {
   return emptyInputParameters();
 }

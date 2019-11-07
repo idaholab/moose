@@ -21,6 +21,8 @@ class FileMesh : public MooseMesh
 {
 public:
   FileMesh(const InputParameters & parameters);
+
+  static InputParameters validParams();
   FileMesh(const FileMesh & other_mesh);
   virtual ~FileMesh(); // empty dtor required for unique_ptr with forward declarations
 

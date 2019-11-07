@@ -35,6 +35,8 @@ public:
    */
   MooseParsedGradFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Destructor necessary for std::unique_ptr usage
    */

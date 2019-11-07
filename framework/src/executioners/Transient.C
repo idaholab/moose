@@ -38,11 +38,12 @@
 
 registerMooseObject("MooseApp", Transient);
 
-template <>
+defineLegacyParams(Transient);
+
 InputParameters
-validParams<Transient>()
+Transient::validParams()
 {
-  InputParameters params = validParams<Executioner>();
+  InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for time varying simulations.");
 
   std::vector<Real> sync_times(1);

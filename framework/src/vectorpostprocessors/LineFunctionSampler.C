@@ -15,13 +15,14 @@
 
 registerMooseObject("MooseApp", LineFunctionSampler);
 
-template <>
-InputParameters
-validParams<LineFunctionSampler>()
-{
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+defineLegacyParams(LineFunctionSampler);
 
-  params += validParams<SamplerBase>();
+InputParameters
+LineFunctionSampler::validParams()
+{
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+
+  params += SamplerBase::validParams();
 
   params.addRequiredParam<Point>("start_point", "The beginning of the line");
   params.addRequiredParam<Point>("end_point", "The ending of the line");

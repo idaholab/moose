@@ -26,6 +26,8 @@ class MultiAppPostprocessorToAuxScalarTransfer : public MultiAppTransfer
 public:
   MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Execute the transfer
    */
@@ -38,4 +40,3 @@ protected:
   /// The name of the variable to which the postprocessor is being transfered
   VariableName _to_aux_name;
 };
-

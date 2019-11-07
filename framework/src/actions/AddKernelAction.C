@@ -14,11 +14,12 @@ registerMooseAction("MooseApp", AddKernelAction, "add_kernel");
 
 registerMooseAction("MooseApp", AddKernelAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(AddKernelAction);
+
 InputParameters
-validParams<AddKernelAction>()
+AddKernelAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddKernelAction::AddKernelAction(InputParameters params) : MooseObjectAction(params) {}

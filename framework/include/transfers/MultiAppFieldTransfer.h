@@ -26,6 +26,8 @@ class MultiAppFieldTransfer : public MultiAppTransfer
 public:
   MultiAppFieldTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup();
 
   /**

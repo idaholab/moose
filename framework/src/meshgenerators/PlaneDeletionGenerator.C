@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", PlaneDeletionGenerator);
 
-template <>
+defineLegacyParams(PlaneDeletionGenerator);
+
 InputParameters
-validParams<PlaneDeletionGenerator>()
+PlaneDeletionGenerator::validParams()
 {
-  InputParameters params = validParams<ElementDeletionGeneratorBase>();
+  InputParameters params = ElementDeletionGeneratorBase::validParams();
 
   params.addClassDescription(
       "Removes elements lying 'above' the plane (in the direction of the normal).");

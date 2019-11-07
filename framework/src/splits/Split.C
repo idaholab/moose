@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", Split);
 
-template <>
+defineLegacyParams(Split);
+
 InputParameters
-validParams<Split>()
+Split::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addParam<std::vector<NonlinearVariableName>>(
       "vars", "Variables Split operates on (omitting this implies \"all variables\"");
   params.addParam<std::vector<SubdomainName>>(

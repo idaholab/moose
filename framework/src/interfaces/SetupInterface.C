@@ -11,10 +11,12 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(SetupInterface);
+
 InputParameters
-validParams<SetupInterface>()
+SetupInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
 
   // Add the 'execute_on' input parameter for users to set

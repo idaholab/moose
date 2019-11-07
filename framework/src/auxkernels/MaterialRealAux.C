@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialRealAux);
 
-template <>
+defineLegacyParams(MaterialRealAux);
+
 InputParameters
-validParams<MaterialRealAux>()
+MaterialRealAux::validParams()
 {
-  InputParameters params = validParams<MaterialAuxBase<Real>>();
+  InputParameters params = MaterialAuxBase<Real>::validParams();
   params.addClassDescription("Outputs element volume-averaged material properties");
   return params;
 }

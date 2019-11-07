@@ -13,10 +13,12 @@
 #include "MooseMesh.h"
 #include "MooseObject.h"
 
-template <>
+defineLegacyParams(BoundaryRestrictable);
+
 InputParameters
-validParams<BoundaryRestrictable>()
+BoundaryRestrictable::validParams()
 {
+
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 

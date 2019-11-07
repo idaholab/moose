@@ -21,6 +21,8 @@ class AddPostprocessorAction : public MooseObjectAction
 public:
   AddPostprocessorAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

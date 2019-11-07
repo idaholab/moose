@@ -26,6 +26,8 @@ class FullSolveMultiApp : public MultiApp
 public:
   FullSolveMultiApp(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
@@ -41,4 +43,3 @@ public:
 private:
   std::vector<Executioner *> _executioners;
 };
-

@@ -21,6 +21,8 @@ class MooseVariableConstMonomial : public MooseVariableFE<Real>
 public:
   MooseVariableConstMonomial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;

@@ -14,10 +14,12 @@
 #include "ActionWarehouse.h"
 
 // Define input parameters
-template <>
+defineLegacyParams(OutputInterface);
+
 InputParameters
-validParams<OutputInterface>()
+OutputInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<OutputName>>("outputs",
                                            "Vector of output names were you would like "

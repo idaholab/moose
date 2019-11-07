@@ -42,6 +42,8 @@ class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Re
 public:
   ADDGKernel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual ~ADDGKernel();
 
   // See KernelBase base for documentation of these overridden methods

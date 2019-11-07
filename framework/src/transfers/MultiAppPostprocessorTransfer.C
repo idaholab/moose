@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", MultiAppPostprocessorTransfer);
 
-template <>
+defineLegacyParams(MultiAppPostprocessorTransfer);
+
 InputParameters
-validParams<MultiAppPostprocessorTransfer>()
+MultiAppPostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
       "Transfers postprocessor data between the master application and sub-application(s).");
   params.addRequiredParam<PostprocessorName>(

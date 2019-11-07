@@ -24,11 +24,12 @@
 
 registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
 
-template <>
+defineLegacyParams(MultiAppMeshFunctionTransfer);
+
 InputParameters
-validParams<MultiAppMeshFunctionTransfer>()
+MultiAppMeshFunctionTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppFieldTransfer::validParams();
   params.addClassDescription(
       "Transfers field data at the MultiApp position using solution the finite element function "
       "from the master application, via a 'libMesh::MeshFunction' object.");

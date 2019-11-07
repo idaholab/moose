@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", RealFunctionControl);
 
-template <>
+defineLegacyParams(RealFunctionControl);
+
 InputParameters
-validParams<RealFunctionControl>()
+RealFunctionControl::validParams()
 {
-  InputParameters params = validParams<Control>();
+  InputParameters params = Control::validParams();
   params.addClassDescription(
       "Sets the value of a 'Real' input parameters to the value of a provided function.");
   params.addRequiredParam<FunctionName>(

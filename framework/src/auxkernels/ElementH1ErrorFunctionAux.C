@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", ElementH1ErrorFunctionAux);
 
-template <>
+defineLegacyParams(ElementH1ErrorFunctionAux);
+
 InputParameters
-validParams<ElementH1ErrorFunctionAux>()
+ElementH1ErrorFunctionAux::validParams()
 {
-  InputParameters params = validParams<ElementL2ErrorFunctionAux>();
+  InputParameters params = ElementL2ErrorFunctionAux::validParams();
   params.addClassDescription(
       "Computes the H1 or W^{1,p} error between an exact function and a coupled variable.");
 

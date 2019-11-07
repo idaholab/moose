@@ -12,9 +12,10 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(FunctionInterface);
+
 InputParameters
-validParams<FunctionInterface>()
+FunctionInterface::validParams()
 {
   return emptyInputParameters();
 }

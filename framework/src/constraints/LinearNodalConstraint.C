@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", LinearNodalConstraint);
 
-template <>
+defineLegacyParams(LinearNodalConstraint);
+
 InputParameters
-validParams<LinearNodalConstraint>()
+LinearNodalConstraint::validParams()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  InputParameters params = NodalConstraint::validParams();
   params.addClassDescription(
       "Constrains slave node to move as a linear combination of master nodes.");
   params.addRequiredParam<std::vector<unsigned int>>("master", "The master node IDs.");

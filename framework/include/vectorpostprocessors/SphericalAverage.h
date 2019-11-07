@@ -23,6 +23,8 @@ InputParameters validParams<SphericalAverage>();
 class SphericalAverage : public SpatialAverageBase
 {
 public:
+  static InputParameters validParams();
+
   SphericalAverage(const InputParameters & parameters);
 
 protected:

@@ -20,11 +20,12 @@
 
 registerMooseAction("MooseApp", CheckOutputAction, "check_output");
 
-template <>
+defineLegacyParams(CheckOutputAction);
+
 InputParameters
-validParams<CheckOutputAction>()
+CheckOutputAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

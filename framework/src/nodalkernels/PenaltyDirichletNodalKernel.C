@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PenaltyDirichletNodalKernel);
 
-template <>
+defineLegacyParams(PenaltyDirichletNodalKernel);
+
 InputParameters
-validParams<PenaltyDirichletNodalKernel>()
+PenaltyDirichletNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Enforces a Dirichlet boundary condition "
                              "in a weak sense by penalizing differences between the current "
                              "solution and the Dirichlet value on nodesets.");

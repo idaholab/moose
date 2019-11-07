@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", CombinerGenerator);
 
-template <>
+defineLegacyParams(CombinerGenerator);
+
 InputParameters
-validParams<CombinerGenerator>()
+CombinerGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addClassDescription(
       "Combine multiple meshes (or copies of one mesh) together into one (disjoint) mesh.  Can "

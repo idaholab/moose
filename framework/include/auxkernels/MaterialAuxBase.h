@@ -26,6 +26,8 @@ template <typename T>
 class MaterialAuxBase : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters for this object
@@ -48,6 +50,19 @@ private:
   /// Value to be added to the material property
   const Real _offset;
 };
+
+template <typename T>
+InputParameters
+MaterialAuxBase<T>::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
+  params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
+  params.addParam<Real>(
+      "factor", 1, "The factor by which to multiply your material property for visualization");
+  params.addParam<Real>(
+      "offset", 0, "The offset to add to your material property for visualization");
+  return params;
+}
 
 template <typename T>
 MaterialAuxBase<T>::MaterialAuxBase(const InputParameters & parameters)

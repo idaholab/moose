@@ -31,6 +31,8 @@ public:
    */
   ImageFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Class destructor
    */

@@ -30,6 +30,8 @@ public:
    */
   AddVariableAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
   /**

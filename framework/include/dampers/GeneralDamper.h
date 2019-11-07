@@ -28,6 +28,8 @@ class GeneralDamper : public Damper
 public:
   GeneralDamper(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Computes this Damper's damping
    */

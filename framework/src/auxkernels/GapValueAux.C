@@ -18,13 +18,14 @@
 
 registerMooseObject("MooseApp", GapValueAux);
 
-template <>
+defineLegacyParams(GapValueAux);
+
 InputParameters
-validParams<GapValueAux>()
+GapValueAux::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary",
                                         "The boundary on the other side of a gap.");

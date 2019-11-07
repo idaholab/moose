@@ -38,12 +38,13 @@
 // Call to "uname"
 #include <sys/utsname.h>
 
-template <>
+defineLegacyParams(MultiApp);
+
 InputParameters
-validParams<MultiApp>()
+MultiApp::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += ::validParams<SetupInterface>();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

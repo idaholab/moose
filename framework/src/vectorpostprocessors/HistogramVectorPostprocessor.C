@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", HistogramVectorPostprocessor);
 
-template <>
+defineLegacyParams(HistogramVectorPostprocessor);
+
 InputParameters
-validParams<HistogramVectorPostprocessor>()
+HistogramVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Compute a histogram for each column of a VectorPostprocessor");
 
   params.addRequiredParam<VectorPostprocessorName>(

@@ -53,6 +53,8 @@ public:
    */
   Function(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Function destructor
    */

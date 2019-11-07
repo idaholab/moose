@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddInitialConditionAction, "add_ic");
 
-template <>
+defineLegacyParams(AddInitialConditionAction);
+
 InputParameters
-validParams<AddInitialConditionAction>()
+AddInitialConditionAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

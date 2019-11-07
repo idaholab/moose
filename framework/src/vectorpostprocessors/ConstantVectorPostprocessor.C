@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantVectorPostprocessor);
 
-template <>
+defineLegacyParams(ConstantVectorPostprocessor);
+
 InputParameters
-validParams<ConstantVectorPostprocessor>()
+ConstantVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<VectorPostprocessorValue>("value",
                                                     "The vector value this object will have.");

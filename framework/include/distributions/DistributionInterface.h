@@ -37,6 +37,8 @@ public:
    */
   DistributionInterface(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   ///@{
   /**
    * Get a distribution with a given name
@@ -110,4 +112,3 @@ DistributionInterface::getDistributionByName(const std::string & name) const
                "' distribution with the desired type.");
   }
 }
-

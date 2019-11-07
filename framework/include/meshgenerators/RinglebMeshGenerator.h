@@ -25,6 +25,8 @@ class RinglebMeshGenerator : public MeshGenerator
 public:
   RinglebMeshGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   // No copy
   RinglebMeshGenerator & operator=(const RinglebMeshGenerator & other_mesh) = delete;
 

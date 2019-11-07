@@ -20,11 +20,12 @@ registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
 registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
 registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
 
-template <>
+defineLegacyParams(SetupMeshAction);
+
 InputParameters
-validParams<SetupMeshAction>()
+SetupMeshAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
 
   // Here we are setting the default type of the mesh to construct to "FileMesh". This is to support
   // the very long-running legacy syntax where only a file parameter is required to determine the
@@ -198,7 +199,7 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
                    "command line");
     }
 
-    auto new_pars = validParams<FileMesh>();
+    auto new_pars = ::validParams<FileMesh>();
 
     // Keep existing parameters where possible
     new_pars.applyParameters(_moose_object_pars);

@@ -31,6 +31,8 @@ public:
   SetupInterface(const MooseObject * moose_object);
   virtual ~SetupInterface();
 
+  static InputParameters validParams();
+
   /**
    * Gets called at the beginning of the simulation before this object is asked to do its job
    */
@@ -99,4 +101,3 @@ protected:
   // FEProblemBase::addMultiApp needs to reset the execution flags
   friend class FEProblemBase;
 };
-

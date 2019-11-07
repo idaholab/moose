@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialStdVectorRealGradientAux);
 
-template <>
+defineLegacyParams(MaterialStdVectorRealGradientAux);
+
 InputParameters
-validParams<MaterialStdVectorRealGradientAux>()
+MaterialStdVectorRealGradientAux::validParams()
 {
-  InputParameters params = validParams<MaterialStdVectorAuxBase<>>();
+  InputParameters params = MaterialStdVectorAuxBase<>::validParams();
   params.addClassDescription("Extracts a component of a material's std::vector<RealGradient> to an "
                              "aux variable.  If the std::vector is not of sufficient size then "
                              "zero is returned");

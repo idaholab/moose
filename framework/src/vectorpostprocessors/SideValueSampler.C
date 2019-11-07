@@ -16,13 +16,14 @@
 
 registerMooseObject("MooseApp", SideValueSampler);
 
-template <>
-InputParameters
-validParams<SideValueSampler>()
-{
-  InputParameters params = validParams<SideVectorPostprocessor>();
+defineLegacyParams(SideValueSampler);
 
-  params += validParams<SamplerBase>();
+InputParameters
+SideValueSampler::validParams()
+{
+  InputParameters params = SideVectorPostprocessor::validParams();
+
+  params += SamplerBase::validParams();
 
   params.addRequiredCoupledVar(
       "variable", "The names of the variables that this VectorPostprocessor operates on");

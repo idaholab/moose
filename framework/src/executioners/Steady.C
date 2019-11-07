@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", Steady);
 
-template <>
+defineLegacyParams(Steady);
+
 InputParameters
-validParams<Steady>()
+Steady::validParams()
 {
-  InputParameters params = validParams<Executioner>();
+  InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for steady-state simulations.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;

@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", DGDiffusion);
 
-template <>
+defineLegacyParams(DGDiffusion);
+
 InputParameters
-validParams<DGDiffusion>()
+DGDiffusion::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");

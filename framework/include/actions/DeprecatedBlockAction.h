@@ -24,6 +24,8 @@ class DeprecatedBlockAction : public Action
 public:
   DeprecatedBlockAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   void act() override;
 };
 

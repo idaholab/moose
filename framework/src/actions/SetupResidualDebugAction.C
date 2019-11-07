@@ -19,11 +19,12 @@
 
 registerMooseAction("MooseApp", SetupResidualDebugAction, "setup_residual_debug");
 
-template <>
+defineLegacyParams(SetupResidualDebugAction);
+
 InputParameters
-validParams<SetupResidualDebugAction>()
+SetupResidualDebugAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::vector<NonlinearVariableName>>(
       "show_var_residual", "Variables for which residuals will be sent to the output file.");
   params.addClassDescription(

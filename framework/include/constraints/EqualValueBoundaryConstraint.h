@@ -21,6 +21,8 @@ class EqualValueBoundaryConstraint : public NodalConstraint
 public:
   EqualValueBoundaryConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Called on this object when the mesh changes
    */

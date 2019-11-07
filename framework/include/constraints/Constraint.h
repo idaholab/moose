@@ -48,6 +48,8 @@ class Constraint : public MooseObject,
 {
 public:
   Constraint(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~Constraint();
 
   /**

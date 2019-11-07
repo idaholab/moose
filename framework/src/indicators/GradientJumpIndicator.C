@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", GradientJumpIndicator);
 
-template <>
+defineLegacyParams(GradientJumpIndicator);
+
 InputParameters
-validParams<GradientJumpIndicator>()
+GradientJumpIndicator::validParams()
 {
-  InputParameters params = validParams<InternalSideIndicator>();
+  InputParameters params = InternalSideIndicator::validParams();
   params.addClassDescription(
       "Compute the jump of the solution gradient across element boundaries.");
   return params;

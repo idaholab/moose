@@ -27,6 +27,8 @@ class CoupledTiedValueConstraint : public NodeFaceConstraint
 public:
   CoupledTiedValueConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpSlaveValue() override;
 

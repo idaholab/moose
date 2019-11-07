@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorVisualizationAux);
 
-template <>
+defineLegacyParams(VectorPostprocessorVisualizationAux);
+
 InputParameters
-validParams<VectorPostprocessorVisualizationAux>()
+VectorPostprocessorVisualizationAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Read values from a VectorPostprocessor that is producing vectors "
                              "that are 'number of processors' * in length.  Puts the value for "

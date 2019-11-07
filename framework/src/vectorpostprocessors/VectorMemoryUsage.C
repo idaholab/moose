@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", VectorMemoryUsage);
 
-template <>
+defineLegacyParams(VectorMemoryUsage);
+
 InputParameters
-validParams<VectorMemoryUsage>()
+VectorMemoryUsage::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Get memory stats for all ranks in the simulation");
   params.addParam<bool>("report_peak_value",
                         true,

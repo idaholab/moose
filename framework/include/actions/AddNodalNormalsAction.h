@@ -34,6 +34,8 @@ class AddNodalNormalsAction : public Action
 public:
   AddNodalNormalsAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

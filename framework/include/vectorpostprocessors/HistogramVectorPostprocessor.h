@@ -29,6 +29,8 @@ InputParameters validParams<HistogramVectorPostprocessor>();
 class HistogramVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   HistogramVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -21,9 +21,10 @@ class ElementIntegralIndicator : public ElementIndicator
 public:
   ElementIntegralIndicator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeIndicator() override;
 
 protected:
   virtual Real computeQpIntegral();
 };
-

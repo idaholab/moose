@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", MultiAppPostprocessorInterpolationTransfer);
 
-template <>
+defineLegacyParams(MultiAppPostprocessorInterpolationTransfer);
+
 InputParameters
-validParams<MultiAppPostprocessorInterpolationTransfer>()
+MultiAppPostprocessorInterpolationTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Transfer postprocessor data from sub-application into field data on "
                              "the master application.");
   params.addRequiredParam<AuxVariableName>(

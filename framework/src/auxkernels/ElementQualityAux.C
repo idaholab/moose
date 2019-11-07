@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ElementQualityAux);
 
-template <>
+defineLegacyParams(ElementQualityAux);
+
 InputParameters
-validParams<ElementQualityAux>()
+ElementQualityAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Generates a field containing the quality metric for each element.  "
                              "Useful for visualizing mesh quality.");

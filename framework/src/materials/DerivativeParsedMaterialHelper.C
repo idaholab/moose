@@ -14,11 +14,13 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DerivativeParsedMaterialHelper);
+
 InputParameters
-validParams<DerivativeParsedMaterialHelper>()
+DerivativeParsedMaterialHelper::validParams()
 {
-  InputParameters params = validParams<ParsedMaterialHelper>();
+
+  InputParameters params = ParsedMaterialHelper::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   params.addDeprecatedParam<bool>("third_derivatives",
                                   "Flag to indicate if third derivatives are needed",

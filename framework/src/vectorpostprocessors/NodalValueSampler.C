@@ -17,15 +17,16 @@
 
 registerMooseObject("MooseApp", NodalValueSampler);
 
-template <>
+defineLegacyParams(NodalValueSampler);
+
 InputParameters
-validParams<NodalValueSampler>()
+NodalValueSampler::validParams()
 {
-  InputParameters params = validParams<NodalVariableVectorPostprocessor>();
+  InputParameters params = NodalVariableVectorPostprocessor::validParams();
 
   params.addClassDescription("Samples values of nodal variable(s).");
 
-  params += validParams<SamplerBase>();
+  params += SamplerBase::validParams();
 
   return params;
 }

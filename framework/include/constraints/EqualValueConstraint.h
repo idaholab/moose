@@ -26,6 +26,8 @@ class EqualValueConstraint : public ADMortarConstraint<compute_stage>
 public:
   EqualValueConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 

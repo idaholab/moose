@@ -15,13 +15,14 @@
 
 registerMooseObject("MooseApp", SubdomainBoundingBoxGenerator);
 
-template <>
+defineLegacyParams(SubdomainBoundingBoxGenerator);
+
 InputParameters
-validParams<SubdomainBoundingBoxGenerator>()
+SubdomainBoundingBoxGenerator::validParams()
 {
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Changes the subdomain ID of elements either (XOR) inside or outside "

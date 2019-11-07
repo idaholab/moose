@@ -59,6 +59,8 @@ class MultiApp : public MooseObject, public SetupInterface, public Restartable
 public:
   MultiApp(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void preExecute() {}
 
   /**

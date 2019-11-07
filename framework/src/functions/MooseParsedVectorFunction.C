@@ -12,12 +12,13 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedVectorFunction, "ParsedVectorFunction");
 
-template <>
+defineLegacyParams(MooseParsedVectorFunction);
+
 InputParameters
-validParams<MooseParsedVectorFunction>()
+MooseParsedVectorFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
-  params += validParams<MooseParsedFunctionBase>();
+  InputParameters params = Function::validParams();
+  params += MooseParsedFunctionBase::validParams();
   params.addParam<std::string>("value_x", "0", "x-component of function.");
   params.addParam<std::string>("value_y", "0", "y-component of function.");
   params.addParam<std::string>("value_z", "0", "z-component of function.");

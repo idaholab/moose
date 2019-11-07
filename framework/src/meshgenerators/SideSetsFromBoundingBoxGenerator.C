@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", SideSetsFromBoundingBoxGenerator);
 
-template <>
+defineLegacyParams(SideSetsFromBoundingBoxGenerator);
+
 InputParameters
-validParams<SideSetsFromBoundingBoxGenerator>()
+SideSetsFromBoundingBoxGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Find sidesets with given boundary ids in bounding box and add new "

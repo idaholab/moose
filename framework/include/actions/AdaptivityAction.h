@@ -23,6 +23,8 @@ class AdaptivityAction : public Action
 public:
   AdaptivityAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

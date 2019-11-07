@@ -29,6 +29,8 @@ class MooseVariableFEBase : public MooseVariableBase
 public:
   MooseVariableFEBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at
    * all...

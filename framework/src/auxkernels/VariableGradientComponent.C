@@ -11,12 +11,13 @@
 
 registerMooseObject("MooseApp", VariableGradientComponent);
 
-template <>
+defineLegacyParams(VariableGradientComponent);
+
 InputParameters
-validParams<VariableGradientComponent>()
+VariableGradientComponent::validParams()
 {
   MooseEnum component("x=0 y=1 z=2");
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Creates a field with consisting of one component of a coupled variable.");
   params.addRequiredCoupledVar("gradient_variable",

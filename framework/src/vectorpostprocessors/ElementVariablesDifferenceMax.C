@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ElementVariablesDifferenceMax);
 
-template <>
+defineLegacyParams(ElementVariablesDifferenceMax);
+
 InputParameters
-validParams<ElementVariablesDifferenceMax>()
+ElementVariablesDifferenceMax::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
 
   params.addRequiredCoupledVar(
       "compare_a",

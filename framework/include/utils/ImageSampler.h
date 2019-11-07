@@ -61,6 +61,8 @@ public:
    */
   ImageSampler(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data

@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", LeastSquaresFitHistory);
 
-template <>
+defineLegacyParams(LeastSquaresFitHistory);
+
 InputParameters
-validParams<LeastSquaresFitHistory>()
+LeastSquaresFitHistory::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>(
       "vectorpostprocessor",

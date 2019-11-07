@@ -23,11 +23,12 @@
 
 registerMooseObject("MooseApp", StackGenerator);
 
-template <>
+defineLegacyParams(StackGenerator);
+
 InputParameters
-validParams<StackGenerator>()
+StackGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   MooseEnum dims("2=2 3=3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");

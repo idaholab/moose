@@ -24,6 +24,8 @@ InputParameters validParams<VariableGradientComponent>();
 class VariableGradientComponent : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Input parameters for the object

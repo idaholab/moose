@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", MeshExtruderGenerator);
 
-template <>
+defineLegacyParams(MeshExtruderGenerator);
+
 InputParameters
-validParams<MeshExtruderGenerator>()
+MeshExtruderGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "the mesh we want to extrude");
   params.addClassDescription("Takes a 1D or 2D mesh and extrudes the entire structure along the "

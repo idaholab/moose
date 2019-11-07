@@ -24,6 +24,8 @@ InputParameters validParams<TagVectorAux>();
 class TagVectorAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TagVectorAux(const InputParameters & parameters);
 
 protected:

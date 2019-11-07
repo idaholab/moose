@@ -28,6 +28,8 @@ InputParameters validParams<BoundsAux>();
 class BoundsAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Factory constructor.
    */

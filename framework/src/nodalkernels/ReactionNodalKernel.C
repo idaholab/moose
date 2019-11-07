@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ReactionNodalKernel);
 
-template <>
+defineLegacyParams(ReactionNodalKernel);
+
 InputParameters
-validParams<ReactionNodalKernel>()
+ReactionNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Implements a simple consuming reaction term at nodes");
   params.addParam<Real>("coeff", 1., "A coefficient for multiplying the reaction term");
   return params;

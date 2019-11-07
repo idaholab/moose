@@ -30,6 +30,8 @@ class MultiAppProjectionTransfer : public MultiAppFieldTransfer
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
   virtual void execute() override;
@@ -59,4 +61,3 @@ protected:
   std::vector<std::vector<Point>> _cached_qps;
   std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> _cached_index_map;
 };
-

@@ -25,6 +25,8 @@ class MultiAppPostprocessorTransfer : public MultiAppTransfer
 public:
   MultiAppPostprocessorTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
   enum
@@ -40,4 +42,3 @@ protected:
   PostprocessorName _to_pp_name;
   MooseEnum _reduction_type;
 };
-

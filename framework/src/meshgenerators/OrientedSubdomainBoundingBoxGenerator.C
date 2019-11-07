@@ -14,12 +14,13 @@
 
 registerMooseObject("MooseApp", OrientedSubdomainBoundingBoxGenerator);
 
-template <>
+defineLegacyParams(OrientedSubdomainBoundingBoxGenerator);
+
 InputParameters
-validParams<OrientedSubdomainBoundingBoxGenerator>()
+OrientedSubdomainBoundingBoxGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
-  params += validParams<OrientedBoxInterface>();
+  InputParameters params = MeshGenerator::validParams();
+  params += OrientedBoxInterface::validParams();
 
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 

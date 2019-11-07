@@ -16,11 +16,12 @@
 
 registerMooseAction("MooseApp", SplitMeshAction, "split_mesh");
 
-template <>
+defineLegacyParams(SplitMeshAction);
+
 InputParameters
-validParams<SplitMeshAction>()
+SplitMeshAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 SplitMeshAction::SplitMeshAction(InputParameters params) : Action(params) {}

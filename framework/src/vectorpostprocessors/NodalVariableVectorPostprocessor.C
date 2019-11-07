@@ -12,11 +12,12 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template <>
+defineLegacyParams(NodalVariableVectorPostprocessor);
+
 InputParameters
-validParams<NodalVariableVectorPostprocessor>()
+NodalVariableVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<NodalVectorPostprocessor>();
+  InputParameters params = NodalVectorPostprocessor::validParams();
   params.addRequiredCoupledVar(
       "variable", "The names of the variables that this VectorPostprocessor operates on");
   return params;

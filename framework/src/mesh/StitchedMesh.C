@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", StitchedMesh);
 
-template <>
+defineLegacyParams(StitchedMesh);
+
 InputParameters
-validParams<StitchedMesh>()
+StitchedMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<std::vector<MeshFileName>>(
       "files",
       "The name of the mesh files to read.  These mesh files will be 'stitched' into the "

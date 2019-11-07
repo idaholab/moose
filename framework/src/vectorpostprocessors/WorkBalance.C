@@ -22,11 +22,12 @@
 
 registerMooseObject("MooseApp", WorkBalance);
 
-template <>
+defineLegacyParams(WorkBalance);
+
 InputParameters
-validParams<WorkBalance>()
+WorkBalance::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Computes several metrics for workload balance per processor");
 
   // These are numbered this way because NL is always system 0 and Aux is system 1

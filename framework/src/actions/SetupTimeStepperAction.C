@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", SetupTimeStepperAction, "setup_time_stepper");
 
-template <>
+defineLegacyParams(SetupTimeStepperAction);
+
 InputParameters
-validParams<SetupTimeStepperAction>()
+SetupTimeStepperAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
 
   return params;
 }

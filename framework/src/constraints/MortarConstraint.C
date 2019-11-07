@@ -13,11 +13,12 @@
 #include "MooseVariable.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(MortarConstraint);
+
 InputParameters
-validParams<MortarConstraint>()
+MortarConstraint::validParams()
 {
-  return validParams<MortarConstraintBase>();
+  return MortarConstraintBase::validParams();
 }
 
 MortarConstraint::MortarConstraint(const InputParameters & parameters)

@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", MeshSideSetGenerator);
 
-template <>
+defineLegacyParams(MeshSideSetGenerator);
+
 InputParameters
-validParams<MeshSideSetGenerator>()
+MeshSideSetGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Add lower dimensional elements along the faces contained in a side "

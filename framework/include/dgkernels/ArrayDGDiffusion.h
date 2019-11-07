@@ -24,6 +24,8 @@ class ArrayDGDiffusion : public ArrayDGKernel
 public:
   ArrayDGDiffusion(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual RealEigenVector computeQpResidual(Moose::DGResidualType type) override;
   virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) override;

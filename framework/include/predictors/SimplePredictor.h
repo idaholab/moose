@@ -43,6 +43,8 @@ class SimplePredictor : public Predictor
 public:
   SimplePredictor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual bool shouldApply() override;
   virtual void apply(NumericVector<Number> & sln) override;
 };

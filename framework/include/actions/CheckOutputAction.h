@@ -30,6 +30,8 @@ public:
    */
   CheckOutputAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 private:

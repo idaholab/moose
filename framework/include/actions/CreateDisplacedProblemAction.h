@@ -25,6 +25,8 @@ class CreateDisplacedProblemAction : public Action
 public:
   CreateDisplacedProblemAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

@@ -25,6 +25,8 @@ class SideSetsFromNormalsGenerator : public SideSetsGeneratorBase
 public:
   SideSetsFromNormalsGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

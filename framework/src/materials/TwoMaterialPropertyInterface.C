@@ -11,12 +11,14 @@
 #include "MaterialData.h"
 #include "InputParameters.h"
 
-template <>
+defineLegacyParams(TwoMaterialPropertyInterface);
+
 InputParameters
-validParams<TwoMaterialPropertyInterface>()
+TwoMaterialPropertyInterface::validParams()
 {
+
   // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
-  InputParameters params = validParams<MaterialPropertyInterface>();
+  InputParameters params = MaterialPropertyInterface::validParams();
   params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
   return params;
 }

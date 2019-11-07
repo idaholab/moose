@@ -10,11 +10,12 @@
 #include "FunctorRelationshipManager.h"
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(FunctorRelationshipManager);
+
 InputParameters
-validParams<FunctorRelationshipManager>()
+FunctorRelationshipManager::validParams()
 {
-  InputParameters params = validParams<RelationshipManager>();
+  InputParameters params = RelationshipManager::validParams();
   return params;
 }
 

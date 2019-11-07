@@ -30,6 +30,8 @@ public:
    */
   TimePeriod(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * If enabled, this injects the start/end times into the TimeStepper sync times.

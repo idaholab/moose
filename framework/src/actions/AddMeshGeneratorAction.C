@@ -15,11 +15,12 @@
 
 registerMooseAction("MooseApp", AddMeshGeneratorAction, "add_mesh_generator");
 
-template <>
+defineLegacyParams(AddMeshGeneratorAction);
+
 InputParameters
-validParams<AddMeshGeneratorAction>()
+AddMeshGeneratorAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

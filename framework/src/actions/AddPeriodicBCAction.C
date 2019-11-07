@@ -25,11 +25,12 @@
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_periodic_bc");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_geometric_rm");
 
-template <>
+defineLegacyParams(AddPeriodicBCAction);
+
 InputParameters
-validParams<AddPeriodicBCAction>()
+AddPeriodicBCAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::vector<std::string>>("auto_direction",
                                             "If using a generated mesh, you can "
                                             "specifiy just the dimension(s) you "

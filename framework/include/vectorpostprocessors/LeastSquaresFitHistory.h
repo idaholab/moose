@@ -26,6 +26,8 @@ InputParameters validParams<LeastSquaresFitHistory>();
 class LeastSquaresFitHistory : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters

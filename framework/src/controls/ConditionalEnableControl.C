@@ -9,11 +9,12 @@
 
 #include "ConditionalEnableControl.h"
 
-template <>
+defineLegacyParams(ConditionalEnableControl);
+
 InputParameters
-validParams<ConditionalEnableControl>()
+ConditionalEnableControl::validParams()
 {
-  InputParameters params = validParams<Control>();
+  InputParameters params = Control::validParams();
 
   params.addParam<std::vector<std::string>>(
       "disable_objects", std::vector<std::string>(), "A list of object tags to disable.");

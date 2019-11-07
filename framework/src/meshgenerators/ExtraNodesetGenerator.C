@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", ExtraNodesetGenerator);
 
-template <>
+defineLegacyParams(ExtraNodesetGenerator);
+
 InputParameters
-validParams<ExtraNodesetGenerator>()
+ExtraNodesetGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",

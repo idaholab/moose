@@ -27,6 +27,8 @@ class MultiAppVectorPostprocessorTransfer : public MultiAppTransfer
 public:
   MultiAppVectorPostprocessorTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:
@@ -37,4 +39,3 @@ protected:
   const VectorPostprocessorName & _master_vpp_name;
   const std::string & _vector_name;
 };
-

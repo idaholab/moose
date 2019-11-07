@@ -32,9 +32,10 @@ public:
    */
   Eigenvalue(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:
   EigenProblem & _eigen_problem;
 };
-

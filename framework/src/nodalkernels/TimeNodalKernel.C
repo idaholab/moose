@@ -14,11 +14,12 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(TimeNodalKernel);
+
 InputParameters
-validParams<TimeNodalKernel>()
+TimeNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system";

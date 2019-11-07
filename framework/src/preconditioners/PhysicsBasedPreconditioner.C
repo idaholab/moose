@@ -30,11 +30,12 @@
 
 registerMooseObjectAliased("MooseApp", PhysicsBasedPreconditioner, "PBP");
 
-template <>
+defineLegacyParams(PhysicsBasedPreconditioner);
+
 InputParameters
-validParams<PhysicsBasedPreconditioner>()
+PhysicsBasedPreconditioner::validParams()
 {
-  InputParameters params = validParams<MoosePreconditioner>();
+  InputParameters params = MoosePreconditioner::validParams();
 
   params.addRequiredParam<std::vector<std::string>>(
       "solve_order",

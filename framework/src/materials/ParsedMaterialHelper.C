@@ -11,12 +11,14 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ParsedMaterialHelper);
+
 InputParameters
-validParams<ParsedMaterialHelper>()
+ParsedMaterialHelper::validParams()
 {
-  InputParameters params = validParams<FunctionMaterialBase>();
-  params += validParams<FunctionParserUtils>();
+
+  InputParameters params = FunctionMaterialBase::validParams();
+  params += FunctionParserUtils::validParams();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }

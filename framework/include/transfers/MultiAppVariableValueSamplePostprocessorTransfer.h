@@ -27,10 +27,11 @@ class MultiAppVariableValueSamplePostprocessorTransfer : public MultiAppTransfer
 public:
   MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:
   AuxVariableName _postprocessor_name;
   PostprocessorName _from_var_name;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LinearCombinationFunction);
 
-template <>
+defineLegacyParams(LinearCombinationFunction);
+
 InputParameters
-validParams<LinearCombinationFunction>()
+LinearCombinationFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<std::vector<FunctionName>>(
       "functions", "This function will return Sum_over_i(w_i * functions_i)");
   params.addRequiredParam<std::vector<Real>>(

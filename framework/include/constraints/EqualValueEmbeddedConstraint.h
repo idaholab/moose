@@ -27,6 +27,8 @@ class EqualValueEmbeddedConstraint : public NodeElemConstraint
 public:
   EqualValueEmbeddedConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void timestepSetup() override{};
   virtual void jacobianSetup() override{};
   virtual void residualEnd() override{};

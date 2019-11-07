@@ -23,6 +23,8 @@ InputParameters validParams<SpatialAverageBase>();
 class SpatialAverageBase : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SpatialAverageBase(const InputParameters & parameters);
 
   virtual void initialize() override;

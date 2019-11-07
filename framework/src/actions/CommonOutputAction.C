@@ -26,11 +26,12 @@
 
 registerMooseAction("MooseApp", CommonOutputAction, "common_output");
 
-template <>
+defineLegacyParams(CommonOutputAction);
+
 InputParameters
-validParams<CommonOutputAction>()
+CommonOutputAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Adds short-cut syntax and common parameters to the Outputs block.");
 
   // Short-cut methods for typical output objects

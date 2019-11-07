@@ -41,6 +41,8 @@ class NodeFaceConstraint : public Constraint,
 {
 public:
   NodeFaceConstraint(const InputParameters & parameters);
+
+  static InputParameters validParams();
   virtual ~NodeFaceConstraint();
 
   /**

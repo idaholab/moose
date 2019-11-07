@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", AdamsPredictor);
 
-template <>
+defineLegacyParams(AdamsPredictor);
+
 InputParameters
-validParams<AdamsPredictor>()
+AdamsPredictor::validParams()
 {
-  InputParameters params = validParams<Predictor>();
+  InputParameters params = Predictor::validParams();
   params.addParam<int>("order", 2, "The maximum reachable order of the Adams-Bashforth Predictor");
   return params;
 }

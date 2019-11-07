@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", MeshGeneratorMesh);
 
-template <>
+defineLegacyParams(MeshGeneratorMesh);
+
 InputParameters
-validParams<MeshGeneratorMesh>()
+MeshGeneratorMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.set<bool>("_mesh_generator_mesh") = true;
 
   params.addParam<std::string>("final_generator",

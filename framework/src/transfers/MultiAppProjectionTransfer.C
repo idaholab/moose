@@ -37,11 +37,12 @@ assemble_l2(EquationSystems & es, const std::string & system_name)
 
 registerMooseObject("MooseApp", MultiAppProjectionTransfer);
 
-template <>
+defineLegacyParams(MultiAppProjectionTransfer);
+
 InputParameters
-validParams<MultiAppProjectionTransfer>()
+MultiAppProjectionTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppFieldTransfer::validParams();
   params.addClassDescription(
       "Perform a projection between a master and sub-application mesh of a field variable.");
 

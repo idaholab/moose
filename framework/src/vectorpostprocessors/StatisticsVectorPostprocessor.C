@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", StatisticsVectorPostprocessor);
 
-template <>
+defineLegacyParams(StatisticsVectorPostprocessor);
+
 InputParameters
-validParams<StatisticsVectorPostprocessor>()
+StatisticsVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Compute statistical values of a given VectorPostprocessor.  The "
                              "statistics are computed for each column.");
 

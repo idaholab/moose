@@ -28,6 +28,8 @@ class MultiAppUserObjectTransfer : public MultiAppFieldTransfer
 public:
   MultiAppUserObjectTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void execute() override;
 
 protected:

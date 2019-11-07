@@ -26,6 +26,8 @@ class MultiAppScalarToAuxScalarTransfer : public MultiAppTransfer
 public:
   MultiAppScalarToAuxScalarTransfer(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Execute the transfer
    */
@@ -38,4 +40,3 @@ protected:
   /// The name of the variable to which the scalar values are being transfered
   VariableName _to_aux_name;
 };
-

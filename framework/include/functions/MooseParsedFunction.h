@@ -36,6 +36,8 @@ public:
    */
   MooseParsedFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
    * x and y are optional.

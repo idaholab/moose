@@ -12,11 +12,12 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 
-template <>
+defineLegacyParams(MortarConstraintBase);
+
 InputParameters
-validParams<MortarConstraintBase>()
+MortarConstraintBase::validParams()
 {
-  InputParameters params = validParams<Constraint>();
+  InputParameters params = Constraint::validParams();
   params.addRequiredParam<BoundaryName>("master_boundary",
                                         "The name of the master boundary sideset.");
   params.addRequiredParam<BoundaryName>("slave_boundary",

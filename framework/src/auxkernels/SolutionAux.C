@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", SolutionAux);
 
-template <>
+defineLegacyParams(SolutionAux);
+
 InputParameters
-validParams<SolutionAux>()
+SolutionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates fields by using information from a SolutionUserObject.");
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_variable",

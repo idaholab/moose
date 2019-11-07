@@ -30,6 +30,8 @@ class TransientMultiApp : public MultiApp
 public:
   TransientMultiApp(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual NumericVector<Number> & appTransferVector(unsigned int app,
                                                     std::string var_name) override;
 
@@ -114,4 +116,3 @@ public:
 
   ~MultiAppSolveFailure() throw() {}
 };
-

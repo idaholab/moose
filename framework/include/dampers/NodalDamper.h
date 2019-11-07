@@ -34,6 +34,8 @@ class NodalDamper : public Damper, protected MaterialPropertyInterface
 public:
   NodalDamper(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Computes this Damper's damping for one node.
    */

@@ -10,11 +10,12 @@
 #include "Piecewise.h"
 #include "DelimitedFileReader.h"
 
-template <>
+defineLegacyParams(Piecewise);
+
 InputParameters
-validParams<Piecewise>()
+Piecewise::validParams()
 {
-  InputParameters params = validParams<PiecewiseBase>();
+  InputParameters params = PiecewiseBase::validParams();
   params.addParam<std::vector<Real>>("xy_data",
                                      "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<std::vector<Real>>("x", "The abscissa values");

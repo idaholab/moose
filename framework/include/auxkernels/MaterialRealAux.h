@@ -24,6 +24,8 @@ InputParameters validParams<MaterialRealAux>();
 class MaterialRealAux : public MaterialAuxBase<Real>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor.
    * @param parameters Input parameters for this object

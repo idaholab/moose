@@ -23,11 +23,12 @@
 
 registerMooseObject("MooseApp", MultiAppCopyTransfer);
 
-template <>
+defineLegacyParams(MultiAppCopyTransfer);
+
 InputParameters
-validParams<MultiAppCopyTransfer>()
+MultiAppCopyTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");

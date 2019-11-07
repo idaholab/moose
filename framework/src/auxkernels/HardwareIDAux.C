@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", HardwareIDAux);
 
-template <>
+defineLegacyParams(HardwareIDAux);
+
 InputParameters
-validParams<HardwareIDAux>()
+HardwareIDAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Creates a field showing the assignment of partitions to physical nodes in the cluster.");
   return params;

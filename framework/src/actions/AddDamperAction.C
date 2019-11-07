@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddDamperAction, "add_damper");
 
-template <>
+defineLegacyParams(AddDamperAction);
+
 InputParameters
-validParams<AddDamperAction>()
+AddDamperAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddDamperAction::AddDamperAction(InputParameters params) : MooseObjectAction(params) {}

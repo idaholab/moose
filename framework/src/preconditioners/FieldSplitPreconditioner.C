@@ -24,11 +24,12 @@
 
 registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
 
-template <>
+defineLegacyParams(FieldSplitPreconditioner);
+
 InputParameters
-validParams<FieldSplitPreconditioner>()
+FieldSplitPreconditioner::validParams()
 {
-  InputParameters params = validParams<MoosePreconditioner>();
+  InputParameters params = MoosePreconditioner::validParams();
 
   params.addParam<std::vector<std::string>>(
       "off_diag_row",

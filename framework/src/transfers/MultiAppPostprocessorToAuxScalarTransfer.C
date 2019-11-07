@@ -22,11 +22,12 @@
 // Define the input parameters
 registerMooseObject("MooseApp", MultiAppPostprocessorToAuxScalarTransfer);
 
-template <>
+defineLegacyParams(MultiAppPostprocessorToAuxScalarTransfer);
+
 InputParameters
-validParams<MultiAppPostprocessorToAuxScalarTransfer>()
+MultiAppPostprocessorToAuxScalarTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Transfers from a postprocessor to an scalar auxiliary variable.");
   params.addRequiredParam<PostprocessorName>(
       "from_postprocessor",

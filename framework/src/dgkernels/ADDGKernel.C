@@ -17,7 +17,15 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADBaseValidParams(ADDGKernel, DGKernelBase, );
+defineADLegacyParams(ADDGKernel);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADDGKernel<compute_stage>::validParams()
+{
+  InputParameters params = DGKernelBase::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)

@@ -29,11 +29,12 @@
 
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
-template <>
+defineLegacyParams(AddVariableAction);
+
 InputParameters
-validParams<AddVariableAction>()
+AddVariableAction::validParams()
 {
-  auto params = validParams<MooseObjectAction>();
+  auto params = MooseObjectAction::validParams();
 
   // The user may specify a type in the Variables block, but if they don't we'll just use all the
   // parameters available from MooseVariableBase

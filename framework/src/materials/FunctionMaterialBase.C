@@ -9,11 +9,13 @@
 
 #include "FunctionMaterialBase.h"
 
-template <>
+defineLegacyParams(FunctionMaterialBase);
+
 InputParameters
-validParams<FunctionMaterialBase>()
+FunctionMaterialBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy)");
   params.addParam<std::string>(
       "f_name",

@@ -31,6 +31,8 @@ class PiecewiseMulticonstant : public PiecewiseMultiInterpolation
 public:
   PiecewiseMulticonstant(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real sample(const std::vector<Real> & pt) const override;
 

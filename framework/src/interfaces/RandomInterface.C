@@ -14,10 +14,12 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(RandomInterface);
+
 InputParameters
-validParams<RandomInterface>()
+RandomInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
   params.addParam<unsigned int>("seed", 0, "The seed for the master random number generator");
 

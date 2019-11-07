@@ -35,6 +35,8 @@ class ElementDamper : public Damper, protected MaterialPropertyInterface
 public:
   ElementDamper(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Computes this Damper's damping for one element.
    */

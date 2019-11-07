@@ -23,6 +23,8 @@ class SetupDebugAction : public Action
 public:
   SetupDebugAction(InputParameters parameters);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
 

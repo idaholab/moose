@@ -40,6 +40,9 @@ class Indicator : public MooseObject,
 {
 public:
   Indicator(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   virtual ~Indicator(){};
 
   /**

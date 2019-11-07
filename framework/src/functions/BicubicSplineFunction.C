@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", BicubicSplineFunction);
 
-template <>
+defineLegacyParams(BicubicSplineFunction);
+
 InputParameters
-validParams<BicubicSplineFunction>()
+BicubicSplineFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   MooseEnum normal_component("x=0 y=1 z=2", "z");
   params.addParam<MooseEnum>(
       "normal_component",

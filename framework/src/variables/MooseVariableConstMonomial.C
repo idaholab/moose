@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", MooseVariableConstMonomial);
 
-template <>
+defineLegacyParams(MooseVariableConstMonomial);
+
 InputParameters
-validParams<MooseVariableConstMonomial>()
+MooseVariableConstMonomial::validParams()
 {
-  auto params = validParams<MooseVariableBase>();
+  auto params = MooseVariableBase::validParams();
   params.addClassDescription("Specialization for constant monomials that avoids unnecessary loops");
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";

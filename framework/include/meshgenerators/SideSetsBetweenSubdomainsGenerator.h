@@ -25,6 +25,8 @@ class SideSetsBetweenSubdomainsGenerator : public MeshGenerator
 public:
   SideSetsBetweenSubdomainsGenerator(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:

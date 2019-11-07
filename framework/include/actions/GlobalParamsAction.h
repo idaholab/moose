@@ -21,6 +21,8 @@ class GlobalParamsAction : public Action
 public:
   GlobalParamsAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 
   /**

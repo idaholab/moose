@@ -61,6 +61,8 @@ public:
    */
   MeshBaseImageSampler(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data
@@ -160,4 +162,3 @@ private:
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
 };
-

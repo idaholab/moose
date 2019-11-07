@@ -22,6 +22,8 @@ class MortarConstraint : public MortarConstraintBase
 public:
   MortarConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   // Using declarations necessary to pull in computeResidual with different parameter list and avoid
   // hidden method warning
   using MortarConstraintBase::computeResidual;

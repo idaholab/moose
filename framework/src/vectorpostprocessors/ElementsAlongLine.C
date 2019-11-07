@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ElementsAlongLine);
 
-template <>
+defineLegacyParams(ElementsAlongLine);
+
 InputParameters
-validParams<ElementsAlongLine>()
+ElementsAlongLine::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");

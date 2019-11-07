@@ -13,24 +13,27 @@
 
 registerADMooseObject("MooseApp", ADPiecewiseLinearInterpolationMaterial);
 
-defineADValidParams(
-    ADPiecewiseLinearInterpolationMaterial,
-    ADMaterial,
-    params.addClassDescription(
-        "Compute a property using a piecewise linear interpolation to define "
-        "its dependence on a variable");
-    params.addRequiredParam<std::string>("property",
-                                         "The name of the property this material will compute");
-    params.addRequiredCoupledVar(
-        "variable",
-        "The name of the variable whose value is used as the abscissa in the interpolation");
-    params.addParam<std::vector<Real>>("x", "The abscissa values");
-    params.addParam<std::vector<Real>>("y", "The ordinate values");
-    params.addParam<std::vector<Real>>("xy_data",
-                                       "All function data, supplied in abscissa, ordinate pairs");
-    params.addParam<Real>("scale_factor",
-                          1.0,
-                          "Scale factor to be applied to the ordinate values"););
+defineADLegacyParams(ADPiecewiseLinearInterpolationMaterial);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADPiecewiseLinearInterpolationMaterial<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("Compute a property using a piecewise linear interpolation to define "
+                             "its dependence on a variable");
+  params.addRequiredParam<std::string>("property",
+                                       "The name of the property this material will compute");
+  params.addRequiredCoupledVar(
+      "variable",
+      "The name of the variable whose value is used as the abscissa in the interpolation");
+  params.addParam<std::vector<Real>>("x", "The abscissa values");
+  params.addParam<std::vector<Real>>("y", "The ordinate values");
+  params.addParam<std::vector<Real>>("xy_data",
+                                     "All function data, supplied in abscissa, ordinate pairs");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADPiecewiseLinearInterpolationMaterial<compute_stage>::ADPiecewiseLinearInterpolationMaterial(

@@ -18,11 +18,12 @@
 
 registerMooseAction("MooseApp", SetupDebugAction, "add_output");
 
-template <>
+defineLegacyParams(SetupDebugAction);
+
 InputParameters
-validParams<SetupDebugAction>()
+SetupDebugAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<unsigned int>(
       "show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
   params.addParam<bool>(

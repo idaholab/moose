@@ -16,11 +16,12 @@ registerMooseAction("MooseApp", DisplayGhostingAction, "add_aux_kernel");
 
 registerMooseAction("MooseApp", DisplayGhostingAction, "add_user_object");
 
-template <>
+defineLegacyParams(DisplayGhostingAction);
+
 InputParameters
-validParams<DisplayGhostingAction>()
+DisplayGhostingAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<bool>("output_ghosting", false, "Boolean to turn on ghosting auxiliary fields");
   params.addParam<bool>("include_local_in_ghosting",
                         false,

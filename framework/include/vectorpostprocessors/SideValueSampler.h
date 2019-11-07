@@ -21,6 +21,8 @@ InputParameters validParams<SideValueSampler>();
 class SideValueSampler : public SideVectorPostprocessor, protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   SideValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;

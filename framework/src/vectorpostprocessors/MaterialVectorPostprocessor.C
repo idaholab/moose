@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", MaterialVectorPostprocessor);
 
-template <>
+defineLegacyParams(MaterialVectorPostprocessor);
+
 InputParameters
-validParams<MaterialVectorPostprocessor>()
+MaterialVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
   params.addRequiredParam<std::vector<unsigned int>>(

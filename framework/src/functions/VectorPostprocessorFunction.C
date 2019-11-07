@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorFunction);
 
-template <>
+defineLegacyParams(VectorPostprocessorFunction);
+
 InputParameters
-validParams<VectorPostprocessorFunction>()
+VectorPostprocessorFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component < 3",

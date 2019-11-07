@@ -45,6 +45,8 @@ public:
 
   virtual ~Executioner() {}
 
+  static InputParameters validParams();
+
   /**
    * Initialize the executioner
    */

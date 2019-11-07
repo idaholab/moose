@@ -15,11 +15,12 @@
 
 registerMooseAction("MooseApp", AddControlAction, "add_control");
 
-template <>
+defineLegacyParams(AddControlAction);
+
 InputParameters
-validParams<AddControlAction>()
+AddControlAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

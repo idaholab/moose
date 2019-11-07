@@ -9,12 +9,13 @@
 
 #include "ElementVectorPostprocessor.h"
 
-template <>
+defineLegacyParams(ElementVectorPostprocessor);
+
 InputParameters
-validParams<ElementVectorPostprocessor>()
+ElementVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
-  params += validParams<VectorPostprocessor>();
+  InputParameters params = ElementUserObject::validParams();
+  params += VectorPostprocessor::validParams();
   return params;
 }
 

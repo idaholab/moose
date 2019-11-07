@@ -14,10 +14,12 @@
 
 #include "libmesh/dense_vector.h"
 
-template <>
+defineLegacyParams(TaggingInterface);
+
 InputParameters
-validParams<TaggingInterface>()
+TaggingInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
 
   // These are the default names for tags, but users will be able to add their own

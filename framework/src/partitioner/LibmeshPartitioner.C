@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", LibmeshPartitioner);
 
-template <>
+defineLegacyParams(LibmeshPartitioner);
+
 InputParameters
-validParams<LibmeshPartitioner>()
+LibmeshPartitioner::validParams()
 {
-  InputParameters params = validParams<MoosePartitioner>();
+  InputParameters params = MoosePartitioner::validParams();
   MooseEnum partitioning(
       "metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc subdomain_partitioner");
   params.addRequiredParam<MooseEnum>(

@@ -24,11 +24,12 @@
 
 registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
 
-template <>
+defineLegacyParams(MultiAppNearestNodeTransfer);
+
 InputParameters
-validParams<MultiAppNearestNodeTransfer>()
+MultiAppNearestNodeTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppFieldTransfer::validParams();
   params.addClassDescription(
       "Transfer the value to the target domain from the nearest node in the source domain.");
 

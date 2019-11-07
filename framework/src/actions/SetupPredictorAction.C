@@ -16,11 +16,12 @@
 
 registerMooseAction("MooseApp", SetupPredictorAction, "setup_predictor");
 
-template <>
+defineLegacyParams(SetupPredictorAction);
+
 InputParameters
-validParams<SetupPredictorAction>()
+SetupPredictorAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
 
   return params;
 }

@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", TiedValueConstraint);
 
-template <>
+defineLegacyParams(TiedValueConstraint);
+
 InputParameters
-validParams<TiedValueConstraint>()
+TiedValueConstraint::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.addParam<Real>("scaling", 1, "scaling factor to be applied to constraint equations");
   params.set<bool>("use_displaced_mesh") = true;
   return params;

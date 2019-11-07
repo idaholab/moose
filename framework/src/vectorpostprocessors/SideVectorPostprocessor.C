@@ -9,12 +9,13 @@
 
 #include "SideVectorPostprocessor.h"
 
-template <>
+defineLegacyParams(SideVectorPostprocessor);
+
 InputParameters
-validParams<SideVectorPostprocessor>()
+SideVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
-  params += validParams<VectorPostprocessor>();
+  InputParameters params = SideUserObject::validParams();
+  params += VectorPostprocessor::validParams();
   return params;
 }
 
