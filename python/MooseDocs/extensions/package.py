@@ -115,18 +115,16 @@ class PackageCodeReplace(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         content = info['inline'] if 'inline' in info else info['block']
-        content = re.sub(r'__(?P<package>[A-Z][A-Z_]+)__', self.subFunction, content,
+        content = re.sub(r'__(?P<package>[A-Z][A-Z_]+)__', self._subFunction, content,
                          flags=re.UNICODE)
         core.Code(parent, style="max-height:{};".format(self.settings['max-height']),
                   language=self.settings['language'], content=content)
         return parent
 
-    def subFunction(self, match):
-        key = match.group('package')
-        for package in self.extension.keys():
-            if package.upper() == key:
-                version = self.extension.get(package)
-                return str(version)
+    def _subFunction(self, match):
+        version = self.extension.get(match.group('package').lower(), None)
+        if version is not None:
+            return str(version)
         return match.group(0)
 
 class PackageTextReplace(command.CommandComponent):
