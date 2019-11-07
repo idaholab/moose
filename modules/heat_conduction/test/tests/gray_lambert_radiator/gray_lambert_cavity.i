@@ -36,7 +36,7 @@
 []
 
 [VectorPostprocessors]
-  [./temperature]
+  [./lambert_vpp]
     type = SurfaceRadiationVectorPostprocessor
     surface_radiation_object_name = gray_lambert
     information = 'temperature emissivity radiosity heat_flux_density'
