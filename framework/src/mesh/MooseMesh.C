@@ -2016,12 +2016,6 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
   return (*_boundary_to_normal_map)[id];
 }
 
-MooseMesh &
-MooseMesh::clone() const
-{
-  mooseError("MooseMesh::clone() is no longer supported, use MooseMesh::safeClone() instead.");
-}
-
 std::unique_ptr<MeshBase>
 MooseMesh::buildMeshBaseObject(ParallelType override_type)
 {
