@@ -50,11 +50,11 @@ std::string paramErrorPrefix(const InputParameters & params, const std::string &
 class MooseObject : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
+  static InputParameters validParams();
+
   MooseObject(const InputParameters & parameters);
 
   virtual ~MooseObject() = default;
-
-  static InputParameters validParams();
 
   /**
    * Get the type of this object.

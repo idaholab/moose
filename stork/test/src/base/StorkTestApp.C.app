@@ -13,11 +13,10 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
-template <>
 InputParameters
-validParams<StorkTestApp>()
+StorkTestApp::validParams()
 {
-  InputParameters params = validParams<StorkApp>();
+  InputParameters params = StorkApp::validParams();
   return params;
 }
 

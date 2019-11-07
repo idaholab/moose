@@ -83,7 +83,7 @@ public:
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
       _name_to_build_pointer[name] = &buildApp<T>;
-      _name_to_params_pointer[name] = &validParams<T>;
+      _name_to_params_pointer[name] = &moose::internal::callValidParams<T>;
     }
   }
 

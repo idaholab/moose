@@ -70,9 +70,10 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-template <>
+defineLegacyParams(MooseApp);
+
 InputParameters
-validParams<MooseApp>()
+MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 

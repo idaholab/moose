@@ -1499,6 +1499,12 @@ template <class T>
 InputParameters
 validParams()
 {
-  static_assert(false && sizeof(T), "Missing validParams declaration!");
-  mooseError("Missing validParams declaration!");
+  // If users forgot to make their (old) validParams, they screwed up and
+  // should get an error - so it is okay for us to try to call the new
+  // validParams static function - which will error if they didn't implement
+  // the new function.  We can't have the old static assert that use to be
+  // here because then the sfinae for toggling between old and new-style
+  // templating will always see this function and call it even if an object
+  // has *only* the new style validParams.
+  return T::validParams();
 }
