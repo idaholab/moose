@@ -14,14 +14,11 @@ There are two basic forms of a MooseObject, a basic form and a template form for
 
 #include "BaseObject.h"
 
-class CustomObject;
-
-template<>
-InputParameters validParams<CustomObject>();
-
 class CustomObject : public BaseObject
 {
 public:
+  static InputParameters validParams();
+
   CustomObject(const InputParameters & parameters);
 
 protected:
@@ -41,11 +38,10 @@ protected:
 
 registerMooseObject("CustomApp", CustomObject);
 
-template<>
 InputParameters
-validParams<CustomObject>()
+CustomObject::validParams()
 {
-  InputParameters params = validParams<BaseObject>();
+  InputParameters params = BaseObject::validParams();
   params.addClassDescription("The CustomObject does something with a scale parameter.");
   params.addParam<Real>("scale", 1, "A scale factor for use when doing something.");
   return params;
@@ -74,15 +70,12 @@ CustomObject::doSomething()
 
 #include "ADBaseObject.h"
 
-template <ComputeStage>
-class ADCustomObject;
-
-declareADValidParams(ADCustomObject);
-
 template <ComputeStage compute_stage>
 class ADCustomObject : public ADBaseObject<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCustomObject(const InputParameters & parameters);
 
 protected:
@@ -103,12 +96,15 @@ protected:
 
 registerADMooseObject("MooseApp", ADCustomObject);
 
-defineADValidParams(
-    ADCustomObject,
-    ADBaseObject,
+template <ComputeStage compute_stage>
+InputParameters
+ADCustomObject<compute_stage>::validParams()
+{
+    InputParameters params = ADCustomObject<
     params.addParam<Real>("scale", 1, "A scale factor for use when doing something.");
     params.addClassDescription("The ADCustomObject does something with a scale parameter.");
-);
+    params;
+)
 
 template <ComputeStage compute_stage>
 ADCustomObject<compute_stage>::ADCustomObject(const InputParameters & parameters)
