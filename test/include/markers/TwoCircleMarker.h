@@ -13,14 +13,11 @@
 
 #include "libmesh/mesh_tools.h"
 
-class TwoCircleMarker;
-
-template <>
-InputParameters validParams<TwoCircleMarker>();
-
 class TwoCircleMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   TwoCircleMarker(const InputParameters & parameters);
   virtual ~TwoCircleMarker(){};
 
@@ -36,4 +33,3 @@ protected:
   const Real _r2;
   const Real _shut_off_time;
 };
-

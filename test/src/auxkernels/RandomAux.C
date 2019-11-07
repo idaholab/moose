@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", RandomAux);
 
-template <>
 InputParameters
-validParams<RandomAux>()
+RandomAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<UserObjectName>("random_user_object",
                                   "The RandomElementalUserObject to optionally use");
   params.addParam<bool>(

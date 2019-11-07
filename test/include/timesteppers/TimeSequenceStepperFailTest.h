@@ -11,11 +11,6 @@
 
 #include "TimeSequenceStepper.h"
 
-class TimeSequenceStepperFailTest;
-
-template <>
-InputParameters validParams<TimeSequenceStepperFailTest>();
-
 /**
  * Exactly the same as TimeSequenceStepper, but fails at predetermined
  * timesteps.
@@ -23,6 +18,8 @@ InputParameters validParams<TimeSequenceStepperFailTest>();
 class TimeSequenceStepperFailTest : public TimeSequenceStepper
 {
 public:
+  static InputParameters validParams();
+
   TimeSequenceStepperFailTest(const InputParameters & parameters);
 
   virtual void step() override;
@@ -31,4 +28,3 @@ protected:
   /// stores a copy of the original sequence of time points, is not updated due to failures.
   std::vector<Real> _original_time_sequence;
 };
-

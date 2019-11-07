@@ -38,11 +38,12 @@
 
 registerMooseObject("HeatConductionApp", PatchSidesetGenerator);
 
-template <>
+defineLegacyParams(PatchSidesetGenerator);
+
 InputParameters
-validParams<PatchSidesetGenerator>()
+PatchSidesetGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<boundary_id_type>("sideset",

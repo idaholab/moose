@@ -16,11 +16,10 @@
 
 registerMooseObject("MooseTestApp", RandomHitSolutionModifier);
 
-template <>
 InputParameters
-validParams<RandomHitSolutionModifier>()
+RandomHitSolutionModifier::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>(
       "random_hits", "The name of the UserObject to use for the positions of the random hits");
   params.addRequiredParam<VariableName>("modify", "The name of the variable to be modified");

@@ -11,17 +11,14 @@
 
 #include "AuxKernel.h"
 
-class MultipleUpdateElemAux;
-
-template <>
-InputParameters validParams<MultipleUpdateElemAux>();
-
 /**
  * Aux kernel that updated values of coupled variables
  */
 class MultipleUpdateElemAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MultipleUpdateElemAux(const InputParameters & parameters);
   virtual ~MultipleUpdateElemAux();
 
@@ -33,4 +30,3 @@ protected:
   unsigned int _n_vars;
   std::vector<MooseVariable *> _vars;
 };
-

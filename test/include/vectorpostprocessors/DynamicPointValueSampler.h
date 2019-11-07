@@ -12,15 +12,11 @@
 // MOOSE includes
 #include "LineValueSampler.h"
 
-// Forward Declarations
-class DynamicPointValueSampler;
-
-template <>
-InputParameters validParams<DynamicPointValueSampler>();
-
 class DynamicPointValueSampler : public LineValueSampler
 {
 public:
+  static InputParameters validParams();
+
   DynamicPointValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -30,4 +26,3 @@ protected:
 
   const bool _use_transfer;
 };
-

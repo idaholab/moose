@@ -53,9 +53,9 @@ InputParameters validParams<PiecewiseBilinear>();
 class PiecewiseBilinear : public Function
 {
 public:
-  PiecewiseBilinear(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PiecewiseBilinear(const InputParameters & parameters);
 
   // Necessary for using forward declaration of BilinearInterpolation in std::unique_ptr
   virtual ~PiecewiseBilinear();

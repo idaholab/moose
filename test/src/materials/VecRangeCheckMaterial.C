@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VecRangeCheckMaterial);
 
-template <>
 InputParameters
-validParams<VecRangeCheckMaterial>()
+VecRangeCheckMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredRangeCheckedParam<std::vector<Real>>(
       "rv3", "rv3_size = 3", "Real vector of length 3");
   params.addRequiredRangeCheckedParam<std::vector<int>>(

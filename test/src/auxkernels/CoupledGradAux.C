@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledGradAux);
 
-template <>
 InputParameters
-validParams<CoupledGradAux>()
+CoupledGradAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addRequiredCoupledVar("coupled", "Coupled gradient for calculation");
 

@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", RealControlParameterReporter);
 
-template <>
 InputParameters
-validParams<RealControlParameterReporter>()
+RealControlParameterReporter::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<std::string>("parameter",
                                        "The input parameter to control, the name must "
                                        "be complete (e.g. "

@@ -25,9 +25,9 @@ InputParameters validParams<BoundingValueNodalDamper>();
 class BoundingValueNodalDamper : public NodalDamper
 {
 public:
-  BoundingValueNodalDamper(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BoundingValueNodalDamper(const InputParameters & parameters);
 
 protected:
   /// The maximum permissible value of the variable

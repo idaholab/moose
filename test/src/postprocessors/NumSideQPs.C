@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", NumSideQPs);
 
-template <>
 InputParameters
-validParams<NumSideQPs>()
+NumSideQPs::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   return params;
 }
 

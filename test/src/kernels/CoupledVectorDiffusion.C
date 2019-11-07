@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledVectorDiffusion);
 
-template <>
 InputParameters
-validParams<CoupledVectorDiffusion>()
+CoupledVectorDiffusion::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addRequiredCoupledVar("v",
                                "A vector variable that will determine the diffusion rate of u.");
   MooseEnum state("current old older", "current");

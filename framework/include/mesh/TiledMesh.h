@@ -19,9 +19,9 @@ InputParameters validParams<TiledMesh>();
 class TiledMesh : public MooseMesh
 {
 public:
-  TiledMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TiledMesh(const InputParameters & parameters);
   TiledMesh(const TiledMesh & other_mesh);
 
   virtual std::unique_ptr<MooseMesh> safeClone() const override;

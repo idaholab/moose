@@ -11,23 +11,24 @@
 
 registerADMooseObject("MooseTestApp", ADMatDiffusionTest);
 
-defineADValidParams(
-    ADMatDiffusionTest,
-    ADKernel,
-    params.addParam<MaterialPropertyName>(
-        "ad_mat_prop",
-        "ad_diffusivity",
-        "the name of the AD material property we are going to use");
-    params.addParam<MaterialPropertyName>(
-        "regular_mat_prop",
-        "regular_diffusivity",
-        "the name of the AD material property we are going to use");
-    MooseEnum prop_to_use("AdAd AdReg RegAd RegReg", "AdAd");
-    params.addParam<MooseEnum>("prop_to_use",
-                               prop_to_use,
-                               "What type of property to use. The prefix indicates the getter type "
-                               "in the kernel; the suffix indicates the declaration type in the "
-                               "material."););
+template <ComputeStage compute_stage>
+InputParameters
+ADMatDiffusionTest<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addParam<MaterialPropertyName>(
+      "ad_mat_prop", "ad_diffusivity", "the name of the AD material property we are going to use");
+  params.addParam<MaterialPropertyName>("regular_mat_prop",
+                                        "regular_diffusivity",
+                                        "the name of the AD material property we are going to use");
+  MooseEnum prop_to_use("AdAd AdReg RegAd RegReg", "AdAd");
+  params.addParam<MooseEnum>("prop_to_use",
+                             prop_to_use,
+                             "What type of property to use. The prefix indicates the getter type "
+                             "in the kernel; the suffix indicates the declaration type in the "
+                             "material.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMatDiffusionTest<compute_stage>::ADMatDiffusionTest(const InputParameters & parameters)

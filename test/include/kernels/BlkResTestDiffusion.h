@@ -11,21 +11,16 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class BlkResTestDiffusion;
-
-template <>
-InputParameters validParams<BlkResTestDiffusion>();
-
 InputParameters & modifyParams(InputParameters & params);
 
 class BlkResTestDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   BlkResTestDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-

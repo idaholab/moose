@@ -12,11 +12,7 @@
 #include "InitialCondition.h"
 #include "MooseMesh.h"
 
-class ElementUOIC;
 class ElementUOProvider;
-
-template <>
-InputParameters validParams<ElementUOIC>();
 
 /**
  * Initial Condition for returing values from an ElementUOProvider derived class.
@@ -24,6 +20,8 @@ InputParameters validParams<ElementUOIC>();
 class ElementUOIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ElementUOIC(const InputParameters & parameters);
 
   virtual Real value(const Point & /*p*/);
@@ -36,4 +34,3 @@ private:
   const std::string _field_name;
   const MooseEnum _field_type;
 };
-

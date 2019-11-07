@@ -22,9 +22,9 @@ InputParameters validParams<ReactionNodalKernel>();
 class ReactionNodalKernel : public NodalKernel
 {
 public:
-  ReactionNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ReactionNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

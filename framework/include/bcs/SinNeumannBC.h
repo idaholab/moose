@@ -32,9 +32,9 @@ InputParameters validParams<SinNeumannBC>();
 class SinNeumannBC : public IntegratedBC
 {
 public:
-  SinNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SinNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

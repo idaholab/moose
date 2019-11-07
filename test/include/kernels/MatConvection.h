@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class MatConvection;
-
-template <>
-InputParameters validParams<MatConvection>();
-
 class MatConvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MatConvection(const InputParameters & parameters);
 
 protected:
@@ -34,4 +30,3 @@ protected:
   Real _y;
   Real _z;
 };
-

@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class NanAtCountKernel;
-
-template <>
-InputParameters validParams<NanAtCountKernel>();
-
 /**
  * Kernel that generates NaN
  */
 class NanAtCountKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NanAtCountKernel(const InputParameters & parameters);
 
 protected:
@@ -42,4 +38,3 @@ private:
   /// The current count
   unsigned int _count;
 };
-

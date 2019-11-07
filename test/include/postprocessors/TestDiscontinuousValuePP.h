@@ -12,11 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class TestDiscontinuousValuePP;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<TestDiscontinuousValuePP>();
 
 /**
  * Compute the value of a variable or the gradient at a specified location.
@@ -25,6 +21,8 @@ InputParameters validParams<TestDiscontinuousValuePP>();
 class TestDiscontinuousValuePP : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TestDiscontinuousValuePP(const InputParameters & parameters);
 
   virtual ~TestDiscontinuousValuePP(){};
@@ -56,4 +54,3 @@ protected:
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObject * _solution_object_ptr;
 };
-

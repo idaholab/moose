@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CircleMarker);
 
-template <>
 InputParameters
-validParams<CircleMarker>()
+CircleMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<Point>("point", "The center of the circle.");
   params.addRequiredParam<Real>("radius",
                                 "Distance from the center of the circle to mark elements");

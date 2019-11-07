@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-class VectorCoupledValuesMaterial;
-
-template <>
-InputParameters validParams<VectorCoupledValuesMaterial>();
-
 /**
  *  A material that couples vector variable values and stores them into material properties
  *  This makes sure that everything is properly resized and can be indexed into.
@@ -23,6 +18,8 @@ InputParameters validParams<VectorCoupledValuesMaterial>();
 class VectorCoupledValuesMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   VectorCoupledValuesMaterial(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", ConstantViewFactorSurfaceRadiation);
 
-template <>
+defineLegacyParams(ConstantViewFactorSurfaceRadiation);
+
 InputParameters
-validParams<ConstantViewFactorSurfaceRadiation>()
+ConstantViewFactorSurfaceRadiation::validParams()
 {
-  InputParameters params = validParams<GrayLambertSurfaceRadiationBase>();
+  InputParameters params = GrayLambertSurfaceRadiationBase::validParams();
   params.addRequiredParam<std::vector<std::vector<Real>>>(
       "view_factors", "The view factors from sideset i to sideset j.");
   params.addClassDescription(

@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", GrayLambertSurfaceRadiationPP);
 
-template <>
+defineLegacyParams(GrayLambertSurfaceRadiationPP);
+
 InputParameters
-validParams<GrayLambertSurfaceRadiationPP>()
+GrayLambertSurfaceRadiationPP::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum return_type("RADIOSITY HEAT_FLUX_DENSITY TEMPERATURE", "HEAT_FLUX_DENSITY");
   params.addParam<MooseEnum>("return_type",
                              return_type,

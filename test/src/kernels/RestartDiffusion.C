@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RestartDiffusion);
 
-template <>
 InputParameters
-validParams<RestartDiffusion>()
+RestartDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   return params;
 }

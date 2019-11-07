@@ -20,12 +20,13 @@
 
 registerMooseObject("MooseApp", OrientedBoxMarker);
 
-template <>
+defineLegacyParams(OrientedBoxMarker);
+
 InputParameters
-validParams<OrientedBoxMarker>()
+OrientedBoxMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
-  params += validParams<OrientedBoxInterface>();
+  InputParameters params = Marker::validParams();
+  params += OrientedBoxInterface::validParams();
 
   MooseEnum marker_states = Marker::markerStates();
 

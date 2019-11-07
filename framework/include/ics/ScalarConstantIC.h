@@ -28,9 +28,9 @@ public:
    *
    * @param parameters The parameters object holding data for the class to use.
    */
-  ScalarConstantIC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ScalarConstantIC(const InputParameters & parameters);
 
   virtual Real value() override;
 

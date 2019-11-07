@@ -24,9 +24,9 @@ InputParameters validParams<FluxBC>();
 class FluxBC : public IntegratedBC
 {
 public:
-  FluxBC(const InputParameters & params);
-
   static InputParameters validParams();
+
+  FluxBC(const InputParameters & params);
 
 protected:
   virtual Real computeQpResidual() override;

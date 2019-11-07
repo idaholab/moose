@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADHeatConduction : public ADDiffusion<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADHeatConduction(const InputParameters & parameters);
 
 protected:

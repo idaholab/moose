@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MTICSum);
 
-template <>
 InputParameters
-validParams<MTICSum>()
+MTICSum::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("var1", "First variable");
   params.addRequiredCoupledVar("var2", "Second variable");
 

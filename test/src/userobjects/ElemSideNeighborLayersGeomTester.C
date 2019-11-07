@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", ElemSideNeighborLayersGeomTester);
 
-template <>
 InputParameters
-validParams<ElemSideNeighborLayersGeomTester>()
+ElemSideNeighborLayersGeomTester::validParams()
 {
-  InputParameters params = validParams<ElemSideNeighborLayersTester>();
+  InputParameters params = ElemSideNeighborLayersTester::validParams();
 
   // Our base class had called out some relationship managers that we don't want for this object
   params.clearRelationshipManagers();

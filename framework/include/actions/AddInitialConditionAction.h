@@ -19,9 +19,9 @@ InputParameters validParams<AddInitialConditionAction>();
 class AddInitialConditionAction : public MooseObjectAction
 {
 public:
-  AddInitialConditionAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddInitialConditionAction(InputParameters params);
 
   virtual void act() override;
 };

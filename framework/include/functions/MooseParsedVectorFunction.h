@@ -30,9 +30,9 @@ public:
    * Class constructor
    * @param parameters The input parameters
    */
-  MooseParsedVectorFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MooseParsedVectorFunction(const InputParameters & parameters);
 
   virtual RealVectorValue vectorValue(Real t, const Point & p) const override;
 

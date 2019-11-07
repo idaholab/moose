@@ -23,9 +23,9 @@ InputParameters validParams<ConditionalFunctionEnableControl>();
 class ConditionalFunctionEnableControl : public ConditionalEnableControl
 {
 public:
-  ConditionalFunctionEnableControl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConditionalFunctionEnableControl(const InputParameters & parameters);
 
 protected:
   virtual bool conditionMet(const unsigned int & i) override;

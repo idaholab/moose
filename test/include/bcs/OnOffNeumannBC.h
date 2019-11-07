@@ -11,21 +11,17 @@
 
 #include "NeumannBC.h"
 
-class OnOffNeumannBC;
-
-template <>
-InputParameters validParams<OnOffNeumannBC>();
-
 /**
  * NeumanBC with ability to turn on and off
  */
 class OnOffNeumannBC : public NeumannBC
 {
 public:
+  static InputParameters validParams();
+
   OnOffNeumannBC(const InputParameters & parameters);
 
   virtual bool shouldApply();
 
 protected:
 };
-

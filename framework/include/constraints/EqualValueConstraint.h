@@ -24,9 +24,9 @@ template <ComputeStage compute_stage>
 class EqualValueConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
-  EqualValueConstraint(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  EqualValueConstraint(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;

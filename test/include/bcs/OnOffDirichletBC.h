@@ -11,17 +11,11 @@
 
 #include "DirichletBC.h"
 
-class OnOffDirichletBC;
-
-template <>
-InputParameters validParams<OnOffDirichletBC>();
-
-/**
- *
- */
 class OnOffDirichletBC : public DirichletBC
 {
 public:
+  static InputParameters validParams();
+
   OnOffDirichletBC(const InputParameters & parameters);
   virtual ~OnOffDirichletBC();
 
@@ -29,4 +23,3 @@ public:
 
 protected:
 };
-

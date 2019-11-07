@@ -11,17 +11,14 @@
 
 #include "Steady.h"
 
-class SteadyWithPicardCheck;
-
-template <>
-InputParameters validParams<SteadyWithPicardCheck>();
-
 /**
  * Test executioner to show custom convergence check of Picard iterations
  */
 class SteadyWithPicardCheck : public Steady
 {
 public:
+  static InputParameters validParams();
+
   SteadyWithPicardCheck(const InputParameters & parameters);
 
   virtual void init() override;
@@ -46,4 +43,3 @@ private:
   /// Reference to the postprocessor value
   const PostprocessorValue * _pp_value;
 };
-

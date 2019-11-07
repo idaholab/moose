@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TEJumpFFN);
 
-template <>
 InputParameters
-validParams<TEJumpFFN>()
+TEJumpFFN::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<double>("t_jump", 1.0, "Time when the jump occurs");
   params.addParam<double>("slope", 1.0, "How steep the jump is");
   return params;

@@ -12,15 +12,13 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class MatPropUserObjectAux;
 class MaterialPropertyUserObject;
-
-template <>
-InputParameters validParams<MatPropUserObjectAux>();
 
 class MatPropUserObjectAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MatPropUserObjectAux(const InputParameters & parameters);
 
   virtual ~MatPropUserObjectAux() {}
@@ -30,4 +28,3 @@ protected:
 
   const MaterialPropertyUserObject & _mat_uo;
 };
-

@@ -31,9 +31,9 @@ InputParameters validParams<AdamsPredictor>();
 class AdamsPredictor : public Predictor
 {
 public:
-  AdamsPredictor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AdamsPredictor(const InputParameters & parameters);
 
   virtual int order() override { return _order; }
   virtual void timestepSetup() override;

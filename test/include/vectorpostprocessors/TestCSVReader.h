@@ -11,18 +11,14 @@
 
 #include "GeneralUserObject.h"
 
-// Forward Declarations
-class TestCSVReader;
-
-template <>
-InputParameters validParams<TestCSVReader>();
-
 /**
  * Test class to make certain that CSV data is broadcast correctly.
  */
 class TestCSVReader : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   TestCSVReader(const InputParameters & parameters);
   virtual void execute() override;
   virtual void initialize() override {}
@@ -33,4 +29,3 @@ protected:
   const processor_id_type & _rank;
   const std::vector<double> & _gold;
 };
-

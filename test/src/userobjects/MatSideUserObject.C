@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MatSideUserObject);
 
-template <>
 InputParameters
-validParams<MatSideUserObject>()
+MatSideUserObject::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "mat_prop", "the name of the material property we are going to use");
   return params;

@@ -12,11 +12,10 @@
 
 registerMooseAction("MooseTestApp", BadAddKernelAction, "add_kernel");
 
-template <>
 InputParameters
-validParams<BadAddKernelAction>()
+BadAddKernelAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 BadAddKernelAction::BadAddKernelAction(InputParameters params) : MooseObjectAction(params) {}

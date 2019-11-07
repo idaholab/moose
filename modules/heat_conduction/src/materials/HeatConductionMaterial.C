@@ -14,11 +14,12 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionMaterial);
 
-template <>
+defineLegacyParams(HeatConductionMaterial);
+
 InputParameters
-validParams<HeatConductionMaterial>()
+HeatConductionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addCoupledVar("temp", "Coupled Temperature");
 

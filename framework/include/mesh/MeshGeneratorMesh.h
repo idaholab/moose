@@ -23,9 +23,9 @@ InputParameters validParams<MeshGeneratorMesh>();
 class MeshGeneratorMesh : public MooseMesh
 {
 public:
-  MeshGeneratorMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MeshGeneratorMesh(const InputParameters & parameters);
   MeshGeneratorMesh(const MeshGeneratorMesh & /* other_mesh */) = default;
 
   // No copy

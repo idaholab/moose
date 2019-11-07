@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", GetElementalValueAux);
 
-template <>
 InputParameters
-validParams<GetElementalValueAux>()
+GetElementalValueAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Tests the getElementalValue() function of MooseVariableFE.");
 

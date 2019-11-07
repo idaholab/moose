@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", ElemSideNeighborLayersTester);
 
-template <>
 InputParameters
-validParams<ElemSideNeighborLayersTester>()
+ElemSideNeighborLayersTester::validParams()
 {
-  InputParameters params = validParams<ElementUOProvider>();
+  InputParameters params = ElementUOProvider::validParams();
   params.addParam<unsigned int>(
       "rank",
       DofObject::invalid_processor_id,

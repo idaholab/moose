@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ExampleShapeElementKernel2);
 
-template <>
 InputParameters
-validParams<ExampleShapeElementKernel2>()
+ExampleShapeElementKernel2::validParams()
 {
-  InputParameters params = validParams<NonlocalKernel>();
+  InputParameters params = NonlocalKernel::validParams();
   params.addRequiredParam<UserObjectName>("user_object",
                                           "Name of an ExampleShapeElementUserObject");
   params.addRequiredCoupledVar("u", "coupled variable");

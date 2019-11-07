@@ -28,9 +28,9 @@ InputParameters validParams<MultiAppNearestNodeTransfer>();
 class MultiAppNearestNodeTransfer : public MultiAppFieldTransfer
 {
 public:
-  MultiAppNearestNodeTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppNearestNodeTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

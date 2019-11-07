@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-class PolyDiffusion;
-
-template <>
-InputParameters validParams<PolyDiffusion>();
-
 class PolyDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PolyDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-

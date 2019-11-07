@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MaterialEigenKernel);
 
-template <>
 InputParameters
-validParams<MaterialEigenKernel>()
+MaterialEigenKernel::validParams()
 {
-  InputParameters params = validParams<EigenKernel>();
+  InputParameters params = EigenKernel::validParams();
   params.addParam<MaterialPropertyName>("mat", "Material property name (pseudo-stateful)");
   return params;
 }

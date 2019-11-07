@@ -12,15 +12,11 @@
 #include "Kernel.h"
 #include "Material.h"
 
-// Forward Declarations
-class Advection0;
-
-template <>
-InputParameters validParams<Advection0>();
-
 class Advection0 : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Advection0(const InputParameters & parameters);
 
 protected:
@@ -31,4 +27,3 @@ private:
   /// Parameters for spatially linearly varying velocity.
   Real _Au, _Bu, _Cu, _Av, _Bv, _Cv;
 };
-

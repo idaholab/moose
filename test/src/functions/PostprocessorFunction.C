@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", PostprocessorFunction);
 
-template <>
 InputParameters
-validParams<PostprocessorFunction>()
+PostprocessorFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<PostprocessorName>(
       "pp", "The name of the postprocessor you are trying to get.");
   return params;

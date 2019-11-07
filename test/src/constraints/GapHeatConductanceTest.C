@@ -11,12 +11,16 @@
 
 registerADMooseObject("MooseTestApp", GapHeatConductanceTest);
 
-defineADValidParams(
-    GapHeatConductanceTest,
-    ADMortarConstraint,
-    params.addParam<Real>("gap_conductance_constant",
-                          0.03,
-                          "The numerator in calculation of the heat transfer coefficient"););
+template <ComputeStage compute_stage>
+InputParameters
+GapHeatConductanceTest<compute_stage>::validParams()
+{
+  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  params.addParam<Real>("gap_conductance_constant",
+                        0.03,
+                        "The numerator in calculation of the heat transfer coefficient");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 GapHeatConductanceTest<compute_stage>::GapHeatConductanceTest(const InputParameters & parameters)

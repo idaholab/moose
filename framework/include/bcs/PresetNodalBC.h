@@ -22,9 +22,9 @@ InputParameters validParams<PresetNodalBC>();
 class PresetNodalBC : public NodalBC
 {
 public:
-  PresetNodalBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PresetNodalBC(const InputParameters & parameters);
 
   void computeValue(NumericVector<Number> & current_solution);
 

@@ -11,17 +11,14 @@
 
 #include "Material.h"
 
-class VarCouplingMaterial;
-
-template <>
-InputParameters validParams<VarCouplingMaterial>();
-
 /**
  * A material that couples a variable
  */
 class VarCouplingMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   VarCouplingMaterial(const InputParameters & parameters);
 
 protected:
@@ -34,4 +31,3 @@ protected:
   MaterialProperty<Real> & _diffusion;
   const MaterialProperty<Real> * const _diffusion_old;
 };
-

@@ -14,11 +14,9 @@
 class ConvDiffMetaAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ConvDiffMetaAction(const InputParameters & params);
 
   virtual void act();
 };
-
-template <>
-InputParameters validParams<ConvDiffMetaAction>();
-

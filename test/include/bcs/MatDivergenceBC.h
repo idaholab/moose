@@ -11,17 +11,14 @@
 
 #include "DivergenceBC.h"
 
-class MatDivergenceBC;
-
-template <>
-InputParameters validParams<MatDivergenceBC>();
-
 /**
  * Extends DivergenceBC by multiplication of material property
  */
 class MatDivergenceBC : public DivergenceBC
 {
 public:
+  static InputParameters validParams();
+
   MatDivergenceBC(const InputParameters & parameters);
   virtual ~MatDivergenceBC();
 
@@ -31,4 +28,3 @@ protected:
 
   const MaterialProperty<Real> & _mat;
 };
-

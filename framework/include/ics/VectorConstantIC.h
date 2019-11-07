@@ -32,9 +32,9 @@ InputParameters validParams<VectorConstantIC>();
 class VectorConstantIC : public VectorInitialCondition
 {
 public:
-  VectorConstantIC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  VectorConstantIC(const InputParameters & parameters);
 
   virtual RealVectorValue value(const Point & p) override;
 

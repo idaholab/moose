@@ -22,9 +22,9 @@ InputParameters validParams<Distribution>();
 class Distribution : public MooseObject
 {
 public:
-  Distribution(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Distribution(const InputParameters & parameters);
   /**
    * Compute the probability with given probability distribution function (PDF) at x
    */

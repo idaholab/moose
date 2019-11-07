@@ -26,6 +26,8 @@ InputParameters validParams<JouleHeatingSource>();
 class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>
 {
 public:
+  static InputParameters validParams();
+
   JouleHeatingSource(const InputParameters & parameters);
   virtual void initialSetup();
 

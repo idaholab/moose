@@ -25,6 +25,8 @@ InputParameters validParams<InterfaceTimeKernel>();
 class InterfaceTimeKernel : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   InterfaceTimeKernel(const InputParameters & parameters);
 
 protected:

@@ -24,9 +24,9 @@ InputParameters validParams<MultiAppFieldTransfer>();
 class MultiAppFieldTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppFieldTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppFieldTransfer(const InputParameters & parameters);
 
   virtual void initialSetup();
 

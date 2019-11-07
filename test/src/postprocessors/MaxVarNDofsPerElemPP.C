@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MaxVarNDofsPerElemPP);
 
-template <>
 InputParameters
-validParams<MaxVarNDofsPerElemPP>()
+MaxVarNDofsPerElemPP::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

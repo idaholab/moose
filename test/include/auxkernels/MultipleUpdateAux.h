@@ -11,17 +11,14 @@
 
 #include "AuxKernel.h"
 
-class MultipleUpdateAux;
-
-template <>
-InputParameters validParams<MultipleUpdateAux>();
-
 /**
  * Aux kernel that updated values of coupled variables
  */
 class MultipleUpdateAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MultipleUpdateAux(const InputParameters & parameters);
   virtual ~MultipleUpdateAux();
 
@@ -32,4 +29,3 @@ protected:
   VariableValue & _var1;
   VariableValue & _var2;
 };
-

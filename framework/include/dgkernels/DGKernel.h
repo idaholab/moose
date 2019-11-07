@@ -30,9 +30,9 @@ public:
    * @param parameters The parameters object for holding additional parameters for kernels and
    * derived kernels
    */
-  DGKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DGKernel(const InputParameters & parameters);
 
   /**
    * The variable that this kernel operates on.

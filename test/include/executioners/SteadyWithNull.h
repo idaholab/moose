@@ -11,19 +11,15 @@
 
 #include "Steady.h"
 
-class SteadyWithNull;
-
-template <>
-InputParameters validParams<SteadyWithNull>();
-
 /**
  * Steady excecutioner setting nullspace
  */
 class SteadyWithNull : public Steady
 {
 public:
+  static InputParameters validParams();
+
   SteadyWithNull(const InputParameters & parameters);
 
   virtual void init() override;
 };
-

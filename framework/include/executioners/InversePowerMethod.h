@@ -20,9 +20,9 @@ InputParameters validParams<InversePowerMethod>();
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:
-  InversePowerMethod(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InversePowerMethod(const InputParameters & parameters);
 
   virtual void init() override;
 

@@ -16,9 +16,14 @@
 
 registerADMooseObject("MooseTestApp", ADDGCoupledTest);
 
-defineADValidParams(ADDGCoupledTest,
-                    ADDGKernel,
-                    params.addRequiredCoupledVar("v", "The coupling variable"););
+template <ComputeStage compute_stage>
+InputParameters
+ADDGCoupledTest<compute_stage>::validParams()
+{
+  InputParameters params = ADDGKernel<compute_stage>::validParams();
+  params.addRequiredCoupledVar("v", "The coupling variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDGCoupledTest<compute_stage>::ADDGCoupledTest(const InputParameters & parameters)

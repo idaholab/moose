@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class TEJumpFFN;
-
-template <>
-InputParameters validParams<TEJumpFFN>();
-
 class TEJumpFFN : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   TEJumpFFN(const InputParameters & parameters);
 
 protected:
@@ -29,4 +26,3 @@ protected:
   Real _t_jump;
   Real _slope;
 };
-

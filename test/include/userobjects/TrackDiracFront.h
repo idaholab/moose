@@ -12,12 +12,6 @@
 #include "NodalUserObject.h"
 #include "libmesh/id_types.h"
 
-// Forward Declarations
-class TrackDiracFront;
-
-template <>
-InputParameters validParams<TrackDiracFront>();
-
 /**
  * This is an example NodalUserObject that will record nodal positions where the
  * variable is near 0.5 in value.  This information will then be used by
@@ -43,6 +37,8 @@ InputParameters validParams<TrackDiracFront>();
 class TrackDiracFront : public NodalUserObject
 {
 public:
+  static InputParameters validParams();
+
   TrackDiracFront(const InputParameters & parameters);
 
   virtual void initialize();
@@ -63,4 +59,3 @@ protected:
 
   const VariableValue & _var_value;
 };
-

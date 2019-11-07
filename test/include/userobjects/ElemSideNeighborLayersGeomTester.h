@@ -11,18 +11,13 @@
 
 #include "ElemSideNeighborLayersTester.h"
 
-// Forward Declarations
-class ElemSideNeighborLayersGeomTester;
-
-template <>
-InputParameters validParams<ElemSideNeighborLayersGeomTester>();
-
 /**
  * User object to show information about the ElemSideNeighborLayer object's "ghosting" behaviors
  */
 class ElemSideNeighborLayersGeomTester : public ElemSideNeighborLayersTester
 {
 public:
+  static InputParameters validParams();
+
   ElemSideNeighborLayersGeomTester(const InputParameters & parameters);
 };
-

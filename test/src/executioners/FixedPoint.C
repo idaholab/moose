@@ -11,9 +11,8 @@
 
 #include "NonlinearSystemBase.h"
 
-template <>
 InputParameters
-validParams<FixedPoint>()
+FixedPoint::validParams()
 {
   InputParameters params = emptyInputParameters();
 

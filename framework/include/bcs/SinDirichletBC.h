@@ -31,9 +31,9 @@ InputParameters validParams<SinDirichletBC>();
 class SinDirichletBC : public NodalBC
 {
 public:
-  SinDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SinDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

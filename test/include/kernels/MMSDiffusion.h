@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class MMSDiffusion;
-
-template <>
-InputParameters validParams<MMSDiffusion>();
-
 class MMSDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MMSDiffusion(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
 
   unsigned int _mesh_dimension;
 };
-

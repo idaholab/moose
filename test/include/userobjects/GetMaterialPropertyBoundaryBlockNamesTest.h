@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class GetMaterialPropertyBoundaryBlockNamesTest;
-
-template <>
-InputParameters validParams<GetMaterialPropertyBoundaryBlockNamesTest>();
-
 /**
  * A Postprocessor to test a call to GetMaterialPropertyBoundaryName() method.
  *
@@ -24,6 +19,8 @@ InputParameters validParams<GetMaterialPropertyBoundaryBlockNamesTest>();
 class GetMaterialPropertyBoundaryBlockNamesTest : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GetMaterialPropertyBoundaryBlockNamesTest(const InputParameters & parameters);
   virtual ~GetMaterialPropertyBoundaryBlockNamesTest(){};
   virtual void execute(){};
@@ -63,4 +60,3 @@ GetMaterialPropertyBoundaryBlockNamesTest::performTest(const std::vector<T> & re
   // If you are here, you win
   mooseError("TEST PASSED: The retrieved names are the same as the names expected");
 }
-

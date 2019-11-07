@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", BIDAux);
 
-template <>
 InputParameters
-validParams<BIDAux>()
+BIDAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

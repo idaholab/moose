@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ExplicitODE);
 
-template <>
 InputParameters
-validParams<ExplicitODE>()
+ExplicitODE::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addParam<Real>("lambda", 1, "Lambda on the right-hand side");
   return params;
 }

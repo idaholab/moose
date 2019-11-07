@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoefTimeDerivativeNodalKernel);
 
-template <>
 InputParameters
-validParams<CoefTimeDerivativeNodalKernel>()
+CoefTimeDerivativeNodalKernel::validParams()
 {
-  InputParameters params = validParams<TimeDerivativeNodalKernel>();
+  InputParameters params = TimeDerivativeNodalKernel::validParams();
   params.addParam<Real>("coeff", 1, "The coefficient");
   return params;
 }

@@ -20,9 +20,9 @@ InputParameters validParams<PatchMeshGenerator>();
 class PatchMeshGenerator : public MeshGenerator
 {
 public:
-  PatchMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PatchMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

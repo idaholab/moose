@@ -11,14 +11,11 @@
 
 #include "TimeDerivativeNodalKernel.h"
 
-class CoefTimeDerivativeNodalKernel;
-
-template <>
-InputParameters validParams<CoefTimeDerivativeNodalKernel>();
-
 class CoefTimeDerivativeNodalKernel : public TimeDerivativeNodalKernel
 {
 public:
+  static InputParameters validParams();
+
   CoefTimeDerivativeNodalKernel(const InputParameters & parameters);
 
 protected:

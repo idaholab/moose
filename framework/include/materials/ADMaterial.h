@@ -50,9 +50,9 @@ template <ComputeStage compute_stage>
 class ADMaterial : public Material
 {
 public:
-  ADMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADMaterial(const InputParameters & parameters);
 
   /**
    * declare the ad property named "prop_name"

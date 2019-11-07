@@ -15,11 +15,10 @@
 
 registerMooseAction("MooseTestApp", CreateSpecialProblemAction, "create_problem_custom");
 
-template <>
 InputParameters
-validParams<CreateSpecialProblemAction>()
+CreateSpecialProblemAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::string>("name", "Test Problem", "The name of the Problem object");
   return params;
 }

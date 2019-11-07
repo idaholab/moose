@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", LateDeclarationVectorPostprocessor);
 
-template <>
 InputParameters
-validParams<LateDeclarationVectorPostprocessor>()
+LateDeclarationVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<VectorPostprocessorValue>("value",
                                                     "The vector value this object will have.");

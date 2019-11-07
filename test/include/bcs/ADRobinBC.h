@@ -11,15 +11,12 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADRobinBC;
-
-declareADValidParams(ADRobinBC);
-
 template <ComputeStage compute_stage>
 class ADRobinBC : public ADIntegratedBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADRobinBC(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
 
   usingIntegratedBCMembers;
 };
-

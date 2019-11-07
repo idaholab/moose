@@ -20,9 +20,9 @@ InputParameters validParams<ExtraNodesetGenerator>();
 class ExtraNodesetGenerator : public MeshGenerator
 {
 public:
-  ExtraNodesetGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ExtraNodesetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

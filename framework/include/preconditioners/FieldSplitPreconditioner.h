@@ -28,9 +28,9 @@ public:
   /**
    *  Constructor. Initializes SplitBasedPreconditioner data structures
    */
-  FieldSplitPreconditioner(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FieldSplitPreconditioner(const InputParameters & parameters);
 
   /**
    * top split

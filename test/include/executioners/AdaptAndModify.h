@@ -11,15 +11,11 @@
 
 #include "Transient.h"
 
-// Forward Declarations
-class AdaptAndModify;
-
-template <>
-InputParameters validParams<AdaptAndModify>();
-
 class AdaptAndModify : public Transient
 {
 public:
+  static InputParameters validParams();
+
   AdaptAndModify(const InputParameters & parameters);
 
   virtual void incrementStepOrReject();
@@ -29,4 +25,3 @@ public:
 protected:
   unsigned int _adapt_cycles;
 };
-

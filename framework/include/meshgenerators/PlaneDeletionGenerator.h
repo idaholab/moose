@@ -28,9 +28,9 @@ InputParameters validParams<PlaneDeletionGenerator>();
 class PlaneDeletionGenerator : public ElementDeletionGeneratorBase
 {
 public:
-  PlaneDeletionGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PlaneDeletionGenerator(const InputParameters & parameters);
 
 protected:
   virtual bool shouldDelete(const Elem * elem) override;

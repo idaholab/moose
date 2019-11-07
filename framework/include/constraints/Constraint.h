@@ -47,9 +47,9 @@ class Constraint : public MooseObject,
                    public TaggingInterface
 {
 public:
-  Constraint(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Constraint(const InputParameters & parameters);
   virtual ~Constraint();
 
   /**

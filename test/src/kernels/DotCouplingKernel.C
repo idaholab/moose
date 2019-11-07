@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DotCouplingKernel);
 
-template <>
 InputParameters
-validParams<DotCouplingKernel>()
+DotCouplingKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("v", "Variable being coupled");
   return params;
 }

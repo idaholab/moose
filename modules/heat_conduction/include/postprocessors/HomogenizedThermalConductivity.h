@@ -19,6 +19,8 @@
 class HomogenizedThermalConductivity : public ElementAverageValue
 {
 public:
+  static InputParameters validParams();
+
   HomogenizedThermalConductivity(const InputParameters & parameters);
 
   virtual void initialize();

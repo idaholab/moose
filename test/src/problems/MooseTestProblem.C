@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MooseTestProblem);
 
-template <>
 InputParameters
-validParams<MooseTestProblem>()
+MooseTestProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
   return params;
 }
 

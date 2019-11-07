@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ComboMarker);
 
-template <>
+defineLegacyParams(ComboMarker);
+
 InputParameters
-validParams<ComboMarker>()
+ComboMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<std::vector<MarkerName>>(
       "markers", "A list of marker names to combine into a single marker.");
   params.addClassDescription("A marker that converts many markers into a single marker by "

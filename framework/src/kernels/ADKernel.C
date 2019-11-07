@@ -25,9 +25,9 @@ InputParameters
 ADKernelTempl<T, compute_stage>::validParams()
 {
   auto params = KernelBase::validParams();
-  if (typeid(T).name() == typeid(Real).name())
+  if (std::is_same<T, Real>::value)
     params.registerBase("Kernel");
-  else if (typeid(T).name() == typeid(RealVectorValue).name())
+  else if (std::is_same<T, RealVectorValue>::value)
     params.registerBase("VectorKernel");
   else
     ::mooseError("unsupported ADKernelTempl specialization");

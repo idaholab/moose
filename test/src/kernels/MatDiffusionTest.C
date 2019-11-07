@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MatDiffusionTest);
 
-template <>
 InputParameters
-validParams<MatDiffusionTest>()
+MatDiffusionTest::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "the name of the material property we are going to use");
 

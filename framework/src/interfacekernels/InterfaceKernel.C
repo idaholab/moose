@@ -16,21 +16,20 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
-InputParameters
-validParams<InterfaceKernel>()
-{
-  InputParameters params = validParams<InterfaceKernelBase>();
-  params.registerBase("InterfaceKernel");
-  return params;
-}
+defineLegacyParams(InterfaceKernel);
+defineLegacyParams(VectorInterfaceKernel);
 
-template <>
+template <typename T>
 InputParameters
-validParams<VectorInterfaceKernel>()
+InterfaceKernelTempl<T>::validParams()
 {
-  InputParameters params = validParams<InterfaceKernelBase>();
-  params.registerBase("VectorInterfaceKernel");
+  InputParameters params = InterfaceKernelBase::validParams();
+  if (std::is_same<T, Real>::value)
+    params.registerBase("InterfaceKernel");
+  else if (std::is_same<T, RealVectorValue>::value)
+    params.registerBase("VectorInterfaceKernel");
+  else
+    ::mooseError("unsupported InterfaceKernelTempl specialization");
   return params;
 }
 

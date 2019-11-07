@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", PrimeProductUserObject);
 
-template <>
 InputParameters
-validParams<PrimeProductUserObject>()
+PrimeProductUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

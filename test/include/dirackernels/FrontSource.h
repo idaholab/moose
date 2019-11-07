@@ -11,14 +11,7 @@
 
 // Moose Includes
 #include "DiracKernel.h"
-
 #include "TrackDiracFront.h"
-
-// Forward Declarations
-class FrontSource;
-
-template <>
-InputParameters validParams<FrontSource>();
 
 /**
  * An example showing how point sources can be applied based on
@@ -28,6 +21,8 @@ InputParameters validParams<FrontSource>();
 class FrontSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   FrontSource(const InputParameters & parameters);
   virtual void addPoints();
   virtual Real computeQpResidual();
@@ -37,4 +32,3 @@ protected:
 
   const TrackDiracFront & _front_tracker;
 };
-

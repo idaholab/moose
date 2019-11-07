@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class FluxAverageAux;
-
-template <>
-InputParameters validParams<FluxAverageAux>();
-
 /**
  * Computes the average "flux" of a coupled variable and puts it in an elemental field.
  *
@@ -25,6 +19,8 @@ InputParameters validParams<FluxAverageAux>();
 class FluxAverageAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   FluxAverageAux(const InputParameters & parameters);
 
   virtual ~FluxAverageAux() {}
@@ -44,4 +40,3 @@ protected:
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
 };
-

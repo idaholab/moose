@@ -24,9 +24,9 @@ InputParameters validParams<ImageSubdomainGenerator>();
 class ImageSubdomainGenerator : public MeshGenerator, public MeshBaseImageSampler
 {
 public:
-  ImageSubdomainGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ImageSubdomainGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

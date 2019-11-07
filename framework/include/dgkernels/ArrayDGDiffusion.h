@@ -22,9 +22,9 @@ InputParameters validParams<ArrayDGDiffusion>();
 class ArrayDGDiffusion : public ArrayDGKernel
 {
 public:
-  ArrayDGDiffusion(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ArrayDGDiffusion(const InputParameters & parameters);
 
 protected:
   virtual RealEigenVector computeQpResidual(Moose::DGResidualType type) override;

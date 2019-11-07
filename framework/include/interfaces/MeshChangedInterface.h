@@ -28,9 +28,9 @@ InputParameters validParams<MeshChangedInterface>();
 class MeshChangedInterface
 {
 public:
-  MeshChangedInterface(const InputParameters & params);
-
   static InputParameters validParams();
+
+  MeshChangedInterface(const InputParameters & params);
   virtual ~MeshChangedInterface() = default;
 
   /**

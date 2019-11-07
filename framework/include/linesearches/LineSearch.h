@@ -20,9 +20,9 @@ InputParameters validParams<LineSearch>();
 class LineSearch : public MooseObject
 {
 public:
-  LineSearch(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LineSearch(const InputParameters & parameters);
 
   /**
    * zeros the nonlinear iteration count

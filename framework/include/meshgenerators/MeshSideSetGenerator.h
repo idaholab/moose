@@ -23,9 +23,9 @@ InputParameters validParams<MeshSideSetGenerator>();
 class MeshSideSetGenerator : public MeshGenerator
 {
 public:
-  MeshSideSetGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MeshSideSetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

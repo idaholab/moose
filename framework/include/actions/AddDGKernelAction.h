@@ -19,9 +19,9 @@ InputParameters validParams<AddDGKernelAction>();
 class AddDGKernelAction : public MooseObjectAction
 {
 public:
-  AddDGKernelAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddDGKernelAction(InputParameters params);
 
   virtual void act() override;
 };

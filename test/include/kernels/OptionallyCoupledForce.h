@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class OptionallyCoupledForce;
-
-template <>
-InputParameters validParams<OptionallyCoupledForce>();
-
 /**
  * Simple class to demonstrate off diagonal Jacobian contributions.
  */
 class OptionallyCoupledForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   OptionallyCoupledForce(const InputParameters & parameters);
 
 protected:
@@ -41,4 +37,3 @@ private:
   const VariableValue & _v_dot_du;
   bool _v_coupled;
 };
-

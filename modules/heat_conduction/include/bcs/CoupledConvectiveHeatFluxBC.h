@@ -24,6 +24,8 @@ InputParameters validParams<CoupledConvectiveHeatFluxBC>();
 class CoupledConvectiveHeatFluxBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
 protected:

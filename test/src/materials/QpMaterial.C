@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", QpMaterial);
 
-template <>
 InputParameters
-validParams<QpMaterial>()
+QpMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("property_name",
                                        "The desired name for the Material Property.");
   return params;

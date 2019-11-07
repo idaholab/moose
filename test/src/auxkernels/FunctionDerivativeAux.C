@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", FunctionDerivativeAux);
 
-template <>
 InputParameters
-validParams<FunctionDerivativeAux>()
+FunctionDerivativeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<FunctionName>("function", "The function to use as the value");
   params.addRequiredParam<unsigned int>(
       "component",

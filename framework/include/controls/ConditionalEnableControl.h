@@ -22,9 +22,9 @@ InputParameters validParams<ConditionalEnableControl>();
 class ConditionalEnableControl : public Control
 {
 public:
-  ConditionalEnableControl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConditionalEnableControl(const InputParameters & parameters);
 
   virtual void execute() override;
 

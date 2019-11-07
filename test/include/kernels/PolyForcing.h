@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class PolyForcing;
-
-template <>
-InputParameters validParams<PolyForcing>();
-
 class PolyForcing : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PolyForcing(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
   Real _y;
   Real _z;
 };
-

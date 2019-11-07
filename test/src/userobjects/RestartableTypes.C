@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RestartableTypes);
 
-template <>
 InputParameters
-validParams<RestartableTypes>()
+RestartableTypes::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

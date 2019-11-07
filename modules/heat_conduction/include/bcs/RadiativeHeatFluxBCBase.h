@@ -23,6 +23,8 @@ InputParameters validParams<RadiativeHeatFluxBCBase>();
 class RadiativeHeatFluxBCBase : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   RadiativeHeatFluxBCBase(const InputParameters & parameters);
 
 protected:

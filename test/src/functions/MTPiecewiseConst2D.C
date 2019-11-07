@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MTPiecewiseConst2D);
 
-template <>
 InputParameters
-validParams<MTPiecewiseConst2D>()
+MTPiecewiseConst2D::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   return params;
 }
 

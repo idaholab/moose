@@ -25,9 +25,9 @@ InputParameters validParams<OneDEqualValueConstraintBC>();
 class OneDEqualValueConstraintBC : public IntegratedBC
 {
 public:
-  OneDEqualValueConstraintBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  OneDEqualValueConstraintBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

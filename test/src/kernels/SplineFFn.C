@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", SplineFFn);
 
-template <>
 InputParameters
-validParams<SplineFFn>()
+SplineFFn::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<FunctionName>("function", "The name of the spline function");
 
   return params;

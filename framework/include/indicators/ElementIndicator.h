@@ -35,9 +35,9 @@ class ElementIndicator : public Indicator,
                          public MooseVariableInterface<Real>
 {
 public:
-  ElementIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ElementIndicator(const InputParameters & parameters);
 
 protected:
   MooseVariable & _field_var;

@@ -28,9 +28,9 @@ InputParameters validParams<GenericConstantMaterial>();
 class GenericConstantMaterial : public Material
 {
 public:
-  GenericConstantMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GenericConstantMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

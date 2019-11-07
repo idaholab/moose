@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", RandomPostprocessor);
 
-template <>
 InputParameters
-validParams<RandomPostprocessor>()
+RandomPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addParam<unsigned int>("seed", 0, "Seed the random number generator.");
   params.addParam<unsigned int>("generator", 0, "ID to use for the random number stream.");

@@ -12,12 +12,6 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 
-// Forward Declarations
-class QpMaterial;
-
-template <>
-InputParameters validParams<QpMaterial>();
-
 /**
  * Material with a single property that corresponds to the quadrature
  * point index.  Used to ensure that the constant_on_elem flag
@@ -27,6 +21,8 @@ InputParameters validParams<QpMaterial>();
 class QpMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   QpMaterial(const InputParameters & parameters);
 
 protected:
@@ -35,4 +31,3 @@ protected:
   const std::string _prop_name;
   MaterialProperty<Real> & _mat_prop;
 };
-

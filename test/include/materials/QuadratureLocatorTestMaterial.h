@@ -13,15 +13,13 @@
 #include "GeometricSearchInterface.h"
 
 // Forward Declarations
-class QuadratureLocatorTestMaterial;
 class PenetrationLocator;
-
-template <>
-InputParameters validParams<QuadratureLocatorTestMaterial>();
 
 class QuadratureLocatorTestMaterial : public Material, public GeometricSearchInterface
 {
 public:
+  static InputParameters validParams();
+
   QuadratureLocatorTestMaterial(const InputParameters & parameters);
 
 protected:

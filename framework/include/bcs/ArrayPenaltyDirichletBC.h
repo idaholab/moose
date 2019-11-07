@@ -19,9 +19,9 @@ InputParameters validParams<ArrayPenaltyDirichletBC>();
 class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 {
 public:
-  ArrayPenaltyDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ArrayPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual RealEigenVector computeQpResidual() override;

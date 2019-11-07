@@ -11,11 +11,7 @@
 
 #include "AuxKernel.h"
 
-class PeriodicDistanceAux;
 class GeneratedMesh;
-
-template <>
-InputParameters validParams<PeriodicDistanceAux>();
 
 /**
  * Aux kernel that tests periodic distance functions in GeneratedMesh
@@ -23,6 +19,8 @@ InputParameters validParams<PeriodicDistanceAux>();
 class PeriodicDistanceAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PeriodicDistanceAux(const InputParameters & parameters);
 
 protected:
@@ -31,4 +29,3 @@ protected:
   /// A point of interest in the domain
   Point _point;
 };
-

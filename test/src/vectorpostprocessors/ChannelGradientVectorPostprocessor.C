@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ChannelGradientVectorPostprocessor);
 
-template <>
 InputParameters
-validParams<ChannelGradientVectorPostprocessor>()
+ChannelGradientVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>(
       "lv1", "The line value sampler that will be on the LHS of the difference operation");

@@ -12,15 +12,11 @@
 #include "Kernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class MatDiffusionTest;
-
-template <>
-InputParameters validParams<MatDiffusionTest>();
-
 class MatDiffusionTest : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MatDiffusionTest(const InputParameters & parameters);
 
 protected:
@@ -31,4 +27,3 @@ protected:
   std::string _prop_name;
   const MaterialProperty<Real> * _diff;
 };
-

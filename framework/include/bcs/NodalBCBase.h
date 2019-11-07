@@ -34,9 +34,9 @@ class NodalBCBase : public BoundaryCondition,
                     public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  NodalBCBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodalBCBase(const InputParameters & parameters);
 
   virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;

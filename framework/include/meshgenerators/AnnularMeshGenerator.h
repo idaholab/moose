@@ -23,9 +23,9 @@ InputParameters validParams<AnnularMeshGenerator>();
 class AnnularMeshGenerator : public MeshGenerator
 {
 public:
-  AnnularMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AnnularMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

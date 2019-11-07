@@ -11,14 +11,11 @@
 
 #include "Action.h"
 
-class AddLotsOfAuxVariablesAction;
-
-template <>
-InputParameters validParams<AddLotsOfAuxVariablesAction>();
-
 class AddLotsOfAuxVariablesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddLotsOfAuxVariablesAction(const InputParameters & parameters);
 
   virtual void act();
@@ -27,4 +24,3 @@ private:
   static const Real _abs_zero_tol;
   std::string _variable_to_read;
 };
-

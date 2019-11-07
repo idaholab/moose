@@ -38,8 +38,9 @@ InputParameters validParams<FileRangeBuilder>();
 class FileRangeBuilder
 {
 public:
-  FileRangeBuilder(const InputParameters & params);
   static InputParameters validParams();
+
+  FileRangeBuilder(const InputParameters & params);
 
   virtual ~FileRangeBuilder() = default;
 

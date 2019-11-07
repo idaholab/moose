@@ -27,9 +27,9 @@ public:
   /**
    * Class constructor
    */
-  AddOutputAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddOutputAction(InputParameters params);
 
   virtual void act() override;
 };

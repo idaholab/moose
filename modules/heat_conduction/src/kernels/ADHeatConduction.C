@@ -11,13 +11,19 @@
 
 registerADMooseObject("HeatConductionApp", ADHeatConduction);
 
-defineADValidParams(
-    ADHeatConduction,
-    ADDiffusion,
-    params.addParam<MaterialPropertyName>("thermal_conductivity",
-                                          "thermal_conductivity",
-                                          "the name of the thermal conductivity material property");
-    params.set<bool>("use_displaced_mesh") = true;);
+defineADLegacyParams(ADHeatConduction);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADHeatConduction<compute_stage>::validParams()
+{
+  InputParameters params = ADDiffusion<compute_stage>::validParams();
+  params.addParam<MaterialPropertyName>("thermal_conductivity",
+                                        "thermal_conductivity",
+                                        "the name of the thermal conductivity material property");
+  params.set<bool>("use_displaced_mesh") = true;
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parameters)

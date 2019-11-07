@@ -28,9 +28,9 @@ InputParameters validParams<BlockWeightedPartitioner>();
 class BlockWeightedPartitioner : public PetscExternalPartitioner
 {
 public:
-  BlockWeightedPartitioner(const InputParameters & params);
-
   static InputParameters validParams();
+
+  BlockWeightedPartitioner(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 

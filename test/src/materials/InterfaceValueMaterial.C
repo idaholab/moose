@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", InterfaceValueMaterial);
 
-template <>
 InputParameters
-validParams<InterfaceValueMaterial>()
+InterfaceValueMaterial::validParams()
 {
-  InputParameters params = validParams<InterfaceMaterial>();
+  InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("Calculates a variable's jump value across an interface.");
   params.addRequiredParam<std::string>("mat_prop_master",
                                        "The material property on the master side of the interface");

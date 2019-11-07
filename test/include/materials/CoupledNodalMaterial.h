@@ -11,17 +11,14 @@
 
 #include "Material.h"
 
-class CoupledNodalMaterial;
-
-template <>
-InputParameters validParams<CoupledNodalMaterial>();
-
 /**
  * Material for testing coupling of nodal values
  */
 class CoupledNodalMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   CoupledNodalMaterial(const InputParameters & parameters);
 
 protected:
@@ -32,4 +29,3 @@ protected:
   /// Values of the coupled variable
   const Real & _coupled_val;
 };
-

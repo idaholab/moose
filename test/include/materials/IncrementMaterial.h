@@ -11,17 +11,14 @@
 
 #include "GenericConstantMaterial.h"
 
-class IncrementMaterial;
-
-template <>
-InputParameters validParams<IncrementMaterial>();
-
 /**
  * A material that tracks the number of times computeQpProperties has been called.
  */
 class IncrementMaterial : public GenericConstantMaterial
 {
 public:
+  static InputParameters validParams();
+
   IncrementMaterial(const InputParameters & parameters);
 
 protected:
@@ -29,4 +26,3 @@ protected:
   unsigned int _inc;
   MaterialProperty<Real> & _mat_prop;
 };
-

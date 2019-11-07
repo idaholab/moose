@@ -11,10 +11,15 @@
 
 registerADMooseObject("MooseTestApp", ADStatefulMaterial);
 
-defineADValidParams(ADStatefulMaterial,
-                    ADMaterial,
-                    params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
-                    params.addRequiredCoupledVar("u", "The coupled variable"););
+template <ComputeStage compute_stage>
+InputParameters
+ADStatefulMaterial<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
+  params.addRequiredCoupledVar("u", "The coupled variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADStatefulMaterial<compute_stage>::ADStatefulMaterial(const InputParameters & parameters)

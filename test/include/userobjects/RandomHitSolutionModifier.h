@@ -13,18 +13,15 @@
 #include "GeneralUserObject.h"
 #include "MooseMesh.h"
 
-// Forward Declarations
 class RandomHitUserObject;
-class RandomHitSolutionModifier;
-
-template <>
-InputParameters validParams<RandomHitSolutionModifier>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class RandomHitSolutionModifier : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RandomHitSolutionModifier(const InputParameters & parameters);
 
   virtual ~RandomHitSolutionModifier() {}
@@ -56,4 +53,3 @@ protected:
 
   Real _amount;
 };
-

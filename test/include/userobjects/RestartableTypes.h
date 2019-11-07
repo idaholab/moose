@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RestartableTypes;
-
-template <>
-InputParameters validParams<RestartableTypes>();
-
 class Dummy
 {
 public:
@@ -86,6 +81,8 @@ dataLoad(std::istream & stream, DummyNeedingContext & v, void * context)
 class RestartableTypes : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RestartableTypes(const InputParameters & params);
   virtual ~RestartableTypes();
 

@@ -22,6 +22,8 @@ InputParameters validParams<ComboMarker>();
 class ComboMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   ComboMarker(const InputParameters & parameters);
 
 protected:

@@ -57,9 +57,9 @@ class DiracKernel : public MooseObject,
                     public TaggingInterface
 {
 public:
-  DiracKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DiracKernel(const InputParameters & parameters);
   virtual ~DiracKernel() {}
 
   /**

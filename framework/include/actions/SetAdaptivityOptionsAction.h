@@ -19,9 +19,9 @@ InputParameters validParams<SetAdaptivityOptionsAction>();
 class SetAdaptivityOptionsAction : public Action
 {
 public:
-  SetAdaptivityOptionsAction(InputParameters params);
-
   static InputParameters validParams();
+
+  SetAdaptivityOptionsAction(InputParameters params);
 
   virtual void act() override;
 };

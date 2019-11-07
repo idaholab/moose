@@ -18,13 +18,12 @@
 
 registerMooseObject("MooseTestApp", QuadratureLocatorTestMaterial);
 
-template <>
 InputParameters
-validParams<QuadratureLocatorTestMaterial>()
+QuadratureLocatorTestMaterial::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary",
                                         "The boundary on the other side of a gap.");

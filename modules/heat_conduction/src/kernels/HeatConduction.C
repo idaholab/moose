@@ -12,11 +12,12 @@
 
 registerMooseObjectAliased("HeatConductionApp", HeatConductionKernel, "HeatConduction");
 
-template <>
+defineLegacyParams(HeatConductionKernel);
+
 InputParameters
-validParams<HeatConductionKernel>()
+HeatConductionKernel::validParams()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = Diffusion::validParams();
   params.addClassDescription(
       "Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
   params.addParam<MaterialPropertyName>(

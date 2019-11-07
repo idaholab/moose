@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class PReaction;
-
-template <>
-InputParameters validParams<PReaction>();
-
 class PReaction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PReaction(const InputParameters & parameters);
 
 protected:

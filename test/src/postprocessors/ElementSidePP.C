@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ElementSidePP);
 
-template <>
 InputParameters
-validParams<ElementSidePP>()
+ElementSidePP::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("side_pp", "Side postprocessor to be passed in");
   return params;
 }

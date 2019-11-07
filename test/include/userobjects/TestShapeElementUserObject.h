@@ -11,12 +11,6 @@
 
 #include "ShapeElementUserObject.h"
 
-// Forward Declarations
-class TestShapeElementUserObject;
-
-template <>
-InputParameters validParams<TestShapeElementUserObject>();
-
 /**
  * Internal test object for the ShapeElementUserObject class. This tests if the
  * _phi and _grad_phi get initialized to the correct sizes and that executeJacobian is called.
@@ -26,6 +20,8 @@ InputParameters validParams<TestShapeElementUserObject>();
 class TestShapeElementUserObject : public ShapeElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   TestShapeElementUserObject(const InputParameters & parameters);
 
   virtual ~TestShapeElementUserObject() {}
@@ -45,4 +41,3 @@ protected:
   unsigned int _v_var;
   unsigned int _v_dofs;
 };
-

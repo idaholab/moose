@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DivergenceBC);
 
-template <>
 InputParameters
-validParams<DivergenceBC>()
+DivergenceBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   return params;
 }
 

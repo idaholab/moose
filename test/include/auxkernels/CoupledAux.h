@@ -11,22 +11,14 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class CoupledAux;
-
-template <>
-InputParameters validParams<CoupledAux>();
-
 /**
  * Coupled auxiliary value
  */
 class CoupledAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   CoupledAux(const InputParameters & parameters);
 
   virtual ~CoupledAux() {}
@@ -40,4 +32,3 @@ protected:
   int _coupled;                       ///< The number of the coupled variable
   const VariableValue & _coupled_val; ///< Coupled variable
 };
-

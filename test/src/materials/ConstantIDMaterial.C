@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ConstantIDMaterial);
 
-template <>
 InputParameters
-validParams<ConstantIDMaterial>()
+ConstantIDMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the property");
   params.addRequiredParam<std::vector<Real>>(
       "prop_values", "List of values to be used for property values based on element integer");

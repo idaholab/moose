@@ -11,15 +11,11 @@
 
 #include "Reaction.h"
 
-// Forward Declarations
-class RenamedKernel;
-
-template <>
-InputParameters validParams<RenamedKernel>();
-
 class RenamedKernel : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   RenamedKernel(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
 
   Real _coef;
 };
-

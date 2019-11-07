@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", TestSerializedSolution);
 
-template <>
 InputParameters
-validParams<TestSerializedSolution>()
+TestSerializedSolution::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   MooseEnum system("nl aux");
 

@@ -19,9 +19,9 @@ template <typename T, ComputeStage compute_stage>
 class ADNodalBCTempl : public NodalBCBase, public MooseVariableInterface<T>
 {
 public:
-  ADNodalBCTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADNodalBCTempl(const InputParameters & parameters);
 
   virtual MooseVariableFE<T> & variable() override { return _var; }
 

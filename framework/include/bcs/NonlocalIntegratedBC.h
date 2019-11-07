@@ -27,9 +27,9 @@ InputParameters validParams<NonlocalIntegratedBC>();
 class NonlocalIntegratedBC : public IntegratedBC
 {
 public:
-  NonlocalIntegratedBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NonlocalIntegratedBC(const InputParameters & parameters);
 
   /**
    * computeJacobian and computeQpOffDiagJacobian methods are almost same

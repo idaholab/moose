@@ -19,9 +19,9 @@ InputParameters validParams<DerivativeSumMaterial>();
 class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 {
 public:
-  DerivativeSumMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DerivativeSumMaterial(const InputParameters & parameters);
 
   virtual void initialSetup();
 

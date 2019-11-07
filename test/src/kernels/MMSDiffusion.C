@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MMSDiffusion);
 
-template <>
 InputParameters
-validParams<MMSDiffusion>()
+MMSDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

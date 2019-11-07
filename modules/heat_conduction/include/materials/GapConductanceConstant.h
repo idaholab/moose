@@ -14,6 +14,8 @@
 class GapConductanceConstant : public Material
 {
 public:
+  static InputParameters validParams();
+
   GapConductanceConstant(const InputParameters & parameters);
 
   static InputParameters actionParameters();

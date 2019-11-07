@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class PolyConvection;
-
-template <>
-InputParameters validParams<PolyConvection>();
-
 class PolyConvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PolyConvection(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
   Real _y;
   Real _z;
 };
-

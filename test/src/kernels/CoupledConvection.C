@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledConvection);
 
-template <>
 InputParameters
-validParams<CoupledConvection>()
+CoupledConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection Kernel");
   params.addParam<bool>(
       "lag_coupling",

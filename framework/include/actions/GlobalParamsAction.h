@@ -19,9 +19,9 @@ InputParameters validParams<GlobalParamsAction>();
 class GlobalParamsAction : public Action
 {
 public:
-  GlobalParamsAction(InputParameters params);
-
   static InputParameters validParams();
+
+  GlobalParamsAction(InputParameters params);
 
   virtual void act() override;
 

@@ -11,14 +11,11 @@
 
 #include "Material.h"
 
-class ConstantIDMaterial;
-
-template <>
-InputParameters validParams<ConstantIDMaterial>();
-
 class ConstantIDMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   ConstantIDMaterial(const InputParameters & parameters);
 
 protected:

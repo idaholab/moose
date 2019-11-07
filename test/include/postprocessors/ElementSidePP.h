@@ -11,15 +11,11 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-// Forward Declarations
-class ElementSidePP;
-
-template <>
-InputParameters validParams<ElementSidePP>();
-
 class ElementSidePP : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementSidePP(const InputParameters & parameters);
 
 protected:
@@ -29,4 +25,3 @@ protected:
 
   const PostprocessorValue & _sidepp;
 };
-

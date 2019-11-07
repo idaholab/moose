@@ -26,9 +26,9 @@ InputParameters validParams<PetscExternalPartitioner>();
 class PetscExternalPartitioner : public MoosePartitioner
 {
 public:
-  PetscExternalPartitioner(const InputParameters & params);
-
   static InputParameters validParams();
+
+  PetscExternalPartitioner(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 

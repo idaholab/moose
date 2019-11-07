@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", Biharmonic);
 
-template <>
 InputParameters
-validParams<Biharmonic>()
+Biharmonic::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

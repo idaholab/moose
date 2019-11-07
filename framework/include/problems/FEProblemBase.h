@@ -138,9 +138,9 @@ enum class MooseLinearConvergenceReason
 class FEProblemBase : public SubProblem, public Restartable
 {
 public:
-  FEProblemBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
   virtual EquationSystems & es() override { return _eq; }

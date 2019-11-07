@@ -20,6 +20,8 @@ InputParameters validParams<HeatSource>();
 class HeatSource : public BodyForce
 {
 public:
+  static InputParameters validParams();
+
   HeatSource(const InputParameters & parameters);
 };
 

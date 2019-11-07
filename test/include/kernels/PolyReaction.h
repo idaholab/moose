@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class PolyReaction;
-
-template <>
-InputParameters validParams<PolyReaction>();
-
 class PolyReaction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PolyReaction(const InputParameters & parameters);
 
 protected:

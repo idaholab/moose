@@ -24,9 +24,9 @@ InputParameters validParams<ConstantPointSource>();
 class ConstantPointSource : public DiracKernel
 {
 public:
-  ConstantPointSource(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConstantPointSource(const InputParameters & parameters);
 
   virtual void addPoints() override;
 

@@ -11,14 +11,11 @@
 
 #include "AuxKernel.h"
 
-class CheckCurrentExecAux;
-
-template <>
-InputParameters validParams<CheckCurrentExecAux>();
-
 class CheckCurrentExecAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   CheckCurrentExecAux(const InputParameters & parameters);
 
 protected:
@@ -26,4 +23,3 @@ protected:
 
   const FEProblemBase & _problem;
 };
-

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", SteadyWithPicardCheck);
 
-template <>
 InputParameters
-validParams<SteadyWithPicardCheck>()
+SteadyWithPicardCheck::validParams()
 {
-  InputParameters params = validParams<Steady>();
+  InputParameters params = Steady::validParams();
 
   params.addRequiredParam<PostprocessorName>(
       "pp_name", "Postprocessor used to control the Picard convergence");

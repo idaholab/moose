@@ -18,11 +18,10 @@
 
 registerMooseAction("MooseTestApp", MeshMetaDataDependenceAction, "add_vector_postprocessor");
 
-template <>
 InputParameters
-validParams<MeshMetaDataDependenceAction>()
+MeshMetaDataDependenceAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable to sample");
   params.addRequiredParam<MeshGeneratorName>(
       "mesh_generator",

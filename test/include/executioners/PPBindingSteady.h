@@ -11,17 +11,14 @@
 
 #include "Steady.h"
 
-class PPBindingSteady;
-
-template <>
-InputParameters validParams<PPBindingSteady>();
-
 /**
  * Steady excecutioner testing postprocessor binding
  */
 class PPBindingSteady : public Steady
 {
 public:
+  static InputParameters validParams();
+
   PPBindingSteady(const InputParameters & parameters);
 
   virtual void init() override;
@@ -31,4 +28,3 @@ protected:
   const PostprocessorValue & _pp_old;
   const PostprocessorValue & _pp_older;
 };
-

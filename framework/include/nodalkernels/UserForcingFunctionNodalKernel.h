@@ -27,9 +27,9 @@ public:
   /**
    * Constructor grabs the Function
    */
-  UserForcingFunctionNodalKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  UserForcingFunctionNodalKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

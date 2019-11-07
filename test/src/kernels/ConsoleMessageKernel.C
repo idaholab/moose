@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ConsoleMessageKernel);
 
-template <>
 InputParameters
-validParams<ConsoleMessageKernel>()
+ConsoleMessageKernel::validParams()
 {
-  InputParameters params = validParams<CoefDiffusion>();
+  InputParameters params = CoefDiffusion::validParams();
   return params;
 }
 

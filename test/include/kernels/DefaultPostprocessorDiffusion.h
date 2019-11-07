@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class DefaultPostprocessorDiffusion;
-
-template <>
-InputParameters validParams<DefaultPostprocessorDiffusion>();
-
 class DefaultPostprocessorDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DefaultPostprocessorDiffusion(const InputParameters & parameters);
 
 protected:
@@ -27,4 +23,3 @@ protected:
   virtual Real computeQpJacobian();
   const PostprocessorValue & _pps_value;
 };
-

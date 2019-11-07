@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", BiharmonicLapBC);
 
-template <>
 InputParameters
-validParams<BiharmonicLapBC>()
+BiharmonicLapBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<FunctionName>(
       "laplacian_function", "0", "A function representing the weakly-imposed Laplacian.");
   return params;

@@ -28,9 +28,9 @@ public:
    * Class constructor
    * @param params Input parameters for this object
    */
-  CheckOutputAction(InputParameters params);
-
   static InputParameters validParams();
+
+  CheckOutputAction(InputParameters params);
 
   virtual void act() override;
 

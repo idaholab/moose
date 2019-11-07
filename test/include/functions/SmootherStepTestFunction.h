@@ -11,14 +11,11 @@
 
 #include "Function.h"
 
-class SmootherStepTestFunction;
-
-template <>
-InputParameters validParams<SmootherStepTestFunction>();
-
 class SmootherStepTestFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   SmootherStepTestFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

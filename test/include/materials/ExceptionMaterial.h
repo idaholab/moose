@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-class ExceptionMaterial;
-
-template <>
-InputParameters validParams<ExceptionMaterial>();
-
 /**
  * ExceptionMaterial throws a MooseException when certain conditions are
  * met.
@@ -23,6 +18,8 @@ InputParameters validParams<ExceptionMaterial>();
 class ExceptionMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   ExceptionMaterial(const InputParameters & parameters);
 
 protected:
@@ -40,4 +37,3 @@ protected:
   /// throw only once
   bool _has_thrown;
 };
-

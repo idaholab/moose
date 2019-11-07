@@ -23,9 +23,9 @@ InputParameters validParams<BreakBoundaryOnSubdomainGenerator>();
 class BreakBoundaryOnSubdomainGenerator : public MeshGenerator
 {
 public:
-  BreakBoundaryOnSubdomainGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BreakBoundaryOnSubdomainGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

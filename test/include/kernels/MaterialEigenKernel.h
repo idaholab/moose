@@ -11,15 +11,11 @@
 
 #include "EigenKernel.h"
 
-// Forward Declarations
-class MaterialEigenKernel;
-
-template <>
-InputParameters validParams<MaterialEigenKernel>();
-
 class MaterialEigenKernel : public EigenKernel
 {
 public:
+  static InputParameters validParams();
+
   MaterialEigenKernel(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
   std::string _propname;
   const MaterialProperty<Real> & _mat;
 };
-

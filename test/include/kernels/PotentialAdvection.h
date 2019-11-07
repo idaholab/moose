@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class PotentialAdvection;
-
-template <>
-InputParameters validParams<PotentialAdvection>();
-
 class PotentialAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PotentialAdvection(const InputParameters & parameters);
   virtual ~PotentialAdvection();
 
@@ -33,4 +30,3 @@ private:
   VariableGradient _default;
   const VariableGradient & _grad_potential;
 };
-

@@ -29,9 +29,9 @@ InputParameters validParams<PiecewiseMultilinear>();
 class PiecewiseMultilinear : public PiecewiseMultiInterpolation
 {
 public:
-  PiecewiseMultilinear(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PiecewiseMultilinear(const InputParameters & parameters);
 
 protected:
   virtual Real sample(const std::vector<Real> & pt) const override;

@@ -11,11 +11,6 @@
 
 #include "GeneratedMesh.h"
 
-class StripeMesh;
-
-template <>
-InputParameters validParams<StripeMesh>();
-
 /**
  * Mesh with subdomains as stripes
  *
@@ -24,6 +19,8 @@ InputParameters validParams<StripeMesh>();
 class StripeMesh : public GeneratedMesh
 {
 public:
+  static InputParameters validParams();
+
   StripeMesh(const InputParameters & parameters);
   StripeMesh(const StripeMesh & other_mesh);
   virtual ~StripeMesh();
@@ -35,4 +32,3 @@ public:
 protected:
   unsigned int _n_stripes; ///< number of stripes
 };
-

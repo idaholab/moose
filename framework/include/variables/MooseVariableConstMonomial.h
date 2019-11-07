@@ -19,9 +19,9 @@ InputParameters validParams<MooseVariableConstMonomial>();
 class MooseVariableConstMonomial : public MooseVariableFE<Real>
 {
 public:
-  MooseVariableConstMonomial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MooseVariableConstMonomial(const InputParameters & parameters);
 
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;

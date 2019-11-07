@@ -11,12 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-// Forward Declarations
-class ChannelGradientVectorPostprocessor;
-
-template <>
-InputParameters validParams<ChannelGradientVectorPostprocessor>();
-
 /**
  *  ChannelGradientVectorPostprocessor is a VectorPostprocessor that calculates
  *  the difference between two LineValueSampler vector postprocessors.
@@ -25,6 +19,8 @@ InputParameters validParams<ChannelGradientVectorPostprocessor>();
 class ChannelGradientVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ChannelGradientVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -54,4 +50,3 @@ protected:
   /// The vector holding the difference between the two line value samplers
   VectorPostprocessorValue * _gradient_values;
 };
-

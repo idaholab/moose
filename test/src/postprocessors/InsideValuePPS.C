@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", InsideValuePPS);
 
-template <>
 InputParameters
-validParams<InsideValuePPS>()
+InsideValuePPS::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
 
   return params;

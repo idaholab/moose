@@ -12,11 +12,7 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class ElementUOProvider;
 class InputParameters;
-
-template <>
-InputParameters validParams<ElementUOProvider>();
 
 /**
  * User object intermediate base class that declares an interface for providing generic fields
@@ -27,6 +23,8 @@ InputParameters validParams<ElementUOProvider>();
 class ElementUOProvider : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ElementUOProvider(const InputParameters & parameters);
 
   virtual unsigned long getElementalValueLong(dof_id_type /*element_id*/,
@@ -41,4 +39,3 @@ public:
     mooseError(name(), " does not satisfy the getElementalValueReal interface");
   }
 };
-

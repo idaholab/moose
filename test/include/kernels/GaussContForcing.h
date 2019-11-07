@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class GaussContForcing;
-
-template <>
-InputParameters validParams<GaussContForcing>();
-
 class GaussContForcing : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   GaussContForcing(const InputParameters & parameters);
 
 protected:
@@ -40,4 +37,3 @@ protected:
   const Real _z_min;
   const Real _z_max;
 };
-

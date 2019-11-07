@@ -23,9 +23,9 @@ InputParameters validParams<BreakMeshByBlockGeneratorBase>();
 class BreakMeshByBlockGeneratorBase : public MeshGenerator
 {
 public:
-  BreakMeshByBlockGeneratorBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BreakMeshByBlockGeneratorBase(const InputParameters & parameters);
 
 protected:
   /// the file_name from whence this mesh came

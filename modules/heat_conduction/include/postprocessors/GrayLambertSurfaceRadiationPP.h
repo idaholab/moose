@@ -24,6 +24,8 @@ InputParameters validParams<GrayLambertSurfaceRadiationPP>();
 class GrayLambertSurfaceRadiationPP : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GrayLambertSurfaceRadiationPP(const InputParameters & parameters);
 
   virtual void initialize() override {}

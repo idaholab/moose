@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class MMSForcing;
-
-template <>
-InputParameters validParams<MMSForcing>();
-
 class MMSForcing : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MMSForcing(const InputParameters & parameters);
 
 protected:
@@ -34,4 +31,3 @@ private:
   Real _y;
   Real _z;
 };
-

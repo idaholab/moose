@@ -11,12 +11,11 @@
 
 registerMooseObject("MooseTestApp", FixedPointSteady);
 
-template <>
 InputParameters
-validParams<FixedPointSteady>()
+FixedPointSteady::validParams()
 {
-  InputParameters params = validParams<Steady>();
-  params += validParams<FixedPoint>();
+  InputParameters params = Steady::validParams();
+  params += FixedPoint::validParams();
   return params;
 }
 

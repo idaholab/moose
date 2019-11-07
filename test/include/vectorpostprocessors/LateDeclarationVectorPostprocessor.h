@@ -11,15 +11,11 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-// Forward Declarations
-class LateDeclarationVectorPostprocessor;
-
-template <>
-InputParameters validParams<LateDeclarationVectorPostprocessor>();
-
 class LateDeclarationVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   LateDeclarationVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -28,4 +24,3 @@ public:
 protected:
   VectorPostprocessorValue * _value;
 };
-

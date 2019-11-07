@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", JacobianCheck);
 
-template <>
 InputParameters
-validParams<JacobianCheck>()
+JacobianCheck::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   return params;
 }
 

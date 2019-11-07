@@ -25,9 +25,9 @@ InputParameters validParams<StackGenerator>();
 class StackGenerator : public MeshGenerator
 {
 public:
-  StackGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StackGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class CoupledArrayForce;
-
-template <>
-InputParameters validParams<CoupledArrayForce>();
-
 class CoupledArrayForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledArrayForce(const InputParameters & parameters);
 
 protected:

@@ -24,9 +24,9 @@ InputParameters validParams<NodalNormalBC>();
 class NodalNormalBC : public NodalBC
 {
 public:
-  NodalNormalBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodalNormalBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
 

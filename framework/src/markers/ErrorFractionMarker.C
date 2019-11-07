@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ErrorFractionMarker);
 
-template <>
+defineLegacyParams(ErrorFractionMarker);
+
 InputParameters
-validParams<ErrorFractionMarker>()
+ErrorFractionMarker::validParams()
 {
-  InputParameters params = validParams<IndicatorMarker>();
+  InputParameters params = IndicatorMarker::validParams();
   params.addRangeCheckedParam<Real>("coarsen",
                                     0,
                                     "coarsen>=0 & coarsen<=1",

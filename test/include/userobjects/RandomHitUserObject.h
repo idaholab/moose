@@ -13,15 +13,11 @@
 
 #include "MooseRandom.h"
 
-// Forward Declarations
-class RandomHitUserObject;
-
-template <>
-InputParameters validParams<RandomHitUserObject>();
-
 class RandomHitUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RandomHitUserObject(const InputParameters & parameters);
 
   virtual ~RandomHitUserObject() {}
@@ -55,4 +51,3 @@ protected:
   std::vector<unsigned int> _closest_node;
   MooseRandom _random;
 };
-

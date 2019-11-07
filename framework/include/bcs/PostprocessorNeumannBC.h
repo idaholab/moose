@@ -27,9 +27,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  PostprocessorNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PostprocessorNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

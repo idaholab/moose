@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledDirichletBC);
 
-template <>
 InputParameters
-validParams<CoupledDirichletBC>()
+CoupledDirichletBC::validParams()
 {
-  InputParameters params = validParams<DirichletBC>();
+  InputParameters params = DirichletBC::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable");
   return params;
 }

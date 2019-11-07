@@ -11,14 +11,11 @@
 
 #include "KernelGrad.h"
 
-class DiffusionPrecompute;
-
-template <>
-InputParameters validParams<DiffusionPrecompute>();
-
 class DiffusionPrecompute : public KernelGrad
 {
 public:
+  static InputParameters validParams();
+
   DiffusionPrecompute(const InputParameters & parameters);
   virtual ~DiffusionPrecompute();
 
@@ -26,4 +23,3 @@ protected:
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
 };
-

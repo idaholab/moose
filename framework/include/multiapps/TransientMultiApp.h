@@ -28,9 +28,9 @@ InputParameters validParams<TransientMultiApp>();
 class TransientMultiApp : public MultiApp
 {
 public:
-  TransientMultiApp(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TransientMultiApp(const InputParameters & parameters);
 
   virtual NumericVector<Number> & appTransferVector(unsigned int app,
                                                     std::string var_name) override;

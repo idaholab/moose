@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", NumElemQPs);
 
-template <>
 InputParameters
-validParams<NumElemQPs>()
+NumElemQPs::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   return params;
 }
 

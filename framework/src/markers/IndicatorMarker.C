@@ -9,11 +9,12 @@
 
 #include "IndicatorMarker.h"
 
-template <>
+defineLegacyParams(IndicatorMarker);
+
 InputParameters
-validParams<IndicatorMarker>()
+IndicatorMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<IndicatorName>("indicator",
                                          "The name of the Indicator that this Marker uses.");
   return params;

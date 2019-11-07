@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", QPointMarker);
 
-template <>
 InputParameters
-validParams<QPointMarker>()
+QPointMarker::validParams()
 {
-  InputParameters params = validParams<QuadraturePointMarker>();
+  InputParameters params = QuadraturePointMarker::validParams();
   return params;
 }
 

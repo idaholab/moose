@@ -11,17 +11,11 @@
 
 #include "AuxNodalScalarKernel.h"
 
-class SumNodalValuesAux;
-
-template <>
-InputParameters validParams<SumNodalValuesAux>();
-
-/**
- *
- */
 class SumNodalValuesAux : public AuxNodalScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   SumNodalValuesAux(const InputParameters & parameters);
   virtual ~SumNodalValuesAux();
 
@@ -32,4 +26,3 @@ protected:
 
   const VariableValue & _sum_var;
 };
-

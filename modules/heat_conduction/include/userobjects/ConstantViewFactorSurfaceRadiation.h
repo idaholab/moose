@@ -25,6 +25,8 @@ InputParameters validParams<ConstantViewFactorSurfaceRadiation>();
 class ConstantViewFactorSurfaceRadiation : public GrayLambertSurfaceRadiationBase
 {
 public:
+  static InputParameters validParams();
+
   ConstantViewFactorSurfaceRadiation(const InputParameters & parameters);
 
 protected:

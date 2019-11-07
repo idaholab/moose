@@ -19,11 +19,10 @@
 
 registerMooseObject("MooseTestApp", ScalarLagrangeMultiplier);
 
-template <>
 InputParameters
-validParams<ScalarLagrangeMultiplier>()
+ScalarLagrangeMultiplier::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
                              "Lagrange multiplier approach.");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");

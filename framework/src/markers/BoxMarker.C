@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", BoxMarker);
 
-template <>
+defineLegacyParams(BoxMarker);
+
 InputParameters
-validParams<BoxMarker>()
+BoxMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<RealVectorValue>(
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(

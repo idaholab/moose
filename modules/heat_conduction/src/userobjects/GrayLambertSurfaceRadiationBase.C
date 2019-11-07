@@ -14,11 +14,12 @@
 
 #include <cmath>
 
-template <>
+defineLegacyParams(GrayLambertSurfaceRadiationBase);
+
 InputParameters
-validParams<GrayLambertSurfaceRadiationBase>()
+GrayLambertSurfaceRadiationBase::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   params.addParam<Real>(
       "stefan_boltzmann_constant",
       5.670367e-8,

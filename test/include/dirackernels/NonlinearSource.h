@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class NonlinearSource;
-
-template <>
-InputParameters validParams<NonlinearSource>();
-
 /**
  * A DiracKernel with both on and off-diagonal Jacobian contributions
  * to test the off-diagonal contribution capability for Dirac kernels.
@@ -25,6 +19,8 @@ InputParameters validParams<NonlinearSource>();
 class NonlinearSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   NonlinearSource(const InputParameters & parameters);
 
   virtual void addPoints();
@@ -41,4 +37,3 @@ protected:
   Real _scale_factor;
   Point _p;
 };
-

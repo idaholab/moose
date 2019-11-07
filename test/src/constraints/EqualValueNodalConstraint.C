@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", EqualValueNodalConstraint);
 
-template <>
 InputParameters
-validParams<EqualValueNodalConstraint>()
+EqualValueNodalConstraint::validParams()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  InputParameters params = NodalConstraint::validParams();
   params.addRequiredParam<unsigned int>("master", "The ID of the master node");
   params.addRequiredParam<unsigned int>("slave", "The ID of the slave node");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");

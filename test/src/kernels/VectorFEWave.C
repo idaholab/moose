@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", VectorFEWave);
 
-template <>
 InputParameters
-validParams<VectorFEWave>()
+VectorFEWave::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addParam<FunctionName>("x_forcing_func", 0, "The x forcing function.");
   params.addParam<FunctionName>("y_forcing_func", 0, "The y forcing function.");
   params.addParam<FunctionName>("z_forcing_func", 0, "The z forcing function.");

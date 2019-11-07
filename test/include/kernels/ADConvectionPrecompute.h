@@ -11,15 +11,12 @@
 
 #include "ADKernelValue.h"
 
-template <ComputeStage>
-class ADConvectionPrecompute;
-
-declareADValidParams(ADConvectionPrecompute);
-
 template <ComputeStage compute_stage>
 class ADConvectionPrecompute : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADConvectionPrecompute(const InputParameters & parameters);
 
 protected:
@@ -30,4 +27,3 @@ private:
 
   usingKernelValueMembers;
 };
-

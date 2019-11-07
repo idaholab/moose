@@ -13,14 +13,11 @@
 
 #include "libmesh/mesh_tools.h"
 
-class CircleMarker;
-
-template <>
-InputParameters validParams<CircleMarker>();
-
 class CircleMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   CircleMarker(const InputParameters & parameters);
   virtual ~CircleMarker(){};
 
@@ -33,4 +30,3 @@ protected:
   Point _p;
   Real _r;
 };
-

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DirichletBCfuncXYZ0);
 
-template <>
 InputParameters
-validParams<DirichletBCfuncXYZ0>()
+DirichletBCfuncXYZ0::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
 
   params.set<Real>("A0") = 0.;
   params.set<Real>("B0") = 0.;

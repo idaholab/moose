@@ -40,9 +40,9 @@ InputParameters validParams<Sampler>();
 class Sampler : public MooseObject, public SetupInterface, public DistributionInterface
 {
 public:
-  Sampler(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Sampler(const InputParameters & parameters);
 
   /**
    * Simple object for storing the sampler location (see SamplerTransientMultiApp and

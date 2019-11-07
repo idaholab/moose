@@ -20,9 +20,9 @@ InputParameters validParams<GenericConstantArray>();
 class GenericConstantArray : public Material
 {
 public:
-  GenericConstantArray(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GenericConstantArray(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

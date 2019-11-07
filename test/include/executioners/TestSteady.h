@@ -11,17 +11,14 @@
 
 #include "Steady.h"
 
-class TestSteady;
-
-template <>
-InputParameters validParams<TestSteady>();
-
 /**
  * Test executioner to show exception handling
  */
 class TestSteady : public Steady
 {
 public:
+  static InputParameters validParams();
+
   TestSteady(const InputParameters & parameters);
   virtual ~TestSteady();
 
@@ -42,4 +39,3 @@ private:
   /// A value to report (used for addAttributeReporter test)
   Real _some_value_that_needs_to_be_reported;
 };
-

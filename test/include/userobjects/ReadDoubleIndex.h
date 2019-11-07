@@ -11,17 +11,14 @@
 
 #include "GeneralUserObject.h"
 
-class ReadDoubleIndex;
-
-template <>
-InputParameters validParams<ReadDoubleIndex>();
-
 /**
  * User Object for testing double index parsing
  */
 class ReadDoubleIndex : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ReadDoubleIndex(const InputParameters & params);
 
   virtual void initialize(){};
@@ -54,4 +51,3 @@ protected:
   const std::vector<std::vector<OutputName>> & _output_name_di;
   const std::vector<std::vector<MaterialPropertyName>> & _material_property_name_di;
 };
-

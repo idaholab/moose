@@ -34,11 +34,10 @@ registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_kernel");
 
 registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_bc");
 
-template <>
 InputParameters
-validParams<AddLotsOfDiffusion>()
+AddLotsOfDiffusion::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   MooseEnum order(
       "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);

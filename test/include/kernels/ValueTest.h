@@ -14,13 +14,11 @@
 class ValueTest : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ValueTest(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-
-template <>
-InputParameters validParams<ValueTest>();
-

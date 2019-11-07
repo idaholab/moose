@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class StatefulMaterial;
-
-template <>
-InputParameters validParams<StatefulMaterial>();
-
 /**
  * Stateful material class that defines a few properties.
  */
 class StatefulMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   StatefulMaterial(const InputParameters & parameters);
 
 protected:
@@ -39,4 +35,3 @@ private:
   MaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
 };
-

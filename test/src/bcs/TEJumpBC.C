@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TEJumpBC);
 
-template <>
 InputParameters
-validParams<TEJumpBC>()
+TEJumpBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
   params.addParam<double>("t_jump", 1.0, "Time when the jump occurs");
   params.addParam<double>("slope", 1.0, "How steep the jump is");

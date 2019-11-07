@@ -19,9 +19,9 @@ InputParameters validParams<LaplacianJumpIndicator>();
 class LaplacianJumpIndicator : public InternalSideIndicator
 {
 public:
-  LaplacianJumpIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LaplacianJumpIndicator(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;

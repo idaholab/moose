@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", IncrementMaterial);
 
-template <>
 InputParameters
-validParams<IncrementMaterial>()
+IncrementMaterial::validParams()
 {
-  InputParameters params = validParams<GenericConstantMaterial>();
+  InputParameters params = GenericConstantMaterial::validParams();
   params.addClassDescription(
       "Material that tracks the number of times computeQpProperties has been called.");
   return params;

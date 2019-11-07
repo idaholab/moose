@@ -11,7 +11,13 @@
 
 registerADMooseObject("MooseTestApp", ADValueTest);
 
-defineADValidParams(ADValueTest, ADKernel, );
+template <ComputeStage compute_stage>
+InputParameters
+ADValueTest<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADValueTest<compute_stage>::ADValueTest(const InputParameters & parameters)

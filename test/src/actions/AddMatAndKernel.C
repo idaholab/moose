@@ -34,11 +34,10 @@ registerMooseAction("MooseTestApp", AddMatAndKernel, "add_material");
 
 registerMooseAction("MooseTestApp", AddMatAndKernel, "add_variable");
 
-template <>
 InputParameters
-validParams<AddMatAndKernel>()
+AddMatAndKernel::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   MooseEnum order(
       "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
   params.addParam<MooseEnum>("order",

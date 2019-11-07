@@ -29,6 +29,8 @@ InputParameters validParams<OrientedBoxMarker>();
 class OrientedBoxMarker : public Marker, public OrientedBoxInterface
 {
 public:
+  static InputParameters validParams();
+
   OrientedBoxMarker(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", InterfaceReaction);
 
-template <>
+defineLegacyParams(InterfaceReaction);
+
 InputParameters
-validParams<InterfaceReaction>()
+InterfaceReaction::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<Real>("kf", "Forward reaction rate coefficient.");
   params.addRequiredParam<Real>("kb", "Backward reaction rate coefficient.");
   params.addClassDescription("Implements a reaction to establish ReactionRate=k_f*u-k_b*v "

@@ -11,17 +11,14 @@
 
 #include "GeneralPostprocessor.h"
 
-class UseOldVectorPostprocessor;
-
-template <>
-InputParameters validParams<UseOldVectorPostprocessor>();
-
 /**
  * Test Postprocessor uses old values from a VectorPostprocessor
  */
 class UseOldVectorPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   UseOldVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}
@@ -41,4 +38,3 @@ private:
   /// The old value (from the old vector, not stateful)
   Real _old_value;
 };
-

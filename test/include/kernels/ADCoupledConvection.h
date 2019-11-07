@@ -11,11 +11,6 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
-class ADCoupledConvection;
-
-declareADValidParams(ADCoupledConvection);
-
 /**
  * Define the ADKernel for a convection operator that looks like:
  *
@@ -25,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADCoupledConvection : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCoupledConvection(const InputParameters & parameters);
 
 protected:

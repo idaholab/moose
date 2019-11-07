@@ -32,9 +32,9 @@ InputParameters validParams<AddNodalNormalsAction>();
 class AddNodalNormalsAction : public Action
 {
 public:
-  AddNodalNormalsAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  AddNodalNormalsAction(InputParameters parameters);
 
   virtual void act() override;
 
