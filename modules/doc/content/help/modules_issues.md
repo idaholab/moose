@@ -22,7 +22,7 @@ Load the two default modules pertaining to your operating system:
 - Linux:
 
   - `module load moose-dev-gcc moose-tools`
-  
+
 - Macintosh:
 
   - `module load moose-dev-clang moose-tools`
@@ -35,9 +35,9 @@ Loading these two modules will in-turn load other necessary modules. The correct
   module list
 
   Currently Loaded Modulefiles:
-  1) moose/.gcc-__GCC__                             5) moose/.cppunit-__CPPUNIT___gcc-__GCC__
-  2) moose/.mpich-__MPICH___gcc-__GCC__                   6) moose-dev-gcc
-  3) moose/.petsc-__PETSC_DEFAULT___mpich-3.2_gcc-__GCC__-opt   7) miniconda
+  1) moose/.gcc-__GCC__                             5) moose/.cppunit-__CPPUNIT__-gcc-__GCC__
+  2) moose/.mpich-__MPICH__-gcc-__GCC__                   6) moose-dev-gcc
+  3) moose/.petsc-__PETSC_DEFAULT__-mpich-3.2_gcc-__GCC__-opt   7) miniconda
   4) moose/.tbb-__TBB__                           8) moose-tools
   !package-end!
 
@@ -47,10 +47,10 @@ Loading these two modules will in-turn load other necessary modules. The correct
   module list
 
   Currently Loaded Modulefiles:
-  1) moose/.gcc-__GCC__                               6) moose/.cppunit-__CPPUNIT___clang-__LLVM__
+  1) moose/.gcc-__GCC__                               6) moose/.cppunit-__CPPUNIT__-clang-__LLVM__
   2) moose/.clang-__LLVM__                             7) moose-dev-clang
-  3) moose/.mpich-__MPICH___clang-__LLVM__                   8) miniconda
-  4) moose/.petsc-__PETSC_DEFAULT___mpich-__MPICH___clang-__LLVM__-opt   9) moose-tools
+  3) moose/.mpich-__MPICH__-clang-__LLVM__                   8) miniconda
+  4) moose/.petsc-__PETSC_DEFAULT__-mpich-__MPICH__-clang-__LLVM__-opt   9) moose-tools
   5) moose/.tbb-__TBB__
   !package-end!
 
