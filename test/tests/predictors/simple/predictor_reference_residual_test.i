@@ -9,7 +9,6 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'u'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
 []

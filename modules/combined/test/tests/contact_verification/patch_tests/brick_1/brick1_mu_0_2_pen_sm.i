@@ -8,7 +8,6 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y disp_z'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
 []
