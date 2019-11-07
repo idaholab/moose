@@ -27,9 +27,9 @@ InputParameters validParams<VolumeDeformGradCorrectedStress>();
 class VolumeDeformGradCorrectedStress : public DerivativeMaterialInterface<Material>
 {
 public:
-  VolumeDeformGradCorrectedStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  VolumeDeformGradCorrectedStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

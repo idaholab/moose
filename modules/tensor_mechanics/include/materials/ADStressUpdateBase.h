@@ -51,9 +51,9 @@ template <ComputeStage compute_stage>
 class ADStressUpdateBase : public ADMaterial<compute_stage>
 {
 public:
-  ADStressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADStressUpdateBase(const InputParameters & parameters);
 
   /**
    * Given a strain increment that results in a trial stress, perform some

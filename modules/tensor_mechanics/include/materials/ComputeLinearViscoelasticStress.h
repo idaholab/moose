@@ -30,9 +30,9 @@ InputParameters validParams<ComputeLinearViscoelasticStress>();
 class ComputeLinearViscoelasticStress : public ComputeLinearElasticStress
 {
 public:
-  ComputeLinearViscoelasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeLinearViscoelasticStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

@@ -22,9 +22,9 @@
 class PresetDisplacement : public PresetNodalBC
 {
 public:
-  PresetDisplacement(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PresetDisplacement(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpValue();

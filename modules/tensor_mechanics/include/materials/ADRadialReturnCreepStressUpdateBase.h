@@ -30,9 +30,9 @@ template <ComputeStage compute_stage>
 class ADRadialReturnCreepStressUpdateBase : public ADRadialReturnStressUpdate<compute_stage>
 {
 public:
-  ADRadialReturnCreepStressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADRadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

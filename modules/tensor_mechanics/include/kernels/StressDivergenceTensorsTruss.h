@@ -20,9 +20,9 @@ InputParameters validParams<StressDivergenceTensorsTruss>();
 class StressDivergenceTensorsTruss : public Kernel
 {
 public:
-  StressDivergenceTensorsTruss(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressDivergenceTensorsTruss(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup() override;

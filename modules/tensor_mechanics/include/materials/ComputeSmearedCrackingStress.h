@@ -26,9 +26,9 @@ InputParameters validParams<ComputeSmearedCrackingStress>();
 class ComputeSmearedCrackingStress : public ComputeMultipleInelasticStress
 {
 public:
-  ComputeSmearedCrackingStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeSmearedCrackingStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;

@@ -28,9 +28,9 @@ InputParameters validParams<InteractionIntegral>();
 class InteractionIntegral : public ElementIntegralPostprocessor
 {
 public:
-  InteractionIntegral(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InteractionIntegral(const InputParameters & parameters);
 
   virtual Real getValue();
 

@@ -19,6 +19,8 @@ InputParameters validParams<TestNewmarkTI>();
 class TestNewmarkTI : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Stores the velocity/acceleration computed using the time integrator into
    * the provided auxvariable
@@ -26,8 +28,6 @@ public:
   TestNewmarkTI(const InputParameters & parameters);
 
   virtual ~TestNewmarkTI() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

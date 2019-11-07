@@ -22,9 +22,9 @@ InputParameters validParams<ComputeCosseratElasticityTensor>();
 class ComputeCosseratElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
-  ComputeCosseratElasticityTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCosseratElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor();

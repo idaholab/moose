@@ -24,9 +24,9 @@ InputParameters validParams<ComputeThermalExpansionEigenstrainBeam>();
 class ComputeThermalExpansionEigenstrainBeam : public ComputeThermalExpansionEigenstrainBeamBase
 {
 public:
-  ComputeThermalExpansionEigenstrainBeam(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeThermalExpansionEigenstrainBeam(const InputParameters & parameters);
 
 protected:
   virtual void computeThermalStrain(Real & thermal_strain) override;

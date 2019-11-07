@@ -29,9 +29,9 @@ InputParameters validParams<FiniteStrainPlasticMaterial>();
 class FiniteStrainPlasticMaterial : public ComputeStressBase
 {
 public:
-  FiniteStrainPlasticMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FiniteStrainPlasticMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStress();

@@ -29,9 +29,9 @@ template <ComputeStage compute_stage>
 class ADComputeLinearElasticStress : public ADComputeStressBase<compute_stage>
 {
 public:
-  ADComputeLinearElasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeLinearElasticStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

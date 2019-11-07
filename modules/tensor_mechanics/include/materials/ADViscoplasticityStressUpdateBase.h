@@ -39,9 +39,9 @@ class ADViscoplasticityStressUpdateBase
     public ADSingleVariableReturnMappingSolution<compute_stage>
 {
 public:
-  ADViscoplasticityStressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADViscoplasticityStressUpdateBase(const InputParameters & parameters);
 
   virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
                                         const ADReal & scalar_effective_inelastic_strain) override;

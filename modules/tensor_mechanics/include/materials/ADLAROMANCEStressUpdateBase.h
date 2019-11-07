@@ -34,9 +34,9 @@ template <ComputeStage compute_stage>
 class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<compute_stage>
 {
 public:
-  ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup() override;

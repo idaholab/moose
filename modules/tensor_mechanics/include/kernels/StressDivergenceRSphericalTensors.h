@@ -34,9 +34,9 @@ InputParameters validParams<StressDivergenceRSphericalTensors>();
 class StressDivergenceRSphericalTensors : public StressDivergenceTensors
 {
 public:
-  StressDivergenceRSphericalTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressDivergenceRSphericalTensors(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup() override;

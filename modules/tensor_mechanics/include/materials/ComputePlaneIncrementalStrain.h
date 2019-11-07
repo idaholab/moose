@@ -24,9 +24,9 @@ InputParameters validParams<ComputePlaneIncrementalStrain>();
 class ComputePlaneIncrementalStrain : public Compute2DIncrementalStrain
 {
 public:
-  ComputePlaneIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputePlaneIncrementalStrain(const InputParameters & parameters);
 
 protected:
   virtual Real computeOutOfPlaneGradDisp() override;

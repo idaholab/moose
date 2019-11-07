@@ -25,9 +25,9 @@ InputParameters validParams<ExponentialSoftening>();
 class ExponentialSoftening : public SmearedCrackSofteningBase
 {
 public:
-  ExponentialSoftening(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ExponentialSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,

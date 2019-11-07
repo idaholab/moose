@@ -33,9 +33,9 @@ template <ComputeStage compute_stage>
 class ADCompute2DFiniteStrain : public ADComputeFiniteStrain<compute_stage>
 {
 public:
-  ADCompute2DFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADCompute2DFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

@@ -22,9 +22,9 @@ InputParameters validParams<ComputeCosseratSmallStrain>();
 class ComputeCosseratSmallStrain : public ComputeStrainBase
 {
 public:
-  ComputeCosseratSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCosseratSmallStrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

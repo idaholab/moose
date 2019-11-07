@@ -24,9 +24,9 @@ InputParameters validParams<GlobalDisplacementAux>();
 class GlobalDisplacementAux : public AuxKernel
 {
 public:
-  GlobalDisplacementAux(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GlobalDisplacementAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

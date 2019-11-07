@@ -25,9 +25,9 @@ template <ComputeStage compute_stage>
 class ADComputeAxisymmetricRZIncrementalStrain : public ADCompute2DIncrementalStrain<compute_stage>
 {
 public:
-  ADComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

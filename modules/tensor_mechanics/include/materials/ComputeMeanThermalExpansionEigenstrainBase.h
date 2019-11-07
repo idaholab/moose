@@ -30,9 +30,9 @@ InputParameters validParams<ComputeMeanThermalExpansionEigenstrainBase>();
 class ComputeMeanThermalExpansionEigenstrainBase : public ComputeThermalExpansionEigenstrainBase
 {
 public:
-  ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
   /*

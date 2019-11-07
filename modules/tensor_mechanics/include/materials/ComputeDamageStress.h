@@ -24,9 +24,9 @@ InputParameters validParams<ComputeDamageStress>();
 class ComputeDamageStress : public ComputeFiniteStrainElasticStress
 {
 public:
-  ComputeDamageStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeDamageStress(const InputParameters & parameters);
 
   void initialSetup() override;
 

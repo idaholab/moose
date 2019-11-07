@@ -19,10 +19,11 @@ InputParameters validParams<TensorMechanicsTestApp>();
 class TensorMechanicsTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsTestApp(InputParameters parameters);
   virtual ~TensorMechanicsTestApp();
 
-  static InputParameters validParams();
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerObjects(Factory & factory);

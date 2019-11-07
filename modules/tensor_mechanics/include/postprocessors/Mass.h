@@ -24,9 +24,9 @@ InputParameters validParams<Mass>();
 class Mass : public ElementIntegralVariablePostprocessor
 {
 public:
-  Mass(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Mass(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();

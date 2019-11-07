@@ -34,9 +34,9 @@ InputParameters validParams<RadialReturnStressUpdate>();
 class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
 {
 public:
-  RadialReturnStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RadialReturnStressUpdate(const InputParameters & parameters);
 
   /**
    * A radial return (J2) mapping method is performed with return mapping

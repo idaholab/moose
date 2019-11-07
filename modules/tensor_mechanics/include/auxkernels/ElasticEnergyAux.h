@@ -21,10 +21,10 @@ InputParameters validParams<ElasticEnergyAux>();
 class ElasticEnergyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElasticEnergyAux(const InputParameters & parameters);
   virtual ~ElasticEnergyAux() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

@@ -25,9 +25,9 @@ InputParameters validParams<ComputeEigenstrain>();
 class ComputeEigenstrain : public ComputeEigenstrainBase
 {
 public:
-  ComputeEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain();

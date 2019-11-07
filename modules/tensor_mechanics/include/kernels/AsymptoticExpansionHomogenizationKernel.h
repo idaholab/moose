@@ -20,9 +20,9 @@ InputParameters validParams<AsymptoticExpansionHomogenizationKernel>();
 class AsymptoticExpansionHomogenizationKernel : public Kernel
 {
 public:
-  AsymptoticExpansionHomogenizationKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AsymptoticExpansionHomogenizationKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

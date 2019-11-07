@@ -31,9 +31,9 @@ InputParameters validParams<CappedWeakPlaneStressUpdate>();
 class CappedWeakPlaneStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
-  CappedWeakPlaneStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CappedWeakPlaneStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?

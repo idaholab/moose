@@ -30,9 +30,9 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
-  LineMaterialRankTwoSampler(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LineMaterialRankTwoSampler(const InputParameters & parameters);
 
   /**
    * Reduce the material property to a scalar for output

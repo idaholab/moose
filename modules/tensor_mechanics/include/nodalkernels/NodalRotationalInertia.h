@@ -25,9 +25,9 @@ InputParameters validParams<NodalRotationalInertia>();
 class NodalRotationalInertia : public TimeNodalKernel
 {
 public:
-  NodalRotationalInertia(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodalRotationalInertia(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

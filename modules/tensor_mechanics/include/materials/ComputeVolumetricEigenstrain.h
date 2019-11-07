@@ -26,9 +26,9 @@ InputParameters validParams<ComputeVolumetricEigenstrain>();
 class ComputeVolumetricEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrainBase>
 {
 public:
-  ComputeVolumetricEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeVolumetricEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup();

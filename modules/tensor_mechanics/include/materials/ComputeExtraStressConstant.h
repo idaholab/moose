@@ -23,9 +23,9 @@ InputParameters validParams<ComputeExtraStressConstant>();
 class ComputeExtraStressConstant : public ComputeExtraStressBase
 {
 public:
-  ComputeExtraStressConstant(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeExtraStressConstant(const InputParameters & parameters);
 
 protected:
   virtual void computeQpExtraStress();

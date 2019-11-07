@@ -24,9 +24,9 @@ InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>();
 class ComputeAxisymmetricRZFiniteStrain : public Compute2DFiniteStrain
 {
 public:
-  ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

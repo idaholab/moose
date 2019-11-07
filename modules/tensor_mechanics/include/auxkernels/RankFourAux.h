@@ -26,11 +26,11 @@ InputParameters validParams<RankFourAux>();
 class RankFourAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RankFourAux(const InputParameters & parameters);
 
   virtual ~RankFourAux() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

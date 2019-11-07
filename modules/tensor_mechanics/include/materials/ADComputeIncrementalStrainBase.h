@@ -35,9 +35,9 @@ template <ComputeStage compute_stage>
 class ADComputeIncrementalStrainBase : public ADComputeStrainBase<compute_stage>
 {
 public:
-  ADComputeIncrementalStrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeIncrementalStrainBase(const InputParameters & parameters);
 
   void initialSetup() override;
 

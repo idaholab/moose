@@ -24,9 +24,9 @@ InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>();
 class ComputeAxisymmetric1DFiniteStrain : public Compute1DFiniteStrain
 {
 public:
-  ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

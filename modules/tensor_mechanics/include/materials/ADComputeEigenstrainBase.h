@@ -35,9 +35,9 @@ template <ComputeStage compute_stage>
 class ADComputeEigenstrainBase : public ADMaterial<compute_stage>
 {
 public:
-  ADComputeEigenstrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeEigenstrainBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

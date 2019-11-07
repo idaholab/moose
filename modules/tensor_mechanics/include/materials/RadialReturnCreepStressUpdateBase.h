@@ -23,9 +23,9 @@ InputParameters validParams<RadialReturnCreepStressUpdateBase>();
 class RadialReturnCreepStressUpdateBase : public RadialReturnStressUpdate
 {
 public:
-  RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

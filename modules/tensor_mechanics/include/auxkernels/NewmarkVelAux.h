@@ -19,14 +19,14 @@ InputParameters validParams<NewmarkVelAux>();
 class NewmarkVelAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Calcualtes velocity using Newmark time integration scheme
    */
   NewmarkVelAux(const InputParameters & parameters);
 
   virtual ~NewmarkVelAux() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

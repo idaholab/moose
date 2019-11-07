@@ -26,9 +26,9 @@ class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
                                     public GuaranteeProvider
 {
 public:
-  ComputeElasticityTensorBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeElasticityTensorBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

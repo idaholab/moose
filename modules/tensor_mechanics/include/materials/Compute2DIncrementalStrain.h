@@ -26,9 +26,9 @@ InputParameters validParams<Compute2DIncrementalStrain>();
 class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
 {
 public:
-  Compute2DIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Compute2DIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

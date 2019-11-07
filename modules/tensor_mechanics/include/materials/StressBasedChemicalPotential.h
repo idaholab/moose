@@ -26,9 +26,9 @@ InputParameters validParams<StressBasedChemicalPotential>();
 class StressBasedChemicalPotential : public DerivativeMaterialInterface<Material>
 {
 public:
-  StressBasedChemicalPotential(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressBasedChemicalPotential(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

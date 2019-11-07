@@ -38,9 +38,9 @@ template <ComputeStage compute_stage>
 class ADStressDivergenceTensors : public ADKernel<compute_stage>
 {
 public:
-  ADStressDivergenceTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   void initialSetup() override;

@@ -21,9 +21,9 @@ InputParameters validParams<ALEKernel>();
 class ALEKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  ALEKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ALEKernel(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;

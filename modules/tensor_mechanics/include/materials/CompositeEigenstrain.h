@@ -29,9 +29,9 @@ InputParameters validParams<CompositeEigenstrain>();
 class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeEigenstrainBase>
 {
 public:
-  CompositeEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CompositeEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain();

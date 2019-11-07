@@ -25,9 +25,9 @@ InputParameters validParams<ComputePlaneSmallStrain>();
 class ComputePlaneSmallStrain : public Compute2DSmallStrain
 {
 public:
-  ComputePlaneSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputePlaneSmallStrain(const InputParameters & parameters);
 
 protected:
   virtual Real computeOutOfPlaneStrain();

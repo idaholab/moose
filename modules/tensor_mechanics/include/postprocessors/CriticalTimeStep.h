@@ -27,9 +27,9 @@ InputParameters validParams<CriticalTimeStep>();
 class CriticalTimeStep : public ElementPostprocessor, public GuaranteeConsumer
 {
 public:
-  CriticalTimeStep(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CriticalTimeStep(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

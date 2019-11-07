@@ -33,9 +33,9 @@ InputParameters validParams<VolumeWeightedWeibull>();
 class VolumeWeightedWeibull : public RandomICBase
 {
 public:
-  VolumeWeightedWeibull(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  VolumeWeightedWeibull(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
 

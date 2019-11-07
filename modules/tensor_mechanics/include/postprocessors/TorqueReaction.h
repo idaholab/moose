@@ -36,9 +36,9 @@ InputParameters validParams<TorqueReaction>();
 class TorqueReaction : public NodalPostprocessor
 {
 public:
-  TorqueReaction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TorqueReaction(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

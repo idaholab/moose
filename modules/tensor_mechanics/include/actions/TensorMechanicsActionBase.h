@@ -19,9 +19,9 @@ InputParameters validParams<TensorMechanicsActionBase>();
 class TensorMechanicsActionBase : public Action
 {
 public:
-  TensorMechanicsActionBase(const InputParameters & params);
-
   static InputParameters validParams();
+
+  TensorMechanicsActionBase(const InputParameters & params);
 
   static MultiMooseEnum outputPropertiesType();
 

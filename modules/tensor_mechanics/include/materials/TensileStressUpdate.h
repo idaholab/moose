@@ -24,9 +24,9 @@ InputParameters validParams<TensileStressUpdate>();
 class TensileStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
-  TensileStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TensileStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?

@@ -20,9 +20,9 @@ InputParameters validParams<TrussMaterial>();
 class TrussMaterial : public Material
 {
 public:
-  TrussMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TrussMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

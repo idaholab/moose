@@ -20,9 +20,9 @@ template <ComputeStage compute_stage>
 class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<compute_stage>
 {
 public:
-  ADViscoplasticityStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADViscoplasticityStressUpdate(const InputParameters & parameters);
 
   virtual void updateState(ADRankTwoTensor & strain_increment,
                            ADRankTwoTensor & inelastic_strain_increment,

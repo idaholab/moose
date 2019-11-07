@@ -26,9 +26,9 @@ InputParameters validParams<ComputeInterfaceStress>();
 class ComputeInterfaceStress : public Material
 {
 public:
-  ComputeInterfaceStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeInterfaceStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

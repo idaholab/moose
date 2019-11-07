@@ -26,9 +26,9 @@ InputParameters validParams<ComputeVolumetricDeformGrad>();
 class ComputeVolumetricDeformGrad : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeVolumetricDeformGrad(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeVolumetricDeformGrad(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

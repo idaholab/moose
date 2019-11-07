@@ -21,9 +21,9 @@ InputParameters validParams<InertialForce>();
 class InertialForce : public TimeKernel
 {
 public:
-  InertialForce(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InertialForce(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

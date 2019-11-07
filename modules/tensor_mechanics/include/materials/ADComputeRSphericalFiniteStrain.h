@@ -26,9 +26,9 @@ template <ComputeStage compute_stage>
 class ADComputeRSphericalFiniteStrain : public ADComputeFiniteStrain<compute_stage>
 {
 public:
-  ADComputeRSphericalFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeRSphericalFiniteStrain(const InputParameters & parameters);
 
   virtual void initialSetup();
 

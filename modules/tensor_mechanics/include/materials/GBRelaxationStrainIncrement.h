@@ -25,9 +25,9 @@ InputParameters validParams<GBRelaxationStrainIncrement>();
 class GBRelaxationStrainIncrement : public DerivativeMaterialInterface<Material>
 {
 public:
-  GBRelaxationStrainIncrement(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GBRelaxationStrainIncrement(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

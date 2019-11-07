@@ -54,9 +54,9 @@ InputParameters validParams<CappedDruckerPragerCosseratStressUpdate>();
 class CappedDruckerPragerCosseratStressUpdate : public CappedDruckerPragerStressUpdate
 {
 public:
-  CappedDruckerPragerCosseratStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CappedDruckerPragerCosseratStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?

@@ -26,9 +26,9 @@ InputParameters validParams<ComputeStressBase>();
 class ComputeStressBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeStressBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeStressBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

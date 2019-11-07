@@ -30,9 +30,9 @@ InputParameters validParams<MultiPhaseStressMaterial>();
 class MultiPhaseStressMaterial : public Material
 {
 public:
-  MultiPhaseStressMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiPhaseStressMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

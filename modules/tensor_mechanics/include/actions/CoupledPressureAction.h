@@ -22,9 +22,9 @@ InputParameters validParams<CoupledPressureAction>();
 class CoupledPressureAction : public Action
 {
 public:
-  CoupledPressureAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  CoupledPressureAction(const InputParameters & params);
 
   virtual void act() override;
 

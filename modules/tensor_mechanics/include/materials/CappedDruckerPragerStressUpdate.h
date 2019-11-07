@@ -60,9 +60,9 @@ InputParameters validParams<CappedDruckerPragerStressUpdate>();
 class CappedDruckerPragerStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
-  CappedDruckerPragerStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CappedDruckerPragerStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?

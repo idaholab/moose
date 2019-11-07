@@ -28,8 +28,9 @@ InputParameters validParams<JIntegral>();
 class JIntegral : public ElementIntegralPostprocessor
 {
 public:
-  JIntegral(const InputParameters & parameters);
   static InputParameters validParams();
+
+  JIntegral(const InputParameters & parameters);
   virtual Real getValue();
 
 protected:

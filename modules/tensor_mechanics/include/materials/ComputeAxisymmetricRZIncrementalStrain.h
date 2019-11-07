@@ -24,9 +24,9 @@ InputParameters validParams<ComputeAxisymmetricRZIncrementalStrain>();
 class ComputeAxisymmetricRZIncrementalStrain : public Compute2DIncrementalStrain
 {
 public:
-  ComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

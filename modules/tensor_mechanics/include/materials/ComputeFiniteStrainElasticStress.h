@@ -24,9 +24,9 @@ InputParameters validParams<ComputeFiniteStrainElasticStress>();
 class ComputeFiniteStrainElasticStress : public ComputeStressBase, public GuaranteeConsumer
 {
 public:
-  ComputeFiniteStrainElasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
   void initialSetup() override;
 

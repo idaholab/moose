@@ -23,9 +23,9 @@ InputParameters validParams<ComputeEigenstrainBeamFromVariable>();
 class ComputeEigenstrainBeamFromVariable : public ComputeEigenstrainBeamBase
 {
 public:
-  ComputeEigenstrainBeamFromVariable(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeEigenstrainBeamFromVariable(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain() override;

@@ -19,14 +19,14 @@ InputParameters validParams<NewmarkAccelAux>();
 class NewmarkAccelAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
-  *Computes Acceleration using Newmark Time integration scheme
-  */
+   *Computes Acceleration using Newmark Time integration scheme
+   */
   NewmarkAccelAux(const InputParameters & parameters);
 
   virtual ~NewmarkAccelAux() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

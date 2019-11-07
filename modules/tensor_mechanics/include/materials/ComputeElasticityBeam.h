@@ -24,9 +24,9 @@ InputParameters validParams<ComputeElasticityBeam>();
 class ComputeElasticityBeam : public Material
 {
 public:
-  ComputeElasticityBeam(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeElasticityBeam(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

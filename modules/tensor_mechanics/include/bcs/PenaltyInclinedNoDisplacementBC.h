@@ -23,9 +23,9 @@ InputParameters validParams<PenaltyInclinedNoDisplacementBC>();
 class PenaltyInclinedNoDisplacementBC : public IntegratedBC
 {
 public:
-  PenaltyInclinedNoDisplacementBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PenaltyInclinedNoDisplacementBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

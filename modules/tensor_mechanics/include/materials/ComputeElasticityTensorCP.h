@@ -25,9 +25,9 @@ InputParameters validParams<ComputeElasticityTensorCP>();
 class ComputeElasticityTensorCP : public ComputeElasticityTensor
 {
 public:
-  ComputeElasticityTensorCP(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeElasticityTensorCP(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor();

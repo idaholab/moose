@@ -24,9 +24,9 @@ InputParameters validParams<ComputePlaneFiniteStrain>();
 class ComputePlaneFiniteStrain : public Compute2DFiniteStrain
 {
 public:
-  ComputePlaneFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputePlaneFiniteStrain(const InputParameters & parameters);
 
 protected:
   virtual Real computeOutOfPlaneGradDisp() override;

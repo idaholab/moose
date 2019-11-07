@@ -25,9 +25,9 @@ class ComputeThermalExpansionEigenstrainBeamBase
   : public DerivativeMaterialInterface<ComputeEigenstrainBeamBase>
 {
 public:
-  ComputeThermalExpansionEigenstrainBeamBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeThermalExpansionEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain() override;

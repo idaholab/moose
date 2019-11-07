@@ -18,6 +18,8 @@
 class DomainIntegralQFunction : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -25,8 +27,6 @@ public:
   DomainIntegralQFunction(const InputParameters & parameters);
 
   virtual ~DomainIntegralQFunction() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual void initialSetup();

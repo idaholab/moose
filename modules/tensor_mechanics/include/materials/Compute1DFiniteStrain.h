@@ -24,9 +24,9 @@ InputParameters validParams<Compute1DFiniteStrain>();
 class Compute1DFiniteStrain : public ComputeFiniteStrain
 {
 public:
-  Compute1DFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Compute1DFiniteStrain(const InputParameters & parameters);
 
   void computeProperties() override;
 

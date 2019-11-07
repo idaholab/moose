@@ -35,9 +35,9 @@ InputParameters validParams<GeneralizedMaxwellBase>();
 class GeneralizedMaxwellBase : public LinearViscoelasticityBase
 {
 public:
-  GeneralizedMaxwellBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneralizedMaxwellBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpApparentElasticityTensors() final;

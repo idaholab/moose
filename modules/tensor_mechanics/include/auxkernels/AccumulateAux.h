@@ -23,9 +23,9 @@ InputParameters validParams<AccumulateAux>();
 class AccumulateAux : public AuxKernel
 {
 public:
-  AccumulateAux(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AccumulateAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();

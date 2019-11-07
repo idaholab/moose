@@ -30,9 +30,9 @@ InputParameters validParams<LinearViscoelasticStressUpdate>();
 class LinearViscoelasticStressUpdate : public StressUpdateBase
 {
 public:
-  LinearViscoelasticStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LinearViscoelasticStressUpdate(const InputParameters & parameters);
 
   /**
    * Computes the new creep strain, and removes the creep contribution from the elastic strains and

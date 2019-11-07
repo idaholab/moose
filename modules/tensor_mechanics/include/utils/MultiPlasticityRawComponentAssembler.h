@@ -44,11 +44,11 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>();
 class MultiPlasticityRawComponentAssembler : public UserObjectInterface
 {
 public:
+  static InputParameters validParams();
+
   MultiPlasticityRawComponentAssembler(const MooseObject * moose_object);
 
   virtual ~MultiPlasticityRawComponentAssembler() {}
-
-  static InputParameters validParams();
 
 protected:
   const InputParameters & _params;

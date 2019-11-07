@@ -22,9 +22,9 @@ InputParameters validParams<ComputeEigenstrainBeamBase>();
 class ComputeEigenstrainBeamBase : public Material
 {
 public:
-  ComputeEigenstrainBeamBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

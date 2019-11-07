@@ -23,9 +23,9 @@ InputParameters validParams<AsymptoticExpansionHomogenizationElasticConstants>()
 class AsymptoticExpansionHomogenizationElasticConstants : public ElementIntegralPostprocessor
 {
 public:
-  AsymptoticExpansionHomogenizationElasticConstants(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AsymptoticExpansionHomogenizationElasticConstants(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();

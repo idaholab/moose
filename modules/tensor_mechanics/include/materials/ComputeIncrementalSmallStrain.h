@@ -23,9 +23,9 @@ InputParameters validParams<ComputeIncrementalSmallStrain>();
 class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
 public:
-  ComputeIncrementalSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeIncrementalSmallStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 

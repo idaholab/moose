@@ -20,9 +20,9 @@ template <ComputeStage compute_stage>
 class ADGravity : public ADKernelValue<compute_stage>
 {
 public:
-  ADGravity(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADGravity(const InputParameters & parameters);
 
 protected:
   ADReal precomputeQpResidual() override;

@@ -23,9 +23,9 @@ InputParameters validParams<ComputeAxisymmetricRZSmallStrain>();
 class ComputeAxisymmetricRZSmallStrain : public Compute2DSmallStrain
 {
 public:
-  ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

@@ -28,9 +28,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DashpotBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DashpotBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

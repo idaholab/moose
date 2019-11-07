@@ -27,9 +27,9 @@ InputParameters validParams<StressDivergenceTensors>();
 class StressDivergenceTensors : public ALEKernel
 {
 public:
-  StressDivergenceTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressDivergenceTensors(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;

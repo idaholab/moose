@@ -26,9 +26,9 @@ InputParameters validParams<Compute2DFiniteStrain>();
 class Compute2DFiniteStrain : public ComputeFiniteStrain
 {
 public:
-  Compute2DFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Compute2DFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

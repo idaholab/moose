@@ -33,9 +33,9 @@ template <ComputeStage compute_stage>
 class ADCompute2DIncrementalStrain : public ADComputeIncrementalSmallStrain<compute_stage>
 {
 public:
-  ADCompute2DIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADCompute2DIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

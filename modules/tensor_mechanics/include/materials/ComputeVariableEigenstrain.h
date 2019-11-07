@@ -24,9 +24,9 @@ InputParameters validParams<ComputeVariableEigenstrain>();
 class ComputeVariableEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrain>
 {
 public:
-  ComputeVariableEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeVariableEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain();

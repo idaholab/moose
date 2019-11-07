@@ -26,9 +26,9 @@ template <ComputeStage compute_stage>
 class ADComputeEigenstrain : public ADComputeEigenstrainBase<compute_stage>
 {
 public:
-  ADComputeEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain() override;

@@ -22,9 +22,9 @@ InputParameters validParams<ComputeLinearElasticStress>();
 class ComputeLinearElasticStress : public ComputeStressBase
 {
 public:
-  ComputeLinearElasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeLinearElasticStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

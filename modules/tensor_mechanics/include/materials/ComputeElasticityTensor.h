@@ -22,9 +22,9 @@ InputParameters validParams<ComputeElasticityTensor>();
 class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
-  ComputeElasticityTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor() override;

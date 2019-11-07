@@ -14,9 +14,9 @@
 class InclinedNoDisplacementBCAction : public Action
 {
 public:
-  InclinedNoDisplacementBCAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  InclinedNoDisplacementBCAction(const InputParameters & params);
 
   virtual void act() override;
 

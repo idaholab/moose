@@ -30,9 +30,9 @@ InputParameters validParams<ComputeMultiPlasticityStress>();
 class ComputeMultiPlasticityStress : public ComputeStressBase, public MultiPlasticityDebugger
 {
 public:
-  ComputeMultiPlasticityStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeMultiPlasticityStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStress();

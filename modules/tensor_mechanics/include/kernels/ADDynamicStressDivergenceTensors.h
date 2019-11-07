@@ -27,9 +27,9 @@ template <ComputeStage compute_stage>
 class ADDynamicStressDivergenceTensors : public ADStressDivergenceTensors<compute_stage>
 {
 public:
-  ADDynamicStressDivergenceTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADDynamicStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual();

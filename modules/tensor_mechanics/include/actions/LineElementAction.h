@@ -19,9 +19,9 @@ InputParameters validParams<LineElementAction>();
 class LineElementAction : public Action
 {
 public:
-  LineElementAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  LineElementAction(const InputParameters & params);
 
   virtual void act();
 

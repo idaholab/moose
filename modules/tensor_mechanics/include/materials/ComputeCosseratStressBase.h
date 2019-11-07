@@ -22,9 +22,9 @@ InputParameters validParams<ComputeCosseratStressBase>();
 class ComputeCosseratStressBase : public ComputeStressBase
 {
 public:
-  ComputeCosseratStressBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCosseratStressBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

@@ -22,9 +22,9 @@ InputParameters validParams<ComputePFFractureStressBase>();
 class ComputePFFractureStressBase : public ComputeStressBase
 {
 public:
-  ComputePFFractureStressBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputePFFractureStressBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

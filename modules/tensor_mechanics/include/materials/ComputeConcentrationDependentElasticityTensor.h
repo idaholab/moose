@@ -23,9 +23,9 @@ InputParameters validParams<ComputeConcentrationDependentElasticityTensor>();
 class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
-  ComputeConcentrationDependentElasticityTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeConcentrationDependentElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor();

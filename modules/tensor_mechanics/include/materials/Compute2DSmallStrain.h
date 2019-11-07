@@ -25,9 +25,9 @@ InputParameters validParams<Compute2DSmallStrain>();
 class Compute2DSmallStrain : public ComputeSmallStrain
 {
 public:
-  Compute2DSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Compute2DSmallStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

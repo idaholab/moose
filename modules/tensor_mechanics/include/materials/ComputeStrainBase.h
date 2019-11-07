@@ -26,9 +26,9 @@ InputParameters validParams<ComputeStrainBase>();
 class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeStrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeStrainBase(const InputParameters & parameters);
 
   void initialSetup() override;
 

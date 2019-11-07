@@ -27,9 +27,9 @@ InputParameters validParams<ComputeVariableBaseEigenStrain>();
 class ComputeVariableBaseEigenStrain : public ComputeEigenstrainBase
 {
 public:
-  ComputeVariableBaseEigenStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeVariableBaseEigenStrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain();

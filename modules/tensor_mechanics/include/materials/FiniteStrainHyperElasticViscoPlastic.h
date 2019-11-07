@@ -33,9 +33,9 @@ InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>();
 class FiniteStrainHyperElasticViscoPlastic : public ComputeStressBase
 {
 public:
-  FiniteStrainHyperElasticViscoPlastic(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FiniteStrainHyperElasticViscoPlastic(const InputParameters & parameters);
 
 protected:
   /**

@@ -19,9 +19,9 @@ InputParameters validParams<CavityPressureAction>();
 class CavityPressureAction : public Action
 {
 public:
-  CavityPressureAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  CavityPressureAction(const InputParameters & params);
 
   virtual void act() override;
 

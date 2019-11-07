@@ -19,9 +19,9 @@ InputParameters validParams<FiniteStrainCPSlipRateRes>();
 class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
 {
 public:
-  FiniteStrainCPSlipRateRes(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FiniteStrainCPSlipRateRes(const InputParameters & parameters);
 
 protected:
   /**

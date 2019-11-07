@@ -26,9 +26,9 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>();
 class FiniteStrainCrystalPlasticity : public ComputeStressBase
 {
 public:
-  FiniteStrainCrystalPlasticity(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FiniteStrainCrystalPlasticity(const InputParameters & parameters);
 
 protected:
   /**

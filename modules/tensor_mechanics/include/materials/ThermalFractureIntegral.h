@@ -28,9 +28,9 @@ InputParameters validParams<ThermalFractureIntegral>();
 class ThermalFractureIntegral : public DerivativeMaterialInterface<Material>
 {
 public:
-  ThermalFractureIntegral(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ThermalFractureIntegral(const InputParameters & parameters);
 
   virtual void computeQpProperties() override;
 

@@ -95,10 +95,9 @@ public:
     /// theta automatically adjusted as a function of the time step and the viscosity
     Zienkiewicz,
   };
+  static InputParameters validParams();
 
   LinearViscoelasticityBase(const InputParameters & parameters);
-
-  static InputParameters validParams();
 
   /**
    * Compute the apparent properties at a quadrature point. This initializes the internal

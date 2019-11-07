@@ -26,9 +26,9 @@ template <ComputeStage compute_stage>
 class ADComputeRSphericalIncrementalStrain : public ADComputeIncrementalSmallStrain<compute_stage>
 {
 public:
-  ADComputeRSphericalIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

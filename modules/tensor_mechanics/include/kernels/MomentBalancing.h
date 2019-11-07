@@ -35,9 +35,9 @@ InputParameters validParams<MomentBalancing>();
 class MomentBalancing : public Kernel
 {
 public:
-  MomentBalancing(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MomentBalancing(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

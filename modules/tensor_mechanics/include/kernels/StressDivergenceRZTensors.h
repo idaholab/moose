@@ -31,9 +31,9 @@ InputParameters validParams<StressDivergenceRZTensors>();
 class StressDivergenceRZTensors : public StressDivergenceTensors
 {
 public:
-  StressDivergenceRZTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressDivergenceRZTensors(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup() override;

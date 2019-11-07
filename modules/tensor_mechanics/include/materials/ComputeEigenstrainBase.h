@@ -26,9 +26,9 @@ InputParameters validParams<ComputeEigenstrainBase>();
 class ComputeEigenstrainBase : public Material
 {
 public:
-  ComputeEigenstrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeEigenstrainBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

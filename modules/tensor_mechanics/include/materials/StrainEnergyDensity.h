@@ -27,9 +27,9 @@ InputParameters validParams<StrainEnergyDensity>();
 class StrainEnergyDensity : public DerivativeMaterialInterface<Material>
 {
 public:
-  StrainEnergyDensity(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StrainEnergyDensity(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;
   virtual void initialSetup() override;

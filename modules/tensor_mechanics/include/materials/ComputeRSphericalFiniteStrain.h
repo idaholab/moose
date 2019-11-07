@@ -25,9 +25,9 @@ InputParameters validParams<ComputeRSphericalFiniteStrain>();
 class ComputeRSphericalFiniteStrain : public ComputeFiniteStrain
 {
 public:
-  ComputeRSphericalFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeRSphericalFiniteStrain(const InputParameters & parameters);
 
   virtual void initialSetup();
 

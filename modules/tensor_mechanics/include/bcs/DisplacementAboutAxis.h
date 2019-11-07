@@ -29,9 +29,9 @@ void addDisplacementAboutAxisParams(InputParameters & params);
 class DisplacementAboutAxis : public PresetNodalBC
 {
 public:
-  DisplacementAboutAxis(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DisplacementAboutAxis(const InputParameters & parameters);
 
 protected:
   /// Evaluate the boundary condition at the current quadrature point and timestep.

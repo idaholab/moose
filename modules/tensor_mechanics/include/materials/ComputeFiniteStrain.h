@@ -22,9 +22,9 @@ InputParameters validParams<ComputeFiniteStrain>();
 class ComputeFiniteStrain : public ComputeIncrementalStrainBase
 {
 public:
-  ComputeFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeFiniteStrain(const InputParameters & parameters);
 
   void computeProperties() override;
 

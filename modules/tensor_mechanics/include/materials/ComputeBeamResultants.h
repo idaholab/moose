@@ -24,9 +24,9 @@ InputParameters validParams<ComputeBeamResultants>();
 class ComputeBeamResultants : public Material
 {
 public:
-  ComputeBeamResultants(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeBeamResultants(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

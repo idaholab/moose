@@ -24,10 +24,10 @@ InputParameters validParams<SingleVariableReturnMappingSolution>();
 class SingleVariableReturnMappingSolution
 {
 public:
+  static InputParameters validParams();
+
   SingleVariableReturnMappingSolution(const InputParameters & parameters);
   virtual ~SingleVariableReturnMappingSolution() {}
-
-  static InputParameters validParams();
 
 protected:
   /**

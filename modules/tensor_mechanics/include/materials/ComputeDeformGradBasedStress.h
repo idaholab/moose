@@ -26,9 +26,9 @@ InputParameters validParams<ComputeDeformGradBasedStress>();
 class ComputeDeformGradBasedStress : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeDeformGradBasedStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeDeformGradBasedStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

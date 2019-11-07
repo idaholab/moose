@@ -25,9 +25,9 @@ template <ComputeStage compute_stage>
 class ADComputeAxisymmetricRZFiniteStrain : public ADCompute2DFiniteStrain<compute_stage>
 {
 public:
-  ADComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

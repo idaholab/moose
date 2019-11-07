@@ -28,9 +28,9 @@ InputParameters validParams<InclusionProperties>();
 class InclusionProperties : public Material
 {
 public:
-  InclusionProperties(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InclusionProperties(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

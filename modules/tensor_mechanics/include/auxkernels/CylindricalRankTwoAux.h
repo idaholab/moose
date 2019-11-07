@@ -26,10 +26,10 @@ InputParameters validParams<CylindricalRankTwoAux>();
 class CylindricalRankTwoAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   CylindricalRankTwoAux(const InputParameters & parameters);
   virtual ~CylindricalRankTwoAux() {}
-
-  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

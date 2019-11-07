@@ -29,9 +29,9 @@ InputParameters validParams<PowerLawCreepStressUpdate>();
 class PowerLawCreepStressUpdate : public RadialReturnCreepStressUpdateBase
 {
 public:
-  PowerLawCreepStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PowerLawCreepStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,

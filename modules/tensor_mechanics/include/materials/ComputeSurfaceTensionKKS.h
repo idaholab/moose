@@ -22,9 +22,9 @@ InputParameters validParams<ComputeSurfaceTensionKKS>();
 class ComputeSurfaceTensionKKS : public Material
 {
 public:
-  ComputeSurfaceTensionKKS(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeSurfaceTensionKKS(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

@@ -23,9 +23,9 @@ InputParameters validParams<CombinedScalarDamage>();
 class CombinedScalarDamage : public ScalarDamageBase
 {
 public:
-  CombinedScalarDamage(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CombinedScalarDamage(const InputParameters & parameters);
 
   void initialSetup() override;
 

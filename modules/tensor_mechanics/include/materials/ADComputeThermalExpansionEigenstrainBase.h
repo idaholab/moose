@@ -36,9 +36,9 @@ class ADComputeThermalExpansionEigenstrainBase : public ADComputeEigenstrainBase
                                                  public DerivativeMaterialPropertyNameInterface
 {
 public:
-  ADComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain() override;

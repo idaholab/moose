@@ -49,9 +49,9 @@ template <ComputeStage compute_stage>
 class ADIsotropicPlasticityStressUpdate : public ADRadialReturnStressUpdate<compute_stage>
 {
 public:
-  ADIsotropicPlasticityStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADIsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

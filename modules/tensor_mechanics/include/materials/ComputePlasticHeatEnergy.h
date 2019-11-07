@@ -26,9 +26,9 @@ InputParameters validParams<ComputePlasticHeatEnergy>();
 class ComputePlasticHeatEnergy : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputePlasticHeatEnergy(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputePlasticHeatEnergy(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

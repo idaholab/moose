@@ -23,9 +23,9 @@ InputParameters validParams<ScalarMaterialDamage>();
 class ScalarMaterialDamage : public ScalarDamageBase
 {
 public:
-  ScalarMaterialDamage(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ScalarMaterialDamage(const InputParameters & parameters);
 
 protected:
   virtual void updateQpDamageIndex() override;

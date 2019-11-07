@@ -23,8 +23,9 @@ InputParameters validParams<StressDivergenceBeam>();
 class StressDivergenceBeam : public Kernel
 {
 public:
-  StressDivergenceBeam(const InputParameters & parameters);
   static InputParameters validParams();
+
+  StressDivergenceBeam(const InputParameters & parameters);
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;

@@ -19,9 +19,9 @@ InputParameters validParams<DynamicTensorMechanicsAction>();
 class DynamicTensorMechanicsAction : public TensorMechanicsAction
 {
 public:
-  DynamicTensorMechanicsAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  DynamicTensorMechanicsAction(const InputParameters & params);
 
 protected:
   virtual std::string getKernelType();

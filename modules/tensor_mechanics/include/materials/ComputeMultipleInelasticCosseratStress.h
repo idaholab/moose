@@ -38,9 +38,9 @@ InputParameters validParams<ComputeMultipleInelasticCosseratStress>();
 class ComputeMultipleInelasticCosseratStress : public ComputeMultipleInelasticStress
 {
 public:
-  ComputeMultipleInelasticCosseratStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeMultipleInelasticCosseratStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

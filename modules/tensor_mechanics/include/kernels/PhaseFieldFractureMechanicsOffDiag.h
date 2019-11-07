@@ -27,9 +27,9 @@ InputParameters validParams<PhaseFieldFractureMechanicsOffDiag>();
 class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  PhaseFieldFractureMechanicsOffDiag(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PhaseFieldFractureMechanicsOffDiag(const InputParameters & parameters);
 
 protected:
   Real computeQpResidual() override { return 0.0; }

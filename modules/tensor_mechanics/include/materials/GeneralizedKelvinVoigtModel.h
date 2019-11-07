@@ -25,9 +25,9 @@ InputParameters validParams<GeneralizedKelvinVoigtModel>();
 class GeneralizedKelvinVoigtModel : public GeneralizedKelvinVoigtBase
 {
 public:
-  GeneralizedKelvinVoigtModel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneralizedKelvinVoigtModel(const InputParameters & parameters);
 
 protected:
   virtual void computeQpViscoelasticProperties();

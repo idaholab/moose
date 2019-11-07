@@ -23,9 +23,9 @@ InputParameters validParams<NodalGravity>();
 class NodalGravity : public NodalKernel
 {
 public:
-  NodalGravity(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodalGravity(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

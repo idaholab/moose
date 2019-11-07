@@ -28,9 +28,9 @@ void addInteractionIntegralBenchmarkBCParams(InputParameters & params);
 class InteractionIntegralBenchmarkBC : public PresetNodalBC
 {
 public:
-  InteractionIntegralBenchmarkBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InteractionIntegralBenchmarkBC(const InputParameters & parameters);
 
 protected:
   /**

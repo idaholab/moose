@@ -25,9 +25,9 @@ InputParameters validParams<PlasticHeatEnergy>();
 class PlasticHeatEnergy : public Kernel
 {
 public:
-  PlasticHeatEnergy(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PlasticHeatEnergy(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

@@ -38,9 +38,9 @@ InputParameters validParams<FiniteStrainUObasedCP>();
 class FiniteStrainUObasedCP : public ComputeStressBase
 {
 public:
-  FiniteStrainUObasedCP(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FiniteStrainUObasedCP(const InputParameters & parameters);
 
 protected:
   /**

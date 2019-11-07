@@ -25,9 +25,9 @@ InputParameters validParams<ComputeRSphericalIncrementalStrain>();
 class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
 {
 public:
-  ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

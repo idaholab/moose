@@ -27,9 +27,9 @@ class ADComputeMultiplePorousInelasticStress
   : public ADComputeMultipleInelasticStress<compute_stage>
 {
 public:
-  ADComputeMultiplePorousInelasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeMultiplePorousInelasticStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

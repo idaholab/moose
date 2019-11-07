@@ -24,9 +24,9 @@ InputParameters validParams<StickyBC>();
 class StickyBC : public NodalBC
 {
 public:
-  StickyBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StickyBC(const InputParameters & parameters);
 
 protected:
   virtual bool shouldApply() override;

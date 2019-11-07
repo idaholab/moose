@@ -56,9 +56,9 @@ template <ComputeStage compute_stage>
 class ADComputeMultipleInelasticStress : public ADComputeFiniteStrainElasticStress<compute_stage>
 {
 public:
-  ADComputeMultipleInelasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeMultipleInelasticStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

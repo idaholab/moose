@@ -25,9 +25,9 @@ InputParameters validParams<PowerLawSoftening>();
 class PowerLawSoftening : public SmearedCrackSofteningBase
 {
 public:
-  PowerLawSoftening(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PowerLawSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,

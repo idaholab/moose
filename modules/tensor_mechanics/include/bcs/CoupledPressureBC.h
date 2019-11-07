@@ -22,9 +22,9 @@ InputParameters validParams<CoupledPressureBC>();
 class CoupledPressureBC : public IntegratedBC
 {
 public:
-  CoupledPressureBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CoupledPressureBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

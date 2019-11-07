@@ -21,9 +21,9 @@ InputParameters validParams<GeneralizedPlaneStrainReferenceResidual>();
 class GeneralizedPlaneStrainReferenceResidual : public AuxScalarKernel
 {
 public:
-  GeneralizedPlaneStrainReferenceResidual(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneralizedPlaneStrainReferenceResidual(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

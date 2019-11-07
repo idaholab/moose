@@ -23,9 +23,9 @@ InputParameters validParams<ComputeIsotropicElasticityTensor>();
 class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
-  ComputeIsotropicElasticityTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeIsotropicElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor() override;

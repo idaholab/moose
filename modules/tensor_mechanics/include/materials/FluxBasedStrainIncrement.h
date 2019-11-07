@@ -25,9 +25,9 @@ InputParameters validParams<FluxBasedStrainIncrement>();
 class FluxBasedStrainIncrement : public DerivativeMaterialInterface<Material>
 {
 public:
-  FluxBasedStrainIncrement(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FluxBasedStrainIncrement(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

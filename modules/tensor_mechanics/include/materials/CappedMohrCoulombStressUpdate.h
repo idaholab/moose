@@ -24,9 +24,9 @@ InputParameters validParams<CappedMohrCoulombStressUpdate>();
 class CappedMohrCoulombStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
-  CappedMohrCoulombStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CappedMohrCoulombStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?

@@ -21,9 +21,9 @@ InputParameters validParams<GeneralizedPlaneStrain>();
 class GeneralizedPlaneStrain : public ScalarKernel
 {
 public:
-  GeneralizedPlaneStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneralizedPlaneStrain(const InputParameters & parameters);
 
   virtual void reinit(){};
   virtual void computeResidual();

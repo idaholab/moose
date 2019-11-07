@@ -25,9 +25,9 @@ InputParameters validParams<HyperElasticPhaseFieldIsoDamage>();
 class HyperElasticPhaseFieldIsoDamage : public FiniteStrainHyperElasticViscoPlastic
 {
 public:
-  HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters);
 
 protected:
   /// This function computes PK2 stress

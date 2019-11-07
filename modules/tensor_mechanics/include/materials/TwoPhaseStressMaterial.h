@@ -31,9 +31,9 @@ InputParameters validParams<TwoPhaseStressMaterial>();
 class TwoPhaseStressMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  TwoPhaseStressMaterial(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  TwoPhaseStressMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

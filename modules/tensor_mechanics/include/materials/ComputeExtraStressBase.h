@@ -24,9 +24,9 @@ InputParameters validParams<ComputeExtraStressBase>();
 class ComputeExtraStressBase : public Material
 {
 public:
-  ComputeExtraStressBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeExtraStressBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

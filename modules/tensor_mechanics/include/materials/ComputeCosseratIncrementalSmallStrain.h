@@ -23,9 +23,9 @@ InputParameters validParams<ComputeCosseratIncrementalSmallStrain>();
 class ComputeCosseratIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
 public:
-  ComputeCosseratIncrementalSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCosseratIncrementalSmallStrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

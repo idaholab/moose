@@ -31,9 +31,9 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
-  LineMaterialRankTwoScalarSampler(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LineMaterialRankTwoScalarSampler(const InputParameters & parameters);
 
   /**
    * Reduce the RankTwoTensor material property to a scalar for output

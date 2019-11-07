@@ -25,9 +25,9 @@ InputParameters validParams<AbruptSoftening>();
 class AbruptSoftening : public SmearedCrackSofteningBase
 {
 public:
-  AbruptSoftening(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  AbruptSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,

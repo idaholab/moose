@@ -27,9 +27,9 @@ InputParameters validParams<ComputeGlobalStrain>();
 class ComputeGlobalStrain : public Material
 {
 public:
-  ComputeGlobalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeGlobalStrain(const InputParameters & parameters);
 
   virtual void computeProperties();
 

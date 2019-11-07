@@ -22,9 +22,9 @@ InputParameters validParams<ComputeStrainIncrementBasedStress>();
 class ComputeStrainIncrementBasedStress : public ComputeStressBase
 {
 public:
-  ComputeStrainIncrementBasedStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeStrainIncrementBasedStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStress();

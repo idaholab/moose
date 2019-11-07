@@ -24,9 +24,9 @@ InputParameters validParams<RankTwoScalarAux>();
 class RankTwoScalarAux : public NodalPatchRecovery
 {
 public:
-  RankTwoScalarAux(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RankTwoScalarAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();

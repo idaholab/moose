@@ -42,9 +42,9 @@ template <ComputeStage compute_stage>
 class ADComputeStrainBase : public ADMaterial<compute_stage>
 {
 public:
-  ADComputeStrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeStrainBase(const InputParameters & parameters);
 
   void initialSetup() override;
 

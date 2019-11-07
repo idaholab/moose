@@ -35,9 +35,9 @@ class ADComputeFiniteStrainElasticStress : public ADComputeStressBase<compute_st
                                            public GuaranteeConsumer
 {
 public:
-  ADComputeFiniteStrainElasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
   void initialSetup() override;
 

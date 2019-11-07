@@ -22,9 +22,9 @@ InputParameters validParams<ComputeIncrementalStrainBase>();
 class ComputeIncrementalStrainBase : public ComputeStrainBase
 {
 public:
-  ComputeIncrementalStrainBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeIncrementalStrainBase(const InputParameters & parameters);
 
   void initialSetup() override;
 

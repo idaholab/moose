@@ -23,9 +23,9 @@ InputParameters validParams<ComputeExtraStressVDWGas>();
 class ComputeExtraStressVDWGas : public ComputeExtraStressBase
 {
 public:
-  ComputeExtraStressVDWGas(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeExtraStressVDWGas(const InputParameters & parameters);
 
 protected:
   virtual void computeQpExtraStress();

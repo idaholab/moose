@@ -25,9 +25,9 @@ class ADComputeThermalExpansionEigenstrain
   : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
 {
 public:
-  ADComputeThermalExpansionEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeThermalStrain(ADReal & thermal_strain, ADReal & instantaneous_cte) override;

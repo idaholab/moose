@@ -14,9 +14,9 @@
 class PressureAction : public Action
 {
 public:
-  PressureAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  PressureAction(const InputParameters & params);
 
   virtual void act() override;
 

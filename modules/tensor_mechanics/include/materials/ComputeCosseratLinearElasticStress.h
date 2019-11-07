@@ -25,9 +25,9 @@ InputParameters validParams<ComputeCosseratLinearElasticStress>();
 class ComputeCosseratLinearElasticStress : public ComputeCosseratStressBase
 {
 public:
-  ComputeCosseratLinearElasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCosseratLinearElasticStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

@@ -38,9 +38,9 @@ InputParameters validParams<ComputeMultipleInelasticStress>();
 class ComputeMultipleInelasticStress : public ComputeFiniteStrainElasticStress
 {
 public:
-  ComputeMultipleInelasticStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeMultipleInelasticStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

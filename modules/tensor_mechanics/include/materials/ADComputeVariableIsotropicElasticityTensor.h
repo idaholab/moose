@@ -26,9 +26,9 @@ class ADComputeVariableIsotropicElasticityTensor
   : public ADComputeElasticityTensorBase<compute_stage>
 {
 public:
-  ADComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpElasticityTensor() override;

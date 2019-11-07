@@ -25,9 +25,9 @@ InputParameters validParams<CosseratStressDivergenceTensors>();
 class CosseratStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
-  CosseratStressDivergenceTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CosseratStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

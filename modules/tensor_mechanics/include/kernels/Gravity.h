@@ -24,9 +24,9 @@ InputParameters validParams<Gravity>();
 class Gravity : public Kernel
 {
 public:
-  Gravity(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Gravity(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

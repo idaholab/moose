@@ -24,9 +24,9 @@ InputParameters validParams<ComputeAxisymmetric1DSmallStrain>();
 class ComputeAxisymmetric1DSmallStrain : public Compute1DSmallStrain
 {
 public:
-  ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

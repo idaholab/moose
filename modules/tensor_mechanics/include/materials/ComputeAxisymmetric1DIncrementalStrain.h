@@ -25,9 +25,9 @@ InputParameters validParams<ComputeAxisymmetric1DIncrementalStrain>();
 class ComputeAxisymmetric1DIncrementalStrain : public Compute1DIncrementalStrain
 {
 public:
-  ComputeAxisymmetric1DIncrementalStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeAxisymmetric1DIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
 

@@ -19,9 +19,9 @@ InputParameters validParams<LinearElasticTruss>();
 class LinearElasticTruss : public TrussMaterial
 {
 public:
-  LinearElasticTruss(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LinearElasticTruss(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStrain();

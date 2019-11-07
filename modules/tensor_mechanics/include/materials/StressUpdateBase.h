@@ -52,9 +52,9 @@ InputParameters validParams<StressUpdateBase>();
 class StressUpdateBase : public Material
 {
 public:
-  StressUpdateBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  StressUpdateBase(const InputParameters & parameters);
 
   /**
    * Given a strain increment that results in a trial stress, perform some

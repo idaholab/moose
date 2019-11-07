@@ -41,9 +41,9 @@ template <ComputeStage compute_stage>
 class ADComputeStressBase : public ADMaterial<compute_stage>
 {
 public:
-  ADComputeStressBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADComputeStressBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

@@ -24,9 +24,9 @@ InputParameters validParams<DomainIntegralAction>();
 class DomainIntegralAction : public Action
 {
 public:
-  DomainIntegralAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  DomainIntegralAction(const InputParameters & params);
 
   ~DomainIntegralAction();
 

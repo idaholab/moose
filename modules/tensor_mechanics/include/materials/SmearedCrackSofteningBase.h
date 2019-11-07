@@ -28,9 +28,9 @@ InputParameters validParams<SmearedCrackSofteningBase>();
 class SmearedCrackSofteningBase : public Material
 {
 public:
-  SmearedCrackSofteningBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SmearedCrackSofteningBase(const InputParameters & parameters);
 
   /**
    * Compute the effect of the cracking release model on the stress

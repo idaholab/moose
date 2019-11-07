@@ -24,9 +24,9 @@ InputParameters validParams<SumTensorIncrements>();
 class SumTensorIncrements : public DerivativeMaterialInterface<Material>
 {
 public:
-  SumTensorIncrements(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SumTensorIncrements(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();

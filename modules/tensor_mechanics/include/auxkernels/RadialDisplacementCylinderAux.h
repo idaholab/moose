@@ -24,11 +24,11 @@ InputParameters validParams<RadialDisplacementCylinderAux>();
 class RadialDisplacementCylinderAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RadialDisplacementCylinderAux(const InputParameters & parameters);
 
   virtual ~RadialDisplacementCylinderAux() {}
-
-  static InputParameters validParams();
 
 protected:
   /// Compute the value of the radial displacement

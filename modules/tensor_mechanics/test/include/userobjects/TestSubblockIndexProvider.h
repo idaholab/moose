@@ -24,9 +24,9 @@ InputParameters validParams<TestSubblockIndexProvider>();
 class TestSubblockIndexProvider : public SubblockIndexProvider
 {
 public:
-  TestSubblockIndexProvider(const InputParameters & params);
-
   static InputParameters validParams();
+
+  TestSubblockIndexProvider(const InputParameters & params);
 
   virtual void initialize() override {};
   virtual void execute() override {};

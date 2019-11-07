@@ -28,9 +28,9 @@ InputParameters validParams<DamageBase>();
 class DamageBase : public Material
 {
 public:
-  DamageBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DamageBase(const InputParameters & parameters);
 
   /**
    * Update the internal variable(s) that evolve the damage

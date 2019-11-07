@@ -24,9 +24,9 @@ InputParameters validParams<ComputeThermalExpansionEigenstrain>();
 class ComputeThermalExpansionEigenstrain : public ComputeThermalExpansionEigenstrainBase
 {
 public:
-  ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;

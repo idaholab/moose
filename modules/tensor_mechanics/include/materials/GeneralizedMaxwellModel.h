@@ -26,9 +26,9 @@ InputParameters validParams<GeneralizedMaxwellModel>();
 class GeneralizedMaxwellModel : public GeneralizedMaxwellBase
 {
 public:
-  GeneralizedMaxwellModel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneralizedMaxwellModel(const InputParameters & parameters);
 
 protected:
   virtual void computeQpViscoelasticProperties();

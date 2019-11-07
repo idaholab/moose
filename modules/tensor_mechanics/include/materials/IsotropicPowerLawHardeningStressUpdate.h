@@ -36,9 +36,9 @@ InputParameters validParams<IsotropicPowerLawHardeningStressUpdate>();
 class IsotropicPowerLawHardeningStressUpdate : public IsotropicPlasticityStressUpdate
 {
 public:
-  IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,

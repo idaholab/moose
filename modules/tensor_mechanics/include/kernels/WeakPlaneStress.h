@@ -26,9 +26,9 @@ InputParameters validParams<WeakPlaneStress>();
 class WeakPlaneStress : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  WeakPlaneStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  WeakPlaneStress(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

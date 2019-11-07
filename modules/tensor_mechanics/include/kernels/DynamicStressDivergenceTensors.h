@@ -23,9 +23,9 @@ InputParameters validParams<DynamicStressDivergenceTensors>();
 class DynamicStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
-  DynamicStressDivergenceTensors(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DynamicStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -25,9 +25,9 @@ template <ComputeStage compute_stage>
 class ADPressure : public ADIntegratedBC<compute_stage>
 {
 public:
-  ADPressure(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADPressure(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;

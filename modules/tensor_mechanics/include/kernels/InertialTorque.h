@@ -28,9 +28,9 @@ InputParameters validParams<InertialTorque>();
 class InertialTorque : public TimeKernel
 {
 public:
-  InertialTorque(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InertialTorque(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

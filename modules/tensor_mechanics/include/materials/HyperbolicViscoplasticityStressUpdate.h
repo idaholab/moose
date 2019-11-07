@@ -33,9 +33,9 @@ InputParameters validParams<HyperbolicViscoplasticityStressUpdate>();
 class HyperbolicViscoplasticityStressUpdate : public RadialReturnStressUpdate
 {
 public:
-  HyperbolicViscoplasticityStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  HyperbolicViscoplasticityStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;

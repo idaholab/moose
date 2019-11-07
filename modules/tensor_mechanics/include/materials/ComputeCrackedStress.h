@@ -27,9 +27,9 @@ InputParameters validParams<ComputeCrackedStress>();
 class ComputeCrackedStress : public DerivativeMaterialInterface<Material>
 {
 public:
-  ComputeCrackedStress(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeCrackedStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

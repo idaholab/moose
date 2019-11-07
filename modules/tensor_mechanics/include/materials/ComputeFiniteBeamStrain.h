@@ -25,9 +25,9 @@ InputParameters validParams<ComputeFiniteBeamStrain>();
 class ComputeFiniteBeamStrain : public ComputeIncrementalBeamStrain
 {
 public:
-  ComputeFiniteBeamStrain(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ComputeFiniteBeamStrain(const InputParameters & parameters);
 
 protected:
   // Compute incremental rotation matrix from the previous time step to the current configuration

@@ -19,9 +19,9 @@ InputParameters validParams<TensorMechanicsAction>();
 class TensorMechanicsAction : public TensorMechanicsActionBase
 {
 public:
-  TensorMechanicsAction(const InputParameters & params);
-
   static InputParameters validParams();
+
+  TensorMechanicsAction(const InputParameters & params);
 
   virtual void act();
 

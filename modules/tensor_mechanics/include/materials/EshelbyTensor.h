@@ -27,9 +27,9 @@ InputParameters validParams<EshelbyTensor>();
 class EshelbyTensor : public DerivativeMaterialInterface<Material>
 {
 public:
-  EshelbyTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  EshelbyTensor(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;

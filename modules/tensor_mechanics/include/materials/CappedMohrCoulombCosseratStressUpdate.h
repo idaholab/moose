@@ -28,9 +28,9 @@ InputParameters validParams<CappedMohrCoulombCosseratStressUpdate>();
 class CappedMohrCoulombCosseratStressUpdate : public CappedMohrCoulombStressUpdate
 {
 public:
-  CappedMohrCoulombCosseratStressUpdate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CappedMohrCoulombCosseratStressUpdate(const InputParameters & parameters);
 
   /**
    * The full elasticity tensor may be anisotropic, and usually is in the case
