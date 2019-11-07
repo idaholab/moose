@@ -18,9 +18,9 @@ InputParameters
 InterfaceUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<BoundaryRestrictableRequired>();
-  params += ::validParams<TwoMaterialPropertyInterface>();
-  params += ::validParams<TransientInterface>();
+  params += BoundaryRestrictableRequired::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
   params.addClassDescription("Basic UO class to perform computation across an interface");
 
   // Need one layer of ghosting

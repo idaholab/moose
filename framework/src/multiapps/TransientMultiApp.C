@@ -31,7 +31,7 @@ InputParameters
 TransientMultiApp::validParams()
 {
   InputParameters params = MultiApp::validParams();
-  params += ::validParams<TransientInterface>();
+  params += TransientInterface::validParams();
   params.addClassDescription("MultiApp for performing coupled simulations with the master and "
                              "sub-application both progressing in time.");
 

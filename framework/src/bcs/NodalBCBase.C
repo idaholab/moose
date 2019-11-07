@@ -20,7 +20,7 @@ InputParameters
 NodalBCBase::validParams()
 {
   InputParameters params = BoundaryCondition::validParams();
-  params += ::validParams<RandomInterface>();
+  params += RandomInterface::validParams();
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
       "The name of auxiliary variables to save this BC's residual contributions to.  "

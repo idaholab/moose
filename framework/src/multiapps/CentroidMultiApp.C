@@ -23,7 +23,7 @@ InputParameters
 CentroidMultiApp::validParams()
 {
   InputParameters params = TransientMultiApp::validParams();
-  params += ::validParams<BlockRestrictable>();
+  params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Automatically generates Sub-App positions from centroids of elements in the master mesh.");
   params.suppressParameter<std::vector<Point>>("positions");

@@ -19,7 +19,7 @@ Control::validParams()
   InputParameters params = MooseObject::validParams();
   params += TransientInterface::validParams();
   params += SetupInterface::validParams();
-  params += ::validParams<FunctionInterface>();
+  params += FunctionInterface::validParams();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);

@@ -17,7 +17,7 @@ InputParameters
 ParsedAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params += ::validParams<FunctionParserUtils>();
+  params += FunctionParserUtils::validParams();
   params.addClassDescription("Parsed function AuxKernel.");
 
   params.addRequiredCustomTypeParam<std::string>(

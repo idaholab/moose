@@ -35,7 +35,7 @@ Transfer::validParams()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_begin'
-  params += ::validParams<SetupInterface>();
+  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
   MultiMooseEnum possible_directions(Transfer::possibleDirections());

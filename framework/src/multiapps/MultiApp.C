@@ -44,7 +44,7 @@ InputParameters
 MultiApp::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<SetupInterface>();
+  params += SetupInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

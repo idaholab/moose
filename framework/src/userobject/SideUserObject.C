@@ -18,8 +18,8 @@ InputParameters
 SideUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<BoundaryRestrictableRequired>();
-  params += ::validParams<MaterialPropertyInterface>();
+  params += BoundaryRestrictableRequired::validParams();
+  params += MaterialPropertyInterface::validParams();
   return params;
 }
 
