@@ -26,6 +26,8 @@ class VectorNodalBC : public NodalBCBase, public MooseVariableInterface<RealVect
 public:
   VectorNodalBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Gets the variable this BC is active on
    * @return the variable
@@ -59,4 +61,3 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VacuumBC);
 
-template <>
+defineLegacyParams(VacuumBC);
+
 InputParameters
-validParams<VacuumBC>()
+VacuumBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("alpha", 1, "No idea.");
   return params;
 }

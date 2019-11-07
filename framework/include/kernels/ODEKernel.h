@@ -23,6 +23,8 @@ InputParameters validParams<ODEKernel>();
 class ODEKernel : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   ODEKernel(const InputParameters & parameters);
 
   virtual void reinit() override;

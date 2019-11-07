@@ -20,6 +20,8 @@ InputParameters validParams<VectorTimeDerivative>();
 class VectorTimeDerivative : public VectorTimeKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorTimeDerivative(const InputParameters & parameters);
 
   virtual void computeJacobian() override;

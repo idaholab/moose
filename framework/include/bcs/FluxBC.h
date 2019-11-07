@@ -26,6 +26,8 @@ class FluxBC : public IntegratedBC
 public:
   FluxBC(const InputParameters & params);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -33,4 +35,3 @@ protected:
   virtual RealGradient computeQpFluxResidual() = 0;
   virtual RealGradient computeQpFluxJacobian() = 0;
 };
-

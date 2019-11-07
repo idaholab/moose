@@ -21,6 +21,8 @@ class ADNodalBCTempl : public NodalBCBase, public MooseVariableInterface<T>
 public:
   ADNodalBCTempl(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual MooseVariableFE<T> & variable() override { return _var; }
 
   void computeResidual() override;

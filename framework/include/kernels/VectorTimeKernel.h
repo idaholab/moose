@@ -24,6 +24,8 @@ InputParameters validParams<VectorTimeKernel>();
 class VectorTimeKernel : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorTimeKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;

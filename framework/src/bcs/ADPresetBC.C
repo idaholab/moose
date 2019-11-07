@@ -11,11 +11,19 @@
 
 registerADMooseObject("MooseApp", ADPresetBC);
 
-defineADValidParams(
-    ADPresetBC, ADPresetNodalBC, params.addRequiredParam<Real>("value", "Value of the BC");
-    params.declareControllable("value");
-    params.addClassDescription(
-        "Similar to DirichletBC except the value is applied before the solve begins"););
+defineADLegacyParams(ADPresetBC);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADPresetBC<compute_stage>::validParams()
+{
+  InputParameters params = ADPresetNodalBC<compute_stage>::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.declareControllable("value");
+  params.addClassDescription(
+      "Similar to DirichletBC except the value is applied before the solve begins");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADPresetBC<compute_stage>::ADPresetBC(const InputParameters & parameters)

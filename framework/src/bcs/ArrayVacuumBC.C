@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayVacuumBC);
 
-template <>
+defineLegacyParams(ArrayVacuumBC);
+
 InputParameters
-validParams<ArrayVacuumBC>()
+ArrayVacuumBC::validParams()
 {
-  InputParameters params = validParams<ArrayIntegratedBC>();
+  InputParameters params = ArrayIntegratedBC::validParams();
   params.addParam<RealEigenVector>("alpha", "Ratio between directional gradient and solution");
   params.addClassDescription("Imposes the Robin boundary condition $\\partial_n "
                              "\\vec{u}=-\\frac{\\vec{\\alpha}}{2}\\vec{u}$.");

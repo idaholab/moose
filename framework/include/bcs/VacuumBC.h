@@ -32,6 +32,8 @@ public:
    */
   VacuumBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -40,4 +42,3 @@ protected:
   /// Ratio of u to du/dn
   Real _alpha;
 };
-

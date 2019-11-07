@@ -4,13 +4,9 @@
 First you need to install the MOOSE framework. To do this, click the link below corresponding to
 your operating system/platform and follow the instructions:
 
-!alert warning title=No Mac OS 10.15 (Catalina) support at this time
-There are numerous changes with this operating system that we are working through including
-the removal of all 32-bit libraries, a new default shell, and changes to Python. Do NOT upgrade
-your system if you are developing or running MOOSE or MOOSE-based applications.
-
 - +MacOS+:
 
+  - [Catalina](getting_started/installation/macos_catalina.md)
   - [Mojave](getting_started/installation/macos_mojave.md)
   - [High Sierra or older](getting_started/installation/macos_other.md)
 
@@ -18,8 +14,8 @@ your system if you are developing or running MOOSE or MOOSE-based applications.
 
   - [getting_started/installation/ubuntu.md]
   - [getting_started/installation/mint.md]
-  - [getting_started/installation/opensuse.md]
   - [getting_started/installation/fedora.md]
+  - [getting_started/installation/opensuse.md]
   - [getting_started/installation/centos.md]
 
 - [getting_started/installation/windows10.md]

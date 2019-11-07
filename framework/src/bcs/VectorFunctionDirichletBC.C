@@ -16,11 +16,12 @@ registerMooseObjectRenamed("MooseApp",
                            "05/01/2019 00:01",
                            VectorFunctionDirichletBC);
 
-template <>
+defineLegacyParams(VectorFunctionDirichletBC);
+
 InputParameters
-validParams<VectorFunctionDirichletBC>()
+VectorFunctionDirichletBC::validParams()
 {
-  InputParameters params = validParams<VectorNodalBC>();
+  InputParameters params = VectorNodalBC::validParams();
   params.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "components are calculated with functions.");

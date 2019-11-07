@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorDiffusion);
 
-template <>
+defineLegacyParams(VectorDiffusion);
+
 InputParameters
-validParams<VectorDiffusion>()
+VectorDiffusion::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "The Laplacian operator ($-\\nabla \\cdot \\nabla \\vec{u}$), with the weak "
       "form of $(\\nabla \\vec{\\phi_i}, \\nabla \\vec{u_h})$.");

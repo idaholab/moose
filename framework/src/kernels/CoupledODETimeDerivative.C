@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CoupledODETimeDerivative);
 
-template <>
+defineLegacyParams(CoupledODETimeDerivative);
+
 InputParameters
-validParams<CoupledODETimeDerivative>()
+CoupledODETimeDerivative::validParams()
 {
-  InputParameters params = validParams<ODETimeKernel>();
+  InputParameters params = ODETimeKernel::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable.");
   return params;
 }

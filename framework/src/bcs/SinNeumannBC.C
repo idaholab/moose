@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SinNeumannBC);
 
-template <>
+defineLegacyParams(SinNeumannBC);
+
 InputParameters
-validParams<SinNeumannBC>()
+SinNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("initial", 0.0, "The initial value of the gradient on the boundary");
   params.addParam<Real>("final", 0.0, "The final value of the gradient on the boundary");
   params.addParam<Real>("duration", 0.0, "The duration of the ramp");

@@ -26,6 +26,8 @@ public:
    */
   ConvectiveFluxBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -39,4 +41,3 @@ private:
   Real _rate;
   Real _duration;
 };
-

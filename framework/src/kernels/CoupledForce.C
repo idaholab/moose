@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", CoupledForce);
 
-template <>
+defineLegacyParams(CoupledForce);
+
 InputParameters
-validParams<CoupledForce>()
+CoupledForce::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "variable. Weak form: $(\\psi_i, -\\sigma v)$.");

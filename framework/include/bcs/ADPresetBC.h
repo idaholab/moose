@@ -26,6 +26,8 @@ class ADPresetBC : public ADPresetNodalBC<compute_stage>
 public:
   ADPresetBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpValue() override;
 

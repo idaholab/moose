@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", PostprocessorNeumannBC);
 
-template <>
+defineLegacyParams(PostprocessorNeumannBC);
+
 InputParameters
-validParams<PostprocessorNeumannBC>()
+PostprocessorNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<PostprocessorName>(
       "postprocessor", 0.0, "The postprocessor to use for value of the gradient on the boundary.");
   return params;

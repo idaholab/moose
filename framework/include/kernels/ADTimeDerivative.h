@@ -21,9 +21,9 @@ template <ComputeStage compute_stage>
 class ADTimeDerivative : public ADTimeKernelValue<compute_stage>
 {
 public:
-  ADTimeDerivative(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual ADReal precomputeQpResidual() override;

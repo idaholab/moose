@@ -26,6 +26,8 @@ InputParameters validParams<VectorBodyForce>();
 class VectorBodyForce : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorBodyForce(const InputParameters & parameters);
 
 protected:

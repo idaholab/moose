@@ -22,6 +22,8 @@ InputParameters validParams<VectorCoupledTimeDerivative>();
 class VectorCoupledTimeDerivative : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:

@@ -24,6 +24,8 @@ InputParameters validParams<ParsedODEKernel>();
 class ParsedODEKernel : public ODEKernel, public FunctionParserUtils
 {
 public:
+  static InputParameters validParams();
+
   ParsedODEKernel(const InputParameters & parameters);
 
 protected:

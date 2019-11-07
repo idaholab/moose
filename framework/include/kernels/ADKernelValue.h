@@ -30,9 +30,9 @@ template <typename T, ComputeStage compute_stage>
 class ADKernelValueTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
-  ADKernelValueTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADKernelValueTempl(const InputParameters & parameters);
 
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;

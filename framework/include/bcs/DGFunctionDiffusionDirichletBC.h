@@ -36,6 +36,8 @@ public:
    */
   DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;

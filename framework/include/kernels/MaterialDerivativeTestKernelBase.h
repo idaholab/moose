@@ -21,9 +21,9 @@ class MaterialDerivativeTestKernelBase
     : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
-  MaterialDerivativeTestKernelBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MaterialDerivativeTestKernelBase(const InputParameters & parameters);
 
 protected:
   /// number of nonlinear variables
@@ -63,7 +63,7 @@ template <typename T>
 InputParameters
 MaterialDerivativeTestKernelBase<T>::validParams()
 {
-  InputParameters params = ::validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Class used for testing derivatives of a material property.");
   params.addRequiredParam<MaterialPropertyName>(
       "material_property", "Name of material property for which derivatives are to be tested.");

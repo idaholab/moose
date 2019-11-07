@@ -27,6 +27,8 @@ class ADFunctionDirichletBC : public ADNodalBC<compute_stage>
 public:
   ADFunctionDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal computeQpResidual() override;
 

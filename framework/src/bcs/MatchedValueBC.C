@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MatchedValueBC);
 
-template <>
+defineLegacyParams(MatchedValueBC);
+
 InputParameters
-validParams<MatchedValueBC>()
+MatchedValueBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
                              "on a specified boundary.");

@@ -129,7 +129,8 @@ def verifyCoverage(options):
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
 
-    summary_output = ' '.join(summary_command.communicate())
+    stdout, stderr = summary_command.communicate()
+    summary_output = ' '.join([stdout.decode(), stderr.decode()])
     coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
     print(summary_output, '\n\nCode Coverage:', str(coverage))
     if coverage >= options.coverage_percent:

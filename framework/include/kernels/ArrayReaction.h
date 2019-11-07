@@ -19,6 +19,8 @@ InputParameters validParams<ArrayReaction>();
 class ArrayReaction : public ArrayKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayReaction(const InputParameters & parameters);
 
 protected:

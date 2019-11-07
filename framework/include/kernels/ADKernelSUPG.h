@@ -33,9 +33,9 @@ template <typename T, ComputeStage compute_stage>
 class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T, compute_stage>
 {
 public:
-  ADKernelSUPGTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADKernelSUPGTempl(const InputParameters & parameters);
 
 protected:
   ADRealVectorValue virtual computeQpStabilization() override;

@@ -275,6 +275,11 @@ public:
    */
   const MooseArray<std::vector<Point>> & tangents() const { return _current_tangents; }
 
+  /**
+   * Returns an integer ID of the current element given the index associated with the integer
+   */
+  const dof_id_type & extraElemID(unsigned int id) const { return _extra_elem_ids[id]; }
+
   template <ComputeStage compute_stage>
   const ADPoint & adNormals() const
   {
@@ -1680,6 +1685,8 @@ private:
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
   MooseArray<std::vector<Point>> _current_tangents;
+  /// Extra element IDs
+  std::vector<dof_id_type> _extra_elem_ids;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
   /// Holds pointers to the dimension's q_points on a face

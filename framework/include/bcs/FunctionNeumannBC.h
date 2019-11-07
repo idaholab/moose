@@ -26,6 +26,8 @@ class FunctionNeumannBC : public IntegratedBC
 public:
   FunctionNeumannBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 

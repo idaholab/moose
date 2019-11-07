@@ -24,10 +24,11 @@ class PresetNodalBC : public NodalBC
 public:
   PresetNodalBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void computeValue(NumericVector<Number> & current_solution);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpValue() = 0;
 };
-

@@ -4,11 +4,13 @@
     command = background.py
     imagediff = background.png
     python = 3
+    display_required = true
   [../]
   [./gradient]
     type = ImageDiff
     command = gradient.py
     imagediff = gradient.png
     python = 3
+    display_required = true
   [../]
 []

@@ -4,5 +4,6 @@
     command = color.py
     imagediff = color.png
     python = 3
+    display_required = true
   [../]
 []

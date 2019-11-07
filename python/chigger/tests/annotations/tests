@@ -6,6 +6,8 @@
     imagediff = 'image_annotation.png'
     python = 3
     platform = LINUX
+
+    display_required = true
   [../]
 
   [./logo]
@@ -15,6 +17,8 @@
     imagediff = 'logo_annotation.png'
     python = 3
     platform = LINUX
+
+    display_required = true
   [../]
 
   [./text]
@@ -23,6 +27,8 @@
     command = text_annotation.py
     imagediff = 'text_annotation.png'
     python = 3
+
+    display_required = true
   [../]
 
   [./time]
@@ -31,6 +37,8 @@
     command = time_annotation.py
     imagediff = 'time_annotation.png'
     python = 3
+
+    display_required = true
   [../]
 
   [./time_change]
@@ -40,5 +48,7 @@
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
     python = 3
     platform = LINUX
+
+    display_required = true
   [../]
 []

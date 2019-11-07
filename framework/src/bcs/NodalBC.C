@@ -14,12 +14,12 @@
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
-template <>
+defineLegacyParams(NodalBC);
+
 InputParameters
-validParams<NodalBC>()
+NodalBC::validParams()
 {
-  InputParameters params = validParams<NodalBCBase>();
-  params += validParams<RandomInterface>();
+  InputParameters params = NodalBCBase::validParams();
 
   return params;
 }

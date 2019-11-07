@@ -28,6 +28,7 @@
 #include "VectorPostprocessorInterface.h"
 #include "MooseVariableInterface.h"
 #include "MemberTemplateMacros.h"
+#include "ElementIDInterface.h"
 
 // forward declarations
 template <typename ComputeValueType>
@@ -68,7 +69,8 @@ class AuxKernelTempl : public MooseObject,
                        protected GeometricSearchInterface,
                        public Restartable,
                        public MeshChangedInterface,
-                       protected VectorPostprocessorInterface
+                       protected VectorPostprocessorInterface,
+                       public ElementIDInterface
 {
 public:
   AuxKernelTempl(const InputParameters & parameters);

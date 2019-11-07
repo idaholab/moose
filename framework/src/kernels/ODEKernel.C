@@ -14,11 +14,12 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(ODEKernel);
+
 InputParameters
-validParams<ODEKernel>()
+ODEKernel::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   return params;
 }
 

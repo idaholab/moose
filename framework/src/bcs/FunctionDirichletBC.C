@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionDirichletBC);
 
-template <>
+defineLegacyParams(FunctionDirichletBC);
+
 InputParameters
-validParams<FunctionDirichletBC>()
+FunctionDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addClassDescription(
       "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "

@@ -2,21 +2,29 @@
 This pipeline builds a Docker image of MOOSE, runs the standard suite of tests,
 and pushes the image to the registry prescribed by $DOCKER_TAG.  A second push 
 is also done, with the tag suffix set to the commit hash of the MOOSE working 
-tree.  For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
-parameter in Jenkins.
+tree.
+
+For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
+parameter in Jenkins.  Additionally, $DISTRO_NAME and $DISTRO_VERSION need to
+be defined, e.g. Ubuntu and 18.04, respectively.  Supported package managers 
+are apt and yum.  Distros that should work include Ubuntu, Debian, CentOS, 
+and Amazon Linux.
 */
 
 pipeline {
-    agent none
+    agent any
+
+    environment {
+        SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
+        SLACK_ERR = "Slack not configured.\n"
+    }
     
     stages {
         
         // Run 'docker build' on the Dockerfile in this repository
         // with args for core count and submodule commit hashes
         stage('Build Image')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Setup for getting submodule commit hashes
@@ -25,6 +33,8 @@ pipeline {
                 
                 # Build MOOSE image with max cores and compatible submodules
                 docker build \
+                --build-arg DISTRO_NAME=$DISTRO_NAME \
+                --build-arg DISTRO_VERSION=$DISTRO_VERSION \
                 --build-arg MOOSE_JOBS=$(grep -c ^processor /proc/cpuinfo) \
                 --build-arg PETSC_REV=$(sub_rev petsc) \
                 --build-arg LIBMESH_REV=$(sub_rev libmesh) \
@@ -36,9 +46,7 @@ pipeline {
         
         // Pipes output from MOOSE tests into a readable, accessible file
         stage('Run Tests')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Run tests and pipe to accessible log file
@@ -50,9 +58,7 @@ pipeline {
         
         // Pushes given tag to registry and also for the current MOOSE commit
         stage('Push to Docker Registry')
-        {
-            agent any
-            
+        {            
             steps {
                 sh '''
                 # Get Docker repo prefix and tag string for current revision
@@ -70,5 +76,35 @@ pipeline {
                 '''
             }
         }
+    }
+
+    post {
+        success {
+            script {
+                try {   
+                    // Send message build was successful
+                    slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
+                } catch (Exception e) {
+                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                }
+            }
+        }
+
+        failure {
+            script {
+                try {        
+                    MOOSE_COMMIT = sh(
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    )
+
+                    // Send message build failed
+                    slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
+                } catch (Exception e) {
+                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                }
+            }
+        }
+
     }
 }

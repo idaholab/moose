@@ -29,10 +29,11 @@ class VectorNeumannBC : public IntegratedBC
 public:
   VectorNeumannBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
   /// Vector to dot with the normal.
   const RealVectorValue & _value;
 };
-

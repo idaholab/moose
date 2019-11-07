@@ -8,6 +8,7 @@
       type = ImageDiff
       command = default.py
       imagediff = 'default.png'
+      display_required = true
 
       detail = "default settings;"
       python = 3
@@ -16,6 +17,7 @@
       type = ImageDiff
       command = blocks.py
       imagediff = 'blocks.png'
+      display_required = true
 
       detail = "defined subdomains;"
       python = 3
@@ -25,6 +27,7 @@
       command = all_boundary.py
       imagediff = 'all_boundary.png'
       allowed_linux = 0.95
+      display_required = true
 
       detail = "all boundaries;"
       python = 3
@@ -33,6 +36,7 @@
       type = ImageDiff
       command = boundary.py
       imagediff = 'boundary.png'
+      display_required = true
 
       detail = "defined boundaries by name;"
       python = 3
@@ -41,6 +45,7 @@
       type = ImageDiff
       command = boundary_numeric.py
       imagediff = 'boundary_numeric.png'
+      display_required = true
 
       detail = "defined boundaries by number;"
       python = 3
@@ -52,6 +57,7 @@
       allowed_linux = 0.97
       python = 3
       platform = LINUX
+      display_required = true
 
       detail = "defined nodesets;"
     []
@@ -62,6 +68,7 @@
       allowed_linux = 0.90
       python = 3
       platform = LINUX
+      display_required = true
 
       detail = "all nodesets;"
     []
@@ -69,6 +76,7 @@
       type = ImageDiff
       command = none.py
       imagediff = 'none.png'
+      display_required = true
 
       detail = "no geometric entities selected;"
       python = 3
@@ -79,6 +87,7 @@
       imagediff = 'combo.png'
       allowed_linux = 0.95
       platform = LINUX
+      display_required = true
 
       detail = "subdomains, boundaries, and nodesets specified; and"
       python = 3
@@ -87,6 +96,7 @@
       type = ImageDiff
       command = partial.py
       imagediff = 'partial.png'
+      display_required = true
 
       detail = "data only defined on a subset of subdomains."
       python = 3

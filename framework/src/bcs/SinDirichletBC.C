@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SinDirichletBC);
 
-template <>
+defineLegacyParams(SinDirichletBC);
+
 InputParameters
-validParams<SinDirichletBC>()
+SinDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.set<Real>("initial") = 0.0;
   params.set<Real>("final") = 0.0;
   params.set<Real>("duration") = 0.0;

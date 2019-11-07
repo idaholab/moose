@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", BodyForce);
 
-template <>
+defineLegacyParams(BodyForce);
+
 InputParameters
-validParams<BodyForce>()
+BodyForce::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Demonstrates the multiple ways that scalar values can be introduced "
                              "into kernels, e.g. (controllable) constants, functions, and "
                              "postprocessors. Implements the weak form $(\\psi_i, -f)$.");

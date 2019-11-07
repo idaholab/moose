@@ -28,6 +28,8 @@ class NodalBC : public NodalBCBase, public MooseVariableInterface<Real>
 public:
   NodalBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Gets the variable this BC is active on
    * @return the variable

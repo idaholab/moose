@@ -26,6 +26,8 @@ class VectorIntegratedBC : public IntegratedBCBase, public MooseVariableInterfac
 public:
   VectorIntegratedBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual VectorMooseVariable & variable() override { return _var; }
 
   virtual void computeResidual() override;

@@ -98,6 +98,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
+    ElementIDInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),

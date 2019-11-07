@@ -22,6 +22,14 @@ defineADBaseValidParams(ADNodalBC, NodalBCBase, );
 defineADBaseValidParams(ADVectorNodalBC, NodalBCBase, );
 
 template <typename T, ComputeStage compute_stage>
+InputParameters
+ADNodalBCTempl<T, compute_stage>::validParams()
+{
+  InputParameters params = NodalBCBase::validParams();
+  return params;
+}
+
+template <typename T, ComputeStage compute_stage>
 ADNodalBCTempl<T, compute_stage>::ADNodalBCTempl(const InputParameters & parameters)
   : NodalBCBase(parameters),
     MooseVariableInterface<T>(this,

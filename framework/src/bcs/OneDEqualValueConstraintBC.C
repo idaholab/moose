@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", OneDEqualValueConstraintBC);
 
-template <>
+defineLegacyParams(OneDEqualValueConstraintBC);
+
 InputParameters
-validParams<OneDEqualValueConstraintBC>()
+OneDEqualValueConstraintBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
   params.addRequiredParam<unsigned int>("component", "Component of the Lagrange multiplier");
   params.addRequiredParam<Real>(

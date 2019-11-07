@@ -35,6 +35,8 @@ class IntegratedBCBase : public BoundaryCondition,
 public:
   IntegratedBCBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual ~IntegratedBCBase();
 
   virtual void computeResidual() = 0;

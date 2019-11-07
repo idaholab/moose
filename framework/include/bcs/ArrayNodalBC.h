@@ -26,6 +26,8 @@ class ArrayNodalBC : public NodalBCBase, public MooseVariableInterface<RealEigen
 public:
   ArrayNodalBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Gets the variable this BC is active on
    * @return the variable

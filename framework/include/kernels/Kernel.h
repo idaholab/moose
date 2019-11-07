@@ -20,9 +20,9 @@ InputParameters validParams<Kernel>();
 class Kernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:
-  Kernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Kernel(const InputParameters & parameters);
 
   /// Compute this Kernel's contribution to the residual
   virtual void computeResidual() override;

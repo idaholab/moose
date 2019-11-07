@@ -24,6 +24,8 @@ InputParameters validParams<TimeKernel>();
 class TimeKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   TimeKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;

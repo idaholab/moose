@@ -26,10 +26,11 @@ class PostprocessorDirichletBC : public NodalBC
 public:
   PostprocessorDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
   /// The value for this BC
   const PostprocessorValue & _postprocessor_value;
 };
-

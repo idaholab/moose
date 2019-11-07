@@ -28,6 +28,8 @@ InputParameters validParams<EigenKernel>();
 class EigenKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & /*jvar*/) override;
