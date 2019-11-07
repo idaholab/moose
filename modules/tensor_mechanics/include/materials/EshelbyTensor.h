@@ -29,6 +29,8 @@ class EshelbyTensor : public DerivativeMaterialInterface<Material>
 public:
   EshelbyTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
@@ -46,4 +48,3 @@ protected:
   const bool _has_temp;
   const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
 };
-

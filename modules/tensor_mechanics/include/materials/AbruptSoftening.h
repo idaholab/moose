@@ -27,6 +27,8 @@ class AbruptSoftening : public SmearedCrackSofteningBase
 public:
   AbruptSoftening(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,
                                       const Real strain,
@@ -39,4 +41,3 @@ protected:
   /// Residual stress after full softening
   const Real & _residual_stress;
 };
-

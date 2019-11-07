@@ -28,6 +28,8 @@ class ComputeDeformGradBasedStress : public DerivativeMaterialInterface<Material
 public:
   ComputeDeformGradBasedStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -39,4 +41,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };
-

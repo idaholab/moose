@@ -26,6 +26,8 @@ class ComputeDamageStress : public ComputeFiniteStrainElasticStress
 public:
   ComputeDamageStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -37,4 +39,3 @@ protected:
   /// Pointer to the damage model
   DamageBase * _damage_model;
 };
-

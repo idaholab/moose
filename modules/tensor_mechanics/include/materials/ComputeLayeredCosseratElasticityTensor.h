@@ -28,6 +28,8 @@ class ComputeLayeredCosseratElasticityTensor : public ComputeElasticityTensorBas
 public:
   ComputeLayeredCosseratElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpElasticityTensor();
 
@@ -50,4 +52,3 @@ protected:
   /// Compliance tensor (_Eijkl^-1) at the qps
   MaterialProperty<RankFourTensor> & _compliance;
 };
-

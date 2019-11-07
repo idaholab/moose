@@ -22,6 +22,8 @@ class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<c
 public:
   ADViscoplasticityStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void updateState(ADRankTwoTensor & strain_increment,
                            ADRankTwoTensor & inelastic_strain_increment,
                            const ADRankTwoTensor & rotation_increment,

@@ -26,6 +26,8 @@ class ComputeAxisymmetric1DSmallStrain : public Compute1DSmallStrain
 public:
   ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -51,4 +53,3 @@ protected:
   unsigned int _nscalar_strains;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
-

@@ -26,6 +26,8 @@ class ComputeFiniteStrainElasticStress : public ComputeStressBase, public Guaran
 public:
   ComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -48,4 +50,3 @@ protected:
    */
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 };
-

@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeInterfaceStress);
 
-template <>
+defineLegacyParams(ComputeInterfaceStress);
+
 InputParameters
-validParams<ComputeInterfaceStress>()
+ComputeInterfaceStress::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Stress in the plane of an interface defined by the gradient of an order parameter");
   params.addCoupledVar("v",

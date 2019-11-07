@@ -27,6 +27,8 @@ class PowerLawSoftening : public SmearedCrackSofteningBase
 public:
   PowerLawSoftening(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,
                                       const Real strain,
@@ -39,4 +41,3 @@ protected:
   /// Reduction factor applied to the initial stiffness each time a new crack initiates
   const Real & _stiffness_reduction;
 };
-

@@ -23,6 +23,9 @@ class ComputeLinearElasticStress : public ComputeStressBase
 {
 public:
   ComputeLinearElasticStress(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:
@@ -33,4 +36,3 @@ protected:
   /// Elasticity tensor material property
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 };
-

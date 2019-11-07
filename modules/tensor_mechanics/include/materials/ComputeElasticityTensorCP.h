@@ -27,6 +27,8 @@ class ComputeElasticityTensorCP : public ComputeElasticityTensor
 public:
   ComputeElasticityTensorCP(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpElasticityTensor();
 
@@ -46,4 +48,3 @@ protected:
   /// Rotation matrix
   RotationTensor _R;
 };
-

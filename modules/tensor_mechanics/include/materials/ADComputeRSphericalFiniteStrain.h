@@ -28,6 +28,8 @@ class ADComputeRSphericalFiniteStrain : public ADComputeFiniteStrain<compute_sta
 public:
   ADComputeRSphericalFiniteStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup();
 
   /// Computes the current and old deformation gradients with the assumptions for
@@ -40,4 +42,3 @@ protected:
 
   usingComputeFiniteStrainMembers;
 };
-

@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeReducedOrderEigenstrain);
 
-template <>
+defineLegacyParams(ComputeReducedOrderEigenstrain);
+
 InputParameters
-validParams<ComputeReducedOrderEigenstrain>()
+ComputeReducedOrderEigenstrain::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBase>();
+  InputParameters params = ComputeEigenstrainBase::validParams();
   params.addClassDescription("accepts eigenstrains and computes a reduced order eigenstrain for "
                              "consistency in the order of strain and eigenstrains.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(

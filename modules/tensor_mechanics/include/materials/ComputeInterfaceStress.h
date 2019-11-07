@@ -28,6 +28,8 @@ class ComputeInterfaceStress : public Material
 public:
   ComputeInterfaceStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
 
@@ -38,4 +40,3 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
-

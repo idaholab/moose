@@ -33,6 +33,8 @@ class TwoPhaseStressMaterial : public DerivativeMaterialInterface<Material>
 public:
   TwoPhaseStressMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
 
@@ -57,4 +59,3 @@ protected:
   /// Global extra stress tensor
   const MaterialProperty<RankTwoTensor> & _global_extra_stress;
 };
-

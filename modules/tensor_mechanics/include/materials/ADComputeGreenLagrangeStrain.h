@@ -25,9 +25,10 @@ class ADComputeGreenLagrangeStrain : public ADComputeStrainBase<compute_stage>
 public:
   ADComputeGreenLagrangeStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeProperties() override;
 
   usingComputeStrainBaseMembers;
 };
-

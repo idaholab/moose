@@ -27,6 +27,8 @@ class ComputeFiniteBeamStrain : public ComputeIncrementalBeamStrain
 public:
   ComputeFiniteBeamStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   // Compute incremental rotation matrix from the previous time step to the current configuration
   void computeRotation() override;
@@ -34,4 +36,3 @@ protected:
   /// Rotational transformation from the global to beam local coordinate system at time t.
   const MaterialProperty<RankTwoTensor> & _total_rotation_old;
 };
-

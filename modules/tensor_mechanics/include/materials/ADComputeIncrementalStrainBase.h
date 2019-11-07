@@ -37,6 +37,8 @@ class ADComputeIncrementalStrainBase : public ADComputeStrainBase<compute_stage>
 public:
   ADComputeIncrementalStrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -57,4 +59,3 @@ protected:
 
   usingComputeStrainBaseMembers;
 };
-

@@ -26,6 +26,8 @@ class TensileStressUpdate : public MultiParameterPlasticityStressUpdate
 public:
   TensileStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Does the model require the elasticity tensor to be isotropic?
    */
@@ -105,4 +107,3 @@ protected:
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
 };
-

@@ -27,6 +27,8 @@ class ComputeThermalExpansionEigenstrainBeamBase
 public:
   ComputeThermalExpansionEigenstrainBeamBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain() override;
   /*
@@ -47,4 +49,3 @@ protected:
   /// Initial orientation of the beam
   RealGradient _initial_axis;
 };
-

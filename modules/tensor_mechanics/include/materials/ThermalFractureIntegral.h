@@ -30,6 +30,8 @@ class ThermalFractureIntegral : public DerivativeMaterialInterface<Material>
 public:
   ThermalFractureIntegral(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeQpProperties() override;
 
 protected:
@@ -38,4 +40,3 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
   MaterialProperty<RankTwoTensor> & _total_deigenstrain_dT;
 };
-

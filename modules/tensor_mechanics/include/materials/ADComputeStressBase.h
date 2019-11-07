@@ -43,6 +43,8 @@ class ADComputeStressBase : public ADMaterial<compute_stage>
 public:
   ADComputeStressBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;

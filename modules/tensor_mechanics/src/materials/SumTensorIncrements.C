@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", SumTensorIncrements);
 
-template <>
+defineLegacyParams(SumTensorIncrements);
+
 InputParameters
-validParams<SumTensorIncrements>()
+SumTensorIncrements::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute tensor property by summing tensor increments");
   params.addRequiredParam<MaterialPropertyName>("tensor_name", "Name of strain property");
   params.addParam<std::vector<MaterialPropertyName>>("coupled_tensor_increment_names",

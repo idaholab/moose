@@ -31,6 +31,8 @@ class ADComputeFiniteStrain : public ADComputeIncrementalStrainBase<compute_stag
 public:
   ADComputeFiniteStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void computeProperties() override;
 
   static MooseEnum decompositionType();
@@ -53,4 +55,3 @@ private:
 protected:
   usingComputeIncrementalStrainBaseMembers;
 };
-

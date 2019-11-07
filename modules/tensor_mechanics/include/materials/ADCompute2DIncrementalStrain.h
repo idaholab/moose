@@ -35,6 +35,8 @@ class ADCompute2DIncrementalStrain : public ADComputeIncrementalSmallStrain<comp
 public:
   ADCompute2DIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -63,4 +65,3 @@ protected:
 
   usingComputeIncrementalSmallStrainMembers;
 };
-

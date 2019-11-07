@@ -11,16 +11,20 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(ADCompute2DIncrementalStrain,
-                    ADComputeIncrementalSmallStrain,
-                    params.addClassDescription(
-                        "Compute strain increment for incremental strains in 2D geometries.");
+defineADLegacyParams(ADCompute2DIncrementalStrain);
 
-                    MooseEnum outOfPlaneDirection("x y z", "z");
-                    params.addParam<MooseEnum>("out_of_plane_direction",
-                                               outOfPlaneDirection,
-                                               "The direction of the out-of-plane strain.");
-                    return params;);
+template <ComputeStage compute_stage>
+InputParameters
+ADCompute2DIncrementalStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalSmallStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute strain increment for incremental strains in 2D geometries.");
+
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCompute2DIncrementalStrain<compute_stage>::ADCompute2DIncrementalStrain(

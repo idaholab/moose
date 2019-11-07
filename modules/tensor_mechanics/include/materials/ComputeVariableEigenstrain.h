@@ -26,6 +26,8 @@ class ComputeVariableEigenstrain : public DerivativeMaterialInterface<ComputeEig
 public:
   ComputeVariableEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain();
 
@@ -42,4 +44,3 @@ protected:
   /// second derivatives of the elastic strain w.r.t. to the args
   std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
-

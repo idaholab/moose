@@ -29,6 +29,8 @@ class ComputeCrackedStress : public DerivativeMaterialInterface<Material>
 public:
   ComputeCrackedStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
   virtual void initQpStatefulProperties();
@@ -90,4 +92,3 @@ protected:
   /// Property where the value for L will be defined
   MaterialProperty<Real> & _L;
 };
-

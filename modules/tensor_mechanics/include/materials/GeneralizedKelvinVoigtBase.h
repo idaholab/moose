@@ -37,6 +37,8 @@ class GeneralizedKelvinVoigtBase : public LinearViscoelasticityBase
 public:
   GeneralizedKelvinVoigtBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
@@ -47,4 +49,3 @@ protected:
   const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_inv_old;
   ///@}
 };
-

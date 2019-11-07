@@ -27,6 +27,8 @@ class GeneralizedKelvinVoigtModel : public GeneralizedKelvinVoigtBase
 public:
   GeneralizedKelvinVoigtModel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpViscoelasticProperties();
   virtual void computeQpViscoelasticPropertiesInv();
@@ -46,4 +48,3 @@ protected:
   /// The inverse of each subsequent spring elasticity tensor
   std::vector<RankFourTensor> _Si;
 };
-

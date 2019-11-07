@@ -28,6 +28,8 @@ class ComputeVolumetricEigenstrain : public DerivativeMaterialInterface<ComputeE
 public:
   ComputeVolumetricEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initialSetup();
   virtual void computeQpEigenstrain();
@@ -50,4 +52,3 @@ protected:
   /// second derivatives of the elastic strain with respect to the args
   std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
-

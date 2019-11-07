@@ -33,6 +33,8 @@ class ADCompute1DSmallStrain : public ADComputeSmallStrain<compute_stage>
 public:
   ADCompute1DSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void computeProperties() override;
 
 protected:
@@ -46,4 +48,3 @@ protected:
 
   usingComputeSmallStrainMembers;
 };
-

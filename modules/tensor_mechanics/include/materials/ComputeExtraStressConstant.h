@@ -25,6 +25,8 @@ class ComputeExtraStressConstant : public ComputeExtraStressBase
 public:
   ComputeExtraStressConstant(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpExtraStress();
 
@@ -32,4 +34,3 @@ protected:
 
   RankTwoTensor _extra_stress_tensor;
 };
-

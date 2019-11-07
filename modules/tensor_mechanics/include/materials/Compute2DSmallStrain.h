@@ -27,6 +27,8 @@ class Compute2DSmallStrain : public ComputeSmallStrain
 public:
   Compute2DSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -36,4 +38,3 @@ protected:
 
   const unsigned int _out_of_plane_direction;
 };
-

@@ -11,11 +11,12 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(ComputeStrainBase);
+
 InputParameters
-validParams<ComputeStrainBase>()
+ComputeStrainBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");

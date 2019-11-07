@@ -21,6 +21,8 @@ class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
 public:
   FiniteStrainCPSlipRateRes(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * This function solves internal variables.
@@ -95,4 +97,3 @@ protected:
   DenseMatrix<Real> _jacob;
   DenseMatrix<Real> _dsliprate_dsliprate;
 };
-

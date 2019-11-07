@@ -24,6 +24,8 @@ class ComputeFiniteStrain : public ComputeIncrementalStrainBase
 public:
   ComputeFiniteStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void computeProperties() override;
 
   static MooseEnum decompositionType();
@@ -43,4 +45,3 @@ private:
 
   const DecompMethod _decomposition_method;
 };
-

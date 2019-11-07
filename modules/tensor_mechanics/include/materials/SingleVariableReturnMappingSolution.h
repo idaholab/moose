@@ -27,6 +27,8 @@ public:
   SingleVariableReturnMappingSolution(const InputParameters & parameters);
   virtual ~SingleVariableReturnMappingSolution() {}
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Perform the return mapping iterations

@@ -28,6 +28,8 @@ class GeneralizedMaxwellModel : public GeneralizedMaxwellBase
 public:
   GeneralizedMaxwellModel(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpViscoelasticProperties();
   virtual void computeQpViscoelasticPropertiesInv();
@@ -47,4 +49,3 @@ protected:
   /// The inverse of each subsequent spring elasticity tensor
   std::vector<RankFourTensor> _Si;
 };
-

@@ -25,6 +25,8 @@ class ScalarDamageBase : public DamageBase
 public:
   ScalarDamageBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initQpStatefulProperties() override;
 
   virtual void updateDamage() override;

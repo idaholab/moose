@@ -25,6 +25,8 @@ class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
 public:
   ComputeIncrementalSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeProperties() override;
 
 protected:
@@ -32,4 +34,3 @@ protected:
   /// total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 };
-

@@ -32,6 +32,8 @@ class ComputeMultiPlasticityStress : public ComputeStressBase, public MultiPlast
 public:
   ComputeMultiPlasticityStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
@@ -591,4 +593,3 @@ protected:
 private:
   RankTwoTensor rot(const RankTwoTensor & tens);
 };
-

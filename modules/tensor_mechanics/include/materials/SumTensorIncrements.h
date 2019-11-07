@@ -26,6 +26,8 @@ class SumTensorIncrements : public DerivativeMaterialInterface<Material>
 public:
   SumTensorIncrements(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -39,4 +41,3 @@ protected:
 
   std::vector<const MaterialProperty<RankTwoTensor> *> _coupled_tensor_increments;
 };
-

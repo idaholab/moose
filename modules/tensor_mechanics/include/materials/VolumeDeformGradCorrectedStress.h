@@ -29,6 +29,8 @@ class VolumeDeformGradCorrectedStress : public DerivativeMaterialInterface<Mater
 public:
   VolumeDeformGradCorrectedStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -41,4 +43,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> * _Jacobian_mult;
 };
-

@@ -28,6 +28,8 @@ class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 public:
   ComputeStrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -53,4 +55,3 @@ protected:
   const bool _volumetric_locking_correction;
   const Real & _current_elem_volume;
 };
-

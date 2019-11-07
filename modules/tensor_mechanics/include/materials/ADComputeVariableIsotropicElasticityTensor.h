@@ -28,6 +28,8 @@ class ADComputeVariableIsotropicElasticityTensor
 public:
   ADComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpElasticityTensor() override;
 

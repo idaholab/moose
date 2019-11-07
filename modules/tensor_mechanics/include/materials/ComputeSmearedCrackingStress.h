@@ -28,6 +28,8 @@ class ComputeSmearedCrackingStress : public ComputeMultipleInelasticStress
 public:
   ComputeSmearedCrackingStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
@@ -159,4 +161,3 @@ protected:
   /// The user-supplied list of softening models to be used in the 3 crack directions
   std::vector<SmearedCrackSofteningBase *> _softening_models;
 };
-

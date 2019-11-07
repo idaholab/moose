@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainHyperElasticViscoPlastic);
 
-template <>
+defineLegacyParams(FiniteStrainHyperElasticViscoPlastic);
+
 InputParameters
-validParams<FiniteStrainHyperElasticViscoPlastic>()
+FiniteStrainHyperElasticViscoPlastic::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addParam<Real>(
       "resid_abs_tol", 1e-10, "Absolute Tolerance for flow rate residual equation");
   params.addParam<Real>(

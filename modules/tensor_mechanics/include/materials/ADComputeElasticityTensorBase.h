@@ -39,6 +39,8 @@ class ADComputeElasticityTensorBase : public ADMaterial<compute_stage>,
 public:
   ADComputeElasticityTensorBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
   virtual void computeQpElasticityTensor() = 0;

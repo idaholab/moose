@@ -32,6 +32,8 @@ class CappedWeakInclinedPlaneStressUpdate : public CappedWeakPlaneStressUpdate
 public:
   CappedWeakInclinedPlaneStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Does the model require the elasticity tensor to be isotropic?
    */
@@ -102,4 +104,3 @@ protected:
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
-

@@ -27,6 +27,8 @@ class FluxBasedStrainIncrement : public DerivativeMaterialInterface<Material>
 public:
   FluxBasedStrainIncrement(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -45,4 +47,3 @@ protected:
 
   RankTwoTensor _flux_grad_tensor;
 };
-

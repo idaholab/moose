@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeIsotropicElasticityTensor);
 
-template <>
+defineLegacyParams(ComputeIsotropicElasticityTensor);
+
 InputParameters
-validParams<ComputeIsotropicElasticityTensor>()
+ComputeIsotropicElasticityTensor::validParams()
 {
-  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription("Compute a constant isotropic elasticity tensor.");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first constant for the material.");

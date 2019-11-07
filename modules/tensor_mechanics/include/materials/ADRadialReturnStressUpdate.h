@@ -46,6 +46,8 @@ class ADRadialReturnStressUpdate : public ADStressUpdateBase<compute_stage>,
 public:
   ADRadialReturnStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * A radial return (J2) mapping method is performed with return mapping
    * iterations.

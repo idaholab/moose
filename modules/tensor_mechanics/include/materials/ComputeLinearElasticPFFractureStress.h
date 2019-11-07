@@ -29,6 +29,8 @@ class ComputeLinearElasticPFFractureStress : public ComputePFFractureStressBase,
 public:
   ComputeLinearElasticPFFractureStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -64,4 +66,3 @@ protected:
     none
   } _decomposition_type;
 };
-

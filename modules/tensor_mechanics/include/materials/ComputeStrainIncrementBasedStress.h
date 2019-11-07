@@ -24,6 +24,8 @@ class ComputeStrainIncrementBasedStress : public ComputeStressBase
 public:
   ComputeStrainIncrementBasedStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpStress();
   virtual void computeQpJacobian();
@@ -48,4 +50,3 @@ protected:
   /// Number of inelastic models
   unsigned int _num_inelastic_strain_models;
 };
-

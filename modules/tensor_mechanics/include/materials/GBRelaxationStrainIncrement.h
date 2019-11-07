@@ -27,6 +27,8 @@ class GBRelaxationStrainIncrement : public DerivativeMaterialInterface<Material>
 public:
   GBRelaxationStrainIncrement(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -35,4 +37,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _gb_normal_tensor;
   MaterialProperty<RankTwoTensor> & _strain_increment;
 };
-

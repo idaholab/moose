@@ -36,6 +36,8 @@ class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableR
 public:
   RadialReturnStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * A radial return (J2) mapping method is performed with return mapping
    * iterations.
@@ -144,4 +146,3 @@ protected:
    */
   const RankFourTensor _deviatoric_projection_four;
 };
-

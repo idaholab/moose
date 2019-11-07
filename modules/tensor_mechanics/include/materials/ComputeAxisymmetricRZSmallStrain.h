@@ -25,9 +25,10 @@ class ComputeAxisymmetricRZSmallStrain : public Compute2DSmallStrain
 public:
   ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:
   virtual Real computeOutOfPlaneStrain() override;
 };
-

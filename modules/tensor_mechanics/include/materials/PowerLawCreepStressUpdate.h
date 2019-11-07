@@ -31,6 +31,8 @@ class PowerLawCreepStressUpdate : public RadialReturnCreepStressUpdateBase
 public:
   PowerLawCreepStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
@@ -67,4 +69,3 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 };
-

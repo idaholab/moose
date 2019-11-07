@@ -35,6 +35,8 @@ class FiniteStrainHyperElasticViscoPlastic : public ComputeStressBase
 public:
   FiniteStrainHyperElasticViscoPlastic(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    *  This function initializes the properties, stateful properties and user objects
@@ -243,4 +245,3 @@ protected:
 
   Real _dt_substep;
 };
-

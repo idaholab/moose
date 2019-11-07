@@ -29,6 +29,8 @@ class ComputeIncrementalBeamStrain : public Material
 public:
   ComputeIncrementalBeamStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeProperties() override;
 
 protected:

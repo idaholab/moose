@@ -28,6 +28,8 @@ class ComputeEigenstrainBase : public Material
 public:
   ComputeEigenstrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -57,4 +59,3 @@ protected:
   /// Restartable data to check for the zeroth and first time steps for thermal calculations
   bool & _step_zero;
 };
-

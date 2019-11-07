@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(Compute1DIncrementalStrain);
+
 InputParameters
-validParams<Compute1DIncrementalStrain>()
+Compute1DIncrementalStrain::validParams()
 {
-  InputParameters params = validParams<ComputeIncrementalSmallStrain>();
+  InputParameters params = ComputeIncrementalSmallStrain::validParams();
   params.addClassDescription("Compute strain increment for small strains in 1D problems.");
 
   return params;

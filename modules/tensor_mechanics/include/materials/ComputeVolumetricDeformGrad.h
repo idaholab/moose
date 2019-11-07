@@ -28,6 +28,8 @@ class ComputeVolumetricDeformGrad : public DerivativeMaterialInterface<Material>
 public:
   ComputeVolumetricDeformGrad(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -37,4 +39,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _volumetric_deform_grad;
   MaterialProperty<RankTwoTensor> & _post_deform_grad;
 };
-

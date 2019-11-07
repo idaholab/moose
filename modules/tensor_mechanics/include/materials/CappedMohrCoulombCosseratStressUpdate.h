@@ -30,6 +30,8 @@ class CappedMohrCoulombCosseratStressUpdate : public CappedMohrCoulombStressUpda
 public:
   CappedMohrCoulombCosseratStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * The full elasticity tensor may be anisotropic, and usually is in the case
    * of layered Cosserat.  However, this class only uses the isotropic parts of
@@ -78,4 +80,3 @@ protected:
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
 };
-

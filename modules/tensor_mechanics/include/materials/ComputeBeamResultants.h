@@ -26,6 +26,8 @@ class ComputeBeamResultants : public Material
 public:
   ComputeBeamResultants(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
   virtual void initQpStatefulProperties() override;
@@ -57,4 +59,3 @@ protected:
   /// Old force vector in global coordinate system
   const MaterialProperty<RealVectorValue> & _moment_old;
 };
-

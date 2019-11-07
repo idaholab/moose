@@ -28,6 +28,8 @@ class ADComputeEigenstrain : public ADComputeEigenstrainBase<compute_stage>
 public:
   ADComputeEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain() override;
 
@@ -37,4 +39,3 @@ protected:
 
   usingComputeEigenstrainBaseMembers;
 };
-

@@ -27,6 +27,8 @@ class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
 public:
   ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:
@@ -37,4 +39,3 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
-

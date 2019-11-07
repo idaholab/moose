@@ -25,6 +25,8 @@ class ComputeEigenstrainBeamFromVariable : public ComputeEigenstrainBeamBase
 public:
   ComputeEigenstrainBeamFromVariable(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain() override;
 
@@ -40,4 +42,3 @@ protected:
   /// Rotational eigenstrain variable values
   std::vector<const VariableValue *> _rot;
 };
-

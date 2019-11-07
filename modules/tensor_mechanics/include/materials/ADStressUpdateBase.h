@@ -53,6 +53,8 @@ class ADStressUpdateBase : public ADMaterial<compute_stage>
 public:
   ADStressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Given a strain increment that results in a trial stress, perform some
    * procedure (such as an iterative return-mapping process) to produce
@@ -108,4 +110,3 @@ protected:
 
   usingMaterialMembers;
 };
-

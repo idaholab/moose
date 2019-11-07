@@ -27,6 +27,8 @@ class ComputeEigenstrain : public ComputeEigenstrainBase
 public:
   ComputeEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain();
 
@@ -34,4 +36,3 @@ protected:
 
   RankTwoTensor _eigen_base_tensor;
 };
-

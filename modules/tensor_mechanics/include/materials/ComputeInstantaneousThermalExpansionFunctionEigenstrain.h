@@ -27,6 +27,8 @@ class ComputeInstantaneousThermalExpansionFunctionEigenstrain
 public:
   ComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;

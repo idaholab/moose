@@ -29,6 +29,8 @@ class TemperatureDependentHardeningStressUpdate : public IsotropicPlasticityStre
 public:
   TemperatureDependentHardeningStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeStressInitialize(const Real effectiveTrialStress,
                                        const RankFourTensor & elasticity_tensor) override;

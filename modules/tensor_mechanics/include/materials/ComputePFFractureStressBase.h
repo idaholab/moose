@@ -24,6 +24,8 @@ class ComputePFFractureStressBase : public ComputeStressBase
 public:
   ComputePFFractureStressBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
 
@@ -77,4 +79,3 @@ protected:
   /// Second-order derivative of degradation w.r.t damage variable
   const MaterialProperty<Real> & _d2Dd2c;
 };
-

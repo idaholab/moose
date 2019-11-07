@@ -10,11 +10,12 @@
 #include "ScalarDamageBase.h"
 #include "MooseUtils.h"
 
-template <>
+defineLegacyParams(ScalarDamageBase);
+
 InputParameters
-validParams<ScalarDamageBase>()
+ScalarDamageBase::validParams()
 {
-  InputParameters params = validParams<DamageBase>();
+  InputParameters params = DamageBase::validParams();
   params.addClassDescription("Base class for damage model based on a scalar damage parameter");
   params.addParam<bool>(
       "use_old_damage",

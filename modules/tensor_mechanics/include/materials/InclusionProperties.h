@@ -30,6 +30,8 @@ class InclusionProperties : public Material
 public:
   InclusionProperties(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
   virtual void precomputeInteriorProperties();
@@ -64,4 +66,3 @@ private:
   MaterialProperty<RankTwoTensor> & _strain;
   MaterialProperty<Real> & _elastic_energy;
 };
-

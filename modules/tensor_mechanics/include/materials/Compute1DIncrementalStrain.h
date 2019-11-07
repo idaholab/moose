@@ -27,6 +27,8 @@ class Compute1DIncrementalStrain : public ComputeIncrementalSmallStrain
 public:
   Compute1DIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Computes the current and old deformation gradients with the assumptions for
@@ -58,4 +60,3 @@ protected:
    */
   virtual Real computeGradDispZZOld() = 0;
 };
-

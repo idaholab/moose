@@ -30,6 +30,8 @@ class ComputeThermalExpansionEigenstrainBase
 public:
   ComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain() override;
   /*
@@ -48,4 +50,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
   const VariableValue & _stress_free_temperature;
 };
-

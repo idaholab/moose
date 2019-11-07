@@ -24,6 +24,8 @@ class ComputeCosseratStressBase : public ComputeStressBase
 public:
   ComputeCosseratStressBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpStress() = 0;
@@ -40,4 +42,3 @@ protected:
   /// derivative of couple-stress w.r.t. curvature
   MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 };
-

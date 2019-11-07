@@ -27,6 +27,8 @@ class HyperElasticPhaseFieldIsoDamage : public FiniteStrainHyperElasticViscoPlas
 public:
   HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /// This function computes PK2 stress
   virtual void computePK2StressAndDerivative();
@@ -80,4 +82,3 @@ protected:
   /// Old value of history variable
   const MaterialProperty<Real> & _hist_old;
 };
-

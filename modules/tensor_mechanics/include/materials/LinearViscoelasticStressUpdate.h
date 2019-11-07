@@ -32,6 +32,8 @@ class LinearViscoelasticStressUpdate : public StressUpdateBase
 public:
   LinearViscoelasticStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Computes the new creep strain, and removes the creep contribution from the elastic strains and
    * stress. The tangent_operator is set equal to the elasticity tensor of the material.
@@ -66,4 +68,3 @@ protected:
   /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
-

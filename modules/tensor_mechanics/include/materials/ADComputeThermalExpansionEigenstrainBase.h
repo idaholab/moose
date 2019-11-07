@@ -38,6 +38,8 @@ class ADComputeThermalExpansionEigenstrainBase : public ADComputeEigenstrainBase
 public:
   ADComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain() override;
 
@@ -59,4 +61,3 @@ protected:
 
   usingComputeEigenstrainBaseMembers;
 };
-

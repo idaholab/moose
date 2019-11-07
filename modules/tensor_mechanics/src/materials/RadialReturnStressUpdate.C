@@ -12,16 +12,17 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 
-template <>
+defineLegacyParams(RadialReturnStressUpdate);
+
 InputParameters
-validParams<RadialReturnStressUpdate>()
+RadialReturnStressUpdate::validParams()
 {
-  InputParameters params = validParams<StressUpdateBase>();
+  InputParameters params = StressUpdateBase::validParams();
   params.addClassDescription("Calculates the effective inelastic strain increment required to "
                              "return the isotropic stress state to a J2 yield surface.  This class "
                              "is intended to be a parent class for classes with specific "
                              "constitutive models.");
-  params += validParams<SingleVariableReturnMappingSolution>();
+  params += SingleVariableReturnMappingSolution::validParams();
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");

@@ -28,6 +28,8 @@ class FiniteStrainCrystalPlasticity : public ComputeStressBase
 public:
   FiniteStrainCrystalPlasticity(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * This function updates the stress at a quadrature point.
@@ -355,4 +357,3 @@ protected:
   ///Flags to reset variables and reinitialize variables
   bool _first_step_iter, _last_step_iter, _first_substep;
 };
-

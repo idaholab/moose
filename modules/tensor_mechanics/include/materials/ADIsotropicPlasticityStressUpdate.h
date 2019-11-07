@@ -51,6 +51,8 @@ class ADIsotropicPlasticityStressUpdate : public ADRadialReturnStressUpdate<comp
 public:
   ADIsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;

@@ -11,11 +11,12 @@
 
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(StressUpdateBase);
+
 InputParameters
-validParams<StressUpdateBase>()
+StressUpdateBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Calculates an admissible state (stress that lies on or within the "
                              "yield surface, plastic strains, internal parameters, etc).  This "
                              "class is intended to be a parent class for classes with specific "

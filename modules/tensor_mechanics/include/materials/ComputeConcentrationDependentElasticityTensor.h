@@ -25,6 +25,8 @@ class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElast
 public:
   ComputeConcentrationDependentElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpElasticityTensor();
 
@@ -39,4 +41,3 @@ protected:
   /// Derivative of elasticity tensor with respect to concentration.
   MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
 };
-

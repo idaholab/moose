@@ -56,6 +56,8 @@ class CappedDruckerPragerCosseratStressUpdate : public CappedDruckerPragerStress
 public:
   CappedDruckerPragerCosseratStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Does the model require the elasticity tensor to be isotropic?
    */
@@ -91,4 +93,3 @@ protected:
                                          bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 };
-

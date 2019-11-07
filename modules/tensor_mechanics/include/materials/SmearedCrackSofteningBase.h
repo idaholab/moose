@@ -30,6 +30,8 @@ class SmearedCrackSofteningBase : public Material
 public:
   SmearedCrackSofteningBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Compute the effect of the cracking release model on the stress
    * and stiffness in the direction of a single crack.
@@ -56,4 +58,3 @@ public:
   void resetProperties() final {}
   ///@}
 };
-

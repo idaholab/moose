@@ -27,6 +27,8 @@ class ADComputeAxisymmetricRZIncrementalStrain : public ADCompute2DIncrementalSt
 public:
   ADComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -39,4 +41,3 @@ protected:
 
   usingCompute2DIncrementalStrainMembers;
 };
-

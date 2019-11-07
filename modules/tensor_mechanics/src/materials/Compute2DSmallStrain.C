@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(Compute2DSmallStrain);
+
 InputParameters
-validParams<Compute2DSmallStrain>()
+Compute2DSmallStrain::validParams()
 {
-  InputParameters params = validParams<ComputeSmallStrain>();
+  InputParameters params = ComputeSmallStrain::validParams();
   params.addClassDescription("Compute a small strain in a plane strain configuration.");
 
   MooseEnum outOfPlaneDirection("x y z", "z");

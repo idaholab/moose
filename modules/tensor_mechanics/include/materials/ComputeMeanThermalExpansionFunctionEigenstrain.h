@@ -26,6 +26,8 @@ class ComputeMeanThermalExpansionFunctionEigenstrain
 public:
   ComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /*
    * Get the reference temperature for the mean thermal expansion relationship.  This is

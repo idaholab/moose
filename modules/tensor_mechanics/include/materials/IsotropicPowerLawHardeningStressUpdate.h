@@ -38,6 +38,8 @@ class IsotropicPowerLawHardeningStressUpdate : public IsotropicPlasticityStressU
 public:
   IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
@@ -57,4 +59,3 @@ protected:
 
   Real getIsotropicLameLambda(const RankFourTensor & elasticity_tensor);
 };
-

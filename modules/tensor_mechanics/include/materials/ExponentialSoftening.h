@@ -27,6 +27,8 @@ class ExponentialSoftening : public SmearedCrackSofteningBase
 public:
   ExponentialSoftening(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,
                                       const Real strain,
@@ -48,4 +50,3 @@ protected:
   /// Multiplier on alpha to determine the initial softening slope
   const Real & _beta;
 };
-

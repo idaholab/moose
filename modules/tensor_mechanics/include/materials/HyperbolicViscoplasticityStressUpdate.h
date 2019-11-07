@@ -35,6 +35,8 @@ class HyperbolicViscoplasticityStressUpdate : public RadialReturnStressUpdate
 public:
   HyperbolicViscoplasticityStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
@@ -77,4 +79,3 @@ protected:
   /// old value of plastic strain
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 };
-

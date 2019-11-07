@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeSmearedCrackingStress);
 
-template <>
+defineLegacyParams(ComputeSmearedCrackingStress);
+
 InputParameters
-validParams<ComputeSmearedCrackingStress>()
+ComputeSmearedCrackingStress::validParams()
 {
-  InputParameters params = validParams<ComputeMultipleInelasticStress>();
+  InputParameters params = ComputeMultipleInelasticStress::validParams();
   params.addClassDescription("Compute stress using a fixed smeared cracking model");
   MooseEnum cracking_release("abrupt exponential power", "abrupt");
   params.addDeprecatedParam<MooseEnum>(

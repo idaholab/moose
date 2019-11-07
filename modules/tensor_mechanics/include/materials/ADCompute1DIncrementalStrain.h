@@ -35,6 +35,8 @@ class ADCompute1DIncrementalStrain : public ADComputeIncrementalSmallStrain<comp
 public:
   ADCompute1DIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Computes the current and old deformation gradients with the assumptions for
@@ -68,4 +70,3 @@ protected:
 
   usingComputeIncrementalSmallStrainMembers;
 };
-

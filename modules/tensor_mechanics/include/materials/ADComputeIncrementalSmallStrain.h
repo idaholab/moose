@@ -30,6 +30,8 @@ class ADComputeIncrementalSmallStrain : public ADComputeIncrementalStrainBase<co
 public:
   ADComputeIncrementalSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeProperties() override;
 
 protected:
@@ -41,4 +43,3 @@ protected:
 
   usingComputeIncrementalStrainBaseMembers;
 };
-

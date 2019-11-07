@@ -27,6 +27,8 @@ class ComputePlaneSmallStrain : public Compute2DSmallStrain
 public:
   ComputePlaneSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeOutOfPlaneStrain();
 
@@ -46,4 +48,3 @@ private:
   unsigned int _nscalar_strains;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
-

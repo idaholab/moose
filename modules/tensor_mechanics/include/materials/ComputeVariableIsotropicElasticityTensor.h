@@ -26,6 +26,8 @@ class ComputeVariableIsotropicElasticityTensor : public ComputeElasticityTensorB
 public:
   ComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
@@ -58,4 +60,3 @@ protected:
   /// Vector of elastic constants to create the elasticity tensor (member to avoid memory churn)
   std::vector<Real> _isotropic_elastic_constants;
 };
-

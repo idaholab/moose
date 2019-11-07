@@ -9,11 +9,12 @@
 
 #include "ComputeThermalExpansionEigenstrainBeamBase.h"
 
-template <>
+defineLegacyParams(ComputeThermalExpansionEigenstrainBeamBase);
+
 InputParameters
-validParams<ComputeThermalExpansionEigenstrainBeamBase>()
+ComputeThermalExpansionEigenstrainBeamBase::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBeamBase>();
+  InputParameters params = ComputeEigenstrainBeamBase::validParams();
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addRequiredCoupledVar("stress_free_temperature",
                                "Reference temperature at which there is no "

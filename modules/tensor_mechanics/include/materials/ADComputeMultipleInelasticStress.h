@@ -58,6 +58,8 @@ class ADComputeMultipleInelasticStress : public ADComputeFiniteStrainElasticStre
 public:
   ADComputeMultipleInelasticStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:

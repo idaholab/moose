@@ -13,14 +13,20 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
 
-defineADValidParams(ADComputeEigenstrain,
-                    ADComputeEigenstrainBase,
-                    params.addClassDescription("Computes a constant Eigenstrain");
-                    params.addRequiredParam<std::vector<Real>>(
-                        "eigen_base",
-                        "Vector of values defining the constant base tensor for the Eigenstrain");
-                    params.addParam<MaterialPropertyName>(
-                        "prefactor", 1.0, "Name of material defining the variable dependence"););
+defineADLegacyParams(ADComputeEigenstrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeEigenstrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeEigenstrainBase<compute_stage>::validParams();
+  params.addClassDescription("Computes a constant Eigenstrain");
+  params.addRequiredParam<std::vector<Real>>(
+      "eigen_base", "Vector of values defining the constant base tensor for the Eigenstrain");
+  params.addParam<MaterialPropertyName>(
+      "prefactor", 1.0, "Name of material defining the variable dependence");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeEigenstrain<compute_stage>::ADComputeEigenstrain(const InputParameters & parameters)

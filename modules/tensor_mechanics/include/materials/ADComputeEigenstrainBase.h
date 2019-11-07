@@ -37,6 +37,8 @@ class ADComputeEigenstrainBase : public ADMaterial<compute_stage>
 public:
   ADComputeEigenstrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
@@ -68,4 +70,3 @@ protected:
 
   usingMaterialMembers;
 };
-

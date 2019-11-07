@@ -32,6 +32,8 @@ class ADRadialReturnCreepStressUpdateBase : public ADRadialReturnStressUpdate<co
 public:
   ADRadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
@@ -43,4 +45,3 @@ protected:
 
   usingRadialReturnStressUpdateMembers;
 };
-

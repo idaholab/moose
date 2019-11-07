@@ -28,6 +28,8 @@ class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
 public:
   ComputeElasticityTensorBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
   virtual void computeQpElasticityTensor() = 0;

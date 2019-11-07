@@ -28,6 +28,8 @@ class StressBasedChemicalPotential : public DerivativeMaterialInterface<Material
 public:
   StressBasedChemicalPotential(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -41,4 +43,3 @@ protected:
   const MaterialProperty<Real> * _dprefactor_dc;
   bool _has_coupled_c;
 };
-

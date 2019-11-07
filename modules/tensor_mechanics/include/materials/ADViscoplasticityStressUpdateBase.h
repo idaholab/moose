@@ -41,6 +41,8 @@ class ADViscoplasticityStressUpdateBase
 public:
   ADViscoplasticityStressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
                                         const ADReal & scalar_effective_inelastic_strain) override;
 

@@ -16,11 +16,17 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalIncrementalStrain);
 
-defineADValidParams(
-    ADComputeRSphericalIncrementalStrain,
-    ADComputeIncrementalSmallStrain,
-    params.addClassDescription(
-        "Compute a strain increment for incremental strains in 1D spherical symmetry problems."););
+defineADLegacyParams(ADComputeRSphericalIncrementalStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeRSphericalIncrementalStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalSmallStrain<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute a strain increment for incremental strains in 1D spherical symmetry problems.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeRSphericalIncrementalStrain<compute_stage>::ADComputeRSphericalIncrementalStrain(

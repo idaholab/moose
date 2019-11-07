@@ -25,6 +25,8 @@ class CombinedScalarDamage : public ScalarDamageBase
 public:
   CombinedScalarDamage(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -43,4 +45,3 @@ protected:
 
   std::vector<ScalarDamageBase *> _damage_models;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeFiniteStrainElasticStress);
 
-template <>
+defineLegacyParams(ComputeFiniteStrainElasticStress);
+
 InputParameters
-validParams<ComputeFiniteStrainElasticStress>()
+ComputeFiniteStrainElasticStress::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Compute stress using elasticity for finite strains");
   return params;
 }

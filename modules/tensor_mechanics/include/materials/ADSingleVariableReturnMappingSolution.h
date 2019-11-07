@@ -45,6 +45,8 @@ public:
   ADSingleVariableReturnMappingSolution(const InputParameters & parameters);
   virtual ~ADSingleVariableReturnMappingSolution() {}
 
+  static InputParameters validParams();
+
 protected:
   /**
    * Perform the return mapping iterations

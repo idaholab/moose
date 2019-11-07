@@ -21,14 +21,20 @@ ADComputeFiniteStrain<compute_stage>::decompositionType()
 
 registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
 
-defineADValidParams(
-    ADComputeFiniteStrain,
-    ADComputeIncrementalStrainBase,
-    params.addClassDescription(
-        "Compute a strain increment and rotation increment for finite strains.");
-    params.addParam<MooseEnum>("decomposition_method",
-                               ADComputeFiniteStrain<RESIDUAL>::decompositionType(),
-                               "Methods to calculate the strain and rotation increments"););
+defineADLegacyParams(ADComputeFiniteStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeFiniteStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalStrainBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for finite strains.");
+  params.addParam<MooseEnum>("decomposition_method",
+                             ADComputeFiniteStrain<RESIDUAL>::decompositionType(),
+                             "Methods to calculate the strain and rotation increments");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeFiniteStrain<compute_stage>::ADComputeFiniteStrain(const InputParameters & parameters)

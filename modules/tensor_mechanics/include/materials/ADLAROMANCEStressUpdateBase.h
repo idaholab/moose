@@ -36,6 +36,8 @@ class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<c
 public:
   ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initialSetup() override;
 

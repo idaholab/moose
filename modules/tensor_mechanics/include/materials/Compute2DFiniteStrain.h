@@ -27,6 +27,9 @@ class Compute2DFiniteStrain : public ComputeFiniteStrain
 {
 public:
   Compute2DFiniteStrain(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   void initialSetup() override;
 
   virtual void computeProperties() override;
@@ -48,4 +51,3 @@ protected:
 
   const unsigned int _out_of_plane_direction;
 };
-

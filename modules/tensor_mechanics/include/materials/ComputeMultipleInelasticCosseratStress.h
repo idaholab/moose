@@ -40,6 +40,8 @@ class ComputeMultipleInelasticCosseratStress : public ComputeMultipleInelasticSt
 public:
   ComputeMultipleInelasticCosseratStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
@@ -74,4 +76,3 @@ protected:
   /// Inverse of the elasticity tensor
   const MaterialProperty<RankFourTensor> & _compliance;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedMaxwellModel);
 
-template <>
+defineLegacyParams(GeneralizedMaxwellModel);
+
 InputParameters
-validParams<GeneralizedMaxwellModel>()
+GeneralizedMaxwellModel::validParams()
 {
-  InputParameters params = validParams<GeneralizedMaxwellBase>();
+  InputParameters params = GeneralizedMaxwellBase::validParams();
   params.addClassDescription(
       "Generalized Maxwell model composed of a parallel assembly of unit Maxwell modules");
   params.addRequiredParam<Real>("young_modulus", "initial elastic modulus of the material");

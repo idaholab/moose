@@ -39,6 +39,8 @@ class IsotropicPlasticityStressUpdate : public RadialReturnStressUpdate
 public:
   IsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;

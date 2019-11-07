@@ -26,9 +26,10 @@ class ComputeThermalExpansionEigenstrain : public ComputeThermalExpansionEigenst
 public:
   ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
 
   const Real & _thermal_expansion_coeff;
 };
-

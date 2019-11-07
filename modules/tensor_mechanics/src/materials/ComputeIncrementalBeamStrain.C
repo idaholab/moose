@@ -19,11 +19,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeIncrementalBeamStrain);
 
-template <>
+defineLegacyParams(ComputeIncrementalBeamStrain);
+
 InputParameters
-validParams<ComputeIncrementalBeamStrain>()
+ComputeIncrementalBeamStrain::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a infinitesimal/large strain increment for the beam.");
   params.addRequiredCoupledVar(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");

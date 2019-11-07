@@ -31,6 +31,8 @@ class FiniteStrainPlasticMaterial : public ComputeStressBase
 public:
   FiniteStrainPlasticMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
@@ -138,4 +140,3 @@ protected:
    */
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
 };
-

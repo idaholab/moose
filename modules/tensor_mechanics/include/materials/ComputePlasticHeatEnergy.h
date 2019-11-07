@@ -28,6 +28,8 @@ class ComputePlasticHeatEnergy : public DerivativeMaterialInterface<Material>
 public:
   ComputePlasticHeatEnergy(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
 
@@ -55,4 +57,3 @@ protected:
   /// d(plastic_heat)/d(total strain)
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
 };
-

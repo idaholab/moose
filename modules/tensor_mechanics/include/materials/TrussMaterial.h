@@ -22,6 +22,8 @@ class TrussMaterial : public Material
 public:
   TrussMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeProperties();
@@ -44,4 +46,3 @@ protected:
   Real _origin_length;
   Real _current_length;
 };
-

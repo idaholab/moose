@@ -32,6 +32,8 @@ class ComputeLinearViscoelasticStress : public ComputeLinearElasticStress
 public:
   ComputeLinearViscoelasticStress(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
@@ -48,4 +50,3 @@ protected:
   /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
-

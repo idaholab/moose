@@ -31,6 +31,8 @@ class CompositeElasticityTensor : public CompositeTensorBase<RankFourTensor, Mat
 public:
   CompositeElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   void computeQpProperties();
 
@@ -39,4 +41,3 @@ protected:
 
   MaterialProperty<RankFourTensor> & _M;
 };
-

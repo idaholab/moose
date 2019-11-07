@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeFiniteBeamStrain);
 
-template <>
+defineLegacyParams(ComputeFiniteBeamStrain);
+
 InputParameters
-validParams<ComputeFiniteBeamStrain>()
+ComputeFiniteBeamStrain::validParams()
 {
-  InputParameters params = validParams<ComputeIncrementalBeamStrain>();
+  InputParameters params = ComputeIncrementalBeamStrain::validParams();
   params.addClassDescription("Compute a rotation increment for finite rotations of the beam and "
                              "computes the small/large strain increments in the current rotated "
                              "configuration of the beam.");

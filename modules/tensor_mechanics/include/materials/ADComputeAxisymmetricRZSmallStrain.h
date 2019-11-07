@@ -26,6 +26,8 @@ class ADComputeAxisymmetricRZSmallStrain : public ADCompute2DSmallStrain<compute
 public:
   ADComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:
@@ -33,4 +35,3 @@ protected:
 
   usingCompute2DSmallStrainMembers;
 };
-

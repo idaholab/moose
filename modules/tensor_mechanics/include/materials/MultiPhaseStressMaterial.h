@@ -32,6 +32,8 @@ class MultiPhaseStressMaterial : public Material
 public:
   MultiPhaseStressMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
 
@@ -54,4 +56,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };
-

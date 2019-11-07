@@ -30,6 +30,9 @@ class ADComputeLinearElasticStress : public ADComputeStressBase<compute_stage>
 {
 public:
   ADComputeLinearElasticStress(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   virtual void initialSetup() override;
 
 protected:
@@ -42,4 +45,3 @@ protected:
 
   usingComputeStressBaseMembers;
 };
-

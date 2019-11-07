@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", CappedDruckerPragerStressUpdate);
 
-template <>
+defineLegacyParams(CappedDruckerPragerStressUpdate);
+
 InputParameters
-validParams<CappedDruckerPragerStressUpdate>()
+CappedDruckerPragerStressUpdate::validParams()
 {
-  InputParameters params = validParams<TwoParameterPlasticityStressUpdate>();
+  InputParameters params = TwoParameterPlasticityStressUpdate::validParams();
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "DP_model",

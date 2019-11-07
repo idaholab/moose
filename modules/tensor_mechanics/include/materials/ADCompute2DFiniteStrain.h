@@ -34,6 +34,9 @@ class ADCompute2DFiniteStrain : public ADComputeFiniteStrain<compute_stage>
 {
 public:
   ADCompute2DFiniteStrain(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
   void initialSetup() override;
 
   virtual void computeProperties() override;
@@ -57,4 +60,3 @@ protected:
 
   usingComputeFiniteStrainMembers;
 };
-

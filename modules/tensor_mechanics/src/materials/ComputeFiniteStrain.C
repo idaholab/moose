@@ -21,11 +21,12 @@ ComputeFiniteStrain::decompositionType()
 
 registerMooseObject("TensorMechanicsApp", ComputeFiniteStrain);
 
-template <>
+defineLegacyParams(ComputeFiniteStrain);
+
 InputParameters
-validParams<ComputeFiniteStrain>()
+ComputeFiniteStrain::validParams()
 {
-  InputParameters params = validParams<ComputeIncrementalStrainBase>();
+  InputParameters params = ComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains.");
   params.addParam<MooseEnum>("decomposition_method",

@@ -54,6 +54,8 @@ class StressUpdateBase : public Material
 public:
   StressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Given a strain increment that results in a trial stress, perform some
    * procedure (such as an iterative return-mapping process) to produce
@@ -120,4 +122,3 @@ protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
 };
-

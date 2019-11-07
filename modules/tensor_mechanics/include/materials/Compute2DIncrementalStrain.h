@@ -28,6 +28,8 @@ class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
 public:
   Compute2DIncrementalStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -54,4 +56,3 @@ protected:
 
   const unsigned int _out_of_plane_direction;
 };
-

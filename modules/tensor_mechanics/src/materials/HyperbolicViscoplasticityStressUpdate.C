@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", HyperbolicViscoplasticityStressUpdate);
 
-template <>
+defineLegacyParams(HyperbolicViscoplasticityStressUpdate);
+
 InputParameters
-validParams<HyperbolicViscoplasticityStressUpdate>()
+HyperbolicViscoplasticityStressUpdate::validParams()
 {
-  InputParameters params = validParams<RadialReturnStressUpdate>();
+  InputParameters params = RadialReturnStressUpdate::validParams();
   params.addClassDescription("This class uses the discrete material for a hyperbolic sine "
                              "viscoplasticity model in which the effective plastic strain is "
                              "solved for using a creep approach.");

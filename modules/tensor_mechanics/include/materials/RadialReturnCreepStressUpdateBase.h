@@ -25,6 +25,8 @@ class RadialReturnCreepStressUpdateBase : public RadialReturnStressUpdate
 public:
   RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
@@ -54,4 +56,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };
-

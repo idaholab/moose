@@ -21,6 +21,8 @@ class LinearElasticTruss : public TrussMaterial
 public:
   LinearElasticTruss(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
@@ -31,4 +33,3 @@ private:
   Real _T0;
   Real _thermal_expansion_coeff;
 };
-

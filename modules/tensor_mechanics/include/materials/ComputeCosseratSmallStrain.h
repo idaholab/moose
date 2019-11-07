@@ -24,6 +24,8 @@ class ComputeCosseratSmallStrain : public ComputeStrainBase
 public:
   ComputeCosseratSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
 
@@ -39,4 +41,3 @@ protected:
   /// Grad(Cosserat rotation)
   std::vector<const VariableGradient *> _grad_wc;
 };
-

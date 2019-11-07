@@ -98,6 +98,8 @@ public:
 
   LinearViscoelasticityBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * Compute the apparent properties at a quadrature point. This initializes the internal
    * time-stepping scheme, and must be called at the beginning of the time step.
@@ -268,4 +270,3 @@ protected:
   /// checks whether we are at the first time step
   bool & _step_zero;
 };
-

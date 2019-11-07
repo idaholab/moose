@@ -27,6 +27,8 @@ class ADComputeAxisymmetricRZFiniteStrain : public ADCompute2DFiniteStrain<compu
 public:
   ADComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initialSetup() override;
 
 protected:
@@ -39,4 +41,3 @@ protected:
 
   usingCompute2DFiniteStrainMembers;
 };
-

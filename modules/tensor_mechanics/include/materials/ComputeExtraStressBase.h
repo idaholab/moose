@@ -26,6 +26,8 @@ class ComputeExtraStressBase : public Material
 public:
   ComputeExtraStressBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties();
   virtual void computeQpExtraStress() = 0;
@@ -35,4 +37,3 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _extra_stress;
 };
-

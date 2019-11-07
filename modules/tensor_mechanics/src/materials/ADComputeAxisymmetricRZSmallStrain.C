@@ -13,10 +13,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeAxisymmetricRZSmallStrain);
 
-defineADValidParams(
-    ADComputeAxisymmetricRZSmallStrain,
-    ADCompute2DSmallStrain,
-    params.addClassDescription("Compute a small strain in an Axisymmetric geometry"););
+defineADLegacyParams(ADComputeAxisymmetricRZSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeAxisymmetricRZSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADCompute2DSmallStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain in an Axisymmetric geometry");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeAxisymmetricRZSmallStrain<compute_stage>::ADComputeAxisymmetricRZSmallStrain(

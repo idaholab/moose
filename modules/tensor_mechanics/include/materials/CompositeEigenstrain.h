@@ -31,9 +31,10 @@ class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeEi
 public:
   CompositeEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpEigenstrain();
 
   const std::string _M_name;
 };
-

@@ -24,10 +24,11 @@ class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 public:
   ComputeElasticityTensor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpElasticityTensor() override;
 
   /// Individual material information
   RankFourTensor _Cijkl;
 };
-

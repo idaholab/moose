@@ -32,6 +32,8 @@ class ComputeMeanThermalExpansionEigenstrainBase : public ComputeThermalExpansio
 public:
   ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   /*
    * Compute the total thermal strain relative to the stress-free temperature at the
@@ -63,4 +65,3 @@ protected:
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
 };
-

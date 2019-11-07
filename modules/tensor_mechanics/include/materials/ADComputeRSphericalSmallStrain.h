@@ -28,8 +28,9 @@ class ADComputeRSphericalSmallStrain : public ADComputeSmallStrain<compute_stage
 public:
   ADComputeRSphericalSmallStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void computeProperties() override;
 
   usingComputeSmallStrainMembers;
 };
-

@@ -26,6 +26,8 @@ class ComputePlaneFiniteStrain : public Compute2DFiniteStrain
 public:
   ComputePlaneFiniteStrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeOutOfPlaneGradDisp() override;
   virtual Real computeOutOfPlaneGradDispOld() override;
@@ -47,4 +49,3 @@ protected:
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
 };
-

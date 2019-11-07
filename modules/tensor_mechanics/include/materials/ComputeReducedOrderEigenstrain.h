@@ -30,6 +30,8 @@ class ComputeReducedOrderEigenstrain : public ComputeEigenstrainBase
 public:
   ComputeReducedOrderEigenstrain(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void initQpStatefulProperties();
   void computeProperties();
   void computeQpEigenstrain();

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeExtraStressVDWGas);
 
-template <>
+defineLegacyParams(ComputeExtraStressVDWGas);
+
 InputParameters
-validParams<ComputeExtraStressVDWGas>()
+ComputeExtraStressVDWGas::validParams()
 {
-  InputParameters params = validParams<ComputeExtraStressBase>();
+  InputParameters params = ComputeExtraStressBase::validParams();
   params.addClassDescription(
       "Computes a hydrostatic stress corresponding to the pressure of a van der Waals gas that is "
       "added as an extra_stress to the stress computed by the constitutive model");
