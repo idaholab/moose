@@ -3,18 +3,15 @@
 Every `MooseObject` includes a set of custom parameters within the `InputParameters` object that
 is used to construct the object.
 
-The `InputParameters` object for each object is created using the `validParams` function,
-which every class specializes.
+The `InputParameters` object for each object is created using the static `validParams` method,
+which every class contains.
 
 !---
 
 ## `validParams` Declaration
 
 ```cpp
-class Convection;
-
-template<>
-InputParameters validParams<Convection>();
+static InputParameters Convection::validParams();
 ```
 
 !---
@@ -22,10 +19,10 @@ InputParameters validParams<Convection>();
 ## `validParams` Definition
 
 ```cpp
-template<>
-InputParameters validParams<Convection>()
+InputParameters
+Convection::validParams()
 {
-  InputParameters params = validParams<Kernel>();  // Start with parent
+  InputParameters params = Kernel::validParams();  // Start with parent
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   params.addParam<Real>("coefficient", "Diffusion coefficient");
   return params;
@@ -230,10 +227,9 @@ Objects that have a specific set of named options should use a `MooseEnum` so th
 checking code can be omitted.
 
 ```cpp
-template<>
-InputParameters validParams<MyObject>()
+InputParameters MyObject::validParams()
 {
-  InputParameters params = validParams<ParentObject>();
+  InputParameters params = ParentObject::validParams();
   MooseEnum component("X Y Z");  // No default supplied
   params.addRequiredParam<MooseEnum>("component", component,
                                      "The X, Y, or Z component");
@@ -251,10 +247,9 @@ error message is provided.
 Operates the same way as `MooseEnum` but supports multiple ordered options.
 
 ```cpp
-template<>
-InputParameters validParams<MyObject>()
+InputParameters MyObject::validParams()
 {
-  InputParameters params = validParams<ParentObject>();
+  InputParameters params = ParentObject::validParams();
   MultiMooseEnum transforms("scale rotate translate");
   params.addRequiredParam<MultiMooseEnum>("transforms", transforms,
                                           "The transforms to perform");
