@@ -9,9 +9,10 @@
 
 #include "SubblockIndexProvider.h"
 
-template <>
+defineLegacyParams(SubblockIndexProvider);
+
 InputParameters
-validParams<SubblockIndexProvider>()
+SubblockIndexProvider::validParams()
 {
-  return validParams<GeneralUserObject>();
+  return GeneralUserObject::validParams();
 }

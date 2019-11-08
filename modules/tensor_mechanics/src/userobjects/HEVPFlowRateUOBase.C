@@ -9,11 +9,12 @@
 
 #include "HEVPFlowRateUOBase.h"
 
-template <>
+defineLegacyParams(HEVPFlowRateUOBase);
+
 InputParameters
-validParams<HEVPFlowRateUOBase>()
+HEVPFlowRateUOBase::validParams()
 {
-  InputParameters params = validParams<DiscreteElementUserObject>();
+  InputParameters params = DiscreteElementUserObject::validParams();
   params.addParam<std::string>(
       "strength_prop_name",
       "Name of strength property: Same as strength user object specified in input file");

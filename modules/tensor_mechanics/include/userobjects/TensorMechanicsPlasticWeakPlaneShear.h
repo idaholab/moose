@@ -24,6 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>();
 class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticWeakPlaneShear(const InputParameters & parameters);
 
   virtual void activeConstraints(const std::vector<Real> & f,
@@ -106,4 +108,3 @@ protected:
   /// d(tan_psi)/d(internal_param);
   virtual Real dtan_psi(const Real internal_param) const;
 };
-

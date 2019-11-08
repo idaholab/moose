@@ -26,6 +26,8 @@ InputParameters validParams<TensorMechanicsHardeningCubic>();
 class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningCubic(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -56,4 +58,3 @@ private:
   /// convenience parameter for cubic
   Real _beta;
 };
-

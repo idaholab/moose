@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPEqvPlasticStrainRate);
 
-template <>
+defineLegacyParams(HEVPEqvPlasticStrainRate);
+
 InputParameters
-validParams<HEVPEqvPlasticStrainRate>()
+HEVPEqvPlasticStrainRate::validParams()
 {
-  InputParameters params = validParams<HEVPInternalVarRateUOBase>();
+  InputParameters params = HEVPInternalVarRateUOBase::validParams();
   params.addParam<Real>("h_scaling", 1.0, "Scaling parameter");
   params.addClassDescription("User Object computing equivalent plastic strain rate");
   return params;

@@ -24,6 +24,8 @@ InputParameters validParams<HEVPFlowRatePowerLawJ2>();
 class HEVPFlowRatePowerLawJ2 : public HEVPFlowRateUOBase
 {
 public:
+  static InputParameters validParams();
+
   HEVPFlowRatePowerLawJ2(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real &) const;
@@ -39,4 +41,3 @@ protected:
   RankTwoTensor computePK2Deviatoric(const RankTwoTensor &, const RankTwoTensor &) const;
   Real computeEqvStress(const RankTwoTensor &, const RankTwoTensor &) const;
 };
-

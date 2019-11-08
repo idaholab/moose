@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningPowerRule);
 
-template <>
+defineLegacyParams(TensorMechanicsHardeningPowerRule);
+
 InputParameters
-validParams<TensorMechanicsHardeningPowerRule>()
+TensorMechanicsHardeningPowerRule::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsHardeningModel>();
+  InputParameters params = TensorMechanicsHardeningModel::validParams();
   params.addRequiredParam<Real>("value_0", "The yield strength when internal variable = 0");
   params.addParam<Real>("epsilon0", 1.0, "The reference strain");
   params.addParam<Real>(

@@ -9,9 +9,10 @@
 
 #include "EulerAngleProvider.h"
 
-template <>
+defineLegacyParams(EulerAngleProvider);
+
 InputParameters
-validParams<EulerAngleProvider>()
+EulerAngleProvider::validParams()
 {
-  return validParams<GeneralUserObject>();
+  return GeneralUserObject::validParams();
 }

@@ -24,6 +24,8 @@ InputParameters validParams<SubblockIndexProvider>();
 class SubblockIndexProvider : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   SubblockIndexProvider(const InputParameters & params) : GeneralUserObject(params) {}
 
   /**
@@ -36,4 +38,3 @@ public:
    */
   virtual unsigned int getMaxSubblockIndex() const = 0;
 };
-

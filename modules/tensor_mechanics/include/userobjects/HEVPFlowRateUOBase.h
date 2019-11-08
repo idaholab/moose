@@ -25,6 +25,8 @@ InputParameters validParams<HEVPFlowRateUOBase>();
 class HEVPFlowRateUOBase : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   HEVPFlowRateUOBase(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
@@ -41,4 +43,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _pk2;
   const MaterialProperty<RankTwoTensor> & _ce;
 };
-

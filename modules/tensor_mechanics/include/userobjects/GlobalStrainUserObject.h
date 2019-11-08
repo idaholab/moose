@@ -23,6 +23,8 @@ InputParameters validParams<GlobalStrainUserObject>();
 class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUserObjectInterface
 {
 public:
+  static InputParameters validParams();
+
   GlobalStrainUserObject(const InputParameters & parameters);
 
   void initialize() override;
@@ -53,4 +55,3 @@ protected:
   std::vector<unsigned int> _disp_var;
   VectorValue<bool> _periodic_dir;
 };
-

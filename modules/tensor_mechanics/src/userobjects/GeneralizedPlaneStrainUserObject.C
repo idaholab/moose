@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainUserObject);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainUserObject);
+
 InputParameters
-validParams<GeneralizedPlaneStrainUserObject>()
+GeneralizedPlaneStrainUserObject::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription(
       "Generalized plane strain UserObject to provide residual and diagonal Jacobian entries.");
   params.addParam<UserObjectName>("subblock_index_provider",

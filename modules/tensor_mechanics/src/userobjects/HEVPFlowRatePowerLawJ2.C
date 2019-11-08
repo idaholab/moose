@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPFlowRatePowerLawJ2);
 
-template <>
+defineLegacyParams(HEVPFlowRatePowerLawJ2);
+
 InputParameters
-validParams<HEVPFlowRatePowerLawJ2>()
+HEVPFlowRatePowerLawJ2::validParams()
 {
-  InputParameters params = validParams<HEVPFlowRateUOBase>();
+  InputParameters params = HEVPFlowRateUOBase::validParams();
   params.addParam<Real>(
       "reference_flow_rate", 0.001, "Reference flow rate for rate dependent flow");
   params.addParam<Real>("flow_rate_exponent", 10.0, "Power law exponent in flow rate equation");
