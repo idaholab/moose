@@ -99,6 +99,19 @@ the output file.
 
 ## AD Material Objects
 
+The material property system includes the ability to perform calculations using automatic
+differentiation, which ensures and exact Jacobian for the numerical solver, even for
+complex, coupled properties.
+
+The `ADMaterial` class serves as the base class for `Material` objects requiring automatic
+derivative evaluations.
+
+!---
+
+## Additional Get Methods for AD
+
+The are two methods for retrieving AD material properties:
+
 `adGetMaterialProperty<TYPE>()`\\
 Use within AD objects to retrieve non-AD material properties, generally this should not be used
 unless the object is being optimized and the property cannot be AD.

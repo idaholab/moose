@@ -1,68 +1,28 @@
-# Step 7: Mesh Adaptivity id=step07
+# Step 7: Temperature Dependent Properties id=step07
+
+!---
+
+## AD Material Properties
+
+In reality the viscosity is also a function of temperature, this dependence can be optionally added
+in a manner that leverages the AD calculations.
+
+The permability is defined as a function of space and time; for some problems (e.g., solid mechanics)
+the Jacobian will be dependant upon this function, due to displacement calculations.
+
 
 !!end-intro
 
 !---
 
-## Step 7a: Coarse Solution
+## Convert to ADMaterial
 
-!listing step7a_coarse.i
-
-!---
-
-## Step 7a: Run and Visualize
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step7a_coarse.i
-```
 
 !---
 
-## Step 7b: Fine Solution
+## Temperature Dependence
 
-!listing step7b_fine.i
+Make reference to temperatuer equation, even though we aren't solving for it yet
 
-!---
-
-## Step 7b: Run and Visualize
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step7b_fine.i
-```
 
 !---
-
-## Step 7c: Adaptive Mesh Solution
-
-!listing step7c_adapt.i
-
-!---
-
-## Step 7c: Run and Visualize
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step7a_adapt.i
-```
-
-!---
-
-!media step07abc_result.mp4
-
-!---
-
-## Step 7d: Multiple Subdomains
-
-!listing step7d_adapt_blocks.i
-
-!---
-
-!media step07d_result.mp4

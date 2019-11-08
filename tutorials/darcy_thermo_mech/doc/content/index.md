@@ -151,7 +151,25 @@ www.mooseframework.org
 
 !include problem/step06.md start=end-intro
 
+!---
 
+!include problems/step07.md end=end-intro
+
+!---
+
+# Material System
+
+## (continued)
+
+!include systems/materials.md stascrt=end-non-ad-material
+
+!---
+
+# Step 7: Temperature Dependent Properties
+
+## (continued)
+
+!include problems/step07.md start=end-intro
 
 
 !!!

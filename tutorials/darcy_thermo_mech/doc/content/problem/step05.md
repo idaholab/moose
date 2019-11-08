@@ -1,4 +1,4 @@
-# Step 5: Pressure Kernel with Material id=step03
+# Step 5: Pressure Kernel with Material id=step05
 
 !---
 
