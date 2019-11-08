@@ -3,15 +3,15 @@
 !style halign=center
 [#step01]\\
 [#step02]\\
-[#step03]\\
-[#step04]\\
-[#step05]\\
-[#step06]\\
-[#step07]\\
-[#step08]\\
-[#step09]\\
-[#step10]\\
-[#step11]
+!![#step03]\\
+!![#step04]\\
+!![#step05]\\
+!![#step06]\\
+!![#step07]\\
+!![#step08]\\
+!![#step09]\\
+!![#step10]\\
+!![#step11]
 
 !---
 
@@ -31,6 +31,12 @@ In order to implement the Darcy pressure equation, a `Kernel` object is needed t
 
 !equation
 -\nabla\cdot\frac{\mathbf{K}}{\mu}\nabla p = 0
+
+
+
+
+
+!!!
 
 !---
 
@@ -110,3 +116,5 @@ another application that runs a phase-based micro-structure simulation.
 
 MOOSE includes a system to create custom input syntax for common tasks, in this step the syntax
 for the two equations and velocity auxiliary calculation are simplified for end-users.
+
+!!!

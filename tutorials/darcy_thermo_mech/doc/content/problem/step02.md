@@ -23,8 +23,9 @@ volume integrals of a [!ac](PDE).
 
 To implement the coefficient a new Kernel object must be created: `DarcyPressure`.
 
-This object will inherit from ADDiffusion and will use input parameters for specifying the
-permeability and viscosity.
+This object will inherit from `Kernel` and will use input parameters for specifying the
+permeability and viscosity within the `computeQpResidual` and `computeQpJacobian`
+overrides.
 
 !---
 
