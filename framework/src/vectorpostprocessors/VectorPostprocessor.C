@@ -21,7 +21,7 @@ InputParameters
 VectorPostprocessor::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::validParams<OutputInterface>();
+  params += OutputInterface::validParams();
   params.addParam<bool>("contains_complete_history",
                         false,
                         "Set this flag to indicate that the values in all vectors declared by this "

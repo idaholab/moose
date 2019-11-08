@@ -21,8 +21,8 @@ InputParameters
 IntegratedBCBase::validParams()
 {
   InputParameters params = BoundaryCondition::validParams();
-  params += ::validParams<RandomInterface>();
-  params += ::validParams<MaterialPropertyInterface>();
+  params += RandomInterface::validParams();
+  params += MaterialPropertyInterface::validParams();
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",

@@ -5,7 +5,6 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y scalar_strain_zz1 scalar_strain_zz2'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
   group_variables = 'disp_x disp_y;

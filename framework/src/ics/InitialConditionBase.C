@@ -17,8 +17,8 @@ InputParameters
 InitialConditionBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<BoundaryRestrictable>();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addRequiredParam<VariableName>("variable",
                                         "The variable this initial condition is "

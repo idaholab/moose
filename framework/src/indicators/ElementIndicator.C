@@ -21,8 +21,8 @@ InputParameters
 ElementIndicator::validParams()
 {
   InputParameters params = Indicator::validParams();
-  params += ::validParams<MaterialPropertyInterface>();
-  params += ::validParams<TransientInterface>();
+  params += MaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable that this Indicator operates on");
   std::vector<SubdomainName> everywhere(1, "ANY_BLOCK_ID");

@@ -105,7 +105,7 @@ LineMaterialSamplerBase<T>::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params += SamplerBase::validParams();
-  params += ::validParams<BlockRestrictable>();
+  params += BlockRestrictable::validParams();
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");
   params.addRequiredParam<std::vector<std::string>>(

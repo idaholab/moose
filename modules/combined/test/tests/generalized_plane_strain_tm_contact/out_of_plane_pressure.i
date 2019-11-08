@@ -14,7 +14,6 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y scalar_strain_zz'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
 []

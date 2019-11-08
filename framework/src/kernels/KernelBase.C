@@ -23,12 +23,12 @@ InputParameters
 KernelBase::validParams()
 {
   auto params = MooseObject::validParams();
-  params += ::validParams<TransientInterface>();
-  params += ::validParams<BlockRestrictable>();
-  params += ::validParams<RandomInterface>();
-  params += ::validParams<MeshChangedInterface>();
-  params += ::validParams<MaterialPropertyInterface>();
-  params += ::validParams<TaggingInterface>();
+  params += TransientInterface::validParams();
+  params += BlockRestrictable::validParams();
+  params += RandomInterface::validParams();
+  params += MeshChangedInterface::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params += TaggingInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");

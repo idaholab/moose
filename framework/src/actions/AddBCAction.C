@@ -19,7 +19,7 @@ InputParameters
 AddBCAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params += ::validParams<BoundaryCondition>();
+  params += BoundaryCondition::validParams();
   return params;
 }
 

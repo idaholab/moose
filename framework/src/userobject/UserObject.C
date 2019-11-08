@@ -21,7 +21,7 @@ UserObject::validParams()
   InputParameters params = MooseObject::validParams();
 
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_end'
-  params += ::validParams<SetupInterface>();
+  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
 
   params.addParam<bool>("use_displaced_mesh",

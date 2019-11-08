@@ -20,7 +20,7 @@ InputParameters
 RandomIC::validParams()
 {
   InputParameters params = RandomICBase::validParams();
-  params += ::validParams<DistributionInterface>();
+  params += DistributionInterface::validParams();
   params.addParam<Real>(
       "min", 0.0, "Lower bound of uniformly distributed randomly generated values");
   params.addParam<Real>(
