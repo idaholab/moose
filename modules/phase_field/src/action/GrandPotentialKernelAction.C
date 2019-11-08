@@ -67,7 +67,7 @@ validParams<GrandPotentialKernelAction>()
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   MultiMooseEnum anisotropy("true=1 false=0", "false");
   parameters.addRequiredParam<MultiMooseEnum>(
-      "anisotropic", anisotropy, "Whether each chemical potential is anisotropic");
+      "anisotropic", anisotropy, "Whether or not each mobility is anisotropic");
 
   return parameters;
 }
