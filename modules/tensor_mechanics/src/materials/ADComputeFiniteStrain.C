@@ -31,7 +31,7 @@ ADComputeFiniteStrain<compute_stage>::validParams()
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains.");
   params.addParam<MooseEnum>("decomposition_method",
-                             ADComputeFiniteStrain<RESIDUAL>::decompositionType(),
+                             ADComputeFiniteStrain<compute_stage>::decompositionType(),
                              "Methods to calculate the strain and rotation increments");
   return params;
 }
