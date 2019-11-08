@@ -25,7 +25,6 @@ NonlinearEigen::validParams()
       "pfactor",
       1e-2,
       "The factor of residual to be reduced per free power iteration or per nonlinear step");
-  params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
   params.addParam<bool>(
       "output_after_power_iterations", true, "True to output solution after free power iterations");
   return params;
@@ -39,10 +38,6 @@ NonlinearEigen::NonlinearEigen(const InputParameters & parameters)
     _pfactor(getParam<Real>("pfactor")),
     _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
-  if (!_app.isRecovering() && !_app.isRestarting())
-    _eigenvalue = getParam<Real>("k0");
-
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
 }
 
 void

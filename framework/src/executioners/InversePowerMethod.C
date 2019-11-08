@@ -30,7 +30,6 @@ InversePowerMethod::validParams()
   params.addParam<Real>("pfactor", 1e-2, "Reduce residual norm per power iteration by this factor");
   params.addParam<bool>(
       "Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
-  params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
   return params;
 }
 
@@ -44,11 +43,6 @@ InversePowerMethod::InversePowerMethod(const InputParameters & parameters)
     _pfactor(getParam<Real>("pfactor")),
     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
-  if (!_app.isRecovering() && !_app.isRestarting())
-    _eigenvalue = getParam<Real>("k0");
-
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
-
   if (_max_iter < _min_iter)
     mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol < 0.0)
