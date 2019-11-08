@@ -9,10 +9,16 @@
 
 ## Obtaining MOOSE and Running Tests
 
-Images of MOOSE are currently hosted on Docker Hub in the repository [herter4171/ubuntu-moose](https://cloud.docker.com/u/herter4171/repository/docker/herter4171/ubuntu-moose).  The tag "latest" is kept current with the master branch of the repository, and the other tags are commit hashes to be used by codes with MOOSE as a submodule.  Since the Docker image already has the framework compiled, it is possible to go from no extant, local copy of MOOSE to running the tests with a single command.
+Images of MOOSE are currently hosted on Docker Hub in the repository [herter4171/ubuntu-moose](https://hub.docker.com/r/herter4171/ubuntu-moose) and [herter4171/centos-moose](https://hub.docker.com/r/herter4171/centos-moose) for Ubuntu 18.04 and CentOS 7, respectively.  The tag "latest" is kept current with the master branch of the repository, and the other tags are commit hashes to be used by codes with MOOSE as a Git submodule.  Since the Docker image already has the framework compiled, it is possible to go from no extant, local copy of MOOSE to running the tests with a single command.
 
 ```bash
 docker run -ti herter4171/ubuntu-moose:latest /bin/bash -c 'cd test; ./run_tests'
+```
+
+As one might expect, the same procedure applies for running a CentOS image. 
+
+```bash
+docker run -ti herter4171/centos-moose:latest /bin/bash -c 'cd test; ./run_tests'
 ```
 
 ## Extending the Image With MOOSE Apps

@@ -89,10 +89,10 @@ Any MOOSE object can retrieve a `UserObject` in a manner similar to retrieving a
 Generally, it is a good idea to take the name of the `UserObject` to from the input file:
 
 ```cpp
-template<>
-InputParameters validParams<BlockAverageDiffusionMaterial>()
+InputParameters
+BlockAverageDiffusionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<UserObjectName>("block_average_userobject", "Computes the ...");
   return params;
 }
