@@ -100,3 +100,9 @@ the output file.
 | Real | `MaterialRealAux` | prop |
 | RealVectorValue | `MaterialRealVectorValueAux` | prop_1, prop_2, and prop_3 |
 | RealTensorValue | `MaterialRealTensorValueAux` | prop_11, prop_12, prop_13, prop_21, etc. |
+
+!!end-non-ad-material
+
+!---
+
+## AD Material Objects

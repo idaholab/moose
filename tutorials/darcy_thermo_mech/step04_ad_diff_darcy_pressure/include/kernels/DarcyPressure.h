@@ -24,7 +24,7 @@ public:
   DarcyPressure(const InputParameters & parameters);
 
 protected:
-  /// Kernel objects must override
+  /// ADKernelGrad objects must override
   virtual ADRealVectorValue precomputeQpResidual() override;
 
   /// References to be set from input file

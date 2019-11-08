@@ -18,10 +18,11 @@ PackedColumn::validParams()
   InputParameters params = Material::validParams();
 
   // Parameter for radius of the spheres used to interpolate permeability.
-  params.addParam<FunctionName>("radius",
-                                "1.0",
-                                "The radius of the steel spheres (mm) that are packed in the "
-                                "column for computing permeability.");
+  params.addRangeCheckedParam<Real>("radius",
+                                    1.0,
+                                    "radius>=1 & radius<=3",
+                                    "The radius of the steel spheres (mm) that are packed in the "
+                                    "column for computing permeability.");
   params.addParam<Real>(
       "viscosity",
       7.98e-4,
@@ -34,7 +35,7 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
   : Material(parameters),
 
     // Get the parameters from the input file
-    _radius(getFunction("radius")),
+    _radius(getParam<Real>("radius")),
     _input_viscosity(getParam<Real>("viscosity")),
 
     // Declare two material properties by getting a reference from the MOOSE Material system
@@ -52,10 +53,6 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
 void
 PackedColumn::computeQpProperties()
 {
-  Real value = _radius.value(_t, _q_point[_qp]);
-  mooseAssert(value >= 1 && value <= 3,
-              "The radius range must be in the range [1, 3], but " << value << " provided.");
-
   _viscosity[_qp] = _input_viscosity;
-  _permeability[_qp] = _permeability_interpolation.sample(value);
+  _permeability[_qp] = _permeability_interpolation.sample(_radius);
 }

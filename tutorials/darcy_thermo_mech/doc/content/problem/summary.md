@@ -4,8 +4,8 @@
 [#step01]\\
 [#step02]\\
 [#step03]\\
-!![#step04]\\
-!![#step05]\\
+[#step04]\\
+[#step05]\\
 !![#step06]\\
 !![#step07]\\
 !![#step08]\\
@@ -40,15 +40,26 @@ Convert the object created in [#step02] to use automatic differentiation, by inh
 `ADKernel`.
 
 
-!!!
+!---
+
+## [#step04]
+
+Convert the object created in [#step03] to use ADDiffusion to avoid duplicate code and to take
+advantage of pre-computing the residual term.
 
 !---
 
-## [#step03]
+## [#step05]
 
-Instead of passing constant parameters to the pressure diffusion `Kernel` object, the Material
+Instead of passing input parameters to the pressure diffusion `Kernel` object, the Material
 system can be used to supply the values. This allows for properties that vary in space and time
 as well as be coupled to variables in the simulation.
+
+!!!
+
+6: functions
+7: ad material
+
 
 !---
 

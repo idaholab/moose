@@ -107,11 +107,6 @@ www.mooseframework.org
 
 !include problem/step04.md
 
-
-
-
-!!!
-
 !---
 
 !include problem/laplace_young.md
@@ -126,23 +121,26 @@ www.mooseframework.org
 
 !---
 
-!include problem/step03.md end=end-intro
+!include problem/step05.md end=end-intro
 
 !---
 
-!include systems/materials.md
+!include systems/materials.md end=end-non-ad-material
+
+!---
+
+# Step 5: Pressure Kernel with Material id=step05
+
+## (continued)
+
+!include problem/step05.md start=end-intro
+
+
+!!!
 
 !---
 
 !include systems/functions.md
-
-!---
-
-# Step 3: Pressure Kernel with Material id=step03b
-
-## (continued)
-
-!include problem/step03.md start=end-intro
 
 !---
 
