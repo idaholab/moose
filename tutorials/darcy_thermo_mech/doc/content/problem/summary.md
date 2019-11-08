@@ -6,7 +6,7 @@
 [#step03]\\
 [#step04]\\
 [#step05]\\
-!![#step06]\\
+[#step06]\\
 !![#step07]\\
 !![#step08]\\
 !![#step09]\\
@@ -55,9 +55,17 @@ Instead of passing input parameters to the pressure diffusion `Kernel` object, t
 system can be used to supply the values. This allows for properties that vary in space and time
 as well as be coupled to variables in the simulation.
 
+!---
+
+## [#step06]
+
+The sphere radius is allowed to vary by converting the constant value of the radius into a
+function of space and time.
+
+
 !!!
 
-6: functions
+
 7: ad material
 
 

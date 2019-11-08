@@ -95,26 +95,3 @@ cd problems
 ```
 
 !media step05_result.png
-
-
-!!!
-TODO: Move to step 6: functions
-
-!---
-
-## Step 6: Variable Spheres
-
-Update the input file to vary the sphere size from 1 to 3 along the length of the pipe.
-
-!---
-
-## Step 6: Input File
-
-!listing step03_darcy_material/problems/step3b.i
-
-!---
-
-## Step 6: Visualize Result
-
-!media step03b_result.png
-!!!

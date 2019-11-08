@@ -1,9 +1,11 @@
 # Function System
 
-A system for defining analytic expressions based on the spatial location ($x$, $y$, $z$) and
+A system for defining analytic expressions based on the spatial location ($x$, $y$, $z$)\\ and
 time, $t$.
 
 !---
+
+## MOOSE Function Objects
 
 A `Function` object is created by inheriting from `Function` and overriding the virtual `value()`
 (and optionally other methods as well) functions.

@@ -135,12 +135,26 @@ www.mooseframework.org
 
 !include problem/step05.md start=end-intro
 
+!---
 
-!!!
+!include problem/step06.md end=end-intro
 
 !---
 
 !include systems/functions.md
+
+!---
+
+# Step 6: Function Properties id=step06
+
+## (continued)
+
+!include problem/step05.md start=end-intro
+
+
+
+
+!!!
 
 !---
 
