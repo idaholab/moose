@@ -3,7 +3,7 @@
 !style halign=center
 [#step01]\\
 [#step02]\\
-!![#step03]\\
+[#step03]\\
 !![#step04]\\
 !![#step05]\\
 !![#step06]\\
@@ -32,8 +32,12 @@ In order to implement the Darcy pressure equation, a `Kernel` object is needed t
 !equation
 -\nabla\cdot\frac{\mathbf{K}}{\mu}\nabla p = 0
 
+!---
 
+## [#step03]
 
+Convert the object created in [#step02] to use automatic differentiation, by inheriting from
+`ADKernel`.
 
 
 !!!

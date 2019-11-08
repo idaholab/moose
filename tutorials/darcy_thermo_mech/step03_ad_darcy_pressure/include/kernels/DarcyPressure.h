@@ -9,13 +9,14 @@
 
 #pragma once
 
-// Including the "Kernel" Kernel here so we can extend it
-#include "Kernel.h"
+// Including the "ADKernel" Kernel here so we can extend it
+#include "ADKernel.h"
 
 /**
  * Computes the residual contribution: K / mu * grad_u * grad_phi.
  */
-class DarcyPressure : public Kernel
+template <ComputeStage compute_stage>
+class DarcyPressure : public ADKernel<compute_stage>
 {
 public:
   static InputParameters validParams();
@@ -24,12 +25,11 @@ public:
 
 protected:
   /// Kernel objects must override
-  virtual Real computeQpResidual() override;
-
-  /// Kernel objects optionally override
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
   /// References to be set from input file
   const Real & _permeability;
   const Real & _viscosity;
+
+  usingKernelMembers;
 };

@@ -75,7 +75,6 @@ www.mooseframework.org
 
 !include systems/kernels.md end=end-non-ad-kernel
 
-!!!
 !---
 
 # Step 2: Pressure Kernel id=step02b
@@ -83,6 +82,21 @@ www.mooseframework.org
 ## (continued)
 
 !include problem/step02.md start=end-intro
+
+!---
+
+# Kernel System
+
+## (continued)
+
+!include systems/kernels.md start=end-non-ad-kernel end=end-ad-kernel
+
+!---
+
+!include problem/step03.md
+
+
+!!!
 
 !---
 

@@ -109,7 +109,7 @@ ADCustomObject<compute_stage>::validParams()
 template <ComputeStage compute_stage>
 ADCustomObject<compute_stage>::ADCustomObject(const InputParameters & parameters)
   : ADBaseObject<compute_stage>(parameters),
-    _scale(adGetParam<Real>("scale"))
+    _scale(getParam<Real>("scale"))
 
 {
 }

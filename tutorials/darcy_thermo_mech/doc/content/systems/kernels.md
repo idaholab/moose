@@ -70,8 +70,47 @@ Current quadrature point index
 
 !---
 
-## Automatic Differentiation
+## Automatic Differentiation (AD)
 
+The object exists to create Kernel objects that utilize automatic differentiation. This eliminates
+the need for the `computeQpJacobian` method, but requires the use of C++ templates.
+
+The entire class must be a template:
+
+```c++
+template <ComputeStage compute_stage>
+```
+
+The `computeQpResidual` method return type is `ADReal`:
+
+```c++
+ADReal computeQpResidual() override;
+```
+
+!---
+
+## Common AD Errors
+
+```bash
+.../src/kernels/CustomADKernel.C:45:3: warning: expression result unused [-Wunused-value]
+  _a_member_variable;
+  ^~~~~~~~~~~~~~~~~~
+```
+
+The solution is to use the `this` pointer:
+
+```c++
+this->_a_member_variable;
+```
+
+For template methods the `template` keyword is also required:
+
+```c++
+this->template templateMethod<Real>();
+```
+
+
+!!end-ad-kernel
 
 !---
 
