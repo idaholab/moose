@@ -437,6 +437,9 @@ public:
    */
   void addSolution(NumericVector<Number> & sol, const DenseVector<Number> & v) const;
 
+  void scaleGrad(FieldVariableGradient & grad);
+  void adScaleGrad();
+
   /////////////////////////// DoF value getters /////////////////////////////////////
 
   const DoFValue & dofValues() const;
@@ -633,6 +636,9 @@ private:
 
   bool _has_dof_indices;
   bool _has_dof_values;
+  bool _has_scaled_grad;
+
+  std::vector<Real> _gradient_scaling_vector;
 
   /// local solution values
   DoFValue _dof_values;

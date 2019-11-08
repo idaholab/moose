@@ -642,6 +642,16 @@ public:
    */
   bool haveADObjects() const { return _have_ad_objects; }
 
+  /*
+   * Method for returning scaling vector
+   */
+  std::vector<Real> getScalingVector() const { return _gradient_scaling_vector; }
+
+  /*
+   * Method for checking if gradient scaling is present
+   */
+  bool hasScaledGrad() const { return _has_scaled_grad; }
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -743,6 +753,12 @@ protected:
 
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
+
+  /// Is scaling vector supplied
+  bool _has_scaled_grad;
+
+  /// Vector holding scaling factors for the gradient: todo make RealVectorValue work!
+  std::vector<Real> _gradient_scaling_vector;
 
 private:
   ///@{ Helper functions for checking MaterialProperties

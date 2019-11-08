@@ -1,0 +1,116 @@
+[Tests]
+  design = 'FEProblem.md'
+  issues = '#14119'
+  [./first]
+    requirement = 'The system shall solve a diffusion problem with a body force on a first order mesh'
+    [./1d]
+      type = CSVDiff
+      input = '1d.i'
+      csvdiff = 1d_out.csv
+      detail = 'in 1D on a long mesh'
+    [../]
+    [./1d_scaled]
+      type = CSVDiff
+      input = '1d_scaled.i'
+      csvdiff = 1d_scaled_out.csv
+      detail = 'in 1D on a unit length mesh and match the long mesh values using graident scaling'
+    [../]
+    [./2d]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = 2d_out.csv
+      detail = 'in 2D on a rectangular mesh'
+    [../]
+    [./2d_scaled]
+      type = CSVDiff
+      input = '2d_scaled.i'
+      csvdiff = 2d_scaled_out.csv
+      detail = 'in 2D on a unit square mesh and match the rectangular mesh values using graident scaling'
+    [../]
+    [./2drz]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = 2drz_out.csv
+      detail = 'in 2DRZ on a rectangular mesh'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_out'
+    [../]
+    [./2drz_scaled]
+      type = CSVDiff
+      input = '2d_scaled.i'
+      csvdiff = 2drz_scaled_out.csv
+      detail = 'in 2DRZ on a unit square mesh and match the rectangular mesh values using graident scaling'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_scaled_out'
+    [../]
+    [./3d]
+      type = CSVDiff
+      input = '3d.i'
+      csvdiff = 3d_out.csv
+      detail = 'in 3D on a non-cubic mesh'
+    [../]
+    [./3d_scaled]
+      type = CSVDiff
+      input = '3d_scaled.i'
+      csvdiff = 3d_scaled_out.csv
+      detail = 'in 3D on a unit cube mesh and match the non-cubic mesh values using graident scaling'
+    [../]
+  [../]
+  [./second]
+    requirement = 'The system shall solve a diffusion problem with a body force on a second order mesh'
+    [./1d]
+      type = CSVDiff
+      input = '1d.i'
+      csvdiff = 1d_second_out.csv
+      detail = 'in 1D on a long mesh'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=1d_second_out'
+    [../]
+    [./1d_scaled]
+      type = CSVDiff
+      input = '1d_scaled.i'
+      csvdiff = 1d_scaled_second_out.csv
+      detail = 'in 1D on a unit length mesh and match the long mesh values using graident scaling'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=1d_scaled_second_out'
+    [../]
+    [./2d]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = 2d_second_out.csv
+      detail = 'in 2D on a rectangular mesh'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=2d_second_out'
+    [../]
+    [./2d_scaled]
+      type = CSVDiff
+      input = '2d_scaled.i'
+      csvdiff = 2d_scaled_second_out.csv
+      detail = 'in 2D on a unit square mesh and match the rectangular mesh values using graident scaling'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=2d_scaled_second_out'
+    [../]
+    [./2drz]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = 2drz_second_out.csv
+      detail = 'in 2DRZ on a rectangular mesh'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_second_out Mesh/second_order=true Variables/u/order=Second'
+    [../]
+    [./2drz_scaled]
+      type = CSVDiff
+      input = '2d_scaled.i'
+      csvdiff = 2drz_scaled_second_out.csv
+      detail = 'in 2DRZ on a unit square mesh and match the rectangular mesh values using graident scaling'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_scaled_second_out Mesh/second_order=true Variables/u/order=Second'
+    [../]
+    [./3d]
+      type = CSVDiff
+      input = '3d.i'
+      csvdiff = 3d_second_out.csv
+      detail = 'in 3D on a non-cubic mesh'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=3d_second_out'
+    [../]
+    [./3d_scaled]
+      type = CSVDiff
+      input = '3d_scaled.i'
+      csvdiff = 3d_scaled_second_out.csv
+      detail = 'in 3D on a unit cube mesh and match the non-cubic mesh values using graident scaling'
+      cli_args = 'Mesh/second_order=true Variables/u/order=Second Outputs/file_base=3d_scaled_second_out'
+    [../]
+  [../]
+[]

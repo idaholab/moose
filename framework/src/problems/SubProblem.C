@@ -29,6 +29,8 @@ SubProblem::validParams()
       "default_ghosting",
       false,
       "Whether or not to use libMesh's default amount of algebraic and geometric ghosting");
+  params.addParam<RealVectorValue>("gradient_scaling_vector",
+                                   "Vector of scalars to scale gradients.");
 
   params.addParamNamesToGroup("default_ghosting", "Advanced");
 
@@ -47,7 +49,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _computing_nonlinear_residual(false),
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
-    _have_ad_objects(false)
+    _have_ad_objects(false),
+    _has_scaled_grad(isParamValid("gradient_scaling_vector")),
+    _gradient_scaling_vector(3)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -58,6 +62,14 @@ SubProblem::SubProblem(const InputParameters & parameters)
   _active_fe_var_coupleable_vector_tags.resize(n_threads);
   _active_sc_var_coupleable_matrix_tags.resize(n_threads);
   _active_sc_var_coupleable_vector_tags.resize(n_threads);
+
+  if (_has_scaled_grad)
+    _gradient_scaling_vector = {getParam<RealVectorValue>("gradient_scaling_vector")(0) *
+                                    getParam<RealVectorValue>("gradient_scaling_vector")(0),
+                                getParam<RealVectorValue>("gradient_scaling_vector")(1) *
+                                    getParam<RealVectorValue>("gradient_scaling_vector")(1),
+                                getParam<RealVectorValue>("gradient_scaling_vector")(2) *
+                                    getParam<RealVectorValue>("gradient_scaling_vector")(2)};
 }
 
 SubProblem::~SubProblem() {}

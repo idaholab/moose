@@ -79,6 +79,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     _need_dof_du_dotdot_du(false),
     _has_dof_indices(false),
     _has_dof_values(false),
+    _has_scaled_grad(_subproblem.hasScaledGrad()),
+    _gradient_scaling_vector(_subproblem.getScalingVector()),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
     _second_phi_assembly_method(nullptr),
@@ -739,6 +741,19 @@ MooseVariableData<OutputType>::computeValues()
     }
   }
 
+  if (_has_scaled_grad)
+  {
+    scaleGrad(_grad_u);
+    if (_need_grad_old)
+      scaleGrad(_grad_u_old);
+    if (_need_grad_older)
+      scaleGrad(_grad_u_older);
+    if (_need_grad_previous_nl)
+      scaleGrad(_grad_u_previous_nl);
+    if (_need_grad_dot || _need_grad_dotdot)
+      mooseError("No support yet for gradient scaling with grad_dot");
+  }
+
   // Automatic differentiation
   if (_need_ad && _subproblem.currentlyComputingJacobian())
     computeAD(num_dofs, nqp);
@@ -746,8 +761,36 @@ MooseVariableData<OutputType>::computeValues()
 
 template <>
 void
+MooseVariableData<Real>::scaleGrad(FieldVariableGradient & grad)
+{
+  for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+    for (unsigned int i = 0; i < 3; i++)
+      grad[qp](i) *= _gradient_scaling_vector[i];
+}
+
+template <>
+void
+MooseVariableData<RealEigenVector>::scaleGrad(FieldVariableGradient & /*grad*/)
+{
+  mooseError("No support yet for gradient scaling with array variables");
+}
+
+template <>
+void
+MooseVariableData<Real>::adScaleGrad()
+{
+  for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+    for (unsigned int i = 0; i < 3; i++)
+      _ad_grad_u[qp](i) *= _gradient_scaling_vector[i];
+}
+
+template <>
+void
 MooseVariableData<RealEigenVector>::computeValues()
 {
+  if (_has_scaled_grad)
+    mooseError("No support yet for gradient scaling with grad_dot");
+
   unsigned int num_dofs = _dof_indices.size();
 
   if (num_dofs > 0)
@@ -1402,6 +1445,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
         _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
     }
   }
+
+  if (_has_scaled_grad)
+    adScaleGrad();
 
   if (_need_ad_u_dot && !_time_integrator)
     for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
