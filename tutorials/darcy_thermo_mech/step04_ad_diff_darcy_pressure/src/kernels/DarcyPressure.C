@@ -15,7 +15,7 @@ template <ComputeStage compute_stage>
 InputParameters
 DarcyPressure<compute_stage>::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADDiffusion<compute_stage>::validParams();
   params.addClassDescription("Compute the diffusion term for Darcy pressure ($p$) equation: "
                              "$-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0$");
 
@@ -32,17 +32,17 @@ DarcyPressure<compute_stage>::validParams()
 
 template <ComputeStage compute_stage>
 DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
-    : ADKernel<compute_stage>(parameters),
+    : ADDiffusion<compute_stage>(parameters),
     _permeability(getParam<Real>("permeability")), // get parameters from input file
     _viscosity(getParam<Real>("viscosity"))
 {
 }
 
 template <ComputeStage compute_stage>
-ADReal
-DarcyPressure<compute_stage>::computeQpResidual()
+ADRealVectorValue
+DarcyPressure<compute_stage>::precomputeQpResidual()
 {
-  return (_permeability / _viscosity) * _grad_test[_i][_qp] * _grad_u[_qp];
+  return (_permeability / _viscosity) * ADDiffusion<compute_stage>::precomputeQpResidual();
 }
 
 adBaseClass(DarcyPressure);

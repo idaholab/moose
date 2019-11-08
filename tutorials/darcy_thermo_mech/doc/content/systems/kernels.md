@@ -114,7 +114,10 @@ this->template templateMethod<Real>();
 
 !---
 
-## Base Classes
+## Kernel Base Classes
+
+Depending on the term being computed, it is possible to improve performance by reducing
+mathematical operations with the test function.
 
 | Base | Override | Use |
 | :- | :- | :- |

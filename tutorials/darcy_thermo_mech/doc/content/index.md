@@ -95,6 +95,20 @@ www.mooseframework.org
 
 !include problem/step03.md
 
+!---
+
+# Kernel System
+
+## (continued)
+
+!include systems/kernels.md start=end-non-ad-kernel start=end-ad-kernel
+
+!---
+
+!include problem/step04.md
+
+
+
 
 !!!
 
