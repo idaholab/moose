@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", TagTestProblem);
 
-template <>
 InputParameters
-validParams<TagTestProblem>()
+TagTestProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
 
   MultiMooseEnum test_tagvs(" ", " ", true);
   MultiMooseEnum test_tagms(" ", " ", true);

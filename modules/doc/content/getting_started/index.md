@@ -8,7 +8,7 @@ your operating system/platform and follow the instructions:
 
   - [Catalina](getting_started/installation/macos_catalina.md)
   - [Mojave](getting_started/installation/macos_mojave.md)
-  - [High Sierra or older](getting_started/installation/macos_other.md)
+  - [High Sierra](getting_started/installation/macos_other.md)
 
 - +Linux+:
 

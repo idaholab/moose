@@ -15,18 +15,14 @@
 
 #include "libmesh/quadrature.h"
 
-// Forward Declarations
-class MaterialTestIndicator;
-
-template <>
-InputParameters validParams<MaterialTestIndicator>();
-
 /**
  * Computes the minimum element size.
  */
 class MaterialTestIndicator : public Indicator
 {
 public:
+  static InputParameters validParams();
+
   MaterialTestIndicator(const InputParameters & params);
 
 protected:
@@ -42,4 +38,3 @@ protected:
   /// The variable for storing indicator value
   MooseVariable & _indicator_var;
 };
-

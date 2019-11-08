@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", StatefulTest);
 
-template <>
 InputParameters
-validParams<StatefulTest>()
+StatefulTest::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
   params.addParam<std::vector<Real>>("prop_values",

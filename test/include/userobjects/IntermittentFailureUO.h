@@ -12,15 +12,11 @@
 #include "GeneralUserObject.h"
 #include "MooseRandom.h"
 
-// Forward Declarations
-class IntermittentFailureUO;
-
-template <>
-InputParameters validParams<IntermittentFailureUO>();
-
 class IntermittentFailureUO : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   IntermittentFailureUO(const InputParameters & parameters);
 
   virtual void initialSetup() override;

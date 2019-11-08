@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PMassKernel);
 
-template <>
 InputParameters
-validParams<PMassKernel>()
+PMassKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The actual exponent is p-2");
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;

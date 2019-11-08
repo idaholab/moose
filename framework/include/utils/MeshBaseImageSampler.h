@@ -59,9 +59,9 @@ public:
    *
    * @see ImageFunction
    */
-  MeshBaseImageSampler(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MeshBaseImageSampler(const InputParameters & parameters);
 
   /**
    * Return the pixel value for the given point

@@ -19,6 +19,8 @@ InputParameters validParams<UniformMarker>();
 class UniformMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   UniformMarker(const InputParameters & parameters);
 
 protected:

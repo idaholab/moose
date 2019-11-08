@@ -27,9 +27,9 @@ InputParameters validParams<VectorNeumannBC>();
 class VectorNeumannBC : public IntegratedBC
 {
 public:
-  VectorNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  VectorNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

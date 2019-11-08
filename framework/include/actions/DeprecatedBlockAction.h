@@ -22,9 +22,9 @@ InputParameters validParams<DeprecatedBlockAction>();
 class DeprecatedBlockAction : public Action
 {
 public:
-  DeprecatedBlockAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  DeprecatedBlockAction(InputParameters parameters);
 
   void act() override;
 };

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VectorCoefDiffusion);
 
-template <>
 InputParameters
-validParams<VectorCoefDiffusion>()
+VectorCoefDiffusion::validParams()
 {
-  InputParameters params = validParams<VectorDiffusion>();
+  InputParameters params = VectorDiffusion::validParams();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   return params;
 }

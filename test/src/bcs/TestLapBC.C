@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", TestLapBC);
 
-template <>
 InputParameters
-validParams<TestLapBC>()
+TestLapBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   return params;
 }
 

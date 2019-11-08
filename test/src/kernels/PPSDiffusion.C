@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PPSDiffusion);
 
-template <>
 InputParameters
-validParams<PPSDiffusion>()
+PPSDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<PostprocessorName>("pps_name",
                                              "the name of the postprocessor we are going to use");
   return params;

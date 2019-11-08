@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", AdvDiffReaction1);
 
-template <>
 InputParameters
-validParams<AdvDiffReaction1>()
+AdvDiffReaction1::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.set<Real>("A0") = 0.0;
   params.set<Real>("B0") = 0.0;

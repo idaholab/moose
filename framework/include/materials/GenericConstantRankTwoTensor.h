@@ -23,9 +23,9 @@ InputParameters validParams<GenericConstantRankTwoTensor>();
 class GenericConstantRankTwoTensor : public Material
 {
 public:
-  GenericConstantRankTwoTensor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GenericConstantRankTwoTensor(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

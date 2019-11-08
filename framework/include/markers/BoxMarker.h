@@ -21,6 +21,8 @@ InputParameters validParams<BoxMarker>();
 class BoxMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   BoxMarker(const InputParameters & parameters);
 
 protected:

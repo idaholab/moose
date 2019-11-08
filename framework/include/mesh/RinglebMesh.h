@@ -22,9 +22,9 @@ InputParameters validParams<RinglebMesh>();
 class RinglebMesh : public MooseMesh
 {
 public:
-  RinglebMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RinglebMesh(const InputParameters & parameters);
   RinglebMesh(const RinglebMesh & /* other_mesh */) = default;
 
   // No copy

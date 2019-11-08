@@ -23,6 +23,8 @@ InputParameters validParams<ViewFactorPP>();
 class ViewFactorPP : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ViewFactorPP(const InputParameters & parameters);
 
   virtual void initialize() override {}

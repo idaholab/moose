@@ -25,9 +25,9 @@ InputParameters validParams<MeshExtruderGenerator>();
 class MeshExtruderGenerator : public MeshGenerator
 {
 public:
-  MeshExtruderGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MeshExtruderGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

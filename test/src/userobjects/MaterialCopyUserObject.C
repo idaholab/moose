@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MaterialCopyUserObject);
 
-template <>
 InputParameters
-validParams<MaterialCopyUserObject>()
+MaterialCopyUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<std::vector<Real>>("copy_times", "Times at which state should be copied");
   params.addRequiredParam<unsigned int>("copy_from_element",
                                         "The id of the element from which data is copied");

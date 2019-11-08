@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", DerivativeMaterialInterfaceTestClient);
 
-template <>
 InputParameters
-validParams<DerivativeMaterialInterfaceTestClient>()
+DerivativeMaterialInterfaceTestClient::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>("prop_name", "", "Name of the property to be retrieved");
   return params;
 }

@@ -11,14 +11,11 @@
 
 #include "IntegratedBC.h"
 
-class InflowBC;
-
-template <>
-InputParameters validParams<InflowBC>();
-
 class InflowBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   InflowBC(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-

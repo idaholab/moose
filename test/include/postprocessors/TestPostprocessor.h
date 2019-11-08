@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class TestPostprocessor;
-
-template <>
-InputParameters validParams<TestPostprocessor>();
-
 /**
  * A postprocessor for testing
  *
@@ -28,6 +23,8 @@ InputParameters validParams<TestPostprocessor>();
 class TestPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TestPostprocessor(const InputParameters & parameters);
 
   ///@{
@@ -58,4 +55,3 @@ private:
   /// A test counter
   unsigned int _execute_count = 0;
 };
-

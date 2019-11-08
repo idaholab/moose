@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class Biharmonic;
-
-template <>
-InputParameters validParams<Biharmonic>();
-
 /**
  * Computes the residual and Jacobian contribution for the weak form
  * of the biharmonic equation:
@@ -26,6 +20,8 @@ InputParameters validParams<Biharmonic>();
 class Biharmonic : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Biharmonic(const InputParameters & parameters);
 
 protected:
@@ -36,4 +32,3 @@ protected:
   const VariablePhiSecond & _second_phi;
   const VariableTestSecond & _second_test;
 };
-

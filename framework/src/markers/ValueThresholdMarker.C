@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ValueThresholdMarker);
 
-template <>
+defineLegacyParams(ValueThresholdMarker);
+
 InputParameters
-validParams<ValueThresholdMarker>()
+ValueThresholdMarker::validParams()
 {
-  InputParameters params = validParams<QuadraturePointMarker>();
+  InputParameters params = QuadraturePointMarker::validParams();
 
   params.addParam<Real>("coarsen",
                         "The threshold value for coarsening.  Elements with variable "

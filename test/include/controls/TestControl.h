@@ -12,18 +12,14 @@
 // MOOSE includes
 #include "Control.h"
 
-// Forward declarations
-class TestControl;
-
-template <>
-InputParameters validParams<TestControl>();
-
 /**
  * A Control object for testing purposes
  */
 class TestControl : public Control
 {
 public:
+  static InputParameters validParams();
+
   TestControl(const InputParameters & parameters);
   virtual ~TestControl(){};
   virtual void execute();
@@ -35,4 +31,3 @@ private:
   /// Storage for the alias test
   const MooseObjectParameterName _alias;
 };
-

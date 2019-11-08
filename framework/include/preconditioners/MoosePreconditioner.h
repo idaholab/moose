@@ -34,9 +34,9 @@ InputParameters validParams<MoosePreconditioner>();
 class MoosePreconditioner : public MooseObject, public Restartable, public PerfGraphInterface
 {
 public:
-  MoosePreconditioner(const InputParameters & params);
-
   static InputParameters validParams();
+
+  MoosePreconditioner(const InputParameters & params);
   virtual ~MoosePreconditioner() = default;
 
   /**

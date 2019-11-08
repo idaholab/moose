@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class FunctionGradAux;
 class Function;
-
-template <>
-InputParameters validParams<FunctionGradAux>();
 
 /**
  * AuxKernel for computing the gradient of a function and selecting one component
@@ -25,6 +21,8 @@ InputParameters validParams<FunctionGradAux>();
 class FunctionGradAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   FunctionGradAux(const InputParameters & parameters);
 
   virtual ~FunctionGradAux();

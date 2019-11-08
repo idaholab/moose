@@ -19,9 +19,9 @@ InputParameters validParams<ExternalProblem>();
 class ExternalProblem : public FEProblemBase
 {
 public:
-  ExternalProblem(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ExternalProblem(const InputParameters & parameters);
 
   enum class Direction : unsigned char
   {

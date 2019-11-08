@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", AlphaCED);
 
-template <>
 InputParameters
-validParams<AlphaCED>()
+AlphaCED::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addRequiredParam<Real>("value", "The value we are enforcing");
 
   return params;

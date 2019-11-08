@@ -26,9 +26,9 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>();
 class MultiAppMeshFunctionTransfer : public MultiAppFieldTransfer
 {
 public:
-  MultiAppMeshFunctionTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppMeshFunctionTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

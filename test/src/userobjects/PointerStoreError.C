@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PointerStoreError);
 
-template <>
 InputParameters
-validParams<PointerStoreError>()
+PointerStoreError::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

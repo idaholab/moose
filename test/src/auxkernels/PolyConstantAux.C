@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PolyConstantAux);
 
-template <>
 InputParameters
-validParams<PolyConstantAux>()
+PolyConstantAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   return params;
 }

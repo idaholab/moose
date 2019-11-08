@@ -11,15 +11,11 @@
 
 #include "VectorDiffusion.h"
 
-// Forward Declarations
-class VectorCoefDiffusion;
-
-template <>
-InputParameters validParams<VectorCoefDiffusion>();
-
 class VectorCoefDiffusion : public VectorDiffusion
 {
 public:
+  static InputParameters validParams();
+
   VectorCoefDiffusion(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
 
   const Real & _coef;
 };
-

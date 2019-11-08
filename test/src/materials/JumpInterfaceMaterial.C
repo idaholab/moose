@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", JumpInterfaceMaterial);
 
-template <>
 InputParameters
-validParams<JumpInterfaceMaterial>()
+JumpInterfaceMaterial::validParams()
 {
-  InputParameters params = validParams<InterfaceMaterial>();
+  InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("Calculates a variable's jump value across an interface.");
   params.addRequiredCoupledVar("var", "Name of the variable");
   params.addRequiredCoupledVar("neighbor_var", "Name of the neighbor variable");

@@ -10,21 +10,15 @@
 #pragma once
 #include "Material.h"
 
-
-// Forward Declarations
-class BadStatefulMaterial;
-
-template <>
-InputParameters validParams<BadStatefulMaterial>();
-
 /// Tries to retrieve non-existing old/older versions of a material property.
 class BadStatefulMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   BadStatefulMaterial(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 };
-

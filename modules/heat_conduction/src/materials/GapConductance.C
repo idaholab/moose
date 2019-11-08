@@ -21,11 +21,12 @@
 
 registerMooseObject("HeatConductionApp", GapConductance);
 
-template <>
+defineLegacyParams(GapConductance);
+
 InputParameters
-validParams<GapConductance>()
+GapConductance::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params += GapConductance::actionParameters();
 
   params.addRequiredCoupledVar("variable", "Temperature variable");

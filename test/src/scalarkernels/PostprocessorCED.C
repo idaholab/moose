@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", PostprocessorCED);
 
-template <>
 InputParameters
-validParams<PostprocessorCED>()
+PostprocessorCED::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
                              "Lagrange multiplier approach.");
   params.addRequiredParam<PostprocessorName>(

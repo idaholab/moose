@@ -40,9 +40,9 @@ public:
    * Factory constructor initializes all internal references needed for indicator computation.
    *
    */
-  InternalSideIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  InternalSideIndicator(const InputParameters & parameters);
 
   /**
    * Computes the indicator for the current side.

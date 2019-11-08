@@ -30,9 +30,9 @@ InputParameters validParams<DGDiffusion>();
 class DGDiffusion : public DGKernel
 {
 public:
-  DGDiffusion(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DGDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;

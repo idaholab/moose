@@ -36,9 +36,9 @@ class NodeElemConstraint : public Constraint,
                            public NeighborMooseVariableInterface<Real>
 {
 public:
-  NodeElemConstraint(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  NodeElemConstraint(const InputParameters & parameters);
   virtual ~NodeElemConstraint();
 
   /// Compute the value the slave node should have at the beginning of a timestep.

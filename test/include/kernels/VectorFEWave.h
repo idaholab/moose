@@ -12,15 +12,11 @@
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class VectorFEWave;
-
-template <>
-InputParameters validParams<VectorFEWave>();
-
 class VectorFEWave : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorFEWave(const InputParameters & parameters);
 
 protected:

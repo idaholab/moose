@@ -11,12 +11,18 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledMaterial);
 
-defineADValidParams(
-    ADCoupledMaterial, ADMaterial, params.addRequiredCoupledVar("coupled_var", "A coupledvariable");
-    params.addRequiredParam<MaterialPropertyName>("ad_mat_prop",
-                                                  "Name of the ad property this material defines");
-    params.addRequiredParam<MaterialPropertyName>(
-        "regular_mat_prop", "Name of the regular property this material defines"););
+template <ComputeStage compute_stage>
+InputParameters
+ADCoupledMaterial<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addRequiredCoupledVar("coupled_var", "A coupledvariable");
+  params.addRequiredParam<MaterialPropertyName>("ad_mat_prop",
+                                                "Name of the ad property this material defines");
+  params.addRequiredParam<MaterialPropertyName>(
+      "regular_mat_prop", "Name of the regular property this material defines");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCoupledMaterial<compute_stage>::ADCoupledMaterial(const InputParameters & parameters)

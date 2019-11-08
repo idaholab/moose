@@ -11,12 +11,6 @@
 
 #include "AuxScalarKernel.h"
 
-// Forward Declarations
-class ExplicitODE;
-
-template <>
-InputParameters validParams<ExplicitODE>();
-
 /**
  * Explicit solve of ODE:
  *
@@ -25,6 +19,8 @@ InputParameters validParams<ExplicitODE>();
 class ExplicitODE : public AuxScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   ExplicitODE(const InputParameters & parameters);
   virtual ~ExplicitODE();
 
@@ -33,4 +29,3 @@ protected:
 
   Real _lambda;
 };
-

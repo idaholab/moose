@@ -11,12 +11,6 @@
 
 #include "ADDGKernel.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADDGCoupledTest;
-
-declareADValidParams(ADDGCoupledTest);
-
 /**
  * This class is only currently used to test whether we can request neighbor AD calculations and not
  * have anything go horribly wrong
@@ -25,6 +19,8 @@ template <ComputeStage compute_stage>
 class ADDGCoupledTest : public ADDGKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADDGCoupledTest(const InputParameters & parameters);
 
 protected:
@@ -36,4 +32,3 @@ protected:
 
   usingDGKernelMembers;
 };
-

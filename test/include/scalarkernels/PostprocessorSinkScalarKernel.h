@@ -11,14 +11,11 @@
 
 #include "ODEKernel.h"
 
-class PostprocessorSinkScalarKernel;
-
-template <>
-InputParameters validParams<PostprocessorSinkScalarKernel>();
-
 class PostprocessorSinkScalarKernel : public ODEKernel
 {
 public:
+  static InputParameters validParams();
+
   PostprocessorSinkScalarKernel(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ReportingConstantSource);
 
-template <>
 InputParameters
-validParams<ReportingConstantSource>()
+ReportingConstantSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   params.addRequiredCoupledVar("shared", "Constant auxilary variable for storing the total flux");
   params.addParam<Real>("factor", 1, "The multiplier for the shared source value");

@@ -11,14 +11,11 @@
 
 #include "AuxKernel.h"
 
-class DriftDiffusionFluxAux;
-
-template <>
-InputParameters validParams<DriftDiffusionFluxAux>();
-
 class DriftDiffusionFluxAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DriftDiffusionFluxAux(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ private:
   const VariableGradient & _grad_u;
   const int _component;
 };
-

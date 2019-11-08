@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", NonlinearSource);
 
-template <>
 InputParameters
-validParams<NonlinearSource>()
+NonlinearSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredCoupledVar("coupled_var",
                                "The variable whose value is coupled into the source term.");
   params.addRequiredParam<Real>("scale_factor", "Strength of the source term");

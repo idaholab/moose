@@ -25,9 +25,9 @@ InputParameters validParams<FunctionDirichletBC>();
 class FunctionDirichletBC : public NodalBC
 {
 public:
-  FunctionDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   /**

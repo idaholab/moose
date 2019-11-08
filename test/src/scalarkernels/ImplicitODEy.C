@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ImplicitODEy);
 
-template <>
 InputParameters
-validParams<ImplicitODEy>()
+ImplicitODEy::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
   params.addRequiredCoupledVar("x", "X");
   return params;
 }

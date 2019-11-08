@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", StatefulSpatialTest);
 
-template <>
 InputParameters
-validParams<StatefulSpatialTest>()
+StatefulSpatialTest::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   return params;
 }
 

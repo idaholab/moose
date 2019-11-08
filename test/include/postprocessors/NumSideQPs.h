@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
 
-// Forward declerations
-class NumSideQPs;
-
-template <>
-InputParameters validParams<NumSideQPs>();
-
 /**
  * An object for testing that the specified quadrature order is used.  It
  * counts the number of quadrature points.
@@ -25,9 +19,10 @@ InputParameters validParams<NumSideQPs>();
 class NumSideQPs : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumSideQPs(const InputParameters & parameters);
   virtual ~NumSideQPs();
   virtual Real computeIntegral();
   virtual Real computeQpIntegral();
 };
-

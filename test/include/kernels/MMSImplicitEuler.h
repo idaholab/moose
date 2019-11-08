@@ -11,14 +11,11 @@
 
 #include "TimeKernel.h"
 
-class MMSImplicitEuler;
-
-template <>
-InputParameters validParams<MMSImplicitEuler>();
-
 class MMSImplicitEuler : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   MMSImplicitEuler(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
 
   const VariableValue & _u_old;
 };
-

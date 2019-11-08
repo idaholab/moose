@@ -19,9 +19,9 @@ InputParameters validParams<ElementIntegralIndicator>();
 class ElementIntegralIndicator : public ElementIndicator
 {
 public:
-  ElementIntegralIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ElementIntegralIndicator(const InputParameters & parameters);
 
   virtual void computeIndicator() override;
 

@@ -25,9 +25,9 @@ InputParameters validParams<FunctionPresetBC>();
 class FunctionPresetBC : public PresetNodalBC
 {
 public:
-  FunctionPresetBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FunctionPresetBC(const InputParameters & parameters);
 
 protected:
   /**

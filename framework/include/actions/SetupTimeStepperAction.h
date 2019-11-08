@@ -22,9 +22,9 @@ InputParameters validParams<SetupTimeStepperAction>();
 class SetupTimeStepperAction : public MooseObjectAction
 {
 public:
-  SetupTimeStepperAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  SetupTimeStepperAction(InputParameters parameters);
 
   virtual void act() override;
 };

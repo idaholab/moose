@@ -12,18 +12,14 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 
-// Forward Declarations
-class MTMaterial;
-
-template <>
-InputParameters validParams<MTMaterial>();
-
 /**
  * Simple material with constant properties.
  */
 class MTMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   MTMaterial(const InputParameters & parameters);
 
 protected:
@@ -32,4 +28,3 @@ protected:
   MaterialProperty<Real> & _mat_prop;
   Real _value;
 };
-

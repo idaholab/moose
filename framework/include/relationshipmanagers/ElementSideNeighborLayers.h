@@ -28,9 +28,9 @@ InputParameters validParams<ElementSideNeighborLayers>();
 class ElementSideNeighborLayers : public FunctorRelationshipManager
 {
 public:
-  ElementSideNeighborLayers(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ElementSideNeighborLayers(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;

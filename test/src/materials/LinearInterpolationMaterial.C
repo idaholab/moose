@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", LinearInterpolationMaterial);
 
-template <>
 InputParameters
-validParams<LinearInterpolationMaterial>()
+LinearInterpolationMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>(
       "prop_name", "The property name that will contain the piecewise function");
   params.addRequiredParam<std::vector<Real>>(

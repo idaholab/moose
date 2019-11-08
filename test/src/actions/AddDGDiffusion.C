@@ -14,11 +14,10 @@
 
 registerMooseAction("MooseTestApp", AddDGDiffusion, "add_dg_kernel");
 
-template <>
 InputParameters
-validParams<AddDGDiffusion>()
+AddDGDiffusion::validParams()
 {
-  auto params = validParams<Action>();
+  auto params = Action::validParams();
   params.addRequiredParam<NonlinearVariableName>("variable",
                                                  "The variable on which the dgkernel will act");
   params.addParam<Real>("sigma", "sigma");

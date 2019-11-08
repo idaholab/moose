@@ -11,17 +11,11 @@
 
 #include "InitialCondition.h"
 
-class MTICMult;
-
-template <>
-InputParameters validParams<MTICMult>();
-
-/**
- *
- */
 class MTICMult : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   MTICMult(const InputParameters & parameters);
   virtual ~MTICMult();
 
@@ -31,4 +25,3 @@ protected:
   const VariableValue & _var1;
   Real _factor;
 };
-

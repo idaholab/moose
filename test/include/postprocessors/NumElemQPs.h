@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ElementIntegralPostprocessor.h"
 
-// Forward declerations
-class NumElemQPs;
-
-template <>
-InputParameters validParams<NumElemQPs>();
-
 /**
  * An object for testing that the specified quadrature order is used.  It
  * counts the number of quadrature points.
@@ -25,9 +19,10 @@ InputParameters validParams<NumElemQPs>();
 class NumElemQPs : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumElemQPs(const InputParameters & parameters);
   virtual ~NumElemQPs();
   virtual Real computeIntegral();
   virtual Real computeQpIntegral();
 };
-

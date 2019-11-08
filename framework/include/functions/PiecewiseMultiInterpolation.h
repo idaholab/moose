@@ -33,9 +33,9 @@ public:
    * Create new PiecewiseMultiInterpolation object.
    * This calls GriddedData to do most of the work
    */
-  PiecewiseMultiInterpolation(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PiecewiseMultiInterpolation(const InputParameters & parameters);
 
   // Necessary for using forward declaration of GriddedData in std::unique_ptr
   virtual ~PiecewiseMultiInterpolation();

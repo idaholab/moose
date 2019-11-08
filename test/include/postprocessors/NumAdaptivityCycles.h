@@ -11,18 +11,14 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class NumAdaptivityCycles;
-
-template <>
-InputParameters validParams<NumAdaptivityCycles>();
-
 /**
  * Just returns the number of adaptivity cyles needed.
  */
 class NumAdaptivityCycles : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumAdaptivityCycles(const InputParameters & parameters);
 
   virtual void initialize() override {}
@@ -30,4 +26,3 @@ public:
 
   virtual Real getValue() override;
 };
-

@@ -24,6 +24,8 @@ InputParameters validParams<GapHeatTransfer>();
 class GapHeatTransfer : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   GapHeatTransfer(const InputParameters & parameters);
 
   virtual void initialSetup() override;

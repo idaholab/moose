@@ -11,17 +11,14 @@
 
 #include "GeneralPostprocessor.h"
 
-class TestSerializedSolution;
-
-template <>
-InputParameters validParams<TestSerializedSolution>();
-
 /**
  * A postprocessor for testing serialized solution vectors
  */
 class TestSerializedSolution : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TestSerializedSolution(const InputParameters & parameters);
 
   /**
@@ -49,4 +46,3 @@ protected:
   /// Sum of all of the entries in the serialized solution vector
   Real _sum;
 };
-

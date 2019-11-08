@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", ForcingFn);
 
-template <>
 InputParameters
-validParams<ForcingFn>()
+ForcingFn::validParams()
 {
-  return validParams<Kernel>();
+  return Kernel::validParams();
 }
 
 ForcingFn::ForcingFn(const InputParameters & parameters) : Kernel(parameters) {}

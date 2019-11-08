@@ -32,9 +32,9 @@ InputParameters validParams<ProxyRelationshipManager>();
 class ProxyRelationshipManager : public RelationshipManager
 {
 public:
-  ProxyRelationshipManager(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ProxyRelationshipManager(const InputParameters & parameters);
 
   virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
                           const MeshBase::const_element_iterator & /*range_end*/,

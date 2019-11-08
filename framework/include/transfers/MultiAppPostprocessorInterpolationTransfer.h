@@ -25,9 +25,9 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>();
 class MultiAppPostprocessorInterpolationTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

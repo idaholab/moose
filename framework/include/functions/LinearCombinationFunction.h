@@ -23,9 +23,9 @@ InputParameters validParams<LinearCombinationFunction>();
 class LinearCombinationFunction : public Function, protected FunctionInterface
 {
 public:
-  LinearCombinationFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  LinearCombinationFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & pt) const override;
   virtual RealVectorValue vectorValue(Real t, const Point & p) const override;

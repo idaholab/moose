@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledMaterial);
 
-template <>
 InputParameters
-validParams<CoupledMaterial>()
+CoupledMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop",
                                                 "Name of the property this material defines");
   params.addRequiredParam<MaterialPropertyName>(

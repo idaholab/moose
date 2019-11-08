@@ -11,12 +11,6 @@
 
 #include "ShapeSideUserObject.h"
 
-// Forward Declarations
-class DenomShapeSideUserObject;
-
-template <>
-InputParameters validParams<DenomShapeSideUserObject>();
-
 /**
  * Test and proof of concept class for computing UserObject Jacobians using the
  * ShapeSideUserObject base class. This object computes the integral
@@ -28,6 +22,8 @@ InputParameters validParams<DenomShapeSideUserObject>();
 class DenomShapeSideUserObject : public ShapeSideUserObject
 {
 public:
+  static InputParameters validParams();
+
   DenomShapeSideUserObject(const InputParameters & parameters);
 
   virtual ~DenomShapeSideUserObject() {}
@@ -51,4 +47,3 @@ protected:
   unsigned int _u_var;
   const VariableGradient & _grad_u;
 };
-

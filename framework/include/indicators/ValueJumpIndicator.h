@@ -19,9 +19,9 @@ InputParameters validParams<ValueJumpIndicator>();
 class ValueJumpIndicator : public InternalSideIndicator
 {
 public:
-  ValueJumpIndicator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ValueJumpIndicator(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", GetMaterialPropertyBoundaryBlockNamesTest);
 
-template <>
 InputParameters
-validParams<GetMaterialPropertyBoundaryBlockNamesTest>()
+GetMaterialPropertyBoundaryBlockNamesTest::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<std::string>("property_name",
                                        "The name of the property to extract boundary names for");
   params.addRequiredParam<std::vector<std::string>>(

@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", HeatCapacityConductionTimeDerivative);
 
-template <>
+defineLegacyParams(HeatCapacityConductionTimeDerivative);
+
 InputParameters
-validParams<HeatCapacityConductionTimeDerivative>()
+HeatCapacityConductionTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addClassDescription("Time derivative term $C_p \\frac{\\partial T}{\\partial t}$ of "
                              "the heat equation with the heat capacity $C_p$ as an argument.");
 

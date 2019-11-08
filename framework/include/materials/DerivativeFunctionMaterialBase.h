@@ -35,9 +35,9 @@ InputParameters validParams<DerivativeFunctionMaterialBase>();
 class DerivativeFunctionMaterialBase : public FunctionMaterialBase
 {
 public:
-  DerivativeFunctionMaterialBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DerivativeFunctionMaterialBase(const InputParameters & parameters);
 
 protected:
   virtual void computeProperties();

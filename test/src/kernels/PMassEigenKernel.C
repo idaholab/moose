@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PMassEigenKernel);
 
-template <>
 InputParameters
-validParams<PMassEigenKernel>()
+PMassEigenKernel::validParams()
 {
-  InputParameters params = validParams<EigenKernel>();
+  InputParameters params = EigenKernel::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The exponent p");
   return params;
 }

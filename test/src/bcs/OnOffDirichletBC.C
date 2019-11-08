@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", OnOffDirichletBC);
 
-template <>
 InputParameters
-validParams<OnOffDirichletBC>()
+OnOffDirichletBC::validParams()
 {
-  InputParameters params = validParams<DirichletBC>();
+  InputParameters params = DirichletBC::validParams();
 
   return params;
 }

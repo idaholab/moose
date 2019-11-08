@@ -40,9 +40,9 @@ template <ComputeStage compute_stage>
 class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Real>
 {
 public:
-  ADDGKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADDGKernel(const InputParameters & parameters);
 
   virtual ~ADDGKernel();
 

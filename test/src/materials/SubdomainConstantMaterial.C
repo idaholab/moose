@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", SubdomainConstantMaterial);
 
-template <>
 InputParameters
-validParams<SubdomainConstantMaterial>()
+SubdomainConstantMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>("mat_prop_name", "Material property name");
   params.addParam<std::vector<Real>>(
       "values",

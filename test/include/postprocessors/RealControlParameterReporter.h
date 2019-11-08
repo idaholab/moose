@@ -12,15 +12,11 @@
 // MOOSE includes
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class RealControlParameterReporter;
-
-template <>
-InputParameters validParams<RealControlParameterReporter>();
-
 class RealControlParameterReporter : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RealControlParameterReporter(const InputParameters & parameters);
 
   /**
@@ -47,4 +43,3 @@ private:
   // must be created prior to attempting to access the parameter objects
   const Real * _parameter;
 };
-

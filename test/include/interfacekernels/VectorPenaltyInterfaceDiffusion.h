@@ -11,18 +11,14 @@
 
 #include "InterfaceKernel.h"
 
-// Forward declaration
-class VectorPenaltyInterfaceDiffusion;
-
-template <>
-InputParameters validParams<VectorPenaltyInterfaceDiffusion>();
-
 /**
  *  DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
 class VectorPenaltyInterfaceDiffusion : public VectorInterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorPenaltyInterfaceDiffusion(const InputParameters & parameters);
 
 protected:

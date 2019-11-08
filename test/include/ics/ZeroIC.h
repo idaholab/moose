@@ -11,19 +11,15 @@
 
 #include "InitialCondition.h"
 
-class ZeroIC;
-
-template <>
-InputParameters validParams<ZeroIC>();
-
 /**
  * Initial condition that accesses _zero
  */
 class ZeroIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ZeroIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);
 };
-

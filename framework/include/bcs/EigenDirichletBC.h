@@ -23,9 +23,9 @@ InputParameters validParams<NodalBC>();
 class EigenDirichletBC : public NodalBC
 {
 public:
-  EigenDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  EigenDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

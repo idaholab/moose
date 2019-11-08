@@ -14,6 +14,8 @@
 class ConvectiveFluxFunction : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ConvectiveFluxFunction(const InputParameters & parameters);
   virtual ~ConvectiveFluxFunction() {}
 

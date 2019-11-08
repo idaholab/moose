@@ -25,9 +25,9 @@ InputParameters validParams<FunctionMaterialBase>();
 class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  FunctionMaterialBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FunctionMaterialBase(const InputParameters & parameters);
 
 protected:
   /**

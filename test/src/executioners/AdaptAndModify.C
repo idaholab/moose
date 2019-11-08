@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", AdaptAndModify);
 
-template <>
 InputParameters
-validParams<AdaptAndModify>()
+AdaptAndModify::validParams()
 {
-  InputParameters params = validParams<Transient>();
+  InputParameters params = Transient::validParams();
   params.addParam<unsigned int>("adapt_cycles", 1, "Number of adaptivity cycles to do.");
   return params;
 }

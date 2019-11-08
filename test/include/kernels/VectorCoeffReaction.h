@@ -12,15 +12,11 @@
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class VectorCoeffReaction;
-
-template <>
-InputParameters validParams<VectorCoeffReaction>();
-
 class VectorCoeffReaction : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorCoeffReaction(const InputParameters & parameters);
 
 protected:
@@ -29,4 +25,3 @@ protected:
 
   const Real _coefficient;
 };
-

@@ -11,18 +11,11 @@
 
 #include "ODEKernel.h"
 
-// Forward Declarations
-class ImplicitODEy;
-
-template <>
-InputParameters validParams<ImplicitODEy>();
-
-/**
- *
- */
 class ImplicitODEy : public ODEKernel
 {
 public:
+  static InputParameters validParams();
+
   ImplicitODEy(const InputParameters & parameters);
   virtual ~ImplicitODEy();
 
@@ -34,4 +27,3 @@ protected:
   unsigned int _x_var;
   VariableValue & _x;
 };
-

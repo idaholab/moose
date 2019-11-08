@@ -22,6 +22,8 @@ InputParameters validParams<HeatConductionBC>();
 class HeatConductionBC : public FluxBC
 {
 public:
+  static InputParameters validParams();
+
   HeatConductionBC(const InputParameters & parameters);
   virtual ~HeatConductionBC();
 

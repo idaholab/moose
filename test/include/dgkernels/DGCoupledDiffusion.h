@@ -11,15 +11,11 @@
 
 #include "DGKernel.h"
 
-// Forward Declarations
-class DGCoupledDiffusion;
-
-template <>
-InputParameters validParams<DGCoupledDiffusion>();
-
 class DGCoupledDiffusion : public DGKernel
 {
 public:
+  static InputParameters validParams();
+
   DGCoupledDiffusion(const InputParameters & parameters);
 
 protected:
@@ -34,4 +30,3 @@ protected:
   const VariableGradient & _grad_v_neighbor;
   unsigned int _v_id;
 };
-

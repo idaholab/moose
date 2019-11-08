@@ -16,15 +16,16 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(InterfaceKernelBase);
+
 InputParameters
-validParams<InterfaceKernelBase>()
+InterfaceKernelBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TransientInterface::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += MeshChangedInterface::validParams();
+  params += TaggingInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");

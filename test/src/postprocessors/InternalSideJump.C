@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", InternalSideJump);
 
-template <>
 InputParameters
-validParams<InternalSideJump>()
+InternalSideJump::validParams()
 {
-  InputParameters params = validParams<InternalSidePostprocessor>();
+  InputParameters params = InternalSidePostprocessor::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }

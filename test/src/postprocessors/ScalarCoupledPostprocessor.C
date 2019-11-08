@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ScalarCoupledPostprocessor);
 
-template <>
 InputParameters
-validParams<ScalarCoupledPostprocessor>()
+ScalarCoupledPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable", "Name of variable");
   params.addRequiredCoupledVar("coupled_scalar", "The name of the scalar coupled variable");
   return params;

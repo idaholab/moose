@@ -19,6 +19,8 @@ InputParameters validParams<ValueRangeMarker>();
 class ValueRangeMarker : public QuadraturePointMarker
 {
 public:
+  static InputParameters validParams();
+
   ValueRangeMarker(const InputParameters & parameters);
 
 protected:

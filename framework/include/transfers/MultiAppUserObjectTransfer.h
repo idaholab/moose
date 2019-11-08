@@ -26,9 +26,9 @@ InputParameters validParams<MultiAppUserObjectTransfer>();
 class MultiAppUserObjectTransfer : public MultiAppFieldTransfer
 {
 public:
-  MultiAppUserObjectTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppUserObjectTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

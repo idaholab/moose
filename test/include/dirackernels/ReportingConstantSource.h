@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class ReportingConstantSource;
-
-template <>
-InputParameters validParams<ReportingConstantSource>();
-
 /**
  * A test class that uses a AuxScalarVariable to share with another
  * kernel as well as report the value via a postprocessor
@@ -25,6 +19,8 @@ InputParameters validParams<ReportingConstantSource>();
 class ReportingConstantSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   ReportingConstantSource(const InputParameters & parameters);
   virtual void addPoints();
   virtual Real computeQpResidual();
@@ -35,4 +31,3 @@ protected:
   Point _p;
   Real _factor;
 };
-

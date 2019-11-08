@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", VectorCoupledGradientTimeDerivative);
 
-template <>
 InputParameters
-validParams<VectorCoupledGradientTimeDerivative>()
+VectorCoupledGradientTimeDerivative::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addRequiredCoupledVar("v",
                                "The standard MooseVariable whose time derivative of the gradient "
                                "we will add to the residual. A physical realization of this is in "

@@ -11,22 +11,14 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class CoupledScalarAux;
-
-template <>
-InputParameters validParams<CoupledScalarAux>();
-
 /**
  * Coupled auxiliary scalar value
  */
 class CoupledScalarAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   CoupledScalarAux(const InputParameters & parameters);
 
 protected:
@@ -40,4 +32,3 @@ protected:
   /// The component of the scalar variable
   unsigned int _component;
 };
-

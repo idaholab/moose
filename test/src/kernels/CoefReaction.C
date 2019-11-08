@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoefReaction);
 
-template <>
 InputParameters
-validParams<CoefReaction>()
+CoefReaction::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }

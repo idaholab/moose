@@ -12,11 +12,7 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class DGMDDBC;
 class Function;
-
-template <>
-InputParameters validParams<DGMDDBC>();
 
 /**
  * Implements a simple dirichlet BC for DG with material property
@@ -30,10 +26,8 @@ InputParameters validParams<DGMDDBC>();
 class DGMDDBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   DGMDDBC(const InputParameters & parameters);
 
   virtual ~DGMDDBC() {}

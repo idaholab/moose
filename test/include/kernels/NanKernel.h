@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class NanKernel;
-
-template <>
-InputParameters validParams<NanKernel>();
-
 /**
  * Kernel that generates NaN
  */
 class NanKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NanKernel(const InputParameters & parameters);
 
 protected:
@@ -36,4 +32,3 @@ private:
   unsigned int _deprecated_default;
   unsigned int _deprecated_no_default;
 };
-

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", NanAtCountKernel);
 
-template <>
 InputParameters
-validParams<NanAtCountKernel>()
+NanAtCountKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<unsigned int>("count", "Will return a Nan during this residual count");
   params.addParam<bool>("print_count", false, "Print out the count.");
 

@@ -21,11 +21,12 @@
 
 registerMooseObject("HeatConductionApp", GapHeatTransfer);
 
-template <>
+defineLegacyParams(GapHeatTransfer);
+
 InputParameters
-validParams<GapHeatTransfer>()
+GapHeatTransfer::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Transfers heat across a gap between two "
                              "surfaces dependent on the gap geometry specified.");
   params.addParam<std::string>(

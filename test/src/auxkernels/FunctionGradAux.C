@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", FunctionGradAux);
 
-template <>
 InputParameters
-validParams<FunctionGradAux>()
+FunctionGradAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   MooseEnum dim_indices("x=0 y=1 z=2", "x");
   params.addRequiredParam<FunctionName>("function", "Function used to compute gradient");
   params.addParam<MooseEnum>("dimension_index", dim_indices, "The dimension index x|y|z");

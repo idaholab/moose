@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PostprocessorAux);
 
-template <>
 InputParameters
-validParams<PostprocessorAux>()
+PostprocessorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<PostprocessorName>("pp", "The Postprocessor to use as the value");
   return params;
 }

@@ -19,9 +19,9 @@ template <typename T, ComputeStage compute_stage>
 class ADIntegratedBCTempl : public IntegratedBCBase, public MooseVariableInterface<T>
 {
 public:
-  ADIntegratedBCTempl(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADIntegratedBCTempl(const InputParameters & parameters);
 
   virtual MooseVariableFE<T> & variable() override { return _var; }
 

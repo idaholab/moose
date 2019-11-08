@@ -19,9 +19,9 @@ InputParameters validParams<AddMultiAppAction>();
 class AddMultiAppAction : public MooseObjectAction
 {
 public:
-  AddMultiAppAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddMultiAppAction(InputParameters params);
 
   virtual void act() override;
 };

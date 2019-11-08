@@ -24,9 +24,9 @@ InputParameters validParams<ArrayDirichletBC>();
 class ArrayDirichletBC : public ArrayNodalBC
 {
 public:
-  ArrayDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ArrayDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual RealEigenVector computeQpResidual() override;

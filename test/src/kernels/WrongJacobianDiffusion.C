@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", WrongJacobianDiffusion);
 
-template <>
 InputParameters
-validParams<WrongJacobianDiffusion>()
+WrongJacobianDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<Real>("rfactor", 1.0, "Prefactor on the Residual");
   params.addParam<Real>("jfactor", 1.0, "Prefactor on the Jacobian");
   params.addCoupledVar("coupled", "optionally couple variables");

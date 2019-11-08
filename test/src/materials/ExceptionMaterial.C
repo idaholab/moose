@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ExceptionMaterial);
 
-template <>
 InputParameters
-validParams<ExceptionMaterial>()
+ExceptionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("coupled_var", "Name of the coupled variable");
   params.addClassDescription("Test Material that throws MooseExceptions for testing purposes");
   params.addParam<processor_id_type>(

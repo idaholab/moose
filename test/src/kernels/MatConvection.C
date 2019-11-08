@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MatConvection);
 
-template <>
 InputParameters
-validParams<MatConvection>()
+MatConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "mat_prop", "Name of the property (scalar) to multiply the MatConvection kernel with");
 

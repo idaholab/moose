@@ -23,9 +23,9 @@ InputParameters validParams<SideSetsFromPointsGenerator>();
 class SideSetsFromPointsGenerator : public SideSetsGeneratorBase
 {
 public:
-  SideSetsFromPointsGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SideSetsFromPointsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

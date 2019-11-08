@@ -19,9 +19,9 @@ InputParameters validParams<CopyNodalVarsAction>();
 class CopyNodalVarsAction : public Action
 {
 public:
-  CopyNodalVarsAction(InputParameters params);
-
   static InputParameters validParams();
+
+  CopyNodalVarsAction(InputParameters params);
 
   virtual void act() override;
 };

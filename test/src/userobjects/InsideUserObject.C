@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", InsideUserObject);
 
-template <>
 InputParameters
-validParams<InsideUserObject>()
+InsideUserObject::validParams()
 {
-  InputParameters params = validParams<InternalSideUserObject>();
+  InputParameters params = InternalSideUserObject::validParams();
   params.addParam<MaterialPropertyName>(
       "diffusivity",
       0.0,

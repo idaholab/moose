@@ -27,7 +27,7 @@ InputParameters validParams<MoosePartitioner>();
 class MoosePartitioner : public libMesh::Partitioner, public MooseObject, public Restartable
 {
 public:
-  MoosePartitioner(const InputParameters & params);
-
   static InputParameters validParams();
+
+  MoosePartitioner(const InputParameters & params);
 };

@@ -24,9 +24,9 @@ InputParameters validParams<PiecewiseConstant>();
 class PiecewiseConstant : public Piecewise
 {
 public:
-  PiecewiseConstant(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PiecewiseConstant(const InputParameters & parameters);
 
   /**
    * Get the value of the function (based on time only)

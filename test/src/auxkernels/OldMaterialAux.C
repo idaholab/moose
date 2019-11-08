@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", OldMaterialAux);
 
-template <>
 InputParameters
-validParams<OldMaterialAux>()
+OldMaterialAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "property_name", "The name of the material property to capture old and older values from");
   return params;

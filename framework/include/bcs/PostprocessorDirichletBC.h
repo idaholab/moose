@@ -24,9 +24,9 @@ InputParameters validParams<PostprocessorDirichletBC>();
 class PostprocessorDirichletBC : public NodalBC
 {
 public:
-  PostprocessorDirichletBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PostprocessorDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

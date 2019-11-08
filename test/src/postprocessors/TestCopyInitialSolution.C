@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", TestCopyInitialSolution);
 
-template <>
 InputParameters
-validParams<TestCopyInitialSolution>()
+TestCopyInitialSolution::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

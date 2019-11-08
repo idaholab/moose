@@ -12,22 +12,14 @@
 // MOOSE includes
 #include "CoefDiffusion.h"
 
-// Forward declarations
-class ConsoleMessageKernel;
-
-template <>
-InputParameters validParams<ConsoleMessageKernel>();
-
 /**
  * A class for testing MooseObject::mooseConsole method
  */
 class ConsoleMessageKernel : public CoefDiffusion
 {
 public:
-  /**
-   * Class constructor
-   * @param parameters Input parameters
-   */
+  static InputParameters validParams();
+
   ConsoleMessageKernel(const InputParameters & parameters);
 
   /**
@@ -50,4 +42,3 @@ public:
    */
   void constMethod() const;
 };
-

@@ -33,9 +33,9 @@ class IntegratedBCBase : public BoundaryCondition,
                          public MaterialPropertyInterface
 {
 public:
-  IntegratedBCBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  IntegratedBCBase(const InputParameters & parameters);
 
   virtual ~IntegratedBCBase();
 

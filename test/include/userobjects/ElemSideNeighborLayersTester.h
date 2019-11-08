@@ -11,18 +11,14 @@
 
 #include "ElementUOProvider.h"
 
-// Forward Declarations
-class ElemSideNeighborLayersTester;
-
-template <>
-InputParameters validParams<ElemSideNeighborLayersTester>();
-
 /**
  * User object to show information about the ElemSideNeighborLayer object's "ghosting" behaviors
  */
 class ElemSideNeighborLayersTester : public ElementUOProvider
 {
 public:
+  static InputParameters validParams();
+
   ElemSideNeighborLayersTester(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -37,4 +33,3 @@ protected:
 
   const dof_id_type _rank;
 };
-

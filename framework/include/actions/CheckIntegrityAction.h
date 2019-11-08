@@ -19,9 +19,9 @@ InputParameters validParams<CheckIntegrityAction>();
 class CheckIntegrityAction : public Action
 {
 public:
-  CheckIntegrityAction(InputParameters params);
-
   static InputParameters validParams();
+
+  CheckIntegrityAction(InputParameters params);
 
   virtual void act() override;
 };

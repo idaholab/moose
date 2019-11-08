@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", Convection);
 
-template <>
 InputParameters
-validParams<Convection>()
+Convection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   params.addPrivateParam<std::vector<std::string>>("some_variable");
   return params;

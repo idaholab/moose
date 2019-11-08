@@ -23,9 +23,9 @@ InputParameters validParams<ElementSubdomainIDGenerator>();
 class ElementSubdomainIDGenerator : public MeshGenerator
 {
 public:
-  ElementSubdomainIDGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ElementSubdomainIDGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

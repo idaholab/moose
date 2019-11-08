@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DynamicPointValueSampler);
 
-template <>
 InputParameters
-validParams<DynamicPointValueSampler>()
+DynamicPointValueSampler::validParams()
 {
-  InputParameters params = validParams<LineValueSampler>();
+  InputParameters params = LineValueSampler::validParams();
 
   params.addParam<unsigned int>(
       "num_points_adder", 2, "The number of new points to add each iteration");

@@ -12,15 +12,11 @@
 #include "Kernel.h"
 #include "Material.h"
 
-// Forward Declarations
-class Diffusion0;
-
-template <>
-InputParameters validParams<Diffusion0>();
-
 class Diffusion0 : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Diffusion0(const InputParameters & parameters);
 
 protected:
@@ -31,4 +27,3 @@ private:
   /// Parameters for spatially linearly varying diffusivity.
   Real _Ak, _Bk, _Ck;
 };
-

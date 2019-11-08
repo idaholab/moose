@@ -14,11 +14,10 @@
 
 registerMooseObject("MooseTestApp", ElemUniqueSubdomainsGenerator);
 
-template <>
 InputParameters
-validParams<ElemUniqueSubdomainsGenerator>()
+ElemUniqueSubdomainsGenerator::validParams()
 {
-  auto p = validParams<MeshGenerator>();
+  auto p = MeshGenerator::validParams();
   p.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   p.addParam<subdomain_id_type>("mod",
                                 std::numeric_limits<subdomain_id_type>::max(),

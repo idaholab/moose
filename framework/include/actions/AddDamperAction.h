@@ -19,9 +19,9 @@ InputParameters validParams<AddDamperAction>();
 class AddDamperAction : public MooseObjectAction
 {
 public:
-  AddDamperAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddDamperAction(InputParameters params);
 
   virtual void act() override;
 };

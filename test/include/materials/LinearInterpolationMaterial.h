@@ -12,15 +12,13 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-class LinearInterpolationMaterial;
 class PolynomialFit;
-
-template <>
-InputParameters validParams<LinearInterpolationMaterial>();
 
 class LinearInterpolationMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   LinearInterpolationMaterial(const InputParameters & parameters);
 
 protected:

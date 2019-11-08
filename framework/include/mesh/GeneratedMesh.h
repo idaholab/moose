@@ -22,9 +22,9 @@ InputParameters validParams<GeneratedMesh>();
 class GeneratedMesh : public MooseMesh
 {
 public:
-  GeneratedMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneratedMesh(const InputParameters & parameters);
   GeneratedMesh(const GeneratedMesh & /* other_mesh */) = default;
 
   // No copy

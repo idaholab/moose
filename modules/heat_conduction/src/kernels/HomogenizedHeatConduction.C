@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", HomogenizedHeatConduction);
 
-template <>
+defineLegacyParams(HomogenizedHeatConduction);
+
 InputParameters
-validParams<HomogenizedHeatConduction>()
+HomogenizedHeatConduction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Kernel for asymptotic expansion homogenization for thermal conductivity");
   params.addParam<MaterialPropertyName>(

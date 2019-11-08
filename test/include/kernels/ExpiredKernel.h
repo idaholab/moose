@@ -11,15 +11,11 @@
 
 #include "Reaction.h"
 
-// Forward Declarations
-class ExpiredKernel;
-
-template <>
-InputParameters validParams<ExpiredKernel>();
-
 class ExpiredKernel : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   ExpiredKernel(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
 
   Real _coef;
 };
-

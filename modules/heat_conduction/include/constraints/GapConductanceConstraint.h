@@ -55,6 +55,8 @@ template <ComputeStage compute_stage>
 class GapConductanceConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   GapConductanceConstraint(const InputParameters & parameters);
 
 protected:

@@ -26,9 +26,9 @@ public:
   /**
    * Constructor initializes the rate
    */
-  ConstantRate(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConstantRate(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

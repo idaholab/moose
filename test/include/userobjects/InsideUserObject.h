@@ -11,17 +11,11 @@
 
 #include "InternalSideUserObject.h"
 
-class InsideUserObject;
-
-template <>
-InputParameters validParams<InsideUserObject>();
-
-/**
- *
- */
 class InsideUserObject : public InternalSideUserObject
 {
 public:
+  static InputParameters validParams();
+
   InsideUserObject(const InputParameters & parameters);
   virtual ~InsideUserObject();
 
@@ -40,4 +34,3 @@ protected:
   const MaterialProperty<Real> & _diffusivity_prop;
   const MaterialProperty<Real> & _neighbor_diffusivity_prop;
 };
-

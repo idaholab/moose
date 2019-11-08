@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MatDivergenceBC);
 
-template <>
 InputParameters
-validParams<MatDivergenceBC>()
+MatDivergenceBC::validParams()
 {
-  InputParameters params = validParams<DivergenceBC>();
+  InputParameters params = DivergenceBC::validParams();
   params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the material property");
 
   return params;

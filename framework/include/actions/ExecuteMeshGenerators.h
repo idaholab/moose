@@ -19,9 +19,9 @@ InputParameters validParams<ExecuteMeshGenerators>();
 class ExecuteMeshGenerators : public Action
 {
 public:
-  ExecuteMeshGenerators(InputParameters params);
-
   static InputParameters validParams();
+
+  ExecuteMeshGenerators(InputParameters params);
 
   virtual void act() override;
 };

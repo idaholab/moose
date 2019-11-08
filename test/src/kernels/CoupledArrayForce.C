@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", CoupledArrayForce);
 
-template <>
 InputParameters
-validParams<CoupledArrayForce>()
+CoupledArrayForce::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addRequiredCoupledVar("v", "The coupled array variable which provides the force");
   params.addRequiredParam<RealEigenVector>(

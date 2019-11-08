@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", TestDiscontinuousValuePP);
 
-template <>
 InputParameters
-validParams<TestDiscontinuousValuePP>()
+TestDiscontinuousValuePP::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum gradient_components("x=0 y=1 z=2", "x");
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on.");

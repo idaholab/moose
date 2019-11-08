@@ -11,19 +11,15 @@
 
 #include "Action.h"
 
-class CreateSpecialProblemAction;
-
-template <>
-InputParameters validParams<CreateSpecialProblemAction>();
-
 /**
  * Small test action that creates a special problem based on a particular input syntax.
  */
 class CreateSpecialProblemAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   CreateSpecialProblemAction(InputParameters parameters);
 
   virtual void act() override;
 };
-

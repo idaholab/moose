@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PolyReaction);
 
-template <>
 InputParameters
-validParams<PolyReaction>()
+PolyReaction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

@@ -26,9 +26,9 @@ InputParameters validParams<VectorPostprocessorFunction>();
 class VectorPostprocessorFunction : public Function, public VectorPostprocessorInterface
 {
 public:
-  VectorPostprocessorFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  VectorPostprocessorFunction(const InputParameters & parameters);
   virtual Real value(Real /*t*/, const Point & pt) const override;
 
 protected:

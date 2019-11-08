@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ElementL2Diff);
 
-template <>
 InputParameters
-validParams<ElementL2Diff>()
+ElementL2Diff::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   return params;
 }
 

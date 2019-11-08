@@ -11,18 +11,14 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class BIDAux;
-
-template <>
-InputParameters validParams<BIDAux>();
-
 /**
  * returns the boundary ID
  */
 class BIDAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   BIDAux(const InputParameters & parameters);
 
 protected:

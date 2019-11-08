@@ -11,11 +11,6 @@
 
 #include "Kernel.h"
 
-class ScalarLagrangeMultiplier;
-
-template <>
-InputParameters validParams<ScalarLagrangeMultiplier>();
-
 /**
  * This Kernel is part of a test [0] that solves the constrained
  * Neumann problem:
@@ -40,6 +35,8 @@ InputParameters validParams<ScalarLagrangeMultiplier>();
 class ScalarLagrangeMultiplier : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ScalarLagrangeMultiplier(const InputParameters & parameters);
   virtual ~ScalarLagrangeMultiplier();
 
@@ -52,4 +49,3 @@ protected:
   unsigned int _lambda_var;
   VariableValue & _lambda;
 };
-

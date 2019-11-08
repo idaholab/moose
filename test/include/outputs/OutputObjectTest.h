@@ -12,15 +12,6 @@
 // MOOSE includes
 #include "Console.h"
 
-// Forward declerations
-class OutputObjectTest;
-
-template <>
-InputParameters validParams<OutputObjectTest>();
-
-/**
- *
- */
 class OutputObjectTest : public Console
 {
 public:
@@ -29,6 +20,8 @@ public:
    * @param name
    * @param InputParameters
    */
+  static InputParameters validParams();
+
   OutputObjectTest(const InputParameters & parameters);
 
   /**
@@ -41,4 +34,3 @@ public:
 private:
   MooseEnum _type;
 };
-

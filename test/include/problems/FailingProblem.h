@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class FailingProblem;
-
-template <>
-InputParameters validParams<FailingProblem>();
-
 /**
  * FEProblemBase derived class that will fail a prescribed timestep for testing
  * timestepping algorithms
@@ -23,6 +18,8 @@ InputParameters validParams<FailingProblem>();
 class FailingProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   FailingProblem(const InputParameters & params);
   virtual bool converged();
 
@@ -30,4 +27,3 @@ protected:
   bool _failed;
   unsigned int _fail_step;
 };
-

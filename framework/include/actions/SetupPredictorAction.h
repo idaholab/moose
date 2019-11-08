@@ -22,9 +22,9 @@ InputParameters validParams<SetupPredictorAction>();
 class SetupPredictorAction : public MooseObjectAction
 {
 public:
-  SetupPredictorAction(InputParameters parameters);
-
   static InputParameters validParams();
+
+  SetupPredictorAction(InputParameters parameters);
 
   virtual void act() override;
 };

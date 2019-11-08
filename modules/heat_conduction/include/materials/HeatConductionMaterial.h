@@ -24,6 +24,8 @@ InputParameters validParams<HeatConductionMaterial>();
 class HeatConductionMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   HeatConductionMaterial(const InputParameters & parameters);
 
 protected:

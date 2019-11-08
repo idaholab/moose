@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", PrimeProductPostprocessor);
 
-template <>
 InputParameters
-validParams<PrimeProductPostprocessor>()
+PrimeProductPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>(
       "prime_product", "The name of the user object that holds the prime product");
   return params;

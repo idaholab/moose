@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", DummyExternalProblem);
 
-template <>
 InputParameters
-validParams<DummyExternalProblem>()
+DummyExternalProblem::validParams()
 {
-  InputParameters params = validParams<ExternalProblem>();
+  InputParameters params = ExternalProblem::validParams();
   return params;
 }
 

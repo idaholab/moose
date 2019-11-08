@@ -19,6 +19,8 @@
 class MeshMetaDataDependenceAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MeshMetaDataDependenceAction(const InputParameters & params);
 
   virtual void act();
@@ -30,6 +32,3 @@ private:
   const Real & _xmin_prop;
   const Real & _xmax_prop;
 };
-
-template <>
-InputParameters validParams<MeshMetaDataDependenceAction>();

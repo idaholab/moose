@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class MatCoefDiffusion;
-
-template <>
-InputParameters validParams<MatCoefDiffusion>();
-
 /**
  * A test class for checking the operation for BlockRestrictable::hasMaterialProperty
  */
 class MatCoefDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MatCoefDiffusion(const InputParameters & parameters);
 
 protected:
@@ -31,4 +27,3 @@ protected:
   std::string _prop_name;
   const MaterialProperty<Real> * _coef;
 };
-

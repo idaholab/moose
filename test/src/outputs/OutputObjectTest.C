@@ -13,12 +13,11 @@
 
 registerMooseObject("MooseTestApp", OutputObjectTest);
 
-template <>
 InputParameters
-validParams<OutputObjectTest>()
+OutputObjectTest::validParams()
 {
   MooseEnum type("getOutput getOutputs-names getOutputs getOutputNames");
-  InputParameters params = validParams<Console>();
+  InputParameters params = Console::validParams();
   params.addRequiredParam<MooseEnum>("test_type", type, "The type of test to execute");
   return params;
 }

@@ -27,6 +27,8 @@ InputParameters validParams<HeatConductionKernel>();
 class HeatConductionKernel : public Diffusion
 {
 public:
+  static InputParameters validParams();
+
   HeatConductionKernel(const InputParameters & parameters);
 
 protected:

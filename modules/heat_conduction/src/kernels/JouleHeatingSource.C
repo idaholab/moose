@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", JouleHeatingSource);
 
-template <>
+defineLegacyParams(JouleHeatingSource);
+
 InputParameters
-validParams<JouleHeatingSource>()
+JouleHeatingSource::validParams()
 {
-  InputParameters params = validParams<HeatSource>();
+  InputParameters params = HeatSource::validParams();
   params.addCoupledVar("elec", "Electric potential for joule heating.");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
   params.addParam<MaterialPropertyName>(

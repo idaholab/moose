@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", NumInternalSides);
 
-template <>
 InputParameters
-validParams<NumInternalSides>()
+NumInternalSides::validParams()
 {
-  InputParameters params = validParams<InternalSidePostprocessor>();
+  InputParameters params = InternalSidePostprocessor::validParams();
   return params;
 }
 

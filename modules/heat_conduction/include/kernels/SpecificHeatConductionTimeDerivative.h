@@ -32,6 +32,8 @@ class SpecificHeatConductionTimeDerivative
     : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
+  static InputParameters validParams();
+
   SpecificHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:

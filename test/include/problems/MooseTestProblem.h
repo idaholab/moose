@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class MooseTestProblem;
-
-template <>
-InputParameters validParams<MooseTestProblem>();
-
 /**
  * FEProblemBase derived class for customization of callbacks. In this instance we only print out
  * something in the c-tor and d-tor, so we know the class was build and used properly.
@@ -23,7 +18,8 @@ InputParameters validParams<MooseTestProblem>();
 class MooseTestProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   MooseTestProblem(const InputParameters & params);
   virtual ~MooseTestProblem();
 };
-

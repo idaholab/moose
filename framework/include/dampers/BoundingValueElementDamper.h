@@ -25,9 +25,9 @@ InputParameters validParams<BoundingValueElementDamper>();
 class BoundingValueElementDamper : public ElementDamper
 {
 public:
-  BoundingValueElementDamper(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BoundingValueElementDamper(const InputParameters & parameters);
 
 protected:
   /// The maximum permissible value of the variable

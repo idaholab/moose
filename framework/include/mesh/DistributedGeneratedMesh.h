@@ -22,9 +22,9 @@ InputParameters validParams<DistributedGeneratedMesh>();
 class DistributedGeneratedMesh : public MooseMesh
 {
 public:
-  DistributedGeneratedMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  DistributedGeneratedMesh(const InputParameters & parameters);
   DistributedGeneratedMesh(const DistributedGeneratedMesh & /* other_mesh */) = default;
 
   // No copy

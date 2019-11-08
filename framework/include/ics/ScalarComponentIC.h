@@ -22,9 +22,9 @@ InputParameters validParams<ScalarComponentIC>();
 class ScalarComponentIC : public ScalarInitialCondition
 {
 public:
-  ScalarComponentIC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ScalarComponentIC(const InputParameters & parameters);
 
 protected:
   virtual Real value();

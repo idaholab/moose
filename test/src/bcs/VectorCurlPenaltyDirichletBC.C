@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", VectorCurlPenaltyDirichletBC);
 
-template <>
 InputParameters
-validParams<VectorCurlPenaltyDirichletBC>()
+VectorCurlPenaltyDirichletBC::validParams()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
+  InputParameters params = VectorIntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "The penalty coefficient");
   params.addParam<FunctionName>("function_x", 0, "The function for the x component");
   params.addParam<FunctionName>("function_y", 0, "The function for the y component");

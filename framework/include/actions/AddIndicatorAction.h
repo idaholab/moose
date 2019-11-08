@@ -19,9 +19,9 @@ InputParameters validParams<AddIndicatorAction>();
 class AddIndicatorAction : public MooseObjectAction
 {
 public:
-  AddIndicatorAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddIndicatorAction(InputParameters params);
 
   virtual void act() override;
 

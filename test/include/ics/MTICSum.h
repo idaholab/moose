@@ -11,17 +11,11 @@
 
 #include "InitialCondition.h"
 
-class MTICSum;
-
-template <>
-InputParameters validParams<MTICSum>();
-
-/**
- *
- */
 class MTICSum : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   MTICSum(const InputParameters & parameters);
   virtual ~MTICSum();
 
@@ -31,4 +25,3 @@ protected:
   const VariableValue & _var1;
   const VariableValue & _var2;
 };
-

@@ -29,9 +29,9 @@ InputParameters validParams<AddPeriodicBCAction>();
 class AddPeriodicBCAction : public Action
 {
 public:
-  AddPeriodicBCAction(InputParameters params);
-
   static InputParameters validParams();
+
+  AddPeriodicBCAction(InputParameters params);
 
   virtual void act() override;
 

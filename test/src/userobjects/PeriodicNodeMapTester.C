@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", PeriodicNodeMapTester);
 
-template <>
 InputParameters
-validParams<PeriodicNodeMapTester>()
+PeriodicNodeMapTester::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Test MooseMesh::buildPeriodicNodeMap()");
   params.addCoupledVar("v", "coupled variable (should be periodic)");
   return params;

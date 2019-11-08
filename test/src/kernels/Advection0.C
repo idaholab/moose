@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", Advection0);
 
-template <>
 InputParameters
-validParams<Advection0>()
+Advection0::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.set<Real>("Au") = 1.0;
   params.set<Real>("Bu") = 1.0;

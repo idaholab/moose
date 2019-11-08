@@ -24,9 +24,9 @@ InputParameters validParams<GeneratedMeshGenerator>();
 class GeneratedMeshGenerator : public MeshGenerator
 {
 public:
-  GeneratedMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  GeneratedMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

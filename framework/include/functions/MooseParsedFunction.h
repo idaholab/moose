@@ -34,9 +34,9 @@ public:
    * Created from MooseSystem via the FunctionFactory.
    * @param parameters The input parameters
    */
-  MooseParsedFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MooseParsedFunction(const InputParameters & parameters);
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations

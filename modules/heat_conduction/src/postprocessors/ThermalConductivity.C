@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", ThermalConductivity);
 
-template <>
+defineLegacyParams(ThermalConductivity);
+
 InputParameters
-validParams<ThermalConductivity>()
+ThermalConductivity::validParams()
 {
-  InputParameters params = validParams<SideAverageValue>();
+  InputParameters params = SideAverageValue::validParams();
   params.addRequiredParam<Real>("dx", "Length between sides of sample in length_scale");
   params.addRequiredParam<PostprocessorName>(
       "flux", "Heat flux out of 'cold' boundary in solution units, should always be positive");

@@ -23,9 +23,9 @@ InputParameters validParams<SplineFunction>();
 class SplineFunction : public Function
 {
 public:
-  SplineFunction(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SplineFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;
   virtual RealGradient gradient(Real t, const Point & p) const override;

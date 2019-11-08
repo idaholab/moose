@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", PeriodicDistanceAux);
 
-template <>
 InputParameters
-validParams<PeriodicDistanceAux>()
+PeriodicDistanceAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<Point>("point", "Some point in the domain");
 
   return params;

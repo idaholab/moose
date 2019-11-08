@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RandomMaterial);
 
-template <>
 InputParameters
-validParams<RandomMaterial>()
+RandomMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   return params;
 }
 

@@ -31,9 +31,9 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  EigenExecutionerBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  EigenExecutionerBase(const InputParameters & parameters);
 
   virtual void init() override;
 

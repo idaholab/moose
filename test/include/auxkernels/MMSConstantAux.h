@@ -11,14 +11,11 @@
 
 #include "AuxKernel.h"
 
-class MMSConstantAux;
-
-template <>
-InputParameters validParams<MMSConstantAux>();
-
 class MMSConstantAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MMSConstantAux(const InputParameters & parameters);
 
   virtual ~MMSConstantAux() {}
@@ -28,4 +25,3 @@ protected:
 
   unsigned int _mesh_dimension;
 };
-

@@ -15,9 +15,14 @@ registerADMooseObject("MooseTestApp", ADConvectionPrecompute);
  * This macro defines the valid parameters for
  * this Kernel and their default values
  */
-defineADValidParams(ADConvectionPrecompute,
-                    ADKernelValue,
-                    params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector"););
+template <ComputeStage compute_stage>
+InputParameters
+ADConvectionPrecompute<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADConvectionPrecompute<compute_stage>::ADConvectionPrecompute(const InputParameters & parameters)

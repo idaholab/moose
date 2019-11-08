@@ -21,11 +21,12 @@
 
 registerMooseObject("HeatConductionApp", UnobstructedPlanarViewFactor);
 
-template <>
+defineLegacyParams(UnobstructedPlanarViewFactor);
+
 InputParameters
-validParams<UnobstructedPlanarViewFactor>()
+UnobstructedPlanarViewFactor::validParams()
 {
-  InputParameters params = validParams<ViewFactorBase>();
+  InputParameters params = ViewFactorBase::validParams();
   params.addClassDescription(
       "Computes the view factors for planar faces in unubstructed radiative heat transfer.");
   return params;

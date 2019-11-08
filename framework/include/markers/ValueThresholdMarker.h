@@ -19,6 +19,8 @@ InputParameters validParams<ValueThresholdMarker>();
 class ValueThresholdMarker : public QuadraturePointMarker
 {
 public:
+  static InputParameters validParams();
+
   ValueThresholdMarker(const InputParameters & parameters);
 
 protected:

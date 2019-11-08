@@ -11,12 +11,6 @@
 
 #include "IntegratedBC.h"
 
-// Forward Declarations
-class TestLapBC;
-
-template <>
-InputParameters validParams<TestLapBC>();
-
 /**
  * This BC enforces: grad(u) \cdot n = (1/2)*Lap(u) weakly.  This is
  * consistent with the exact solution, for which we know that:
@@ -28,6 +22,8 @@ InputParameters validParams<TestLapBC>();
 class TestLapBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   TestLapBC(const InputParameters & parameters);
   virtual ~TestLapBC() {}
 
@@ -38,4 +34,3 @@ protected:
   const VariableSecond & _second_u;
   const VariablePhiSecond & _second_phi;
 };
-

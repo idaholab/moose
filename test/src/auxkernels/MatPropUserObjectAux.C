@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", MatPropUserObjectAux);
 
-template <>
 InputParameters
-validParams<MatPropUserObjectAux>()
+MatPropUserObjectAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "material_user_object", "The MaterialPropertyUserObject to retrieve values from.");
   return params;

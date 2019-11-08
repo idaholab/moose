@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RandomElementalUserObject);
 
-template <>
 InputParameters
-validParams<RandomElementalUserObject>()
+RandomElementalUserObject::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   return params;
 }

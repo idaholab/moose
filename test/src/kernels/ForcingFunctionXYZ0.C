@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ForcingFunctionXYZ0);
 
-template <>
 InputParameters
-validParams<ForcingFunctionXYZ0>()
+ForcingFunctionXYZ0::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.set<Real>("A0") = 0.;
   params.set<Real>("B0") = 0.;

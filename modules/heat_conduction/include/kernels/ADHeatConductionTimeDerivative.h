@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADHeatConductionTimeDerivative : public ADTimeDerivative<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:

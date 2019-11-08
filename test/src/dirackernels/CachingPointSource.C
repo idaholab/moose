@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CachingPointSource);
 
-template <>
 InputParameters
-validParams<CachingPointSource>()
+CachingPointSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   return params;
 }
 

@@ -11,17 +11,14 @@
 
 #include "Material.h"
 
-class SubdomainConstantMaterial;
-
-template <>
-InputParameters validParams<SubdomainConstantMaterial>();
-
 /**
  * Simple material with subdomain-wise constant properties.
  */
 class SubdomainConstantMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   SubdomainConstantMaterial(const InputParameters & parameters);
 
 protected:
@@ -31,4 +28,3 @@ protected:
   MaterialProperty<Real> & _mat_prop;
   std::map<SubdomainID, Real> _mapped_values;
 };
-

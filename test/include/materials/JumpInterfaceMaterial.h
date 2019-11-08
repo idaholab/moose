@@ -12,18 +12,14 @@
 #include "InterfaceMaterial.h"
 #include "MaterialProperty.h"
 
-// Forward Declarations
-class JumpInterfaceMaterial;
-
-template <>
-InputParameters validParams<JumpInterfaceMaterial>();
-
 /**
  * Interface material calculates a variable's jump value across an interface
  */
 class JumpInterfaceMaterial : public InterfaceMaterial
 {
 public:
+  static InputParameters validParams();
+
   JumpInterfaceMaterial(const InputParameters & parameters);
 
 protected:

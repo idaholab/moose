@@ -11,18 +11,14 @@
 
 #include "NodalKernel.h"
 
-// Forward Declarations
-class JacobianCheck;
-
-template <>
-InputParameters validParams<JacobianCheck>();
-
 /**
  * Dummy class that tests the Jacobian calculation
  */
 class JacobianCheck : public NodalKernel
 {
 public:
+  static InputParameters validParams();
+
   JacobianCheck(const InputParameters & parameters);
 
 protected:
@@ -30,4 +26,3 @@ protected:
 
   virtual Real computeQpJacobian() override;
 };
-

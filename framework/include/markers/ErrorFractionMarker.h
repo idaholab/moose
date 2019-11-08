@@ -19,6 +19,8 @@ InputParameters validParams<ErrorFractionMarker>();
 class ErrorFractionMarker : public IndicatorMarker
 {
 public:
+  static InputParameters validParams();
+
   ErrorFractionMarker(const InputParameters & parameters);
 
   virtual void markerSetup() override;

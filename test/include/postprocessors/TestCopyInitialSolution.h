@@ -11,17 +11,14 @@
 
 #include "GeneralPostprocessor.h"
 
-class TestCopyInitialSolution;
-
-template <>
-InputParameters validParams<TestCopyInitialSolution>();
-
 /**
  * A postprocessor for testing initial solution equality (see #1396)
  */
 class TestCopyInitialSolution : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TestCopyInitialSolution(const InputParameters & parameters);
   virtual ~TestCopyInitialSolution();
   virtual void initialize();
@@ -31,4 +28,3 @@ public:
 protected:
   bool _value;
 };
-

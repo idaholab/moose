@@ -23,9 +23,9 @@ InputParameters validParams<BlockDeletionGenerator>();
 class BlockDeletionGenerator : public ElementDeletionGeneratorBase
 {
 public:
-  BlockDeletionGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  BlockDeletionGenerator(const InputParameters & parameters);
 
 protected:
   virtual bool shouldDelete(const Elem * elem) override;

@@ -11,11 +11,6 @@
 
 #include "ADNodalBC.h"
 
-template <ComputeStage>
-class ADMatchedScalarValueBC;
-
-declareADValidParams(ADMatchedScalarValueBC);
-
 /**
  * Boundary condition of a Dirichlet type
  *
@@ -25,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADMatchedScalarValueBC : public ADNodalBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADMatchedScalarValueBC(const InputParameters & parameters);
 
 protected:

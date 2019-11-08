@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class MaterialPropertyBlockAux;
-
-template <>
-InputParameters validParams<MaterialPropertyBlockAux>();
-
 /**
  * This AuxKernel sets an elemental aux field to one on blocks where
  * a material property is defined and zero elsewhere. This class
@@ -25,6 +19,8 @@ InputParameters validParams<MaterialPropertyBlockAux>();
 class MaterialPropertyBlockAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MaterialPropertyBlockAux(const InputParameters & params);
 
 protected:
@@ -34,4 +30,3 @@ protected:
   const MaterialPropertyName & _mat_prop_name;
   bool _has_prop;
 };
-

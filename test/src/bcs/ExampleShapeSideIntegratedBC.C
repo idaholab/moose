@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ExampleShapeSideIntegratedBC);
 
-template <>
 InputParameters
-validParams<ExampleShapeSideIntegratedBC>()
+ExampleShapeSideIntegratedBC::validParams()
 {
-  InputParameters params = validParams<NonlocalIntegratedBC>();
+  InputParameters params = NonlocalIntegratedBC::validParams();
   params.addRequiredParam<UserObjectName>(
       "num_user_object", "ShapeSideUserObject for computing integral component in numerator.");
   params.addRequiredParam<UserObjectName>(

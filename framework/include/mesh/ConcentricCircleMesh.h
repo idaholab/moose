@@ -23,9 +23,9 @@ InputParameters validParams<ConcentricCircleMesh>();
 class ConcentricCircleMesh : public MooseMesh
 {
 public:
-  ConcentricCircleMesh(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConcentricCircleMesh(const InputParameters & parameters);
 
   ConcentricCircleMesh(const ConcentricCircleMesh & /* other_mesh */) = default;
 

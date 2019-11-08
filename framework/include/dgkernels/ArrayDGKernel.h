@@ -32,9 +32,9 @@ public:
    * @param parameters The parameters object for holding additional parameters for kernels and
    * derived kernels
    */
-  ArrayDGKernel(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ArrayDGKernel(const InputParameters & parameters);
 
   /**
    * The variable that this kernel operates on.

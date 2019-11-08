@@ -27,9 +27,9 @@ template <class T, class U>
 class CompositeTensorBase : public DerivativeMaterialInterface<U>
 {
 public:
-  CompositeTensorBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CompositeTensorBase(const InputParameters & parameters);
 
 protected:
   /**

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PReaction);
 
-template <>
 InputParameters
-validParams<PReaction>()
+PReaction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   params.addParam<Real>("power", 1.0, "Variable power");
   return params;

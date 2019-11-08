@@ -36,9 +36,9 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Transient(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Transient(const InputParameters & parameters);
 
   virtual void init() override;
 

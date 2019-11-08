@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", RobinBC);
 
-template <>
 InputParameters
-validParams<RobinBC>()
+RobinBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("coef", 2, "The cofficient multiplying this BC's residual/Jacobian");
   return params;
 }

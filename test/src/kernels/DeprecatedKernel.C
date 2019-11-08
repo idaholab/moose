@@ -11,11 +11,10 @@
 
 registerMooseObjectDeprecated("MooseTestApp", DeprecatedKernel, "01/01/2050 00:00");
 
-template <>
 InputParameters
-validParams<DeprecatedKernel>()
+DeprecatedKernel::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }

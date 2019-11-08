@@ -15,6 +15,8 @@
 class ExampleShapeElementKernel2 : public NonlocalKernel
 {
 public:
+  static InputParameters validParams();
+
   ExampleShapeElementKernel2(const InputParameters & parameters);
 
 protected:
@@ -32,7 +34,3 @@ protected:
   unsigned int _v_var;
   const std::vector<dof_id_type> & _v_dofs;
 };
-
-template <>
-InputParameters validParams<ExampleShapeElementKernel2>();
-

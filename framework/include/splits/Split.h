@@ -29,9 +29,9 @@ InputParameters validParams<Split>();
 class Split : public MooseObject, public Restartable
 {
 public:
-  Split(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  Split(const InputParameters & parameters);
   virtual ~Split() = default;
 
   virtual void setup(const std::string & prefix = "-");

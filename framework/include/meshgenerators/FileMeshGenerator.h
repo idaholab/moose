@@ -23,9 +23,9 @@ InputParameters validParams<FileMeshGenerator>();
 class FileMeshGenerator : public MeshGenerator
 {
 public:
-  FileMeshGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FileMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

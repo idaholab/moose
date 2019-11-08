@@ -11,14 +11,11 @@
 
 #include "Action.h"
 
-class AddDGDiffusion;
-
-template <>
-InputParameters validParams<AddDGDiffusion>();
-
 class AddDGDiffusion : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddDGDiffusion(const InputParameters & params);
 
   void act() override;

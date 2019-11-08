@@ -31,9 +31,9 @@ template <ComputeStage compute_stage>
 class ADDGDiffusion : public ADDGKernel<compute_stage>
 {
 public:
-  ADDGDiffusion(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADDGDiffusion(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;

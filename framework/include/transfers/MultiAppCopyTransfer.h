@@ -28,9 +28,9 @@ InputParameters validParams<MultiAppCopyTransfer>();
 class MultiAppCopyTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppCopyTransfer(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MultiAppCopyTransfer(const InputParameters & parameters);
 
   /**
    * Performs basic error checking that the variable exists on MultiApp.

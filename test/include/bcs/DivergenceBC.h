@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class DivergenceBC;
-
-template <>
-InputParameters validParams<DivergenceBC>();
-
 /**
  * This provides the term that you get from using the Gauss Divergence Theorem on the second
  * order term in a Laplace/Poisson equation.
@@ -23,14 +18,11 @@ InputParameters validParams<DivergenceBC>();
 class DivergenceBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   DivergenceBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-

@@ -23,9 +23,9 @@ InputParameters validParams<RenameBoundaryGenerator>();
 class RenameBoundaryGenerator : public MeshGenerator
 {
 public:
-  RenameBoundaryGenerator(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  RenameBoundaryGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

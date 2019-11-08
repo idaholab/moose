@@ -30,9 +30,9 @@ InputParameters validParams<MooseVariableScalar>();
 class MooseVariableScalar : public MooseVariableBase
 {
 public:
-  MooseVariableScalar(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  MooseVariableScalar(const InputParameters & parameters);
   virtual ~MooseVariableScalar();
 
   /**

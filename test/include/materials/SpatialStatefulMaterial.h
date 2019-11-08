@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class SpatialStatefulMaterial;
-
-template <>
-InputParameters validParams<SpatialStatefulMaterial>();
-
 /**
  * Stateful material class that defines a few properties.
  */
 class SpatialStatefulMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   SpatialStatefulMaterial(const InputParameters & parameters);
 
 protected:
@@ -39,4 +35,3 @@ private:
   MaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
 };
-

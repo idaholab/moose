@@ -11,17 +11,14 @@
 
 #include "GeneralUserObject.h"
 
-class MTUserObject;
-
-template <>
-InputParameters validParams<MTUserObject>();
-
 /**
  * Demonstration of user-data object
  */
 class MTUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   MTUserObject(const InputParameters & params);
   virtual ~MTUserObject();
 
@@ -68,4 +65,3 @@ protected:
   /// Number of elements to allocate (we do not like magic numbers)
   static const unsigned int NUM = 10;
 };
-

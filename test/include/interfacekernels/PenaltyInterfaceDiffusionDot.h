@@ -11,18 +11,14 @@
 
 #include "InterfaceTimeKernel.h"
 
-// Forward Declarations
-class PenaltyInterfaceDiffusionDot;
-
-template <>
-InputParameters validParams<PenaltyInterfaceDiffusionDot>();
-
 /**
  * Interface kernel enforcing continuity of flux and continuity of time derivatives
  */
 class PenaltyInterfaceDiffusionDot : public InterfaceTimeKernel
 {
 public:
+  static InputParameters validParams();
+
   PenaltyInterfaceDiffusionDot(const InputParameters & parameters);
 
 protected:

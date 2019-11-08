@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class RestartDiffusion;
-
-template <>
-InputParameters validParams<RestartDiffusion>();
-
 class RestartDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   RestartDiffusion(const InputParameters & parameters);
 
   virtual void timestepSetup();
@@ -31,4 +27,3 @@ protected:
   Real _coef;
   Real & _current_coef;
 };
-

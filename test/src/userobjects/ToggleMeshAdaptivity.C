@@ -11,13 +11,12 @@
 
 registerMooseObject("MooseTestApp", ToggleMeshAdaptivity);
 
-template <>
 InputParameters
-validParams<ToggleMeshAdaptivity>()
+ToggleMeshAdaptivity::validParams()
 {
   MooseEnum state("on off");
 
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<MooseEnum>(
       "mesh_adaptivity", state, "Control mesh adaptivity, choices are 'on' or 'off'.");
   params.addParam<int>("apply_after_timestep",

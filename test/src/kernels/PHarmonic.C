@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PHarmonic);
 
-template <>
 InputParameters
-validParams<PHarmonic>()
+PHarmonic::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The exponent p");
   return params;
 }

@@ -11,15 +11,11 @@
 
 #include "KernelValue.h"
 
-// Forward Declarations
-class ConvectionPrecompute;
-
-template <>
-InputParameters validParams<ConvectionPrecompute>();
-
 class ConvectionPrecompute : public KernelValue
 {
 public:
+  static InputParameters validParams();
+
   ConvectionPrecompute(const InputParameters & parameters);
 
 protected:
@@ -29,4 +25,3 @@ protected:
 private:
   RealVectorValue _velocity;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", HeatSource);
 
-template <>
+defineLegacyParams(HeatSource);
+
 InputParameters
-validParams<HeatSource>()
+HeatSource::validParams()
 {
-  InputParameters params = validParams<BodyForce>();
+  InputParameters params = BodyForce::validParams();
 
   // Override defaults and documentation, weak form is identical to BodyForce in MOOSE
   params.addParam<Real>("value", 1.0, "Value of heat source. Multiplied by function if present.");

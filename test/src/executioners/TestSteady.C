@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", TestSteady);
 
-template <>
 InputParameters
-validParams<TestSteady>()
+TestSteady::validParams()
 {
-  InputParameters params = validParams<Steady>();
+  InputParameters params = Steady::validParams();
 
   // Add control for the type of test to perform
   MooseEnum test_type("Exception addAttributeReporter");

@@ -11,17 +11,14 @@
 
 #include "AuxKernel.h"
 
-class ScalarDotCouplingAux;
-
-template <>
-InputParameters validParams<ScalarDotCouplingAux>();
-
 /**
  * Couples in the time derivatives of a scalar variable
  */
 class ScalarDotCouplingAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ScalarDotCouplingAux(const InputParameters & parameters);
   virtual ~ScalarDotCouplingAux();
 
@@ -30,4 +27,3 @@ protected:
 
   const VariableValue & _v_dot;
 };
-

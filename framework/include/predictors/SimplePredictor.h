@@ -41,9 +41,9 @@ InputParameters validParams<SimplePredictor>();
 class SimplePredictor : public Predictor
 {
 public:
-  SimplePredictor(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  SimplePredictor(const InputParameters & parameters);
 
   virtual bool shouldApply() override;
   virtual void apply(NumericVector<Number> & sln) override;

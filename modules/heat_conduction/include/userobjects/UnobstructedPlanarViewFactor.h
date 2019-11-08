@@ -23,6 +23,8 @@ InputParameters validParams<UnobstructedPlanarViewFactor>();
 class UnobstructedPlanarViewFactor : public ViewFactorBase
 {
 public:
+  static InputParameters validParams();
+
   UnobstructedPlanarViewFactor(const InputParameters & parameters);
 
   virtual void execute() override;

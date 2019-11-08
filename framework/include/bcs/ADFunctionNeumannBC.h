@@ -24,9 +24,9 @@ template <ComputeStage compute_stage>
 class ADFunctionNeumannBC : public ADIntegratedBC<compute_stage>
 {
 public:
-  ADFunctionNeumannBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ADFunctionNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

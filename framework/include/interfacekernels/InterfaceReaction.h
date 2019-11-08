@@ -24,6 +24,8 @@ InputParameters validParams<InterfaceReaction>();
 class InterfaceReaction : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   InterfaceReaction(const InputParameters & parameters);
 
 protected:

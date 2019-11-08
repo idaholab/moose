@@ -24,9 +24,9 @@ InputParameters validParams<FullSolveMultiApp>();
 class FullSolveMultiApp : public MultiApp
 {
 public:
-  FullSolveMultiApp(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  FullSolveMultiApp(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

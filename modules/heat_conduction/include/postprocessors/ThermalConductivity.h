@@ -23,6 +23,8 @@ InputParameters validParams<ThermalConductivity>();
 class ThermalConductivity : public SideAverageValue
 {
 public:
+  static InputParameters validParams();
+
   ThermalConductivity(const InputParameters & parameters);
 
   virtual Real getValue();

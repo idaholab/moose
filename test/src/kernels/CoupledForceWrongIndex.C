@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledForceWrongIndex);
 
-template <>
 InputParameters
-validParams<CoupledForceWrongIndex>()
+CoupledForceWrongIndex::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("v", {1, 2}, "The two coupled variables which provide the force");
   params.addParam<bool>("access_value",
                         true,

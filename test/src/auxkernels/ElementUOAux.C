@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ElementUOAux);
 
-template <>
 InputParameters
-validParams<ElementUOAux>()
+ElementUOAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>("element_user_object",
                                           "The ElementUOProvider where this Aux pulls values from");
 

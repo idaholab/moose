@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", FailingProblem);
 
-template <>
 InputParameters
-validParams<FailingProblem>()
+FailingProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
   params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
   return params;
 }

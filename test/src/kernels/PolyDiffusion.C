@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PolyDiffusion);
 
-template <>
 InputParameters
-validParams<PolyDiffusion>()
+PolyDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

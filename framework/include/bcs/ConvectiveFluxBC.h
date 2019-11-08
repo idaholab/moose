@@ -24,9 +24,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ConvectiveFluxBC(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  ConvectiveFluxBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

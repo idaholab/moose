@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class TestGetActionsAction;
-
-template <>
-InputParameters validParams<TestGetActionsAction>();
-
 /**
  * This action tests two functions provided by action warehouse: getAction and getActions.
  * It uses AddMaterialAction as the example for calling these two functions.
@@ -24,8 +19,9 @@ InputParameters validParams<TestGetActionsAction>();
 class TestGetActionsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   TestGetActionsAction(const InputParameters & params);
 
   virtual void act() override;
 };
-

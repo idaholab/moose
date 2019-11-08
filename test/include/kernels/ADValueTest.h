@@ -11,15 +11,12 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class ADValueTest;
-
-declareADValidParams(ADValueTest);
-
 template <ComputeStage compute_stage>
 class ADValueTest : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADValueTest(const InputParameters & parameters);
 
 protected:
@@ -27,4 +24,3 @@ protected:
 
   usingKernelMembers;
 };
-

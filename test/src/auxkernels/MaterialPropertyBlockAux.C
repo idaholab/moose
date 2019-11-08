@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", MaterialPropertyBlockAux);
 
-template <>
 InputParameters
-validParams<MaterialPropertyBlockAux>()
+MaterialPropertyBlockAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<MaterialPropertyName>("mat_prop_name",
                                         "The material property to check where it is defined");
   return params;
