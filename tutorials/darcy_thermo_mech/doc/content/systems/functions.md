@@ -8,7 +8,7 @@ time, $t$.
 ## MOOSE Function Objects
 
 A `Function` object is created by inheriting from `Function` and overriding the virtual `value()`
-(and optionally other methods as well) functions.
+(and optionally other methods as well) methods.
 
 Functions can be accessed in most MOOSE objects by calling `getFunction("name")`,
 where "name" matches a name from the input file.

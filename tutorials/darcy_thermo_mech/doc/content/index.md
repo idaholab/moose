@@ -149,7 +149,7 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step05.md start=end-intro
+!include problem/step06.md start=end-intro
 
 
 

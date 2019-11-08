@@ -2,7 +2,7 @@
 
 !---
 
-## Variable Spheres
+## Fluctuating Spheres
 
 The sphere size in the domain may not be constant, thus this property can quickly be
 changed to a `Function` that will allow it to be defined with respect to space and time.
@@ -11,7 +11,7 @@ changed to a `Function` that will allow it to be defined with respect to space a
 
 !---
 
-## Variable Spheres
+## Fluctuating Spheres
 
 Update `PackedColumn` object to utilize a function and then change the input file to vary the
 sphere size from 1 to 3 along the length of the pipe.
@@ -53,7 +53,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_functions
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step5.i
+../darcy_thermo_mech-opt -i step6.i
 ```
 
 !---
