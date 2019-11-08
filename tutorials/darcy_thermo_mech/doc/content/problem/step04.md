@@ -39,7 +39,7 @@ cd problems
 
 !---
 
-## Step 3: Run via Command-line
+## Step 4: Run via Command-line
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_ad_diff_darcy_pressure
@@ -50,7 +50,7 @@ cd problems
 
 !---
 
-## Step 3: Visualize Result
+## Step 4: Visualize Result
 
 ```bash
 ~/projects/moose/python/peacock/peacock -r step4_out.e

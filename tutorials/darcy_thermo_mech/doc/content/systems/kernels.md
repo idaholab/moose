@@ -109,6 +109,19 @@ For template methods the `template` keyword is also required:
 this->template templateMethod<Real>();
 ```
 
+!---
+
+## AD `using...` Macros
+
+To limit the need for `this->` and `this->template` the core base classes in MOOSE include "using"
+macros, such as `usingKernelMembers`. If objects created in an application include
+additional member variables and are intended to extended then it is advised to create a
+using macro.
+
+!listing step04_ad_diff_darcy_pressure/src/kernels/DarcyPressure.C start=usingDarcyPressureMembers end=template
+
+If classes that inherit from `DarcyPressure` call this macro, then they do not require the
+use of `this->` to access the permeability and viscsosity member variables.
 
 !!end-ad-kernel
 
