@@ -122,6 +122,20 @@ NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 }
 
 void
+NodeFaceConstraint::residualSetup()
+{
+  _slave_residual_computed = false;
+}
+
+Real
+NodeFaceConstraint::slaveResidual() const
+{
+  mooseAssert(_slave_residual_computed,
+              "The slave residual has not yet been computed, so the value will be garbage!");
+  return _slave_residual;
+}
+
+void
 NodeFaceConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
@@ -133,7 +147,8 @@ NodeFaceConstraint::computeResidual()
     neighbor_re(_i) += computeQpResidual(Moose::Master);
 
   _i = 0;
-  re(0) = computeQpResidual(Moose::Slave);
+  _slave_residual = re(0) = computeQpResidual(Moose::Slave);
+  _slave_residual_computed = true;
 }
 
 void

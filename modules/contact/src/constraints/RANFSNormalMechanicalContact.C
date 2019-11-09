@@ -54,6 +54,7 @@ void
 RANFSNormalMechanicalContact::residualSetup()
 {
   _node_to_lm.clear();
+  NodeFaceConstraint::residualSetup();
 }
 
 bool
