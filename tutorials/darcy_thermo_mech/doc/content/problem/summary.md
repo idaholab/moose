@@ -66,8 +66,7 @@ function of space and time.
 
 ## [#step07]
 
-Add temperature dependence to the viscosity and convert the material properties to use automatic
-differntiation to guarantee the correct Jabobian terms.
+Convert material object to use automatic differntiation to guarantee the correct Jabobian terms.
 
 
 !!!

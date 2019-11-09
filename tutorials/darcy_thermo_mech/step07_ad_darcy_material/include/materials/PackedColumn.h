@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 
 // A helper class from MOOSE that linear interpolates x,y data
 #include "LinearInterpolation.h"
@@ -20,7 +20,8 @@
  * Their job is to declare properties for use by other objects in the
  * calculation such as Kernels and BoundaryConditions.
  */
-class PackedColumn : public Material
+template <ComputeStage compute_stage>
+class PackedColumn : public ADMaterial<compute_stage>
 {
 public:
   static InputParameters validParams();
@@ -38,11 +39,13 @@ protected:
   const Real & _input_viscosity;
 
   /// Compute permeability based on the radius (mm)
-  LinearInterpolation _permeability_interpolation;
+  ADLinearInterpolation _permeability_interpolation;
 
   /// The permeability (K)
-  MaterialProperty<Real> & _permeability;
+  ADMaterialProperty(Real) & _permeability;
 
   /// The viscosity of the fluid (mu)
   MaterialProperty<Real> & _viscosity;
+
+  usingMaterialMembers;
 };

@@ -153,7 +153,7 @@ www.mooseframework.org
 
 !---
 
-!include problems/step07.md end=end-intro
+!include problem/step07.md end=end-intro
 
 !---
 
@@ -161,15 +161,15 @@ www.mooseframework.org
 
 ## (continued)
 
-!include systems/materials.md stascrt=end-non-ad-material
+!include systems/materials.md start=end-non-ad-material
 
 !---
 
-# Step 7: Temperature Dependent Properties
+# Step 7: Material with AD Properties
 
 ## (continued)
 
-!include problems/step07.md start=end-intro
+!include problem/step07.md start=end-intro
 
 
 !!!
@@ -237,6 +237,7 @@ www.mooseframework.org
 !---
 
 !include problem/step07.md end=end-intro
+
 
 !---
 
@@ -341,6 +342,7 @@ www.mooseframework.org
 !---
 
 !include systems/index.md
+
 !!!
 
 !---

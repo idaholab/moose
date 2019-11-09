@@ -28,6 +28,7 @@
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \
   using ADMaterial<compute_stage>::_q_point;                                                       \
+  using ADMaterial<compute_stage>::_ad_q_point;                                                    \
   using ADMaterial<compute_stage>::_current_elem;                                                  \
   using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
@@ -59,6 +60,10 @@ public:
    */
   template <typename T>
   ADMaterialPropertyObject<T> & declareADPropertyTempl(const std::string & prop_name);
+
+protected:
+
+  const ADPoint & _ad_q_point;
 };
 
 template <ComputeStage compute_stage>

@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "ADMaterial.h"
+#include "Assembly.h"
 
 defineADLegacyParams(ADMaterial);
 
@@ -21,7 +22,9 @@ ADMaterial<compute_stage>::validParams()
 }
 
 template <ComputeStage compute_stage>
-ADMaterial<compute_stage>::ADMaterial(const InputParameters & parameters) : Material(parameters)
+ADMaterial<compute_stage>::ADMaterial(const InputParameters & parameters) : Material(parameters),
+  _ad_q_point(_bnd ? _assembly.template adQPointsFace<compute_stage>() : _assembly.template adQPoints<compute_stage>())
+
 {
 }
 

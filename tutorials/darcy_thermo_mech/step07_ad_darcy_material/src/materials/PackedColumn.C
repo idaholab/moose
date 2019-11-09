@@ -10,12 +10,13 @@
 #include "PackedColumn.h"
 #include "Function.h"
 
-registerMooseObject("DarcyThermoMechApp", PackedColumn);
+registerADMooseObject("DarcyThermoMechApp", PackedColumn);
 
+template <ComputeStage compute_stage>
 InputParameters
-PackedColumn::validParams()
+PackedColumn<compute_stage>::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = ADMaterial<compute_stage>::validParams();
 
   // Parameter for radius of the spheres used to interpolate permeability.
   params.addParam<FunctionName>("radius",
@@ -30,15 +31,16 @@ PackedColumn::validParams()
   return params;
 }
 
-PackedColumn::PackedColumn(const InputParameters & parameters)
-  : Material(parameters),
+template <ComputeStage compute_stage>
+PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
+  : ADMaterial<compute_stage>(parameters),
 
     // Get the parameters from the input file
     _radius(getFunction("radius")),
     _input_viscosity(getParam<Real>("viscosity")),
 
     // Declare two material properties by getting a reference from the MOOSE Material system
-    _permeability(declareProperty<Real>("permeability")),
+    _permeability(declareADProperty<Real>("permeability")),
     _viscosity(declareProperty<Real>("viscosity"))
 {
   // From the paper: Table 1
@@ -49,8 +51,9 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
   _permeability_interpolation.setData(sphere_sizes, permeability);
 }
 
+template <ComputeStage compute_stage>
 void
-PackedColumn::computeQpProperties()
+PackedColumn<compute_stage>::computeQpProperties()
 {
   Real value = _radius.value(_t, _q_point[_qp]);
   mooseAssert(value >= 1 && value <= 3,
