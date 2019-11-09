@@ -63,6 +63,12 @@ starting_point = .5
     boundary = 40
     value = 0.0
   [../]
+  [./topx]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 30
+    value = 0.0
+  [../]
   [./boty]
     type = DirichletBC
     variable = disp_y
@@ -82,10 +88,10 @@ starting_point = .5
   num_steps = 1
   dt = 1
   dtmin = 1
-  solve_type = 'JFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual'
-  petsc_options_iname = '-mat_mffd_err'
-  petsc_options_value = '1e-5'
+  solve_type = 'NEWTON'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual -pc_svd_monitor -snes_fd -ksp_view_pmat'
+  petsc_options_iname = '-mat_mffd_err -pc_type'
+  petsc_options_value = '1e-5          svd'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
@@ -101,6 +107,10 @@ starting_point = .5
     execute_on = 'nonlinear'
   []
   print_linear_residuals = false
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []
 
 [Postprocessors]

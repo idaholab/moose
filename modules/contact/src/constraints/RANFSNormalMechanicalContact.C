@@ -50,6 +50,12 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
     mooseError("The number of displacement variables does not match the mesh dimension!");
 }
 
+void
+RANFSNormalMechanicalContact::residualSetup()
+{
+  _node_to_lm.clear();
+}
+
 bool
 RANFSNormalMechanicalContact::shouldApply()
 {
@@ -60,17 +66,24 @@ RANFSNormalMechanicalContact::shouldApply()
     _pinfo = found->second;
     if (_pinfo)
     {
-      // Build up residual vector corresponding to contact forces
-      RealVectorValue res_vec;
-      for (unsigned int i = 0; i < _mesh_dimension; ++i)
+      // We overwrite the slave residual when constraints are active so we cannot use the residual
+      // copy for determining the Lagrange multiplier when computing the Jacobian
+      if (!_subproblem.currentlyComputingJacobian())
       {
-        dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-        res_vec(i) = _residual_copy(dof_number) / _var_objects[i]->scalingFactor();
+        // Build up residual vector corresponding to contact forces
+        RealVectorValue res_vec;
+        for (unsigned int i = 0; i < _mesh_dimension; ++i)
+        {
+          dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
+          res_vec(i) = _residual_copy(dof_number) / _var_objects[i]->scalingFactor();
+        }
+
+        _node_to_lm.insert(std::make_pair(_current_node->id(), res_vec * _pinfo->_normal));
       }
 
-      // The normal points out of the master face
-      _lagrange_multiplier = res_vec * _pinfo->_normal;
-
+      mooseAssert(_node_to_lm.find(_current_node->id()) != _node_to_lm.end(),
+                  "The node " << _current_node->id() << " should map to a lagrange multiplier");
+      _lagrange_multiplier = _node_to_lm[_current_node->id()];
       if (_lagrange_multiplier > -_pinfo->_distance)
       {
         // The constraint is active -> we're going to use our linear solve to ensure that the gap
@@ -107,7 +120,14 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
       if (_largest_component == static_cast<unsigned int>(_component))
       {
         _overwrite_slave_residual = true;
-        return _pinfo->_distance;
+        mooseAssert(_pinfo->_normal(_component) != 0,
+                    "We should be selecting the largest normal component, hence it should be "
+                    "impossible for this normal component to be zero");
+        // Do this if-else to make sure that the on-diagonal is positive
+        if (_pinfo->_normal(_component) > 0)
+          return -_pinfo->_distance;
+        else
+          return _pinfo->_distance;
       }
 
       else
@@ -126,67 +146,39 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
   }
 }
 
-Real RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
-{
-  return 0;
-}
-
 Real
-RANFSNormalMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                       unsigned jvar)
+RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
-  std::map<dof_id_type, PenetrationInfo *>::iterator found =
-      _penetration_locator._penetration_info.find(_current_node->id());
-  if (found != _penetration_locator._penetration_info.end())
+  switch (type)
   {
-    PenetrationInfo * pinfo = found->second;
-
-    // Latter check here is actually redundant because we don't call into this function unless
-    // jvar
-    // == _lambda_id
-    if (pinfo) // && jvar == _lambda_id)
+    case Moose::ConstraintJacobianType::SlaveSlave:
     {
-      switch (type)
+      if (_largest_component == static_cast<unsigned int>(_component))
       {
-        case Moose::SlaveSlave:
-          return -pinfo->_normal(_component);
-        case Moose::MasterSlave:
-          return _test_master[_i][_qp] * pinfo->_normal(_component);
-        default:
-          return 0;
+        _overwrite_slave_residual = true;
+        return std::abs(_pinfo->_normal(_component));
+      }
+      else
+      {
+        _overwrite_slave_residual = false;
+        return 0;
       }
     }
+    case Moose::ConstraintJacobianType::MasterSlave:
+    {
+      auto slave_dof_number =
+          _current_node->dof_number(/*system_number=*/0, _var.number(), /*variable_component=*/0);
+
+      // At least this matrix entry should be ghosted
+      auto slave_on_diagonal_jacobian =
+          (*_jacobian)(slave_dof_number, slave_dof_number) / _var.scalingFactor();
+      return _test_master[_i][_qp] * _pinfo->_normal(_component) * _pinfo->_normal(_component) *
+             slave_on_diagonal_jacobian;
+    }
+
+    default:
+      return 0;
   }
-
-  return 0;
-}
-
-void
-RANFSNormalMechanicalContact::computeJacobian()
-{
-}
-
-void
-RANFSNormalMechanicalContact::computeOffDiagJacobian(unsigned jvar)
-{
-  // Our residual only strongly depends on the lagrange multiplier (the normal vector does indeed
-  // depend on displacements but it's complicated and shouldn't be too strong of a dependence)
-  // if (jvar != _lambda_id)
-  return;
-
-  // MooseVariableFEBase & var = _sys.getVariable(0, jvar);
-  // _connected_dof_indices.clear();
-  // _connected_dof_indices.push_back(var.nodalDofIndex());
-
-  // _qp = 0;
-
-  // _Kee.resize(1, 1);
-  // _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
-
-  // _Kne.resize(_test_master.size(), 1);
-
-  // for (_i = 0; _i < _test_master.size(); ++_i)
-  //   _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
 }
 
 Real

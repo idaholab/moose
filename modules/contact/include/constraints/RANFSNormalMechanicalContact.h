@@ -14,6 +14,7 @@
 #include "MooseEnum.h"
 
 #include <vector>
+#include <unordered_map>
 
 class RANFSNormalMechanicalContact;
 class PenetrationInfo;
@@ -32,16 +33,14 @@ class RANFSNormalMechanicalContact : public NodeFaceConstraint
 public:
   RANFSNormalMechanicalContact(const InputParameters & parameters);
 
-  void computeJacobian() override;
-  void computeOffDiagJacobian(unsigned int jvar) override;
   bool shouldApply() override;
+  void residualSetup() override;
 
 protected:
   virtual Real computeQpSlaveValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar) override;
 
   const MooseEnum _component;
   const unsigned int _mesh_dimension;
@@ -50,6 +49,7 @@ protected:
   unsigned int _largest_component;
   std::vector<unsigned int> _vars;
   std::vector<MooseVariable *> _var_objects;
+  std::unordered_map<dof_id_type, Real> _node_to_lm;
   Real _lagrange_multiplier;
   PenetrationInfo * _pinfo;
 };
