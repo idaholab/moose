@@ -310,8 +310,36 @@ When rendering HTML, MooseDocs converts the following punctuation to the correct
 table below lists the conversions that are performed.
 
 | MooseDocs | HTML |
-| - | - |
+| :- | :- |
 | `--` | `&ndash` |
 | `---` | `&mdash` |
 
 [markdown]: https://en.wikipedia.org/wiki/Markdown
+
+### Line Breaks
+
+Line breaks can be forced by using `\\` within the text followed by a space or the end of a line,
+as in [break].
+
+!devel! example id=break caption=Example line break.
+This sentence has a\\ line break. And so does\\
+this.
+!devel-end!
+
+### Escape Characters
+
+In some cases the use of characters such as a bracket of exclamation are needed in a context that
+is recognized as special markdown syntax. In this case, the character should be escaped, using the
+`\` character, as in the following examples.
+
+| MooseDocs | HTML |
+| :-        | :-   |
+| `\!`      | \!   |
+| `\[`      | \[   |
+| `\]`      | \]   |
+| `\@`      | \@   |
+| `\^`      | \^   |
+| `\*`      | \*   |
+| `\+`      | \+   |
+| `\~`      | \~   |
+| `\-`      | \-   |
