@@ -65,37 +65,37 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = top_2
-    function = 2*t
-  [../]
-  [./top2_y]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top_2
     function = 1*t
   [../]
+  [./top2_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = top_2
+    value = 0.0
+  [../]
   [./top2_z]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_z
     boundary = top_2
-    function = 3*t
+    value = 0.0
   [../]
   [./top3_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = top_3
-    function = 2*t
-  [../]
-  [./top3_y]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top_3
     function = 1*t
   [../]
+  [./top3_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = top_3
+    value = 0.0
+  [../]
   [./top3_z]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_z
     boundary = top_3
-    function = 3*t
+    value = 0.0
   [../]
 []
 
@@ -138,7 +138,7 @@
     block = '1 2 3'
   [../]
   [./czm_3dc]
-    type = CZM3DCLaw
+    type = SalehaniIrani3DCTraction
     boundary = 'interface'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5
@@ -167,7 +167,7 @@
   l_max_its = 50
   start_time = 0.0
   dt = 0.1
-  end_time = 1
+  end_time = 3
   dtmin = 0.1
   line_search = none
 []
@@ -218,18 +218,6 @@
   [./disp_top3_x]
     type = SideAverageValue
     variable = disp_x
-    execute_on = 'initial timestep_end'
-    boundary = 'top_3'
-  [../]
-  [./disp_top3_y]
-    type = SideAverageValue
-    variable = disp_y
-    execute_on = 'initial timestep_end'
-    boundary = 'top_3'
-  [../]
-  [./disp_top3_z]
-    type = SideAverageValue
-    variable = disp_z
     execute_on = 'initial timestep_end'
     boundary = 'top_3'
   [../]

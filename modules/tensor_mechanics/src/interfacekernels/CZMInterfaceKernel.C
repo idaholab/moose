@@ -25,8 +25,8 @@ validParams<CZMInterfaceKernel>()
 
   params.addRequiredCoupledVar("displacements", "the string containing dispalcement variables");
 
-  params.addClassDescription(
-      "Cohesive Zone Interface Kernel for cohesive zone model deping only on the disaplcment jump");
+  params.addClassDescription("Interface kernel for use with cohesive zone models (CZMs) that "
+                             "compute traction as a function of the displacement jump");
 
   return params;
 }
@@ -41,12 +41,6 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _traction_jump_derivatives(
         getMaterialPropertyByName<RankTwoTensor>("traction_jump_derivatives_global"))
 {
-  if (!parameters.isParamValid("boundary"))
-  {
-    mooseError("In order to use  CZMInterfaceKernel ,"
-               " you must specify a boundary where it will live.");
-  }
-
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp_var[i] = coupled("displacements", i);
@@ -67,12 +61,10 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
     case Moose::Element:
       r *= -_test[_i][_qp];
       break;
-
     case Moose::Neighbor:
       r *= _test_neighbor[_i][_qp];
       break;
   }
-
   return r;
 }
 
@@ -85,24 +77,19 @@ CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 
   switch (type)
   {
-
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
       jac *= _test[_i][_qp] * _phi[_j][_qp];
       break;
-
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
       jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
-
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
       jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
       break;
-
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
       jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
   }
-
   return jac;
 }
 
@@ -123,19 +110,15 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
 
   switch (type)
   {
-
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
       jac *= _test[_i][_qp] * _phi[_j][_qp];
       break;
-
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
       jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
-
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
       jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
       break;
-
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
       jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
       break;

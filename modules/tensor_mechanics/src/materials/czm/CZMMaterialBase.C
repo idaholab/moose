@@ -18,8 +18,7 @@ validParams<CZMMaterialBase>()
   InputParameters params = validParams<InterfaceMaterial>();
 
   params.addParam<Real>("inner_penetration_penalty", 1, "inner penalty factor");
-  params.addClassDescription("this material class is used when defining a "
-                             "cohesive zone model");
+  params.addClassDescription("Base class for cohesive zone mateirla models");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
   return params;
@@ -57,7 +56,7 @@ CZMMaterialBase::computeQpProperties()
   RealTensorValue RotationGlobal2Local =
       RotationMatrix::rotVec1ToVec2(_normals[_qp], RealVectorValue(1, 0, 0));
 
-  // computing the actual displacemnt jump
+  // computing the actual displacement jump
   for (unsigned int i = 0; i < _ndisp; i++)
     _displacement_jump_global[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
   for (unsigned int i = _ndisp; i < 3; i++)

@@ -1,31 +1,37 @@
 [Mesh]
   [./msh]
-    type = GeneratedMeshGenerator
-    nx =2
-    ny =2
-    dim = 2
-  []
-  [./subdomain_1]
-    type = SubdomainBoundingBoxGenerator
-    input = msh
-    bottom_left = '0 0 0'
-    block_id = 1
-    top_right = '1 0.5 0'
-  []
-  [./subdomain_2]
-    type = SubdomainBoundingBoxGenerator
-    input = subdomain_1
-    bottom_left = '0 0.5 0'
-    block_id = 2
-    top_right = '1 1 0'
+    type = FileMeshGenerator
+    file = coh3D_3Blocks.e
   []
   [./breakmesh]
-    input = subdomain_2
+    input = msh
     type = BreakMeshByBlockGenerator
   [../]
+  [./bottom_block_1]
+    input = breakmesh
+    type = SideSetsAroundSubdomainGenerator
+    block = '1'
+    new_boundary = 'bottom_1'
+    normal = '0 0 -1'
+  [../]
+  [./top_block_2]
+    input = bottom_block_1
+    type = SideSetsAroundSubdomainGenerator
+    block = '2'
+    new_boundary = 'top_2'
+    normal = '0 0 1'
+  [../]
+  [./top_block_3]
+    input = top_block_2
+    type = SideSetsAroundSubdomainGenerator
+    block = '3'
+    new_boundary = 'top_3'
+    normal = '0 0 1'
+  [../]
 []
+
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Modules/TensorMechanics/Master]
@@ -36,71 +42,89 @@
   [../]
 []
 
+[Modules/TensorMechanics/CohesiveZoneMaster]
+  [./czm1]
+    boundary = 'interface'
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+[]
+
 [BCs]
   [./bottom_x]
     type = DirichletBC
     variable = disp_x
-    boundary = bottom
+    boundary = bottom_1
     value = 0.0
   [../]
   [./bottom_y]
     type = DirichletBC
     variable = disp_y
-    boundary = bottom
+    boundary = bottom_1
     value = 0.0
   [../]
-  [./top_x]
+  [./bottom_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = bottom_1
+    value = 0.0
+  [../]
+  [./top2_x]
     type = DirichletBC
     variable = disp_x
-    boundary = top
+    boundary = top_2
     value = 0.0
   [../]
-  [./top_y]
-    type = FunctionDirichletBC
+  [./top2_y]
+    type = DirichletBC
     variable = disp_y
-    boundary = top
+    boundary = top_2
+    value = 0.0
+  [../]
+  [./top2_z]
+    type = FunctionDirichletBC
+    variable = disp_z
+    boundary = top_2
     function = 1*t
   [../]
-[]
-
-[InterfaceKernels]
-  [./interface_x]
-    type = CZMInterfaceKernel
+  [./top3_x]
+    type = DirichletBC
     variable = disp_x
-    neighbor_var = disp_x
-    displacements = 'disp_x disp_y'
-    component = 0
-    boundary = 'interface'
+    boundary = top_3
+    value = 0.0
   [../]
-  [./interface_y]
-    type = CZMInterfaceKernel
+  [./top3_y]
+    type = DirichletBC
     variable = disp_y
-    neighbor_var = disp_y
-    displacements = 'disp_x disp_y'
-    component = 1
-    boundary = 'interface'
+    boundary = top_3
+    value = 0.0
+  [../]
+  [./top3_z]
+    type = FunctionDirichletBC
+    variable = disp_z
+    boundary = top_3
+    function = 1*t
   [../]
 []
 
 [Materials]
   [./Elasticity_tensor]
     type = ComputeElasticityTensor
-    block = '1 2'
+    block = '1 2 3'
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = '1 2'
+    block = '1 2 3'
   [../]
   [./czm_3dc]
-    type = CZM3DCLaw
+    type = SalehaniIrani3DCTraction
     boundary = 'interface'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5
     maximum_normal_traction = 100
     maximum_shear_traction = 70
-    displacements = 'disp_x disp_y'
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -135,46 +159,46 @@
 []
 
 [Postprocessors]
-  [./sxx_2G]
+  [./sxx_3G]
     type = ElementAverageValue
     variable = stress_xx
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./syy_2G]
+  [./syy_3G]
     type = ElementAverageValue
     variable = stress_yy
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./szz_2G]
+  [./szz_3G]
     type = ElementAverageValue
     variable = stress_zz
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./syz_2G]
+  [./syz_3G]
     type = ElementAverageValue
     variable = stress_yz
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./sxz_2G]
+  [./sxz_3G]
     type = ElementAverageValue
     variable = stress_xz
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./sxy_2G]
+  [./sxy_3G]
     type = ElementAverageValue
     variable = stress_xy
     execute_on = 'initial timestep_end'
-    block = 2
+    block = 3
   [../]
-  [./disp_top_y]
+  [./disp_top3_z]
     type = SideAverageValue
-    variable = disp_y
+    variable = disp_z
     execute_on = 'initial timestep_end'
-    boundary = 'top'
+    boundary = 'top_3'
   [../]
 []

@@ -17,9 +17,10 @@ class CZMInterfaceKernel;
 template <>
 InputParameters validParams<CZMInterfaceKernel>();
 
-/// DG kernel implementing CZM for a 1D/2D/3D traction sepration law based on
-/// the displacement jump. This kernel operates only on a single displacement
-/// compenent. One kernel is needed for each dispalcement jump component
+/// DG kernel implementing cohesive Zone mMdel (CZM) for a 1D/2D/3D traction
+/// sepration laws based on  the displacement jump. This kernel operates only on
+/// a single displacement compenent.
+/// One kernel is required for each mesh dimension
 class CZMInterfaceKernel : public InterfaceKernel
 {
 public:

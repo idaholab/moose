@@ -14,15 +14,17 @@ class CZMMaterialBase;
 template <>
 InputParameters validParams<CZMMaterialBase>();
 /**
- * This is the base Material class for implemnting traction separation laws.
- * The respoinasbility of this class is to rotate the dispalcement jump from global to local
- * coordinates and traction and its derivative back from local to global coordinates.
- * Local coordaintes refernce system assume (opening, tangential1, tangential2) cooridantes order.
- * Note that tangential1, tangential2 are arbitrry and therefore therefore the interface assume an
- * inplane isotropic behavior. By subclassing computeTraction and computeTractionDerivatives
- * different traction sepration laws can be implemented. CZMLaws should always be implemented in 3D
- * even if they are going to be used in 2D or 1D simulations. This class assume small deformations
- * and a traction sepration law being a function only of the displacement jump.
+ * This is the base Material class for implementing a traction separation material model.
+ * The responsibility of this class is to rotate the displacement jump from global to local
+ * coordinates and rotate back traction and traction derivative
+ * The local coordinates system assumes the following coordinates order: opening,
+ * tangential1, tangential2. Note that tangential1, tangential2 are arbitrary and therefore the
+ * interface assumes an in-plane isotropic behavior. By subclassing computeTraction and
+ * computeTractionDerivatives different traction separation laws can be implemented.
+ * computeTraction and computeTractionDerivatives assumes calculations are performed in the local
+ * frame. CZM laws should always be implemented in 3D even if they are going to be used in 2D or 1D
+ * simulations. This class assumes small deformations and that the traction separation law is only
+ * dependent upon the the displacement jump.
  */
 class CZMMaterialBase : public InterfaceMaterial
 {
@@ -48,7 +50,7 @@ protected:
   /// method returning the traction derivitaves wrt to local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() = 0;
 
-  /// the dispalcement jump in global coordiantes
+  /// the displacement jump in global coordiantes
   MaterialProperty<RealVectorValue> & _displacement_jump_global;
 
   /// the disaplcement jump in natural element coordiantes

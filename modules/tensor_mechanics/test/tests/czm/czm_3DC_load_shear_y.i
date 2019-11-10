@@ -138,7 +138,7 @@
     block = '1 2 3'
   [../]
   [./czm_3dc]
-    type = CZM3DCLaw
+    type = SalehaniIrani3DCTraction
     boundary = 'interface'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5

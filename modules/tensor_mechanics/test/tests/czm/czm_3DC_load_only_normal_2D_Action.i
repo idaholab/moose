@@ -2,29 +2,31 @@
   [./msh]
     type = GeneratedMeshGenerator
     nx =2
-    dim = 1
+    ny =2
+    dim = 2
   []
   [./subdomain_1]
     type = SubdomainBoundingBoxGenerator
     input = msh
     bottom_left = '0 0 0'
     block_id = 1
-    top_right = '0.5 0 0'
+    top_right = '1 0.5 0'
   []
   [./subdomain_2]
     type = SubdomainBoundingBoxGenerator
     input = subdomain_1
-    bottom_left = '0.5 0 0'
+    bottom_left = '0 0.5 0'
     block_id = 2
-    top_right = '1 0 0'
+    top_right = '1 1 0'
   []
   [./breakmesh]
     input = subdomain_2
     type = BreakMeshByBlockGenerator
   [../]
 []
+
 [GlobalParams]
-  displacements = 'disp_x'
+  displacements = 'disp_x disp_y'
 []
 
 [Modules/TensorMechanics/Master]
@@ -35,29 +37,37 @@
   [../]
 []
 
-[BCs]
-  [./left_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 0.0
-  [../]
-  [./right_x]
-    type = FunctionDirichletBC
-    variable = disp_x
-    boundary = right
-    function = 1*t
+[Modules/TensorMechanics/CohesiveZoneMaster]
+  [./czm1]
+    boundary = 'interface'
+    displacements = 'disp_x disp_y'
   [../]
 []
 
-[InterfaceKernels]
-  [./interface_x]
-    type = CZMInterfaceKernel
+[BCs]
+  [./bottom_x]
+    type = DirichletBC
     variable = disp_x
-    neighbor_var = disp_x
-    displacements = 'disp_x'
-    component = 0
-    boundary = 'interface'
+    boundary = bottom
+    value = 0.0
+  [../]
+  [./bottom_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = bottom
+    value = 0.0
+  [../]
+  [./top_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = top
+    value = 0.0
+  [../]
+  [./top_y]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = top
+    function = 1*t
   [../]
 []
 
@@ -73,13 +83,13 @@
     block = '1 2'
   [../]
   [./czm_3dc]
-    type = CZM3DCLaw
+    type = SalehaniIrani3DCTraction
     boundary = 'interface'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5
     maximum_normal_traction = 100
     maximum_shear_traction = 70
-    displacements = 'disp_x'
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -150,10 +160,10 @@
     execute_on = 'initial timestep_end'
     block = 2
   [../]
-  [./disp_right_x]
+  [./disp_top_y]
     type = SideAverageValue
-    variable = disp_x
+    variable = disp_y
     execute_on = 'initial timestep_end'
-    boundary = 'right'
+    boundary = 'top'
   [../]
 []

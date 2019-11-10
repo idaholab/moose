@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CZM3DCLaw.h"
+#include "SalehaniIrani3DCTraction.h"
 
-registerMooseObject("TensorMechanicsApp", CZM3DCLaw);
+registerMooseObject("TensorMechanicsApp", SalehaniIrani3DCTraction);
 
 template <>
 InputParameters
-validParams<CZM3DCLaw>()
+validParams<SalehaniIrani3DCTraction>()
 {
   InputParameters params = validParams<CZMMaterialBase>();
-  params.addClassDescription("3DC cohseive law model, no damage");
+  params.addClassDescription("3D Coupled (3DC) cohesive law of Salehani and Irani with no damage");
   params.addRequiredParam<Real>(
       "normal_gap_at_maximum_normal_traction",
       "the value of normal gap at which maximum normal traction is achieved");
@@ -27,14 +27,12 @@ validParams<CZM3DCLaw>()
                                 "The maximum normal traction the interface can sustain");
   params.addRequiredParam<Real>("maximum_shear_traction",
                                 "The maximum shear traction the interface can sustain");
-  params.addClassDescription("Simple Exponential cohseive law model, with damage");
   return params;
 }
 
-CZM3DCLaw::CZM3DCLaw(const InputParameters & parameters)
+SalehaniIrani3DCTraction::SalehaniIrani3DCTraction(const InputParameters & parameters)
   : CZMMaterialBase(parameters), _deltaU0(3, 0), _maxAllowableTraction(3, 0)
 {
-
   const_cast<std::vector<Real> &>(_deltaU0)[0] =
       getParam<Real>("normal_gap_at_maximum_normal_traction");
   const_cast<std::vector<Real> &>(_maxAllowableTraction)[0] =
@@ -50,18 +48,19 @@ CZM3DCLaw::CZM3DCLaw(const InputParameters & parameters)
 }
 
 RealVectorValue
-CZM3DCLaw::computeTraction()
+SalehaniIrani3DCTraction::computeTraction()
 {
+  // traction convention N, T, S, where N is the noraml direction and T and S
+  // two arbitrarty tangential driection
   RealVectorValue traction_local;
 
-  // just a temporaty container for auxiliary calcualtions
-  Real aa;
-
-  // convention N, T, S
-  Real X, expX, A_i, B_i;
+  // just a temporaty containers for auxiliary calcualtions
+  Real aa, X, expX, A_i, B_i;
+  // indecx variables to avaoid multiple redefinition
+  unsigned int i;
 
   X = 0;
-  for (unsigned int i = 0; i < 3; i++)
+  for (i = 0; i < 3; i++)
   {
     aa = _displacement_jump[_qp](i) / _deltaU0[i];
     if (i > 0)
@@ -72,9 +71,8 @@ CZM3DCLaw::computeTraction()
 
   expX = std::exp(-X);
 
-  for (unsigned int i = 0; i < 3; i++)
+  for (i = 0; i < 3; i++)
   {
-
     if (i == 0)
       aa = std::exp(1);
     else
@@ -82,7 +80,6 @@ CZM3DCLaw::computeTraction()
 
     A_i = _maxAllowableTraction[i] * aa;
     B_i = _displacement_jump[_qp](i) / _deltaU0[i];
-
     traction_local(i) = A_i * B_i * expX;
   }
 
@@ -90,7 +87,7 @@ CZM3DCLaw::computeTraction()
 }
 
 RankTwoTensor
-CZM3DCLaw::computeTractionDerivatives()
+SalehaniIrani3DCTraction::computeTractionDerivatives()
 {
   RankTwoTensor traction_jump_derivatives_local;
 
@@ -107,11 +104,9 @@ CZM3DCLaw::computeTractionDerivatives()
   //         = A_i * ( exp(-X) * (dBi_duj + B_i * dX_duj ) )
 
   // just a temporaty container for auxiliary calcualtions
-  Real aa;
-
-  // convention N, T, S
+  Real aa, expX, X;
+  // indeces variab;les to avaoid multiple redefinition
   unsigned int i, j;
-  Real expX, X;
 
   // compute X and the exponential term
   aa = 0;
@@ -134,7 +129,6 @@ CZM3DCLaw::computeTractionDerivatives()
 
   for (i = 0; i < 3; i++)
   {
-
     // compute A_i
     if (i == 0) // alpha = 1
       A_i = std::exp(1);
@@ -142,24 +136,20 @@ CZM3DCLaw::computeTractionDerivatives()
       A_i = std::sqrt(2 * std::exp(1));
 
     A_i *= _maxAllowableTraction[i];
-
     // compute B_i
     B_i = _displacement_jump[_qp](i) / _deltaU0[i];
 
     for (j = 0; j < 3; j++)
     {
-
       // add term for diagonal entry dBi_dui
       dBi_dui = 0;
       if (i == j)
         dBi_dui = 1 / _deltaU0[j];
-
       // compute the derivative of the argument of exponential
       if (j == 0) // alpha = 1
         dX_duj = 1. / _deltaU0[j];
       else // alpha = 2
         dX_duj = 2. * _displacement_jump[_qp](j) / (_deltaU0[j] * _deltaU0[j]);
-
       traction_jump_derivatives_local(i, j) =
           A_i * expX * (dBi_dui - B_i * dX_duj); // the minus sign is due to exp(-X)
     }
