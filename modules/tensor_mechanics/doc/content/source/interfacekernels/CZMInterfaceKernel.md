@@ -77,7 +77,7 @@ The derivatives of the traction w.r.t. the displacement jump, e.g. $\frac{dT_i(\
 
 ## examples
 
-!listing modules/tensor_mechanics/test/tests/CZM/czm_3DC_load_complex.i block=InterfaceKernels/interface_x
+!listing modules/tensor_mechanics/test/tests/czm/czm_3DC_load_complex.i block=InterfaceKernels/interface_x
 !syntax parameters /InterfaceKernels/CZMInterfaceKernel
 !syntax inputs /InterfaceKernels/CZMInterfaceKernel
 !syntax children /InterfaceKernels/CZMInterfaceKernel

@@ -12,7 +12,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_shear_x]
     type = Exodiff
@@ -27,7 +27,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_shear_y]
     type = Exodiff
@@ -42,7 +42,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_complex]
     type = Exodiff
@@ -57,7 +57,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_Normal_Action]
     type = Exodiff
@@ -70,7 +70,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_complex_Action]
     type = Exodiff
@@ -83,7 +83,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_Normal_2D]
     type = Exodiff
@@ -98,7 +98,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_Normal_2D_Action]
     type = Exodiff
@@ -111,7 +111,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'syntax/CohesiveZoneModel/index.md source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
+    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_Normal_1D]
     type = Exodiff
@@ -126,7 +126,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
   [./czm_3DC_load_Normal_1D_Action]
     type = Exodiff
@@ -139,6 +139,6 @@
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
-    design = 'source/materials/CZM/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
 []
