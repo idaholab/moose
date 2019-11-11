@@ -215,6 +215,21 @@ www.mooseframework.org
 
 !include problem/step09.md start=end-steady
 
+!---
+
+!include problem/step10.md end=end-intro
+
+!---
+
+!include systems/initialconditions.md
+
+!---
+
+# Step 10: Variable Starting Temperature
+
+## (continued)
+
+!include problem/step10.md start=end-intro
 
 
 !!!
