@@ -1,0 +1,1 @@
+frictionless-nodal-reduced-active-set_exo.e

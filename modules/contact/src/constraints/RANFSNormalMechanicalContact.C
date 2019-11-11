@@ -58,6 +58,12 @@ RANFSNormalMechanicalContact::residualSetup()
 }
 
 bool
+RANFSNormalMechanicalContact::overwriteSlaveResidual()
+{
+  return _largest_component == static_cast<unsigned int>(_component);
+}
+
+bool
 RANFSNormalMechanicalContact::shouldApply()
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
@@ -120,7 +126,6 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
     {
       if (_largest_component == static_cast<unsigned int>(_component))
       {
-        _overwrite_slave_residual = true;
         mooseAssert(_pinfo->_normal(_component) != 0,
                     "We should be selecting the largest normal component, hence it should be "
                     "impossible for this normal component to be zero");
@@ -132,11 +137,8 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
       }
 
       else
-      {
-        _overwrite_slave_residual = false;
         // The normal points out of the master face
         return _lagrange_multiplier * -_pinfo->_normal(_component);
-      }
     }
 
     case Moose::ConstraintType::Master:
@@ -155,26 +157,21 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::ConstraintJacobianType::SlaveSlave:
     {
       if (_largest_component == static_cast<unsigned int>(_component))
-      {
-        _overwrite_slave_residual = true;
-        return std::abs(_pinfo->_normal(_component));
-      }
-      else
-      {
-        _overwrite_slave_residual = false;
-        return 0;
-      }
-    }
-    case Moose::ConstraintJacobianType::MasterSlave:
-    {
-      auto slave_dof_number =
-          _current_node->dof_number(/*system_number=*/0, _var.number(), /*variable_component=*/0);
+        // _phi_slave has been set such that it is 1 when _j corresponds to the degree of freedom
+        // associated with the _current node and 0 otherwise
+        return std::abs(_pinfo->_normal(_component)) * _phi_slave[_j][_qp];
 
-      // At least this matrix entry should be ghosted
-      auto slave_on_diagonal_jacobian =
-          (*_jacobian)(slave_dof_number, slave_dof_number) / _var.scalingFactor();
-      return _test_master[_i][_qp] * _pinfo->_normal(_component) * _pinfo->_normal(_component) *
-             slave_on_diagonal_jacobian;
+      else
+        return 0;
+    }
+
+    case Moose::ConstraintJacobianType::SlaveMaster:
+    {
+      if (_largest_component == static_cast<unsigned int>(_component))
+        return -std::abs(_pinfo->_normal(_component)) * _phi_master[_j][_qp];
+
+      else
+        return 0;
     }
 
     default:

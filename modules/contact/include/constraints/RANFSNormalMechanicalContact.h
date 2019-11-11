@@ -35,6 +35,7 @@ public:
 
   bool shouldApply() override;
   void residualSetup() override;
+  bool overwriteSlaveResidual() override;
 
 protected:
   virtual Real computeQpSlaveValue() override;
