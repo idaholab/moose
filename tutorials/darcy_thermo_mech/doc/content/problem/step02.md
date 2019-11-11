@@ -43,7 +43,7 @@ overrides.
 
 ## Step 2: Input File
 
-!listing step02_darcy_pressure/problems/step2.i
+!listing step02_darcy_pressure/problems/pressure.i
 
 !---
 
@@ -53,7 +53,7 @@ overrides.
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step2.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -64,7 +64,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step2.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -72,7 +72,7 @@ cd problems
 ## Step 2: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step2_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step02_result.png

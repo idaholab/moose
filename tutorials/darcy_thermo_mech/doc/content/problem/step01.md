@@ -43,7 +43,7 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 
 ## Step 1: Input File
 
-!listing step01_diffusion/problems/step1.i
+!listing step01_diffusion/problems/pressure.i
 
 !---
 
@@ -53,7 +53,7 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step01_diffusion
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step1.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -64,7 +64,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step01_diffusion
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step1.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -72,7 +72,7 @@ cd problems
 ## Step 1: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step1_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step01_result.png

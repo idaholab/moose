@@ -137,6 +137,10 @@ www.mooseframework.org
 
 !---
 
+!include infrastructure/testing.md
+
+!---
+
 !include problem/step06.md end=end-intro
 
 !---
@@ -172,11 +176,21 @@ www.mooseframework.org
 !include problem/step07.md start=end-intro
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 !!!
 
-!---
-
-!include infrastructure/testing.md
 
 !---
 
