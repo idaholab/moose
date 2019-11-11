@@ -273,6 +273,15 @@ GrayLambertSurfaceRadiationBase::threadJoin(const UserObject & y)
   }
 }
 
+std::set<BoundaryID>
+GrayLambertSurfaceRadiationBase::getSurfaceIDs() const
+{
+  std::set<BoundaryID> surface_ids;
+  for (auto & p : _side_id_index)
+    surface_ids.insert(p.first);
+  return surface_ids;
+}
+
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceIrradiation(BoundaryID id) const
 {
@@ -311,4 +320,14 @@ GrayLambertSurfaceRadiationBase::getSurfaceEmissivity(BoundaryID id) const
   if (_side_id_index.find(id) == _side_id_index.end())
     return 1;
   return _emissivity[_side_id_index.find(id)->second];
+}
+
+Real
+GrayLambertSurfaceRadiationBase::getViewFactor(BoundaryID from_id, BoundaryID to_id) const
+{
+  if (_side_id_index.find(from_id) == _side_id_index.end())
+    return 0;
+  if (_side_id_index.find(to_id) == _side_id_index.end())
+    return 0;
+  return _view_factors[_side_id_index.find(from_id)->second][_side_id_index.find(to_id)->second];
 }
