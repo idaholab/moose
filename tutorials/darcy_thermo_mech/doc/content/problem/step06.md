@@ -32,7 +32,7 @@ sphere size from 1 to 3 along the length of the pipe.
 
 ## Step 6: Input File
 
-!listing step06_functions/problems/step6.i
+!listing step06_functions/problems/pressure.i
 
 !---
 

@@ -19,9 +19,9 @@ def compare(dir0, dir1, link=False):
 
     Inputs:
         dir0: The base directory, identical files in dir1 will be linked to this directory if the
-              'create' flag is True.
+              'link' flag is True.
         dir1: The directory to compare, links will be created here if the 'create' flag is True.
-        linkR: When True a symlink is created.
+        link: When True a symlink is created.
     """
     for root, _, files in os.walk(dir1):
         for fname in files:
@@ -39,9 +39,9 @@ def compare(dir0, dir1, link=False):
                 if link:
                     os.remove(full_name1)
                     subprocess.call(cmd, cwd=root) # os.symlink doesn't handle files w/o extension
-                    print ' '.join(cmd)
+                    print(' '.join(cmd))
                 else:
-                    print 'REQUIRED: {}'.format(' '.join(cmd))
+                    print('REQUIRED: {}'.format(' '.join(cmd)))
 
 if __name__ == '__main__':
 

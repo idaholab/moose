@@ -55,4 +55,4 @@ cd problems
 ~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
-!media step02_result.png !!Results are the same, just use it again
+!media step03_result.png

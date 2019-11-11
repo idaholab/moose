@@ -1,9 +1,14 @@
 [Tests]
   issues = '#4522'
   design = 'tutorials/darcy_thermo_mech/index.md'
-  [step]
+  [pressure]
     type = RunApp
     input = 'pressure.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
+  []
+  [velocity]
+    type = RunApp
+    input = 'velocity.i'
     requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
   []
 []

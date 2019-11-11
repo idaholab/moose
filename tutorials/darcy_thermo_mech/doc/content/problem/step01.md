@@ -26,7 +26,7 @@ An input file is used define which capabilities are used to perform a simulation
 
 MOOSE uses the "hierarchical input text" (hit) format.
 
-!listing step01_diffusion/problems/step1.i block=Kernels
+!listing step01_diffusion/problems/pressure.i block=Kernels
 
 !---
 
