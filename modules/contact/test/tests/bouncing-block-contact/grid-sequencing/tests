@@ -10,6 +10,7 @@
     # Fix below when I understand duplicate element centroids
     map = False
     partial = True
+    mesh_mode = replicated # Fix when mortar segment mesh is distributed
   []
   [no_grid_sequencing]
     type = Exodiff
@@ -20,5 +21,6 @@
     # Fix below when I understand duplicate element centroids
     map = False
     partial = True
+    mesh_mode = replicated # Fix when mortar segment mesh is distributed
   []
 []
