@@ -1,5 +1,7 @@
 # Step 11: Outflow Boundary Condition id=step11
 
+!---
+
 The flow is assumed to exit the pipe into a large tank, which is modeled with the "No BC" boundary
 condition of [!cite](griffiths1997no).
 
@@ -13,19 +15,19 @@ rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 ## HeatConductionOutflow.h
 
-!listing step11_boundary_conditions/include/bcs/HeatConductionOutflow.h
+!listing step11_boundary_condition/include/bcs/HeatConductionOutflow.h
 
 !---
 
 ## HeatConductionOutflow.C
 
-!listing step11_boundary_conditions/src/bcs/HeatConductionOutflow.C
+!listing step11_boundary_condition/src/bcs/HeatConductionOutflow.C
 
 !---
 
 ## Step 11: Outflow Input File
 
-!listing step11_boundary_conditions/problems/heat_transient.i
+!listing step11_boundary_condition/problems/heat_transient.i
 
 !---
 
