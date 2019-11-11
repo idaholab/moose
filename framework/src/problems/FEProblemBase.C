@@ -818,7 +818,6 @@ FEProblemBase::initialSetup()
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
-    CONSOLE_TIMED_PRINT("Adapting initial mesh");
     initialAdaptMesh();
   }
 
@@ -5560,7 +5559,7 @@ FEProblemBase::initialAdaptMesh()
 
     for (unsigned int i = 0; i < n; i++)
     {
-      _console << "Initial adaptivity step " << i + 1 << " of " << n << std::endl;
+      CONSOLE_TIMED_PRINT("Initial adaptivity step ", i + 1, " of ", n);
       computeIndicators();
       computeMarkers();
 
@@ -5599,7 +5598,7 @@ FEProblemBase::adaptMesh()
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
-    _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
+    CONSOLE_TIMED_PRINT("Adaptivity step ", i + 1, " of ", cycles_per_step);
 
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
