@@ -12,16 +12,16 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
+registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
+
+defineADLegacyParams(ADComputeFiniteStrain);
+
 template <ComputeStage compute_stage>
 MooseEnum
 ADComputeFiniteStrain<compute_stage>::decompositionType()
 {
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
-
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
-
-defineADLegacyParams(ADComputeFiniteStrain);
 
 template <ComputeStage compute_stage>
 InputParameters
