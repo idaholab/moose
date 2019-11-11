@@ -1,1 +1,1 @@
-../../../../../step03_darcy_material/tests/kernels/simple_diffusion/gold/simple_diffusion_out.e
+../../../../../step07_ad_darcy_material/tests/kernels/simple_diffusion/gold/simple_diffusion_out.e

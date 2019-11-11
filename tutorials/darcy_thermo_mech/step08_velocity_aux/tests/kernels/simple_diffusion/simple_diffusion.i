@@ -1,1 +1,1 @@
-../../../../step03_darcy_material/tests/kernels/simple_diffusion/simple_diffusion.i
+../../../../step07_ad_darcy_material/tests/kernels/simple_diffusion/simple_diffusion.i
