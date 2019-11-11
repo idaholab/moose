@@ -1030,20 +1030,20 @@ FEProblemBase::timestepSetup()
     MeshRefinement mesh_refinement(_mesh);
     std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
     if (_displaced_mesh)
-    {
       displaced_mesh_refinement = libmesh_make_unique<MeshRefinement>(*_displaced_mesh);
 
-      // If the DisplacedProblem is active, undisplace the DisplacedMesh
-      // in preparation for refinement.  We can't safely refine the
-      // DisplacedMesh directly, since the Hilbert keys computed on the
-      // inconsistenly-displaced Mesh are different on different
-      // processors, leading to inconsistent Hilbert keys.  We must do
-      // this before the undisplaced Mesh is refined, so that the
-      // element and node numbering is still consistent.
-      _displaced_problem->undisplaceMesh();
-    }
     for (MooseIndex(_num_grid_steps) i = 0; i < _num_grid_steps; ++i)
     {
+      if (_displaced_problem)
+        // If the DisplacedProblem is active, undisplace the DisplacedMesh in preparation for
+        // refinement.  We can't safely refine the DisplacedMesh directly, since the Hilbert keys
+        // computed on the inconsistenly-displaced Mesh are different on different processors,
+        // leading to inconsistent Hilbert keys.  We must do this before the undisplaced Mesh is
+        // coarsensed, so that the element and node numbering is still consistent. We also have to
+        // make sure this is done during every step of coarsening otherwise different partitions
+        // will be generated for the reference and displaced meshes (even for replicated)
+        _displaced_problem->undisplaceMesh();
+
       mesh_refinement.uniformly_coarsen();
       if (_displaced_mesh)
         displaced_mesh_refinement->uniformly_coarsen();
