@@ -1,1 +1,0 @@
-../../../../../step03_darcy_material/tests/materials/packed_column/gold/packed_column_out.e

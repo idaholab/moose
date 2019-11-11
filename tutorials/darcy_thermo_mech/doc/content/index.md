@@ -175,26 +175,9 @@ www.mooseframework.org
 
 !include problem/step07.md start=end-intro
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-!!!
-
-
 !---
 
-!include problem/step04.md end=end-intro
+!include problem/step08.md end=end-intro
 
 !---
 
@@ -206,7 +189,10 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step04.md start=end-intro
+!include problem/step08.md start=end-intro
+
+
+!!!
 
 !---
 

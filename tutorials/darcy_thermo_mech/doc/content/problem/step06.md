@@ -42,7 +42,7 @@ sphere size from 1 to 3 along the length of the pipe.
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_functions
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step6.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -53,7 +53,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_functions
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step6.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -61,7 +61,7 @@ cd problems
 ## Step 6: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step6_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step06_result.png

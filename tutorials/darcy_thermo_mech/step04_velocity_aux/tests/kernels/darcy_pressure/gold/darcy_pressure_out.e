@@ -1,1 +1,0 @@
-../../../../../step03_darcy_material/tests/kernels/darcy_pressure/gold/darcy_pressure_out.e

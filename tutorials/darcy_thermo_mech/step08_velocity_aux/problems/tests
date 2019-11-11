@@ -3,7 +3,7 @@
   design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
-    input = 'step4.i'
+    input = 'pressure.i'
     requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
   []
 []

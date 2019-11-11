@@ -62,7 +62,7 @@ it must be updated to consume the newly created material properties.
 
 ## Step 5: Input File
 
-!listing step05_darcy_material/problems/step5.i
+!listing step05_darcy_material/problems/pressure.i
 
 !---
 
@@ -72,7 +72,7 @@ it must be updated to consume the newly created material properties.
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step05_darcy_material
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step5.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -83,7 +83,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step05_darcy_material
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step5.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -91,7 +91,7 @@ cd problems
 ## Step 5: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step5_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step05_result.png

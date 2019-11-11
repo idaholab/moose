@@ -24,7 +24,7 @@ multiplier.
 
 ## Step 4: Input File
 
-!listing step04_ad_diff_darcy_pressure/problems/step4.i
+!listing step04_ad_diff_darcy_pressure/problems/pressure.i
 
 !---
 
@@ -34,7 +34,7 @@ multiplier.
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_ad_diff_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step4.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -45,7 +45,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_ad_diff_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step4.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -53,7 +53,7 @@ cd problems
 ## Step 4: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step4_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step02_result.png !!Results are the same, just use it again

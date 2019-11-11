@@ -33,7 +33,7 @@ fashion to that of Kernel objects.
 
 ## Step 7: Input File
 
-!listing step07_ad_darcy_material/problems/step7.i
+!listing step07_ad_darcy_material/problems/pressure.i
 
 !---
 
@@ -43,7 +43,7 @@ fashion to that of Kernel objects.
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_ad_darcy_material
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step7.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -54,7 +54,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_ad_darcy_material
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step7.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -62,7 +62,7 @@ cd problems
 ## Step 7: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step7_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step07_result.png

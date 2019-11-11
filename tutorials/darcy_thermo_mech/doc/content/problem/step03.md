@@ -23,7 +23,7 @@ To use automatic differentiation, the `DarcyPressure` object must be altered to 
 
 ## Step 3: Input File
 
-!listing step03_ad_darcy_pressure/problems/step3.i
+!listing step03_ad_darcy_pressure/problems/pressure.i
 
 !---
 
@@ -33,7 +33,7 @@ To use automatic differentiation, the `DarcyPressure` object must be altered to 
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_ad_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step3.i
+~/projects/moose/python/peacock/peacock -i pressure.i
 ```
 
 !---
@@ -44,7 +44,7 @@ cd problems
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_ad_darcy_pressure
 make -j 12 # use number of processors for you system
 cd problems
-../darcy_thermo_mech-opt -i step3.i
+../darcy_thermo_mech-opt -i pressure.i
 ```
 
 !---
@@ -52,7 +52,7 @@ cd problems
 ## Step 3: Visualize Result
 
 ```bash
-~/projects/moose/python/peacock/peacock -r step3_out.e
+~/projects/moose/python/peacock/peacock -r pressure_out.e
 ```
 
 !media step02_result.png !!Results are the same, just use it again
