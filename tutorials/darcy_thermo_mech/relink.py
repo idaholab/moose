@@ -21,4 +21,4 @@ for root, _, files in os.walk(link_from):
         if (os.path.islink(full_link_from)):
             cmd = ['ln', '-sf', os.path.relpath(full_link_to, os.path.dirname(full_link_from)), fname]
             print(' '.join(cmd))
-            subprocess.call(cmd, cwd=root)
+            #subprocess.call(cmd, cwd=root)

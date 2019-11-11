@@ -1,58 +1,45 @@
-# Step 11: Custom Syntax id=step11
+# Step 11: Outflow Boundary Condition id=step11
 
-!---
+The flow is assumed to exit the pipe into a large tank, which is modeled with the "No BC" boundary
+condition of [!cite](griffiths1997no).
 
-Add custom syntax to build objects that are common to all Darcy thermal mecahnical problems:
-
-- Velocity auxiliary variables and kernels
-- Pressure kernel
-- Temperature kernels
+The boundary term, $-\left < k \nabla T \cdot \mathbf{n}, \psi_i \right >$, is computed implicitly
+rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 !!end-intro
 
-!---
-
-## SetupDarcySimulation.h
-
-!listing step11_action/include/actions/SetupDarcySimulation.h
 
 !---
 
-## SetupDarcySimulation.C
+## HeatConductionOutflow.h
 
-!listing step11_action/src/actions/SetupDarcySimulation.C
-
-!---
-
-## DarcyThermoMechApp.h
-
-!listing step11_action/include/base/DarcyThermoMechApp.h
+!listing step11_boundary_conditions/include/bcs/HeatConductionOutflow.h
 
 !---
 
-## DarcyThermoMechApp.C
+## HeatConductionOutflow.C
 
-!listing step11_action/src/base/DarcyThermoMechApp.C
-
-!---
-
-## Step 11: Input File
-
-!listing step11_action/problems/step11.i
+!listing step11_boundary_conditions/src/bcs/HeatConductionOutflow.C
 
 !---
 
-## Step 11: Run and Visualize
+## Step 11: Outflow Input File
+
+!listing step11_boundary_conditions/problems/heat_transient.i
+
+!---
+
+## Step 11: Run and Visualize with Peacock
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step11_action
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step11_boundary_conditions
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step11.i
+~/projects/moose/python/peacock/peacock -i heat_transient.i
 ```
 
 !---
 
 ## Step 11: Results
 
-!media step09_result.mp4
+!media step11_result.webm

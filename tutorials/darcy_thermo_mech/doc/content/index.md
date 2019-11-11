@@ -231,12 +231,26 @@ www.mooseframework.org
 
 !include problem/step10.md start=end-intro
 
+!---
 
-!!!
+!include problem/step11.md end=end-intro
 
 !---
 
 !include systems/boundaryconditions.md
+
+
+!---
+
+# Step 11: Outflow Boundary Condition id=step11
+
+## (continued)
+
+
+!include problem/step11.md start=end-intro
+
+
+!!!
 
 !---
 

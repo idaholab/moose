@@ -9,7 +9,14 @@
 
 [Variables]
   [temperature]
-    initial_condition = 300 # Start at room temperature
+  []
+[]
+
+[ICs]
+  [temperature]
+    type = FunctionIC
+    function = '300 + 100*y'
+    variable = temperature
   []
 []
 
@@ -26,16 +33,16 @@
 
 [BCs]
   [inlet_temperature]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = temperature
     boundary = left
-    value = 350 # (K)
+    function = '350 + 100*y' # (K)
   []
   [outlet_temperature]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = temperature
     boundary = right
-    value = 300 # (K)
+    function = '300 + 100*y' # (K)
   []
 []
 
@@ -55,7 +62,8 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 100
+  dt = 0.01
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
