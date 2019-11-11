@@ -8,8 +8,8 @@
 [#step05]\\
 [#step06]\\
 [#step07]\\
-!![#step08]\\
-!![#step09]\\
+[#step08]\\
+[#step09]\\
 !![#step10]\\
 !![#step11]
 
@@ -68,13 +68,9 @@ function of space and time.
 
 Convert material object to use automatic differntiation to guarantee the correct Jabobian terms.
 
-
-!!!
-
-
 !---
 
-## [#step04]
+## [#step08]
 
 The velocity is computed from the pressure based on Darcy's law as:
 
@@ -85,12 +81,16 @@ This velocity can be computed using the Auxiliary system.
 
 !---
 
-## [#step05]
+## [#step09]
 
 Solve the transient heat equation using the "heat conduction" module.
 
 !equation
 C \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
+
+!!!
+
+
 
 !---
 

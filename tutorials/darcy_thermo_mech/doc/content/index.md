@@ -185,14 +185,11 @@ www.mooseframework.org
 
 !---
 
-# Step 4: Velocity Auxiliary Variable
+# Step 8: Velocity Auxiliary Variable
 
 ## (continued)
 
 !include problem/step08.md start=end-intro
-
-
-!!!
 
 !---
 
@@ -212,11 +209,15 @@ www.mooseframework.org
 
 !---
 
-# Step 5: Heat Conduction id=step05b
+# Step 9: Heat Conduction id=step05b
 
 ## (continued)
 
-!include problem/step05.md start=start-transient end=end-transient
+!include problem/step05.md start=end-steady
+
+
+
+!!
 
 !---
 
