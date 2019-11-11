@@ -18,7 +18,7 @@
   []
   [transient]
     type = RunApp
-    input = 'steady_transient.i'
+    input = 'heat_transient.i'
     requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
   []
 []
