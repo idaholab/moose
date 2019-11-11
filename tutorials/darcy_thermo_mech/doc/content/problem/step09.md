@@ -95,14 +95,14 @@ only an update to the input file is required to run the transient case.
 
 ## Step 9b: Time-dependent Input File
 
-!listing step05_heat_conduction/problems/heat_transient.i
+!listing step09_heat_conduction/problems/heat_transient.i
 
 !---
 
 ## Step 9b: Running Input File
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step5_heat_conduction
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step09_heat_conduction
 make -j 12 # use number of processors for you system
 cd problems
 ../darcy_thermo_mech-opt -i heat_transient.i

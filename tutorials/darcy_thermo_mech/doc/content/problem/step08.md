@@ -1,4 +1,4 @@
-# Step 8: Velocity Auxiliary Variable id=step04
+# Step 8: Velocity Auxiliary Variable id=step08
 
 !---
 

@@ -193,7 +193,7 @@ www.mooseframework.org
 
 !---
 
-!include problem/step05.md end=end-steady
+!include problem/step09.md end=end-steady
 
 !---
 
@@ -209,15 +209,15 @@ www.mooseframework.org
 
 !---
 
-# Step 9: Heat Conduction id=step05b
+# Step 9: Heat Conduction id=step09
 
 ## (continued)
 
-!include problem/step05.md start=end-steady
+!include problem/step09.md start=end-steady
 
 
 
-!!
+!!!
 
 !---
 
