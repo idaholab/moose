@@ -51,12 +51,6 @@ THMMesh::effectiveSpatialDimension() const
   return _dim;
 }
 
-MooseMesh &
-THMMesh::clone() const
-{
-  mooseError("CRITICAL ERROR: calling clone() is not allowed and should not happen.");
-}
-
 std::unique_ptr<MooseMesh>
 THMMesh::safeClone() const
 {
