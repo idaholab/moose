@@ -18,7 +18,6 @@ public:
 
   virtual unsigned int dimension() const override;
   virtual unsigned int effectiveSpatialDimension() const override;
-  virtual MooseMesh & clone() const override;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
   virtual void prep();
