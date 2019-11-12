@@ -1,0 +1,3 @@
+time,hydro_avg,strain_xx_point,stress_xx_point,von_mises_avg
+0,0,0,0,0
+1,5376344.0860215,0.0005,7854658.8319942,3717472.1189591

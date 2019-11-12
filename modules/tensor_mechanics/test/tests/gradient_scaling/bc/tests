@@ -1,0 +1,49 @@
+[Tests]
+  issues = '#todo'
+  design = 'Todo.md'
+  [./regular]
+    requirement = 'The system shall solve a simple linear elastic tensor mechanics solve'
+    [./1d]
+      type = CSVDiff
+      input = '1d.i'
+      csvdiff = '1d_out.csv'
+      detail = 'in 1d.'
+    [../]
+    [./2d]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = '2d_out.csv'
+      detail = 'in 2d.'
+    [../]
+    [./2drz]
+      type = CSVDiff
+      input = '2drz.i'
+      csvdiff = '2drz_out.csv'
+      detail = 'in 2drz.'
+    [../]
+  [../]
+  [./scaled]
+    requirement = 'The system shall solve a simple linear elastic tensor mechanics solve using gradient scaling and match the non-scaled solution'
+    [./1d]
+      type = CSVDiff
+      input = '1d.i'
+      csvdiff = '1d_scaled_out.csv'
+      cli_args = 'xscalar=0.5 Outputs/file_base=1d_scaled_out'
+      detail = 'in 1d.'
+    [../]
+    [./2d]
+      type = CSVDiff
+      input = '2d.i'
+      csvdiff = '2d_scaled_out.csv'
+      cli_args = 'xscalar=0.5 yscalar=2 Outputs/file_base=2d_scaled_out'
+      detail = 'in 2d.'
+    [../]
+    [./2drz]
+      type = CSVDiff
+      input = '2drz.i'
+      csvdiff = '2drz_scaled_out.csv'
+      cli_args = 'xscalar=0.5 yscalar=2 Outputs/file_base=2drz_scaled_out'
+      detail = 'in 2drz.'
+    [../]
+  [../]
+[]
