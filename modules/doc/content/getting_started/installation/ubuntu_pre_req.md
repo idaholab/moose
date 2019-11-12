@@ -19,7 +19,8 @@ sudo apt-get install build-essential \
   libhwloc-dev \
   libxml2-dev \
   libpng-dev \
-  pkg-config
+  pkg-config \
+  liblzma-dev
 ```
 
 Download and install one of our redistributable packages according to your version of Ubuntu.
