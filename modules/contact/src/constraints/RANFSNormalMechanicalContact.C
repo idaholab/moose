@@ -179,8 +179,13 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
   }
 }
 
+void
+RANFSNormalMechanicalContact::computeSlaveValue(NumericVector<Number> &)
+{
+}
+
 Real
 RANFSNormalMechanicalContact::computeQpSlaveValue()
 {
-  mooseError("Why are you calling me?");
+  mooseError("We overrode commputeSlaveValue so computeQpSlaveValue should never get called");
 }

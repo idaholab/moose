@@ -36,6 +36,7 @@ public:
   bool shouldApply() override;
   void residualSetup() override;
   bool overwriteSlaveResidual() override;
+  void computeSlaveValue(NumericVector<Number> & solution) override;
 
 protected:
   virtual Real computeQpSlaveValue() override;
