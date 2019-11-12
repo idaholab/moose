@@ -11,9 +11,9 @@
 
 registerADMooseObject("DarcyThermoMechApp", DarcyPressure);
 
-#define usingDarcyPressureMembers                       \
-  usingKernelMembers;                                   \
-  using DarcyPressure<compute_stage>::_permeability;    \
+#define usingDarcyPressureMembers                                                                  \
+  usingKernelMembers;                                                                              \
+  using DarcyPressure<compute_stage>::_permeability;                                               \
   using DarcyPressure<compute_stage>::_viscosity
 
 template <ComputeStage compute_stage>
@@ -37,7 +37,7 @@ DarcyPressure<compute_stage>::validParams()
 
 template <ComputeStage compute_stage>
 DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
-    : ADKernel<compute_stage>(parameters),
+  : ADKernel<compute_stage>(parameters),
     _permeability(getParam<Real>("permeability")), // get parameters from input file
     _viscosity(getParam<Real>("viscosity"))
 {
