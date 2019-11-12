@@ -242,27 +242,17 @@ www.mooseframework.org
 
 !---
 
-# Step 11: Outflow Boundary Condition id=step11
+# Step 11: Outflow Boundary Condition
 
 ## (continued)
-
 
 !include problem/step11.md start=end-intro
 
+!---
+
+!include problem/step12.md
 
 !!!
-
-!---
-
-# Step 5: Heat Conduction id=step05c
-
-## (continued)
-
-!include problem/step05.md start=start-bc
-
-!---
-
-!include problem/step06.md
 
 !---
 

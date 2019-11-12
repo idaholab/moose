@@ -1,4 +1,4 @@
-# Step 6: Equation Coupling id=step06
+# Step 12: Equation Coupling id=step12
 
 !---
 
@@ -18,43 +18,46 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 
 ## DarcyAdvection.h
 
-!listing step06_coupled_darcy_heat_conduction/include/kernels/DarcyAdvection.h
+!listing step12_equation_coupling/include/kernels/DarcyAdvection.h
 
 !---
 
 ## DarcyAdvection.C
 
-!listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyAdvection.C
+!listing step12_equation_coupling/src/kernels/DarcyAdvection.C
 
 !---
 
 ## PackedColumn.h
 
-!listing step06_coupled_darcy_heat_conduction/include/materials/PackedColumn.h
+!listing step12_equation_coupling/include/materials/PackedColumn.h
 
 !---
 
 ## PackedColumn.C
 
-!listing step06_coupled_darcy_heat_conduction/src/materials/PackedColumn.C
+!listing step12_equation_coupling/src/materials/PackedColumn.C
 
+!!!
 !---
 
 ## HeatConductionOutflow.h
 
-!listing step06_coupled_darcy_heat_conduction/include/bcs/HeatConductionOutflow.h
+!listing step12_equation_coupling/include/bcs/HeatConductionOutflow.h
 
 !---
 
 ## HeatConductionOutflow.C
 
-!listing step06_coupled_darcy_heat_conduction/src/bcs/HeatConductionOutflow.C
+!listing step12_equation_coupling/src/bcs/HeatConductionOutflow.C
+
+!!!
 
 !---
 
-## Step 6a: Coupled Pressure and Heat Equations
+## Step 12: Coupled Pressure and Heat Equations
 
-!listing step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
+!listing step12_equation_coupling/problems/coupled.i
 
 !---
 
@@ -72,9 +75,9 @@ MOOSE includes the ability to automatically scale non-linear variables
 The condition number can be used to determine if variable scaling is required.
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step12_equation_coupling
 make -j 12
-../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../darcy_thermo_mech-opt -i coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 ```bash
@@ -100,9 +103,9 @@ row 4: (0, 4.01973e-12)  (1, 0.)  (2, 3.97056e-14)  (3, 0.)  (4, -6.43156e-11)  
 ### Condition Number +with+ Scaling
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step12_equation_coupling
 make -j 12
-../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../darcy_thermo_mech-opt -i coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 ```bash
@@ -125,59 +128,24 @@ row 4: (0, 0.401973)  (1, 0.)  (2, 0.00397056)  (3, 0.)  (4, -6.43156)  (5, 0.) 
 
 !---
 
-## Step 6a: Run and Visualize with Peacock
+## Step 12: Run and Visualize with Peacock
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step12_equation_coupling
 make -j 12 # use number of processors for you system
 cd problems
-~/projects/moose/python/peacock/peacock -i step6a_coupled.i
+~/projects/moose/python/peacock/peacock -i coupled.i
 ```
 
 !---
 
-## Step 6a: Results
+## Step 12: Results
 
-!media step06a_result.webm
+!media step12_result.webm
 
-!---
-
-## Step 6b:\\ Oscillating Pressure and Temperature Dependence
-
-Vary the inlet and output pressure:
-
-- Inlet (left): $p = 2000\sin(0.466\pi t)$
-- Outlet (right): $p = 2000\cos(0.466\pi t)$
-
-Viscosity, density, thermal conductivity, and specific heat capacity of the fluid are setup to vary
-as a function of temperature.
-
-
-!---
-
-## Step 6b: Input File
-
-!listing step06_coupled_darcy_heat_conduction/problems/step6b_transient_inflow.i
-
-!---
-
-## Step 6b: Run and Visualize with Peacock
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step6b_transient_inflow.i
-```
-
-!---
-
-## Step 6b: Results
-
-!media step06b_result.mp4
 
 !---
 
 ## Decoupling Heat Equation
 
-!listing step06_coupled_darcy_heat_conduction/problems/step6c_decoupled.i
+!listing step12_equation_coupling/problems/decoupled.i
