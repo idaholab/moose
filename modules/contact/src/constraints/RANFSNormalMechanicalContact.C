@@ -51,6 +51,12 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
 }
 
 void
+RANFSNormalMechanicalContact::timestepSetup()
+{
+  _node_to_master_elem_sequence.clear();
+}
+
+void
 RANFSNormalMechanicalContact::residualSetup()
 {
   _node_to_lm.clear();
@@ -93,6 +99,22 @@ RANFSNormalMechanicalContact::shouldApply()
       _lagrange_multiplier = _node_to_lm[_current_node->id()];
       if (_lagrange_multiplier > -_pinfo->_distance)
       {
+        // Ok, our math is telling us we should apply the constraint, but what if we are
+        // ping-ponging back and forth between different master faces? If we are then let's try to
+        // not apply the constraint
+
+        // This only works for a basic line search! Write assertion here
+        if (_subproblem.computingNonlinearResid())
+        {
+          auto & master_elem_sequence = _node_to_master_elem_sequence[_current_node->id()];
+          master_elem_sequence.push_back(_pinfo->_elem);
+
+          if (master_elem_sequence.size() >= 3 &&
+              _pinfo->_elem == *(master_elem_sequence.rbegin() + 2) &&
+              _pinfo->_elem != *(master_elem_sequence.rbegin() + 1))
+            mooseError("We are ping-ponging!");
+        }
+
         // The constraint is active -> we're going to use our linear solve to ensure that the gap
         // is driven to zero. We only have one zero-penetration constraint per node, so we choose
         // to apply the zero penetration constraint only to the displacement component with the
@@ -114,6 +136,11 @@ RANFSNormalMechanicalContact::shouldApply()
     }
   }
 
+  // If we're not applying the constraint then we can clear the node to master elem sequence for
+  // this node
+  if (_node_to_master_elem_sequence.find(_current_node->id()) !=
+      _node_to_master_elem_sequence.end())
+    _node_to_master_elem_sequence[_current_node->id()].clear();
   return false;
 }
 

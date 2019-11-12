@@ -35,6 +35,7 @@ public:
 
   bool shouldApply() override;
   void residualSetup() override;
+  void timestepSetup() override;
   bool overwriteSlaveResidual() override;
   void computeSlaveValue(NumericVector<Number> & solution) override;
 
@@ -52,6 +53,7 @@ protected:
   std::vector<unsigned int> _vars;
   std::vector<MooseVariable *> _var_objects;
   std::unordered_map<dof_id_type, Real> _node_to_lm;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> _node_to_master_elem_sequence;
   Real _lagrange_multiplier;
   PenetrationInfo * _pinfo;
 };
