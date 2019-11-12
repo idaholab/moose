@@ -35,7 +35,8 @@ FourierNoise::FourierNoise(const InputParameters & parameters)
     _lambda(getParam<Real>("lambda")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
-  MooseRandom::seed(getParam<unsigned int>("seed"));
+  MooseRandom rng;
+  rng.seed(0, getParam<unsigned int>("seed"));
 
   if (isParamValid("num_terms"))
   {
@@ -55,8 +56,8 @@ FourierNoise::FourierNoise(const InputParameters & parameters)
       Real r2;
       do
       {
-        const Real x = MooseRandom::rand() - 0.5;
-        const Real y = MooseRandom::rand() - 0.5;
+        const Real x = rng.rand(0) - 0.5;
+        const Real y = rng.rand(0) - 0.5;
         f.k = RealVectorValue(x, y, 0.0);
         r2 = f.k.norm_sq();
       } while (r2 > 0.25);
@@ -64,8 +65,8 @@ FourierNoise::FourierNoise(const InputParameters & parameters)
       // scale maximum to a wavelength of lambda
       f.k *= scale;
 
-      f.c = MooseRandom::randNormal(0, 1.0);
-      f.s = MooseRandom::randNormal(0, 1.0);
+      f.c = rng.randNormal(0, 0.0, 1.0);
+      f.s = rng.randNormal(0, 0.0, 1.0);
     }
   }
   else
@@ -91,8 +92,8 @@ FourierNoise::FourierNoise(const InputParameters & parameters)
           f.k = RealVectorValue(x * dx, y * dy, 0.0);
           if (f.k.norm_sq() <= rmax2)
           {
-            f.c = MooseRandom::randNormal(0, 1.0);
-            f.s = MooseRandom::randNormal(0, 1.0);
+            f.c = rng.randNormal(0, 0.0, 1.0);
+            f.s = rng.randNormal(0, 0.0, 1.0);
             _series.push_back(f);
           }
         }
