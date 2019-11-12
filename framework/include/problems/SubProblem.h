@@ -598,7 +598,7 @@ public:
   bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
 
   /// Set whether residual being evaulated is non-linear
-  void computingNonlinearResid(bool computing_nonlinear_residual)
+  virtual void computingNonlinearResid(bool computing_nonlinear_residual)
   {
     _computing_nonlinear_residual = computing_nonlinear_residual;
   }

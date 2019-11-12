@@ -6430,3 +6430,11 @@ FEProblemBase::systemBaseAuxiliary()
 {
   return *_aux;
 }
+
+void
+FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
+{
+  if (_displaced_problem)
+    _displaced_problem->computingNonlinearResid(computing_nonlinear_residual);
+  _computing_nonlinear_residual = computing_nonlinear_residual;
+}
