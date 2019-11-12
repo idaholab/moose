@@ -28,15 +28,17 @@ defineADValidParams(
     ADStressDivergenceShell,
     ADKernel,
     params.addClassDescription("Quasi-static stress divergence kernel for Shell element");
-    params.addRequiredParam<unsigned int>("component",
-                                          "An integer corresponding to the direction "
-                                          "the variable this kernel acts in. (0 for disp_x, "
-                                          "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y)");
+    params.addRequiredRangeCheckedParam<unsigned int>(
+        "component",
+        "component < 5",
+        "An integer corresponding to the direction "
+        "the variable this kernel acts in. (0 for disp_x, "
+        "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y)");
     params.addRequiredParam<std::string>("order", "Quadrature order in out of plane direction");
     params.addParam<bool>("large_strain",
                           false,
                           "Set to true to turn on finite strain calculations.");
-    params.set<bool>("use_displaced_mesh") = true;);
+    params.set<bool>("use_displaced_mesh") = false;);
 
 template <ComputeStage compute_stage>
 ADStressDivergenceShell<compute_stage>::ADStressDivergenceShell(const InputParameters & parameters)

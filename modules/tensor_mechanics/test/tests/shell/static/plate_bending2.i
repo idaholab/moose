@@ -18,21 +18,22 @@
 # of 0.16%.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 1
-  ny = 1
-  xmin = 0.0
-  xmax = 40.0
-  ymin = 0.0
-  ymax = 20.0
-[]
+  [./gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 1
+    ny = 1
+    xmin = 0.0
+    xmax = 40.0
+    ymin = 0.0
+    ymax = 20.0
+  [../]
 
-[MeshModifiers]
   [./c_node]
-    type = AddExtraNodeset
-    coord = '40.0 20.0'
+    type = ExtraNodesetGenerator
+    input = gmg
     new_boundary = 100
+    coord = '40.0 20.0'
   [../]
 []
 

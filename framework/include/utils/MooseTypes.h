@@ -26,7 +26,6 @@
 #include "Eigen/Core"
 #include "libmesh/restore_warnings.h"
 #include "libmesh/tensor_tools.h"
-#include "libmesh/dense_matrix.h"
 
 #include <string>
 #include <vector>
@@ -145,6 +144,10 @@ class TypeTensor;
 template <unsigned int, typename>
 class TypeNTensor;
 class Point;
+template <typename>
+class DenseMatrix;
+template <typename>
+class DenseVector;
 
 namespace TensorTools
 {

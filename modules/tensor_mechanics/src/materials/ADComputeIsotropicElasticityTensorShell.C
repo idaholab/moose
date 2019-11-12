@@ -23,8 +23,12 @@ defineADValidParams(
     ADComputeIsotropicElasticityTensorShell,
     ADMaterial,
     params.addClassDescription("Compute a plane stress isotropic elasticity tensor.");
-    params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-    params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+    params.addRequiredRangeCheckedParam<Real>("poissons_ratio",
+                                              "poissons_ratio >= -1.0 & poissons_ratio < 0.5",
+                                              "Poisson's ratio for the material.");
+    params.addRequiredRangeCheckedParam<Real>("youngs_modulus",
+                                              "youngs_modulus > 0.0",
+                                              "Young's modulus of the material.");
     params.addRequiredParam<std::string>("order", "Quadrature order in out of plane direction"););
 
 template <ComputeStage compute_stage>

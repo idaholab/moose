@@ -22,19 +22,20 @@
 
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 25
-  ny = 25
-  xmin = 0.0
-  xmax = 25.0
-  ymin = 0.0
-  ymax = 25.0
-[]
+  [./gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 25
+    ny = 25
+    xmin = 0.0
+    xmax = 25.0
+    ymin = 0.0
+    ymax = 25.0
+  [../]
 
-[MeshModifiers]
   [./allnodes]
-    type = BoundingBoxNodeSet
+    type = BoundingBoxNodeSetGenerator
+    input = gmg
     bottom_left = '0.0 0.0 0.0'
     top_right = '25.0 25.0 0.0'
     new_boundary = 101
