@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticDruckerPrager);
+
 InputParameters
-validParams<TensorMechanicsPlasticDruckerPrager>()
+TensorMechanicsPlasticDruckerPrager::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   MooseEnum mc_interpolation_scheme("outer_tip=0 inner_tip=1 lode_zero=2 inner_edge=3 native=4",
                                     "lode_zero");
   params.addParam<MooseEnum>(

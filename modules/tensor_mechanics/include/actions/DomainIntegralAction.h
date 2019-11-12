@@ -24,6 +24,8 @@ InputParameters validParams<DomainIntegralAction>();
 class DomainIntegralAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   DomainIntegralAction(const InputParameters & params);
 
   ~DomainIntegralAction();
@@ -90,4 +92,3 @@ protected:
   bool _solid_mechanics;
   bool _incremental;
 };
-

@@ -12,11 +12,12 @@
 
 registerMooseAction("TensorMechanicsApp", CommonLineElementAction, "meta_action");
 
-template <>
+defineLegacyParams(CommonLineElementAction);
+
 InputParameters
-validParams<CommonLineElementAction>()
+CommonLineElementAction::validParams()
 {
-  InputParameters params = validParams<LineElementAction>();
+  InputParameters params = LineElementAction::validParams();
   return params;
 }
 

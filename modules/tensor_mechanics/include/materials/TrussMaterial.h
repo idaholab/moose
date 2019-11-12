@@ -20,6 +20,8 @@ InputParameters validParams<TrussMaterial>();
 class TrussMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   TrussMaterial(const InputParameters & parameters);
 
 protected:
@@ -44,4 +46,3 @@ protected:
   Real _origin_length;
   Real _current_length;
 };
-

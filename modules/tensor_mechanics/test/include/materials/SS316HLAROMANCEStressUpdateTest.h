@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class SS316HLAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters);
 
 protected:

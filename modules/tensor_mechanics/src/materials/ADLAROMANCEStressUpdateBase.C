@@ -12,70 +12,75 @@
 #include "Function.h"
 #include "MathUtils.h"
 
-defineADValidParams(
-    ADLAROMANCEStressUpdateBase,
-    ADRadialReturnCreepStressUpdateBase,
-    params.addClassDescription(
-        "Calculates the effective creep strain based on the rates predicted by a material "
-        "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
-        "calculations.");
+defineADLegacyParams(ADLAROMANCEStressUpdateBase);
 
-    params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
-    params.addCoupledVar("environmental_factor", 0.0, "Optional coupled environmental factor");
-    params.addRangeCheckedParam<Real>("input_window_limit",
-                                      1.0,
-                                      "input_window_limit>0.0",
-                                      "Multiplier for the input minium/maximum input window");
-    MooseEnum window_failure("ERROR WARN IGNORE", "WARN");
-    params.addParam<MooseEnum>("input_window_failure_action",
-                               window_failure,
-                               "What to do if ROM input is outside the window of applicability.");
-    params.addParam<bool>("extrapolate_to_zero_stress",
-                          true,
-                          "Flag to allow for extrapolation of input J2 stress to zero");
+template <ComputeStage compute_stage>
+InputParameters
+ADLAROMANCEStressUpdateBase<compute_stage>::validParams()
+{
+  InputParameters params = ADRadialReturnCreepStressUpdateBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "Calculates the effective creep strain based on the rates predicted by a material "
+      "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
+      "calculations.");
 
-    params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
-                                      0.0,
-                                      "initial_mobile_dislocation_density >= 0.0",
-                                      "Initial density of mobile (glissile) dislocations (1/m^2)");
-    params.addRangeCheckedParam<Real>(
-        "max_relative_mobile_dislocation_increment",
-        0.5,
-        "max_relative_mobile_dislocation_increment > 0.0",
-        "Maximum increment of density of mobile (glissile) dislocations.");
-    params.addParam<FunctionName>(
-        "mobile_dislocation_density_forcing_function",
-        "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
-        "density will be reset to the function value at the beginning of the timestep. Used for "
-        "testing purposes only.");
-    params.addRangeCheckedParam<Real>(
-        "initial_immobile_dislocation_density",
-        0.0,
-        "initial_immobile_dislocation_density >= 0.0",
-        "Immobile (locked) dislocation density initial value (1/m^2).");
-    params.addRangeCheckedParam<Real>(
-        "max_relative_immobile_dislocation_increment",
-        0.5,
-        "max_relative_immobile_dislocation_increment > 0.0",
-        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2).");
-    params.addParam<FunctionName>(
-        "immobile_dislocation_density_forcing_function",
-        "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
-        "density will be reset to the function value at the beginning of the timestep. Used for "
-        "testing purposes only.");
+  params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
+  params.addCoupledVar("environmental_factor", 0.0, "Optional coupled environmental factor");
+  params.addRangeCheckedParam<Real>("input_window_limit",
+                                    1.0,
+                                    "input_window_limit>0.0",
+                                    "Multiplier for the input minium/maximum input window");
+  MooseEnum window_failure("ERROR WARN IGNORE", "WARN");
+  params.addParam<MooseEnum>("input_window_failure_action",
+                             window_failure,
+                             "What to do if ROM input is outside the window of applicability.");
+  params.addParam<bool>("extrapolate_to_zero_stress",
+                        true,
+                        "Flag to allow for extrapolation of input J2 stress to zero");
 
-    params.addParam<FunctionName>(
-        "old_creep_strain_forcing_function",
-        "Optional forcing function for the creep strain from the previous timestep. If provided, "
-        "the old creep strain will be reset to the function value at the beginning of the "
-        "timestep. Used for testing purposes only.");
+  params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
+                                    0.0,
+                                    "initial_mobile_dislocation_density >= 0.0",
+                                    "Initial density of mobile (glissile) dislocations (1/m^2)");
+  params.addRangeCheckedParam<Real>(
+      "max_relative_mobile_dislocation_increment",
+      0.5,
+      "max_relative_mobile_dislocation_increment > 0.0",
+      "Maximum increment of density of mobile (glissile) dislocations.");
+  params.addParam<FunctionName>(
+      "mobile_dislocation_density_forcing_function",
+      "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
+      "density will be reset to the function value at the beginning of the timestep. Used for "
+      "testing purposes only.");
+  params.addRangeCheckedParam<Real>("initial_immobile_dislocation_density",
+                                    0.0,
+                                    "initial_immobile_dislocation_density >= 0.0",
+                                    "Immobile (locked) dislocation density initial value (1/m^2).");
+  params.addRangeCheckedParam<Real>(
+      "max_relative_immobile_dislocation_increment",
+      0.5,
+      "max_relative_immobile_dislocation_increment > 0.0",
+      "Maximum increment of immobile (locked) dislocation density initial value (1/m^2).");
+  params.addParam<FunctionName>(
+      "immobile_dislocation_density_forcing_function",
+      "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
+      "density will be reset to the function value at the beginning of the timestep. Used for "
+      "testing purposes only.");
 
-    params.addParam<bool>("verbose", false, "Flag to add verbose output");
+  params.addParam<FunctionName>(
+      "old_creep_strain_forcing_function",
+      "Optional forcing function for the creep strain from the previous timestep. If provided, "
+      "the old creep strain will be reset to the function value at the beginning of the "
+      "timestep. Used for testing purposes only.");
 
-    params.addParamNamesToGroup(
-        "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
-        "old_creep_strain_forcing_function",
-        "Advanced"););
+  params.addParam<bool>("verbose", false, "Flag to add verbose output");
+
+  params.addParamNamesToGroup(
+      "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
+      "old_creep_strain_forcing_function",
+      "Advanced");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(

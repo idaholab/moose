@@ -10,11 +10,12 @@
 #include "ComputeMeanThermalExpansionEigenstrainBase.h"
 #include "Function.h"
 
-template <>
+defineLegacyParams(ComputeMeanThermalExpansionEigenstrainBase);
+
 InputParameters
-validParams<ComputeMeanThermalExpansionEigenstrainBase>()
+ComputeMeanThermalExpansionEigenstrainBase::validParams()
 {
-  InputParameters params = validParams<ComputeThermalExpansionEigenstrainBase>();
+  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Base class for models that compute eigenstrain due to mean"
                              "thermal expansion as a function of temperature");
   return params;

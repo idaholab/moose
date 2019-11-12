@@ -42,6 +42,8 @@ template <ComputeStage compute_stage>
 class ADSingleVariableReturnMappingSolution
 {
 public:
+  static InputParameters validParams();
+
   ADSingleVariableReturnMappingSolution(const InputParameters & parameters);
   virtual ~ADSingleVariableReturnMappingSolution() {}
 

@@ -11,9 +11,16 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(ADCompute1DSmallStrain,
-                    ADComputeSmallStrain,
-                    params.addClassDescription("Compute a small strain in 1D problem"););
+defineADLegacyParams(ADCompute1DSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCompute1DSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeSmallStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain in 1D problem");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCompute1DSmallStrain<compute_stage>::ADCompute1DSmallStrain(const InputParameters & parameters)

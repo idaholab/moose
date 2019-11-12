@@ -25,6 +25,8 @@ InputParameters validParams<ComputeFiniteBeamStrain>();
 class ComputeFiniteBeamStrain : public ComputeIncrementalBeamStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeFiniteBeamStrain(const InputParameters & parameters);
 
 protected:
@@ -34,4 +36,3 @@ protected:
   /// Rotational transformation from the global to beam local coordinate system at time t.
   const MaterialProperty<RankTwoTensor> & _total_rotation_old;
 };
-

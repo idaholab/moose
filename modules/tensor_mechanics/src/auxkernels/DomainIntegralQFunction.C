@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", DomainIntegralQFunction);
 
-template <>
+defineLegacyParams(DomainIntegralQFunction);
+
 InputParameters
-validParams<DomainIntegralQFunction>()
+DomainIntegralQFunction::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the q-function for a segment along the crack front, used in "
                              "the calculation of the J-integral");
   params.addRequiredParam<Real>("j_integral_radius_inner", "Radius for J-Integral calculation");

@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(Compute2DIncrementalStrain);
+
 InputParameters
-validParams<Compute2DIncrementalStrain>()
+Compute2DIncrementalStrain::validParams()
 {
-  InputParameters params = validParams<ComputeIncrementalSmallStrain>();
+  InputParameters params = ComputeIncrementalSmallStrain::validParams();
   params.addClassDescription("Compute strain increment for incremental strains in 2D geometries.");
 
   MooseEnum outOfPlaneDirection("x y z", "z");

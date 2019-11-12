@@ -26,6 +26,8 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>();
 class FiniteStrainCrystalPlasticity : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   FiniteStrainCrystalPlasticity(const InputParameters & parameters);
 
 protected:
@@ -355,4 +357,3 @@ protected:
   ///Flags to reset variables and reinitialize variables
   bool _first_step_iter, _last_step_iter, _first_substep;
 };
-

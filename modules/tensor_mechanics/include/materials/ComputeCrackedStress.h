@@ -27,6 +27,8 @@ InputParameters validParams<ComputeCrackedStress>();
 class ComputeCrackedStress : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ComputeCrackedStress(const InputParameters & parameters);
 
 protected:
@@ -90,4 +92,3 @@ protected:
   /// Property where the value for L will be defined
   MaterialProperty<Real> & _L;
 };
-

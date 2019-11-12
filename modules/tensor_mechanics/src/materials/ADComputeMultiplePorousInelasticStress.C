@@ -13,20 +13,24 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeMultiplePorousInelasticStress);
 
-defineADValidParams(
-    ADComputeMultiplePorousInelasticStress,
-    ADComputeMultipleInelasticStress,
-    params.addClassDescription(
-        "Compute state (stress and internal parameters such as plastic "
-        "strains and internal parameters) using an iterative process. A porosity material property "
-        "is defined and is calculated from the trace of inelastic strain increment.");
+defineADLegacyParams(ADComputeMultiplePorousInelasticStress);
 
-    params.addParam<MaterialPropertyName>("porosity_name",
-                                          "porosity",
-                                          "Name of porosity material property");
-    params.addRequiredRangeCheckedParam<Real>("initial_porosity",
-                                              "initial_porosity>0.0 & initial_porosity<1.0",
-                                              "Initial porosity"););
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeMultiplePorousInelasticStress<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeMultipleInelasticStress<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute state (stress and internal parameters such as plastic "
+      "strains and internal parameters) using an iterative process. A porosity material property "
+      "is defined and is calculated from the trace of inelastic strain increment.");
+
+  params.addParam<MaterialPropertyName>(
+      "porosity_name", "porosity", "Name of porosity material property");
+  params.addRequiredRangeCheckedParam<Real>(
+      "initial_porosity", "initial_porosity>0.0 & initial_porosity<1.0", "Initial porosity");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeMultiplePorousInelasticStress<compute_stage>::ADComputeMultiplePorousInelasticStress(

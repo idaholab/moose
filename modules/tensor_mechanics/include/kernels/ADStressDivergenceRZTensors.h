@@ -27,6 +27,8 @@ template <ComputeStage compute_stage>
 class ADStressDivergenceRZTensors : public ADStressDivergenceTensors<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADStressDivergenceRZTensors(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
 
   usingStressDivergenceTensorsMembers;
 };
-

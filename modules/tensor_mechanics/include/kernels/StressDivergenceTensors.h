@@ -27,6 +27,8 @@ InputParameters validParams<StressDivergenceTensors>();
 class StressDivergenceTensors : public ALEKernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceTensors(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
@@ -82,4 +84,3 @@ protected:
   /// Flag for volumetric locking correction
   bool _volumetric_locking_correction;
 };
-

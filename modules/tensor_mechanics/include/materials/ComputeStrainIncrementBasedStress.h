@@ -22,6 +22,8 @@ InputParameters validParams<ComputeStrainIncrementBasedStress>();
 class ComputeStrainIncrementBasedStress : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeStrainIncrementBasedStress(const InputParameters & parameters);
 
 protected:
@@ -48,4 +50,3 @@ protected:
   /// Number of inelastic models
   unsigned int _num_inelastic_strain_models;
 };
-

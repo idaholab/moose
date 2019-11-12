@@ -19,11 +19,12 @@
 
 registerMooseObject("TensorMechanicsApp", GlobalStrain);
 
-template <>
+defineLegacyParams(GlobalStrain);
+
 InputParameters
-validParams<GlobalStrain>()
+GlobalStrain::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addClassDescription("Scalar Kernel to solve for the global strain");
   params.addRequiredParam<UserObjectName>("global_strain_uo",
                                           "The name of the GlobalStrainUserObject");

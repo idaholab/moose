@@ -29,6 +29,8 @@ InputParameters validParams<CompositeElasticityTensor>();
 class CompositeElasticityTensor : public CompositeTensorBase<RankFourTensor, Material>
 {
 public:
+  static InputParameters validParams();
+
   CompositeElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -39,4 +41,3 @@ protected:
 
   MaterialProperty<RankFourTensor> & _M;
 };
-

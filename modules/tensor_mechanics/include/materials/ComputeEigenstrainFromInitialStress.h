@@ -25,6 +25,8 @@ InputParameters validParams<ComputeEigenstrainFromInitialStress>();
 class ComputeEigenstrainFromInitialStress : public ComputeEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeEigenstrainFromInitialStress(const InputParameters & parameters);
 
 protected:

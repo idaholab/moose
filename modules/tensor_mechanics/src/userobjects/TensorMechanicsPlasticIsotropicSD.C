@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticIsotropicSD);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticIsotropicSD);
+
 InputParameters
-validParams<TensorMechanicsPlasticIsotropicSD>()
+TensorMechanicsPlasticIsotropicSD::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticJ2>();
+  InputParameters params = TensorMechanicsPlasticJ2::validParams();
   params.addRequiredParam<Real>("b", "A constant to model the influence of pressure");
   params.addParam<Real>(
       "c", 0.0, "A constant to model the influence of strength differential effect");

@@ -24,10 +24,11 @@ InputParameters validParams<Mass>();
 class Mass : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   Mass(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();
   const MaterialProperty<Real> & _density;
 };
-

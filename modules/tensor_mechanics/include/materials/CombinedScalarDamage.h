@@ -23,6 +23,8 @@ InputParameters validParams<CombinedScalarDamage>();
 class CombinedScalarDamage : public ScalarDamageBase
 {
 public:
+  static InputParameters validParams();
+
   CombinedScalarDamage(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -43,4 +45,3 @@ protected:
 
   std::vector<ScalarDamageBase *> _damage_models;
 };
-

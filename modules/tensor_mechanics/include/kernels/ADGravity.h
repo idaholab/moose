@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADGravity : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADGravity(const InputParameters & parameters);
 
 protected:
@@ -35,4 +37,3 @@ private:
 
   usingKernelValueMembers;
 };
-

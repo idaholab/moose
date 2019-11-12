@@ -22,11 +22,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceBeam);
 
-template <>
+defineLegacyParams(StressDivergenceBeam);
+
 InputParameters
-validParams<StressDivergenceBeam>()
+StressDivergenceBeam::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Quasi-static and dynamic stress divergence kernel for Beam element");
   params.addRequiredParam<unsigned int>(
       "component",

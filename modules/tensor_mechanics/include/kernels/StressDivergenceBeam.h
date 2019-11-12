@@ -23,6 +23,8 @@ InputParameters validParams<StressDivergenceBeam>();
 class StressDivergenceBeam : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceBeam(const InputParameters & parameters);
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -130,4 +132,3 @@ protected:
   /// Residual corresponding to rotational DOFs at the nodes in beam local coordinate system
   std::vector<RealVectorValue> _local_moment_res;
 };
-

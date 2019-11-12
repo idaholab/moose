@@ -24,6 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticJ2>();
 class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticJ2(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -89,4 +91,3 @@ private:
   /// Whether to use the custom consistent tangent operator calculation
   const bool _use_custom_cto;
 };
-

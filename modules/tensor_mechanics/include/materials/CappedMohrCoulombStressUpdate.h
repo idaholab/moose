@@ -24,6 +24,8 @@ InputParameters validParams<CappedMohrCoulombStressUpdate>();
 class CappedMohrCoulombStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedMohrCoulombStressUpdate(const InputParameters & parameters);
 
   /**
@@ -121,4 +123,3 @@ protected:
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
 };
-

@@ -25,6 +25,8 @@ InputParameters validParams<FluxBasedStrainIncrement>();
 class FluxBasedStrainIncrement : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   FluxBasedStrainIncrement(const InputParameters & parameters);
 
 protected:
@@ -45,4 +47,3 @@ protected:
 
   RankTwoTensor _flux_grad_tensor;
 };
-

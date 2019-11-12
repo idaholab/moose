@@ -36,6 +36,8 @@ InputParameters validParams<IsotropicPowerLawHardeningStressUpdate>();
 class IsotropicPowerLawHardeningStressUpdate : public IsotropicPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
@@ -57,4 +59,3 @@ protected:
 
   Real getIsotropicLameLambda(const RankFourTensor & elasticity_tensor);
 };
-

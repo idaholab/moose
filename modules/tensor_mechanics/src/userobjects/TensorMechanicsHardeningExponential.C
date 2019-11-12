@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningExponential);
 
-template <>
+defineLegacyParams(TensorMechanicsHardeningExponential);
+
 InputParameters
-validParams<TensorMechanicsHardeningExponential>()
+TensorMechanicsHardeningExponential::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsHardeningModel>();
+  InputParameters params = TensorMechanicsHardeningModel::validParams();
   params.addRequiredParam<Real>("value_0", "The value of the parameter at internal_parameter = 0");
   params.addParam<Real>("value_residual",
                         "The value of the parameter for internal_parameter = "

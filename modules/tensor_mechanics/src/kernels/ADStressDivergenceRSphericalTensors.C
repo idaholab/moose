@@ -15,13 +15,18 @@
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
 
-defineADValidParams(
-    ADStressDivergenceRSphericalTensors,
-    ADStressDivergenceTensors,
-    params.addClassDescription(
-        "Calculate stress divergence for a spherically symmetric 1D problem in polar coordinates.");
-    params.set<unsigned int>("component") = 0;
-    return params;);
+defineADLegacyParams(ADStressDivergenceRSphericalTensors);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADStressDivergenceRSphericalTensors<compute_stage>::validParams()
+{
+  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  params.addClassDescription(
+      "Calculate stress divergence for a spherically symmetric 1D problem in polar coordinates.");
+  params.set<unsigned int>("component") = 0;
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADStressDivergenceRSphericalTensors<compute_stage>::ADStressDivergenceRSphericalTensors(

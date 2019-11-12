@@ -16,11 +16,12 @@
 
 registerMooseObject("TensorMechanicsApp", JIntegral);
 
-template <>
+defineLegacyParams(JIntegral);
+
 InputParameters
-validParams<JIntegral>()
+JIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Calculates the J-integral at a specified point "
                              " along the crack front");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

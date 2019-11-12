@@ -27,10 +27,12 @@ InputParameters validParams<CrackDataSampler>();
 class CrackDataSampler : public GeneralVectorPostprocessor, public SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   /**
-    * Class constructor
-    * @param parameters The input parameters
-    */
+   * Class constructor
+   * @param parameters The input parameters
+   */
   CrackDataSampler(const InputParameters & parameters);
 
   /**
@@ -58,4 +60,3 @@ protected:
   /// The vector of PostprocessorValue objects that are used to get the values of the domain integral postprocessors
   std::vector<const PostprocessorValue *> _domain_integral_postprocessor_values;
 };
-

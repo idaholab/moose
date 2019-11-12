@@ -19,8 +19,9 @@ InputParameters validParams<LegacyTensorMechanicsAction>();
 class LegacyTensorMechanicsAction : public TensorMechanicsAction
 {
 public:
+  static InputParameters validParams();
+
   LegacyTensorMechanicsAction(const InputParameters & params);
 
   virtual void act();
 };
-

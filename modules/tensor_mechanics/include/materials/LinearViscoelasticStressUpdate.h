@@ -30,6 +30,8 @@ InputParameters validParams<LinearViscoelasticStressUpdate>();
 class LinearViscoelasticStressUpdate : public StressUpdateBase
 {
 public:
+  static InputParameters validParams();
+
   LinearViscoelasticStressUpdate(const InputParameters & parameters);
 
   /**
@@ -66,4 +68,3 @@ protected:
   /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
-

@@ -28,6 +28,8 @@ InputParameters validParams<GeneralizedPlaneStrainOffDiag>();
 class GeneralizedPlaneStrainOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainOffDiag(const InputParameters & parameters);
 
 protected:

@@ -26,6 +26,8 @@ InputParameters validParams<CylindricalRankTwoAux>();
 class CylindricalRankTwoAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   CylindricalRankTwoAux(const InputParameters & parameters);
   virtual ~CylindricalRankTwoAux() {}
 
@@ -36,4 +38,3 @@ protected:
   const unsigned int _j;
   const Point _center_point;
 };
-

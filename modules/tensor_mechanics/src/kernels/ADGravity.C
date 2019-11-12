@@ -14,16 +14,21 @@ registerADMooseObject("TensorMechanicsApp", ADGravity);
 /**
  * This kernel defines the residual contribution from a gravitational body force
  */
-defineADValidParams(
-    ADGravity,
-    ADKernelValue,
-    params.addClassDescription("Apply gravity. Value is in units of acceleration.");
-    params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
-    params.addRequiredParam<Real>(
-        "value", "Value multiplied against the residual, e.g. gravitational acceleration");
-    params.addParam<Real>("alpha",
-                          0.0,
-                          "alpha parameter required for HHT time integration scheme"););
+
+defineADLegacyParams(ADGravity);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADGravity<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription("Apply gravity. Value is in units of acceleration.");
+  params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
+  params.addRequiredParam<Real>(
+      "value", "Value multiplied against the residual, e.g. gravitational acceleration");
+  params.addParam<Real>("alpha", 0.0, "alpha parameter required for HHT time integration scheme");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADGravity<compute_stage>::ADGravity(const InputParameters & parameters)

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneFiniteStrain);
 
-template <>
+defineLegacyParams(ComputePlaneFiniteStrain);
+
 InputParameters
-validParams<ComputePlaneFiniteStrain>()
+ComputePlaneFiniteStrain::validParams()
 {
-  InputParameters params = validParams<Compute2DFiniteStrain>();
+  InputParameters params = Compute2DFiniteStrain::validParams();
   params.addClassDescription("Compute strain increment and rotation increment for finite strain "
                              "under 2D planar assumptions.");
   params.addParam<UserObjectName>("subblock_index_provider",

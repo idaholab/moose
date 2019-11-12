@@ -21,6 +21,8 @@ InputParameters validParams<InertialForce>();
 class InertialForce : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   InertialForce(const InputParameters & parameters);
 
 protected:
@@ -49,4 +51,3 @@ private:
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;
 };
-

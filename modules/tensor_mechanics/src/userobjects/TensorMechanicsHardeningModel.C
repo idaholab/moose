@@ -11,11 +11,12 @@
 //
 #include "TensorMechanicsHardeningModel.h"
 
-template <>
+defineLegacyParams(TensorMechanicsHardeningModel);
+
 InputParameters
-validParams<TensorMechanicsHardeningModel>()
+TensorMechanicsHardeningModel::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Hardening Model base class.  Override the virtual functions in your class");
   return params;

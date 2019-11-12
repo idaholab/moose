@@ -12,25 +12,30 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-defineADValidParams(
-    ADComputeStrainBase,
-    ADMaterial,
-    params.addRequiredCoupledVar(
-        "displacements",
-        "The displacements appropriate for the simulation geometry and coordinate system");
-    params.addParam<std::string>("base_name",
-                                 "Optional parameter that allows the user to define "
-                                 "multiple mechanics material systems on the same "
-                                 "block, i.e. for multiple phases");
-    params.addParam<bool>("volumetric_locking_correction",
-                          false,
-                          "Flag to correct volumetric locking");
-    params.addParam<std::vector<MaterialPropertyName>>(
-        "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
-    params.addParam<MaterialPropertyName>("global_strain",
-                                          "Optional material property holding a global strain "
-                                          "tensor applied to the mesh as a whole");
-    params.suppressParameter<bool>("use_displaced_mesh"););
+defineADLegacyParams(ADComputeStrainBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeStrainBase<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
+  params.addParam<bool>(
+      "volumetric_locking_correction", false, "Flag to correct volumetric locking");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  params.addParam<MaterialPropertyName>("global_strain",
+                                        "Optional material property holding a global strain "
+                                        "tensor applied to the mesh as a whole");
+  params.suppressParameter<bool>("use_displaced_mesh");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & parameters)

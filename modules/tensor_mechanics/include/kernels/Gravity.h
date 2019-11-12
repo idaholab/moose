@@ -24,6 +24,8 @@ InputParameters validParams<Gravity>();
 class Gravity : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Gravity(const InputParameters & parameters);
 
 protected:

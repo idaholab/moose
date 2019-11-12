@@ -23,6 +23,8 @@ InputParameters validParams<ComputeExtraStressConstant>();
 class ComputeExtraStressConstant : public ComputeExtraStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeExtraStressConstant(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
 
   RankTwoTensor _extra_stress_tensor;
 };
-

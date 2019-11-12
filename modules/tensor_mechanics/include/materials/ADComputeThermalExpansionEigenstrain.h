@@ -25,6 +25,8 @@ class ADComputeThermalExpansionEigenstrain
   : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
@@ -34,4 +36,3 @@ protected:
 
   usingComputeThermalExpansionEigenstrainBaseMembers;
 };
-

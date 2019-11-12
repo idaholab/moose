@@ -27,6 +27,8 @@ InputParameters validParams<ElementPropertyReadFile>();
 class ElementPropertyReadFile : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ElementPropertyReadFile(const InputParameters & parameters);
   virtual ~ElementPropertyReadFile() {}
 
@@ -98,4 +100,3 @@ private:
   Point _range;
   Real _max_range;
 };
-

@@ -22,6 +22,8 @@ InputParameters validParams<ComputeSurfaceTensionKKS>();
 class ComputeSurfaceTensionKKS : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputeSurfaceTensionKKS(const InputParameters & parameters);
 
 protected:
@@ -41,4 +43,3 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
-

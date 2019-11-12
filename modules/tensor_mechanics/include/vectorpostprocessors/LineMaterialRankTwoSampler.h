@@ -30,6 +30,8 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
+  static InputParameters validParams();
+
   LineMaterialRankTwoSampler(const InputParameters & parameters);
 
   /**
@@ -44,4 +46,3 @@ public:
   const unsigned int _i;
   const unsigned int _j;
 };
-

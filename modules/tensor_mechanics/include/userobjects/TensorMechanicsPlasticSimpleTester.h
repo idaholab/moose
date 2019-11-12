@@ -25,6 +25,8 @@ InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
 class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticSimpleTester(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -63,4 +65,3 @@ protected:
   /// strength
   Real _strength;
 };
-

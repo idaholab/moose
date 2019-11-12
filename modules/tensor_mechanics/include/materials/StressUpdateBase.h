@@ -52,6 +52,8 @@ InputParameters validParams<StressUpdateBase>();
 class StressUpdateBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   StressUpdateBase(const InputParameters & parameters);
 
   /**
@@ -120,4 +122,3 @@ protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
 };
-

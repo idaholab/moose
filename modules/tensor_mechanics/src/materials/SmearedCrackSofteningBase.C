@@ -11,11 +11,12 @@
 
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(SmearedCrackSofteningBase);
+
 InputParameters
-validParams<SmearedCrackSofteningBase>()
+SmearedCrackSofteningBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Calculates the softening behavior in a given crack direction. This "
                              "class is intended to be used with ComputeSmearedCrackingStress.");
   // These models are to be called by another model, so set compute=false

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneSmallStrain);
 
-template <>
+defineLegacyParams(ComputePlaneSmallStrain);
+
 InputParameters
-validParams<ComputePlaneSmallStrain>()
+ComputePlaneSmallStrain::validParams()
 {
-  InputParameters params = validParams<Compute2DSmallStrain>();
+  InputParameters params = Compute2DSmallStrain::validParams();
   params.addClassDescription("Compute a small strain under generalized plane strain assumptions "
                              "where the out of plane strain is generally nonzero.");
   params.addParam<UserObjectName>("subblock_index_provider",

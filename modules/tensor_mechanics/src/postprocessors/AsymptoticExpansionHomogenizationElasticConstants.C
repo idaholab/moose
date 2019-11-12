@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", AsymptoticExpansionHomogenizationElasticConstants);
 
-template <>
+defineLegacyParams(AsymptoticExpansionHomogenizationElasticConstants);
+
 InputParameters
-validParams<AsymptoticExpansionHomogenizationElasticConstants>()
+AsymptoticExpansionHomogenizationElasticConstants::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Postprocessor for asymptotic expansion homogenization for elasticity");
   params.addRequiredCoupledVar("dx_xx", "solution in xx");

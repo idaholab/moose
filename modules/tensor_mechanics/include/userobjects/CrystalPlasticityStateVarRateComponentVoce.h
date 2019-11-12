@@ -23,6 +23,8 @@ InputParameters validParams<CrystalPlasticityStateVarRateComponentVoce>();
 class CrystalPlasticityStateVarRateComponentVoce : public CrystalPlasticityStateVarRateComponent
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticityStateVarRateComponentVoce(const InputParameters & parameters);
 
   /// computing the slip system hardening rate
@@ -70,4 +72,3 @@ protected:
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
                                        unsigned int slipSystemIndex_j) const;
 };
-

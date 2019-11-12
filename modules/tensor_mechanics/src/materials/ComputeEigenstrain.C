@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeEigenstrain);
 
-template <>
+defineLegacyParams(ComputeEigenstrain);
+
 InputParameters
-validParams<ComputeEigenstrain>()
+ComputeEigenstrain::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBase>();
+  InputParameters params = ComputeEigenstrainBase::validParams();
   params.addClassDescription("Computes a constant Eigenstrain");
   params.addRequiredParam<std::vector<Real>>(
       "eigen_base", "Vector of values defining the constant base tensor for the Eigenstrain");

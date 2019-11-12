@@ -10,13 +10,20 @@
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
-defineADValidParams(ADComputeThermalExpansionEigenstrainBase,
-                    ADComputeEigenstrainBase,
-                    params.addCoupledVar("temperature", "Coupled temperature");
-                    params.addRequiredCoupledVar("stress_free_temperature",
-                                                 "Reference temperature at which there is no "
-                                                 "thermal expansion for thermal eigenstrain "
-                                                 "calculation"););
+defineADLegacyParams(ADComputeThermalExpansionEigenstrainBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeEigenstrainBase<compute_stage>::validParams();
+  params.addCoupledVar("temperature", "Coupled temperature");
+  params.addRequiredCoupledVar("stress_free_temperature",
+                               "Reference temperature at which there is no "
+                               "thermal expansion for thermal eigenstrain "
+                               "calculation");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeThermalExpansionEigenstrainBase<compute_stage>::ADComputeThermalExpansionEigenstrainBase(

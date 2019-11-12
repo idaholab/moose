@@ -33,11 +33,12 @@ registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_kernel
 
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material");
 
-template <>
+defineLegacyParams(TensorMechanicsAction);
+
 InputParameters
-validParams<TensorMechanicsAction>()
+TensorMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsActionBase>();
+  InputParameters params = TensorMechanicsActionBase::validParams();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
 
   // parameters specified here only appear in the input file sub-blocks of the

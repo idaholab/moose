@@ -15,11 +15,12 @@
 
 registerMooseObject("TensorMechanicsApp", TorqueReaction);
 
-template <>
+defineLegacyParams(TorqueReaction);
+
 InputParameters
-validParams<TorqueReaction>()
+TorqueReaction::validParams()
 {
-  InputParameters params = validParams<NodalPostprocessor>();
+  InputParameters params = NodalPostprocessor::validParams();
   params.addClassDescription("TorqueReaction calculates the torque in 2D and 3D"
                              "about a user-specified axis of rotation centered"
                              "at a user-specied origin.");

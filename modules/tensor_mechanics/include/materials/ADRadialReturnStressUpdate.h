@@ -44,6 +44,8 @@ class ADRadialReturnStressUpdate : public ADStressUpdateBase<compute_stage>,
                                    public ADSingleVariableReturnMappingSolution<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADRadialReturnStressUpdate(const InputParameters & parameters);
 
   /**

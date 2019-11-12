@@ -32,6 +32,8 @@ class ADPowerLawCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase<c
 public:
   ADPowerLawCreepStressUpdate<compute_stage>(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeStressInitialize(const ADReal & effective_trial_stress,
                                        const ADRankFourTensor & elasticity_tensor) override;

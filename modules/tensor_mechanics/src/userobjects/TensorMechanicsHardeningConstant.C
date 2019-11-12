@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningConstant);
 
-template <>
+defineLegacyParams(TensorMechanicsHardeningConstant);
+
 InputParameters
-validParams<TensorMechanicsHardeningConstant>()
+TensorMechanicsHardeningConstant::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsHardeningModel>();
+  InputParameters params = TensorMechanicsHardeningModel::validParams();
   params.addParam<Real>("value",
                         1.0,
                         "The value of the parameter for all internal parameter.  "

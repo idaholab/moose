@@ -19,6 +19,8 @@ InputParameters validParams<LineElementAction>();
 class LineElementAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   LineElementAction(const InputParameters & params);
 
   virtual void act();
@@ -156,4 +158,3 @@ protected:
   /// Set to true if line element is a truss
   bool _truss;
 };
-

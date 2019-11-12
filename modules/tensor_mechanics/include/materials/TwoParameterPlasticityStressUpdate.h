@@ -33,6 +33,8 @@ public:
                                      unsigned num_yf,
                                      unsigned num_intnl);
 
+  static InputParameters validParams();
+
 protected:
   /// Number of variables = 2 = (p, q)
   constexpr static int _num_pq = 2;
@@ -337,4 +339,3 @@ protected:
    */
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
 };
-

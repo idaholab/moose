@@ -26,6 +26,8 @@ InputParameters validParams<WeakPlaneStress>();
 class WeakPlaneStress : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   WeakPlaneStress(const InputParameters & parameters);
 
 protected:

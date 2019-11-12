@@ -11,23 +11,28 @@
 
 registerADMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
-defineADValidParams(
-    ADPowerLawCreepStressUpdate,
-    ADRadialReturnCreepStressUpdateBase,
-    params.addClassDescription(
-        "This class uses the stress update material in a radial return isotropic power law creep "
-        "model. This class can be used in conjunction with other creep and plasticity materials "
-        "for more complex simulations.");
+defineADLegacyParams(ADPowerLawCreepStressUpdate);
 
-    // Linear strain hardening parameters
-    params.addCoupledVar("temperature", "Coupled temperature");
-    params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
-    params.addRequiredParam<Real>("n_exponent",
-                                  "Exponent on effective stress in power-law equation");
-    params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
-    params.addRequiredParam<Real>("activation_energy", "Activation energy");
-    params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
-    params.addParam<Real>("start_time", 0.0, "Start time (if not zero)"););
+template <ComputeStage compute_stage>
+InputParameters
+ADPowerLawCreepStressUpdate<compute_stage>::validParams()
+{
+  InputParameters params = ADRadialReturnCreepStressUpdateBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "This class uses the stress update material in a radial return isotropic power law creep "
+      "model. This class can be used in conjunction with other creep and plasticity materials "
+      "for more complex simulations.");
+
+  // Linear strain hardening parameters
+  params.addCoupledVar("temperature", "Coupled temperature");
+  params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
+  params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
+  params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
+  params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+  params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(

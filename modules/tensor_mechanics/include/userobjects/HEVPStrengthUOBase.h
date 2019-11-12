@@ -24,6 +24,8 @@ InputParameters validParams<HEVPStrengthUOBase>();
 class HEVPStrengthUOBase : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   HEVPStrengthUOBase(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
@@ -33,4 +35,3 @@ protected:
   std::string _intvar_prop_name;
   const MaterialProperty<Real> & _intvar;
 };
-

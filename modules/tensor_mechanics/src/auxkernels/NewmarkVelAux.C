@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", NewmarkVelAux);
 
-template <>
+defineLegacyParams(NewmarkVelAux);
+
 InputParameters
-validParams<NewmarkVelAux>()
+NewmarkVelAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Calculates the current velocity using Newmark method.");
   params.addRequiredCoupledVar("acceleration", "acceleration variable");
   params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark method");

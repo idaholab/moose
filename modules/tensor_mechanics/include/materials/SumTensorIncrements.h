@@ -24,6 +24,8 @@ InputParameters validParams<SumTensorIncrements>();
 class SumTensorIncrements : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   SumTensorIncrements(const InputParameters & parameters);
 
 protected:
@@ -39,4 +41,3 @@ protected:
 
   std::vector<const MaterialProperty<RankTwoTensor> *> _coupled_tensor_increments;
 };
-

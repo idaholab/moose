@@ -30,6 +30,8 @@ InputParameters validParams<MultiPhaseStressMaterial>();
 class MultiPhaseStressMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   MultiPhaseStressMaterial(const InputParameters & parameters);
 
 protected:
@@ -54,4 +56,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };
-

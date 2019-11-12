@@ -28,6 +28,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
+  static InputParameters validParams();
+
   DashpotBC(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ private:
   const VariableValue & _disp_y_dot;
   const VariableValue & _disp_z_dot;
 };
-

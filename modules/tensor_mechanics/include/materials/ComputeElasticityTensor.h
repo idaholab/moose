@@ -22,6 +22,8 @@ InputParameters validParams<ComputeElasticityTensor>();
 class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,3 @@ protected:
   /// Individual material information
   RankFourTensor _Cijkl;
 };
-

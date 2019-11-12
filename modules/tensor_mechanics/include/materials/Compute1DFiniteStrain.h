@@ -24,6 +24,8 @@ InputParameters validParams<Compute1DFiniteStrain>();
 class Compute1DFiniteStrain : public ComputeFiniteStrain
 {
 public:
+  static InputParameters validParams();
+
   Compute1DFiniteStrain(const InputParameters & parameters);
 
   void computeProperties() override;
@@ -45,4 +47,3 @@ protected:
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZOld() = 0;
 };
-

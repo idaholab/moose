@@ -22,6 +22,8 @@
 class PresetDisplacement : public PresetNodalBC
 {
 public:
+  static InputParameters validParams();
+
   PresetDisplacement(const InputParameters & parameters);
 
 protected:

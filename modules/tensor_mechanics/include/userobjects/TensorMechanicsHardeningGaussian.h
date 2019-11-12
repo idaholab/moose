@@ -26,6 +26,8 @@ InputParameters validParams<TensorMechanicsHardeningGaussian>();
 class TensorMechanicsHardeningGaussian : public TensorMechanicsHardeningModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningGaussian(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -47,4 +49,3 @@ private:
   /// The value = _val_res + (val_0 - val_res)*exp(-0.5*rate*(p - intnl_0)^2) for p>intnl_0.  Here p = internal parameter
   Real _rate;
 };
-

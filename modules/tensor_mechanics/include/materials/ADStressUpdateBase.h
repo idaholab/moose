@@ -51,6 +51,8 @@ template <ComputeStage compute_stage>
 class ADStressUpdateBase : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADStressUpdateBase(const InputParameters & parameters);
 
   /**
@@ -108,4 +110,3 @@ protected:
 
   usingMaterialMembers;
 };
-

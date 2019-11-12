@@ -25,6 +25,8 @@ class ComputeThermalExpansionEigenstrainBeamBase
   : public DerivativeMaterialInterface<ComputeEigenstrainBeamBase>
 {
 public:
+  static InputParameters validParams();
+
   ComputeThermalExpansionEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ protected:
   /// Initial orientation of the beam
   RealGradient _initial_axis;
 };
-

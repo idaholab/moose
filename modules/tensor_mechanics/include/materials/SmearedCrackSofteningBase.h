@@ -28,6 +28,8 @@ InputParameters validParams<SmearedCrackSofteningBase>();
 class SmearedCrackSofteningBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   SmearedCrackSofteningBase(const InputParameters & parameters);
 
   /**
@@ -56,4 +58,3 @@ public:
   void resetProperties() final {}
   ///@}
 };
-

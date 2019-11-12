@@ -19,6 +19,8 @@ InputParameters validParams<GlobalStrainAction>();
 class GlobalStrainAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   GlobalStrainAction(const InputParameters & params);
 
   void act() override;

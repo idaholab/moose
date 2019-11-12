@@ -24,6 +24,8 @@ InputParameters validParams<ComputePlaneFiniteStrain>();
 class ComputePlaneFiniteStrain : public Compute2DFiniteStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputePlaneFiniteStrain(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ protected:
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
 };
-

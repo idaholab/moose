@@ -20,6 +20,8 @@ InputParameters validParams<StressDivergenceTensorsTruss>();
 class StressDivergenceTensorsTruss : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceTensorsTruss(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ private:
   const VariableValue & _area;
   const std::vector<RealGradient> * _orientation;
 };
-

@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", CappedMohrCoulombStressUpdate);
 
-template <>
+defineLegacyParams(CappedMohrCoulombStressUpdate);
+
 InputParameters
-validParams<CappedMohrCoulombStressUpdate>()
+CappedMohrCoulombStressUpdate::validParams()
 {
-  InputParameters params = validParams<MultiParameterPlasticityStressUpdate>();
+  InputParameters params = MultiParameterPlasticityStressUpdate::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the "

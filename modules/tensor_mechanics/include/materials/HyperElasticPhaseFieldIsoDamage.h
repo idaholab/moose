@@ -25,6 +25,8 @@ InputParameters validParams<HyperElasticPhaseFieldIsoDamage>();
 class HyperElasticPhaseFieldIsoDamage : public FiniteStrainHyperElasticViscoPlastic
 {
 public:
+  static InputParameters validParams();
+
   HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters);
 
 protected:
@@ -80,4 +82,3 @@ protected:
   /// Old value of history variable
   const MaterialProperty<Real> & _hist_old;
 };
-

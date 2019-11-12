@@ -12,10 +12,17 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
 
-defineADValidParams(ADComputeIncrementalSmallStrain,
-                    ADComputeIncrementalStrainBase,
-                    params.addClassDescription(
-                        "Compute a strain increment and rotation increment for small strains."););
+defineADLegacyParams(ADComputeIncrementalSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeIncrementalSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalStrainBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for small strains.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeIncrementalSmallStrain<compute_stage>::ADComputeIncrementalSmallStrain(

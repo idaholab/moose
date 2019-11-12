@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", MultiPhaseStressMaterial);
 
-template <>
+defineLegacyParams(MultiPhaseStressMaterial);
+
 InputParameters
-validParams<MultiPhaseStressMaterial>()
+MultiPhaseStressMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a global stress form multiple phase stresses");
   params.addParam<std::vector<MaterialPropertyName>>(
       "h", "Switching Function Materials that provide h(eta_i)");

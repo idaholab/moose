@@ -26,6 +26,8 @@ class MultiPlasticityDebugger : public MultiPlasticityLinearSystem
 public:
   MultiPlasticityDebugger(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   /**
    * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc
    * and checks that they are sized correctly
@@ -147,4 +149,3 @@ private:
 
   bool dof_included(unsigned int dof, const std::vector<bool> & deactivated_due_to_ld);
 };
-

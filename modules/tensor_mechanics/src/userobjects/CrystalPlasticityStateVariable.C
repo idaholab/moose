@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVariable);
 
-template <>
+defineLegacyParams(CrystalPlasticityStateVariable);
+
 InputParameters
-validParams<CrystalPlasticityStateVariable>()
+CrystalPlasticityStateVariable::validParams()
 {
-  InputParameters params = validParams<CrystalPlasticityUOBase>();
+  InputParameters params = CrystalPlasticityUOBase::validParams();
   params.addParam<FileName>(
       "state_variable_file_name",
       "",

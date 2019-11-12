@@ -26,11 +26,12 @@ registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_variable"
 
 registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(GlobalStrainAction);
+
 InputParameters
-validParams<GlobalStrainAction>()
+GlobalStrainAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up the GlobalStrainAction environment");
   params.addRequiredParam<VariableName>("scalar_global_strain",
                                         "Scalar variable for global strain");

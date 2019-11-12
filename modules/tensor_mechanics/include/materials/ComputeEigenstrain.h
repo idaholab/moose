@@ -25,6 +25,8 @@ InputParameters validParams<ComputeEigenstrain>();
 class ComputeEigenstrain : public ComputeEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeEigenstrain(const InputParameters & parameters);
 
 protected:
@@ -34,4 +36,3 @@ protected:
 
   RankTwoTensor _eigen_base_tensor;
 };
-

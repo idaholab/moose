@@ -24,6 +24,8 @@ InputParameters validParams<ComputeAxisymmetricRZIncrementalStrain>();
 class ComputeAxisymmetricRZIncrementalStrain : public Compute2DIncrementalStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -36,4 +38,3 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
-

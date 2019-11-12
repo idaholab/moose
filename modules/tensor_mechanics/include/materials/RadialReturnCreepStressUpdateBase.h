@@ -23,6 +23,8 @@ InputParameters validParams<RadialReturnCreepStressUpdateBase>();
 class RadialReturnCreepStressUpdateBase : public RadialReturnStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
 protected:
@@ -54,4 +56,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };
-

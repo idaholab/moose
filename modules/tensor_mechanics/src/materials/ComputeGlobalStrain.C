@@ -15,11 +15,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeGlobalStrain);
 
-template <>
+defineLegacyParams(ComputeGlobalStrain);
+
 InputParameters
-validParams<ComputeGlobalStrain>()
+ComputeGlobalStrain::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Material for storing the global strain values from the scalar variable");
   params.addParam<std::string>("base_name",

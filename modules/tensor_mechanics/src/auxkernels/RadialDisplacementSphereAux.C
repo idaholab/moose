@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", RadialDisplacementSphereAux);
 
-template <>
+defineLegacyParams(RadialDisplacementSphereAux);
+
 InputParameters
-validParams<RadialDisplacementSphereAux>()
+RadialDisplacementSphereAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Compute the radial component of the displacement vector for spherical models.");
   params.addRequiredCoupledVar(

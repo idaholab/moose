@@ -26,6 +26,8 @@ InputParameters validParams<StressBasedChemicalPotential>();
 class StressBasedChemicalPotential : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   StressBasedChemicalPotential(const InputParameters & parameters);
 
 protected:
@@ -41,4 +43,3 @@ protected:
   const MaterialProperty<Real> * _dprefactor_dc;
   bool _has_coupled_c;
 };
-

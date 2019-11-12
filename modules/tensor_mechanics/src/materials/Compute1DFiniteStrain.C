@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(Compute1DFiniteStrain);
+
 InputParameters
-validParams<Compute1DFiniteStrain>()
+Compute1DFiniteStrain::validParams()
 {
-  InputParameters params = validParams<ComputeFiniteStrain>();
+  InputParameters params = ComputeFiniteStrain::validParams();
   params.addClassDescription("Compute strain increment for finite strain in 1D problem");
 
   return params;

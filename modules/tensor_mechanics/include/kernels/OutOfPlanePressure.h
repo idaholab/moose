@@ -28,6 +28,8 @@ InputParameters validParams<OutOfPlanePressure>();
 class OutOfPlanePressure : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   OutOfPlanePressure(const InputParameters & parameters);
 
 protected:

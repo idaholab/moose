@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainPlasticMaterial);
 
-template <>
+defineLegacyParams(FiniteStrainPlasticMaterial);
+
 InputParameters
-validParams<FiniteStrainPlasticMaterial>()
+FiniteStrainPlasticMaterial::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
 
   params.addRequiredParam<std::vector<Real>>(
       "yield_stress",

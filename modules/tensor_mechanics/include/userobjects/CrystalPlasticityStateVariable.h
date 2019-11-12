@@ -22,6 +22,8 @@ InputParameters validParams<CrystalPlasticityStateVariable>();
 class CrystalPlasticityStateVariable : public CrystalPlasticityUOBase
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticityStateVariable(const InputParameters & parameters);
 
   virtual bool updateStateVariable(unsigned int qp,
@@ -69,4 +71,3 @@ protected:
   /// Scale factor of individual component
   std::vector<Real> _scale_factor;
 };
-

@@ -15,11 +15,12 @@
 
 registerMooseObject("TensorMechanicsApp", ElementPropertyReadFile);
 
-template <>
+defineLegacyParams(ElementPropertyReadFile);
+
 InputParameters
-validParams<ElementPropertyReadFile>()
+ElementPropertyReadFile::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("User Object to read property data from an external file and assign "
                              "to elements.");
   params.addParam<FileName>("prop_file_name", "", "Name of the property file name");

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", AccumulateAux);
 
-template <>
+defineLegacyParams(AccumulateAux);
+
 InputParameters
-validParams<AccumulateAux>()
+AccumulateAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar(
       "accumulate_from_variable",
       "Variable whose values are to be accumulated into the current variable");

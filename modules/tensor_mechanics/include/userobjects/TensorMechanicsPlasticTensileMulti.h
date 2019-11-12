@@ -24,6 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticTensileMulti>();
 class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticTensileMulti(const InputParameters & parameters);
 
   virtual unsigned int numberSurfaces() const override;
@@ -221,4 +223,3 @@ private:
     plane = 2
   };
 };
-

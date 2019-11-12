@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVariableBaseEigenStrain);
 
-template <>
+defineLegacyParams(ComputeVariableBaseEigenStrain);
+
 InputParameters
-validParams<ComputeVariableBaseEigenStrain>()
+ComputeVariableBaseEigenStrain::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBase>();
+  InputParameters params = ComputeEigenstrainBase::validParams();
   params.addClassDescription("Computes Eigenstrain based on material property tensor base");
   params.addRequiredParam<MaterialPropertyName>("base_tensor_property_name",
                                                 "Name of base tensor property");

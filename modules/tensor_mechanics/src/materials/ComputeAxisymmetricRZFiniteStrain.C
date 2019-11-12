@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetricRZFiniteStrain);
 
-template <>
+defineLegacyParams(ComputeAxisymmetricRZFiniteStrain);
+
 InputParameters
-validParams<ComputeAxisymmetricRZFiniteStrain>()
+ComputeAxisymmetricRZFiniteStrain::validParams()
 {
-  InputParameters params = validParams<Compute2DFiniteStrain>();
+  InputParameters params = Compute2DFiniteStrain::validParams();
   params.addClassDescription(
       "Compute a strain increment for finite strains under axisymmetric assumptions.");
   return params;

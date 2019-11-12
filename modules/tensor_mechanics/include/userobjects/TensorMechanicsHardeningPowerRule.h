@@ -24,6 +24,8 @@ InputParameters validParams<TensorMechanicsHardeningPowerRule>();
 class TensorMechanicsHardeningPowerRule : public TensorMechanicsHardeningModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningPowerRule(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -42,4 +44,3 @@ private:
   /// The value = value_0 * (p / epsilon0 + 1)^{exponent})
   const Real _exponent;
 };
-

@@ -24,6 +24,8 @@ InputParameters validParams<StickyBC>();
 class StickyBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   StickyBC(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
   /// The maximum bound
   const Real _max_value;
 };
-

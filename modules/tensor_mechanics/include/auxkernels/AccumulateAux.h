@@ -23,6 +23,8 @@ InputParameters validParams<AccumulateAux>();
 class AccumulateAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   AccumulateAux(const InputParameters & parameters);
 
 protected:
@@ -31,4 +33,3 @@ protected:
   // coupled variable values to be aggregated
   std::vector<const VariableValue *> _values;
 };
-

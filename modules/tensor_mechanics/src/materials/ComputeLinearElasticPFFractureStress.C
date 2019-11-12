@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeLinearElasticPFFractureStress);
 
-template <>
+defineLegacyParams(ComputeLinearElasticPFFractureStress);
+
 InputParameters
-validParams<ComputeLinearElasticPFFractureStress>()
+ComputeLinearElasticPFFractureStress::validParams()
 {
-  InputParameters params = validParams<ComputePFFractureStressBase>();
+  InputParameters params = ComputePFFractureStressBase::validParams();
   params.addClassDescription("Computes the stress and free energy derivatives for the phase field "
                              "fracture model, with small strain");
   MooseEnum Decomposition("strain_spectral strain_vol_dev stress_spectral none", "none");

@@ -11,10 +11,16 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(
-    ADCompute1DFiniteStrain,
-    ADComputeFiniteStrain,
-    params.addClassDescription("Compute strain increment for finite strain in 1D problem"););
+defineADLegacyParams(ADCompute1DFiniteStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCompute1DFiniteStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeFiniteStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute strain increment for finite strain in 1D problem");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCompute1DFiniteStrain<compute_stage>::ADCompute1DFiniteStrain(const InputParameters & parameters)

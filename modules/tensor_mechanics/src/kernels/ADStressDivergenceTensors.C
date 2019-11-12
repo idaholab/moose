@@ -13,22 +13,28 @@
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
 
-defineADValidParams(
-    ADStressDivergenceTensors,
-    ADKernel,
-    params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
-                               "Cartesian coordinate system");
-    params.addRequiredParam<unsigned int>("component",
-                                          "An integer corresponding to the direction "
-                                          "the variable this kernel acts in. (0 for x, "
-                                          "1 for y, 2 for z)");
-    params.addRequiredCoupledVar("displacements",
-                                 "The string of displacements suitable for the problem statement");
-    params.addParam<std::string>("base_name", "Material property base name");
-    params.set<bool>("use_displaced_mesh") = false;
-    params.addParam<bool>("volumetric_locking_correction",
-                          false,
-                          "Set to false to turn off volumetric locking correction"););
+defineADLegacyParams(ADStressDivergenceTensors);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADStressDivergenceTensors<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
+                             "Cartesian coordinate system");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
+  params.addRequiredCoupledVar("displacements",
+                               "The string of displacements suitable for the problem statement");
+  params.addParam<std::string>("base_name", "Material property base name");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.addParam<bool>("volumetric_locking_correction",
+                        false,
+                        "Set to false to turn off volumetric locking correction");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(

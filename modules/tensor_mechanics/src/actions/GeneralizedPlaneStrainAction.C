@@ -20,11 +20,12 @@ registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_ker
 
 registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_user_object");
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainAction);
+
 InputParameters
-validParams<GeneralizedPlaneStrainAction>()
+GeneralizedPlaneStrainAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up the GeneralizedPlaneStrain environment");
   params.addRequiredParam<std::vector<VariableName>>("displacements", "The displacement variables");
   params.addRequiredParam<VariableName>("scalar_out_of_plane_strain",

@@ -16,11 +16,17 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalFiniteStrain);
 
-defineADValidParams(ADComputeRSphericalFiniteStrain,
-                    ADComputeFiniteStrain,
-                    params.addClassDescription(
-                        "Compute a strain increment and rotation increment for finite strains "
-                        "in 1D spherical symmetry problems."););
+defineADLegacyParams(ADComputeRSphericalFiniteStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeRSphericalFiniteStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeFiniteStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
+                             "in 1D spherical symmetry problems.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeRSphericalFiniteStrain<compute_stage>::ADComputeRSphericalFiniteStrain(

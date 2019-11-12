@@ -31,6 +31,8 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
+  static InputParameters validParams();
+
   LineMaterialRankTwoScalarSampler(const InputParameters & parameters);
 
   /**
@@ -50,4 +52,3 @@ protected:
   const Point _point2;
   Point _direction;
 };
-

@@ -22,9 +22,10 @@
 #include <cmath>
 #include <memory>
 
-template <>
+defineLegacyParams(SingleVariableReturnMappingSolution);
+
 InputParameters
-validParams<SingleVariableReturnMappingSolution>()
+SingleVariableReturnMappingSolution::validParams()
 {
   InputParameters params = emptyInputParameters();
 

@@ -16,11 +16,12 @@
 
 registerMooseObject("TensorMechanicsApp", CosseratStressDivergenceTensors);
 
-template <>
+defineLegacyParams(CosseratStressDivergenceTensors);
+
 InputParameters
-validParams<CosseratStressDivergenceTensors>()
+CosseratStressDivergenceTensors::validParams()
 {
-  InputParameters params = validParams<StressDivergenceTensors>();
+  InputParameters params = StressDivergenceTensors::validParams();
   params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
   return params;
 }

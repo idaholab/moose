@@ -25,6 +25,8 @@ InputParameters validParams<ComputePlaneSmallStrain>();
 class ComputePlaneSmallStrain : public Compute2DSmallStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputePlaneSmallStrain(const InputParameters & parameters);
 
 protected:
@@ -46,4 +48,3 @@ private:
   unsigned int _nscalar_strains;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
-

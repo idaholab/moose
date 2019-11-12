@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", PresetDisplacement);
 
-template <>
+defineLegacyParams(PresetDisplacement);
+
 InputParameters
-validParams<PresetDisplacement>()
+PresetDisplacement::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addClassDescription(
       "Prescribe the displacement on a given boundary in a given direction.");
   params.addParam<Real>("scale_factor", 1, "Scale factor if function is given.");

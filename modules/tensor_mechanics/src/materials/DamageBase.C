@@ -9,11 +9,12 @@
 
 #include "DamageBase.h"
 
-template <>
+defineLegacyParams(DamageBase);
+
 InputParameters
-validParams<DamageBase>()
+DamageBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Base class for damage models for use in conjunction with "
       "ComputeMultipleInelasticStress. The damage model updates the "

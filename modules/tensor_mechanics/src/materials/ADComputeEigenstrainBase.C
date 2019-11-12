@@ -11,23 +11,28 @@
 
 #include "RankTwoTensor.h"
 
-defineADValidParams(
-    ADComputeEigenstrainBase,
-    ADMaterial,
-    params.addParam<std::string>("base_name",
-                                 "Optional parameter that allows the user to define "
-                                 "multiple mechanics material systems on the same "
-                                 "block, i.e. for multiple phases");
-    params.addRequiredParam<std::string>(
-        "eigenstrain_name",
-        "Material property name for the eigenstrain tensor computed "
-        "by this model. IMPORTANT: The name of this property must "
-        "also be provided to the strain calculator.");
-    params.addDeprecatedParam<bool>(
-        "incremental_form",
-        false,
-        "Should the eigenstrain be in incremental form (for incremental models)?",
-        "This parameter no longer has any effect. Simply remove it."););
+defineADLegacyParams(ADComputeEigenstrainBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeEigenstrainBase<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
+  params.addRequiredParam<std::string>("eigenstrain_name",
+                                       "Material property name for the eigenstrain tensor computed "
+                                       "by this model. IMPORTANT: The name of this property must "
+                                       "also be provided to the strain calculator.");
+  params.addDeprecatedParam<bool>(
+      "incremental_form",
+      false,
+      "Should the eigenstrain be in incremental form (for incremental models)?",
+      "This parameter no longer has any effect. Simply remove it.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeEigenstrainBase<compute_stage>::ADComputeEigenstrainBase(

@@ -35,6 +35,8 @@ InputParameters validParams<MomentBalancing>();
 class MomentBalancing : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MomentBalancing(const InputParameters & parameters);
 
 protected:
@@ -66,4 +68,3 @@ protected:
   /// the moose variable numbers for the displacements
   std::vector<unsigned int> _disp_var;
 };
-

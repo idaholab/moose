@@ -16,11 +16,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainCrystalPlasticity);
 
-template <>
+defineLegacyParams(FiniteStrainCrystalPlasticity);
+
 InputParameters
-validParams<FiniteStrainCrystalPlasticity>()
+FiniteStrainCrystalPlasticity::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription(
       "Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int>("nss", "Number of slip systems");

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
 
-template <>
+defineLegacyParams(PowerLawCreepStressUpdate);
+
 InputParameters
-validParams<PowerLawCreepStressUpdate>()
+PowerLawCreepStressUpdate::validParams()
 {
-  InputParameters params = validParams<RadialReturnCreepStressUpdateBase>();
+  InputParameters params = RadialReturnCreepStressUpdateBase::validParams();
   params.addClassDescription(
       "This class uses the stress update material in a radial return isotropic power law creep "
       "model.  This class can be used in conjunction with other creep and plasticity materials for "

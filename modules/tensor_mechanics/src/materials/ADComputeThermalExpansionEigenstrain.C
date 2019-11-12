@@ -11,12 +11,18 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
 
-defineADValidParams(ADComputeThermalExpansionEigenstrain,
-                    ADComputeThermalExpansionEigenstrainBase,
-                    params.addClassDescription("Computes eigenstrain due to thermal expansion "
-                                               "with a constant coefficient");
-                    params.addRequiredParam<Real>("thermal_expansion_coeff",
-                                                  "Thermal expansion coefficient"););
+defineADLegacyParams(ADComputeThermalExpansionEigenstrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeThermalExpansionEigenstrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  params.addClassDescription("Computes eigenstrain due to thermal expansion "
+                             "with a constant coefficient");
+  params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeThermalExpansionEigenstrain<compute_stage>::ADComputeThermalExpansionEigenstrain(

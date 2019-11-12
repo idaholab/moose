@@ -28,6 +28,8 @@ InputParameters validParams<ComputeReducedOrderEigenstrain>();
 class ComputeReducedOrderEigenstrain : public ComputeEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeReducedOrderEigenstrain(const InputParameters & parameters);
 
   void initQpStatefulProperties();

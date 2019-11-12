@@ -26,6 +26,8 @@ InputParameters validParams<RankTwoAux>();
 class RankTwoAux : public NodalPatchRecovery
 {
 public:
+  static InputParameters validParams();
+
   RankTwoAux(const InputParameters & parameters);
 
 protected:
@@ -42,4 +44,3 @@ private:
   /// The std::vector will be evaluated at this quadpoint only if defined
   const unsigned int _selected_qp;
 };
-

@@ -104,6 +104,8 @@ public:
                                        unsigned num_yf,
                                        unsigned num_intnl);
 
+  static InputParameters validParams();
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void updateState(RankTwoTensor & strain_increment,
@@ -746,4 +748,3 @@ private:
     poly3
   } _smoother_function_type;
 };
-

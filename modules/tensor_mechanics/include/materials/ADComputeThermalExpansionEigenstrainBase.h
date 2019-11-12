@@ -36,6 +36,8 @@ class ADComputeThermalExpansionEigenstrainBase : public ADComputeEigenstrainBase
                                                  public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
@@ -59,4 +61,3 @@ protected:
 
   usingComputeEigenstrainBaseMembers;
 };
-

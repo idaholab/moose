@@ -23,6 +23,8 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileN>();
 class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWeakPlaneTensile
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticWeakPlaneTensileN(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -49,4 +51,3 @@ protected:
   /// This rotation matrix rotates _input_n to (0, 0, 1)
   RealTensorValue _rot;
 };
-

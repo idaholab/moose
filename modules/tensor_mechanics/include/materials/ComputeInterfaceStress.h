@@ -26,6 +26,8 @@ InputParameters validParams<ComputeInterfaceStress>();
 class ComputeInterfaceStress : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputeInterfaceStress(const InputParameters & parameters);
 
 protected:
@@ -38,4 +40,3 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
-

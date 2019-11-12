@@ -26,6 +26,8 @@ InputParameters validParams<ComputeDeformGradBasedStress>();
 class ComputeDeformGradBasedStress : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ComputeDeformGradBasedStress(const InputParameters & parameters);
 
 protected:
@@ -39,4 +41,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };
-

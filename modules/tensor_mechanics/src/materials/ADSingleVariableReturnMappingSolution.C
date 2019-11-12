@@ -25,32 +25,37 @@
 #include <cmath>
 #include <memory>
 
-defineADValidParamsFromEmpty(
-    ADSingleVariableReturnMappingSolution,
-    params.addParam<Real>("relative_tolerance",
-                          1e-8,
-                          "Relative convergence tolerance for Newton iteration");
-    params.addParam<Real>("absolute_tolerance",
-                          1e-11,
-                          "Absolute convergence tolerance for Newton iteration");
-    params.addParam<Real>("acceptable_multiplier",
-                          10,
-                          "Factor applied to relative and absolute "
-                          "tolerance for acceptable convergence if "
-                          "iterations are no longer making progress");
+defineADLegacyParams(ADSingleVariableReturnMappingSolution);
 
-    // diagnostic output parameters
-    MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
-    params.addParam<MooseEnum>("internal_solve_output_on",
-                               internal_solve_output_on_enum,
-                               "When to output internal Newton solve information");
-    params.addParam<bool>("internal_solve_full_iteration_history",
-                          false,
-                          "Set true to output full internal Newton iteration history at times "
-                          "determined by `internal_solve_output_on`. If false, only a summary is "
-                          "output.");
-    params.addParamNamesToGroup("internal_solve_output_on internal_solve_full_iteration_history",
-                                "Debug"););
+template <ComputeStage compute_stage>
+InputParameters
+ADSingleVariableReturnMappingSolution<compute_stage>::validParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>(
+      "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
+  params.addParam<Real>(
+      "absolute_tolerance", 1e-11, "Absolute convergence tolerance for Newton iteration");
+  params.addParam<Real>("acceptable_multiplier",
+                        10,
+                        "Factor applied to relative and absolute "
+                        "tolerance for acceptable convergence if "
+                        "iterations are no longer making progress");
+
+  // diagnostic output parameters
+  MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
+  params.addParam<MooseEnum>("internal_solve_output_on",
+                             internal_solve_output_on_enum,
+                             "When to output internal Newton solve information");
+  params.addParam<bool>("internal_solve_full_iteration_history",
+                        false,
+                        "Set true to output full internal Newton iteration history at times "
+                        "determined by `internal_solve_output_on`. If false, only a summary is "
+                        "output.");
+  params.addParamNamesToGroup("internal_solve_output_on internal_solve_full_iteration_history",
+                              "Debug");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADSingleVariableReturnMappingSolution<compute_stage>::ADSingleVariableReturnMappingSolution(

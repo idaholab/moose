@@ -36,6 +36,8 @@ void addCrackFrontDefinitionParams(InputParameters & params);
 class CrackFrontDefinition : public GeneralUserObject, public BoundaryRestrictable
 {
 public:
+  static InputParameters validParams();
+
   CrackFrontDefinition(const InputParameters & parameters);
   virtual ~CrackFrontDefinition();
 

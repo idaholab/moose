@@ -38,6 +38,8 @@ InputParameters validParams<ComputeMultipleInelasticCosseratStress>();
 class ComputeMultipleInelasticCosseratStress : public ComputeMultipleInelasticStress
 {
 public:
+  static InputParameters validParams();
+
   ComputeMultipleInelasticCosseratStress(const InputParameters & parameters);
 
 protected:
@@ -74,4 +76,3 @@ protected:
   /// Inverse of the elasticity tensor
   const MaterialProperty<RankFourTensor> & _compliance;
 };
-

@@ -25,6 +25,8 @@ InputParameters validParams<TensorMechanicsHardeningExponential>();
 class TensorMechanicsHardeningExponential : public TensorMechanicsHardeningModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningExponential(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -43,4 +45,3 @@ private:
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*internal_parameter)
   Real _rate;
 };
-

@@ -14,11 +14,17 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeAxisymmetricRZIncrementalStrain);
 
-defineADValidParams(ADComputeAxisymmetricRZIncrementalStrain,
-                    ADCompute2DIncrementalStrain,
-                    params.addClassDescription(
-                        "Compute a strain increment and rotation increment for finite strains "
-                        "under axisymmetric assumptions."););
+defineADLegacyParams(ADComputeAxisymmetricRZIncrementalStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeAxisymmetricRZIncrementalStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADCompute2DIncrementalStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
+                             "under axisymmetric assumptions.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeAxisymmetricRZIncrementalStrain<compute_stage>::ADComputeAxisymmetricRZIncrementalStrain(

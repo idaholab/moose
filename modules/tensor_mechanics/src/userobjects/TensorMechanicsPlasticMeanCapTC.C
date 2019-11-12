@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCapTC);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticMeanCapTC);
+
 InputParameters
-validParams<TensorMechanicsPlasticMeanCapTC>()
+TensorMechanicsPlasticMeanCapTC::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addRangeCheckedParam<unsigned>("max_iterations",
                                         10,
                                         "max_iterations>0",

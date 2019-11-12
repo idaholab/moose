@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceTensorsTruss);
 
-template <>
+defineLegacyParams(StressDivergenceTensorsTruss);
+
 InputParameters
-validParams<StressDivergenceTensorsTruss>()
+StressDivergenceTensorsTruss::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Kernel for truss element");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "

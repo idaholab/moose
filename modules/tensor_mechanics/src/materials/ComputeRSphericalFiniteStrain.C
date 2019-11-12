@@ -16,11 +16,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeRSphericalFiniteStrain);
 
-template <>
+defineLegacyParams(ComputeRSphericalFiniteStrain);
+
 InputParameters
-validParams<ComputeRSphericalFiniteStrain>()
+ComputeRSphericalFiniteStrain::validParams()
 {
-  InputParameters params = validParams<ComputeFiniteStrain>();
+  InputParameters params = ComputeFiniteStrain::validParams();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
                              "in 1D spherical symmetry problems.");
   return params;

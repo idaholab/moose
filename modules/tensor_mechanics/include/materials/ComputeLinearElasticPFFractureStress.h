@@ -27,6 +27,8 @@ class ComputeLinearElasticPFFractureStress : public ComputePFFractureStressBase,
                                              public GuaranteeConsumer
 {
 public:
+  static InputParameters validParams();
+
   ComputeLinearElasticPFFractureStress(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -64,4 +66,3 @@ protected:
     none
   } _decomposition_type;
 };
-
