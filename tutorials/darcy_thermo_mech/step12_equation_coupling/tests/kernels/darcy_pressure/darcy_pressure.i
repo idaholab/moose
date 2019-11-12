@@ -1,1 +1,1 @@
-../../../../step05_heat_conduction/tests/kernels/darcy_pressure/darcy_pressure.i
+../../../../step11_boundary_condition/tests/kernels/darcy_pressure/darcy_pressure.i

@@ -1,1 +1,1 @@
-../../../../step05_heat_conduction/tests/kernels/simple_diffusion/simple_diffusion.i
+../../../../step11_boundary_condition/tests/kernels/simple_diffusion/simple_diffusion.i

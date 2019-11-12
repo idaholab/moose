@@ -1,1 +1,1 @@
-../../../../step05_heat_conduction/tests/bcs/outflow/outflow.i
+../../../../step11_boundary_condition/tests/bcs/outflow/outflow.i

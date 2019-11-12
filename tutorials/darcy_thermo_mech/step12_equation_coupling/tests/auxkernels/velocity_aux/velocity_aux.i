@@ -1,1 +1,1 @@
-../../../../step05_heat_conduction/tests/auxkernels/velocity_aux/velocity_aux.i
+../../../../step11_boundary_condition/tests/auxkernels/velocity_aux/velocity_aux.i

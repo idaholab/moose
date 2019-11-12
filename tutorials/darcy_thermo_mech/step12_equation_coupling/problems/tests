@@ -1,22 +1,39 @@
 [Tests]
   issues = '#4522'
   design = 'tutorials/darcy_thermo_mech/index.md'
-  [step_a]
+  [pressure]
     type = RunApp
-    input = 'step6a_coupled.i'
-    cli_args = Executioner/num_steps=2
-    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate coupling between the Darcy equation and heat equation."
+    input = 'pressure.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
   []
-  [step_b]
+  [velocity]
     type = RunApp
-    input = 'step6b_transient_inflow.i'
-    cli_args = Executioner/num_steps=2
-    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate coupling between the Darcy equation and heat equation with an outflow boundary condition."
+    input = 'velocity.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
   []
-  [step_c]
+  [steady]
     type = RunApp
-    input = 'step6c_decoupled.i'
-    cli_args = Executioner/num_steps=2
-    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate heat equation coupled with an auxiliary pressure variable."
+    input = 'heat_steady.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the steady-state heat equation."
+  []
+  [transient]
+    type = RunApp
+    input = 'heat_transient.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
+  []
+  [transient_ic]
+    type = RunApp
+    input = 'heat_transient_ic.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
+  []
+  [coupled]
+    type = RunApp
+    input = 'coupled.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
+  []
+  [decoupled]
+    type = RunApp
+    input = 'decoupled.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
   []
 []
