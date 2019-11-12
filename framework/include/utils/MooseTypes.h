@@ -790,6 +790,7 @@ enum LineSearchType
 #else
   LS_SHELL,
   LS_CONTACT,
+  LS_PING_PONG,
   LS_L2,
   LS_BT,
   LS_CP

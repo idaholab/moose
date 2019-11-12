@@ -32,12 +32,14 @@ public:
   /**
    * read-only reference to number of non-linear iterations
    */
-  const size_t & nlIts() const { return _nl_its; }
+  size_t nlIts() const { return _nl_its; }
 
   /**
    * The method that actually implements the line-search
    */
   virtual void lineSearch() { mooseError("You must implement a line-search method."); }
+
+  virtual void timestepSetup() {}
 
 protected:
   /// Reference to the finite element problem

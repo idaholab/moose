@@ -141,6 +141,7 @@ initLineSearchType()
     line_search_type_to_enum["BT"] = LS_BT;
     line_search_type_to_enum["CP"] = LS_CP;
     line_search_type_to_enum["CONTACT"] = LS_CONTACT;
+    line_search_type_to_enum["PING_PONG"] = LS_PING_PONG;
 #endif
 #endif
   }

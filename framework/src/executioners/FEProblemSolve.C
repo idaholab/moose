@@ -24,7 +24,7 @@ FEProblemSolve::validParams()
                                             "hierarchical decomposition into "
                                             "subsystems to help the solver.");
 
-  std::set<std::string> line_searches = {"contact", "default", "none", "basic"};
+  std::set<std::string> line_searches = {"contact", "default", "none", "basic", "ping_pong"};
 #ifdef LIBMESH_HAVE_PETSC
   std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
   line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
@@ -48,6 +48,10 @@ FEProblemSolve::validParams()
                         "The linear relative tolerance to be used while the contact state is "
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
+  params.addParam<Real>("ping_pong_tol",
+                        1e-4,
+                        "A relative tolerance for determining whether we are ping-ponging for ping "
+                        "pong line-searches");
 
   // Default Solver Behavior
 #ifdef LIBMESH_HAVE_PETSC

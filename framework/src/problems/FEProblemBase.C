@@ -1021,6 +1021,9 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
+  if (_line_search)
+    _line_search->timestepSetup();
+
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
