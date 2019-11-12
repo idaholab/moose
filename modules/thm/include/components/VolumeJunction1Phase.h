@@ -33,6 +33,11 @@ public:
 protected:
   virtual void check() const override;
 
+  /**
+   * Builds user object for computing and storing the fluxes
+   */
+  virtual const UserObjectName buildVolumeJunctionUserObject();
+
   /// Scaling factor for rho*V
   const Real & _scaling_factor_rhoV;
   /// Scaling factor for rho*u*V
