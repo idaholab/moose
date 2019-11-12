@@ -8,7 +8,7 @@ InputParameters
 validParams<Outlet1Phase>()
 {
   InputParameters params = validParams<FlowBoundary>();
-  params.addParam<bool>("reversible", false, "true for reversible outlet boundary conditions");
+  params.addParam<bool>("reversible", false, "True for reversible outlet boundary conditions");
   params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<bool>(
       "legacy", false, "Use the old version of the BC (violating characteristic theory) or not.");

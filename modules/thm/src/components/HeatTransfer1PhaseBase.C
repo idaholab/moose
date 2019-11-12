@@ -9,7 +9,7 @@ InputParameters
 validParams<HeatTransfer1PhaseBase>()
 {
   InputParameters params = validParams<HeatTransferBase>();
-  params.addParam<FunctionName>("Hw", "Convective heat transfer coefficient");
+  params.addParam<FunctionName>("Hw", "Convective heat transfer coefficient [W/(m^2-K)]");
   return params;
 }
 

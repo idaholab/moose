@@ -19,11 +19,11 @@ validParams<VolumeJunction1Phase>()
   params.addParam<FunctionName>("initial_vel_y", "Initial velocity in y-direction [m/s]");
   params.addParam<FunctionName>("initial_vel_z", "Initial velocity in z-direction [m/s]");
 
-  params.addParam<Real>("scaling_factor_rhoV", 1.0, "Scaling factor for rho*V");
-  params.addParam<Real>("scaling_factor_rhouV", 1.0, "Scaling factor for rho*u*V");
-  params.addParam<Real>("scaling_factor_rhovV", 1.0, "Scaling factor for rho*v*V");
-  params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V");
-  params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V");
+  params.addParam<Real>("scaling_factor_rhoV", 1.0, "Scaling factor for rho*V [-]");
+  params.addParam<Real>("scaling_factor_rhouV", 1.0, "Scaling factor for rho*u*V [-]");
+  params.addParam<Real>("scaling_factor_rhovV", 1.0, "Scaling factor for rho*v*V [-]");
+  params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V [-]");
+  params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V [-]");
 
   params.addParam<Real>("K", 0., "Form loss factor [-]");
   params.addParam<Real>("A_ref", 0., "Reference area [m^2]");

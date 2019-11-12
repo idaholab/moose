@@ -7,7 +7,7 @@ InputParameters
 validParams<PrescribedReactorPower>()
 {
   InputParameters params = validParams<TotalPowerBase>();
-  params.addRequiredParam<Real>("power", "Number specifying the total power");
+  params.addRequiredParam<Real>("power", "Total power [W]");
   return params;
 }
 

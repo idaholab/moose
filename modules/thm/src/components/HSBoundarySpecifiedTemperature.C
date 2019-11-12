@@ -9,7 +9,7 @@ validParams<HSBoundarySpecifiedTemperature>()
 {
   InputParameters params = validParams<HSBoundary>();
 
-  params.addRequiredParam<FunctionName>("T", "The function prescribing temperature");
+  params.addRequiredParam<FunctionName>("T", "Prescribed temperature [K]");
 
   return params;
 }

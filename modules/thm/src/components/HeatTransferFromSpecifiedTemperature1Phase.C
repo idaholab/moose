@@ -7,7 +7,7 @@ InputParameters
 validParams<HeatTransferFromSpecifiedTemperature1Phase>()
 {
   InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
-  params.addRequiredParam<FunctionName>("T_wall", "Specified wall temperature function");
+  params.addRequiredParam<FunctionName>("T_wall", "Specified wall temperature [K]");
   params.addClassDescription(
       "Heat transfer connection from a fixed temperature function for 1-phase flow");
   return params;

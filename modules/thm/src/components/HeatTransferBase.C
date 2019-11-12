@@ -16,7 +16,7 @@ validParams<HeatTransferBase>()
                                        "Name of flow channel component to connect to");
   params.addParam<bool>(
       "P_hf_transferred", false, "Is heat flux perimeter transferred from an external source?");
-  params.addParam<FunctionName>("P_hf", "Heat flux perimeter function");
+  params.addParam<FunctionName>("P_hf", "Heat flux perimeter [m]");
   return params;
 }
 

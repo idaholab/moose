@@ -9,7 +9,7 @@ InputParameters
 validParams<HeatTransferFromHeatFlux1Phase>()
 {
   InputParameters params = validParams<HeatTransfer1PhaseBase>();
-  params.addRequiredParam<FunctionName>("q_wall", "Specified wall heat flux function");
+  params.addRequiredParam<FunctionName>("q_wall", "Specified wall heat flux [W/m^2]");
   params.addClassDescription(
       "Heat transfer specified by heat flux going into 1-phase flow channel.");
   return params;

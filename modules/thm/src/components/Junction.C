@@ -9,10 +9,11 @@ InputParameters
 validParams<Junction>()
 {
   InputParameters params = validParams<FlowJunction>();
-  params.addParam<std::vector<Real>>("K", "Form loss coefficients");
-  params.addRequiredParam<Real>("initial_p", "Initial pressure");
-  params.addRequiredParam<Real>("initial_T", "Initial temperature");
-  params.addParam<Real>("scaling_factor_s_junction", 1.0, "Scaling factor for junction entropy");
+  params.addParam<std::vector<Real>>("K", "Form loss coefficients [-]");
+  params.addRequiredParam<Real>("initial_p", "Initial pressure [Pa]");
+  params.addRequiredParam<Real>("initial_T", "Initial temperature [K]");
+  params.addParam<Real>(
+      "scaling_factor_s_junction", 1.0, "Scaling factor for junction specific entropy [-]");
   return params;
 }
 

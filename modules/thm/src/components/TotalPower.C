@@ -7,7 +7,7 @@ InputParameters
 validParams<TotalPower>()
 {
   InputParameters params = validParams<TotalPowerBase>();
-  params.addRequiredParam<Real>("power", "Number specifying the total power");
+  params.addRequiredParam<Real>("power", "Total power [W]");
   params.addClassDescription("Prescribes total power via a user supplied value");
   return params;
 }

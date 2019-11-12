@@ -7,7 +7,7 @@ validParams<VolumeJunctionBase>()
   InputParameters params = validParams<FlowJunction>();
 
   params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
-  params.addRequiredParam<Point>("position", "Spatial position of the center of the junction");
+  params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");
 
   return params;
 }

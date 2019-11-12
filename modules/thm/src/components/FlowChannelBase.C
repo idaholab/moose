@@ -56,17 +56,17 @@ validParams<FlowChannelBase>()
   InputParameters params = validParams<GeometricalFlowComponent>();
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function");
-  params.addParam<Real>("roughness", 0.0, "roughness, [m]");
-  params.addParam<FunctionName>("f", "Wall friction");
+  params.addParam<Real>("roughness", 0.0, "Roughness [m]");
+  params.addParam<FunctionName>("f", "Wall friction factor [-]");
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannelBase::getConvHeatTransGeometry("PIPE"),
                              "Convective heat transfer geometry");
-  params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
+  params.addParam<Real>("PoD", 1, "Pitch-to-diameter ratio for parallel bundle heat transfer [-]");
   params.addParam<bool>(
       "pipe_pars_transferred",
       false,
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
-  params.addParam<FunctionName>("D_h", "Hydraulic diameter");
+  params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
   params.addParam<UserObjectName>(
       "stabilization", "", "The name of the local stabilization scheme to use");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");

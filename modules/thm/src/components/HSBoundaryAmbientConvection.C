@@ -10,8 +10,9 @@ validParams<HSBoundaryAmbientConvection>()
 {
   InputParameters params = validParams<HSBoundary>();
 
-  params.addRequiredParam<Real>("htc_ambient", "Convective heat transfer coefficient with ambient");
-  params.addRequiredParam<Real>("T_ambient", "Ambient temperature");
+  params.addRequiredParam<Real>("htc_ambient",
+                                "Convective heat transfer coefficient with ambient [W/(m^2-K)]");
+  params.addRequiredParam<Real>("T_ambient", "Ambient temperature [K]");
 
   return params;
 }

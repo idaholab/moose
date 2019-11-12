@@ -5,10 +5,10 @@ InputParameters
 validParams<JunctionWithLossesBase>()
 {
   InputParameters params = validParams<FlowJunction>();
-  params.addRequiredParam<std::vector<Real>>("K", "Form loss coefficients");
+  params.addRequiredParam<std::vector<Real>>("K", "Form loss coefficients [-]");
   // use same values in K for K_reverse if not provided
-  params.addParam<std::vector<Real>>("K_reverse", "Reverse form loss coefficients");
-  params.addRequiredParam<Real>("A_ref", "Reference area of this junction");
+  params.addParam<std::vector<Real>>("K_reverse", "Reverse form loss coefficients [-]");
+  params.addRequiredParam<Real>("A_ref", "Junction Reference area [m^2]");
 
   return params;
 }
