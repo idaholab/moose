@@ -56,7 +56,9 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
 {
   if (params.isParamSetByUser("K") && !params.isParamSetByUser("A_ref"))
     logError("With specified form loss factor 'K', parameter 'A_ref' is required.");
-  if (params.isParamSetByUser("A_ref") && !params.isParamSetByUser("K"))
+  // Note: 'A_ref' can be required by child classes
+  if (!params.isParamRequired("A_ref") && params.isParamSetByUser("A_ref") &&
+      !params.isParamSetByUser("K"))
     logWarning("Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will "
                "behave as if there were no form loss.");
 }
@@ -148,13 +150,12 @@ VolumeJunction1Phase::addVariables()
   }
 }
 
-void
-VolumeJunction1Phase::addMooseObjects()
+const UserObjectName
+VolumeJunction1Phase::buildVolumeJunctionUserObject()
 {
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-  // Add user object for computing and storing the fluxes
   const std::string volume_junction_uo_name = genName(name(), "volume_junction_uo");
   {
     const std::string class_name = "VolumeJunction1PhaseUserObject";
@@ -178,6 +179,13 @@ VolumeJunction1Phase::addMooseObjects()
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, volume_junction_uo_name, params);
   }
+  return volume_junction_uo_name;
+}
+
+void
+VolumeJunction1Phase::addMooseObjects()
+{
+  const std::string volume_junction_uo_name = buildVolumeJunctionUserObject();
 
   // Add BC to each of the connected flow channels
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
