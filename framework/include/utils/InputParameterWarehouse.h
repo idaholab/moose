@@ -174,6 +174,11 @@ private:
   /// the Control object.
   friend class Control;
 
+  /// Make Executioner a friend so that the base executioner can call getControllableParameter
+  /// to get a controllable parameter through a user indicated name in the input.
+  /// Note that derived executioners do not have this privilege.
+  friend class Executioner;
+
   // Allow unit test to call methods
   FRIEND_TEST(InputParameterWarehouse, getControllableItems);
   FRIEND_TEST(InputParameterWarehouse, getControllableParameter);

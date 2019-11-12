@@ -16,6 +16,8 @@
 #include "PerfGraphInterface.h"
 #include "FEProblemSolve.h"
 #include "PicardSolve.h"
+#include "InputParameterWarehouse.h"
+#include "ControllableParameter.h"
 
 // System includes
 #include <string>
@@ -130,6 +132,20 @@ protected:
    */
   virtual PostprocessorValue & addAttributeReporter(const std::string & name,
                                                     Real initial_value = 0);
+
+  /**
+   * Set a control with its parameter name to a value
+   * @param param_name Parameter name of this executioner that points to a control
+   * @param value The value set to the control
+   * Note: this function is not supposed to be called in constructor!
+   */
+  template <typename T>
+  void setControllableParameter(const std::string & param_name, const T & value) const
+  {
+    auto control_name = getParam<std::string>(param_name);
+    auto & input_param_warehouse = _app.getInputParameterWarehouse();
+    input_param_warehouse.getControllableParameter(control_name).set<T>(value);
+  }
 
   FEProblemBase & _fe_problem;
 

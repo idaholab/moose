@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#14361'
+  design = 'syntax/Executioner/index.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'set_dirichlet_value.i'
+    exodiff = 'set_dirichlet_value_out.e'
+    recover = false
+    requirement = "The Executioner system shall support the ability to set user indicated controls during the calculation."
+  [../]
+[]

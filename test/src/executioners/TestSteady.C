@@ -21,6 +21,9 @@ TestSteady::validParams()
   MooseEnum test_type("Exception addAttributeReporter");
   params.addParam<MooseEnum>(
       "test_type", test_type, "The type of test that this object should perform");
+
+  params.addParam<std::string>("set_control", "The control to be set by this executioner");
+  params.addParam<Real>("control_value", 0, "The value for the control");
   return params;
 }
 
@@ -38,6 +41,9 @@ TestSteady::preExecute()
 {
   if (_test_type == "addAttributeReporter")
     *_some_value_that_needs_to_be_reported = 12345;
+
+  if (isParamValid("set_control"))
+    setControllableParameter("set_control", getParam<Real>("control_value"));
 }
 
 void
