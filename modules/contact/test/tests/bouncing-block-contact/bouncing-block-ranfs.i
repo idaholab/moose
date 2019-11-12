@@ -1,4 +1,5 @@
-starting_point = .5
+starting_point = 2e-1
+offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -6,7 +7,7 @@ starting_point = .5
 []
 
 [Mesh]
-  file = square-blocks-no-offset.e
+  file = long-bottom-block-no-lower-d.e
 []
 
 [Variables]
@@ -20,7 +21,7 @@ starting_point = .5
   [./disp_y]
     block = 2
     variable = disp_y
-    value = ${starting_point}
+    value = ${fparse starting_point + offset}
     type = ConstantIC
   [../]
 []
@@ -63,12 +64,6 @@ starting_point = .5
     boundary = 40
     value = 0.0
   [../]
-  [./topx]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 30
-    value = 0.0
-  [../]
   [./boty]
     type = DirichletBC
     variable = disp_y
@@ -79,19 +74,25 @@ starting_point = .5
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
-    function = '${starting_point} - t'
+    function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
+  [../]
+  [./leftx]
+    type = FunctionDirichletBC
+    variable = disp_x
+    boundary = 50
+    function = '1e-2 * t'
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  dt = 1
+  end_time = 200
+  dt = 5
   dtmin = 1
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual -pc_svd_monitor -snes_view'
-  petsc_options_iname = '-mat_mffd_err -pc_type'
-  petsc_options_value = '1e-5          svd'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
@@ -104,13 +105,15 @@ starting_point = .5
 [Outputs]
   [exo]
     type = Exodus
-    execute_on = 'nonlinear'
   []
-  print_linear_residuals = false
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
+  checkpoint = true
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
 []
 
 [Postprocessors]
