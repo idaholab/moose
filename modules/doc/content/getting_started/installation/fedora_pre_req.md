@@ -16,7 +16,8 @@ sudo -E dnf install gcc \
   m4 \
   blas-devel \
   lapack-devel \
-  git
+  git \
+  xz-devel
 ```
 
 Download and install one our redistributable packages according to your version of Fedora.
