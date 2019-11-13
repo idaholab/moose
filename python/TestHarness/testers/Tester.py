@@ -320,7 +320,7 @@ class Tester(MooseObject):
         self.errfile.flush()
 
         # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile)
+        self.joined_out = util.readOutput(self.outfile, self.errfile, self)
         self.outfile.close()
         self.errfile.close()
 

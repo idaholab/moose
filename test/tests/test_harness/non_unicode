@@ -1,0 +1,6 @@
+[Tests]
+  [./non_unicode]
+    type = RunCommand
+    command = 'echo b\'A\xC4B\xE8C\''
+  [../]
+[]

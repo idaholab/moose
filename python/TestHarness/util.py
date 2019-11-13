@@ -709,18 +709,24 @@ def getOutputFromFiles(tester, options):
     for file_path in output_files:
         with open(file_path, 'r+b') as f:
             file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None)
+                           + "\n" + "#"*80 + "\n" + readOutput(f, None, tester)
     return file_output
 
 # Read stdout and stderr file objects, append error and return the string
-def readOutput(stdout, stderr):
+def readOutput(stdout, stderr, tester):
     output = ''
-    if stdout:
-        stdout.seek(0)
-        output += stdout.read().decode('utf-8')
-    if stderr:
-        stderr.seek(0)
-        output += stderr.read().decode('utf-8')
+    try:
+        if stdout:
+            stdout.seek(0)
+            output += stdout.read().decode('utf-8')
+        if stderr:
+            stderr.seek(0)
+            output += stderr.read().decode('utf-8')
+    except UnicodeDecodeError:
+        tester.setStatus(tester.fail, 'non-unicode characters in output')
+    except:
+        tester.setStatus(tester.fail, 'error while attempting to read output files')
+
     return output
 
 # Trimming routines for job output
