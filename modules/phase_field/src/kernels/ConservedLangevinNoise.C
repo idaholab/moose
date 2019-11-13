@@ -24,6 +24,11 @@ validParams<ConservedLangevinNoise>()
 ConservedLangevinNoise::ConservedLangevinNoise(const InputParameters & parameters)
   : LangevinNoise(parameters), _noise(getUserObject<ConservedNoiseInterface>("noise"))
 {
+  if (parameters.isParamSetByUser("seed"))
+    paramError(
+        "seed",
+        "This parameter has no effect in this kernel. The noise is generated in the user object "
+        "specified in the 'noise' parameter. Specify a seed in that user object instead.");
 }
 
 Real
