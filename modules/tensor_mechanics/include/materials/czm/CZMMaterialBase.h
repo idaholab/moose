@@ -16,8 +16,8 @@ InputParameters validParams<CZMMaterialBase>();
 /**
  * This is the base Material class for implementing a traction separation material model.
  * The responsibility of this class is to rotate the displacement jump from global to local
- * coordinates and rotate back traction and traction derivative
- * The local coordinates system assumes the following coordinates order: opening,
+ * coordinate and rotate back traction and traction derivatives.
+ * The local coordinate system assumes the following order: opening,
  * tangential1, tangential2. Note that tangential1, tangential2 are arbitrary and therefore the
  * interface assumes an in-plane isotropic behavior. By subclassing computeTraction and
  * computeTractionDerivatives different traction separation laws can be implemented.
@@ -41,8 +41,10 @@ protected:
   const unsigned int _ndisp;
 
   /// the coupled displacement and neighbor displacement values
+  ///@{
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableValue *> _disp_neighbor;
+  ///@}
 
   /// method returning the traction in the interface coordinate system.
   virtual RealVectorValue computeTraction() = 0;
@@ -50,21 +52,21 @@ protected:
   /// method returning the traction derivitaves wrt to local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() = 0;
 
-  /// the displacement jump in global coordiantes
+  /// the displacement jump in global and local coordiante
+  ///@{
   MaterialProperty<RealVectorValue> & _displacement_jump_global;
-
-  /// the disaplcement jump in natural element coordiantes
   MaterialProperty<RealVectorValue> & _displacement_jump;
+  ///@}
 
-  /// the value of the Traction in global coordiantes
+  /// the value of the traction in global and local coordiantes
+  ///@{
   MaterialProperty<RealVectorValue> & _traction_global;
-
-  /// the value of the Traction in natural element coordiantes
   MaterialProperty<RealVectorValue> & _traction;
+  ///@}
 
-  /// the traction's derivatives wrt to the displacement jump in global coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_jump_derivatives_global;
-
-  /// the traction's derivatives wrt to the displacement jump in natural element coordiantes
-  MaterialProperty<RankTwoTensor> & _traction_jump_derivatives;
+  /// the traction's derivatives wrt to the displacement jump in global and local coordiantes
+  ///@{
+  MaterialProperty<RankTwoTensor> & _traction_derivatives_global;
+  MaterialProperty<RankTwoTensor> & _traction_derivatives;
+  ///@}
 };

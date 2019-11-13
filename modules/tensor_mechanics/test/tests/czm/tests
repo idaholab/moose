@@ -4,11 +4,10 @@
     input = czm_3DC_load_only_normal.i
     exodiff = czm_3DC_load_only_normal_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 3D. By construction of the test,'
-    'only a normal gap should appear. The maximum theoretical '
-    'normal traction of 100 MPa shall be seen when the normal gap reaches a value of 1'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
+    'compute a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
@@ -19,11 +18,11 @@
     input = czm_3DC_load_shear_x.i
     exodiff = czm_3DC_load_shear_x_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 3D. By construction of the test,'
-    'only a shear gap on the x direction should appear. The maximum theoretical '
-    'shear traction of 70 MPa shall be seen when the shear gap reaches a value of 0.5'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
+    'compute a nonzero x-component of the tangential gap under purely shear'
+    'loading in the x-direction.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
@@ -34,11 +33,11 @@
     input = czm_3DC_load_shear_y.i
     exodiff = czm_3DC_load_shear_y_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 3D. By construction of the test,'
-    'only a shear gap on the y direction should appear. The maximum theoretical '
-    'shear traction of 70 MPa shall be seen when the shear gap reaches a value of 0.5'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
+    'compute a nonzero y-component of the tangential gap under purely shear'
+    'loading in the y-direction.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
@@ -49,93 +48,38 @@
     input = czm_3DC_load_complex.i
     exodiff = czm_3DC_load_complex_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 3D under mix mode loaidng conditions.'
-    'By construction of the test, the maximum traction in each direction should observed for'
-    'at the when the gap vector is Du_x_y_z=(0.2,0.4,0.6). Such gaps should be obtained as the time.'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 3D using the Salehani Irani 3DC model, and compute'
+    'the correct response under mixed-mode loading.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
-  [../]
-  [./czm_3DC_load_Normal_Action]
-    type = Exodiff
-    input = czm_3DC_load_only_normal_Action.i
-    exodiff = czm_3DC_load_only_normal_Action_out.e
-    issues = '#11546'
-    requirement = 'The CZMAction must be able to setup the 3 required CZMInterfaceKernel instances'
-    'and replicate the results obtained by setting up the input file manually. '
-    'The gold file of this test is a symbolic link to czm_3DC_load_only_normal_out.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    method = '!dbg' # issue 12033
-    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
-  [../]
-  [./czm_3DC_load_complex_Action]
-    type = Exodiff
-    input = czm_3DC_load_complex_Action.i
-    exodiff = czm_3DC_load_complex_Action_out.e
-    issues = '#11546'
-    requirement = 'The CZMAction must be able to setup the 3 required CZMInterfaceKernel instances'
-    'and replicate the results obtained by setting up the input file manually under complex loading conditions'
-    'The gold file of this test is a symbolic link to czm_3DC_load_complex_out.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    method = '!dbg' # issue 12033
-    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_Normal_2D]
     type = Exodiff
     input = czm_3DC_load_only_normal_2D.i
     exodiff = czm_3DC_load_only_normal_2D_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 2D. By construction of the test,'
-    'only a normal gap should appear. The maximum theoretical '
-    'normal traction of 100 MPa shall be seen when the normal gap reaches a value of 1'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 2D using the Salehani Irani 3DC model, and only '
+    'compute a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
-  [../]
-  [./czm_3DC_load_Normal_2D_Action]
-    type = Exodiff
-    input = czm_3DC_load_only_normal_2D_Action.i
-    exodiff = czm_3DC_load_only_normal_2D_Action_out.e
-    issues = '#11546'
-    requirement = 'The CZMAction must be able to setup the 2 required CZMInterfaceKernel instances'
-    'and replicate the results obtained by setting up the input file manually. '
-    'The gold file of this test is a symbolic link to czm_3DC_load_only_normal_2D_out.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    method = '!dbg' # issue 12033
-    design = 'syntax/Modules/TensorMechanics/CohesiveZoneMaster/index.md source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md source/actions/CohesiveZoneModelAction.md'
   [../]
   [./czm_3DC_load_Normal_1D]
     type = Exodiff
     input = czm_3DC_load_only_normal_1D.i
     exodiff = czm_3DC_load_only_normal_1D_out.e
     issues = '#11546'
-    requirement = 'The system shall allow for cohesive zone laws to'
-    'represent the traction-separation behavior at an interface between'
-    'two bodies represented by continuum elements in 1D. By construction of the test,'
-    'only a normal gap should appear. The maximum theoretical '
-    'normal traction of 100 MPa shall be seen when the normal gap reaches a value of 1'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    method = '!dbg' # issue 12033
-    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
-  [../]
-  [./czm_3DC_load_Normal_1D_Action]
-    type = Exodiff
-    input = czm_3DC_load_only_normal_1D_Action.i
-    exodiff = czm_3DC_load_only_normal_1D_Action_out.e
-    issues = '#11546'
-    requirement = 'The CZMAction must be able to setup a single instance of CZMInterfaceKernel for 1D simulations'
-    'and replicate the results obtained by setting up the input file manually. '
-    'The gold file of this test is a symbolic link to czm_3DC_load_only_normal_1D_out.e'
+    requirement = 'The system shall allow for cohesive zone laws to represent'
+    'the traction-separation behavior at an interface between two bodies represented'
+    'by continuum elements in 1D using the Salehani Irani 3DC model, and only compute'
+    'a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
     method = '!dbg' # issue 12033

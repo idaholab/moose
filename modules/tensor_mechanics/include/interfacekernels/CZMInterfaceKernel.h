@@ -17,10 +17,10 @@ class CZMInterfaceKernel;
 template <>
 InputParameters validParams<CZMInterfaceKernel>();
 
-/// DG kernel implementing cohesive Zone mMdel (CZM) for a 1D/2D/3D traction
-/// sepration laws based on  the displacement jump. This kernel operates only on
+/// DG kernel implementing cohesive zone models (CZM) for a 1D/2D/3D traction
+/// separation laws based on the displacement jump. This kernel operates only on
 /// a single displacement compenent.
-/// One kernel is required for each mesh dimension
+/// One kernel is required for each mesh dimension.
 class CZMInterfaceKernel : public InterfaceKernel
 {
 public:
@@ -37,11 +37,13 @@ protected:
   /// number of displacement components
   const unsigned int _ndisp;
 
-  /// coupled displacement componenets variables ID
+  /// Coupled displacement component variable IDs
+  ///@{
   std::vector<unsigned int> _disp_var;
   std::vector<unsigned int> _disp_neighbor_var;
+  ///@}
 
   // values of the traction and traction derivatives used
   const MaterialProperty<RealVectorValue> & _traction_global;
-  const MaterialProperty<RankTwoTensor> & _traction_jump_derivatives;
+  const MaterialProperty<RankTwoTensor> & _traction_derivatives_global;
 };

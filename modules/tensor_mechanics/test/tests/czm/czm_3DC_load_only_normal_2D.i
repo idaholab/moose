@@ -36,6 +36,13 @@
   [../]
 []
 
+[Modules/TensorMechanics/CohesiveZoneMaster]
+  [./czm1]
+    boundary = 'interface'
+    displacements = 'disp_x disp_y'
+  [../]
+[]
+
 [BCs]
   [./bottom_x]
     type = DirichletBC
@@ -60,25 +67,6 @@
     variable = disp_y
     boundary = top
     function = 1*t
-  [../]
-[]
-
-[InterfaceKernels]
-  [./interface_x]
-    type = CZMInterfaceKernel
-    variable = disp_x
-    neighbor_var = disp_x
-    displacements = 'disp_x disp_y'
-    component = 0
-    boundary = 'interface'
-  [../]
-  [./interface_y]
-    type = CZMInterfaceKernel
-    variable = disp_y
-    neighbor_var = disp_y
-    displacements = 'disp_x disp_y'
-    component = 1
-    boundary = 'interface'
   [../]
 []
 

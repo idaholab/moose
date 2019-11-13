@@ -17,7 +17,6 @@ validParams<CZMMaterialBase>()
 {
   InputParameters params = validParams<InterfaceMaterial>();
 
-  params.addParam<Real>("inner_penetration_penalty", 1, "inner penalty factor");
   params.addClassDescription("Base class for cohesive zone mateirla models");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
@@ -34,14 +33,13 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
     _displacement_jump(declareProperty<RealVectorValue>("displacement_jump")),
     _traction_global(declareProperty<RealVectorValue>("traction_global")),
     _traction(declareProperty<RealVectorValue>("traction")),
-    _traction_jump_derivatives_global(
-        declareProperty<RankTwoTensor>("traction_jump_derivatives_global")),
-    _traction_jump_derivatives(declareProperty<RankTwoTensor>("traction_jump_derivatives"))
+    _traction_derivatives_global(declareProperty<RankTwoTensor>("traction_derivatives_global")),
+    _traction_derivatives(declareProperty<RankTwoTensor>("traction_derivatives"))
 {
   if (_ndisp > 3 || _ndisp < 1)
-    mooseError("the CZM material requires 1, 2 or 3 dispalcment variables");
+    mooseError("the CZM material requires 1, 2 or 3 displacement variables");
 
-  // intializing disaplcement vectors
+  // intializing displacement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp[i] = &coupledValue("displacements", i);
@@ -53,7 +51,7 @@ void
 CZMMaterialBase::computeQpProperties()
 {
 
-  RealTensorValue RotationGlobal2Local =
+  RealTensorValue RotationGlobalToLocal =
       RotationMatrix::rotVec1ToVec2(_normals[_qp], RealVectorValue(1, 0, 0));
 
   // computing the actual displacement jump
@@ -62,17 +60,17 @@ CZMMaterialBase::computeQpProperties()
   for (unsigned int i = _ndisp; i < 3; i++)
     _displacement_jump_global[_qp](i) = 0;
 
-  // rotate the disaplcement jump to local coordiante system
-  _displacement_jump[_qp] = RotationGlobal2Local * _displacement_jump_global[_qp];
+  // rotate the displacement jump to local coordiante system
+  _displacement_jump[_qp] = RotationGlobalToLocal * _displacement_jump_global[_qp];
 
   // compute local traction_global
   _traction[_qp] = computeTraction();
 
-  // compute local traction_global derivatives wrt to the displacement jump
-  _traction_jump_derivatives[_qp] = computeTractionDerivatives();
+  // compute local traction_global derivatives wrt the displacement jump
+  _traction_derivatives[_qp] = computeTractionDerivatives();
 
   // rotate local traction_global and derivatives to the global reference
-  _traction_global[_qp] = RotationGlobal2Local.transpose() * _traction[_qp];
-  _traction_jump_derivatives_global[_qp] = _traction_jump_derivatives[_qp];
-  _traction_jump_derivatives_global[_qp].rotate(RotationGlobal2Local.transpose());
+  _traction_global[_qp] = RotationGlobalToLocal.transpose() * _traction[_qp];
+  _traction_derivatives_global[_qp] = _traction_derivatives[_qp];
+  _traction_derivatives_global[_qp].rotate(RotationGlobalToLocal.transpose());
 }

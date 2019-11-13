@@ -19,7 +19,8 @@ InputParameters
 validParams<CohesiveZoneModelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Set cohesive zone model kernels");
+  params.addClassDescription("Action to create an instance of the cohesive zone model kernel for "
+                             "each displacement component");
 
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");

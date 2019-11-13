@@ -23,7 +23,7 @@ validParams<CZMInterfaceKernel>()
                                         " component == 1, ==> Y"
                                         " component == 2, ==> Z");
 
-  params.addRequiredCoupledVar("displacements", "the string containing dispalcement variables");
+  params.addRequiredCoupledVar("displacements", "the string containing displacement variables");
 
   params.addClassDescription("Interface kernel for use with cohesive zone models (CZMs) that "
                              "compute traction as a function of the displacement jump");
@@ -38,8 +38,8 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _disp_var(_ndisp),
     _disp_neighbor_var(_ndisp),
     _traction_global(getMaterialPropertyByName<RealVectorValue>("traction_global")),
-    _traction_jump_derivatives(
-        getMaterialPropertyByName<RankTwoTensor>("traction_jump_derivatives_global"))
+    _traction_derivatives_global(
+        getMaterialPropertyByName<RankTwoTensor>("traction_derivatives_global"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -71,9 +71,9 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 Real
 CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 {
-  // retrieve the diagonal jacobain coefficient dependning on the disaplcement
+  // retrieve the diagonal jacobain coefficient dependning on the displacement
   // component (_component) this kernel is working on
-  Real jac = _traction_jump_derivatives[_qp](_component, _component);
+  Real jac = _traction_derivatives_global[_qp](_component, _component);
 
   switch (type)
   {
@@ -97,7 +97,7 @@ Real
 CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
 
-  // find the displacement component assocaite to jvar
+  // find the displacement component associated to jvar
   unsigned int off_diag_component;
   for (off_diag_component = 0; off_diag_component < _ndisp; off_diag_component++)
     if (_disp_var[off_diag_component] == jvar)
@@ -106,7 +106,7 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
   mooseAssert(off_diag_component < _ndisp,
               "CZMInterfaceKernel::computeQpOffDiagJacobian wrong offdiagonal variable");
 
-  Real jac = _traction_jump_derivatives[_qp](_component, off_diag_component);
+  Real jac = _traction_derivatives_global[_qp](_component, off_diag_component);
 
   switch (type)
   {
@@ -120,7 +120,7 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
       jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
       break;
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
-      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp] * (1);
+      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
   }
   return jac;

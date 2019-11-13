@@ -15,7 +15,7 @@ The strong form of the force equilibrium equation in vector form can be written 
 where superscripts $+$ and $-$ identify the master and slave surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the traction, and $A$ the area.
 The master surface is the one where the normal is computed.
 
-By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium equitation can be written as  
+By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium eqaution can be written as  
 \begin{equation}
   \int_{A^-}{T^- \psi^- da^-}  - \int_{A^+}{T^+ \psi^+ da^+} = 0
 \end{equation}
@@ -72,12 +72,9 @@ and for the slave surface
 \end{aligned}
 \end{equation}
 
-The last two sets of equation are implemented as Jacobian terms in the `CZMInterfaceKernel`.
-The derivatives of the traction w.r.t. the displacement jump, e.g. $\frac{dT_i(\Delta U)}{\Delta U_j)}$ are provided by the `CZMMaterial`.
+The last two sets of equations are implemented as Jacobian terms in the `CZMInterfaceKernel`.
+The derivatives of the traction with respect to the displacement jump, e.g. $\frac{dT_i(\Delta U)}{\Delta U_j)}$ are provided by the `CZMMaterial`.
 
-## examples
-
-!listing modules/tensor_mechanics/test/tests/czm/czm_3DC_load_complex.i block=InterfaceKernels/interface_x
 !syntax parameters /InterfaceKernels/CZMInterfaceKernel
 !syntax inputs /InterfaceKernels/CZMInterfaceKernel
 !syntax children /InterfaceKernels/CZMInterfaceKernel
