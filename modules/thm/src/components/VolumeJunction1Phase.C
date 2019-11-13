@@ -26,7 +26,7 @@ validParams<VolumeJunction1Phase>()
   params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V [-]");
 
   params.addParam<Real>("K", 0., "Form loss factor [-]");
-  params.addParam<Real>("A_ref", 0., "Reference area [m^2]");
+  params.addParam<Real>("A_ref", "Reference area [m^2]");
 
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
@@ -52,7 +52,7 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _velocity_var_name(genName(name(), "vel")),
 
     _K(getParam<Real>("K")),
-    _A_ref(getParam<Real>("A_ref"))
+    _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero)
 {
   if (params.isParamSetByUser("K") && !params.isParamSetByUser("A_ref"))
     logError("With specified form loss factor 'K', parameter 'A_ref' is required.");
