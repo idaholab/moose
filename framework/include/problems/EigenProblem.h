@@ -32,6 +32,8 @@ public:
 
   virtual void solve() override;
 
+  virtual void init() override;
+
   virtual bool converged() override;
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
@@ -54,6 +56,10 @@ public:
    * In nonlinear solver, RHS kernels always have a negative sign.
    */
   bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
+
+  bool matrixFree() { return _matrix_free; }
+
+  void matrixFree(bool matrix_free) { _matrix_free = matrix_free; }
 
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
@@ -103,6 +109,7 @@ protected:
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
 
   bool _negative_sign_eigen_kernel;
+  bool _matrix_free;
 
   unsigned int _active_eigen_index;
   /// Timers

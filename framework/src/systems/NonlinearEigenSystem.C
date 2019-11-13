@@ -25,6 +25,7 @@
 #include "libmesh/libmesh_config.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_shell_matrix.h"
 
 #if LIBMESH_HAVE_SLEPC
 
@@ -37,6 +38,15 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
+
+  // If we use shell matrices, we only need to form a preconditioning matrix
+  if (eigen_system.use_shell_matrices())
+  {
+    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
+                          *eigen_system.precond_matrix,
+                          eigen_nl.nonEigenMatrixTag());
+    return;
+  }
 
   // If it is a linear generalized eigenvalue problem,
   // we assemble A and B together
@@ -54,72 +64,14 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     return;
   }
 
+  // If it is a linear eigenvalue problem, we assemble matrix A
   if (!p->isNonlinearEigenvalueSolver())
   {
     p->computeJacobianTag(*eigen_system.current_local_solution.get(),
                           *eigen_system.matrix_A,
                           eigen_nl.nonEigenMatrixTag());
-  }
-  else
-  {
-    Mat petsc_mat_A = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_A).mat();
 
-    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
-                               "formJacobian",
-                               Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
-    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
-                               "formFunction",
-                               Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
-
-    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
-                               "formFunctionAB",
-                               Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB);
-
-    PetscContainer container;
-    PetscContainerCreate(eigen_system.comm().get(), &container);
-    PetscContainerSetPointer(container, p);
-    PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", nullptr);
-    PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", (PetscObject)container);
-    PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", nullptr);
-    PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", (PetscObject)container);
-    PetscContainerDestroy(&container);
-
-    // Let libmesh do not close matrices before solve
-    eigen_system.eigen_solver->set_close_matrix_before_solve(false);
-  }
-  if (eigen_system.generalized())
-  {
-    if (eigen_system.matrix_B)
-    {
-      if (!p->isNonlinearEigenvalueSolver())
-      {
-        p->computeJacobianTag(*eigen_system.current_local_solution.get(),
-                              *eigen_system.matrix_B,
-                              eigen_nl.eigenMatrixTag());
-      }
-      else
-      {
-        Mat petsc_mat_B = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat();
-
-        PetscObjectComposeFunction((PetscObject)petsc_mat_B,
-                                   "formJacobian",
-                                   Moose::SlepcSupport::mooseSlepcEigenFormJacobianB);
-        PetscObjectComposeFunction((PetscObject)petsc_mat_B,
-                                   "formFunction",
-                                   Moose::SlepcSupport::mooseSlepcEigenFormFunctionB);
-
-        PetscContainer container;
-        PetscContainerCreate(eigen_system.comm().get(), &container);
-        PetscContainerSetPointer(container, p);
-        PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", nullptr);
-        PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", (PetscObject)container);
-        PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", nullptr);
-        PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", (PetscObject)container);
-        PetscContainerDestroy(&container);
-      }
-    }
-    else
-      mooseError("It is a generalized eigenvalue problem but matrix B is empty\n");
+    return;
   }
 }
 }
@@ -202,7 +154,7 @@ NonlinearEigenSystem::solve()
 // In DEBUG mode, Libmesh will check the residual automatically. This may cause
 // an error because B does not need to assembly by default.
 #ifdef DEBUG
-  if (_eigen_problem.isGeneralizedEigenvalueProblem())
+  if (_eigen_problem.isGeneralizedEigenvalueProblem() && sys().matrix_B)
     sys().matrix_B->close();
 #endif
   // Solve the transient problem if we have a time integrator; the
@@ -226,6 +178,54 @@ NonlinearEigenSystem::solve()
   _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
     _eigen_values[n] = getNthConvergedEigenvalue(n);
+}
+
+void
+NonlinearEigenSystem::attachSLEPcCallbacks()
+{
+  // Matrix A
+  if (_transient_sys.matrix_A)
+  {
+    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.matrix_A).mat();
+
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
+
+    // Let libmesh do not close matrices before solve
+    _transient_sys.eigen_solver->set_close_matrix_before_solve(false);
+  }
+
+  // Matrix B
+  if (_transient_sys.matrix_B)
+  {
+    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.matrix_B).mat();
+
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+  }
+
+  // Shell matrix A
+  if (_transient_sys.shell_matrix_A)
+  {
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_matrix_A).mat();
+
+    // Attach callbacks for nonlinear eigenvalue solver
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
+
+    // Set MatMult operations for shell
+    Moose::SlepcSupport::setOperationsForShellMat(_eigen_problem, mat, false);
+
+    _transient_sys.eigen_solver->set_close_matrix_before_solve(false);
+  }
+
+  // Shell matrix B
+  if (_transient_sys.shell_matrix_B)
+  {
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_matrix_B).mat();
+
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+
+    // Set MatMult operations for shell
+    Moose::SlepcSupport::setOperationsForShellMat(_eigen_problem, mat, true);
+  }
 }
 
 void

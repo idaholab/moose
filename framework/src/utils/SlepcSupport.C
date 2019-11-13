@@ -367,7 +367,6 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -379,7 +378,6 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Matrix-free nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -395,7 +393,6 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption(
           "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
@@ -413,7 +410,6 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption(
           "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Matrix-free Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
@@ -566,6 +562,98 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     VecScale(Bx, -1.);
 
   PetscFunctionReturn(0);
+}
+
+void
+attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
+{
+  PetscObjectComposeFunction((PetscObject)mat,
+                             "formJacobian",
+                             eigen ? Moose::SlepcSupport::mooseSlepcEigenFormJacobianB
+                                   : Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
+  PetscObjectComposeFunction((PetscObject)mat,
+                             "formFunction",
+                             eigen ? Moose::SlepcSupport::mooseSlepcEigenFormFunctionB
+                                   : Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
+
+  PetscObjectComposeFunction(
+      (PetscObject)mat, "formFunctionAB", Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB);
+
+  PetscContainer container;
+  PetscContainerCreate(eigen_problem.comm().get(), &container);
+  PetscContainerSetPointer(container, &eigen_problem);
+  PetscObjectCompose((PetscObject)mat, "formJacobianCtx", nullptr);
+  PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container);
+  PetscObjectCompose((PetscObject)mat, "formFunctionCtx", nullptr);
+  PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container);
+  PetscContainerDestroy(&container);
+}
+
+void
+mooseMatMult(EigenProblem & eigen_problem, Vec x, Vec r, TagID tag)
+{
+  NonlinearSystemBase & nl = eigen_problem.getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
+
+  // update local solution
+  X_global.localize(*sys.current_local_solution.get());
+
+  R.zero();
+
+  eigen_problem.computeResidualTag(*sys.current_local_solution.get(), R, tag);
+
+  R.close();
+}
+
+PetscErrorCode
+mooseMatMult_Eigen(Mat mat, Vec x, Vec r)
+{
+  PetscFunctionBegin;
+  void * ctx = nullptr;
+  MatShellGetContext(mat, &ctx);
+
+  if (!ctx)
+    mooseError("No context is set for shell matrix ");
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  mooseMatMult(*eigen_problem, x, r, eigen_nl.eigenVectorTag());
+
+  if (eigen_problem->negativeSignEigenKernel())
+    VecScale(r, -1.);
+
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+mooseMatMult_NonEigen(Mat mat, Vec x, Vec r)
+{
+  PetscFunctionBegin;
+  void * ctx = nullptr;
+  MatShellGetContext(mat, &ctx);
+
+  if (!ctx)
+    mooseError("No context is set for shell matrix ");
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  mooseMatMult(*eigen_problem, x, r, eigen_nl.nonEigenVectorTag());
+
+  PetscFunctionReturn(0);
+}
+
+void
+setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
+{
+  MatShellSetContext(mat, &eigen_problem);
+  MatShellSetOperation(mat,
+                       MATOP_MULT,
+                       eigen ? (void (*)(void))mooseMatMult_Eigen
+                             : (void (*)(void))mooseMatMult_NonEigen);
 }
 
 } // namespace SlepcSupport
