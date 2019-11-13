@@ -43,6 +43,13 @@ PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, v
 PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionAB(SNES snes, Vec x, Vec Ax, Vec Bx, void * ctx);
+
+void attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
+
+PetscErrorCode mooseMatMult_Eigen(Mat mat, Vec x, Vec y);
+PetscErrorCode mooseMatMult_NonEigen(Mat mat, Vec x, Vec y);
+void setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
+
 } // namespace SlepcSupport
 } // namespace moose
 

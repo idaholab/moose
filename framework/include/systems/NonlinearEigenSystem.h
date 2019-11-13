@@ -72,6 +72,8 @@ public:
 
   virtual void initialSetup() override;
 
+  void attachSLEPcCallbacks();
+
   /**
    * Get the number of converged eigenvalues
    *

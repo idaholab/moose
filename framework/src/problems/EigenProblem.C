@@ -289,8 +289,8 @@ EigenProblem::solve()
   {
     TIME_SECTION(_solve_timer);
 
-    _nl->solve();
-    _nl->update();
+    _nl_eigen->solve();
+    _nl_eigen->update();
   }
 
   // sync solutions in displaced problem
@@ -301,6 +301,18 @@ EigenProblem::solve()
   if (!_app.isUltimateMaster())
     PetscOptionsPop();
 #endif
+}
+
+void
+EigenProblem::init()
+{
+  // If matrix_free=true, this set Libmesh to use shell matrices
+  _nl_eigen->sys().use_shell_matrices(_matrix_free);
+
+  FEProblemBase::init();
+
+  // Set proper operations
+  _nl_eigen->attachSLEPcCallbacks();
 }
 
 bool

@@ -26,6 +26,13 @@ Eigenvalue::validParams()
 
   params.addClassDescription("Eigenvalue solves a standard/generalized eigenvaue problem");
 
+  params.addParam<bool>(
+      "matrix_free",
+      false,
+      "Whether or not to use a matrix free fashion to form operators. "
+      "If true, shell matrices will be used and meanwhile a preconditioning matrix"
+      "may be formed as well.");
+
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
   params.addParam<PostprocessorName>(
@@ -55,6 +62,8 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
+
+  _eigen_problem.matrixFree(getParam<bool>("matrix_free"));
 #endif
 
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
