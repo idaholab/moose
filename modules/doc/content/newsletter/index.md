@@ -2,10 +2,12 @@
 
 MOOSE is a dynamic project with changes occurring daily. In order to help users stay current on the
 major changes to the project monthly highlights will be produced. These highlights will be emailed
-monthly to the [MOOSE users](contact_us.md) as well as provided below.
+monthly to the [MOOSE users](contact_us.md) and [MOOSE announcement](contact_us.md) lists as well as
+provided below.
 
 ## 2019
 
+- [November, 2019](2019_11.md)
 - [October, 2019](2019_10.md)
 - [September, 2019](2019_09.md)
 - [August, 2019](2019_08.md)
