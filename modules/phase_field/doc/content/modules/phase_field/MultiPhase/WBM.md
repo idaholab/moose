@@ -38,10 +38,10 @@ $i$th non-conserved order parameter, we need to find $(\vec\eta,\lambda)$ satisf
 the boundary conditions and such that
 
 \begin{equation}
-\begin{align}
+\begin{aligned}
 a_i(\vec\eta,\vec c,v) + \underbrace{\int_\Omega\lambda\frac{\partial k}{\partial\eta_i} v\,dx}_{L_1(\eta_i)} &=& 0 \\
 \underbrace{\int_\Omega q\frac{\partial(\lambda k)}{\partial\lambda}\,dx}_{L_2(\lambda)} &=& 0
-\end{align}
+\end{aligned}
 \end{equation}
 
 holds for every test function $v$ and $q$.
