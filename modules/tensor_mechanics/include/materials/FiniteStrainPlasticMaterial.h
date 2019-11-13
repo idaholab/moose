@@ -29,6 +29,8 @@ InputParameters validParams<FiniteStrainPlasticMaterial>();
 class FiniteStrainPlasticMaterial : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   FiniteStrainPlasticMaterial(const InputParameters & parameters);
 
 protected:
@@ -138,4 +140,3 @@ protected:
    */
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
 };
-

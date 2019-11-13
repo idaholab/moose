@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", CombinedScalarDamage);
 
-template <>
+defineLegacyParams(CombinedScalarDamage);
+
 InputParameters
-validParams<CombinedScalarDamage>()
+CombinedScalarDamage::validParams()
 {
-  InputParameters params = validParams<ScalarDamageBase>();
+  InputParameters params = ScalarDamageBase::validParams();
 
   params.addClassDescription(
       "Scalar damage model which is computed as a function of multiple scalar damage models");

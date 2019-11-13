@@ -19,6 +19,8 @@ InputParameters validParams<TensorMechanicsApp>();
 class TensorMechanicsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsApp(const InputParameters & parameters);
   virtual ~TensorMechanicsApp();
 
@@ -28,4 +30,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

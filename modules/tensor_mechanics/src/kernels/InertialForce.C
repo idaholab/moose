@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", InertialForce);
 
-template <>
+defineLegacyParams(InertialForce);
+
 InputParameters
-validParams<InertialForce>()
+InertialForce::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addClassDescription("Calculates the residual for the inertial force "
                              "($M \\cdot acceleration$) and the contribution of mass"
                              " dependent Rayleigh damping and HHT time "

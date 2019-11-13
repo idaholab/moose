@@ -14,6 +14,8 @@
 class PresetVelocity : public PresetNodalBC
 {
 public:
+  static InputParameters validParams();
+
   PresetVelocity(const InputParameters & parameters);
 
 protected:

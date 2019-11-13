@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", PresetAcceleration);
 
-template <>
+defineLegacyParams(PresetAcceleration);
+
 InputParameters
-validParams<PresetAcceleration>()
+PresetAcceleration::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addClassDescription("Prescribe acceleration on a given boundary in a given direction");
   params.addParam<Real>("scale_factor", 1, "Scale factor if function is given.");
   params.addParam<FunctionName>("function", "1", "Function describing the velocity.");

@@ -31,6 +31,8 @@ InputParameters validParams<CappedWeakPlaneStressUpdate>();
 class CappedWeakPlaneStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedWeakPlaneStressUpdate(const InputParameters & parameters);
 
   /**
@@ -165,4 +167,3 @@ protected:
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
-

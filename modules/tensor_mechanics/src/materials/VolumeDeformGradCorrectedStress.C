@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", VolumeDeformGradCorrectedStress);
 
-template <>
+defineLegacyParams(VolumeDeformGradCorrectedStress);
+
 InputParameters
-validParams<VolumeDeformGradCorrectedStress>()
+VolumeDeformGradCorrectedStress::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Transforms stress with volumetric term from previous configuration to this configuration");
   params.addRequiredParam<MaterialPropertyName>("pre_stress_name",

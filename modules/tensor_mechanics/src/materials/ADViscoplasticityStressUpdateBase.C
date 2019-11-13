@@ -9,26 +9,31 @@
 
 #include "ADViscoplasticityStressUpdateBase.h"
 
-defineADValidParams(
-    ADViscoplasticityStressUpdateBase,
-    ADStressUpdateBase,
-    params += validParams<ADSingleVariableReturnMappingSolution<RESIDUAL>>();
-    params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
-                               "ADComputeMultiplePorousInelasticStress");
-    params.addParam<Real>("max_inelastic_increment",
-                          1.0e-4,
-                          "The maximum inelastic strain increment allowed in a time step");
-    params.addParam<std::string>(
-        "inelastic_strain_name",
-        "viscoplasticity",
-        "Name of the material property that stores the effective inelastic strain");
-    params.addParam<bool>("verbose", false, "Flag to output verbose information");
-    params.addParam<MaterialPropertyName>("porosity_name",
-                                          "porosity",
-                                          "Name of porosity material property");
-    params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
+defineADLegacyParams(ADViscoplasticityStressUpdateBase);
 
-    params.addParamNamesToGroup("inelastic_strain_name", "Advanced"););
+template <ComputeStage compute_stage>
+InputParameters
+ADViscoplasticityStressUpdateBase<compute_stage>::validParams()
+{
+  InputParameters params = ADStressUpdateBase<compute_stage>::validParams();
+  params += ADSingleVariableReturnMappingSolution<RESIDUAL>::validParams();
+  params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
+                             "ADComputeMultiplePorousInelasticStress");
+  params.addParam<Real>("max_inelastic_increment",
+                        1.0e-4,
+                        "The maximum inelastic strain increment allowed in a time step");
+  params.addParam<std::string>(
+      "inelastic_strain_name",
+      "viscoplasticity",
+      "Name of the material property that stores the effective inelastic strain");
+  params.addParam<bool>("verbose", false, "Flag to output verbose information");
+  params.addParam<MaterialPropertyName>(
+      "porosity_name", "porosity", "Name of porosity material property");
+  params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
+
+  params.addParamNamesToGroup("inelastic_strain_name", "Advanced");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdateBase<compute_stage>::ADViscoplasticityStressUpdateBase(

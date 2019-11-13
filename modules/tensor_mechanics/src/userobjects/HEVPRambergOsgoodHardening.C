@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPRambergOsgoodHardening);
 
-template <>
+defineLegacyParams(HEVPRambergOsgoodHardening);
+
 InputParameters
-validParams<HEVPRambergOsgoodHardening>()
+HEVPRambergOsgoodHardening::validParams()
 {
-  InputParameters params = validParams<HEVPStrengthUOBase>();
+  InputParameters params = HEVPStrengthUOBase::validParams();
   params.addParam<Real>("yield_stress", "Yield strength");
   params.addRequiredParam<Real>("reference_plastic_strain", "Reference plastic strain value");
   params.addRequiredParam<Real>("hardening_exponent", "The hardening exponent value");

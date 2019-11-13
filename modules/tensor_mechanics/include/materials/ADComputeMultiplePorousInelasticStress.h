@@ -27,6 +27,8 @@ class ADComputeMultiplePorousInelasticStress
   : public ADComputeMultipleInelasticStress<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeMultiplePorousInelasticStress(const InputParameters & parameters);
 
 protected:

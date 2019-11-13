@@ -22,6 +22,8 @@ InputParameters validParams<ComputeCosseratElasticityTensor>();
 class ComputeCosseratElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeCosseratElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -36,4 +38,3 @@ protected:
   /// Flexural rigidity tensor at the qps
   MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
 };
-

@@ -26,6 +26,8 @@ InputParameters validParams<ComputePlasticHeatEnergy>();
 class ComputePlasticHeatEnergy : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ComputePlasticHeatEnergy(const InputParameters & parameters);
 
 protected:
@@ -55,4 +57,3 @@ protected:
   /// d(plastic_heat)/d(total strain)
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeDeformGradBasedStress);
 
-template <>
+defineLegacyParams(ComputeDeformGradBasedStress);
+
 InputParameters
-validParams<ComputeDeformGradBasedStress>()
+ComputeDeformGradBasedStress::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Computes stress based on Lagrangian strain");
   params.addRequiredParam<MaterialPropertyName>("deform_grad_name",
                                                 "Name of deformation gradient variable");

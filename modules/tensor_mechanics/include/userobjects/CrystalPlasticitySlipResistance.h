@@ -24,8 +24,9 @@ InputParameters validParams<CrystalPlasticitySlipResistance>();
 class CrystalPlasticitySlipResistance : public CrystalPlasticityUOBase
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticitySlipResistance(const InputParameters & parameters);
 
   virtual bool calcSlipResistance(unsigned int qp, std::vector<Real> & val) const = 0;
 };
-

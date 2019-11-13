@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", CavityPressureUserObject);
 
-template <>
+defineLegacyParams(CavityPressureUserObject);
+
 InputParameters
-validParams<CavityPressureUserObject>()
+CavityPressureUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Uses the ideal gas law to compute internal pressure "
                              "and an initial moles of gas quantity.");
   params.addRangeCheckedParam<Real>(

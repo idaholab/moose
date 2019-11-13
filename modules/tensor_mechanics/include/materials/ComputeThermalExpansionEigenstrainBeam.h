@@ -24,6 +24,8 @@ InputParameters validParams<ComputeThermalExpansionEigenstrainBeam>();
 class ComputeThermalExpansionEigenstrainBeam : public ComputeThermalExpansionEigenstrainBeamBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeThermalExpansionEigenstrainBeam(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
   /// Constant thermal expansion coefficient
   const Real & _thermal_expansion_coeff;
 };
-

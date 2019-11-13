@@ -19,6 +19,8 @@ InputParameters validParams<LinearElasticTruss>();
 class LinearElasticTruss : public TrussMaterial
 {
 public:
+  static InputParameters validParams();
+
   LinearElasticTruss(const InputParameters & parameters);
 
 protected:
@@ -31,4 +33,3 @@ private:
   Real _T0;
   Real _thermal_expansion_coeff;
 };
-

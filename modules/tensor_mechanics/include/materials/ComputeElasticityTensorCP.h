@@ -25,6 +25,8 @@ InputParameters validParams<ComputeElasticityTensorCP>();
 class ComputeElasticityTensorCP : public ComputeElasticityTensor
 {
 public:
+  static InputParameters validParams();
+
   ComputeElasticityTensorCP(const InputParameters & parameters);
 
 protected:
@@ -46,4 +48,3 @@ protected:
   /// Rotation matrix
   RotationTensor _R;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeLinearViscoelasticStress);
 
-template <>
+defineLegacyParams(ComputeLinearViscoelasticStress);
+
 InputParameters
-validParams<ComputeLinearViscoelasticStress>()
+ComputeLinearViscoelasticStress::validParams()
 {
-  InputParameters params = validParams<ComputeLinearElasticStress>();
+  InputParameters params = ComputeLinearElasticStress::validParams();
   params.addClassDescription("Divides total strain into elastic + creep + eigenstrains");
   params.addParam<std::string>(
       "apparent_creep_strain",

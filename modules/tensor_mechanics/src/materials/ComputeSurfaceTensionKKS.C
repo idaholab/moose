@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeSurfaceTensionKKS);
 
-template <>
+defineLegacyParams(ComputeSurfaceTensionKKS);
+
 InputParameters
-validParams<ComputeSurfaceTensionKKS>()
+ComputeSurfaceTensionKKS::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Surface tension of an interface defined by the gradient of an order parameter");
   params.addCoupledVar("v",

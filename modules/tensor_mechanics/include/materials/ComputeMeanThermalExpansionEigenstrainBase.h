@@ -30,6 +30,8 @@ InputParameters validParams<ComputeMeanThermalExpansionEigenstrainBase>();
 class ComputeMeanThermalExpansionEigenstrainBase : public ComputeThermalExpansionEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
@@ -63,4 +65,3 @@ protected:
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
 };
-

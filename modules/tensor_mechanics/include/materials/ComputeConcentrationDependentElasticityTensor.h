@@ -23,6 +23,8 @@ InputParameters validParams<ComputeConcentrationDependentElasticityTensor>();
 class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeConcentrationDependentElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -39,4 +41,3 @@ protected:
   /// Derivative of elasticity tensor with respect to concentration.
   MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
 };
-

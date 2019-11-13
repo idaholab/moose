@@ -22,8 +22,9 @@ InputParameters validParams<ComputeSmallStrain>();
 class ComputeSmallStrain : public ComputeStrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeSmallStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 };
-

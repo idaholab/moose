@@ -22,6 +22,8 @@ InputParameters validParams<ComputeFiniteStrain>();
 class ComputeFiniteStrain : public ComputeIncrementalStrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeFiniteStrain(const InputParameters & parameters);
 
   void computeProperties() override;
@@ -43,4 +45,3 @@ private:
 
   const DecompMethod _decomposition_method;
 };
-

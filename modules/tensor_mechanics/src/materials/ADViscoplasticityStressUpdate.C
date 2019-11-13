@@ -13,43 +13,44 @@
 
 registerADMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
 
-defineADValidParams(
-    ADViscoplasticityStressUpdate,
-    ADViscoplasticityStressUpdateBase,
-    params.addClassDescription(
-        "This material computes the non-linear homogenized gauge stress in order to compute the "
-        "viscoplastic responce due to creep in porous materials. This material must be used in "
-        "conjunction with ADComputeMultiplePorousInelasticStress");
-    MooseEnum viscoplasticity_model("LPS GTN", "LPS");
-    params.addParam<MooseEnum>("viscoplasticity_model",
-                               viscoplasticity_model,
-                               "Which viscoplastic model to use");
-    MooseEnum pore_shape_model("spherical cylindrical", "spherical");
-    params.addParam<MooseEnum>("pore_shape_model",
-                               pore_shape_model,
-                               "Which pore shape model to use");
-    params.addRequiredParam<MaterialPropertyName>(
-        "coefficient", "Material property name for the leading coefficient for Norton power law");
-    params.addRequiredRangeCheckedParam<Real>("power",
-                                              "power>=1.0",
-                                              "Stress exponent for Norton power law");
-    params.addParam<Real>(
-        "maximum_gauge_ratio",
-        1.0e6,
-        "Maximum ratio between the gauge stress and the equivalent stress. This "
-        "should be a high number. Note that this does not set an upper bound on the value, but "
-        "rather will help with convergence of the inner Newton loop");
-    params.addParam<Real>(
-        "minimum_equivalent_stress",
-        1.0e-3,
-        "Minimum value of equivalent stress below which viscoplasticiy is not calculated.");
-    params.addParam<Real>("maximum_equivalent_stress",
-                          1.0e12,
-                          "Maximum value of equivalent stress above which an exception is thrown "
-                          "instead of calculating the properties in this material.");
+defineADLegacyParams(ADViscoplasticityStressUpdate);
 
-    params.addParamNamesToGroup("verbose maximum_gauge_ratio maximum_equivalent_stress",
-                                "Advanced"););
+template <ComputeStage compute_stage>
+InputParameters
+ADViscoplasticityStressUpdate<compute_stage>::validParams()
+{
+  InputParameters params = ADViscoplasticityStressUpdateBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "This material computes the non-linear homogenized gauge stress in order to compute the "
+      "viscoplastic responce due to creep in porous materials. This material must be used in "
+      "conjunction with ADComputeMultiplePorousInelasticStress");
+  MooseEnum viscoplasticity_model("LPS GTN", "LPS");
+  params.addParam<MooseEnum>(
+      "viscoplasticity_model", viscoplasticity_model, "Which viscoplastic model to use");
+  MooseEnum pore_shape_model("spherical cylindrical", "spherical");
+  params.addParam<MooseEnum>("pore_shape_model", pore_shape_model, "Which pore shape model to use");
+  params.addRequiredParam<MaterialPropertyName>(
+      "coefficient", "Material property name for the leading coefficient for Norton power law");
+  params.addRequiredRangeCheckedParam<Real>(
+      "power", "power>=1.0", "Stress exponent for Norton power law");
+  params.addParam<Real>(
+      "maximum_gauge_ratio",
+      1.0e6,
+      "Maximum ratio between the gauge stress and the equivalent stress. This "
+      "should be a high number. Note that this does not set an upper bound on the value, but "
+      "rather will help with convergence of the inner Newton loop");
+  params.addParam<Real>(
+      "minimum_equivalent_stress",
+      1.0e-3,
+      "Minimum value of equivalent stress below which viscoplasticiy is not calculated.");
+  params.addParam<Real>("maximum_equivalent_stress",
+                        1.0e12,
+                        "Maximum value of equivalent stress above which an exception is thrown "
+                        "instead of calculating the properties in this material.");
+
+  params.addParamNamesToGroup("verbose maximum_gauge_ratio maximum_equivalent_stress", "Advanced");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(

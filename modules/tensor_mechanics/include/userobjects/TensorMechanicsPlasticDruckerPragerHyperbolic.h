@@ -26,6 +26,8 @@ InputParameters validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>();
 class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlasticDruckerPrager
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticDruckerPragerHyperbolic(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -74,4 +76,3 @@ private:
   /// max iters for custom return map loop
   const unsigned _max_iters;
 };
-

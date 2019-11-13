@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class ADComputeEigenstrain : public ADComputeEigenstrainBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeEigenstrain(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
 
   usingComputeEigenstrainBaseMembers;
 };
-

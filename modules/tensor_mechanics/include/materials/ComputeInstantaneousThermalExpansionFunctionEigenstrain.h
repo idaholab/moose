@@ -25,6 +25,8 @@ class ComputeInstantaneousThermalExpansionFunctionEigenstrain
     : public ComputeThermalExpansionEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
 
 protected:

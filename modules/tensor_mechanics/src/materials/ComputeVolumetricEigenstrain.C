@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVolumetricEigenstrain);
 
-template <>
+defineLegacyParams(ComputeVolumetricEigenstrain);
+
 InputParameters
-validParams<ComputeVolumetricEigenstrain>()
+ComputeVolumetricEigenstrain::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBase>();
+  InputParameters params = ComputeEigenstrainBase::validParams();
   params.addClassDescription("Computes an eigenstrain that is defined by a set of scalar material "
                              "properties that summed together define the volumetric change.  This "
                              "also computes the derivatives of that eigenstrain with respect to a "

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DFiniteStrain);
 
-template <>
+defineLegacyParams(ComputeAxisymmetric1DFiniteStrain);
+
 InputParameters
-validParams<ComputeAxisymmetric1DFiniteStrain>()
+ComputeAxisymmetric1DFiniteStrain::validParams()
 {
-  InputParameters params = validParams<Compute1DFiniteStrain>();
+  InputParameters params = Compute1DFiniteStrain::validParams();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
                              "in an axisymmetric 1D problem");
   params.addParam<UserObjectName>("subblock_index_provider",

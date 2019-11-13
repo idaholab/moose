@@ -24,6 +24,8 @@ InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>();
 class ComputeAxisymmetricRZFiniteStrain : public Compute2DFiniteStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -36,4 +38,3 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
-

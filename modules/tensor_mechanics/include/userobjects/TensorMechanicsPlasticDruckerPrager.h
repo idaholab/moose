@@ -27,6 +27,8 @@ InputParameters validParams<TensorMechanicsPlasticDruckerPrager>();
 class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticDruckerPrager(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -143,4 +145,3 @@ private:
    */
   void initializeB(Real intnl, int fd, Real & bbb) const;
 };
-

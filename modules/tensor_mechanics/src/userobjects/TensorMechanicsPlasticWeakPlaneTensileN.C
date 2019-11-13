@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensileN);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticWeakPlaneTensileN);
+
 InputParameters
-validParams<TensorMechanicsPlasticWeakPlaneTensileN>()
+TensorMechanicsPlasticWeakPlaneTensileN::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticWeakPlaneTensile>();
+  InputParameters params = TensorMechanicsPlasticWeakPlaneTensile::validParams();
   params.addRequiredParam<RealVectorValue>("normal_vector", "The normal vector to the weak plane");
   params.addClassDescription("Associative weak-plane tensile plasticity with hardening/softening, "
                              "with specified, fixed normal vector.  (WeakPlaneTensile combined "

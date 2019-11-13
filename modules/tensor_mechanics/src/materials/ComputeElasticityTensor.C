@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeElasticityTensor);
 
-template <>
+defineLegacyParams(ComputeElasticityTensor);
+
 InputParameters
-validParams<ComputeElasticityTensor>()
+ComputeElasticityTensor::validParams()
 {
-  InputParameters params = validParams<ComputeRotatedElasticityTensorBase>();
+  InputParameters params = ComputeRotatedElasticityTensorBase::validParams();
   params.addClassDescription("Compute an elasticity tensor.");
   params.addRequiredParam<std::vector<Real>>("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>(

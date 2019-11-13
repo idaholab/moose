@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeCosseratLinearElasticStress);
 
-template <>
+defineLegacyParams(ComputeCosseratLinearElasticStress);
+
 InputParameters
-validParams<ComputeCosseratLinearElasticStress>()
+ComputeCosseratLinearElasticStress::validParams()
 {
-  InputParameters params = validParams<ComputeCosseratStressBase>();
+  InputParameters params = ComputeCosseratStressBase::validParams();
   params.addClassDescription(
       "Compute Cosserat stress and couple-stress elasticity for small strains");
   return params;

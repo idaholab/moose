@@ -505,7 +505,7 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
   template <>                                                                                      \
   InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
   {                                                                                                \
-    return ADObjectType<RESIDUAL>::validParams();                                                  \
+    return ADObjectType<JACOBIAN>::validParams();                                                  \
   }                                                                                                \
   void mooseClangFormatFunction()
 

@@ -33,6 +33,8 @@ InputParameters validParams<HyperbolicViscoplasticityStressUpdate>();
 class HyperbolicViscoplasticityStressUpdate : public RadialReturnStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   HyperbolicViscoplasticityStressUpdate(const InputParameters & parameters);
 
 protected:
@@ -77,4 +79,3 @@ protected:
   /// old value of plastic strain
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 };
-

@@ -12,12 +12,13 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentVoce);
 
-template <>
+defineLegacyParams(CrystalPlasticityStateVarRateComponentVoce);
+
 InputParameters
-validParams<CrystalPlasticityStateVarRateComponentVoce>()
+CrystalPlasticityStateVarRateComponentVoce::validParams()
 {
 
-  InputParameters params = validParams<CrystalPlasticityStateVarRateComponent>();
+  InputParameters params = CrystalPlasticityStateVarRateComponent::validParams();
   params.addParam<std::string>(
       "uo_slip_rate_name",
       "Name of slip rate property: Same as slip rate user object specified in input file.");

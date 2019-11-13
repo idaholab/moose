@@ -19,6 +19,8 @@ InputParameters validParams<TestNewmarkTI>();
 class TestNewmarkTI : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Stores the velocity/acceleration computed using the time integrator into
    * the provided auxvariable
@@ -36,4 +38,3 @@ protected:
   /// Value of the first/second time derivative of dispalcement
   const VariableValue & _value;
 };
-

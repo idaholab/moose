@@ -23,6 +23,8 @@ InputParameters validParams<ComputeExtraStressVDWGas>();
 class ComputeExtraStressVDWGas : public ComputeExtraStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeExtraStressVDWGas(const InputParameters & parameters);
 
 protected:
@@ -36,4 +38,3 @@ protected:
   const Real _nondim_factor;
   const Real _kB;
 };
-

@@ -12,6 +12,10 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
+registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
+
+defineADLegacyParams(ADComputeFiniteStrain);
+
 template <ComputeStage compute_stage>
 MooseEnum
 ADComputeFiniteStrain<compute_stage>::decompositionType()
@@ -19,16 +23,18 @@ ADComputeFiniteStrain<compute_stage>::decompositionType()
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
 
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
-
-defineADValidParams(
-    ADComputeFiniteStrain,
-    ADComputeIncrementalStrainBase,
-    params.addClassDescription(
-        "Compute a strain increment and rotation increment for finite strains.");
-    params.addParam<MooseEnum>("decomposition_method",
-                               ADComputeFiniteStrain<RESIDUAL>::decompositionType(),
-                               "Methods to calculate the strain and rotation increments"););
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeFiniteStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalStrainBase<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for finite strains.");
+  params.addParam<MooseEnum>("decomposition_method",
+                             ADComputeFiniteStrain<compute_stage>::decompositionType(),
+                             "Methods to calculate the strain and rotation increments");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeFiniteStrain<compute_stage>::ADComputeFiniteStrain(const InputParameters & parameters)

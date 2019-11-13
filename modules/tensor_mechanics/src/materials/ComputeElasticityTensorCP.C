@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeElasticityTensorCP);
 
-template <>
+defineLegacyParams(ComputeElasticityTensorCP);
+
 InputParameters
-validParams<ComputeElasticityTensorCP>()
+ComputeElasticityTensorCP::validParams()
 {
-  InputParameters params = validParams<ComputeElasticityTensor>();
+  InputParameters params = ComputeElasticityTensor::validParams();
   params.addClassDescription("Compute an elasticity tensor for crystal plasticity.");
   params.addParam<UserObjectName>("read_prop_user_object",
                                   "The ElementReadPropertyFile "

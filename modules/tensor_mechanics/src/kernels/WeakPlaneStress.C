@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", WeakPlaneStress);
 
-template <>
+defineLegacyParams(WeakPlaneStress);
+
 InputParameters
-validParams<WeakPlaneStress>()
+WeakPlaneStress::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Plane stress kernel to provide out-of-plane strain contribution.");
   params.addCoupledVar("displacements",
                        "The string of displacements suitable for the problem statement");

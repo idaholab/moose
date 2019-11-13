@@ -26,6 +26,8 @@ InputParameters validParams<ComputeStressBase>();
 class ComputeStressBase : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ComputeStressBase(const InputParameters & parameters);
 
 protected:

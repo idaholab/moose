@@ -26,6 +26,8 @@ InputParameters validParams<RankFourAux>();
 class RankFourAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RankFourAux(const InputParameters & parameters);
 
   virtual ~RankFourAux() {}
@@ -40,4 +42,3 @@ private:
   const unsigned int _k;
   const unsigned int _l;
 };
-

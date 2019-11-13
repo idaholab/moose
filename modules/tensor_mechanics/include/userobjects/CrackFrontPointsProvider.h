@@ -22,6 +22,8 @@ InputParameters validParams<CrackFrontPointsProvider>();
 class CrackFrontPointsProvider : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   CrackFrontPointsProvider(const InputParameters & parameters);
 
   /** get a set of points along a crack front from a XFEM GeometricCutUserObject
@@ -30,4 +32,3 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const = 0;
 };
-

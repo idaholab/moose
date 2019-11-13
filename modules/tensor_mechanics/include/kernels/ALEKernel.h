@@ -21,6 +21,8 @@ InputParameters validParams<ALEKernel>();
 class ALEKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   ALEKernel(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
@@ -39,4 +41,3 @@ protected:
   const VariableTestGradient & _grad_test_undisplaced;
   ///@}
 };
-

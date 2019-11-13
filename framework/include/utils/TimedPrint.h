@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "Moose.h" // Color constants
 #include "ConsoleStream.h"
 #include "StreamArguments.h"
 
@@ -20,6 +21,7 @@
 #include <thread>
 #include <future>
 #include <ios>
+#include <iomanip>
 
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
     !defined(__clang__)
@@ -79,6 +81,10 @@ public:
 #define ARGS args_in...
 
 #endif
+    if (_active_instance)
+      return;
+
+    _active_instance = this;
 
     // This is using move assignment
     _thread = std::thread{[&out, initial_wait, dot_interval, this, ARGS] {
@@ -137,14 +143,21 @@ public:
    */
   ~TimedPrint()
   {
-    // Tell the thread to end
-    _done.set_value(true);
+    if (_active_instance == this)
+    {
+      // Tell the thread to end
+      _done.set_value(true);
 
-    // Wait for it to end
-    _thread.join();
+      // Wait for it to end
+      _thread.join();
+
+      _active_instance = nullptr;
+    }
   }
 
-protected:
+private:
   std::promise<bool> _done;
   std::thread _thread;
+
+  static TimedPrint * _active_instance;
 };

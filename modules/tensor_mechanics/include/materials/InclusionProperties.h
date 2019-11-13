@@ -28,6 +28,8 @@ InputParameters validParams<InclusionProperties>();
 class InclusionProperties : public Material
 {
 public:
+  static InputParameters validParams();
+
   InclusionProperties(const InputParameters & parameters);
 
 protected:
@@ -64,4 +66,3 @@ private:
   MaterialProperty<RankTwoTensor> & _strain;
   MaterialProperty<Real> & _elastic_energy;
 };
-

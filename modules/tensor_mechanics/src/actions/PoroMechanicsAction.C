@@ -20,11 +20,12 @@ registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "validate_coordin
 
 registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "add_kernel");
 
-template <>
+defineLegacyParams(PoroMechanicsAction);
+
 InputParameters
-validParams<PoroMechanicsAction>()
+PoroMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsAction>();
+  InputParameters params = TensorMechanicsAction::validParams();
   params.addRequiredParam<VariableName>("porepressure", "The pore pressure variable");
   return params;
 }

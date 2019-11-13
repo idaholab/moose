@@ -11,10 +11,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeLinearElasticStress);
 
-defineADValidParams(
-    ADComputeLinearElasticStress,
-    ADComputeStressBase,
-    params.addClassDescription("Compute stress using elasticity for small strains"););
+defineADLegacyParams(ADComputeLinearElasticStress);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeLinearElasticStress<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeStressBase<compute_stage>::validParams();
+  params.addClassDescription("Compute stress using elasticity for small strains");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeLinearElasticStress<compute_stage>::ADComputeLinearElasticStress(

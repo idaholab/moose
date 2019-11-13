@@ -23,6 +23,8 @@ InputParameters validParams<DynamicStressDivergenceTensors>();
 class DynamicStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
+  static InputParameters validParams();
+
   DynamicStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
@@ -38,4 +40,3 @@ protected:
   const Real _alpha;
   const bool _static_initialization;
 };
-

@@ -24,9 +24,10 @@ InputParameters validParams<CrystalPlasticityStateVarRateComponent>();
 class CrystalPlasticityStateVarRateComponent : public CrystalPlasticityUOBase
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticityStateVarRateComponent(const InputParameters & parameters);
 
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const = 0;
 };
-

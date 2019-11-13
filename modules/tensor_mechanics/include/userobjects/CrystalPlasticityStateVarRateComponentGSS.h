@@ -22,6 +22,8 @@ InputParameters validParams<CrystalPlasticityStateVarRateComponentGSS>();
 class CrystalPlasticityStateVarRateComponentGSS : public CrystalPlasticityStateVarRateComponent
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticityStateVarRateComponentGSS(const InputParameters & parameters);
 
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
@@ -36,4 +38,3 @@ protected:
 
   std::vector<Real> _hprops;
 };
-

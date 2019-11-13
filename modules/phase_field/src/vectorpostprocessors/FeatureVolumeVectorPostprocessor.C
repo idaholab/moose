@@ -39,6 +39,8 @@ validParams<FeatureVolumeVectorPostprocessor>()
                              "of a \"FeatureFloodCount\" or derived object (e.g. individual "
                              "feature volumes)");
 
+  params.suppressParameter<bool>("contains_complete_history");
+
   return params;
 }
 

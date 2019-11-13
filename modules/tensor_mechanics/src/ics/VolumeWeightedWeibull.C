@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", VolumeWeightedWeibull);
 
-template <>
+defineLegacyParams(VolumeWeightedWeibull);
+
 InputParameters
-validParams<VolumeWeightedWeibull>()
+VolumeWeightedWeibull::validParams()
 {
-  InputParameters params = validParams<RandomICBase>();
+  InputParameters params = RandomICBase::validParams();
   params.addRequiredParam<Real>("reference_volume", "Reference volume (of a test specimen)");
   params.addRequiredParam<Real>("weibull_modulus", "Weibull modulus");
   params.addParam<Real>(

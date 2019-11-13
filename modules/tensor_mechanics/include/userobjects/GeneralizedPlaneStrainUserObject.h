@@ -27,6 +27,8 @@ InputParameters validParams<GeneralizedPlaneStrainUserObject>();
 class GeneralizedPlaneStrainUserObject : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainUserObject(const InputParameters & parameters);
 
   void initialize() override;

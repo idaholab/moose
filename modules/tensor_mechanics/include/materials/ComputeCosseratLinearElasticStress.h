@@ -25,7 +25,10 @@ InputParameters validParams<ComputeCosseratLinearElasticStress>();
 class ComputeCosseratLinearElasticStress : public ComputeCosseratStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeCosseratLinearElasticStress(const InputParameters & parameters);
+
   virtual void initialSetup() override;
 
 protected:
@@ -36,4 +39,3 @@ protected:
   /// Elasticity tensor material property
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 };
-

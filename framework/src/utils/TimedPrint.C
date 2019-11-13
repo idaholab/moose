@@ -7,19 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "TimedPrint.h"
 
-#include "Action.h"
-
-class CavityPressurePPAction : public Action
-{
-public:
-  static InputParameters validParams();
-
-  CavityPressurePPAction(InputParameters params);
-
-  virtual void act();
-};
-
-template <>
-InputParameters validParams<CavityPressurePPAction>();
+// Singleton TimedPrint object
+TimedPrint * TimedPrint::_active_instance = nullptr;

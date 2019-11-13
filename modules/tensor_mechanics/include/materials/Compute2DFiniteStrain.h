@@ -26,7 +26,10 @@ InputParameters validParams<Compute2DFiniteStrain>();
 class Compute2DFiniteStrain : public ComputeFiniteStrain
 {
 public:
+  static InputParameters validParams();
+
   Compute2DFiniteStrain(const InputParameters & parameters);
+
   void initialSetup() override;
 
   virtual void computeProperties() override;
@@ -48,4 +51,3 @@ protected:
 
   const unsigned int _out_of_plane_direction;
 };
-

@@ -27,6 +27,8 @@ InputParameters validParams<VolumeDeformGradCorrectedStress>();
 class VolumeDeformGradCorrectedStress : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   VolumeDeformGradCorrectedStress(const InputParameters & parameters);
 
 protected:
@@ -41,4 +43,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> * _Jacobian_mult;
 };
-

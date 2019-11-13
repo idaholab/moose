@@ -22,6 +22,8 @@ InputParameters validParams<CoupledPressureBC>();
 class CoupledPressureBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledPressureBC(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
   /// The values of pressure to be imposed
   const VariableValue & _pressure;
 };
-

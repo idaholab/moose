@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeRSphericalSmallStrain);
 
-template <>
+defineLegacyParams(ComputeRSphericalSmallStrain);
+
 InputParameters
-validParams<ComputeRSphericalSmallStrain>()
+ComputeRSphericalSmallStrain::validParams()
 {
-  InputParameters params = validParams<ComputeSmallStrain>();
+  InputParameters params = ComputeSmallStrain::validParams();
   params.addClassDescription("Compute a small strain 1D spherical symmetry case.");
   return params;
 }

@@ -34,6 +34,8 @@ InputParameters validParams<RadialReturnStressUpdate>();
 class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
 {
 public:
+  static InputParameters validParams();
+
   RadialReturnStressUpdate(const InputParameters & parameters);
 
   /**
@@ -144,4 +146,3 @@ protected:
    */
   const RankFourTensor _deviatoric_projection_four;
 };
-

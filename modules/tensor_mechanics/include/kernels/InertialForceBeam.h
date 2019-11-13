@@ -22,6 +22,8 @@ InputParameters validParams<InertialForceBeam>();
 class InertialForceBeam : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   InertialForceBeam(const InputParameters & parameters);
 
   virtual void computeResidual() override;
@@ -186,4 +188,3 @@ private:
    **/
   const VariableValue * _du_dotdot_du;
 };
-

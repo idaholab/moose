@@ -30,6 +30,8 @@ InputParameters validParams<ComputeLinearViscoelasticStress>();
 class ComputeLinearViscoelasticStress : public ComputeLinearElasticStress
 {
 public:
+  static InputParameters validParams();
+
   ComputeLinearViscoelasticStress(const InputParameters & parameters);
 
 protected:
@@ -48,4 +50,3 @@ protected:
   /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
-

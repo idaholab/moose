@@ -23,6 +23,8 @@ InputParameters validParams<TensorMechanicsHardeningConstant>();
 class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningConstant(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -35,4 +37,3 @@ private:
   /// The value that the parameter will take
   Real _val;
 };
-

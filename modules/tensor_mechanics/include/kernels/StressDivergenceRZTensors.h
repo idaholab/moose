@@ -31,6 +31,8 @@ InputParameters validParams<StressDivergenceRZTensors>();
 class StressDivergenceRZTensors : public StressDivergenceTensors
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceRZTensors(const InputParameters & parameters);
 
 protected:
@@ -45,4 +47,3 @@ protected:
 
   Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
-

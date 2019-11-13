@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainUObasedCP);
 
-template <>
+defineLegacyParams(FiniteStrainUObasedCP);
+
 InputParameters
-validParams<FiniteStrainUObasedCP>()
+FiniteStrainUObasedCP::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("UserObject based Crystal Plasticity system.");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");

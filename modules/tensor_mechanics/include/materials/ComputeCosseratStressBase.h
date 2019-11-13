@@ -22,6 +22,8 @@ InputParameters validParams<ComputeCosseratStressBase>();
 class ComputeCosseratStressBase : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeCosseratStressBase(const InputParameters & parameters);
 
 protected:
@@ -40,4 +42,3 @@ protected:
   /// derivative of couple-stress w.r.t. curvature
   MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 };
-

@@ -10,15 +10,22 @@
 #include "ADComputeElasticityTensorBase.h"
 #include "Function.h"
 
-defineADValidParams(ADComputeElasticityTensorBase,
-                    ADMaterial,
-                    params.addParam<FunctionName>(
-                        "elasticity_tensor_prefactor",
-                        "Optional function to use as a scalar prefactor on the elasticity tensor.");
-                    params.addParam<std::string>(
-                        "base_name",
-                        "Optional parameter that allows the user to define multiple mechanics "
-                        "material systems on the same block, i.e. for multiple phases"););
+defineADLegacyParams(ADComputeElasticityTensorBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeElasticityTensorBase<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addParam<FunctionName>(
+      "elasticity_tensor_prefactor",
+      "Optional function to use as a scalar prefactor on the elasticity tensor.");
+  params.addParam<std::string>(
+      "base_name",
+      "Optional parameter that allows the user to define multiple mechanics "
+      "material systems on the same block, i.e. for multiple phases");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeElasticityTensorBase<compute_stage>::ADComputeElasticityTensorBase(

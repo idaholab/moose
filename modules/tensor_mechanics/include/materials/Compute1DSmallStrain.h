@@ -25,6 +25,8 @@ InputParameters validParams<Compute1DSmallStrain>();
 class Compute1DSmallStrain : public ComputeSmallStrain
 {
 public:
+  static InputParameters validParams();
+
   Compute1DSmallStrain(const InputParameters & parameters);
 
   void computeProperties() override;
@@ -40,4 +42,3 @@ protected:
    */
   virtual Real computeStrainZZ() = 0;
 };
-

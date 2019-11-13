@@ -24,6 +24,8 @@ InputParameters validParams<HEVPInternalVarRateUOBase>();
 class HEVPInternalVarRateUOBase : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   HEVPInternalVarRateUOBase(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
@@ -33,4 +35,3 @@ protected:
   std::string _flow_rate_prop_name;
   const MaterialProperty<Real> & _flow_rate;
 };
-

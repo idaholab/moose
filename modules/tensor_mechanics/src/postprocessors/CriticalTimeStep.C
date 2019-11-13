@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", CriticalTimeStep);
 
-template <>
+defineLegacyParams(CriticalTimeStep);
+
 InputParameters
-validParams<CriticalTimeStep>()
+CriticalTimeStep::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription(
       "Computes and reports the critical time step for the explicit solver.");
   params.addParam<MaterialPropertyName>(

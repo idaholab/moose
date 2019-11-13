@@ -126,6 +126,8 @@ class MultiPlasticityLinearSystem : public MultiPlasticityRawComponentAssembler
 public:
   MultiPlasticityLinearSystem(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
 protected:
   /// Tolerance on the minimum ratio of singular values before flow-directions are deemed linearly dependent
   Real _svd_tol;
@@ -272,4 +274,3 @@ private:
                                          const std::vector<bool> & active,
                                          std::vector<bool> & deactivated_due_to_ld);
 };
-

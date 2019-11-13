@@ -12,9 +12,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
 
-defineADValidParams(ADComputeSmallStrain,
-                    ADComputeStrainBase,
-                    params.addClassDescription("Compute a small strain."););
+defineADLegacyParams(ADComputeSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeStrainBase<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeSmallStrain<compute_stage>::ADComputeSmallStrain(const InputParameters & parameters)

@@ -27,6 +27,8 @@ InputParameters validParams<PhaseFieldFractureMechanicsOffDiag>();
 class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   PhaseFieldFractureMechanicsOffDiag(const InputParameters & parameters);
 
 protected:
@@ -43,4 +45,3 @@ protected:
   const unsigned int _c_var;
   const MaterialProperty<RankTwoTensor> & _d_stress_dc;
 };
-

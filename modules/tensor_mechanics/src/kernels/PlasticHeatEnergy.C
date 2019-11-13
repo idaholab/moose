@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", PlasticHeatEnergy);
 
-template <>
+defineLegacyParams(PlasticHeatEnergy);
+
 InputParameters
-validParams<PlasticHeatEnergy>()
+PlasticHeatEnergy::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Plastic heat energy density = coeff * stress * plastic_strain_rate");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");

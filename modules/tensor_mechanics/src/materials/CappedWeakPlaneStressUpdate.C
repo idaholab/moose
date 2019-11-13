@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", CappedWeakPlaneStressUpdate);
 
-template <>
+defineLegacyParams(CappedWeakPlaneStressUpdate);
+
 InputParameters
-validParams<CappedWeakPlaneStressUpdate>()
+CappedWeakPlaneStressUpdate::validParams()
 {
-  InputParameters params = validParams<TwoParameterPlasticityStressUpdate>();
+  InputParameters params = TwoParameterPlasticityStressUpdate::validParams();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "cohesion",

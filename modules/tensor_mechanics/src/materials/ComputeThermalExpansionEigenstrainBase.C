@@ -10,11 +10,12 @@
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
-template <>
+defineLegacyParams(ComputeThermalExpansionEigenstrainBase);
+
 InputParameters
-validParams<ComputeThermalExpansionEigenstrainBase>()
+ComputeThermalExpansionEigenstrainBase::validParams()
 {
-  InputParameters params = validParams<ComputeEigenstrainBase>();
+  InputParameters params = ComputeEigenstrainBase::validParams();
   params.addCoupledVar("temperature", "Coupled temperature");
   params.addRequiredCoupledVar("stress_free_temperature",
                                "Reference temperature at which there is no "

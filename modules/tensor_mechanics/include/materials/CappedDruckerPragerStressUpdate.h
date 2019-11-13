@@ -60,6 +60,8 @@ InputParameters validParams<CappedDruckerPragerStressUpdate>();
 class CappedDruckerPragerStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedDruckerPragerStressUpdate(const InputParameters & parameters);
 
   /**
@@ -189,4 +191,3 @@ protected:
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
-

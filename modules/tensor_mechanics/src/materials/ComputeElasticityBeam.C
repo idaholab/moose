@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeElasticityBeam);
 
-template <>
+defineLegacyParams(ComputeElasticityBeam);
+
 InputParameters
-validParams<ComputeElasticityBeam>()
+ComputeElasticityBeam::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Computes the equivalent of the elasticity tensor for the beam "
                              "element, which are vectors of material translational and flexural "
                              "stiffness.");

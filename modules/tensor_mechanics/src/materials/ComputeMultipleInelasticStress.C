@@ -15,11 +15,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
 
-template <>
+defineLegacyParams(ComputeMultipleInelasticStress);
+
 InputParameters
-validParams<ComputeMultipleInelasticStress>()
+ComputeMultipleInelasticStress::validParams()
 {
-  InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
+  InputParameters params = ComputeFiniteStrainElasticStress::validParams();
   params.addClassDescription("Compute state (stress and internal parameters such as plastic "
                              "strains and internal parameters) using an iterative process.  "
                              "Combinations of creep models and plastic models may be used.");

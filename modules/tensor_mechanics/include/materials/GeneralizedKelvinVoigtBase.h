@@ -35,6 +35,8 @@ InputParameters validParams<GeneralizedKelvinVoigtBase>();
 class GeneralizedKelvinVoigtBase : public LinearViscoelasticityBase
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedKelvinVoigtBase(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ protected:
   const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_inv_old;
   ///@}
 };
-

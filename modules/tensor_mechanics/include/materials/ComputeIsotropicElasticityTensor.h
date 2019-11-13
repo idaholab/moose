@@ -23,6 +23,8 @@ InputParameters validParams<ComputeIsotropicElasticityTensor>();
 class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeIsotropicElasticityTensor(const InputParameters & parameters);
 
 protected:

@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class ADComputeAxisymmetricRZSmallStrain : public ADCompute2DSmallStrain<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -33,4 +35,3 @@ protected:
 
   usingCompute2DSmallStrainMembers;
 };
-

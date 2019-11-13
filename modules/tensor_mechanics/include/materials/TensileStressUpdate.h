@@ -24,6 +24,8 @@ InputParameters validParams<TensileStressUpdate>();
 class TensileStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   TensileStressUpdate(const InputParameters & parameters);
 
   /**
@@ -105,4 +107,3 @@ protected:
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
 };
-

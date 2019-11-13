@@ -25,8 +25,9 @@ InputParameters validParams<ComputeRSphericalSmallStrain>();
 class ComputeRSphericalSmallStrain : public ComputeSmallStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeRSphericalSmallStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 };
-

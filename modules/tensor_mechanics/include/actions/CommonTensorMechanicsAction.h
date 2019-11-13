@@ -22,8 +22,9 @@ InputParameters validParams<CommonTensorMechanicsAction>();
 class CommonTensorMechanicsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   CommonTensorMechanicsAction(const InputParameters & parameters);
 
   virtual void act() override{};
 };
-

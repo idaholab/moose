@@ -29,6 +29,8 @@ InputParameters validParams<CompositeEigenstrain>();
 class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeEigenstrainBase>
 {
 public:
+  static InputParameters validParams();
+
   CompositeEigenstrain(const InputParameters & parameters);
 
 protected:
@@ -36,4 +38,3 @@ protected:
 
   const std::string _M_name;
 };
-

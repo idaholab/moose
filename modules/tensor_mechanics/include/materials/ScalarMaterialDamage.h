@@ -23,6 +23,8 @@ InputParameters validParams<ScalarMaterialDamage>();
 class ScalarMaterialDamage : public ScalarDamageBase
 {
 public:
+  static InputParameters validParams();
+
   ScalarMaterialDamage(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
   const MaterialProperty<Real> & _damage_property;
   ///@}
 };
-

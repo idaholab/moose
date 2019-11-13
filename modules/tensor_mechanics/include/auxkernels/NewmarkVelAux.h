@@ -19,6 +19,8 @@ InputParameters validParams<NewmarkVelAux>();
 class NewmarkVelAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Calcualtes velocity using Newmark time integration scheme
    */
@@ -33,4 +35,3 @@ protected:
   const VariableValue & _accel;
   Real _gamma;
 };
-

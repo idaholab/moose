@@ -13,11 +13,12 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressurePPAction, "add_postprocessor");
 
-template <>
+defineLegacyParams(CavityPressurePPAction);
+
 InputParameters
-validParams<CavityPressurePPAction>()
+CavityPressurePPAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("This Action creates a CavityPressurePostprocessor.");
   params.addParam<std::string>("output", "The name to use for the cavity pressure value");
   params.addParam<std::string>("output_initial_moles",

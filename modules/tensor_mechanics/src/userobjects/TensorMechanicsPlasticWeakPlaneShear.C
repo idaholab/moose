@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneShear);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticWeakPlaneShear);
+
 InputParameters
-validParams<TensorMechanicsPlasticWeakPlaneShear>()
+TensorMechanicsPlasticWeakPlaneShear::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addRequiredParam<UserObjectName>(
       "cohesion",
       "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "

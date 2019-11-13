@@ -20,11 +20,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceTensors);
 
-template <>
+defineLegacyParams(StressDivergenceTensors);
+
 InputParameters
-validParams<StressDivergenceTensors>()
+StressDivergenceTensors::validParams()
 {
-  InputParameters params = validParams<ALEKernel>();
+  InputParameters params = ALEKernel::validParams();
   params.addClassDescription("Stress divergence kernel for the Cartesian coordinate system");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "

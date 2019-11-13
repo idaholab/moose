@@ -9,11 +9,12 @@
 
 #include "CrystalPlasticityUOBase.h"
 
-template <>
+defineLegacyParams(CrystalPlasticityUOBase);
+
 InputParameters
-validParams<CrystalPlasticityUOBase>()
+CrystalPlasticityUOBase::validParams()
 {
-  InputParameters params = validParams<DiscreteElementUserObject>();
+  InputParameters params = DiscreteElementUserObject::validParams();
   params.addRequiredParam<unsigned int>("variable_size", "The userobject's variable size.");
   params.addClassDescription("Crystal plasticity userobject system base class. Override the "
                              "virtual functions in your class");

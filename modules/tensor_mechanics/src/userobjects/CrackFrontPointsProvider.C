@@ -9,11 +9,12 @@
 
 #include "CrackFrontPointsProvider.h"
 
-template <>
+defineLegacyParams(CrackFrontPointsProvider);
+
 InputParameters
-validParams<CrackFrontPointsProvider>()
+CrackFrontPointsProvider::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Base class for a class that can provide a set of points along a "
                              "crack front. The virtual functions must be overridden by a derived "
                              "class to provide this functionality.");

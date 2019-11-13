@@ -25,6 +25,8 @@ InputParameters validParams<GBRelaxationStrainIncrement>();
 class GBRelaxationStrainIncrement : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   GBRelaxationStrainIncrement(const InputParameters & parameters);
 
 protected:
@@ -35,4 +37,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _gb_normal_tensor;
   MaterialProperty<RankTwoTensor> & _strain_increment;
 };
-

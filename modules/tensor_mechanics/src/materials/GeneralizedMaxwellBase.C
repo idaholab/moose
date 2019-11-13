@@ -9,11 +9,12 @@
 
 #include "GeneralizedMaxwellBase.h"
 
-template <>
+defineLegacyParams(GeneralizedMaxwellBase);
+
 InputParameters
-validParams<GeneralizedMaxwellBase>()
+GeneralizedMaxwellBase::validParams()
 {
-  InputParameters params = validParams<LinearViscoelasticityBase>();
+  InputParameters params = LinearViscoelasticityBase::validParams();
   return params;
 }
 

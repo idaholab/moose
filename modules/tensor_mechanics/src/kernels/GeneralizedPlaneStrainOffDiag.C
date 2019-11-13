@@ -21,11 +21,12 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainOffDiag);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainOffDiag);
+
 InputParameters
-validParams<GeneralizedPlaneStrainOffDiag>()
+GeneralizedPlaneStrainOffDiag::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Generalized Plane Strain kernel to provide contribution of the "
                              "out-of-plane strain to other kernels");
   params.addRequiredParam<std::vector<VariableName>>("displacements",

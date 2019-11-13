@@ -23,6 +23,8 @@ InputParameters validParams<ComputeCosseratIncrementalSmallStrain>();
 class ComputeCosseratIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeCosseratIncrementalSmallStrain(const InputParameters & parameters);
 
 protected:
@@ -54,4 +56,3 @@ protected:
   /// _curvature_increment = (curvature - _curvature_old)
   MaterialProperty<RankTwoTensor> & _curvature_increment;
 };
-

@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", IsotropicPowerLawHardeningStressUpdate);
 
-template <>
+defineLegacyParams(IsotropicPowerLawHardeningStressUpdate);
+
 InputParameters
-validParams<IsotropicPowerLawHardeningStressUpdate>()
+IsotropicPowerLawHardeningStressUpdate::validParams()
 {
-  InputParameters params = validParams<IsotropicPlasticityStressUpdate>();
+  InputParameters params = IsotropicPlasticityStressUpdate::validParams();
   params.addClassDescription("This class uses the discrete material in a radial return isotropic "
                              "plasticity power law hardening model, solving for the yield stress "
                              "as the intersection of the power law relation curve and Hooke's law. "

@@ -25,6 +25,8 @@ InputParameters validParams<ComputeAxisymmetric1DIncrementalStrain>();
 class ComputeAxisymmetric1DIncrementalStrain : public Compute1DIncrementalStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeAxisymmetric1DIncrementalStrain(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -64,4 +66,3 @@ protected:
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
 };
-

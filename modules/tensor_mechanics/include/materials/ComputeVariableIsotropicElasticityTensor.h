@@ -24,6 +24,8 @@ InputParameters validParams<ComputeVariableIsotropicElasticityTensor>();
 class ComputeVariableIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -58,4 +60,3 @@ protected:
   /// Vector of elastic constants to create the elasticity tensor (member to avoid memory churn)
   std::vector<Real> _isotropic_elastic_constants;
 };
-

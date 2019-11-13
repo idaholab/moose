@@ -11,16 +11,21 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(
-    ADCompute2DFiniteStrain,
-    ADComputeFiniteStrain,
-    params.addClassDescription(
-        "Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+defineADLegacyParams(ADCompute2DFiniteStrain);
 
-    MooseEnum outOfPlaneDirection("x y z", "z");
-    params.addParam<MooseEnum>("out_of_plane_direction",
-                               outOfPlaneDirection,
-                               "The direction of the out-of-plane strain."););
+template <ComputeStage compute_stage>
+InputParameters
+ADCompute2DFiniteStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeFiniteStrain<compute_stage>::validParams();
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCompute2DFiniteStrain<compute_stage>::ADCompute2DFiniteStrain(const InputParameters & parameters)

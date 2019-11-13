@@ -24,6 +24,8 @@ InputParameters validParams<ComputeExtraStressBase>();
 class ComputeExtraStressBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputeExtraStressBase(const InputParameters & parameters);
 
 protected:
@@ -35,4 +37,3 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _extra_stress;
 };
-

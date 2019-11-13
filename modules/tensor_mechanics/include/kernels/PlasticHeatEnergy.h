@@ -25,6 +25,8 @@ InputParameters validParams<PlasticHeatEnergy>();
 class PlasticHeatEnergy : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PlasticHeatEnergy(const InputParameters & parameters);
 
 protected:
@@ -50,4 +52,3 @@ protected:
   /// MOOSE variable number for the displacement variables
   std::vector<unsigned int> _disp_var;
 };
-

@@ -20,6 +20,8 @@ InputParameters validParams<AsymptoticExpansionHomogenizationKernel>();
 class AsymptoticExpansionHomogenizationKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   AsymptoticExpansionHomogenizationKernel(const InputParameters & parameters);
 
 protected:

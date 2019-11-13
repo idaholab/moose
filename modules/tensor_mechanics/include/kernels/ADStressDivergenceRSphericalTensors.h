@@ -27,6 +27,8 @@ template <ComputeStage compute_stage>
 class ADStressDivergenceRSphericalTensors : public ADStressDivergenceTensors<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADStressDivergenceRSphericalTensors(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
 
   usingStressDivergenceTensorsMembers;
 };
-

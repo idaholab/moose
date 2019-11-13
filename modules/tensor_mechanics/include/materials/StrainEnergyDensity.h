@@ -27,6 +27,8 @@ InputParameters validParams<StrainEnergyDensity>();
 class StrainEnergyDensity : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   StrainEnergyDensity(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;
@@ -54,4 +56,3 @@ protected:
   /// Current value of the strain increment for incremental models
   const MaterialProperty<RankTwoTensor> * _strain_increment;
 };
-

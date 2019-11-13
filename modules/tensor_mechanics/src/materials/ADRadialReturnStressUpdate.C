@@ -12,23 +12,28 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 
-defineADValidParams(
-    ADRadialReturnStressUpdate,
-    ADStressUpdateBase,
-    params.addClassDescription(
-        "Calculates the effective inelastic strain increment required to "
-        "return the isotropic stress state to a J2 yield surface.  This class "
-        "is intended to be a parent class for classes with specific "
-        "constitutive models.");
-    params += validParams<ADSingleVariableReturnMappingSolution<RESIDUAL>>();
-    params.addParam<Real>("max_inelastic_increment",
-                          1e-4,
-                          "The maximum inelastic strain increment allowed in a time step");
-    params.addRequiredParam<std::string>(
-        "effective_inelastic_strain_name",
-        "Name of the material property that stores the effective inelastic strain");
-    params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
-    params.addParamNamesToGroup("effective_inelastic_strain_name apply_strain", "Advanced"););
+defineADLegacyParams(ADRadialReturnStressUpdate);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADRadialReturnStressUpdate<compute_stage>::validParams()
+{
+  InputParameters params = ADStressUpdateBase<compute_stage>::validParams();
+  params.addClassDescription("Calculates the effective inelastic strain increment required to "
+                             "return the isotropic stress state to a J2 yield surface.  This class "
+                             "is intended to be a parent class for classes with specific "
+                             "constitutive models.");
+  params += ADSingleVariableReturnMappingSolution<RESIDUAL>::validParams();
+  params.addParam<Real>("max_inelastic_increment",
+                        1e-4,
+                        "The maximum inelastic strain increment allowed in a time step");
+  params.addRequiredParam<std::string>(
+      "effective_inelastic_strain_name",
+      "Name of the material property that stores the effective inelastic strain");
+  params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
+  params.addParamNamesToGroup("effective_inelastic_strain_name apply_strain", "Advanced");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADRadialReturnStressUpdate<compute_stage>::ADRadialReturnStressUpdate(

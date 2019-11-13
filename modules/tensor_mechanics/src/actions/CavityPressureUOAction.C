@@ -15,12 +15,13 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressureUOAction, "add_user_object");
 
-template <>
+defineLegacyParams(CavityPressureUOAction);
+
 InputParameters
-validParams<CavityPressureUOAction>()
+CavityPressureUOAction::validParams()
 {
-  InputParameters params = validParams<Action>();
-  params += validParams<CavityPressureUserObject>();
+  InputParameters params = Action::validParams();
+  params += CavityPressureUserObject::validParams();
 
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = EXEC_LINEAR;

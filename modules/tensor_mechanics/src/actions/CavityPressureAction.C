@@ -14,11 +14,12 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressureAction, "add_bc");
 
-template <>
+defineLegacyParams(CavityPressureAction);
+
 InputParameters
-validParams<CavityPressureAction>()
+CavityPressureAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<std::vector<VariableName>>("displacements",

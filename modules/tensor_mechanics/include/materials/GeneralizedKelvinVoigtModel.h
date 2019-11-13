@@ -25,6 +25,8 @@ InputParameters validParams<GeneralizedKelvinVoigtModel>();
 class GeneralizedKelvinVoigtModel : public GeneralizedKelvinVoigtBase
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedKelvinVoigtModel(const InputParameters & parameters);
 
 protected:
@@ -46,4 +48,3 @@ protected:
   /// The inverse of each subsequent spring elasticity tensor
   std::vector<RankFourTensor> _Si;
 };
-

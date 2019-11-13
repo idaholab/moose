@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeBeamResultants);
 
-template <>
+defineLegacyParams(ComputeBeamResultants);
+
 InputParameters
-validParams<ComputeBeamResultants>()
+ComputeBeamResultants::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute forces and moments using elasticity");
   return params;
 }

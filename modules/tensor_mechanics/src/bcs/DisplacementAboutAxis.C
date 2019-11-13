@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", DisplacementAboutAxis);
 
-template <>
+defineLegacyParams(DisplacementAboutAxis);
+
 InputParameters
-validParams<DisplacementAboutAxis>()
+DisplacementAboutAxis::validParams()
 {
-  InputParameters params = validParams<PresetNodalBC>();
+  InputParameters params = PresetNodalBC::validParams();
   params.addClassDescription("Implements a boundary condition that enforces rotational"
                              "displacement around an axis on a boundary");
   addDisplacementAboutAxisParams(params);

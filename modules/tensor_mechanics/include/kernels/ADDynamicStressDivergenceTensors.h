@@ -27,6 +27,8 @@ template <ComputeStage compute_stage>
 class ADDynamicStressDivergenceTensors : public ADStressDivergenceTensors<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADDynamicStressDivergenceTensors(const InputParameters & parameters);
 
 protected:

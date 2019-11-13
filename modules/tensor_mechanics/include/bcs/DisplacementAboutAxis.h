@@ -29,6 +29,8 @@ void addDisplacementAboutAxisParams(InputParameters & params);
 class DisplacementAboutAxis : public PresetNodalBC
 {
 public:
+  static InputParameters validParams();
+
   DisplacementAboutAxis(const InputParameters & parameters);
 
 protected:

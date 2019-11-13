@@ -12,22 +12,23 @@
 
 registerMooseObject("TensorMechanicsApp", StickyBC);
 
-template <>
+defineLegacyParams(StickyBC);
+
 InputParameters
-validParams<StickyBC>()
+StickyBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addParam<Real>(
+  InputParameters params = NodalBC::validParams();
+  params.addParam<Real>(
       "min_value",
       std::numeric_limits<Real>::lowest(),
       "If the old variable value <= min_value, the variable is fixed at its old value");
-  p.addParam<Real>(
+  params.addParam<Real>(
       "max_value",
       std::numeric_limits<Real>::max(),
       "If the old variable value >= max_value, the variable is fixed at its old value");
-  p.addClassDescription(
+  params.addClassDescription(
       "Imposes the boundary condition $u = u_{old}$ if $u_{old}$ exceeds the bounds provided");
-  return p;
+  return params;
 }
 
 StickyBC::StickyBC(const InputParameters & parameters)

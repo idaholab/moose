@@ -25,6 +25,8 @@ InputParameters validParams<HEVPInternalVarUOBase>();
 class HEVPInternalVarUOBase : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   HEVPInternalVarUOBase(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real, Real &) const = 0;
@@ -35,4 +37,3 @@ protected:
   const MaterialProperty<Real> & _intvar_rate;
   const MaterialProperty<Real> & _this_old;
 };
-

@@ -27,6 +27,8 @@ InputParameters validParams<GlobalStrain>();
 class GlobalStrain : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   GlobalStrain(const InputParameters & parameters);
 
   virtual void reinit(){};

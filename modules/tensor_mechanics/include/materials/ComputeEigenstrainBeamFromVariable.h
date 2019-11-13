@@ -23,6 +23,8 @@ InputParameters validParams<ComputeEigenstrainBeamFromVariable>();
 class ComputeEigenstrainBeamFromVariable : public ComputeEigenstrainBeamBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeEigenstrainBeamFromVariable(const InputParameters & parameters);
 
 protected:
@@ -40,4 +42,3 @@ protected:
   /// Rotational eigenstrain variable values
   std::vector<const VariableValue *> _rot;
 };
-

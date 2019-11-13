@@ -10,11 +10,12 @@
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
 
-template <>
+defineLegacyParams(ComputeElasticityTensorBase);
+
 InputParameters
-validParams<ComputeElasticityTensorBase>()
+ComputeElasticityTensorBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<FunctionName>(
       "elasticity_tensor_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity tensor.");

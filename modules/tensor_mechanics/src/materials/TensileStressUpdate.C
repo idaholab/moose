@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensileStressUpdate);
 
-template <>
+defineLegacyParams(TensileStressUpdate);
+
 InputParameters
-validParams<TensileStressUpdate>()
+TensileStressUpdate::validParams()
 {
-  InputParameters params = validParams<MultiParameterPlasticityStressUpdate>();
+  InputParameters params = MultiParameterPlasticityStressUpdate::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");

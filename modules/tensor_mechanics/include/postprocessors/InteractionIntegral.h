@@ -28,6 +28,8 @@ InputParameters validParams<InteractionIntegral>();
 class InteractionIntegral : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InteractionIntegral(const InputParameters & parameters);
 
   virtual Real getValue();
@@ -84,4 +86,3 @@ private:
 
   const SifMethod _sif_mode;
 };
-

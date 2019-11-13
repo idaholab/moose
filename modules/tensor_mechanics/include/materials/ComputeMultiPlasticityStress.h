@@ -30,6 +30,8 @@ InputParameters validParams<ComputeMultiPlasticityStress>();
 class ComputeMultiPlasticityStress : public ComputeStressBase, public MultiPlasticityDebugger
 {
 public:
+  static InputParameters validParams();
+
   ComputeMultiPlasticityStress(const InputParameters & parameters);
 
 protected:
@@ -591,4 +593,3 @@ protected:
 private:
   RankTwoTensor rot(const RankTwoTensor & tens);
 };
-

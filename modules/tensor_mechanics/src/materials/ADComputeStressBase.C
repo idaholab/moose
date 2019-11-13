@@ -11,18 +11,24 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-defineADValidParams(
-    ADComputeStressBase,
-    ADMaterial,
-    params.addParam<std::string>("base_name",
-                                 "Optional parameter that allows the user to define "
-                                 "multiple mechanics material systems on the same "
-                                 "block, i.e. for multiple phases");
-    params.suppressParameter<bool>("use_displaced_mesh");
-    params.addParam<std::vector<MaterialPropertyName>>(
-        "extra_stress_names",
-        std::vector<MaterialPropertyName>(),
-        "Material property names of rank two tensors to be added to the stress."));
+defineADLegacyParams(ADComputeStressBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeStressBase<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
+  params.suppressParameter<bool>("use_displaced_mesh");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "extra_stress_names",
+      std::vector<MaterialPropertyName>(),
+      "Material property names of rank two tensors to be added to the stress.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeStressBase<compute_stage>::ADComputeStressBase(const InputParameters & parameters)

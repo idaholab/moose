@@ -21,6 +21,8 @@ InputParameters validParams<ElasticEnergyAux>();
 class ElasticEnergyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElasticEnergyAux(const InputParameters & parameters);
   virtual ~ElasticEnergyAux() {}
 
@@ -32,4 +34,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
-
