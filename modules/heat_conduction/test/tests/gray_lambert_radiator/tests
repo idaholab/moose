@@ -114,4 +114,12 @@
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject'
     design = 'ViewFactorObjectSurfaceRadiation.md'
   [../]
+
+  [./gray_lambert_cavity_automatic_vf_3D]
+    type = CSVDiff
+    input = 'gray_lambert_cavity_automatic_vf_3D.i'
+    csvdiff = 'gray_lambert_cavity_automatic_vf_3D_out.csv'
+    requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject'
+    design = 'ViewFactorObjectSurfaceRadiation.md'
+  [../]
 []
