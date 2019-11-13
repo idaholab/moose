@@ -28,6 +28,13 @@ class NumericVector;
 template <>
 InputParameters validParams<RANFSNormalMechanicalContact>();
 
+struct MasterNodeInfo
+{
+  const Node * master_node;
+  std::pair<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
+      master_elems_and_sides;
+};
+
 class RANFSNormalMechanicalContact : public NodeFaceConstraint
 {
 public:
@@ -56,4 +63,9 @@ protected:
   std::unordered_map<dof_id_type, std::vector<const Elem *>> _node_to_master_elem_sequence;
   Real _lagrange_multiplier;
   PenetrationInfo * _pinfo;
+  std::unordered_map<dof_id_type, MasterNodeInfo> _ping_pong_slave_node_to_master_node;
+  Real _distance;
+  Real _normal_component;
+  bool _restrict_master_residual;
+  unsigned int _master_index;
 };
