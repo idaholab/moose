@@ -94,7 +94,7 @@ starting_point = .5
   petsc_options_value = '1e-5          svd'
   l_max_its = 30
   nl_max_its = 20
-  line_search = 'none'
+  line_search = 'ping_pong'
 []
 
 [Debug]

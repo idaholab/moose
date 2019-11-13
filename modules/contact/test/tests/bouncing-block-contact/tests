@@ -106,21 +106,37 @@
     cli_args = "Executioner/end_time=50 Postprocessors/active=''"
   []
   [reduced_active_set]
-    requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced active residual set scheme in conjunction with a node-face geometric discretization of the contact surface and be'
-    [frictionless-nodal-reduced-active-set]
+    requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced active nonlinear function set scheme (RANFS) in conjunction with a node-face geometric discretization. The RANFS scheme shall be'
+    [ranfs-project-svd]
       type = 'Exodiff'
       input = 'frictionless-nodal-reduced-active-set.i'
-      exodiff = 'frictionless-nodal-reduced-active-set_exo.e'
+      exodiff = 'ranfs-project-svd.e'
       absent_out = '[1-9]+[0-9]* of 16 singular values'
       expect_out = '0 of 16 singular values'
-      detail = 'nonsingular and'
+      detail = 'nonsingular both with bounds projection and'
+      cli_args = 'Outputs/file_base=ranfs-project-svd'
     []
-    [frictionless-nodal-reduced-active-set-amg]
+    [ranfs-dont-project-svd]
       type = 'Exodiff'
       input = 'frictionless-nodal-reduced-active-set.i'
-      exodiff = 'reduced-active-set-amg.e'
-      detail = 'solvable with amg'
-      cli_args = 'Outputs/file_base=reduced-active-set-amg -pc_type hypre -pc_hypre_type boomeramg'
+      exodiff = 'ranfs-dont-project-svd.e'
+      detail = 'without bounds projection and be'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none'
+    []
+    [ranfs-project-amg]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-project-amg.e'
+      detail = 'solvable with amg both with bounds projection'
+      cli_args = 'Outputs/file_base=ranfs-project-amg -pc_type hypre -pc_hypre_type boomeramg'
+      expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+    []
+    [ranfs-dont-project-amg]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-dont-project-amg.e'
+      detail = 'and without bounds projection'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg'
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
     []
   []

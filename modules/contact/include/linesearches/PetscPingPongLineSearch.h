@@ -18,9 +18,16 @@
 
 #include "LineSearch.h"
 
+#include <map>
+
 using namespace libMesh;
 
 class PetscPingPongLineSearch;
+class GeometricSearchData;
+class PenetrationLocator;
+class NonlinearSystemBase;
+class DisplacedProblem;
+
 namespace libMesh
 {
 template <typename>
@@ -38,15 +45,16 @@ class PetscPingPongLineSearch : public LineSearch
 public:
   PetscPingPongLineSearch(const InputParameters & parameters);
 
+  void initialSetup() override;
   virtual void lineSearch() override;
-  void timestepSetup() override;
 
 protected:
+  NonlinearSystemBase & _nl;
   PetscNonlinearSolver<Real> * _solver;
-  Real _lambda;
-  Real _fnorm_older;
-  Real _fnorm_old;
-  Real _ping_pong_tol;
+  DisplacedProblem * _displaced_problem;
+  const GeometricSearchData * _geometric_search_data;
+  const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> *
+      _pentration_locators;
 };
 
 #endif // PETSC_VERSION_LESS_THAN(3, 3, 0)

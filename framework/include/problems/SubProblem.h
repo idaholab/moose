@@ -36,6 +36,7 @@ typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -641,6 +642,8 @@ public:
    * Method for reading wehther we have any ad objects
    */
   bool haveADObjects() const { return _have_ad_objects; }
+
+  virtual LineSearch * getLineSearch() = 0;
 
 protected:
   /**

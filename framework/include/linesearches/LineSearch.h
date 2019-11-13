@@ -40,6 +40,7 @@ public:
   virtual void lineSearch() { mooseError("You must implement a line-search method."); }
 
   virtual void timestepSetup() {}
+  virtual void initialSetup() {}
 
 protected:
   /// Reference to the finite element problem

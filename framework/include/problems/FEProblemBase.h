@@ -541,7 +541,7 @@ public:
   /**
    * getter for the MOOSE line search
    */
-  std::shared_ptr<LineSearch> getLineSearch() { return _line_search; }
+  LineSearch * getLineSearch() override { return _line_search.get(); }
 
   /**
    * The following functions will enable MOOSE to have the capability to import distributions

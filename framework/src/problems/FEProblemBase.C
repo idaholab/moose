@@ -1014,6 +1014,9 @@ FEProblemBase::initialSetup()
       _assembly[tid]->initNonlocalCoupling();
   }
 
+  if (_line_search)
+    _line_search->initialSetup();
+
   _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
