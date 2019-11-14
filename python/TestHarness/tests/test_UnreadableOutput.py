@@ -13,7 +13,7 @@ from TestHarnessTestCase import TestHarnessTestCase
 class TestHarnessTester(TestHarnessTestCase):
     def testUnreadableOutput(self):
         """
-        Test for bad output supplied be executed commands
+        Test for bad output supplied by executed commands
         """
 
         with self.assertRaises(subprocess.CalledProcessError) as cm:
