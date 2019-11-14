@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174'
+  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174 #9668'
   design = 'PolycrystalICs.md'
 
   [RampIC]
@@ -169,6 +169,14 @@
       exodiff = 'TricrystalTripleJunctionIC_out.e'
 
       detail = 'smooth interface in a triple junction.'
+    []
+
+    [polycrystal_BndsCalcIC]
+      type = 'Exodiff'
+      input = 'polycrystal_BndsCalcIC.i'
+      exodiff = 'polycrystal_BndsCalcIC_out.e'
+
+      detail = 'polycrystal structure with IC specifying the GB locations '
     []
   []
 
