@@ -140,4 +140,21 @@
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
     []
   []
+  [tied_node]
+    requirement = 'Using a RANFS scheme with Lagrange multipliers corresponding to equality constraints the system shall be able to '
+    [physics]
+      type = 'Exodiff'
+      input = tied-nodes.i
+      exodiff = 'tied-nodes_exo.e'
+      absent_out = '[1-9]+[0-9]* of 16 singular values'
+      expect_out = '0 of 16 singular values'
+      detail = 'tie nodes together and'
+    []
+    [jac]
+      type = 'PetscJacobianTester'
+      input = tied-nodes.i
+      cli_args = "Outputs/active=''"
+      detail = 'have a perfect Jacobian'
+    []
+  []
 []
