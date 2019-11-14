@@ -12,7 +12,8 @@ sudo -E zypper install gcc-c++ \
   freeglut-devel \
   tcl-devel \
   m4 \
-  git
+  git \
+  xz-devel
 ```
 
 Download and install one our redistributable packages according to your version of OpenSUSE.

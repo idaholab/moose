@@ -51,3 +51,26 @@ ConstantViewFactorSurfaceRadiation::setViewFactors()
                  " entries.");
   return vf;
 }
+
+void
+ConstantViewFactorSurfaceRadiation::initialize()
+{
+  GrayLambertSurfaceRadiationBase::initialize();
+
+  // check row-sum and normalize if necessary
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    Real sum = 0;
+    for (auto & v : _view_factors[i])
+      sum += v;
+
+    // an error of 5% is acceptable, but more indicates an error in the
+    // problem setup
+    if (std::abs(sum - 1) > 0.05)
+      mooseError("view_factors row ", i, " sums to ", sum);
+
+    // correct view factors
+    for (auto & v : _view_factors[i])
+      v /= sum;
+  }
+}

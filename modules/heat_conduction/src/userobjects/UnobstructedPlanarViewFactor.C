@@ -9,6 +9,7 @@
 
 #include "UnobstructedPlanarViewFactor.h"
 #include "Assembly.h"
+#include "MathUtils.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -42,6 +43,19 @@ UnobstructedPlanarViewFactor::UnobstructedPlanarViewFactor(const InputParameters
     _current_remote_normals(nullptr)
 {
   _mesh.errorIfDistributedMesh("UnobstructedPlanarViewFactor");
+
+  if (_mesh.dimension() == 1)
+    mooseError("View factor calculations for 1D geometry makes no sense");
+  else if (_mesh.dimension() == 2)
+  {
+    _exponent = 1;
+    _divisor = 2;
+  }
+  else
+  {
+    _exponent = 2;
+    _divisor = libMesh::pi;
+  }
 }
 
 void
@@ -83,7 +97,7 @@ UnobstructedPlanarViewFactor::execute()
           Real cos2 = r2r * (*_current_remote_normals)[r_qp] / distance;
 
           vf += _JxW[qp] * _coord[qp] * (*_current_remote_JxW)[r_qp] * _current_remote_coord[r_qp] *
-                std::abs(cos1) * std::abs(cos2) / distance / distance;
+                std::abs(cos1) * std::abs(cos2) / MathUtils::pow(distance, _exponent);
         }
       }
     }
@@ -116,7 +130,7 @@ UnobstructedPlanarViewFactor::finalizeViewFactor()
   // divide view_factor Fij by Ai and pi
   for (unsigned int i = 0; i < _n_sides; ++i)
     for (auto & vf : _view_factors[i])
-      vf /= (_areas[i] * libMesh::pi);
+      vf /= (_areas[i] * _divisor);
 }
 
 void

@@ -1,12 +1,15 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 3
   xmin = 0
   xmax = 1
   ymin = 0
   ymax = 2
-  nx = 20
-  ny = 20
+  zmin = 0
+  zmax = 3
+  nx = 4
+  ny = 4
+  nz = 4
 []
 
 [Problem]
@@ -22,18 +25,18 @@
 [UserObjects]
   [./gray_lambert]
     type = ViewFactorObjectSurfaceRadiation
-    boundary = 'bottom top left right'
+    boundary = 'bottom top left right front back'
     fixed_temperature_boundary = 'bottom top'
     fixed_boundary_temperatures = '550 300'
-    adiabatic_boundary = 'right left'
-    emissivity = '1 0.75 0.75 0.75'
+    adiabatic_boundary = 'right left front back'
+    emissivity = '1 0.75 0.75 0.75 0.75 0.75'
     temperature = temperature
     view_factor_object_name = view_factor
   [../]
 
   [./view_factor]
     type = UnobstructedPlanarViewFactor
-    boundary = 'left right bottom top'
+    boundary = 'bottom top left right front back'
     normalize_view_factor = true
     execute_on = 'INITIAL'
   [../]
@@ -66,6 +69,20 @@
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY
     boundary = top
+  [../]
+
+  [./brightness_front]
+    type = GrayLambertSurfaceRadiationPP
+    surface_radiation_object_name = gray_lambert
+    return_type = RADIOSITY
+    boundary = front
+  [../]
+
+  [./brightness_back]
+    type = GrayLambertSurfaceRadiationPP
+    surface_radiation_object_name = gray_lambert
+    return_type = RADIOSITY
+    boundary = back
   [../]
 []
 

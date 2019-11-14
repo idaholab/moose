@@ -29,6 +29,8 @@ public:
 
   ConstantViewFactorSurfaceRadiation(const InputParameters & parameters);
 
+  virtual void initialize() override;
+
 protected:
   virtual std::vector<std::vector<Real>> setViewFactors() override;
 };
