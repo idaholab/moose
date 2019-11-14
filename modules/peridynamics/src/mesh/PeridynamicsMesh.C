@@ -123,7 +123,9 @@ PeridynamicsMesh::safeClone() const
 void
 PeridynamicsMesh::buildMesh()
 {
-  _mesh = _app.getMeshGeneratorMesh();
+  if (!hasMeshBase())
+    _mesh = _app.getMeshGeneratorMesh();
+
   _mesh->prepare_for_use(/*skip_renumber =*/true);
 }
 

@@ -12,20 +12,19 @@
 #include "PresetNodalBC.h"
 #include "PeridynamicsMesh.h"
 
-class IntactBondsPresetBCPD;
+class RBMPresetOldValuePD;
 
 template <>
-InputParameters validParams<IntactBondsPresetBCPD>();
+InputParameters validParams<RBMPresetOldValuePD>();
 
 /**
- * Class to selectively apply a preset Dirichlet BC based on the number of intact
- * bonds associated with each material point. Used to stabilize nodes without
- * a sufficient number of connections to other material points.
+ * Class to apply preset BC of old variable solution based on the singularity of nodal shape tensor.
+ * Used to fix nodes with rigid body motion.
  */
-class IntactBondsPresetBCPD : public PresetNodalBC
+class RBMPresetOldValuePD : public PresetNodalBC
 {
 public:
-  IntactBondsPresetBCPD(const InputParameters & parameters);
+  RBMPresetOldValuePD(const InputParameters & parameters);
 
   virtual Real computeQpValue() override;
   virtual bool shouldApply() override;
@@ -37,9 +36,6 @@ protected:
   /// Value of the unknown variable this BC is acting on at last time step
   const VariableValue & _u_old;
 
-  /// Bond_status variable
+  /// AuxVariable for number of intact bonds associated with each material point
   MooseVariable * _bond_status_var;
-
-  /// Maximum number of intact bonds connected a node for this BC to be active
-  const unsigned int _max_intact_bonds;
 };
