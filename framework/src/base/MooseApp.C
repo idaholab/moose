@@ -331,10 +331,10 @@ MooseApp::MooseApp(InputParameters parameters)
 {
 
 #ifdef HAVE_GPERFTOOLS
-  if (std::getenv("MOOSE_PARALLEL_PROFILE"))
+  if (std::getenv("MOOSE_PROFILE_BASE"))
   {
     static std::string profile_file =
-        std::getenv("MOOSE_PARALLEL_PROFILE") + std::to_string(_comm->rank()) + ".prof";
+        std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
     _profiling = true;
     ProfilerStart(profile_file.c_str());
   }

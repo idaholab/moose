@@ -9,7 +9,7 @@ applications on Mac systems.
 
 ## Google Performance Tools (Linux, Mac)
 
-Moose has support for profiling with
+MOOSE has support for profiling with
 [gperftools](https://github.com/gperftools/gperftools) built-in.  To use it,
 you must compile MOOSE with profiling support enabled.  If compiling with the
 latest MOOSE environment package, your applications will already be compiled
@@ -35,24 +35,17 @@ installation as well.
 
 To profile your application, you will need to run a simulation of suitable
 duration - generally at least a few seconds long - while setting the
-CPUPROFILE or MOOSE_PARALLEL_PROFILE environment variables (each for serial or
-parallel profiling respectively) to a file name used to store the profiling
-data.  Performing a serial profiling run might look something like this:
+MOOSE_PROFILE_BASE environment variable to a file base used to store the profiling
+data.  Performing profiling run might look something like this:
 
 ```
-CPUPROFILE=run1.prof ./your-app_oprof -i input_file.i 
+MOOSE_PROFILE_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
 ```
 
-A parallel one might look like this:
-
-```
-MOOSE_PARALLEL_PROFILE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
-```
-
-The parallel case uses the filename you pass and appends a suffix of the form
+This will use the filename base you pass and append a suffix of the form
 `[proc#].prof` to generate an independent profiling data file for each MPI
 rank/process. The above example would generate files `run1_0.prof`,
-`run1_1.prof`, `run1_2.prof`, ..., `run1_32.prof`.
+`run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`.
 
 ### Analyzing Profile Data
 
@@ -81,6 +74,7 @@ interactive mode.
 `top [N]` shows the top N functions that used the most "flat" time:
 
 ```
+pprof run1.prof
 (pprof) top 12
 Showing nodes accounting for 2030ms, 31.92% of 6360ms total
 Dropped 362 nodes (cum <= 31.80ms)
@@ -109,6 +103,7 @@ useful ways to look at the profiling data. The output is printed to screen
 by default - so you will want to redirect it to a file:
 
 ```
+pprof run1.prof
 (pprof) png > run1.png
 ```
 
@@ -143,6 +138,8 @@ A few notes about data represented in the image:
 with both "flat" and "cumulative" time spent on each line:
 
 ```
+pprof run1.prof
+(pprof) list Assembly::reinit
 ROUTINE ======================== Assembly::reinit in /home/calsrw/animals/moose/framework/src/base/Assembly.C
      180ms      5.47s (flat, cum) 21.65% of Total
          .          .   1627:  _current_physical_points = physical_points;
