@@ -366,6 +366,7 @@ MooseADWrapper<DenseVector<Real>>::dn(bool)
 void
 MooseADWrapper<DenseVector<Real>>::copyDualNumberToValue()
 {
+  _val.resize(_dual_number->size());
   for (std::size_t i = 0; i < _dual_number->size(); ++i)
     _val(i) = (*_dual_number)(i).value();
 }
@@ -428,6 +429,7 @@ MooseADWrapper<DenseMatrix<Real>>::dn(bool)
 void
 MooseADWrapper<DenseMatrix<Real>>::copyDualNumberToValue()
 {
+  _val.resize(_dual_number->m(), _dual_number->n());
   for (std::size_t i = 0; i < _dual_number->m(); ++i)
     for (std::size_t j = 0; j < _dual_number->n(); ++j)
       _val(i, j) = (*_dual_number)(i, j).value();
@@ -579,9 +581,13 @@ MooseADWrapper<std::vector<DenseVector<Real>>>::dn(bool)
 void
 MooseADWrapper<std::vector<DenseVector<Real>>>::copyDualNumberToValue()
 {
+  _val.resize(_dual_number->size());
   for (std::size_t i = 0; i < _dual_number->size(); ++i)
+  {
+    _val[i].resize((*_dual_number)[i].size());
     for (std::size_t j = 0; j < (*_dual_number)[i].size(); ++j)
       _val[i](j) = (*_dual_number)[i](j).value();
+  }
 }
 
 void
