@@ -1,22 +1,22 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 40
+  nx = 20
+  ny = 20
   nz = 0
   xmin = 0
-  xmax = 1000
+  xmax = 100
   ymin = 0
-  ymax = 1000
+  ymax = 100
   zmin = 0
   zmax = 0
   elem_type = QUAD4
 []
 
 [GlobalParams]
-  op_num = 6
+  op_num = 3
   var_name_base = gr
-  int_width = 60 # int_width > 0 is required for initial adaptivity to work based on Bnds
+  int_width = 5 # int_width > 0 is required for initial adaptivity to work based on Bnds
 []
 
 [Variables]
@@ -28,7 +28,7 @@
   [./voronoi]
     type = PolycrystalVoronoi
     rand_seed = 105
-    grain_num = 6
+    grain_num = 3
   [../]
 []
 
@@ -76,7 +76,7 @@
   [./Copper]
     type = GBEvolution
     T = 500 # K
-    wGB = 60 # nm
+    wGB = 6 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
@@ -84,7 +84,6 @@
 []
 
 [Postprocessors]
-  active = ''
   [./ngrains]
     type = FeatureFloodCount
     variable = bnds
@@ -93,7 +92,6 @@
 []
 
 [Preconditioning]
-  active = ''
   [./SMP]
     type = SMP
     full = true
@@ -114,24 +112,30 @@
   nl_rel_tol = 1.0e-9
   start_time = 0.0
   num_steps = 2
-  dt = 80.0
+  dt = 1.0
 []
 
 [Adaptivity]
- marker = bound_adapt
- max_h_level = 2
- initial_marker = bound_adapt
- initial_steps = 1
+  initial_steps = 1
+  max_h_level = 1
+  marker = err_bnds
  [./Markers]
-   [./bound_adapt]
-     type = ValueRangeMarker
-     lower_bound = 0.1
-     upper_bound = 0.9
-     variable = bnds
-   [../]
- [../]
+    [./err_bnds]
+      type = ErrorFractionMarker
+      coarsen = 0.3
+      refine = 0.9
+      indicator = ind_bnds
+    [../]
+  [../]
+  [./Indicators]
+     [./ind_bnds]
+       type = GradientJumpIndicator
+       variable = bnds
+    [../]
+  [../]
 []
 
 [Outputs]
   exodus = true
+  perf_graph = true
 []

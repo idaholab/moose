@@ -14,7 +14,7 @@ namespace BndsCalculator
 
 template <typename T>
 Real
-computeBndsVariable(std::vector<T *> & var, unsigned int qp)
+computeBndsVariable(const std::vector<T *> & var, unsigned int qp)
 {
   Real value = 0.0;
 
