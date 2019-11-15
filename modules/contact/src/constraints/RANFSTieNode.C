@@ -12,6 +12,7 @@
 #include "PenetrationInfo.h"
 #include "SystemBase.h"
 #include "Assembly.h"
+#include "NearestNodeLocator.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/petsc_matrix.h"

@@ -91,8 +91,8 @@ offset = 1e-2
   dtmin = 5
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err -mat_fd_coloring_err'
+  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5          1e-5'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
@@ -111,7 +111,7 @@ offset = 1e-2
 
 [Preconditioning]
   [./smp]
-    type = SMP
+    type = FDP
     full = true
   [../]
 []

@@ -135,9 +135,15 @@
       type = 'Exodiff'
       input = 'frictionless-nodal-reduced-active-set.i'
       exodiff = 'ranfs-dont-project-amg.e'
-      detail = 'and without bounds projection'
+      detail = 'and without bounds projection.'
       cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg'
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+    []
+    [full-bouncing-block]
+      type = 'Exodiff'
+      input = 'bouncing-block-ranfs.i'
+      exodiff = 'bouncing-block-ranfs_exo.e'
+      detail = 'The system shall be able to detect when a slave node is ping-ponging back and forth between different master faces and consequently tie the locations of the slave and corresponding master node using Lagrange Multipliers corresponding to equality constraints, e.g. more RANFS'
     []
   []
   [tied_node]
