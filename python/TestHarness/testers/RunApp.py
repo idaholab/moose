@@ -252,6 +252,8 @@ class RunApp(Tester):
             elif self.exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
             elif self.exit_code != 0 and specs['should_crash'] == False:
+                # Let's look at the error code to see if we can perhaps further split this out later with a post exam
+                output += "\n\n" + str(self.exit_code)
                 reason = 'CRASH'
             # Valgrind runs
             elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:

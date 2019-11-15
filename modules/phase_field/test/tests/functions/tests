@@ -1,0 +1,10 @@
+[Tests]
+  [./fourier_noise]
+    type = 'Exodiff'
+    input = 'fourier_noise.i'
+    exodiff = 'fourier_noise_out.e'
+    issues = '#13316'
+    design = '/FourierNoise.md'
+    requirement = 'A function that returns a new periodic random field with a lower wavelength cut-off shall be provided.'
+  [../]
+[]
