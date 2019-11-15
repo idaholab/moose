@@ -216,4 +216,7 @@ namespace THM
 {
 template <>
 FlowChannelBase::EConvHeatTransGeom stringToEnum(const std::string & s);
+
+template <>
+FlowChannelBase::EPipeType stringToEnum(const std::string & s);
 }
