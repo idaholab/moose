@@ -28,7 +28,7 @@
     abs_zero = 1e-09
     requirement = "The thermal contact system shall compute the heat transfer across a offsetted gap between a moving "
                   "block and a larger convex block."
-    design = "/materials/GapConductance.md"
-    issues = "#14089"
+    design = "PenetrationAux.md"
+    issues = '#14089'
   [../]
 []

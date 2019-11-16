@@ -40,9 +40,9 @@ PenetrationAux::validParams()
   params.addParam<std::string>("normal_smoothing_method",
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<VariableName>("slave_gap_offset", "offset to the gap distance from slave side");
-  params.addParam<VariableName>("mapped_master_gap_offset",
-                                "offset to the gap distance mapped from master side");
+  params.addCoupledVar("slave_gap_offset", "offset to the gap distance from slave side");
+  params.addCoupledVar("mapped_master_gap_offset",
+                       "offset to the gap distance mapped from master side");
 
   params.set<bool>("use_displaced_mesh") = true;
 
@@ -79,17 +79,11 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters)
                      parameters.get<BoundaryName>("paired_boundary"),
                      boundaryNames()[0],
                      Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-    _has_slave_gap_offset(isParamValid("slave_gap_offset")),
-    _slave_gap_offset_var(
-        _has_slave_gap_offset
-            ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("slave_gap_offset"))
-            : NULL),
-    _has_mapped_master_gap_offset(isParamValid("mapped_master_gap_offset")),
+    _has_slave_gap_offset(isCoupled("slave_gap_offset")),
+    _slave_gap_offset_var(_has_slave_gap_offset ? getVar("slave_gap_offset", 0) : nullptr),
+    _has_mapped_master_gap_offset(isCoupled("mapped_master_gap_offset")),
     _mapped_master_gap_offset_var(
-        _has_mapped_master_gap_offset
-            ? &_subproblem.getStandardVariable(_tid,
-                                               getParam<VariableName>("mapped_master_gap_offset"))
-            : NULL)
+        _has_mapped_master_gap_offset ? getVar("mapped_master_gap_offset", 0) : nullptr)
 {
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));

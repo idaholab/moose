@@ -9,13 +9,6 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 [AuxVariables]
   [./penetration]
   [../]
@@ -42,10 +35,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -81,6 +74,8 @@
     variable = penetration
     boundary = 3
     paired_boundary = 2
+    slave_gap_offset = slave_gap_offset
+    mapped_master_gap_offset = mapped_master_gap_offset
   [../]
   [./master_gap_offset]
     type = ConstantAux
@@ -132,20 +127,20 @@
 
 [Materials]
   [./left]
-    type = LinearIsotropicMaterial
+    type = ComputeIsotropicElasticityTensor
     block = 1
-    disp_y = disp_y
-    disp_x = disp_x
     poissons_ratio = 0.3
     youngs_modulus = 1e7
   [../]
   [./right]
-    type = LinearIsotropicMaterial
+    type = ComputeIsotropicElasticityTensor
     block = 2
-    disp_y = disp_y
-    disp_x = disp_x
     poissons_ratio = 0.3
     youngs_modulus = 1e6
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 

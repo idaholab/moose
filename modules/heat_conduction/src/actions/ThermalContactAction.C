@@ -196,10 +196,11 @@ ThermalContactAction::addAuxKernels()
         {"tangential_tolerance", "normal_smoothing_distance", "normal_smoothing_method", "order"});
     params.set<AuxVariableName>("variable") = _penetration_var_name;
     if (isParamValid("slave_gap_offset"))
-      params.set<VariableName>("slave_gap_offset") = getParam<VariableName>("slave_gap_offset");
+      params.set<std::vector<VariableName>>("slave_gap_offset") = {
+          getParam<VariableName>("slave_gap_offset")};
     if (isParamValid("mapped_master_gap_offset"))
-      params.set<VariableName>("mapped_master_gap_offset") =
-          getParam<VariableName>("mapped_master_gap_offset");
+      params.set<std::vector<VariableName>>("mapped_master_gap_offset") = {
+          getParam<VariableName>("mapped_master_gap_offset")};
     params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
     params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name};
     params.set<BoundaryName>("paired_boundary") = _primary_name;

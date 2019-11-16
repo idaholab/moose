@@ -54,9 +54,9 @@ MechanicalContactConstraint::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
-  params.addParam<VariableName>("slave_gap_offset", "offset to the gap distance from slave side");
-  params.addParam<VariableName>("mapped_master_gap_offset",
-                                "offset to the gap distance mapped from master side");
+  params.addCoupledVar("slave_gap_offset", "offset to the gap distance from slave side");
+  params.addCoupledVar("mapped_master_gap_offset",
+                       "offset to the gap distance mapped from master side");
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -140,19 +140,13 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
     _var_objects(3, nullptr),
-    _has_slave_gap_offset(isParamValid("slave_gap_offset")),
-    _slave_gap_offset_var(
-        _has_slave_gap_offset
-            ? &_fe_problem.getStandardVariable(_tid, getParam<VariableName>("slave_gap_offset"))
-            : NULL),
-    _has_mapped_master_gap_offset(isParamValid("mapped_master_gap_offset")),
+    _has_slave_gap_offset(isCoupled("slave_gap_offset")),
+    _slave_gap_offset_var(_has_slave_gap_offset ? getVar("slave_gap_offset", 0) : nullptr),
+    _has_mapped_master_gap_offset(isCoupled("mapped_master_gap_offset")),
     _mapped_master_gap_offset_var(
-        _has_mapped_master_gap_offset
-            ? &_fe_problem.getStandardVariable(_tid,
-                                               getParam<VariableName>("mapped_master_gap_offset"))
-            : NULL),
+        _has_mapped_master_gap_offset ? getVar("mapped_master_gap_offset", 0) : nullptr),
     _nodal_area_var(getVar("nodal_area", 0)),
-    _aux_system(_fe_problem.getAuxiliarySystem()),
+    _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
     _primary_secondary_jacobian(getParam<bool>("primary_secondary_jacobian")),
     _connected_secondary_nodes_jacobian(getParam<bool>("connected_secondary_nodes_jacobian")),
