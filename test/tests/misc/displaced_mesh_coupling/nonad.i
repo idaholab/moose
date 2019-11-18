@@ -35,6 +35,18 @@
     value = 1.0e-3
     use_displaced_mesh = true
   [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  [../]
+  [./lright]
+    type = DirichletBC
+    variable = v
+    boundary = right
+    value = 1
+  [../]
 []
 
 [Preconditioning]
@@ -46,4 +58,9 @@
 
 [Executioner]
   type = Transient
+  num_steps = 1
+[]
+
+[Outputs]
+  exodus = true
 []
