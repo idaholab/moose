@@ -1,0 +1,6 @@
+[Tests]
+  [./non_unicode]
+    type = RunCommand
+    command = "cat gold/good_exodiff_out.e"
+  [../]
+[]
