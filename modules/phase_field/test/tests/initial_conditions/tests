@@ -170,7 +170,23 @@
 
       detail = 'smooth interface in a triple junction.'
     []
+
   []
+
+  [GB_adaptivity]
+    requirement = 'The system shall support initial adaptivity based on GB locations:'
+    issues = '#9668'
+
+    [polycrystal_BndsCalcIC]
+      type = 'Exodiff'
+      input = 'polycrystal_BndsCalcIC.i'
+      exodiff = 'polycrystal_BndsCalcIC_out.e polycrystal_BndsCalcIC_out.e-s002'
+
+      detail = 'polycrystal structure with IC specifying the GB locations '
+    []
+
+  []
+
 
   [circles]
     requirement = "The system shall support phase-field initial conditions consisting of circle "
