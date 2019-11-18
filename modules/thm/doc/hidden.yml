@@ -301,9 +301,6 @@
 - /ScalarKernels/MomentumBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
 
-- /Stabilizations
-- /Stabilizations/AddStabilizationSettingsAction
-
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
@@ -317,7 +314,6 @@
 - /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
 - /UserObjects/JunctionStagnationEnthalpyUserObject
-- /UserObjects/StabilizationSettings
 - /UserObjects/WaveSpeeds7EqnNCGHLLC
 
 - /VectorPostprocessors/Sampler1DBase
