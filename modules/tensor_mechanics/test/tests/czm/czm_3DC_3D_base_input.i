@@ -1,32 +1,28 @@
 [Mesh]
   [./msh]
-    type = FileMeshGenerator
-    file = coh3D_3Blocks.e
+    type = GeneratedMeshGenerator
+    nx =2
+    ny =2
+    nz =2
+    dim = 3
+  []
+  [./subdomain_1]
+    type = SubdomainBoundingBoxGenerator
+    input = msh
+    bottom_left = '0 0 0'
+    block_id = 1
+    top_right = '0.5 1 1'
+  []
+  [./subdomain_2]
+    type = SubdomainBoundingBoxGenerator
+    input = subdomain_1
+    bottom_left = '0.5 0 0'
+    block_id = 2
+    top_right = '1 1 1'
   []
   [./breakmesh]
-    input = msh
+    input = subdomain_2
     type = BreakMeshByBlockGenerator
-  [../]
-  [./bottom_block_1]
-    input = breakmesh
-    type = SideSetsAroundSubdomainGenerator
-    block = '1'
-    new_boundary = 'bottom_1'
-    normal = '0 0 -1'
-  [../]
-  [./top_block_2]
-    input = bottom_block_1
-    type = SideSetsAroundSubdomainGenerator
-    block = '2'
-    new_boundary = 'top_2'
-    normal = '0 0 1'
-  [../]
-  [./top_block_3]
-    input = top_block_2
-    type = SideSetsAroundSubdomainGenerator
-    block = '3'
-    new_boundary = 'top_3'
-    normal = '0 0 1'
   [../]
 []
 
@@ -50,72 +46,51 @@
 []
 
 [BCs]
-  [./bottom_x]
+  [./left_x]
     type = DirichletBC
     variable = disp_x
-    boundary = bottom_1
+    boundary = left
     value = 0.0
   [../]
-  [./bottom_y]
+  [./left_y]
     type = DirichletBC
     variable = disp_y
-    boundary = bottom_1
+    boundary = left
     value = 0.0
   [../]
-  [./bottom_z]
+  [./left_z]
     type = DirichletBC
     variable = disp_z
-    boundary = bottom_1
+    boundary = left
     value = 0.0
   [../]
-  [./top2_x]
+  [./right_x]
     type = FunctionDirichletBC
     variable = disp_x
-    boundary = top_2
-    function = 2*t
+    boundary = right
   [../]
-  [./top2_y]
+  [./right_y]
     type = FunctionDirichletBC
     variable = disp_y
-    boundary = top_2
-    function = 1*t
+    boundary = right
   [../]
-  [./top2_z]
+  [./right_z]
     type = FunctionDirichletBC
     variable = disp_z
-    boundary = top_2
-    function = 3*t
-  [../]
-  [./top3_x]
-    type = FunctionDirichletBC
-    variable = disp_x
-    boundary = top_3
-    function = 2*t
-  [../]
-  [./top3_y]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top_3
-    function = 1*t
-  [../]
-  [./top3_z]
-    type = FunctionDirichletBC
-    variable = disp_z
-    boundary = top_3
-    function = 3*t
+    boundary = right
   [../]
 []
 
 [Materials]
   [./Elasticity_tensor]
     type = ComputeElasticityTensor
-    block = '1 2 3'
+    block = '1 2'
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = '1 2 3'
+    block = '1 2'
   [../]
   [./czm_3dc]
     type = SalehaniIrani3DCTraction
@@ -146,9 +121,9 @@
   l_tol = 1e-10
   l_max_its = 50
   start_time = 0.0
-  dt = 0.1
-  end_time = 1
-  dtmin = 0.1
+  dt = 0.2
+  end_time = 5
+  dtmin = 0.2
   line_search = none
 []
 
@@ -159,58 +134,58 @@
 []
 
 [Postprocessors]
-  [./sxx_3G]
-    type = ElementAverageValue
+  [./sxx]
+    type = SideAverageValue
     variable = stress_xx
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./syy_3G]
-    type = ElementAverageValue
+  [./syy]
+    type = SideAverageValue
     variable = stress_yy
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./szz_3G]
-    type = ElementAverageValue
+  [./szz]
+    type = SideAverageValue
     variable = stress_zz
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./syz_3G]
-    type = ElementAverageValue
+  [./syz]
+    type = SideAverageValue
     variable = stress_yz
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./sxz_3G]
-    type = ElementAverageValue
+  [./sxz]
+    type = SideAverageValue
     variable = stress_xz
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./sxy_3G]
-    type = ElementAverageValue
+  [./sxy]
+    type = SideAverageValue
     variable = stress_xy
     execute_on = 'initial timestep_end'
-    block = 3
+    boundary = 'interface'
   [../]
-  [./disp_top3_x]
+  [./disp_x]
     type = SideAverageValue
     variable = disp_x
     execute_on = 'initial timestep_end'
-    boundary = 'top_3'
+    boundary = 'right'
   [../]
-  [./disp_top3_y]
+  [./disp_y]
     type = SideAverageValue
     variable = disp_y
     execute_on = 'initial timestep_end'
-    boundary = 'top_3'
+    boundary = 'right'
   [../]
-  [./disp_top3_z]
+  [./disp_z]
     type = SideAverageValue
     variable = disp_z
     execute_on = 'initial timestep_end'
-    boundary = 'top_3'
+    boundary = 'right'
   [../]
 []
