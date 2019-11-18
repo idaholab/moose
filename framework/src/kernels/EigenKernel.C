@@ -149,7 +149,7 @@ EigenKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).phiSize();
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
     mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
     Real one_over_eigen = 1.0 / *_eigenvalue;

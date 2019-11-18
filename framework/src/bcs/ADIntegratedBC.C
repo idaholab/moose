@@ -185,7 +185,7 @@ void
 ADIntegratedBCTempl<T, compute_stage>::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   auto jvar_num = jvar.number();
-  auto phi_size = _sys.getVariable(_tid, jvar.number()).phiFaceSize();
+  auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
   if (jvar_num == _var.number())
     computeJacobian();

@@ -143,17 +143,14 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
 
   prepareMatrixTag(_assembly, _var.number(), jvar);
 
-  auto phi_size = _sys.getVariable(_tid, jvar).phiFaceSize();
+  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+  // on the displaced mesh
+  auto phi_size = _sys.getVariable(_tid, jvar).dofIndices().size();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
-      {
-        if (_var.number() == jvar)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-        else
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-      }
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 
   accumulateTaggedLocalMatrix();
 }

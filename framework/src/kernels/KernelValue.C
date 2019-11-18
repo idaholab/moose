@@ -90,7 +90,7 @@ KernelValue::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).phiSize();
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
     for (_j = 0; _j < phi_size; _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)

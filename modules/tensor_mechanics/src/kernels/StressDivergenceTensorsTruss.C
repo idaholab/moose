@@ -127,7 +127,7 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   {
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).phiSize();
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
     unsigned int coupled_component = 0;
     bool disp_coupled = false;
