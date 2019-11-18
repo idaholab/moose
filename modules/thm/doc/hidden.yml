@@ -299,7 +299,6 @@
 - /Postprocessors/SumPostprocessor
 
 - /ScalarKernels/EnergyBalanceScalarKernel
-- /ScalarKernels/EnergyScalarKernel
 - /ScalarKernels/JunctionMassBalanceScalarKernel
 - /ScalarKernels/MassBalanceScalarKernel
 - /ScalarKernels/MomentumBalanceScalarKernel
