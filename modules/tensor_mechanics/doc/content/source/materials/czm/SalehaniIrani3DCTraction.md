@@ -25,7 +25,7 @@ where $\lambda = e$ if $i==1$ or $\lambda = \sqrt{2 e}$ if $i == 2,3$. The param
 
 ## Examples
 
-!listing modules/tensor_mechanics/test/tests/czm/czm_3DC_load_complex.i block=Materials/czm_3dc
+!listing modules/tensor_mechanics/test/tests/czm/czm_3DC_3D_base_input.i block=Materials/czm_3dc
 !syntax parameters /Materials/SalehaniIrani3DCTraction
 !syntax inputs /Materials/SalehaniIrani3DCTraction
 !syntax children /Materials/SalehaniIrani3DCTraction
