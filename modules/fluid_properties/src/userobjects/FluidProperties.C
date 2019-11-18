@@ -9,6 +9,8 @@
 
 #include "FluidProperties.h"
 
+const Real FluidProperties::_R = 8.3144598;
+
 template <>
 InputParameters
 validParams<FluidProperties>()
@@ -24,7 +26,6 @@ validParams<FluidProperties>()
 
 FluidProperties::FluidProperties(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
-    _R(8.3144598),
     _T_c2k(273.15),
     _allow_imperfect_jacobians(getParam<bool>("allow_imperfect_jacobians"))
 {

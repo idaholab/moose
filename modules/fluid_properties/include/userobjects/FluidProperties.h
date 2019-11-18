@@ -38,9 +38,10 @@ public:
   virtual void threadJoin(const UserObject &) final {}
   virtual void subdomainSetup() final {}
 
-protected:
   /// Universal gas constant (J/mol/K)
-  const Real _R;
+  static const Real _R;
+
+protected:
   /// Conversion of temperature from Celsius to Kelvin
   const Real _T_c2k;
   /// Flag to set unimplemented Jacobian entries to zero
