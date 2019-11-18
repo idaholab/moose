@@ -182,9 +182,6 @@ delta_t_open = 0.1
   end_time = 1.0
   dt = 0.01
   abort_on_solve_fail = true
-
-  steady_state_detection = true
-  steady_state_tolerance = 1e-8
 []
 
 [Outputs]
