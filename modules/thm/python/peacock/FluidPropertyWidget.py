@@ -208,7 +208,7 @@ class FluidPropertyWidget(QWidget):
 
     @pyqtSlot()
     def _onReadStdErr(self):
-        self.process.setReadChannel(QProcess.StandardError)
+        self.process.setReadChannel(QProcess.Exception)
         while self.process.canReadLine():
             line = self.process.readLine().data().decode("utf-8").rstrip()
             if line == '*** ERROR ***':
@@ -239,7 +239,7 @@ class FluidPropertyWidget(QWidget):
 
     @pyqtSlot(QProcess.ProcessError)
     def _onError(self, err):
-        print "error:", err
+        print("error:", err)
 
 
 class FluidPropertyWidget1PhasePT(FluidPropertyWidget):
