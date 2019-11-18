@@ -29,7 +29,7 @@
       type = RunException
       input = from_sub.i
       cli_args = 'sub0:AuxVariables/active="" sub0:Outputs/exodus=false'
-      expect_err = "The variable 'aux' does not exist."
+      expect_err = "Cannot find variable aux for from_sub Transfer."
 
       detail = "in the sub-application when transferring form it and"
     []

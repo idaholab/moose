@@ -81,7 +81,7 @@ void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-    if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblemBase(i).es(), var_name))
+    if (_multi_app->hasLocalApp(i) && !_multi_app->appProblemBase(i).hasVariable(var_name))
       mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 

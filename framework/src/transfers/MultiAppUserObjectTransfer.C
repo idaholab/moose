@@ -33,7 +33,7 @@ defineLegacyParams(MultiAppUserObjectTransfer);
 InputParameters
 MultiAppUserObjectTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   //  MultiAppUserObjectTransfer does not need source variable since it query values from user
   //  objects
   params.suppressParameter<std::vector<VariableName>>("source_variable");
@@ -60,7 +60,7 @@ MultiAppUserObjectTransfer::validParams()
 }
 
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app")),
     _skip_bbox_check(getParam<bool>("skip_bounding_box_check"))
