@@ -51,9 +51,6 @@
   initial_T_vapor = 454
   initial_vel_vapor = 0
   initial_alpha_vapor = 0.5
-
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

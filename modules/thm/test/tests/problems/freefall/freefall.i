@@ -21,9 +21,6 @@ time = ${fparse num_steps * dt}
 
   scaling_factor_1phase = '1 1 1e-5'
 
-  spatial_discretization = RDG
-  rdg_slope_reconstruction = none
-
   closures = simple
 []
 

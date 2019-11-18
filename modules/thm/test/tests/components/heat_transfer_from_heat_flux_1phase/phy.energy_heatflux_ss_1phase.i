@@ -10,9 +10,6 @@
   gravity_vector = '0.0 0.0 0.0'
 
   closures = simple
-
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

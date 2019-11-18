@@ -12,6 +12,8 @@
   scaling_factor_temperature = 1e-2
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

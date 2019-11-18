@@ -20,6 +20,8 @@
   specific_interfacial_area_max_value = 10
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

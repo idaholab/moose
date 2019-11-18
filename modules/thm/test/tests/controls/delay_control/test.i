@@ -3,8 +3,6 @@
   initial_vel = 0
   initial_T = 300.
   closures = simple
-  spatial_discretization = rDG
-  rdg_slope_reconstruction = none
 []
 
 [Functions]

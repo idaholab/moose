@@ -11,6 +11,8 @@
   initial_p = 1e5
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [AuxVariables]

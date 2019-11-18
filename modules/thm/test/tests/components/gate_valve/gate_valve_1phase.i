@@ -23,9 +23,6 @@ delta_t_open = 0.1
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  spatial_discretization = RDG
-  rdg_slope_reconstruction = none
-
   closures = simple
   fp = fp
 
