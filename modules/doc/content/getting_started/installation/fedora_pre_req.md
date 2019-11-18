@@ -22,7 +22,7 @@ sudo -E dnf install gcc \
 
 Download and install one our redistributable packages according to your version of Fedora.
 
-- Fedora: [!package!name arch=fedora30]
+- Fedora 31: [!package!name arch=fedora31]
 
 Once downloaded, the package can be installed via the rpm utility:
 
