@@ -111,7 +111,6 @@
 - /Components/Junction
 - /Components/JunctionBase
 - /Components/JunctionWithLossesBase
-- /Components/OldJunction
 - /Components/Outlet1Phase
 - /Components/Outlet2Phase
 - /Components/PeriodicJunction
@@ -130,8 +129,6 @@
 - /Constraints/JunctionMomentumConstraint
 - /Constraints/MassBalanceConstraint
 - /Constraints/MassFreeConstraint
-- /Constraints/OldJunctionEnergyConstraint
-- /Constraints/OldJunctionMomentumConstraint
 
 - /Controls
 - /Controls/THMAddControlAction
@@ -307,7 +304,6 @@
 - /ScalarKernels/MassBalanceScalarKernel
 - /ScalarKernels/MomentumBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
-- /ScalarKernels/OldJunctionMassBalanceScalarKernel
 
 - /Stabilizations
 - /Stabilizations/AddStabilizationSettingsAction
