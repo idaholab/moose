@@ -16,6 +16,7 @@ If you use MOOSE for your publication, please cite the following:
 ```
 
 Another reference you may consider for a good demonstration problem:
+
 ```
 @article{gaston2015physics,
   title = {Physics-based multiscale coupling for full core nuclear reactor simulation},
