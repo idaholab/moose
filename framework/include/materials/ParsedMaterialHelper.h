@@ -33,6 +33,13 @@ public:
     USE_MOOSE_NAMES,
     USE_PARAM_NAMES
   };
+  enum VariableType
+  {
+    VARIABLE_VALUE,
+    VARIABLE_GRADIENT,
+    VARIABLE_SECOND,
+    MATERIAL_PROPERTY
+  };
 
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
@@ -43,16 +50,13 @@ public:
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
-                     const std::vector<std::string> & mat_prop_names,
-                     const std::vector<std::string> & tol_names,
-                     const std::vector<Real> & tol_values);
+                     const std::vector<std::string> & mat_prop_names);
 
 protected:
-  void getVariableNames(std::string & expression,
-                        const std::string & var_name,
-                        std::vector<std::string> & temp_arg_names,
-                        unsigned int index);
+  void setCoupledValues(const std::string & var_to_find, unsigned int component);
   void replaceDuplicates(std::string & expression, const std::string & to_replace);
+  void setMaterialValues(const std::vector<std::string> & var_used, const std::string & var_value);
+  void addAllArgNames();
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
@@ -62,7 +66,7 @@ protected:
   // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
 
-  void getCoupledFuncParams(std::vector<Real> & _coupled_var_vals, unsigned int i);
+  Real getValue(unsigned int index);
 
   /// The undiffed free energy function parser object.
   ADFunctionPtr _func_F;
@@ -86,4 +90,11 @@ protected:
    * parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
+
+  /**
+   * Holds information for coupled variables. First is the variable type (i.e. VariableValue).
+   * Second is the location of the value in the vector _args, _grad_args, or _second_args.
+   * Third is the index or component of the value (only applies for gradient and second terms).
+   */
+  std::vector<std::tuple<VariableType, unsigned int, unsigned int>> variable_info;
 };

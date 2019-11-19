@@ -44,12 +44,12 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const InputParameters & parameters)
       free_energy(_c, _W, _a) = pow(2.0, 4.0) * _W * pow(_c - _a, 2) * pow(1 - _c - _a, 2);
       break;
     case 1: // 6th order
-      free_energy(_c, _W, _a) =
-          pow(2.0, 6.0) * _W * (2.0 * pow(_c, 6) - 6.0 * pow(_c, 5) +
-                                (3.0 * _a + 27.0 / 4.0 - 3.0 * _a * _a) * pow(_c, 4) +
-                                (-6.0 * _a - 7.0 / 2.0 + 6.0 * _a * _a) * pow(_c, 3) +
-                                (9.0 / 2.0 * _a - 9.0 / 2.0 * _a * _a + 3.0 / 4.0) * pow(_c, 2) +
-                                (3.0 / 2.0 * _a * _a - 3.0 / 2.0 * _a) * _c);
+      free_energy(_c, _W, _a) = pow(2.0, 6.0) * _W *
+                                (2.0 * pow(_c, 6) - 6.0 * pow(_c, 5) +
+                                 (3.0 * _a + 27.0 / 4.0 - 3.0 * _a * _a) * pow(_c, 4) +
+                                 (-6.0 * _a - 7.0 / 2.0 + 6.0 * _a * _a) * pow(_c, 3) +
+                                 (9.0 / 2.0 * _a - 9.0 / 2.0 * _a * _a + 3.0 / 4.0) * pow(_c, 2) +
+                                 (3.0 / 2.0 * _a * _a - 3.0 / 2.0 * _a) * _c);
       break;
     case 2: // 8th order
       free_energy(_c, _W, _a) =
@@ -66,5 +66,5 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const InputParameters & parameters)
   }
 
   // Parse function
-  functionParse(free_energy, {}, {}, {"W_name", "c_eq_name"}, {}, {});
+  functionParse(free_energy, {}, {}, {"W_name", "c_eq_name"});
 }

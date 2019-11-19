@@ -88,8 +88,11 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
 
   // append material property descriptors
   for (const auto & mpd : mpd_list)
+  {
+    variable_info.push_back(std::make_tuple<VariableType, unsigned int, unsigned int>(
+        MATERIAL_PROPERTY, _mat_prop_descriptors.size(), 9));
     _mat_prop_descriptors.push_back(mpd);
-
+  }
   // go one order deeper
   for (unsigned int i = var; i < _nargs; ++i)
     recurseMatProps(i, order + 1, mpd_list);
@@ -112,7 +115,10 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   current._darg_names = parent_derivative._darg_names;
 
   // the moose variable name goes into the derivative property name
-  current._darg_names.push_back(_arg_names[var]);
+  if (_map_mode == USE_PARAM_NAMES)
+    current._darg_names.push_back(map_to_arg_names[_variable_names[var]]);
+  else
+    current._darg_names.push_back(_variable_names[var]);
 
   current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
 
@@ -188,7 +194,6 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     _func_params.resize(master->_func_params.size());
     return;
   }
-
   // generate all coupled material property mappings
   for (unsigned int i = 0; i < _nargs; ++i)
     recurseMatProps(i, 1, _mat_prop_descriptors);
@@ -205,16 +210,14 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     for (const auto & rule : _bulk_rules)
       _func_F->RegisterDerivative(rule._parent, rule._var, rule._child);
   }
+  _func_params.resize(variable_info.size());
 
   // generate all derivatives
   Derivative root;
   root._F = _func_F;
   root._mat_prop = nullptr;
-
   for (unsigned int i = 0; i < _nargs; ++i)
     recurseDerivative(i, 1, root);
-  // increase the parameter buffer to provide storage for the material property derivatives
-  _func_params.resize(_nargs + _mat_prop_descriptors.size());
 }
 
 void
@@ -230,27 +233,9 @@ DerivativeParsedMaterialHelper::initQpStatefulProperties()
 void
 DerivativeParsedMaterialHelper::computeQpProperties()
 {
-  std::vector<Real> _coupled_var_vals(10);
-  Real a;
-
-  // fill the parameter vector, apply tolerances
+  // fill the parameter vector
   for (unsigned int i = 0; i < _nargs / 10; ++i)
-  {
-    for (unsigned int j = 0; j < 10; j++)
-    {
-      getCoupledFuncParams(_coupled_var_vals, i);
-      a = _coupled_var_vals[j];
-      if (_tol[i] < 0.0)
-        _func_params[10 * i + j] = a;
-      else
-        _func_params[10 * i + j] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
-    }
-  }
-
-  // insert material property values
-  auto nmat_props = _mat_prop_descriptors.size();
-  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
+    _func_params[i] = getValue(i);
 
   // set function value
   if (_prop_F)

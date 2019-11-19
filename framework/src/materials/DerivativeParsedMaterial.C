@@ -28,7 +28,5 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const InputParameters & param
   functionParse(_function,
                 _constant_names,
                 _constant_expressions,
-                getParam<std::vector<std::string>>("material_property_names"),
-                _tol_names,
-                _tol_values);
+                getParam<std::vector<std::string>>("material_property_names"));
 }

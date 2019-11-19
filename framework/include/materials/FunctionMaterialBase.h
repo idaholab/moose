@@ -86,6 +86,8 @@ protected:
   /// Material property to store the function value.
   MaterialProperty<Real> * _prop_F;
 
+  std::map<std::string, std::string> map_to_arg_names;
+
 private:
   /// map the variable numbers to an even/odd interspersed pattern
   unsigned int libMeshVarNumberRemap(unsigned int var) const
