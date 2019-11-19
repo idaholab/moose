@@ -9,21 +9,6 @@
     recover = false
   [../]
 
-  [./phy:deadend_syntax]
-    type = 'RunApp'
-    input = 'phy.deadend.i'
-    check_input = true
-    recover = false
-  [../]
-  [./phy:deadend]
-    type = 'CSVDiff'
-    input = 'phy.deadend.i'
-    csvdiff = 'phy.deadend_out.csv'
-    abs_zero = 1e-5
-    rel_err = 0
-    heavy = true
-  [../]
-
   [./phy:hydrostatic_loop]
     type = 'Exodiff'
     input = 'phy.hydrostatic_loop.i'

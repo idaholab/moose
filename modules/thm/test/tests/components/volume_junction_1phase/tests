@@ -33,6 +33,14 @@
     recover = false
   [../]
 
+  [./phy:deadend]
+    type = 'CSVDiff'
+    input = 'phy.deadend.i'
+    csvdiff = 'phy.deadend_out.csv'
+    abs_zero = 1e-5
+    rel_err = 0
+  [../]
+
   # Tests conservation of mass and energy for 1-phase flow.
   [./conservation_1phase]
     type = 'CSVDiff'
