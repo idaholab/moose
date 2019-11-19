@@ -2,9 +2,9 @@
   [./czm_3DC_load_Normal]
     type = Exodiff
     input = czm_3DC_3D_base_input.i
-    exodiff = czm_3DC_load_Normal_out.e
+    exodiff = czm_3DC_load_only_normal_3D_out.e
     issues = '#11546'
-    cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_3DC_load_Normal_out'
+    cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_3DC_load_only_normal_3D_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'
     'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
@@ -19,7 +19,7 @@
     input = czm_3DC_3D_base_input.i
     exodiff = czm_3DC_load_shear_y_out.e
     issues = '#11546'
-    cli_args = 'BCs/right_x/function=0*t BCs/right_y/function=1*t BCs/right_z/function=0*t Outputs/out/file_base=czm_3DC_load_shear_y_out Executioner/dt=0.25 Executioner/dtmin=0.25'
+    cli_args = 'BCs/right_x/function=0*t BCs/right_y/function=1*t BCs/right_z/function=0*t Outputs/out/file_base=czm_3DC_load_shear_y_out Executioner/dt=0.25 Executioner/dtmin=0.25 Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'
     'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
@@ -35,7 +35,7 @@
     input = czm_3DC_3D_base_input.i
     exodiff = czm_3DC_load_shear_z_out.e
     issues = '#11546'
-    cli_args = 'BCs/right_x/function=0*t BCs/right_y/function=0*t BCs/right_z/function=1*t Outputs/out/file_base=czm_3DC_load_shear_z_out Executioner/dt=0.25 Executioner/dtmin=0.25'
+    cli_args = 'BCs/right_x/function=0*t BCs/right_y/function=0*t BCs/right_z/function=1*t Outputs/out/file_base=czm_3DC_load_shear_z_out Executioner/dt=0.25 Executioner/dtmin=0.25 Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'
     'by continuum elements in 3D using the Salehani Irani 3DC model, and only '
@@ -51,7 +51,7 @@
     input = czm_3DC_3D_base_input.i
     exodiff = czm_3DC_load_complex_out.e
     issues = '#11546'
-    cli_args = 'BCs/right_x/function=3*t BCs/right_y/function=2*t BCs/right_z/function=1*t Outputs/out/file_base=czm_3DC_load_complex_out'
+    cli_args = 'BCs/right_x/function=3*t BCs/right_y/function=2*t BCs/right_z/function=1*t Outputs/out/file_base=czm_3DC_load_complex_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'
     'by continuum elements in 3D using the Salehani Irani 3DC model, and compute'
@@ -61,11 +61,13 @@
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
+
   [./czm_3DC_load_Normal_2D]
     type = Exodiff
-    input = czm_3DC_load_only_normal_2D.i
+    input = czm_3DC_3D_base_input.i
     exodiff = czm_3DC_load_only_normal_2D_out.e
     issues = '#11546'
+    cli_args = "BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/inactive='left_z right_z' Outputs/out/file_base=czm_3DC_load_only_normal_2D_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/dim=2 Mesh/subdomain_1/top_right='0.5 1 0' Mesh/subdomain_2/top_right='1 1 0' GlobalParams/displacements='disp_x disp_y' Modules/TensorMechanics/Master/all/generate_output='stress_xx stress_yy stress_xy' Modules/TensorMechanics/CohesiveZoneMaster/czm1/displacements='disp_x disp_y' Materials/czm_3dc/displacements='disp_x disp_y' Postprocessors/inactive='szz sxz syz disp_z'"
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'
     'by continuum elements in 2D using the Salehani Irani 3DC model, and only '
@@ -75,10 +77,12 @@
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
+
   [./czm_3DC_load_Normal_1D]
     type = Exodiff
-    input = czm_3DC_load_only_normal_1D.i
+    input = czm_3DC_3D_base_input.i
     exodiff = czm_3DC_load_only_normal_1D_out.e
+    cli_args = "BCs/right_x/function=1*t BCs/inactive='left_y right_y left_z right_z' Outputs/out/file_base=czm_3DC_load_only_normal_1D_out Mesh/msh/nx=2  Mesh/msh/dim=1 Mesh/subdomain_1/top_right='0.5 0 0' Mesh/subdomain_2/top_right='1 0 0' GlobalParams/displacements='disp_x' Modules/TensorMechanics/Master/all/generate_output='stress_xx' Modules/TensorMechanics/CohesiveZoneMaster/czm1/displacements='disp_x' Materials/czm_3dc/displacements='disp_x' Postprocessors/inactive='szz sxz syz syy sxy disp_z disp_y'"
     issues = '#11546'
     requirement = 'The system shall allow for cohesive zone laws to represent'
     'the traction-separation behavior at an interface between two bodies represented'

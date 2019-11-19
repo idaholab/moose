@@ -1,10 +1,6 @@
 [Mesh]
   [./msh]
     type = GeneratedMeshGenerator
-    nx =2
-    ny =2
-    nz =2
-    dim = 3
   []
   [./subdomain_1]
     type = SubdomainBoundingBoxGenerator
