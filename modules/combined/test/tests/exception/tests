@@ -1,0 +1,23 @@
+[Tests]
+  design = 'MooseException.md'
+  issues = '#9659'
+  [./g]
+    requirement = 'The system allow gracefully allow exceptions from the radial return mapping algorithm'
+    [./nonad]
+      type = Exodiff
+      input = 'nonad.i'
+      exodiff = 'nonad_out.e'
+      detail = 'not using automatic differentiation methods'
+      allow_test_objects = true
+      min_parallel = 2
+    [../]
+    [./ad]
+      type = Exodiff
+      input = 'ad.i'
+      exodiff = 'ad_out.e'
+      detail = 'using automatic differentiation methods'
+      allow_test_objects = true
+      min_parallel = 2
+    [../]
+  [../]
+[]
