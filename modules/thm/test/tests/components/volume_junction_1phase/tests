@@ -24,6 +24,15 @@
     prereq = 'equal_area_x_direction'
   [../]
 
+  [./phy:unequal_area]
+    type = 'CSVDiff'
+    input = 'phy.unequal_area.i'
+    csvdiff = 'phy.unequal_area_out.csv'
+    abs_zero = 5e-5
+    rel_err = 0
+    recover = false
+  [../]
+
   # Tests conservation of mass and energy for 1-phase flow.
   [./conservation_1phase]
     type = 'CSVDiff'

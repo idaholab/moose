@@ -24,14 +24,6 @@
     heavy = true
   [../]
 
-  [./phy:unequal_area]
-    type = 'CSVDiff'
-    input = 'phy.unequal_area.i'
-    csvdiff = 'phy.unequal_area_out.csv'
-    abs_zero = 5e-5
-    rel_err = 0
-  [../]
-
   [./phy:hydrostatic_loop]
     type = 'Exodiff'
     input = 'phy.hydrostatic_loop.i'
