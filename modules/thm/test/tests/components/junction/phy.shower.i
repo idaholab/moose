@@ -18,6 +18,8 @@
   scaling_factor_1phase = '1 1 1e-5'
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -98,8 +100,6 @@
 
   start_time = 0
   end_time = 10
-  steady_state_detection = true
-  steady_state_tolerance = 1e-8
 
   dt = 0.05
   abort_on_solve_fail = true

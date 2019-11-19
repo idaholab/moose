@@ -8,6 +8,8 @@
   2nd_order_mesh = true
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

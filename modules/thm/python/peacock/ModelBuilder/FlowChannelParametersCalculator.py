@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
 from PyQt5.QtWidgets import QSizePolicy, QLabel
 from PyQt5.QtGui import QDoubleValidator
 import peacock
-import FlowChannelGeometries
+from . import FlowChannelGeometries
 
 
 class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
@@ -165,7 +165,7 @@ def main(size=None):
     """
     Run the FlowChannelParametersCalculator alone
     """
-    from ModelBuilderPluginManager import ModelBuilderPluginManager
+    from .ModelBuilderPluginManager import ModelBuilderPluginManager
     widget = ModelBuilderPluginManager(plugins=[FlowChannelParametersCalculator])
     widget.MainLayout.setContentsMargins(5, 5, 5, 5)
     widget.show()

@@ -8,9 +8,6 @@
   scaling_factor_1phase = '1 1 1e-5'
 
   closures = simple
-
-  spatial_discretization = rDG
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

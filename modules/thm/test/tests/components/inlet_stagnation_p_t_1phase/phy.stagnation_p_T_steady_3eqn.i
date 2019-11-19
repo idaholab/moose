@@ -8,6 +8,8 @@
   scaling_factor_1phase = '1. 1.e-4 1.e-6'
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

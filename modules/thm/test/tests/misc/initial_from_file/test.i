@@ -10,9 +10,6 @@
 
   closures = simple
 
-  spatial_discretization = rDG
-  rdg_slope_reconstruction = none
-
   initial_from_file = 'steady_state_out.e'
 []
 

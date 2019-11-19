@@ -4,6 +4,7 @@
 # @requirement F8.7
 
 [GlobalParams]
+  spatial_discretization = cg
 []
 
 [Functions]

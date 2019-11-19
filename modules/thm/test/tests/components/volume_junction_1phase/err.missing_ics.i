@@ -5,9 +5,6 @@
   f = 0
   fp = fp
 
-  spatial_discretization = RDG
-  rdg_slope_reconstruction = none
-
   closures = simple
 []
 

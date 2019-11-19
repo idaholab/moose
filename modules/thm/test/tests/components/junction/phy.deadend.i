@@ -11,6 +11,8 @@
   initial_p = 1e5
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [AuxVariables]
@@ -152,8 +154,6 @@
 
   start_time = 0
   end_time = 5
-  steady_state_detection = true
-  steady_state_tolerance = 1e-8
 
   dt = 0.05
   abort_on_solve_fail = true

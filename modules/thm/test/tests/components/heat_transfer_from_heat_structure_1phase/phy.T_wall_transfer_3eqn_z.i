@@ -9,6 +9,7 @@
   initial_T = 300.
 
   closures = simple
+  spatial_discretization = cg
 []
 
 [FluidProperties]

@@ -3,6 +3,7 @@
 
 [GlobalParams]
   2nd_order_mesh = true
+  spatial_discretization = cg
 []
 
 [HeatStructureMaterials]
