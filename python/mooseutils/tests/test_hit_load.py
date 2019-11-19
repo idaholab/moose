@@ -47,13 +47,13 @@ class TestHitLoad(unittest.TestCase):
     def testFind(self):
         root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertIs(root.find('A'), root.children[0])
-        self.assertEqual(root.findall('A'), [root.children[0], root.children[0].children[0]])
-        self.assertEqual(root.findall('-1'),
+        self.assertEqual(list(root.findall('A')), [root.children[0], root.children[0].children[0]])
+        self.assertEqual(list(root.findall('-1')),
                          [root.children[0].children[0],
                           root.children[1].children[0],
                           root.children[1].children[0].children[0]])
 
-        self.assertEqual(root.children[1].findall('-1'),
+        self.assertEqual(list(root.children[1].findall('-1')),
                          [root.children[1].children[0],
                           root.children[1].children[0].children[0]])
 
