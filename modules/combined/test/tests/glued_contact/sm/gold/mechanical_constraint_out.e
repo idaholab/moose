@@ -1,0 +1,1 @@
+../../gold/mechanical_constraint_out.e
