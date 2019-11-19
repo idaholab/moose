@@ -167,16 +167,20 @@ ArrayKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
   prepareMatrixTag(_assembly, _var.number(), jvar.number());
 
+  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting on
+  // the displaced mesh
+  auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
   precalculateOffDiagJacobian(jvar.number());
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initQpOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
+      for (_j = 0; _j < phi_size; _j++)
       {
         RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         _assembly.saveFullLocalArrayJacobian(
-            _local_ke, _i, _test.size(), _j, jvar.phiSize(), _var.number(), jvar.number(), v);
+            _local_ke, _i, _test.size(), _j, phi_size, _var.number(), jvar.number(), v);
       }
   }
 

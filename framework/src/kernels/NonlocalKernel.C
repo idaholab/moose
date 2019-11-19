@@ -76,8 +76,12 @@ NonlocalKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
     precalculateOffDiagJacobian(jvar_num);
-    for (_j = 0; _j < jvar.phiSize();
+    for (_j = 0; _j < phi_size;
          _j++) // looping order for _i & _j are reversed for performance improvement
     {
       getUserObjectJacobian(jvar_num, jvar.dofIndices()[_j]);
