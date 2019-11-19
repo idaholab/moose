@@ -141,20 +141,27 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   {
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
-    if (_local_ke.m() != _test.size() || _local_ke.n() != jvar.phiSize())
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+    mooseAssert(
+        phi_size * jvar.count() == _local_ke.n(),
+        "The size of the phi container does not match the number of local Jacobian columns");
+
+    if (_local_ke.m() != _test.size())
       return;
 
     precalculateOffDiagJacobian(jvar_num);
     if (jvar.count() == 1)
     {
       for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < jvar.phiSize(); _j++)
+        for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
             _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
     }
     else
     {
-      unsigned int n = jvar.phiSize();
+      unsigned int n = phi_size;
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < n; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)

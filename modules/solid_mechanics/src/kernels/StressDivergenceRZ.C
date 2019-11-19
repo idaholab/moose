@@ -295,6 +295,10 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     computeJacobian();
   else
   {
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
     if (_volumetric_locking_correction)
     {
       // calculate volume averaged value of shape function derivative
@@ -316,8 +320,8 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         _avg_grad_test[_i][_component] /= _current_elem_volume;
       }
 
-      _avg_grad_phi.resize(jvar.phiSize());
-      for (_i = 0; _i < jvar.phiSize(); _i++)
+      _avg_grad_phi.resize(phi_size);
+      for (_i = 0; _i < phi_size; _i++)
       {
         _avg_grad_phi[_i].resize(3);
         for (unsigned int component = 0; component < 2; component++)
@@ -342,7 +346,7 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
+      for (_j = 0; _j < phi_size; _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
 

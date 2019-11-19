@@ -75,9 +75,13 @@ VectorIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
   size_t jvar_num = jvar.number();
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
+  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting on
+  // the displaced mesh
+  auto phi_size = _sys.getVariable(_tid, jvar_num).dofIndices().size();
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiFaceSize(); _j++)
+      for (_j = 0; _j < phi_size; _j++)
       {
         if (_var.number() == jvar_num)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();

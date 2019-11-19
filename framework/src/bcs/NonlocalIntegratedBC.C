@@ -77,7 +77,11 @@ NonlocalIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
     MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar_num);
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
-    for (_j = 0; _j < jvar.phiFaceSize();
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar_num).dofIndices().size();
+
+    for (_j = 0; _j < phi_size;
          _j++) // looping order for _i & _j are reversed for performance improvement
     {
       getUserObjectJacobian(jvar_num, jv.dofIndices()[_j]);

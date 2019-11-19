@@ -185,14 +185,16 @@ void
 ADIntegratedBCTempl<T, compute_stage>::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   auto jvar_num = jvar.number();
+  auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
   if (jvar_num == _var.number())
     computeJacobian();
   else
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-    if (jvar.phiFaceSize() != ke.n())
-      return;
+    mooseAssert(
+        phi_size == ke.n(),
+        "The size of the phi container does not match the number of local Jacobian columns");
 
     size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
 
@@ -202,7 +204,7 @@ ADIntegratedBCTempl<T, compute_stage>::computeJacobianBlock(MooseVariableFEBase 
         {
           DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
 
-          for (_j = 0; _j < jvar.phiFaceSize(); _j++)
+          for (_j = 0; _j < phi_size; _j++)
             ke(_i, _j) += residual.derivatives()[ad_offset + _j];
         }
     else
@@ -211,7 +213,7 @@ ADIntegratedBCTempl<T, compute_stage>::computeJacobianBlock(MooseVariableFEBase 
         {
           DualReal residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-          for (_j = 0; _j < jvar.phiFaceSize(); _j++)
+          for (_j = 0; _j < phi_size; _j++)
             ke(_i, _j) += residual.derivatives()[ad_offset + _j];
         }
   }
