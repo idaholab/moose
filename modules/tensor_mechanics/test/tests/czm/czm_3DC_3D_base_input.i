@@ -133,55 +133,55 @@
   [./sxx]
     type = SideAverageValue
     variable = stress_xx
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./syy]
     type = SideAverageValue
     variable = stress_yy
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./szz]
     type = SideAverageValue
     variable = stress_zz
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./syz]
     type = SideAverageValue
     variable = stress_yz
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./sxz]
     type = SideAverageValue
     variable = stress_xz
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./sxy]
     type = SideAverageValue
     variable = stress_xy
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'interface'
   [../]
   [./disp_x]
     type = SideAverageValue
     variable = disp_x
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'right'
   [../]
   [./disp_y]
     type = SideAverageValue
     variable = disp_y
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'right'
   [../]
   [./disp_z]
     type = SideAverageValue
     variable = disp_z
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
     boundary = 'right'
   [../]
 []

@@ -61,7 +61,6 @@
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
-
   [./czm_3DC_load_Normal_2D]
     type = Exodiff
     input = czm_3DC_3D_base_input.i
@@ -77,7 +76,6 @@
     method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
   [../]
-
   [./czm_3DC_load_Normal_1D]
     type = Exodiff
     input = czm_3DC_3D_base_input.i

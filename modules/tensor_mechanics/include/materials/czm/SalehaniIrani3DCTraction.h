@@ -26,7 +26,7 @@ protected:
   /// method returning the traction in the interface coordinate system.
   virtual RealVectorValue computeTraction() override;
 
-  /// method returning the traction derivitaves wrt to local displacement jump.
+  /// method returning the traction derivitaves wrt local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() override;
 
   /// the displacement jump assocaited to the maximum traction

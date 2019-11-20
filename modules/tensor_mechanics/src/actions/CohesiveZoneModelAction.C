@@ -23,7 +23,7 @@ validParams<CohesiveZoneModelAction>()
                              "each displacement component");
 
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
+      "boundary", "The list of boundary IDs from the mesh where the cohesive zone will be applied");
 
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements",

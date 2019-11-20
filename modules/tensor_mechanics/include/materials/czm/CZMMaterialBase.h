@@ -64,7 +64,7 @@ protected:
   MaterialProperty<RealVectorValue> & _traction;
   ///@}
 
-  /// the traction's derivatives wrt to the displacement jump in global and local coordiantes
+  /// the traction's derivatives wrt the displacement jump in global and local coordiantes
   ///@{
   MaterialProperty<RankTwoTensor> & _traction_derivatives_global;
   MaterialProperty<RankTwoTensor> & _traction_derivatives;

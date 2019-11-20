@@ -15,7 +15,7 @@ The strong form of the force equilibrium equation in vector form can be written 
 where superscripts $+$ and $-$ identify the master and slave surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the traction, and $A$ the area.
 The master surface is the one where the normal is computed.
 
-By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium eqaution can be written as  
+By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium equation can be written as  
 \begin{equation}
   \int_{A^-}{T^- \psi^- da^-}  - \int_{A^+}{T^+ \psi^+ da^+} = 0
 \end{equation}

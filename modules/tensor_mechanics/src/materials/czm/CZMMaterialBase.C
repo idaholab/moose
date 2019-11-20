@@ -63,13 +63,13 @@ CZMMaterialBase::computeQpProperties()
   // rotate the displacement jump to local coordiante system
   _displacement_jump[_qp] = RotationGlobalToLocal * _displacement_jump_global[_qp];
 
-  // compute local traction_global
+  // compute local traction
   _traction[_qp] = computeTraction();
 
-  // compute local traction_global derivatives wrt the displacement jump
+  // compute local traction derivatives wrt the displacement jump
   _traction_derivatives[_qp] = computeTractionDerivatives();
 
-  // rotate local traction_global and derivatives to the global reference
+  // rotate local traction and derivatives to the global reference
   _traction_global[_qp] = RotationGlobalToLocal.transpose() * _traction[_qp];
   _traction_derivatives_global[_qp] = _traction_derivatives[_qp];
   _traction_derivatives_global[_qp].rotate(RotationGlobalToLocal.transpose());
