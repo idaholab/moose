@@ -15,7 +15,7 @@
 #include "NearestNodeLocator.h"
 
 #include "libmesh/numeric_vector.h"
-#include "libmesh/petsc_matrix.h"
+#include "libmesh/sparse_matrix.h"
 
 registerMooseObject("ContactApp", RANFSTieNode);
 
@@ -94,41 +94,20 @@ RANFSTieNode::shouldApply()
   _nearest_node = nearest_node_loc.nearestNode(_current_node->id());
   if (_nearest_node)
   {
-    _dof_number = static_cast<PetscInt>(_current_node->dof_number(0, _vars[_component], 0));
+    _dof_number = _current_node->dof_number(0, _vars[_component], 0);
     // We overwrite the slave residual so we cannot use the residual
     // copy for determining the Lagrange multiplier when computing the Jacobian
     if (!_subproblem.currentlyComputingJacobian())
-      _node_to_lm.insert(std::make_pair(_current_node->id(),
-                                        _residual_copy(static_cast<dof_id_type>(_dof_number)) /
-                                            _var_objects[_component]->scalingFactor()));
+      _node_to_lm.insert(
+          std::make_pair(_current_node->id(),
+                         _residual_copy(_dof_number) / _var_objects[_component]->scalingFactor()));
     else
     {
-      // Let's get the Jacobian row coresponding to the slave node
-      auto petsc_mat = dynamic_cast<PetscMatrix<Number> *>(_jacobian);
-      if (!petsc_mat)
-        mooseError("This only works with a Petsc matrix");
-
       // We need the matrix to be assembled so we get the correct Jacobian entries
-      if (!petsc_mat->closed())
-        petsc_mat->close();
+      if (!_jacobian->closed())
+        _jacobian->close();
 
-      _mat = petsc_mat->mat();
-
-      const PetscInt * master_cols;
-      const PetscScalar * master_values;
-      PetscInt master_ncols;
-      PetscErrorCode ierr =
-          MatGetRow(_mat, _dof_number, &master_ncols, &master_cols, &master_values);
-      LIBMESH_CHKERR(ierr);
-
-      // Copy the data
-      _master_ncols = master_ncols;
-      _master_cols.assign(master_cols, master_cols + _master_ncols);
-      _master_values.assign(master_values, master_values + _master_ncols);
-
-      // Now restore
-      ierr = MatRestoreRow(_mat, _dof_number, &master_ncols, &master_cols, &master_values);
-      LIBMESH_CHKERR(ierr);
+      _jacobian->get_row(_dof_number, _master_cols, _master_values);
     }
 
     mooseAssert(_node_to_lm.find(_current_node->id()) != _node_to_lm.end(),
@@ -139,7 +118,7 @@ RANFSTieNode::shouldApply()
     mooseAssert(_master_index != libMesh::invalid_uint,
                 "nearest node not a node on the current master element");
 
-    _master_dof_number = static_cast<PetscInt>(_nearest_node->dof_number(0, _vars[_component], 0));
+    _master_dof_number = _nearest_node->dof_number(0, _vars[_component], 0);
 
     return true;
   }
@@ -188,42 +167,28 @@ RANFSTieNode::computeQpSlaveValue()
 void
 RANFSTieNode::computeJacobian()
 {
-  // Now set the slave row
-  std::vector<PetscInt> slave_row = {_dof_number};
-  std::vector<PetscInt> slave_cols = {_dof_number, _master_dof_number};
-  std::vector<PetscScalar> slave_values = {1, -1};
+  // set the slave row
+  std::vector<dof_id_type> slave_row = {_dof_number};
 
   // This is currently a bad design because we're going to (possibly) assemble here and then put the
   // matrix in an unassembled state again
+  if (!_jacobian->closed())
+    _jacobian->close();
 
-  PetscBool assembled;
-  PetscErrorCode ierr = MatAssembled(_mat, &assembled);
-  LIBMESH_CHKERR(ierr);
-
-  if (!assembled)
-  {
-    ierr = MatAssemblyBegin(_mat, MAT_FINAL_ASSEMBLY);
-    LIBMESH_CHKERR(ierr);
-    ierr = MatAssemblyEnd(_mat, MAT_FINAL_ASSEMBLY);
-    LIBMESH_CHKERR(ierr);
-  }
   // This operation requires that the matrix be assembled
-  ierr = MatZeroRows(_mat, 1, slave_row.data(), 0, NULL, NULL);
-  LIBMESH_CHKERR(ierr);
+  _jacobian->zero_rows(slave_row);
 
-  ierr = MatSetValues(
-      _mat, 1, slave_row.data(), 2, slave_cols.data(), slave_values.data(), ADD_VALUES);
-  LIBMESH_CHKERR(ierr);
+  // Now set the constraint equation. We just zeroed so it's safe to just use add
+  _jacobian->add(_dof_number, _dof_number, 1);
+  _jacobian->add(_dof_number, _master_dof_number, -1);
 
-  std::vector<PetscInt> master_row = {_master_dof_number};
-  ierr = MatSetValues(_mat,
-                      1,
-                      master_row.data(),
-                      _master_ncols,
-                      _master_cols.data(),
-                      _master_values.data(),
-                      ADD_VALUES);
-  LIBMESH_CHKERR(ierr);
+  // Now set the master Jacobian
+
+  mooseAssert(_master_cols.size() == _master_values.size(),
+              "Somehow the column indices and column values vectors got out of sync in size");
+
+  for (MooseIndex(_master_cols) i = 0; i < _master_cols.size(); ++i)
+    _jacobian->add(_master_dof_number, _master_cols[i], _master_values[i]);
 }
 
 void

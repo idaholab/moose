@@ -13,8 +13,6 @@
 #include "NodeFaceConstraint.h"
 #include "MooseEnum.h"
 
-#include <petscmat.h>
-
 #include <vector>
 #include <unordered_map>
 
@@ -63,10 +61,8 @@ protected:
   std::unordered_map<dof_id_type, Real> _node_to_lm;
   dof_id_type _master_index;
 
-  Mat _mat;
-  PetscInt _dof_number;
-  PetscInt _master_dof_number;
-  PetscInt _master_ncols;
-  std::vector<PetscInt> _master_cols;
-  std::vector<PetscScalar> _master_values;
+  dof_id_type _dof_number;
+  dof_id_type _master_dof_number;
+  std::vector<numeric_index_type> _master_cols;
+  std::vector<Number> _master_values;
 };
