@@ -307,7 +307,7 @@ void
 EigenProblem::init()
 {
   // If matrix_free=true, this set Libmesh to use shell matrices
-  _nl_eigen->sys().use_shell_matrices(_matrix_free);
+  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
 
   FEProblemBase::init();
 
@@ -325,7 +325,5 @@ bool
 EigenProblem::isNonlinearEigenvalueSolver()
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_MF_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
-         solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
+         solverParams()._eigen_solve_type == Moose::EST_NEWTON;
 }
