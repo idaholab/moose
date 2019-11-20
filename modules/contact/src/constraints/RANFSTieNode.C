@@ -53,25 +53,9 @@ RANFSTieNode::RANFSTieNode(const InputParameters & parameters)
 }
 
 void
-RANFSTieNode::initialSetup()
-{
-}
-
-void
-RANFSTieNode::timestepSetup()
-{
-}
-
-void
 RANFSTieNode::residualSetup()
 {
   _node_to_lm.clear();
-}
-
-void
-RANFSTieNode::jacobianSetup()
-{
-  _jacobian = &_sys.getMatrix(_sys.systemMatrixTag());
 }
 
 bool
@@ -81,33 +65,36 @@ RANFSTieNode::overwriteSlaveResidual()
 }
 
 bool
-RANFSTieNode::overwriteSlaveJacobian()
-{
-  // We did it ourselves
-  return false;
-}
-
-bool
 RANFSTieNode::shouldApply()
 {
+  _dof_number_to_value.clear();
+
   auto & nearest_node_loc = _penetration_locator._nearest_node;
   _nearest_node = nearest_node_loc.nearestNode(_current_node->id());
   if (_nearest_node)
   {
-    _dof_number = _current_node->dof_number(0, _vars[_component], 0);
+    auto slave_dof_number = _current_node->dof_number(0, _vars[_component], 0);
     // We overwrite the slave residual so we cannot use the residual
     // copy for determining the Lagrange multiplier when computing the Jacobian
     if (!_subproblem.currentlyComputingJacobian())
-      _node_to_lm.insert(
-          std::make_pair(_current_node->id(),
-                         _residual_copy(_dof_number) / _var_objects[_component]->scalingFactor()));
+      _node_to_lm.insert(std::make_pair(_current_node->id(),
+                                        _residual_copy(slave_dof_number) /
+                                            _var_objects[_component]->scalingFactor()));
     else
     {
       // We need the matrix to be assembled so we get the correct Jacobian entries
       if (!_jacobian->closed())
         _jacobian->close();
 
-      _jacobian->get_row(_dof_number, _master_cols, _master_values);
+      std::vector<dof_id_type> master_cols;
+      std::vector<Number> master_values;
+
+      _jacobian->get_row(slave_dof_number, master_cols, master_values);
+      mooseAssert(master_cols.size() == master_values.size(),
+                  "The size of the dof container and value container are different");
+      for (MooseIndex(master_cols) i = 0; i < master_cols.size(); ++i)
+        _dof_number_to_value.insert(
+            std::make_pair(master_cols[i], master_values[i] / _var.scalingFactor()));
     }
 
     mooseAssert(_node_to_lm.find(_current_node->id()) != _node_to_lm.end(),
@@ -117,8 +104,6 @@ RANFSTieNode::shouldApply()
     _master_index = _current_master->get_node_index(_nearest_node);
     mooseAssert(_master_index != libMesh::invalid_uint,
                 "nearest node not a node on the current master element");
-
-    _master_dof_number = _nearest_node->dof_number(0, _vars[_component], 0);
 
     return true;
   }
@@ -148,9 +133,35 @@ RANFSTieNode::computeQpResidual(Moose::ConstraintType type)
   }
 }
 
-Real RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType)
+Real
+RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
-  mooseError("This shouldn't get called");
+  switch (type)
+  {
+    case Moose::ConstraintJacobianType::SlaveSlave:
+      return _phi_slave[_j][_qp];
+
+    case Moose::ConstraintJacobianType::SlaveMaster:
+      if (_master_index == _j)
+        return -1;
+      else
+        return 0;
+
+    case Moose::ConstraintJacobianType::MasterSlave:
+      if (_i == _master_index)
+      {
+        mooseAssert(_dof_number_to_value.find(_connected_dof_indices[_j]) !=
+                        _dof_number_to_value.end(),
+                    "The connected dof index is not found in the _dof_number_to_value container. "
+                    "This must mean that insufficient sparsity was allocated");
+        return _dof_number_to_value[_connected_dof_indices[_j]];
+      }
+      else
+        return 0;
+
+    default:
+      return 0;
+  }
 }
 
 void
@@ -162,36 +173,4 @@ Real
 RANFSTieNode::computeQpSlaveValue()
 {
   mooseError("We overrode commputeSlaveValue so computeQpSlaveValue should never get called");
-}
-
-void
-RANFSTieNode::computeJacobian()
-{
-  // set the slave row
-  std::vector<dof_id_type> slave_row = {_dof_number};
-
-  // This is currently a bad design because we're going to (possibly) assemble here and then put the
-  // matrix in an unassembled state again
-  if (!_jacobian->closed())
-    _jacobian->close();
-
-  // This operation requires that the matrix be assembled
-  _jacobian->zero_rows(slave_row);
-
-  // Now set the constraint equation. We just zeroed so it's safe to just use add
-  _jacobian->add(_dof_number, _dof_number, 1);
-  _jacobian->add(_dof_number, _master_dof_number, -1);
-
-  // Now set the master Jacobian
-
-  mooseAssert(_master_cols.size() == _master_values.size(),
-              "Somehow the column indices and column values vectors got out of sync in size");
-
-  for (MooseIndex(_master_cols) i = 0; i < _master_cols.size(); ++i)
-    _jacobian->add(_master_dof_number, _master_cols[i], _master_values[i]);
-}
-
-void
-RANFSTieNode::computeOffDiagJacobian(unsigned int)
-{
 }

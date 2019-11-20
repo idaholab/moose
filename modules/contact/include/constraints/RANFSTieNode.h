@@ -35,14 +35,8 @@ public:
 
   bool shouldApply() override;
   void residualSetup() override;
-  void jacobianSetup() override;
-  void timestepSetup() override;
-  void initialSetup() override;
   bool overwriteSlaveResidual() override;
-  bool overwriteSlaveJacobian() override;
   void computeSlaveValue(NumericVector<Number> & solution) override;
-  void computeJacobian() override;
-  void computeOffDiagJacobian(unsigned int) override;
 
 protected:
   virtual Real computeQpSlaveValue() override;
@@ -61,8 +55,5 @@ protected:
   std::unordered_map<dof_id_type, Real> _node_to_lm;
   dof_id_type _master_index;
 
-  dof_id_type _dof_number;
-  dof_id_type _master_dof_number;
-  std::vector<numeric_index_type> _master_cols;
-  std::vector<Number> _master_values;
+  std::unordered_map<dof_id_type, Number> _dof_number_to_value;
 };
