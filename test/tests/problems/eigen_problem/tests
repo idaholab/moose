@@ -56,7 +56,7 @@
   [./nonlinear_power]
     type = 'CSVDiff'
     input = 'ne.i'
-    cli_args = 'Executioner/solve_type=MF_NONLINEAR_POWER Outputs/file_base=nonlinear_power'
+    cli_args = 'Executioner/solve_type=NONLINEAR_POWER Executioner/matrix_free=true Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
@@ -65,7 +65,7 @@
   [./monolith_newton]
     type = 'CSVDiff'
     input = 'ne.i'
-    cli_args = 'Executioner/solve_type=MF_MONOLITH_NEWTON Outputs/file_base=monolith_newton'
+    cli_args = 'Executioner/solve_type=NEWTON Executioner/matrix_free=true Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"

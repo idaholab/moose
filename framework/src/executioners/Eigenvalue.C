@@ -62,8 +62,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
-
-  _eigen_problem.matrixFree(getParam<bool>("matrix_free"));
 #endif
 
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))

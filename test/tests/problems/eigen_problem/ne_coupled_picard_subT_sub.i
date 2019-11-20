@@ -81,7 +81,8 @@
 
 [Executioner]
   type = Eigenvalue
-  solve_type = MF_MONOLITH_NEWTON
+  matrix_free = true
+  solve_type = NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
 []
 
