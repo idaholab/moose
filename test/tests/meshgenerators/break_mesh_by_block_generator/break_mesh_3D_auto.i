@@ -2,7 +2,6 @@
   [./fmg]
     type = FileMeshGenerator
     file = coh3D_3Blocks.e
-    parallel_type = replicated
   []
 
   [./breakmesh]

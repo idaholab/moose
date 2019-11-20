@@ -34,15 +34,12 @@ BreakMeshByBlockGenerator::validParams()
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
   : BreakMeshByBlockGeneratorBase(parameters), _input(getMesh("input"))
 {
-  if (typeid(_input).name() == typeid(DistributedMesh).name())
-    mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 }
 
 std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
@@ -97,11 +94,10 @@ BreakMeshByBlockGenerator::generate()
                   current_node->id()) // if current node == node on element
               {
                 // add new node
-                new_node = Node::build(*current_node, mesh->n_nodes()).release();
-
-                // We're duplicating nodes so that each subdomain elem has its own copy, so it seems
-                // natural to assign this new node the same proc id as corresponding subdomain elem
-                new_node->processor_id() = current_elem->processor_id();
+                dof_id_type new_node_id =
+                    (current_elem->subdomain_id() + 1) * mesh->max_node_id() + current_node->id();
+                new_node = Node::build(*current_node, new_node_id).release();
+                new_node->processor_id() = current_node->processor_id();
                 mesh->add_node(new_node);
 
                 // Add boundary info to the new node
@@ -163,6 +159,8 @@ BreakMeshByBlockGenerator::generate()
   }     // end nodeptr check
 
   addInterfaceBoundary(*mesh);
+  // Find neighbors, etc.
+  mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
