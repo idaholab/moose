@@ -1,0 +1,32 @@
+[Tests]
+  issue = '#14407'
+  design = 'MultiApps/index.md'
+
+  [restart_a_restart]
+    requirement = "The system shall support the restarting simulations from existing simulations "
+                  "that are also restarted from an existing simulation, where"
+
+    [step_1]
+      type = CSVDiff
+      input = step1.i
+      csvdiff = 'step1_out.csv'
+      detail = "a complete simulation produces results that are identical to a simulation"
+    []
+    [step_2]
+      type = CSVDiff
+      input = step2.i
+      csvdiff = 'step2_out.csv'
+      prereq = restart_a_restart/step_1
+
+      detail = "that takes a single step from a checkpoint at intermediate step from part 1 and"
+    []
+    [step_3]
+      type = CSVDiff
+      input = step3.i
+      csvdiff = 'step3_out.csv'
+      prereq = restart_a_restart/step_2
+
+      detail = "another single step from part 2."
+    []
+  []
+[]
