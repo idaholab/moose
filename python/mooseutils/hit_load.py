@@ -18,7 +18,7 @@ class HitNode(moosetree.Node):
     An moosetree.Node object for building a hit tree.
     """
     def __init__(self, parent, hitnode):
-        super().__init__(parent, hitnode.path())
+        super(HitNode, self).__init__(parent, hitnode.path())
         self.__hitnode = hitnode     # hit.Node object
 
     @property
