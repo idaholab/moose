@@ -38,7 +38,9 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
   : NodeFaceConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
     _mesh_dimension(_mesh.dimension()),
-    _residual_copy(_sys.residualGhosted())
+    _residual_copy(_sys.residualGhosted()),
+    _dof_number_to_value(coupledComponents("displacements")),
+    _disp_coupling(coupledComponents("displacements"))
 {
   // modern parameter scheme for displacements
   for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
@@ -49,6 +51,16 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
 
   if (_vars.size() != _mesh_dimension)
     mooseError("The number of displacement variables does not match the mesh dimension!");
+}
+
+void
+RANFSNormalMechanicalContact::initialSetup()
+{
+  auto system_coupling_matrix = _subproblem.couplingMatrix();
+
+  for (MooseIndex(_vars) i = 0; i < _vars.size(); ++i)
+    for (MooseIndex(_vars) j = 0; j < _vars.size(); ++j)
+      _disp_coupling(i, j) = (*system_coupling_matrix)(_vars[i], _vars[j]);
 }
 
 void
@@ -99,6 +111,34 @@ RANFSNormalMechanicalContact::shouldApply()
 
         _node_to_contact_lm.insert(std::make_pair(_current_node->id(), _res_vec * _pinfo->_normal));
         _node_to_tied_lm.insert(std::make_pair(_current_node->id(), _res_vec(_component)));
+      }
+      else
+      {
+        // We need the matrix to be assembled so we get the correct Jacobian entries
+        if (!_jacobian->closed())
+          _jacobian->close();
+
+        std::vector<dof_id_type> cols;
+        std::vector<Number> values;
+
+        for (auto & d_to_v : _dof_number_to_value)
+          d_to_v.clear();
+
+        mooseAssert(_vars.size() == _dof_number_to_value.size() &&
+                        _vars.size() == _var_objects.size(),
+                    "Somehow the sizes of our variable containers got out of sync");
+        for (MooseIndex(_var_objects) i = 0; i < _var_objects.size(); ++i)
+        {
+          auto slave_dof_number = _current_node->dof_number(0, _vars[i], 0);
+
+          _jacobian->get_row(slave_dof_number, cols, values);
+          mooseAssert(cols.size() == values.size(),
+                      "The size of the dof container and value container are different");
+
+          for (MooseIndex(cols) j = 0; j < cols.size(); ++j)
+            _dof_number_to_value[i].insert(
+                std::make_pair(cols[j], values[j] / _var_objects[i]->scalingFactor()));
+        }
       }
 
       mooseAssert(_node_to_contact_lm.find(_current_node->id()) != _node_to_contact_lm.end(),
@@ -262,32 +302,103 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::ConstraintJacobianType::SlaveSlave:
     {
       if (_tie_nodes)
-        return 0;
+        return _phi_slave[_j][_qp];
+
+      // doing contact
       else
       {
+        // corresponds to gap equation
         if (_largest_component == static_cast<unsigned int>(_component))
           // _phi_slave has been set such that it is 1 when _j corresponds to the degree of freedom
           // associated with the _current node and 0 otherwise
           return std::abs(_pinfo->_normal(_component)) * _phi_slave[_j][_qp];
 
+        // corresponds to regular residual with Lagrange Multiplier applied
         else
-          return 0;
+        {
+          Real ret_val = 0;
+          for (MooseIndex(_disp_coupling) i = 0; i < _disp_coupling.size(); ++i)
+            if (_disp_coupling(_component, i))
+            {
+              mooseAssert(
+                  _dof_number_to_value[i].find(_connected_dof_indices[_j]) !=
+                      _dof_number_to_value[i].end(),
+                  "The connected dof index is not found in the _dof_number_to_value container. "
+                  "This must mean that insufficient sparsity was allocated");
+              ret_val += -_pinfo->_normal(_component) * _pinfo->_normal(i) *
+                         _dof_number_to_value[i][_connected_dof_indices[_j]];
+            }
+          return ret_val;
+        }
       }
     }
 
     case Moose::ConstraintJacobianType::SlaveMaster:
     {
       if (_tie_nodes)
-        return 0;
+      {
+        if (_master_index == _j)
+          return -1;
+
+        // We're tying the slave node to only one node on the master side (specified by
+        // _master_index). If the current _j doesn't correspond to that tied master node, then the
+        // slave residual doesn't depend on it
+        else
+          return 0;
+      }
       else
       {
         if (_largest_component == static_cast<unsigned int>(_component))
           return -std::abs(_pinfo->_normal(_component)) * _phi_master[_j][_qp];
 
+        // If we're not applying the gap constraint equation on this _component, then we're
+        // applying a Lagrange multiplier, and consequently there is no dependence of the slave
+        // residual on the master dofs because the Lagrange multiplier is only a functon of the
+        // slave residuals
         else
           return 0;
       }
     }
+
+    case Moose::ConstraintJacobianType::MasterSlave:
+    {
+      if (_tie_nodes)
+      {
+        if (_i == _master_index)
+        {
+          mooseAssert(_dof_number_to_value[_component].find(_connected_dof_indices[_j]) !=
+                          _dof_number_to_value[_component].end(),
+                      "The connected dof index is not found in the _dof_number_to_value container. "
+                      "This must mean that insufficient sparsity was allocated");
+          return _dof_number_to_value[_component][_connected_dof_indices[_j]];
+        }
+
+        // We only apply the tied node Lagrange multiplier to the closest master node
+        else
+          return 0;
+      }
+      else
+      {
+        Real ret_val = 0;
+        for (MooseIndex(_disp_coupling) i = 0; i < _disp_coupling.size(); ++i)
+          if (_disp_coupling(_component, i))
+          {
+            mooseAssert(
+                _dof_number_to_value[i].find(_connected_dof_indices[_j]) !=
+                    _dof_number_to_value[i].end(),
+                "The connected dof index is not found in the _dof_number_to_value container. "
+                "This must mean that insufficient sparsity was allocated");
+            ret_val += _test_master[_i][_qp] * _pinfo->_normal(_component) * _pinfo->_normal(i) *
+                       _dof_number_to_value[i][_connected_dof_indices[_j]];
+          }
+        return ret_val;
+      }
+    }
+
+      // The only master-master dependence would come from the dependence of the normal and also the
+      // location of the integration (quadrature) points. We assume (valid or not) that this
+      // dependence is weak
+      // case MooseConstraintJacobianType::MasterMaster
 
     default:
       return 0;

@@ -139,6 +139,14 @@
       cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg'
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
     []
+    [ranfs-jacobian]
+      type = 'PetscJacobianTester'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      difference_tol = 1e-7
+      cli_args = "Outputs/active='' Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg"
+      expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+      detail = "The system's RANFS scheme shall have a perfect Jacobian for mechanical contact that only has one non-zero normal component"
+    []
     [full-bouncing-block]
       type = 'Exodiff'
       input = 'bouncing-block-ranfs.i'

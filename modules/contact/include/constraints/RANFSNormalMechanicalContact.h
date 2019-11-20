@@ -13,6 +13,8 @@
 #include "NodeFaceConstraint.h"
 #include "MooseEnum.h"
 
+#include "libmesh/coupling_matrix.h"
+
 #include <vector>
 #include <unordered_map>
 
@@ -36,6 +38,7 @@ public:
   bool shouldApply() override;
   void residualSetup() override;
   void timestepSetup() override;
+  void initialSetup() override;
   bool overwriteSlaveResidual() override;
   void computeSlaveValue(NumericVector<Number> & solution) override;
 
@@ -64,4 +67,6 @@ protected:
   unsigned int _master_index;
   RealVectorValue _res_vec;
   const Node * _nearest_node;
+  std::vector<std::unordered_map<dof_id_type, Number>> _dof_number_to_value;
+  CouplingMatrix _disp_coupling;
 };
