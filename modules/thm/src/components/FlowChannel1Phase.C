@@ -1,7 +1,6 @@
 #include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
-#include "StabilizationSettings.h"
 #include "HeatTransfer1PhaseBase.h"
 #include "Closures1PhaseBase.h"
 #include "THMApp.h"
