@@ -67,8 +67,6 @@ RANFSTieNode::overwriteSlaveResidual()
 bool
 RANFSTieNode::shouldApply()
 {
-  _dof_number_to_value.clear();
-
   auto & nearest_node_loc = _penetration_locator._nearest_node;
   _nearest_node = nearest_node_loc.nearestNode(_current_node->id());
   if (_nearest_node)
@@ -92,6 +90,9 @@ RANFSTieNode::shouldApply()
       _jacobian->get_row(slave_dof_number, master_cols, master_values);
       mooseAssert(master_cols.size() == master_values.size(),
                   "The size of the dof container and value container are different");
+
+      _dof_number_to_value.clear();
+
       for (MooseIndex(master_cols) i = 0; i < master_cols.size(); ++i)
         _dof_number_to_value.insert(
             std::make_pair(master_cols[i], master_values[i] / _var.scalingFactor()));

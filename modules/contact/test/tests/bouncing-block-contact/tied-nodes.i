@@ -9,8 +9,10 @@
 
 [Variables]
   [./disp_x]
+    scaling = 2
   [../]
   [./disp_y]
+    scaling = 3
   [../]
 []
 
