@@ -5,6 +5,8 @@
   gravity_vector = '0 0 0'
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

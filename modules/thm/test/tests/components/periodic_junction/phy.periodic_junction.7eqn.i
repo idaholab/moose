@@ -22,6 +22,8 @@
   explicit_alpha_gradient = true
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

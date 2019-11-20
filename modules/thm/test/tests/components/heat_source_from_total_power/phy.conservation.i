@@ -9,6 +9,7 @@ energy_change = ${fparse power_fraction * power * t}
 
 [GlobalParams]
   scaling_factor_temperature = 1e-3
+  spatial_discretization = cg
 []
 
 [Functions]

@@ -6,9 +6,6 @@
   initial_T = 300
 
   closures = simple
-
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

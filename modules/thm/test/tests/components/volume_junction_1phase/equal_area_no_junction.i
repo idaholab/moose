@@ -20,9 +20,6 @@
 
   scaling_factor_1phase = '0.04 0.04 0.04e-5'
 
-  spatial_discretization = RDG
-  rdg_slope_reconstruction = none
-
   closures = simple
 []
 

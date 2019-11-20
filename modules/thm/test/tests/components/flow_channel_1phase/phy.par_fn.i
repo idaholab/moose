@@ -12,9 +12,6 @@ D_h = 5
   initial_vel = 0.0
 
   closures = simple
-
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [Functions]

@@ -69,7 +69,7 @@ class FluidPropertyInterrogatorPlugin(QtWidgets.QWidget):
 
         json_fps = self.exe_info.json_data.json_data["blocks"]["FluidProperties"]['star']['subblock_types']
 
-        for class_name, vals in json_fps.iteritems():
+        for class_name, vals in json_fps.items():
             params = vals['parameters']
             if 'fp_type' in params:
                 fp_type = params['fp_type']['default']

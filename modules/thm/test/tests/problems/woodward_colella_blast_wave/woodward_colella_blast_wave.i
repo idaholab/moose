@@ -1,24 +1,7 @@
-# This test problem is the Sedov blast wave test problem,
-# which is a Riemann problem with the following parameters:
-#   * domain = (0,1)
-#   * gravity = 0
-#   * EoS: Ideal gas EoS with gamma = 1.4, R = 0.71428571428571428571
-#   * interface: x = 0.5
-#   * typical end time: 0.15
-# Left initial values:
-#   * rho = 0.445
-#   * vel = 0.692
-#   * p = 3.52874226
-# Right initial values:
-#   * rho = 0.5
-#   * vel = 0
-#   * p = 0.571
+# Woodward-Colella blast wave problem
 
 [GlobalParams]
   gravity_vector = '0 0 0'
-
-  spatial_discretization = RDG
-  rdg_slope_reconstruction = none
 
   closures = simple
 []
@@ -28,22 +11,22 @@
     type = PiecewiseConstant
     axis = x
     direction = right
-    x = '0.0025                1'
-    y = '1.591549333333333e+06 6.666666666666668e-09'
+    x = '0.1  0.9  1.0'
+    y = '1000 0.01 100'
   [../]
   [./T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
-    x = '0.0025                1'
-    y = '2.228169066666667e+06 9.333333333333334e-09'
+    x = '0.1  0.9   1.0'
+    y = '1400 0.014 140'
   [../]
 []
 
 [FluidProperties]
   [./fp]
     type = IdealGasFluidProperties
-    gamma = 1.66666666666666666667
+    gamma = 1.4
     molar_mass = 11.64024372
   [../]
 []
@@ -58,7 +41,7 @@
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1.0
-    n_elems = 400
+    n_elems = 500
     A = 1.0
 
     # IC
@@ -69,13 +52,13 @@
     f = 0
   [../]
 
-  [./left_boundary]
+  [./left_wall]
     type = SolidWall
     input = 'pipe:in'
   [../]
 
-  [./right_boundary]
-    type = FreeBoundary
+  [./right_wall]
+    type = SolidWall
     input = 'pipe:out'
   [../]
 []
@@ -91,15 +74,15 @@
   nl_abs_tol = 1e-8
   nl_max_its = 60
 
-  # run to t = 0.005
+  # run to t = 0.038
   start_time = 0.0
-  dt = 1e-6
-  num_steps = 5000
+  dt = 1e-5
+  num_steps = 3800
   abort_on_solve_fail = true
 []
 
 [Outputs]
-  file_base = 'sedov_blast_wave'
+  file_base = 'woodward_colella_blast_wave'
   execute_on = 'initial timestep_end'
   [./out]
     type = Exodus

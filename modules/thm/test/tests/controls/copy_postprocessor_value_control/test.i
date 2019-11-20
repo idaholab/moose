@@ -12,8 +12,6 @@
   initial_T = 350.
   scaling_factor_1phase = '1 1e-2 1e-4'
   closures = simple
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

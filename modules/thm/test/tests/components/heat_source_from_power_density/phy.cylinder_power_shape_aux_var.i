@@ -2,6 +2,7 @@
 
 [GlobalParams]
   scaling_factor_temperature = 1e1
+  spatial_discretization = cg
 []
 
 [Functions]

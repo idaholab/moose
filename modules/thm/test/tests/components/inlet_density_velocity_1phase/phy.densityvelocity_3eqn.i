@@ -6,9 +6,6 @@
   initial_vel = 0
 
   closures = simple
-
-  spatial_discretization = rdg
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]

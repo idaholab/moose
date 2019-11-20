@@ -15,6 +15,8 @@
   f = 0
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]

@@ -4,6 +4,7 @@
 #
 
 [GlobalParams]
+  spatial_discretization = cg
 []
 
 [HeatStructureMaterials]

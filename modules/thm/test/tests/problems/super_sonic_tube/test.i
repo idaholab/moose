@@ -8,6 +8,8 @@
   initial_vel = 522.676
 
   closures = simple
+
+  spatial_discretization = cg
 []
 
 [FluidProperties]
