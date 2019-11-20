@@ -22,5 +22,6 @@
     map = False
     partial = True
     mesh_mode = replicated # Fix when mortar segment mesh is distributed
+    rel_err = 2e-5
   []
 []
