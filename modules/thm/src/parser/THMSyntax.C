@@ -8,8 +8,6 @@ namespace THM
 void
 associateSyntax(Syntax & syntax)
 {
-  syntax.registerActionSyntax(
-      "AddStabilizationSettingsAction", "Stabilizations/*", "THM:add_stabilization");
   syntax.registerActionSyntax("AddHeatStructureMaterialAction",
                               "HeatStructureMaterials/*",
                               "THM:add_heat_structure_material");
@@ -41,8 +39,6 @@ registerActions(Syntax & syntax)
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
 
-  registerMooseObjectTask("THM:add_stabilization", StabilizationSettings, false);
-
   syntax.replaceActionSyntax("THMAddControlAction", "Controls/*", "add_control");
 
   try
@@ -72,7 +68,6 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_user_object", "THM:add_variables");
     syntax.addDependency("add_output_aux_variables", "THM:add_component_physics");
     syntax.addDependency("add_periodic_bc", "THM:add_variables");
-    syntax.addDependency("THM:add_stabilization", "add_function");
     syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
   }
   catch (CyclicDependencyException<std::string> & e)

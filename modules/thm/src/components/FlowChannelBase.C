@@ -5,7 +5,6 @@
 #include "TwoPhaseFluidProperties.h"
 #include "VaporMixtureFluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
-#include "StabilizationSettings.h"
 #include "HeatTransferBase.h"
 #include "HeatTransfer1PhaseBase.h"
 #include "HeatTransfer2PhaseBase.h"
@@ -129,15 +128,6 @@ FlowChannelBase::init()
     _flow_model->init();
 
     _closures = buildClosures();
-
-    // initialize the stabilization object
-    if (!_stabilization_uo_name.empty())
-      if (_sim.hasUserObject(_stabilization_uo_name))
-      {
-        StabilizationSettings & stabilization = const_cast<StabilizationSettings &>(
-            _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name));
-        stabilization.initMooseObjects(*_flow_model);
-      }
   }
 }
 
@@ -304,13 +294,6 @@ FlowChannelBase::addVariables()
   }
 
   _flow_model->addInitialConditions();
-
-  if (!_stabilization_uo_name.empty())
-  {
-    const StabilizationSettings & stabilization =
-        _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name);
-    stabilization.addVariables(*_flow_model, getSubdomainName());
-  }
 }
 
 void
@@ -443,19 +426,6 @@ FlowChannelBase::addMooseObjects()
 
   _flow_model->addMooseObjects();
   _closures->addMooseObjects(*this);
-
-  if (!_stabilization_uo_name.empty())
-  {
-    InputParameters pars = emptyInputParameters();
-    pars.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    pars.set<Component *>("component") = this;
-    pars.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
-    pars.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-
-    const StabilizationSettings & stabilization =
-        _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name);
-    stabilization.addMooseObjects(*_flow_model, pars);
-  }
 }
 
 void

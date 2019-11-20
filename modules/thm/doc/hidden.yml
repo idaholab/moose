@@ -239,8 +239,6 @@
 - /Kernels/OneD7EqnVolumeFractionPressureRelaxation
 - /Kernels/OneD7EqnVolumeFractionTimeDerivative
 - /Kernels/OneD7EqnVolumeFractionWallMassTransfer
-- /Kernels/OneDSUPG
-- /Kernels/OneDStabilizationBase
 
 - /Materials/AverageWallTemperature3EqnMaterial
 - /Materials/ConstantMaterial
@@ -265,7 +263,6 @@
 - /Materials/MultiComponentFluidPropertiesMaterialPT
 - /Materials/PressureRelaxationRateMaterial
 - /Materials/RDG7EqnNCGMaterial
-- /Materials/SUPGMaterial
 - /Materials/SaturationTemperatureMaterial
 - /Materials/SpecificInterfacialArea7EqnMaterial
 - /Materials/SpecificInterfacialAreaSimpleMaterial
@@ -304,10 +301,6 @@
 - /ScalarKernels/MomentumBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
 
-- /Stabilizations
-- /Stabilizations/AddStabilizationSettingsAction
-- /Stabilizations/SUPG
-
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
@@ -321,8 +314,6 @@
 - /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
 - /UserObjects/JunctionStagnationEnthalpyUserObject
-- /UserObjects/SUPG
-- /UserObjects/StabilizationSettings
 - /UserObjects/WaveSpeeds7EqnNCGHLLC
 
 - /VectorPostprocessors/Sampler1DBase
