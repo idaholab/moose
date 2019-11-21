@@ -1,0 +1,7 @@
+COORDINATES absolute 5.5e-6
+
+TIME STEPS relative 5.5e-6 floor 1e-10
+
+NODAL VARIABLES relative 5.5e-6 floor 1e-10
+	disp_x  floor 1e-4 # The primary action in this problem is in the y-direction and displacement scale is actually on the order unity so a floor of 1e-4 isn't bad
+	disp_y
