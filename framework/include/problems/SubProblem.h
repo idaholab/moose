@@ -645,6 +645,11 @@ public:
 
   virtual LineSearch * getLineSearch() = 0;
 
+  /**
+   * The coupling matrix defining what blocks exist in the preconditioning matrix
+   */
+  virtual const CouplingMatrix * couplingMatrix() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

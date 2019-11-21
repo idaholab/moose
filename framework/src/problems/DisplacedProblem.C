@@ -944,3 +944,9 @@ DisplacedProblem::getLineSearch()
 {
   return _mproblem.getLineSearch();
 }
+
+const CouplingMatrix *
+DisplacedProblem::couplingMatrix() const
+{
+  return _mproblem.couplingMatrix();
+}

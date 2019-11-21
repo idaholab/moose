@@ -278,6 +278,8 @@ public:
 
   LineSearch * getLineSearch() override;
 
+  const CouplingMatrix * couplingMatrix() const override;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

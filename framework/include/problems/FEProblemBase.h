@@ -171,7 +171,7 @@ public:
   // DEPRECATED METHOD
   void setCouplingMatrix(CouplingMatrix * cm);
 
-  const CouplingMatrix * couplingMatrix() { return _cm.get(); }
+  const CouplingMatrix * couplingMatrix() const override { return _cm.get(); }
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
