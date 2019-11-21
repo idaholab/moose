@@ -1,0 +1,50 @@
+#include "Closures1PhaseNone.h"
+#include "FlowModelTwoPhase.h"
+#include "FlowChannel1Phase.h"
+#include "HeatTransfer1PhaseBase.h"
+
+registerMooseObject("THMApp", Closures1PhaseNone);
+
+template <>
+InputParameters
+validParams<Closures1PhaseNone>()
+{
+  InputParameters params = validParams<Closures1PhaseBase>();
+  params.addClassDescription("No 1-phase closures. Useful for testing with one-time correlations.");
+  return params;
+}
+
+Closures1PhaseNone::Closures1PhaseNone(const InputParameters & params) : Closures1PhaseBase(params)
+{
+}
+
+void
+Closures1PhaseNone::check(const FlowChannelBase & /*flow_channel*/) const
+{
+}
+
+void
+Closures1PhaseNone::check(const HeatTransferBase & /*heat_transfer*/) const
+{
+}
+
+void
+Closures1PhaseNone::addMooseObjects(const FlowChannelBase & flow_channel)
+{
+  const FlowChannel1Phase & flow_channel_1phase =
+      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
+
+  const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
+  if ((n_ht_connections > 0) && (flow_channel.getTemperatureMode()))
+  {
+    if (flow_channel.getNumberOfHeatTransferConnections() > 1)
+      addAverageWallTemperatureMaterial(flow_channel_1phase);
+    else
+      addWallTemperatureFromAuxMaterial(flow_channel_1phase);
+  }
+}
+
+void
+Closures1PhaseNone::addMooseObjects(const HeatTransferBase & /*heat_transfer*/)
+{
+}
