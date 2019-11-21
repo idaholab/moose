@@ -17,9 +17,23 @@
     [../]
     [./2drz]
       type = CSVDiff
-      input = '2drz.i'
+      input = '2d.i'
       csvdiff = '2drz_out.csv'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_out'
       detail = 'in 2drz.'
+    [../]
+    [./2d_plastic]
+      type = CSVDiff
+      input = '2d_plastic.i'
+      csvdiff = '2d_plastic_out.csv'
+      detail = 'in 2d.'
+    [../]
+    [./2drz_plastic]
+      type = CSVDiff
+      input = '2d_plastic.i'
+      csvdiff = '2drz_plastic_out.csv'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=2drz_plastic_out'
+      detail = 'in 2d.'
     [../]
   [../]
   [./scaled]
@@ -40,10 +54,24 @@
     [../]
     [./2drz]
       type = CSVDiff
-      input = '2drz.i'
+      input = '2d.i'
       csvdiff = '2drz_scaled_out.csv'
-      cli_args = 'xscalar=0.5 yscalar=2 Outputs/file_base=2drz_scaled_out'
+      cli_args = 'Problem/coord_type=RZ yscalar=2 Outputs/file_base=2drz_scaled_out'
       detail = 'in 2drz.'
+    [../]
+    [./2d_plastic]
+      type = CSVDiff
+      input = '2d_plastic.i'
+      csvdiff = '2d_plastic_scaled_out.csv'
+      cli_args = 'xscalar=0.5 yscalar=2 Outputs/file_base=2d_plastic_scaled_out'
+      detail = 'in 2d with creep.'
+    [../]
+    [./2drz_plastic]
+      type = CSVDiff
+      input = '2d_plastic.i'
+      csvdiff = '2drz_plastic_scaled_out.csv'
+      cli_args = 'Problem/coord_type=RZ yscalar=2 Outputs/file_base=2drz_plastic_scaled_out'
+      detail = 'in 2drz with creep.'
     [../]
   [../]
 []
