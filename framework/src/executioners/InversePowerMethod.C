@@ -31,7 +31,7 @@ InversePowerMethod::validParams()
                                   1e-2,
                                   "Reduce residual norm per power iteration by this factor",
                                   "Please use l_tol instead");
-  params.set<Real>("l_tol") = 1e-2;
+  params.set<Real>("l_tol", true) = 1e-2;
   params.addParam<bool>(
       "Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
   return params;
