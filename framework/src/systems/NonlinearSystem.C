@@ -123,7 +123,7 @@ NonlinearSystem::init()
 {
   NonlinearSystemBase::init();
 
-  if (_automatic_scaling)
+  if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors
     _transient_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
 }
@@ -410,21 +410,11 @@ NonlinearSystem::converged()
 }
 
 void
-NonlinearSystem::computeScalingJacobian()
+NonlinearSystem::computeScaling()
 {
   _console << "\nPerforming automatic scaling calculation\n\n";
 
-  TIME_SECTION(_compute_scaling_jacobian_timer);
-
-  mooseAssert(_transient_sys.have_matrix("scaling_matrix"),
-              "The scaling matrix has not been created. There must have been an issue in "
-              "initialization of the NonlinearSystem");
-
-  auto & scaling_matrix = _transient_sys.get_matrix("scaling_matrix");
-
-  _computing_scaling_jacobian = true;
-  _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, scaling_matrix);
-  _computing_scaling_jacobian = false;
+  TIME_SECTION(_compute_scaling_timer);
 
   // container for repeated access of element global dof indices
   std::vector<dof_id_type> dof_indices;
@@ -433,11 +423,45 @@ NonlinearSystem::computeScalingJacobian()
   auto & scalar_variables = _vars[0].scalars();
 
   std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
+  std::vector<Real> resid_inverse_scaling_factors(field_variables.size() + scalar_variables.size(),
+                                                  0);
+  std::vector<Real> jac_inverse_scaling_factors(field_variables.size() + scalar_variables.size(),
+                                                0);
   auto & dof_map = dofMap();
+
+  // what types of scaling do we want?
+  bool jac_scaling = _resid_vs_jac_scaling_param < 1. - TOLERANCE;
+  bool resid_scaling = _resid_vs_jac_scaling_param > TOLERANCE;
+
+  SparseMatrix<Number> * scaling_matrix = nullptr;
+  NumericVector<Number> * scaling_residual = nullptr;
+
+  if (jac_scaling)
+  {
+    mooseAssert(_transient_sys.have_matrix("scaling_matrix"),
+                "The scaling matrix has not been created. There must have been an issue in "
+                "initialization of the NonlinearSystem");
+
+    scaling_matrix = &_transient_sys.get_matrix("scaling_matrix");
+
+    _computing_scaling_jacobian = true;
+    _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *scaling_matrix);
+    _computing_scaling_jacobian = false;
+  }
+
+  if (resid_scaling)
+  {
+    scaling_residual = _transient_sys.rhs;
+
+    _computing_scaling_residual = true;
+    _fe_problem.computingNonlinearResid(true);
+    _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *scaling_residual);
+    _fe_problem.computingNonlinearResid(false);
+    _computing_scaling_residual = false;
+  }
 
   // Compute our scaling factors for the spatial field variables
   for (const auto & elem : *mesh().getActiveLocalElementRange())
-  {
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
     {
       auto & field_variable = *field_variables[i];
@@ -445,12 +469,21 @@ NonlinearSystem::computeScalingJacobian()
       for (auto dof_index : dof_indices)
         if (dof_map.local_index(dof_index))
         {
-          // For now we will use the diagonal for determining scaling
-          auto mat_value = scaling_matrix(dof_index, dof_index);
-          inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
+          if (jac_scaling)
+          {
+            // For now we will use the diagonal for determining scaling
+            auto mat_value = (*scaling_matrix)(dof_index, dof_index);
+            jac_inverse_scaling_factors[i] =
+                std::max(jac_inverse_scaling_factors[i], std::abs(mat_value));
+          }
+          if (resid_scaling)
+          {
+            auto vec_value = (*scaling_residual)(dof_index);
+            resid_inverse_scaling_factors[i] =
+                std::max(resid_inverse_scaling_factors[i], std::abs(vec_value));
+          }
         }
     }
-  }
 
   auto offset = field_variables.size();
 
@@ -462,15 +495,52 @@ NonlinearSystem::computeScalingJacobian()
     for (auto dof_index : dof_indices)
       if (dof_map.local_index(dof_index))
       {
-        // For now we will use the diagonal for determining scaling
-        auto mat_value = scaling_matrix(dof_index, dof_index);
-        inverse_scaling_factors[offset + i] =
-            std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
+        if (jac_scaling)
+        {
+          // For now we will use the diagonal for determining scaling
+          auto mat_value = (*scaling_matrix)(dof_index, dof_index);
+          jac_inverse_scaling_factors[offset + i] =
+              std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
+        }
+        if (resid_scaling)
+        {
+          auto vec_value = (*scaling_residual)(dof_index);
+          resid_inverse_scaling_factors[offset + i] =
+              std::max(resid_inverse_scaling_factors[offset + i], std::abs(vec_value));
+        }
       }
   }
 
-  // Get the maximum value across processes
-  _communicator.max(inverse_scaling_factors);
+  if (resid_scaling)
+    _communicator.max(resid_inverse_scaling_factors);
+  if (jac_scaling)
+    _communicator.max(jac_inverse_scaling_factors);
+
+  if (jac_scaling && resid_scaling)
+    for (MooseIndex(inverse_scaling_factors) i = 0; i < inverse_scaling_factors.size(); ++i)
+    {
+      // Be careful not to take log(0)
+      if (!resid_inverse_scaling_factors[i])
+      {
+        if (!jac_inverse_scaling_factors[i])
+          inverse_scaling_factors[i] = 1;
+        else
+          inverse_scaling_factors[i] = jac_inverse_scaling_factors[i];
+      }
+      else if (!jac_inverse_scaling_factors[i])
+        // We know the resid is not zero
+        inverse_scaling_factors[i] = resid_inverse_scaling_factors[i];
+      else
+        inverse_scaling_factors[i] =
+            std::exp(_resid_vs_jac_scaling_param * std::log(resid_inverse_scaling_factors[i]) +
+                     (1 - _resid_vs_jac_scaling_param) * std::log(jac_inverse_scaling_factors[i]));
+    }
+  else if (jac_scaling)
+    inverse_scaling_factors = jac_inverse_scaling_factors;
+  else if (resid_scaling)
+    inverse_scaling_factors = resid_inverse_scaling_factors;
+  else
+    mooseError("We shouldn't be calling this routine if we're not performing any scaling");
 
   // We have to make sure that our scaling values are not zero
   for (auto & scaling_factor : inverse_scaling_factors)

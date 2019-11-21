@@ -302,7 +302,7 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  virtual void computeScalingJacobian();
+  virtual void computeScaling();
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -653,6 +653,16 @@ public:
     _compute_scaling_once = compute_scaling_once;
   }
 
+  /**
+   * Sets the param that indicates the weighting of the residual vs the Jacobian in determining
+   * variable scaling parameters. A value of 1 indicates pure residual-based scaling. A value of 0
+   * indicates pure Jacobian-based scaling
+   */
+  void autoScalingParam(Real resid_vs_jac_scaling_param)
+  {
+    _resid_vs_jac_scaling_param = resid_vs_jac_scaling_param;
+  }
+
 #ifndef MOOSE_SPARSE_AD
   /**
    * Set the required size of the derivative vector
@@ -908,7 +918,7 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
-  PerfID _compute_scaling_jacobian_timer;
+  PerfID _compute_scaling_timer;
 
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;
@@ -920,6 +930,11 @@ protected:
   /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
   /// be computed during an extra Jacobian evaluation at the beginning of every time step.
   bool _compute_scaling_once;
+
+  /// The param that indicates the weighting of the residual vs the Jacobian in determining
+  /// variable scaling parameters. A value of 1 indicates pure residual-based scaling. A value of 0
+  /// indicates pure Jacobian-based scaling
+  Real _resid_vs_jac_scaling_param;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints

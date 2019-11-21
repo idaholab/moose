@@ -129,6 +129,19 @@ public:
   }
 
   /**
+   * Whether we are computing an initial Residual for automatic variable scaling
+   */
+  bool computingScalingResidual() const { return _computing_scaling_residual; }
+
+  /**
+   * Setter for whether we're computing the scaling residual
+   */
+  void computingScalingResidual(bool computing_scaling_residual)
+  {
+    _computing_scaling_residual = computing_scaling_residual;
+  }
+
+  /**
    * Gets writeable reference to the dof map
    */
   virtual DofMap & dofMap();
@@ -812,6 +825,9 @@ protected:
 
   /// Flag used to indicate whether we are computing the scaling Jacobian
   bool _computing_scaling_jacobian;
+
+  /// Flag used to indicate whether we are computing the scaling Residual
+  bool _computing_scaling_residual;
 };
 
 #define PARALLEL_TRY

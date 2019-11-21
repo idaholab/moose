@@ -86,6 +86,8 @@ Executioner::Executioner(const InputParameters & parameters)
                         (_fe_problem.solverParams()._type != Moose::ST_JFNK));
 
   nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
+  nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
+
   _fe_problem.numGridSteps(_num_grid_steps);
 }
 
