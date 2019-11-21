@@ -34,9 +34,11 @@ protected:
   virtual void takeStep();
 
   const unsigned int & _free_iter;
-  const Real & _abs_tol;
-  const Real & _rel_tol;
-  const Real & _pfactor;
+  const Real & _nl_abs_tol;
+  const Real & _nl_rel_tol;
+  const Real & _l_tol;
+  const Real & _free_l_tol;
+
   bool _output_pi;
   bool _output_after_pi;
   bool _last_solve_converged;
