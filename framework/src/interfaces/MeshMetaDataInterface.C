@@ -9,8 +9,9 @@
 
 // MOOSE includes
 #include "MeshMetaDataInterface.h"
+
 #include "MooseApp.h"
-#include "MeshGenerator.h"
+#include "MooseObject.h"
 
 MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * moose_object)
   : _meta_data_app(moose_object->getMooseApp())

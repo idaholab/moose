@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseObject.h"
 #include "MooseError.h"
 #include "InputParameters.h"
 #include "RestartableData.h"
@@ -17,7 +16,6 @@
 #include <string>
 
 class MooseApp;
-class MeshGenerator;
 
 /**
  * The Interface used to retrieve mesh meta data (attributes) set by the MeshGenerator system.

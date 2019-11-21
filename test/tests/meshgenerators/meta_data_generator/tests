@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#13841'
+  design = '/MeshMetaDataInterface.md'
+
+  [meta_data_store]
+    type = 'Exodiff'
+    input = 'mesh_meta_data_store.i'
+    exodiff = 'mesh_meta_data_store_out.e'
+    design = 'MeshMetaDataInterface.md'
+    requirement = 'The system shall support the ability for mesh generators to save attributes to a stateful
+                   data store available for use when recovering a simulation.'
+  []
+[]

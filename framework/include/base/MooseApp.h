@@ -596,6 +596,11 @@ public:
   void setFinalMeshGeneratorName(const std::string & generator_name);
 
   /**
+   * Get the final mesh generator name
+   */
+  const std::string & finalMeshGeneratorName() { return _final_generator_name; }
+
+  /**
    * Add a mesh generator that will act on the meshes in the system
    */
   void addMeshGenerator(const std::string & generator_name,

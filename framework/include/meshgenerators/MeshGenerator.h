@@ -83,6 +83,13 @@ protected:
   std::unique_ptr<MeshBase> &
   getMeshByName(const MeshGeneratorName & input_mesh_generator_parameter_name);
 
+  /*
+   * Whether or not this mesh generator is the final.
+   * Note: Final mesh generator owns the final mesh base in type of libMesh::MeshBase.
+   *       This function should only be called in generate function.
+   */
+  bool isFinal() const { return _app.finalMeshGeneratorName() == _name; }
+
   /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
   std::shared_ptr<MooseMesh> & _mesh;
 
@@ -105,7 +112,8 @@ MeshGenerator::declareMeshProperty(const std::string & data_name)
   // If it's already in use, the App will return a reference to the existing instance and we'll
   // return that one instead. We might refactor this to have the app create the RestartableData
   // at a later date.
-  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, nullptr);
+  auto data_ptr =
+      libmesh_make_unique<RestartableData<T>>(full_name, _app.actionWarehouse().mesh().get());
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(
       _app.registerRestartableData(full_name, std::move(data_ptr), 0, true, false));
 
