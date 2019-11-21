@@ -23,7 +23,9 @@ template <>
 InputParameters validParams<SamplerPostprocessorTransfer>();
 
 /**
- * Transfer Postprocessor from sub-applications to the master application.
+ * Transfer Postprocessor from sub-applications to a VectorPostprocessor on the master application.
+ *
+ * This object transfers the distributed data to a StochasticResults object.
  */
 class SamplerPostprocessorTransfer : public StochasticToolsTransfer
 {
@@ -51,9 +53,6 @@ protected:
 
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;
-
-  /// Local values of compute PP values
-  std::vector<PostprocessorValue> _local_values;
 
   /// Name of postprocessor on the sub-applications
   const PostprocessorName & _sub_pp_name;

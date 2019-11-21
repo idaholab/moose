@@ -25,8 +25,8 @@ class StochasticResults : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
   StochasticResults(const InputParameters & parameters);
-  void virtual initialize() override;
-  void virtual finalize() override {}
+  void virtual initialize() override {}
+  void virtual finalize() override;
   void virtual execute() override {}
 
   /**
@@ -43,6 +43,12 @@ protected:
   /// Storage for declared vectors
   VectorPostprocessorValue * _sample_vector;
 
+  /// Parallel operation mode
+  const MooseEnum _parallel_type;
+
   /// The sampler to extract data
   Sampler * _sampler = nullptr;
+
+  /// The rank data to output if parallel type is distributed
+  const processor_id_type _output_distributed_rank;
 };

@@ -70,19 +70,26 @@ SamplerPostprocessorTransfer::initialSetup()
 void
 SamplerPostprocessorTransfer::initializeFromMultiapp()
 {
-  _local_values.clear();
+  VectorPostprocessorValue & vpp =
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+
+  vpp.clear();
+  vpp.reserve(_sampler->getNumberOfLocalRows());
 }
 
 void
 SamplerPostprocessorTransfer::executeFromMultiapp()
 {
+  VectorPostprocessorValue & vpp =
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
     if (_multi_app->hasLocalApp(i))
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      _local_values.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
+      vpp.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
     }
   }
 }
@@ -90,46 +97,20 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
 void
 SamplerPostprocessorTransfer::finalizeFromMultiapp()
 {
-  // Gather the PP values from all ranks
-  _communicator.gather(0, _local_values);
-
-  // Update VPP
-  if (processor_id() == 0)
-  {
-    _results->initialize();
-    VectorPostprocessorValue & vpp =
-        _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
-    vpp = _local_values;
-  }
 }
 
 void
 SamplerPostprocessorTransfer::execute()
 {
-  // Number of PP is equal to the number of MultiApps
-  const unsigned int n = _multi_app->numGlobalApps();
-
-  // Collect the PP values for this processor
-  _local_values.assign(n, 0);
-  for (unsigned int i = 0; i < n; i++)
-  {
-    if (_multi_app->hasLocalApp(i))
-    {
-      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-
-      // use reserve and push_back b/c access to FEProblemBase is based on global id
-      _local_values[i] = app_problem.getPostprocessorValue(_sub_pp_name);
-    }
-  }
-
-  // Sum the PP values from all ranks
-  _communicator.sum(_local_values);
-
-  // Initialize VPP
-  _results->initialize();
-
-  // Update VPP
   VectorPostprocessorValue & vpp =
       _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
-  vpp = _local_values;
+
+  vpp.clear();
+  vpp.reserve(_sampler->getNumberOfLocalRows());
+
+  for (dof_id_type i = _sampler->getLocalRowBegin(); i < _sampler->getLocalRowEnd(); ++i)
+  {
+    FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+    vpp.emplace_back(app_problem.getPostprocessorValue(_sub_pp_name));
+  }
 }
