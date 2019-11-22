@@ -173,12 +173,14 @@
       absent_out = '[1-9]+[0-9]* of 16 singular values'
       expect_out = '0 of 16 singular values'
       detail = 'tie nodes together and'
+      allow_test_objects = True
     []
     [jac]
       type = 'PetscJacobianTester'
       input = tied-nodes.i
       cli_args = "Outputs/active=''"
       detail = 'have a perfect Jacobian'
+      allow_test_objects = True
     []
   []
 []

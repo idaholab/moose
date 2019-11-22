@@ -31,6 +31,9 @@ validParams<RANFSNormalMechanicalContact>()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addClassDescription("Applies the Reduced Active Nonlinear Function Set scheme in which "
+                             "the slave node's non-linear residual function is replaced by the "
+                             "zero penetration constraint equation when the constraint is active");
   return params;
 }
 

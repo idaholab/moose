@@ -17,7 +17,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/sparse_matrix.h"
 
-registerMooseObject("ContactApp", RANFSTieNode);
+registerMooseObject("ContactTestApp", RANFSTieNode);
 
 template <>
 InputParameters
