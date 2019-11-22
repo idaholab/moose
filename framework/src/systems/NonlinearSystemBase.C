@@ -707,6 +707,10 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
         residual += *_Re_non_time;
       residual.close();
     }
+    if (_computing_scaling_residual)
+      // We don't want to do nodal bcs or anything else
+      return;
+
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
@@ -1472,24 +1476,10 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   PARALLEL_CATCH;
 
   if (_computing_scaling_residual)
-  {
     // We computed the volumetric objects. We can return now (after assembling) before we get into
-    // any strongly enforced constraint conditions (NodalBCs, Constraints) or penalty-type objects
+    // any strongly enforced constraint conditions or penalty-type objects
     // (DGKernels, IntegratedBCs, InterfaceKernels, Constraints)
-    if (_need_residual_copy)
-    {
-      _Re_non_time->close();
-      _Re_non_time->localize(_residual_copy);
-    }
-
-    if (_need_residual_ghosted)
-    {
-      _Re_non_time->close();
-      *_residual_ghosted = *_Re_non_time;
-      _residual_ghosted->close();
-    }
     return;
-  }
 
   // residual contributions from boundary NodalKernels
   PARALLEL_TRY
