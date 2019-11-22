@@ -1,13 +1,11 @@
 #  This is a benchmark test that checks Dirac based frictional
-#  contact using the penalty method.  In this test a sinusoidal
+#  contact using the penalty method.  In this test a constant
 #  displacement is applied in the horizontal direction to simulate
-#  a small block come in and out of contact as it slides down a larger block.
+#  a small block come sliding down a larger block.
 #
-#  The sinusoid is of the form 0.4sin(4t)+0.2 and a friction coefficient
-#  of 0. is used.  The gold file is run on one processor and the benchmark
-#  case is run on a minimum of 4 processors to ensure no parallel variability
-#  in the contact pressure and penetration results.  Further documentation can
-#  found in moose/modules/contact/doc/sliding_block/
+#  A friction coefficient of 0.2 is used.  The gold file is run on one processor
+#  and the benchmark case is run on a minimum of 4 processors to ensure no
+#  parallel variability in the contact pressure and penetration results.
 #
 
 [Mesh]
@@ -18,6 +16,13 @@
 [GlobalParams]
   volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
 []
 
 [AuxVariables]
@@ -38,16 +43,12 @@
     type = ParsedFunction
     value = -t
   [../]
-  [./horizontal_movement]
-    type = ParsedFunction
-    value = -0.04*sin(4*t)+0.02
-  [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    add_variables = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
@@ -117,10 +118,10 @@
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionPresetBC
+    type = PresetBC
     variable = disp_x
     boundary = 4
-    function = horizontal_movement
+    value = -0.02
   [../]
   [./right_y]
     type = FunctionPresetBC
@@ -131,15 +132,23 @@
 []
 
 [Materials]
-  [./constitutive]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 2'
-    youngs_modulus = 1e6
+  [./left]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 1
+    disp_y = disp_y
+    disp_x = disp_x
     poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
+  [./right]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 2
+    disp_y = disp_y
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
 []
 
@@ -153,11 +162,14 @@
 
   line_search = 'none'
 
+  # petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -ksp_gmres_restart'
+  # petsc_options_value = 'hypre    boomeramg  4    101'
+
   nl_abs_tol = 1e-7
   l_max_its = 100
   nl_max_its = 1000
-  dt = 0.1
-  end_time = 15
+  dt = 0.05
+  end_time = 10
   num_steps = 1000
   nl_rel_tol = 1e-6
   dtmin = 0.01
@@ -170,7 +182,6 @@
 []
 
 [Outputs]
-  file_base = frictional_04_penalty_out
   interval = 10
   [./exodus]
     type = Exodus
@@ -186,10 +197,10 @@
   [./leftright]
     slave = 3
     master = 2
-    model = frictionless
+    model = coulomb
     penalty = 1e+7
     formulation = penalty
-    friction_coefficient = 0.4
+    friction_coefficient = 0.2
     normal_smoothing_distance = 0.1
   [../]
 []
