@@ -1,9 +1,12 @@
 #
 
+[GlobalParams]
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   file = LinearStrainHardening_test.e
-
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -60,11 +63,9 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
@@ -72,31 +73,39 @@
 [AuxKernels]
 
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_mag]
@@ -140,21 +149,33 @@
 
 []
 
+
 [Materials]
-  [./constant]
-    type = LinearStrainHardening
-    block = 1
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = '1'
+  [../]
+  [./stress]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'isoplas'
+    block = '1'
+  [../]
+  [./isoplas]
+    type = IsotropicPlasticityStressUpdate
     yield_stress = 2.4e2
     hardening_constant = 1206
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
+
+
 
 [Executioner]
   type = Transient
@@ -183,7 +204,6 @@
 []
 
 [Outputs]
-  file_base = LinearStrainHardening_test_out
   exodus = true
   csv = true
 []
@@ -191,3 +211,4 @@
 [Problem]
   restart_file_base = LinearStrainHardeningRestart1_out_cp/0004
 []
+

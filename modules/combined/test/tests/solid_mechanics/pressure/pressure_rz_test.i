@@ -21,8 +21,8 @@
 #    Stress xy = 0
 
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
+  volumetric_locking_correction = false
+  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -46,101 +46,15 @@
   [../]
 [] # Functions
 
-[Variables]
-
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-[] # Variables
-
-[AuxVariables]
-
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-[] # AuxVariables
-
-[SolidMechanics]
-
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
-  [../]
-
-[] # SolidMechanics
-
-[AuxKernels]
-
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-#  [./stress_xy]
-#    type = MaterialTensorAux
-#    tensor = stress
-#    variable = stress_xy
-#    index = 3
-#  [../]
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-  [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zx
-    index = 5
-  [../]
-
-[] # AuxKernels
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    additional_generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+  []
+[]
 
 [BCs]
-
   [./no_y]
     type = DirichletBC
     variable = disp_y
@@ -158,34 +72,26 @@
       function = vary
     [../]
   [../]
-
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff]
-    type = Elastic
-    block = 1
-
-    disp_r = disp_x
-    disp_z = disp_y
-
+  [./constant]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-    thermal_expansion = 1e-5
   [../]
-
-[] # Materials
+  [./constant_stress]
+    type = ComputeLinearElasticStress
+    block = '1'
+  [../]
+[]
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-12

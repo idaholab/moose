@@ -1,21 +1,28 @@
 [Tests]
-
-  [./3D]
+  issues = '#2814'
+  design = 'syntax/Modules/TensorMechanics/index.md'
+  [./3D_test]
     type = Exodiff
     input = '3D_test.i'
-    exodiff = '3D_out.e'
+    exodiff = '3D_test_out.e'
     valgrind = 'HEAVY'
+    design = 'ComputeFiniteStrain.md'
+    requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 3D problem.'
   [../]
-  [./RZ]
+  [./2D-RZ_test]
     type = Exodiff
     input = '2D-RZ_test.i'
-    exodiff = '2D-RZ_out.e'
+    exodiff = '2D-RZ_test_out.e'
+    design = 'ComputeAxisymmetric1DFiniteStrain.md'
+    requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 2D problem.'
   [../]
-  [./RSpherical]
+  [./1D-SPH_test]
     type = Exodiff
     input = '1D-SPH_test.i'
-    exodiff = '1D-SPH_out.e'
+    exodiff = '1D-SPH_test_out.e'
     max_parallel = 2
+    requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 1D problem.'
+    design = 'StressDivergenceRSphericalTensors.md'
   [../]
 
 []

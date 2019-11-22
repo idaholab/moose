@@ -41,56 +41,26 @@
 # refined.
 
 [GlobalParams]
-  order = SECOND
-  family = LAGRANGE
-  disp_x = disp_x
-  disp_y = disp_y
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = 2D-RZ_mesh.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
   coord_type = RZ
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-
-  [./disp_y]
-  [../]
-[]
-
-
-[AuxVariables]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-    execute_on = timestep_end
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    additional_generate_output = 'stress_zz'
+  []
 []
 
 [BCs]
-
 # pin particle along symmetry planes
   [./no_disp_x]
     type = DirichletBC
@@ -141,15 +111,15 @@
 []
 
 [Materials]
-
- [./fuel_disp]
-    type = Elastic
-    block = 1
-    disp_r = disp_x
-    disp_z = disp_y
+  [./fuel_disp]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e10
-    poissons_ratio = .345
-    thermal_expansion = 0
+    poissons_ratio = 0.345
+  [../]
+  [./fuel_disp_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
   [../]
 []
 
@@ -206,6 +176,5 @@
 []
 
 [Outputs]
-  file_base = 2D-RZ_out
   exodus = true
 []
