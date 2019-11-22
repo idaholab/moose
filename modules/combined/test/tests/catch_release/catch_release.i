@@ -1,4 +1,5 @@
 [GlobalParams]
+  volumetric_locking_correction = true
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -15,45 +16,12 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_yy'
+  []
 []
 
 [Contact]
@@ -97,29 +65,15 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./stiffStuff]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
+  [./stiffStuffStress]
+    type = ComputeFiniteStrainElasticStress
+  []
 []
 
 [Executioner]

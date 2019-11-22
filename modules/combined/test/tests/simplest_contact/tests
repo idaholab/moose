@@ -1,13 +1,17 @@
 [Tests]
-  [./test]
+  issue = '#716'
+  design = 'syntax/Contact/index.md MultiDContactConstraint.md'
+  [./simplest_contact_test]
     type = 'Exodiff'
     input = 'simplest_contact_test.i'
-    exodiff = 'out.e'
+    exodiff = 'simplest_contact_test_out.e'
+    requirement = 'The contact system shall enforce node-face constraint upon external solicitation of the interface.'
   [../]
 
-  [./test_skew]
+  [./simplest_contact_skew_test]
     type = 'Exodiff'
     input = 'simplest_contact_skew_test.i'
-    exodiff = 'out_skew.e'
+    exodiff = 'simplest_contact_skew_test_out.e'
+    requirement = 'The contact system shall enforce node-face constraint on a tilted configuration upon external solicitation of the interface.'
   [../]
 []

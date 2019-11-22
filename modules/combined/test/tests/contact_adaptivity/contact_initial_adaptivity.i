@@ -2,18 +2,15 @@
 # It ensures that contact is enforced on the new nodes that are
 # created due to refinement on the slave side of the interface.
 
-[Mesh]
-  file = 2blocks.e
+[GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-  patch_size = 80
-  parallel_type = replicated
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+[Mesh]
+  file = 2blocks.e
+  patch_size = 80
+  parallel_type = replicated
 []
 
 [AuxVariables]
@@ -30,11 +27,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+  []
 []
 
 [AuxKernels]
@@ -81,20 +78,21 @@
 []
 
 [Materials]
-  [./left]
-    type = LinearIsotropicMaterial
+  [./stiffStuff1]
+    type = ComputeIsotropicElasticityTensor
     block = '1 2'
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
 [Contact]
   [./leftright]
     slave = 3
-    displacements = 'disp_x disp_y'
     master = 2
     model = frictionless
     penalty = 1e+6

@@ -11,6 +11,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  volumetric_locking_correction = true
 []
 
 [Mesh]
@@ -18,33 +19,12 @@
   dim = 3
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-
 [AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
-
 
 [Functions]
   [./top_pull]
@@ -53,21 +33,16 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = true
+    generate_output = 'stress_yy'
+  []
 []
 
-
 [AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
   [./total_strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -76,7 +51,6 @@
     index_j = 1
   [../]
  []
-
 
 [BCs]
   [./y_pull_function]
@@ -111,15 +85,11 @@
     youngs_modulus = 1.0
     poissons_ratio = 0.3
   [../]
-  [./strain]
-    type = ComputeIncrementalSmallStrain
-  [../]
   [./power_law_hardening]
     type = IsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
   [../]
-
   [./radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'power_law_hardening'
@@ -134,7 +104,6 @@
   petsc_options = '-ksp_snes_ew'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
-
 
   line_search = 'none'
 
@@ -160,11 +129,9 @@
   [../]
 []
 
-
 [Outputs]
   [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
-  file_base = PowerLawHardening_out
 []

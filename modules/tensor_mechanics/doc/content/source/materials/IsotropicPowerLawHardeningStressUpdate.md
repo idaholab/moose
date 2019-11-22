@@ -25,13 +25,13 @@ class to solve for yield stress:
 
 ## Example Input File Syntax
 
-!listing modules/combined/test/tests/power_law_hardening/PowerLawHardening-TM.i
+!listing modules/combined/test/tests/power_law_hardening/PowerLawHardening.i
          block=Materials/power_law_hardening
 
 `IsotropicPowerLawHardeningStressUpdate` must be run in conjunction with the inelastic strain return
 mapping stress calculator as shown below:
 
-!listing modules/combined/test/tests/power_law_hardening/PowerLawHardening-TM.i
+!listing modules/combined/test/tests/power_law_hardening/PowerLawHardening.i
          block=Materials/radial_return_stress
 
 !syntax parameters /Materials/IsotropicPowerLawHardeningStressUpdate
