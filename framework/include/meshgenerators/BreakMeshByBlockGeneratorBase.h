@@ -47,7 +47,7 @@ protected:
                               const subdomain_id_type & /*masterBlockID*/,
                               const subdomain_id_type & /*slaveBlockID*/,
                               std::string & /*boundaryName*/,
-                              boundary_id_type & /*boundaryID*/,
+                              const boundary_id_type & /*boundaryID*/,
                               BoundaryInfo & /*boundary_info*/);
 
   std::set<std::pair<std::string, BoundaryID>> _bName_bID_set;
@@ -62,7 +62,7 @@ private:
                                    const subdomain_id_type & /*slaveBlockID*/);
 
   /// this method save the boundary name/id pair
-  void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,
+  void mapBoundaryIdAndBoundaryName(const boundary_id_type & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };
 

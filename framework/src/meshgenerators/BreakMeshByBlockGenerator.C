@@ -164,6 +164,7 @@ BreakMeshByBlockGenerator::generate()
                 std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
                     std::make_pair(current_elem->subdomain_id(), connected_elem->subdomain_id());
 
+                _new_boundary_sides_list.insert(blocks_pair);
                 _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
                     current_elem->id(), current_elem->which_neighbor_am_i(connected_elem)));
               }
@@ -186,27 +187,40 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  boundary_id_type boundaryID = findFreeBoundaryId(mesh);
   std::string boundaryName = _interface_name;
 
+  std::set<boundary_id_type> ids = boundary_info.get_boundary_ids();
+  boundary_id_type boundaryID = *ids.rbegin() + 1;
+
+  // Make sure the new is the same on every processor
+  mesh.comm().set_union(_new_boundary_sides_list);
+  mesh.comm().max(boundaryID);
+
   // loop over boundary sides
-  for (auto & boundary_side_map : _new_boundary_sides_map)
+  for (auto & boundary_side : _new_boundary_sides_list)
   {
 
     // find the appropriate boundary name and id
     //  given master and slave block ID
     if (_split_interface)
       findBoundaryNameAndInd(mesh,
-                             boundary_side_map.first.first,
-                             boundary_side_map.first.second,
+                             boundary_side.first,
+                             boundary_side.second,
                              boundaryName,
                              boundaryID,
                              boundary_info);
     else
       boundary_info.sideset_name(boundaryID) = boundaryName;
 
+    libmesh_assert(mesh.comm().verify(boundaryID));
+    libmesh_assert(mesh.comm().verify(boundaryName));
+
     // loop over all the side belonging to each pair and add it to the proper interface
-    for (auto & element_side : boundary_side_map.second)
-      boundary_info.add_side(element_side.first, element_side.second, boundaryID);
+    auto boundary_side_map = _new_boundary_sides_map.find(boundary_side);
+    if (boundary_side_map != _new_boundary_sides_map.end())
+      for (auto & element_side : boundary_side_map->second)
+        boundary_info.add_side(element_side.first, element_side.second, boundaryID);
+
+    ++boundaryID;
   }
 }

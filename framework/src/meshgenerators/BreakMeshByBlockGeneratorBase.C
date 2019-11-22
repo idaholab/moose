@@ -83,7 +83,7 @@ BreakMeshByBlockGeneratorBase::generateBoundaryName(MeshBase & mesh,
 }
 
 void
-BreakMeshByBlockGeneratorBase::mapBoundaryIdAndBoundaryName(boundary_id_type & boundaryID,
+BreakMeshByBlockGeneratorBase::mapBoundaryIdAndBoundaryName(const boundary_id_type & boundaryID,
                                                             const std::string & boundaryName)
 {
   _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
@@ -94,7 +94,7 @@ BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
                                                       const subdomain_id_type & masterBlockID,
                                                       const subdomain_id_type & slaveBlockID,
                                                       std::string & boundaryName,
-                                                      boundary_id_type & boundaryID,
+                                                      const boundary_id_type & boundaryID,
                                                       BoundaryInfo & boundary_info)
 {
   // TODO need to be updated if distributed mesh is implemented
@@ -110,7 +110,7 @@ BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
   {
     if (b.first.compare(boundaryName) == 0)
     {
-      boundaryID = b.second;
+      mooseAssert(boundaryID == b.second, "Boundary with two inconsistent ids");
       checkBoundaryAlreadyExist = true;
     }
   }
@@ -122,7 +122,6 @@ BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
   }
   else
   {
-    boundaryID = findFreeBoundaryId(mesh);
     mapBoundaryIdAndBoundaryName(boundaryID, boundaryName);
 
     boundary_info.sideset_name(boundaryID) = boundaryName;

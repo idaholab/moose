@@ -33,6 +33,8 @@ private:
   void addInterfaceBoundary(MeshBase & mesh);
 
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
+  std::set<std::pair<subdomain_id_type, subdomain_id_type>>
+      _new_boundary_sides_list;
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map;
