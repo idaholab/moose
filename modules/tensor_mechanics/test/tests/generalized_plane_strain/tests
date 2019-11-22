@@ -24,6 +24,14 @@
     requirement = 'The system shall support a generalized plane strain mechanics solution'
     design = 'ComputePlaneSmallStrain.md'
   [../]
+  [./generalized_plane_strain_ref_resid]
+    type = 'Exodiff'
+    input = 'generalized_plane_strain_ref_resid.i'
+    exodiff = 'generalized_plane_strain_ref_resid_out.e'
+    custom_cmp = 'generalized.exodiff'
+    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables'
+    design = 'ComputePlaneSmallStrain.md'
+  [../]
   [./generalized_plane_strain_increment]
     type = 'Exodiff'
     input = 'generalized_plane_strain_increment.i'
