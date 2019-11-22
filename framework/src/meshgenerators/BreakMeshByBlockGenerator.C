@@ -100,7 +100,7 @@ BreakMeshByBlockGenerator::generate()
                   current_node->id()) // if current node == node on element
               {
                 // add new node
-                new_node = Node::build(*current_node).release();
+                new_node = Node::build(*current_node, DofObject::invalid_id).release();
                 new_node->processor_id() = current_node->processor_id();
                 if (!is_replicated)
                   {
@@ -112,10 +112,6 @@ BreakMeshByBlockGenerator::generate()
                     const unique_id_type new_unique_id =
                       (current_elem->subdomain_id() + 1) *
                       max_unique_id + current_node->unique_id();
-{
-  std::cerr << "new_node_id = " << new_node_id << std::endl;
-  std::cerr << "new_unique_id = " << new_unique_id << std::endl;
-}
                     new_node->set_unique_id() = new_unique_id;
 #endif
                   }
