@@ -46,6 +46,12 @@ BreakMeshByBlockGenerator::generate()
     for (unsigned int n = 0; n < elem->n_nodes(); n++)
       node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
+  const dof_id_type max_node_id = mesh->max_node_id();
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+  const unique_id_type max_unique_id = mesh->parallel_max_unique_id();
+#endif
+  const bool is_replicated = mesh->is_replicated();
+
   for (auto node_it = node_to_elem_map.begin(); node_it != node_to_elem_map.end(); ++node_it)
   {
     const dof_id_type current_node_id = node_it->first;
@@ -94,10 +100,25 @@ BreakMeshByBlockGenerator::generate()
                   current_node->id()) // if current node == node on element
               {
                 // add new node
-                dof_id_type new_node_id =
-                    (current_elem->subdomain_id() + 1) * mesh->max_node_id() + current_node->id();
-                new_node = Node::build(*current_node, new_node_id).release();
+                new_node = Node::build(*current_node).release();
                 new_node->processor_id() = current_node->processor_id();
+                if (!is_replicated)
+                  {
+                    const dof_id_type new_node_id =
+                      (current_elem->subdomain_id() + 1) *
+                      max_node_id + current_node->id();
+                    new_node->set_id(new_node_id);
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+                    const unique_id_type new_unique_id =
+                      (current_elem->subdomain_id() + 1) *
+                      max_unique_id + current_node->unique_id();
+{
+  std::cerr << "new_node_id = " << new_node_id << std::endl;
+  std::cerr << "new_unique_id = " << new_unique_id << std::endl;
+}
+                    new_node->set_unique_id() = new_unique_id;
+#endif
+                  }
                 mesh->add_node(new_node);
 
                 // Add boundary info to the new node
