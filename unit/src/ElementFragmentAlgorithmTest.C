@@ -986,6 +986,27 @@ case6Mesh(ElementFragmentAlgorithm & MyMesh)
   MyMesh.updateEdgeNeighbors();
 }
 
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |O O O O O O O O          | |\|
+   | |*|---------|-|O|---------|-|-|
+   | |*|         | |O|         | | |
+   | |*|         | |O|         | | |
+   |-|*|---------|-|O|---------| | |
+    \|*|          \|O|          \| |
+     \*|-----------\O|-----------\ |
+      * * * * * * * O|            \|
+       \-------------\-------------\
+*/
+
 TEST(ElementFragmentAlgorithm, test6a)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
@@ -1054,6 +1075,27 @@ TEST(ElementFragmentAlgorithm, test6a)
   cte_gold.insert(cte, cte + 2);
   CheckElements(crack_tip_elem, cte_gold);
 }
+
+/* \-------------\-------------\
+   |\            |\            |*
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | * |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |*| |         |\| |
+   | |-|---------|-\-|-----*---|-| |
+   | | |         | |\|         | |*|
+   | | |---------|-|-|---------|-|-|
+   | | |         | * |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | *
+    *| |          \| |          \* |
+     \-|----*------\-|---------*-\ |
+      \|            *|       *    \|
+       \-------------\-----*-------\
+*/
 
 TEST(ElementFragmentAlgorithm, test6b)
 {
@@ -1204,4 +1246,2062 @@ TEST(ElementFragmentAlgorithm, test6b)
   std::set<unsigned int> cte_gold;
   cte_gold.insert(cte, cte + 2);
   CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |\|         | |\|         | |\|
+   | | |---------|-|-|---------|-|-|
+   | | |         | | |         | | |
+   | O O O O O O O O |         | | |
+   |-|*|---------| |O|---------| | |
+    \| * * * * * * * O          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6c)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {10, 11};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|----O----|-\-|---------|-| |
+   | |\|    OO   | |\|         | |\|
+   | | |----O-*--|-|-|---------|-|-|
+   | | |    O *  | | |         | | |
+   | | |    O *  | | |         | | |
+   |-|-|----O-*--|-|-|---------| | |
+    \| |    O *   \| |          \| |
+     \-|----O-*----\-|-----------\ |
+      \|     **     \|            \|
+       \------*------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6d)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {10, 11};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---O-----|-\-|---------|-| |
+   | |\| O  O    | |\|         | |\|
+   | | O-----O---|-|-|---------|-|-|
+   | O |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6e)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {10, 11};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | O |         | | |
+   | | |         O |O|         | | |
+   |-|-|-------O-|-|-*---------| | |
+   |\| |     O   |\* |         |\| |
+   | |-|---O-----*-\-|---------|-| |
+   | |\| O     * | |\|         | |\|
+   | | O-----*---|-|-|---------|-|-|
+   | O |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6f)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                                       22, 23, 24, 25, 26, 27, 29, 30, 31};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {12, 13, 14};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 3);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----O-----|-\
+   | |\          | |\  O  *    | |\
+   | | \---------|-|-O-----*---|-|-\
+   | | |         | O |   *     | | |
+   | | |         O | | *       | | |
+   |-|-|-------O-|-|-*---------| | |
+   |\| |     O   |\* |         |\| |
+   | \-|---O-----*-\-|---------|-\ |
+   | |\| O     * | |\|         | |\|
+   | | O-----*---|-|-|---------|-|-|
+   | O |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6g)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                       12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                       24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {14, 15, 16};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 3);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |\|         | |\|         | |\|
+   | | |---------|-|-|---------|-|-|
+   | | |         | | |         | | |
+   | o o o o o o o o o o o o o o o |
+   |-|*|---------| |*|---------| |*|
+    \| * * * * * * * * * * * * *\* *
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6h)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(1, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                                       22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {12, 13};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |*|* * * * * * * * * * * *| |*
+   | | \---------|-|*\---------|-|-\
+   | |*|         | |*|         | |*|
+   | | |         | | |         | | |
+   |-|*|---------|-|*|---------| |*|
+   |\| |         |\| |         |\| |
+   | |*|---------|-\*|---------|-|*|
+   | |*|* * * * *|*|*|* * * * *|*|\|
+   | |*|---------|-|*|---------|-|*|
+   | | |         | | |         | | |
+   | |*|         | |*|         | |*|
+   |-|-|---------|-|-|---------| | |
+    \|*|          \|*|          \|*|
+     \-|-----------\-|-----------\ |
+      *|* * * * * * *|* * * * * * *|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6i)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(1, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(2, 4, cut_edge_id, cut_position);
+
+  MyMesh.addElemFaceIntersection(3, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+  // second time, just test
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                                       30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \------*------\-------------\
+   |\            |\            |\
+   | \----*-*----|-\-----------|-\
+   | |\          | |\          | |\
+   | | \--*---*--|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |  *   *  | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |  *   *  |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |\|  *   *  | |\|         | |\|
+   | | |---------|-|-|---------|-|-|
+   | | |  *   *  | | |         | | |
+   | | |         | | |         | | |
+   |-|-|--*---*--|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|---*--*----\-|-----------\ |
+      \|            \|            \|
+       \------*------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6j)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(6, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(6, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(6, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(6, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  MyMesh.printMesh();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                                       30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|-o-------|-|-|---------| | |
+   |\| *  o      |\| |         |\| |
+   | *-|---o-----|-\-|---------|-| |
+   * |\|    o    | |\|         | |\|
+   |*| |-----o---|-|-|---------|-|-|
+   | * |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6k)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+
+  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                                       22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {10, 13};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |*          | |\          | |\
+   | | \-----*---|-|-\---------|-|-\
+   | |*|         | | |         | | |
+   | | |     *   | | |         | | |
+   |-|*|---------|-|-|---------| | |
+   |\| |     *   |\| |         |\| |
+   | |*|---------|-\-|---------|-| |
+   | |\|     *   | |\|         | |\|
+   | |*|---------|-|-|---------|-|-|
+   | | |     *   | | |         | | |
+   | |*|         | | |         | | |
+   |-|-|-----*---|-|-|---------| | |
+    \|*|          \| |          \| |
+     \-|-----*-----\-|-----------\ |
+      *|            \|            \|
+       \-----*-------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6l)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |O|         | |\|         | |\|
+   | | |----O----|-|-|---------|-|-|
+   | | | *       | | |         | | |
+   | | *         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6m)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                                       22, 23, 24, 25, 26, 27, 28, 29, 30};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {10};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 1);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-------------|-\
+   | |\          O |\          | |\
+   | | \-------*-|-|-----------|-|-\
+   | | |     *   | O |         | | |
+   | | |   *     * | |         | | |
+   |-|-|-*-----*-|-|-O---------| | |
+   |\| *     *   |\* |         |\| |
+   | *-|---*-----*-\-|---------|-\ |
+   * |\| *     * | |\|         | |\|
+   |*| *-----*---|-|-|---------|-|-|
+   | * |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6n)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+
+  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(6, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(6, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 5, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                       26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {12, 17};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 2);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+/* \-------------\-----*-------\
+   |\            |\  *  *      |\
+   | \-----------|-*-----*-----|-\
+   | |\          * |\  *  *    | |\
+   | | \-------*-|-|-*-----*---|-|-\
+   | | |     *   | * |   *     | | |
+   | | |   *     * | | *       | | |
+   |-|-|-*-----*-|-|-*---------| | |
+   |\| *     *   |\* |         |\| |
+   | *-|---*-----*-\-|---------|-\ |
+   * |\| *     * | |\|         | |\|
+   |*| *-----*---|-|-|---------|-|-|
+   | * |   *     | | |         | | |
+   | |*| *       | | |         | | |
+   |-|-*---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6o)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+
+  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 4, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+
+  MyMesh.addElemFaceIntersection(6, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(6, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(7, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(7, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+                                       39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |\|         | |\|         | |\|
+   | | |---------|-|-|---------|-|-|
+   | | |         | | |         | | |
+   | | |         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+    \| *          \| |          \| |
+     \-|-----------\-|-----------\ |
+      *|            \|            \|
+       \-----*-------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6p)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                       12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                       24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |O          | |\
+   | | \---------|-|-\------*--|-|-\
+   | | |         | |O|         | | |
+   | | |         | | |      *  | | |
+   |-|-|---------|-|O|---------| | |
+   | | |         |\| |      *  |\| |
+   | |-|---------|-\O|---------|-| |
+   | |\|         | |\|      *  | |\|
+   | | |---------|-|O|---------|-|-|
+   | | |         | | |      *  | | |
+   | | |         | |O|         | | |
+   |-|-|---------|-|-|------*--| | |
+    \| |          \|O|          \| |
+     \-|-----------\-|------*----\ |
+      \|            O|            \|
+       \-------------\------*-------
+*/
+
+TEST(ElementFragmentAlgorithm, test6q)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                                       22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \------O----|-\-----------|-\
+   | |\          | |*          | |\
+   | | \----O----|-|-\------*--|-|-\
+   | | |         | |*|         | | |
+   | | |    O    | | |      *  | | |
+   |-|-|---------|-|*|---------| | |
+   | | |    O    |\| |      *  |\| |
+   | |-|---------|-\*|---------|-| |
+   | |\|    O    | |\|      *  | |\|
+   | | |---------|-|*|---------|-|-|
+   | | |    O    | | |      *  | | |
+   | | |         | |*|         | | |
+   |-|-|----O----|-|-|------*--| | |
+    \| |          \|*|          \| |
+     \-|----O------\-|------*----\ |
+      \|            *|            \|
+       \-------------\------*-------
+*/
+
+TEST(ElementFragmentAlgorithm, test6r)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |*            |\            |\
+   |*\------*----|-\-----------|-\
+   | |\          | |*          | |\
+   |*| \----*----|-|-\------*--|-|-\
+   | | |         | |*|         | | |
+   |*| |    *    | | |      *  | | |
+   |-|-|---------|-|*|---------| | |
+   |*| |    *    |\| |      *  |\| |
+   | |-|---------|-\*|---------|-| |
+   |*|\|    *    | |\|      *  | |\|
+   | | |---------|-|*|---------|-|-|
+   |*| |    *    | | |      *  | | |
+   | | |         | |*|         | | |
+   |*|-|----*----|-|-|------*--| | |
+    *| |          \|*|          \| |
+     \-|----*------\-|------*----\ |
+      \|            *|            \|
+       \-------------\------*-------
+*/
+
+TEST(ElementFragmentAlgorithm, test6s)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(4, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(6, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(6, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+                                       39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |*            |\            |\
+   | \------*----|-\-----------|-\
+   | |\          | |*          | |\
+   | | \---------|-|-\-----*---|-|-\
+   | | |         | | |   *     | | |
+   | * |         | | | *       | | |
+   |-|-|---------|-|-*---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|---------|-| |
+   | |*|      *  | |\|         | |\|
+   | | |----*----|-|-|---------|-|-|
+   | | | *       | | |         | | |
+   | | *         | | |         | | |
+   |-|-|---------|-|-|---------| | |
+    \| |          \| |          \| |
+     \-|-----------\-|-----------\ |
+      \|            \|            \|
+       \-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test6t)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 3, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 4, cut_edge_id, cut_position);
+  //
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 0, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(2, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(2, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(2, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(6, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(6, 4, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                       12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                       24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                                       36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+}
+
+/* \-------------\-------------\
+   |\            |\            |\
+   | \-----------|-\-----------|-\
+   | |\          | |\          | |\
+   | | \---------|-|-\---------|-|-\
+   | | |         | | |         | | |
+   | | |         | | |         | O |
+   |-|-|---------|-|-|---------| | |
+   |\| |         |\| |         |\| |
+   | |-|---------|-\-|------O--|-| |
+   | |\|         | |\|   O     | |*|
+   | | |---------|-|-|-O-------|-|-|
+   | | |         | | |         | | |
+   | | |         | O |         | | |
+   |-|-|---------|-|-|---------| | |
+    \| |          \| |          \| *
+     \-|------O----\-|-----------\ |
+      \|            *|            \|
+       \-------------\--------*-----
+*/
+
+TEST(ElementFragmentAlgorithm, test6u)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case6Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(0, 1, cut_edge_id, cut_position);
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(0, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(0, 5, cut_edge_id, cut_position);
+  //
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 0, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 1, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(1, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 3, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(1, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 2;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 2, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 1;
+  MyMesh.addElemFaceIntersection(3, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                       12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                       24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5, 6, 7};
+  CheckNodes(embedded_nodes, en_gold);
+
+  // Test child elements
+  std::vector<EFAElement *> child_elem = MyMesh.getChildElements();
+  std::vector<unsigned int> ce_gold;
+  CheckElements(child_elem, ce_gold);
+
+  // Test parent elements
+  std::vector<EFAElement *> parent_elem = MyMesh.getParentElements();
+  std::vector<unsigned int> pe_gold;
+  CheckElements(parent_elem, pe_gold);
+
+  // Test crack tip elements
+  unsigned int cte[] = {14, 15, 16};
+  std::set<unsigned int> cte_gold;
+  cte_gold.insert(cte, cte + 3);
+  CheckElements(crack_tip_elem, cte_gold);
+}
+
+// create new Mesh
+
+/* \-------------\-------------\-------------\
+   |\            |\            |\            |\
+   | \-----------|-\-----------|-\-----------|-\
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------| |---------- | |
+   |\|           |\|           |\|           |\|
+   | |-----------|-\-----------|-|-----------| |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------| |---------- | |
+   |\|           |\|           |\|           |\|
+   | |-----------|-\-----------|-|-----------| |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------|-|-----------| |
+    \|            \|            \|            \|
+     \-------------\-------------\--------------
+*/
+
+void
+case7Mesh(ElementFragmentAlgorithm & MyMesh)
+{
+  // 3D test
+  std::vector<unsigned int> v1 = {0, 1, 5, 4, 16, 17, 21, 20};
+  MyMesh.add3DElement(v1, 0);
+
+  std::vector<unsigned int> v2 = {1, 2, 6, 5, 17, 18, 22, 21};
+  MyMesh.add3DElement(v2, 1);
+
+  std::vector<unsigned int> v3 = {2, 3, 7, 6, 18, 19, 23, 22};
+  MyMesh.add3DElement(v3, 2);
+
+  std::vector<unsigned int> v4 = {4, 5, 9, 8, 20, 21, 25, 24};
+  MyMesh.add3DElement(v4, 3);
+
+  std::vector<unsigned int> v5 = {5, 6, 10, 9, 21, 22, 26, 25};
+  MyMesh.add3DElement(v5, 4);
+
+  std::vector<unsigned int> v6 = {6, 7, 11, 10, 22, 23, 27, 26};
+  MyMesh.add3DElement(v6, 5);
+
+  std::vector<unsigned int> v7 = {8, 9, 13, 12, 24, 25, 29, 28};
+  MyMesh.add3DElement(v7, 6);
+
+  std::vector<unsigned int> v8 = {9, 10, 14, 13, 25, 26, 30, 29};
+  MyMesh.add3DElement(v8, 7);
+
+  std::vector<unsigned int> v9 = {10, 11, 15, 14, 26, 27, 31, 30};
+  MyMesh.add3DElement(v9, 8);
+
+  MyMesh.updateEdgeNeighbors();
+}
+
+/* \-------------\-------------\-------------\
+   |\            |\            |\            |\
+   | \-----------|-\-----------|-\-----------|-\
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------| |---------- | |
+   |\|           |\|           |\|           |\|
+   | |-----------|-\-----------|-|-----------| |
+   | |           | |           | |           | |
+   * * * * * * * * * * * * * * O |           | |
+   |*|           | |           |O|           | |
+   | * * * * * * * * * * * * * * O           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------| |---------- | |
+   |\|           |\|           |\|           |\|
+   | |-----------|-\-----------|-|-----------| |
+   | |           | |           | |           | |
+   | |           | |           | |           | |
+   |-|-----------|-|-----------|-|-----------| |
+    \|            \|            \|            \|
+     \-------------\-------------\--------------
+*/
+
+TEST(ElementFragmentAlgorithm, test7a)
+{
+  ElementFragmentAlgorithm MyMesh(Moose::out);
+  case7Mesh(MyMesh);
+  //  MyMesh.printMesh();
+
+  std::vector<unsigned int> cut_edge_id(2, 0);
+  std::vector<double> cut_position(2, 0.5);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(3, 0, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(3, 2, cut_edge_id, cut_position);
+  MyMesh.addElemFaceIntersection(3, 4, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(3, 5, cut_edge_id, cut_position);
+
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 0, cut_edge_id, cut_position);
+  cut_edge_id[0] = 0;
+  cut_edge_id[1] = 2;
+  MyMesh.addElemFaceIntersection(4, 2, cut_edge_id, cut_position);
+  cut_edge_id[0] = 1;
+  cut_edge_id[1] = 3;
+  MyMesh.addElemFaceIntersection(4, 5, cut_edge_id, cut_position);
+
+  MyMesh.updatePhysicalLinksAndFragments();
+  MyMesh.updateTopology();
+  MyMesh.clearAncestry();
+  MyMesh.updateEdgeNeighbors();
+  MyMesh.initCrackTipTopology();
+
+  MyMesh.printMesh();
+
+  // print crack tip elems
+  std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
+
+  // Test permanent nodes
+  std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
+  std::vector<unsigned int> pn_gold = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
+                                       14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                                       28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39};
+  CheckNodes(permanent_nodes, pn_gold);
+
+  // Test temp nodes
+  std::map<unsigned int, EFANode *> temp_nodes = MyMesh.getTempNodes();
+  std::vector<unsigned int> tn_gold;
+  CheckNodes(temp_nodes, tn_gold);
+
+  // Test embedded nodes
+  std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
+  std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
+  CheckNodes(embedded_nodes, en_gold);
 }
