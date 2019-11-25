@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "StochasticToolsTransfer.h"
-#include "Sampler.h"
 
 // Forward declarations
 class SamplerPostprocessorTransfer;
@@ -47,9 +46,6 @@ protected:
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
   ///@}
-
-  /// Sampler object that is retrieved from the SamplerTransientMultiApp or SamplerFullSolveMultiApp
-  Sampler * _sampler;
 
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;

@@ -12,6 +12,7 @@
 #include "SamplerTransientMultiApp.h"
 #include "SamplerFullSolveMultiApp.h"
 #include "SamplerReceiver.h"
+#include "Sampler.h"
 
 registerMooseObject("StochasticToolsApp", SamplerTransfer);
 
@@ -39,21 +40,6 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
     _parameter_names(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
-
-  // Determine the Sampler
-  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
-      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
-  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
-      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
-
-  if (!ptr_transient && !ptr_fullsolve)
-    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
-               "'SamplerFullSolveMultiApp' object.");
-
-  if (ptr_transient)
-    _sampler_ptr = &(ptr_transient->getSampler());
-  else
-    _sampler_ptr = &(ptr_fullsolve->getSampler());
 }
 
 void

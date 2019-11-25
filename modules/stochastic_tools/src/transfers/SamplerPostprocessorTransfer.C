@@ -13,6 +13,7 @@
 #include "SamplerTransientMultiApp.h"
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
+#include "Sampler.h"
 
 registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
 
@@ -39,20 +40,6 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
     _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
     _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
 {
-  // Determine the Sampler
-  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
-      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
-  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
-      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
-
-  if (!ptr_transient && !ptr_fullsolve)
-    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
-               "'SamplerFullSolveMultiApp' object.");
-
-  if (ptr_transient)
-    _sampler = &(ptr_transient->getSampler());
-  else
-    _sampler = &(ptr_fullsolve->getSampler());
 }
 
 void
@@ -64,24 +51,24 @@ SamplerPostprocessorTransfer::initialSetup()
   if (!_results)
     mooseError("The 'results' object must be a 'StochasticResults' object.");
 
-  _results->init(*_sampler);
+  _results->init(*_sampler_ptr);
 }
 
 void
 SamplerPostprocessorTransfer::initializeFromMultiapp()
 {
   VectorPostprocessorValue & vpp =
-      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler_ptr->name(), false);
 
   vpp.clear();
-  vpp.reserve(_sampler->getNumberOfLocalRows());
+  vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
 }
 
 void
 SamplerPostprocessorTransfer::executeFromMultiapp()
 {
   VectorPostprocessorValue & vpp =
-      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler_ptr->name(), false);
 
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
@@ -103,12 +90,12 @@ void
 SamplerPostprocessorTransfer::execute()
 {
   VectorPostprocessorValue & vpp =
-      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler_ptr->name(), false);
 
   vpp.clear();
-  vpp.reserve(_sampler->getNumberOfLocalRows());
+  vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
 
-  for (dof_id_type i = _sampler->getLocalRowBegin(); i < _sampler->getLocalRowEnd(); ++i)
+  for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
   {
     FEProblemBase & app_problem = _multi_app->appProblemBase(i);
     vpp.emplace_back(app_problem.getPostprocessorValue(_sub_pp_name));

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "StochasticToolsTransfer.h"
 #include "MultiApp.h"
+#include "Sampler.h"
 
 template <>
 InputParameters
@@ -56,6 +57,21 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
   // has not been set, then the user wants the check to be performed, so do it.
   else if (!parameters.isParamSetByUser("check_multiapp_execute_on"))
     checkMultiAppExecuteOn();
+
+  // Determine the Sampler
+  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
+      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
+      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+
+  if (!ptr_transient && !ptr_fullsolve)
+    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+               "'SamplerFullSolveMultiApp' object.");
+
+  if (ptr_transient)
+    _sampler_ptr = &(ptr_transient->getSampler());
+  else
+    _sampler_ptr = &(ptr_fullsolve->getSampler());
 }
 
 void
