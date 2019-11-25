@@ -24,7 +24,7 @@
   [test]
     type = SamplerTester
     sampler = sample
-    test_type = 'getSamples'
+    test_type = 'getGlobalSamples'
   []
 []
 

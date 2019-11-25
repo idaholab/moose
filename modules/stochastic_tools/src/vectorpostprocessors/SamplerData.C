@@ -31,7 +31,7 @@ validParams<SamplerData>()
   // params.set<bool>("_is_broadcast") = false;
 
   // Control for
-  MooseEnum method("get_samples get_local_samples get_next_local_row", "get_next_local_row");
+  MooseEnum method("get_global_samples get_local_samples get_next_local_row", "get_next_local_row");
   params.addParam<MooseEnum>(
       "sampler_method",
       method,
@@ -54,8 +54,8 @@ SamplerData::SamplerData(const InputParameters & parameters)
 void
 SamplerData::initialize()
 {
-  dof_id_type n = (_sampler_method == "get_samples") ? _sampler.getNumberOfRows()
-                                                     : _sampler.getNumberOfLocalRows();
+  dof_id_type n = (_sampler_method == "get_global_samples") ? _sampler.getNumberOfRows()
+                                                            : _sampler.getNumberOfLocalRows();
   for (auto & ppv_ptr : _sample_vectors)
     ppv_ptr->resize(n, 0);
 }
@@ -63,9 +63,9 @@ SamplerData::initialize()
 void
 SamplerData::execute()
 {
-  if (_sampler_method == "get_samples")
+  if (_sampler_method == "get_global_samples")
   {
-    DenseMatrix<Real> data = _sampler.getSamples();
+    DenseMatrix<Real> data = _sampler.getGlobalSamples();
     for (unsigned int j = 0; j < data.n(); ++j)
       for (unsigned int i = 0; i < data.m(); ++i)
         (*_sample_vectors[j])[i] = data(i, j);
@@ -93,7 +93,7 @@ SamplerData::execute()
 void
 SamplerData::finalize()
 {
-  if (_sampler_method != "get_samples")
+  if (_sampler_method != "get_global_samples")
     for (auto & ppv_ptr : _sample_vectors)
       _communicator.gather(0, *ppv_ptr);
 }

@@ -52,7 +52,7 @@ public:
   Sampler(const InputParameters & parameters);
 
   // The public members define the API that is exposed to application developers that are using
-  // Sampler objects to perform calculations, so be very carefull when adding items here since
+  // Sampler objects to perform calculations, so be very careful when adding items here since
   // they are exposed to any other object via the SamplerInterface.
   //
   // It is also important to point out that when Sampler objects, when used, are not const. This is
@@ -63,10 +63,10 @@ public:
   /**
    * Return the sampled complete or distributed sample data.
    *
-   * Use these with caution as they can result in a large amount of memory use, the prefered
-   * method for accessing Stampler data is the getNextLocalRow() method.
+   * Use these with caution as they can result in a large amount of memory use, the preferred
+   * method for accessing Sampler data is the getNextLocalRow() method.
    */
-  DenseMatrix<Real> getSamples();
+  DenseMatrix<Real> getGlobalSamples();
   DenseMatrix<Real> getLocalSamples();
   ///@}
 
@@ -77,7 +77,7 @@ public:
    * for (dof_id_type i = getLocalRowBegin(); i < getLocalRowEnd(); ++i)
    *     std::vector<Real> row = getNextLocalRow();
    *
-   * This is the prefered method for accessing Sampler data.
+   * This is the preferred method for accessing Sampler data.
    *
    * Calls to getNextLocalRow() will continue to return the next row of data until the last local
    * row has been reached, it will then start again at the beginning if called again. Also, calls
@@ -108,7 +108,7 @@ public:
 
 protected:
   // The following methods are the basic methods that should be utilized my most application
-  // developers that are creatign a custom Sampler.
+  // developers that are creating a custom Sampler.
 
   ///@{
   /**
@@ -136,20 +136,21 @@ protected:
    */
   double getRand(unsigned int index = 0);
 
+  // TODO: Restore this pure virtual after application are updated to new interface
   /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
 
   ///@{
   /**
    * Setup method called prior and after looping through distributions.
    *
    * These methods should not be called directly, each is automatically called by the public
-   * getSamples() or getLocalSamples() methods.
+   * getGlobalSamples() or getLocalSamples() methods.
    */
   virtual void sampleSetUp(){};
   virtual void sampleTearDown(){};
@@ -164,7 +165,7 @@ protected:
    * @param matrix The correctly sized matrix of sample values to populate
    *
    * These methods should not be called directly, each is automatically called by the public
-   * getSamples() or getLocalSamples() methods.
+   * getGlobalSamples() or getLocalSamples() methods.
    */
   virtual void computeSampleMatrix(DenseMatrix<Real> & matrix);
   virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix);
@@ -177,7 +178,7 @@ protected:
    * @param data The correctly sized vector of sample value to poplulate
 
    * This method should not be called directly, it is automatically called by the public
-   * getSamples(), getLocalSamples(), or getNextLocalRow() methods.
+   * getGlobalSamples(), getLocalSamples(), or getNextLocalRow() methods.
    */
   virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data);
 
@@ -204,8 +205,8 @@ private:
                                         InputParameters & parameters);
 
   /**
-   * Store the state of the MooseRandom generator so that new calls to getSamples/getLocalSamples
-   * methods will create new numbers. This also handles sample data cache, if enabled.
+   * Store the state of the MooseRandom generator so that new calls to
+   * getGlobalSamples/getLocalSamples methods will create new numbers.
    *
    * The execute() method is called in the init() method of this class and
    * FEProblemBase::executeSamplers; it should not be called elsewhere.
@@ -246,8 +247,8 @@ private:
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
 
-  /// Max number of entries for matrix returned by getSamples
-  const dof_id_type _limit_get_samples;
+  /// Max number of entries for matrix returned by getGlobalSamples
+  const dof_id_type _limit_get_global_samples;
 
   /// Max number of entries for matrix returned by getLocalSamples
   const dof_id_type _limit_get_local_samples;
@@ -257,7 +258,7 @@ private:
 
   ///@{
   /// PrefGraph timers
-  const PerfID _perf_get_samples;
+  const PerfID _perf_get_global_samples;
   const PerfID _perf_get_local_samples;
   const PerfID _perf_get_next_local_row;
   const PerfID _perf_advance_generator;

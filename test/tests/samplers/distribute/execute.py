@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--processors', default=[1,4], type=int, nargs='+', help="List of number of processors to use (default: [1,4]).")
     args = parser.parse_args()
 
-    execute('distribute.i', 'distribute_none', 1, args.processors, 'getSamples')
-    execute('distribute.i', 'distribute_off', args.rows, args.processors, 'getSamples')
+    execute('distribute.i', 'distribute_none', 1, args.processors, 'getGlobalSamples')
+    execute('distribute.i', 'distribute_off', args.rows, args.processors, 'getGlobalSamples')
     execute('distribute.i', 'distribute_on', args.rows, args.processors, 'getLocalSamples')
     execute('distribute.i', 'distribute_row', args.rows, args.processors, 'getNextLocalRow')

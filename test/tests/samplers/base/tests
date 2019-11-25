@@ -138,7 +138,7 @@
 
       detail = "if the number of random number generator seeds is set to zero,"
     []
-    [getSamples_max]
+    [getGlobalSamples_max]
       type = RunException
       input = errors.i
       expect_err = "The number of entries in the DenseMatrix \(3705032704\) exceeds the allowed limit of 429496729."

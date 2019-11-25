@@ -19,7 +19,7 @@ validParams<SamplerTester>()
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
   MooseEnum test_type(
-      "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getSamples "
+      "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getGlobalSamples "
       "getLocalSamples getNextLocalRow");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
@@ -36,8 +36,8 @@ SamplerTester::SamplerTester(const InputParameters & parameters)
 void
 SamplerTester::execute()
 {
-  if (_test_type == "getSamples")
-    _samples = _sampler.getSamples();
+  if (_test_type == "getGlobalSamples")
+    _samples = _sampler.getGlobalSamples();
 
   if (_test_type == "getLocalSamples")
     _samples = _sampler.getLocalSamples();
@@ -51,7 +51,7 @@ SamplerTester::execute()
     mooseAssert(n_processors() == 1, "This test only works on one processor.");
 
     // Get the full set of samples
-    DenseMatrix<Real> global = _sampler.getSamples();
+    DenseMatrix<Real> global = _sampler.getGlobalSamples();
 
     // Iterate through some
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < 7; ++i)
@@ -79,7 +79,7 @@ SamplerTester::execute()
 
   if (_test_type == "rand_global_vs_local")
   {
-    DenseMatrix<Real> global = _sampler.getSamples();
+    DenseMatrix<Real> global = _sampler.getGlobalSamples();
     DenseMatrix<Real> local = _sampler.getLocalSamples();
     if (n_processors() == 1)
     {
@@ -230,7 +230,7 @@ SamplerTester::execute()
 
   if (_test_type == "base_global_vs_local")
   {
-    DenseMatrix<Real> global = _sampler.getSamples();
+    DenseMatrix<Real> global = _sampler.getGlobalSamples();
     DenseMatrix<Real> local = _sampler.getLocalSamples();
 
     if (n_processors() == 1)
@@ -342,7 +342,7 @@ SamplerTester::finalize()
     std::vector<Real> samples;
     if (_communicator.rank() == 0)
     {
-      samples = _sampler.getSamples().get_values();
+      samples = _sampler.getGlobalSamples().get_values();
       vec_size = samples.size();
     }
 
@@ -350,7 +350,7 @@ SamplerTester::finalize()
     samples.resize(vec_size);
     _communicator.broadcast(samples);
 
-    if (_sampler.getSamples().get_values() != samples)
+    if (_sampler.getGlobalSamples().get_values() != samples)
       mooseError("The sample generation is not working correctly with MPI.");
   }
 }
@@ -361,7 +361,7 @@ SamplerTester::threadJoin(const UserObject & uo)
   if (_test_type == "thread")
   {
     const SamplerTester & other = static_cast<const SamplerTester &>(uo);
-    if (_sampler.getSamples() != other._sampler.getSamples())
+    if (_sampler.getGlobalSamples() != other._sampler.getGlobalSamples())
       mooseError("The sample generation is not working correctly with threads.");
   }
 }
