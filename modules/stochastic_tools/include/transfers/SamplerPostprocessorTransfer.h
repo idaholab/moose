@@ -29,6 +29,8 @@ InputParameters validParams<SamplerPostprocessorTransfer>();
 class SamplerPostprocessorTransfer : public StochasticToolsTransfer
 {
 public:
+  static InputParameters validParams();
+
   SamplerPostprocessorTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
 

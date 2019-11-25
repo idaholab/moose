@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsApp", JohnsonSBDistribution);
 
-template <>
+defineLegacyParams(JohnsonSBDistribution);
+
 InputParameters
-validParams<JohnsonSBDistribution>()
+JohnsonSBDistribution::validParams()
 {
-  InputParameters params = validParams<NormalDistribution>();
+  InputParameters params = NormalDistribution::validParams();
   params.addClassDescription("Johnson Special Bounded (SB) distribution.");
 
   params.set<Real>("mean") = 0.0;

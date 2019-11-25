@@ -25,6 +25,8 @@ InputParameters validParams<SamplerTransientMultiApp>();
 class SamplerTransientMultiApp : public TransientMultiApp, public SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   SamplerTransientMultiApp(const InputParameters & parameters);
 
   /**

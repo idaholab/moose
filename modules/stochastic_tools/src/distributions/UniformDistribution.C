@@ -11,11 +11,12 @@
 
 registerMooseObject("StochasticToolsApp", UniformDistribution);
 
-template <>
+defineLegacyParams(UniformDistribution);
+
 InputParameters
-validParams<UniformDistribution>()
+UniformDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Continuous uniform distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
   params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");

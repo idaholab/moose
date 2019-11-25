@@ -15,14 +15,15 @@
 
 registerMooseObject("StochasticToolsApp", StochasticResults);
 
-template <>
+defineLegacyParams(StochasticResults);
+
 InputParameters
-validParams<StochasticResults>()
+StochasticResults::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Storage container for stochastic simulation results coming from a Postprocessor.");
-  params += validParams<SamplerInterface>();
+  params += SamplerInterface::validParams();
 
   MooseEnum parallel_type("REPLICATED DISTRIBUTED", "REPLICATED");
   params.addParam<MooseEnum>(

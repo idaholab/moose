@@ -17,11 +17,12 @@
 
 registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
 
-template <>
+defineLegacyParams(SamplerPostprocessorTransfer);
+
 InputParameters
-validParams<SamplerPostprocessorTransfer>()
+SamplerPostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<StochasticToolsTransfer>();
+  InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
                              "VectorPostprocessor on the master application.");
   params.addRequiredParam<PostprocessorName>(

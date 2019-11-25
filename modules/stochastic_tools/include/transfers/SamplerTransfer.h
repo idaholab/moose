@@ -25,6 +25,8 @@ InputParameters validParams<SamplerTransfer>();
 class SamplerTransfer : public StochasticToolsTransfer
 {
 public:
+  static InputParameters validParams();
+
   SamplerTransfer(const InputParameters & parameters);
   /**
    * Traditional Transfer callback

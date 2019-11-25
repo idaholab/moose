@@ -16,11 +16,12 @@
 
 registerMooseObject("StochasticToolsApp", SamplerTransfer);
 
-template <>
+defineLegacyParams(SamplerTransfer);
+
 InputParameters
-validParams<SamplerTransfer>()
+SamplerTransfer::validParams()
 {
-  InputParameters params = validParams<StochasticToolsTransfer>();
+  InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");

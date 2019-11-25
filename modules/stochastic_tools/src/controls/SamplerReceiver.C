@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsApp", SamplerReceiver);
 
-template <>
+defineLegacyParams(SamplerReceiver);
+
 InputParameters
-validParams<SamplerReceiver>()
+SamplerReceiver::validParams()
 {
-  InputParameters params = validParams<Control>();
+  InputParameters params = Control::validParams();
   params.addClassDescription("Control for receiving data from a Sampler via SamplerTransfer.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   return params;

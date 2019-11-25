@@ -25,6 +25,8 @@ InputParameters validParams<SamplerReceiver>();
 class SamplerReceiver : public Control
 {
 public:
+  static InputParameters validParams();
+
   SamplerReceiver(const InputParameters & parameters);
   virtual void execute() override;
 

@@ -24,6 +24,8 @@ InputParameters validParams<StochasticResults>();
 class StochasticResults : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   StochasticResults(const InputParameters & parameters);
   void virtual initialize() override {}
   void virtual finalize() override;

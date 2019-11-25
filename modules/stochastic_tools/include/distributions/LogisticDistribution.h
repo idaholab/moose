@@ -22,6 +22,8 @@ InputParameters validParams<LogisticDistribution>();
 class LogisticDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   LogisticDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;

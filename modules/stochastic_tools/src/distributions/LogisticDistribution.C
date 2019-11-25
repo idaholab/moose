@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsApp", LogisticDistribution);
 
-template <>
+defineLegacyParams(LogisticDistribution);
+
 InputParameters
-validParams<LogisticDistribution>()
+LogisticDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Logistic distribution.");
   params.addRequiredParam<Real>("location", "Location or mean of the distribution (alpha or mu)");
   params.addRequiredParam<Real>("shape", "Shape of the distribution (beta or s)");

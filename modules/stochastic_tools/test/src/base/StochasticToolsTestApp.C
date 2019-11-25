@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(StochasticToolsTestApp);
+
 InputParameters
-validParams<StochasticToolsTestApp>()
+StochasticToolsTestApp::validParams()
 {
-  InputParameters params = validParams<StochasticToolsApp>();
+  InputParameters params = StochasticToolsApp::validParams();
   return params;
 }
 

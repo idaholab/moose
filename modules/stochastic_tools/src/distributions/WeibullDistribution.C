@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsApp", WeibullDistribution);
 
-template <>
+defineLegacyParams(WeibullDistribution);
+
 InputParameters
-validParams<WeibullDistribution>()
+WeibullDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Three-parameter Weibull distribution.");
   params.addRequiredParam<Real>("location", "Location parameter (a or low)");
   params.addRequiredRangeCheckedParam<Real>("scale", "scale > 0", "Scale parameter (b or lambda)");

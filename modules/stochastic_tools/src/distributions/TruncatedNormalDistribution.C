@@ -11,11 +11,12 @@
 
 registerMooseObject("StochasticToolsApp", TruncatedNormalDistribution);
 
-template <>
+defineLegacyParams(TruncatedNormalDistribution);
+
 InputParameters
-validParams<TruncatedNormalDistribution>()
+TruncatedNormalDistribution::validParams()
 {
-  InputParameters params = validParams<NormalDistribution>();
+  InputParameters params = NormalDistribution::validParams();
   params.addClassDescription("Truncated normal distribution");
   params.addParam<Real>(
       "lower_bound", -std::numeric_limits<Real>::max(), "Lower bound of the distribution ");

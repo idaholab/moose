@@ -22,6 +22,8 @@ InputParameters validParams<TruncatedNormalDistribution>();
 class TruncatedNormalDistribution : public NormalDistribution
 {
 public:
+  static InputParameters validParams();
+
   TruncatedNormalDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;

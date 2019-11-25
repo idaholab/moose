@@ -23,6 +23,8 @@ InputParameters validParams<StochasticToolsTransfer>();
 class StochasticToolsTransfer : public MultiAppTransfer
 {
 public:
+  static InputParameters validParams();
+
   StochasticToolsTransfer(const InputParameters & parameters);
 
   ///@{

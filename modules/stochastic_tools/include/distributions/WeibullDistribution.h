@@ -22,6 +22,8 @@ InputParameters validParams<WeibullDistribution>();
 class WeibullDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   WeibullDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;

@@ -12,11 +12,12 @@
 
 registerMooseObject("StochasticToolsApp", SobolSampler);
 
-template <>
+defineLegacyParams(SobolSampler);
+
 InputParameters
-validParams<SobolSampler>()
+SobolSampler::validParams()
 {
-  InputParameters params = validParams<Sampler>();
+  InputParameters params = Sampler::validParams();
   params.addClassDescription("Sobol variance-based sensitivity analysis Sampler.");
   params.addRequiredParam<dof_id_type>("num_rows", "The number of rows per matrix to generate.");
   params.addRequiredParam<std::vector<DistributionName>>(

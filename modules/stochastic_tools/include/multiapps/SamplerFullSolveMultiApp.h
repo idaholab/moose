@@ -25,6 +25,8 @@ InputParameters validParams<SamplerFullSolveMultiApp>();
 class SamplerFullSolveMultiApp : public FullSolveMultiApp, public SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   SamplerFullSolveMultiApp(const InputParameters & parameters);
 
   /**

@@ -21,6 +21,8 @@ InputParameters validParams<UniformDistribution>();
 class UniformDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   UniformDistribution(const InputParameters & parameters);
 
   Real pdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const;

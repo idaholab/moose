@@ -22,6 +22,8 @@ InputParameters validParams<NormalDistribution>();
 class NormalDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   NormalDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;

@@ -22,6 +22,8 @@ InputParameters validParams<JohnsonSBDistribution>();
 class JohnsonSBDistribution : public NormalDistribution
 {
 public:
+  static InputParameters validParams();
+
   JohnsonSBDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;

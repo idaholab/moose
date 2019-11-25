@@ -10,11 +10,12 @@
 #include "MultiApp.h"
 #include "Sampler.h"
 
-template <>
+defineLegacyParams(StochasticToolsTransfer);
+
 InputParameters
-validParams<StochasticToolsTransfer>()
+StochasticToolsTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.set<bool>("check_multiapp_execute_on", true) = false; // see comments in constructor
   return params;
 }
