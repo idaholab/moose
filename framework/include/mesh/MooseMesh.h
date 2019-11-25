@@ -1203,6 +1203,9 @@ private:
 
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;
+
+  /// Set of elements ghosted by ghostGhostedBoundaries
+  std::set<Elem *> _ghost_elems_from_ghost_boundaries;
 };
 
 /**

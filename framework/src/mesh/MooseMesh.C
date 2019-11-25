@@ -2484,13 +2484,11 @@ MooseMesh::ghostGhostedBoundaries()
 
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
-  // We would like to clear ghosted elements that were added by
-  // previous invocations of this method; however we can't do so
-  // simply without also clearing ghosted elements that were added by
-  // other code; e.g.  OversampleOutput.  So for now we'll just
-  // swallow the inefficiency that can come from leaving unnecessary
-  // elements ghosted after AMR.
-  //  mesh.clear_extra_ghost_elems();
+  // We clear ghosted elements that were added by previous invocations of this
+  // method but leave ghosted elements that were added by other code, e.g.
+  // OversampleOutput, untouched
+  mesh.clear_extra_ghost_elems(_ghost_elems_from_ghost_boundaries);
+  _ghost_elems_from_ghost_boundaries.clear();
 
   std::set<const Elem *, CompareElemsByLevel> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;
@@ -2534,6 +2532,9 @@ MooseMesh::ghostGhostedBoundaries()
     }
   }
 
+  // We really do want to store this by value instead of by reference
+  const auto prior_ghost_elems = mesh.extra_ghost_elems();
+
   mesh.comm().allgather_packed_range(&mesh,
                                      connected_nodes_to_ghost.begin(),
                                      connected_nodes_to_ghost.end(),
@@ -2542,6 +2543,15 @@ MooseMesh::ghostGhostedBoundaries()
                                      boundary_elems_to_ghost.begin(),
                                      boundary_elems_to_ghost.end(),
                                      extra_ghost_elem_inserter<Elem>(mesh));
+
+  const auto & current_ghost_elems = mesh.extra_ghost_elems();
+
+  std::set_difference(current_ghost_elems.begin(),
+                      current_ghost_elems.end(),
+                      prior_ghost_elems.begin(),
+                      prior_ghost_elems.end(),
+                      std::inserter(_ghost_elems_from_ghost_boundaries,
+                                    _ghost_elems_from_ghost_boundaries.begin()));
 }
 
 unsigned int
