@@ -19,10 +19,10 @@ The GridPartitioner works by creating a [/GeneratedMesh.md] for the "grid".  Tha
 
 To assign the processor IDs the centroid of each element of the mesh to be partitioned is searched for in the GeneratedMesh.  The ID of the element of the GeneratedMesh that it lies within is then assigned as the `processor_id`.
 
-!syntax parameters /Mesh/Partitioner/LibmeshPartitioner
+!syntax parameters /Mesh/Partitioner/GridPartitioner
 
-!syntax inputs /Mesh/Partitioner/LibmeshPartitioner
+!syntax inputs /Mesh/Partitioner/GridPartitioner
 
-!syntax children /Mesh/Partitioner/LibmeshPartitioner
+!syntax children /Mesh/Partitioner/GridPartitioner
 
 !bibtex bibliography

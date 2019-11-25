@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    requirement = 'MOOSE shall provide a random partitioner'
+    design = '/RandomPartitioner.md'
+    issues = '#14419'
+    type = 'Exodiff'
+    input = 'random_partitioner.i'
+    exodiff = 'random_partitioner_out.e'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]
