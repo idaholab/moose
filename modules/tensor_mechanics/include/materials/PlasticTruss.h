@@ -19,6 +19,8 @@ InputParameters validParams<PlasticTruss>();
 class PlasticTruss : public LinearElasticTruss
 {
 public:
+  static InputParameters validParams();
+
   PlasticTruss(const InputParameters & parameters);
 
 protected:
