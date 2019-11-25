@@ -10,47 +10,16 @@
 """Wrapper for hit parser."""
 import os
 import hit
+import moosetree
 from . import message
 
-# The 'HitNode' object is used within the TestHarness, which should operate without any
-# special python libraries. However, the 'anytree' package is used by various utilities within the
-# moose/python tools (e.g., MooseDocs). It is useful to have this hit wrapper use the anytree
-# package for consistency. Therefore, the following allows the HitNode to work with or without it.
-try:
-    import anytree
-    from anytree import NodeMixin
-    HAVE_ANYTREE = True
-
-except ImportError:
-    HAVE_ANYTREE = False
-
-    class NodeMixin(object):
-        """Proxy for anytree.NodeMixin"""
-        def __init__(self):
-            self._parent = None
-            self.name = None
-            self.children = list()
-
-        @property
-        def parent(self):
-            return self._parent
-
-        @parent.setter
-        def parent(self, value):
-            self._parent = value
-            if self._parent:
-                self._parent.children.append(self)
-
-class HitNode(NodeMixin):
+class HitNode(moosetree.Node):
     """
-    An anytree.Node object for building a hit tree.
+    An moosetree.Node object for building a hit tree.
     """
-    def __init__(self, parent=None, hitnode=None):
-        super(HitNode, self).__init__()
-        self.name = hitnode.path()   # anytree.Node property
-        self.parent = parent         # anytree.Node property
+    def __init__(self, parent, hitnode):
+        super(HitNode, self).__init__(parent, hitnode.path())
         self.__hitnode = hitnode     # hit.Node object
-
 
     @property
     def fullpath(self):
@@ -74,14 +43,8 @@ class HitNode(NodeMixin):
                          provide name must be in the node name. If this is set to False the names
                          must match exact.
         """
-        if HAVE_ANYTREE:
-            for node in anytree.PreOrderIter(self):
-                if (fuzzy and name in node.fullpath) or (not fuzzy and name == node.fullpath):
-                    return node
-        else:
-            msg = "The 'find' method requires the 'anytree' python package. This can " \
-                  "be installed via your python package manager (e.g., pip install anytree --user)."
-            message.mooseError(msg)
+        func = lambda n: (fuzzy and name in n.fullpath) or (not fuzzy and name == n.fullpath)
+        return moosetree.find(self, func, method=moosetree.IterMethod.PRE_ORDER)
 
     def findall(self, name, fuzzy=True):
         """
@@ -93,13 +56,8 @@ class HitNode(NodeMixin):
                          provide name must be in the node name. If this is set to False the names
                          must match exact.
         """
-        if HAVE_ANYTREE:
-            filter_ = lambda n: (fuzzy and name in n.name) or (not fuzzy and n.name == name)
-            return [node for node in anytree.PreOrderIter(self, filter_=filter_)]
-        else:
-            msg = "The 'findall' method requires the 'anytree' python package. This can " \
-                  "be installed via your python package manager (e.g., pip install anytree --user)."
-            message.mooseError(msg)
+        func = lambda n: (fuzzy and name in n.fullpath) or (not fuzzy and name == n.fullpath)
+        return moosetree.findall(self, func, method=moosetree.IterMethod.PRE_ORDER)
 
     def render(self):
         """
@@ -168,22 +126,6 @@ class HitNode(NodeMixin):
         """
         return self.__hitnode.param(name)
 
-    def __repr__(self):
-        """
-        Display the node name and parameters.
-        """
-        params = {k:v for k, v in self.iterparams()}
-        if params:
-            return '{}: {}'.format(self.name, repr(params))
-        return self.name
-
-    def __str__(self):
-        """
-        Print the complete tree beginning at this node.
-        """
-        if HAVE_ANYTREE:
-            return str(anytree.RenderTree(self))
-        return self.__class__
 
 def hit_load(filename):
     """
@@ -193,7 +135,7 @@ def hit_load(filename):
         filename[str]: The filename to open and parse.
 
     Returns a HitNode object, which is the root of the tree. HitNode objects are custom
-    versions of the anytree.Node objects.
+    versions of the moosetree.Node objects.
     """
     if os.path.exists(filename):
         with open(filename, 'r') as fid:
@@ -204,7 +146,7 @@ def hit_load(filename):
         message.mooseError("Unable to load the hit file ", filename)
 
     hit_node = hit.parse(filename, content)
-    root = HitNode(hitnode=hit_node)
+    root = HitNode(None, hit_node)
     hit_parse(root, hit_node, filename)
     return root
 
@@ -218,11 +160,11 @@ def hit_parse(root, hit_node, filename):
         filename[str]: (optional) The filename for error reporting.
 
     Returns a HitNode object, which is the root of the tree. HitNode objects are custom
-    versions of the anytree.Node objects.
+    versions of the moosetree.Node objects.
     """
     for hit_child in hit_node.children():
         if hit_child.type() == hit.NodeType.Section:
-            new = HitNode(parent=root, hitnode=hit_child)
+            new = HitNode(root, hit_child)
             hit_parse(new, hit_child, filename)
 
     return root

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -103,7 +103,8 @@ class TestContentAtoZ(MooseDocsTestCase):
         self._assertHTML(res)
 
     def testMaterialize(self):
-        _, res = self.execute('!content a-to-z location=extensions', renderer=base.MaterializeRenderer())
+        _, res = self.execute('!content a-to-z location=extensions',
+                              renderer=base.MaterializeRenderer())
 
         b = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         self.assertHTMLTag(res(0), 'div', size=len(b), class_='moose-a-to-z-buttons')
@@ -113,7 +114,8 @@ class TestContentAtoZ(MooseDocsTestCase):
             else:
                 self.assertHTMLTag(res(0)(i), 'a', class_='btn moose-a-to-z-button disabled', string=b[i])
 
-        res(0).remove()
+        res(0).parent = None
+        print(res)
         self.assertHTMLTag(res, 'div', size=6)
         self._assertHTML(res)
 

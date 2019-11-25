@@ -12,7 +12,7 @@ import re
 import subprocess
 import logging
 import collections
-import anytree
+import moosetree
 import mooseutils
 from MooseDocs.base import renderers
 from MooseDocs.common import exceptions, box
@@ -55,7 +55,7 @@ class PDFExtension(command.CommandExtension):
         """
 
         depth = page.depth if page.depth < 2 else 2
-        for node in anytree.PreOrderIter(ast):
+        for node in moosetree.iterate(ast):
 
             if node.name == 'Heading':
                 lvl = node['level'] + depth
@@ -75,7 +75,6 @@ class PDFExtension(command.CommandExtension):
         """
         Combines all the LaTeX files into a single file.
         """
-
         files = []
         for page in content:
             if isinstance(page, pages.Source):
@@ -103,8 +102,8 @@ class PDFExtension(command.CommandExtension):
 
         # Process output
         root = self.processLatexOutput(output, content)
-        for node in anytree.PreOrderIter(root):
-            if node.warnings:
+        for node in moosetree.iterate(root):
+            if node['warnings']:
                 self._reportLatexWarnings(node, content)
 
     def _processPages(self, root):
@@ -131,7 +130,7 @@ class PDFExtension(command.CommandExtension):
             cmd.parent = main
 
         doc = latex.Environment(main, 'document', end='\n')
-        for node in anytree.PreOrderIter(root, filter_=lambda n: 'page' in n):
+        for node in moosetree.iterate(root, lambda n: 'page' in n):
             page = node['page']
             if self.translator.getMetaData(page, 'active'):
                 cmd = latex.Command(doc, 'input', start='\n')
@@ -152,7 +151,7 @@ class PDFExtension(command.CommandExtension):
         # Locate the Page object where the error was producec.
         pnode = None
         for page in content:
-            if lnode.filename in page.destination:
+            if lnode['filename'] in page.destination:
                 pnode = page
                 break
 
@@ -164,12 +163,12 @@ class PDFExtension(command.CommandExtension):
             self._lineCounter(result)
 
         # Report warning(s)
-        for w in lnode.warnings:
+        for w in lnode['warnings']:
 
             # Locate the rendered node that that caused the error
             r_node = None
             if result:
-                for r in anytree.PreOrderIter(result):
+                for r in moosetree.iterate(result):
                     if w.line >= r.get('_start_line', float('Inf')):
                         r_node = r
 
@@ -234,34 +233,34 @@ class PDFExtension(command.CommandExtension):
         root = PDFExtension.parseOutput(output)
 
         # Loop through the result and capture filenames and warnings
-        for n in anytree.PreOrderIter(root):
-            match = regex.search(n.content)
+        for n in moosetree.iterate(root):
+            match = regex.search(n['content'])
             if match:
-                n.content = match.group('content')
-                n.filename = match.group('filename').replace('\n', '')
-            n.content = [c.strip().replace('\n', '') for c in re.split(r'\n{2,}', n.content) if c]
+                n['content'] = match.group('content')
+                n['filename'] = match.group('filename').replace('\n', '')
+            n['content'] = [c.strip().replace('\n', '') for c in re.split(r'\n{2,}', n['content']) if c]
 
-            for c in n.content:
+            for c in n['content']:
                 if 'LaTeX Warning' in c:
                     c = c.replace('LaTeX Warning:', '').strip()
                     match = line_re.search(c)
                     line = int(match.group('line')) if match else None
-                    n.warnings.append(warn(content=c, line=line))
+                    n['warnings'].append(warn(content=c, line=line))
 
         return root
 
     @staticmethod
     def parseOutput(content):
-        """Convert the nested paranthesis output from pdflatex to a tree structure."""
-        root = anytree.AnyNode(content='', filename='', warnings=[])
+        """Convert the nested parenthesis output from pdflatex to a tree structure."""
+        root = moosetree.Node(None, 'root', content='', filename='', warnings=[])
         node = root
         for char in content:
             if char == '(':
-                node = anytree.AnyNode(parent=node, content='', filename='', warnings=[])
+                node = moosetree.Node(node, 'paren', content='', filename='', warnings=[])
             elif char == ')':
                 node = node.parent
             else:
-                node.content += str(char)
+                node['content'] += str(char)
         return root
 
     @staticmethod

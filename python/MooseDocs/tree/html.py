@@ -8,8 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 #pylint: enable=missing-docstring
-import cgi
-import anytree
+import html
+import re
+import moosetree
 from .base import NodeBase
 
 class Tag(NodeBase):
@@ -56,14 +57,14 @@ class Tag(NodeBase):
         """
         c = self.get('class', '').strip().split(' ')
         c += [a.strip() for a in args]
-        self.set('class', ' '.join(c).strip())
+        self['class'] = ' '.join(c).strip()
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
         out = ''
         attr_list = []
         skip_list = ('close', 'string')
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if value and (key not in skip_list):
                 attr_list.append('{}="{}"'.format(key, str(value).strip()))
 
@@ -84,10 +85,10 @@ class Tag(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in anytree.PreOrderIter(self):
+        for node in moosetree.iterate(self):
             if node.name == 'String':
                 strings.append(node['content'])
-        return ' '.join(strings)
+        return re.sub(r' {2,}', ' ', ' '.join(strings))
 
     def copy(self, _parent=None):
         """Copy the tree from this node."""
@@ -106,14 +107,38 @@ class String(NodeBase):
         super(String, self).__init__('String', parent, **kwargs)
 
         if self.get('content') is None:
-            self.set('content', '')
+            self['content'] = ''
 
     def write(self):
         if self.get('escape'):
-            return cgi.escape(str(self.get('content')), quote=True)
+            return html.escape(str(self.get('content')), quote=True)
         else:
             return self.get('content')
 
     def copy(self, _parent=None):
         """Copy the String. These shouldn't have children, so don't worry about them."""
         return String(_parent, **self.attributes)
+
+if __name__ == '__main__':
+    import mooseutils
+
+    class Node(object):
+        def __init__(self, parent, name, **kwargs):
+            self.children = list()
+            self.attributes = dict()
+            self.attributes.update(kwargs)
+            if parent is not None:
+                parent.children.append(self)
+
+    def createTree(N, cls):
+        body = cls(None, 'body')
+        for i in range(N):
+            div0 = cls(body, 'div')
+            for j in range(N):
+                div1 = cls(div0, 'div')
+                for k in range(N):
+                    p = cls(div1, 'p', string='STUFF')
+
+
+    mooseutils.run_profile(createTree, 100, Tag)
+    mooseutils.run_profile(createTree, 100, Node)

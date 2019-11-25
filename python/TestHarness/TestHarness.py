@@ -32,7 +32,7 @@ def readTestRoot(fname):
     if root.find('run_tests_args'):
         args = shlex.split(root.param('run_tests_args'))
 
-    hit_node = HitNode(hitnode=root)
+    hit_node = HitNode(None, root)
     hit_parse(hit_node, root, '')
 
     # TODO: add check to see if the binary exists before returning. This can be used to
@@ -63,7 +63,7 @@ class TestHarness:
         os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
 
         if app_name:
-            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(hitnode=hit.parse('',''))
+            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(None, hit.parse('',''))
         else:
             rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
 

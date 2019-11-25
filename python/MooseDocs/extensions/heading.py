@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import anytree
+import moosetree
 from MooseDocs.base import components
 from MooseDocs.extensions import core
 
@@ -37,7 +37,7 @@ class HeadingExtension(components.Extension):
     def postTokenize(self, ast, page, meta, reader):
         data = dict()
         func = lambda n: (n.name == 'Heading')
-        for node in anytree.PreOrderIter(ast.root, filter_=func):
+        for node in moosetree.iterate(ast.root, func):
             id_ = node.get('id', '')
             if id_ not in data:
                 data[id_] = node.copy()

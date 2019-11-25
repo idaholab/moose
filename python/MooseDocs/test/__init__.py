@@ -126,6 +126,12 @@ class MooseDocsTestCase(unittest.TestCase):
         if nargs is not None:
             self.assertEqual(len(node['args']), nargs)
 
+    def assertLatexCommand(self, *args, **kwargs):
+        self.assertLatex(args[0], 'Command', *args[1:], **kwargs)
+
+    def assertLatexEnvironment(self, *args, **kwargs):
+        self.assertLatex(args[0], 'Environment', *args[1:], **kwargs)
+
     def assertLatexString(self, node, content, **kwargs):
         self.assertIsInstance(node, latex.String)
         self.assertEqual(node.get('content'), content)

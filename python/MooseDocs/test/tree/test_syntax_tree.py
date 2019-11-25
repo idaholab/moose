@@ -10,8 +10,8 @@
 
 import os
 import unittest
-import anytree
 import logging
+import moosetree
 import mooseutils
 import MooseDocs
 from MooseDocs.tree import app_syntax
@@ -23,8 +23,7 @@ class TestSyntaxTree(unittest.TestCase):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined')
         exe = mooseutils.find_moose_executable(location)
         root = app_syntax(exe, remove=[])
-        node = anytree.search.find_by_attr(root, '/Variables/InitialCondition/BoundingBoxIC',
-                                           name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/Variables/InitialCondition/BoundingBoxIC')
         self.assertEqual(node.name, 'BoundingBoxIC')
 
     def testRemove(self):
@@ -32,21 +31,18 @@ class TestSyntaxTree(unittest.TestCase):
         exe = mooseutils.find_moose_executable(location)
         root = app_syntax(exe, remove=['/Variables/InitialCondition'])
 
-        node = anytree.search.find_by_attr(root, '/Variables/InitialCondition/AddICAction',
-                                           name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/Variables/InitialCondition/AddICAction')
         self.assertEqual(node.name, 'AddICAction')
         self.assertTrue(node.removed)
 
-        node = anytree.search.find_by_attr(root, '/Variables/InitialCondition/BoundingBoxIC',
-                                           name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/Variables/InitialCondition/BoundingBoxIC')
         self.assertTrue(node.removed)
 
     def testRemoveTestApp(self):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined')
         exe = mooseutils.find_moose_executable(location)
         root = app_syntax(exe)
-        node = anytree.search.find_by_attr(root, '/UserObjects/TestDistributionPostprocessor',
-                                           name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/UserObjects/TestDistributionPostprocessor')
         self.assertTrue(node.removed)
         self.assertIn('MiscTestApp', root.groups)
 
@@ -56,8 +52,8 @@ class TestSyntaxTree(unittest.TestCase):
         alias = dict()
         alias['/VectorPostprocessors/VolumeHistogram'] = '/VPP/VolumeHistogram'
         root = app_syntax(exe, alias=alias)
-        node = anytree.search.find_by_attr(root, '/VectorPostprocessors/VolumeHistogram',
-                                           name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/VectorPostprocessors/VolumeHistogram')
+
         self.assertEqual(node.fullpath, '/VectorPostprocessors/VolumeHistogram')
         self.assertEqual(node.alias, '/VPP/VolumeHistogram')
 
@@ -65,7 +61,7 @@ class TestSyntaxTree(unittest.TestCase):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'test')
         exe = mooseutils.find_moose_executable(location)
         root = app_syntax(exe)
-        node = anytree.search.find_by_attr(root, '/Kernels/ADDiffusion', name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/Kernels/ADDiffusion')
         self.assertEqual(node.fullpath, '/Kernels/ADDiffusion')
 
 if __name__ == '__main__':

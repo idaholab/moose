@@ -14,7 +14,7 @@ import logging
 import copy
 import re
 import time
-import anytree
+import moosetree
 
 import mooseutils
 
@@ -173,7 +173,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
-        for node in anytree.PreOrderIter(self._app_syntax):
+        for node in moosetree.iterate(self._app_syntax):
             if not node.removed:
                 self._cache[node.fullpath] = node
                 if node.alias:
@@ -208,15 +208,19 @@ class AppSyntaxExtension(command.CommandExtension):
             LOG.warning(msg, name)
             name = name[0:-10]
 
-        try:
-            if node_type == syntax.ObjectNode:
-                return self._object_cache[name]
-            elif node_type == syntax.SyntaxNode:
-                return self._syntax_cache[name]
-            return self._cache[name]
-        except KeyError:
+        node = None
+        if node_type == syntax.ObjectNode:
+            node = self._object_cache.get(name, None)
+        elif node_type == syntax.SyntaxNode:
+            node = self._syntax_cache.get(name, None)
+        else:
+            node = self._cache.get(name, None)
+
+        if node is None:
             msg = "'{}' syntax was not recognized."
             raise common.MooseDocsException(msg, name)
+
+        return node
 
     def extend(self, reader, renderer):
         self.requires(core, floats, table, autolink, materialicon)
@@ -571,7 +575,7 @@ class RenderSyntaxList(components.RenderComponent):
 
 class RenderSyntaxListItem(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        token(0).parent = None
+        #token(0).parent = None # I don't recall why this was here
         p = html.Tag(parent, 'p', class_='moose-syntax-list-item')
         html.Tag(p, 'span', string='{}: '.format(token['syntax']),
                  class_='moose-syntax-list-item-syntax')
@@ -602,11 +606,13 @@ class RenderSyntaxListItem(components.RenderComponent):
 class RenderInputParametersToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        pass
+        self._createHTMLHelper(parent, token, page, _insert_html_parameter, False)
 
     def createMaterialize(self, parent, token, page):
+        self._createHTMLHelper(parent, token, page, _insert_materialize_parameter, True)
 
-        groups = self._getParameters(token, token['parameters'])
+    def _createHTMLHelper(self, parent, token, page, func, collapse):
+        groups = _get_parameters(token, token['parameters'])
 
         n_groups = 0
         for group, params in groups.items():
@@ -625,13 +631,13 @@ class RenderInputParametersToken(components.RenderComponent):
                 else:
                     h['data-details-open'] = 'close'
 
-            ul = html.Tag(parent, 'ul', class_='collapsible')
-            ul['data-collapsible'] = "expandable"
+            ul = html.Tag(parent, 'ul')
+            if collapse:
+                ul.addClass('collapsible')
+                ul['data-collapsible'] = "expandable"
 
             for name, param in params.items():
-                _insert_parameter(ul, name, param)
-
-        return parent
+                func(ul, name, param)
 
     @staticmethod
     def _getParameters(token, parameters):
@@ -711,15 +717,54 @@ class RenderParameterToken(components.RenderComponent):
         return span
 
     def createLatex(self, parent, token, page):
-        pass
-
+        return parent
 
 class RenderSyntaxLink(core.RenderLink):
     def createLatex(self, parent, token, page):
         return parent
 
+def _get_parameters(token, parameters):
+    """
+    Add the parameters from the supplied node to the supplied groups
+    """
 
-def _insert_parameter(parent, name, param):
+    # Build the list of groups to display
+    groups = collections.OrderedDict()
+    if token['groups']:
+        for group in token['groups']:
+            groups[group] = dict()
+
+    else:
+        groups['Required'] = dict()
+        groups['Optional'] = dict()
+        for param in parameters.values():
+            group = param['group_name']
+            if group and group not in groups:
+                groups[group] = dict()
+
+    # Populate the parameter lists by group
+    for param in parameters.values() or []:
+
+        # Do nothing if the parameter is hidden or not shown
+        name = param['name']
+        if (name == 'type') or \
+           (token['hide'] and name in token['hide']) or \
+           (token['show'] and name not in token['show']):
+            continue
+
+        # Handle the 'ungroup' parameters
+        group = param['group_name']
+        if not group and param['required']:
+            group = 'Required'
+        elif not group and not param['required']:
+            group = 'Optional'
+
+        if group in groups:
+            groups[group][name] = param
+
+    return groups
+
+def _insert_html_parameter(parent, name, param):
     """
     Insert parameter in to the supplied <ul> tag.
 
@@ -728,7 +773,31 @@ def _insert_parameter(parent, name, param):
         name[str]: The name of the parameter.
         param: The parameter object from JSON dump.
     """
+    if param['deprecated']:
+        return
 
+    li = html.Tag(parent, 'li')
+    default = _format_default(param)
+
+    if default:
+        html.Tag(li, 'strong', string=name)
+        html.Tag(li, 'span', string=' ({}): '.format(default))
+    else:
+        html.Tag(li, 'strong', string='{}: '.format(name))
+
+    desc = param['description']
+    if desc:
+        html.Tag(li, 'span', string=desc)
+
+def _insert_materialize_parameter(parent, name, param):
+    """
+    Insert parameter in to the supplied <ul> tag.
+
+    Input:
+        parent[html.Tag]: The 'ul' tag that parameter <li> item is to belong.
+        name[str]: The name of the parameter.
+        param: The parameter object from JSON dump.
+    """
     if param['deprecated']:
         return
 

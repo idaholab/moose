@@ -12,7 +12,7 @@ import os
 import uuid
 import logging
 import json
-import anytree
+import moosetree
 from MooseDocs import common
 from MooseDocs.extensions import core, heading
 from MooseDocs.base import components, renderers
@@ -86,7 +86,7 @@ class NavigationExtension(components.Extension):
 
         index = []
         title = None
-        for head in anytree.search.findall_by_attr(ast, 'Heading'):
+        for head in moosetree.findall(ast, lambda n: n.name == 'Heading'):
             if (head['level'] == 1) and (title is None):
                 title = head.text()
 
@@ -123,9 +123,9 @@ class NavigationExtension(components.Extension):
             return
 
         root = result.root
-        header = anytree.search.find_by_attr(root, 'header')
+        header = moosetree.find(root, lambda n: n.name == 'header')
         nav = html.Tag(html.Tag(header, 'nav'), 'div', class_='nav-wrapper container')
-        container = anytree.search.find_by_attr(root, 'main').children[0]
+        container = moosetree.find(root, lambda n: n.name == 'main').children[0]
 
         row = container(0)
         col = container(0)(0)
@@ -154,7 +154,7 @@ class NavigationExtension(components.Extension):
         if repo is not None:
             self._addRepo(nav, page)
 
-        head = anytree.search.find_by_attr(root, 'head')
+        head = moosetree.find(root, lambda n: n.name == 'head')
         self._addTitle(head, root, page)
         self._addName(nav, page)
 
@@ -225,8 +225,8 @@ class NavigationExtension(components.Extension):
         btn = html.Tag(parent, 'a', class_="modal-trigger", href="#moose-search")
         html.Tag(btn, 'i', string='search', class_="material-icons")
 
-        # Search Modal window
-        div = html.Tag(anytree.search.find_by_attr(parent.root, 'header'), 'div',
+        # Search modal
+        div = html.Tag(moosetree.find(parent.root, lambda n: n.name == 'header'), 'div',
                        id_="moose-search",
                        class_="modal modal-fixed-footer moose-search-modal")
         container = html.Tag(div, 'div',
@@ -343,7 +343,7 @@ class NavigationExtension(components.Extension):
 
             child.parent = section
 
-        for node in anytree.PreOrderIter(container, filter_=lambda n: n.name == 'section'):
+        for node in moosetree.iterate(container, lambda n: n.name == 'section'):
 
             if 'data-details-open' in node:
                 status = node['data-details-open']
@@ -376,7 +376,7 @@ class NavigationExtension(components.Extension):
 
         div = html.Tag(toc, 'div', class_='toc-wrapper pin-top')
         ul = html.Tag(div, 'ul', class_='section table-of-contents')
-        for node in anytree.PreOrderIter(content):
+        for node in moosetree.iterate(content):
             if node.get('data-section-level', None) == 2:
                 node.addClass('scrollspy')
                 li = html.Tag(ul, 'li')
@@ -420,7 +420,7 @@ class NavigationExtension(components.Extension):
         """Create a "mega menu" by parsing the *.menu.md file."""
 
         id_ = uuid.uuid4()
-        header = anytree.search.find_by_attr(parent.root, 'header')
+        header = moosetree.find(parent.root, lambda n: n.name == 'header')
         div = html.Tag(header, 'div', id_=id_)
         div.addClass('moose-mega-menu-content')
         parent['data-target'] = id_

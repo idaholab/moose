@@ -218,7 +218,6 @@ def touch(fname):
     with open(fname, 'a'):
         os.utime(fname, None)
 
-
 def gold(filename):
     """
     Get the gold filename corresponding to a filename.
@@ -394,6 +393,12 @@ def git_root_dir(working_dir=os.getcwd()):
         print("The supplied directory is not a git repository: {}".format(working_dir))
     except OSError:
         print("The supplied directory does not exist: {}".format(working_dir))
+
+def run_time(function, *args, **kwargs):
+    """Run supplied function with duration timing."""
+    start = time.time()
+    out = function(*args, **kwargs)
+    return time.time() - start
 
 def run_profile(function, *args, **kwargs):
     """Run supplied function with python profiler."""
