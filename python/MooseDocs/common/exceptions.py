@@ -22,7 +22,12 @@ class MooseDocsException(Exception):
                message with the built-in python format method.
     """
     def __init__(self, message, *args, **kwargs):
-        msg = message.format(*args)
+        self.__message = message.format(*args)
         if kwargs.pop('log', False):
-            LOG.exception(msg)
-        Exception.__init__(self, str(msg))
+            LOG.exception(self.__message)
+        Exception.__init__(self, self.__message)
+
+    @property
+    def message(self):
+        """Return the message supplied to the constructor."""
+        return self.__message

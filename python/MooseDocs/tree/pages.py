@@ -68,7 +68,7 @@ class Page(mooseutils.AutoPropertyMixin):
         return os.path.relpath(self.destination, os.path.dirname(other.destination))
 
     def __str__(self):
-        """Define the anytree screen output."""
+        """Define the screen output."""
         return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
                                    self.local, self.source)
 

@@ -13,7 +13,7 @@ import collections
 import logging
 import json
 
-import anytree
+import moosetree
 
 import mooseutils
 
@@ -59,11 +59,12 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         hidden.update(hide)
 
     if hidden:
-        for node in anytree.PreOrderIter(root):
+        for node in moosetree.iterate(root):
             if node.fullpath in hidden:
                 node.hidden = True
 
     # Remove
+    # TODO: There is multiple iterations over the tree, there should be just none or one
     removed = set()
     if isinstance(remove, dict):
         for value in remove.values():
@@ -72,18 +73,18 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         removed.update(remove)
 
     if removed:
-        for node in anytree.PreOrderIter(root):
+        for node in moosetree.iterate(root):
             if any(n.fullpath == prefix for n in node.path for prefix in removed):
                 node.removed = True
 
     if not allow_test_objects:
-        for node in anytree.PreOrderIter(root):
+        for node in moosetree.iterate(root):
             if node.groups and all([group.endswith('TestApp') for group in node.groups]):
                 node.removed = True
 
     # Alias
     if alias:
-        for node in anytree.PreOrderIter(root):
+        for node in moosetree.iterate(root):
             for k, v in alias.items():
                 if node.fullpath == k:
                     node.alias = str(v)

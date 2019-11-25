@@ -86,7 +86,7 @@ class LocalListingCommand(command.CommandComponent):
             code.attributes.update(**self.attributes)
 
         if flt is not parent:
-            code.name = 'ListingCode'
+            code.name = 'ListingCode' #TODO: Find a better way
 
         return parent
 
@@ -120,7 +120,7 @@ class FileListingCommand(LocalListingCommand):
             code.attributes.update(**self.attributes)
 
         if flt is not parent:
-            code.name = 'ListingCode'
+            code.name = 'ListingCode' #TODO: Find a better way
 
         # Add bottom modal
         link = self.settings['link']
@@ -237,7 +237,7 @@ class RenderListing(floats.RenderFloat):
                           args=opts,
                           info=token.info)
 
-        token.children = tuple()
+        token.children = list()
         return parent
 
 class RenderListingCode(core.RenderCode):

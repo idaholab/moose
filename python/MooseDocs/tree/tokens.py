@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
 import copy
-import anytree
+import moosetree
 import MooseDocs
 from MooseDocs.tree.base import NodeBase
 
@@ -84,7 +84,7 @@ class Token(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in anytree.PreOrderIter(self):
+        for node in moosetree.iterate(self):
             if node.name in ['Word', 'Number', 'String']:
                 strings.append(node['content'])
         return sep.join(strings)
@@ -100,7 +100,7 @@ class Token(NodeBase):
 
     def copyToToken(self, token):
         """Copy the children from this token to the supplied parent."""
-        for child in self.copy():
+        for child in self.copy().children:
             child.parent = token
 
     def toDict(self):

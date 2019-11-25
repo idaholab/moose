@@ -15,7 +15,7 @@ import codecs
 import logging
 import collections
 import traceback
-import anytree
+import moosetree
 
 import mooseutils
 import MooseDocs
@@ -214,7 +214,7 @@ class SQARequirementsCommand(command.CommandComponent):
         text = SQARequirementText(item)
 
         self.reader.tokenize(text, req.text, page, MooseDocs.INLINE, info.line, report=False)
-        for token in anytree.PreOrderIter(item):
+        for token in moosetree.iterate(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
                                           req.filename,
@@ -381,7 +381,7 @@ class SQAVerificationCommand(command.CommandComponent):
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname)
         self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
-        for token in anytree.PreOrderIter(item):
+        for token in moosetree.iterate(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
                                           req.filename,

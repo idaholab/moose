@@ -11,12 +11,12 @@ import sys
 import uuid
 import logging
 
-import anytree
-
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
 from pylatexenc.latex2text import LatexNodes2Text
+
+import moosetree
 
 import MooseDocs
 from MooseDocs.common import exceptions
@@ -89,7 +89,7 @@ class BibtexExtension(command.CommandExtension):
             del self.__citations[:] # TODO: In python 3 this should be a clear()
 
             has_bib = False
-            for node in anytree.PreOrderIter(ast):
+            for node in moosetree.iterate(ast):
                 if node.name == 'BibtexBibliography':
                     has_bib = True
                     break

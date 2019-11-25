@@ -11,7 +11,7 @@
 import os
 import logging
 
-import anytree
+import moosetree
 
 import MooseDocs
 from MooseDocs import common
@@ -78,7 +78,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
 
         # Report errors
         if report:
-            for token in anytree.PreOrderIter(root):
+            for token in moosetree.iterate(root):
                 if token.name == 'ErrorToken':
                     msg = common.report_error(token['message'],
                                               page.source,

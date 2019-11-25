@@ -14,7 +14,7 @@ import re
 import uuid
 import logging
 
-import anytree
+import moosetree
 
 from MooseDocs.base import components, renderers, Translator
 from MooseDocs.common import exceptions
@@ -392,7 +392,7 @@ class RenderHeading(components.RenderComponent):
 
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
         if not token.get('id'):
-            token.set('id', token.text('-').lower())
+            token['id'] = token.text('-').lower()
         return html.Tag(parent, 'h{}'.format(token['level']), token)
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
@@ -461,7 +461,7 @@ class RenderShortcutLink(components.RenderComponent):
             return self.__cache[key]
 
         #TODO: error if more than one found
-        for node in anytree.PreOrderIter(token.root, maxlevel=None):
+        for node in moosetree.iterate(token.root):
             if node.name == 'Shortcut' and node['key'] == key:
                 with Translator.LOCK:
                     self.__cache[key] = node

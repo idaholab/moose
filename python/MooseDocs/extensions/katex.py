@@ -10,7 +10,7 @@
 import sys
 import re
 import uuid
-import anytree
+import moosetree
 from MooseDocs.base import components, renderers
 from MooseDocs.tree import tokens, html, latex
 from MooseDocs.extensions import command, core, floats
@@ -76,9 +76,9 @@ class KatexExtension(command.CommandExtension):
         labels = set()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
-        for node in anytree.PreOrderIter(ast, filter_=func):
+        for node in moosetree.iterate(ast, func):
             count += 1
-            node.set('number', count)
+            node['number'] = count
             if node['label']:
                 if isinstance(self.translator.renderer, renderers.LatexRenderer):
                     labels.add(node['label'])
@@ -140,9 +140,8 @@ class KatexBlockEquationComponent(components.TokenComponent):
         # Add a label
         label = self.LABEL_RE.search(info['equation'])
         if label:
-            token.set('label', label.group('id'))
-            token.set('tex', token['tex'].replace(str(label.group()), ''))
-
+            token['label'] = label.group('id')
+            token['tex'] = token['tex'].replace(label.group(), '')
         return parent
 
 class KatexInlineEquationComponent(components.TokenComponent):

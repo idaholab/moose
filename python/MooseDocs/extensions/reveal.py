@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import re
 import logging
-import anytree
+import moosetree
 from MooseDocs.base import renderers, components
 from MooseDocs.tree import html, tokens
 from MooseDocs.extensions import core, command
@@ -97,7 +97,7 @@ class RevealExtension(command.CommandExtension):
                 thesubsection += 1
             thesection += 1
 
-        for a in anytree.PreOrderIter(result, lambda n: n.name == 'a'):
+        for a in moosetree.iterate(result, lambda n: n.name == 'a'):
             href = a.get('href', '')
             if href.startswith('#'):
                 key = lookup[href[1:]]
@@ -107,10 +107,15 @@ class RevealExtension(command.CommandExtension):
     def _getNodeIDs(root):
         """Return all 'ids' in a node tree."""
         keys = []
-        for node in anytree.PreOrderIter(root):
+        id_ = root.get('id', None)
+        if id_:
+            keys.append(id_)
+
+        for node in moosetree.iterate(root, method=moosetree.IterMethod.PRE_ORDER):
             id_ = node.get('id', None)
             if id_:
                 keys.append(id_)
+
         return keys
 
 class RevealNotes(command.CommandComponent):

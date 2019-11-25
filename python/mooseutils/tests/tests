@@ -45,7 +45,6 @@
     type = PythonUnitTest
     input = test_hit_load.py
     requirement = "MOOSE python utilities shall include a tool for reading hit files."
-    required_python_packages = anytree
   []
   [yaml_load]
     type = PythonUnitTest

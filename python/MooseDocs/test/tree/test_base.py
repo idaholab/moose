@@ -10,7 +10,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import unittest
-import mock
 from MooseDocs.tree import base
 
 class TestNodeBase(unittest.TestCase):
@@ -29,13 +28,11 @@ class TestNodeBase(unittest.TestCase):
         self.assertIs(root.children[0], node)
         self.assertIs(root(0), node)
 
-    @mock.patch('logging.Logger.error')
-    def testCallError(self, mock):
-        node = base.NodeBase('root', None)
-        node(0)
-        mock.assert_called_once()
-        args, _ = mock.call_args
-        self.assertIn('A child node with index', args[0])
+    def testCallError(self):
+        with self.assertRaises(IndexError) as ex:
+            node = base.NodeBase('root', None)
+            node(0)
+        self.assertIn('list index out of range', str(ex.exception))
 
     def testWrite(self):
         node = base.NodeBase('root', None)
