@@ -49,6 +49,9 @@ GeneralizedPlaneStrainAction::validParams()
                                               "The list of ids of the blocks (subdomain) "
                                               "that the GeneralizedPlaneStrain kernels "
                                               "will be applied to");
+  params.addParam<std::vector<TagName>>(
+      "extra_vector_tags",
+      "The tag names for extra vectors that residual data should be saved into");
 
   return params;
 }
@@ -134,6 +137,10 @@ GeneralizedPlaneStrainAction::act()
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = uo_name;
+
+    if (isParamValid("extra_vector_tags"))
+      params.set<std::vector<TagName>>("extra_vector_tags") =
+          getParam<std::vector<TagName>>("extra_vector_tags");
 
     _problem->addScalarKernel(sk_type, _name + "_GeneralizedPlaneStrain", params);
   }
