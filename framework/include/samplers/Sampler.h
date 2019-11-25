@@ -51,6 +51,11 @@ public:
 
   Sampler(const InputParameters & parameters);
 
+  // DEPRECATED, DO NOT USE
+  virtual std::vector<DenseMatrix<Real>> sample();
+  std::vector<DenseMatrix<Real>> getSamples();
+  double rand(unsigned int index = 0);
+
   // The public members define the API that is exposed to application developers that are using
   // Sampler objects to perform calculations, so be very careful when adding items here since
   // they are exposed to any other object via the SamplerInterface.

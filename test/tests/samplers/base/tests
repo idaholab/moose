@@ -118,7 +118,7 @@
       type = RunException
       input = errors.i
       expect_err = "The number of rows cannot be zero"
-      cli_args = "Samplers/sample/num_rows=0"
+      cli_args = "Samplers/sample/num_rows=0 Samplers/sample/legacy_support=false"
 
       detail = "if the number of rows is set to zero,"
     []
@@ -126,7 +126,7 @@
       type = RunException
       input = errors.i
       expect_err = "The number of columns cannot be zero"
-      cli_args = "Samplers/sample/num_cols=0"
+      cli_args = "Samplers/sample/num_cols=0 Samplers/sample/legacy_support=false"
 
       detail = "if the number of columns is set to zero,"
     []
