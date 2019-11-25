@@ -199,6 +199,9 @@ TensorMechanicsAction::act()
       auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(type, name() + "_gps", action_params));
       _awh.addActionBlock(action);
+      if (isParamValid("extra_vector_tags"))
+        action_params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
     }
   }
 
