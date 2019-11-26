@@ -30,21 +30,12 @@ public:
   virtual Real cdf(const Real & x) const override;
   virtual Real quantile(const Real & p) const override;
 
-  Real pdf(const Real & x,
-           const Real & a,
-           const Real & b,
-           const Real & alpha_1,
-           const Real & alpha_2) const;
-  Real cdf(const Real & x,
-           const Real & a,
-           const Real & b,
-           const Real & alpha_1,
-           const Real & alpha_2) const;
-  Real quantile(const Real & p,
-                const Real & a,
-                const Real & b,
-                const Real & alpha_1,
-                const Real & alpha_2) const;
+  static Real
+  pdf(const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2);
+  static Real
+  cdf(const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2);
+  static Real quantile(
+      const Real & p, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2);
 
 protected:
   /// The lower location parameter, a
@@ -59,4 +50,3 @@ protected:
   /// The second shape parameter, alpha_2
   const Real & _alpha_2;
 };
-

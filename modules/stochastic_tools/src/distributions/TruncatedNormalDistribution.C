@@ -39,7 +39,7 @@ TruncatedNormalDistribution::pdf(const Real & x,
                                  const Real & mean,
                                  const Real & std_dev,
                                  const Real & lower_bound,
-                                 const Real & upper_bound) const
+                                 const Real & upper_bound)
 {
   if (x <= lower_bound || x >= upper_bound)
     return 0.0;
@@ -54,7 +54,7 @@ TruncatedNormalDistribution::cdf(const Real & x,
                                  const Real & mean,
                                  const Real & std_dev,
                                  const Real & lower_bound,
-                                 const Real & upper_bound) const
+                                 const Real & upper_bound)
 {
 
   if (x <= lower_bound || x >= upper_bound)
@@ -71,7 +71,7 @@ TruncatedNormalDistribution::quantile(const Real & p,
                                       const Real & mean,
                                       const Real & std_dev,
                                       const Real & lower_bound,
-                                      const Real & upper_bound) const
+                                      const Real & upper_bound)
 {
   return NormalDistribution::quantile(NormalDistribution::cdf(lower_bound, mean, std_dev) +
                                           p * (NormalDistribution::cdf(upper_bound, mean, std_dev) -

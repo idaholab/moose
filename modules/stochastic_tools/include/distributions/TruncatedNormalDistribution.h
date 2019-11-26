@@ -30,21 +30,21 @@ public:
   virtual Real cdf(const Real & x) const override;
   virtual Real quantile(const Real & p) const override;
 
-  Real pdf(const Real & x,
-           const Real & mean,
-           const Real & std_dev,
-           const Real & lower_bound,
-           const Real & upper_bound) const;
-  Real cdf(const Real & x,
-           const Real & mean,
-           const Real & std_dev,
-           const Real & lower_bound,
-           const Real & upper_bound) const;
-  Real quantile(const Real & p,
-                const Real & mean,
-                const Real & std_dev,
-                const Real & lower_bound,
-                const Real & upper_bound) const;
+  static Real pdf(const Real & x,
+                  const Real & mean,
+                  const Real & std_dev,
+                  const Real & lower_bound,
+                  const Real & upper_bound);
+  static Real cdf(const Real & x,
+                  const Real & mean,
+                  const Real & std_dev,
+                  const Real & lower_bound,
+                  const Real & upper_bound);
+  static Real quantile(const Real & p,
+                       const Real & mean,
+                       const Real & std_dev,
+                       const Real & lower_bound,
+                       const Real & upper_bound);
 
 protected:
   /// The lower bound for the distribution
@@ -53,4 +53,3 @@ protected:
   /// The upper bound for the distribution
   const Real & _upper_bound;
 };
-
