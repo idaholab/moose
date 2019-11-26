@@ -101,3 +101,10 @@ rm -rf libmesh/* libmesh/.* || true
 #-----------------------------------------------------------------------------#
 COPY . ${MOOSE_DIR}
 RUN cd test ; make -j ${MOOSE_JOBS}
+
+#-----------------------------------------------------------------------------#
+# Add needed env vars to /etc/environment
+#-----------------------------------------------------------------------------#
+RUN for CURR_VAR in $(env | grep 'CC\|CXX\|_DIR'); do \
+    echo "$CURR_VAR" >> /etc/environment ; \
+done
