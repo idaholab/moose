@@ -60,6 +60,7 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
+    samplers = mc
   []
   [data]
     type = SamplerData

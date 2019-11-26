@@ -59,6 +59,7 @@
   [storage]
     type = StochasticResults
     parallel_type = DISTRIBUTED
+    samplers = sample
   []
 []
 
