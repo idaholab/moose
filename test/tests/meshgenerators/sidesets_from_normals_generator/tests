@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #14441'
 
   [generate]
     requirement = 'The system shall support the generation of multiple mesh side sets on the '
@@ -20,7 +20,6 @@
       type = 'Exodiff'
       input = 'sidesets_cylinder_normals_fixed.i'
       exodiff = 'sidesets_cylinder_normals_fixed_out.e'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = 'where the normal is fixed within a specified tolerance.'

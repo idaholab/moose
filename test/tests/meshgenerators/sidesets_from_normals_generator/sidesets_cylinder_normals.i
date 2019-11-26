@@ -2,7 +2,6 @@
   [./fmg]
     type = FileMeshGenerator
     file = cylinder.e
-    #parallel_type = replicated
   []
 
   [./sidesets]

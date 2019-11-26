@@ -73,7 +73,8 @@ SideSetsGeneratorBase::flood(const Elem * elem,
                              boundary_id_type side_id,
                              MeshBase & mesh)
 {
-  if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
+  if (elem == nullptr || elem->is_remote() ||
+      (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;
 
   _visited[side_id].insert(elem);

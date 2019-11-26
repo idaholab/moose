@@ -49,8 +49,11 @@ SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters
     _input(getMesh("input")),
     _normals(getParam<std::vector<Point>>("normals"))
 {
-  if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
+  if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name() && !_fixed_normal)
+    paramError(
+        "fixed_normal",
+        "Painting around curves is only supported with ReplicatedMesh. You must either set this to "
+        "true to disable painting around curves or set the mesh type to ReplicatedMesh.");
 
   // Get the BoundaryIDs from the mesh
   _boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
