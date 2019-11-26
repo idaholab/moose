@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", PlasticTruss);
 
-template <>
+defineLegacyParams(PlasticTruss);
+
 InputParameters
-validParams<PlasticTruss>()
+PlasticTruss::validParams()
 {
-  InputParameters params = validParams<LinearElasticTruss>();
+  InputParameters params = LinearElasticTruss::validParams();
   params.addClassDescription(
       "Computes the stress and strain for a truss element with plastic behavior defined by either "
       "linear hardening or a user-defined hardening function.");

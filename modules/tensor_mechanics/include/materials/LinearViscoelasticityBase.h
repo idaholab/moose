@@ -95,6 +95,7 @@ public:
     /// theta automatically adjusted as a function of the time step and the viscosity
     Zienkiewicz,
   };
+
   static InputParameters validParams();
 
   LinearViscoelasticityBase(const InputParameters & parameters);

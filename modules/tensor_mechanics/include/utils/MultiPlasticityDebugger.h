@@ -24,9 +24,9 @@ InputParameters validParams<MultiPlasticityDebugger>();
 class MultiPlasticityDebugger : public MultiPlasticityLinearSystem
 {
 public:
-  MultiPlasticityDebugger(const MooseObject * moose_object);
-
   static InputParameters validParams();
+
+  MultiPlasticityDebugger(const MooseObject * moose_object);
 
   /**
    * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc
