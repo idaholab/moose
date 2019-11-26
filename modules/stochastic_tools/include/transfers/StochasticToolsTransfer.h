@@ -10,6 +10,7 @@
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
+#include "SamplerInterface.h"
 
 class Sampler;
 class StochasticToolsTransfer;
@@ -20,7 +21,7 @@ InputParameters validParams<StochasticToolsTransfer>();
  * The class creates an additional API to allow Transfers to work when running the
  * StochasticTools<FullSolve/Transient>MultiApp objects in batch-mode.
  */
-class StochasticToolsTransfer : public MultiAppTransfer
+class StochasticToolsTransfer : public MultiAppTransfer, SamplerInterface
 {
 public:
   static InputParameters validParams();

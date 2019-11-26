@@ -44,12 +44,14 @@
   [runner]
     type = SamplerTransfer
     multi_app = runner
+    sampler = mc
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
   []
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
+    sampler = mc
     vector_postprocessor = storage
     postprocessor = average
   []

@@ -29,11 +29,6 @@ public:
 
   SamplerFullSolveMultiApp(const InputParameters & parameters);
 
-  /**
-   * Return the Sampler object for this MultiApp.
-   */
-  Sampler & getSampler() const { return _sampler; }
-
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
 protected:

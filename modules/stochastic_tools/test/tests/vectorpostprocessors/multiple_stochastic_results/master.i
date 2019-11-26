@@ -55,12 +55,14 @@
   [sobol]
     type = SamplerTransfer
     multi_app = sobol
+    sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
   []
   [sobol_data]
     type = SamplerPostprocessorTransfer
     multi_app = sobol
+    sampler = sobol
     vector_postprocessor = storage
     postprocessor = avg
   []
@@ -68,12 +70,14 @@
   [mc]
     type = SamplerTransfer
     multi_app = mc
+    sampler = mc
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
   []
   [mc_data]
     type = SamplerPostprocessorTransfer
     multi_app = mc
+    sampler = mc
     vector_postprocessor = storage
     postprocessor = avg
   []

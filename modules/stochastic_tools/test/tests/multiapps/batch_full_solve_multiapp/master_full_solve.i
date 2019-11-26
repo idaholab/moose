@@ -41,6 +41,7 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
+    sampler = mc
     vector_postprocessor = storage
     postprocessor = average
   []

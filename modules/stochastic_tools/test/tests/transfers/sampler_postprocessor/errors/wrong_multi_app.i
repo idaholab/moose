@@ -44,6 +44,7 @@
   [./runner]
     type = SamplerTransfer
     multi_app = sub
+    sampler = sample
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
     execute_on = INITIAL
@@ -52,6 +53,7 @@
   [./data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
+    sampler = sample
     vector_postprocessor = storage
     postprocessor = avg
     execute_on = timestep_end

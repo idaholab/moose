@@ -55,6 +55,7 @@
   [./sub]
     type = SamplerTransfer
     multi_app = sub
+    sampler = sample
     parameters = 'BCs/left/value Materials/mat/prop_values BCs/right/value'
     to_control = 'stochastic'
     execute_on = 'initial timestep_end'

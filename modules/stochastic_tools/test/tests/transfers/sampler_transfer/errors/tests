@@ -28,4 +28,11 @@
     design = 'SamplerTransfer.md'
     requirement = "MOOSE shall produce an error if supplied vector of real values is not sized correctly."
   [../]
+  [./sampler_mismatch]
+    type = RunException
+    input = master_transfer_wrong_sampler.i
+    expect_err = "The supplied 'multi_app' must have the same Sampler object as this Transfer."
+    design = 'SamplerTransfer.md'
+    requirement = "MOOSE shall produce an error if sampling method differs between the sub-application and the associated sub-application data transfer."
+  [../]
 []

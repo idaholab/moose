@@ -30,11 +30,6 @@ public:
   SamplerTransientMultiApp(const InputParameters & parameters);
 
   /**
-   * Return the Sampler object for this MultiApp.
-   */
-  Sampler & getSampler() const { return _sampler; }
-
-  /**
    * Override solveStep to allow for batch execution.
    */
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
