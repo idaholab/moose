@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./lognormal_test]
+  [lognormal_test]
     type = BoostLognormalDistribution
     location = -0.371
     scale = 0.52
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cdf]
+  [cdf]
     type = TestDistributionPostprocessor
     distribution = lognormal_test
     value = 0.6
     method = cdf
     execute_on = initial
-  [../]
-  [./pdf]
+  []
+  [pdf]
     type = TestDistributionPostprocessor
     distribution = lognormal_test
     value = 0.6
     method = pdf
     execute_on = initial
-  [../]
-  [./quantile]
+  []
+  [quantile]
     type = TestDistributionPostprocessor
     distribution = lognormal_test
     value = 0.5
     method = quantile
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,42 +6,42 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform_left]
+  [uniform_left]
     type = UniformDistribution
     lower_bound = 0
     upper_bound = 0.5
-  [../]
-  [./uniform_right]
+  []
+  [uniform_right]
     type = UniformDistribution
     lower_bound = 1
     upper_bound = 2
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 5
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
-  [../]
+  []
 []
 
 [Transfers]
-  [./sub]
+  [sub]
     type = SamplerTransfer
     multi_app = sub
     sampler = sample
@@ -49,7 +49,7 @@
     to_control = 'stochastic'
     execute_on = INITIAL
     check_multiapp_execute_on = false
-  [../]
+  []
 []
 
 [Executioner]

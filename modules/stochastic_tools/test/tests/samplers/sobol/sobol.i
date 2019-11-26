@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./d0]
+  [d0]
     type = UniformDistribution
     lower_bound = 0
     upper_bound = 1
-  [../]
-  [./d1]
+  []
+  [d1]
     type = UniformDistribution
     lower_bound = 10
     upper_bound = 11
-  [../]
-  [./d2]
+  []
+  [d2]
     type = UniformDistribution
     lower_bound = 100
     upper_bound = 101
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = SobolSampler
     num_rows = 4
     distributions = 'd0 d1 d2'
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./data]
+  [data]
     type = SamplerData
     sampler = sample
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Executioner]

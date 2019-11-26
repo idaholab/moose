@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./logistic_test]
+  [logistic_test]
     type = LogisticDistribution
     location = 1
     shape = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cdf]
+  [cdf]
     type = TestDistributionPostprocessor
     distribution = logistic_test
     value = 1.5
     method = cdf
     execute_on = initial
-  [../]
-  [./pdf]
+  []
+  [pdf]
     type = TestDistributionPostprocessor
     distribution = logistic_test
     value = 1.5
     method = pdf
     execute_on = initial
-  [../]
-  [./quantile]
+  []
+  [quantile]
     type = TestDistributionPostprocessor
     distribution = logistic_test
     value = 0.5
     method = quantile
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]

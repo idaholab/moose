@@ -20,11 +20,11 @@
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = 1.0
     upper_bound = 3.0
-  [../]
+  []
 []
 
 [ICs]
@@ -60,7 +60,7 @@
 []
 
 [VectorPostprocessors]
-  [./histo]
+  [histo]
     type = VolumeHistogram
     variable = u_aux
     min_value = 0
@@ -68,7 +68,7 @@
     bin_number = 80
     execute_on = initial
     outputs = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,8 +81,8 @@
 
 [Outputs]
   exodus = true
-  [./initial]
+  [initial]
     type = CSV
     execute_on = initial
-  [../]
+  []
 []

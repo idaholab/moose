@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = 5
     upper_bound = 10
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cdf]
+  [cdf]
     type = TestDistributionPostprocessor
     distribution = uniform
     value = 7.5
     method = cdf
     execute_on = initial
-  [../]
-  [./pdf]
+  []
+  [pdf]
     type = TestDistributionPostprocessor
     distribution = uniform
     value = 7.5
     method = pdf
     execute_on = initial
-  [../]
-  [./quantile]
+  []
+  [quantile]
     type = TestDistributionPostprocessor
     distribution = uniform
     value = 0.5
     method = quantile
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]

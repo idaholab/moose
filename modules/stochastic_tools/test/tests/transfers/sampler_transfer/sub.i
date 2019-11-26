@@ -5,34 +5,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -45,22 +45,22 @@
 []
 
 [Controls]
-  [./stochastic]
+  [stochastic]
     type = SamplerReceiver
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./left_bc]
+  [left_bc]
     type = NodalVariableValue
     nodeid = 0
     variable = u
-  [../]
-  [./right_bc]
+  []
+  [right_bc]
     type = NodalVariableValue
     nodeid = 10
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

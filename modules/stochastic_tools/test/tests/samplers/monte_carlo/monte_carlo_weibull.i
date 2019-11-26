@@ -6,33 +6,33 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./weibull]
+  [weibull]
     type = BoostWeibullDistribution
     scale = 1
     shape = 5
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 10
     distributions = 'weibull'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./data]
+  [data]
     type = SamplerData
     sampler = sample
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

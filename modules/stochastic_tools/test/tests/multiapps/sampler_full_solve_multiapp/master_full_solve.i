@@ -9,19 +9,19 @@
 []
 
 [Distributions]
-  [./uniform_0]
+  [uniform_0]
     type = UniformDistribution
     lower_bound = 0.1
     upper_bound = 0.3
-  [../]
+  []
 []
 
 [Samplers]
-  [./mc]
+  [mc]
     type = MonteCarloSampler
     num_rows = 5
     distributions = 'uniform_0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -29,9 +29,9 @@
 []
 
 [MultiApps]
-  [./runner]
+  [runner]
     type = SamplerFullSolveMultiApp
     sampler = mc
     input_files = 'sub.i'
-  [../]
+  []
 []
