@@ -20,6 +20,11 @@ InterfaceMaterial::validParams()
   params += TwoMaterialPropertyInterface::validParams();
   params.set<bool>("_interface") = true;
   params.set<Moose::MaterialDataType>("_material_data_type") = Moose::INTERFACE_MATERIAL_DATA;
+
+  // Interface materials always need one layer of ghosting to be safe
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
