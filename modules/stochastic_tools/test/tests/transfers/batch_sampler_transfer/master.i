@@ -44,7 +44,7 @@
 
 [Transfers]
   [runner]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = runner
     sampler = mc
     parameters = 'BCs/left/value BCs/right/value'

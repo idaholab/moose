@@ -13,21 +13,17 @@
 #include "StochasticToolsTransfer.h"
 
 // Forward declarations
-class SamplerTransfer;
 class SamplerReceiver;
-
-template <>
-InputParameters validParams<SamplerTransfer>();
 
 /**
  * Copy each row from each DenseMatrix to the sub-applications SamplerReceiver object.
  */
-class SamplerTransfer : public StochasticToolsTransfer
+class SamplerParameterTransfer : public StochasticToolsTransfer
 {
 public:
   static InputParameters validParams();
 
-  SamplerTransfer(const InputParameters & parameters);
+  SamplerParameterTransfer(const InputParameters & parameters);
   /**
    * Traditional Transfer callback
    */

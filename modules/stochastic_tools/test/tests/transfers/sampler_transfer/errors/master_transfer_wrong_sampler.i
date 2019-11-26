@@ -44,7 +44,7 @@
 
 [Transfers]
   [sub]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = sub
     sampler = wrong
     parameters = 'BCs/left/value BCs/right/value'

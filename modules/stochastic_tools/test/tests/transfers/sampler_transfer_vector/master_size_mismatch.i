@@ -43,7 +43,7 @@
 
 [Transfers]
   [sub]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
     parameters = 'Materials/*/prop_values'

@@ -53,7 +53,7 @@
 
 [Transfers]
   [sobol]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = sobol
     sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
@@ -68,7 +68,7 @@
   []
 
   [mc]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = mc
     sampler = mc
     parameters = 'BCs/left/value BCs/right/value'

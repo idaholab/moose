@@ -19,7 +19,8 @@ InputParameters
 SamplerReceiver::validParams()
 {
   InputParameters params = Control::validParams();
-  params.addClassDescription("Control for receiving data from a Sampler via SamplerTransfer.");
+  params.addClassDescription(
+      "Control for receiving data from a Sampler via SamplerParameterTransfer.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   return params;
 }
