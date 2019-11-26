@@ -45,11 +45,11 @@ conda_vtk: 8.2
 pip_pylint: 1.6.5
 pip_livereload: 2.5.1
 moose_packages:
-    osx10.15: moose-environment_osx-catalina_20191104_x86_64.pkg
-    osx10.14: moose-environment_osx-mojave_20191104_x86_64.pkg
-    osx10.13: moose-environment_osx-highsierra_20191105_x86_64.pkg
-    ubuntu16: moose-environment_ubuntu-16.04_20191104_x86_64.deb
-    ubuntu18: moose-environment_ubuntu-18.04_20191104_x86_64.deb
-    opensuse15: moose-environment_opensuse-15.0_20191104_x86_64.rpm
-    fedora30: moose-environment_fedora-30_20191104_x86_64.rpm
-    centos7: moose-environment_centos-7.7.1908_20191104_x86_64.rpm
+    osx10.15: moose-environment_osx-catalina_20191125_x86_64.pkg
+    osx10.14: moose-environment_osx-mojave_20191125_x86_64.pkg
+    osx10.13: moose-environment_osx-highsierra_20191125_x86_64.pkg
+    ubuntu16: moose-environment_ubuntu-16.04_20191125_x86_64.deb
+    ubuntu18: moose-environment_ubuntu-18.04_20191125_x86_64.deb
+    opensuse15: moose-environment_opensuse-15.0_20191125_x86_64.rpm
+    fedora31: moose-environment_fedora-31_20191125_x86_64.rpm
+    centos8: moose-environment_centos-8.0.1905_20191125_x86_64.rpm
