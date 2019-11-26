@@ -36,7 +36,7 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 5
+    num_rows = 5
     distributions = 'uniform_left uniform_prop_a uniform_prop_b uniform_right'
     execute_on = 'initial timestep_end' # create new random numbers on initial and timestep_end
   [../]

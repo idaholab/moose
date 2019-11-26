@@ -52,17 +52,20 @@ LogisticDistribution::quantile(const Real & p, const Real & location, const Real
 Real
 LogisticDistribution::pdf(const Real & x) const
 {
+  TIME_SECTION(_perf_pdf);
   return pdf(x, _location, _shape);
 }
 
 Real
 LogisticDistribution::cdf(const Real & x) const
 {
+  TIME_SECTION(_perf_cdf);
   return cdf(x, _location, _shape);
 }
 
 Real
 LogisticDistribution::quantile(const Real & p) const
 {
+  TIME_SECTION(_perf_quantile);
   return quantile(p, _location, _shape);
 }

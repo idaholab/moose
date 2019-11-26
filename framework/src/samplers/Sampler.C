@@ -12,8 +12,6 @@
 
 // MOOSE includes
 #include "Sampler.h"
-#include "MooseRandom.h"
-#include "Distribution.h"
 
 defineLegacyParams(Sampler);
 
@@ -28,10 +26,28 @@ Sampler::validParams()
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
 
-  params.addRequiredParam<std::vector<DistributionName>>(
-      "distributions", "The names of distributions that you want to sample.");
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
+
+  params.addParam<bool>("legacy_support", true, "Disables errors for legacy API support.");
+
+  // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
+  // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
+  // for size definition, so as start the limits will be based the max of unsigned int. Note,
+  // the values here are the limits of the number of items in the complete container. dof_id_type
+  // is used just in case in the future we need more.
+  params.addParam<dof_id_type>("limit_get_global_samples",
+                               0.1 * std::numeric_limits<unsigned int>::max(),
+                               "The maximum allowed number of items in the DenseMatrix returned by "
+                               "getGlobalSamples method.");
+  params.addParam<dof_id_type>(
+      "limit_get_local_samples",
+      0.1 * std::numeric_limits<unsigned int>::max(),
+      "The maximum allowed number of items in the DenseMatrix returned by getLocalSamples method.");
+  params.addParam<dof_id_type>(
+      "limit_get_next_local_row",
+      0.1 * std::numeric_limits<unsigned int>::max(),
+      "The maximum allowed number of items in the std::vector returned by getNextLocalRow method.");
   return params;
 }
 
@@ -39,79 +55,227 @@ Sampler::Sampler(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     DistributionInterface(this),
-    _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
+    PerfGraphInterface(this),
     _seed(getParam<unsigned int>("seed")),
-    _total_rows(0)
+    _n_rows(0),
+    _n_cols(0),
+    _next_local_row_requires_state_restore(true),
+    _initialized(false),
+    _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
+    _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
+    _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
+    _perf_get_global_samples(registerTimedSection("getGlobalSamples", 1)),
+    _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
+    _perf_get_next_local_row(registerTimedSection("getNextLocalRow", 1)),
+    _perf_advance_generator(registerTimedSection("advanceGenerators", 2)),
+    _perf_get_rand(registerTimedSection("getRand", 5))
 {
-  for (const DistributionName & name : _distribution_names)
-    _distributions.push_back(&getDistributionByName(name));
-  setNumberOfRequiedRandomSeeds(1);
+  setNumberOfRandomSeeds(1);
+}
+
+void
+Sampler::init()
+{
+  // The init() method is private so it is un-likely to be called, but just in case the following
+  // was added to help avoid future mistakes.
+  if (_initialized)
+    mooseError("The Sampler::init() method is called automatically and should not be called.");
+
+  if (!getParam<bool>("legacy_support"))
+  {
+    if (_n_rows == 0)
+      mooseError("The number of rows cannot be zero.");
+
+    if (_n_cols == 0)
+      mooseError("The number of columns cannot be zero.");
+  }
+
+  // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
+  MooseUtils::linearPartitionItems(
+      _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
+
+  // See FEProblemBase::execute
+  execute();
+
+  // Set the next row iterator index
+  _next_local_row = _local_row_begin;
+
+  // Mark class as initialized, which locks out certain methods
+  _initialized = true;
+}
+
+void
+Sampler::setNumberOfRows(dof_id_type n_rows)
+{
+  if (_initialized)
+    mooseError(
+        "The 'setNumberOfRows()' method can not be called after the Sampler has been initialized; "
+        "this method should be called in the constructor of the Sampler object.");
+
+  _n_rows = n_rows;
+}
+
+void
+Sampler::setNumberOfCols(dof_id_type n_cols)
+{
+  if (_initialized)
+    mooseError(
+        "The 'setNumberOfCols()' method can not be called after the Sampler has been initialized; "
+        "this method should be called in the constructor of the Sampler object.");
+
+  _n_cols = n_cols;
 }
 
 void
 Sampler::execute()
 {
-  // Get the samples then save the state so that subsequent calls to getSamples returns the same
-  // random numbers until this execute command is called again.
-  std::vector<DenseMatrix<Real>> data = getSamples();
   _generator.saveState();
-  reinit(data);
 }
 
-void
-Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
+DenseMatrix<Real>
+Sampler::getGlobalSamples()
 {
-  // Update offsets and total number of rows
-  _total_rows = 0;
-  _offsets.clear();
-  _offsets.reserve(data.size() + 1);
-  _offsets.push_back(_total_rows);
-  for (const DenseMatrix<Real> & mat : data)
-  {
-    _total_rows += mat.m();
-    _offsets.push_back(_total_rows);
-  }
+  TIME_SECTION(_perf_get_global_samples);
 
-  // Update parallel information
-  MooseUtils::linearPartitionItems(
-      _total_rows, n_processors(), processor_id(), _local_rows, _local_row_begin, _local_row_end);
-}
+  if (_n_rows * _n_cols > _limit_get_global_samples)
+    paramError("limit_get_global_samples",
+               "The number of entries in the DenseMatrix (",
+               _n_rows * _n_cols,
+               ") exceeds the allowed limit of ",
+               _limit_get_global_samples,
+               ".");
 
-std::vector<DenseMatrix<Real>>
-Sampler::getSamples()
-{
+  _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp();
-  std::vector<DenseMatrix<Real>> output = sample();
+  DenseMatrix<Real> output(_n_rows, _n_cols);
+  computeSampleMatrix(output);
   sampleTearDown();
+  return output;
+}
 
-  if (_sample_names.empty())
+DenseMatrix<Real>
+Sampler::getLocalSamples()
+{
+  TIME_SECTION(_perf_get_local_samples);
+
+  if (_n_local_rows * _n_cols > _limit_get_local_samples)
+    paramError("limit_get_local_samples",
+               "The number of entries in the DenseMatrix (",
+               _n_local_rows * _n_cols,
+               ") exceeds the allowed limit of ",
+               _limit_get_local_samples,
+               ".");
+
+  _next_local_row_requires_state_restore = true;
+  _generator.restoreState();
+  sampleSetUp();
+  DenseMatrix<Real> output(_n_local_rows, _n_cols);
+  computeLocalSampleMatrix(output);
+  sampleTearDown();
+  return output;
+}
+
+std::vector<Real>
+Sampler::getNextLocalRow()
+{
+  TIME_SECTION(_perf_get_next_local_row);
+
+  if (_next_local_row_requires_state_restore)
   {
-    _sample_names.resize(output.size());
-    for (MooseIndex(output) i = 0; i < output.size(); ++i)
-      _sample_names[i] = "sample_" + std::to_string(i);
-  }
-  mooseAssert(output.size() == _sample_names.size(),
-              "The number of sample names must match the number of samples returned.");
+    _generator.restoreState();
+    sampleSetUp();
+    advanceGenerators(_next_local_row * _n_cols);
+    _next_local_row_requires_state_restore = false;
 
-  mooseAssert(output.size() > 0,
-              "It is not acceptable to return an empty vector of sample matrices.");
+    if (_n_cols > _limit_get_next_local_row)
+      paramError("limit_get_next_local_row",
+                 "The number of entries in the std::vector (",
+                 _n_cols,
+                 ") exceeds the allowed limit of ",
+                 _limit_get_next_local_row,
+                 ".");
+  }
+
+  std::vector<Real> output(_n_cols);
+  computeSampleRow(_next_local_row, output);
+  mooseAssert(output.size() == _n_cols, "The row of sample data is not sized correctly.");
+  _next_local_row++;
+
+  if (_next_local_row == _local_row_end)
+  {
+    advanceGenerators((_n_rows - _local_row_end) * _n_cols);
+    sampleTearDown();
+    _next_local_row = _local_row_begin;
+    _next_local_row_requires_state_restore = true;
+  }
 
   return output;
 }
 
+void
+Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  for (dof_id_type i = 0; i < _n_rows; ++i)
+  {
+    std::vector<Real> row(_n_cols, 0);
+    computeSampleRow(i, row);
+    mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    std::copy(row.begin(), row.end(), matrix.get_values().begin() + i * _n_cols);
+  }
+}
+
+void
+Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  advanceGenerators(_local_row_begin * _n_cols);
+  for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
+  {
+    std::vector<Real> row(_n_cols, 0);
+    computeSampleRow(i, row);
+    mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    std::copy(
+        row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
+  }
+  advanceGenerators((_n_rows - _local_row_end) * _n_cols);
+}
+
+void
+Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
+{
+  for (dof_id_type j = 0; j < _n_cols; ++j)
+    data[j] = computeSample(i, j);
+}
+
+void
+Sampler::advanceGenerators(dof_id_type count)
+{
+  TIME_SECTION(_perf_advance_generator);
+
+  for (dof_id_type i = 0; i < count; ++i)
+    for (std::size_t j = 0; j < _generator.size(); ++j)
+      getRand(j);
+}
+
 double
-Sampler::rand(const unsigned int index)
+Sampler::getRand(const unsigned int index)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  TIME_SECTION(_perf_get_rand);
+
   return _generator.rand(index);
 }
 
 void
-Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
+Sampler::setNumberOfRandomSeeds(std::size_t number)
 {
   if (number == 0)
     mooseError("The number of seeds must be larger than zero.");
+
+  if (_initialized)
+    mooseError("The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been "
+               "initialized; "
+               "this method should be called in the constructor of the Sampler object.");
 
   // Seed the "master" seed generator
   _seed_generator.seed(0, _seed);
@@ -119,78 +283,69 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
   // See the "slave" generator that will be used for the random number generation
   for (std::size_t i = 0; i < number; ++i)
     _generator.seed(i, _seed_generator.randl(0));
-
-  _generator.saveState();
-}
-
-void
-Sampler::setSampleNames(const std::vector<std::string> & names)
-{
-  _sample_names = names;
-
-  // Use assert because to check the size a getSamples call is required, which you don't
-  // want to do if you don't need it.
-  mooseAssert(getSamples().size() == _sample_names.size(),
-              "The number of sample names must match the number of samples returned.");
-}
-
-Sampler::Location
-Sampler::getLocation(dof_id_type global_index)
-{
-  if (_offsets.empty())
-    reinit(getSamples());
-
-  mooseAssert(_offsets.size() > 1,
-              "The getSamples method returned an empty vector, if you are seeing this you have "
-              "done something to bypass another assert in the 'getSamples' method that should "
-              "prevent this message.");
-
-  // The lower_bound method returns the first value "which does not compare less than" the value and
-  // upper_bound performs "which compares greater than." The upper_bound -1 method is used here
-  // because lower_bound will provide the wrong index, but the method here will provide the correct
-  // index, see the Sampler.GetLocation test in moose/unit/src/Sampler.C for an example.
-  std::vector<unsigned int>::iterator iter =
-      std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
-  return Sampler::Location(std::distance(_offsets.begin(), iter), global_index - *iter);
 }
 
 dof_id_type
-Sampler::getTotalNumberOfRows()
+Sampler::getNumberOfRows() const
 {
-  if (_total_rows == 0)
-    reinit(getSamples());
-  return _total_rows;
+  return _n_rows;
 }
 
-/**
- * Return the number of rows local to this processor.
- */
 dof_id_type
-Sampler::getLocalNumerOfRows()
+Sampler::getNumberOfCols() const
 {
-  if (_total_rows == 0)
-    reinit(getSamples());
-  return _local_rows;
+  return _n_cols;
 }
 
-/**
- * Return the beginning local row index for this processor
- */
 dof_id_type
-Sampler::getLocalRowBegin()
+Sampler::getNumberOfLocalRows() const
 {
-  if (_total_rows == 0)
-    reinit(getSamples());
+  return _n_local_rows;
+}
+
+dof_id_type
+Sampler::getLocalRowBegin() const
+{
   return _local_row_begin;
 }
 
-/**
- * Return the ending local row index for this processor
- */
 dof_id_type
-Sampler::getLocalRowEnd()
+Sampler::getLocalRowEnd() const
 {
-  if (_total_rows == 0)
-    reinit(getSamples());
   return _local_row_end;
+}
+
+// DEPRECATED: Everything below should removed when apps are updated to new syntax
+std::vector<DenseMatrix<Real>>
+Sampler::sample()
+{
+  return std::vector<DenseMatrix<Real>>();
+}
+
+std::vector<DenseMatrix<Real>>
+Sampler::getSamples()
+{
+  mooseDoOnce(mooseDeprecated(
+      "getSamples is being removed, use getNextLocalRow, getLocalSamples, or getGlobalSamples."));
+
+  _generator.restoreState();
+  sampleSetUp();
+  std::vector<DenseMatrix<Real>> output = sample();
+  sampleTearDown();
+
+  mooseAssert(output.size() > 0,
+              "It is not acceptable to return an empty vector of sample matrices.");
+
+  return output;
+}
+
+// TODO: Remove this and restore to pure virtual when deprecated syntax is removed
+Real Sampler::computeSample(dof_id_type, dof_id_type) { return 0.0; }
+
+double
+Sampler::rand(const unsigned int index)
+{
+  mooseDoOnce(mooseDeprecated("rand(() is being removed, use getRand()"));
+  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  return _generator.rand(index);
 }

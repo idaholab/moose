@@ -19,7 +19,7 @@
 [Samplers]
   [./mc]
     type = MonteCarloSampler
-    n_samples = 5
+    num_rows = 5
     distributions = 'uniform_0'
   [../]
 []

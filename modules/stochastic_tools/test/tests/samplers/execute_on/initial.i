@@ -21,7 +21,7 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 10
+    num_rows = 10
     distributions = 'uniform'
     execute_on = 'initial' # Create random numbers on initial only, they remain the same with time.
   [../]

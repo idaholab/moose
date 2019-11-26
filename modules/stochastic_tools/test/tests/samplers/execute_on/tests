@@ -1,7 +1,14 @@
 [Tests]
-  [./initial]
+  issues = '#8065'
+  design = 'Sampler.md'
+
+  [initial]
     type = CSVDiff
     input = initial.i
-    csvdiff = 'initial_out_data_0000.csv initial_out_data_0001.csv initial_out_data_0002.csv initial_out_data_0003.csv'
-  [../]
+    csvdiff = 'initial_out_data_0000.csv initial_out_data_0001.csv initial_out_data_0002.csv '
+              'initial_out_data_0003.csv'
+
+    requirement = 'The system shall support the creation of data sampled from distribution during '
+                  'the initial setup of a simulation.'
+  []
 []

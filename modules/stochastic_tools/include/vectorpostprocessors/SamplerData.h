@@ -25,17 +25,18 @@ class SamplerData : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
   SamplerData(const InputParameters & parameters);
-  void virtual initialize() override;
-  void virtual execute() override;
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
-  /// Storage for declared vectors
+  /// Storage for declared vectors, one for each column
   std::vector<VectorPostprocessorValue *> _sample_vectors;
 
   /// The sampler to extract data
   Sampler & _sampler;
 
-  /// Whether to output the number of rows and columns in the first two rows of output
-  const bool & _output_col_row_sizes;
+  /// The method of data retrival from the Sample
+  const MooseEnum & _sampler_method;
 };
-

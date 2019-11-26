@@ -6,34 +6,23 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
-#include "ElementUserObject.h"
-#include "SamplerInterface.h"
 #include "Sampler.h"
-
-// Forward Declarations
 class TestSampler;
 
 template <>
 InputParameters validParams<TestSampler>();
 
-/**
- * UserObject for testing Sampler object threaded and parallel behavior, it should be used for
- * anything else.
- */
-class TestSampler : public ElementUserObject, public SamplerInterface
+class TestSampler : public Sampler
 {
 public:
   TestSampler(const InputParameters & parameters);
 
 protected:
-  virtual void execute() final {}
-  virtual void initialize() final {}
-  virtual void finalize() final;
-  virtual void threadJoin(const UserObject & uo) final;
-  Sampler & _sampler;
-  const MooseEnum & _test_type;
-};
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
 
+private:
+  const bool _use_rand;
+  const MooseEnum _error_test;
+};

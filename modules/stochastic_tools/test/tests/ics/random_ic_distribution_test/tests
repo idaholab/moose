@@ -1,38 +1,24 @@
 [Tests]
-  [./test]
+  issues = '#5567 #11901 #9710'
+  design = '/RandomIC.md'
+
+  [generate]
     type = 'CSVDiff'
     input = 'random_ic_distribution_test.i'
     csvdiff = 'random_ic_distribution_test_initial_histo_0000.csv'
+    mesh_mode = 'replicated' # sensitive to difference in partitioning
 
-    requirement = 'MOOSE shall generate parallel agnostic random initial conditions using a Distribution object'
-    design = '/RandomIC.md'
-    issues = '#5567 #11901 #9710'
-
-    # Test is sensitive to difference in partitioning
-    mesh_mode = 'replicated'
-  [../]
-  [./test_threaded]
-    type = 'CSVDiff'
-    input = 'random_ic_distribution_test.i'
-    csvdiff = 'random_ic_distribution_test_initial_histo_0000.csv'
-    prereq = 'test'
-    min_threads = 2
-
-    requirement = 'MOOSE shall generate threaded agnostic random initial conditions using a Distribution object'
-    design = '/RandomIC.md'
-    issues = '#5567 #11901 #9710'
-
-    # Test is sensitive to difference in partitioning
-    mesh_mode = 'replicated'
-  [../]
-  [./test_err_distribution_and_min_max]
+    requirement = 'The system shall generate parallel agnostic random initial conditions using a '
+                  'distribution function.'
+  []
+  [test_err_distribution_and_min_max]
     type = 'RunException'
     input = 'random_ic_distribution_test.i'
     cli_args = 'ICs/u_aux/min=0 ICs/u_aux/max=1'
-    prereq = 'test_threaded'
-    requirement = 'MOOSE shall generate an error if RandomIC is used with both a distribution and min or max defined'
-    design = '/RandomIC.md'
-    issues = '#5567 #11901 #9710'
+    prereq = 'generate'
     expect_err = "Cannot use together with 'min' or 'max' parameter"
-  [../]
+
+    requirement = 'The system shall generate an error the random initial condition is used with both '
+                  'a distribution and min or max value defined.'
+  []
 []

@@ -1,10 +1,15 @@
 [Tests]
+  design = 'SamplerTransientMultiApp.md'
   issues = '#9923'
+
   [transient]
     type = CheckFiles
     input = master_transient.i
-    check_files = 'master_transient_out_runner0.e master_transient_out_runner1.e master_transient_out_runner2.e master_transient_out_runner3.e master_transient_out_runner4.e'
-    design = 'SamplerTransientMultiApp.md'
-    requirement = 'MOOSE shall provide an ability to creates a transient type sub application from the Sampler object.'
+    check_files = 'master_transient_out_runner0.e master_transient_out_runner1.e '
+                  'master_transient_out_runner2.e master_transient_out_runner3.e '
+                  'master_transient_out_runner4.e'
+
+    requirement = 'The system shall provide the ability to create a transient sub-application from '
+                  'the sample data generated from distributions.'
   []
 []
