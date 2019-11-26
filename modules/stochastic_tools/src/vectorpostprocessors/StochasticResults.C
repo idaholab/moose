@@ -25,6 +25,9 @@ StochasticResults::validParams()
       "Storage container for stochastic simulation results coming from a Postprocessor.");
   params += SamplerInterface::validParams();
 
+  params.addParam<std::vector<SamplerName>>("samplers",
+                                            "A list of sampler names of associated data.");
+
   MooseEnum parallel_type("REPLICATED DISTRIBUTED", "REPLICATED");
   params.addParam<MooseEnum>(
       "parallel_type",
@@ -69,27 +72,49 @@ StochasticResults::StochasticResults(const InputParameters & parameters)
                    "root processor. Output can be disabled by setting 'outputs = none' in the "
                    "input block. If output is desired the 'output_distributed_rank' can be set.");
   }
-}
 
-void
-StochasticResults::init(Sampler & sampler)
-{
-  _sampler = &sampler;
-  _sample_vector = &declareVector(_sampler->name());
+  if (isParamValid("samplers"))
+    for (const SamplerName & name : getParam<std::vector<SamplerName>>("samplers"))
+    {
+      Sampler & sampler = getSamplerByName(name);
+      _sample_vectors.emplace_back(&declareVector(sampler.name()));
+    }
 }
 
 void
 StochasticResults::finalize()
 {
   if (_parallel_type == "REPLICATED")
-    _communicator.gather(0, *_sample_vector);
+  {
+    for (VectorPostprocessorValue * vpp : _sample_vectors)
+      _communicator.gather(0, *vpp);
+  }
 
   else if (_output_distributed_rank != 0 && _output_distributed_rank != Moose::INVALID_PROCESSOR_ID)
   {
     if (processor_id() == _output_distributed_rank)
-      _communicator.send(0, *_sample_vector);
+    {
+      for (VectorPostprocessorValue * vpp : _sample_vectors)
+        _communicator.send(0, *vpp);
+    }
 
     else if (processor_id() == 0)
-      _communicator.receive(_output_distributed_rank, *_sample_vector);
+    {
+      for (VectorPostprocessorValue * vpp : _sample_vectors)
+        _communicator.receive(_output_distributed_rank, *vpp);
+    }
+  }
+}
+
+// DEPRECATED
+void
+StochasticResults::init(Sampler & sampler)
+{
+  if (!isParamValid("samplers"))
+  {
+    paramWarning("samplers",
+                 "Support for the 'StochasticResults' objects without the 'samplers' input "
+                 "parameter is being removed, please update your input file(s).");
+    _sample_vectors.emplace_back(&declareVector(sampler.name()));
   }
 }
