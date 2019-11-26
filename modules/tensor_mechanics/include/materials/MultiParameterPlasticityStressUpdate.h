@@ -99,12 +99,12 @@ InputParameters validParams<MultiParameterPlasticityStressUpdate>();
 class MultiParameterPlasticityStressUpdate : public StressUpdateBase
 {
 public:
+  static InputParameters validParams();
+
   MultiParameterPlasticityStressUpdate(const InputParameters & parameters,
                                        unsigned num_sp,
                                        unsigned num_yf,
                                        unsigned num_intnl);
-
-  static InputParameters validParams();
 
 protected:
   virtual void initQpStatefulProperties() override;

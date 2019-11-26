@@ -29,11 +29,11 @@ InputParameters validParams<TwoParameterPlasticityStressUpdate>();
 class TwoParameterPlasticityStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   TwoParameterPlasticityStressUpdate(const InputParameters & parameters,
                                      unsigned num_yf,
                                      unsigned num_intnl);
-
-  static InputParameters validParams();
 
 protected:
   /// Number of variables = 2 = (p, q)

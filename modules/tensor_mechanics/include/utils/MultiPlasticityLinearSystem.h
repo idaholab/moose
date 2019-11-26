@@ -124,9 +124,9 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
 class MultiPlasticityLinearSystem : public MultiPlasticityRawComponentAssembler
 {
 public:
-  MultiPlasticityLinearSystem(const MooseObject * moose_object);
-
   static InputParameters validParams();
+
+  MultiPlasticityLinearSystem(const MooseObject * moose_object);
 
 protected:
   /// Tolerance on the minimum ratio of singular values before flow-directions are deemed linearly dependent
