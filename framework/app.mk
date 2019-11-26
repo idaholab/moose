@@ -382,9 +382,7 @@ endif
 # Codesign command (OS X Only)
 codesign :=
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
-  ifneq (x$(MOOSE_NO_CODESIGN), x)
-    codesign :=
-  else
+  ifeq (x$(MOOSE_NO_CODESIGN), x)
     get_task_allow_entitlement := $(FRAMEWORK_DIR)/build_support/get_task_allow.plist
     codesign := codesign -s - --entitlements $(get_task_allow_entitlement) $(app_EXEC)
   endif
