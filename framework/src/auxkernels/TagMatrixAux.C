@@ -20,6 +20,7 @@ TagMatrixAux::validParams()
   params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
 
   params.addClassDescription("Couple the diag of a tag matrix, and return its nodal value");
   return params;
@@ -30,6 +31,9 @@ TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
     _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
     _v(coupledMatrixTagValue("v", _tag_id))
 {
+  auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+  if (execute_on.size() != 1 || !execute_on.contains(EXEC_TIMESTEP_END))
+    mooseError("execute_on for TagMatrixAux must be set to EXEC_TIMESTEP_END");
 }
 
 Real
