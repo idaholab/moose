@@ -61,8 +61,13 @@ SamplerPostprocessorTransfer::initializeFromMultiapp()
   VectorPostprocessorValue & vpp =
       _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler_ptr->name(), false);
 
-  vpp.clear();
-  vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
+  if (_results->containsCompleteHistory())
+    vpp.reserve(vpp.size() + _sampler_ptr->getNumberOfLocalRows());
+  else
+  {
+    vpp.clear();
+    vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
+  }
 }
 
 void
@@ -93,8 +98,13 @@ SamplerPostprocessorTransfer::execute()
   VectorPostprocessorValue & vpp =
       _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler_ptr->name(), false);
 
-  vpp.clear();
-  vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
+  if (_results->containsCompleteHistory())
+    vpp.reserve(vpp.size() + _sampler_ptr->getNumberOfLocalRows());
+  else
+  {
+    vpp.clear();
+    vpp.reserve(_sampler_ptr->getNumberOfLocalRows());
+  }
 
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
   {
