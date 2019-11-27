@@ -2076,6 +2076,12 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
 
+  // MeshGenerators may call `prepare_for_use` which would delete remote elements before we've had a
+  // chance to add geometric ghosting functors. (You can look at our task list in Moose.C to see
+  // that we execute mesh generators before addition of geometric ghosting). We need to delay remote
+  // element deletion until after we've had a chance to add those functors
+  mesh->allow_remote_element_removal(false);
+
   return mesh;
 }
 

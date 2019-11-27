@@ -45,6 +45,17 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
 {
   bool prepared = mesh->prepared();
 
+  auto & mesh_base = mesh->getMesh();
+
+  // We may have prevented remote element deletion during the mesh generation process. If we did,
+  // then we should prepare_for_use one more time, this time deleting remote elements
+  if (mesh->isDistributedMesh() && !mesh_base.allow_remote_element_removal())
+  {
+    mesh_base.allow_remote_element_removal(true);
+    mesh->needsPrepareForUse();
+    prepared = false;
+  }
+
   if (!prepared)
     mesh->prepare();
 
