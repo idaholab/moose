@@ -34,6 +34,8 @@ BreakMeshByBlockGenerator::validParams()
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
   : BreakMeshByBlockGeneratorBase(parameters), _input(getMesh("input"))
 {
+  if (typeid(_input).name() == typeid(DistributedMesh).name())
+    mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 }
 
 std::unique_ptr<MeshBase>
@@ -103,18 +105,17 @@ BreakMeshByBlockGenerator::generate()
                 new_node = Node::build(*current_node, DofObject::invalid_id).release();
                 new_node->processor_id() = current_node->processor_id();
                 if (!is_replicated)
-                  {
-                    const dof_id_type new_node_id =
-                      (current_elem->subdomain_id() + 1) *
-                      max_node_id + current_node->id();
-                    new_node->set_id(new_node_id);
+                {
+                  const dof_id_type new_node_id =
+                      (current_elem->subdomain_id() + 1) * max_node_id + current_node->id();
+                  new_node->set_id(new_node_id);
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-                    const unique_id_type new_unique_id =
-                      (current_elem->subdomain_id() + 1) *
-                      max_unique_id + current_node->unique_id();
-                    new_node->set_unique_id() = new_unique_id;
+                  const unique_id_type new_unique_id =
+                      (current_elem->subdomain_id() + 1) * max_unique_id +
+                      current_node->unique_id();
+                  new_node->set_unique_id() = new_unique_id;
 #endif
-                  }
+                }
                 mesh->add_node(new_node);
 
                 // Add boundary info to the new node
@@ -203,12 +204,8 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
     // find the appropriate boundary name and id
     //  given master and slave block ID
     if (_split_interface)
-      findBoundaryNameAndInd(mesh,
-                             boundary_side.first,
-                             boundary_side.second,
-                             boundaryName,
-                             boundaryID,
-                             boundary_info);
+      findBoundaryNameAndInd(
+          mesh, boundary_side.first, boundary_side.second, boundaryName, boundaryID, boundary_info);
     else
       boundary_info.sideset_name(boundaryID) = boundaryName;
 

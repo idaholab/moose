@@ -7,20 +7,10 @@
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
   [../]
-  [./break_mesh_by_blocks_generator_3d_auto_test_distributed]
-    type = 'Exodiff'
-    input = 'break_mesh_3D_auto.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_3D_auto_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640 #12033'
-    recover = false
-    prereq = 'break_mesh_by_blocks_generator_3d_auto_test'
-    min_parallel = 3
-  [../]
+
   [./break_mesh_by_blocks_generator_3d_split_test]
     type = 'Exodiff'
     input = 'break_mesh_3D_splittrue.i'
@@ -29,6 +19,7 @@
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
@@ -40,8 +31,8 @@
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
-    min_parallel = 3
   [../]
 
   [./break_mesh_by_blocks_generator_2d_auto_test]
@@ -52,19 +43,20 @@
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
   [./break_mesh_by_blocks_generator_2d_splittrue_test]
     type = 'Exodiff'
     input = 'break_mesh_2DJunction_splittrue.i'
-    cli_args = '--mesh-only --distributed-mesh'
+    cli_args = '--mesh-only'
     exodiff = 'break_mesh_2DJunction_splittrue_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
-    min_parallel = 3
   [../]
 
   [./break_mesh_by_blocks_generator_2d_polycrystal_test]
@@ -75,7 +67,7 @@
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640 #12033'
+    mesh_mode = 'REPLICATED'
     recover = false
-    min_parallel = 3
   [../]
 []
