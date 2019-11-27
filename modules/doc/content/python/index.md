@@ -12,6 +12,7 @@ MOOSE.  Click on each one for further information
 | [mms.md] | Utilities for verifying solves with the method of manufactured solutions. |
 | [free_energy.py](/CALPHAD_free_energies.md) | Tool for extracting MOOSE parsed function expressions from thermodynamic database files. |
 | [moosetree/index.md] | Tool for building and searching tree structures. |
+| [combine_csv.md] | Tool for combining CSV files together. |
 
 ## Setup
 
