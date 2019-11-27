@@ -82,9 +82,7 @@ LowerDBlockFromSidesetGenerator::generate()
     }
   }
 
-  bool distributed = false;
-  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    distributed = true;
+  bool distributed = dynamic_cast<DistributedMesh *>(mesh.get());
 
   auto side_list = mesh->get_boundary_info().build_side_list();
   std::sort(side_list.begin(),
@@ -117,14 +115,10 @@ LowerDBlockFromSidesetGenerator::generate()
 
   dof_id_type max_elem_id = mesh->max_elem_id();
   mesh->comm().max(max_elem_id);
-  auto max_elems_to_add = element_sides_on_boundary.size();
-  mesh->comm().max(max_elems_to_add);
 
   for (MooseIndex(element_sides_on_boundary) i = 0; i < element_sides_on_boundary.size(); ++i)
   {
     Elem * elem = element_sides_on_boundary[i].elem;
-    if (distributed && elem->processor_id() != processor_id())
-      continue;
 
     unsigned int side = element_sides_on_boundary[i].side;
 
@@ -143,7 +137,10 @@ LowerDBlockFromSidesetGenerator::generate()
 
     // Add id for distributed
     if (distributed)
-      side_elem->set_id(max_elem_id + processor_id() * max_elems_to_add + i);
+    {
+      side_elem->set_id(max_elem_id + i);
+      side_elem->set_unique_id() = max_elem_id + i;
+    }
 
     // Finally, add the lower-dimensional element to the Mesh.
     mesh->add_elem(side_elem.release());
