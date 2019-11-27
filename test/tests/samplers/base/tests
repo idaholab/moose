@@ -1,0 +1,167 @@
+[Tests]
+  design = 'Sampler.md'
+  issues = '#13906'
+
+  [parallel]
+    requirement = "The system shall include a random number sampling system that operates in "
+                  "parallel"
+    [threads]
+      type = RunApp
+      input = threads.i
+      min_threads = 2
+      allow_test_objects = true
+      detail = "with threads,"
+    []
+    [mpi]
+      type = RunApp
+      input = mpi.i
+      min_parallel = 2
+      allow_test_objects = true
+      detail = " MPI, and"
+    []
+
+    [iter]
+      type = RunApp
+      input = global_vs_local.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=rand_global_vs_next'
+      max_parallel = 1 # by design, see SamplerTester
+
+      detail = "that operates with a row-based iteration scheme."
+    []
+  []
+
+  [global_vs_local]
+    requirement = "The system shall include a random number sampling system that creates replicated "
+                  "and/or distribute sample data that is consistent:"
+
+    [base_1rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 1
+      max_parallel = 1
+      allow_test_objects = true
+      detail = "on a single processor,"
+    []
+    [base_2rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      detail = "on a two processors,"
+    []
+    [base_3rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+      detail = "on a three processors,"
+    []
+    [rand_1rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 1
+      max_parallel = 1
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on a one processor with random numbers,"
+    []
+    [rand_2rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on two processor with random numbers, and"
+    []
+    [rand_3rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on thre processor with random numbers."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall include a random number sampling system that errors"
+    [setNumberOfRows]
+      type = RunException
+      input = errors.i
+      expect_err = "The 'setNumberOfRows\(\)' method can not"
+      cli_args = "Samplers/sample/error_test=call_set_number_of_rows"
+
+      detail = "if the number of rows is set after object construction,"
+    []
+    [setNumberOfCols]
+      type = RunException
+      input = errors.i
+      expect_err = "The 'setNumberOfCols\(\)' method can not"
+      cli_args = "Samplers/sample/error_test=call_set_number_of_cols"
+
+      detail = "if the number of cols is set after object construction,"
+    []
+    [setNumberOfRandomSeeds]
+      type = RunException
+      input = errors.i
+      expect_err = "The 'setNumberOfRandomSeeds\(\)' method can not"
+      cli_args = "Samplers/sample/error_test=call_set_number_of_seeds"
+
+      detail = "if the number of random number generator seeds is set after object construction,"
+    []
+    [zero_rows]
+      type = RunException
+      input = errors.i
+      expect_err = "The number of rows cannot be zero"
+      cli_args = "Samplers/sample/num_rows=0 Samplers/sample/legacy_support=false"
+
+      detail = "if the number of rows is set to zero,"
+    []
+    [zero_cols]
+      type = RunException
+      input = errors.i
+      expect_err = "The number of columns cannot be zero"
+      cli_args = "Samplers/sample/num_cols=0 Samplers/sample/legacy_support=false"
+
+      detail = "if the number of columns is set to zero,"
+    []
+    [zero_seeds]
+      type = RunException
+      input = errors.i
+      expect_err = "The number of seeds must be larger than zero"
+      cli_args = "Samplers/sample/error_test=set_number_of_seeds_to_zero"
+
+      detail = "if the number of random number generator seeds is set to zero,"
+    []
+    [getGlobalSamples_max]
+      type = RunException
+      input = errors.i
+      expect_err = "The number of entries in the DenseMatrix \([0-9]+\) exceeds the allowed limit of [0-9]+."
+      cli_args = "Samplers/sample/num_rows=1000000000"
+
+      detail = "if the number of entries in the global sample matrix exceeds the maximum allowed,"
+    []
+    [getLocalSamples_max]
+      type = RunException
+      input = errors.i
+      max_parallel = 1 # the number of local samples changes with number of cores
+      expect_err = "The number of entries in the DenseMatrix \([0-9]+\) exceeds the allowed limit of [0-9]+."
+      cli_args = "Samplers/sample/num_cols=1000000000 UserObjects/test/test_type=getLocalSamples"
+
+      detail = "if the number of entries in the local sample matrix exceeds the maximum allowed, and"
+    []
+    [getNextLocalRow_max]
+      type = RunException
+      input = errors.i
+      expect_err = "The number of entries in the std::vector \([0-9]+\) exceeds the allowed limit of [0-9]+."
+      cli_args = "Samplers/sample/num_cols=1000000000 UserObjects/test/test_type=getNextLocalRow"
+
+      detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed."
+    []
+  []
+[]

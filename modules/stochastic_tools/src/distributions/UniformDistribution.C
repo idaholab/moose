@@ -65,17 +65,20 @@ UniformDistribution::quantile(const Real & y,
 Real
 UniformDistribution::pdf(const Real & x) const
 {
+  TIME_SECTION(_perf_pdf);
   return pdf(x, _lower_bound, _upper_bound);
 }
 
 Real
 UniformDistribution::cdf(const Real & x) const
 {
+  TIME_SECTION(_perf_cdf);
   return cdf(x, _lower_bound, _upper_bound);
 }
 
 Real
 UniformDistribution::quantile(const Real & y) const
 {
+  TIME_SECTION(_perf_quantile);
   return quantile(y, _lower_bound, _upper_bound);
 }

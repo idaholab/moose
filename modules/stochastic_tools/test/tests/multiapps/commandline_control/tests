@@ -1,26 +1,38 @@
 [Tests]
   design = 'syntax/MultiApps/index.md'
   issues = '#12576'
-  [master_single]
-    type = CSVDiff
-    input = master_single.i
-    csvdiff = 'master_single_out_sub0.csv master_single_out_sub1.csv master_single_out_sub2.csv'
-    requirement = "The 'stocastic_tools' module shall be able to set a single MultiApp command line parameters from a sample distribution."
-  []
 
-  [master_multiple]
-    type = CSVDiff
-    input = master_multiple.i
-    csvdiff = 'master_multiple_out_sub0.csv master_multiple_out_sub1.csv master_multiple_out_sub2.csv'
-    requirement = "The 'stocastic_tools' module shall be able to set multiple MultiApp command line parameters from a sample distribution."
+  [master]
+    requirement = "The system shall be able to set a sub-application command line parameters from a "
+                  "sample distribution"
+
+    [single]
+      type = CSVDiff
+      input = master_single.i
+      csvdiff = 'master_single_out_sub0.csv master_single_out_sub1.csv master_single_out_sub2.csv'
+
+      detail = 'for a single parameter and'
+    []
+
+    [multiple]
+      type = CSVDiff
+      input = master_multiple.i
+      csvdiff = 'master_multiple_out_sub0.csv master_multiple_out_sub1.csv '
+                'master_multiple_out_sub2.csv'
+
+      detail = 'for a multiple parameters.'
+    []
   []
 
   [wrong_size]
     type = RunException
     input = master_wrong_size.i
-    expect_err = "The number of sub apps \(2\) created by MultiApp object 'sub' must be equal to the number for rows \(10\) for the 'sample' Sampler object"
+    expect_err = "The number of sub apps \(2\) created by MultiApp object 'sub' must be equal to the "
+                 "number for rows \(10\) for the 'sample' Sampler object"
     design = 'source/controls/MultiAppCommandLineControl.md'
-    requirement = "The MultiAppCommandLineControl object shall error when the number of samplers differs from the number of sub apps."
+
+    requirement = "The system shall error when the number of samplers differs from the number of sub "
+                  "applications."
   []
 
   [wrong_num_params]
@@ -28,6 +40,8 @@
     input = master_wrong_num_params.i
     expect_err = "The number of columns \(2\) must match the number of parameters \(3\)"
     design = 'source/controls/MultiAppCommandLineControl.md'
-    requirement = "The MultiAppCommandLineControl object shall error when the number of samples differs from the number of command line parameters."
+
+    requirement = "The system shall error when the number of samples differs from the number of "
+                  "command line parameters."
   []
 []

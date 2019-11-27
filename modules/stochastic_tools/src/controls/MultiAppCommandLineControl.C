@@ -71,13 +71,13 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
         "' object is setup to run in 'batch-restore' mode, when using this mode command line "
         "arguments cannot be modified; batch-reset mode should be used instead.");
 
-  else if (_multi_app->numGlobalApps() != _sampler.getTotalNumberOfRows())
+  else if (_multi_app->numGlobalApps() != _sampler.getNumberOfRows())
     mooseError("The number of sub apps (",
                _multi_app->numGlobalApps(),
                ") created by MultiApp object '",
                _multi_app->name(),
                "' must be equal to the number for rows (",
-               _sampler.getTotalNumberOfRows(),
+               _sampler.getNumberOfRows(),
                ") for the '",
                _sampler.name(),
                "' Sampler object.");
@@ -94,49 +94,46 @@ void
 MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
-  std::vector<DenseMatrix<Real>> samples = _sampler.getSamples();
 
-  for (const DenseMatrix<Real> & matrix : samples)
+  if (_sampler.getNumberOfCols() != _param_names.size())
+    paramError("param_names",
+               "The number of columns (",
+               _sampler.getNumberOfCols(),
+               ") must match the number of parameters (",
+               _param_names.size(),
+               ").");
+
+  // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
+  // store only param_names once in "cli_args". For other MultApp, we store the full information
+  // of params_names and values for each sampler.
+
+  if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
   {
-    if (matrix.n() != _param_names.size())
-      paramError("param_names",
-                 "The number of columns (",
-                 matrix.n(),
-                 ") must match the number of parameters (",
-                 _param_names.size(),
-                 ").");
-
-    // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
-    // store only param_names once in "cli_args". For other MultApp, we store the full information
-    // of params_names and values for each sampler.
-
-    if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
+    for (dof_id_type row = _sampler.getLocalRowBegin(); row < _sampler.getLocalRowEnd(); ++row)
     {
-      for (unsigned int row = 0; row < matrix.m(); ++row)
-      {
-        std::ostringstream oss;
-        for (unsigned int col = 0; col < matrix.n(); ++col)
-        {
-          if (col > 0)
-            oss << ";";
-          oss << _param_names[col] << "=" << Moose::stringify(matrix(row, col));
-        }
-
-        cli_args.push_back(oss.str());
-      }
-    }
-    else
-    {
+      std::vector<Real> data = _sampler.getNextLocalRow();
       std::ostringstream oss;
-      for (unsigned int col = 0; col < matrix.n(); ++col)
+      for (std::size_t col = 0; col < data.size(); ++col)
       {
         if (col > 0)
           oss << ";";
-        oss << _param_names[col];
+        oss << _param_names[col] << "=" << Moose::stringify(data[col]);
       }
 
       cli_args.push_back(oss.str());
     }
+  }
+  else
+  {
+    std::ostringstream oss;
+    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
+    {
+      if (col > 0)
+        oss << ";";
+      oss << _param_names[col];
+    }
+
+    cli_args.push_back(oss.str());
   }
 
   setControllableValueByName<std::vector<std::string>>(

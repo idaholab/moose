@@ -21,7 +21,7 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 10
+    num_rows = 10
     distributions = 'uniform'
     execute_on = 'initial timestep_end'
   [../]
@@ -40,7 +40,7 @@
 []
 
 [Problem]
-  solve = false
+  #solve = false
   kernel_coverage_check = false
 []
 

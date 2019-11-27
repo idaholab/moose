@@ -23,7 +23,7 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 3
+    num_rows = 3
     distributions = 'uniform uniform'
     execute_on = 'initial timestep_end'
   [../]

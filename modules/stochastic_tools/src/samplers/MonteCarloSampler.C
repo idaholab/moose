@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MonteCarloSampler.h"
+#include "Distribution.h"
 
 registerMooseObject("StochasticToolsApp", MonteCarloSampler);
 
@@ -17,31 +18,27 @@ validParams<MonteCarloSampler>()
 {
   InputParameters params = validParams<Sampler>();
   params.addClassDescription("Monte Carlo Sampler.");
-  params.addRequiredParam<dof_id_type>(
-      "n_samples",
-      "Number of Monte Carlo samples to perform for each distribution within each matrix.");
-  params.addParam<dof_id_type>(
-      "n_matrices", 1, "Number of matrices to create, each matrix will contain 'n_samples'.");
+  params.addRequiredParam<dof_id_type>("num_rows", "The number of rows per matrix to generate.");
+  params.addRequiredParam<std::vector<DistributionName>>(
+      "distributions",
+      "The distribution names to be sampled, the number of distributions provided defines the "
+      "number of columns per matrix.");
   return params;
 }
 
 MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    _num_matrices(getParam<dof_id_type>("n_matrices")),
-    _num_samples(getParam<dof_id_type>("n_samples"))
+    _distribution_names(getParam<std::vector<DistributionName>>("distributions"))
 {
+  for (const DistributionName & name : _distribution_names)
+    _distributions.push_back(&getDistributionByName(name));
+
+  setNumberOfRows(getParam<dof_id_type>("num_rows"));
+  setNumberOfCols(_distributions.size());
 }
 
-std::vector<DenseMatrix<Real>>
-MonteCarloSampler::sample()
+Real
+MonteCarloSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 {
-  std::vector<DenseMatrix<Real>> output(_num_matrices);
-  for (MooseIndex(_num_matrices) m = 0; m < _num_matrices; ++m)
-  {
-    output[m].resize(_num_samples, _distributions.size());
-    for (MooseIndex(_num_samples) i = 0; i < _num_samples; ++i)
-      for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
-        output[m](i, j) = _distributions[j]->quantile(rand());
-  }
-  return output;
+  return _distributions[col_index]->quantile(getRand());
 }

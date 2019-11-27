@@ -51,13 +51,16 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
+
   else
-    init(_sampler.getTotalNumberOfRows());
+    init(_sampler.getNumberOfRows());
 }
 
 bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  mooseAssert(_my_num_apps, _sampler.getNumberOfLocalRows());
+
   bool last_solve_converged = true;
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
@@ -82,6 +85,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   // Initialize to/from transfers
   for (auto transfer : to_transfers)
     transfer->initializeToMultiapp();
+
   for (auto transfer : from_transfers)
     transfer->initializeFromMultiapp();
 
@@ -90,18 +94,23 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
   // Perform batch MultiApp solves
   _local_batch_app_index = 0;
-  dof_id_type num_items = _sampler.getLocalNumerOfRows();
-  for (MooseIndex(num_items) i = 0; i < num_items; ++i)
+  for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
   {
     for (auto & transfer : to_transfers)
+    {
+      transfer->setGlobalMultiAppIndex(i);
       transfer->executeToMultiapp();
+    }
 
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
 
     for (auto & transfer : from_transfers)
+    {
+      transfer->setGlobalMultiAppIndex(i);
       transfer->executeFromMultiapp();
+    }
 
-    if (i != num_items - 1)
+    if (i < _sampler.getLocalRowEnd() - 1)
     {
       if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
         restore();
@@ -109,8 +118,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       {
         // The app is being reset for the next loop, thus the batch index must be indexed as such
         _local_batch_app_index = i + 1;
-        for (std::size_t app = 0; app < _total_num_apps; app++)
-          resetApp(app, target_time);
+        resetApp(_local_batch_app_index, target_time);
         initialSetup();
       }
     }
@@ -145,28 +153,17 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
   // Since we only store param_names in cli_args, we need to find the values for each param from
   // sampler data and combine them to get full command line option strings.
+  std::vector<Real> row = _sampler.getNextLocalRow();
 
-  std::vector<DenseMatrix<Real>> samples = _sampler.getSamples();
   std::ostringstream oss;
+  const std::vector<std::string> & cli_args_name =
+      MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
 
-  for (unsigned int i = 0; i < samples.size(); ++i)
+  for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
   {
-    DenseMatrix<Real> matrix = samples[i];
-    const std::vector<std::string> & cli_args_name = MooseUtils::split(_cli_args[i], ";");
-
-    for (unsigned int col = 0; col < matrix.n(); ++col)
-    {
-      if (col > 0)
-        oss << ";";
-
-      if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
-        oss << cli_args_name[col] << "="
-            << Moose::stringify(matrix(_local_batch_app_index + _sampler.getLocalRowBegin(), col));
-      else
-        oss << cli_args_name[col] << "="
-            << Moose::stringify(matrix(local_app + _first_local_app, col));
-    }
+    if (col > 0)
+      oss << ";";
+    oss << cli_args_name[col] << "=" << Moose::stringify(row[col]);
   }
-
   return oss.str();
 }

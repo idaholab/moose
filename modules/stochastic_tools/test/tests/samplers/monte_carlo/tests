@@ -1,14 +1,46 @@
-
 [Tests]
-  [./uniform]
-    type = 'CSVDiff'
-    input = 'monte_carlo_uniform.i'
-    csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
-  [../]
-  [./weibull]
-    type = 'CSVDiff'
-    input = 'monte_carlo_weibull.i'
-    csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
-    boost = true
-  [../]
+  issues = '#8065'
+  design = 'MonteCarloSampler.md'
+
+  [monte_carlo]
+    requirement = 'The system shall include a Monte Carlo method for sampling distribution data '
+                  'including'
+
+    [uniform]
+      type = 'CSVDiff'
+      input = 'monte_carlo_uniform.i'
+      csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+
+      detail = 'a uniform distribution distributed across processors,'
+    []
+
+    [uniform_global]
+      type = 'CSVDiff'
+      input = 'monte_carlo_uniform.i'
+      csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+      prereq = monte_carlo/uniform
+      cli_args = VectorPostprocessors/data/sampler_method=get_global_samples
+
+      detail = 'a uniform distribution replicated across processors,'
+    []
+
+    [weibull]
+      type = 'CSVDiff'
+      input = 'monte_carlo_weibull.i'
+      csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
+      boost = true
+
+      detail = 'a Wiebull distribution distributed across processors, and'
+    []
+    [weibull_global]
+      type = 'CSVDiff'
+      input = 'monte_carlo_weibull.i'
+      csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
+      boost = true
+      prereq = monte_carlo/weibull
+      cli_args = VectorPostprocessors/data/sampler_method=get_global_samples
+
+      detail = 'a Weibull distribution replicated across processors.'
+    []
+  []
 []

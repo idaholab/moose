@@ -703,7 +703,6 @@ stringToInteger(const std::string & input, bool throw_on_failure)
 }
 
 void
-
 linearPartitionItems(dof_id_type num_items,
                      dof_id_type num_chunks,
                      dof_id_type chunk_id,

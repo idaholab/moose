@@ -24,8 +24,7 @@
 [Samplers]
   [mc]
     type = MonteCarloSampler
-    n_matrices = 3
-    n_samples = 5
+    num_rows = 15
     distributions = 'uniform_0 uniform_1'
   []
 []

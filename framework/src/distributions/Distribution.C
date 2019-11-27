@@ -21,7 +21,15 @@ Distribution::validParams()
   return params;
 }
 
-Distribution::Distribution(const InputParameters & parameters) : MooseObject(parameters) {}
+Distribution::Distribution(const InputParameters & parameters)
+  : MooseObject(parameters),
+    PerfGraphInterface(this),
+    _perf_pdf(registerTimedSection("pdf", 4)),
+    _perf_cdf(registerTimedSection("cdf", 4)),
+    _perf_quantile(registerTimedSection("quantile", 4)),
+    _perf_median(registerTimedSection("median", 4))
+{
+}
 
 Real
 Distribution::median() const

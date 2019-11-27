@@ -56,35 +56,25 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
     _sampler_ptr = &(ptr_fullsolve->getSampler());
 }
 
-std::vector<Real>
-SamplerTransfer::getRow(const dof_id_type global_index) const
-{
-  Sampler::Location loc = _sampler_ptr->getLocation(global_index);
-  std::vector<Real> row;
-  row.reserve(_samples[loc.sample()].n());
-  for (unsigned int j = 0; j < _samples[loc.sample()].n(); ++j)
-    row.emplace_back(_samples[loc.sample()](loc.row(), j));
-  return row;
-}
-
 void
 SamplerTransfer::execute()
 {
-  // Get the Sampler data
-  _samples = _sampler_ptr->getSamples();
+  mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(),
+              "The number of MultiApps and the number of sample rows must be the same.");
 
   // Loop over all sub-apps
-  for (unsigned int app_index = 0; app_index < _multi_app->numGlobalApps(); app_index++)
+  for (dof_id_type row_index = _sampler_ptr->getLocalRowBegin();
+       row_index < _sampler_ptr->getLocalRowEnd();
+       row_index++)
   {
-    // Do nothing if the sub-app is not local
-    if (!_multi_app->hasLocalApp(app_index))
-      continue;
+    mooseAssert(_multi_app->hasLocalApp(row_index),
+                "The current sample row index is not a valid global MultiApp index.");
 
     // Get the sub-app SamplerReceiver object and perform error checking
-    SamplerReceiver * ptr = getReceiver(app_index);
+    SamplerReceiver * ptr = getReceiver(row_index);
 
     // Populate the row of data to transfer
-    std::vector<Real> row = getRow(app_index);
+    std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
     // Perform the transfer
     ptr->transfer(_parameter_names, row);
@@ -94,18 +84,19 @@ SamplerTransfer::execute()
 void
 SamplerTransfer::initializeToMultiapp()
 {
-  _samples = _sampler_ptr->getSamples();
   _global_index = _sampler_ptr->getLocalRowBegin();
 }
 
 void
 SamplerTransfer::executeToMultiapp()
 {
-
   SamplerReceiver * ptr = getReceiver(processor_id());
-  std::vector<Real> row = getRow(_global_index);
+
+  std::vector<Real> row = _sampler_ptr->getNextLocalRow();
+
   ptr->transfer(_parameter_names, row);
-  _global_index += 1;
+
+  _global_index++;
 }
 
 void
