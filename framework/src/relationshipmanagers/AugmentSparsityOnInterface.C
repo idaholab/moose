@@ -39,8 +39,6 @@ AugmentSparsityOnInterface::validParams()
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & params)
   : RelationshipManager(params),
-    _amg(nullptr),
-    _has_attached_amg(false),
     _master_boundary_name(getParam<BoundaryName>("master_boundary")),
     _slave_boundary_name(getParam<BoundaryName>("slave_boundary")),
     _master_subdomain_name(getParam<SubdomainName>("master_subdomain")),
@@ -51,17 +49,6 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
 void
 AugmentSparsityOnInterface::mesh_reinit()
 {
-  // This might eventually be where the mortar segment mesh and all the other data
-  // structures get rebuilt?
-}
-
-void
-AugmentSparsityOnInterface::internalInit()
-{
-  if (_mesh.isDistributedMesh())
-    mooseError(
-        "We need to first be able to run MeshModifiers before remote elements are deleted before "
-        "the AugmentSparsityOnInterface ghosting functor can work with DistributedMesh");
 }
 
 std::string
@@ -73,84 +60,49 @@ AugmentSparsityOnInterface::getInfo() const
 }
 
 void
-AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & range_begin,
-                                       const MeshBase::const_element_iterator & range_end,
+AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator &,
+                                       const MeshBase::const_element_iterator &,
                                        processor_id_type p,
                                        map_type & coupled_elements)
 {
-  // Note that as indicated by our error in internalInit this ghosting functor will not work on a
-  // distributed mesh. This logic below will have to changed in order to support distributed
-  // mesh. The FEProblemBase and Executioner do not get created until after the mesh has been
-  // prepared and we have potentially deleted remote elements (although we do now have code that
-  // illustrates delaying deletion of remote elements until after the equation systems init,
-  // e.g. until after we've run ghosting functors on the DofMap
-  if (!_has_attached_amg && _app.getExecutioner())
-  {
-    // We ask the user to pass boundary names instead of ids to our constraint object.  We are
-    // unable to get the boundary ids until we've read in the mesh, which is done after we add
-    // geometric relationship managers. Hence we can't do the below in our constructor. Now that
-    // we're doing ghosting we've definitely read in the mesh
-    auto boundary_pair = std::make_pair(_mesh.getBoundaryID(_master_boundary_name),
-                                        _mesh.getBoundaryID(_slave_boundary_name));
-    _subdomain_pair.first = _mesh.getSubdomainID(_master_subdomain_name);
-    _subdomain_pair.second = _mesh.getSubdomainID(_slave_subdomain_name);
-
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
-        boundary_pair, _subdomain_pair, _use_displaced_mesh);
-    _has_attached_amg = true;
-  }
-
   const CouplingMatrix * const null_mat = libmesh_nullptr;
 
-  // If we're on a dynamic mesh, we need to ghost the entire interface because we don't know at the
-  // beginning of the non-linear solve which elements will project onto which over the course of the
-  // solve
-  if (_use_displaced_mesh)
+  // The MeshBase object
+  const auto & libmesh_mesh = _mesh.getMesh();
+
+  auto slave_boundary_id = _mesh.getBoundaryID(_slave_boundary_name);
+  auto master_boundary_id = _mesh.getBoundaryID(_master_boundary_name);
+  auto slave_subdomain_id = _mesh.getSubdomainID(_slave_subdomain_name);
+  auto master_subdomain_id = _mesh.getSubdomainID(_master_subdomain_name);
+
+  // Build up the boundary information so we know which higher-dimensional elements are on the
+  // mortar interface
+  std::set<dof_id_type> higher_d_elems_to_ghost;
+
+  std::vector<dof_id_type> elem_ids;
+  std::vector<Point> elem_centroids;
+  std::vector<processor_id_type> elem_proc_ids;
+  for (const auto & elem : libmesh_mesh.active_element_ptr_range())
   {
-    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
-    {
-      if (elem->subdomain_id() == _subdomain_pair.first ||
-          elem->subdomain_id() == _subdomain_pair.second)
-      {
-        if (elem->processor_id() != p)
-          coupled_elements.insert(std::make_pair(elem, null_mat));
-        auto ip = elem->interior_parent();
-        if (ip->processor_id() != p)
-          coupled_elements.insert(std::make_pair(ip, null_mat));
-      }
-    }
+    elem_ids.push_back(elem->id());
+    elem_centroids.push_back(elem->centroid());
+    elem_proc_ids.push_back(elem->processor_id());
   }
-  // For a static mesh we can just ghost the cross interface neighbors calculated during mortar mesh
-  // generation
-  else if (_amg)
+
+  auto side_list = libmesh_mesh.get_boundary_info().build_active_side_list();
+  for (auto & tuple : side_list)
   {
-    for (const auto & elem : as_range(range_begin, range_end))
-    {
-      // Look up elem in the mortar_interface_coupling data structure.
-      auto bounds = _amg->mortar_interface_coupling.equal_range(elem->id());
+    auto boundary_id = std::get<2>(tuple);
+    if (boundary_id == slave_boundary_id || boundary_id == master_boundary_id)
+      higher_d_elems_to_ghost.insert(std::get<0>(tuple));
+  }
 
-      for (const auto & pr : as_range(bounds))
-      {
-        const Elem * cross_interface_neighbor = _mesh.getMesh().elem_ptr(pr.second);
-
-        if (cross_interface_neighbor->processor_id() != p)
-          coupled_elements.insert(std::make_pair(cross_interface_neighbor, null_mat));
-
-        // If the cross_interface_neighbor is a lower-dimensional element with
-        // an interior parent, add the interior parent to the
-        // list of Elems coupled to us.
-        const Elem * cross_interface_neighbor_ip = cross_interface_neighbor->interior_parent();
-        if (cross_interface_neighbor_ip && cross_interface_neighbor_ip->processor_id() != p)
-          coupled_elements.insert(std::make_pair(cross_interface_neighbor_ip, null_mat));
-      } // end loop over bounds range
-
-      // Finally add the interior parent of this element if it's not local
-      auto elem_ip = elem->interior_parent();
-      if (elem_ip && elem_ip->processor_id() != p)
-        coupled_elements.insert(std::make_pair(elem_ip, null_mat));
-
-    } // end loop over active local elements range
-  }   // end if (_amg)
+  for (const auto & elem : libmesh_mesh.active_element_ptr_range())
+    if (elem->processor_id() != p &&
+        (elem->subdomain_id() == slave_subdomain_id ||
+         elem->subdomain_id() == master_subdomain_id ||
+         higher_d_elems_to_ghost.find(elem->id()) != higher_d_elems_to_ghost.end()))
+      coupled_elements.insert(std::make_pair(elem, null_mat));
 }
 
 bool
