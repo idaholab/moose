@@ -19,7 +19,7 @@ def execute(infile, outfile, n_samples, processors, test_type):
         exe_args = ['-i', infile,
                     'Outputs/file_base={}'.format(file_base),
                     'UserObjects/test/test_type={}'.format(test_type),
-                    'Samplers/sampler/num_rows={}'.format(n_samples)]
+                    'Samplers/sampler/num_rows={}'.format(int(n_samples))]
 
         print('mpiexec -n {} {} {}'.format(n_procs, exe, ' '.join(exe_args)))
         t = time.time()
