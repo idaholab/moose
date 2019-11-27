@@ -7,6 +7,9 @@
   initial_T = 250
   initial_p = 1e5
   initial_vel = 1
+  initial_vel_x = 1
+  initial_vel_y = 0
+  initial_vel_z = 0
 
   f = 0
 
@@ -15,8 +18,6 @@
   scaling_factor_1phase = '1 1 1e-5'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -48,8 +49,10 @@
   [../]
 
   [./junction]
-    type = Junction
+    type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
+    position = '1 0 0'
+    volume = 1e-8
   [../]
 
   [./pipe2]
@@ -72,8 +75,6 @@
   [./pc]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-    petsc_options_value = 'lu       mumps'
   [../]
 []
 
@@ -91,37 +92,30 @@
   l_max_its = 10
 
   start_time = 0
-  end_time = 5
-  steady_state_detection = true
-  steady_state_tolerance = 2e-7
+  end_time = 3
+  dt = 0.1
 
-  dt = 0.05
   abort_on_solve_fail = true
-
-  [./Quadrature]
-    type = GAUSS
-    order = SECOND
-  [../]
 []
 
 [Postprocessors]
   # These post-processors are used to test that the outlet side of the junction,
   # which has half the area of the inlet side, has twice the momentum density
   # that the inlet side does.
-  [./rhouA_small]
-    type = PointValue
+  [./rhouA_pipe1]
+    type = SideAverageValue
     variable = rhouA
-    point = '0.999 0 0'
+    boundary = pipe1:out
   [../]
-  [./rhouA_big]
-    type = PointValue
+  [./rhouA_pipe2]
+    type = SideAverageValue
     variable = rhouA
-    point = '1.001 0 0'
+    boundary = pipe2:out
   [../]
   [./test_rel_err]
     type = RelativeDifferencePostprocessor
-    value1 = rhouA_big
-    value2 = rhouA_small
+    value1 = rhouA_pipe1
+    value2 = rhouA_pipe2
   [../]
 []
 
@@ -129,5 +123,6 @@
   [./out]
     type = CSV
     show = test_rel_err
+    execute_on = 'final'
   [../]
 []
