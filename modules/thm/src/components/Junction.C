@@ -25,6 +25,10 @@ Junction::Junction(const InputParameters & params)
     _initial_T(getParam<Real>("initial_T")),
     _scaling_factor_s_junction(getParam<Real>("scaling_factor_s_junction"))
 {
+  mooseDeprecated(
+      name(),
+      ": Junction component is scheduled for removal.  Please update your input file to use rDG.");
+
   if (isParamValid("K"))
   {
     _K = getParam<std::vector<Real>>("K");

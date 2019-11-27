@@ -6,19 +6,19 @@
 
   scaling_factor_1phase = '1 1 1e-5'
 
-  # Currently, these parameters are required for the initialization of junction DoFs
   initial_T = 250
   initial_p = 1e5
+  initial_vel_x = 1
+  initial_vel_y = 0
+  initial_vel_z = 0
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [AuxVariables]
   [./p0]
-    family = LAGRANGE
-    order = FIRST
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -78,8 +78,10 @@
   [../]
 
   [./junction1]
-    type = Junction
+    type = VolumeJunction1Phase
     connections = 'inlet_pipe:out deadend_pipe:in outlet_pipe:in'
+    position = '1 0 0'
+    volume = 1e-8
   [../]
 
   [./outlet_pipe]
@@ -134,8 +136,6 @@
   [./pc]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-    petsc_options_value = 'lu       mumps'
   [../]
 []
 
@@ -154,28 +154,23 @@
 
   start_time = 0
   end_time = 5
+  dt = 0.1
 
-  dt = 0.05
   abort_on_solve_fail = true
-
-  [./Quadrature]
-    type = GAUSS
-    order = SECOND
-  [../]
 []
 
 [Postprocessors]
   # These post-processors are used for testing that the stagnation pressure in
   # the dead-end pipe is equal to the inlet stagnation pressure.
   [./p0_inlet]
-    type = PointValue
+    type = SideAverageValue
     variable = p0
-    point = '0 0 0'
+    boundary = inlet_pipe:in
   [../]
   [./p0_deadend]
-    type = PointValue
+    type = SideAverageValue
     variable = p0
-    point = '1 1 0'
+    boundary = deadend_pipe:out
   [../]
   [./test_rel_err]
     type = RelativeDifferencePostprocessor
@@ -188,5 +183,7 @@
   [./out]
     type = CSV
     show = test_rel_err
+    sync_only = true
+    sync_times = '1 2 3 4 5'
   [../]
 []

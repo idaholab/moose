@@ -7,6 +7,9 @@
   initial_T = 300
   initial_p = 1e5
   initial_vel = 0
+  initial_vel_x = 0
+  initial_vel_y = 0
+  initial_vel_z = 0
 
   # global parameters for pipes
   fp = eos
@@ -15,11 +18,9 @@
   n_elems = 20
   f = 0
 
-  scaling_factor_1phase = '1 1 1e-5'
+  scaling_factor_1phase = '1 1 1e-6'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -71,8 +72,10 @@
   [../]
 
   [./junction]
-    type = Junction
+    type = VolumeJunction1Phase
     connections = 'pipe_cold:out pipe_hot:out pipe_warm:in'
+    position = '1 0.5 0'
+    volume = 1e-8
   [../]
 []
 
@@ -80,8 +83,6 @@
   [./pc]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-    petsc_options_value = 'lu       mumps'
   [../]
 []
 
@@ -91,23 +92,18 @@
 
   solve_type = 'NEWTON'
   line_search = 'basic'
-  nl_rel_tol = 0
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-5
   nl_max_its = 10
 
-  l_tol = 1e-10
+  l_tol = 1e-2
   l_max_its = 10
 
   start_time = 0
-  end_time = 10
-
+  end_time = 5
   dt = 0.05
-  abort_on_solve_fail = true
 
-  [./Quadrature]
-    type = GAUSS
-    order = SECOND
-  [../]
+  # abort_on_solve_fail = true
 []
 
 [Postprocessors]
@@ -115,22 +111,22 @@
   # the warm side of the junction is equal to the sum of the energy
   # fluxes of the hot and cold inlets to the junction.
   [./energy_flux_hot]
-    type = NodalEnergyFluxPostprocessor
+    type = EnergyFluxIntegral
+    boundary = pipe_hot:out
     arhouA = rhouA
     H = H
-    boundary = pipe_hot:out
   [../]
   [./energy_flux_cold]
-    type = NodalEnergyFluxPostprocessor
+    type = EnergyFluxIntegral
+    boundary = pipe_cold:out
     arhouA = rhouA
     H = H
-    boundary = pipe_cold:out
   [../]
   [./energy_flux_warm]
-    type = NodalEnergyFluxPostprocessor
+    type = EnergyFluxIntegral
+    boundary = pipe_warm:in
     arhouA = rhouA
     H = H
-    boundary = pipe_warm:in
   [../]
   [./energy_flux_inlet_sum]
     type = SumPostprocessor
@@ -148,5 +144,7 @@
   [./out]
     type = CSV
     show = test_rel_err
+    sync_only = true
+    sync_times = '3 4 5'
   [../]
 []
