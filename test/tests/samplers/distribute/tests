@@ -9,6 +9,7 @@
       command = 'execute.py'
       check_files = 'distribute_none.csv distribute_on.csv distribute_off.csv'
       recover = false
+      valgrind = NONE
       detail = "that distributes samples in parallel and"
       python = 3
       required_python_packages = 'pandas' # uncomment with upstream/python-3 is merged
@@ -18,6 +19,7 @@
       command = 'plot.py'
       check_files = 'memory_total.pdf memory_per_proc.pdf'
       recover = false
+      valgrind = NONE
       prereq = scale/execute
       python = 3
       required_python_packages = 'pandas matplotlib' # uncomment with upstream/python-3 is merged
