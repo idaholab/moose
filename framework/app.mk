@@ -382,9 +382,12 @@ endif
 # Codesign command (OS X Only)
 codesign :=
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	get_task_allow_entitlement := $(FRAMEWORK_DIR)/build_support/get_task_allow.plist
-	codesign := codesign -s - --entitlements $(get_task_allow_entitlement) $(app_EXEC)
+  ifeq (x$(MOOSE_NO_CODESIGN), x)
+    get_task_allow_entitlement := $(FRAMEWORK_DIR)/build_support/get_task_allow.plist
+    codesign := codesign -s - --entitlements $(get_task_allow_entitlement) $(app_EXEC)
+  endif
 endif
+
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
