@@ -47,17 +47,37 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
 
   auto & mesh_base = mesh->getMesh();
 
+  // Save the partitioning state
+  bool skip_partitioning = mesh_base.skip_partitioning();
+
   // We may have prevented remote element deletion during the mesh generation process. If we did,
   // then we should prepare_for_use one more time, this time deleting remote elements
   if (mesh->isDistributedMesh() && !mesh_base.allow_remote_element_removal())
   {
     mesh_base.allow_remote_element_removal(true);
+
+    // Determine the status of MooseMesh::_needs_prepare_for_use
+    bool needs_prepare_for_use;
+    mesh->needsPrepareForUse(needs_prepare_for_use);
+
+    if (!needs_prepare_for_use && mesh_base.is_prepared())
+      // The MooseMesh thinks we don't need to prepare and the libMesh MeshBase indicates we've
+      // already prepared (and consequently we've already partitioned) So we should skip
+      // partitioning because its expensive and some partitioners (like GridPartitioner) will
+      // actually error out if called multiple times
+      mesh_base.skip_partitioning(true);
+
+    // Set that we need to prepare_for_use
     mesh->needsPrepareForUse();
+
     prepared = false;
   }
 
   if (!prepared)
     mesh->prepare();
+
+  // Restore the partitioning flag
+  mesh_base.skip_partitioning(skip_partitioning);
 
   // Clear the modifiers, they are not used again during the simulation after the mesh has been
   // completed

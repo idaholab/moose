@@ -301,6 +301,12 @@ public:
   void needsPrepareForUse();
 
   /**
+   * Used to examine the state of \p _needs_prepare_for_use
+   * @param needs_prepare_for_use Will be set to the current value of \p _needs_prepare_for_use
+   */
+  void needsPrepareForUse(bool & needs_prepare_for_use) const;
+
+  /**
    * Declares that the MooseMesh has changed, invalidates cached data
    * and rebuilds caches.  Sets a flag so that clients of the
    * MooseMesh also know when it has changed.

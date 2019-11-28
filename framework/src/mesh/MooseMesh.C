@@ -2334,6 +2334,12 @@ MooseMesh::needsPrepareForUse()
   _needs_prepare_for_use = true;
 }
 
+void
+MooseMesh::needsPrepareForUse(bool & needs_prepare_for_use) const
+{
+  needs_prepare_for_use = _needs_prepare_for_use;
+}
+
 const std::set<SubdomainID> &
 MooseMesh::meshSubdomains() const
 {
