@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#13988'
+  design = 'python/index.md'
+  [combine_csv]
+    requirement = "MOOSE python postprocessor class shall combine CSV files together."
+    type = PythonUnitTest
+    input = test_combine_csv.py
+  []
+[]
