@@ -77,6 +77,9 @@ protected:
   std::vector<std::string> _arg_param_names;
   std::vector<int> _arg_param_numbers;
 
+  // boolean vector for whether the parameter has unique mapping
+  std::vector<bool> _arg_param_unique;
+
   /// coupled variables with default values
   std::vector<std::string> _arg_constant_defaults;
 
@@ -85,8 +88,6 @@ protected:
 
   /// Material property to store the function value.
   MaterialProperty<Real> * _prop_F;
-
-  std::map<std::string, std::string> map_to_arg_names;
 
 private:
   /// map the variable numbers to an even/odd interspersed pattern

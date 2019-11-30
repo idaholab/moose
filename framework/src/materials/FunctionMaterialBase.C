@@ -63,18 +63,8 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
       _arg_names.push_back(vars->second[j]->name());
       _arg_numbers.push_back(number);
       _arg_param_names.push_back(*it);
-      if (_mapping_is_unique)
-      {
-        _arg_param_numbers.push_back(-1);
-        map_to_arg_names[*it + std::to_string(j)] = vars->second[j]->name();
-        map_to_arg_names[vars->second[j]->name()] = *it;
-      }
-      else
-      {
-        _arg_param_numbers.push_back(j);
-        map_to_arg_names[*it] = vars->second[j]->name();
-        map_to_arg_names[vars->second[j]->name()] = *it + std::to_string(j);
-      }
+      _arg_param_numbers.push_back(j);
+      _arg_param_unique.push_back(_mapping_is_unique);
 
       // populate number -> arg index lookup table
       unsigned int idx = libMeshVarNumberRemap(number);
@@ -82,6 +72,9 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
         _arg_index.resize(idx + 1, -1);
 
       _arg_index[idx] = _args.size();
+
+      // get variable value
+      _args.push_back(&coupledValue(*it, j));
     }
   }
 

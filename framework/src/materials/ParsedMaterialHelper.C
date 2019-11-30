@@ -25,11 +25,30 @@ ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
                                            VariableNameMappingMode map_mode)
   : FunctionMaterialBase(parameters),
     FunctionParserUtils(parameters),
-    _variable_names(_nargs),
+    _variable_names(0),
     _mat_prop_descriptors(0),
     _tol(0),
-    _map_mode(map_mode)
+    _map_mode(map_mode),
+    variable_info(0)
 {
+  switch (map_mode)
+  {
+    case USE_MOOSE_NAMES:
+      _equation_args = _arg_names;
+      break;
+    case USE_PARAM_NAMES:
+      _equation_args = _arg_param_names;
+      break;
+  }
+  _args.empty();
+  for (unsigned int i = 0; i < _equation_args.size(); ++i)
+  {
+    if (!_arg_param_unique[i] && _map_mode == USE_PARAM_NAMES)
+    {
+      _equation_args[i] += std::to_string(_arg_param_numbers[i]);
+      _arg_names[i] += std::to_string(_arg_param_numbers[i]);
+    }
+  }
 }
 
 void
@@ -70,23 +89,11 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       if (!_func_F->AddConstant(acd, _pars.defaultCoupledValue(acd)))
         mooseError("Invalid constant name in parsed function object");
 
-  // set variable names based on map_mode
-  switch (_map_mode)
-  {
-    case USE_MOOSE_NAMES:
-      // replace duplicate derivative terms (i.e. D[c,xy] == D[c,yx])
-      for (unsigned int i = 0; i < _nargs; ++i)
-        replaceDuplicates(expression, _arg_names[i]);
-      // get variable names from FParser
-      _func_F->ParseAndDeduceVariables(expression, _variable_names, false);
-      _nargs = _variable_names.size();
-      variable_info.resize(_nargs);
+  // replace duplicate derivative terms (i.e. D[c,xy] == D[c,yx])
+  for (unsigned int i = 0; i < _nargs; ++i)
+    replaceDuplicates(expression, _equation_args[i]);
 
-      // get our coupled values
-      for (unsigned int i = 0; i < _nargs; ++i)
-        setCoupledValues(_arg_names[i], _nargs);
-      break;
-
+<<<<<<< HEAD
     case USE_PARAM_NAMES:
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -117,140 +124,152 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
           setCoupledValues(_arg_param_names[i], _arg_param_numbers[i]);
       }
       break;
+=======
+  // get variable names from FParser
+  _func_F->ParseAndDeduceVariables(expression, _variable_names, false);
+  _nargs = _variable_names.size();
+<<<<<<< HEAD
+  variable_info.resize(_nargs);
+>>>>>>> 788a1d59b3... Deduces variables retrieved from fparser, classifying them as coupled values or material properties
+=======
+>>>>>>> 62f950033f... VariableInfo for Material Properties weren't being added, so I changed that #14366
 
-    default:
-      mooseError("Unknown variable mapping mode");
-  }
+  for (auto & var : _variable_names)
+    getVariableValue(var, mat_prop_expressions);
 
+  // get all possible variable names for derivatives of material properties
   addAllArgNames();
-
-  // get all material properties
-  unsigned int nmat_props = mat_prop_expressions.size();
-  _mat_prop_descriptors.resize(nmat_props);
-  std::vector<std::string>::iterator finder;
-  for (unsigned int i = 0; i < nmat_props; ++i)
-  {
-    // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
-    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor(mat_prop_expressions[i], this);
-    finder = std::find(_variable_names.begin(), _variable_names.end(), mat_prop_expressions[i]);
-    variable_info[std::distance(_variable_names.begin(), finder)] =
-        std::make_tuple<VariableType, unsigned int, unsigned int>(MATERIAL_PROPERTY, 1 * i, 9);
-  }
 
   // create parameter passing buffer
   _func_params.resize(_nargs);
   // perform next steps (either optimize or take derivatives and then optimize)
+
   functionsPostParse();
-}
-
-void
-ParsedMaterialHelper::setCoupledValues(const std::string & var_to_find, unsigned int component)
-{
-  std::vector<std::string> comps{"x", "y", "z"};
-  std::vector<std::string>::iterator finder;
-  std::string to_find;
-  if (component < _nargs)
-    to_find = var_to_find + std::to_string(component);
-  else
-    to_find = var_to_find;
-
-  // we will look to see if the variable is being used in the equation
-  finder = std::find(_variable_names.begin(), _variable_names.end(), to_find);
-  // if it is, we now find the value of the variable
-  if (finder != _variable_names.end())
-  {
-    variable_info[std::distance(_variable_names.begin(), finder)] =
-        std::make_tuple<VariableType, unsigned int, unsigned int>(VARIABLE_VALUE, _args.size(), 9);
-    if (component < _nargs)
-      _args.push_back(&coupledValue(var_to_find, component));
-    else
-    {
-      if (_map_mode == USE_MOOSE_NAMES)
-        _args.push_back(&coupledValue(map_to_arg_names[var_to_find]));
-      else
-        _args.push_back(&coupledValue(var_to_find));
-    }
-  }
-  // do the same for all of the gradient components
-  for (unsigned int i = 0; i < 3; ++i)
-  {
-    finder = std::find(_variable_names.begin(), _variable_names.end(), to_find + comps[i]);
-    if (finder != _variable_names.end())
-    {
-      variable_info[std::distance(_variable_names.begin(), finder)] =
-          std::make_tuple<VariableType, unsigned int, unsigned int>(
-              VARIABLE_GRADIENT, _grad_args.size(), 1 * i);
-      if (component < _nargs)
-        _grad_args.push_back(&coupledGradient(var_to_find, component));
-      else
-      {
-        if (_map_mode == USE_MOOSE_NAMES)
-          _grad_args.push_back(&coupledGradient(map_to_arg_names[var_to_find]));
-        else
-          _grad_args.push_back(&coupledGradient(var_to_find));
-      }
-    }
-    // do the same for all of the second derivative components
-    for (unsigned int j = 0; j < 3; ++j)
-    {
-      finder =
-          std::find(_variable_names.begin(), _variable_names.end(), to_find + comps[i] + comps[j]);
-      if (finder != _variable_names.end())
-      {
-        variable_info[std::distance(_variable_names.begin(), finder)] =
-            std::make_tuple<VariableType, unsigned int, unsigned int>(
-                VARIABLE_SECOND, _second_args.size(), 3 * i + j);
-        if (component < _nargs)
-          _second_args.push_back(&coupledSecond(var_to_find, component));
-        else
-        {
-          if (_map_mode == USE_MOOSE_NAMES)
-            _second_args.push_back(&coupledSecond(map_to_arg_names[var_to_find]));
-          else
-            _second_args.push_back(&coupledSecond(var_to_find));
-        }
-      }
-    }
-  }
 }
 
 void
 ParsedMaterialHelper::replaceDuplicates(std::string & expression, const std::string & to_replace)
 {
-  std::vector<std::string> comps{"yx", "zx", "zy"};
+  std::vector<std::string> comps{"_yx", "_zx", "_zy"};
   for (auto & comp : comps)
   {
     std::size_t variable_location = expression.find(to_replace + comp);
     char temp;
     while (variable_location != std::string::npos)
     {
-      temp = expression[variable_location + to_replace.size()];
-      expression[variable_location + to_replace.size()] =
-          expression[variable_location + to_replace.size() + 1];
-      expression[variable_location + to_replace.size() + 1] = temp;
+      temp = expression[variable_location + to_replace.size() + 1];
+      expression[variable_location + to_replace.size() + 1] =
+          expression[variable_location + to_replace.size() + 2];
+      expression[variable_location + to_replace.size() + 2] = temp;
       variable_location = expression.find(to_replace + comp);
     }
   }
 }
 
 void
+ParsedMaterialHelper::getVariableValue(const std::string & var,
+                                       const std::vector<std::string> & mat_prop_expressions)
+{
+
+  std::map<char, unsigned int> char_to_int = {{'x', 0}, {'y', 1}, {'z', 2}};
+  std::string::const_iterator find_comps;
+  std::vector<std::string>::iterator find_var;
+  std::vector<std::string>::const_iterator find_mat_prop;
+
+  VariableInfo this_var_info;
+  std::string var_name = var;
+  std::string comps;
+
+  // Find where the variable ends and the components begin
+  for (find_comps = var.begin(); find_comps != var.end(); ++find_comps)
+    if (*find_comps == '_' &&
+        (*(find_comps + 1) == 'x' || *(find_comps + 1) == 'y' || *(find_comps + 1) == 'z'))
+    {
+      var_name = std::string(var.begin(), find_comps);
+      comps = std::string(find_comps + 1, var.end());
+    }
+  // If the variable is a coupled variable
+  for (find_var = _equation_args.begin(); find_var != _equation_args.end(); ++find_var)
+    if (var_name == *find_var)
+    {
+      unsigned int arg_index = find_var - _equation_args.begin();
+      if (!comps.empty())
+      {
+        char last_comp = comps.back();
+        comps.pop_back();
+        if (!comps.empty())
+        {
+          this_var_info.comp_one = char_to_int[comps.back()];
+          this_var_info.comp_two = char_to_int[last_comp];
+          this_var_info.var_type = VARIABLE_SECOND;
+          this_var_info.arg_location = _second_args.size();
+          _second_args.push_back(
+              &coupledSecond(_arg_param_names[arg_index], _arg_param_numbers[arg_index]));
+          variable_info.push_back(this_var_info);
+          return;
+        }
+        this_var_info.comp_one = char_to_int[last_comp];
+        this_var_info.var_type = VARIABLE_GRADIENT;
+        this_var_info.arg_location = _grad_args.size();
+        _grad_args.push_back(
+            &coupledGradient(_arg_param_names[arg_index], _arg_param_numbers[arg_index]));
+        variable_info.push_back(this_var_info);
+        return;
+      }
+      this_var_info.var_type = VARIABLE_VALUE;
+      this_var_info.arg_location = _args.size();
+      _args.push_back(&coupledValue(_arg_param_names[arg_index], _arg_param_numbers[arg_index]));
+      variable_info.push_back(this_var_info);
+      return;
+    }
+  // If the variable is a material property
+  for (find_mat_prop = mat_prop_expressions.begin(); find_mat_prop != mat_prop_expressions.end();
+       ++find_mat_prop)
+  {
+    std::string clean_mat;
+    cleanMat(*find_mat_prop, clean_mat);
+    if (var_name == clean_mat)
+    {
+      this_var_info.var_type = MATERIAL_PROPERTY;
+      this_var_info.arg_location = _mat_prop_descriptors.size();
+      _mat_prop_descriptors.push_back(FunctionMaterialPropertyDescriptor(*find_mat_prop, this));
+      variable_info.push_back(this_var_info);
+      return;
+    }
+  }
+  // The variable isn't in the coupled variables or material properties
+  mooseError("Unknown Variable Name!");
+}
+
+void
+ParsedMaterialHelper::cleanMat(const std::string & dirty_mat, std::string & clean_mat)
+{
+  std::string::const_iterator find_dirt;
+  for (find_dirt = dirty_mat.begin(); find_dirt != dirty_mat.end(); ++find_dirt)
+    if (*find_dirt == '(' || *find_dirt == ':')
+    {
+      clean_mat = std::string(dirty_mat.begin(), find_dirt);
+      return;
+    }
+  clean_mat = dirty_mat;
+  return;
+}
+
+void
 ParsedMaterialHelper::addAllArgNames()
 {
-  // we need this to check is any of the material properties
-  // have derivative components
+  // we need this to check for all possible components of a coupled variable
   std::vector<std::string> comps{"x", "y", "z"};
-  std::vector<std::string> temp_args = _arg_names;
-  for (auto & arg : temp_args)
-    for (auto & comp1 : comps)
+  unsigned int numVars = _arg_names.size();
+  for (unsigned int i = 0; i < numVars; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
     {
-      _arg_names.push_back(arg + comp1);
-      if (_map_mode == USE_PARAM_NAMES)
-        map_to_arg_names[map_to_arg_names[arg] + comp1] = arg + comp1;
-      for (auto & comp2 : comps)
+      _arg_names.push_back(_arg_names[i] + "_" + comps[j]);
+      _equation_args.push_back(_equation_args[i] + "_" + comps[j]);
+      for (unsigned int k = 0; k < 3; ++k)
       {
-        _arg_names.push_back(arg + comp1 + comp2);
-        if (_map_mode == USE_PARAM_NAMES)
-          map_to_arg_names[map_to_arg_names[arg] + comp1 + comp2] = arg + comp1 + comp2;
+        _arg_names.push_back(_arg_names[i] + "_" + comps[j] + comps[k]);
+        _equation_args.push_back(_equation_args[i] + "_" + comps[j] + comps[k]);
       }
     }
 }
@@ -259,7 +278,6 @@ void
 ParsedMaterialHelper::functionsPostParse()
 {
   functionsOptimize();
-
   // force a value update to get the property at least once and register it for the dependencies
   for (auto & mpd : _mat_prop_descriptors)
     mpd.value();
@@ -297,18 +315,19 @@ ParsedMaterialHelper::computeQpProperties()
 Real
 ParsedMaterialHelper::getValue(unsigned int index)
 {
-  switch (std::get<0>(variable_info[index]))
+  switch (variable_info[index].var_type)
   {
     case VARIABLE_VALUE:
-      return (*_args[std::get<1>(variable_info[index])])[_qp];
+      return (*_args[variable_info[index].arg_location])[_qp];
     case VARIABLE_GRADIENT:
-      return ((*_grad_args[std::get<1>(variable_info[index])])[_qp])(
-          std::get<2>(variable_info[index]));
+      return ((*_grad_args[variable_info[index].arg_location])[_qp])(variable_info[index].comp_one);
     case VARIABLE_SECOND:
-      return ((*_second_args[std::get<1>(variable_info[index])])[_qp])(
-          std::get<2>(variable_info[index]) / 3, std::get<2>(variable_info[index]) % 3);
+      return ((*_second_args[variable_info[index].arg_location])[_qp])(
+          variable_info[index].comp_one, variable_info[index].comp_two);
     case MATERIAL_PROPERTY:
-      return _mat_prop_descriptors[std::get<1>(variable_info[index])].value()[_qp];
+      return _mat_prop_descriptors[variable_info[index].arg_location].value()[_qp];
+    case NO_VAL:
+      return 0;
   }
   return 0;
 }

@@ -38,8 +38,10 @@ protected:
   virtual void functionsPostParse();
   void assembleDerivatives();
 
-  void
-  recurseMatProps(unsigned int var, unsigned int order, const MatPropDescriptorList & parent_mpd);
+  void recurseMatProps(unsigned int var,
+                       unsigned int order,
+                       const MatPropDescriptorList & parent_mpd,
+                       std::vector<std::string> & add_variable_vector);
 
   void
   recurseDerivative(unsigned int var, unsigned int order, const Derivative & parent_derivative);

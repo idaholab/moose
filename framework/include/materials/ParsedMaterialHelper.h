@@ -17,6 +17,7 @@
 
 // forward declatration
 class ParsedMaterialHelper;
+struct VariableInfo;
 
 template <>
 InputParameters validParams<ParsedMaterialHelper>();
@@ -33,12 +34,15 @@ public:
     USE_MOOSE_NAMES,
     USE_PARAM_NAMES
   };
+
   enum VariableType
   {
     VARIABLE_VALUE,
     VARIABLE_GRADIENT,
     VARIABLE_SECOND,
-    MATERIAL_PROPERTY
+    MATERIAL_PROPERTY,
+    NO_VAL // This is for variables that a material property has a derivative w.r.t., but aren't in
+           // the equation
   };
 
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
@@ -53,9 +57,10 @@ public:
                      const std::vector<std::string> & mat_prop_names);
 
 protected:
-  void setCoupledValues(const std::string & var_to_find, unsigned int component);
   void replaceDuplicates(std::string & expression, const std::string & to_replace);
-  void setMaterialValues(const std::vector<std::string> & var_used, const std::string & var_value);
+  void cleanMat(const std::string & dirty_mat, std::string & clean_mat);
+  void getVariableValue(const std::string & var,
+                        const std::vector<std::string> & mat_prop_expressions);
   void addAllArgNames();
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -96,5 +101,15 @@ protected:
    * Second is the location of the value in the vector _args, _grad_args, or _second_args.
    * Third is the index or component of the value (only applies for gradient and second terms).
    */
-  std::vector<std::tuple<VariableType, unsigned int, unsigned int>> variable_info;
+  std::vector<VariableInfo> variable_info;
+
+  std::vector<std::string> _equation_args;
+};
+
+struct VariableInfo
+{
+  ParsedMaterialHelper::VariableType var_type;
+  unsigned int arg_location;
+  unsigned int comp_one;
+  unsigned int comp_two;
 };

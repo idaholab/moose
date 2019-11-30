@@ -57,7 +57,8 @@ DerivativeParsedMaterialHelper::functionsPostParse()
 void
 DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
                                                 unsigned int order,
-                                                const MatPropDescriptorList & parent_mpd_list)
+                                                const MatPropDescriptorList & parent_mpd_list,
+                                                std::vector<std::string> & add_variable_vector)
 {
   // quit if we have exceeded the requested derivative order
   if (order > _derivative_order)
@@ -80,22 +81,28 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
     mpd.setSymbolName(newvarname);
 
     // add the new mpd and register it as the current variable derivative of the parent mpd
-    _bulk_rules.emplace_back(parent_mpd.getSymbolName(), _variable_names[var], newvarname);
+    _bulk_rules.emplace_back(parent_mpd.getSymbolName(), _equation_args[var], newvarname);
+
+    // if the variable is not known to fparser, we must add it
+    add_variable_vector.push_back(_equation_args[var]);
 
     // append to list
     mpd_list.push_back(mpd);
   }
 
   // append material property descriptors
+  VariableInfo this_var_info;
+  this_var_info.var_type = MATERIAL_PROPERTY;
   for (const auto & mpd : mpd_list)
   {
-    variable_info.push_back(std::make_tuple<VariableType, unsigned int, unsigned int>(
-        MATERIAL_PROPERTY, _mat_prop_descriptors.size(), 9));
+    this_var_info.arg_location = _mat_prop_descriptors.size();
+    variable_info.push_back(this_var_info);
+    _nargs++;
     _mat_prop_descriptors.push_back(mpd);
   }
   // go one order deeper
   for (unsigned int i = var; i < _nargs; ++i)
-    recurseMatProps(i, order + 1, mpd_list);
+    recurseMatProps(i, order + 1, mpd_list, add_variable_vector);
 }
 
 void
@@ -110,17 +117,32 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   // variable we are deriving w.r.t.
   auto derivative_var = _variable_names[var];
 
+  // make sure the variable isn't a material property
+  std::vector<std::string>::iterator finder =
+      std::find(_equation_args.begin(), _equation_args.end(), _variable_names[var]);
+  if (finder == _equation_args.end())
+    return;
+
   // current derivative starts off of the parent function
   Derivative current;
   current._darg_names = parent_derivative._darg_names;
 
   // the moose variable name goes into the derivative property name
+<<<<<<< HEAD
+<<<<<<< HEAD
   if (_map_mode == USE_PARAM_NAMES)
     current._darg_names.push_back(map_to_arg_names[_variable_names[var]]);
   else
     current._darg_names.push_back(_variable_names[var]);
 
   current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
+=======
+  current._darg_names.push_back(_variable_names[var]);
+=======
+  current._darg_names.push_back(_arg_names[finder - _equation_args.begin()]);
+>>>>>>> fd40bf1c23... Update and change branch
+  current._F = std::make_shared<ADFunction>(*parent_derivative._F);
+>>>>>>> 788a1d59b3... Deduces variables retrieved from fparser, classifying them as coupled values or material properties
 
   // execute derivative
   if (current._F->AutoDiff(derivative_var) != -1)
@@ -137,8 +159,9 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
     if (_enable_jit && !current._F->JITCompile())
       mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
 
+    unsigned int _nvars = _variable_names.size();
     // go one order deeper
-    for (unsigned int i = var; i < _nargs; ++i)
+    for (unsigned int i = var; i < _nvars; ++i)
       recurseDerivative(i, order + 1, current);
 
     // set up a material property for the derivative
@@ -158,7 +181,6 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   // need to check for zero derivatives here, otherwise at least one order is generated
   if (_derivative_order < 1)
     return;
-
   // if we are not on thread 0 we fetch all data from the thread 0 copy that already did all the
   // work
   if (_tid > 0)
@@ -179,7 +201,6 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       newderivative._F = ADFunctionPtr(new ADFunction(*D._F));
       _derivatives.push_back(newderivative);
     }
-
     // copy coupled material properties
     auto start = _mat_prop_descriptors.size();
     for (MooseIndex(master->_mat_prop_descriptors) i = start;
@@ -189,14 +210,25 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i], this);
       _mat_prop_descriptors.push_back(newdescriptor);
     }
-
+    // copy variable info
+    auto var_info_size = variable_info.size();
+    for (MooseIndex(master->variable_info) i = var_info_size; i < master->variable_info.size(); ++i)
+    {
+      VariableInfo new_var_info(master->variable_info[i]);
+      variable_info.push_back(new_var_info);
+    }
+    _nargs = master->_nargs;
     // size parameter buffer
     _func_params.resize(master->_func_params.size());
     return;
   }
+
+  std::vector<std::string> add_variable_vector(0);
+  MatPropDescriptorList temp_mat_props = _mat_prop_descriptors;
+
   // generate all coupled material property mappings
-  for (unsigned int i = 0; i < _nargs; ++i)
-    recurseMatProps(i, 1, _mat_prop_descriptors);
+  for (unsigned int i = 0; i < _arg_names.size(); ++i)
+    recurseMatProps(i, 1, temp_mat_props, add_variable_vector);
 
   // bulk register material property derivative rules to avoid repeated calls
   // to the (slow) AddVariable method
@@ -205,19 +237,37 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     std::string vars = _bulk_rules[0]._child;
     for (MooseIndex(_bulk_rules) i = 1; i < _bulk_rules.size(); ++i)
       vars += ',' + _bulk_rules[i]._child;
+
+    std::vector<std::string>::iterator finder;
+
+    VariableInfo this_var_info;
+    this_var_info.var_type = NO_VAL;
+    for (auto & var : add_variable_vector)
+    {
+      finder = std::find(_variable_names.begin(), _variable_names.end(), var);
+      if (finder == _variable_names.end())
+      {
+        _variable_names.push_back(var);
+        vars += ',' + var;
+        _nargs++;
+        variable_info.push_back(this_var_info);
+      }
+    }
     _func_F->AddVariable(vars);
 
     for (const auto & rule : _bulk_rules)
       _func_F->RegisterDerivative(rule._parent, rule._var, rule._child);
   }
-  _func_params.resize(variable_info.size());
+  unsigned int _nvars = _variable_names.size();
 
   // generate all derivatives
   Derivative root;
   root._F = _func_F;
   root._mat_prop = nullptr;
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nvars; ++i)
     recurseDerivative(i, 1, root);
+
+  _func_params.resize(_nargs);
 }
 
 void
@@ -234,7 +284,7 @@ void
 DerivativeParsedMaterialHelper::computeQpProperties()
 {
   // fill the parameter vector
-  for (unsigned int i = 0; i < _nargs / 10; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
     _func_params[i] = getValue(i);
 
   // set function value
