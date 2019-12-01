@@ -657,24 +657,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     input_file = _input_files[_first_local_app + i];
 
-  std::ostringstream output_base;
-
-  // Create an output base by taking the output base of the master problem and appending
-  // the name of the multiapp + a number to it
-  if (!_app.getOutputFileBase().empty())
-    output_base << _app.getOutputFileBase() + "_";
-  else
-  {
-    std::string base = _app.getFileName();
-    size_t pos = base.find_last_of('.');
-    output_base << base.substr(0, pos) + "_out_";
-  }
-
-  // Append the sub app name to the output file base
-  output_base << multiapp_name.str();
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
-  app->setOutputFileBase(output_base.str());
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());
@@ -691,6 +675,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
+  if (app->getOutputFileBase().empty())
+  {
+    // Create an output base by taking the output base of the master problem and appending
+    // the name of the multiapp + a number to it
+    std::string output_base;
+    if (_app.outputFileBaseSetByUser())
+      output_base = _app.getOutputFileBase() + "_" + multiapp_name.str();
+    else
+      output_base = _app.getOutputFileBase() + "_out_" + multiapp_name.str();
+
+    app->setOutputFileBase(output_base);
+  }
   preRunInputFile();
   app->runInputFile();
 

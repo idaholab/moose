@@ -63,10 +63,18 @@ FileOutput::FileOutput(const InputParameters & parameters)
     if (!_file_base.empty() && _file_base[0] == '/')
       mooseError("absolute paths not allowed in output 'file_base' param");
   }
-  else if (getParam<bool>("_built_by_moose"))
-    _file_base = getOutputFileBase(_app);
   else
-    _file_base = getOutputFileBase(_app, "_" + name());
+  {
+    if (getParam<bool>("_built_by_moose"))
+    {
+      if (_app.outputFileBaseSetByUser())
+        _file_base = _app.getOutputFileBase();
+      else
+        _file_base = _app.getOutputFileBase() + "_out";
+    }
+    else
+      _file_base = _app.getOutputFileBase() + "_" + name();
+  }
 
   // Append the date/time
   if (getParam<bool>("append_date"))

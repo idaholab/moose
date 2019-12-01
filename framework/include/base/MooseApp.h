@@ -178,12 +178,19 @@ public:
   void setOutputFileBase(const std::string & output_file_base)
   {
     _output_file_base = output_file_base;
+    _file_base_set_by_user = true;
   }
 
   /**
-   * Override the selection of the output file base name.
+   * Get the output file base name.
    */
   std::string getOutputFileBase() const;
+
+  /**
+   * Whether or not setOutputFileBase is called or this app has file_base
+   * in the Outputs input block.
+   */
+  bool outputFileBaseSetByUser() const { return _file_base_set_by_user; }
 
   /**
    * Tell the app to output in a specific position.
@@ -246,6 +253,8 @@ public:
 
   /**
    * Return the filename that was parsed
+   * Note: When stripLeadingPath is false, this function returns the same name as
+   *       getInputFileName() method when the input file is not a link.
    */
   std::string getFileName(bool stripLeadingPath = true) const;
 
@@ -801,6 +810,9 @@ protected:
 
   /// The output file basename
   std::string _output_file_base;
+
+  /// Whether or not file base is set through input or setOutputFileBase by MultiApp
+  bool _file_base_set_by_user;
 
   /// Whether or not an output position has been set for this app
   bool _output_position_set;
