@@ -42,7 +42,6 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  const dof_id_type max_node_id = mesh->max_node_id();
   const unique_id_type n_total_nodes = mesh->parallel_n_nodes();
 
   // initialize the node to element map
