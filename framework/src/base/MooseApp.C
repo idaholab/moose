@@ -818,6 +818,9 @@ MooseApp::setupOptions()
         std::string base = getInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
+        // Note: we did not append "_out" in the file base here because we do not want to
+        //       have it in betwen the input file name and the object name for Output/*
+        //       syntax.
       }
       // default file base for multiapps is set by MultiApp
     }
@@ -1064,12 +1067,13 @@ MooseApp::getCheckpointDirectories() const
   // Storage for the directory names
   std::list<std::string> checkpoint_dirs;
 
+  // Add the directories added with Outputs/checkpoint=true input syntax
   if (outputFileBaseSetByUser())
     checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
   else
     checkpoint_dirs.push_back(getOutputFileBase() + "_out_cp");
 
-  // Add the directories from any existing checkpoint objects
+  // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
   for (const auto & action : actions)
   {
@@ -1079,19 +1083,8 @@ MooseApp::getCheckpointDirectories() const
       continue;
 
     const InputParameters & params = moose_object_action->getObjectParams();
-
-    // Loop through the actions and add the necessary directories to the list to check
     if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
-    {
-      if (params.isParamValid("file_base"))
-        checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
-      else
-      {
-        std::ostringstream oss;
-        oss << "_" << action->name() << "_cp";
-        checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
-      }
-    }
+      checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
 
   return checkpoint_dirs;

@@ -55,17 +55,6 @@ public:
    */
   unsigned int getFileNumber();
 
-  /**
-   * Returns the default output file base
-   * @return The name of the input file with '_out' append to the end
-   *
-   * This method is static to allow for outside objects to call it, namely
-   * CommonOutputAction::setRecoverFileBase().
-   *
-   * @see CommonOutputAction::setRecoverFileBase()
-   */
-  static std::string getOutputFileBase(const MooseApp & app, std::string suffix = "_out");
-
 protected:
   /**
    * Checks if the output method should be executed
@@ -96,4 +85,3 @@ private:
   // OutputWarehouse::merge)
   friend class OutputWarehouse;
 };
-

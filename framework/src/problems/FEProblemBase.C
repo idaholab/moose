@@ -6359,6 +6359,23 @@ FEProblemBase::addOutput(const std::string & object_type,
   if (common)
     parameters.applyParameters(*common, exclude);
 
+  // If file_base parameter has not been set with the common parameters, we inquire app to set it
+  // here
+  if (parameters.have_parameter<std::string>("file_base") &&
+      !parameters.isParamSetByUser("file_base"))
+  {
+    if (parameters.get<bool>("_built_by_moose"))
+    {
+      if (_app.outputFileBaseSetByUser())
+        // for multiapp case
+        parameters.set<std::string>("file_base") = _app.getOutputFileBase();
+      else
+        parameters.set<std::string>("file_base") = _app.getOutputFileBase() + "_out";
+    }
+    else
+      parameters.set<std::string>("file_base") = _app.getOutputFileBase() + "_" + object_name;
+  }
+
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")
     parameters.set<bool>("_binary") = true;
