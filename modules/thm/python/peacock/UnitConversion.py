@@ -302,10 +302,57 @@ class PressureGroup(UnitGroup):
         return "Pressure"
 
 
+# Speed
+
+class FootPerSecondUnit(Unit):
+
+    def name(self):
+        return "Foot per second"
+
+    def unit(self):
+        return [ "ft/s" ]
+
+    def to(self, value):
+        return value * 0.3048
+
+    def frm(self, value):
+        return value / 0.3048
+
+
+class MeterPerSecondUnit(Unit):
+
+    def name(self):
+        return "Meter per second"
+
+    def unit(self):
+        return [ "m/s" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class SpeedGroup(UnitGroup):
+    """
+    Group of speed units
+    """
+    def __init__(self):
+        super(SpeedGroup, self).__init__([
+        FootPerSecondUnit(),
+        MeterPerSecondUnit()
+    ])
+
+    def name(self):
+        return "Speed"
+
+
 # Unit groups
 
 GROUPS = [
     TemperatureGroup(),
     LengthGroup(),
-    PressureGroup()
+    PressureGroup(),
+    SpeedGroup()
 ]

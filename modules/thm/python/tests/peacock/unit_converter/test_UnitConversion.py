@@ -102,5 +102,22 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(pressure.name() == 'Pressure')
 
 
+    def testSpeed(self):
+        ftps = FootPerSecondUnit()
+        self.assertTrue(ftps.name() == 'Foot per second')
+        self.assertTrue(ftps.unit() == [ "ft/s" ])
+        self.assertAlmostEqual(ftps.to(1.), 0.3048, places = 6)
+        self.assertAlmostEqual(ftps.frm(0.3048), 1., places = 6)
+
+        mps = MeterPerSecondUnit()
+        self.assertTrue(mps.name() == 'Meter per second')
+        self.assertTrue(mps.unit() == [ "m/s" ])
+        self.assertAlmostEqual(mps.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(mps.frm(123.456), 123.456, places = 6)
+
+        speed = SpeedGroup()
+        self.assertTrue(speed.name() == 'Speed')
+
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)
