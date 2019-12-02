@@ -226,6 +226,20 @@ class LengthGroup(UnitGroup):
 
 # Pressure units
 
+class PsiUnit(Unit):
+
+    def name(self):
+        return "Pound-force per square inch"
+
+    def unit(self):
+        return [ "Psi", "psi", "psia" ]
+
+    def to(self, value):
+        return value * 6894.757
+
+    def frm(self, value):
+        return value / 6894.757
+
 class PascalUnit(Unit):
 
     def name(self):
@@ -292,6 +306,7 @@ class PressureGroup(UnitGroup):
     """
     def __init__(self):
         super(PressureGroup, self).__init__([
+        PsiUnit(),
         BarUnit(),
         MegapascalUnit(),
         KilopascalUnit(),

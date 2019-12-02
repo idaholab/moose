@@ -98,6 +98,12 @@ class TestUnitConversion(unittest.TestCase):
         self.assertAlmostEqual(bar.to(0.123456), 12345.6, places = 6)
         self.assertAlmostEqual(bar.frm(12345.6), 0.123456, places = 6)
 
+        psi = PsiUnit()
+        self.assertTrue(psi.name() == 'Pound-force per square inch')
+        self.assertTrue(psi.unit() == [ "Psi", "psi", "psia" ])
+        self.assertAlmostEqual(psi.to(1.), 6894.757, places = 6)
+        self.assertAlmostEqual(psi.frm(6894.757), 1.0, places = 6)
+
         pressure = PressureGroup()
         self.assertTrue(pressure.name() == 'Pressure')
 
