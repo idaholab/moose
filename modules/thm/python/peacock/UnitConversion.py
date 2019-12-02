@@ -348,11 +348,74 @@ class SpeedGroup(UnitGroup):
         return "Speed"
 
 
+# Volume group
+
+class CubicMeterUnit(Unit):
+
+    def name(self):
+        return "Cubic meter"
+
+    def unit(self):
+        return [ "m^3" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class USGallonUnit(Unit):
+
+    def name(self):
+        return "US Gallon"
+
+    def unit(self):
+        return [ "gal" ]
+
+    def to(self, value):
+        return value * 0.00378541
+
+    def frm(self, value):
+        return value / 0.00378541
+
+
+class LiterUnit(Unit):
+
+    def name(self):
+        return "Liter"
+
+    def unit(self):
+        return [ "l" ]
+
+    def to(self, value):
+        return value / 1000
+
+    def frm(self, value):
+        return value * 1000
+
+
+class VolumeGroup(UnitGroup):
+    """
+    Group of volume units
+    """
+    def __init__(self):
+        super(VolumeGroup, self).__init__([
+        CubicMeterUnit(),
+        USGallonUnit(),
+        LiterUnit()
+    ])
+
+    def name(self):
+        return "Volume"
+
+
 # Unit groups
 
 GROUPS = [
     TemperatureGroup(),
     LengthGroup(),
     PressureGroup(),
-    SpeedGroup()
+    SpeedGroup(),
+    VolumeGroup()
 ]

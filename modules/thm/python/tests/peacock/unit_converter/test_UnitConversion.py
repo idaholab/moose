@@ -119,5 +119,28 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(speed.name() == 'Speed')
 
 
+    def testVolume(self):
+        cubm = CubicMeterUnit()
+        self.assertTrue(cubm.name() == 'Cubic meter')
+        self.assertTrue(cubm.unit() == [ "m^3" ])
+        self.assertAlmostEqual(cubm.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(cubm.frm(123.456), 123.456, places = 6)
+
+        gal = USGallonUnit()
+        self.assertTrue(gal.name() == 'US Gallon')
+        self.assertTrue(gal.unit() == [ "gal" ])
+        self.assertAlmostEqual(gal.to(1.), 0.00378541, places = 6)
+        self.assertAlmostEqual(gal.frm(0.00378541), 1., places = 6)
+
+        liter = LiterUnit()
+        self.assertTrue(liter.name() == 'Liter')
+        self.assertTrue(liter.unit() == [ "l" ])
+        self.assertAlmostEqual(liter.to(1000.), 1, places = 6)
+        self.assertAlmostEqual(liter.frm(1), 1000., places = 6)
+
+        volume = VolumeGroup()
+        self.assertTrue(volume.name() == 'Volume')
+
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)
