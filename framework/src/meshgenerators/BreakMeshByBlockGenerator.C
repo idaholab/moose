@@ -42,144 +42,108 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  const dof_id_type max_node_id = mesh->max_node_id();
+  const unique_id_type n_total_nodes = mesh->parallel_n_nodes();
+
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
     for (unsigned int n = 0; n < elem->n_nodes(); n++)
       node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
-  const dof_id_type max_node_id = mesh->max_node_id();
-#ifdef LIBMESH_ENABLE_UNIQUE_ID
-  const unique_id_type max_unique_id = mesh->parallel_max_unique_id();
-#endif
-  const bool is_replicated = mesh->is_replicated();
+  // construct the node to domain map <node, subdomain_id_type>
+  std::map<dof_id_type, std::set<subdomain_id_type>> node_to_domains_map;
+  std::map<dof_id_type, unsigned int> node_multiplicity;
+  std::set<subdomain_id_type> connected_blocks;
+  unsigned int n_new_nodes = 0;
 
-  for (auto node_it = node_to_elem_map.begin(); node_it != node_to_elem_map.end(); ++node_it)
+  for (const auto & node_it : node_to_elem_map)
   {
-    const dof_id_type current_node_id = node_it->first;
+    const dof_id_type current_node_id = node_it.first;
     const Node * current_node = mesh->node_ptr(current_node_id);
-
     if (current_node != nullptr)
     {
-      // find node multiplicity
-      std::set<subdomain_id_type> connected_blocks;
-      for (auto elem_id = node_it->second.begin(); elem_id != node_it->second.end(); elem_id++)
+      // find connected blocks
+      connected_blocks.clear();
+      for (const auto & elem_id : node_it.second)
       {
-        const Elem * current_elem = mesh->elem_ptr(*elem_id);
+        const Elem * current_elem = mesh->elem_ptr(elem_id);
         connected_blocks.insert(current_elem->subdomain_id());
       }
-
-      unsigned int node_multiplicity = connected_blocks.size();
-
-      // check if current_node need to be duplicated
-      if (node_multiplicity > 1)
+      if (connected_blocks.size() > 1) // add set do node to domain map
       {
-        // retrieve connected elements from the map
-        const std::vector<dof_id_type> & connected_elems = node_it->second;
+        connected_blocks.erase(connected_blocks.begin());
+        node_to_domains_map[current_node_id] = connected_blocks;
+        node_multiplicity[current_node_id] = connected_blocks.size();
+        n_new_nodes += connected_blocks.size();
+      }
+    }
+  }
 
-        // find reference_subdomain_id (e.g. the subdomain with lower id)
-        auto subdomain_it = connected_blocks.begin();
-        subdomain_id_type reference_subdomain_id = *subdomain_it;
+  // if the mesh is distributed do some communication to merge the node_to_domains_map and
+  // recalculate node_multiplicity
 
-        // multiplicity counter to keep track of how many nodes we added
-        unsigned int multiplicity_counter = node_multiplicity;
-        for (auto elem_id : connected_elems)
-        {
-          // all the duplicate nodes are added and assigned
-          if (multiplicity_counter == 0)
-            break;
+  // assign unique new node ids based on domain id
+  std::map<dof_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> new_node_id_map;
+  dof_id_type node_counter = n_total_nodes;
+  for (auto node_it = node_to_domains_map.begin(); node_it != node_to_domains_map.end(); ++node_it)
+  {
+    dof_id_type original_node_id = node_it->first;
 
-          Elem * current_elem = mesh->elem_ptr(elem_id);
-          if (current_elem->subdomain_id() != reference_subdomain_id)
+    for (auto sub_it : node_it->second)
+    {
+      new_node_id_map[original_node_id].push_back(std::make_pair(sub_it, node_counter));
+      node_counter++;
+    }
+  } // done creating new unique node ids
+
+  // start adding nodes giving the new identified ids
+  for (auto node_it = new_node_id_map.begin(); node_it != new_node_id_map.end(); ++node_it)
+  {
+    dof_id_type old_node_id = node_it->first;
+    const Node * old_node = mesh->node_ptr(old_node_id);
+    auto connected_elem = node_to_elem_map.find(old_node_id);
+    std::vector<boundary_id_type> node_boundary_ids;
+    mesh->boundary_info->boundary_ids(old_node, node_boundary_ids);
+    for (auto sub_node : node_it->second)
+    {
+      Node * new_node = nullptr;
+      new_node = Node::build(*old_node, sub_node.second).release();
+      new_node->processor_id() = old_node->processor_id();
+      mesh->add_node(new_node);
+
+      mesh->boundary_info->add_node(new_node, node_boundary_ids);
+      for (auto elem_id : connected_elem->second)
+      {
+        Elem * elem = mesh->elem_ptr(elem_id);
+        if (elem->subdomain_id() == sub_node.first)
+          for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
+            if (elem->node_id(node_id) == old_node_id)
+              elem->set_node(node_id) = new_node;
+      }
+    }
+
+    // create blocks pair and assign element side to new interface boundary map
+    for (auto elem_id : connected_elem->second)
+      for (auto connected_elem_id : connected_elem->second)
+      {
+        Elem * current_elem_pt = mesh->elem_ptr(elem_id);
+        Elem * connected_elem_pt = mesh->elem_ptr(connected_elem_id);
+
+        if (current_elem_pt != connected_elem_pt &&
+            current_elem_pt->subdomain_id() < connected_elem_pt->subdomain_id())
+          if (current_elem_pt->has_neighbor(connected_elem_pt))
           {
-            // assign the newly added node to current_elem
-            Node * new_node = nullptr;
+            std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
+                std::make_pair(current_elem_pt->subdomain_id(), connected_elem_pt->subdomain_id());
 
-            std::vector<boundary_id_type> node_boundary_ids;
-
-            for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
-              if (current_elem->node_id(node_id) ==
-                  current_node->id()) // if current node == node on element
-              {
-                // add new node
-                new_node = Node::build(*current_node, DofObject::invalid_id).release();
-                new_node->processor_id() = current_node->processor_id();
-                if (!is_replicated)
-                {
-                  const dof_id_type new_node_id =
-                      (current_elem->subdomain_id() + 1) * max_node_id + current_node->id();
-                  new_node->set_id(new_node_id);
-#ifdef LIBMESH_ENABLE_UNIQUE_ID
-                  const unique_id_type new_unique_id =
-                      (current_elem->subdomain_id() + 1) * max_unique_id +
-                      current_node->unique_id();
-                  new_node->set_unique_id() = new_unique_id;
-#endif
-                }
-                mesh->add_node(new_node);
-
-                // Add boundary info to the new node
-                mesh->boundary_info->boundary_ids(current_node, node_boundary_ids);
-                mesh->boundary_info->add_node(new_node, node_boundary_ids);
-
-                multiplicity_counter--; // node created, update multiplicity counter
-
-                current_elem->set_node(node_id) = new_node;
-                break; // ones the proper node has been fixed in one element we can break the
-                       // loop
-              }
-
-            for (auto connected_elem_id : connected_elems)
-            {
-              Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
-
-              // Assign the newly added node to other connected elements with the same block_id
-              if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
-                  connected_elem != current_elem)
-              {
-                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
-                  if (connected_elem->node_id(node_id) ==
-                      current_node->id()) // if current node == node on element
-                  {
-                    connected_elem->set_node(node_id) = new_node;
-                    break;
-                  }
-              }
-            }
+            _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
+                current_elem_pt->id(), current_elem_pt->which_neighbor_am_i(connected_elem_pt)));
           }
-        }
-
-        // create blocks pair and assign element side to new interface boundary map
-        for (auto elem_id : connected_elems)
-        {
-          for (auto connected_elem_id : connected_elems)
-          {
-            Elem * current_elem = mesh->elem_ptr(elem_id);
-            Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
-
-            if (current_elem != connected_elem &&
-                current_elem->subdomain_id() < connected_elem->subdomain_id())
-            {
-              if (current_elem->has_neighbor(connected_elem))
-              {
-                std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
-                    std::make_pair(current_elem->subdomain_id(), connected_elem->subdomain_id());
-
-                _new_boundary_sides_list.insert(blocks_pair);
-                _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
-                    current_elem->id(), current_elem->which_neighbor_am_i(connected_elem)));
-              }
-            }
-          }
-        }
-
-      } // end multiplicity check
-    }   // end loop over nodes
-  }     // end nodeptr check
+      }
+  }
 
   addInterfaceBoundary(*mesh);
-  // Find neighbors, etc.
-  mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
@@ -188,36 +152,27 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
+  boundary_id_type boundaryID = findFreeBoundaryId(mesh);
   std::string boundaryName = _interface_name;
 
-  std::set<boundary_id_type> ids = boundary_info.get_boundary_ids();
-  boundary_id_type boundaryID = *ids.rbegin() + 1;
-
-  // Make sure the new is the same on every processor
-  mesh.comm().set_union(_new_boundary_sides_list);
-  mesh.comm().max(boundaryID);
-
   // loop over boundary sides
-  for (auto & boundary_side : _new_boundary_sides_list)
+  for (auto & boundary_side_map : _new_boundary_sides_map)
   {
 
     // find the appropriate boundary name and id
     //  given master and slave block ID
     if (_split_interface)
-      findBoundaryNameAndInd(
-          mesh, boundary_side.first, boundary_side.second, boundaryName, boundaryID, boundary_info);
+      findBoundaryNameAndInd(mesh,
+                             boundary_side_map.first.first,
+                             boundary_side_map.first.second,
+                             boundaryName,
+                             boundaryID,
+                             boundary_info);
     else
       boundary_info.sideset_name(boundaryID) = boundaryName;
 
-    libmesh_assert(mesh.comm().verify(boundaryID));
-    libmesh_assert(mesh.comm().verify(boundaryName));
-
     // loop over all the side belonging to each pair and add it to the proper interface
-    auto boundary_side_map = _new_boundary_sides_map.find(boundary_side);
-    if (boundary_side_map != _new_boundary_sides_map.end())
-      for (auto & element_side : boundary_side_map->second)
-        boundary_info.add_side(element_side.first, element_side.second, boundaryID);
-
-    ++boundaryID;
+    for (auto & element_side : boundary_side_map.second)
+      boundary_info.add_side(element_side.first, element_side.second, boundaryID);
   }
 }
