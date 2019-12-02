@@ -29,16 +29,6 @@ QuadratureLocatorTestMaterial::validParams()
                                         "The boundary on the other side of a gap.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addRelationshipManager(
-      "FaceFaceRelationshipManager",
-      Moose::RelationshipManagerType::GEOMETRIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-        rm_params.set<BoundaryName>("slave_boundary") =
-            obj_params.get<std::vector<BoundaryName>>("boundary")[0];
-        rm_params.set<BoundaryName>("master_boundary") =
-            obj_params.get<BoundaryName>("paired_boundary");
-      });
   return params;
 }
 
