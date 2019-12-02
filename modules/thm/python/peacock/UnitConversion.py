@@ -410,6 +410,68 @@ class VolumeGroup(UnitGroup):
         return "Volume"
 
 
+# Mass group
+
+class KilogramUnit(Unit):
+
+    def name(self):
+        return "Kilogram"
+
+    def unit(self):
+        return [ "kg" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class GramUnit(Unit):
+
+    def name(self):
+        return "Gram"
+
+    def unit(self):
+        return [ "g" ]
+
+    def to(self, value):
+        return value / 1000
+
+    def frm(self, value):
+        return value * 1000
+
+
+class PoundUnit(Unit):
+
+    def name(self):
+        return "Pound"
+
+    def unit(self):
+        return [ "lbs" ]
+
+    def to(self, value):
+        return value * 0.453592
+
+    def frm(self, value):
+        return value / 0.453592
+
+
+class MassGroup(UnitGroup):
+    """
+    Group of mass units
+    """
+    def __init__(self):
+        super(MassGroup, self).__init__([
+        KilogramUnit(),
+        GramUnit(),
+        PoundUnit()
+    ])
+
+    def name(self):
+        return "Mass"
+
+
 # Unit groups
 
 GROUPS = [
@@ -417,5 +479,6 @@ GROUPS = [
     LengthGroup(),
     PressureGroup(),
     SpeedGroup(),
-    VolumeGroup()
+    VolumeGroup(),
+    MassGroup()
 ]

@@ -142,5 +142,28 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(volume.name() == 'Volume')
 
 
+    def testMass(self):
+        kg = KilogramUnit()
+        self.assertTrue(kg.name() == 'Kilogram')
+        self.assertTrue(kg.unit() == [ "kg" ])
+        self.assertAlmostEqual(kg.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(kg.frm(123.456), 123.456, places = 6)
+
+        g = GramUnit()
+        self.assertTrue(g.name() == 'Gram')
+        self.assertTrue(g.unit() == [ "g" ])
+        self.assertAlmostEqual(g.to(123.456), 0.123456, places = 6)
+        self.assertAlmostEqual(g.frm(0.123456), 123.456, places = 6)
+
+        lbs = PoundUnit()
+        self.assertTrue(lbs.name() == 'Pound')
+        self.assertTrue(lbs.unit() == [ "lbs" ])
+        self.assertAlmostEqual(lbs.to(1.), 0.453592, places = 6)
+        self.assertAlmostEqual(lbs.frm(0.453592), 1., places = 6)
+
+        mass = MassGroup()
+        self.assertTrue(mass.name() == 'Mass')
+
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)
