@@ -31,54 +31,11 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_xx stress_yy stress_zz'
   [../]
 []
 
@@ -101,15 +58,17 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
+    type = ComputeIsotropicElasticityTensor
     block = '1 2 3'
-
-    disp_r = disp_x
-
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2 3'
+  [../]
 []
+
 
 [Executioner]
   type = Transient
@@ -132,6 +91,5 @@
 []
 
 [Outputs]
-  file_base = out_rspherical
   exodus = true
 []
