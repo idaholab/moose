@@ -25,7 +25,7 @@ MortarConstraintBase::validParams()
   params.addRequiredParam<SubdomainName>("master_subdomain", "The name of the master subdomain.");
   params.addRequiredParam<SubdomainName>("slave_subdomain", "The name of the slave subdomain.");
   params.addRelationshipManager(
-      "AugmentSparsityOnInterface",
+      "MortarRelationshipManager",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");

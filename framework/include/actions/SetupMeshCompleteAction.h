@@ -23,10 +23,14 @@ public:
 
   SetupMeshCompleteAction(InputParameters params);
 
-  bool completeSetup(MooseMesh * mesh);
+  /**
+   * Complete setup of the mesh
+   * @param mesh The mesh for which to complete setup
+   * @param safe_to_remove Whether it's safe to remove remote elements
+   */
+  bool completeSetup(MooseMesh * mesh, bool safe_to_remove = true);
 
   virtual void act() override;
 
   PerfID _uniform_refine_timer;
 };
-

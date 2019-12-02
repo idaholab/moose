@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // App includes
-#include "AugmentSparsityOnInterface.h"
+#include "MortarRelationshipManager.h"
 #include "Executioner.h"
 #include "FEProblemBase.h"
 #include "MooseApp.h"
@@ -16,14 +16,14 @@
 // libMesh includes
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", AugmentSparsityOnInterface);
+registerMooseObject("MooseApp", MortarRelationshipManager);
 
 using namespace libMesh;
 
-defineLegacyParams(AugmentSparsityOnInterface);
+defineLegacyParams(MortarRelationshipManager);
 
 InputParameters
-AugmentSparsityOnInterface::validParams()
+MortarRelationshipManager::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<BoundaryName>("master_boundary",
@@ -37,7 +37,7 @@ AugmentSparsityOnInterface::validParams()
   return params;
 }
 
-AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & params)
+MortarRelationshipManager::MortarRelationshipManager(const InputParameters & params)
   : RelationshipManager(params),
     _master_boundary_name(getParam<BoundaryName>("master_boundary")),
     _slave_boundary_name(getParam<BoundaryName>("slave_boundary")),
@@ -47,23 +47,23 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
 }
 
 void
-AugmentSparsityOnInterface::mesh_reinit()
+MortarRelationshipManager::mesh_reinit()
 {
 }
 
 std::string
-AugmentSparsityOnInterface::getInfo() const
+MortarRelationshipManager::getInfo() const
 {
   std::ostringstream oss;
-  oss << "AugmentSparsityOnInterface";
+  oss << "MortarRelationshipManager";
   return oss.str();
 }
 
 void
-AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator &,
-                                       const MeshBase::const_element_iterator &,
-                                       processor_id_type p,
-                                       map_type & coupled_elements)
+MortarRelationshipManager::operator()(const MeshBase::const_element_iterator &,
+                                      const MeshBase::const_element_iterator &,
+                                      processor_id_type p,
+                                      map_type & coupled_elements)
 {
   const CouplingMatrix * const null_mat = libmesh_nullptr;
 
@@ -78,16 +78,6 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator &,
   // Build up the boundary information so we know which higher-dimensional elements are on the
   // mortar interface
   std::set<dof_id_type> higher_d_elems_to_ghost;
-
-  std::vector<dof_id_type> elem_ids;
-  std::vector<Point> elem_centroids;
-  std::vector<processor_id_type> elem_proc_ids;
-  for (const auto & elem : libmesh_mesh.active_element_ptr_range())
-  {
-    elem_ids.push_back(elem->id());
-    elem_centroids.push_back(elem->centroid());
-    elem_proc_ids.push_back(elem->processor_id());
-  }
 
   auto side_list = libmesh_mesh.get_boundary_info().build_active_side_list();
   for (auto & tuple : side_list)
@@ -106,9 +96,9 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator &,
 }
 
 bool
-AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
+MortarRelationshipManager::operator==(const RelationshipManager & other) const
 {
-  if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
+  if (auto asoi = dynamic_cast<const MortarRelationshipManager *>(&other))
   {
     if (_master_boundary_name == asoi->_master_boundary_name &&
         _slave_boundary_name == asoi->_slave_boundary_name &&

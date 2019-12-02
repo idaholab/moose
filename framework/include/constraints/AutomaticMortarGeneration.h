@@ -230,7 +230,7 @@ public:
   // the mesh. Used in plotting convergence data.
   Real h_max;
 
-  // Used by the AugmentSparsityOnInterface functor to determine
+  // Used by the MortarRelationshipManager to determine
   // whether a given Elem is coupled to any others across the gap, and
   // to explicitly set up the dependence between interior_parent()
   // elements on the slave side and their lower-dimensional sides

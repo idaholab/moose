@@ -456,7 +456,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from slave elements to the master Elems which they are
   // coupled to and vice-versa. This is used in the
-  // AugmentSparsityOnInterface functor to determine whether a given
+  // MortarRelationshipManager to determine whether a given
   // slave Elem is coupled across the mortar interface to a master
   // element.
   for (const auto & pr : msm_elem_to_info)

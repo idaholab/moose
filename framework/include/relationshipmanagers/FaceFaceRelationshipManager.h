@@ -9,11 +9,9 @@
 
 #pragma once
 
-// App includes
 #include "AutomaticMortarGeneration.h"
 #include "RelationshipManager.h"
 
-// libMesh includes
 #include "libmesh/mesh_base.h"
 
 using libMesh::boundary_id_type;
@@ -22,15 +20,15 @@ using libMesh::GhostingFunctor;
 using libMesh::MeshBase;
 using libMesh::processor_id_type;
 
-class AugmentSparsityOnInterface;
+class FaceFaceRelationshipManager;
 
 template <>
-InputParameters validParams<AugmentSparsityOnInterface>();
+InputParameters validParams<FaceFaceRelationshipManager>();
 
-class AugmentSparsityOnInterface : public RelationshipManager
+class FaceFaceRelationshipManager : public RelationshipManager
 {
 public:
-  AugmentSparsityOnInterface(const InputParameters &);
+  FaceFaceRelationshipManager(const InputParameters &);
 
   static InputParameters validParams();
 
@@ -52,6 +50,4 @@ protected:
 
   BoundaryName _master_boundary_name;
   BoundaryName _slave_boundary_name;
-  SubdomainName _master_subdomain_name;
-  SubdomainName _slave_subdomain_name;
 };

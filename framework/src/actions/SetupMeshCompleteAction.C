@@ -41,7 +41,7 @@ SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params)
 }
 
 bool
-SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
+SetupMeshCompleteAction::completeSetup(MooseMesh * mesh, bool safe_to_remove)
 {
   bool prepared = mesh->prepared();
 
@@ -51,8 +51,11 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
   bool skip_partitioning = mesh_base.skip_partitioning();
 
   // We may have prevented remote element deletion during the mesh generation process. If we did,
-  // then we should prepare_for_use one more time, this time deleting remote elements
-  if (mesh->isDistributedMesh() && !mesh_base.allow_remote_element_removal())
+  // then we should prepare_for_use one more time, this time deleting remote elements. Note that if
+  // we have a displaced mesh, we cannot delete remote elements until after the problem and system
+  // objects have been created because the proxy relationship managers rely on them; such a case is
+  // protected by the safe_to_remove flag
+  if (mesh->isDistributedMesh() && !mesh_base.allow_remote_element_removal() && safe_to_remove)
   {
     mesh_base.allow_remote_element_removal(true);
 
@@ -129,21 +132,23 @@ SetupMeshCompleteAction::act()
       }
     }
   }
-  else if (_current_task == "delete_remote_elements_post_equation_systems_init")
-  {
-    if (_mesh->needsRemoteElemDeletion())
-    {
-      _mesh->getMesh().delete_remote_elements();
-      if (_displaced_mesh)
-        _displaced_mesh->getMesh().delete_remote_elements();
-    }
-  }
   else
   {
+    bool safe_to_remove = false;
+    if (_current_task == "delete_remote_elements_post_equation_systems_init")
+    {
+      if (!_mesh->needsRemoteElemDeletion())
+        return;
+
+      safe_to_remove = true;
+    }
+    else if (!_displaced_mesh)
+      safe_to_remove = true;
+
     // Prepare the mesh (may occur multiple times)
-    completeSetup(_mesh.get());
+    completeSetup(_mesh.get(), safe_to_remove);
 
     if (_displaced_mesh)
-      completeSetup(_displaced_mesh.get());
+      completeSetup(_displaced_mesh.get(), safe_to_remove);
   }
 }
