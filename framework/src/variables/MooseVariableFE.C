@@ -661,6 +661,13 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
 
 template <typename OutputType>
 void
+MooseVariableFE<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+{
+  _element_data->setDofValue(value, index);
+}
+
+template <typename OutputType>
+void
 MooseVariableFE<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   _element_data->setDofValues(values);

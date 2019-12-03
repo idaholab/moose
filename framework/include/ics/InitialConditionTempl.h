@@ -59,6 +59,7 @@ public:
   virtual MooseVariableFEBase & variable() override { return _var; }
 
   virtual void compute() override;
+
   virtual void computeNodal(const Point & p) override;
 
   /**

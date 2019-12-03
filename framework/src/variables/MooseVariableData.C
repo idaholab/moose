@@ -1442,6 +1442,20 @@ MooseVariableData<RealVectorValue>::setNodalValue(const RealVectorValue & value,
 
 template <typename OutputType>
 void
+MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+{
+  _dof_values[index] = value;
+  _has_dof_values = true;
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+  {
+    _u[qp] = (*_phi)[0][qp] * _dof_values[0];
+    for (unsigned int i = 1; i < _dof_values.size(); i++)
+      _u[qp] += (*_phi)[i][qp] * _dof_values[i];
+  }
+}
+
+template <typename OutputType>
+void
 MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   for (unsigned int i = 0; i < values.size(); i++)
