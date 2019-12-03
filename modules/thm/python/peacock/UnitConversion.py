@@ -317,6 +317,85 @@ class PressureGroup(UnitGroup):
         return "Pressure"
 
 
+
+# Mass flow rate units
+
+class KilogramPerSecondUnit(Unit):
+
+    def name(self):
+        return "Kilogram per second"
+
+    def unit(self):
+        return [ "kg/s", "kg/sec" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class PoundPerSecondUnit(Unit):
+
+    def name(self):
+        return "Pound per second"
+
+    def unit(self):
+        return [ "lb/s", "lbm/s", "lb/sec", "lbm/sec" ]
+
+    def to(self, value):
+        return value * 0.45359237
+
+    def frm(self, value):
+        return value / 0.45359237
+
+
+class MegapoundPerHourlUnit(Unit):
+
+    def name(self):
+        return "Megapound per hour"
+
+    def unit(self):
+        return [ "Mlb/hr", "Mlbm/hr", "Mlbm/h", "Mlb/h" ]
+
+    def to(self, value):
+        return value * 1000000 * 0.45359237 / 3600
+
+    def frm(self, value):
+        return value * 3600 / (1000000 * 0.45359237)
+
+
+class PoundPerMinutelUnit(Unit):
+
+    def name(self):
+        return "Pound per minute"
+
+    def unit(self):
+        return [ "lb/min", "lbm/min" ]
+
+    def to(self, value):
+        return value * 0.45359237 / 60
+
+    def frm(self, value):
+        return value * 60 /  0.45359237
+
+
+class MassFlowRateGroup(UnitGroup):
+    """
+    Group of mass flow rate units
+    """
+    def __init__(self):
+        super(MassFlowRateGroup, self).__init__([
+        PoundPerSecondUnit(),
+        PoundPerMinutelUnit(),
+        MegapoundPerHourlUnit(),
+        KilogramPerSecondUnit()
+    ])
+
+    def name(self):
+        return "Mass flow rate"
+
+
 # Speed
 
 class FootPerSecondUnit(Unit):
@@ -495,5 +574,6 @@ GROUPS = [
     PressureGroup(),
     SpeedGroup(),
     VolumeGroup(),
-    MassGroup()
+    MassGroup(),
+    MassFlowRateGroup()
 ]

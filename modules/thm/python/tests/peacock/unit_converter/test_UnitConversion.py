@@ -171,5 +171,34 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(mass.name() == 'Mass')
 
 
+    def testMassFlowRate(self):
+        kgpersecond = KilogramPerSecondUnit()
+        self.assertTrue(kgpersecond.name() == 'Kilogram per second')
+        self.assertTrue(kgpersecond.unit() == [ "kg/s", "kg/sec" ])
+        self.assertAlmostEqual(kgpersecond.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(kgpersecond.frm(123.456), 123.456, places = 6)
+
+        lbpersecond = PoundPerSecondUnit()
+        self.assertTrue(lbpersecond.name() == 'Pound per second')
+        self.assertTrue(lbpersecond.unit() == [ "lb/s", "lbm/s", "lb/sec", "lbm/sec" ])
+        self.assertAlmostEqual(lbpersecond.to(1.), 0.45359237, places = 6)
+        self.assertAlmostEqual(lbpersecond.frm(0.45359237), 1., places = 6)
+
+        megalbperhour = MegapoundPerHourlUnit()
+        self.assertTrue(megalbperhour.name() == 'Megapound per hour')
+        self.assertTrue(megalbperhour.unit() == [ "Mlb/hr", "Mlbm/hr", "Mlbm/h", "Mlb/h" ])
+        self.assertAlmostEqual(megalbperhour.to(1.), 125.9978805556, places = 6)
+        self.assertAlmostEqual(megalbperhour.frm(125.9978805556), 1., places = 6)
+
+        lbperminute = PoundPerMinutelUnit()
+        self.assertTrue(lbperminute.name() == 'Pound per minute')
+        self.assertTrue(lbperminute.unit() == [ "lb/min", "lbm/min" ])
+        self.assertAlmostEqual(lbperminute.to(1.), 0.007559872833, places = 6)
+        self.assertAlmostEqual(lbperminute.frm(0.007559872833), 1., places = 6)
+
+        mdot = MassFlowRateGroup()
+        self.assertTrue(mdot.name() == 'Mass flow rate')
+
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)
