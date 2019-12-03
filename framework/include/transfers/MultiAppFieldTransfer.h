@@ -13,13 +13,17 @@
 
 // Forward declarations
 class MultiAppFieldTransfer;
+class MooseVariableFEBase;
+namespace libMesh
+{
+class DofObject;
+}
 
 template <>
 InputParameters validParams<MultiAppFieldTransfer>();
 
 /**
- *  This serves an interface for MultiAppInterpolationTransfer, MultiAppNearestNodeTransfer and so
- * on.
+ *  intermediary class that allows variable names as inputs
  */
 class MultiAppFieldTransfer : public MultiAppTransfer
 {
@@ -30,37 +34,22 @@ public:
 
   virtual void initialSetup();
 
-  /**
-   * Add some extra work if necessary after execute(). For example, adjust the solution
-   * to preserve some physics quality of interest.
-   */
-  virtual void postExecute();
-
 protected:
-  std::vector<VariableName> _from_var_names;
-  std::vector<AuxVariableName> _to_var_names;
+  /**
+   * Performs the transfer of a variable between two problems if they have the same mesh.
+   */
+  void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
 
-  VariableName _from_var_name;
-  AuxVariableName _to_var_name;
+  /**
+   * Performs the transfer of values between a node or element.
+   */
+  void transferDofObject(libMesh::DofObject * to_object,
+                         libMesh::DofObject * from_object,
+                         MooseVariableFEBase & to_var,
+                         MooseVariableFEBase & from_var);
 
-  // If this transfer is going to conserve the physics
-  bool _preserve_transfer;
-  // Postprocessor evaluates an adjuster for the source physics
-  std::vector<PostprocessorName> _from_postprocessors_to_be_preserved;
-  // Postprocessor evaluates an adjuster for the target physics
-  std::vector<PostprocessorName> _to_postprocessors_to_be_preserved;
-
-private:
-  void adjustTransferedSolution(FEProblemBase * from_problem,
-                                PostprocessorName & from_postprocessor,
-                                FEProblemBase & to_problem,
-                                PostprocessorName & to_postprocessor);
-
-  void adjustTransferedSolutionNearestPoint(unsigned int i,
-                                            FEProblemBase * from_problem,
-                                            PostprocessorName & from_postprocessor,
-                                            FEProblemBase & to_problem,
-                                            PostprocessorName & to_postprocessor);
-
-  bool _use_nearestpoint_pps;
+  /// Virtual function defining variables to be transferred
+  virtual std::vector<VariableName> getFromVarNames() const = 0;
+  /// Virtual function defining variables to transfer to
+  virtual std::vector<AuxVariableName> getToVarNames() const = 0;
 };

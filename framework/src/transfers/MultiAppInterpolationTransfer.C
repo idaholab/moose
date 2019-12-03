@@ -28,7 +28,7 @@ defineLegacyParams(MultiAppInterpolationTransfer);
 InputParameters
 MultiAppInterpolationTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
       "Transfers the value to the target domain from the nearest node in the source domain.");
   params.addParam<unsigned int>(
@@ -49,7 +49,7 @@ MultiAppInterpolationTransfer::validParams()
 }
 
 MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),

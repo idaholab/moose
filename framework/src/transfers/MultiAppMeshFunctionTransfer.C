@@ -29,7 +29,7 @@ defineLegacyParams(MultiAppMeshFunctionTransfer);
 InputParameters
 MultiAppMeshFunctionTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
       "Transfers field data at the MultiApp position using solution the finite element function "
       "from the master application, via a 'libMesh::MeshFunction' object.");
@@ -42,7 +42,7 @@ MultiAppMeshFunctionTransfer::validParams()
 }
 
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
