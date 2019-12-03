@@ -13,6 +13,18 @@ class UnitConverterPlugin(QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(UnitConverterPlugin, self).__init__(**kwargs)
 
+        # default units (used in THM/RELAP-7/etc.)
+        self._default_units = {
+            'Pressure': 'Pascal',
+            'Mass': 'Kilogram',
+            'Volume': 'Cubic meter',
+            'Speed': 'Meter per second',
+            'Length': 'Meter',
+            'Temperature': 'Kelvin',
+            'Energy': 'Joule per kilogram',
+            'Mass flow rate': 'Kilogram per second'
+        }
+
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
         self.LayoutMain = QtWidgets.QGridLayout(self)
@@ -178,6 +190,7 @@ class UnitConverterPlugin(QtWidgets.QWidget):
         for unit in group.units:
             self.InUnit.addItem(unit.name(), unit)
             self.OutUnit.addItem(unit.name(), unit)
+        self.OutUnit.setCurrentText(self._default_units[group.name()])
 
         self.InUnit.blockSignals(False)
         self.OutUnit.blockSignals(False)

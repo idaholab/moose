@@ -105,9 +105,9 @@ class TemperatureGroup(UnitGroup):
     """
     def __init__(self):
         super(TemperatureGroup, self).__init__([
+        FahrenheitUnit(),
         KelvinUnit(),
-        CelsiusUnit(),
-        FahrenheitUnit()
+        CelsiusUnit()
     ])
 
     def name(self):
@@ -212,12 +212,12 @@ class LengthGroup(UnitGroup):
     """
     def __init__(self):
         super(LengthGroup, self).__init__([
-        MillimeterUnit(),
-        CentimeterUnit(),
-        MeterUnit(),
-        KilometerUnit(),
         InchUnit(),
-        FeetUnit()
+        FeetUnit(),
+        KilometerUnit(),
+        MeterUnit(),
+        CentimeterUnit(),
+        MillimeterUnit()
     ])
 
     def name(self):
@@ -292,10 +292,10 @@ class PressureGroup(UnitGroup):
     """
     def __init__(self):
         super(PressureGroup, self).__init__([
-        PascalUnit(),
-        KilopascalUnit(),
+        BarUnit(),
         MegapascalUnit(),
-        BarUnit()
+        KilopascalUnit(),
+        PascalUnit()
     ])
 
     def name(self):
@@ -401,8 +401,8 @@ class VolumeGroup(UnitGroup):
     """
     def __init__(self):
         super(VolumeGroup, self).__init__([
-        CubicMeterUnit(),
         USGallonUnit(),
+        CubicMeterUnit(),
         LiterUnit()
     ])
 
@@ -463,9 +463,9 @@ class MassGroup(UnitGroup):
     """
     def __init__(self):
         super(MassGroup, self).__init__([
+        PoundUnit(),
         KilogramUnit(),
         GramUnit(),
-        PoundUnit()
     ])
 
     def name(self):
