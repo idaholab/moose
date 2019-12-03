@@ -27,6 +27,8 @@ public:
 protected:
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
+  virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
+                                   const ADReal & scalar) override;
 
   usingRadialReturnCreepStressUpdateBaseMembers;
 };

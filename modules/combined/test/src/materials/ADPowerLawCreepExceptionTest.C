@@ -39,9 +39,22 @@ ADPowerLawCreepExceptionTest<compute_stage>::computeResidual(const ADReal & effe
                                                              const ADReal & scalar)
 {
   if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
-      _t_step == 2)
+      _t_step == 1 && _dt > 0.9)
     return 1.0;
 
   return ADPowerLawCreepStressUpdate<compute_stage>::computeResidual(effective_trial_stress,
                                                                      scalar);
+}
+
+template <ComputeStage compute_stage>
+ADReal
+ADPowerLawCreepExceptionTest<compute_stage>::computeDerivative(
+    const ADReal & effective_trial_stress, const ADReal & scalar)
+{
+  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+      _t_step == 1 && _dt > 0.9)
+    return 1.0;
+
+  return ADPowerLawCreepStressUpdate<compute_stage>::computeDerivative(effective_trial_stress,
+                                                                       scalar);
 }

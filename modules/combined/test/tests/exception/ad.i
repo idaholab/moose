@@ -1,8 +1,3 @@
-[Problem]
-  register_objects_from = 'TensorMechanicsTestApp'
-  library_path = '../../../../../../moose/modules/tensor_mechanics/test/lib'
-[]
-
 [GlobalParams]
   order = SECOND
   displacements = 'disp_x disp_y'
@@ -26,6 +21,7 @@
   [./disp_y]
   [../]
   [./temp]
+    initial_condition = 501
   [../]
 []
 
@@ -93,10 +89,10 @@
     value = 0.0
   [../]
   [./temp]
-    type = DirichletBC
+    type = FunctionDirichletBC
     boundary = outer_exterior
     variable = temp
-    value = 500
+    function = '500 + t'
   [../]
 []
 
@@ -122,7 +118,6 @@
 
   [./inner_creep]
     type = ADPowerLawCreepExceptionTest
-    # type = ADPowerLawCreepStressUpdate
     coefficient = 10e-22
     n_exponent = 2
     activation_energy = 0
@@ -142,11 +137,12 @@
   petsc_options_value = 'lu'
   line_search = none
 
-  nl_abs_tol = 1e-5
-  l_max_its = 10
+  nl_abs_tol = 1e-7
+  l_max_its = 20
 
-  num_steps = 3
-  dt = 1e2
+  num_steps = 1
+  dt = 1
+  dtmin = .1
 []
 
 [Outputs]

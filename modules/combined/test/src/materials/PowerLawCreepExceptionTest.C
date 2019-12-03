@@ -34,8 +34,18 @@ Real
 PowerLawCreepExceptionTest::computeResidual(const Real effective_trial_stress, const Real scalar)
 {
   if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
-      _t_step == 2)
+      _t_step == 1 && _dt > 0.9)
     return 1.0;
 
   return PowerLawCreepStressUpdate::computeResidual(effective_trial_stress, scalar);
+}
+
+Real
+PowerLawCreepExceptionTest::computeDerivative(const Real effective_trial_stress, const Real scalar)
+{
+  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+      _t_step == 1 && _dt > 0.9)
+    return 1.0;
+
+  return PowerLawCreepStressUpdate::computeDerivative(effective_trial_stress, scalar);
 }
