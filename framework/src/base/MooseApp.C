@@ -752,6 +752,12 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
+  else if (getParam<bool>("apptype"))
+  {
+    Moose::perf_log.disable_logging();
+    Moose::out << "MooseApp Type: " << type() << std::endl;
+    _ready_to_exit = true;
+  }
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename
   {
@@ -798,7 +804,7 @@ MooseApp::setupOptions()
     }
     _action_warehouse.build();
 
-    if (!_check_input)
+    // Setup the AppFileBase for use by the Outputs or other systems that need output file info
     {
       // Extract the CommonOutputAction
       const auto & common_actions = _action_warehouse.getActionListByName("common_output");
@@ -825,13 +831,7 @@ MooseApp::setupOptions()
       // default file base for multiapps is set by MultiApp
     }
   }
-  else if (getParam<bool>("apptype"))
-  {
-    Moose::perf_log.disable_logging();
-    Moose::out << "MooseApp Type: " << type() << std::endl;
-    _ready_to_exit = true;
-  }
-  else
+  else /* The catch-all case for bad options or missing options, etc. */
   {
     Moose::perf_log.disable_logging();
 
