@@ -19,6 +19,10 @@
 #include <string>
 #include <vector>
 
+#define usingScalarCoupleableMembers                                                               \
+  using ScalarCoupleable::coupledScalarComponents;                                                 \
+  using ScalarCoupleable::coupledScalarValueOld
+
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
