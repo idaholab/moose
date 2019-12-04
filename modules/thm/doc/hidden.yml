@@ -270,7 +270,7 @@
 - /Materials/WallFriction7EqnBaseMaterial
 - /Materials/WallFrictionFunctionMaterial
 - /Materials/WallHeatTransferCoefficient3EqnHeliumMaterial
-- /Materials/WallMassTransferSimpleMaterial
+- /Materials/WallMassTransferMaterial
 
 - /Mesh/THMMesh
 
