@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppFieldTransfer.h"
+#include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
 class MultiAppMeshFunctionTransfer;
@@ -23,7 +23,7 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>();
  * the MultiApp is. Copies that value into a postprocessor in the MultiApp.
  * The source and destination vectors (of variables) should be ordered consistently.
  */
-class MultiAppMeshFunctionTransfer : public MultiAppFieldTransfer
+class MultiAppMeshFunctionTransfer : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();

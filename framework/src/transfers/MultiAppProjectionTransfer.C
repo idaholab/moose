@@ -42,7 +42,7 @@ defineLegacyParams(MultiAppProjectionTransfer);
 InputParameters
 MultiAppProjectionTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
       "Perform a projection between a master and sub-application mesh of a field variable.");
 
@@ -63,7 +63,7 @@ MultiAppProjectionTransfer::validParams()
 }
 
 MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _proj_type(getParam<MooseEnum>("proj_type")),
     _compute_matrix(true),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
@@ -79,7 +79,7 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
 void
 MultiAppProjectionTransfer::initialSetup()
 {
-  MultiAppFieldTransfer::initialSetup();
+  MultiAppConservativeTransfer::initialSetup();
 
   getAppInfo();
 

@@ -29,7 +29,7 @@ defineLegacyParams(MultiAppNearestNodeTransfer);
 InputParameters
 MultiAppNearestNodeTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
       "Transfer the value to the target domain from the nearest node in the source domain.");
 
@@ -50,7 +50,7 @@ MultiAppNearestNodeTransfer::validParams()
 }
 
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _node_map(declareRestartableData<std::map<dof_id_type, Node *>>("node_map")),
     _distance_map(declareRestartableData<std::map<dof_id_type, Real>>("distance_map")),
