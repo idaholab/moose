@@ -174,6 +174,7 @@ public:
 
   /**
    * Override the selection of the output file base name.
+   * Note: This method is supposed to be called by MultiApp only.
    */
   void setOutputFileBase(const std::string & output_file_base)
   {
@@ -183,14 +184,15 @@ public:
 
   /**
    * Get the output file base name.
+   * @param for_non_moose_build_output True for getting the file base for outputs generated with
+   *                                   Outputs/[outputname] input syntax.
+   * @return The file base name used by output objects
+   * Note: for_non_moose_build_output does not affect the returned value when this is a subapp.
+   *       for_non_moose_build_output also does not affect the returned value when Outputs/file_base
+   *       parameter is available. When for_non_moose_build_output does affect the returned value,
+   *       i.e. master without Outputs/file_base, the suffix _out is removed.
    */
-  std::string getOutputFileBase() const;
-
-  /**
-   * Whether or not setOutputFileBase is called or this app has file_base
-   * in the Outputs input block.
-   */
-  bool outputFileBaseSetByUser() const { return _file_base_set_by_user; }
+  std::string getOutputFileBase(bool for_non_moose_build_output = false) const;
 
   /**
    * Tell the app to output in a specific position.

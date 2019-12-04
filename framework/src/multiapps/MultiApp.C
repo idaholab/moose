@@ -675,18 +675,12 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
+  // if multiapp does not have file base in Outputs input block, output file base will
+  // be empty here since setupOptions() does not set the default file base with the multiapp
+  // input file name. Master will create the default file base for multiapp by taking the
+  // output base of the master problem and appending the name of the multiapp plus a number to it
   if (app->getOutputFileBase().empty())
-  {
-    // Create an output base by taking the output base of the master problem and appending
-    // the name of the multiapp + a number to it
-    std::string output_base;
-    if (_app.outputFileBaseSetByUser())
-      output_base = _app.getOutputFileBase() + "_" + multiapp_name.str();
-    else
-      output_base = _app.getOutputFileBase() + "_out_" + multiapp_name.str();
-
-    app->setOutputFileBase(output_base);
-  }
+    app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
   preRunInputFile();
   app->runInputFile();
 

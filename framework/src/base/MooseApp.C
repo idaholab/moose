@@ -851,9 +851,12 @@ MooseApp::setInputFileName(const std::string & input_filename)
 }
 
 std::string
-MooseApp::getOutputFileBase() const
+MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 {
-  return _output_file_base;
+  if (_file_base_set_by_user || for_non_moose_build_output || _multiapp_level)
+    return _output_file_base;
+  else
+    return _output_file_base + "_out";
 }
 
 void
@@ -1068,10 +1071,7 @@ MooseApp::getCheckpointDirectories() const
   std::list<std::string> checkpoint_dirs;
 
   // Add the directories added with Outputs/checkpoint=true input syntax
-  if (outputFileBaseSetByUser())
-    checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
-  else
-    checkpoint_dirs.push_back(getOutputFileBase() + "_out_cp");
+  checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
 
   // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
