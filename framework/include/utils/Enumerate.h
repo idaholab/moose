@@ -110,11 +110,16 @@ struct _enumerate_iterator
 
   bool operator!=(const _enumerate_iterator & other) const { return iter != other.iter; }
 
-#if __cplusplus > 201402L
-  std::pair<index_type &, reference> operator*() { return {index, *iter}; }
-#else
+  /**
+   * When MOOSE moves to C++17, we'll switch the return type of the dereference operator and the
+   * corresponding calling code. This is what
+   * we'll use instead.
+   *
+   *  #if __cplusplus > 201402L
+   *    std::pair<index_type &, reference> operator*() { return {index, *iter}; }
+   *  #endif
+   */
   _enumerate_struct<iterator> operator*() { return _enumerate_struct<iterator>(index, iter); }
-#endif
 
 private:
   index_type index;
@@ -142,4 +147,3 @@ private:
   index_type initial;
 };
 }
-
