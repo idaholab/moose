@@ -10,6 +10,14 @@
   file = plane1_mesh.e
 []
 
+[Problem]
+  type = ReferenceResidualProblem
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
+  solution_variables = 'disp_x disp_y'
+  group_variables = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -82,6 +90,7 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -247,8 +256,6 @@
 
   line_search = 'none'
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-8
   l_max_its = 50
   nl_max_its = 100
   end_time = 1000.0
