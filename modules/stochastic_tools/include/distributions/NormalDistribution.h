@@ -37,9 +37,9 @@ public:
 protected:
   ///@{
   /// Coefficients for the rational function used to approximate the quantile
-  static const std::vector<Real> _a;
+  static const std::array<Real, 6> _a;
 
-  static const std::vector<Real> _b;
+  static const std::array<Real, 6> _b;
   ///@}
 
   /// The mean (or expectation) of the distribution (mu)
