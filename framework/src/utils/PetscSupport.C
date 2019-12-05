@@ -306,8 +306,8 @@ petscNonlinearConverged(SNES snes,
   CHKERRABORT(problem.comm().get(), ierr);
 
   // Ask the SNES object about its divergence tolerance.
-  PetscReal dtol = 0.; // relative divergence tolerance
-  ierr = SNESGetDivergenceTolerance(snes, &dtol);
+  PetscReal divtol = 0.; // relative divergence tolerance
+  ierr = SNESGetDivergenceTolerance(snes, &divtol);
   CHKERRABORT(problem.comm().get(), ierr);
 
   // Get current number of function evaluations done by SNES.
@@ -350,7 +350,7 @@ petscNonlinearConverged(SNES snes,
                                         snorm,
                                         fnorm,
                                         rtol,
-                                        dtol,
+                                        divtol,
                                         stol,
                                         atol,
                                         nfuncs,

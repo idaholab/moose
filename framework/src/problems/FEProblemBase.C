@@ -6161,7 +6161,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real snorm,
                                          const Real fnorm,
                                          const Real rtol,
-                                         const Real dtol,
+                                         const Real divtol,
                                          const Real stol,
                                          const Real abstol,
                                          const PetscInt nfuncs,
@@ -6224,10 +6224,10 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
-    else if (dtol > 0 && fnorm > the_residual * dtol)
+    else if (divtol > 0 && fnorm > the_residual * divtol)
     {
       oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
-          << dtol << " * initial residual " << the_residual << '\n';
+          << divtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
   }

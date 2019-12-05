@@ -191,7 +191,7 @@ public:
    * @param snorm          Norm of the change in the solution vector
    * @param fnorm          Norm of the residual vector
    * @param rtol           Relative residual convergence tolerance
-   * @param dtol           Relative residual divergence tolerance
+   * @param divtol           Relative residual divergence tolerance
    * @param stol           Solution change convergence tolerance
    * @param abstol         Absolute residual convergence tolerance
    * @param nfuncs         Number of function evaluations
@@ -207,7 +207,7 @@ public:
                             const Real snorm,
                             const Real fnorm,
                             const Real rtol,
-                            const Real dtol,
+                            const Real divtol,
                             const Real stol,
                             const Real abstol,
                             const PetscInt nfuncs,
