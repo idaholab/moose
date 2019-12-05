@@ -108,7 +108,6 @@
 - /Components/InletStagnationPressureTemperature
 - /Components/InletStagnationPressureTemperature1Phase
 - /Components/InletStagnationPressureTemperature2Phase
-- /Components/Junction
 - /Components/JunctionBase
 - /Components/JunctionWithLossesBase
 - /Components/Outlet1Phase
@@ -123,10 +122,6 @@
 - /Components/TestSetupStatusComponent
 - /Components/THMCreateMeshAction
 
-- /Constraints/JunctionConstraint
-- /Constraints/JunctionEnergyConstraint
-- /Constraints/JunctionMassConstraint
-- /Constraints/JunctionMomentumConstraint
 - /Constraints/MassBalanceConstraint
 - /Constraints/MassFreeConstraint
 
@@ -296,7 +291,6 @@
 - /Postprocessors/SumPostprocessor
 
 - /ScalarKernels/EnergyBalanceScalarKernel
-- /ScalarKernels/JunctionMassBalanceScalarKernel
 - /ScalarKernels/MassBalanceScalarKernel
 - /ScalarKernels/MomentumBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
@@ -313,7 +307,6 @@
 - /UserObjects/SpecificInterfacialAreaCurve
 - /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
-- /UserObjects/JunctionStagnationEnthalpyUserObject
 - /UserObjects/WaveSpeeds7EqnNCGHLLC
 
 - /VectorPostprocessors/Sampler1DBase
