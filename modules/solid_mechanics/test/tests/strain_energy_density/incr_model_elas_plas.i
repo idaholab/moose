@@ -258,6 +258,7 @@
    nl_max_its = 20
    nl_abs_tol = 3e-7
    nl_rel_tol = 1e-12
+   nl_div_tol = -1 # skip the nl divergence test
    l_tol = 1e-2
 
    start_time = 0.0

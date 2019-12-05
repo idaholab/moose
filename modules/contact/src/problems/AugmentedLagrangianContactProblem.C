@@ -59,7 +59,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                              const Real snorm,
                                                              const Real fnorm,
                                                              const Real rtol,
-                                                             const Real /*dtol*/,
+                                                             const Real dtol,
                                                              const Real stol,
                                                              const Real abstol,
                                                              const PetscInt nfuncs,
@@ -69,7 +69,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                              const Real /*div_threshold*/)
 {
 
-  Real my_dtol = std::numeric_limits<int>::max();
   Real my_max_funcs = std::numeric_limits<int>::max();
   Real my_div_threshold = std::numeric_limits<Real>::max();
 
@@ -80,7 +79,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                           snorm,
                                                           fnorm,
                                                           rtol,
-                                                          my_dtol,
+                                                          dtol,
                                                           stol,
                                                           abstol,
                                                           nfuncs,

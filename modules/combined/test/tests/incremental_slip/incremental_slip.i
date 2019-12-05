@@ -173,6 +173,7 @@
   line_search = 'none'
 
   nl_abs_tol = 1e-8
+  nl_div_tol = -1 # skip the nl divergence test
   l_max_its = 100
   nl_max_its = 10
   dt = 1.0

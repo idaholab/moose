@@ -6226,8 +6226,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     }
     else if (dtol > 0 && fnorm > the_residual * dtol)
     {
-      oss << "Diverged due to function norm " << fnorm << " > divergence tolerance " << dtol
-          << " * function norm " << fnorm << '\n';
+      oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
+          << dtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
   }
