@@ -45,6 +45,15 @@
     requirement = 'The TensorMechanics MasterAction shall error if an input file specifies overlapping block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
   [../]
 
+  [./no_block]
+    type = RunException
+    input = 'no_block.i'
+    cli_args = '--error'
+    expect_err = 'Common parameters are supplied, but not used in'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall warn if global Master action parameters are supplied but no Master action subblock have been added.'
+  [../]
+
   [./two_coord]
     type = Exodiff
     input = 'two_coord.i'
