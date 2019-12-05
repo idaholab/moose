@@ -33,13 +33,19 @@ SideSetsGeneratorBase::validParams()
                         "This Boolean determines whether we fix our normal "
                         "or allow it to vary to \"paint\" around curves");
 
+  params.addParam<bool>("replace",
+                        false,
+                        "If true, replace the old sidesets. If false, the current sidesets (if "
+                        "any) will be preserved.");
+
   return params;
 }
 
 SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _variance(getParam<Real>("variance")),
-    _fixed_normal(getParam<bool>("fixed_normal"))
+    _fixed_normal(getParam<bool>("fixed_normal")),
+    _replace(getParam<bool>("replace"))
 {
 }
 
@@ -88,6 +94,9 @@ SideSetsGeneratorBase::flood(const Elem * elem,
     // We'll just use the normal of the first qp
     if (std::abs(1.0 - normal * normals[0]) <= _variance)
     {
+      if (_replace)
+        mesh.get_boundary_info().remove_side(elem, side);
+
       mesh.get_boundary_info().add_side(elem, side, side_id);
       for (unsigned int neighbor = 0; neighbor < elem->n_sides(); ++neighbor)
       {
