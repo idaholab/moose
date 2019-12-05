@@ -63,8 +63,8 @@
     type = SamplerPostprocessorTransfer
     multi_app = sobol
     sampler = sobol
-    vector_postprocessor = storage
-    postprocessor = avg
+    to_vector_postprocessor = storage
+    from_postprocessor = avg
   []
 
   [mc]
@@ -78,8 +78,8 @@
     type = SamplerPostprocessorTransfer
     multi_app = mc
     sampler = mc
-    vector_postprocessor = storage
-    postprocessor = avg
+    to_vector_postprocessor = storage
+    from_postprocessor = avg
   []
 []
 

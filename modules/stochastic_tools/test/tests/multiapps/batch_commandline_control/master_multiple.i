@@ -42,8 +42,8 @@
     type = SamplerPostprocessorTransfer
     multi_app = sub
     sampler = sample
-    vector_postprocessor = storage
-    postprocessor = size
+    to_vector_postprocessor = storage
+    from_postprocessor = size
   []
 []
 

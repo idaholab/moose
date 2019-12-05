@@ -54,8 +54,8 @@
     type = SamplerPostprocessorTransfer
     multi_app = sub
     sampler = sample
-    vector_postprocessor = storage
-    postprocessor = avg
+    to_vector_postprocessor = storage
+    from_postprocessor = avg
     execute_on = timestep_end
     check_multiapp_execute_on = false
   []

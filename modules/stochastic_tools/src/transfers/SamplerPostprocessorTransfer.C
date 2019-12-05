@@ -25,12 +25,23 @@ SamplerPostprocessorTransfer::validParams()
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
                              "VectorPostprocessor on the master application.");
-  params.addRequiredParam<PostprocessorName>(
-      "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
-  params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",
-                                                   "The name of the VectorPostprocessor in "
-                                                   "the MultiApp to transfer values "
-                                                   "from/to.");
+  params.addParam<PostprocessorName>(
+      "from_postprocessor", "The name of the Postprocessors on the sub-app to transfer from.");
+  params.addParam<VectorPostprocessorName>("to_vector_postprocessor",
+                                           "The name of the VectorPostprocessor in "
+                                           "the MultiApp to transfer values "
+                                           "to.");
+
+  params.addDeprecatedParam<PostprocessorName>(
+      "postprocessor",
+      "The name of the Postprocessors on the sub-app to transfer from.",
+      "Replaced by from_postprocessor");
+  params.addDeprecatedParam<VectorPostprocessorName>("vector_postprocessor",
+                                                     "The name of the VectorPostprocessor in "
+                                                     "the MultiApp to transfer values "
+                                                     "to.",
+                                                     "Replaced by to_vector_postprocessor");
+
   params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
@@ -38,8 +49,11 @@ SamplerPostprocessorTransfer::validParams()
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
-    _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
-    _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
+    _sub_pp_name(isParamValid("postprocessor") ? getParam<PostprocessorName>("postprocessor")
+                                               : getParam<PostprocessorName>("from_postprocessor")),
+    _master_vpp_name(isParamValid("vector_postprocessor")
+                         ? getParam<VectorPostprocessorName>("vector_postprocessor")
+                         : getParam<VectorPostprocessorName>("to_vector_postprocessor"))
 {
 }
 
