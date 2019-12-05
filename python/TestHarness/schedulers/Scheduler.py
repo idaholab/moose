@@ -6,7 +6,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import sys
 from TestHarness.JobDAG import JobDAG
 from FactorySystem.MooseObject import MooseObject
 import os, traceback
@@ -202,6 +202,14 @@ class Scheduler(MooseObject):
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
+    def getStatusPoolState(self):
+        """
+        Return the state of the jobs in the status TheadPool object.
+        """
+        # TODO: ThreadPool._state changed between python 3.7 and 3.8, this logic handles both; this
+        #       logic should be changed to avoid rely on protected variables.
+        (self.status_pool._state != 'RUN') if sys.version_info[1] > 7 else self.status_pool._state
+
     def schedule(self, testers):
         """
         Generate and submit a group of testers to a thread pool queue for execution.
@@ -241,16 +249,18 @@ class Scheduler(MooseObject):
         A finished job will trigger a change to the Job DAG, which will allow additional
         jobs to become available and ready to enter the runner pool (dependency jobs).
         """
+
+        state = self.getStatusPoolState()
         with j_lock:
             concurrent_jobs = Jobs.getJobsAndAdvance()
             for job in concurrent_jobs:
                 if job.isFinished():
-                    if not self.status_pool._state:
+                    if not state:
                         with self.__status_pool_lock:
                             self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, Jobs, j_lock)))
 
                 elif job.isHold():
-                    if not self.run_pool._state:
+                    if not state:
                         with self.__runner_pool_lock:
                             job.setStatus(job.queued)
                             self.__runner_pool_jobs.add(self.run_pool.apply_async(self.runJob, (job, Jobs, j_lock)))
@@ -323,7 +333,9 @@ class Scheduler(MooseObject):
         # jobs now exist in this queue, with a finished status. This method can only work on
         # a finished job object once (a set removal operation occurs to signify scheduled job
         # completion as a sanity check).
-        if self.status_pool._state or job not in self.__job_bank:
+
+        state = self.getStatusPoolState()
+        if state or job not in self.__job_bank:
             return
 
         # Peform within a try, to allow keyboard ctrl-c
