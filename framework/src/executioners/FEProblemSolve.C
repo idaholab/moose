@@ -62,7 +62,7 @@ FEProblemSolve::validParams()
   params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>("nl_div_tol", 1.0e+4, "Nonlinear Divergence Tolerance");
+  params.addParam<Real>("nl_div_tol", -1, "Nonlinear Divergence Tolerance");
   params.addParam<Real>("nl_abs_step_tol", 1.0e-50, "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 1.0e-50, "Nonlinear Relative step Tolerance");
   params.addParam<bool>(
