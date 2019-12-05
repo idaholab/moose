@@ -25,8 +25,12 @@ FileOutput::validParams()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = PetscOutput::validParams();
-  params.addParam<std::string>("file_base",
-                               "The desired solution output name without an extension");
+  params.addRequiredParam<std::string>(
+      "file_base",
+      "The desired solution output name without an extension. If not provided, MOOSE sets it "
+      "with Outputs/file_base when available. Otherwise, MOOSE uses input file name and this "
+      "object name for a master input or uses master file_base, the subapp name and this object "
+      "name for a subapp input to set it.");
   params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
   params.addParam<std::string>("append_date_format",
@@ -48,25 +52,14 @@ FileOutput::validParams()
 
 FileOutput::FileOutput(const InputParameters & parameters)
   : PetscOutput(parameters),
+    _file_base(getParam<std::string>("file_base")),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
-    _output_if_base_contains(parameters.get<std::vector<std::string>>("output_if_base_contains"))
+    _output_if_base_contains(getParam<std::vector<std::string>>("output_if_base_contains"))
 {
   // If restarting reset the file number
   if (_app.isRestarting())
     _file_num = 0;
-
-  // Set the file base
-  if (isParamValid("file_base"))
-  {
-    _file_base = getParam<std::string>("file_base");
-    if (!_file_base.empty() && _file_base[0] == '/')
-      mooseError("absolute paths not allowed in output 'file_base' param");
-  }
-  else if (getParam<bool>("_built_by_moose"))
-    _file_base = getOutputFileBase(_app);
-  else
-    _file_base = getOutputFileBase(_app, "_" + name());
 
   // Append the date/time
   if (getParam<bool>("append_date"))
@@ -106,34 +99,6 @@ FileOutput::FileOutput(const InputParameters & parameters)
           mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
     }
   }
-}
-
-std::string
-FileOutput::getOutputFileBase(const MooseApp & app, std::string suffix)
-{
-  // If the App has an outputfile, then use it (MultiApp scenario)
-  if (!app.getOutputFileBase().empty())
-    return app.getOutputFileBase();
-
-  // If the output base is not set it must be determined from the input file
-  /* This will only return a non-empty string if the setInputFileName() was called, which is
-   * generally not the case. One exception is when CoupledExecutioner is used */
-  std::string input_filename = app.getInputFileName();
-  if (input_filename.empty())
-    input_filename = app.getFileName();
-
-  // Assert that the filename is not empty
-  mooseAssert(!input_filename.empty(), "Input Filename is NULL");
-
-  // Determine location of "." in extension, assert if it is not found
-  size_t pos = input_filename.find_last_of('.');
-  mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-
-  // Append the "_out" to the name and return it
-  size_t start = 0;
-  if (input_filename.find_last_of('/') != std::string::npos)
-    start = input_filename.find_last_of('/') + 1;
-  return input_filename.substr(start, pos - start) + suffix;
 }
 
 bool

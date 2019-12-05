@@ -7,7 +7,7 @@
     [tosub]
       type = 'Exodiff'
       input = 'tosub_master.i'
-      exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e'
+      exodiff = 'tosub_master_out_sub0_out.e tosub_master_out_sub1_out.e'
 
       detail = "from the master application to sub-applications and"
     []

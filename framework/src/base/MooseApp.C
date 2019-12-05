@@ -275,6 +275,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _perf_graph(type() + " (" + name() + ')'),
     _rank_map(*_comm, _perf_graph),
+    _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -329,7 +330,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _popped_final_mesh_generator(false)
 {
-
 #ifdef HAVE_GPERFTOOLS
   if (std::getenv("MOOSE_PROFILE_BASE"))
   {
@@ -752,6 +752,12 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
+  else if (getParam<bool>("apptype"))
+  {
+    Moose::perf_log.disable_logging();
+    Moose::out << "MooseApp Type: " << type() << std::endl;
+    _ready_to_exit = true;
+  }
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename
   {
@@ -797,14 +803,35 @@ MooseApp::setupOptions()
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
+
+    // Setup the AppFileBase for use by the Outputs or other systems that need output file info
+    {
+      // Extract the CommonOutputAction
+      const auto & common_actions = _action_warehouse.getActionListByName("common_output");
+      mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
+
+      const Action * common = *common_actions.begin();
+
+      // If file_base is set in CommonOutputAction through parsing input, obtain the file_base
+      if (common->isParamValid("file_base"))
+      {
+        _output_file_base = common->getParamTempl<std::string>("file_base");
+        _file_base_set_by_user = true;
+      }
+      else if (isUltimateMaster())
+      {
+        // if this app is a master, we use the input file name as the default file base
+        std::string base = getInputFileName();
+        size_t pos = base.find_last_of('.');
+        _output_file_base = base.substr(0, pos);
+        // Note: we did not append "_out" in the file base here because we do not want to
+        //       have it in betwen the input file name and the object name for Output/*
+        //       syntax.
+      }
+      // default file base for multiapps is set by MultiApp
+    }
   }
-  else if (getParam<bool>("apptype"))
-  {
-    Moose::perf_log.disable_logging();
-    Moose::out << "MooseApp Type: " << type() << std::endl;
-    _ready_to_exit = true;
-  }
-  else
+  else /* The catch-all case for bad options or missing options, etc. */
   {
     Moose::perf_log.disable_logging();
 
@@ -824,9 +851,12 @@ MooseApp::setInputFileName(const std::string & input_filename)
 }
 
 std::string
-MooseApp::getOutputFileBase() const
+MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 {
-  return _output_file_base;
+  if (_file_base_set_by_user || for_non_moose_build_output || _multiapp_level)
+    return _output_file_base;
+  else
+    return _output_file_base + "_out";
 }
 
 void
@@ -1040,24 +1070,10 @@ MooseApp::getCheckpointDirectories() const
   // Storage for the directory names
   std::list<std::string> checkpoint_dirs;
 
-  // Extract the CommonOutputAction
-  const auto & common_actions = _action_warehouse.getActionListByName("common_output");
-  mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
+  // Add the directories added with Outputs/checkpoint=true input syntax
+  checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
 
-  const Action * common = *common_actions.begin();
-
-  // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint
-  // files
-  if (common->isParamValid("file_base"))
-    checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
-  // Case for normal application or master in a Multiapp setting
-  else if (getOutputFileBase().empty())
-    checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, "_out_cp"));
-  // Case for a sub app in a Multiapp setting
-  else
-    checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
-
-  // Add the directories from any existing checkpoint objects
+  // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
   for (const auto & action : actions)
   {
@@ -1067,19 +1083,8 @@ MooseApp::getCheckpointDirectories() const
       continue;
 
     const InputParameters & params = moose_object_action->getObjectParams();
-
-    // Loop through the actions and add the necessary directories to the list to check
     if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
-    {
-      if (params.isParamValid("file_base"))
-        checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
-      else
-      {
-        std::ostringstream oss;
-        oss << "_" << action->name() << "_cp";
-        checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
-      }
-    }
+      checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
 
   return checkpoint_dirs;

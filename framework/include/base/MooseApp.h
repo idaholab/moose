@@ -174,16 +174,25 @@ public:
 
   /**
    * Override the selection of the output file base name.
+   * Note: This method is supposed to be called by MultiApp only.
    */
   void setOutputFileBase(const std::string & output_file_base)
   {
     _output_file_base = output_file_base;
+    _file_base_set_by_user = true;
   }
 
   /**
-   * Override the selection of the output file base name.
+   * Get the output file base name.
+   * @param for_non_moose_build_output True for getting the file base for outputs generated with
+   *                                   Outputs/[outputname] input syntax.
+   * @return The file base name used by output objects
+   * Note: for_non_moose_build_output does not affect the returned value when this is a subapp.
+   *       for_non_moose_build_output also does not affect the returned value when Outputs/file_base
+   *       parameter is available. When for_non_moose_build_output does affect the returned value,
+   *       i.e. master without Outputs/file_base, the suffix _out is removed.
    */
-  std::string getOutputFileBase() const;
+  std::string getOutputFileBase(bool for_non_moose_build_output = false) const;
 
   /**
    * Tell the app to output in a specific position.
@@ -246,6 +255,8 @@ public:
 
   /**
    * Return the filename that was parsed
+   * Note: When stripLeadingPath is false, this function returns the same name as
+   *       getInputFileName() method when the input file is not a link.
    */
   std::string getFileName(bool stripLeadingPath = true) const;
 
@@ -801,6 +812,9 @@ protected:
 
   /// The output file basename
   std::string _output_file_base;
+
+  /// Whether or not file base is set through input or setOutputFileBase by MultiApp
+  bool _file_base_set_by_user;
 
   /// Whether or not an output position has been set for this app
   bool _output_position_set;
