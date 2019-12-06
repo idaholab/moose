@@ -30,4 +30,21 @@
     abs_zero = 1e-9
     requirement = 'The system shall compute plane stress conditions with finite strains'
   [../]
+
+  [./3D_finite_tension_pull]
+    type = 'CSVDiff'
+    input = '3D_finite_tension_pull.i'
+    csvdiff = '3D_finite_tension_pull_out.csv'
+    requirement = 'The system shall compute the response of a 3D cube in uniaxial tension with finite strain to provide a benchmark for a 2D plane stress, finite strain model'
+    max_parallel = 1 #Single element test
+  [../]
+
+  [./weak_plane_stress_finite_tension_pull]
+    type = 'CSVDiff'
+    input = 'weak_plane_stress_finite_tension_pull.i'
+    csvdiff = 'weak_plane_stress_finite_tension_pull_out.csv'
+    rel_err = 1e-4
+    requirement = 'The system shall compute the response of a cube in uniaxial tension using a 2D plane stress, finite strain model, and produce the same result as a 3D model'
+    max_parallel = 1 #Single element test
+  [../]
 []
