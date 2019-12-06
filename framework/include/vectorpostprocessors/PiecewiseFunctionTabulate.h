@@ -31,7 +31,12 @@ public:
   virtual void finalize() override {}
 
 protected:
+  /// The piecewise function to tabulate
   const PiecewiseBase * _piecewise_function;
+
+  /// function argument (x) column
   VectorPostprocessorValue & _x_col;
+
+  /// function value (x) column
   VectorPostprocessorValue & _y_col;
 };

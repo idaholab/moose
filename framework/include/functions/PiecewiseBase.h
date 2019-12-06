@@ -19,9 +19,9 @@ InputParameters validParams<PiecewiseBase>();
 
 /**
  * Function base which provides a piecewise approximation to a provided
- * (x,y) point data set.  Derived classes which control the order
+ * (x,y) point data set.  Derived classes, which control the order
  * (constant, linear) of the approximation and how the (x,y) data set
- * is generated. should be used directly,
+ * is generated, should be used directly.
  */
 class PiecewiseBase : public Function
 {

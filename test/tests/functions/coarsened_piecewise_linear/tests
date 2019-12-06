@@ -12,7 +12,7 @@
     type = 'CSVDiff'
     input = 'coarsened_piecewise_linear.i'
     csvdiff = 'coarsened_piecewise_linear_vpp_F_0000.csv'
-    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and returns an explicit value from the supplied data when queried (i.e., linear interpolation is not performed)."
+    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs, reduces the number of data points based on a user supplied cut-off and returns a linearly interpolated value from the coarsened data."
     prereq = 'prepare_data'
   [../]
 []

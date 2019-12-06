@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PointReduction.h"
+#include "MooseUtils.h"
 #include "MooseError.h"
 
 #include <algorithm>
@@ -35,7 +36,8 @@ perpendicularDistance(const FunctionNode & node,
   const Real y2 = end.second;
 
   const Real denom = std::sqrt(sqr(y2 - y1) + sqr(x2 - x1));
-  mooseAssert(denom > 0, "Line begin and end points bust not be the same");
+  mooseAssert(MooseUtils::absoluteFuzzyGreaterThan(denom, 0.0),
+              "Line begin and end points must not be the same");
 
   return std::abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / denom;
 }
@@ -47,7 +49,7 @@ douglasPeuckerRecurse(const FunctionNodeList & list,
                       std::size_t begin,
                       std::size_t end)
 {
-  // Find the point with the maximum distance
+  // Find the point with the maximum distance from the line defined by begin and end
   Real dmax = 0.0;
   std::size_t index = 0;
 

@@ -17,7 +17,10 @@ template <>
 InputParameters validParams<CoarsenedPiecewiseLinear>();
 
 /**
- * Perform a point reduction of the tabulated data upon initialization.
+ * Function class that reads in a list of (x,y) value pairs representing a pointwise defined
+ * function sililar to PiecewiseLinear. In addition this Function object performs a point reduction
+ * of the tabulated data upon initialization resulting in the evaluation of a simplified function
+ * with fewer data points.
  */
 class CoarsenedPiecewiseLinear : public PiecewiseLinearBase
 {

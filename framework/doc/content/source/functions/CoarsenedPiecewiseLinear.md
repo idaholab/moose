@@ -1,4 +1,4 @@
-# PiecewiseLinear
+# CoarsenedPiecewiseLinear
 
 !syntax description /Functions/CoarsenedPiecewiseLinear
 
