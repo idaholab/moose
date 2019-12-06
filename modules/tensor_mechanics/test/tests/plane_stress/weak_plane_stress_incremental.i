@@ -80,13 +80,11 @@
 
 [Kernels]
   [./TensorMechanics]
-    use_displaced_mesh = true
   [../]
 
   [./solid_z]
     type = WeakPlaneStress
     variable = strain_zz
-    use_displaced_mesh = true
   [../]
 []
 
