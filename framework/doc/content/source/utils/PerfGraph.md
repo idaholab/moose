@@ -11,7 +11,7 @@ The performance graph is part of an ecosystem of objects:
 - `PerfGuard`: Scope guard used to active and deactivate timers
 - `PerfGraphInterface`: An interface class for gaining access to the `PerfGraph` for adding timers and pulling timing data
 - [/PerfGraphOutput.md]: Responsible for printing out the graph
-- [/PerfGraphData.md]: `Postprocessor` for outputing time from the graph
+- [/PerfGraphData.md]: `Postprocessor` for outputting time from the graph
 
 The `PerfGraph` works by registering "sections" of code using unique (`std::string`) names.  The registration of a section returns a `PerfID` unique ID that is then used when referring to that section of code for starting and stopping timing.  It's normal to save the `PerfID` in a member variable as a variable called `*_timer`.
 
