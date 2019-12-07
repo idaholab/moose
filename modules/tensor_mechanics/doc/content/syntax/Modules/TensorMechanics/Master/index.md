@@ -6,6 +6,7 @@ The TensorMechanics Master Action is a convenience object that simplifies part o
 mechanics system setup. It performs
 
 - Add StressDivergence Kernels (for the current coordinate system)
+- Add WeakPlaneStress Kernel (for weak enforcement of the plane stress condition)
 - Add Strain calculation material (for the chosen strain model)
 - Correctly set use of displaced mesh
 - Optional: Setup of displacement variables (with the correct order for the current mesh)
@@ -19,7 +20,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 !table id=tmMaster_action_table caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
+| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) and optionally [WeakPlaneStress](/WeakPlaneStress.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
 | Add the displacement variables | [Variables](syntax/Variables/index.md) | `add_variables`: boolean |
 | Calculation of strain for the given coordinate system | [ComputeFiniteStrain](/ComputeFiniteStrain.md) or [ComputePlaneFiniteStrain](/ComputePlaneFiniteStrain.md) or [ComputeAxisymmetric1DFiniteStrain](/ComputeAxisymmetric1DFiniteStrain.md) or [ComputeAxisymmetricRZFiniteStrain](/ComputeAxisymmetricRZFiniteStrain.md) | `strain`: MooseEnum to select finite or strain formulations |
 |   | [ComputeSmallStrain](/ComputeSmallStrain.md) or [ComputePlaneSmallStrain](/ComputePlaneSmallStrain.md) or [ComputeAxisymmetric1DSmallStrain](/ComputeAxisymmetric1DSmallStrain.md) or [ComputeAxisymmetricRZSmallStrain](/ComputeAxisymmetricRZSmallStrain.md) |   |
