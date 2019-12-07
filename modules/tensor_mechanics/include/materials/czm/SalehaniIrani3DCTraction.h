@@ -14,8 +14,8 @@ class SalehaniIrani3DCTraction;
 template <>
 InputParameters validParams<SalehaniIrani3DCTraction>();
 /**
- * Implementation of a simple non-stateful exponential traction separation law
- * Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
+ * Implementation of the non-stateful exponential traction separation law
+ * proposed by Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
  **/
 class SalehaniIrani3DCTraction : public CZMMaterialBase
 {
@@ -29,9 +29,9 @@ protected:
   /// method returning the traction derivitaves wrt local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() override;
 
-  /// the displacement jump assocaited to the maximum traction
+  /// the displacement jump associated to the maximum traction
   const std::vector<Real> _delta_u0;
 
-  /// the vector representing the maximum allowed in each direction
+  /// the vector representing the maximum allowed traction in each direction
   const std::vector<Real> _max_allowable_traction;
 };

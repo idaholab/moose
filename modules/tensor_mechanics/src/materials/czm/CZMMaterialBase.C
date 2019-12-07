@@ -39,7 +39,7 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 displacement variables");
 
-  // intializing displacement vectors
+  // initializing the displacement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp[i] = &coupledValue("displacements", i);
@@ -54,13 +54,13 @@ CZMMaterialBase::computeQpProperties()
   RealTensorValue RotationGlobalToLocal =
       RotationMatrix::rotVec1ToVec2(_normals[_qp], RealVectorValue(1, 0, 0));
 
-  // computing the actual displacement jump
+  // computing the displacement jump
   for (unsigned int i = 0; i < _ndisp; i++)
     _displacement_jump_global[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];
   for (unsigned int i = _ndisp; i < 3; i++)
     _displacement_jump_global[_qp](i) = 0;
 
-  // rotate the displacement jump to local coordiante system
+  // rotate the displacement jump to the local coordiante system
   _displacement_jump[_qp] = RotationGlobalToLocal * _displacement_jump_global[_qp];
 
   // compute local traction
@@ -69,7 +69,7 @@ CZMMaterialBase::computeQpProperties()
   // compute local traction derivatives wrt the displacement jump
   _traction_derivatives[_qp] = computeTractionDerivatives();
 
-  // rotate local traction and derivatives to the global reference
+  // rotate local traction and derivatives to the global coordinate system
   _traction_global[_qp] = RotationGlobalToLocal.transpose() * _traction[_qp];
   _traction_derivatives_global[_qp] = _traction_derivatives[_qp];
   _traction_derivatives_global[_qp].rotate(RotationGlobalToLocal.transpose());

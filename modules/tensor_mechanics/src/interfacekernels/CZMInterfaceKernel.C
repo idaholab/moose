@@ -57,7 +57,6 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     // [test_slave-test_master]*T where T represents the traction.
-    // the + and - signs below are in accordance with this convention
     case Moose::Element:
       r *= -_test[_i][_qp];
       break;
@@ -71,7 +70,7 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 Real
 CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 {
-  // retrieve the diagonal jacobain coefficient dependning on the displacement
+  // retrieve the diagonal Jacobian coefficient dependning on the displacement
   // component (_component) this kernel is working on
   Real jac = _traction_derivatives_global[_qp](_component, _component);
 

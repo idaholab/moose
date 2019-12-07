@@ -10,18 +10,18 @@ The `CZMInterfaceKernel` uses the traction and its derivatives provided by a `CZ
 
 The strong form of the force equilibrium equation in vector form can be written as:
 \begin{equation}
-  F^- -F^+ = \int_{A^-}{T^- da^-} - \int_{A^+}{T^+ da^+} = 0
+  F^- -F^+ = \int_{A^-}{T^- dA^-} - \int_{A^+}{T^+ dA^+} = 0
 \end{equation}
 where superscripts $+$ and $-$ identify the master and slave surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the traction, and $A$ the area.
-The master surface is the one where the normal is computed.
+The master surface is the one where the interface normal is computed.
 
 By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium equation can be written as  
 \begin{equation}
-  \int_{A^-}{T^- \psi^- da^-}  - \int_{A^+}{T^+ \psi^+ da^+} = 0
+  \int_{A^-}{T^- \psi^- dA^-}  - \int_{A^+}{T^+ \psi^+ dA^+} = 0
 \end{equation}
-where $\psi$ are displacement test functions.
+where $\psi$ is a vector of test functions. Each of test function in $\psi$ is associated to a specific displacement component.
 
-Because of the small deformations assumption $A^-=A^+$ and $T^+=T^-=T$. Therefore, the equilibrium equation for a displacement component $i$ can be reacasted as
+Because of the small deformations assumption $A^-=A^+=A$ and $T^+=T^-=T$. Therefore, the equilibrium equation for the displacement component $i$ can be rewritten as
 \begin{equation}
   T_i (\psi^- - \psi^+) = 0
 \end{equation}
@@ -33,12 +33,12 @@ Therefore the residual for the master and slave surfaces can be rewritten as
 \end{aligned}
 \end{equation}
 
-This is the residual equation implemented in the `CZMInterfaceKernel`.
+These are the residual equations implemented in the `CZMInterfaceKernel`.
 The traction vector $T$ is provided to the `CZMInterfaceKernel` by the `CZMMaterial`.
 
 ### Jacobian
 
-Assuming the traction being only a function of the displacement jump vector
+Assuming the traction being only a function of the displacement jump vector $\Delta U$:
 \begin{equation}
  \Delta U = u^- - u^+
 \end{equation}
@@ -64,7 +64,7 @@ the Jacobian of the master surface can be rewritten as
   \frac{\partial R_i^+}{\partial u_j^-} & = & -\frac{\partial T_i(\Delta U)}{\partial \Delta U_j} \phi^- \psi^+
 \end{aligned}
 \end{equation}
-and for the slave surface
+Similarly, the Jacobian of the slave surface can be written as
 \begin{equation}
 \begin{aligned}
   \frac{\partial R_i^-}{\partial u_j^+} & = & -\frac{\partial T_i(\Delta U)}{\partial \Delta U_j} \phi^+ \psi^- \\
