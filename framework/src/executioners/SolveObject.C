@@ -24,6 +24,16 @@ SolveObject::SolveObject(Executioner * ex)
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
     _nl(_problem.getNonlinearSystemBase()),
     _aux(_problem.getAuxiliarySystem()),
-    _inner_solve(nullptr)
+    _inner_solve(nullptr),
+    _outer_solve(nullptr)
 {
+}
+
+SolveObject *
+SolveObject::outerMostSolve()
+{
+  SolveObject * outer_most_solve = this;
+  while (outer_most_solve->_outer_solve)
+    outer_most_solve = outer_most_solve->_outer_solve;
+  return outer_most_solve;
 }

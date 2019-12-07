@@ -32,7 +32,14 @@ public:
   virtual bool solve() = 0;
 
   /// Set the inner solve object wrapped by this object.
-  virtual void setInnerSolve(SolveObject & solve) { _inner_solve = &solve; }
+  virtual void setInnerSolve(SolveObject & solve)
+  {
+    _inner_solve = &solve;
+    solve._outer_solve = this;
+  }
+
+  /// Find the outer most SolveObject
+  SolveObject * outerMostSolve();
 
 protected:
   /// Executioner used to construct this
@@ -51,4 +58,6 @@ protected:
   AuxiliarySystem & _aux;
   /// SolveObject wrapped by this solve object
   SolveObject * _inner_solve;
+  /// SolveObject wrapping this solve object
+  SolveObject * _outer_solve;
 };
