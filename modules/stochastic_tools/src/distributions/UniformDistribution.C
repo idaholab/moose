@@ -11,11 +11,12 @@
 
 registerMooseObject("StochasticToolsApp", UniformDistribution);
 
-template <>
+defineLegacyParams(UniformDistribution);
+
 InputParameters
-validParams<UniformDistribution>()
+UniformDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Continuous uniform distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
   params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
@@ -32,7 +33,7 @@ UniformDistribution::UniformDistribution(const InputParameters & parameters)
 }
 
 Real
-UniformDistribution::pdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const
+UniformDistribution::pdf(const Real & x, const Real & lower_bound, const Real & upper_bound)
 {
   if (x < lower_bound || x > upper_bound)
     return 0.0;
@@ -41,7 +42,7 @@ UniformDistribution::pdf(const Real & x, const Real & lower_bound, const Real & 
 }
 
 Real
-UniformDistribution::cdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const
+UniformDistribution::cdf(const Real & x, const Real & lower_bound, const Real & upper_bound)
 {
   if (x < lower_bound)
     return 0.0;
@@ -52,12 +53,10 @@ UniformDistribution::cdf(const Real & x, const Real & lower_bound, const Real & 
 }
 
 Real
-UniformDistribution::quantile(const Real & y,
-                              const Real & lower_bound,
-                              const Real & upper_bound) const
+UniformDistribution::quantile(const Real & y, const Real & lower_bound, const Real & upper_bound)
 {
   if (y < 0 || y > 1)
-    mooseError("The cdf_value provided is out of range 0 to 1.");
+    ::mooseError("The cdf_value provided is out of range 0 to 1.");
   else
     return y * (upper_bound - lower_bound) + lower_bound;
 }

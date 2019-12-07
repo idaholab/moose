@@ -1,6 +1,6 @@
 [Tests]
   issues = "#8863"
-  design = "SamplerTransfer.md"
+  design = "SamplerParameterTransfer.md"
 
   [normal]
     requirement = "The system shall include the ability to modify parameters for sub-applications "

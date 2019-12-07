@@ -6,63 +6,66 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform_left]
+  [uniform_left]
     type = UniformDistribution
     lower_bound = 0
     upper_bound = 0.5
-  [../]
-  [./uniform_right]
+  []
+  [uniform_right]
     type = UniformDistribution
     lower_bound = 1
     upper_bound = 2
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = SobolSampler
     num_rows = 3
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     input_files = sub.i
     positions = '0 0 0'
-  [../]
+  []
 []
 
 [Transfers]
-  [./runner]
-    type = SamplerTransfer
+  [runner]
+    type = SamplerParameterTransfer
     multi_app = sub
+    sampler = sample
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
     execute_on = INITIAL
     check_multiapp_execute_on = false
-  [../]
-  [./data]
+  []
+  [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    vector_postprocessor = storage
-    postprocessor = avg
+    sampler = sample
+    to_vector_postprocessor = storage
+    from_postprocessor = avg
     execute_on = timestep_end
     check_multiapp_execute_on = false
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./storage]
+  [storage]
     type = StochasticResults
-  [../]
+    samplers = sample
+  []
 []
 
 [Executioner]

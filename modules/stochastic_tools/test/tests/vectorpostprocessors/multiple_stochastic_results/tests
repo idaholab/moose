@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#14414'
+  design = 'StochasticResults.md'
+
+  [multiple]
+    type = CSVDiff
+    input = master.i
+    csvdiff = master_out_storage_0002.csv
+
+    requirement = "The system shall support the collection of stochastic data from multiple "
+                  "sub-applications."
+  []
+[]

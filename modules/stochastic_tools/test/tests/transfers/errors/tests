@@ -5,7 +5,7 @@
     input = master_multiapp_type_error.i
     expect_err = "The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
                  "'SamplerFullSolveMultiApp' object."
-    design = 'SamplerTransfer.md'
+    design = 'SamplerParameterTransfer.md'
     requirement = "The system shall produce an error if sub-application type is not correct for "
                   "performing a transfer of stochastic data."
   []
@@ -33,7 +33,7 @@
     expect_err = "The supplied vector of Real values is not sized correctly, the Real parameter "
                  "'BCs/right/value requires a value but no more values are available in the supplied "
                  "values which have a size of 2."
-    design = 'SamplerTransfer.md'
+    design = 'SamplerParameterTransfer.md'
     requirement = "The system shall produce an error if supplied vector of real values is not sized "
                   "correctly."
   []

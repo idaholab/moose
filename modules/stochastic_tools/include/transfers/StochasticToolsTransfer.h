@@ -10,7 +10,9 @@
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
+#include "SamplerInterface.h"
 
+class Sampler;
 class StochasticToolsTransfer;
 template <>
 InputParameters validParams<StochasticToolsTransfer>();
@@ -19,9 +21,11 @@ InputParameters validParams<StochasticToolsTransfer>();
  * The class creates an additional API to allow Transfers to work when running the
  * StochasticTools<FullSolve/Transient>MultiApp objects in batch-mode.
  */
-class StochasticToolsTransfer : public MultiAppTransfer
+class StochasticToolsTransfer : public MultiAppTransfer, SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   StochasticToolsTransfer(const InputParameters & parameters);
 
   ///@{
@@ -52,4 +56,7 @@ public:
 protected:
   /// Index for tracking the global index when using batch mode operation
   dof_id_type _global_index = 0;
+
+  /// Pointer to the Sampler object used by the SamplerTransientMultiApp or SamplerFullSolveMultiApp
+  Sampler * _sampler_ptr;
 };

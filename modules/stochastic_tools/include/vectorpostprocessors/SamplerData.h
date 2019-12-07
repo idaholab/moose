@@ -24,6 +24,8 @@ InputParameters validParams<SamplerData>();
 class SamplerData : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   SamplerData(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void finalize() override;

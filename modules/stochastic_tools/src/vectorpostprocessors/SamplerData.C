@@ -15,14 +15,15 @@
 
 registerMooseObject("StochasticToolsApp", SamplerData);
 
-template <>
+defineLegacyParams(SamplerData);
+
 InputParameters
-validParams<SamplerData>()
+SamplerData::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Tool for extracting Sampler object data and storing in VectorPostprocessor vectors.");
-  params += validParams<SamplerInterface>();
+  params += SamplerInterface::validParams();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
 

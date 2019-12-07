@@ -6,33 +6,33 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = 1
     upper_bound = 7
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 10
     distributions = 'uniform'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./data]
+  [data]
     type = SamplerData
     sampler = sample
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

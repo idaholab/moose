@@ -12,11 +12,12 @@
 
 registerMooseObject("StochasticToolsTestApp", TestDistributionPostprocessor);
 
-template <>
+defineLegacyParams(TestDistributionPostprocessor);
+
 InputParameters
-validParams<TestDistributionPostprocessor>()
+TestDistributionPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<DistributionName>(
       "distribution", "The distribution which supplies the postprocessor value.");
   params.addRequiredParam<Real>(
