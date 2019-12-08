@@ -4,17 +4,19 @@
     input = 'load_3Dpolycrystal_distributed_gmsh.i'
     cli_args = '--mesh-only --distributed-mesh'
     requirement = 'MOOSE shall be able able to load a gmsh file in distributed mode'
-    min_parallel = 4
-    max_parallel = 16
+    min_parallel = 8
+    max_parallel = 8
     issues = '#14488'
+    recover = false
   [../]
   [./exodus]
     type = 'RunApp'
     input = 'load_3Dpolycrystal_distributed_exodus.i'
     cli_args = '--mesh-only --distributed-mesh'
     requirement = 'MOOSE shall be able able to load an exodus file in distributed mode'
-    min_parallel = 4
-    max_parallel = 16
+    min_parallel = 8
+    max_parallel = 8
     issues = '#14488'
+    recover = false
   [../]
 []
