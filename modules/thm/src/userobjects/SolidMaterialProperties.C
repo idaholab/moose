@@ -7,9 +7,9 @@ InputParameters
 validParams<SolidMaterialProperties>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<FunctionName>("k", "Thermal conductivity");
-  params.addRequiredParam<FunctionName>("Cp", "Specific heat");
-  params.addRequiredParam<FunctionName>("rho", "Density");
+  params.addRequiredParam<FunctionName>("k", "Thermal conductivity [W/(m-K)]");
+  params.addRequiredParam<FunctionName>("Cp", "Specific heat [J/(kg-K)]");
+  params.addRequiredParam<FunctionName>("rho", "Density [kg/m^3]");
 
   params.addPrivateParam<ExecFlagEnum>("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
