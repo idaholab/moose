@@ -343,6 +343,7 @@
     [IsolatedBoundingBoxIC_2D_Overlapping]
       type = RunException
       input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
+      expect_err = 'Partially overlapping boxes are not allowed. Note that this includes the overlapping diffused interfaces. For nested boxes, use NestedBoundingBoxIC.C'
 
       detail = 'Using IsolatedBoundingBoxIC to create overlapping boxes will throw an error.'
     []
