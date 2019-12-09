@@ -22,8 +22,6 @@ InputParameters validParams<BoostNormalDistribution>();
 class BoostNormalDistribution : public BoostDistribution<boost::math::normal_distribution<Real>>
 {
 public:
-  static InputParameters validParams();
-
   BoostNormalDistribution(const InputParameters & parameters);
 };
 

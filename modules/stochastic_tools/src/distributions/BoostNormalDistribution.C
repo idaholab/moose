@@ -13,12 +13,11 @@
 
 registerMooseObject("StochasticToolsApp", BoostNormalDistribution);
 
-defineLegacyParams(BoostNormalDistribution);
-
+template <>
 InputParameters
-BoostNormalDistribution::validParams()
+validParams<BoostNormalDistribution>()
 {
-  InputParameters params = Distribution::validParams();
+  InputParameters params = validParams<Distribution>();
   params.addClassDescription("Boost Normal distribution.");
   params.addRequiredParam<Real>("mean", "Mean of the distribution.");
   params.addRequiredParam<Real>("standard_deviation", "Standard deviation of the distribution.");

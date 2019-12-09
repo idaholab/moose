@@ -1,6 +1,6 @@
 [Tests]
   issues = '#8065'
-  design = 'SamplerParameterTransfer.md'
+  design = 'SamplerTransfer.md'
 
   [monte_carlo]
     type = CSVDiff

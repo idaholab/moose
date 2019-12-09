@@ -22,8 +22,6 @@ InputParameters validParams<BoostWeibullDistribution>();
 class BoostWeibullDistribution : public BoostDistribution<boost::math::weibull_distribution<Real>>
 {
 public:
-  static InputParameters validParams();
-
   BoostWeibullDistribution(const InputParameters & parameters);
 };
 

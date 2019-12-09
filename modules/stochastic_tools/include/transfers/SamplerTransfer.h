@@ -11,19 +11,22 @@
 
 // MOOSE includes
 #include "StochasticToolsTransfer.h"
+#include "Sampler.h"
 
 // Forward declarations
+class SamplerTransfer;
 class SamplerReceiver;
+
+template <>
+InputParameters validParams<SamplerTransfer>();
 
 /**
  * Copy each row from each DenseMatrix to the sub-applications SamplerReceiver object.
  */
-class SamplerParameterTransfer : public StochasticToolsTransfer
+class SamplerTransfer : public StochasticToolsTransfer
 {
 public:
-  static InputParameters validParams();
-
-  SamplerParameterTransfer(const InputParameters & parameters);
+  SamplerTransfer(const InputParameters & parameters);
   /**
    * Traditional Transfer callback
    */
@@ -47,6 +50,9 @@ protected:
 
   /// Storage for the list of parameters to control
   const std::vector<std::string> & _parameter_names;
+
+  /// Pointer to the Sampler object used by the SamplerTransientMultiApp or SamplerFullSolveMultiApp
+  Sampler * _sampler_ptr;
 
   /// The name of the SamplerReceiver Control object on the sub-application
   const std::string & _receiver_name;

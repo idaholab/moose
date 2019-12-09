@@ -24,15 +24,12 @@ InputParameters validParams<StochasticResults>();
 class StochasticResults : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
-  static InputParameters validParams();
-
   StochasticResults(const InputParameters & parameters);
-  void virtual initialize() override {}
-  void virtual finalize() override;
+  void virtual initialize() override;
+  void virtual finalize() override {}
   void virtual execute() override {}
 
   /**
-   * DEPRECATED
    * Initialize storage based on the Sampler returned by the SamplerTransientMultiApp or
    * SamplerFullSolveMultiApp.
    * @param sampler The Sampler associated with the MultiApp that this VPP is working with.
@@ -44,11 +41,8 @@ public:
 
 protected:
   /// Storage for declared vectors
-  std::vector<VectorPostprocessorValue *> _sample_vectors;
+  VectorPostprocessorValue * _sample_vector;
 
-  /// Parallel operation mode
-  const MooseEnum _parallel_type;
-
-  /// The rank data to output if parallel type is distributed
-  const processor_id_type _output_distributed_rank;
+  /// The sampler to extract data
+  Sampler * _sampler = nullptr;
 };

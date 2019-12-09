@@ -8,24 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "SamplerParameterTransfer.h"
+#include "SamplerTransfer.h"
 #include "SamplerTransientMultiApp.h"
 #include "SamplerFullSolveMultiApp.h"
 #include "SamplerReceiver.h"
-#include "Sampler.h"
 
-registerMooseObjectRenamed("StochasticToolsApp",
-                           SamplerTransfer,
-                           "01/01/2020 00:00",
-                           SamplerParameterTransfer);
-registerMooseObject("StochasticToolsApp", SamplerParameterTransfer);
+registerMooseObject("StochasticToolsApp", SamplerTransfer);
 
-defineLegacyParams(SamplerParameterTransfer);
-
+template <>
 InputParameters
-SamplerParameterTransfer::validParams()
+validParams<SamplerTransfer>()
 {
-  InputParameters params = StochasticToolsTransfer::validParams();
+  InputParameters params = validParams<StochasticToolsTransfer>();
   params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
@@ -40,15 +34,30 @@ SamplerParameterTransfer::validParams()
   return params;
 }
 
-SamplerParameterTransfer::SamplerParameterTransfer(const InputParameters & parameters)
+SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     _parameter_names(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
+
+  // Determine the Sampler
+  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
+      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
+      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+
+  if (!ptr_transient && !ptr_fullsolve)
+    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+               "'SamplerFullSolveMultiApp' object.");
+
+  if (ptr_transient)
+    _sampler_ptr = &(ptr_transient->getSampler());
+  else
+    _sampler_ptr = &(ptr_fullsolve->getSampler());
 }
 
 void
-SamplerParameterTransfer::execute()
+SamplerTransfer::execute()
 {
   mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(),
               "The number of MultiApps and the number of sample rows must be the same.");
@@ -73,13 +82,13 @@ SamplerParameterTransfer::execute()
 }
 
 void
-SamplerParameterTransfer::initializeToMultiapp()
+SamplerTransfer::initializeToMultiapp()
 {
   _global_index = _sampler_ptr->getLocalRowBegin();
 }
 
 void
-SamplerParameterTransfer::executeToMultiapp()
+SamplerTransfer::executeToMultiapp()
 {
   SamplerReceiver * ptr = getReceiver(processor_id());
 
@@ -91,12 +100,12 @@ SamplerParameterTransfer::executeToMultiapp()
 }
 
 void
-SamplerParameterTransfer::finalizeToMultiapp()
+SamplerTransfer::finalizeToMultiapp()
 {
 }
 
 SamplerReceiver *
-SamplerParameterTransfer::getReceiver(unsigned int app_index)
+SamplerTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
   FEProblemBase & to_problem = _multi_app->appProblemBase(app_index);

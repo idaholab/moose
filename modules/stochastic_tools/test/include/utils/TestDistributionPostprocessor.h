@@ -25,8 +25,6 @@ InputParameters validParams<TestDistributionPostprocessor>();
 class TestDistributionPostprocessor : public GeneralPostprocessor
 {
 public:
-  static InputParameters validParams();
-
   TestDistributionPostprocessor(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void execute() override {}

@@ -13,12 +13,11 @@
 
 registerMooseObject("StochasticToolsApp", WeibullDistribution);
 
-defineLegacyParams(WeibullDistribution);
-
+template <>
 InputParameters
-WeibullDistribution::validParams()
+validParams<WeibullDistribution>()
 {
-  InputParameters params = Distribution::validParams();
+  InputParameters params = validParams<Distribution>();
   params.addClassDescription("Three-parameter Weibull distribution.");
   params.addRequiredParam<Real>("location", "Location parameter (a or low)");
   params.addRequiredRangeCheckedParam<Real>("scale", "scale > 0", "Scale parameter (b or lambda)");
@@ -38,7 +37,7 @@ Real
 WeibullDistribution::pdf(const Real & x,
                          const Real & location,
                          const Real & scale,
-                         const Real & shape)
+                         const Real & shape) const
 {
   if (x <= location)
     return 0.0;
@@ -53,7 +52,7 @@ Real
 WeibullDistribution::cdf(const Real & x,
                          const Real & location,
                          const Real & scale,
-                         const Real & shape)
+                         const Real & shape) const
 {
   if (x <= location)
     return 0.0;
@@ -68,7 +67,7 @@ Real
 WeibullDistribution::quantile(const Real & p,
                               const Real & location,
                               const Real & scale,
-                              const Real & shape)
+                              const Real & shape) const
 {
   return location + scale * std::pow(-std::log(1 - p), 1.0 / shape);
 }

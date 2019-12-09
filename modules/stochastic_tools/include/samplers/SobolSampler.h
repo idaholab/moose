@@ -21,8 +21,6 @@ InputParameters validParams<SobolSampler>();
 class SobolSampler : public Sampler
 {
 public:
-  static InputParameters validParams();
-
   SobolSampler(const InputParameters & parameters);
 
 protected:

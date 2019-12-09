@@ -23,8 +23,6 @@ class BoostLognormalDistribution
   : public BoostDistribution<boost::math::lognormal_distribution<Real>>
 {
 public:
-  static InputParameters validParams();
-
   BoostLognormalDistribution(const InputParameters & parameters);
 };
 

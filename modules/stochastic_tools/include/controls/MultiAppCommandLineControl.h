@@ -29,8 +29,6 @@ InputParameters validParams<MultiAppCommandLineControl>();
 class MultiAppCommandLineControl : public Control, public SamplerInterface
 {
 public:
-  static InputParameters validParams();
-
   MultiAppCommandLineControl(const InputParameters & parameters);
 
   /**

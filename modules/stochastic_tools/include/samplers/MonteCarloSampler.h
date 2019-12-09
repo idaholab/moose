@@ -21,8 +21,6 @@ InputParameters validParams<MonteCarloSampler>();
 class MonteCarloSampler : public Sampler
 {
 public:
-  static InputParameters validParams();
-
   MonteCarloSampler(const InputParameters & parameters);
 
 protected:

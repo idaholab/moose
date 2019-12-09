@@ -22,18 +22,16 @@ InputParameters validParams<WeibullDistribution>();
 class WeibullDistribution : public Distribution
 {
 public:
-  static InputParameters validParams();
-
   WeibullDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;
   virtual Real cdf(const Real & x) const override;
   virtual Real quantile(const Real & p) const override;
 
-  static Real pdf(const Real & x, const Real & location, const Real & scale, const Real & shape);
-  static Real cdf(const Real & x, const Real & location, const Real & scale, const Real & shape);
-  static Real
-  quantile(const Real & p, const Real & location, const Real & scale, const Real & shape);
+  Real pdf(const Real & x, const Real & location, const Real & scale, const Real & shape) const;
+  Real cdf(const Real & x, const Real & location, const Real & scale, const Real & shape) const;
+  Real
+  quantile(const Real & p, const Real & location, const Real & scale, const Real & shape) const;
 
 protected:
   /// The location parameter (a or low)
@@ -45,3 +43,4 @@ protected:
   /// The shape parameter (c or k)
   const Real & _c;
 };
+

@@ -16,6 +16,14 @@
   []
 []
 
+[UserObjects]
+  [test]
+    type = SamplerTester
+    sampler = sampler
+    test_type = 'getLocalSamples'
+  []
+[]
+
 [Executioner]
   type = Steady
 []
@@ -38,12 +46,6 @@
     mem_units = 'bytes'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [test]
-    type = SamplerTester
-    sampler = sampler
-    test_type = 'getLocalSamples'
-  []
-
 []
 
 [Outputs]

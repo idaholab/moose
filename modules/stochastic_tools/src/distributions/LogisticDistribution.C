@@ -13,12 +13,11 @@
 
 registerMooseObject("StochasticToolsApp", LogisticDistribution);
 
-defineLegacyParams(LogisticDistribution);
-
+template <>
 InputParameters
-LogisticDistribution::validParams()
+validParams<LogisticDistribution>()
 {
-  InputParameters params = Distribution::validParams();
+  InputParameters params = validParams<Distribution>();
   params.addClassDescription("Logistic distribution.");
   params.addRequiredParam<Real>("location", "Location or mean of the distribution (alpha or mu)");
   params.addRequiredParam<Real>("shape", "Shape of the distribution (beta or s)");
@@ -31,21 +30,21 @@ LogisticDistribution::LogisticDistribution(const InputParameters & parameters)
 }
 
 Real
-LogisticDistribution::pdf(const Real & x, const Real & location, const Real & shape)
+LogisticDistribution::pdf(const Real & x, const Real & location, const Real & shape) const
 {
   Real z = std::exp(-(x - location) / shape);
   return z / (shape * Utility::pow<2>(1.0 + z));
 }
 
 Real
-LogisticDistribution::cdf(const Real & x, const Real & location, const Real & shape)
+LogisticDistribution::cdf(const Real & x, const Real & location, const Real & shape) const
 {
   Real z = std::exp(-(x - location) / shape);
   return 1.0 / (1.0 + z);
 }
 
 Real
-LogisticDistribution::quantile(const Real & p, const Real & location, const Real & shape)
+LogisticDistribution::quantile(const Real & p, const Real & location, const Real & shape) const
 {
   return location - shape * std::log(1.0 / p - 1.0);
 }

@@ -16,7 +16,7 @@
   []
 []
 
-[Postprocessors]
+[UserObjects]
   [test]
     type = SamplerTester
     sampler = sample

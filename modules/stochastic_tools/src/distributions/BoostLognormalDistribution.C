@@ -13,12 +13,11 @@
 
 registerMooseObject("StochasticToolsApp", BoostLognormalDistribution);
 
-defineLegacyParams(BoostLognormalDistribution);
-
+template <>
 InputParameters
-BoostLognormalDistribution::validParams()
+validParams<BoostLognormalDistribution>()
 {
-  InputParameters params = Distribution::validParams();
+  InputParameters params = validParams<Distribution>();
   params.addClassDescription("Boost Lognormal distribution.");
   params.addRequiredParam<Real>("location", "The Lognormal location parameter.");
   params.addRequiredParam<Real>("scale", "The Lognormal scale parameter.");

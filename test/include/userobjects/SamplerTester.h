@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeneralPostprocessor.h"
+#include "GeneralUserObject.h"
 #include "SamplerInterface.h"
 #include "Sampler.h"
 
@@ -23,7 +23,7 @@ InputParameters validParams<SamplerTester>();
  * UserObject for testing Sampler object threaded and parallel behavior, it should be used for
  * anything else, see TestSampler object.
  */
-class SamplerTester : public GeneralPostprocessor, public SamplerInterface
+class SamplerTester : public GeneralUserObject, public SamplerInterface
 {
 public:
   SamplerTester(const InputParameters & parameters);
@@ -35,7 +35,6 @@ protected:
   virtual void execute() final;
   virtual void initialize() final;
   virtual void finalize() final;
-  virtual Real getValue() final;
   virtual void threadJoin(const UserObject & uo) final;
   Sampler & _sampler;
   const MooseEnum & _test_type;

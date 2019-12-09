@@ -25,9 +25,12 @@ InputParameters validParams<SamplerTransientMultiApp>();
 class SamplerTransientMultiApp : public TransientMultiApp, public SamplerInterface
 {
 public:
-  static InputParameters validParams();
-
   SamplerTransientMultiApp(const InputParameters & parameters);
+
+  /**
+   * Return the Sampler object for this MultiApp.
+   */
+  Sampler & getSampler() const { return _sampler; }
 
   /**
    * Override solveStep to allow for batch execution.

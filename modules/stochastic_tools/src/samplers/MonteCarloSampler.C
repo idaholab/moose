@@ -12,12 +12,11 @@
 
 registerMooseObject("StochasticToolsApp", MonteCarloSampler);
 
-defineLegacyParams(MonteCarloSampler);
-
+template <>
 InputParameters
-MonteCarloSampler::validParams()
+validParams<MonteCarloSampler>()
 {
-  InputParameters params = Sampler::validParams();
+  InputParameters params = validParams<Sampler>();
   params.addClassDescription("Monte Carlo Sampler.");
   params.addRequiredParam<dof_id_type>("num_rows", "The number of rows per matrix to generate.");
   params.addRequiredParam<std::vector<DistributionName>>(
