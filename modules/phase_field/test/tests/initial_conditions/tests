@@ -343,7 +343,6 @@
     [IsolatedBoundingBoxIC_2D_Overlapping]
       type = RunException
       input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
-      exodiff = 'IsolatedBoundingBoxIC_2D_Overlapping_out.e'
 
       detail = 'Using IsolatedBoundingBoxIC to create overlapping boxes will throw an error.'
     []
