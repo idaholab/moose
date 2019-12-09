@@ -76,6 +76,10 @@ SetupMeshCompleteAction::act()
     if (_app.isUseSplit())
       return;
 
+    // uniform refinement has been done on master, so skip
+    if (_app.masterMesh())
+      return;
+
     /**
      * If possible we'd like to refine the mesh here before the equation systems
      * are setup to avoid doing expensive projections. If however we are doing a
@@ -92,7 +96,6 @@ SetupMeshCompleteAction::act()
       if (_mesh->uniformRefineLevel())
       {
         Adaptivity::uniformRefine(_mesh.get());
-
         if (_displaced_mesh)
           Adaptivity::uniformRefine(_displaced_mesh.get());
       }
