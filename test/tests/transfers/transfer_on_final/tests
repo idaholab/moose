@@ -4,7 +4,7 @@
   [transfer_on_final]
     type = Exodiff
     input = master.i
-    exodiff = 'master_final.e master_out.e master_out_sub0.e'
+    exodiff = 'master_final.e master_out.e master_out_sub0_final.e'
     requirement = "The Transfer system shall support execution with the EXEC_FINAL flag."
   []
 []

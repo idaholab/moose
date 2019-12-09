@@ -110,6 +110,7 @@ AddFluidPropertiesInterrogatorAction::act()
     const std::string class_name = "Console";
     InputParameters params = _factory.getValidParams(class_name);
     params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
+    params.set<std::string>("file_base") = _app.getOutputFileBase();
     params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
     params.set<MultiMooseEnum>("system_info") = "";
     std::shared_ptr<Output> output = _factory.create<Output>(class_name, "Console", params);
