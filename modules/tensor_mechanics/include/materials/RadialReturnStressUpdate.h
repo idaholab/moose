@@ -82,6 +82,11 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  /**
+   * Radial return mapped models should be isotropic by default!
+   */
+  bool isIsotropic() override { return true; };
+
 protected:
   virtual void initQpStatefulProperties() override;
 
