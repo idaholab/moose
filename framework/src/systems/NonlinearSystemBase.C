@@ -1149,8 +1149,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
                   const auto & slave_var = nfc->variable();
                   const auto & slave_dofs = slave_var.dofIndices();
-                  mooseAssert(slave_dofs.size() == 1,
-                              "We are on a node so there should only be one dof");
+                  mooseAssert(slave_dofs.size() == slave_var.count(),
+                              "We are on a node so there should only be one dof per variable (for "
+                              "an ArrayVariable we should have a number of dofs equal to the "
+                              "number of components");
                   std::vector<Number> values = {nfc->slaveResidual() * slave_var.scalingFactor()};
                   residual.insert(values, slave_dofs);
                   residual_has_inserted_values = true;
