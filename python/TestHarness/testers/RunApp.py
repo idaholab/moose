@@ -87,7 +87,10 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        return True
+        if options.validation:
+            return self.specs['validation']
+        else:
+            return not self.specs['validation']
 
     def getThreads(self, options):
         #Set number of threads to be used lower bound
