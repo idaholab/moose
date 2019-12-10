@@ -289,7 +289,6 @@
 - /Postprocessors/SumPostprocessor
 
 - /ScalarKernels/EnergyBalanceScalarKernel
-- /ScalarKernels/MassBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
