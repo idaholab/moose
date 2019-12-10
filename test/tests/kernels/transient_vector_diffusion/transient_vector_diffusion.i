@@ -5,12 +5,19 @@
     nx = 10
     ny = 10
   [../]
-  [./block]
+  [./block1]
     type = SubdomainBoundingBoxGenerator
     input = generator
-    bottom_left = '0.4 0.4 -1'
-    top_right = '0.6 0.6 1'
+    bottom_left = '0 0 -1'
+    top_right = '1 1 1'
     block_id = 1
+  [../]
+  [./block2]
+    type = SubdomainBoundingBoxGenerator
+    input = block1
+    bottom_left = '0.33 0.33 -1'
+    top_right = '0.67 0.67 1'
+    block_id = 2
   [../]
 []
 
@@ -27,7 +34,7 @@
     x_value = 1
     y_value = 2
     z_value = 3
-    block = 1
+    block = 2
   [../]
 []
 
