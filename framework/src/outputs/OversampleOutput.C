@@ -81,7 +81,7 @@ OversampleOutput::initialSetup()
 void
 OversampleOutput::outputStep(const ExecFlagType & type)
 {
-  CONSOLE_TIMED_PRINT("Outputing ", name());
+  CONSOLE_TIMED_PRINT("Outputting ", name());
 
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)

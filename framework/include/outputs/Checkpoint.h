@@ -89,7 +89,7 @@ private:
   /// Directory suffix
   const std::string _suffix;
 
-  /// True if outputing checkpoint files in binary format
+  /// True if outputting checkpoint files in binary format
   bool _binary;
 
   /// True if running with parallel mesh

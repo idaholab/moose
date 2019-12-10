@@ -86,7 +86,7 @@ void petscSetupDM(NonlinearSystemBase & nl);
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
 /**
- * Helper function for outputing the norm values with/without color
+ * Helper function for outputting the norm values with/without color
  */
 void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = false);
 

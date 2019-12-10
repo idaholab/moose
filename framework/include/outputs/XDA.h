@@ -34,7 +34,7 @@ public:
 protected:
   /**
    * Overload the Output::output method, this is required for XDA
-   * output due to the method utlized for outputing single/global parameters
+   * output due to the method utlized for outputting single/global parameters
    */
   virtual void output(const ExecFlagType & type) override;
 

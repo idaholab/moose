@@ -41,7 +41,7 @@ to force the selection of a particular end point by using the "final_generator" 
 This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
 
 
-## Outputing The Mesh
+## Outputting The Mesh
 
 Since MOOSE contains a lot of ability to read/generate/modify meshes - it's often useful to be able to run all of
 the Mesh related portions of the input file and then output the mesh.  This mesh can then be viewed (such as
