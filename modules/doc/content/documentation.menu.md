@@ -29,7 +29,7 @@
 - [Contributing](framework_development/contributing.md)
 - [Code Standards](code_standards.md)
 - [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
-- [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
+- [libMesh Doxygen](https://libmesh.github.io/doxygen/classes.html)
 !col-end!
 
 !col! small=12 medium=6 large=4
