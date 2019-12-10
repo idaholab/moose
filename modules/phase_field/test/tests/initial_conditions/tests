@@ -307,5 +307,45 @@
 
       detail = 'multiple bounding boxes in 3D.'
     []
+    
+    [IsolatedBoundingBoxIC_2D]
+      type = Exodiff
+      input = 'IsolatedBoundingBoxIC_2D.i'
+      exodiff = 'IsolatedBoundingBoxIC_2D_out.e'
+
+      detail = 'Diffused interface can be assigned for isolated bounding boxes in 2D,'
+    []
+
+    [IsolatedBoundingBoxIC_3D]
+      type = Exodiff
+      input = 'IsolatedBoundingBoxIC_3D.i'
+      exodiff = 'IsolatedBoundingBoxIC_3D_out.e'
+
+      detail = '3D,'
+    []
+
+    [NestedBoundingBoxIC_2D]
+      type = Exodiff
+      input = 'NestedBoundingBoxIC_2D.i'
+      exodiff = 'NestedBoundingBoxIC_2D_out.e'
+
+      detail = 'nested bounding boxes in 2D, and'
+    []
+
+    [NestedBoundingBoxIC_3D]
+      type = Exodiff
+      input = 'NestedBoundingBoxIC_3D.i'
+      exodiff = 'NestedBoundingBoxIC_3D_out.e'
+
+      detail = '3D.'
+    []
+      
+    [IsolatedBoundingBoxIC_2D_Overlapping]
+      type = RunException
+      input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
+      expect_err = 'Partially overlapping boxes are not allowed. Note that this includes the overlapping diffused interfaces. For nested boxes, use NestedBoundingBoxIC.C'
+
+      detail = 'Using IsolatedBoundingBoxIC to create overlapping boxes will throw an error.'
+    []
   []
 []
