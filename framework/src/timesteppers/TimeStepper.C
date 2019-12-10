@@ -53,6 +53,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _cutback_factor_at_failure(getParam<Real>("cutback_factor_at_failure")),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
+    _solver(nullptr),
     _current_dt(declareRestartableData("current_dt", 1.0))
 {
 }
@@ -160,7 +161,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = _executioner.solver()->solve();
+  _converged = _solver->solve();
 }
 
 void

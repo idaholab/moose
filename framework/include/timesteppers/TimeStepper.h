@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 #include "ScalarCoupleable.h"
+#include "SolveObject.h"
 
 class TimeStepper;
 class FEProblemBase;
@@ -35,6 +36,9 @@ public:
    * Initialize the time stepper. Called at the very beginning of Executioner::execute()
    */
   virtual void init();
+
+  /// Set the inner solver of this time stepper
+  void setInnerSolve(SolveObject * solver) { _solver = solver; }
 
   virtual void preExecute();
   virtual void preSolve() {}
@@ -150,6 +154,9 @@ protected:
   bool _has_reset_dt;
 
 private:
+  /// The underlying solver
+  SolveObject * _solver;
+
   /// Size of the current time step as computed by the Stepper.  Note that the actual dt that was taken might be smaller if the Executioner constrained it.
   Real & _current_dt;
 };

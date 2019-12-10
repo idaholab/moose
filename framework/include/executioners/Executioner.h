@@ -112,9 +112,6 @@ public:
   /// Return underlining PicardSolve object.
   PicardSolve & picardSolve() { return _picard_solve; }
 
-  /// Return the wrapped solver
-  SolveObject * solver() { return _solver; }
-
   /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const { return false; }
 
@@ -138,7 +135,6 @@ protected:
 
   FEProblemSolve _feproblem_solve;
   PicardSolve _picard_solve;
-  SolveObject * _solver;
 
   // Restart
   std::string _restart_file_base;

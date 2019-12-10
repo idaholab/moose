@@ -246,6 +246,9 @@ Transient::init()
 
   _time_stepper->init();
 
+  // Need to set the solver being wrapped by the time stepper
+  _time_stepper->setInnerSolve(&_picard_solve);
+
   if (_app.isRecovering()) // Recover case
   {
     if (_t_step == 0)
