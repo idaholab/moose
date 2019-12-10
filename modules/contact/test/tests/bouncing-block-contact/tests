@@ -114,21 +114,21 @@
       absent_out = '[1-9]+[0-9]* of 16 singular values'
       expect_out = '0 of 16 singular values'
       detail = 'nonsingular both with bounds projection and'
-      cli_args = 'Outputs/file_base=ranfs-project-svd'
+      cli_args = 'Outputs/file_base=ranfs-project-svd -pc_type svd -pc_svd_monitor'
     []
     [ranfs-dont-project-svd]
       type = 'Exodiff'
       input = 'frictionless-nodal-reduced-active-set.i'
       exodiff = 'ranfs-dont-project-svd.e'
       detail = 'without bounds projection and be'
-      cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none -pc_type svd -pc_svd_monitor'
     []
     [ranfs-project-amg]
       type = 'Exodiff'
       input = 'frictionless-nodal-reduced-active-set.i'
       exodiff = 'ranfs-project-amg.e'
       detail = 'solvable with amg both with bounds projection'
-      cli_args = 'Outputs/file_base=ranfs-project-amg -pc_type hypre -pc_hypre_type boomeramg'
+      cli_args = 'Outputs/file_base=ranfs-project-amg'
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
     []
     [ranfs-dont-project-amg]
@@ -136,14 +136,14 @@
       input = 'frictionless-nodal-reduced-active-set.i'
       exodiff = 'ranfs-dont-project-amg.e'
       detail = 'and without bounds projection.'
-      cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none'
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
     []
     [ranfs-jacobian]
       type = 'PetscJacobianTester'
       input = 'frictionless-nodal-reduced-active-set.i'
       difference_tol = 1e-7
-      cli_args = "Outputs/active='' Executioner/line_search=none -pc_type hypre -pc_hypre_type boomeramg"
+      cli_args = "Outputs/active='' Executioner/line_search=none"
       expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
       detail = "The system's RANFS scheme shall have a perfect Jacobian for mechanical contact that only has one non-zero normal component"
     []
@@ -174,6 +174,7 @@
       expect_out = '0 of 16 singular values'
       detail = 'tie nodes together and'
       allow_test_objects = True
+      cli_args = '-pc_type svd -pc_svd_monitor'
     []
     [jac]
       type = 'PetscJacobianTester'

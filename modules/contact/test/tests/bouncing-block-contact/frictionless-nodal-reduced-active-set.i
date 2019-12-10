@@ -2,7 +2,7 @@ starting_point = .5
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  diffusivity = 1e0
+  diffusivity = 1
 []
 
 [Mesh]
@@ -89,9 +89,9 @@ starting_point = .5
   dt = 1
   dtmin = 1
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual -pc_svd_monitor -snes_view'
-  petsc_options_iname = '-mat_mffd_err -pc_type'
-  petsc_options_value = '1e-5          svd'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual -snes_view'
+  petsc_options_iname = '-mat_mffd_err -pc_type -pc_hypre_type'
+  petsc_options_value = '1e-5          hypre    boomeramg'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'project'

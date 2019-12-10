@@ -79,9 +79,9 @@
   num_steps = 1
   dtmin = 1
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'svd'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre    boomeramg'
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
