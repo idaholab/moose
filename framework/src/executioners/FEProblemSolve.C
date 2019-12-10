@@ -14,6 +14,14 @@
 
 defineLegacyParams(FEProblemSolve);
 
+std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
+
+const std::set<std::string> &
+FEProblemSolve::mooseLineSearches()
+{
+  return _moose_line_searches;
+}
+
 InputParameters
 FEProblemSolve::validParams()
 {
@@ -24,7 +32,10 @@ FEProblemSolve::validParams()
                                             "hierarchical decomposition into "
                                             "subsystems to help the solver.");
 
-  std::set<std::string> line_searches = {"contact", "default", "none", "basic", "project"};
+  std::set<std::string> line_searches = mooseLineSearches();
+
+  std::set<std::string> alias_line_searches = {"default", "none", "basic"};
+  line_searches.insert(alias_line_searches.begin(), alias_line_searches.end());
 #ifdef LIBMESH_HAVE_PETSC
   std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
   line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
@@ -92,7 +103,8 @@ FEProblemSolve::validParams()
 FEProblemSolve::FEProblemSolve(Executioner * ex)
   : SolveObject(ex), _splitting(getParam<std::vector<std::string>>("splitting"))
 {
-  if (_pars.isParamSetByUser("line_search"))
+  if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
+      _moose_line_searches.end())
     _problem.addLineSearch(_pars);
 
 // Extract and store PETSc related settings on FEProblemBase
