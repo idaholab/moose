@@ -123,10 +123,6 @@ RANFSNormalMechanicalContact::shouldApply()
       }
       else
       {
-        // We need the matrix to be assembled so we get the correct Jacobian entries
-        if (!_jacobian->closed())
-          _jacobian->close();
-
         std::vector<dof_id_type> cols;
         std::vector<Number> values;
 

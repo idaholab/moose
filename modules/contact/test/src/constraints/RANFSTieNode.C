@@ -80,10 +80,6 @@ RANFSTieNode::shouldApply()
                                             _var_objects[_component]->scalingFactor()));
     else
     {
-      // We need the matrix to be assembled so we get the correct Jacobian entries
-      if (!_jacobian->closed())
-        _jacobian->close();
-
       std::vector<dof_id_type> master_cols;
       std::vector<Number> master_values;
 
