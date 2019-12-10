@@ -36,6 +36,12 @@
     new_boundary = right_interior
     input = left_interior
   [../]
+  [./rename]
+    type = RenameBlockGenerator
+    input = right_interior
+    old_block_id = '1 2 3'
+    new_block_id = '1 4 3'
+  [../]
 []
 
 
