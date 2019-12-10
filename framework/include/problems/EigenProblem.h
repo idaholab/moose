@@ -55,6 +55,8 @@ public:
    */
   bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
 
+  void scaleEigenvector(const Real scaling_factor);
+
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 

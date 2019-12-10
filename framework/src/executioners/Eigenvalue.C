@@ -28,6 +28,11 @@ Eigenvalue::validParams()
 
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
+  params.addParam<PostprocessorName>(
+      "normalization", "Postprocessor evaluating norm of eigenvector for normalization");
+  params.addParam<Real>(
+      "normal_factor", 1.0, "Normalize eigenvector to make a defined norm equal to this factor");
+
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
   Moose::SlepcSupport::getSlepcValidParams(params);
@@ -40,7 +45,9 @@ Eigenvalue::validParams()
 Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Steady(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
-        "_eigen_problem", "This might happen if you don't have a mesh"))
+        "_eigen_problem", "This might happen if you don't have a mesh")),
+    _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
+                                                 : nullptr)
 {
 // Extract and store SLEPc options
 #if LIBMESH_HAVE_SLEPC
@@ -49,6 +56,10 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
 #endif
+
+  if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
+    paramError("normal_factor",
+               "Cannot set scaling factor without defining normalization postprocessor.");
 }
 
 void
@@ -70,4 +81,26 @@ Eigenvalue::execute()
 #endif
 
   Steady::execute();
+}
+
+void
+Eigenvalue::postSolve()
+{
+  if (_normalization)
+  {
+    Real val = getParam<Real>("normal_factor");
+
+    if (MooseUtils::absoluteFuzzyEqual(*_normalization, 0.0))
+      mooseError("Cannot normalize eigenvector by 0");
+    else
+      val /= *_normalization;
+
+    if (!MooseUtils::absoluteFuzzyEqual(val, 1.0))
+    {
+      _eigen_problem.scaleEigenvector(val);
+      // update all aux variables and user objects
+      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
+        _problem.execute(flag);
+    }
+  }
 }
