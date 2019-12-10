@@ -15,22 +15,30 @@ template <>
 InputParameters
 validParams<SamplerTester>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
   MooseEnum test_type(
       "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getGlobalSamples "
       "getLocalSamples getNextLocalRow");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
+  params.suppressParameter<std::vector<OutputName>>("outputs");
   return params;
 }
 
 SamplerTester::SamplerTester(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : GeneralPostprocessor(parameters),
     SamplerInterface(this),
     _sampler(getSampler("sampler")),
     _test_type(getParam<MooseEnum>("test_type"))
 {
+}
+
+Real
+SamplerTester::getValue()
+{
+  return 0.0;
 }
 
 void

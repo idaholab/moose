@@ -8,18 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "StochasticToolsTransfer.h"
 #include "MultiApp.h"
+#include "Sampler.h"
+#include "SamplerTransientMultiApp.h"
+#include "SamplerFullSolveMultiApp.h"
 
-template <>
+defineLegacyParams(StochasticToolsTransfer);
+
 InputParameters
-validParams<StochasticToolsTransfer>()
+StochasticToolsTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.set<bool>("check_multiapp_execute_on", true) = false; // see comments in constructor
+  params.addParam<SamplerName>("sampler", "A the Sampler object that Transfer is associated..");
   return params;
 }
 
 StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters)
+  : MultiAppTransfer(parameters), SamplerInterface(this)
 {
   // When the MultiApp is running in batch mode the execute flags for the transfer object must
   // be removed. If not the 'regular' transfer that occurs will potentially destroy data
@@ -56,6 +61,46 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
   // has not been set, then the user wants the check to be performed, so do it.
   else if (!parameters.isParamSetByUser("check_multiapp_execute_on"))
     checkMultiAppExecuteOn();
+
+  // Determine the Sampler
+  if (isParamValid("sampler"))
+  {
+    _sampler_ptr = &(getSampler("sampler"));
+
+    SamplerTransientMultiApp * ptr_transient =
+        dynamic_cast<SamplerTransientMultiApp *>(_multi_app.get());
+    SamplerFullSolveMultiApp * ptr_fullsolve =
+        dynamic_cast<SamplerFullSolveMultiApp *>(_multi_app.get());
+
+    if (!ptr_transient && !ptr_fullsolve)
+      mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+                 "'SamplerFullSolveMultiApp' object.");
+
+    if ((ptr_transient && &(ptr_transient->getSampler("sampler")) != _sampler_ptr) ||
+        (ptr_fullsolve && &(ptr_fullsolve->getSampler("sampler")) != _sampler_ptr))
+      mooseError("The supplied 'multi_app' must have the same Sampler object as this Transfer.");
+  }
+
+  else
+  {
+    paramWarning("sampler",
+                 "Support for the 'StochasticToolsTransfer' objects without the 'sampler' input "
+                 "parameter is being removed, please update your input file(s).");
+
+    std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
+        std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+    std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
+        std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+
+    if (!ptr_transient && !ptr_fullsolve)
+      mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+                 "'SamplerFullSolveMultiApp' object.");
+
+    if (ptr_transient)
+      _sampler_ptr = &(ptr_transient->getSampler("sampler"));
+    else
+      _sampler_ptr = &(ptr_fullsolve->getSampler("sampler"));
+  }
 }
 
 void

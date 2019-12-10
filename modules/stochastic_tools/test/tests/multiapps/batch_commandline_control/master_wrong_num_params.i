@@ -13,20 +13,20 @@
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = 5
     upper_bound = 10
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 3
     distributions = 'uniform uniform'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [MultiApps]

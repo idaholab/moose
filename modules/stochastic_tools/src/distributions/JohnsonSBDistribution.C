@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsApp", JohnsonSBDistribution);
 
-template <>
+defineLegacyParams(JohnsonSBDistribution);
+
 InputParameters
-validParams<JohnsonSBDistribution>()
+JohnsonSBDistribution::validParams()
 {
-  InputParameters params = validParams<NormalDistribution>();
+  InputParameters params = NormalDistribution::validParams();
   params.addClassDescription("Johnson Special Bounded (SB) distribution.");
 
   params.set<Real>("mean") = 0.0;
@@ -43,11 +44,8 @@ JohnsonSBDistribution::JohnsonSBDistribution(const InputParameters & parameters)
 }
 
 Real
-JohnsonSBDistribution::pdf(const Real & x,
-                           const Real & a,
-                           const Real & b,
-                           const Real & alpha_1,
-                           const Real & alpha_2) const
+JohnsonSBDistribution::pdf(
+    const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2)
 {
   if (x <= a)
     return 0.0;
@@ -61,30 +59,24 @@ JohnsonSBDistribution::pdf(const Real & x,
 }
 
 Real
-JohnsonSBDistribution::cdf(const Real & x,
-                           const Real & a,
-                           const Real & b,
-                           const Real & alpha_1,
-                           const Real & alpha_2) const
+JohnsonSBDistribution::cdf(
+    const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2)
 {
   if (x <= a)
     return 0.0;
   else if (x < b)
   {
-    return NormalDistribution::cdf(alpha_1 + alpha_2 * std::log((x - a) / (b - x)));
+    return NormalDistribution::cdf(alpha_1 + alpha_2 * std::log((x - a) / (b - x)), 0.0, 1.0);
   }
   else
     return 0.0;
 }
 
 Real
-JohnsonSBDistribution::quantile(const Real & p,
-                                const Real & a,
-                                const Real & b,
-                                const Real & alpha_1,
-                                const Real & alpha_2) const
+JohnsonSBDistribution::quantile(
+    const Real & p, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2)
 {
-  const Real Z = NormalDistribution::quantile(p);
+  const Real Z = NormalDistribution::quantile(p, 0.0, 1.0);
   return (a + b * std::exp((Z - alpha_1) / alpha_2)) / (1.0 + std::exp((Z - alpha_1) / alpha_2));
 }
 

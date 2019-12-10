@@ -1,6 +1,6 @@
 [Tests]
   issues = "#8863"
-  design = "SobolSampler.md SamplerTransfer.md"
+  design = "SobolSampler.md SamplerParameterTransfer.md"
   [sobol]
     type = CSVDiff
     input = sobol.i

@@ -6,60 +6,61 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform_left]
+  [uniform_left]
     type = UniformDistribution
     lower_bound = 1
     upper_bound = 2
-  [../]
-  [./uniform_right]
+  []
+  [uniform_right]
     type = UniformDistribution
     lower_bound = 10
     upper_bound = 20
-  [../]
-  [./uniform_prop_a]
+  []
+  [uniform_prop_a]
     type = UniformDistribution
     lower_bound = 1980
     upper_bound = 1981
-  [../]
-  [./uniform_prop_b]
+  []
+  [uniform_prop_b]
     type = UniformDistribution
     lower_bound = 1949
     upper_bound = 1950
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 5
     distributions = 'uniform_left uniform_prop_a uniform_prop_b uniform_right'
     execute_on = 'initial timestep_end' # create new random numbers on initial and timestep_end
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sample
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./sub]
-    type = SamplerTransfer
+  [sub]
+    type = SamplerParameterTransfer
     multi_app = sub
+    sampler = sample
     parameters = 'BCs/left/value Materials/mat/prop_values BCs/right/value'
     to_control = 'stochastic'
     execute_on = 'initial timestep_end'
     check_multiapp_execute_on = false
-  [../]
+  []
 []
 
 [Executioner]
