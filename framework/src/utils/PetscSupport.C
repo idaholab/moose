@@ -99,8 +99,8 @@ stringify(const LineSearchType & t)
       return "cp";
     case LS_CONTACT:
       return "contact";
-    case LS_PING_PONG:
-      return "ping_pong";
+    case LS_PROJECT:
+      return "project";
 #endif
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
@@ -156,8 +156,7 @@ setSolverOptions(SolverParams & solver_params)
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT &&
-      ls_type != Moose::LS_PING_PONG)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
   {
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
     setSinglePetscOption("-snes_type", "ls");
@@ -552,7 +551,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       Moose::LineSearchType enum_line_search =
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
       fe_problem.solverParams()._line_search = enum_line_search;
-      if (enum_line_search == LS_CONTACT || enum_line_search == LS_PING_PONG)
+      if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
       {
         NonlinearImplicitSystem * nl_system =
             dynamic_cast<NonlinearImplicitSystem *>(&fe_problem.getNonlinearSystemBase().system());

@@ -22,7 +22,7 @@
 
 using namespace libMesh;
 
-class PetscPingPongLineSearch;
+class PetscProjectSolutionOntoBounds;
 class GeometricSearchData;
 class PenetrationLocator;
 class NonlinearSystemBase;
@@ -35,15 +35,15 @@ class PetscNonlinearSolver;
 }
 
 template <>
-InputParameters validParams<PetscPingPongLineSearch>();
+InputParameters validParams<PetscProjectSolutionOntoBounds>();
 
 /**
  *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)
  */
-class PetscPingPongLineSearch : public LineSearch
+class PetscProjectSolutionOntoBounds : public LineSearch
 {
 public:
-  PetscPingPongLineSearch(const InputParameters & parameters);
+  PetscProjectSolutionOntoBounds(const InputParameters & parameters);
 
   void initialSetup() override;
   virtual void lineSearch() override;

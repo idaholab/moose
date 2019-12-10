@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PetscPingPongLineSearch.h"
+#include "PetscProjectSolutionOntoBounds.h"
 
 #ifdef LIBMESH_HAVE_PETSC
 #if !PETSC_VERSION_LESS_THAN(3, 6, 0)
@@ -22,19 +22,16 @@
 #include "libmesh/petsc_vector.h"
 #include <petscdm.h>
 
-registerMooseObject("ContactApp", PetscPingPongLineSearch);
+registerMooseObject("ContactApp", PetscProjectSolutionOntoBounds);
 
 template <>
 InputParameters
-validParams<PetscPingPongLineSearch>()
+validParams<PetscProjectSolutionOntoBounds>()
 {
-  auto params = validParams<LineSearch>();
-  params.addParam<Real>(
-      "ping_pong_tol", 1e-4, "A relative tolerance for determining whether we are ping-ponging");
-  return params;
+  return validParams<LineSearch>();
 }
 
-PetscPingPongLineSearch::PetscPingPongLineSearch(const InputParameters & parameters)
+PetscProjectSolutionOntoBounds::PetscProjectSolutionOntoBounds(const InputParameters & parameters)
   : LineSearch(parameters), _nl(_fe_problem.getNonlinearSystemBase())
 {
   _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
@@ -45,7 +42,7 @@ PetscPingPongLineSearch::PetscPingPongLineSearch(const InputParameters & paramet
 }
 
 void
-PetscPingPongLineSearch::initialSetup()
+PetscProjectSolutionOntoBounds::initialSetup()
 {
   _displaced_problem = _fe_problem.getDisplacedProblem().get();
   if (!_displaced_problem)
@@ -53,7 +50,7 @@ PetscPingPongLineSearch::initialSetup()
 }
 
 void
-PetscPingPongLineSearch::lineSearch()
+PetscProjectSolutionOntoBounds::lineSearch()
 {
   PetscBool changed_y = PETSC_FALSE;
   PetscErrorCode ierr;

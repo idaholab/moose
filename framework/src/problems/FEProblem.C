@@ -14,6 +14,7 @@
 #include "MooseEigenSystem.h"
 #include "NonlinearSystem.h"
 #include "LineSearch.h"
+#include "MooseEnum.h"
 
 registerMooseObject("MooseApp", FEProblem);
 
@@ -62,7 +63,7 @@ FEProblem::addLineSearch(const InputParameters & parameters)
 {
   MooseEnum line_search = parameters.get<MooseEnum>("line_search");
   Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-  if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PING_PONG)
+  if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PROJECT)
   {
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3, 6, 0)
@@ -86,16 +87,17 @@ FEProblem::addLineSearch(const InputParameters & parameters)
     }
     else
     {
-      InputParameters ls_params = _factory.getValidParams("PetscPingPongLineSearch");
-      ls_params.applySpecificParameters(parameters, {"ping_ping_tol"});
+      InputParameters ls_params = _factory.getValidParams("PetscProjectSolutionOntoBounds");
       ls_params.set<FEProblem *>("_fe_problem") = this;
 
       _line_search = _factory.create<LineSearch>(
-          "PetscPingPongLineSearch", "ping_pong_line_search", ls_params);
+          "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
     }
 #endif
 #else
     mooseError("Currently the MOOSE implemented line searches require use of Petsc.");
 #endif
   }
+  else
+    mooseError("Requested line search ", line_search.operator std::string(), " is not supported");
 }
