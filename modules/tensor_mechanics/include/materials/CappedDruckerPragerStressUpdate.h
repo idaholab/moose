@@ -69,6 +69,8 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  bool isIsotropic() override { return true; };
+
 protected:
   /// Hardening model for cohesion, friction and dilation angles
   const TensorMechanicsPlasticDruckerPrager & _dp;

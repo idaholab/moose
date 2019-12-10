@@ -179,6 +179,9 @@ protected:
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
 
+  /// are all inelastic models inherently isotropic? (not the case for e.g. weak plane plasticity models)
+  bool _all_models_isotropic;
+
   /// Pointer to the damage model
   DamageBase * _damage_model;
 
