@@ -160,7 +160,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = _executioner.picardSolve().outerMostSolve()->solve();
+  _converged = _executioner.solver()->solve();
 }
 
 void
