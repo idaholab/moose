@@ -97,6 +97,7 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _cycle_models(getParam<bool>("cycle_models")),
     _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
+    _all_models_isotropic(true),
     _damage_model(isParamValid("damage_model")
                       ? dynamic_cast<DamageBase *>(&getMaterial("damage_model"))
                       : nullptr)
@@ -132,6 +133,7 @@ ComputeMultipleInelasticStress::initialSetup()
     if (rrr)
     {
       _models.push_back(rrr);
+      _all_models_isotropic = _all_models_isotropic && rrr->isIsotropic();
       if (rrr->requiresIsotropicTensor() && !_is_elasticity_tensor_guaranteed_isotropic)
         mooseError("Model " + models[i] +
                    " requires an isotropic elasticity tensor, but the one supplied is not "
@@ -257,9 +259,11 @@ ComputeMultipleInelasticStress::finiteStrainRotation(const bool force_elasticity
   _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
   _inelastic_strain[_qp] =
       _rotation_increment[_qp] * _inelastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
   if (force_elasticity_rotation ||
       !(_is_elasticity_tensor_guaranteed_isotropic &&
-        (_tangent_calculation_method == TangentCalculationMethod::ELASTIC || _num_models == 0)))
+        (_all_models_isotropic ||
+         _tangent_calculation_method == TangentCalculationMethod::ELASTIC || _num_models == 0)))
     _Jacobian_mult[_qp].rotate(_rotation_increment[_qp]);
 }
 

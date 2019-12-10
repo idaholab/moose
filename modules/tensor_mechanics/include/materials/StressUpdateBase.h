@@ -106,6 +106,11 @@ public:
    */
   virtual bool requiresIsotropicTensor() = 0;
 
+  /**
+   * Is the implmented model isotropic? The safe default is 'false'.
+   */
+  virtual bool isIsotropic() { return false; };
+
   virtual Real computeTimeStepLimit();
 
   virtual TangentCalculationMethod getTangentCalculationMethod()
