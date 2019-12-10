@@ -13,8 +13,6 @@
 - /AuxKernels/VolumeFractionLiquidAux
 - /AuxKernels/WeightedAverageAux
 
-- /AuxScalarKernels/TotalInternalEnergyRateIntoJunctionAux
-- /AuxScalarKernels/TotalMassFlowRateIntoJunctionAux
 - /AuxScalarKernels/VolumeJunction1PhasePressureAux
 - /AuxScalarKernels/VolumeJunction1PhaseVelocityMagnitudeAux
 - /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
@@ -290,9 +288,6 @@
 - /Postprocessors/RealControlDataValuePostprocessor
 - /Postprocessors/SumPostprocessor
 
-- /ScalarKernels/EnergyBalanceScalarKernel
-- /ScalarKernels/MassBalanceScalarKernel
-- /ScalarKernels/MomentumBalanceScalarKernel
 - /ScalarKernels/ODECoefTimeDerivative
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
