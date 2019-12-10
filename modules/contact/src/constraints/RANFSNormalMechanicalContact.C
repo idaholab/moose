@@ -13,8 +13,10 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "NearestNodeLocator.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/numeric_vector.h"
+#include "libmesh/enum_fe_family.h"
 
 registerMooseObject("ContactApp", RANFSNormalMechanicalContact);
 
@@ -51,6 +53,10 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
     _vars.push_back(coupled("displacements", i));
     _var_objects.push_back(getVar("displacements", i));
   }
+
+  for (auto & var : _var_objects)
+    if (var->feType().family != LAGRANGE)
+      mooseError("This object only works when the displacement variables use a Lagrange basis");
 
   if (_vars.size() != _mesh_dimension)
     mooseError("The number of displacement variables does not match the mesh dimension!");
