@@ -33,6 +33,8 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  bool isIsotropic() override { return true; };
+
 protected:
   /// Hardening model for tensile strength
   const TensorMechanicsHardeningModel & _tensile_strength;
