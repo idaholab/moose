@@ -154,7 +154,14 @@ InitialConditionTempl<T>::compute()
     // condition once on the lowest numbered block
     auto curr_node = _current_elem->node_ptr(_n);
     const auto & block_ids = _sys.mesh().getNodeBlockIds(*curr_node);
-    auto priority_block = *block_ids.begin();
+
+    auto priority_block = *(block_ids.begin());
+    for (auto id : block_ids)
+      if (_var.hasBlocks(id))
+      {
+        priority_block = id;
+        break;
+      }
 
     if (!hasBlocks(priority_block) && _var.isNodal())
     {
