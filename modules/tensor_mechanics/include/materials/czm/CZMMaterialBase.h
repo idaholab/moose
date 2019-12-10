@@ -19,12 +19,12 @@ InputParameters validParams<CZMMaterialBase>();
  * coordinate and rotate back traction and traction derivatives.
  * The local coordinate system assumes the following order: opening,
  * tangential1, tangential2. Note that tangential1, tangential2 are arbitrary and therefore the
- * interface assumes an in-plane isotropic behavior. By subclassing computeTraction and
- * computeTractionDerivatives different traction separation laws can be implemented.
- * computeTraction and computeTractionDerivatives assumes calculations are performed in the local
- * frame. CZM laws should always be implemented in 3D even if they are going to be used in 2D or 1D
- * simulations. This class assumes small deformations and that the traction separation law is only
- * dependent upon the the displacement jump.
+ * interface assumes an in-plane isotropic behavior. By overriding computeTraction and
+ * computeTractionDerivatives in aderived class, different traction separation laws can be
+ * implemented. The computeTraction and computeTractionDerivatives methods assumes calculations are
+ * performed in the local frame. CZM laws should always be implemented in 3D even if they are going
+ * to be used in 2D or 1D simulations. This class assumes small deformations and that the traction
+ * separation law is only dependent upon the the displacement jump.
  */
 class CZMMaterialBase : public InterfaceMaterial
 {
@@ -49,7 +49,7 @@ protected:
   /// method returning the traction in the interface coordinate system.
   virtual RealVectorValue computeTraction() = 0;
 
-  /// method returning the traction derivitaves wrt to local displacement jump.
+  /// method returning the traction derivitaves wrt local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() = 0;
 
   /// the displacement jump in global and local coordiante

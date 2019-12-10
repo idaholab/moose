@@ -95,8 +95,8 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
   // x = sum_i=1^3{(\delta_u,i / \delta_0,i)^\alpha_i}  with \alpha_i = 1 for i==n
   // \alpha_i = 2 for i!=n
 
-  // dTi_duj = a_i * ( dBi_duj * exp(-x) + b_i * exp(-x) * dX_duj  )
-  //         = a_i * ( exp(-x) * (dBi_duj + b_i * dX_duj ) )
+  // dTi_duj = a_i * ( dBi_duj * exp(-x) + b_i * exp(-x) * dx_duj  )
+  //         = a_i * ( exp(-x) * (dBi_duj + b_i * dx_duj ) )
 
   // temporary containers for auxiliary calculations
   Real aa, exp_x, x;
@@ -120,7 +120,7 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
   // dTi_duj  = | dTt/dun dTt/dut dTt/dus | = _traction_derivative[i][j]
   //            | dTs/dun dTs/dut dTs/dus |
   Real a_i, b_i;
-  Real dBi_dui, dX_duj;
+  Real dbi_dui, dx_duj;
 
   for (i = 0; i < 3; i++)
   {
@@ -135,17 +135,17 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
     for (j = 0; j < 3; j++)
     {
 
-      dBi_dui = 0;
+      dbi_dui = 0;
       if (i == j)
-        dBi_dui = 1 / _delta_u0[j];
+        dbi_dui = 1 / _delta_u0[j];
 
       if (j == 0) // alpha = 1
-        dX_duj = 1. / _delta_u0[j];
+        dx_duj = 1. / _delta_u0[j];
       else // alpha = 2
-        dX_duj = 2. * _displacement_jump[_qp](j) / (_delta_u0[j] * _delta_u0[j]);
+        dx_duj = 2. * _displacement_jump[_qp](j) / (_delta_u0[j] * _delta_u0[j]);
 
       traction_jump_derivatives_local(i, j) =
-          a_i * exp_x * (dBi_dui - b_i * dX_duj); // the minus sign is due to exp(-x)
+          a_i * exp_x * (dbi_dui - b_i * dx_duj); // the minus sign is due to exp(-x)
     }
   }
 

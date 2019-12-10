@@ -11,15 +11,15 @@
 
 #include "Action.h"
 
-class CohesiveZoneModelAction;
+class CohesiveZoneMasterAction;
 
 template <>
-InputParameters validParams<CohesiveZoneModelAction>();
+InputParameters validParams<CohesiveZoneMasterAction>();
 
-class CohesiveZoneModelAction : public Action
+class CohesiveZoneMasterAction : public Action
 {
 public:
-  CohesiveZoneModelAction(const InputParameters & params);
+  CohesiveZoneMasterAction(const InputParameters & params);
 
   void act() override;
 };

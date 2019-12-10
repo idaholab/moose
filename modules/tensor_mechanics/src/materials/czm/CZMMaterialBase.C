@@ -39,6 +39,9 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 displacement variables");
 
+  if (getParam<bool>("use_displaced_mesh") == true)
+    mooseError("This material cannot be used with use_displaced_mesh = true");
+
   // initializing the displacement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {

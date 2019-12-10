@@ -41,6 +41,9 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _traction_derivatives_global(
         getMaterialPropertyByName<RankTwoTensor>("traction_derivatives_global"))
 {
+  if (getParam<bool>("use_displaced_mesh") == true)
+    mooseError("CZMInterfaceKernel cannot be used with use_displaced_mesh = true");
+
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp_var[i] = coupled("displacements", i);

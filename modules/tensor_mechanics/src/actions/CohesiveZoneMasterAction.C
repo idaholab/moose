@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CohesiveZoneModelAction.h"
+#include "CohesiveZoneMasterAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", CohesiveZoneModelAction, "add_interface_kernel");
+registerMooseAction("TensorMechanicsApp", CohesiveZoneMasterAction, "add_interface_kernel");
 
 template <>
 InputParameters
-validParams<CohesiveZoneModelAction>()
+validParams<CohesiveZoneMasterAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Action to create an instance of the cohesive zone model kernel for "
@@ -32,10 +32,12 @@ validParams<CohesiveZoneModelAction>()
   return params;
 }
 
-CohesiveZoneModelAction::CohesiveZoneModelAction(const InputParameters & params) : Action(params) {}
+CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & params) : Action(params)
+{
+}
 
 void
-CohesiveZoneModelAction::act()
+CohesiveZoneMasterAction::act()
 {
   std::string kernel_name = "CZMInterfaceKernel";
 

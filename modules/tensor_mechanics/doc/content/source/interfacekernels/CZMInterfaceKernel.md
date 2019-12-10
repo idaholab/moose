@@ -19,9 +19,9 @@ By utilizing the principle of virtual work and recognizing that forces are work 
 \begin{equation}
   \int_{A^-}{T^- \psi^- dA^-}  - \int_{A^+}{T^+ \psi^+ dA^+} = 0
 \end{equation}
-where $\psi$ is a vector of test functions. Each of test function in $\psi$ is associated to a specific displacement component.
+where $\psi$ is a vector of test functions. Each of the test function in $\psi$ is associated to a specific displacement component.
 
-Because of the small deformations assumption $A^-=A^+=A$ and $T^+=T^-=T$. Therefore, the equilibrium equation for the displacement component $i$ can be rewritten as
+Because of the small deformation assumption $A^-=A^+=A$ and $T^+=T^-=T$. Therefore, the equilibrium equation for the displacement component $i$ can be rewritten as
 \begin{equation}
   T_i (\psi^- - \psi^+) = 0
 \end{equation}
@@ -38,7 +38,7 @@ The traction vector $T$ is provided to the `CZMInterfaceKernel` by the `CZMMater
 
 ### Jacobian
 
-Assuming the traction being only a function of the displacement jump vector $\Delta U$:
+Assuming the traction to be only a function of the displacement jump vector $\Delta U$:
 \begin{equation}
  \Delta U = u^- - u^+
 \end{equation}

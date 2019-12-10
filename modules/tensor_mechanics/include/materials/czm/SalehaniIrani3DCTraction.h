@@ -23,10 +23,8 @@ public:
   SalehaniIrani3DCTraction(const InputParameters & parameters);
 
 protected:
-  /// method returning the traction in the interface coordinate system.
   virtual RealVectorValue computeTraction() override;
 
-  /// method returning the traction derivitaves wrt local displacement jump.
   virtual RankTwoTensor computeTractionDerivatives() override;
 
   /// the displacement jump associated to the maximum traction
