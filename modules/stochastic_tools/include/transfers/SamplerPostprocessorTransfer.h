@@ -57,4 +57,7 @@ protected:
 
   /// Name of vector-postprocessor on the master
   const VectorPostprocessorName & _master_vpp_name;
+
+  /// Temporary storage for batch mode execution
+  VectorPostprocessorValue _current_data;
 };

@@ -37,6 +37,7 @@
     type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sample
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -56,7 +57,7 @@
     sampler = sample
     to_vector_postprocessor = storage
     from_postprocessor = avg
-    execute_on = timestep_end
+    execute_on = TIMESTEP_BEGIN
     check_multiapp_execute_on = false
   []
 []
@@ -65,6 +66,7 @@
   [storage]
     type = StochasticResults
     samplers = sample
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 

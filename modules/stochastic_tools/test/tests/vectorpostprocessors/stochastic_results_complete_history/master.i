@@ -28,7 +28,7 @@
     type = MonteCarloSampler
     num_rows = 3
     distributions = 'uniform_left uniform_right'
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -37,6 +37,7 @@
     type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sample
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -60,9 +61,10 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    parallel_type = DISTRIBUTED
+    parallel_type = REPLICATED
     samplers = sample
     contains_complete_history = true
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -79,6 +81,5 @@
 [Outputs]
   [out]
     type = CSV
-    execute_on = FINAL
   []
 []

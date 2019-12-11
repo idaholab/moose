@@ -26,6 +26,7 @@
     type = MonteCarloSampler
     num_rows = 15
     distributions = 'uniform_0 uniform_1'
+    execute_on = INITIAL
   []
 []
 
@@ -63,6 +64,7 @@
   [storage]
     type = StochasticResults
     samplers = mc
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [data]
     type = SamplerData
@@ -72,5 +74,5 @@
 
 [Outputs]
   csv = true
-  execute_on = 'FINAL'
+  execute_on = 'TIMESTEP_END'
 []

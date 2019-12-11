@@ -41,7 +41,7 @@
     [replicated]
       type = CSVDiff
       input = master.i
-      cli_args = Outputs/file_base=replicated_out
+      cli_args = 'VectorPostprocessors/storage/parallel_type=REPLICATED Outputs/file_base=replicated_out'
       csvdiff = replicated_out_storage_0002.csv
 
       detail = "replicated on all processors and"

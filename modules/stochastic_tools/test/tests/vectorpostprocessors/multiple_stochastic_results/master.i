@@ -86,7 +86,7 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    parallel_type = DISTRIBUTED
+    parallel_type = REPLICATED
     samplers = 'sobol mc'
   []
 []

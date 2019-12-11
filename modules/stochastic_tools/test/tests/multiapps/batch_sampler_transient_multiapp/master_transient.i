@@ -21,7 +21,7 @@
     type = MonteCarloSampler
     num_rows = 5
     distributions = 'uniform uniform'
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -35,7 +35,7 @@
     type = SamplerTransientMultiApp
     sampler = mc
     input_files = 'sub.i'
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     mode = batch-restore
   []
 []
@@ -61,6 +61,7 @@
   [storage]
     type = StochasticResults
     samplers = mc
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
