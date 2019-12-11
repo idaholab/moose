@@ -264,11 +264,11 @@
 - /Materials/VectorPropertyTestMaterial
 - /Materials/VelocityRelaxationRateMaterial
 - /Materials/VolumeFractionMaterial
-- /Materials/WallBoilingFractionMaterial
+- /Materials/WallBoilingFractionSimpleMaterial
 - /Materials/WallFriction7EqnBaseMaterial
 - /Materials/WallFrictionFunctionMaterial
 - /Materials/WallHeatTransferCoefficient3EqnHeliumMaterial
-- /Materials/WallMassTransferSimpleMaterial
+- /Materials/WallMassTransferMaterial
 
 - /Mesh/THMMesh
 

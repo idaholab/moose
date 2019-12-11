@@ -8,12 +8,12 @@
   [./phy:T_wall_transfer_3eqn]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn.master.i'
-    exodiff = 'phy.T_wall_transfer_3eqn.master_out.e phy.T_wall_transfer_3eqn.master_out_thm0.e'
+    exodiff = 'phy.T_wall_transfer_3eqn.master_out.e phy.T_wall_transfer_3eqn.master_out_thm0_out.e'
   [../]
 
   [./phy:T_wall_transfer_elem_3eqn]
     type = Exodiff
     input = 'phy.T_wall_transfer_elem_3eqn.master.i'
-    exodiff = 'phy.T_wall_transfer_elem_3eqn.master_out.e phy.T_wall_transfer_elem_3eqn.master_out_thm0.e'
+    exodiff = 'phy.T_wall_transfer_elem_3eqn.master_out.e phy.T_wall_transfer_elem_3eqn.master_out_thm0_out.e'
   [../]
 []
