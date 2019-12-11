@@ -27,7 +27,11 @@ InversePowerMethod::validParams()
   params.addParam<Real>("sol_check_tol",
                         std::numeric_limits<Real>::max(),
                         "Convergence tolerance on |x-x_previous| when provided");
-  params.addParam<Real>("pfactor", 1e-2, "Reduce residual norm per power iteration by this factor");
+  params.addDeprecatedParam<Real>("pfactor",
+                                  1e-2,
+                                  "Reduce residual norm per power iteration by this factor",
+                                  "Please use l_tol instead");
+  params.set<Real>("l_tol", true) = 1e-2;
   params.addParam<bool>(
       "Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
   return params;
@@ -40,14 +44,15 @@ InversePowerMethod::InversePowerMethod(const InputParameters & parameters)
     _max_iter(getParam<unsigned int>("max_power_iterations")),
     _eig_check_tol(getParam<Real>("eig_check_tol")),
     _sol_check_tol(getParam<Real>("sol_check_tol")),
-    _pfactor(getParam<Real>("pfactor")),
+    _l_tol(parameters.isParamSetByUser("l_tol") ? getParam<Real>("l_tol")
+                                                : getParam<Real>("pfactor")),
     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
   if (_max_iter < _min_iter)
     mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol < 0.0)
     mooseError("eig_check_tol<0!");
-  if (_pfactor < 0.0)
+  if (_l_tol < 0.0)
     mooseError("pfactor<0!");
 }
 
@@ -94,7 +99,7 @@ InversePowerMethod::takeStep()
   Real initial_res;
   _last_solve_converged = inversePowerIteration(_min_iter,
                                                 _max_iter,
-                                                _pfactor,
+                                                _l_tol,
                                                 _cheb_on,
                                                 _eig_check_tol,
                                                 true,

@@ -65,8 +65,8 @@
   bx_norm = 'unorm'
 
   free_power_iterations = 10
-  source_abs_tol = 1e-12
-  source_rel_tol = 1e-50
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-50
   k0 = 1.0
 # important: constant initial value set by auto_initilization does not
 # converge to the fundamental mode

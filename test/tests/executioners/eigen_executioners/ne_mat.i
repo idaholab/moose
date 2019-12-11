@@ -68,8 +68,8 @@
   normal_factor = 9.990012561844
 
   free_power_iterations = 2
-  source_abs_tol = 1e-12
-  source_rel_tol = 1e-50
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-50
   k0 = 1.0
 
   #Preconditioned JFNK (default)
