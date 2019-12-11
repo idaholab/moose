@@ -47,13 +47,6 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
       block_ids.insert(ids.begin(), ids.end());
     }
 
-    // collect extra variables that are active due to our extra nodes
-    // (explained in below comment) here so we can update this set with any
-    // extra variables we pick up from multi-block nodes before calling fe
-    // problem prepare.
-    std::set<MooseVariableFEBase *> active_vars =
-        _fe_problem.getActiveElementalMooseVariables(_tid);
-
     // we need to remember the order the variables originally are provided in
     // since the ics dependencies are resolved to handle the inter-variable
     // dependencies correctly.
@@ -75,9 +68,7 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
             continue;
           order.push_back(&(ic->variable()));
           groups[&(ic->variable())].push_back(ic);
-          active_vars.insert(&(ic->variable()));
         }
-    _fe_problem.setActiveElementalMooseVariables(active_vars, _tid);
 
     _fe_problem.setCurrentSubdomainID(elem, _tid);
     _fe_problem.prepare(elem, _tid);
