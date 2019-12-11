@@ -200,5 +200,28 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(mdot.name() == 'Mass flow rate')
 
 
+    def testEnergy(self):
+        Jperkg = JoulePerKilogramlUnit()
+        self.assertTrue(Jperkg.name() == 'Joule per kilogram')
+        self.assertTrue(Jperkg.unit() == [ "J/kg", "Joule/kg" ])
+        self.assertAlmostEqual(Jperkg.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(Jperkg.frm(123.456), 123.456, places = 6)
+
+        kJperkg = KilojoulePerKilogramlUnit()
+        self.assertTrue(kJperkg.name() == 'Kilojoule per kilogram')
+        self.assertTrue(kJperkg.unit() == [ "kJ/kg" ])
+        self.assertAlmostEqual(kJperkg.to(1.), 1000., places = 6)
+        self.assertAlmostEqual(kJperkg.frm(1000), 1., places = 6)
+
+        btuperlb = BtuPerPoundlUnit()
+        self.assertTrue(btuperlb.name() == 'British thermal unit per pound')
+        self.assertTrue(btuperlb.unit() == [ "BTU/lb", "Btu/lb", "BTU/lbm", "Btu/lbm" ])
+        self.assertAlmostEqual(btuperlb.to(1.), 2326.0091434078, places = 6)
+        self.assertAlmostEqual(btuperlb.frm(2326.0091434078), 1., places = 6)
+
+        energy = EnergyGroup()
+        self.assertTrue(energy.name() == 'Energy')
+
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)

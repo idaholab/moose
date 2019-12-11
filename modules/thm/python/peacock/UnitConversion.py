@@ -566,6 +566,68 @@ class MassGroup(UnitGroup):
         return "Mass"
 
 
+# Energy/enthalpy units
+
+class JoulePerKilogramlUnit(Unit):
+
+    def name(self):
+        return "Joule per kilogram"
+
+    def unit(self):
+        return [ "J/kg", "Joule/kg" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class KilojoulePerKilogramlUnit(Unit):
+
+    def name(self):
+        return "Kilojoule per kilogram"
+
+    def unit(self):
+        return [ "kJ/kg" ]
+
+    def to(self, value):
+        return value * 1000
+
+    def frm(self, value):
+        return value / 1000
+
+
+class BtuPerPoundlUnit(Unit):
+
+    def name(self):
+        return "British thermal unit per pound"
+
+    def unit(self):
+        return [ "BTU/lb", "Btu/lb", "BTU/lbm", "Btu/lbm" ]
+
+    def to(self, value):
+        return value * 1055.06 / 0.45359237
+
+    def frm(self, value):
+        return value * 0.45359237 / 1055.06
+
+
+class EnergyGroup(UnitGroup):
+    """
+    Group of energy units
+    """
+    def __init__(self):
+        super(EnergyGroup, self).__init__([
+        BtuPerPoundlUnit(),
+        JoulePerKilogramlUnit(),
+        KilojoulePerKilogramlUnit()
+    ])
+
+    def name(self):
+        return "Energy"
+
+
 # Unit groups
 
 GROUPS = [
@@ -575,5 +637,6 @@ GROUPS = [
     SpeedGroup(),
     VolumeGroup(),
     MassGroup(),
-    MassFlowRateGroup()
+    MassFlowRateGroup(),
+    EnergyGroup()
 ]
