@@ -1,3 +1,5 @@
+# C++
+
 We use `clang-format` (with a customized [config](https://github.com/idaholab/moose/blob/devel/.clang-format) file) for code formatting.  If you have clang installed, you can run the following command to automatically format code changed between your current checked out branch and `<branch>` (if ommitted, defaults to HEAD).
 
 ```
@@ -19,7 +21,7 @@ General style guidelines include:
 
 [](---)
 
-# File Layout
+## File Layout
 
 - Header files should have a ".h" extension
 - Header files always go either into "include" or a sub-directory of "include"
@@ -28,7 +30,7 @@ General style guidelines include:
 
 [](---)
 
-# Files
+## Files
 
 Header and source file names must match the name of the class that the files define. Hence, each set of .h and .C files
 should contain code for a single class. Helper classes or classes not exposed to the user are an exception to this rule.
@@ -38,7 +40,7 @@ should contain code for a single class. Helper classes or classes not exposed to
 
 [](---)
 
-# Naming
+## Naming
 
 - `ClassName` Class names utilize camel case, note the .h and .C filenames must match the class name.
 - `methodName()` Method and function names utilize camel case with the leading letter lower case.
@@ -47,7 +49,7 @@ should contain code for a single class. Helper classes or classes not exposed to
 
 [](---)
 
-# Example Code
+## Example Code
 
 Below is a sample that covers many (not all) of our code style conventions. Note that clang-format ultimately will format
 your code so use this example only as a guide.
@@ -128,7 +130,7 @@ SomeOtherClass::SomeOtherClass()
 
 [](---)
 
-# Using auto
+## Using auto
 
 Use `auto` for most new code unless it complicates readability. Make sure your variables
 have +good+ names when using auto!
@@ -150,7 +152,7 @@ have +good+ names when using auto!
 
 Do not use `auto` in any kind of function or method declaration
 
-## Index Variables in looping constructs
+### Index Variables in looping constructs
 
 In keeping with good `auto` practices, it would be really nice if we could use `auto` for
 loop indices in places where range loops aren't convenient or possible. Unfortunantly, the most
@@ -184,7 +186,7 @@ than just using `decltype` due to qualifiers like `const`. In MOOSE we have solv
 
 [](---)
 
-# Lambdas
+## Lambdas
 
 ```C++
   // List captured variables (by value or reference) in the capture list explicitly where possible.
@@ -204,7 +206,7 @@ than just using `decltype` due to qualifiers like `const`. In MOOSE we have solv
 
 [](---)
 
-# Variable Initialization
+## Variable Initialization
 
 When creating a new variable use these patterns:
 
@@ -216,7 +218,7 @@ SomeObject * stuff = new SomeObject(18); // Pointers
 
 [](---)
 
-# Trailing Whitespace and Tabs
+## Trailing Whitespace and Tabs
 
 MOOSE currently does not allow any trailing whitespace or tabs in the repository. If you are using our standard [Emacs](emacs) file this shouldn't be a problem. However, if you still end up with trailing whitespace that needs to be removed before a check-in. Try running the following one-liner from the appropriate directory:
 
@@ -226,7 +228,7 @@ MOOSE currently does not allow any trailing whitespace or tabs in the repository
 
 [](---)
 
-# Includes
+## Includes
 
 Firstly, only include things that are absolutely necessary in header files.  Please use forward declarations when you can:
 
@@ -246,7 +248,7 @@ All non-system includes should use quotes.  There is a space between `include` a
 
 [](---)
 
-# Documentation
+## In-code Documentation
 
 - Try to document as much as possible.
 - We suggest using the [Doxymacs](http://doxymacs.sourceforge.net) plugin to help with documenting.
@@ -289,6 +291,47 @@ protected:
 
 [](---)
 
+
+## Code Commandments
+
+- Use references instead of pointers whenever possible
+    - i.e., this object lives for a shorter period of time than the object it needs to refer to does
+- Methods should return pointers to objects if returned objects are stored as pointers and references if returned objects are stored as references
+- When creating a new class:
+    - Include dependent header files in the *.C file whenever possible (i.e. the header uses only references or pointers in it's various declarations) and use forward declarations in the header file as needed
+    - One exception is when doing so would require end users to include multiple files to complete definitions of child objects (Errors typically show up as "incomplete class" or something similar during compilation)
+- Avoid using a global variable when possible.
+- Every destructor must be virtual.
+- All function definitions should be in *.C files.
+    - The only exceptions are for inline functions for speed and templates.
+- Thou shall not commit accidental insertion in a std::map by using brackets in a RHS operator unless he/she can prove it can't fail.
+- Thou shall use range-based loops or MooseIndex() based loops for iteration
+
+## Best practices
+
+-	All input parameters should always use range checked parameters where applicable
+-	Input parameters should always use MooseEnum instead of unsigned int
+-	mooseAssert should always be used to clearly state coding assumptions and to protect dividing by zero
+-	mooseException should be used in cases where the conditions typically used for a mooseAssert are likely to occur (e.g. inner Newton iteration that produces a negative value).
+-	mooseException should be used in favor of mooseError when checking run time conditions
+-	paramError/paramWarning should be used in favor of mooseError/mooseWarning when checking input file conditions
+-	Variable names shall be used that describe the parameter in favor of small names (e.g. activation_energy instead of Q)
+-	Utility::pow<n> shall be used in place of std::pow(x,n) if the power is constant
+
+
+## Code testing
+
+Goal: 1) ensure what is in the documentation is what is in the code, and 2) ensure the code works across a wide swath of parameters
+
+-	MOOSE SQA standards shall always be followed
+-	Default values shall be overridden in the test file whenever possible.
+-	Input parameter values shall be tested over the full range of applicability, e.g. across all concentrations of constituents and/or a wide variety of temperatures.
+-	Hand calculations, either as simple comments in the input file, added as functions in the input file, or in an adjoining python/excel file should always be included where possible. The equations used to get the hand calculations shall always be included, not just the final answers.
+-	All input files should be as simple as possible, with any unnecessary physics, input file fluff, and variables removed (e.g. `solve = false` for tests on materials only)
+-	All tests should be tested using CSVDiff unless Exodiff is required to capture the change during the simulation caused by the new code.
+-	In general, two types of tests are required: 1) a test that is extremely simple to compare to hand calculations, and 2) a test that includes the proto-typical behavior the code will be used under with appropriate kernels and code basis.
+-	If the test is for a kernel or material that uses automatic differentiation, a PetscJacobianTester shall be included.
+
 # Python
 
 Where possible, follow the above rules for Python.  The only modifications are:
@@ -306,17 +349,9 @@ class MyClass:
 
 [](---)
 
-# Code Commandments
-
-- Use references instead of pointers whenever possible
-    - i.e., this object lives for a shorter period of time than the object it needs to refer to does
-- Methods should return pointers to objects if returned objects are stored as pointers and references if returned objects are stored as references
-- When creating a new class:
-    - Include dependent header files in the *.C file whenever possible (i.e. the header uses only references or pointers in it's various declarations) and use forward declarations in the header file as needed
-    - One exception is when doing so would require end users to include multiple files to complete definitions of child objects (Errors typically show up as "incomplete class" or something similar during compilation)
-- Avoid using a global variable when possible.
-- Every destructor must be virtual.
-- All function definitions should be in *.C files.
-    - The only exceptions are for inline functions for speed and templates.
-- Thou shall not commit accidental insertion in a std::map by using brackets in a RHS operator unless he/she can prove it can't fail.
-- Thou shall use range-based loops or MooseIndex() based loops for iteration
+# Documentation:
+  Goal: Present the code in words and documents that give background to the choices made in the code
+  
+- Documentation shall include any equations, definitions of the variables, appropriate referencing of the equations to external publications, description of the code, and use case for the code.
+- Best practices used for journal publications should be adopted
+-	Input parameters shall be described where appropriate
