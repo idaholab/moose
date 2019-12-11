@@ -15,6 +15,11 @@
   # command line. You can verify this by looking at what MOOSE prints
   # out for the "Mesh" information.
   parallel_type = distributed
+
+  [./Partitioner]
+    type = LibmeshPartitioner
+    partitioner = linear
+  [../]
 []
 
 [Functions]

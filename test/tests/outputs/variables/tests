@@ -55,8 +55,6 @@
     min_parallel = 2
     max_parallel = 2
     exodiff = 'nemesis_hide_out.e.2.0 nemesis_hide_out.e.2.1'
-    compiler = 'CLANG'
-    platform = 'DARWIN'
 
     requirement = "The variables specified in an Output object's 'hide = ' list shall not appear in the output file."
     issues = '#1895'
