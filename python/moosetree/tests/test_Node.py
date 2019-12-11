@@ -6,7 +6,7 @@ try:
     import anytree
     HAS_ANYTREE = True
 
-except ImportError:
+except ModuleNotFoundError:
     HAS_ANYTREE = False
 
 class TestNodeInitTime(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestNodeInitTime(unittest.TestCase):
                 for k in range(N):
                     p = cls(div1, 'p')
 
-    unittest.skipIf(not HAS_ANYTREE, "anytree not install")
+    @unittest.skipIf(not HAS_ANYTREE, "anytree not install")
     def testTime(self):
         import mooseutils
 
