@@ -23,6 +23,7 @@
     exodiff = 'normalized_penalty_kin_out.e'
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
+    allow_warnings = true
     # This test no longer works on older versions of PETSc due to the
     # changes in 3061bbd5d.
     petsc_version = '>=3.5.0'
