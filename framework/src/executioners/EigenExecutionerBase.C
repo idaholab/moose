@@ -164,7 +164,7 @@ EigenExecutionerBase::checkIntegrity()
 bool
 EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                                             unsigned int max_iter,
-                                            Real pfactor,
+                                            Real l_rtol,
                                             bool cheb_on,
                                             Real tol_eig,
                                             bool echo,
@@ -175,7 +175,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 {
   mooseAssert(max_iter >= min_iter,
               "Maximum number of power iterations must be greater than or equal to its minimum");
-  mooseAssert(pfactor > 0.0, "Invaid linear convergence tolerance");
+  mooseAssert(l_rtol > 0.0, "Invaid linear convergence tolerance");
   mooseAssert(tol_eig > 0.0, "Invalid eigenvalue tolerance");
   mooseAssert(tol_x > 0.0, "Invalid solution norm tolerance");
 
@@ -210,7 +210,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   Real tol2 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
 
   // every power iteration is a linear solve, so set nonlinear iteration number to one
-  _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = l_rtol;
   // disable nonlinear convergence check
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = 1;
   _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = 1 - 1e-8;
@@ -567,7 +567,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters,
 }
 
 bool
-EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
+EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Real & k)
 {
   makeBXConsistent(k);
 
@@ -579,9 +579,9 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   Real tol2 = _problem.es().parameters.get<Real>("linear solver tolerance");
   Real tol3 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
 
-  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = abs_tol;
-  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = rel_tol;
-  _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
+  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = nl_atol;
+  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = nl_rtol;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = l_rtol;
 
   // call nonlinear solve
   _problem.solve();
