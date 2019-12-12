@@ -14,7 +14,6 @@
   type = ReferenceResidualProblem
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
-  solution_variables = 'disp_x disp_y'
   group_variables = 'disp_x disp_y'
 []
 
