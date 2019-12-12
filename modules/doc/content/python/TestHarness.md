@@ -9,7 +9,7 @@ documentation.
 
 # Testers
 
-Testers represent inidividual tests in MOOSE. Testers encompass a set of instructions for performing
+Testers represent individual tests in MOOSE. Testers encompass a set of instructions for performing
 a task and then verifying the result. There are several built-in testers in the framework but the
 Tester system is completely pluggable and extendable. The list of default testers is listed here:
 
@@ -117,12 +117,12 @@ Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a particul
 | :- | :- | :- |
 | MOOSE_TERM_FORMAT | c | Print caveats |
 | MOOSE_TERM_FORMAT | j | Print justification filler |
-| MOOSE_TERM_FORMAT | p | Print pre-formated status (10 character buffer fill) |
+| MOOSE_TERM_FORMAT | p | Print pre-formatted status (10 character buffer fill) |
 | MOOSE_TERM_FORMAT | s | Print status |
 | MOOSE_TERM_FORMAT | n-N | Print test name |
 | MOOSE_TERM_FORMAT | t | Print test completion time |
 
-Example, if we set MOOSE_TERM_FORMAT to tpNsc, we would print the time, pre-fromatted status, test name (converted to upper-case), long naming status, and then the caveats. In that order:
+Example, if we set MOOSE_TERM_FORMAT to tpNsc, we would print the time, pre-formatted status, test name (converted to upper-case), long naming status, and then the caveats. In that order:
 
 ```bash
 MOOSE_TERM_FORMAT=tpNsc ./run_tests --re=simple_diffusion.test -p4 -t
@@ -151,4 +151,4 @@ Ran 2 tests in 2.9 seconds.
 2 passed, 0 skipped, 0 pending, 0 failed
 ```
 
-Caveats of MOOSE_TERM_COLS; If you specify to low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
+Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
