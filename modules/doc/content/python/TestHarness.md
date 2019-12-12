@@ -16,6 +16,7 @@ Tester system is completely pluggable and extendable. The list of default tester
 [RunApp](RunApp.md)
 Exodiff
 CSVDiff
+[CSVValidationTester](CSVValidationTester.md)
 FileTester
 AnalyzeJacobian
 CheckFiles
