@@ -52,7 +52,15 @@ samples are taken at the corresponding mesh entity and null otherwise.
 
 ## Block/Boundary Restrictions
 
-The ICs system support both the [BlockRestrictable.md] and [BoundaryRestrictable.md] interfaces.
+The ICs system support both the [BlockRestrictable.md] and
+[BoundaryRestrictable.md] interfaces.  When using nodal variables with block
+restriction, there is an ambiguity that can occur at inter-block interfaces
+where a node sits in elements of two or more different blocks.  To resolve
+this ambiguity on multi-block nodes, MOOSE chooses the IC object defined on
+the lowest block ID for a node to "win" along the interface; the winning
+object's variable *must* be defined on the block - otherwise the IC for the
+next lowest block ID for the node is used - and so forth until one has the
+variable defined.
 
 !syntax list /ICs objects=True actions=False subsystems=False
 

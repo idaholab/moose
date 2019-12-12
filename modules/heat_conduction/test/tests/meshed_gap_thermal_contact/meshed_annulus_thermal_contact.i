@@ -1,7 +1,14 @@
 [Mesh]
-  type = FileMesh
-  file = meshed_annulus.e
-  dim = 2
+  [fmesh]
+    type = FileMeshGenerator
+    file = meshed_annulus.e
+  []
+  [rename]
+    type = RenameBlockGenerator
+    input = fmesh
+    old_block_id = '1 2 3'
+    new_block_id = '1 4 3'
+  []
 []
 
 [Variables]

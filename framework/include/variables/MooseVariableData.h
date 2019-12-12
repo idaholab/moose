@@ -376,7 +376,10 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  void setDofValues(const DenseVector<OutputData> & value);
+  void setDofValues(const DenseVector<OutputData> & values);
+
+  void setDofValue(const OutputData & value, unsigned int index);
+
   /**
    * Write a nodal value to the passed-in solution vector
    */
