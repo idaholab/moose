@@ -1,0 +1,10 @@
+[Tests]
+  [./validation_01]
+    type = CSVValidationTester
+    input = validation_01.i
+    csvdiff = validation_01.csv
+    validation = True
+    mean_limit = 1e-2
+    std_limit = 0.011
+  [../]
+[]
