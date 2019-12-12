@@ -229,8 +229,14 @@ DependencyResolver<T>::insertDependency(const T & key, const T & value)
 
   if (dependsOn(value, key))
   {
+    decltype(_depends) depends_copy(_depends);
+
+    // Insert the breaking dependency here so it will reflect properly in the exception
+    depends_copy.insert(k);
+
     throw CyclicDependencyException<T>(
-        "DependencyResolver: attempt to insert dependency will result in cyclic graph", _depends);
+        "DependencyResolver: attempt to insert dependency will result in cyclic graph",
+        depends_copy);
   }
   _depends.insert(k);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
