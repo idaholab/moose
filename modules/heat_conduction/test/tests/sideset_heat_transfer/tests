@@ -1,0 +1,8 @@
+[Tests]
+  [./CFEM_gap]
+    type = 'Exodiff'
+    input = 'cfem_gap.i'
+    exodiff = 'cfem_gap_out.e'
+    abs_zero = 1e-6
+  [../]
+[]
