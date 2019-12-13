@@ -1,4 +1,24 @@
 [Tests]
+  [./1D_gap]
+    type = 'Exodiff'
+    input = 'gap_thermal_1D.i'
+    exodiff = 'gap_thermal_1D_out.e'
+    abs_zero = 1e-6
+  [../]
+  [./1D_gap_Tbulk_var]
+    type = 'Exodiff'
+    input = 'gap_thermal_1D.i'
+    exodiff = 'gap_thermal_1D_Tbulk_var.e'
+    cli_args = 'InterfaceKernels/active="gap_var"
+                Outputs/file_base=gap_thermal_1D_Tbulk_var'
+    abs_zero = 1e-6
+  [../]
+  [./1D_gap_ktemp]
+    type = 'Exodiff'
+    input = 'gap_thermal_ktemp_1D.i'
+    exodiff = 'gap_thermal_ktemp_1D_out.e'
+    abs_zero = 1e-6
+  [../]
   [./CFEM_gap]
     type = 'Exodiff'
     input = 'cfem_gap.i'
