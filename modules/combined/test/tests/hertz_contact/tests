@@ -1,4 +1,5 @@
 [Tests]
+  issues = '#716'
   [./test]
     type = 'Exodiff'
     input = 'hertz_contact_rz.i'

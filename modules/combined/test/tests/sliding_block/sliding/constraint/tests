@@ -12,7 +12,6 @@
     abs_zero = 1e-7
     max_time = 800
     allow_warnings = true
-
     requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 
@@ -24,8 +23,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
-    deleted = '#6139'
-
+#    deleted = '#6139'
     requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 
@@ -37,8 +35,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
-    deleted = '#6139'
-
+#    deleted = '#6139'
     requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
@@ -51,7 +48,6 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
-
     requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
@@ -64,7 +60,6 @@
     min_parallel = 4
     abs_zero = 1e-4
     max_time = 800
-
     requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
@@ -77,7 +72,6 @@
     min_parallel = 4
     abs_zero = 1e-5
     max_time = 800
-
     requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 

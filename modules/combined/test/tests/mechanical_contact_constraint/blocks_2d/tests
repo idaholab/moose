@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2816'
   design = 'syntax/Contact/index.md source/MechanicalContactConstraint.md'
-  [./constraint_blocks_2d_frictionless_kinematic]
+  [./frictionless_kinematic]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
     exodiff = 'frictionless_kinematic_out.e'
@@ -10,7 +10,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
   [../]
-  [./constraint_blocks_2d_frictionless_kinematic_2]
+  [./frictionless_kinematic_dirac]
     type = 'Exodiff'
     input = 'frictionless_kinematic_dirac.i'
     exodiff = 'frictionless_kinematic_dirac_out.e'
@@ -19,7 +19,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the DiracKernel system."
   [../]
-  [./constraint_blocks_2d_frictionless_penalty]
+  [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
@@ -28,7 +28,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
   [../]
-  [./constraint_blocks_2d_frictionless_penalty_2]
+  [./frictionless_penalty_dirac]
     type = 'Exodiff'
     input = 'frictionless_penalty_dirac.i'
     exodiff = 'frictionless_penalty_dirac_out.e'
@@ -37,7 +37,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the DiracKernel system."
   [../]
-  [./constraint_blocks_2d_glued_kinematic]
+  [./glued_kinematic]
     type = 'Exodiff'
     input = 'glued_kinematic.i'
     exodiff = 'glued_kinematic_out.e'
@@ -46,7 +46,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
   [../]
-  [./constraint_blocks_2d_glued_kinematic_2]
+  [./glued_kinematic_dirac]
     type = 'Exodiff'
     input = 'glued_kinematic_dirac.i'
     exodiff = 'glued_kinematic_dirac_out.e'
@@ -55,7 +55,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the DiracKernel system."
   [../]
-  [./constraint_blocks_2d_glued_penalty]
+  [./glued_penalty]
     type = 'Exodiff'
     input = 'glued_penalty.i'
     exodiff = 'glued_penalty_out.e'
@@ -64,7 +64,7 @@
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
   [../]
-  [./constraint_blocks_2d_glued_penalty_2]
+  [./glued_penalty_dirac]
     type = 'Exodiff'
     input = 'glued_penalty_dirac.i'
     exodiff = 'glued_penalty_dirac_out.e'

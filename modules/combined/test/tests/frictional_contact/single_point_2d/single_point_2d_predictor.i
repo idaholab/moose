@@ -4,13 +4,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  volumetric_locking_correction = false
 []
 
 [AuxVariables]
@@ -41,14 +35,12 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    diag_save_in_disp_x = diag_saved_x
-    diag_save_in_disp_y = diag_saved_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    save_in = 'saved_x saved_y'
+    diag_save_in = 'diag_saved_x diag_saved_y'
   [../]
 []
 
@@ -128,20 +120,20 @@
 
 [Materials]
   [./bottom]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
+    youngs_modulus = 1.0e9
     poissons_ratio = 0.3
-    youngs_modulus = 1e9
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
   [./top]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
+    youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-    youngs_modulus = 1e6
   [../]
 []
 
@@ -204,7 +196,6 @@
 []
 
 [Outputs]
-  file_base = single_point_2d_predictor_out
   exodus = true
   print_linear_residuals = true
   perf_graph = true

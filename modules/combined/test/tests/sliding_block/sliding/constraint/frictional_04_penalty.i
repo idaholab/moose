@@ -14,14 +14,8 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -44,12 +38,13 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
+
 
 [AuxKernels]
   [./zeroslip_x]
@@ -132,20 +127,14 @@
 
 [Materials]
   [./left]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./right]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
-    youngs_modulus = 1e6
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -154,15 +143,15 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
-  petsc_options_value = 'asm     lu    20    101'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
   l_max_its = 100
   nl_max_its = 1000
   dt = 0.1
-  end_time = 15
+  end_time = 14.99999
   num_steps = 1000
   l_tol = 1e-6
   nl_rel_tol = 1e-10
@@ -176,9 +165,8 @@
 []
 
 [Outputs]
-  file_base = frictional_04_penalty_out
   interval = 10
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
