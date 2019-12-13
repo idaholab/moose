@@ -1,6 +1,6 @@
 # Manual Installation GCC/MPICH
 
-!include getting_started/minimum_requirements.md
+!include sqa/minimum_requirements.md
 
 ## Prerequisites
 
@@ -61,4 +61,3 @@ command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
 ## Compiler Stack Finished
 
 With the compiler stack ready, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
-

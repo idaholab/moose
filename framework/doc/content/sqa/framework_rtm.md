@@ -1,7 +1,7 @@
 !template load file=rtm.md.template category=framework project=Framework
 
 !template! item key=minimum_requirements
-!include getting_started/minimum_requirements.md
+!include sqa/minimum_requirements.md
 - Many flavors of modern Linux and the two most recent versions of Mac OS X
 !template-end!
 
