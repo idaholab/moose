@@ -43,15 +43,15 @@ BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   const unique_id_type n_total_nodes = mesh->parallel_n_nodes();
-  std::cout << "INTIAL NODE SETUP \n";
-  for (const auto & elem : mesh->active_element_ptr_range())
-  {
-    std::cout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " ";
-    for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-      std::cout << "node" << elem->node_id(node_id) << " ";
-
-    std::cout << " nn " << elem->n_neighbors() << "\n";
-  }
+  // std::ccout << "INTIAL NODE SETUP \n";
+  // for (const auto & elem : mesh->active_element_ptr_range())
+  // {
+  //  std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " ";
+  //   for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
+  //  std::ccout << "node" << elem->node_id(node_id) << " ";
+  //
+  //  std::ccout << " nn " << elem->n_neighbors() << "\n";
+  // }
 
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
@@ -167,68 +167,68 @@ BreakMeshByBlockGenerator::generate()
                 if (elem->node_id(node_id) == old_node_id)
                   elem->set_node(node_id) = new_node;
 
-              // std::cout << "Rank " << mesh->processor_id() << " elem_id " << elem_id << " ";
+              //  // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem_id << " ";
               // for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-              //   std::cout << "node" << elem->node_id(node_id) << " ";
+              //    // std::ccout << "node" << elem->node_id(node_id) << " ";
               //
-              // std::cout << " nn " << elem->n_neighbors() << "\n";
+              //  // std::ccout << " nn " << elem->n_neighbors() << "\n";
             }
         }
       }
 
       // create blocks pair and assign element side to new interface boundary map
-
-      for (auto elem_id : connected_elem->second)
-        for (auto connected_elem_id : connected_elem->second)
-        {
-          Elem * current_elem_pt = mesh->query_elem_ptr(elem_id);
-          Elem * connected_elem_pt = mesh->query_elem_ptr(connected_elem_id);
-
-          if ((current_elem_pt != nullptr) && (connected_elem_pt != nullptr) &&
-              (current_elem_pt != connected_elem_pt) &&
-              (current_elem_pt->subdomain_id() < connected_elem_pt->subdomain_id()))
-            if (current_elem_pt->has_neighbor(connected_elem_pt))
-            {
-              // std::cout << "Rank " << mesh->processor_id() << "  curr_elem id "
-              //           << current_elem_pt->id() << "  connected_elem id "
-              //           << connected_elem_pt->id() << "  neigh curr_conn"
-              //           << current_elem_pt->which_neighbor_am_i(connected_elem_pt)
-              //           << "  neigh conn_curr"
-              //           << connected_elem_pt->which_neighbor_am_i(current_elem_pt) << std::endl;
-              // std::pair<subdomain_id_type, subdomain_id_type> blocks_pair = std::make_pair(
-              //     current_elem_pt->subdomain_id(), connected_elem_pt->subdomain_id());
-              //
-              // _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
-              //     current_elem_pt->id(),
-              //     current_elem_pt->which_neighbor_am_i(connected_elem_pt)));
-            }
-        }
+      /*********************** FORGTE ABOUT THIS FOR NOW **************/
+      // for (auto elem_id : connected_elem->second)
+      //   for (auto connected_elem_id : connected_elem->second)
+      //   {
+      //     Elem * current_elem_pt = mesh->query_elem_ptr(elem_id);
+      //     Elem * connected_elem_pt = mesh->query_elem_ptr(connected_elem_id);
+      //
+      //     if ((current_elem_pt != nullptr) && (connected_elem_pt != nullptr) &&
+      //         (current_elem_pt != connected_elem_pt) &&
+      //         (current_elem_pt->subdomain_id() < connected_elem_pt->subdomain_id()))
+      //       if (current_elem_pt->has_neighbor(connected_elem_pt))
+      //       {
+      //         //  // std::ccout << "Rank " << mesh->processor_id() << "  curr_elem id "
+      //         //           << current_elem_pt->id() << "  connected_elem id "
+      //         //           << connected_elem_pt->id() << "  neigh curr_conn"
+      //         //           << current_elem_pt->which_neighbor_am_i(connected_elem_pt)
+      //         //           << "  neigh conn_curr"
+      //         //           << connected_elem_pt->which_neighbor_am_i(current_elem_pt) << std::endl;
+      //         std::pair<subdomain_id_type, subdomain_id_type> blocks_pair = std::make_pair(
+      //             current_elem_pt->subdomain_id(), connected_elem_pt->subdomain_id());
+      //         //
+      //         // _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
+      //         //     current_elem_pt->id(),
+      //         //     current_elem_pt->which_neighbor_am_i(connected_elem_pt)));
+      //       }
+      //   }
     }
   }
 
-  std::cout << "FINAL NODE SETUP \n";
-  for (const auto & elem : mesh->active_element_ptr_range())
-  {
-    std::cout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " nodes";
-    for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-      std::cout << elem->node_id(node_id) << " ";
+  // // std::ccout << "FINAL NODE SETUP \n";
+  // for (const auto & elem : mesh->active_element_ptr_range())
+  // {
+  //   // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " nodes";
+  //   for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
+  //     std::ccout << elem->node_id(node_id) << " ";
+  //
+  //     std::ccout << " n_neighbors " << elem->n_neighbors() << " n_sides " << elem->n_sides()
+  //     << " neighbor ";
+  //   for (const auto & conn_elem : mesh->active_element_ptr_range())
+  //     if (elem->has_neighbor(conn_elem))
+  //   std::ccout << "  connelem_id " << conn_elem->id() << "   wNamI "
+  //   << elem->which_neighbor_am_i(conn_elem) << "  " << conn_elem->which_neighbor_am_i(elem)
+  //   << "; ";
 
-    std::cout << " n_neighbors " << elem->n_neighbors() << " n_sides " << elem->n_sides()
-              << " neighbor ";
-    for (const auto & conn_elem : mesh->active_element_ptr_range())
-      if (elem->has_neighbor(conn_elem))
-        std::cout << "  connelem_id " << conn_elem->id() << "   wNamI "
-                  << elem->which_neighbor_am_i(conn_elem) << "  "
-                  << conn_elem->which_neighbor_am_i(elem) << "; ";
-
-    std::cout << std::endl;
-  }
+  // std::ccout << std::endl;
+  // }
 
   // for (const auto & elem : mesh->active_element_ptr_range())
   //   if (elem != nullptr)
   //     for (const auto & conn_elem : mesh->active_element_ptr_range())
   //       if (conn_elem != nullptr && elem->has_neighbor(conn_elem))
-  //         std::cout << "Rank " << mesh->processor_id() << "  curr_elem id " << elem->id()
+  //          // std::ccout << "Rank " << mesh->processor_id() << "  curr_elem id " << elem->id()
   //                   << "  connected_elem id " << conn_elem->id() << "  neigh curr_conn"
   //                   << elem->which_neighbor_am_i(conn_elem) << "  neigh conn_curr"
   //                   << conn_elem->which_neighbor_am_i(elem) << std::endl;
