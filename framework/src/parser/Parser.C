@@ -961,7 +961,15 @@ Parser::setVectorParameter<Point, Point>(const std::string & full_name,
                                          InputParameters::Parameter<std::vector<Point>> * param,
                                          bool in_global,
                                          GlobalParamsAction * global_block);
-
+/*
+template <>
+void Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+*/
 template <>
 void Parser::setVectorParameter<MooseEnum, MooseEnum>(
     const std::string & full_name,

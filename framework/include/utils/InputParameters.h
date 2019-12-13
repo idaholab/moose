@@ -600,24 +600,28 @@ public:
    * Get the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @param suppress_error If true, the error check is suppressed
+   * @param index The index in the default postprocessor vector
    * @return The default value for the postprocessor
    */
   const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name,
-                                                          bool suppress_error = false) const;
+                                                          bool suppress_error = false,
+                                                          unsigned int index = 0) const;
 
   /**
    * Set the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @value value The value of the postprocessor default to set
+   * @param index The index in the default postprocessor vector
    */
-  void setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value);
+  void setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value, unsigned int index = 0);
 
   /**
    * Returns true if a default PostprocessorValue is defined
    * @param name The name of the postprocessor
+   * @param index The index in the default postprocessor vector
    * @return True if a default value exists
    */
-  bool hasDefaultPostprocessorValue(const std::string & name) const;
+  bool hasDefaultPostprocessorValue(const std::string & name, unsigned int index = 0) const;
 
   // BEGIN APPLY PARAMETER METHODS
   /**
@@ -827,8 +831,8 @@ private:
     bool _have_coupled_default = false;
     /// The default value for optionally coupled variables
     std::vector<Real> _coupled_default = {0};
-    bool _have_default_postprocessor_val = false;
-    PostprocessorValue _default_postprocessor_val = 0;
+    std::vector<bool> _have_default_postprocessor_val = {false};
+    std::vector<PostprocessorValue> _default_postprocessor_val = {0};
     /// True if a parameters value was set by addParam, and not set again.
     bool _set_by_add_param = false;
     /// The reserved option names for a parameter
