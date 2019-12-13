@@ -47,7 +47,6 @@
       recover = false
       min_parallel = 1
       max_parallel = 1
-      recover = false
       allow_test_objects = true
       detail = "on a single processor,"
     []
