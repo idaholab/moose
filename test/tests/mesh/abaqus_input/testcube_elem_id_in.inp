@@ -1,0 +1,43 @@
+*Heading
+** Job name: testcube Model name: Model-1
+*Preprint, echo=NO, model=NO, history=NO, contact=NO
+** ----------------------------------------------------------------
+** 
+** PART INSTANCE: Part-1-1
+** 
+*Node
+      1,           1.,           1.,           1.
+      2,           1.,           0.,           1.
+      3,           1.,           0.,           0.
+      4,           1.,           1.,           0.
+      5,           0.,           0.,           1.
+      6,           0.,           0.,           0.
+      7,           0.,           1.,           0.
+      8,           0.,           1.,           1.
+      9,  0.492907375,  0.533767402,  0.547177196
+*Element, type=C3D4
+ 1, 2, 6, 5, 9
+ 2, 9, 6, 5, 7
+ 3, 7, 9, 8, 5
+ 4, 6, 7, 9, 3
+ 5, 4, 9, 1, 8
+ 6, 3, 4, 9, 1
+ 7, 3, 7, 9, 4
+ 8, 3, 9, 2, 1
+ 9, 5, 9, 8, 2
+10, 9, 2, 1, 8
+11, 6, 9, 2, 3
+12, 7, 9, 4, 8
+*Elset, elset=_Part-1-1_top_S3
+ 10,
+*Elset, elset=_Part-1-1_top_S4
+ 9,
+*Surface, type=ELEMENT, name=Part-1-1_top
+ 10, S3
+ 9, S4
+*Elset, elset=_Part-1-1_right_S4
+  5, 12
+*Surface, type=ELEMENT, name=Part-1-1_right
+ 5, S4
+ 12, S4 
+*System
