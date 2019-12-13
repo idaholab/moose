@@ -97,7 +97,11 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
       vec.clear();
 
       // Now that all dofs are set for this variable, solemnize the solution.
-      var->insert(var->sys().solution());
+      // Lock the new_vector since it is shared among threads.
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        var->insert(var->sys().solution());
+      }
     }
   }
 }
