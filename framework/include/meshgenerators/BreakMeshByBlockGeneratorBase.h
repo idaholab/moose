@@ -55,14 +55,13 @@ protected:
   /// this method finds the first free boundary id
   BoundaryID findFreeBoundaryId(MeshBase & mesh);
 
-private:
   /// this method generate the boundary name by assembling subdomain names
   std::string generateBoundaryName(MeshBase & mesh,
                                    const subdomain_id_type & /*masterBlockID*/,
                                    const subdomain_id_type & /*slaveBlockID*/);
 
+private:
   /// this method save the boundary name/id pair
   void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };
-
