@@ -4,7 +4,7 @@
 #  a small block come in and out of contact as it slides down a larger block.
 #
 #  The sinusoid is of the form 0.4sin(4t)+0.2 and a friction coefficient
-#  of 0. is used.  The gold file is run on one processor and the benchmark
+#  of 0.2 is used.  The gold file is run on one processor and the benchmark
 #  case is run on a minimum of 4 processors to ensure no parallel variability
 #  in the contact pressure and penetration results.  Further documentation can
 #  found in moose/modules/contact/doc/sliding_block/
@@ -16,8 +16,15 @@
 []
 
 [GlobalParams]
-  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
 []
 
 [AuxVariables]
@@ -44,10 +51,10 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    add_variables = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
@@ -131,15 +138,23 @@
 []
 
 [Materials]
-  [./constitutive]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 2'
-    youngs_modulus = 1e6
+  [./left]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 1
+    disp_y = disp_y
+    disp_x = disp_x
     poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
+  [./right]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 2
+    disp_y = disp_y
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
 []
 
@@ -170,7 +185,6 @@
 []
 
 [Outputs]
-  file_base = frictional_04_penalty_out
   interval = 10
   [./exodus]
     type = Exodus
@@ -186,10 +200,10 @@
   [./leftright]
     slave = 3
     master = 2
-    model = frictionless
+    model = coulomb
     penalty = 1e+7
     formulation = penalty
-    friction_coefficient = 0.4
+    friction_coefficient = 0.2
     normal_smoothing_distance = 0.1
   [../]
 []

@@ -16,8 +16,15 @@
 []
 
 [GlobalParams]
-  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
 []
 
 [AuxVariables]
@@ -44,10 +51,10 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    add_variables = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
@@ -131,15 +138,23 @@
 []
 
 [Materials]
-  [./constitutive]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 2'
-    youngs_modulus = 1e6
+  [./left]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 1
+    disp_y = disp_y
+    disp_x = disp_x
     poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
+  [./right]
+    type = Elastic
+    formulation = NonlinearPlaneStrain
+    block = 2
+    disp_y = disp_y
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
 []
 
@@ -170,7 +185,6 @@
 []
 
 [Outputs]
-  file_base = frictional_04_penalty_out
   interval = 10
   [./exodus]
     type = Exodus
