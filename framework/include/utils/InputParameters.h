@@ -608,12 +608,21 @@ public:
                                                           unsigned int index = 0) const;
 
   /**
+   * Reserve space for default postprocessor values
+   * @param name The name of the postprocessor
+   * @param size Number of entries required in default p
+   */
+  void reserveDefaultPostprocessorValueStorage(const std::string & name, unsigned int size);
+
+  /**
    * Set the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @value value The value of the postprocessor default to set
    * @param index The index in the default postprocessor vector
    */
-  void setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value, unsigned int index = 0);
+  void setDefaultPostprocessorValue(const std::string & name,
+                                    const PostprocessorValue & value,
+                                    unsigned int index = 0);
 
   /**
    * Returns true if a default PostprocessorValue is defined
@@ -802,6 +811,27 @@ public:
    */
   bool shouldIgnore(const std::string & name);
 
+  /**
+   * Getter for the _vector_of_postprocessors flag in parameters
+   *
+   * @param pp_name The name of the postprocessor parameter
+   */
+  bool isSinglePostprocessor(const std::string & pp_name) const
+  {
+    return !_params.find(pp_name)->second._vector_of_postprocessors;
+  }
+
+  /**
+   * Setter for the _vector_of_postprocessors flag in parameters
+   *
+   * @param pp_name The name of the postprocessor parameter
+   * @param b value that _vector_of_postprocessors is set to
+   */
+  void setVectorOfPostprocessors(const std::string & pp_name, bool b)
+  {
+    _params[pp_name]._vector_of_postprocessors = b;
+  }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -831,6 +861,8 @@ private:
     bool _have_coupled_default = false;
     /// The default value for optionally coupled variables
     std::vector<Real> _coupled_default = {0};
+    /// are pps provided as single pp or as vector of pps
+    bool _vector_of_postprocessors = false;
     std::vector<bool> _have_default_postprocessor_val = {false};
     std::vector<PostprocessorValue> _default_postprocessor_val = {0};
     /// True if a parameters value was set by addParam, and not set again.

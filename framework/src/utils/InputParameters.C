@@ -632,10 +632,21 @@ InputParameters::getDefaultPostprocessorValue(const std::string & name,
 {
   // Check that a default exists, error if it does not
   auto it = _params.find(name);
-  if (!suppress_error && (it == _params.end() || !it->second._have_default_postprocessor_val[index]))
+  if (!suppress_error &&
+      (it == _params.end() || !it->second._have_default_postprocessor_val[index]))
     mooseError("A default PostprcessorValue does not exist for the given name: ", name);
 
   return it->second._default_postprocessor_val[index];
+}
+
+void
+InputParameters::reserveDefaultPostprocessorValueStorage(const std::string & name,
+                                                         unsigned int size)
+{
+  if (_params[name]._default_postprocessor_val.size() >= size)
+    return;
+  _params[name]._default_postprocessor_val.resize(size, 0);
+  _params[name]._have_default_postprocessor_val.resize(size, false);
 }
 
 void

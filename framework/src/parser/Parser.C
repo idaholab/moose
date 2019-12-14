@@ -961,7 +961,7 @@ Parser::setVectorParameter<Point, Point>(const std::string & full_name,
                                          InputParameters::Parameter<std::vector<Point>> * param,
                                          bool in_global,
                                          GlobalParamsAction * global_block);
-/*
+
 template <>
 void Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
@@ -969,7 +969,7 @@ void Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
     InputParameters::Parameter<std::vector<PostprocessorName>> * param,
     bool in_global,
     GlobalParamsAction * global_block);
-*/
+
 template <>
 void Parser::setVectorParameter<MooseEnum, MooseEnum>(
     const std::string & full_name,
@@ -1221,7 +1221,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(IndicatorName, string);
       setvector(MarkerName, string);
       setvector(MultiAppName, string);
-      setvector(PostprocessorName, string);
+      setvector(PostprocessorName, PostprocessorName);
       setvector(VectorPostprocessorName, string);
       setvector(OutputName, string);
       setvector(MaterialPropertyName, string);
@@ -1337,7 +1337,6 @@ Parser::setScalarParameter(const std::string & full_name,
                            bool in_global,
                            GlobalParamsAction * global_block)
 {
-
   try
   {
     param->set() = _root->param<Base>(full_name);
@@ -1943,6 +1942,39 @@ Parser::setVectorParameter<MooseEnum, MooseEnum>(
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec.size(), enum_values[0]);
     for (unsigned int i = 0; i < vec.size(); ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
+  }
+}
+
+template <>
+void
+Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  std::vector<std::string> pps_names = _root->param<std::vector<std::string>>(full_name);
+  unsigned int n = pps_names.size();
+  param->set().resize(n);
+  _current_params->setVectorOfPostprocessors(short_name, true);
+  _current_params->reserveDefaultPostprocessorValueStorage(short_name, n);
+
+  for (unsigned int j = 0; j < n; ++j)
+  {
+    param->set()[j] = pps_names[j];
+    Real real_value = -std::numeric_limits<Real>::max();
+    std::istringstream ss(pps_names[j]);
+    if (ss >> real_value && ss.eof())
+      _current_params->setDefaultPostprocessorValue(short_name, real_value, j);
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<PostprocessorName>(short_name).resize(n, "");
+    for (unsigned int j = 0; j < n; ++j)
+      global_block->setVectorParam<PostprocessorName>(short_name)[j] = pps_names[j];
   }
 }
 
