@@ -7,7 +7,8 @@
     exodiff = 'frictional_02_penalty_sm_exodus.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
+    rel_err = 1e-5
     max_time = 800
     requirement = 'The contact system shall enforce frictional interaction with coefficient of 0.2. Contact in and out. Legacy Solid Mechanics. '
   [../]
@@ -18,7 +19,8 @@
     exodiff = 'frictional_04_penalty_sm_exodus.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
+    rel_err = 1e-5
     max_time = 800
     requirement = 'The contact system shall enforce frictional interaction with coefficient of 0.4. Contact in and out. Legacy Solid Mechanics. '
   [../]
@@ -29,7 +31,8 @@
     exodiff = 'frictionless_kinematic_sm_exodus.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
+    rel_err = 1e-5
     max_time = 800
     requirement = 'The contact system shall enforce frictionaless kinematic interaction. Contact in and out. Legacy Solid Mechanics. '
   [../]
@@ -40,7 +43,8 @@
     exodiff = 'frictionless_penalty_sm_exodus.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
+    rel_err = 1e-5
     max_time = 800
     requirement = 'The contact system shall enforce frictionless penalty interaction. Contact in and out. Legacy Solid Mechanics. '
   [../]

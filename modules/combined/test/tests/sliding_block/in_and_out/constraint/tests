@@ -4,7 +4,7 @@
     input = 'frictional_lm.i'
     exodiff = 'frictional_lm_out.e'
     heavy = true
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     design = 'Constraints/index.md'
     issues = '#13080'
     requirement = 'We shall be able to run our canonical frictional sliding block problem with mortar Lagrange Multiplier contact'
@@ -17,7 +17,7 @@
     input = 'frictionless_lm.i'
     exodiff = 'frictionless_lm_out.e'
     heavy = true
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     design = 'Constraints/index.md'
     issues = '#13080'
     requirement = 'We shall be able to run our canonical frictional sliding block problem with lagrange multipliers and the mortar method'
@@ -30,7 +30,7 @@
     exodiff = 'frictional_02_penalty_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
@@ -42,7 +42,7 @@
     exodiff = 'frictional_04_penalty_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
@@ -54,7 +54,7 @@
     exodiff = 'frictionless_kinematic_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     custom_cmp = 'frictionless_kinematic_out.cmp'
     issues = '#2816'
@@ -67,7 +67,7 @@
     exodiff = 'frictionless_kinematic_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     cli_args = 'Variables/disp_x/scaling=1e-6 Variables/disp_y/scaling=1e-6'
     prereq = 'frictionless_kinematic'
@@ -84,7 +84,7 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
@@ -97,7 +97,7 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     # The linesearch used by this test requires PETSc >= 3.6.0.
     petsc_version = '>=3.6.0'
