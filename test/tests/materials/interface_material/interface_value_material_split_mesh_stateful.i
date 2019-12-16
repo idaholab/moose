@@ -15,12 +15,22 @@
     top_right = '2 2 0'
     block_id = 1
   [../]
+  # [./msh]
+  #   type = FileMeshGenerator
+  #   file = interface_value_material_split_mesh_stateful_in.e
+  # [../]
   [./split]
     type = BreakMeshByBlockGenerator
     input = subdomain_id
   [../]
+  # [./add_boundary]
+  #   input = split
+  #   type = SideSetsBetweenSubdomainsGenerator
+  #   master_block = 0
+  #   paired_block = 1
+  #   interface = interface
+  # []
 []
-
 
 
 [Variables]

@@ -15,6 +15,8 @@
     issues = '#12066 #12033'
     requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface when the mesh is split'
     recover = false
+    min_parallel = 3
+    max_parallel = 3
   []
   [jump_split_stateful]
     type = Exodiff
@@ -24,6 +26,8 @@
     issues = '#12066 #12033'
     requirement = 'The system shall be able to calculate stateful material properties in an interface material object'
     recover = false
+    min_parallel = 3
+    max_parallel = 3
   []
   [boundary_elem_aux]
     type = Exodiff

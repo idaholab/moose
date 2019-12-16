@@ -15,10 +15,21 @@
     top_right = '2 2 0'
     block_id = 1
   [../]
+  # [./msh]
+  #   type = FileMeshGenerator
+  #   file = interface_value_material_split_mesh_in.e
+  # [../]
   [./split]
     type = BreakMeshByBlockGenerator
     input = subdomain_id
   [../]
+  # [./add_boundary]
+  #   input = msh
+  #   type = SideSetsBetweenSubdomainsGenerator
+  #   master_block = 0
+  #   paired_block = 1
+  #   'interface' = 'interface'
+  # []
 []
 
 
@@ -95,7 +106,7 @@
       var_master = diffusivity_var
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = average
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
@@ -108,7 +119,7 @@
       var_master = diffusivity_var
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = jump_master_minus_slave
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
@@ -121,7 +132,7 @@
       var_master = diffusivity_var
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = jump_slave_minus_master
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
@@ -134,7 +145,7 @@
       var_master = diffusivity_var
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = jump_abs
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
@@ -147,7 +158,7 @@
       var_master = diffusivity_var
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = master
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
@@ -161,7 +172,7 @@
       var_slave = diffusivity_var
       mat_prop_out_basename = diff
       mat_prop_var_out_basename = diff_var
-      boundary = interface
+      boundary = 'interface'
       interface_value_type = slave
       nl_var_master = u
       nl_var_slave = v
@@ -173,37 +184,37 @@
     type = MaterialRealAux
     property = diff_average
     variable = diffusivity_average
-    boundary = interface
+    boundary = 'interface'
   []
   [./interface_material_jump_master_minus_slave]
     type = MaterialRealAux
     property = diff_jump_master_minus_slave
     variable = diffusivity_jump_master_minus_slave
-    boundary = interface
+    boundary = 'interface'
   []
   [./interface_material_jump_slave_minus_master]
     type = MaterialRealAux
     property = diff_jump_slave_minus_master
     variable = diffusivity_jump_slave_minus_master
-    boundary = interface
+    boundary = 'interface'
   []
   [./interface_material_jump_abs]
     type = MaterialRealAux
     property = diff_jump_abs
     variable = diffusivity_jump_abs
-    boundary = interface
+    boundary = 'interface'
   []
   [./interface_material_master]
     type = MaterialRealAux
     property = diff_master
     variable = diffusivity_master
-    boundary = interface
+    boundary = 'interface'
   []
   [./interface_material_slave]
     type = MaterialRealAux
     property = diff_slave
     variable = diffusivity_slave
-    boundary = interface
+    boundary = 'interface'
   []
   [diffusivity_var]
     type = MaterialRealAux

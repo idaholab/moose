@@ -141,6 +141,7 @@ BreakMeshByBlockGenerator::generate()
     {
       new_node_id_map[original_node_id].push_back(std::make_pair(sub_it, node_counter));
       node_counter++;
+      mooseAssert(first_id < sub_it, "first_id > sub_it");
       _neighboring_block_list.insert(std::make_pair(first_id, sub_it));
     }
   } // done creating new unique node ids
@@ -173,15 +174,16 @@ BreakMeshByBlockGenerator::generate()
           if (elem != nullptr)
             if (elem->subdomain_id() == sub_node.first)
             {
+              mooseAssert(elem->subdomain_id() > 0, "elem->subdomain_id() <= 0");
               for (unsigned int node_id = 0; node_id < elem->n_nodes(); node_id++)
                 if (elem->node_id(node_id) == old_node_id)
                   elem->set_node(node_id) = new_node;
 
-              //  // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem_id << " ";
+              // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem_id << " ";
               // for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-              //    // std::ccout << "node" << elem->node_id(node_id) << " ";
-              //
-              //  // std::ccout << " nn " << elem->n_neighbors() << "\n";
+              // std::ccout << "node" << elem->node_id(node_id) << " ";
+
+              // std::ccout << " nn " << elem->n_neighbors() << "\n";
             }
         }
       }
