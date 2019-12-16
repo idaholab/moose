@@ -13,9 +13,14 @@ import hit
 import moosetree
 from . import message
 
+
 class HitNode(moosetree.Node):
     """
     An moosetree.Node object for building a hit tree.
+
+    Inputs:
+        parent[HitNode]: The parent of the node being created
+        hitnode[hit.Node|hit.Kind]: The node or kind being created
     """
     def __init__(self, parent, hitnode):
         super(HitNode, self).__init__(parent, hitnode.path())
@@ -59,7 +64,76 @@ class HitNode(moosetree.Node):
         func = lambda n: (fuzzy and name in n.fullpath) or (not fuzzy and name == n.fullpath)
         return moosetree.findall(self, func, method=moosetree.IterMethod.PRE_ORDER)
 
-    def render(self):
+    def append(self, name, **kwargs):
+        """
+        Append a new input file block.
+
+        Inputs:
+            name[str]: The name of the section to add
+            kwargs[dict]: Parameters to populate to the new section
+        """
+        new = hit.NewSection(name)
+        self.__hitnode.addChild(new)
+        node = HitNode(self, new)
+        for key, value in kwargs.items():
+            node.addParam(key, value)
+        return node
+
+    def remove(self):
+        """
+        Remove this node form the tree.
+        """
+        self.__hitnode.remove()
+        self.__hitnode = None
+        self.parent = None
+
+    def addParam(self, name, value):
+        """
+        Add a new parameter to the given node.
+
+        Inputs:
+            name[str]: The name of the parameter
+            value[Int|Float|Bool|String]: The parameter value
+        """
+        if isinstance(value, int):
+            kind = hit.FieldKind.Int
+        elif isinstance(value, float):
+            kind = hit.FieldKind.Float
+        elif isinstance(value, bool):
+            kind = hit.FieldKind.Bool
+        elif isinstance(value, str):
+            kind = hit.FieldKind.String
+        else:
+            kind = hit.FieldKind.NotField
+
+        param = hit.NewField(name, kind, str(value))
+        self.__hitnode.addChild(param)
+
+    def removeParam(self, name):
+        """
+        Remove the supplied parameter.
+
+        Inputs:
+            name[str]: The name of the parameter
+        """
+        for child in self.__hitnode.children(hit.NodeType.Field):
+            if child.path() == name:
+                child.remove()
+
+    def format(self, **kwargs):
+        """
+        Render tree with formatting.
+
+        Inputs:
+            canonical_section_markers[bool]: Enable/disable use of "./" and "../" section markings,
+                                             by default the markings are removed.
+        """
+        formatter = hit.Formatter()
+        formatter.config(**kwargs)
+        formatter.formatTree(self.__hitnode)
+        return self.render()
+
+    def render(self, **kwargs):
         """
         Render the tree with the hit library.
         """
@@ -168,9 +242,3 @@ def hit_parse(root, hit_node, filename):
             hit_parse(new, hit_child, filename)
 
     return root
-
-if __name__ == '__main__':
-    filename = '../../test/tests/kernels/simple_diffusion/simple_diffusion.i'
-    root = hit_load(filename)
-    print(root)
-    print(root.render())

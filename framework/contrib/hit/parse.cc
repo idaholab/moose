@@ -183,6 +183,12 @@ Node::~Node()
   }
 }
 
+void
+Node::remove()
+{
+  delete this;
+}
+
 int
 Node::line()
 {
@@ -1079,13 +1085,18 @@ std::string
 Formatter::format(const std::string & fname, const std::string & input)
 {
   std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+  format(root.get());
+  return root->render(0, indent_string, line_length);
+}
 
+void
+Formatter::format(hit::Node * root)
+{
   TokenClearer tc;
   if (canonical_section_markers)
     root->walk(&tc, hit::NodeType::Section);
 
   root->walk(this, hit::NodeType::All);
-  return root->render(0, indent_string, line_length);
 }
 
 void
