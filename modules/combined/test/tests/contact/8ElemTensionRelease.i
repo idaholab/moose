@@ -5,6 +5,7 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
 []
 
@@ -13,13 +14,6 @@
     type = PiecewiseLinear
     x = '0 1      2 3'
     y = '0 0.0001 0 -.0001'
-  [../]
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
   [../]
 []
 
@@ -32,11 +26,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+  []
 []
 
 [Contact]
@@ -91,25 +85,14 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-
-    youngs_modulus = 1e6
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
+    youngs_modulus = 1.0e6
     poissons_ratio = 0.3
   [../]
-
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -121,7 +104,7 @@
 
   line_search = 'none'
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-9
   l_tol = 1e-4
 
   l_max_its = 100

@@ -170,5 +170,4 @@
     type = Exodus
     elemental_as_nodal = true
   [../]
-  file_base = PowerLawHardening_out
 []
