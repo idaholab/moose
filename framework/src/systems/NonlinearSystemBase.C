@@ -1143,7 +1143,18 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
                 if (nfc->overwriteSlaveResidual())
                 {
-                  _fe_problem.setResidual(residual, 0);
+                  // The below will actually overwrite the residual for every single dof that lives
+                  // on the node. We definitely don't want to do that!
+                  // _fe_problem.setResidual(residual, 0);
+
+                  const auto & slave_var = nfc->variable();
+                  const auto & slave_dofs = slave_var.dofIndices();
+                  mooseAssert(slave_dofs.size() == slave_var.count(),
+                              "We are on a node so there should only be one dof per variable (for "
+                              "an ArrayVariable we should have a number of dofs equal to the "
+                              "number of components");
+                  std::vector<Number> values = {nfc->slaveResidual() * slave_var.scalingFactor()};
+                  residual.insert(values, slave_dofs);
                   residual_has_inserted_values = true;
                 }
                 else

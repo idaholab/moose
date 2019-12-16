@@ -36,6 +36,7 @@ typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -598,7 +599,7 @@ public:
   bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
 
   /// Set whether residual being evaulated is non-linear
-  void computingNonlinearResid(bool computing_nonlinear_residual)
+  virtual void computingNonlinearResid(bool computing_nonlinear_residual)
   {
     _computing_nonlinear_residual = computing_nonlinear_residual;
   }
@@ -641,6 +642,13 @@ public:
    * Method for reading wehther we have any ad objects
    */
   bool haveADObjects() const { return _have_ad_objects; }
+
+  virtual LineSearch * getLineSearch() = 0;
+
+  /**
+   * The coupling matrix defining what blocks exist in the preconditioning matrix
+   */
+  virtual const CouplingMatrix * couplingMatrix() const = 0;
 
 protected:
   /**

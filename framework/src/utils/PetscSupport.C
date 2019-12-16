@@ -99,6 +99,8 @@ stringify(const LineSearchType & t)
       return "cp";
     case LS_CONTACT:
       return "contact";
+    case LS_PROJECT:
+      return "project";
 #endif
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
@@ -154,7 +156,7 @@ setSolverOptions(SolverParams & solver_params)
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
   {
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
     setSinglePetscOption("-snes_type", "ls");
@@ -549,7 +551,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       Moose::LineSearchType enum_line_search =
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
       fe_problem.solverParams()._line_search = enum_line_search;
-      if (enum_line_search == LS_CONTACT)
+      if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
       {
         NonlinearImplicitSystem * nl_system =
             dynamic_cast<NonlinearImplicitSystem *>(&fe_problem.getNonlinearSystemBase().system());
@@ -559,7 +561,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
             dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
         if (!petsc_nonlinear_solver)
-          mooseError("Currently the contact line search is only implemented through Petsc, so you "
+          mooseError("Currently the MOOSE line searches all use Petsc, so you "
                      "must use Petsc as your non-linear solver.");
         petsc_nonlinear_solver->linesearch_object =
             libmesh_make_unique<ComputeLineSearchObjectWrapper>(fe_problem);

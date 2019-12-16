@@ -171,7 +171,7 @@ public:
   // DEPRECATED METHOD
   void setCouplingMatrix(CouplingMatrix * cm);
 
-  const CouplingMatrix * couplingMatrix() { return _cm.get(); }
+  const CouplingMatrix * couplingMatrix() const override { return _cm.get(); }
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
@@ -541,7 +541,7 @@ public:
   /**
    * getter for the MOOSE line search
    */
-  std::shared_ptr<LineSearch> getLineSearch() { return _line_search; }
+  LineSearch * getLineSearch() override { return _line_search.get(); }
 
   /**
    * The following functions will enable MOOSE to have the capability to import distributions
@@ -1735,6 +1735,9 @@ public:
    * Whether the simulation has mortar coupling
    */
   virtual bool hasMortarCoupling() const { return _has_mortar; }
+
+  using SubProblem::computingNonlinearResid;
+  void computingNonlinearResid(bool computing_nonlinear_residual) override;
 
 protected:
   /// Create extra tagged vectors and matrices

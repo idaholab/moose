@@ -100,14 +100,15 @@ For normal and tangential (frictional) mortar contact:
 
 ### Frictionless contact algorithm comparison id=frictionless_table
 
-| Lagrange multiplier | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
-| ------------------- | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
-| Nodal | Mortar | Min | 14.401 | 40 | 104 |
-| Nodal | Mortar | FB | 17.752 | 40 | 135 |
-| Nodal | Nodal | Min | 5.438 | 41 | 104 |
-| Nodal | Nodal | FB | 6.770 | 41 | 149 |
-| Mortar | Mortar | Min | 14.454 | 40 | 106 |
-| Mortar | Mortar | FB | 19.027 | 40 | 136 |
+| Constraint | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
+| ---------- | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
+| Nodal | Mortar | Min | 4.164 | 40 | 104 |
+| Nodal | Mortar | FB | 5.020 | 40 | 135 |
+| Nodal | Nodal | Min | 3.124 | 41 | 104 |
+| Nodal | Nodal | FB | 4.014 | 41 | 149 |
+| Mortar | Mortar | Min | 4.461 | 40 | 106 |
+| Mortar | Mortar | FB | 5.577 | 40 | 136 |
+| Nodal | Nodal | RANFS | 2.700 | 40 | 99 |
 
 The first column denotes the discretization algorithm used for applying the
 frictionless contact constraints. Nodal denotes use of a `NodeFaceConstraint`;
@@ -117,7 +118,10 @@ residuals. The third column denotes the type of non-linear complimentarity
 problem (NCP) function used to ensure that the contact constraints are
 satisfied. Min indicates the canonical min function (see
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min)); FB represents the
-Fischer-Burmeister function. The fourth column is the simulation time in
+Fischer-Burmeister function. `RANFS` denotes the Reduced Active Nonlinear
+Function Set scheme in which no Lagrange Multipliers are used, and instead the
+non-linear residual equations at the slave nodes are replaced with the gap
+function. The fourth column in the table is the simulation time in
 arbitrary units (since timings will be different across machines). The fifth
 column is the number of time steps required to reach the simulation end
 time. The final, sixth column is the cumulative number of non-linear iterations

@@ -105,4 +105,83 @@
     requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces using the ContactAction. The result shall be identical to that obtained by directly specifying individual objects.'
     cli_args = "Executioner/end_time=50 Postprocessors/active=''"
   []
+  [reduced_active_set]
+    requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced active nonlinear function set scheme (RANFS) in conjunction with a node-face geometric discretization. The RANFS scheme shall be'
+    [ranfs-project-svd]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-project-svd.e'
+      absent_out = '[1-9]+[0-9]* of 16 singular values'
+      expect_out = '0 of 16 singular values'
+      detail = 'nonsingular both with bounds projection and'
+      cli_args = 'Outputs/file_base=ranfs-project-svd -pc_type svd -pc_svd_monitor'
+    []
+    [ranfs-dont-project-svd]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-dont-project-svd.e'
+      detail = 'without bounds projection and be'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none -pc_type svd -pc_svd_monitor'
+    []
+    [ranfs-project-amg]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-project-amg.e'
+      detail = 'solvable with amg both with bounds projection'
+      cli_args = 'Outputs/file_base=ranfs-project-amg'
+      expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+    []
+    [ranfs-dont-project-amg]
+      type = 'Exodiff'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      exodiff = 'ranfs-dont-project-amg.e'
+      detail = 'and without bounds projection.'
+      cli_args = 'Outputs/file_base=ranfs-dont-project-amg Executioner/line_search=none'
+      expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+    []
+    [ranfs-jacobian]
+      type = 'PetscJacobianTester'
+      input = 'frictionless-nodal-reduced-active-set.i'
+      difference_tol = 1e-7
+      cli_args = "Outputs/active='' Executioner/line_search=none"
+      expect_out = '[bB][oO][oO][mM][eE][rR][aA][mM][gG]'
+      detail = "The system's RANFS scheme shall have a perfect Jacobian for mechanical contact that only has one non-zero normal component"
+    []
+    [full-bouncing-block]
+      type = 'Exodiff'
+      input = 'bouncing-block-ranfs.i'
+      exodiff = 'bouncing-block-ranfs_exo.e'
+      detail = 'The system shall be able to detect when a slave node is ping-ponging back and forth between different master faces and consequently tie the locations of the slave and corresponding master node using Lagrange Multipliers corresponding to equality constraints, e.g. more RANFS'
+      cli_args = "Postprocessors/active=''"
+      custom_cmp = 'bouncing-block-ranfs.cmp'
+      heavy = true
+    []
+    [bouncing-block]
+      type = 'Exodiff'
+      input = 'bouncing-block-ranfs.i'
+      exodiff = 'bouncing-block-coarse.e'
+      detail = 'The system shall be able to solve a smaller model of the full ping-ponging problem'
+      cli_args = "Postprocessors/active='' Mesh/file=long-bottom-block-no-lower-d-coarse.e Executioner/end_time=100 Outputs/file_base=bouncing-block-coarse"
+    []
+  []
+  [tied_node]
+    requirement = 'Using a RANFS scheme with Lagrange multipliers corresponding to equality constraints the system shall be able to '
+    [physics]
+      type = 'Exodiff'
+      input = tied-nodes.i
+      exodiff = 'tied-nodes_exo.e'
+      absent_out = '[1-9]+[0-9]* of 16 singular values'
+      expect_out = '0 of 16 singular values'
+      detail = 'tie nodes together and'
+      allow_test_objects = True
+      cli_args = '-pc_type svd -pc_svd_monitor'
+    []
+    [jac]
+      type = 'PetscJacobianTester'
+      input = tied-nodes.i
+      cli_args = "Outputs/active=''"
+      detail = 'have a perfect Jacobian'
+      allow_test_objects = True
+    []
+  []
 []

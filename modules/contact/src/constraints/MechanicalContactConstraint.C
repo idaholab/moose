@@ -110,7 +110,6 @@ Threads::spin_mutex MechanicalContactConstraint::_contact_set_mutex;
 MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
@@ -132,8 +131,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-    _contact_linesearch(
-        std::dynamic_pointer_cast<ContactLineSearchBase>(_fe_problem.getLineSearch())),
+    _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
 {
   _overwrite_slave_residual = false;
@@ -472,7 +470,7 @@ MechanicalContactConstraint::shouldApply()
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      bool is_nonlinear = _fe_problem.computingNonlinearResid();
+      bool is_nonlinear = _subproblem.computingNonlinearResid();
 
       // This computes the contact force once per constraint, rather than once per quad point
       // and for both master and slave cases.
