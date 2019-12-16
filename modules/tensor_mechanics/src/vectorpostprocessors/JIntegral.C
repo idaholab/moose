@@ -22,6 +22,9 @@ InputParameters
 JIntegral::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
@@ -38,8 +41,7 @@ JIntegral::validParams()
   params.addParam<Real>("poissons_ratio", "Poisson's ratio");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam<unsigned int>("ring_index", "Ring ID");
-  params.addParam<unsigned int>("ring_first", "First Ring ID");
+  params.addRequiredParam<unsigned int>("ring_index", "Ring ID");
   MooseEnum q_function_type("Geometry Topology", "Geometry");
   params.addParam<MooseEnum>("q_function_type",
                              q_function_type,
@@ -56,6 +58,8 @@ JIntegral::JIntegral(const InputParameters & parameters)
                             ? &getMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             : NULL),
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
+    _fe_vars(getCoupledMooseVars()),
+    _fe_type(_fe_vars[0]->feType()),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
     _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
@@ -92,6 +96,12 @@ JIntegral::initialize()
   _z.assign(num_pts, 0.0);
   _position.assign(num_pts, 0.0);
   _j_integral.assign(num_pts, 0.0);
+
+  for (const auto * fe_var : _fe_vars)
+  {
+    if (fe_var->feType() != _fe_type)
+      mooseError("All coupled displacements must have the same type");
+  }
 }
 
 Real
@@ -138,10 +148,8 @@ void
 JIntegral::execute()
 {
   // calculate phi and dphi for this element
-  FEType fe_type(Utility::string_to_enum<Order>("first"),
-                 Utility::string_to_enum<FEFamily>("lagrange"));
   const unsigned int dim = _current_elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();

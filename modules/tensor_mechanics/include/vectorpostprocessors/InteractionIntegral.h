@@ -49,6 +49,10 @@ protected:
   bool _treat_as_2d;
   const MaterialProperty<RankTwoTensor> * _stress;
   const MaterialProperty<RankTwoTensor> * _strain;
+  /// Vector of all coupled variables
+  std::vector<MooseVariableFEBase *> _fe_vars;
+  /// FEType object defining order and family of displacement variables
+  const FEType & _fe_type;
   std::vector<const VariableGradient *> _grad_disp;
   const bool _has_temp;
   const VariableGradient & _grad_temp;

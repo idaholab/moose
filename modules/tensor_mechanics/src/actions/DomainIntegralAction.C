@@ -197,36 +197,36 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     mooseError("Must specify at least one domain integral to perform.");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
+    if (isParamValid("displacements"))
+    {
+      _displacements = getParam<std::vector<VariableName>>("displacements");
+
+      if (_displacements.size() < 2)
+        mooseError(
+                   "DomainIntegral error: The size of the displacements vector should at least be 2.");
+    }
+    else
+    {
+      if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
+        mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
+                        "Please specify displacements using the `dispalcements` parameter.");
+
+      if (!isParamValid("disp_x") || !isParamValid("disp_y"))
+        mooseError(
+                   "DomainIntegral error: Specify displacements using the `displacements` parameter.");
+      else
+      {
+        _displacements.clear();
+        _displacements.push_back(getParam<VariableName>("disp_x"));
+        _displacements.push_back(getParam<VariableName>("disp_y"));
+        if (isParamValid("disp_z"))
+          _displacements.push_back(getParam<VariableName>("disp_z"));
+      }
+    }
+
     if (integral_moose_enums[i] != "JIntegral")
     {
       // Check that parameters required for interaction integrals are defined
-      if (isParamValid("displacements"))
-      {
-        _displacements = getParam<std::vector<VariableName>>("displacements");
-
-        if (_displacements.size() < 2)
-          mooseError(
-              "DomainIntegral error: The size of the displacements vector should atleast be 2.");
-      }
-      else
-      {
-        if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
-          mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
-                          "Please specify displacements using the `dispalcements` parameter.");
-
-        if (!isParamValid("disp_x") || !isParamValid("disp_y"))
-          mooseError(
-              "DomainIntegral error: Specify displacements using the `displacements` parameter.");
-        else
-        {
-          _displacements.clear();
-          _displacements.push_back(getParam<VariableName>("disp_x"));
-          _displacements.push_back(getParam<VariableName>("disp_y"));
-          if (isParamValid("disp_z"))
-            _displacements.push_back(getParam<VariableName>("disp_z"));
-        }
-      }
-
       if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
         mooseError(
             "DomainIntegral error: must set Poisson's ratio and Young's modulus for integral: ",
@@ -584,6 +584,7 @@ DomainIntegralAction::act()
       }
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+      params.set<std::vector<VariableName>>("displacements") = _displacements;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {

@@ -1449,7 +1449,11 @@ CrackFrontDefinition::getCrackFrontTangentialStrain(const unsigned int node_inde
 {
   Real strain;
   if (_t_stress)
+  {
     strain = _strain_along_front[node_index];
+    mooseAssert(strain > -std::numeric_limits<Real>::max(),
+                "Failure in parallel communication of crack tangential strain");
+  }
   else
     mooseError("In CrackFrontDefinition, tangential strain not available");
 

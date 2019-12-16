@@ -46,16 +46,16 @@ InteractionIntegral::validParams()
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: " + position_type.getRawNames());
-  params.addParam<Real>(
+  params.addRequiredParam<Real>(
       "K_factor", "Conversion factor between interaction integral and stress intensity factor K");
   params.addParam<unsigned int>("symmetry_plane",
                                 "Account for a symmetry plane passing through "
                                 "the plane of the crack, normal to the specified "
                                 "axis (0=x, 1=y, 2=z)");
-  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.addRequiredParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
+  params.addRequiredParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam<unsigned int>("ring_index", "Ring ID");
+  params.addRequiredParam<unsigned int>("ring_index", "Ring ID");
   params.addParam<MooseEnum>("q_function_type",
                              InteractionIntegral::qFunctionType(),
                              "The method used to define the integration domain. Options are: " +
@@ -82,6 +82,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _strain(hasMaterialProperty<RankTwoTensor>("elastic_strain")
                 ? &getMaterialPropertyByName<RankTwoTensor>("elastic_strain")
                 : nullptr),
+    _fe_vars(getCoupledMooseVars()),
+    _fe_type(_fe_vars[0]->feType()),
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
@@ -159,6 +161,12 @@ InteractionIntegral::initialize()
   _z.assign(num_pts, 0.0);
   _position.assign(num_pts, 0.0);
   _interaction_integral.assign(num_pts, 0.0);
+
+  for (const auto * fe_var : _fe_vars)
+  {
+    if (fe_var->feType() != _fe_type)
+      mooseError("All coupled displacements must have the same type");
+  }
 }
 
 Real
@@ -239,10 +247,8 @@ void
 InteractionIntegral::execute()
 {
   // calculate phi and dphi for this element
-  FEType fe_type(Utility::string_to_enum<Order>("first"), //BWS TODO does this have to be hardcoded?
-                 Utility::string_to_enum<FEFamily>("lagrange"));
   const unsigned int dim = _current_elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();
@@ -310,7 +316,7 @@ InteractionIntegral::finalize()
     if (_sif_mode == SifMethod::T && !_treat_as_2d)
       _interaction_integral[i] +=
         _poissons_ratio *
-        _crack_front_definition->getCrackFrontTangentialStrain(i); //BWS TODO: this might not be parallel consistent
+        _crack_front_definition->getCrackFrontTangentialStrain(i);
 
     _interaction_integral[i] *= _K_factor;
   }

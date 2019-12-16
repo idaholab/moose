@@ -42,6 +42,10 @@ protected:
   const MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
   bool _convert_J_to_K;
   bool _treat_as_2d;
+  /// Vector of all coupled variables
+  std::vector<MooseVariableFEBase *> _fe_vars;
+  /// FEType object defining order and family of displacement variables
+  const FEType & _fe_type;
   bool _has_symmetry_plane;
   Real _poissons_ratio;
   Real _youngs_modulus;
