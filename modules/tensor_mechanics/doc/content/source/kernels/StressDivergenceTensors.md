@@ -34,8 +34,6 @@ t = e^{\varepsilon_{oop}}
 This correction is made for 2D planar models when the deformed mesh is used by setting
 `use_displaced_mesh = true` and `out_of_plane_strain` is specified.
 
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
-
 ## Example Input File syntax
 
 The Cartesian `StressDivergenceTensors` is the default case for the tensor

@@ -157,10 +157,10 @@ documentation.
 
 ### Plane Stress
 
-The tensor mechanics [MasterAction](/Modules/TensorMechanics/Master/index.md)
+The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
 can be used to create the `ComputePlaneIncrementalStrain` class by setting
 `planar_formulation = WEAK_PLANE_STRESS`, `strain = SMALL`, and `incremental = true` in the
-`MasterAction` block.
+`Master` action block.
 
 !listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_incremental.i block=Modules/TensorMechanics/Master
 
@@ -176,7 +176,7 @@ In the case of this example, `out_of_plane_strain` is defined in the `GlobalPara
 The use of this plane strain class for
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 simulations uses the scalar out-of-plane strains. The tensor mechanics
-[MasterAction](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
 `ComputePlaneIncrementalStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`,
 `strain = SMALL`, and `incremental = true` settings.
 

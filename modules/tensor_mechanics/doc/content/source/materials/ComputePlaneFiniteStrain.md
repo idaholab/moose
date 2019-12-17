@@ -165,10 +165,10 @@ documentation.
 
 ### Plane Stress
 
-The tensor mechanics [MasterAction](/Modules/TensorMechanics/Master/index.md)
+The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
 can be used to create the `ComputePlaneFiniteStrain` class by setting
 `planar_formulation = WEAK_PLANE_STRESS` and `strain = FINITE` in the
-`MasterAction` block.
+`Master` action block.
 
 !listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Modules/TensorMechanics/Master
 
@@ -184,7 +184,7 @@ In the case of this example, `out_of_plane_strain` is defined in the `GlobalPara
 The use of this plane strain class for
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 simulations uses the scalar out-of-plane strains. The tensor mechanics
-[MasterAction](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
 `ComputePlaneFiniteStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`
 and the `strain = FINITE` settings.
 
