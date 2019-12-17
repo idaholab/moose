@@ -34,7 +34,6 @@ bindings: hit.so
 
 hit.so: parse.cc lex.cc braceexpr.cc $(HITCPP)
 	$(CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ -o $@
-	cp hit.so ../../../python
 
 $(HITCPP): hit.pyx chit.pxd
 	cython -$(PYTHON_VERSION) -o $@ --cplus $<
