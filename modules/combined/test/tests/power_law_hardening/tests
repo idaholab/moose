@@ -1,15 +1,11 @@
 [tests]
-  [./powerlaw_hardening_solidmech]
+  issues = '# 5481'
+  design = 'IsotropicPowerLawHardeningStressUpdate.md'
+  [./PowerLawHardening]
     type = 'Exodiff'
-    input = 'PowerLawHardening-SM.i'
+    input = 'PowerLawHardening.i'
     exodiff = 'PowerLawHardening_out.e'
     abs_zero = 1e-09
-  [../]
-  [./powerlaw_hardening_tensormech]
-    type = 'Exodiff'
-    input = 'PowerLawHardening-TM.i'
-    exodiff = 'PowerLawHardening_out.e'
-    abs_zero = 1e-09
-    prereq = 'powerlaw_hardening_solidmech'
+    requirement = 'The tensor mechanics system shall reproduce isotropic power law hardening on a single Hex8 element.'
   [../]
 []

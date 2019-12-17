@@ -48,7 +48,7 @@ public:
   /**
    * Compute the value the slave node should have at the beginning of a timestep.
    */
-  void computeSlaveValue(NumericVector<Number> & current_solution);
+  virtual void computeSlaveValue(NumericVector<Number> & current_solution);
 
   /**
    * Computes the residual Nodal residual.
@@ -106,6 +106,10 @@ public:
   // TODO: Make this protected or add an accessor
   // Do the same for all the other public members
   SparseMatrix<Number> * _jacobian;
+
+  Real slaveResidual() const;
+
+  void residualSetup() override;
 
 protected:
   /**
@@ -270,10 +274,15 @@ protected:
    */
   bool _overwrite_slave_residual;
 
+  /// Whether the slave residual has been computed
+  bool _slave_residual_computed;
+
+  /// The value of the slave residual
+  Real _slave_residual;
+
 public:
   std::vector<dof_id_type> _connected_dof_indices;
 
   DenseMatrix<Number> _Kne;
   DenseMatrix<Number> _Kee;
 };
-

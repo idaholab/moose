@@ -1014,6 +1014,9 @@ FEProblemBase::initialSetup()
       _assembly[tid]->initNonlocalCoupling();
   }
 
+  if (_line_search)
+    _line_search->initialSetup();
+
   _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
@@ -1021,6 +1024,9 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
+  if (_line_search)
+    _line_search->timestepSetup();
+
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
@@ -6429,4 +6435,12 @@ SystemBase &
 FEProblemBase::systemBaseAuxiliary()
 {
   return *_aux;
+}
+
+void
+FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
+{
+  if (_displaced_problem)
+    _displaced_problem->computingNonlinearResid(computing_nonlinear_residual);
+  _computing_nonlinear_residual = computing_nonlinear_residual;
 }

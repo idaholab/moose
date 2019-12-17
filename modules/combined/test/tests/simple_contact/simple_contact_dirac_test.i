@@ -10,30 +10,15 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_xx'
   [../]
 []
 
@@ -43,16 +28,7 @@
     slave = 2
     penalty = 1e5
     formulation = kinematic
-    system = Constraint
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
+    system = DiracKernel
   [../]
 []
 
@@ -101,28 +77,15 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./stiffStuff]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -144,8 +107,7 @@
 []
 
 [Outputs]
-  file_base = dirac_out
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

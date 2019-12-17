@@ -20,15 +20,18 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    block = '1 2'
+  [../]
 []
 
 [Variables]
-  [./disp_x]
-    block = '1 2'
-  [../]
-  [./disp_y]
-    block = '1 2'
-  [../]
   [normal_lm]
     block = '30'
   []
@@ -61,30 +64,16 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    block = '1 2'
-  [../]
-[]
-
 [Materials]
   [./left]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./right]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
-    youngs_modulus = 1e6
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -98,7 +87,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
   end_time = 15
@@ -116,9 +105,8 @@
 
 [Outputs]
   sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
-  [exodus]
+  [out]
     type = Exodus
-    file_base = frictionless_lm_out
     sync_only = true
   []
   [dof]
@@ -183,16 +171,8 @@
   [./num_nl]
     type = NumNonlinearIterations
   [../]
-  [./cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  [../]
   [lin]
     type = NumLinearIterations
-  []
-  [cum_lin]
-    type = CumulativeValuePostprocessor
-    postprocessor = lin
   []
   [contact]
     type = ContactDOFSetSize

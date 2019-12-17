@@ -938,3 +938,15 @@ DisplacedProblem::undisplaceMesh()
   // Undisplace the mesh using threads.
   Threads::parallel_reduce(node_range, rdmt);
 }
+
+LineSearch *
+DisplacedProblem::getLineSearch()
+{
+  return _mproblem.getLineSearch();
+}
+
+const CouplingMatrix *
+DisplacedProblem::couplingMatrix() const
+{
+  return _mproblem.couplingMatrix();
+}

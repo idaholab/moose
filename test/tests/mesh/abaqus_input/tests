@@ -1,0 +1,23 @@
+[Tests]
+  [./testcube_elem_id]
+    type = 'Exodiff'
+    input = 'testcube_elem_id.i'
+    cli_args = '--mesh-only'
+    exodiff = 'testcube_elem_id_in.e'
+    recover = false
+  [../]
+  [./testcube_elset_name]
+    type = 'Exodiff'
+    input = 'testcube_elset_name.i'
+    cli_args = '--mesh-only'
+    exodiff = 'testcube_elset_name_in.e'
+    recover = false
+  [../]
+  [./testcube_elset_name_ws]
+    type = 'Exodiff'
+    input = 'testcube_elset_name_ws.i'
+    cli_args = '--mesh-only'
+    exodiff = 'testcube_elset_name_ws_in.e'
+    recover = false
+  [../]  
+[]

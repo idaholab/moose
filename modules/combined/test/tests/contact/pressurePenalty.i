@@ -1,8 +1,6 @@
 
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -10,25 +8,13 @@
   file = pressure.e
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
 
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_yy'
+  []
 []
 
 [Contact]
@@ -40,16 +26,6 @@
     tangential_tolerance = 1e-3
     tension_release = -1
     system = Constraint
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-    execute_on = timestep_end
   [../]
 []
 
@@ -92,18 +68,14 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    youngs_modulus = 1e6
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
+    youngs_modulus = 1.0e6
     poissons_ratio = 0.0
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 

@@ -58,6 +58,12 @@ public:
   NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int master_id,
                                                        const unsigned int slave_id);
 
+  const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> &
+  getPenetrationLocators() const
+  {
+    return _penetration_locators;
+  }
+
   void addElementPairLocator(const unsigned int & interface_id,
                              std::shared_ptr<ElementPairLocator> epl);
 

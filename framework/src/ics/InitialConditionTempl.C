@@ -134,6 +134,8 @@ InitialConditionTempl<T>::compute()
   _Ue.resize(n_dofs);
   _Ue.zero();
 
+  DenseVector<char> mask(n_dofs, true);
+
   // In general, we need a series of
   // projections to ensure a unique and continuous
   // solution.  We start by interpolating nodes, then
@@ -143,16 +145,42 @@ InitialConditionTempl<T>::compute()
 
   // Interpolate node values first
   _current_dof = 0;
+
   for (_n = 0; _n != n_nodes; ++_n)
   {
+    _nc = FEInterface::n_dofs_at_node(_dim, _fe_type, elem_type, _n);
+
+    // for nodes that are in more than one subdomain, only compute the initial
+    // condition once on the lowest numbered block
+    auto curr_node = _current_elem->node_ptr(_n);
+    const auto & block_ids = _sys.mesh().getNodeBlockIds(*curr_node);
+
+    auto priority_block = *(block_ids.begin());
+    for (auto id : block_ids)
+      if (_var.hasBlocks(id))
+      {
+        priority_block = id;
+        break;
+      }
+
+    if (!hasBlocks(priority_block) && _var.isNodal())
+    {
+      for (decltype(_nc) i = 0; i < _nc; ++i)
+      {
+        mask(_current_dof) = false;
+        _current_dof++;
+      }
+      continue;
+    }
+
     // FIXME: this should go through the DofMap,
     // not duplicate _dof_indices code badly!
-    _nc = FEInterface::n_dofs_at_node(_dim, _fe_type, elem_type, _n);
     if (!_current_elem->is_vertex(_n))
     {
       _current_dof += _nc;
       continue;
     }
+
     if (_cont == DISCONTINUOUS)
       libmesh_assert(_nc == 0);
     else if (_cont == C_ZERO)
@@ -242,14 +270,12 @@ InitialConditionTempl<T>::compute()
   for (unsigned int i = 0; i != n_dofs; ++i)
     libmesh_assert(_dof_is_fixed[i]);
 
-  NumericVector<Number> & solution = _var.sys().solution();
-
   // Lock the new_vector since it is shared among threads.
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    _var.setDofValues(_Ue);
-    _var.insert(solution);
+    for (size_t i = 0; i < mask.size(); i++)
+      if (mask(i))
+        _var.setDofValue(_Ue(i), i);
   }
 }
 

@@ -89,7 +89,6 @@ public:
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
-  FEProblemBase & _fe_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
   Real getTangentialPenalty(PenetrationInfo & pinfo);
@@ -134,7 +133,7 @@ protected:
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
 
-  std::shared_ptr<ContactLineSearchBase> _contact_linesearch;
+  ContactLineSearchBase * _contact_linesearch;
   std::set<dof_id_type> _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 

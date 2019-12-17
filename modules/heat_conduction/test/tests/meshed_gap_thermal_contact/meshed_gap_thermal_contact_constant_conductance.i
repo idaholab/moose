@@ -1,7 +1,15 @@
 [Mesh]
-  type = FileMesh
-  file = meshed_gap.e
-  dim = 2
+  [fmesh]
+    type = FileMeshGenerator
+    file = meshed_gap.e
+  []
+  [block0]
+    type = SubdomainBoundingBoxGenerator
+    input = fmesh
+    bottom_left = '.5 -.5 0'
+    top_right = '.7 .5 0'
+    block_id = 4
+  []
 []
 
 [Variables]

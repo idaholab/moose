@@ -3,16 +3,8 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [AuxVariables]
@@ -20,11 +12,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+  []
 []
 
 [AuxKernels]
@@ -89,19 +81,17 @@
 [] # BCs
 
 [Materials]
-
   [./stiffStuff1]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-[] # Materials
-
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+[]  # Materials
 
 [Executioner]
   type = Transient
@@ -109,18 +99,11 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
 
 
   line_search = 'none'
-
-
-#  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-#  petsc_options_value = 'hypre    boomeramg      101'
-
   nl_abs_tol = 1e-8
 
   l_max_its = 100
@@ -130,8 +113,7 @@
 [] # Executioner
 
 [Outputs]
-  file_base = out
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

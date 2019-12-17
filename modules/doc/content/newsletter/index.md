@@ -7,6 +7,7 @@ provided below.
 
 ## 2019
 
+- [December, 2019](2019_12.md)
 - [November, 2019](2019_11.md)
 - [October, 2019](2019_10.md)
 - [September, 2019](2019_09.md)
