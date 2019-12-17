@@ -636,6 +636,15 @@ InputParameters::getDefaultPostprocessorValue(const std::string & name,
       (it == _params.end() || !it->second._have_default_postprocessor_val[index]))
     mooseError("A default PostprcessorValue does not exist for the given name: ", name);
 
+  if (index >= it->second._default_postprocessor_val.size())
+    mooseError("Default postprocessor with parameter name ",
+               name,
+               " requested with index ",
+               index,
+               " but only ",
+               it->second._default_postprocessor_val.size(),
+               " exists.");
+
   return it->second._default_postprocessor_val[index];
 }
 
