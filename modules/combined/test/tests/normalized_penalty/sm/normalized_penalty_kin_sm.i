@@ -55,6 +55,7 @@
     slave = 2
     penalty = 1e10
     normalize_penalty = true
+    system = constraint
     tangential_tolerance = 1e-3
   [../]
 []

@@ -1,6 +1,17 @@
 [Tests]
   issue = '#716'
   design = 'ContactMaster.md SlaveConstraint.md'
+  [./frictional_02_penalty]
+    type = 'Exodiff'
+    input = 'frictional_02_penalty.i'
+    exodiff = 'frictional_02_penalty_out.e'
+    heavy = true
+    min_parallel = 4
+    abs_zero = 1e-6
+    max_time = 800
+    allow_warnings = true
+    requirement = "The contact system shall enforce frictional interaction with coefficient of 0.2. "
+  [../]
   [./frictional_04_penalty]
     type = 'Exodiff'
     input = 'frictional_04_penalty.i'
@@ -9,6 +20,7 @@
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
+    allow_warnings = true
     requirement = "The contact system shall enforce frictional interaction with coefficient of 0.4. "
   [../]
 
@@ -20,6 +32,7 @@
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
+    allow_warnings = true
     requirement = "The contact system shall enforce frictionaless kinematic interaction. "
   [../]
 
@@ -31,6 +44,7 @@
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
+    allow_warnings = true
     requirement = "The contact system shall enforce frictionless penalty interaction. "
   [../]
 []

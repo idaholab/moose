@@ -161,5 +161,6 @@
     slave = 3
     model = frictionless
     penalty = 1e+6
+    system = diracKernel
   [../]
 []

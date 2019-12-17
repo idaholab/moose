@@ -14,6 +14,7 @@
     type = 'Exodiff'
     input = 'frictionless_kinematic_dirac_sm.i'
     exodiff = 'frictionless_kinematic_dirac_sm_out.e'
+    allow_warnings = true
     max_parallel = 1                                    # -pc_type lu
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
@@ -32,6 +33,7 @@
     type = 'Exodiff'
     input = 'frictionless_penalty_dirac_sm.i'
     exodiff = 'frictionless_penalty_dirac_sm_out.e'
+    allow_warnings = true
     max_parallel = 1                                    # -pc_type lu
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
@@ -50,6 +52,7 @@
     type = 'Exodiff'
     input = 'glued_kinematic_dirac_sm.i'
     exodiff = 'glued_kinematic_dirac_sm_out.e'
+    allow_warnings = true
     max_parallel = 1                                    # -pc_type lu
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
@@ -68,6 +71,7 @@
     type = 'Exodiff'
     input = 'glued_penalty_dirac_sm.i'
     exodiff = 'glued_penalty_dirac_sm_out.e'
+    allow_warnings = true
     max_parallel = 1                                    # -pc_type lu
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using

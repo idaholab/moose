@@ -199,5 +199,6 @@
     formulation = penalty
     friction_coefficient = 0.4
     normal_smoothing_distance = 0.1
+    system = DiracKernel
   [../]
 []
