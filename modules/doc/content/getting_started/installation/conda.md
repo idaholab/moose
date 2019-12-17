@@ -37,8 +37,15 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
 
 If you close, and then re-open this terminal window, know that you will need to `conda activate moose` again. You will need to do this for every terminal you open. If you wish to make this automatic, you can append `conda activate moose` to your bash or zsh profile.
 
+The MOOSE team will make periodic updates to the conda packages. To stay up-to-date, activate the moose environment, and perform an update:
+
+```bash
+conda activate moose
+conda update --all
+```
+
 !alert note title= sudo is not necessary
-If you find yourself using `sudo` for any of the above conda commands... you shouldn't be. Conda should be installed to your home directory. Therefore you should already have write access. Try and figure out +why+ you don't have permissions before forcing a conda command with `sudo`.
+If you find yourself applying the use of `sudo` for any of the above conda commands... something's not right. The most common reason for needing sudo, is due to an improper installation. Conda *should* be installed to your home directory, and without any use of `sudo`.
 
 !include getting_started/installation/clone_moose.md
 
