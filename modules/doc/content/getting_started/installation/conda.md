@@ -25,7 +25,7 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
   conda create --name moose moose-env
   ```
 
-- Activate the moose environment:
+- Activate the moose environment +(do this for any new terminal opened)+:
 
   ```bash
   conda activate moose
