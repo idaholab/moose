@@ -124,6 +124,12 @@ ContactAction::ContactAction(const InputParameters & params)
   // Make the Dirac kernel deprecated as an initial step for its final removal.
   MooseEnum makeDiracDeprecated = params.get<MooseEnum>("system");
   makeDiracDeprecated.deprecate("DiracKernel", "Constraint");
+
+  if (_system == "DiracKernel")
+    mooseDeprecated(
+        "The DiracKernel-based system for mechanical contact enforcement is deprecated, "
+        "and will be removed on April 1, 2020. It is being replaced by the Constraint-based "
+        "system, which is selected by setting 'system=Constraint'.\n");
 }
 
 void

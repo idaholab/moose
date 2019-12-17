@@ -81,10 +81,6 @@
 []
 
 [Postprocessors]
-  [./nonlinear_its]
-    type = NumNonlinearIterations
-    execute_on = timestep_end
-  [../]
   [./penetration]
     type = NodalVariableValue
     variable = penetration

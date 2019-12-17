@@ -7,7 +7,7 @@
     exodiff = 'frictional_02_penalty_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-6
+    abs_zero = 1e-5
     max_time = 800
     allow_warnings = true
     requirement = "The contact system shall enforce frictional interaction with coefficient of 0.2. "
