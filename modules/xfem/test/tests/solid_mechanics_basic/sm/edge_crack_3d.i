@@ -2,7 +2,6 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = true
 []
 
 [XFEM]
@@ -35,7 +34,32 @@
   [../]
 []
 
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+  [./disp_z]
+  [../]
+[]
+
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./vonmises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./SED]
    order = CONSTANT
     family = MONOMIAL
@@ -54,18 +78,48 @@
   poissons_ratio = 0.3
   youngs_modulus = 207000
   block = 0
+  solid_mechanics = true
   incremental = true
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    use_displaced_mesh = true
   [../]
 []
 
 [AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+    execute_on = timestep_end
+  [../]
+  [./stress_yy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yy
+    index = 1
+    execute_on = timestep_end
+  [../]
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
+    execute_on = timestep_end
+  [../]
+  [./vonmises_stress]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = vonmises_stress
+    quantity = vonmises
+    execute_on = timestep_end
+  [../]
   [./SED]
     type = MaterialRealAux
     variable = SED
@@ -111,15 +165,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 207000
+  [./linelast]
+    type = Elastic
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     poissons_ratio = 0.3
-    block = 0
-  [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = 0
+    youngs_modulus = 207000
+    compute_JIntegral = true
   [../]
 []
 

@@ -1,21 +1,7 @@
 [Tests]
   design = 'XFEM/index.md'
   issues = '#6320'
-  [./crack_propagation_sm]
-    type = Exodiff
-    input = crack_propagation_2d_sm.i
-    exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
-    abs_zero = 1e-8
-#    rel_err = 1e-4
-    use_old_floor = true
-    map = false
-    # XFEM requires --enable-unique-ids in libmesh
-    unique_id = true
-    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 2D mechanics problem using the deprecated solid mechanics system in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value.'
-    design = 'XFEMMaterialTensorMarkerUserObject.md'
-  [../]
   [./crack_propagation_ave]
-    prereq = crack_propagation_sm
     type = Exodiff
     input = crack_propagation_2d.i
     exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
@@ -23,7 +9,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   [../]
   [./crack_propagation_var]
@@ -37,7 +23,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   [../]
   [./crack_propagation_single_point]
@@ -50,7 +36,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 2D mechanics problem in which crack growth occurs when the stress at any of the quadrature points in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the stress at any of the quadrature points in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   [../]
   [./edge_crack_3d]
@@ -72,7 +58,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall be capable of representing a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut3DUserObject'
+    requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut3DUserObject'
     design = 'MeshCut3DUserObject.md'
   [../]
   [./elliptical_crack]
@@ -93,7 +79,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'MeshCut3DUserObject shall have the ability to increase the size of the XFEM cutting surface that it defines for a stationary crack in a 3D model at any point in time by adding additional elements around the periphery of the cutting mesh over time'
+    requirement = 'MeshCut3DUserObject shall increase the size of the XFEM cutting surface that it defines for a stationary crack in a 3D model at any point in time by adding additional elements around the periphery of the cutting mesh over time'
     design = 'MeshCut3DUserObject.md'
   [../]
   [./penny_crack]

@@ -1,6 +1,6 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y'
-  volumetric_locking_correction = true
+  order = FIRST
+  family = LAGRANGE
 []
 
 [XFEM]
@@ -17,7 +17,8 @@
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
-  elem_type = QUAD4
+  elem_type = TRI3
+  displacements = 'disp_x disp_y'
 []
 
 [UserObjects]
@@ -35,11 +36,18 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = SMALL
-    planar_formulation = PLANE_STRAIN
-    add_variables = true
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    use_displaced_mesh = false
   [../]
 []
 
@@ -84,13 +92,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e6
+  [./linelast]
+    type = LinearIsotropicMaterial
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
     poissons_ratio = 0.3
-  [../]
-  [./stress]
-    type = ComputeLinearElasticStress
+    youngs_modulus = 1e6
   [../]
 []
 
@@ -125,7 +133,7 @@
 []
 
 [Outputs]
-  file_base = square_branch_quad_2d_out
+  file_base = square_branch_tri_2d_out
   exodus = true
   [./console]
     type = Console
