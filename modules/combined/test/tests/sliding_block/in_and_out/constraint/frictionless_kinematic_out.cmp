@@ -20,9 +20,9 @@
 #         - Element block numbers are the block ids.
 #         - Node(n) and element(e) numbers are 1-offset.
 
-COORDINATES absolute 1.e-6    # min separation not calculated
+COORDINATES absolute 1.e-5    # min separation not calculated
 
-TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:              15 @ t16
+TIME STEPS relative 1.e-5 floor 0.0     # min:               0 @ t1 max:              15 @ t16
 
 GLOBAL VARIABLES absolute 5.e-7 floor 0.0
 	contact_pressure  absolute 3e-2 # min:               0 @ t1	max:       10745.055 @ t3

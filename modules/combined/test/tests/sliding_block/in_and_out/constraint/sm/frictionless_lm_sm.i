@@ -185,16 +185,8 @@
   [./num_nl]
     type = NumNonlinearIterations
   [../]
-  [./cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  [../]
   [lin]
     type = NumLinearIterations
-  []
-  [cum_lin]
-    type = CumulativeValuePostprocessor
-    postprocessor = lin
   []
   [contact]
     type = ContactDOFSetSize

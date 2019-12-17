@@ -9,7 +9,7 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     allow_warnings = true
     requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
@@ -21,7 +21,7 @@
     exodiff = 'frictional_04_penalty_sm_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
@@ -32,7 +32,7 @@
     exodiff = 'frictionless_kinematic_sm_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     requirement = 'MOOSE shall support mechanics frictionless contact problems. Legacy Solid Mechanics.'
   [../]
@@ -44,7 +44,7 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     requirement = 'MOOSE shall support mechanics frictionless contact problems. Legacy Solid Mechanics.'
   [../]
@@ -69,6 +69,7 @@
     superlu = true
     min_parallel = 4
     abs_zero = 1e-5
+    rel_err = 1e-5
     max_time = 800
     requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
