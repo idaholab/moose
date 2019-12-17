@@ -2,7 +2,7 @@
 
 Our preferred method for obtaining libraries necessary for MOOSE based Application development, is through Conda. Follow these instructions to create an environment on your machine using Conda. At this time, a Conda install via Windows is not supported.
 
-!include getting_started/minimum_requirements.md
+!include sqa/minimum_requirements.md
 
 ## Prerequisites
 
