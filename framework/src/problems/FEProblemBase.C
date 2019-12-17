@@ -329,7 +329,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
     _u_dotdot_old_requested(false),
-    _has_mortar(false)
+    _has_mortar(false),
+    _num_grid_steps(0)
 {
   _time = 0.0;
   _time_old = 0.0;
@@ -677,7 +678,7 @@ FEProblemBase::initialSetup()
   _app.getOutputWarehouse().mooseConsole();
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
-  if (_adaptivity.isOn() &&
+  if ((_adaptivity.isOn() || _num_grid_steps) &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
        _neighbor_material_props.hasStatefulProperties()))
   {
@@ -1024,6 +1025,60 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
+  if (_t_step > 1 && _num_grid_steps)
+  {
+    MeshRefinement mesh_refinement(_mesh);
+    std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
+    if (_displaced_mesh)
+      displaced_mesh_refinement = libmesh_make_unique<MeshRefinement>(*_displaced_mesh);
+
+    for (MooseIndex(_num_grid_steps) i = 0; i < _num_grid_steps; ++i)
+    {
+      if (_displaced_problem)
+        // If the DisplacedProblem is active, undisplace the DisplacedMesh in preparation for
+        // refinement.  We can't safely refine the DisplacedMesh directly, since the Hilbert keys
+        // computed on the inconsistenly-displaced Mesh are different on different processors,
+        // leading to inconsistent Hilbert keys.  We must do this before the undisplaced Mesh is
+        // coarsensed, so that the element and node numbering is still consistent. We also have to
+        // make sure this is done during every step of coarsening otherwise different partitions
+        // will be generated for the reference and displaced meshes (even for replicated)
+        _displaced_problem->undisplaceMesh();
+
+      mesh_refinement.uniformly_coarsen();
+      if (_displaced_mesh)
+        displaced_mesh_refinement->uniformly_coarsen();
+
+      // Mark this as an intermediate change because we do not yet want to reinit_systems. E.g. we
+      // need things to happen in the following order for the undisplaced problem:
+      // u1) EquationSystems::reinit_solutions. This will restrict the solution vectors and then
+      //     contract the mesh
+      // u2) MooseMesh::meshChanged. This will update the node/side lists and other
+      //     things which needs to happen after the contraction
+      // u3) GeometricSearchData::reinit. Once the node/side lists are updated we can perform our
+      //     geometric searches which will aid in determining sparsity patterns
+      //
+      // We do these things for the displaced problem (if it exists)
+      // d1) EquationSystems::reinit. Restrict the displaced problem vector copies and then contract
+      //     the mesh. It's safe to do a full reinit with the displaced because there are no
+      //     matrices that sparsity pattern calculations will be conducted for
+      // d2) MooseMesh::meshChanged. This will update the node/side lists and other
+      //     things which needs to happen after the contraction
+      // d3) UpdateDisplacedMeshThread::operator(). Re-displace the mesh using the *displaced*
+      //     solution vector copy because we don't know the state of the reference solution vector.
+      //     It's safe to use the displaced copy because we are outside of a non-linear solve,
+      //     and there is no concern about differences between solution and current_local_solution
+      // d4) GeometricSearchData::reinit. With the node/side lists updated and the mesh
+      //     re-displaced, we can perform our geometric searches, which will aid in determining the
+      //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
+      //     NonlinearSystem held by this
+      meshChangedHelper(/*intermediate_change=*/true);
+    }
+
+    // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
+    //     we're ready to update the sparsity pattern
+    _eq.reinit_systems();
+  }
+
   if (_line_search)
     _line_search->timestepSetup();
 
@@ -5745,6 +5800,11 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   _evaluable_local_elem_range.reset();
 
+  // Just like we reinitialized our geometric search objects, we also need to reinitialize our
+  // mortar meshes. Note that this needs to happen after DisplacedProblem::meshChanged because the
+  // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
+  updateMortarMesh();
+
   reinitBecauseOfGhostingOrNewGeomObjects();
 
   // We need to create new storage for the new elements and copy stateful properties from the old
@@ -5807,7 +5867,7 @@ FEProblemBase::checkProblemIntegrity()
   // Check materials
   {
 #ifdef LIBMESH_ENABLE_AMR
-    if (_adaptivity.isOn() &&
+    if ((_adaptivity.isOn() || _num_grid_steps) &&
         (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
          _neighbor_material_props.hasStatefulProperties()))
     {
@@ -6443,4 +6503,19 @@ FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
   if (_displaced_problem)
     _displaced_problem->computingNonlinearResid(computing_nonlinear_residual);
   _computing_nonlinear_residual = computing_nonlinear_residual;
+}
+
+void
+FEProblemBase::uniformRefine()
+{
+  // ResetDisplacedMeshThread::onNode looks up the reference mesh by ID, so we need to make sure we
+  // undisplace before adapting the reference mesh
+  if (_displaced_problem)
+    _displaced_problem->undisplaceMesh();
+
+  Adaptivity::uniformRefine(&_mesh, 1);
+  if (_displaced_problem)
+    Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
+
+  meshChangedHelper(/*intermediate_change=*/false);
 }

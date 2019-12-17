@@ -79,7 +79,7 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     mooseError("Must specify slave and master boundary ids before building node-to-elem maps.");
 
   // Construct nodes_to_slave_elem_map
-  for (const auto & slave_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & slave_elem : as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional slave side elements, go on to the next one.
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
@@ -93,7 +93,8 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 
   // Construct nodes_to_master_elem_map
-  for (const auto & master_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & master_elem :
+       as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional master side elements, go on to the next one.
     if (!this->master_boundary_subdomain_ids.count(master_elem->subdomain_id()))
@@ -140,6 +141,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem = mortar_segment_mesh.add_elem(new Edge2);
 
     new_elem->processor_id() = slave_elem->processor_id();
+    new_elem->set_parent(const_cast<Elem *>(slave_elem->parent()));
     new_elem->set_interior_parent(const_cast<Elem *>(slave_elem->interior_parent()));
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
@@ -249,6 +251,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
     new_elem_left->set_interior_parent(current_mortar_segment->interior_parent());
+    new_elem_left->set_parent(current_mortar_segment->parent());
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
@@ -278,6 +281,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
     new_elem_right->set_interior_parent(current_mortar_segment->interior_parent());
+    new_elem_right->set_parent(current_mortar_segment->parent());
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
 
@@ -444,7 +448,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh.allow_renumbering(true);
   mortar_segment_mesh.skip_partitioning(true);
-  mortar_segment_mesh.prepare_for_use();
+  mortar_segment_mesh.prepare_for_use(/*skip_renumbering=*/false, /*skip_find_neighbors=*/true);
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)

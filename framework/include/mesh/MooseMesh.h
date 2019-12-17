@@ -229,6 +229,12 @@ public:
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildSideList();
 
   /**
+   * Calls BoundaryInfo::build_active_side_list
+   * @return A container of active (element, side, id) tuples.
+   */
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildActiveSideList();
+
+  /**
    * Calls BoundaryInfo::side_with_boundary_id().
    */
   unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const;
@@ -1197,6 +1203,9 @@ private:
 
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;
+
+  /// Set of elements ghosted by ghostGhostedBoundaries
+  std::set<Elem *> _ghost_elems_from_ghost_boundaries;
 };
 
 /**

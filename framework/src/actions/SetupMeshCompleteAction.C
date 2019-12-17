@@ -96,8 +96,17 @@ SetupMeshCompleteAction::act()
       if (_mesh->uniformRefineLevel())
       {
         Adaptivity::uniformRefine(_mesh.get());
+        // After refinement we need to make sure that all of our MOOSE-specific containers are
+        // up-to-date
+        _mesh->update();
+
         if (_displaced_mesh)
+        {
           Adaptivity::uniformRefine(_displaced_mesh.get());
+          // After refinement we need to make sure that all of our MOOSE-specific containers are
+          // up-to-date
+          _displaced_mesh->update();
+        }
       }
     }
   }

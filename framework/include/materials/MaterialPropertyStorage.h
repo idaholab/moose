@@ -285,6 +285,9 @@ private:
                  const Elem & elem,
                  unsigned int side,
                  unsigned int n_qpoints);
+
+  // Need to be able to eraseProperty from here
+  friend class ProjectMaterialProperties;
 };
 
 template <>

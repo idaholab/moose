@@ -174,15 +174,27 @@ DisplacedProblem::syncSolutions(const NumericVector<Number> & soln,
 }
 
 void
-DisplacedProblem::updateMesh()
+DisplacedProblem::updateMesh(bool mesh_changing)
 {
   TIME_SECTION(_update_mesh_timer);
   CONSOLE_TIMED_PRINT("Updating displaced mesh");
 
-  syncSolutions();
+  if (mesh_changing)
+  {
+    // We are probably performing adaptivity. We do not want to use the undisplaced
+    // mesh solution because it may be out-of-sync, whereas our displaced mesh solution should be in
+    // the correct state after getting restricted/prolonged in EquationSystems::reinit (must have
+    // been called before this method)
+    _nl_solution = _displaced_nl.sys().solution.get();
+    _aux_solution = _displaced_aux.sys().solution.get();
+  }
+  else
+  {
+    syncSolutions();
 
-  _nl_solution = _mproblem.getNonlinearSystemBase().currentSolution();
-  _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
+    _nl_solution = _mproblem.getNonlinearSystemBase().currentSolution();
+    _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
+  }
 
   // If the displaced mesh has been serialized to one processor (as
   // may have occurred if it was used for Exodus output), then we need
@@ -211,7 +223,12 @@ DisplacedProblem::updateMesh()
   // communication
   try
   {
-    _geometric_search_data.update();
+    // We may need to re-run geometric operations like SlaveNeighborhoodTread if, for instance, we
+    // have performed mesh adaptivity
+    if (mesh_changing)
+      _geometric_search_data.reinit();
+    else
+      _geometric_search_data.update();
   }
   catch (MooseException & e)
   {
@@ -848,14 +865,22 @@ DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type
 void
 DisplacedProblem::meshChanged()
 {
-  // mesh changed
+  // The mesh changed. The displaced equations system object only holds ExplicitSystems, so calling
+  // EquationSystems::reinit only prolongs/restricts the solution vectors, which is something that
+  // needs to happen for every step of mesh adaptivity.
   _eq.reinit();
+
+  // We've performed some mesh adaptivity. We need to
+  // clear any quadrature nodes such that when we build the boundary node lists in
+  // MooseMesh::meshChanged we don't have any extraneous extra boundary nodes lying around
+  _mesh.clearQuadratureNodes();
+
   _mesh.meshChanged();
 
-  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
-  _dirac_kernel_info.updatePointLocator(_mesh);
-
-  _geometric_search_data.reinit();
+  // Before performing mesh adaptivity we un-displaced the mesh. We need to re-displace the mesh and
+  // then reinitialize GeometricSearchData such that we have all the correct geometric information
+  // for the changed mesh
+  updateMesh(/*mesh_changing=*/true);
 }
 
 void

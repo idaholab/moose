@@ -148,7 +148,7 @@ public:
    * MooseMesh object. No solution projection is performed in this
    * version.
    */
-  static void uniformRefine(MooseMesh * mesh);
+  static void uniformRefine(MooseMesh * mesh, unsigned int level = libMesh::invalid_uint);
 
   /**
    * Performs uniform refinement on the meshes in the current

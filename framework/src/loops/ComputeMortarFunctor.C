@@ -159,6 +159,8 @@ ComputeMortarFunctor<compute_stage>::operator()()
       _assembly.cacheResidualNeighbor();
       _assembly.cacheResidualLower();
 
+      num_cached++;
+
       if (num_cached % 20 == 0)
         _assembly.addCachedResiduals();
     }
@@ -179,6 +181,8 @@ ComputeMortarFunctor<compute_stage>::operator()()
 
       // Add LowerLower, LowerSlave, LowerMaster, SlaveLower, MasterLower
       _assembly.addJacobianLower();
+
+      num_cached++;
 
       if (num_cached % 20 == 0)
         _assembly.addCachedJacobian();

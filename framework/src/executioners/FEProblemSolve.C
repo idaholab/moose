@@ -92,10 +92,17 @@ FEProblemSolve::validParams()
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
   params.addParam<bool>("verbose", false, "Set to true to print additional information");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_grids",
+      1,
+      "num_grids>0",
+      "The number of grids to use for a grid sequencing algorithm. This includes the final grid, "
+      "so num_grids = 1 indicates just one solve in a time-step");
 
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
-                              "nl_abs_tol nl_rel_tol nl_div_tol nl_abs_step_tol nl_rel_step_tol "
-                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs",
+                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
+                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
+                              "automatic_scaling compute_scaling_once num_grids",
                               "Solver");
   return params;
 }

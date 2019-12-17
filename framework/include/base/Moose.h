@@ -33,7 +33,9 @@ class ExecFlagEnum;
 class MooseVariableFEBase;
 
 void MooseVecView(NumericVector<Number> & vector);
+void MooseVecView(const NumericVector<Number> & vector);
 void MooseMatView(SparseMatrix<Number> & mat);
+void MooseMatView(const SparseMatrix<Number> & mat);
 
 /**
  * MOOSE now contains C++11 code, so give a reasonable error message
