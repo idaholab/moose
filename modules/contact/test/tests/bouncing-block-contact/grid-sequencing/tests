@@ -1,0 +1,27 @@
+[Tests]
+  design = FEProblemBase.md
+  issues = '#14166'
+  [grid_sequencing]
+    type = Exodiff
+    input = grid-sequencing.i
+    exodiff = grid-sequencing_exo.e
+    requirement = 'The system shall use grid sequencing in order to improve the performance of the nonlinear solve in a frictional contact problem'
+    cli_args = 'Postprocessors/active=contact'
+    # Fix below when I understand duplicate element centroids
+    map = False
+    partial = True
+    mesh_mode = replicated # Fix when mortar segment mesh is distributed
+  []
+  [no_grid_sequencing]
+    type = Exodiff
+    input = grid-sequencing.i
+    exodiff = no-grid-sequencing_exo.e
+    requirement = 'The system shall be able to produce the same result when not using grid sequencing'
+    cli_args = 'Postprocessors/active=contact Mesh/uniform_refine=4 Executioner/num_grids=1 Outputs/file_base=no-grid-sequencing_exo'
+    # Fix below when I understand duplicate element centroids
+    map = False
+    partial = True
+    mesh_mode = replicated # Fix when mortar segment mesh is distributed
+    rel_err = 2e-5
+  []
+[]

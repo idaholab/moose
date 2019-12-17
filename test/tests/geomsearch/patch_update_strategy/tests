@@ -40,4 +40,12 @@
     prereq = never
     requirement = "The MOOSE penetration locator system shall error if penetration is not detected."
   [../]
+  [always-grid-sequencing]
+    type = 'Exodiff'
+    input = 'always-grid-sequence.i'
+    exodiff = 'always-grid-sequence_out.e always-grid-sequence_out.e-s002 always-grid-sequence_out.e-s003 always-grid-sequence_out.e-s004'
+    issues = '#14166'
+    design = 'syntax/Mesh/index.md source/auxkernels/GapValueAux.md FEProblemBase.md'
+    requirement = 'The system shall be able to perform patch updates on every non-linear iteration while performing uniform coarsening and refinement from grid sequencing'
+  []
 []

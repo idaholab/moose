@@ -121,6 +121,11 @@ public:
    */
   const bool & verbose() const { return _verbose; }
 
+  /**
+   * Get the number of grid sequencing steps
+   */
+  unsigned int numGridSteps() const { return _num_grid_steps; }
+
 protected:
   /**
    * Adds a postprocessor that the executioner can directly assign values to
@@ -141,4 +146,12 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
+
+  /// The number of steps to perform in a grid sequencing algorithm. This is one
+  /// less than the number of grids requested by the user in their input,
+  /// e.g. if they requested num_grids = 1, then there won't be any steps
+  /// because we only need to perform one solve per time-step. Storing this
+  /// member in this way allows for easy boolean operations, e.g. if (_num_grid_steps)
+  /// as opposed to if (_num_grids)
+  const unsigned int _num_grid_steps;
 };

@@ -1739,6 +1739,17 @@ public:
   using SubProblem::computingNonlinearResid;
   void computingNonlinearResid(bool computing_nonlinear_residual) override;
 
+  /**
+   * Set the number of steps in a grid sequences
+   */
+  void numGridSteps(unsigned int num_grid_steps) { _num_grid_steps = num_grid_steps; }
+
+  /**
+   * uniformly refine the problem mesh(es). This will also prolong the the solution, and in order
+   * for that to be safe, we can only perform one refinement at a time
+   */
+  void uniformRefine();
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2097,6 +2108,9 @@ private:
 
   /// Whether the simulation requires mortar coupling
   bool _has_mortar;
+
+  /// Number of steps in a grid sequence
+  unsigned int _num_grid_steps;
 };
 
 template <typename T>

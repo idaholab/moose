@@ -41,6 +41,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  void postElement(const Elem * elem) override;
 
   void join(const ProjectMaterialProperties & /*y*/);
 
@@ -55,4 +56,9 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<std::unique_ptr<Assembly>> & _assembly;
   bool _need_internal_side_material;
+
+  /// Materials warehouse
+  const MaterialWarehouse & _materials;
+  /// Discrete materials warehouse
+  const MaterialWarehouse & _discrete_materials;
 };

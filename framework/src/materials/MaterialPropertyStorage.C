@@ -178,9 +178,6 @@ MaterialPropertyStorage::prolongStatefulProps(
       }
     }
   }
-
-  // Remove inactive parent element properties
-  eraseProperty(&elem);
 }
 
 void
@@ -237,9 +234,6 @@ MaterialPropertyStorage::restrictStatefulProps(
       if (hasOlderProperties())
         propsOlder(&elem, side)[i]->qpCopy(qp, propsOlder(child_elem, side)[i], qp_map._to);
     }
-
-    // Remove inactive child element properties
-    eraseProperty(child_elem);
   }
 }
 

@@ -90,8 +90,15 @@ public:
   /**
    * Copy the solutions on the undisplaced systems to the displaced systems and
    * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   * The parameter \p mesh_changing indicates whether this method is getting called because of mesh
+   * changes, e.g. due to mesh adaptivity. If \p mesh_changing we need to renitialize the
+   * GeometricSearchData instead of simply update. Reinitialization operations are a super-set of
+   * update operations. Reinitialization for example re-generates neighbor nodes in
+   * NearestNodeLocators, while update does not. Additionally we do not want to use the undisplaced
+   * mesh solution because it may be out-of-sync, whereas our displaced mesh solution should be in
+   * the correct state after getting restricted/prolonged in EquationSystems::reinit
    */
-  virtual void updateMesh();
+  virtual void updateMesh(bool mesh_changing = false);
 
   /**
    * Synchronize the solutions on the displaced systems to the given solutions and

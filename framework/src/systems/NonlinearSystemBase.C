@@ -1349,6 +1349,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     if (_need_residual_ghosted)
       *_residual_ghosted = residual;
   }
+
+  // We may have additional tagged vectors that also need to be accumulated
+  _fe_problem.addCachedResidual(0);
 }
 
 void

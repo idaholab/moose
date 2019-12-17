@@ -38,7 +38,9 @@ ProjectMaterialProperties::ProjectMaterialProperties(
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
     _assembly(assembly),
-    _need_internal_side_material(false)
+    _need_internal_side_material(false),
+    _materials(_fe_problem.getResidualMaterialsWarehouse()),
+    _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse())
 {
 }
 
@@ -54,7 +56,9 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _assembly(x._assembly),
-    _need_internal_side_material(x._need_internal_side_material)
+    _need_internal_side_material(x._need_internal_side_material),
+    _materials(x._materials),
+    _discrete_materials(x._discrete_materials)
 {
 }
 
@@ -69,6 +73,15 @@ ProjectMaterialProperties::subdomainChanged()
 void
 ProjectMaterialProperties::onElement(const Elem * elem)
 {
+  // This check mirrors the check in ComputeMaterialsObjectThread::onElement as it must because it
+  // is possible that there are no materials on this element's subdomain, e.g. if we are doing
+  // mortar, in which case the properties will not have been resized in
+  // ComputeMaterialsObjectThread::onElement, and consequently if we were to proceed we would get
+  // bad access errors
+  if (!_materials.hasActiveBlockObjects(elem->subdomain_id(), _tid) &&
+      !_discrete_materials.hasActiveBlockObjects(elem->subdomain_id(), _tid))
+    return;
+
   _assembly[_tid]->reinit(elem);
 
   if (_refine)
@@ -105,7 +118,8 @@ ProjectMaterialProperties::onElement(const Elem * elem)
 void
 ProjectMaterialProperties::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
+  if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid) &&
+      _bnd_material_props.hasStatefulProperties())
   {
     _assembly[_tid]->reinit(elem, side);
 
@@ -177,4 +191,23 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
 void
 ProjectMaterialProperties::join(const ProjectMaterialProperties & /*y*/)
 {
+}
+
+void
+ProjectMaterialProperties::postElement(const Elem * elem)
+{
+  if (_refine)
+  {
+    _material_props.eraseProperty(elem);
+    _bnd_material_props.eraseProperty(elem);
+  }
+  else
+  {
+    auto && coarsened_children = _mesh.coarsenedElementChildren(elem);
+    for (auto && child : coarsened_children)
+    {
+      _material_props.eraseProperty(child);
+      _bnd_material_props.eraseProperty(child);
+    }
+  }
 }

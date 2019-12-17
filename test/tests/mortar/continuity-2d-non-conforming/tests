@@ -25,4 +25,11 @@
     requirement = 'The Jacobian for the solution continuity test case shall be perfect'
     prereq = 'soln-continuity'
   []
+  [sequencing-stateful-soln-continuity]
+    type = 'Exodiff'
+    input = 'sequencing-stateful-soln-continuity.i'
+    exodiff = 'sequencing-stateful-soln-continuity_out.e-s002 sequencing-stateful-soln-continuity_out.e-s003'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to prolong and restrict stateful material properties because of mesh adaptivity in the presense of lower dimensional subdomains that do not have materials and when stateful properties are needed on boundaries (because of integrated boundary conditions)'
+  []
 []

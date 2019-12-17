@@ -94,7 +94,7 @@ PenetrationLocator::detectPenetration()
 
   // Get list of boundary (elem, side, id) tuples.
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
-      _mesh.buildSideList();
+      _mesh.buildActiveSideList();
 
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
