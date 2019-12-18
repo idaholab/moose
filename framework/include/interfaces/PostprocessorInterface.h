@@ -21,6 +21,12 @@ class InputParameters;
 class PostprocessorName;
 class MooseObject;
 
+#define usingPostprocessorInterfaceMembers                                                         \
+  using PostprocessorInterface::getPostprocessorValue;                                             \
+  using PostprocessorInterface::getPostprocessorValueOld;                                          \
+  using PostprocessorInterface::getPostprocessorValueOlder;                                        \
+  using PostprocessorInterface::coupledPostprocessors
+
 /**
  * Interface class for classes which interact with Postprocessors.
  * Provides the getPostprocessorValueXYZ() and related interfaces.
