@@ -81,8 +81,14 @@ cdef class Formatter:
             order_vec.push_back(o)
         self._formatter.addPattern(prefix, order_vec)
 
+    def config(self, canonical_section_markers=True):
+        self._formatter.canonical_section_markers = canonical_section_markers
+
     def format(self, fname, content):
         return str(self._formatter.format(fname, content))
+
+    def formatTree(self, Node root):
+        self._formatter.format(root._cnode)
 
 cdef class Node:
     cdef chit.Node* _cnode
@@ -105,7 +111,6 @@ cdef class Node:
         self._cnode = NULL
         self._own = own
         self.fname = fname
-        pass
 
     def __dealloc__(self):
         if self._cnode != NULL and self._own:
@@ -119,6 +124,10 @@ cdef class Node:
 
     def __repr__(self):
         return self.render()
+
+    def remove(self):
+        self._cnode.remove()
+        self._cnode = NULL
 
     def render(self, indent=0, indent_text='  ', maxlen=0):
         cindent = <string> indent_text if PYTHON2 else <string> indent_text.encode('utf-8')

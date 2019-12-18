@@ -1,0 +1,1 @@
+../../gold/LinearStrainHardeningRestart2_out.e

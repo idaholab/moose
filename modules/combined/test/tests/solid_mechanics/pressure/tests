@@ -1,19 +1,25 @@
 [Tests]
-
-  [./3D]
+  issues = '#2460'
+  design = 'syntax/Modules/TensorMechanics/index.md'
+  [./pressure_test]
     type = Exodiff
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
+    requirement = 'The tensor mechanics system shall yield verifiable displacement results on a single element under the action of pressure boundary condition for a 3D problem.'
+    design = 'ComputeSmallStrain.md'
   [../]
-  [./RZ]
+  [./pressure_rz_test]
     type = Exodiff
     input = 'pressure_rz_test.i'
     exodiff = 'pressure_rz_test_out.e'
+    design = 'ComputeAxisymmetric1DFiniteStrain.md'
+    requirement = 'The tensor mechanics system shall yield verifiable displacement results on a single element under the action of pressure boundary condition for an axisymmetric problem.'
   [../]
-  [./RSpherical]
+  [./pressure_rspherical]
     type = Exodiff
     input = 'pressure_rspherical.i'
     exodiff = 'pressure_rspherical_out.e'
+    design = 'StressDivergenceRSphericalTensors.md'
+    requirement = 'The tensor mechanics system shall yield verifiable displacement results on a single element under the action of pressure boundary condition for a spherical (1D) problem.'
   [../]
-
 []

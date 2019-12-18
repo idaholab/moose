@@ -41,14 +41,11 @@
 # refined.
 
 [GlobalParams]
-  order = SECOND
-  family = LAGRANGE
-  disp_x = disp_x
+  displacements = 'disp_x'
 []
 
 [Mesh]
   file = 1D-SPH_mesh.e
-  displacements = 'disp_x'
   construct_side_list_from_node_list = true
 []
 
@@ -56,32 +53,13 @@
   coord_type = RSPHERICAL
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-[]
 
-[AuxVariables]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-    execute_on = timestep_end
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    additional_generate_output = 'stress_zz'
+  []
 []
 
 [BCs]
@@ -103,13 +81,15 @@
 []
 
 [Materials]
- [./fuel_disp]
-    type = Elastic
-    block = 1
-    disp_r = disp_x
+  [./fuel_disp]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e10
-    poissons_ratio = .345
-    thermal_expansion = 0
+    poissons_ratio = 0.345
+  [../]
+  [./fuel_disp_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
   [../]
 []
 
@@ -166,7 +146,6 @@
 []
 
 [Outputs]
-  file_base = 1D-SPH_out
   exodus = true
   csv = false
 []

@@ -15,10 +15,13 @@
 # 0.01358333.
 #
 
+[GlobalParams]
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   file = lsh_pressure.e
-
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -87,50 +90,56 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
-
 
 [AuxKernels]
 
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
 
   [./strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
 
   [./plastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
   [../]
 
   [./plastic_strain_mag]
@@ -178,16 +187,27 @@
 []
 
 [Materials]
-  [./constant]
-    type = LinearStrainHardening
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 2.4e5
     poissons_ratio = 0.3
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = '1 2 3 4 5 6 7'
+  [../]
+  [./stress]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'isoplas'
+    block = '1 2 3 4 5 6 7'
+  [../]
+  [./isoplas]
+    type = IsotropicPlasticityStressUpdate
     yield_stress = 2.4e2
     hardening_constant = 1600
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    relative_tolerance = 1e-20
+    absolute_tolerance = 1e-09
   [../]
 []
 
@@ -205,6 +225,8 @@
   nl_max_its = 100
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-6
+
+
   start_time = 0.0
   end_time = 2
   dt = 1.5e-3

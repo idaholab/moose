@@ -1,12 +1,11 @@
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
+  block = 1
+  volumetric_locking_correction = false
 []
 
 [Mesh]
   file = beam_pbp.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -16,29 +15,11 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[] # Variables
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+  []
 []
 
 [BCs]
@@ -69,21 +50,16 @@
       function = press
     [../]
   [../]
-
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 [] # Materials
 
@@ -117,6 +93,5 @@
 [] # Postprocessors
 
 [Outputs]
-  file_base = out
   exodus = true
 [] # Outputs

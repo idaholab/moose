@@ -1,12 +1,13 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-  block = 1
-  order = FIRST
-  family = LAGRANGE
+  disp_x = disp_x
+  disp_y = disp_y
+  disp_z = disp_z
+  volumetric_locking_correction = false
 []
 
 [Mesh]
   file = beam_pbp.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -16,22 +17,28 @@
   [../]
 []
 
-[GlobalParams]
-  volumetric_locking_correction=true
-[]
-
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[] # Variables
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -61,24 +68,23 @@
     [./the_pressure]
       boundary = 2
       function = press
-      disp_x = disp_x
-      disp_y = disp_y
-      disp_z = disp_z
     [../]
   [../]
+
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-  [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
   [../]
 [] # Materials
 
@@ -112,6 +118,5 @@
 [] # Postprocessors
 
 [Outputs]
-  file_base = tm_out
   exodus = true
 [] # Outputs
