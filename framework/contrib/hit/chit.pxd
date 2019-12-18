@@ -36,6 +36,7 @@ cdef extern from "parse.h" namespace "hit":
         Node * parent()
         Node * root()
         Node * clone()
+        void remove()
 
         #void walk(Walker * w, NodeType t = NodeType::Field);
         Node * find(const string & path)
@@ -51,6 +52,8 @@ cdef extern from "parse.h" namespace "hit":
         Formatter(const string & fname, const string & hit_config)
 
         string format(const string & fname, const string & input)
+        void format(Node *)
+
         void addPattern(const string & prefix, const vector[string] & order)
 
         bool canonical_section_markers
@@ -91,4 +94,3 @@ cdef extern from "parse.h" namespace "hit":
 cdef extern from "parse.h" namespace "hit":
     cdef cppclass Section "hit::Section":
         Section(const string & path)
-
