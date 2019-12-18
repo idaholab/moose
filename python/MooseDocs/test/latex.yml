@@ -44,6 +44,11 @@ Extensions:
     MooseDocs.extensions.gallery: disable
     MooseDocs.extensions.template:
         active: True
+    MooseDocs.extensions.civet:
+        categories:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
     MooseDocs.extensions.sqa:
         active: True
         categories:
