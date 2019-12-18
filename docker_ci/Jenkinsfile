@@ -49,9 +49,12 @@ pipeline {
         {            
             steps {
                 sh '''
+                # Want to use all available cores
+                NUM_JOBS=$(grep -c ^processor /proc/cpuinfo)
+
                 # Run tests and pipe to accessible log file
                 docker run $DOCKER_TAG /bin/bash -c \
-                'cd test; ./run_tests --no-color' | tee test_results.log
+                "cd test; ./run_tests -j $NUM_JOBS --no-color" | tee test_results.log
                 '''
             }
         }
