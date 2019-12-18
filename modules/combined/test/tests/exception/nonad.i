@@ -11,7 +11,7 @@
   patch_update_strategy = iteration
   [./gen]
     type = FileMeshGenerator
-    file = mesh_in.e
+    file = mesh.e
   [../]
 []
 
