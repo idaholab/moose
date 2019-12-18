@@ -1,26 +1,23 @@
 [Mesh]
-  file = mammoth_eigenvalue_out_bison0_cp/LATEST
-  # file = bison_ss_out_cp/LATEST
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [Problem]
-  restart_file_base = mammoth_eigenvalue_out_bison0_cp/LATEST
-  # restart_file_base = bison_ss_out_cp/LATEST
-  # force_restart = true
-  # skip_additional_restart_data = true
+  restart_file_base = steady_with_sub_out_sub0_cp/LATEST
+  skip_additional_restart_data = true
 []
 
 [AuxVariables]
   [./power_density]
-    # family = L2_LAGRANGE
-    # order = FIRST
-    # initial_condition = 5e2
   [../]
 []
 
 [Variables]
   [./temp]
-    # initial_condition = 400
+#    initial_condition = 1000000
   [../]
 []
 

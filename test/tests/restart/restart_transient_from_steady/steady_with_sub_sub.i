@@ -7,16 +7,11 @@
 
 [AuxVariables]
   [./power_density]
-    # family = L2_LAGRANGE
-    # order = FIRST
-    # initial_condition = 5e2
   [../]
 []
 
 [Variables]
   [./temp]
-    # initial_condition = 400
-    # scaling = 1e3 # not needed here since temp is the only primal variable
   [../]
 []
 
@@ -64,12 +59,10 @@
   [./temp_fuel_avg]
     type = ElementAverageValue
     variable = temp
-    block = '0'
     execute_on = 'initial timestep_end'
   [../]
   [./pwr_density]
     type = ElementIntegralVariablePostprocessor
-    block = '0'
     variable = power_density
     execute_on = 'initial timestep_end'
   [../]

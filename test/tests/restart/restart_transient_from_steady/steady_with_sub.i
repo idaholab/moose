@@ -1,12 +1,8 @@
 [Mesh]
-  type = FileMesh
-  file = mammoth_eigenvalue_out_cp/LATEST
-[]
-
-[Problem]
-  restart_file_base = mammoth_eigenvalue_out_cp/LATEST
-  force_restart = true
-  skip_additional_restart_data = true
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [AuxVariables]
@@ -22,16 +18,11 @@
 [Functions]
   [pwr_func]
     type = ParsedFunction
-    value = '1e3*x*(1-x)+5e2' # increase this function to drive transient
+    value = '1e3*x*(1-x)+5e2'
   []
 []
 
 [Kernels]
-  [timedt]
-    type = TimeDerivative
-    variable = power_density
-  []
-
   [diff]
     type = Diffusion
     variable = power_density
@@ -62,59 +53,49 @@
 [Postprocessors]
   [pwr_avg]
     type = ElementAverageValue
-    block = '0'
     variable = power_density
     execute_on = 'initial timestep_end'
   []
   [temp_avg]
     type = ElementAverageValue
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
   [temp_max]
     type = ElementExtremeValue
     value_type = max
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
   [temp_min]
     type = ElementExtremeValue
     value_type = min
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
 []
 
 [Executioner]
-  type = Transient
-  start_time = 0
-  end_time = 10
-  dt = 1.0
-
+  type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
 
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 1e-12
 
   picard_rel_tol = 1E-7
   picard_abs_tol = 1.0e-07
-  picard_max_its = 4
-
-  line_search = none
+  picard_max_its = 12
 []
 
 [MultiApps]
-  [./bison]
-    type = TransientMultiApp
+  [sub]
+    type = FullSolveMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files  = bison_tr.i
+    input_files  = steady_with_sub_sub.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
@@ -123,16 +104,16 @@
     direction = to_multiapp
     source_variable = power_density
     variable = power_density
-    multi_app = bison
-    execute_on = 'initial timestep_end'
+    multi_app = sub
+    execute_on = 'timestep_end'
   []
   [t_from_sub]
     type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     source_variable = temp
     variable = Tf
-    multi_app = bison
-    execute_on = 'initial timestep_end'
+    multi_app = sub
+    execute_on = 'timestep_end'
   []
 []
 
@@ -140,4 +121,6 @@
   exodus = true
   csv = true
   perf_graph = true
+  checkpoint = true
+  execute_on = 'INITIAL TIMESTEP_END FINAL'
 []

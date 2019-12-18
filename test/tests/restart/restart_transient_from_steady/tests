@@ -19,4 +19,24 @@
     issues = "#563 #13438"
     requirement = "The system shall support restarting a transient simulation from a steady solution file."
   []
+
+  [steady_with_sub]
+    type = 'Exodiff'
+    input = 'steady_with_sub.i'
+    exodiff = 'steady_with_sub_out.e steady_with_sub_out_sub0.e'
+    recover = false
+
+    issues = "#13438"
+    requirement = "The system shall support outputting a mesh with refinement to checkpoint files for restart testing with sub apps."
+  []
+
+  [restart_trans_from_steady_with_sub]
+    type = 'Exodiff'
+    input = 'restart_trans_with_sub.i'
+    exodiff = 'restart_trans_with_sub_out.e restart_trans_with_sub_out_sub0.e'
+    prereq = 'steady_with_sub'
+
+    issues = "#13438"
+    requirement = "The system shall support restarting a transient simulation from a steady solution file with sub apps."
+  []
 []

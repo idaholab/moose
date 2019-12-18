@@ -5,6 +5,11 @@
   ny = 10
 []
 
+[Problem]
+  restart_file_base = steady_with_sub_out_cp/LATEST
+  skip_additional_restart_data = true
+[]
+
 [AuxVariables]
   [Tf]
   []
@@ -18,11 +23,16 @@
 [Functions]
   [pwr_func]
     type = ParsedFunction
-    value = '1e3*x*(1-x)+5e2'
+    value = '1e3*x*(1-x)+5e2' # increase this function to drive transient
   []
 []
 
 [Kernels]
+  [timedt]
+    type = TimeDerivative
+    variable = power_density
+  []
+
   [diff]
     type = Diffusion
     variable = power_density
@@ -80,27 +90,32 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  start_time = 0
+  end_time = 10
+  dt = 1.0
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
 
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-7
 
-  picard_rel_tol = 1E-7
-  picard_abs_tol = 1.0e-07
-  picard_max_its = 12
+  picard_rel_tol = 1e-7
+  picard_abs_tol = 1e-07
+  picard_max_its = 4
+
+  line_search = none
 []
 
 [MultiApps]
-  [bison]
-    type = FullSolveMultiApp
+  [./sub]
+    type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files  = bison_ss.i
+    input_files  = restart_trans_with_sub_sub.i
     execute_on = 'timestep_end'
-    no_backup_and_restore = true # to restart from the latest solve of the multiapp (for pseudo-transient)
-  []
+  [../]
 []
 
 [Transfers]
@@ -109,22 +124,22 @@
     direction = to_multiapp
     source_variable = power_density
     variable = power_density
-    multi_app = bison
-    execute_on = 'initial timestep_end'
+    multi_app = sub
+    execute_on = 'timestep_end'
   []
   [t_from_sub]
     type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     source_variable = temp
     variable = Tf
-    multi_app = bison
-    execute_on = 'initial timestep_end'
+    multi_app = sub
+    execute_on = 'timestep_end'
   []
 []
 
 [Outputs]
   exodus = true
   csv = true
-  perf_graph = true
   checkpoint = true
+  perf_graph = true
 []
