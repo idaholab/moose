@@ -1,18 +1,13 @@
 [Tests]
-  [./sm_beam_pbp]
+  issues = '#6978'
+  design = 'source/preconditioners/PhysicsBasedPreconditioner.md'
+  [./beam_pbp]
     type = 'Exodiff'
-    input = 'beam_pbp_test.i'
-    exodiff = 'out.e'
+    input = 'beam_pbp.i'
+    exodiff = 'beam_pbp_out.e'
     abs_zero = 1e-07
     scale_refine = 1
-  [../]
-  [./tm_beam_pbp]
-    type = 'Exodiff'
-    input = 'beam_pbp_tm.i'
-    exodiff = 'tm_out.e'
-    abs_zero = 1e-07
-    scale_refine = 1
-    prereq = 'sm_beam_pbp'
     rel_err = 4e-5
+    requirement = 'The PBP preconditioner shall work with the tensor mechanics module on a three-dimensional beam with a space_varying pressure boundary condition.'
   [../]
 []

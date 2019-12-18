@@ -17,6 +17,8 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
+  volumetric_locking_correction = false
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
@@ -67,15 +69,12 @@
 
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+
+  [./DynamicTensorMechanics]
+    use_displaced_mesh = false
     zeta = 0.1
   [../]
-[]
-[Kernels]
  [./inertia_x]
     type = InertialForce
     variable = disp_x
@@ -84,6 +83,7 @@
     beta = 0.3025
     gamma = 0.6
     eta=0.1
+    use_displaced_mesh = false
   [../]
   [./inertia_y]
     type = InertialForce
@@ -93,6 +93,7 @@
     beta = 0.3025
     gamma = 0.6
     eta=0.1
+    use_displaced_mesh = false
   [../]
   [./inertia_z]
     type = InertialForce
@@ -102,6 +103,7 @@
     beta = 0.3025
     gamma = 0.6
     eta = 0.1
+    use_displaced_mesh = false
   [../]
 
 []
@@ -243,23 +245,28 @@
 
 [Materials]
   [./constant]
-     type = Elastic
-     block = 0
-     disp_x = disp_x
-     disp_y = disp_y
-     disp_z = disp_z
-     youngs_modulus = 1
-     poissons_ratio = 0
-     thermal_expansion = 0
-   [../]
-    [./density]
+    type = ComputeIsotropicElasticityTensor
+    block = '0'
+    youngs_modulus = 1.0
+    poissons_ratio = 0.0
+  [../]
+
+  [./constant_strain]
+    type= ComputeFiniteStrain
+    block = '0'
+  [../]
+  [./constant_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '0'
+  [../]
+  [./density]
     type = GenericConstantMaterial
-    block = 0
+    block = '0'
     prop_names = 'density'
     prop_values = '1'
   [../]
-
 []
+
 
 [Executioner]
 
@@ -274,9 +281,7 @@
     type = ConstantDT
     dt = 0.1
   [../]
-
 []
-
 
 [Functions]
   [./pressure]

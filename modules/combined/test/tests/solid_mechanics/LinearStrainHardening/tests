@@ -1,33 +1,39 @@
 [Tests]
-  [./testRestart1]
+  issues = '#2460'
+  design = 'syntax/tensor_mechanics/index.md RadialReturnStressUpdate.md'
+  [./LinearStrainHardeningRestart1]
     type = 'RunApp'
     input = 'LinearStrainHardeningRestart1.i'
     recover = false
+    requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Step 1, before restart.'
   [../]
 
-  [./testRestart2]
+  [./LinearStrainHardeningRestart2]
     type = 'Exodiff'
     input = 'LinearStrainHardeningRestart2.i'
-    exodiff = 'LinearStrainHardening_test_out.e'
+    exodiff = 'LinearStrainHardeningRestart2_out.e'
     exodiff_opts = '-TM'
     abs_zero = 1e-09
-    prereq = 'testRestart1'
+    prereq = 'LinearStrainHardeningRestart1'
     recover = false
+    requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Step 2, after restart.'
   [../]
 
-  [./test_lsh]
+  [./LinearStrainHardening_test]
     type = 'Exodiff'
     input = 'LinearStrainHardening_test.i'
-    exodiff = 'LinearStrainHardening_test_out.e'
+    exodiff = 'LinearStrainHardeningRestart2_out.e'
     abs_zero = 1e-09
-    prereq = 'testRestart2'
+    prereq = 'LinearStrainHardeningRestart2'
     scale_refine = 2
     recover = false
+    requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Simulation with no restart for verification.'
   [../]
 
-  [./test_lsh_pressure]
+  [./lsh_pressure]
     type = 'Exodiff'
     input = 'lsh_pressure.i'
     exodiff = 'lsh_pressure_out.e'
+    requirement = 'The tensor mechanics system shall yield consistent linear hardening results under pressure solicitation.'
   [../]
 []

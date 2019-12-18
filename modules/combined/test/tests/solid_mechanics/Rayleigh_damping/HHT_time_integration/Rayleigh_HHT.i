@@ -26,6 +26,8 @@
 # becomes constant.  Alpha equal to zero will result in Newmark
 # integration.
 [GlobalParams]
+  volumetric_locking_correction = false
+  displacements = 'disp_x disp_y disp_z'
   order = FIRST
   family = LAGRANGE
 []
@@ -79,6 +81,12 @@
 []
 
 [Kernels]
+
+  [./DynamicTensorMechanics]
+    use_automatic_differentiation = true
+    alpha = 0.11
+    zeta = 0.1
+  [../]
   [./inertia_x]
     type = InertialForce
     variable = disp_x
@@ -87,13 +95,6 @@
     beta = 0.25
     gamma = 0.5
     eta=0.1
-  [../]
-  [./stiffness_x]
-    type = StressDivergence
-    variable = disp_x
-    component = 0
-    zeta = 0.1
-    alpha = 0.11
   [../]
   [./inertia_y]
     type = InertialForce
@@ -104,13 +105,6 @@
     gamma = 0.5
     eta=0.1
   [../]
-  [./stiffness_y]
-    type = StressDivergence
-    variable = disp_y
-    component = 1
-    zeta = 0.1
-    alpha = 0.11
-  [../]
   [./inertia_z]
     type = InertialForce
     variable = disp_z
@@ -119,13 +113,6 @@
     beta = 0.25
     gamma = 0.5
     eta = 0.1
-  [../]
-  [./stiffness_z]
-    type = StressDivergence
-    variable = disp_z
-    component = 2
-    zeta = 0.1
-    alpha = 0.11
   [../]
 
 []
@@ -177,16 +164,18 @@
     execute_on = timestep_end
   [../]
   [./stress_yy]
-     type = MaterialTensorAux
+     type = RankTwoAux
      variable = stress_yy
-     tensor = stress
-     index = 1
+     rank_two_tensor = stress
+     index_i = 1
+     index_j = 1
   [../]
   [./strain_yy]
-     type = MaterialTensorAux
+     type = RankTwoAux
      variable = strain_yy
-     tensor = total_strain
-     index = 1
+     rank_two_tensor = total_strain
+     index_i = 1
+     index_j = 1
   [../]
 
 []
@@ -275,9 +264,6 @@
     [./Side1]
     boundary = bottom
     function = pressure
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     factor = 1
     alpha = 0.11
     [../]
@@ -285,25 +271,26 @@
 []
 
 [Materials]
-
-  [./constant]
-    type = Elastic
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+  [./elastic]
+    type = ComputeIsotropicElasticityTensor
+    block = '0'
     youngs_modulus = 210e+09
     poissons_ratio = 0
-    thermal_expansion = 0
   [../]
-
+  [./elastic_strain]
+    type= ComputeFiniteStrain
+    block = '0'
+  [../]
+  [./elastic_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '0'
+  [../]
   [./density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
     prop_values = '7750'
   [../]
-
 []
 
 [Executioner]

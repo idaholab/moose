@@ -18,8 +18,10 @@
 # Kernel The residual due to Pressure is evaluated using Pressure
 # boundary condition
 [GlobalParams]
+  volumetric_locking_correction = false
   order = FIRST
   family = LAGRANGE
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
@@ -36,16 +38,6 @@
   zmax = 0.1
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [AuxVariables]
   [./vel_x]
   [../]
@@ -59,18 +51,18 @@
   [../]
   [./accel_z]
   [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+[]
 
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_yy strain_yy'
+  []
 []
 
 [Kernels]
+
   [./inertia_x]
     type = InertialForce
     variable = disp_x
@@ -78,11 +70,6 @@
     acceleration = accel_x
     beta = 0.25
     gamma = 0.5
-  [../]
-  [./stiffness_x]
-    type = StressDivergence
-    variable = disp_x
-    component = 0
   [../]
   [./inertia_y]
     type = InertialForce
@@ -92,11 +79,6 @@
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_y]
-    type = StressDivergence
-    variable = disp_y
-    component = 1
-  [../]
   [./inertia_z]
     type = InertialForce
     variable = disp_z
@@ -105,12 +87,6 @@
     beta = 0.25
     gamma = 0.5
   [../]
-  [./stiffness_z]
-    type = StressDivergence
-    variable = disp_z
-    component = 2
-  [../]
-
 []
 
 [AuxKernels]
@@ -159,19 +135,6 @@
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./stress_yy]
-     type = MaterialTensorAux
-     variable = stress_yy
-     tensor = stress
-     index = 1
-  [../]
-  [./strain_yy]
-     type = MaterialTensorAux
-     variable = strain_yy
-     tensor = total_strain
-     index = 1
-  [../]
-
 []
 
 
@@ -210,34 +173,28 @@
     [./Side1]
     boundary = bottom
     function = pressure
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     factor = 1
     [../]
   [../]
 []
 
 [Materials]
-
-  [./constant]
-    type = Elastic
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+  [./elastic]
+    type = ComputeIsotropicElasticityTensor
+    block = '0'
     youngs_modulus = 210e+09
     poissons_ratio = 0
-    thermal_expansion = 0
   [../]
-
+  [./elastic_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '0'
+  [../]
   [./density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
     prop_values = '7750'
   [../]
-
 []
 
 [Executioner]
