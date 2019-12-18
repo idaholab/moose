@@ -11,6 +11,8 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
+  displacements = 'disp_x disp_y'
+  volumetric_locking_correction = true
 []
 
 [XFEM]
@@ -27,7 +29,6 @@
   ymin = -12.5
   ymax = 12.5
   elem_type = QUAD4
-  displacements = 'disp_x disp_y'
 []
 
 [UserObjects]
@@ -60,10 +61,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    planar_formulation = PLANE_STRAIN
   [../]
 []
 
@@ -124,14 +126,13 @@
 []
 
 [Materials]
-  [./elastic_body1]
-    type = Elastic
-    block = 0
-    poissons_ratio = 0.3
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
-    disp_x = disp_x
-    disp_y = disp_y
-    formulation = nonlinearplanestrain
+    poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 

@@ -1,0 +1,1 @@
+../../gold/solid_mechanics_moment_fitting_out.e
