@@ -1,0 +1,1 @@
+../../gold/corner_node_cut_out.e

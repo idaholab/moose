@@ -1,7 +1,8 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
-  volumetric_locking_correction = False
+  displacements = 'disp_x disp_y disp_z'
+  volumetric_locking_correction = false
 []
 
 [XFEM]
@@ -22,7 +23,6 @@
   zmin = -0.5
   zmax = 0.5
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [UserObjects]
@@ -42,53 +42,13 @@
   [../]
   [./disp_z]
   [../]
-  []
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-    execute_on = timestep_end
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-    execute_on = timestep_end
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    generate_output = 'stress_xx stress_yy stress_zz'
   [../]
 []
 
@@ -143,14 +103,13 @@
 []
 
 [Materials]
-  [./linelast]
-    type = Elastic
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    poissons_ratio = 0.3
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
+    poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 
