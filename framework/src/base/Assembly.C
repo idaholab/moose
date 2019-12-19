@@ -368,15 +368,15 @@ Assembly::buildVectorFE(FEType type) const
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
@@ -400,16 +400,15 @@ Assembly::buildVectorFaceFE(FEType type) const
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
@@ -429,16 +428,15 @@ Assembly::buildVectorNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
@@ -458,16 +456,15 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
