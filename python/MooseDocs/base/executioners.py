@@ -330,21 +330,29 @@ class ParallelBarrier(Executioner):
     def __target(self, nodes, barrier):
         """Target function for multiprocessing.Process calls."""
 
+        local_ast = dict()
+        local_meta = dict()
+        local_result = dict()
         for node in nodes:
             ast, meta = self.tokenize(node)
-            with self.translator.LOCK:
-                self._tree_data[node.uid] = ast
-                self._meta_data[node.uid] = meta
+            local_ast[node.uid] = ast
+            local_meta[node.uid] = meta
+
+        with self.translator.LOCK:
+            self._tree_data.update(local_ast)
+            self._meta_data.update(local_meta)
 
         barrier.wait()
         self._ast_available.value = True
 
         for node in nodes:
-            ast = self._tree_data[node.uid]
-            meta = self._meta_data[node.uid]
+            ast = local_ast[node.uid]
+            meta = local_meta[node.uid]
             result = self.render(node, ast, meta)
-            with self.translator.LOCK:
-                self._result_data[node.uid] = result
+            local_result[node.uid] = result
+
+        with self.translator.LOCK:
+            self._result_data.update(local_result)
 
         self._result_available.value = True
 

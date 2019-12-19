@@ -7,11 +7,12 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import os
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, civet
+from MooseDocs.tree import pages
 from MooseDocs import base
 logging.basicConfig()
 
@@ -33,7 +34,7 @@ class TestInlineCivet(CivetTestCase):
 
     def setupExtension(self, ext):
         if ext == civet:
-            return dict(generate_test_reports=False)
+            return dict(generate_test_reports=False, test_results_cache='/tmp/civet/jobs')
 
     def testResults(self):
         ast = self.tokenize(self.RESULTS)
@@ -62,8 +63,9 @@ class TestInlineCivetWithConfig(CivetTestCase):
     def setupExtension(self, ext):
         if ext == civet:
             return dict(generate_test_reports=False,
-                        categories=dict(moose=dict(url='https://civet.inl.gov',
-                                                   repo='idaholab/moose')))
+                        test_results_cache='/tmp/civet/jobs',
+                        remotes=dict(moose=dict(url='https://civet.inl.gov',
+                                                repo='idaholab/moose')))
 
     def testResultsAST(self):
         """!civet results with content; no need to render b/c it only uses core tokens"""

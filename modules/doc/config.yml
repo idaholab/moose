@@ -132,7 +132,7 @@ Extensions:
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.civet:
-        categories:
+        remotes:
             moose:
                 url: https://civet.inl.gov
                 repo: idaholab/moose

@@ -46,10 +46,13 @@ Extensions:
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.civet:
-        categories:
+        active: True
+        test_results_cache: '/tmp/civet/jobs'
+        remotes:
             moose:
                 url: https://civet.inl.gov
                 repo: idaholab/moose
+
     MooseDocs.extensions.sqa:
         active: True
         categories:

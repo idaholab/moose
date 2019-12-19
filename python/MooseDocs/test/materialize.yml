@@ -63,7 +63,8 @@ Extensions:
                     - demo
     MooseDocs.extensions.civet:
         active: True
-        categories:
+        test_results_cache: '/tmp/civet/jobs'
+        remotes:
             moose:
                 url: https://civet.inl.gov
                 repo: idaholab/moose

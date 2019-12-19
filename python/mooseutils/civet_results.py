@@ -32,6 +32,7 @@ JOB_RE = re.compile(r'id=\"job_(?P<job>\d+)\"')
 RECIPE_RE = re.compile(r'results_(?P<number>\d+)_(?P<job>.*)/(?P<recipe>.*)')
 RUN_TESTS_START_RE = re.compile(r'^.+?run_tests.+?$', flags=re.MULTILINE)
 RUN_TESTS_END_RE = re.compile(r'^-{5,}$', flags=re.MULTILINE)
+RESULT_FILENAME_RE = re.compile(r'results_(?P<number>[0-9]+)_(?P<recipe>.*)\.tar\.gz')
 
 Test = collections.namedtuple('Test', 'recipe status caveats reason time url')
 Job = collections.namedtuple('Job', 'number filename status url')
@@ -39,10 +40,23 @@ Job = collections.namedtuple('Job', 'number filename status url')
 class JobFileStatus(enum.Enum):
     """Status flag for Job file downloads"""
     CACHE = 0
-    DOWNLOAD = 1
-    FAIL = 2
+    LOCAL = 1
+    DOWNLOAD = 2
+    FAIL = 3
 
-def _get_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=None):
+def _get_local_civet_jobs(location, logger=None):
+    """
+    Get a list of Job objects for the supplied directory; this searches for tar.gz files with the
+    name as: results_<JOB>_*.tar.gz.
+    """
+    jobs = set()
+    for filename in glob.glob(os.path.join(location, 'results_*.tar.gz')):
+        match = RESULT_FILENAME_RE.search(filename)
+        if match:
+            jobs.add(Job(int(match.group('number')), filename, JobFileStatus.LOCAL, None))
+    return sorted(jobs, key=lambda j: j.number)
+
+def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=None):
     """
     Get a list of Job objects for the supplied git SHA1 strings.
     """
@@ -69,7 +83,7 @@ def _download_job(job, site, cache, logger):
         os.makedirs(cache)
 
     url = '{}/job_results/{}'.format(site, job)
-    filename = '{}/job_{}.tar.gz'.format(cache, job)
+    filename = '{}/results_{}.tar.gz'.format(cache, job)
 
     status = None
     if os.path.isfile(filename):
@@ -135,20 +149,29 @@ def _process_results(database, job, recipe, content, possible):
         tname = match.group('test').split(':')[-1]
         status = match.group('status')
         if (possible is None) or (status in possible):
-            database[tname][job.number].append(Test(recipe, status, caveats, reason, time, job.url))
+            url = job.url if job.url is not None else job.filename
+            database[tname][job.number].append(Test(recipe, status, caveats, reason, time, url))
 
-def get_civet_results(hashes, possible=None,
+def get_civet_results(local=list(),
+                      hashes=list(),
                       sites=[(DEFAULT_CIVET_SITE, DEFAULT_CIVET_REPO)],
+                      possible=None,
                       cache=DEFAULT_JOBS_CACHE, logger=None):
 
     database = collections.defaultdict(lambda: collections.defaultdict(list))
+    for loc in local:
+        jobs = _get_local_civet_jobs(loc, logger=logger)
+        for job in jobs:
+            _update_database_from_job(job, database, possible)
+
     for site, repo in sites:
-        jobs = _get_civet_jobs(hashes, site, repo, cache=cache, logger=logger)
+        jobs = _get_remote_civet_jobs(hashes, site, repo, cache=cache, logger=logger)
         for job in jobs:
             _update_database_from_job(job, database, possible)
     return database
 
-
 if __name__ == '__main__':
-    database = civet_results(['681ba2f4274dc8465bb2a54e1353cfa24765a5c1',
-                              'febe3476040fe6af1df1d67e8cc8c04c4760afb6'])
+    #database = get_civet_results(hashes=['681ba2f4274dc8465bb2a54e1353cfa24765a5c1',
+    #                                    'febe3476040fe6af1df1d67e8cc8c04c4760afb6'])
+    database = get_civet_results(sites=[],
+                                 local=['/Users/slauae/projects/moose/python/MooseDocs/test/content/civet'])
