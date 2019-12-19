@@ -714,9 +714,9 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) = dphidxi[i][qp] * _ad_dxidx_map[qp];
-          grad_phi[i][qp](1) = dphidxi[i][qp] * _ad_dxidy_map[qp];
-          grad_phi[i][qp](2) = dphidxi[i][qp] * _ad_dxidz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp];
         }
       break;
     }
@@ -726,11 +726,11 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) =
+          grad_phi[i][qp].slice(0) =
               dphidxi[i][qp] * _ad_dxidx_map[qp] + dphideta[i][qp] * _ad_detadx_map[qp];
-          grad_phi[i][qp](1) =
+          grad_phi[i][qp].slice(1) =
               dphidxi[i][qp] * _ad_dxidy_map[qp] + dphideta[i][qp] * _ad_detady_map[qp];
-          grad_phi[i][qp](2) =
+          grad_phi[i][qp].slice(2) =
               dphidxi[i][qp] * _ad_dxidz_map[qp] + dphideta[i][qp] * _ad_detadz_map[qp];
         }
       break;
@@ -741,15 +741,15 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) = dphidxi[i][qp] * _ad_dxidx_map[qp] +
-                               dphideta[i][qp] * _ad_detadx_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetadx_map[qp];
-          grad_phi[i][qp](1) = dphidxi[i][qp] * _ad_dxidy_map[qp] +
-                               dphideta[i][qp] * _ad_detady_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetady_map[qp];
-          grad_phi[i][qp](2) = dphidxi[i][qp] * _ad_dxidz_map[qp] +
-                               dphideta[i][qp] * _ad_detadz_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetadz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp] +
+                                     dphideta[i][qp] * _ad_detadx_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetadx_map[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp] +
+                                     dphideta[i][qp] * _ad_detady_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetady_map[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp] +
+                                     dphideta[i][qp] * _ad_detadz_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetadz_map[qp];
         }
       break;
     }

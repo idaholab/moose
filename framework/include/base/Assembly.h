@@ -2028,17 +2028,6 @@ Assembly::feADGradPhiFace<RealVectorValue>(FEType type) const
 }
 
 template <>
-inline void
-Assembly::computeGradPhiAD<RealVectorValue>(
-    const Elem *,
-    unsigned int,
-    typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &,
-    FEGenericBase<RealVectorValue> *)
-{
-  mooseError("Not implemented");
-}
-
-template <>
 inline const MooseArray<typename Moose::RealType<ComputeStage::JACOBIAN>::type> &
 Assembly::adCurvatures<ComputeStage::JACOBIAN>() const
 {
