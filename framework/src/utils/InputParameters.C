@@ -949,6 +949,10 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & nam
                                                          PostprocessorName & l_value,
                                                          const Real & r_value)
 {
+  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
+                  _params[name]._have_default_postprocessor_val.size() == 1,
+              "Default postprocessor size is not equal to 1.");
+
   // Store the default value
   _params[name]._default_postprocessor_val[0] = r_value;
   _params[name]._have_default_postprocessor_val[0] = true;
@@ -965,6 +969,10 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name
                                                         PostprocessorName & l_value,
                                                         const int & r_value)
 {
+  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
+                  _params[name]._have_default_postprocessor_val.size() == 1,
+              "Default postprocessor size is not equal to 1.");
+
   // Store the default value
   _params[name]._default_postprocessor_val[0] = r_value;
   _params[name]._have_default_postprocessor_val[0] = true;
