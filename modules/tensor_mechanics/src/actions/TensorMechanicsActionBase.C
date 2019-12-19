@@ -78,14 +78,16 @@ TensorMechanicsActionBase::validParams()
   params.addParamNamesToGroup("save_in diag_save_in", "Advanced");
 
   // Planar Formulation
-  MooseEnum planarFormulationType("NONE PLANE_STRAIN GENERALIZED_PLANE_STRAIN",
-                                  "NONE"); // PLANE_STRESS
+  MooseEnum planarFormulationType("NONE WEAK_PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN",
+                                  "NONE");
   params.addParam<MooseEnum>(
       "planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
   params.addParam<VariableName>("scalar_out_of_plane_strain",
                                 "Scalar variable for the out-of-plane strain (in y "
                                 "direction for 1D Axisymmetric or in z direction for 2D "
                                 "Cartesian problems)");
+  params.addParam<VariableName>("out_of_plane_strain",
+                                "Variable for the out-of-plane strain for plane stress models");
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
@@ -95,7 +97,7 @@ TensorMechanicsActionBase::validParams()
                                 "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
   params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParamNamesToGroup("planar_formulation scalar_out_of_plane_strain out_of_plane_pressure "
-                              "pressure_factor out_of_plane_direction",
+                              "pressure_factor out_of_plane_direction out_of_plane_strain",
                               "Out-of-plane stress/strain");
 
   // Output

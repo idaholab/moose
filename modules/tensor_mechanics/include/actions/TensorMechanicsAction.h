@@ -75,9 +75,9 @@ protected:
   enum class PlanarFormulation
   {
     None,
+    WeakPlaneStress,
     PlaneStrain,
     GeneralizedPlaneStrain,
-    /* PlaneStress */
   } _planar_formulation;
 
   enum class OutOfPlaneDirection

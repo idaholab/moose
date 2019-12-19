@@ -14,27 +14,15 @@
   [../]
   [./disp_y]
   [../]
-
   [./strain_zz]
   [../]
 []
 
-[Kernels]
-  [./disp_x]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./disp_y]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-
-  [./solid_z]
-    type = WeakPlaneStress
-    variable = strain_zz
-  [../]
+[Modules/TensorMechanics/Master]
+  [plane_stress]
+    planar_formulation = WEAK_PLANE_STRESS
+    strain = SMALL
+  []
 []
 
 [Materials]
@@ -42,9 +30,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
-  [./strain]
-    type = ComputePlaneSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
