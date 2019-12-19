@@ -653,12 +653,21 @@ AuxiliarySystem::computeElementalVarsHelper(
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, vars, true);
-      Threads::parallel_reduce(range, eavt);
-
-      solution().close();
-      _sys.update();
+      try
+      {
+        Threads::parallel_reduce(range, eavt);
+      }
+      catch (MooseException & e)
+      {
+        _fe_problem.setException(e.what());
+      }
     }
     PARALLEL_CATCH;
+
+    // We need to make sure we propagate exceptions to all processes before trying to close here,
+    // which is a parallel operation
+    solution().close();
+    _sys.update();
   }
 
   // Boundary Elemental AuxKernels
@@ -670,12 +679,21 @@ AuxiliarySystem::computeElementalVarsHelper(
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
       ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, warehouse, vars, true);
-      Threads::parallel_reduce(bnd_elems, eabt);
-
-      solution().close();
-      _sys.update();
+      try
+      {
+        Threads::parallel_reduce(bnd_elems, eabt);
+      }
+      catch (MooseException & e)
+      {
+        _fe_problem.setException(e.what());
+      }
     }
     PARALLEL_CATCH;
+
+    // We need to make sure we propagate exceptions to all processes before trying to close here,
+    // which is a parallel operation
+    solution().close();
+    _sys.update();
   }
 }
 
