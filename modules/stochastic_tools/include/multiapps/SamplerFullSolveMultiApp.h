@@ -25,12 +25,9 @@ InputParameters validParams<SamplerFullSolveMultiApp>();
 class SamplerFullSolveMultiApp : public FullSolveMultiApp, public SamplerInterface
 {
 public:
-  SamplerFullSolveMultiApp(const InputParameters & parameters);
+  static InputParameters validParams();
 
-  /**
-   * Return the Sampler object for this MultiApp.
-   */
-  Sampler & getSampler() const { return _sampler; }
+  SamplerFullSolveMultiApp(const InputParameters & parameters);
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 

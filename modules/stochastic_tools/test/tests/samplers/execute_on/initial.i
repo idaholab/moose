@@ -6,33 +6,33 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = -42
     upper_bound = 42
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 10
     distributions = 'uniform'
     execute_on = 'initial' # Create random numbers on initial only, they remain the same with time.
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./data]
+  [data]
     type = SamplerData
     sampler = sample
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]

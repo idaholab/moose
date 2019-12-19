@@ -1,6 +1,6 @@
 [Tests]
   issues = "#8863"
-  design = "SamplerTransfer.md"
+  design = "SamplerParameterTransfer.md"
 
   [normal]
     requirement = "The system shall include the ability to modify parameters for sub-applications "
@@ -9,7 +9,7 @@
     [n1]
       type = CSVDiff
       input = master.i
-      csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal'
 
       detail = "on a single processor and"
@@ -17,7 +17,7 @@
     [n2]
       type = CSVDiff
       input = master.i
-      csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal'
       prereq = normal/n1
       min_parallel = 2
@@ -34,7 +34,7 @@
     [n1]
       type = CSVDiff
       input = master.i
-      csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       max_parallel = 1
       prereq = normal/n2
 
@@ -43,7 +43,7 @@
     [n2]
       type = CSVDiff
       input = master.i
-      csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       min_parallel = 2
       max_parallel = 2
       prereq = batch/n1
@@ -53,7 +53,7 @@
     [n2_restore]
       type = CSVDiff
       input = master.i
-      csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       min_parallel = 2
       max_parallel = 2
       prereq = batch/n2

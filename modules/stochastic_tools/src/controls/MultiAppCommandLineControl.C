@@ -16,12 +16,13 @@
 
 registerMooseObject("StochasticToolsApp", MultiAppCommandLineControl);
 
-template <>
+defineLegacyParams(MultiAppCommandLineControl);
+
 InputParameters
-validParams<MultiAppCommandLineControl>()
+MultiAppCommandLineControl::validParams()
 {
-  InputParameters params = validParams<Control>();
-  params += validParams<SamplerInterface>();
+  InputParameters params = Control::validParams();
+  params += SamplerInterface::validParams();
   params.addClassDescription("Control for modifying the command line arguments of MultiApps.");
 
   // Set and suppress the 'execute_on' flag, it doesn't work with any other flag

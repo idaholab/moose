@@ -42,14 +42,16 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    vector_postprocessor = storage
-    postprocessor = size
+    sampler = sample
+    to_vector_postprocessor = storage
+    from_postprocessor = size
   []
 []
 
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
+    samplers = sample
   []
 []
 

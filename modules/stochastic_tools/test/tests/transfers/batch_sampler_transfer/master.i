@@ -26,6 +26,7 @@
     type = MonteCarloSampler
     num_rows = 15
     distributions = 'uniform_0 uniform_1'
+    execute_on = INITIAL
   []
 []
 
@@ -44,22 +45,26 @@
 
 [Transfers]
   [runner]
-    type = SamplerTransfer
+    type = SamplerParameterTransfer
     multi_app = runner
+    sampler = mc
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
   []
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
-    vector_postprocessor = storage
-    postprocessor = average
+    sampler = mc
+    to_vector_postprocessor = storage
+    from_postprocessor = average
   []
 []
 
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
+    samplers = mc
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [data]
     type = SamplerData
@@ -69,5 +74,5 @@
 
 [Outputs]
   csv = true
-  execute_on = 'FINAL'
+  execute_on = 'TIMESTEP_END'
 []

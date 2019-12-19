@@ -19,6 +19,8 @@ InputParameters validParams<StochasticToolsApp>();
 class StochasticToolsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   StochasticToolsApp(InputParameters parameters);
   virtual ~StochasticToolsApp();
 

@@ -1,0 +1,86 @@
+[Tests]
+  issues = '#14410'
+  design = 'StochasticResults.md'
+
+  [warning]
+    type = RunApp
+    input = master.i
+    expect_out = "The parallel_type was set to DISTRIBUTED and output is enabled"
+    min_parallel = 2 # warning is only triggered with MPI
+    allow_warnings = true # the warning is being tested
+
+    requirement = "The system shall error if stochastic data is distributed across processors and "
+                  "output of the data is enabled."
+  []
+
+  [errors]
+    requirement = "The system shall error when stochastic data is set to output on a specific "
+                  "processor with"
+    [wrong_parallel_type]
+      type = RunException
+      input = master.i
+      cli_args = 'VectorPostprocessors/storage/output_distributed_rank=1 '
+                 'VectorPostprocessors/storage/parallel_type=REPLICATED'
+      expect_err = "The output rank cannot be used with"
+
+      detail = "the supplied operation mode is replicated and"
+    []
+    [bad_output_rank]
+      type = RunException
+      input = master.i
+      expect_err = "The supplied value is greater than"
+      cli_args = 'VectorPostprocessors/storage/output_distributed_rank=2'
+      max_parallel = 2
+
+      detail = "the provided rank number is too large for the number of processors being executed."
+    []
+  []
+
+  [parallel_type]
+    requirement = "The system shall support the collection of stochastic data that is"
+    [replicated]
+      type = CSVDiff
+      input = master.i
+      cli_args = 'VectorPostprocessors/storage/parallel_type=REPLICATED Outputs/file_base=replicated_out'
+      csvdiff = replicated_out_storage_0002.csv
+
+      detail = "replicated on all processors and"
+    []
+
+    [distributed_one]
+      type = CSVDiff
+      input = master.i
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = 'Outputs/file_base=distributed_one_out '
+                 'VectorPostprocessors/storage/output_distributed_rank=0'
+      csvdiff = distributed_one_out_storage_0002.csv
+
+      detail = "distributed across one,"
+    []
+
+    [distributed_two]
+      type = CSVDiff
+      input = master.i
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = 'Outputs/file_base=distributed_two_out '
+                 'VectorPostprocessors/storage/output_distributed_rank=1'
+      csvdiff = distributed_two_out_storage_0002.csv
+
+      detail = "two, and"
+    []
+
+    [distributed_three]
+      type = CSVDiff
+      input = master.i
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = 'Outputs/file_base=distributed_three_out '
+                 'VectorPostprocessors/storage/output_distributed_rank=2'
+      csvdiff = distributed_three_out_storage_0002.csv
+
+      detail = "three processors."
+    []
+  []
+[]

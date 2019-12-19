@@ -25,6 +25,8 @@ InputParameters validParams<SamplerReceiver>();
 class SamplerReceiver : public Control
 {
 public:
+  static InputParameters validParams();
+
   SamplerReceiver(const InputParameters & parameters);
   virtual void execute() override;
 
@@ -40,8 +42,7 @@ protected:
   /// Values to use when modifying parameters
   std::vector<Real> _values;
 
-  /// Allows the SamplerTransfer to call the transfer method, which
+  /// Allows the SamplerParameterTransfer to call the transfer method, which
   /// should only be called by that object so making it public is dangerous.
-  friend class SamplerTransfer;
+  friend class SamplerParameterTransfer;
 };
-

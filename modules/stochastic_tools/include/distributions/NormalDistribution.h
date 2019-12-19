@@ -22,24 +22,23 @@ InputParameters validParams<NormalDistribution>();
 class NormalDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   NormalDistribution(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;
   virtual Real cdf(const Real & x) const override;
   virtual Real quantile(const Real & p) const override;
 
-  Real pdf(const Real & x, const Real & mean, const Real & std_dev) const;
-  Real cdf(const Real & x, const Real & mean, const Real & std_dev) const;
-  Real quantile(const Real & p, const Real & mean, const Real & std_dev) const;
+  static Real pdf(const Real & x, const Real & mean, const Real & std_dev);
+  static Real cdf(const Real & x, const Real & mean, const Real & std_dev);
+  static Real quantile(const Real & p, const Real & mean, const Real & std_dev);
 
 protected:
   ///@{
   /// Coefficients for the rational function used to approximate the quantile
-  const std::vector<Real> _a = {
-      -0.322232431088, -1.0, -0.342242088547, -0.0204231210245, -0.0000453642210148};
-
-  const std::vector<Real> _b = {
-      0.099348462606, 0.588581570495, 0.531103462366, 0.10353775285, 0.0038560700634};
+  static const std::array<Real, 6> _a;
+  static const std::array<Real, 6> _b;
   ///@}
 
   /// The mean (or expectation) of the distribution (mu)
@@ -48,4 +47,3 @@ protected:
   /// The standard deviation of the distribution (sigma)
   const Real & _standard_deviation;
 };
-

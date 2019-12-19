@@ -20,7 +20,7 @@
   type = Steady
 []
 
-[UserObjects]
+[Postprocessors]
   [test]
     type = SamplerTester
     sampler = sample
