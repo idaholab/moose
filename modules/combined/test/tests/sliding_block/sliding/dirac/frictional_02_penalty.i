@@ -1,9 +1,9 @@
-#  This is a benchmark test that checks Dirac based frictionless
-#  contact using the kinematic method.  In this test a constant
+#  This is a benchmark test that checks Dirac based frictional
+#  contact using the penalty method.  In this test a constant
 #  displacement is applied in the horizontal direction to simulate
 #  a small block come sliding down a larger block.
 #
-#  The gold file is run on one processor
+#  A friction coefficient of 0.2 is used.  The gold file is run on one processor
 #  and the benchmark case is run on a minimum of 4 processors to ensure no
 #  parallel variability in the contact pressure and penetration results.
 #
@@ -16,13 +16,6 @@
 [GlobalParams]
   volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -45,10 +38,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -88,10 +81,6 @@
 []
 
 [Postprocessors]
-  [./nonlinear_its]
-    type = NumNonlinearIterations
-    execute_on = timestep_end
-  [../]
   [./penetration]
     type = NodalVariableValue
     variable = penetration
@@ -132,37 +121,33 @@
 []
 
 [Materials]
-  [./left]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+  [./stiffStuff]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
-  [../]
-  [./right]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
     poissons_ratio = 0.3
-    youngs_modulus = 1e6
   [../]
-[]
+  [./stiffStuff_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
+  [../]
+[]  # Materials
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg  4    101'
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
+  # petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -ksp_gmres_restart'
+  # petsc_options_value = 'hypre    boomeramg  4    101'
+
   nl_abs_tol = 1e-7
-  l_max_its = 100
+  l_max_its = 200
   nl_max_its = 1000
   dt = 0.05
   end_time = 10
@@ -179,7 +164,7 @@
 
 [Outputs]
   interval = 10
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -193,9 +178,10 @@
   [./leftright]
     slave = 3
     master = 2
-    model = frictionless
-    penalty = 1e+6
-    formulation = kinematic
+    model = coulomb
+    penalty = 1e+7
+    formulation = penalty
+    friction_coefficient = 0.2
     normal_smoothing_distance = 0.1
     system = DiracKernel
   [../]

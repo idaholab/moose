@@ -161,5 +161,6 @@
     model = glued
     formulation = penalty
     penalty = 1e+7
+    system = diracKernel
   [../]
 []
