@@ -397,9 +397,10 @@ AdvancedOutput::initAvailableLists()
         if (var.count() > 1)
           vname = SubProblem::arrayVariableComponent(var_name, i);
 
-        if (type.order == CONSTANT)
+        if (type.order == CONSTANT && type.family != MONOMIAL_VEC)
           _execute_data["elemental"].available.insert(vname);
-        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
+                 type.family == MONOMIAL_VEC)
         {
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
@@ -477,7 +478,8 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].show.insert(vname);
-        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
+                 type.family == MONOMIAL_VEC)
         {
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
@@ -526,7 +528,8 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].hide.insert(vname);
-        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
+                 type.family == MONOMIAL_VEC)
         {
           switch (_es_ptr->get_mesh().spatial_dimension())
           {

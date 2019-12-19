@@ -25,7 +25,7 @@ AddAuxVariableAction::AddAuxVariableAction(InputParameters params) : AddVariable
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
 {
-  return MooseEnum("LAGRANGE MONOMIAL SCALAR LAGRANGE_VEC", "LAGRANGE", true);
+  return MooseEnum("LAGRANGE MONOMIAL SCALAR LAGRANGE_VEC MONOMIAL_VEC", "LAGRANGE", true);
 }
 
 MooseEnum

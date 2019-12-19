@@ -28,17 +28,18 @@ VectorVariableComponentAux::validParams()
 
 VectorVariableComponentAux::VectorVariableComponentAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _vector_variable_value(coupledNodalValue<RealVectorValue>("vector_variable")),
+    _nodal_variable_value(_nodal ? &coupledNodalValue<RealVectorValue>("vector_variable")
+                                 : nullptr),
+    _elemental_variable_value(_nodal ? nullptr : &coupledVectorValue("vector_variable")),
     _component(getParam<MooseEnum>("component"))
 {
-  if (!isNodal())
-    mooseError(
-        "VectorVariableComponentAux is meant to be used with LAGRANGE_VEC variables and so the "
-        "auxiliary variable should be nodal");
 }
 
 Real
 VectorVariableComponentAux::computeValue()
 {
-  return _vector_variable_value(_component);
+  if (_nodal)
+    return (*_nodal_variable_value)(_component);
+  else
+    return (*_elemental_variable_value)[_qp](_component);
 }
