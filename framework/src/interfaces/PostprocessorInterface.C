@@ -20,36 +20,99 @@ PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValue(const std::string & name)
+PostprocessorInterface::getPostprocessorValue(const std::string & name, unsigned int index)
 {
+  if (singlePostprocessor(name) && index > 0)
+    mooseError("Postprocessor requested with index ",
+               index,
+               " when only a single postprocessor is coupled.");
+
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
-  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.getDefaultPostprocessorValue(name);
+  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
+    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
   else
-    return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name));
+  {
+    if (singlePostprocessor(name))
+      return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name));
+
+    // check size of parameter array here
+    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
+      mooseError("Postprocessor requested with index ",
+                 index,
+                 " but parameter ",
+                 name,
+                 " has only ",
+                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
+                 " entries.");
+
+    return _pi_feproblem.getPostprocessorValue(
+        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+  }
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
+PostprocessorInterface::getPostprocessorValueOld(const std::string & name, unsigned int index)
 {
+  if (singlePostprocessor(name) && index > 0)
+    mooseError("Postprocessor requested with index ",
+               index,
+               " when only a single postprocessor is coupled.");
+
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
-  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.getDefaultPostprocessorValue(name);
+  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
+    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
   else
-    return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name));
+  {
+    if (singlePostprocessor(name))
+      return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name));
+
+    // check size of parameter array here
+    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
+      mooseError("Postprocessor requested with index ",
+                 index,
+                 " but parameter ",
+                 name,
+                 " has only ",
+                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
+                 " entries.");
+
+    return _pi_feproblem.getPostprocessorValueOld(
+        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+  }
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOlder(const std::string & name)
+PostprocessorInterface::getPostprocessorValueOlder(const std::string & name, unsigned int index)
 {
+  if (singlePostprocessor(name) && index > 0)
+    mooseError("Postprocessor requested with index ",
+               index,
+               " when only a single postprocessor is coupled.");
+
   // Return the default if the Postprocessor does not exist and a default does, otherwise
   // continue as usual
-  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
-    return _ppi_params.getDefaultPostprocessorValue(name);
+  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
+    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
   else
-    return _pi_feproblem.getPostprocessorValueOlder(_ppi_params.get<PostprocessorName>(name));
+  {
+    if (singlePostprocessor(name))
+      return _pi_feproblem.getPostprocessorValueOlder(_ppi_params.get<PostprocessorName>(name));
+
+    // check size of parameter array here
+    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
+      mooseError("Postprocessor requested with index ",
+                 index,
+                 " but parameter ",
+                 name,
+                 " has only ",
+                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
+                 " entries.");
+
+    return _pi_feproblem.getPostprocessorValueOlder(
+        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+  }
 }
 
 const PostprocessorValue &
@@ -71,9 +134,26 @@ PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName
 }
 
 bool
-PostprocessorInterface::hasPostprocessor(const std::string & name) const
+PostprocessorInterface::hasPostprocessor(const std::string & name, unsigned int index) const
 {
-  return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name));
+  if (singlePostprocessor(name))
+    return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name));
+  return _pi_feproblem.hasPostprocessor(
+      _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+}
+
+unsigned int
+PostprocessorInterface::coupledPostprocessors(const std::string & name) const
+{
+  if (singlePostprocessor(name))
+    return 1;
+  return _ppi_params.get<std::vector<PostprocessorName>>(name).size();
+}
+
+bool
+PostprocessorInterface::singlePostprocessor(const std::string & name) const
+{
+  return _ppi_params.isSinglePostprocessor(name);
 }
 
 bool

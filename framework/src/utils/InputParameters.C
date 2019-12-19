@@ -626,28 +626,51 @@ InputParameters::getGroupName(const std::string & param_name) const
 }
 
 const PostprocessorValue &
-InputParameters::getDefaultPostprocessorValue(const std::string & name, bool suppress_error) const
+InputParameters::getDefaultPostprocessorValue(const std::string & name,
+                                              bool suppress_error,
+                                              unsigned int index) const
 {
   // Check that a default exists, error if it does not
   auto it = _params.find(name);
-  if (!suppress_error && (it == _params.end() || !it->second._have_default_postprocessor_val))
+  if (!suppress_error &&
+      (it == _params.end() || !it->second._have_default_postprocessor_val[index]))
     mooseError("A default PostprcessorValue does not exist for the given name: ", name);
 
-  return it->second._default_postprocessor_val;
+  if (index >= it->second._default_postprocessor_val.size())
+    mooseError("Default postprocessor with parameter name ",
+               name,
+               " requested with index ",
+               index,
+               " but only ",
+               it->second._default_postprocessor_val.size(),
+               " exists.");
+
+  return it->second._default_postprocessor_val[index];
+}
+
+void
+InputParameters::reserveDefaultPostprocessorValueStorage(const std::string & name,
+                                                         unsigned int size)
+{
+  if (_params[name]._default_postprocessor_val.size() >= size)
+    return;
+  _params[name]._default_postprocessor_val.resize(size, 0);
+  _params[name]._have_default_postprocessor_val.resize(size, false);
 }
 
 void
 InputParameters::setDefaultPostprocessorValue(const std::string & name,
-                                              const PostprocessorValue & value)
+                                              const PostprocessorValue & value,
+                                              unsigned int index)
 {
-  _params[name]._default_postprocessor_val = value;
-  _params[name]._have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val[index] = value;
+  _params[name]._have_default_postprocessor_val[index] = true;
 }
 
 bool
-InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
+InputParameters::hasDefaultPostprocessorValue(const std::string & name, unsigned int index) const
 {
-  return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val;
+  return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val[index];
 }
 
 void
@@ -926,9 +949,13 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & nam
                                                          PostprocessorName & l_value,
                                                          const Real & r_value)
 {
+  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
+                  _params[name]._have_default_postprocessor_val.size() == 1,
+              "Default postprocessor size is not equal to 1.");
+
   // Store the default value
-  _params[name]._default_postprocessor_val = r_value;
-  _params[name]._have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val[0] = r_value;
+  _params[name]._have_default_postprocessor_val[0] = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -942,9 +969,13 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name
                                                         PostprocessorName & l_value,
                                                         const int & r_value)
 {
+  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
+                  _params[name]._have_default_postprocessor_val.size() == 1,
+              "Default postprocessor size is not equal to 1.");
+
   // Store the default value
-  _params[name]._default_postprocessor_val = r_value;
-  _params[name]._have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val[0] = r_value;
+  _params[name]._have_default_postprocessor_val[0] = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
