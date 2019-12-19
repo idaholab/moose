@@ -42,11 +42,6 @@ SetupDarcySimulation::SetupDarcySimulation(InputParameters parameters)
 void
 SetupDarcySimulation::act()
 {
-  // Helper variables
-  const std::string vel_x = "velocity_x";
-  const std::string vel_y = "velocity_y";
-  const std::string vel_z = "velocity_z";
-
   // Actual names of input variables
   const std::string pressure = getParam<VariableName>("pressure");
   const std::string temperature = getParam<VariableName>("temperature");
@@ -54,10 +49,11 @@ SetupDarcySimulation::act()
   // Velocity AuxVariables
   if (_compute_velocity && _current_task == "add_aux_variable")
   {
-    FEType fe_type(CONSTANT, MONOMIAL);
-    _problem->addAuxVariable(vel_x, fe_type);
-    _problem->addAuxVariable(vel_y, fe_type);
-    _problem->addAuxVariable(vel_z, fe_type);
+    InputParameters var_params = _factory.getValidParams("VectorMooseVariable");
+    var_params.set<MooseEnum>("family") = "MONOMIAL_VEC";
+    var_params.set<MooseEnum>("order") = "CONSTANT";
+
+    _problem->addAuxVariable("VectorMooseVariable", "velocity", var_params);
   }
 
   // Velocity AuxKernels
@@ -67,17 +63,8 @@ SetupDarcySimulation::act()
     params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
     params.set<std::vector<VariableName>>("pressure") = {pressure};
 
-    params.set<MooseEnum>("component") = "x";
-    params.set<AuxVariableName>("variable") = vel_x;
-    _problem->addAuxKernel("DarcyVelocity", vel_x, params);
-
-    params.set<MooseEnum>("component") = "y";
-    params.set<AuxVariableName>("variable") = vel_y;
-    _problem->addAuxKernel("DarcyVelocity", vel_y, params);
-
-    params.set<MooseEnum>("component") = "z";
-    params.set<AuxVariableName>("variable") = vel_z;
-    _problem->addAuxKernel("DarcyVelocity", vel_z, params);
+    params.set<AuxVariableName>("variable") = "velocity";
+    _problem->addAuxKernel("DarcyVelocity", "velocity", params);
   }
 
   // Kernels
