@@ -18,7 +18,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("SolidMechanicsApp", StressDivergenceRZ);
+registerMooseObjectDeprecated("SolidMechanicsApp", StressDivergenceRZ, "07/30/2020 24:00");
 
 template <>
 InputParameters
@@ -62,6 +62,12 @@ StressDivergenceRZ::StressDivergenceRZ(const InputParameters & parameters)
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
+  mooseDeprecated(name(), ": StressDivergenceRZ is deprecated. \
+                  The solid_mechanics module will be removed from MOOSE on July 31, 2020. \
+                  Please update your input files to utilize the tensor_mechanics equivalents of \
+                  models based on solid_mechanics. A detailed migration guide that was developed \
+                  for BISON, but which is generally applicable to any MOOSE model is available at: \
+                  https://mooseframework.org/bison/tutorials/mechanics_conversion/overview.html");
 }
 
 void
