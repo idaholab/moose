@@ -4,5 +4,6 @@
     input = 'PLSH_smallstrain.i'
     exodiff = 'PLSH_smallstrain_out.e'
     abs_zero = 1e-09
+    no_error_deprecated = true
   [../]
 []
