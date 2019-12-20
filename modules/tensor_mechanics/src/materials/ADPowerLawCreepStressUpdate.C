@@ -86,3 +86,6 @@ ADPowerLawCreepStressUpdate<compute_stage>::computeDerivative(const ADReal & eff
                                        _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADPowerLawCreepStressUpdate);

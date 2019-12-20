@@ -5,6 +5,7 @@
     type = Exodiff
     input = 'simple_contact_dirac_test.i'
     exodiff = 'simple_contact_dirac_test_out.e'
+    allow_warnings = true
     design = 'ContactMaster.md SlaveConstraint.md'
     requirement = ''
   [../]
@@ -30,6 +31,7 @@
     type = Exodiff
     input = 'simple_contact_rz_dirac_test.i'
     exodiff = 'simple_contact_rz_dirac_test_out.e'
+    allow_warnings = true
     abs_zero = 1e-7
     scale_refine = 1
     max_parallel = 1
@@ -45,6 +47,7 @@
     type = Exodiff
     input = 'simple_contact_rspherical_dirac.i'
     exodiff = 'simple_contact_rspherical_dirac_out.e'
+    allow_warnings = true
     max_parallel = 1
     design = 'ContactMaster.md SlaveConstraint.md'
   [../]

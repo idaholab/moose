@@ -98,6 +98,7 @@ ContactAction::ContactAction(const InputParameters & params)
     _system(getParam<MooseEnum>("system")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh"))
 {
+
   if (_formulation == "tangential_penalty")
   {
     if (_system != "Constraint")
@@ -119,6 +120,16 @@ ContactAction::ContactAction(const InputParameters & params)
     if (_model == "glued")
       paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
   }
+
+  // Make the Dirac kernel deprecated as an initial step for its final removal.
+  MooseEnum makeDiracDeprecated = params.get<MooseEnum>("system");
+  makeDiracDeprecated.deprecate("DiracKernel", "Constraint");
+
+  if (_system == "DiracKernel")
+    mooseDeprecated(
+        "The DiracKernel-based system for mechanical contact enforcement is deprecated, "
+        "and will be removed on April 1, 2020. It is being replaced by the Constraint-based "
+        "system, which is selected by setting 'system=Constraint'.\n");
 }
 
 void

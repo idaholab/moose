@@ -416,6 +416,8 @@ stringify(FEFamily f)
       return "LAGRANGE_VEC";
     case 42:
       return "NEDELEC_ONE";
+    case 43:
+      return "MONOMIAL_VEC";
     case 99:
       return "INVALID_FE";
     default:

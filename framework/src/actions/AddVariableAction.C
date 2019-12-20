@@ -67,7 +67,7 @@ MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
-                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC",
+                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC",
                    "LAGRANGE");
 }
 
@@ -200,7 +200,8 @@ AddVariableAction::determineType(const FEType & fe_type, unsigned int components
 {
   if (components > 1)
   {
-    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
+        fe_type.family == MONOMIAL_VEC)
       mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
@@ -209,7 +210,8 @@ AddVariableAction::determineType(const FEType & fe_type, unsigned int components
     return "MooseVariableConstMonomial";
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
-  else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+  else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
+           fe_type.family == MONOMIAL_VEC)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

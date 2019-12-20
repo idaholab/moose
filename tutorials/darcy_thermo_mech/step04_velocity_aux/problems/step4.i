@@ -23,6 +23,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [velocity]
+    order = CONSTANT
+    family = MONOMIAL_VEC
+  []
 []
 
 [Kernels]
@@ -33,26 +37,32 @@
 []
 
 [AuxKernels]
-  [velocity_x]
+  [velocity]
     type = DarcyVelocity
+    variable = velocity
+    execute_on = timestep_end
+    pressure = pressure
+  []
+  [velocity_x]
+    type = VectorVariableComponentAux
     variable = velocity_x
     component = x
     execute_on = timestep_end
-    pressure = pressure
+    vector_variable = velocity
   []
   [velocity_y]
-    type = DarcyVelocity
+    type = VectorVariableComponentAux
     variable = velocity_y
     component = y
     execute_on = timestep_end
-    pressure = pressure
+    vector_variable = velocity
   []
   [velocity_z]
-    type = DarcyVelocity
+    type = VectorVariableComponentAux
     variable = velocity_z
     component = z
     execute_on = timestep_end
-    pressure = pressure
+    vector_variable = velocity
   []
 []
 

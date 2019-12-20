@@ -197,5 +197,6 @@
     penalty = 1e+6
     formulation = kinematic
     normal_smoothing_distance = 0.1
+    system = DiracKernel
   [../]
 []

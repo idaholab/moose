@@ -36,10 +36,12 @@ protected:
   virtual Real computeValue() override;
 
 private:
-  /// Reference to the value of the coupled vector variable
-  const RealVectorValue & _vector_variable_value;
+  /// Pointer to nodal variable value
+  const RealVectorValue * _nodal_variable_value;
+
+  /// Pointer to elemental variable value
+  const VectorVariableValue * _elemental_variable_value;
 
   /// Desired component
-  int _component;
+  const int _component;
 };
-

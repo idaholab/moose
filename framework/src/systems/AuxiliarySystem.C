@@ -196,13 +196,22 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
+        fe_type.family == MONOMIAL_VEC)
     {
       VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(name);
       if (var)
       {
-        _nodal_vars[tid].push_back(var);
-        _nodal_vec_vars[tid].push_back(var);
+        if (var->feType().family == LAGRANGE_VEC)
+        {
+          _nodal_vars[tid].push_back(var);
+          _nodal_vec_vars[tid].push_back(var);
+        }
+        else
+        {
+          _elem_vars[tid].push_back(var);
+          _elem_vec_vars[tid].push_back(var);
+        }
       }
     }
 
@@ -361,10 +370,10 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_vars[0].fieldVariables().size() > 0)
   {
-    computeNodalVars(type);
     computeNodalVecVars(type);
-    computeElementalVars(type);
+    computeNodalVars(type);
     computeElementalVecVars(type);
+    computeElementalVars(type);
 
     // compute time derivatives of nodal aux variables _after_ the values were updated
     if (_fe_problem.dt() > 0. && _time_integrator)
@@ -644,12 +653,21 @@ AuxiliarySystem::computeElementalVarsHelper(
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, vars, true);
-      Threads::parallel_reduce(range, eavt);
-
-      solution().close();
-      _sys.update();
+      try
+      {
+        Threads::parallel_reduce(range, eavt);
+      }
+      catch (MooseException & e)
+      {
+        _fe_problem.setException(e.what());
+      }
     }
     PARALLEL_CATCH;
+
+    // We need to make sure we propagate exceptions to all processes before trying to close here,
+    // which is a parallel operation
+    solution().close();
+    _sys.update();
   }
 
   // Boundary Elemental AuxKernels
@@ -661,12 +679,21 @@ AuxiliarySystem::computeElementalVarsHelper(
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
       ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, warehouse, vars, true);
-      Threads::parallel_reduce(bnd_elems, eabt);
-
-      solution().close();
-      _sys.update();
+      try
+      {
+        Threads::parallel_reduce(bnd_elems, eabt);
+      }
+      catch (MooseException & e)
+      {
+        _fe_problem.setException(e.what());
+      }
     }
     PARALLEL_CATCH;
+
+    // We need to make sure we propagate exceptions to all processes before trying to close here,
+    // which is a parallel operation
+    solution().close();
+    _sys.update();
   }
 }
 
