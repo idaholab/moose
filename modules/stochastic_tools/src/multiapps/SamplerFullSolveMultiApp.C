@@ -14,12 +14,13 @@
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 
-template <>
+defineLegacyParams(SamplerFullSolveMultiApp);
+
 InputParameters
-validParams<SamplerFullSolveMultiApp>()
+SamplerFullSolveMultiApp::validParams()
 {
-  InputParameters params = validParams<FullSolveMultiApp>();
-  params += validParams<SamplerInterface>();
+  InputParameters params = FullSolveMultiApp::validParams();
+  params += SamplerInterface::validParams();
   params.addClassDescription(
       "Creates a full-solve type sub-application for each row of each Sampler matrix.");
   params.addParam<SamplerName>("sampler", "The Sampler object to utilize for creating MultiApps.");

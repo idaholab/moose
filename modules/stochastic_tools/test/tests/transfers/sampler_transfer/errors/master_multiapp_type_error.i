@@ -6,25 +6,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
+[]
+
+[Distributions]
+  [uniform]
+    type = UniformDistribution
+    lower_bound = 1
+    upper_bound = 2
+  []
+[]
+
+[Samplers]
+  [sample]
+    type = MonteCarloSampler
+    num_rows = 3
+    distributions = 'uniform'
+    execute_on = INITIAL # create random numbers on initial and use them for each timestep
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     input_files = sub.i
     positions = '0 0 0'
-  [../]
+  []
 []
 
 [Transfers]
-  [./sub]
-    type = SamplerTransfer
+  [sub]
+    type = SamplerParameterTransfer
     multi_app = sub
+    sampler = sample
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochasticsub'
-  [../]
+  []
 []
 
 [Executioner]

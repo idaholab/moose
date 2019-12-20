@@ -22,20 +22,20 @@
 []
 
 [Distributions]
-  [./uniform]
+  [uniform]
     type = UniformDistribution
     lower_bound = 5
     upper_bound = 10
-  [../]
+  []
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = MonteCarloSampler
     num_rows = 10
     distributions = 'uniform'
     execute_on = PRE_MULTIAPP_SETUP
-  [../]
+  []
 []
 
 [Controls]

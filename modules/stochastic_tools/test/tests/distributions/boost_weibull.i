@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./weibull]
+  [weibull]
     type = BoostWeibullDistribution
     shape = 5
     scale = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cdf]
+  [cdf]
     type = TestDistributionPostprocessor
     distribution = weibull
     value = 1
     method = cdf
     execute_on = initial
-  [../]
-  [./pdf]
+  []
+  [pdf]
     type = TestDistributionPostprocessor
     distribution = weibull
     value = 1
     method = pdf
     execute_on = initial
-  [../]
-  [./quantile]
+  []
+  [quantile]
     type = TestDistributionPostprocessor
     distribution = weibull
     value = 0.63212055882856
     method = quantile
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]

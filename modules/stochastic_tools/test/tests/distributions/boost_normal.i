@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Distributions]
-  [./normal_test]
+  [normal_test]
     type = BoostNormalDistribution
-    mean =  0
+    mean = 0
     standard_deviation = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cdf]
+  [cdf]
     type = TestDistributionPostprocessor
     distribution = normal_test
     value = 0
     method = cdf
     execute_on = initial
-  [../]
-  [./pdf]
+  []
+  [pdf]
     type = TestDistributionPostprocessor
     distribution = normal_test
     value = 0
     method = pdf
     execute_on = initial
-  [../]
-  [./quantile]
+  []
+  [quantile]
     type = TestDistributionPostprocessor
     distribution = normal_test
     value = 0.5
     method = quantile
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]

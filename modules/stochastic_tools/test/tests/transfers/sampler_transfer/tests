@@ -1,6 +1,6 @@
 [Tests]
   issues = '#8065'
-  design = 'SamplerTransfer.md'
+  design = 'SamplerParameterTransfer.md'
   [transfer]
     requirement = "The system shall be capable of transferring scalar data to sub-applications for "
                   "each row of the stochastic data"

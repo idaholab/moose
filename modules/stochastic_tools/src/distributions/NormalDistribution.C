@@ -13,11 +13,18 @@
 
 registerMooseObject("StochasticToolsApp", NormalDistribution);
 
-template <>
+defineLegacyParams(NormalDistribution);
+
+const std::array<Real, 6> NormalDistribution::_a = {
+    {-0.322232431088, -1.0, -0.342242088547, -0.0204231210245, -0.0000453642210148}};
+
+const std::array<Real, 6> NormalDistribution::_b = {
+    {0.099348462606, 0.588581570495, 0.531103462366, 0.10353775285, 0.0038560700634}};
+
 InputParameters
-validParams<NormalDistribution>()
+NormalDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Normal distribution");
   params.addRequiredParam<Real>("mean", "Mean (or expectation) of the distribution.");
   params.addRequiredRangeCheckedParam<Real>(
@@ -31,21 +38,22 @@ NormalDistribution::NormalDistribution(const InputParameters & parameters)
     _standard_deviation(getParam<Real>("standard_deviation"))
 {
 }
+
 Real
-NormalDistribution::pdf(const Real & x, const Real & mean, const Real & std_dev) const
+NormalDistribution::pdf(const Real & x, const Real & mean, const Real & std_dev)
 {
   return 1.0 / (std_dev * std::sqrt(2.0 * M_PI)) *
          std::exp(-0.5 * Utility::pow<2>((x - mean) / std_dev));
 }
 
 Real
-NormalDistribution::cdf(const Real & x, const Real & mean, const Real & std_dev) const
+NormalDistribution::cdf(const Real & x, const Real & mean, const Real & std_dev)
 {
   return 0.5 * (1.0 + std::erf((x - mean) / (std_dev * std::sqrt(2.0))));
 }
 
 Real
-NormalDistribution::quantile(const Real & p, const Real & mean, const Real & std_dev) const
+NormalDistribution::quantile(const Real & p, const Real & mean, const Real & std_dev)
 {
   Real x = (p < 0.5 ? p : 1.0 - p);
   Real y = std::sqrt(-2.0 * std::log(x));

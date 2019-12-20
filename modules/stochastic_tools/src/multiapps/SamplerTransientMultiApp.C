@@ -14,12 +14,13 @@
 
 registerMooseObject("StochasticToolsApp", SamplerTransientMultiApp);
 
-template <>
+defineLegacyParams(SamplerTransientMultiApp);
+
 InputParameters
-validParams<SamplerTransientMultiApp>()
+SamplerTransientMultiApp::validParams()
 {
-  InputParameters params = validParams<TransientMultiApp>();
-  params += validParams<SamplerInterface>();
+  InputParameters params = TransientMultiApp::validParams();
+  params += SamplerInterface::validParams();
   params.addClassDescription("Creates a sub-application for each row of each Sampler matrix.");
   params.addParam<SamplerName>("sampler", "The Sampler object to utilize for creating MultiApps.");
   params.suppressParameter<std::vector<Point>>("positions");
