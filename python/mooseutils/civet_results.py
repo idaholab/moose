@@ -9,7 +9,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import re
-import enum
 import glob
 import tarfile
 import urllib.request
@@ -37,7 +36,7 @@ RESULT_FILENAME_RE = re.compile(r'results_(?P<number>[0-9]+)_(?P<recipe>.*)\.tar
 Test = collections.namedtuple('Test', 'recipe status caveats reason time url')
 Job = collections.namedtuple('Job', 'number filename status url')
 
-class JobFileStatus(enum.Enum):
+class JobFileStatus(object):
     """Status flag for Job file downloads"""
     CACHE = 0
     LOCAL = 1

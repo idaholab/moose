@@ -24,8 +24,10 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.civet:
-        repo: moose
-        owner: idaholab
+        remotes:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:

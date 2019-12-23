@@ -84,6 +84,7 @@ class SQAExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         # Build requirements sets
+        self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
         for index, (category, info) in enumerate(self.get('categories').items(), 1): #pylint: disable=no-member
@@ -121,6 +122,11 @@ class SQAExtension(command.CommandExtension):
         self['repos'].update(dict(moose="https://github.com/idaholab/moose",
                                   libmesh="https://github.com/libMesh/libmesh"))
 
+
+    def hasCivetExtension(self):
+        """Return True if the CivetExtension exists."""
+        return self.__has_civet
+
     def requirements(self, category):
         """Return the requirements dictionaries."""
         req = self.__requirements.get(category, None)
@@ -145,7 +151,11 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats, civet)
+        self.requires(core, command, autolink, floats)
+
+        for ext in self.translator.extensions:
+            if ext.name == 'civet':
+                self.__has_civet = True
 
         self.addCommand(reader, SQARequirementsCommand())
         self.addCommand(reader, SQARequirementsMatrixCommand())
@@ -279,7 +289,8 @@ class SQARequirementsCommand(command.CommandComponent):
                 if not keys:
                     keys.append('{}.{}'.format(req.path, req.name))
 
-                civet.CivetTestBadges(item, tests=keys)
+                if self.extension.hasCivetExtension():
+                    civet.CivetTestBadges(item, tests=keys)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'
