@@ -8,11 +8,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import sys
 import re
 import glob
 import tarfile
-import urllib.request
-import urllib.error
+if sys.version_info[0] == 3:
+    import enum
+    import urllib.request
+    import urllib.error
+else:
+    import urllib2
 import collections
 import logging
 
@@ -36,12 +41,21 @@ RESULT_FILENAME_RE = re.compile(r'results_(?P<number>[0-9]+)_(?P<recipe>.*)\.tar
 Test = collections.namedtuple('Test', 'recipe status caveats reason time url')
 Job = collections.namedtuple('Job', 'number filename status url')
 
-class JobFileStatus(object):
-    """Status flag for Job file downloads"""
-    CACHE = 0
-    LOCAL = 1
-    DOWNLOAD = 2
-    FAIL = 3
+if sys.version_info[0] == 3:
+    class JobFileStatus(enum.Enum):
+        """Status flag for Job file downloads"""
+        CACHE = 0
+        LOCAL = 1
+        DOWNLOAD = 2
+        FAIL = 3
+else:
+    class JobFileStatus(object):
+        """Status flag for Job file downloads"""
+        CACHE = 0
+        LOCAL = 1
+        DOWNLOAD = 2
+        FAIL = 3
+
 
 def _get_local_civet_jobs(location, logger=None):
     """
@@ -64,10 +78,12 @@ def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=
     for sha1 in hashes:
         url = '{}/sha_events/{}/{}'.format(site, repo, sha1)
 
-        # TODO: Error catch
-        pid = urllib.request.urlopen(url)
-        page = pid.read().decode('utf8')
+        if sys.version_info[0] == 3:
+            pid = urllib.request.urlopen(url)
+        else:
+            pid = urllib2.urlopen(url)
 
+        page = pid.read().decode('utf8')
         for match in JOB_RE.finditer(page):
             job = jobs.add(_download_job(int(match.group('job')), site, cache, logger))
 
@@ -92,7 +108,11 @@ def _download_job(job, site, cache, logger):
 
     else:
         try:
-            response = urllib.request.urlopen(url)
+            if sys.version_info[0] == 3:
+                response = urllib.request.urlopen(url)
+            else:
+                response = urllib2.urlopen(url)
+
             if response.code == 200:
                 if logger:
                     logger.debug('Downloading results for job %s', job)

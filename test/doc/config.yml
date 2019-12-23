@@ -24,6 +24,7 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.civet:
+        test_results_cache: '/tmp/civet/jobs'
         remotes:
             moose:
                 url: https://civet.inl.gov
