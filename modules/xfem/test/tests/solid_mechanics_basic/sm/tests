@@ -11,6 +11,7 @@
     unique_id = true
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value using the deprecated SolidMechanics system.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
+    no_error_deprecated = true
   [../]
   [./edge_crack_3d]
     type = Exodiff
@@ -22,6 +23,7 @@
     unique_id = true
     requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using a rectangular cutting plane by RectangleCutUserObject using the deprecated SolidMechanics system.'
     design = 'RectangleCutUserObject.md'
+    no_error_deprecated = true
   [../]
   [./edge_crack_3d_propagation]
     type = Exodiff
@@ -34,6 +36,7 @@
     unique_id = true
     requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut3DUserObject using the deprecated SolidMechanics system.'
     design = 'MeshCut3DUserObject.md'
+    no_error_deprecated = true
   [../]
   [./elliptical_crack]
     type = Exodiff
@@ -44,6 +47,7 @@
     unique_id = true
     requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using an elliptical cutting plane by EllipseCutUserObject using the deprecated SolidMechanics system.'
     design = 'EllipseCutUserObject.md'
+    no_error_deprecated = true
   [../]
   [./mesh_grow]
     type = Exodiff
@@ -55,6 +59,7 @@
     unique_id = true
     requirement = 'MeshCut3DUserObject shall increase the size of the XFEM cutting surface that it defines for a stationary crack in a 3D model at any point in time by adding additional elements around the periphery of the cutting mesh over time using the deprecated SolidMechanics system.'
     design = 'MeshCut3DUserObject.md'
+    no_error_deprecated = true
   [../]
   [./penny_crack]
     type = Exodiff
@@ -65,6 +70,7 @@
     unique_id = true
     requirement = 'The XFEM system shall permit computation of fracture domain integrals in 3D mechanics problems where a stationary embedded circular crack is defined by a cutting plane geometry and points along the crack front for the domain integral are explicitly specified using the deprecated SolidMechanics system.'
     design = 'DomainIntegral/index.md CircleCutUserObject.md'
+    no_error_deprecated = true
   [../]
   [./penny_crack_cfp]
     type = Exodiff
@@ -75,6 +81,7 @@
     unique_id = true
     requirement = 'The XFEM system shall permit computation of fracture domain integrals in 3D mechanics problems where a stationary embedded circular crack is defined by a cutting plane geometry and points along the crack front for the domain integral provided by a class that derives from CrackFrontPointsProvider using the deprecated SolidMechanics system.'
     design = 'DomainIntegral/index.md CircleCutUserObject.md'
+    no_error_deprecated = true
   [../]
   [./square_branch_quad_2d]
     type = Exodiff
@@ -84,6 +91,7 @@
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 4-noded quadrilateral element by two prescribed evolving cutting planes using the deprecated SolidMechanics system.'
+    no_error_deprecated = true
   [../]
   [./square_branch_tri_2d]
     type = Exodiff
@@ -93,5 +101,6 @@
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 3-noded triangle element by two prescribed evolving cutting planes using the deprecated SolidMechanics system.'
+    no_error_deprecated = true
   [../]
 []
