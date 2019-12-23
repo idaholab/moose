@@ -7,14 +7,12 @@
       type = RunCommand
       command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier --disable=civet'
       detail = "using a barrier-based parallel scheme;"
-      python = 3
     []
     [serial]
       type = RunCommand
       command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial --disable=civet'
       detail = "using a serial scheme;"
       prereq = 'materialize/barrier'
-      python = 3
     []
     [pipe]
       type = RunCommand
@@ -22,7 +20,6 @@
       #prereq = serial
       skip = 'WIP'
       detail = "using a pipe-based parallel scheme; and"
-      python = 3
     []
     [demand]
       type = RunCommand
@@ -30,7 +27,6 @@
       #prereq = pipe
       skip = 'WIP'
       detail = "using a on-demand parser parallel scheme."
-      python = 3
     []
   []
 
@@ -38,14 +34,12 @@
     type = RunCommand
     command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier --disable=civet'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelBarrier executioner."
-    python = 3
   []
   [html_serial]
     type = RunCommand
     command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial --disable=civet'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the Serial executioner."
     prereq = html_barrier
-    python = 3
   []
   [html_pipe]
     type = RunCommand
@@ -53,7 +47,6 @@
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelPipe executioner."
     #prereq = html_serial
     skip = 'WIP'
-    python = 3
   []
   [html_demand]
     type = RunCommand
@@ -61,14 +54,12 @@
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelDemand executioner."
     #prereq = html_pipe
     skip = 'WIP'
-    python = 3
   []
 
   [latex_barrier]
     type = RunCommand
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier --disable=civet'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelBarrier executioner."
-    python = 3
     requires = 'pdflatex'
   []
   [latex_serial]
@@ -77,7 +68,6 @@
     requirement = "MooseDocs shall be able to convert markdown to latex with the Serial executioner."
     prereq = latex_barrier
     skip = 'WIP'
-    python = 3
   []
   [latex_pipe]
     type = RunCommand
@@ -85,7 +75,6 @@
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelPipe executioner."
     #prereq = latex_serial
     skip = 'WIP'
-    python = 3
   []
   [latex_demand]
     type = RunCommand
@@ -93,6 +82,5 @@
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelDemand executioner."
     #prereq = latex_pip
     skip = 'WIP'
-    python = 3
   []
 []

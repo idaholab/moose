@@ -22,7 +22,6 @@
     input = test_sqa.py
     requirement = "The documentation system shall include tools for building software quality documents."
     issues = '#6699 #12049'
-    python = 3
   []
   [autolink]
     type = PythonUnitTest

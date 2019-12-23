@@ -193,12 +193,8 @@ class RenderLatexEquation(components.RenderComponent):
 
         config_str = ','.join('{}:{}'.format(key, value) for key, value in config.items())
 
-        if sys.version_info[0] == 2:
-            config_str = config_str.encode('unicode_escape')
-            tex = token['tex'].encode('unicode_escape')
-        else:
-            config_str = config_str.encode('unicode_escape').decode('utf-8')
-            tex = token['tex'].encode('unicode_escape').decode('utf-8')
+        config_str = config_str.encode('unicode_escape').decode('utf-8')
+        tex = token['tex'].encode('unicode_escape').decode('utf-8')
 
         content = 'var element = document.getElementById("%s");' % token['bookmark']
         content += 'katex.render("%s", element, {%s});' % \

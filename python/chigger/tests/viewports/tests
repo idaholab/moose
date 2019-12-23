@@ -3,7 +3,6 @@
     type = ImageDiff
     command = viewports.py
     imagediff = 'viewports.png'
-    python = 3
     display_required = true
   [../]
 []

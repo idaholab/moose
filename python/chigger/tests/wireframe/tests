@@ -5,7 +5,6 @@
     imagediff = 'wireframe.png'
     allowed_linux = 0.895
     allowed_darwin = 0.93
-    python = 3
     display_required = true
   [../]
 
@@ -15,7 +14,6 @@
     imagediff = 'points.png'
     allowed_linux = 0.965
     allowed_darwin = 0.94
-    python = 3
     display_required = true
   [../]
 []

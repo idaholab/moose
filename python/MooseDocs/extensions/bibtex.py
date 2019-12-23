@@ -194,8 +194,7 @@ class RenderBibtexCite(components.RenderComponent):
             else:
                 author = ' '.join(a[0].last_names)
 
-            if sys.version_info[0] == 3:
-                author = LatexNodes2Text().latex_to_text(author)
+            author = LatexNodes2Text().latex_to_text(author)
 
             form = '{}, {}' if citep else '{} ({})'
             html.Tag(parent, 'a', href='#{}'.format(key),

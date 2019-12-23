@@ -4,6 +4,5 @@
     input = test_check_mesh.py
     display_required = True
     platform = linux
-    python = 3
   [../]
 []
