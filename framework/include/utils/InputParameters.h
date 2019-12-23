@@ -1497,6 +1497,9 @@ template <>
 void InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/,
                                                                 MaterialPropertyName & l_value,
                                                                 const int & r_value);
+template <>
+std::vector<PostprocessorName> &
+InputParameters::set<std::vector<PostprocessorName>>(const std::string & name, bool quiet_mode);
 
 template <typename T>
 const T &

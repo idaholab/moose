@@ -1032,6 +1032,26 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
 }
 
 template <>
+std::vector<PostprocessorName> &
+InputParameters::set<std::vector<PostprocessorName>>(const std::string & name, bool quiet_mode)
+{
+  checkParamName(name);
+  checkConsistentType<std::vector<PostprocessorName>>(name);
+
+  if (!this->have_parameter<std::vector<PostprocessorName>>(name))
+    _values[name] = new Parameter<std::vector<PostprocessorName>>;
+
+  set_attributes(name, false);
+
+  if (quiet_mode)
+    _params[name]._set_by_add_param = true;
+
+  _params[name]._vector_of_postprocessors = true;
+
+  return cast_ptr<Parameter<std::vector<PostprocessorName>> *>(_values[name])->set();
+}
+
+template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name,
                                            const InputParameters & pars,
