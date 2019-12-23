@@ -11,5 +11,6 @@
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
     prereq = '2block-3D'
+    no_error_deprecated = true
   [../]
 []

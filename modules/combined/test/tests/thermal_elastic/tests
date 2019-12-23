@@ -39,6 +39,7 @@
     issues = '#8265'
     requirement = "The system shall compute the same stress values as the thermal_elastic.i test using the
                    solid mechanics module implementation  using the solid mechanics module."
+    no_error_deprecated = true
   [../]
 
   [./derivatives]

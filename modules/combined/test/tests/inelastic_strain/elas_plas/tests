@@ -20,11 +20,13 @@
     input = 'elas_plas_nl1_sm.i'
     exodiff = 'elas_plas_nl1_out.e'
     abs_zero = 6e-5
+    no_error_deprecated = true
   [../]
   [./elastic_plastic_cycle_sm]
     type = 'Exodiff'
     input = 'elas_plas_nl1_cycle_sm.i'
     exodiff = 'elas_plas_nl1_cycle_out.e'
     abs_zero = 6e-5
+    no_error_deprecated = true
   [../]
 []

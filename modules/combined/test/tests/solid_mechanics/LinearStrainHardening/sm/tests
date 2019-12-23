@@ -6,6 +6,7 @@
     input = 'LinearStrainHardeningRestart1_sm.i'
     recover = false
     requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Step 1, before restart. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 
   [./LinearStrainHardeningRestart2_sm]
@@ -17,6 +18,7 @@
     prereq = 'LinearStrainHardeningRestart1_sm'
     recover = false
     requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Step 2, after restart. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
 
   [./LinearStrainHardening_test_sm]
@@ -28,6 +30,7 @@
     scale_refine = 2
     recover = false
     requirement = 'The tensor mechanics system shall yield consistent linear hardening results with checkpointing. Simulation with no restart for verification. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
 
   [./lsh_pressure_sm.i]
@@ -35,5 +38,6 @@
     input = 'lsh_pressure_sm.i'
     exodiff = 'lsh_pressure_sm_out.e'
     requirement = 'The tensor mechanics system shall yield consistent linear hardening results under pressure solicitation. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
 []

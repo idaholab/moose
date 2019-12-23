@@ -6,6 +6,7 @@
     exodiff = 'adapt_tstep_function_change_out.e'
     rel_err = 9e-06
     prereq = 'test_function_change_restart2'
+    no_error_deprecated = true
   [../]
 
   [./test_function_force_step_sm]
@@ -15,6 +16,7 @@
     exodiff = 'adapt_tstep_function_force_step_out.e'
     rel_err = 9e-06
     prereq = test_function_force_step
+    no_error_deprecated = true
   [../]
 
   [./test_function_change_restart1_sm]
@@ -22,6 +24,7 @@
     input = 'adapt_tstep_function_change_restart1_sm.i'
     recover = false
     prereq = test_function_change_restart1
+    no_error_deprecated = true
   [../]
 
   [./test_function_change_restart2_sm]
@@ -32,6 +35,7 @@
     exodiff_opts = -TM
     rel_err = 9e-06
     prereq = 'test_function_change_sm test_function_change_restart1_sm'
+    no_error_deprecated = true
   [../]
 
   [./test_function_change]

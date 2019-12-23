@@ -75,6 +75,7 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex202Proc
+    no_error_deprecated = true
   [../]
   [./Hex20_2_sm]
     type = 'Exodiff'
@@ -83,6 +84,7 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20_sm
+    no_error_deprecated = true
   [../]
   [./Hex20_3_sm]
     type = 'Exodiff'
@@ -91,6 +93,7 @@
     exodiff = 'nodal_area_Hex20_3_out.e'
     custom_cmp = 'nodal_area_Hex20_3.exodiff'
     prereq = Hex20_3
+    no_error_deprecated = true
   [../]
   [./Hex202Proc_sm]
     type = 'Exodiff'
@@ -100,6 +103,7 @@
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20_2_sm
     min_parallel = 2
+    no_error_deprecated = true
   [../]
   [./Hex27_sm]
     type = 'Exodiff'
@@ -108,6 +112,7 @@
     exodiff = 'nodal_area_Hex27_out.e'
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex272Proc
+    no_error_deprecated = true
   [../]
   [./Hex272Proc_sm]
     type = 'Exodiff'
@@ -117,5 +122,6 @@
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex27_sm
     min_parallel = 2
+    no_error_deprecated = true
   [../]
 []

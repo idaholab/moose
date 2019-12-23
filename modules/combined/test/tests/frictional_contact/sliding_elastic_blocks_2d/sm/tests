@@ -8,6 +8,7 @@
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
     superlu = true
     requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
   [./sliding_elastic_blocks_2d_tp_sm]
     type = 'Exodiff'
@@ -16,5 +17,6 @@
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
     superlu = true
     requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip, when formulation selected is penalty. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

@@ -8,6 +8,7 @@
                   "block and a larger convex block using the solid_mechanics system."
     design = "/materials/GapConductance.md"
     issues = "#2714"
+    no_error_deprecated = true
   [../]
   [./test]
     type = 'Exodiff'

@@ -11,5 +11,6 @@
     type = 'RunException'
     input = 'contact_displacements_sm.i'
     expect_err = "Contact requires updated coordinates.  Use the"
+    no_error_deprecated = true
   [../]
 []

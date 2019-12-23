@@ -10,6 +10,7 @@
     type = 'Exodiff'
     input = 'linear_anisotropic_material_sm.i'
     exodiff = 'linear_anisotropic_material_out.e'
+    no_error_deprecated = true
   [../]
 
   [./linear_anisotropic_material]

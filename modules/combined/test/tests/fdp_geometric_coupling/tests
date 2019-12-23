@@ -8,6 +8,7 @@
     max_parallel = 1
     valgrind = 'HEAVY'
     prereq = test
+    no_error_deprecated = true
   [../]
   [./test]
     type = 'Exodiff'

@@ -21,5 +21,6 @@
     max_parallel = 1
     prereq = 'thermal_strain_test'
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
 []

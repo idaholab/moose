@@ -9,6 +9,7 @@
     max_parallel = 1
     requirement = 'The contact system shall enforce a glued contact constraint using the dirac kernel system and the solid_mechanics system that ties together two blocks that are separated by an initial gap when the come in contact with each other so that the blocks move together.'
     design = 'ContactMaster.md SlaveConstraint.md'
+    no_error_deprecated = true
   [../]
   [./test2]
     type = 'Exodiff'
@@ -17,5 +18,6 @@
     abs_zero = 5e-05
     max_parallel = 1
     requirement = 'The contact system shall enforce a glued contact constraint using the solid_mechanics system that ties together two blocks that are separated by an initial gap when the come in contact with each other so that the blocks move together.'
+    no_error_deprecated = true
   [../]
 []

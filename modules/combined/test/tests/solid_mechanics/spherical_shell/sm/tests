@@ -8,6 +8,7 @@
     valgrind = 'HEAVY'
     design = 'ComputeFiniteStrain.md'
     requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 3D problem. Legacy Solid Mechanics'
+    no_error_deprecated = true
   [../]
   [./2D-RZ_test_sm]
     type = Exodiff
@@ -15,6 +16,7 @@
     exodiff = '2D-RZ_test_sm_out.e'
     design = 'ComputeAxisymmetric1DFiniteStrain.md'
     requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 2D problem. Legacy Solid Mechanics'
+    no_error_deprecated = true
   [../]
   [./1D-SPH_test_sm]
     type = Exodiff
@@ -23,6 +25,7 @@
     max_parallel = 2
     requirement = 'The tensor mechanics system shall yield correct results for a thick spherical shell pressurized on inner and outer surface (Roarks). 1D problem. Legacy Solid Mechanics'
     design = 'StressDivergenceRSphericalTensors.md'
+    no_error_deprecated = true
   [../]
 
 []
