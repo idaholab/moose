@@ -253,7 +253,7 @@
   [./function_file_test5]
     type = 'RunException'
     input = 'function_file_test5.i'
-    expect_err = "In Piecewise \S+: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together."
+    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively."
 
     requirement = 'The system shall report an error when the Piecewise data is over-specified with the data file option.'
     issues = '#2421'
@@ -262,7 +262,7 @@
   [./function_file_test6]
     type = 'RunException'
     input = 'function_file_test6.i'
-    expect_err = "In Piecewise \S+: Cannot specify 'x', 'y', and 'xy_data' together."
+    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively."
 
     requirement = 'The system shall report an error when the Piecewise data is over-specified with row/column data.'
     issues = '#2421'
@@ -271,7 +271,7 @@
   [./function_file_test7]
     type = 'RunException'
     input = 'function_file_test7.i'
-    expect_err = "In Piecewise \S+: Both 'x' and 'y' must be specified if either one is specified."
+    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively."
 
     requirement = 'The system shall report an error when either the domain or range is missing when using the domain/range option in the Piecewise utility.'
     issues = '#2421'
@@ -289,7 +289,7 @@
   [./function_file_test9]
     type = 'RunException'
     input = 'function_file_test9.i'
-    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
+    expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively."
 
     requirement = 'The system shall report an error if no function is supplied in the Piecewise utility.'
     issues = '#2421'

@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#2272'
+  design = 'source/functions/CoarsenedPiecewiseLinear.md'
+
+  [./prepare_data]
+    type = RunCommand
+    command = './generate_data.py'
+    required_python_packages = 'numpy'
+    requirement = "Generate the fine tabulated function data for the coarsened_piecewise_linear test"
+  [../]
+  [./coarsened_piecewise_linear]
+    type = 'CSVDiff'
+    input = 'coarsened_piecewise_linear.i'
+    csvdiff = 'coarsened_piecewise_linear_vpp_F_0000.csv'
+    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs, reduces the number of data points based on a user supplied cut-off and returns a linearly interpolated value from the coarsened data."
+    prereq = 'prepare_data'
+  [../]
+[]

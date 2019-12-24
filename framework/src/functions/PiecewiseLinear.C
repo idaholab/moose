@@ -16,52 +16,13 @@ defineLegacyParams(PiecewiseLinear);
 InputParameters
 PiecewiseLinear::validParams()
 {
-  InputParameters params = Piecewise::validParams();
+  InputParameters params = PiecewiseLinearBase::validParams();
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }
 
-PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) : Piecewise(parameters) {}
-
-Real
-PiecewiseLinear::value(Real t, const Point & p) const
+PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters)
+  : PiecewiseLinearBase(parameters)
 {
-  Real func_value;
-  if (_has_axis)
-  {
-    func_value = _linear_interp->sample(p(_axis));
-  }
-  else
-  {
-    func_value = _linear_interp->sample(t);
-  }
-  return _scale_factor * func_value;
-}
-
-Real
-PiecewiseLinear::timeDerivative(Real t, const Point & p) const
-{
-  Real func_value;
-  if (_has_axis)
-  {
-    func_value = _linear_interp->sampleDerivative(p(_axis));
-  }
-  else
-  {
-    func_value = _linear_interp->sampleDerivative(t);
-  }
-  return _scale_factor * func_value;
-}
-
-Real
-PiecewiseLinear::integral() const
-{
-  return _scale_factor * _linear_interp->integrate();
-}
-
-Real
-PiecewiseLinear::average() const
-{
-  return integral() /
-         (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
+  buildInterpolation();
 }
