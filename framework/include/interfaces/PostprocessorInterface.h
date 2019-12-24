@@ -21,6 +21,12 @@ class InputParameters;
 class PostprocessorName;
 class MooseObject;
 
+#define usingPostprocessorInterfaceMembers                                                         \
+  using PostprocessorInterface::getPostprocessorValue;                                             \
+  using PostprocessorInterface::getPostprocessorValueOld;                                          \
+  using PostprocessorInterface::getPostprocessorValueOlder;                                        \
+  using PostprocessorInterface::coupledPostprocessors
+
 /**
  * Interface class for classes which interact with Postprocessors.
  * Provides the getPostprocessorValueXYZ() and related interfaces.
@@ -35,6 +41,7 @@ public:
    * doco-normal-methods-begin
    * Retrieve the value of a Postprocessor or one of it's old or older values
    * @param name The name of the Postprocessor parameter (see below)
+   * @param index The index of the Postprocessor
    * @return A reference to the desired value
    *
    * The name required by this method is the name that is hard-coded into
@@ -44,9 +51,12 @@ public:
    *
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & name);
-  const PostprocessorValue & getPostprocessorValueOld(const std::string & name);
-  const PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                   unsigned int index = 0);
+  const PostprocessorValue & getPostprocessorValueOld(const std::string & name,
+                                                      unsigned int index = 0);
+  const PostprocessorValue & getPostprocessorValueOlder(const std::string & name,
+                                                        unsigned int index = 0);
   // doco-normal-methods-end
 
   ///@}
@@ -81,11 +91,12 @@ public:
   /**
    * Determine if the Postprocessor exists
    * @param name The name of the Postprocessor parameter
+   * @param index The index of the Postprocessor
    * @return True if the Postprocessor exists
    *
    * @see hasPostprocessorByName getPostprocessorValue
    */
-  bool hasPostprocessor(const std::string & name) const;
+  bool hasPostprocessor(const std::string & name, unsigned int index = 0) const;
 
   /**
    * Determine if the Postprocessor exists
@@ -95,6 +106,22 @@ public:
    * @see hasPostprocessor getPostprocessorValueByName
    */
   bool hasPostprocessorByName(const PostprocessorName & name);
+
+  /**
+   * Returns number of Postprocessors coupled under parameter name
+   * @param name The name of the Postprocessor parameter
+   * @return Number of coupled post-processors, 1 if it's a single
+   *
+   */
+  unsigned int coupledPostprocessors(const std::string & name) const;
+
+  /**
+   * Checks if there is a single postprocessor coupled by parameter name
+   * @param name The name of the Postprocessor parameter
+   * @return Number of coupled post-processors, 1 if it's a single
+   *
+   */
+  bool singlePostprocessor(const std::string & name) const;
 
 private:
   /// PostprocessorInterface Parameters

@@ -253,14 +253,17 @@ class RunApp(Tester):
                 reason = 'NO CRASH'
             elif self.exit_code != 0 and specs['should_crash'] == False:
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
-                output += "\n\n" + str(self.exit_code)
                 reason = 'CRASH'
+                return "\n\nExit Code: " + str(self.exit_code)
             # Valgrind runs
             elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
 
             if reason != '':
                 self.setStatus(self.fail, reason)
+
+        # Return anything extra here that we want to tack onto the Output for when it gets printed later
+        return ''
 
     def processResults(self, moose_dir, options, output):
         """
@@ -277,6 +280,6 @@ class RunApp(Tester):
                 refactor testFileOutput and processResults.
         """
         output += self.testFileOutput(moose_dir, options, output)
-        self.testExitCodes(moose_dir, options, output)
+        output += self.testExitCodes(moose_dir, options, output)
 
         return output

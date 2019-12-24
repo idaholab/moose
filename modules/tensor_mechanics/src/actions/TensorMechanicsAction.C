@@ -136,6 +136,13 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     else if (_out_of_plane_direction != OutOfPlaneDirection::z && _ndisp != 3)
       mooseError("Must specify three displacements for plane strain when the out of plane "
                  "direction is x or y");
+    if (params.isParamSetByUser("out_of_plane_strain") &&
+        _planar_formulation != PlanarFormulation::WeakPlaneStress)
+      mooseError(
+          "out_of_plane_strain should only be specified with planar_formulation=WEAK_PLANE_STRESS");
+    else if (!params.isParamSetByUser("out_of_plane_strain") &&
+             _planar_formulation == PlanarFormulation::WeakPlaneStress)
+      mooseError("out_of_plane_strain must be specified with planar_formulation=WEAK_PLANE_STRESS");
   }
 
   // convert output variable names to lower case
@@ -260,11 +267,14 @@ TensorMechanicsAction::act()
       else
         mooseError("Unsupported strain formulation");
     }
-    else if (_planar_formulation == PlanarFormulation::PlaneStrain ||
+    else if (_planar_formulation == PlanarFormulation::WeakPlaneStress ||
+             _planar_formulation == PlanarFormulation::PlaneStrain ||
              _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
       if (_use_ad)
-        paramError("use_ad", "AD not setup for use with PlaneStrain");
+        paramError(
+            "use_ad",
+            "AD not setup for use with WeakPlaneStress, PlaneStrain, or GeneralizedPlaneStrain");
 
       std::map<StrainAndIncrement, std::string> type_map = {
           {StrainAndIncrement::SmallTotal, "ComputePlaneSmallStrain"},
@@ -284,7 +294,10 @@ TensorMechanicsAction::act()
     // set material parameters
     auto params = _factory.getValidParams(ad_prepend + type + ad_append);
     params.applyParameters(parameters(),
-                           {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
+                           {"displacements",
+                            "use_displaced_mesh",
+                            "out_of_plane_strain",
+                            "scalar_out_of_plane_strain"});
 
     if (isParamValid("strain_base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
@@ -295,6 +308,10 @@ TensorMechanicsAction::act()
     if (isParamValid("scalar_out_of_plane_strain"))
       params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
           getParam<VariableName>("scalar_out_of_plane_strain")};
+
+    if (isParamValid("out_of_plane_strain"))
+      params.set<std::vector<VariableName>>("out_of_plane_strain") = {
+          getParam<VariableName>("out_of_plane_strain")};
 
     if (_use_ad)
     {
@@ -309,15 +326,15 @@ TensorMechanicsAction::act()
   }
 
   //
-  // Add Stress Divergence Kernels
+  // Add Stress Divergence (and optionally WeakPlaneStress) Kernels
   //
   else if (_current_task == "add_kernel")
   {
-    auto tensor_kernel_type = getKernelType();
-    auto params = getKernelParameters(ad_prepend + tensor_kernel_type + ad_append);
-
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
+      auto tensor_kernel_type = getKernelType();
+      auto params = getKernelParameters(ad_prepend + tensor_kernel_type + ad_append);
+
       std::string kernel_name = "TM_" + name() + Moose::stringify(i);
 
       // Set appropriate components for kernels, including in the cases where a planar model is
@@ -339,6 +356,10 @@ TensorMechanicsAction::act()
         params.set<std::vector<TagName>>("extra_vector_tags") =
             getParam<std::vector<TagName>>("extra_vector_tags");
 
+      if (isParamValid("out_of_plane_strain"))
+        params.set<std::vector<VariableName>>("out_of_plane_strain") = {
+            getParam<VariableName>("out_of_plane_strain")};
+
       if (_use_ad)
       {
         _problem->addKernel(
@@ -349,6 +370,17 @@ TensorMechanicsAction::act()
       }
       else
         _problem->addKernel(tensor_kernel_type, kernel_name, params);
+    }
+
+    if (_planar_formulation == PlanarFormulation::WeakPlaneStress)
+    {
+      auto params = getKernelParameters("WeakPlaneStress");
+      std::string wps_kernel_name = "TM_WPS_" + name();
+      params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
+      _problem->addKernel("WeakPlaneStress", wps_kernel_name, params);
     }
   }
 }
@@ -508,7 +540,12 @@ TensorMechanicsAction::getKernelParameters(std::string type)
 {
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(parameters(),
-                         {"displacements", "use_displaced_mesh", "save_in", "diag_save_in"});
+                         {"displacements",
+                          "use_displaced_mesh",
+                          "save_in",
+                          "diag_save_in",
+                          "extra_vector_tags",
+                          "out_of_plane_strain"});
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
   params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;

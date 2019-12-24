@@ -5,16 +5,18 @@
 ## Description
 
 The material `ComputePlaneIncrementalStrain` calculates the small incremental
-strain for 2D plane strain problems. It can be used for  classical
-[thick body plane strain](https://en.wikipedia.org/wiki/Plane_stress)
-problems, [Weak Plane Stress](/WeakPlaneStress.md) models, or in
+strain for 2D plane strain problems. It can be used for classical
+[plane strain or plane stress](https://en.wikipedia.org/wiki/Plane_stress)
+problems, or in
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
 
 ## Out of Plane Strain
 
-In the classical thick body plane strain problem, the strain and deformation
-gradient components in the out-of-plane direction (the infinitely thick
-direction) are held constant at zero:
+In the classical plane strain problem, it is assumed that the front and back
+surfaces of the body are constrained in the out-of-plane direction, and that
+the displacements in that direction on those surfaces are zero. As a 
+result, the strain and deformation gradient components in the out-of-plane
+direction are held constant at zero:
 \begin{equation}
   \label{eqn:classical_dop_deform_grad}
   F|^{dop} = 0 \text{  and  } \epsilon|^{dop} = 0
@@ -36,12 +38,18 @@ strain variable as the deformation gradient component
 where $F|^{dop}$ is the deformation gradient tensor diagonal component for the
 direction of the out-of-plane strain and $\epsilon|^{op}$ is a prescribed
 out-of-plane strain value: this strain value can be given either as a scalar
-variable or a nonlinear variable.
+variable or a nonlinear field variable.
 The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 problems use scalar variables. Multiple scalar variables can be provided such
 that one strain calculator is needed for multiple generalized plane strain
 models on different subdomains.
 
+For the case of plane stress, the [WeakPlaneStress](WeakPlaneStress.md) kernel
+is used to integrate the out-of-plane component of the stress over the area of
+each element, and assemble that integral to the residual of the out-of-plane
+strain field variable. This results in a weak enforcement of the condition that
+the out-of-plane stress is zero, which allows for re-use of the same constitutive
+models for models of all dimensionality.
 
 ## Strain and Deformation Gradient Formulation
 
@@ -145,15 +153,30 @@ behind [eqn:vlc_strain] see the
 [Volumetric Locking Correction](/tensor_mechanics/VolumetricLocking.md)
 documentation.
 
+## Example Input Files
 
-## Example Input File
+### Plane Stress
+
+The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
+can be used to create the `ComputePlaneIncrementalStrain` class by setting
+`planar_formulation = WEAK_PLANE_STRESS`, `strain = SMALL`, and `incremental = true` in the
+`Master` action block.
+
+!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_incremental.i block=Modules/TensorMechanics/Master
+
+Note that for plane stress analysis, the `out_of_plane_strain` parameter must be
+defined, and is the name of the out-of-plane strain field variable.
+
+!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_incremental.i block=Variables/strain_zz
+
+In the case of this example, `out_of_plane_strain` is defined in the `GlobalParams` block.
 
 ### Generalized Plane Strain
 
-As an example, the use of this plane strain class with the
+The use of this plane strain class for
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 simulations uses the scalar out-of-plane strains. The tensor mechanics
-[MasterAction](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
 `ComputePlaneIncrementalStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`,
 `strain = SMALL`, and `incremental = true` settings.
 

@@ -1,0 +1,1 @@
+../../gold/penny_crack_cfp_out.e

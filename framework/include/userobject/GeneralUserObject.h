@@ -55,7 +55,8 @@ public:
   /**
    * Store dependency among same object types for proper execution order
    */
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                           unsigned int index = 0);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   virtual const VectorPostprocessorValue &
@@ -77,4 +78,3 @@ protected:
   std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 };
-
