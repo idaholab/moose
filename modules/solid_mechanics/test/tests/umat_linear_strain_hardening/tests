@@ -7,5 +7,6 @@
     compiler = 'INTEL'
     valgrind = 'NONE'
     skip = 'ill-posed test' # See #5104
+    no_error_deprecated = true
   [../]
 []

@@ -9,5 +9,6 @@
     scale_refine = 1
     rel_err = 4e-5
     requirement = 'The PBP preconditioner shall work with the tensor mechanics module on a three-dimensional beam with a space_varying pressure boundary condition. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

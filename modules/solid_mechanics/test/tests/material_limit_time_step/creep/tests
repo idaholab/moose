@@ -6,6 +6,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     superlu = true
+    no_error_deprecated = true
   [../]
   [./test5a_lim_on_initial]
     type = 'CSVDiff'
@@ -14,6 +15,7 @@
     Outputs/file_base=nafems_test5a_lim_on_initial_out'
     csvdiff = 'nafems_test5a_lim_on_initial_out.csv'
     superlu = true
+    no_error_deprecated = true
   [../]
   [./test5a_lim_no_comb]
     type = 'Exodiff'
@@ -24,5 +26,6 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     superlu = true
+    no_error_deprecated = true
   [../]
 []

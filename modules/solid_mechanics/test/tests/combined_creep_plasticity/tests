@@ -6,6 +6,7 @@
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug
     prereq = combined2_sm
+    no_error_deprecated = true
   [../]
   [./combined2_sm]
     type = 'Exodiff'
@@ -13,6 +14,7 @@
     exodiff = 'combined_creep_plasticity_sm_out.e'
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug
+    no_error_deprecated = true
   [../]
 
   [./stress_prescribed_sm]
@@ -22,6 +24,7 @@
     rel_err = 1e-5
     abs_zero = 1e-09
     superlu = true
+    no_error_deprecated = true
   [../]
 
   [./stress_relaxation_sm]
@@ -29,6 +32,7 @@
     input = 'combined_stress_relaxation_sm.i'
     exodiff = 'combined_stress_relaxation_out.e'
     abs_zero = 1e-09
+    no_error_deprecated = true
   [../]
 
   [./lsh]
@@ -36,6 +40,7 @@
     input = 'plasticity_only_combined_class_sm1.i'
     exodiff = 'plasticity_only_combined_class_sm_out.e'
     abs_zero = 1e-09
+    no_error_deprecated = true
   [../]
   [./lsh2]
     type = 'Exodiff'
@@ -43,5 +48,6 @@
     exodiff = 'plasticity_only_combined_class_sm_out.e'
     abs_zero = 1e-09
     prereq = lsh
+    no_error_deprecated = true
   [../]
 []

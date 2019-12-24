@@ -30,6 +30,7 @@
     for 2D plane geometry with the deprecated solid mechanics module (NAFEMS
       CGS1 contact patch test with matched nodes)."
     skip = "Separate csvdiff configs necessary"
+    no_error_deprecated = true
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -56,6 +57,7 @@
     requirement = "The Contact system shall enforce glued, penalty contact for
     2D plane geometry with the deprecated solid mechanics module (NAFEMS CGS1
     contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -83,6 +85,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic
     contact for 2D plane geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -110,6 +113,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty
     contact for 2D plane geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -137,6 +141,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D plane geometry with the deprecated solid mechanics
     module (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -164,6 +169,7 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D plane geometry with the deprecated solid mechanics
     module (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -189,5 +195,6 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D plane geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
 []

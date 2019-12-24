@@ -8,5 +8,6 @@
     issues = '#6799'
     requirement = "Contact shall be enforced on new nodes created due to mesh refinement. Legacy Solid Mechanics."
     design = 'Constraints/index.md'
+    no_error_deprecated = true
   [../]
 []

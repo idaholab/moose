@@ -82,6 +82,7 @@
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 3D HEX20 brick geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -96,6 +97,7 @@
     requirement = "The Contact system shall enforce glued, penalty contact
     for 3D HEX20 brick geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_kin_sm]
     type = 'CSVDiff'
@@ -109,6 +111,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 3D HEX20 brick geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
@@ -122,6 +125,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 3D HEX20 brick geometry with the deprecated solid mechanics module
     (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
@@ -135,6 +139,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 3D HEX20 brick geometry with the deprecated solid
     mechanics module (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -162,6 +167,7 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 3D HEX20 brick geometry with the deprecated solid
     mechanics module (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -187,5 +193,6 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 3D HEX20 brick geometry with the deprecated solid
     mechanics module (NAFEMS CGS1 contact patch test with matched nodes)."
+    no_error_deprecated = true
   [../]
 []

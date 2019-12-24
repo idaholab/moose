@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#716'
+  design = '/Contact/index.md NodalArea.md'
   [./3D]
     type = 'Exodiff'
     input = 'nodal_area_3D.i'
     exodiff = 'nodal_area_3D_out.e'
+    requirement = 'The system shall compute the nodal area for use with contact calculations in 3D.'
   [../]
   [./3D2Proc]
     type = 'Exodiff'
@@ -10,11 +13,13 @@
     exodiff = 'nodal_area_3D_out.e'
     prereq = 3D
     min_parallel = 2
+    requirement = 'The system shall compute the nodal area in parallel for use with contact calculations in 3D.'
   [../]
   [./2D]
     type = 'Exodiff'
     input = 'nodal_area_2D.i'
     exodiff = 'nodal_area_2D_out.e'
+    requirement = 'The system shall compute the nodal area for use with contact calculations in 2D.'
   [../]
   [./2D2Proc]
     type = 'Exodiff'
@@ -22,12 +27,14 @@
     exodiff = 'nodal_area_2D_out.e'
     prereq = 2D
     min_parallel = 2
+    requirement = 'The system shall compute the nodal area in parallel for use with contact calculations in 2D.'
   [../]
   [./Hex20]
     type = 'Exodiff'
     input = 'nodal_area_Hex20.i'
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with contact calculations.'
   [../]
   [./Hex20_2]
     type = 'Exodiff'
@@ -36,6 +43,7 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with frictionless contact calculations.'
   [../]
   [./Hex20_3]
     type = 'Exodiff'
@@ -45,6 +53,7 @@
     # This test fails with a negative Jacobian for older versions of
     # PETSc, possibly due to the changes in 3061bbd5d.
     petsc_version = '>=3.5.0'
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with penalty contact calculations.'
   [../]
   [./Hex202Proc]
     type = 'Exodiff'
@@ -53,12 +62,14 @@
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20_2
     min_parallel = 2
+    requirement = 'The system shall compute the nodal area in parallel for Hex20 elements for use with contact calculations.'
   [../]
   [./Hex27]
     type = 'Exodiff'
     input = 'nodal_area_Hex27.i'
     exodiff = 'nodal_area_Hex27_out.e'
     custom_cmp = 'nodal_area_Hex27.exodiff'
+    requirement = 'The system shall compute the nodal area for Hex27 elements for use with contact calculations.'
   [../]
   [./Hex272Proc]
     type = 'Exodiff'
@@ -67,6 +78,7 @@
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex27
     min_parallel = 2
+    requirement = 'The system shall compute the nodal area in parallel for Hex27 elements for use with contact calculations.'
   [../]
   [./Hex20_sm]
     type = 'Exodiff'
@@ -75,6 +87,8 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex202Proc
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with contact calculations using deprecated solid_mechanics.'
   [../]
   [./Hex20_2_sm]
     type = 'Exodiff'
@@ -83,6 +97,8 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20_sm
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with frictionless contact calculations using deprecated solid_mechanics.'
   [../]
   [./Hex20_3_sm]
     type = 'Exodiff'
@@ -91,6 +107,8 @@
     exodiff = 'nodal_area_Hex20_3_out.e'
     custom_cmp = 'nodal_area_Hex20_3.exodiff'
     prereq = Hex20_3
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area for Hex20 elements for use with penalty contact calculations using deprecated solid_mechanics.'
   [../]
   [./Hex202Proc_sm]
     type = 'Exodiff'
@@ -100,6 +118,8 @@
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20_2_sm
     min_parallel = 2
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area in parallel for Hex20 elements for use with contact calculations using deprecated solid_mechanics.'
   [../]
   [./Hex27_sm]
     type = 'Exodiff'
@@ -108,6 +128,8 @@
     exodiff = 'nodal_area_Hex27_out.e'
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex272Proc
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area for Hex27 elements for use with contact calculations using deprecated solid_mechanics.'
   [../]
   [./Hex272Proc_sm]
     type = 'Exodiff'
@@ -117,5 +139,7 @@
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex27_sm
     min_parallel = 2
+    no_error_deprecated = true
+    requirement = 'The system shall compute the nodal area in parallel for Hex27 elements for use with contact calculations using deprecated solid_mechanics.'
   [../]
 []
