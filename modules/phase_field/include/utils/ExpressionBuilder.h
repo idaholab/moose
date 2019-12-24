@@ -65,40 +65,73 @@ public:
     virtual ~EBTermNode(){};
     virtual EBTermNode * clone() const = 0;
 
-    virtual std::string stringify() const = 0;
+    virtual std::string stringify(std::vector<unsigned int> component) const = 0;
     virtual unsigned int substitute(const EBSubstitutionRuleList & /*rule*/) { return 0; }
     virtual int precedence() const = 0;
-    friend std::ostream & operator<<(std::ostream & os, const EBTermNode & node)
+    // friend std::ostream & operator<<(std::ostream & os, const EBTermNode & node)
+    //{
+    //  return os << node.stringify();
+    //}
+    std::vector<unsigned int> getShape()
     {
-      return os << node.stringify();
-    }
+      if (_shape.size() == 0)
+        return setShape();
+      return _shape;
+    };
+    virtual std::vector<unsigned int> setShape() = 0;
+
+  protected:
+    std::vector<unsigned int> _shape;
   };
 
   /// Template class for leaf nodes holding numbers in the expression tree
   template <typename T>
   class EBNumberNode : public EBTermNode
   {
-    T _value;
+    std::vector<T> _value;
 
   public:
-    EBNumberNode(T value) : _value(value){};
-    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(_value); }
+    EBNumberNode(T value)
+    {
+      _value.push_back(value);
+      _shape.push_back(1);
+    };
+    EBNumberNode(std::vector<T> value, std::vector<unsigned int> shape) : _value(value)
+    {
+      _shape = shape;
+    };
 
-    virtual std::string stringify() const;
+    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(_value, _shape); }
+
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 0; }
+
+    virtual std::vector<unsigned int> setShape() { return _shape; };
   };
 
   /// Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
   class EBSymbolNode : public EBTermNode
   {
-    std::string _symbol;
+    std::vector<std::string> _symbol;
 
   public:
-    EBSymbolNode(std::string symbol) : _symbol(symbol){};
-    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol); }
+    EBSymbolNode(std::string symbol)
+    {
+      _symbol.push_back(symbol);
+      _shape.push_back(1);
+    };
 
-    virtual std::string stringify() const;
+    EBSymbolNode(std::vector<std::string> symbol, std::vector<unsigned int> shape) : _symbol(symbol)
+    {
+      _shape = shape;
+    };
+
+    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol, _shape); }
+
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 0; }
+
+    virtual std::vector<unsigned int> setShape() { return _shape; };
   };
 
   /**
@@ -113,8 +146,11 @@ public:
     EBTempIDNode(unsigned int id) : _id(id){};
     virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id); }
 
-    virtual std::string stringify() const; // returns "[idnumber]"
+    virtual std::string
+    stringify(std::vector<unsigned int> component) const; // returns "[idnumber]"
     virtual int precedence() const { return 0; }
+
+    virtual std::vector<unsigned int> setShape() { return _shape; };
   };
 
   /// Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
@@ -156,8 +192,10 @@ public:
       return new EBUnaryFuncTermNode(_subnode->clone(), _type);
     };
 
-    virtual std::string stringify() const;
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 2; }
+
+    virtual std::vector<unsigned int> setShape();
   };
 
   /// Node representing a unary operator
@@ -177,8 +215,10 @@ public:
       return new EBUnaryOpTermNode(_subnode->clone(), _type);
     };
 
-    virtual std::string stringify() const;
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 3; }
+
+    virtual std::vector<unsigned int> setShape();
   };
 
   /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -226,8 +266,12 @@ public:
       return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
     };
 
-    virtual std::string stringify() const;
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const;
+
+    std::string multRule(std::vector<unsigned int> component) const;
+
+    virtual std::vector<unsigned int> setShape();
 
   protected:
     NodeType _type;
@@ -253,8 +297,10 @@ public:
       return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
     };
 
-    virtual std::string stringify() const;
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 2; }
+
+    virtual std::vector<unsigned int> setShape();
   };
 
   /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -287,8 +333,10 @@ public:
       return new EBTernaryFuncTermNode(_left->clone(), _middle->clone(), _right->clone(), _type);
     };
 
-    virtual std::string stringify() const;
+    virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 2; }
+
+    virtual std::vector<unsigned int> setShape();
   };
 
   /**
@@ -325,6 +373,7 @@ public:
   public:
     EBTermSubstitution(const EBTerm & find, const EBTerm & replace);
     virtual ~EBTermSubstitution() { delete _replace; }
+
   protected:
     virtual EBTermNode * substitute(const EBSymbolNode &) const;
     std::string _find;
@@ -343,6 +392,7 @@ public:
       mooseAssert(_epsilon != NULL, "Epsilon must not be an empty term in EBLogPlogSubstitution");
     }
     virtual ~EBLogPlogSubstitution() { delete _epsilon; }
+
   protected:
     virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) const;
     EBTermNode * _epsilon;
@@ -371,9 +421,16 @@ public:
 
   public:
     // construct from number or string
-    EBTerm(int number) : _root(new EBNumberNode<int>(number)) {}
-    EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
-    EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
+    EBTerm(int number) : _root(new EBNumberNode<int>(number)){};
+    EBTerm(Real number) : _root(new EBNumberNode<Real>(number)){};
+    EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)){};
+
+    EBTerm(std::initializer_list<int> list, std::vector<unsigned int> shape)
+      : _root(new EBNumberNode<int>(list, shape)){};
+    EBTerm(std::initializer_list<Real> list, std::vector<unsigned int> shape)
+      : _root(new EBNumberNode<Real>(list, shape)){};
+    EBTerm(std::vector<std::string> list, std::vector<unsigned int> shape)
+      : _root(new EBNumberNode<std::string>(list, shape)){};
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
@@ -384,9 +441,22 @@ public:
                                 const ExpressionBuilder::EBTerm & rarg);
 
     // dump term as FParser expression
-    friend std::ostream & operator<<(std::ostream & os, const EBTerm & term);
+    // friend std::ostream & operator<<(std::ostream & os, const EBTerm & term);
     // cast into a string
-    operator std::string() const { return _root->stringify(); }
+    std::string operator[](const std::initializer_list<unsigned int> component) const
+    {
+      return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
+    };
+    std::string operator[](const std::vector<unsigned int> component) const
+    {
+      return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
+    };
+
+    operator std::vector<std::string>();
+    void getStringVector(std::vector<std::string> & string_vector,
+                         std::vector<unsigned int> dimensions,
+                         std::vector<unsigned int> current_dim,
+                         unsigned int position = 0);
 
     // assign a term
     EBTerm & operator=(const EBTerm & term)
@@ -497,7 +567,7 @@ public:
     BINARYCOMP_OP_IMPLEMENT(%=, MOD)
 
     /**
-    * @{
+     * @{
      * Binary functions
      */
     friend EBTerm min(const EBTerm &, const EBTerm &);
@@ -597,7 +667,7 @@ public:
     operator EBTerm() const;
 
     /// cast into a string (via the cast into a term above)
-    operator std::string() const;
+    operator std::vector<std::string>() const;
 
     /// @{
     /// function definition (assignment)
@@ -681,10 +751,20 @@ pow(const ExpressionBuilder::EBTerm & left, T exponent)
 // convert a number node into a string
 template <typename T>
 std::string
-ExpressionBuilder::EBNumberNode<T>::stringify() const
+ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> component) const
 {
   std::ostringstream s;
-  s << std::setprecision(12) << _value;
+  unsigned int position = 0;
+  for (unsigned int i = 0; i < component.size(); ++i)
+  {
+    unsigned int multiplier = 1;
+    for (unsigned int j = i + 1; j < component.size(); ++j)
+      multiplier *= _shape[j];
+    position += component[i] * multiplier;
+  }
+  std::cout << position << std::endl;
+  s << std::setprecision(12) << _value[position];
+
   return s.str();
 }
 
@@ -699,4 +779,3 @@ ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(
   else
     return substitute(*match_node);
 }
-

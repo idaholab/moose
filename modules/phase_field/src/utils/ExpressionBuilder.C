@@ -31,23 +31,50 @@ operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder:
   return list;
 }
 
-std::ostream &
-operator<<(std::ostream & os, const ExpressionBuilder::EBTerm & term)
+ExpressionBuilder::EBTerm::operator std::vector<std::string>()
 {
-  if (term._root != NULL)
-    return os << *term._root;
-  else
-    return os << "[NULL]";
+  if (_root != NULL)
+  {
+    std::vector<std::string> string_vector;
+    std::vector<unsigned int> dimensions = _root->getShape();
+    getStringVector(string_vector, dimensions, std::vector<unsigned int>(dimensions.size(), 0));
+    return string_vector;
+  }
+  return std::vector<std::string>(1, "[NULL]");
+}
+
+void
+ExpressionBuilder::EBTerm::getStringVector(std::vector<std::string> & string_vector,
+                                           std::vector<unsigned int> dimensions,
+                                           std::vector<unsigned int> current_dim,
+                                           unsigned int position)
+{
+  for (unsigned int i = 0; i < dimensions[position]; ++i)
+  {
+    current_dim[position] = i;
+    if (i != dimensions.size() - 1)
+      getStringVector(string_vector, dimensions, current_dim, position + 1);
+    string_vector.push_back((*this)[dimensions]);
+  }
 }
 
 std::string
-ExpressionBuilder::EBSymbolNode::stringify() const
+ExpressionBuilder::EBSymbolNode::stringify(std::vector<unsigned int> component) const
 {
-  return _symbol;
+  unsigned int position = 0;
+  for (unsigned int i = 0; i < component.size(); ++i)
+  {
+    unsigned int multiplier = 1;
+    for (unsigned int j = i + 1; j < component.size(); ++j)
+      multiplier *= _shape[j];
+    position += component[i] * multiplier;
+  }
+
+  return _symbol[position];
 }
 
 std::string
-ExpressionBuilder::EBTempIDNode::stringify() const
+ExpressionBuilder::EBTempIDNode::stringify(std::vector<unsigned int> component) const
 {
   std::ostringstream s;
   s << '[' << _id << ']';
@@ -55,16 +82,26 @@ ExpressionBuilder::EBTempIDNode::stringify() const
 }
 
 std::string
-ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
+ExpressionBuilder::EBUnaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
   const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
   std::ostringstream s;
-  s << name[_type] << '(' << *_subnode << ')';
+  s << name[_type] << '(' << _subnode->stringify(component) << ')';
   return s.str();
 }
 
+std::vector<unsigned int>
+ExpressionBuilder::EBUnaryFuncTermNode::setShape()
+{
+  std::vector<unsigned int> sub_shape = _subnode->setShape();
+  if (sub_shape.size() != 1 || sub_shape[0] != 1)
+    mooseError("Improper shape for unary node");
+  _shape = sub_shape;
+  return sub_shape;
+}
+
 std::string
-ExpressionBuilder::EBUnaryOpTermNode::stringify() const
+ExpressionBuilder::EBUnaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
   const char * name[] = {"-", "!"};
   std::ostringstream s;
@@ -72,45 +109,115 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
   s << name[_type];
 
   if (_subnode->precedence() > precedence())
-    s << '(' << *_subnode << ')';
+    s << '(' << _subnode->stringify(component) << ')';
   else
-    s << *_subnode;
+    s << _subnode->stringify(component);
 
   return s.str();
 }
 
+std::vector<unsigned int>
+ExpressionBuilder::EBUnaryOpTermNode::setShape()
+{
+  std::vector<unsigned int> sub_shape = _subnode->setShape();
+  if ((sub_shape.size() != 1 || sub_shape[0] != 1) && _type == LOGICNOT)
+    mooseError("Improper shape for unary node with operator !=");
+  _shape = sub_shape;
+  return sub_shape;
+}
+
 std::string
-ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
+ExpressionBuilder::EBBinaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
   const char * name[] = {"min", "max", "atan2", "hypot", "plog"};
   std::ostringstream s;
-  s << name[_type] << '(' << *_left << ',' << *_right << ')';
+  s << name[_type] << '(' << _left->stringify(component) << ',' << _left->stringify(component)
+    << ')';
   return s.str();
 }
 
+std::vector<unsigned int>
+ExpressionBuilder::EBBinaryFuncTermNode::setShape()
+{
+  std::vector<unsigned int> left_shape = _left->setShape();
+  std::vector<unsigned int> right_shape = _right->setShape();
+
+  if (left_shape.size() != 1 || left_shape[0] != 1)
+    mooseError("Improper shape for binary function node");
+  if (right_shape.size() != 1 || right_shape[0] != 1)
+    mooseError("Improper shape for binary function node");
+  _shape = left_shape;
+  return left_shape;
+}
+
 std::string
-ExpressionBuilder::EBBinaryOpTermNode::stringify() const
+ExpressionBuilder::EBBinaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
   const char * name[] = {"+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!="};
   std::ostringstream s;
 
+  if (_type == MUL)
+    return multRule(component);
+
+  std::vector<unsigned int> left_component = component;
+  std::vector<unsigned int> right_component = component;
+
   if (_left->precedence() > precedence())
-    s << '(' << *_left << ')';
+    s << '(' << _left->stringify(left_component) << ')';
   else
-    s << *_left;
+    s << _left->stringify(left_component);
 
   s << name[_type];
 
   // these operators are left associative at equal precedence
   // (this matters for -,/,&,^ but not for + and *)
   if (_right->precedence() > precedence() ||
-      (_right->precedence() == precedence() &&
-       (_type == SUB || _type == DIV || _type == MOD || _type == POW)))
-    s << '(' << *_right << ')';
+      (_right->precedence() == precedence() && (_type == SUB || _type == DIV)))
+    s << '(' << _right->stringify(right_component) << ')';
   else
-    s << *_right;
+    s << _right->stringify(right_component);
 
   return s.str();
+}
+
+std::vector<unsigned int>
+ExpressionBuilder::EBBinaryOpTermNode::setShape()
+{
+  std::vector<unsigned int> left_shape = _left->setShape();
+  std::vector<unsigned int> right_shape = _right->setShape();
+
+  switch (_type)
+  {
+    case ADD:
+    case SUB:
+      if (left_shape != right_shape)
+        mooseError("Improper shape for binary operator node");
+      break;
+    case MUL:
+      if (left_shape.back() != right_shape[0])
+        mooseError("Improper shape for binary operator node");
+      left_shape.insert(left_shape.end() - 1, right_shape.begin() + 1, right_shape.end());
+      break;
+    case DIV:
+      if (right_shape.size() != 1 || right_shape[0] != 1)
+        mooseError("Improper shape for binary operator node");
+      break;
+    case MOD:
+    case POW:
+    case LESS:
+    case GREATER:
+    case LESSEQ:
+    case GREATEREQ:
+    case EQ:
+    case NOTEQ:
+      if (left_shape.size() != 1 || left_shape[0] != 1)
+        mooseError("Improper shape for binary operator node");
+      if (right_shape.size() != 1 || right_shape[0] != 1)
+        mooseError("Improper shape for binary operator node");
+      break;
+  }
+  _shape = left_shape;
+  return left_shape;
 }
 
 int
@@ -141,12 +248,63 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
 }
 
 std::string
-ExpressionBuilder::EBTernaryFuncTermNode::stringify() const
+ExpressionBuilder::EBBinaryOpTermNode::multRule(std::vector<unsigned int> component) const
 {
+  std::vector<unsigned int> left_dims = _left->getShape();
+  std::vector<unsigned int> right_dims = _right->getShape();
+  std::ostringstream s;
+
+  std::vector<unsigned int> zero_vector(1, 0);
+  if (left_dims[0] == 1 && left_dims.size() == 1)
+  {
+    s << _left->stringify(zero_vector) << '*' << (_right->stringify(component));
+    return s.str();
+  }
+
+  if (right_dims[0] == 1 && right_dims.size() == 1)
+  {
+    s << _left->stringify(component) << '*' << _right->stringify(zero_vector);
+    return s.str();
+  }
+
+  std::vector<unsigned int> left_component(component.begin(), component.begin() + left_dims.size());
+  std::vector<unsigned int> right_component(component.rend(), component.rend() + right_dims.size());
+  s << '(';
+  for (unsigned int i = 0; i < right_dims[0]; ++i)
+  {
+    left_component.back() = i;
+    right_component[0] = i;
+    s << _left->stringify(left_component) << '*' << _right->stringify(right_component) << '+';
+  }
+  std::string finished = s.str();
+  finished.back() = ')';
+  return finished;
+}
+
+std::string
+ExpressionBuilder::EBTernaryFuncTermNode::stringify(std::vector<unsigned int> component) const
+{
+  std::vector<unsigned int> zero_vector(1, 0);
   const char * name[] = {"if"};
   std::ostringstream s;
-  s << name[_type] << '(' << *_left << ',' << *_middle << ',' << *_right << ')';
+  s << name[_type] << '(' << _left->stringify(zero_vector) << ',' << _middle->stringify(component)
+    << ',' << _right->stringify(component) << ')';
   return s.str();
+}
+
+std::vector<unsigned int>
+ExpressionBuilder::EBTernaryFuncTermNode::setShape()
+{
+  std::vector<unsigned int> left_shape = _left->setShape();
+  std::vector<unsigned int> right_shape = _right->setShape();
+  std::vector<unsigned int> middle_shape = _middle->setShape();
+
+  if (middle_shape.size() != 1 || middle_shape[0] != 1)
+    mooseError("Improper shape for binary operator node");
+  if (left_shape != right_shape)
+    mooseError("Improper shape for binary operator node");
+  _shape = left_shape;
+  return left_shape;
 }
 
 ExpressionBuilder::EBFunction &
@@ -203,13 +361,11 @@ ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
   return result;
 }
 
-ExpressionBuilder::EBFunction::operator std::string() const
+ExpressionBuilder::EBFunction::operator std::vector<std::string>() const
 {
   EBTerm eval;
   eval = *this; // typecast EBFunction -> EBTerm performs a parameter substitution
-  std::ostringstream s;
-  s << eval;
-  return s.str();
+  return std::vector<std::string>(eval);
 }
 
 std::string
@@ -220,11 +376,12 @@ ExpressionBuilder::EBFunction::args()
     return "";
 
   std::ostringstream s;
-  s << _arguments[0];
-  for (unsigned int i = 1; i < narg; ++i)
-    s << ',' << _arguments[i];
-
-  return s.str();
+  for (unsigned int i = 0; i < narg; ++i)
+    for (std::string & arg : std::vector<std::string>(_arguments[i]))
+      s << arg << ",";
+  std::string all_args = s.str();
+  all_args.pop_back();
+  return all_args;
 }
 
 unsigned int
@@ -444,25 +601,26 @@ ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find,
                                                           const EBTerm & replace)
 {
   // the expression we want to substitute (has to be a symbol node)
-  const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
-  if (find_root == NULL)
-    mooseError("Function arguments must be pure symbols.");
-  _find = find_root->stringify();
+  // const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
+  // if (find_root == NULL)
+  //  mooseError("Function arguments must be pure symbols.");
+  //_find = find_root->stringify();
 
   // the term we want to substitute with
-  if (replace.getRoot() != NULL)
-    _replace = replace.cloneRoot();
-  else
-    mooseError("Trying to substitute in an empty term for ", _find);
+  // if (replace.getRoot() != NULL)
+  //  _replace = replace.cloneRoot();
+  // else
+  //  mooseError("Trying to substitute in an empty term for ", _find);
 }
 
 ExpressionBuilder::EBTermNode *
 ExpressionBuilder::EBTermSubstitution::substitute(const EBSymbolNode & node) const
 {
-  if (node.stringify() == _find)
-    return _replace->clone();
-  else
-    return NULL;
+  //  if (node.stringify() == _find)
+  //    return _replace->clone();
+  //  else
+  //    return NULL;
+  return NULL;
 }
 
 ExpressionBuilder::EBTermNode *
