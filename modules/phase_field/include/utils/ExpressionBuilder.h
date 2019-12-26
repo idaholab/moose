@@ -47,6 +47,7 @@ class ExpressionBuilder
 {
 public:
   ExpressionBuilder(){};
+  ExpressionBuilder(const InputParameters & pars);
 
   // forward delcarations
   class EBTerm;
@@ -57,11 +58,28 @@ public:
   typedef std::vector<EBTermNode *> EBTermNodeList;
   typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
 
+  EBTerm makeGradEB(const std::string & var_name);
+  EBTerm makeSecondEB(const std::string & var_name);
+
+  EBTerm getEBTerm(const std::string & name) { return _coup_vars[name][0]; };
+  EBTermList getEBTermList(const std::string & name) { return _coup_vars[name]; };
+  EBTerm getGradEBTerm(const std::string & name) { return _grad_coup_vars[name][0]; };
+  EBTermList getGradEBTermList(const std::string & name) { return _grad_coup_vars[name]; };
+  EBTerm getSecondEBTerm(const std::string & name) { return _second_coup_vars[name][0]; };
+  EBTermList getSecondEBTermList(const std::string & name) { return _second_coup_vars[name]; };
+
+private:
+  std::map<std::string, EBTermList> _coup_vars;
+  std::map<std::string, EBTermList> _grad_coup_vars;
+  std::map<std::string, EBTermList> _second_coup_vars;
+
+public:
   /// Base class for nodes in the expression tree
   class EBTermNode
   {
   public:
-    EBTermNode() : isTransposed(false){};
+    EBTermNode() : _isTransposed(false){};
+    EBTermNode(bool isTransposed) : _isTransposed(isTransposed){};
     virtual ~EBTermNode(){};
     virtual EBTermNode * clone() const = 0;
 
@@ -81,13 +99,14 @@ public:
       return _shape;
     };
     virtual std::vector<unsigned int> setShape() = 0;
+    void reshape(std::vector<unsigned int> shape) { _shape = shape; };
     void transpose();
 
   protected:
     void transposeComponent(std::vector<unsigned int> & component) const;
 
     std::vector<unsigned int> _shape;
-    bool isTransposed;
+    bool _isTransposed;
   };
 
   /// Template class for leaf nodes holding numbers in the expression tree
@@ -102,12 +121,16 @@ public:
       _value.push_back(value);
       _shape.push_back(1);
     };
-    EBNumberNode(std::vector<T> value, std::vector<unsigned int> shape) : _value(value)
+    EBNumberNode(std::vector<T> value, std::vector<unsigned int> shape, bool isTransposed = false)
+      : EBTermNode(isTransposed), _value(value)
     {
       _shape = shape;
     };
 
-    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(_value, _shape); }
+    virtual EBNumberNode<T> * clone() const
+    {
+      return new EBNumberNode(_value, _shape, _isTransposed);
+    }
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 0; }
@@ -127,12 +150,18 @@ public:
       _shape.push_back(1);
     };
 
-    EBSymbolNode(std::vector<std::string> symbol, std::vector<unsigned int> shape) : _symbol(symbol)
+    EBSymbolNode(std::vector<std::string> symbol,
+                 std::vector<unsigned int> shape,
+                 bool isTransposed = false)
+      : EBTermNode(isTransposed), _symbol(symbol)
     {
       _shape = shape;
     };
 
-    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol, _shape); }
+    virtual EBSymbolNode * clone() const
+    {
+      return new EBSymbolNode(_symbol, _shape, _isTransposed);
+    }
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const { return 0; }
@@ -163,7 +192,8 @@ public:
   class EBUnaryTermNode : public EBTermNode
   {
   public:
-    EBUnaryTermNode(EBTermNode * subnode) : _subnode(subnode){};
+    EBUnaryTermNode(EBTermNode * subnode, bool isTransposed)
+      : EBTermNode(isTransposed), _subnode(subnode){};
     virtual ~EBUnaryTermNode() { delete _subnode; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
@@ -191,11 +221,11 @@ public:
       COSH
     } _type;
 
-    EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
-      : EBUnaryTermNode(subnode), _type(type){};
+    EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type, bool isTransposed = false)
+      : EBUnaryTermNode(subnode, isTransposed), _type(type){};
     virtual EBUnaryFuncTermNode * clone() const
     {
-      return new EBUnaryFuncTermNode(_subnode->clone(), _type);
+      return new EBUnaryFuncTermNode(_subnode->clone(), _type, _isTransposed);
     };
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
@@ -214,11 +244,11 @@ public:
       LOGICNOT
     } _type;
 
-    EBUnaryOpTermNode(EBTermNode * subnode, NodeType type)
-      : EBUnaryTermNode(subnode), _type(type){};
+    EBUnaryOpTermNode(EBTermNode * subnode, NodeType type, bool isTransposed = false)
+      : EBUnaryTermNode(subnode, isTransposed), _type(type){};
     virtual EBUnaryOpTermNode * clone() const
     {
-      return new EBUnaryOpTermNode(_subnode->clone(), _type);
+      return new EBUnaryOpTermNode(_subnode->clone(), _type, _isTransposed);
     };
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
@@ -231,7 +261,8 @@ public:
   class EBBinaryTermNode : public EBTermNode
   {
   public:
-    EBBinaryTermNode(EBTermNode * left, EBTermNode * right) : _left(left), _right(right){};
+    EBBinaryTermNode(EBTermNode * left, EBTermNode * right, bool isTransposed)
+      : EBTermNode(isTransposed), _left(left), _right(right){};
     virtual ~EBBinaryTermNode()
     {
       delete _left;
@@ -262,20 +293,25 @@ public:
       LESSEQ,
       GREATEREQ,
       EQ,
-      NOTEQ
+      NOTEQ,
+      CROSS
     };
 
-    EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
-      : EBBinaryTermNode(left, right), _type(type){};
+    EBBinaryOpTermNode(EBTermNode * left,
+                       EBTermNode * right,
+                       NodeType type,
+                       bool isTransposed = false)
+      : EBBinaryTermNode(left, right, isTransposed), _type(type){};
     virtual EBBinaryOpTermNode * clone() const
     {
-      return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
+      return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type, _isTransposed);
     };
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
     virtual int precedence() const;
 
     std::string multRule(std::vector<unsigned int> component) const;
+    std::string crossRule(std::vector<unsigned int> component) const;
 
     virtual std::vector<unsigned int> setShape();
 
@@ -296,8 +332,11 @@ public:
       PLOG
     } _type;
 
-    EBBinaryFuncTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
-      : EBBinaryTermNode(left, right), _type(type){};
+    EBBinaryFuncTermNode(EBTermNode * left,
+                         EBTermNode * right,
+                         NodeType type,
+                         bool isTransposed = false)
+      : EBBinaryTermNode(left, right, isTransposed), _type(type){};
     virtual EBBinaryFuncTermNode * clone() const
     {
       return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
@@ -313,8 +352,8 @@ public:
   class EBTernaryTermNode : public EBBinaryTermNode
   {
   public:
-    EBTernaryTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right)
-      : EBBinaryTermNode(left, right), _middle(middle){};
+    EBTernaryTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right, bool isTransposed)
+      : EBBinaryTermNode(left, right, isTransposed), _middle(middle){};
     virtual ~EBTernaryTermNode() { delete _middle; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
@@ -332,11 +371,16 @@ public:
       CONDITIONAL
     } _type;
 
-    EBTernaryFuncTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right, NodeType type)
-      : EBTernaryTermNode(left, middle, right), _type(type){};
+    EBTernaryFuncTermNode(EBTermNode * left,
+                          EBTermNode * middle,
+                          EBTermNode * right,
+                          NodeType type,
+                          bool isTransposed = false)
+      : EBTernaryTermNode(left, middle, right, isTransposed), _type(type){};
     virtual EBTernaryFuncTermNode * clone() const
     {
-      return new EBTernaryFuncTermNode(_left->clone(), _middle->clone(), _right->clone(), _type);
+      return new EBTernaryFuncTermNode(
+          _left->clone(), _middle->clone(), _right->clone(), _type, _isTransposed);
     };
 
     virtual std::string stringify(std::vector<unsigned int> component) const;
@@ -440,7 +484,7 @@ public:
     EBTerm(std::vector<Real> list, std::vector<unsigned int> shape)
       : _root(new EBNumberNode<Real>(list, shape)){};
     EBTerm(std::vector<std::string> list, std::vector<unsigned int> shape)
-      : _root(new EBNumberNode<std::string>(list, shape)){};
+      : _root(new EBSymbolNode(list, shape)){};
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
@@ -490,6 +534,8 @@ public:
     EBTermNode * cloneRoot() const { return _root == NULL ? NULL : _root->clone(); }
 
     static EBTerm identity(unsigned int mat_size, int k = 0);
+
+    void reshape(std::vector<unsigned int> shape) { _root->reshape(shape); }
 
   protected:
     EBTermNode * _root;
@@ -591,6 +637,7 @@ public:
     friend EBTerm min(const EBTerm &, const EBTerm &);
     friend EBTerm max(const EBTerm &, const EBTerm &);
     friend EBTerm pow(const EBTerm &, const EBTerm &);
+    friend EBTerm cross(const EBTerm &, const EBTerm &);
     template <typename T>
     friend EBTerm pow(const EBTerm &, T exponent);
     friend EBTerm atan2(const EBTerm &, const EBTerm &);
@@ -696,6 +743,15 @@ public:
     /// get the list of arguments and check if they are all symbols
     std::string args();
 
+    std::string operator[](const std::initializer_list<unsigned int> component) const
+    {
+      return _term[component];
+    };
+    std::string operator[](const std::vector<unsigned int> component) const
+    {
+      return _term[component];
+    };
+
     /// @{
     /// Unary operators on functions
     EBTerm operator-() { return -EBTerm(*this); }
@@ -771,6 +827,9 @@ template <typename T>
 std::string
 ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> component) const
 {
+  if (_isTransposed)
+    transposeComponent(component);
+
   std::ostringstream s;
   unsigned int position = 0;
   for (unsigned int i = 0; i < component.size(); ++i)

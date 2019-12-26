@@ -9,6 +9,61 @@
 
 #include "ExpressionBuilder.h"
 
+ExpressionBuilder::ExpressionBuilder(const InputParameters & pars)
+{
+  std::set<std::string> coupled_vars = pars.getCoupledVariableParamNames();
+  std::map<std::string, std::pair<std::string, std::string>> vec_coupled =
+      pars.getAutoBuildVectors();
+  std::map<std::string, std::pair<std::string, std::string>>::iterator finder;
+  for (std::set<std::string>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end();
+       ++it)
+  {
+    _coup_vars[*it] = EBTermList(0);
+    _grad_coup_vars[*it] = EBTermList(0);
+    _second_coup_vars[*it] = EBTermList(0);
+    if (vec_coupled.find(*it) != vec_coupled.end())
+    {
+      std::pair<std::string, std::string> variable = vec_coupled[*it];
+      // std::string base_name = pars.get<std::string>(variable.first);
+      std::string base_name = *it;
+      for (unsigned int j = 0; j < pars.get<unsigned int>(variable.second); ++j)
+      {
+        std::string varname = base_name + std::to_string(j);
+        _coup_vars[*it].push_back(EBTerm(varname.c_str()));
+        _grad_coup_vars[*it].push_back(makeGradEB(varname));
+        _second_coup_vars[*it].push_back(makeSecondEB(varname));
+      }
+    }
+    else
+    {
+      _coup_vars[*it].push_back(EBTerm(*it->c_str()));
+      _grad_coup_vars[*it].push_back(makeGradEB(*it));
+      _second_coup_vars[*it].push_back(makeSecondEB(*it));
+    }
+  }
+}
+
+ExpressionBuilder::EBTerm
+ExpressionBuilder::makeGradEB(const std::string & var_name)
+{
+  return EBTerm({var_name + "_x", var_name + "_y", var_name + "_z"}, {3});
+}
+
+ExpressionBuilder::EBTerm
+ExpressionBuilder::makeSecondEB(const std::string & var_name)
+{
+  return EBTerm({var_name + "_xx",
+                 var_name + "_xy",
+                 var_name + "_xz",
+                 var_name + "_yx",
+                 var_name + "_yy",
+                 var_name + "_yz",
+                 var_name + "_zx",
+                 var_name + "_zy",
+                 var_name + "_zz"},
+                {3, 3});
+}
+
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg)
 {
@@ -82,21 +137,21 @@ ExpressionBuilder::EBTerm::identity(unsigned int mat_size, int k)
   for (unsigned int i = 0; i < mat_size; ++i)
     for (unsigned int j = 0; j < mat_size; ++j)
       if (i == j + k)
-        mat_vec[i * mat_size + j] = 1;
+        mat_vec[i * mat_size + j] = 1.;
       else
-        mat_vec[i * mat_size + j] = 0;
+        mat_vec[i * mat_size + j] = 0.;
   return EBTerm(mat_vec, {mat_size, mat_size});
 }
 
 void
 ExpressionBuilder::EBTermNode::transpose()
 {
-  if (_shape.size() == 2)
+  if (getShape().size() == 2)
   {
-    if (isTransposed == false)
-      isTransposed = true;
+    if (_isTransposed == false)
+      _isTransposed = true;
     else
-      isTransposed = false;
+      _isTransposed = false;
     std::reverse(_shape.begin(), _shape.end());
   }
   else
@@ -113,7 +168,7 @@ ExpressionBuilder::EBTermNode::transposeComponent(std::vector<unsigned int> & co
 std::string
 ExpressionBuilder::EBSymbolNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   unsigned int position = 0;
@@ -140,7 +195,7 @@ ExpressionBuilder::EBTempIDNode::stringify(std::vector<unsigned int> component) 
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
@@ -162,7 +217,7 @@ ExpressionBuilder::EBUnaryFuncTermNode::setShape()
 std::string
 ExpressionBuilder::EBUnaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   const char * name[] = {"-", "!"};
@@ -191,7 +246,7 @@ ExpressionBuilder::EBUnaryOpTermNode::setShape()
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   const char * name[] = {"min", "max", "atan2", "hypot", "plog"};
@@ -218,7 +273,7 @@ ExpressionBuilder::EBBinaryFuncTermNode::setShape()
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   const char * name[] = {"+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!="};
@@ -226,6 +281,9 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify(std::vector<unsigned int> compo
 
   if (_type == MUL)
     return multRule(component);
+
+  if (_type == CROSS)
+    return crossRule(component);
 
   std::vector<unsigned int> left_component = component;
   std::vector<unsigned int> right_component = component;
@@ -264,6 +322,11 @@ ExpressionBuilder::EBBinaryOpTermNode::setShape()
     case MUL:
       if (left_shape.back() != right_shape[0])
       {
+        if (left_shape == right_shape && left_shape.size() == 1)
+        {
+          left_shape = std::vector<unsigned int>(1, 1);
+          break;
+        }
         if (left_shape.size() == 1 && left_shape[0] == 1)
         {
           left_shape = right_shape;
@@ -293,6 +356,11 @@ ExpressionBuilder::EBBinaryOpTermNode::setShape()
       if (right_shape.size() != 1 || right_shape[0] != 1)
         mooseError("Improper shape for binary operator node");
       break;
+    case CROSS:
+      if (left_shape.size() != 1 || left_shape[0] != 3)
+        mooseError("Improper shape for binary operator node");
+      if (right_shape.size() != 1 || right_shape[0] != 3)
+        mooseError("Improper shape for binary operator node");
   }
   _shape = left_shape;
   return left_shape;
@@ -309,6 +377,7 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
     case MUL:
     case DIV:
     case MOD:
+    case CROSS:
       return 5;
     case POW:
       return 2;
@@ -331,6 +400,20 @@ ExpressionBuilder::EBBinaryOpTermNode::multRule(std::vector<unsigned int> compon
   std::vector<unsigned int> left_dims = _left->getShape();
   std::vector<unsigned int> right_dims = _right->getShape();
   std::ostringstream s;
+
+  if (left_dims == right_dims && left_dims.size() == 1)
+  {
+    std::vector<unsigned int> current_comp(1);
+    s << '(';
+    for (unsigned int i = 0; i < left_dims.size(); ++i)
+    {
+      current_comp[0] = i;
+      s << _left->stringify(current_comp) << '*' << _right->stringify(current_comp) << '+';
+    }
+    std::string return_string = s.str();
+    return_string.back() = ')';
+    return return_string;
+  }
 
   std::vector<unsigned int> zero_vector(1, 0);
   if (left_dims[0] == 1 && left_dims.size() == 1)
@@ -361,9 +444,21 @@ ExpressionBuilder::EBBinaryOpTermNode::multRule(std::vector<unsigned int> compon
 }
 
 std::string
+ExpressionBuilder::EBBinaryOpTermNode::crossRule(std::vector<unsigned int> component) const
+{
+  std::vector<unsigned int> comp1(1, (component[0] + 1) % 3);
+  std::vector<unsigned int> comp2(1, (component[0] + 2) % 3);
+  std::ostringstream s;
+
+  s << '(' << _left->stringify(comp1) << '*' << _right->stringify(comp2);
+  s << '-' << _left->stringify(comp2) << '*' << _right->stringify(comp1) << ')';
+  return s.str();
+}
+
+std::string
 ExpressionBuilder::EBTernaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
-  if (isTransposed)
+  if (_isTransposed)
     transposeComponent(component);
 
   std::vector<unsigned int> zero_vector(1, 0);
@@ -521,6 +616,15 @@ pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & ri
   mooseAssert(right._root != NULL, "Empty term for exponent of pow()");
   return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBBinaryOpTermNode(
       left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryOpTermNode::POW));
+}
+
+ExpressionBuilder::EBTerm
+cross(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right)
+{
+  mooseAssert(left._root != NULL, "Empty term for left side of cross()");
+  mooseAssert(right._root != NULL, "Empty term for right side of cross()");
+  return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBBinaryOpTermNode(
+      left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryOpTermNode::CROSS));
 }
 
 #define TERNARY_FUNC_IMPLEMENT(op, OP)                                                             \
