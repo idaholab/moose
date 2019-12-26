@@ -36,31 +36,86 @@ ExpressionBuilder::EBTerm::operator std::vector<std::string>()
   if (_root != NULL)
   {
     std::vector<std::string> string_vector;
-    std::vector<unsigned int> dimensions = _root->getShape();
-    getStringVector(string_vector, dimensions, std::vector<unsigned int>(dimensions.size(), 0));
+    string_vector = _root->fullStringify();
     return string_vector;
   }
   return std::vector<std::string>(1, "[NULL]");
 }
 
-void
-ExpressionBuilder::EBTerm::getStringVector(std::vector<std::string> & string_vector,
-                                           std::vector<unsigned int> dimensions,
-                                           std::vector<unsigned int> current_dim,
-                                           unsigned int position)
+std::vector<std::string>
+ExpressionBuilder::EBTermNode::fullStringify() const
 {
-  for (unsigned int i = 0; i < dimensions[position]; ++i)
+  std::vector<std::string> string_vector;
+  getStringVector(string_vector, std::vector<unsigned int>(_shape.size(), 0));
+  return string_vector;
+}
+
+void
+ExpressionBuilder::EBTermNode::getStringVector(std::vector<std::string> & string_vector,
+                                               std::vector<unsigned int> current_dim,
+                                               unsigned int position) const
+{
+  for (unsigned int i = 0; i < _shape[position]; ++i)
   {
     current_dim[position] = i;
-    if (i != dimensions.size() - 1)
-      getStringVector(string_vector, dimensions, current_dim, position + 1);
-    string_vector.push_back((*this)[dimensions]);
+    if (position != _shape.size() - 1)
+      getStringVector(string_vector, current_dim, position + 1);
+    string_vector.push_back(stringify(current_dim));
   }
+}
+
+void
+ExpressionBuilder::EBTerm::checkShape(const std::vector<unsigned int> component) const
+{
+  std::vector<unsigned int> shape = _root->getShape();
+  if (component.size() != shape.size())
+    mooseError("Incorrect size for accessing EBTerm");
+  for (unsigned int i = 0; i < component.size(); ++i)
+    if (component[i] >= shape[i])
+      mooseError("Incorrect size for accessing EBTerm");
+}
+
+ExpressionBuilder::EBTerm
+ExpressionBuilder::EBTerm::identity(unsigned int mat_size, int k)
+{
+  std::vector<Real> mat_vec(mat_size * mat_size);
+  for (unsigned int i = 0; i < mat_size; ++i)
+    for (unsigned int j = 0; j < mat_size; ++j)
+      if (i == j + k)
+        mat_vec[i * mat_size + j] = 1;
+      else
+        mat_vec[i * mat_size + j] = 0;
+  return EBTerm(mat_vec, {mat_size, mat_size});
+}
+
+void
+ExpressionBuilder::EBTermNode::transpose()
+{
+  if (_shape.size() == 2)
+  {
+    if (isTransposed == false)
+      isTransposed = true;
+    else
+      isTransposed = false;
+    std::reverse(_shape.begin(), _shape.end());
+  }
+  else
+    mooseError("Cannot transpose higher order matrices or scalars");
+}
+
+void
+ExpressionBuilder::EBTermNode::transposeComponent(std::vector<unsigned int> & component) const
+{
+  // Implement current transpose rule here
+  std::reverse(component.begin(), component.end());
 }
 
 std::string
 ExpressionBuilder::EBSymbolNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   unsigned int position = 0;
   for (unsigned int i = 0; i < component.size(); ++i)
   {
@@ -79,11 +134,15 @@ ExpressionBuilder::EBTempIDNode::stringify(std::vector<unsigned int> component) 
   std::ostringstream s;
   s << '[' << _id << ']';
   return s.str();
+  component.clear(); // Suppresses unused parameter warning
 }
 
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
   std::ostringstream s;
   s << name[_type] << '(' << _subnode->stringify(component) << ')';
@@ -103,6 +162,9 @@ ExpressionBuilder::EBUnaryFuncTermNode::setShape()
 std::string
 ExpressionBuilder::EBUnaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   const char * name[] = {"-", "!"};
   std::ostringstream s;
 
@@ -129,6 +191,9 @@ ExpressionBuilder::EBUnaryOpTermNode::setShape()
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   const char * name[] = {"min", "max", "atan2", "hypot", "plog"};
   std::ostringstream s;
   s << name[_type] << '(' << _left->stringify(component) << ',' << _left->stringify(component)
@@ -153,6 +218,9 @@ ExpressionBuilder::EBBinaryFuncTermNode::setShape()
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   const char * name[] = {"+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!="};
   std::ostringstream s;
 
@@ -195,8 +263,18 @@ ExpressionBuilder::EBBinaryOpTermNode::setShape()
       break;
     case MUL:
       if (left_shape.back() != right_shape[0])
+      {
+        if (left_shape.size() == 1 && left_shape[0] == 1)
+        {
+          left_shape = right_shape;
+          break;
+        }
+        if (right_shape.size() == 1 && right_shape[0] == 1)
+          break;
         mooseError("Improper shape for binary operator node");
-      left_shape.insert(left_shape.end() - 1, right_shape.begin() + 1, right_shape.end());
+      }
+      left_shape.pop_back();
+      left_shape.insert(left_shape.end(), right_shape.begin() + 1, right_shape.end());
       break;
     case DIV:
       if (right_shape.size() != 1 || right_shape[0] != 1)
@@ -268,7 +346,8 @@ ExpressionBuilder::EBBinaryOpTermNode::multRule(std::vector<unsigned int> compon
   }
 
   std::vector<unsigned int> left_component(component.begin(), component.begin() + left_dims.size());
-  std::vector<unsigned int> right_component(component.rend(), component.rend() + right_dims.size());
+  std::vector<unsigned int> right_component(component.begin() + left_dims.size() - 2,
+                                            component.end());
   s << '(';
   for (unsigned int i = 0; i < right_dims[0]; ++i)
   {
@@ -284,6 +363,9 @@ ExpressionBuilder::EBBinaryOpTermNode::multRule(std::vector<unsigned int> compon
 std::string
 ExpressionBuilder::EBTernaryFuncTermNode::stringify(std::vector<unsigned int> component) const
 {
+  if (isTransposed)
+    transposeComponent(component);
+
   std::vector<unsigned int> zero_vector(1, 0);
   const char * name[] = {"if"};
   std::ostringstream s;
@@ -601,26 +683,25 @@ ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find,
                                                           const EBTerm & replace)
 {
   // the expression we want to substitute (has to be a symbol node)
-  // const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
-  // if (find_root == NULL)
-  //  mooseError("Function arguments must be pure symbols.");
-  //_find = find_root->stringify();
+  const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
+  if (find_root == NULL)
+    mooseError("Function arguments must be pure symbols.");
+  _find = find_root->fullStringify();
 
   // the term we want to substitute with
-  // if (replace.getRoot() != NULL)
-  //  _replace = replace.cloneRoot();
-  // else
-  //  mooseError("Trying to substitute in an empty term for ", _find);
+  if (replace.getRoot() != NULL)
+    _replace = replace.cloneRoot();
+  else
+    mooseError("Trying to substitute in an empty term");
 }
 
 ExpressionBuilder::EBTermNode *
 ExpressionBuilder::EBTermSubstitution::substitute(const EBSymbolNode & node) const
 {
-  //  if (node.stringify() == _find)
-  //    return _replace->clone();
-  //  else
-  //    return NULL;
-  return NULL;
+  if (node.fullStringify() == _find)
+    return _replace->clone();
+  else
+    return NULL;
 }
 
 ExpressionBuilder::EBTermNode *

@@ -25,11 +25,12 @@ validParams<MatrixEBTest>()
 }
 
 MatrixEBTest::MatrixEBTest(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters),
+  : DerivativeParsedMaterialHelper(parameters)
 {
   EBTerm new_test({1, 2, 3, 4, 5, 6, 7, 8, 9}, {3, 3});
+  EBTerm newer_test(new_test * new_test);
 
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
-      std::cout << new_test[{i, j}] << " ";
+      std::cout << newer_test[{i, j}] << std::endl;
 }

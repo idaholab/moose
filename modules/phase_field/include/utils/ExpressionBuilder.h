@@ -10,7 +10,6 @@
 #pragma once
 
 #include <vector>
-#include <ostream>
 #include <sstream>
 #include <iomanip>
 
@@ -62,16 +61,19 @@ public:
   class EBTermNode
   {
   public:
+    EBTermNode() : isTransposed(false){};
     virtual ~EBTermNode(){};
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify(std::vector<unsigned int> component) const = 0;
+    std::vector<std::string> fullStringify() const;
+    void getStringVector(std::vector<std::string> & string_vector,
+                         std::vector<unsigned int> current_dim,
+                         unsigned int position = 0) const;
+
     virtual unsigned int substitute(const EBSubstitutionRuleList & /*rule*/) { return 0; }
     virtual int precedence() const = 0;
-    // friend std::ostream & operator<<(std::ostream & os, const EBTermNode & node)
-    //{
-    //  return os << node.stringify();
-    //}
+
     std::vector<unsigned int> getShape()
     {
       if (_shape.size() == 0)
@@ -79,9 +81,13 @@ public:
       return _shape;
     };
     virtual std::vector<unsigned int> setShape() = 0;
+    void transpose();
 
   protected:
+    void transposeComponent(std::vector<unsigned int> & component) const;
+
     std::vector<unsigned int> _shape;
+    bool isTransposed;
   };
 
   /// Template class for leaf nodes holding numbers in the expression tree
@@ -376,7 +382,7 @@ public:
 
   protected:
     virtual EBTermNode * substitute(const EBSymbolNode &) const;
-    std::string _find;
+    std::vector<std::string> _find;
     EBTermNode * _replace;
   };
 
@@ -429,6 +435,10 @@ public:
       : _root(new EBNumberNode<int>(list, shape)){};
     EBTerm(std::initializer_list<Real> list, std::vector<unsigned int> shape)
       : _root(new EBNumberNode<Real>(list, shape)){};
+    EBTerm(std::vector<int> list, std::vector<unsigned int> shape)
+      : _root(new EBNumberNode<int>(list, shape)){};
+    EBTerm(std::vector<Real> list, std::vector<unsigned int> shape)
+      : _root(new EBNumberNode<Real>(list, shape)){};
     EBTerm(std::vector<std::string> list, std::vector<unsigned int> shape)
       : _root(new EBNumberNode<std::string>(list, shape)){};
 
@@ -441,10 +451,10 @@ public:
                                 const ExpressionBuilder::EBTerm & rarg);
 
     // dump term as FParser expression
-    // friend std::ostream & operator<<(std::ostream & os, const EBTerm & term);
     // cast into a string
     std::string operator[](const std::initializer_list<unsigned int> component) const
     {
+      checkShape(component);
       return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
     };
     std::string operator[](const std::vector<unsigned int> component) const
@@ -452,11 +462,9 @@ public:
       return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
     };
 
+    void checkShape(const std::vector<unsigned int> component) const;
+
     operator std::vector<std::string>();
-    void getStringVector(std::vector<std::string> & string_vector,
-                         std::vector<unsigned int> dimensions,
-                         std::vector<unsigned int> current_dim,
-                         unsigned int position = 0);
 
     // assign a term
     EBTerm & operator=(const EBTerm & term)
@@ -466,12 +474,22 @@ public:
       return *this;
     }
 
+    void transpose() { _root->transpose(); };
+    static EBTerm transpose(EBTerm term)
+    {
+      EBTerm new_term(term.cloneRoot());
+      new_term.transpose();
+      return new_term;
+    };
+
     // perform a substitution (returns substituton count)
     unsigned int substitute(const EBSubstitutionRule & rule);
     unsigned int substitute(const EBSubstitutionRuleList & rules);
 
     const EBTermNode * getRoot() const { return _root; }
     EBTermNode * cloneRoot() const { return _root == NULL ? NULL : _root->clone(); }
+
+    static EBTerm identity(unsigned int mat_size, int k = 0);
 
   protected:
     EBTermNode * _root;
@@ -762,7 +780,6 @@ ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> componen
       multiplier *= _shape[j];
     position += component[i] * multiplier;
   }
-  std::cout << position << std::endl;
   s << std::setprecision(12) << _value[position];
 
   return s.str();
