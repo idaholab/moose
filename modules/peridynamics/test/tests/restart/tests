@@ -6,7 +6,8 @@
     input = '2D_mesh_restartable_NOSPD.i'
     exodiff = '2D_mesh_restartable_NOSPD_out.e'
     map = false
-    requirement = 'PeridynamicsMesh shall be able to save extra unconventional mesh data for peridynamics models.'
+    requirement = 'PeridynamicsMesh shall be able to save extra unconventional
+                   mesh data for peridynamics models.'
   [../]
 
   [./restart_run]
@@ -16,6 +17,7 @@
     map = false
     prereq = initial_run
     skip = 'PD does not support restart yet'
-    requirement = 'PeridynamicsMesh shall be able to restore extra unconventional mesh data for peridynamics models.'
+    requirement = 'PeridynamicsMesh shall be able to restore extra unconventional
+                   mesh data for peridynamics models.'
   [../]
 []

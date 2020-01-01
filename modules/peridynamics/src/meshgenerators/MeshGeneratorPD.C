@@ -28,13 +28,29 @@ validParams<MeshGeneratorPD>()
                                              "The mesh based on which PD mesh will be created");
   params.addParam<std::vector<SubdomainID>>("convert_block_ids",
                                             "IDs of the FE mesh blocks to be converted to PD mesh");
+  params.addParam<std::vector<SubdomainID>>(
+      "non_convert_block_ids",
+      "IDs of the FE mesh blocks to not be converted to PD mesh. This should only be used when the "
+      "number of to-be-converted FE blocks is considerable.");
   params.addRequiredParam<bool>(
-      "retain_fe_mesh",
-      "whether to retain the FE mesh or not in addition to the newly created PD mesh");
+      "retain_fe_mesh", "Whether to retain the FE mesh or not after conversion into PD mesh");
+  params.addParam<bool>("single_converted_block",
+                        false,
+                        "Whether to combine converted PD mesh blocks into a single block. This is "
+                        "used when all PD blocks have the same properties");
   params.addParam<bool>(
       "construct_peridynamics_sideset",
       false,
-      "whether to construct peridynamics sidesets based on the sidesets in original FE mesh");
+      "Whether to construct peridynamics sidesets based on the sidesets in original FE mesh");
+  params.addParam<std::vector<SubdomainID>>(
+      "connect_block_id_pairs",
+      "List of block id pairs between which will be connected via interfacial bonds");
+  params.addParam<std::vector<SubdomainID>>(
+      "non_connect_block_id_pairs", "List of block pairs between which will not be connected");
+  params.addParam<bool>("single_interface_block",
+                        false,
+                        "Whether to combine interface blocks into a single block. This is used "
+                        "when all interface blocks have the same properties");
 
   return params;
 }
@@ -42,15 +58,60 @@ validParams<MeshGeneratorPD>()
 MeshGeneratorPD::MeshGeneratorPD(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _has_block_id(isParamValid("convert_block_ids")),
+    _has_conv_blk_ids(isParamValid("convert_block_ids")),
+    _has_non_conv_blk_ids(isParamValid("non_convert_block_ids")),
     _retain_fe_mesh(getParam<bool>("retain_fe_mesh")),
-    _construct_pd_sideset(getParam<bool>("construct_peridynamics_sideset"))
+    _single_converted_blk(getParam<bool>("single_converted_block")),
+    _construct_pd_sideset(getParam<bool>("construct_peridynamics_sideset")),
+    _has_connect_blk_id_pairs(isParamValid("connect_block_id_pairs")),
+    _has_non_connect_blk_id_pairs(isParamValid("non_connect_block_id_pairs")),
+    _single_interface_blk(getParam<bool>("single_interface_block"))
 {
-  if (_has_block_id)
+  if (_has_conv_blk_ids && _has_non_conv_blk_ids)
+    mooseError("Please specifiy either 'convert_block_ids' or 'non_convert_block_ids'!");
+
+  if (_has_non_conv_blk_ids)
+  {
+    std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("non_convert_block_ids");
+    for (unsigned int i = 0; i < ids.size(); ++i)
+      _non_conv_blk_ids.insert(ids[i]);
+  }
+
+  if (_has_conv_blk_ids)
   {
     std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("convert_block_ids");
     for (unsigned int i = 0; i < ids.size(); ++i)
-      _conv_block_ids.insert(ids[i]);
+      _conv_blk_ids.insert(ids[i]);
+  }
+
+  if (_has_connect_blk_id_pairs && _has_non_connect_blk_id_pairs)
+    mooseError("Please specifiy either 'connect_block_id_pairs' or 'non_connect_block_id_pairs'!");
+
+  _connect_blk_id_pairs.clear();
+  if (_has_connect_blk_id_pairs)
+  {
+    std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("connect_block_id_pairs");
+
+    if (ids.size() % 2 != 0)
+      mooseError("Input parameter 'connect_block_id_pairs' must contain even number of entries!");
+
+    const unsigned int pairs = ids.size() / 2;
+    for (unsigned int i = 0; i < pairs; ++i) // consider the renumbering of IDs of converted blocks
+      _connect_blk_id_pairs.insert(std::make_pair(ids[2 * i] + 1000, ids[2 * i + 1] + 1000));
+  }
+
+  _non_connect_blk_id_pairs.clear();
+  if (_has_non_connect_blk_id_pairs)
+  {
+    std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("non_connect_block_id_pairs");
+
+    if (ids.size() % 2 != 0)
+      mooseError(
+          "Input parameter 'non_connect_block_id_pairs' must contain even number of entries!");
+
+    const unsigned int pairs = ids.size() / 2;
+    for (unsigned int i = 0; i < pairs; ++i) // consider the renumbering of IDs of converted blocks
+      _non_connect_blk_id_pairs.insert(std::make_pair(ids[2 * i] + 1000, ids[2 * i + 1] + 1000));
   }
 }
 
@@ -63,37 +124,51 @@ MeshGeneratorPD::generate()
   // STEP 1: obtain FE block(s) and elements to be converted to PD mesh
 
   // get the IDs of all available blocks in the input FE mesh
-  std::set<SubdomainID> all_block_ids;
+  std::set<SubdomainID> all_blk_ids;
   for (const auto & old_elem : old_mesh->element_ptr_range())
-    all_block_ids.insert(old_elem->subdomain_id());
-  // categorize mesh blocks into converted and unconverted blocks
-  std::set<SubdomainID> unconv_block_ids;
-  if (_has_block_id)
-    std::set_difference(all_block_ids.begin(),
-                        all_block_ids.end(),
-                        _conv_block_ids.begin(),
-                        _conv_block_ids.end(),
-                        std::inserter(unconv_block_ids, unconv_block_ids.begin()));
-  else // if no block ids provided by user, by default, convert all FE mesh to PD mesh
-    _conv_block_ids = all_block_ids;
+    all_blk_ids.insert(old_elem->subdomain_id());
 
-  // save IDs of converted FE elems
+  // the maximum FE block ID, which will be used in determine the block ID for interfacial bond in
+  // the case of single interface block
+  const unsigned int max_fe_blk_id = *all_blk_ids.rbegin();
+
+  // categorize mesh blocks into converted and non-converted blocks
+  if (_has_conv_blk_ids)
+    std::set_difference(all_blk_ids.begin(),
+                        all_blk_ids.end(),
+                        _conv_blk_ids.begin(),
+                        _conv_blk_ids.end(),
+                        std::inserter(_non_conv_blk_ids, _non_conv_blk_ids.begin()));
+  else if (_has_non_conv_blk_ids)
+    std::set_difference(all_blk_ids.begin(),
+                        all_blk_ids.end(),
+                        _non_conv_blk_ids.begin(),
+                        _non_conv_blk_ids.end(),
+                        std::inserter(_conv_blk_ids, _conv_blk_ids.begin()));
+  else // if no block ids provided by user, by default, convert all FE mesh to PD mesh
+    _conv_blk_ids = all_blk_ids;
+
+  // the minimum converted FE block ID, which will be used to assign block ID for non-interfacial
+  // bond in the case of combine converted blocks
+  const unsigned int min_converted_fe_blk_id = *_conv_blk_ids.begin();
+
+  // IDs of to-be-converted FE elems
   std::set<dof_id_type> conv_elem_ids;
-  // retained FE mesh and unconverted FE mesh, if any
+  // retained FE mesh and non-converted FE mesh, if any
   std::set<dof_id_type> fe_nodes_ids;
   std::set<dof_id_type> fe_elems_ids;
   for (const auto & old_elem : old_mesh->element_ptr_range())
-    if (_conv_block_ids.count(old_elem->subdomain_id())) // record converted FE elem IDs
+    if (_conv_blk_ids.count(old_elem->subdomain_id())) // record to-be-converted FE elem IDs
     {
       conv_elem_ids.insert(old_elem->id());
-      if (_retain_fe_mesh) // save converted elems and their nodes if retained
+      if (_retain_fe_mesh) // save converted elems and their nodes if need to be retained
       {
         fe_elems_ids.insert(old_elem->id());
         for (unsigned int i = 0; i < old_elem->n_nodes(); ++i)
           fe_nodes_ids.insert(old_elem->node_id(i));
       }
     }
-    else // save unconverted elements and their nodes
+    else // save non-converted elements and their nodes
     {
       fe_elems_ids.insert(old_elem->id());
       for (unsigned int i = 0; i < old_elem->n_nodes(); ++i)
@@ -109,7 +184,7 @@ MeshGeneratorPD::generate()
   // old mesh
   BoundaryInfo & old_boundary_info = old_mesh->get_boundary_info();
 
-  // save the IDs of FE sidesets excluding constructed from nodesets in old mesh
+  // save the IDs of FE sidesets (excluding constructed from nodesets) in old mesh
   std::set<boundary_id_type> fe_sbnd_ids = old_boundary_info.get_side_boundary_ids();
   // determine number of FE side elements, the number of actual phantom elements is less than or
   // equal to the number of FE side elements, this number is used to reserve number of elements
@@ -123,11 +198,12 @@ MeshGeneratorPD::generate()
     ++n_phantom_elems;
   }
 
-  // STEP 2: generate PD data based on to-be converted FE mesh and prepare for new mesh
+  // STEP 2: generate PD data based on to-be-converted FE mesh and prepare for new mesh
 
   PeridynamicsMesh & pd_mesh = dynamic_cast<PeridynamicsMesh &>(*_mesh);
   // generate PD node data
-  pd_mesh.createPeridynamicsMeshData(*old_mesh, conv_elem_ids);
+  pd_mesh.createPeridynamicsMeshData(
+      *old_mesh, conv_elem_ids, _connect_blk_id_pairs, _non_connect_blk_id_pairs);
 
   // number of PD elements and nodes to be created
   dof_id_type n_pd_nodes = pd_mesh.nPDNodes();
@@ -145,7 +221,7 @@ MeshGeneratorPD::generate()
 
   BoundaryInfo & new_boundary_info = new_mesh->get_boundary_info();
 
-  // STEP 3: add points of PD data and FE mesh (retained and/or unconverted, if any) to new mesh
+  // STEP 3: add points of PD and FE (retained and/or non-converted) nodes, if any, to new mesh
 
   // save PD nodes to new mesh first
   unsigned int new_node_id = 0;
@@ -158,7 +234,7 @@ MeshGeneratorPD::generate()
 
     ++new_node_id;
   }
-  // then save both retained and unconverted FE nodes, if any, to the new mesh
+  // then save both retained and non-converted FE nodes, if any, to the new mesh
   // map of IDs of the same point in old and new meshes
   std::map<dof_id_type, dof_id_type> fe_nodes_map;
   for (const auto & nid : fe_nodes_ids)
@@ -169,9 +245,9 @@ MeshGeneratorPD::generate()
     ++new_node_id;
   }
 
-  // STEP 4: generate PD, phantom and FE elems using retained and/or unconverted mesh, if any
+  // STEP 4: generate PD, phantom, and FE elems using retained and/or non-converted meshes if any
 
-  // generate PD elements first to new mesh
+  // first, generate PD elements for new mesh
   unsigned int new_elem_id = 0;
   for (unsigned int i = 0; i < n_pd_nodes; ++i)
   {
@@ -179,15 +255,20 @@ MeshGeneratorPD::generate()
     for (unsigned int j = 0; j < pd_node_neighbors.size(); ++j)
       if (pd_node_neighbors[j] > i)
       {
-        unsigned int bid_i = pd_mesh.getNodeBlockID(i);
-        unsigned int bid_j = pd_mesh.getNodeBlockID(pd_node_neighbors[j]);
+        SubdomainID bid_i = pd_mesh.getNodeBlockID(i);
+        SubdomainID bid_j = pd_mesh.getNodeBlockID(pd_node_neighbors[j]);
         Elem * new_elem = new Edge2;
         new_elem->set_id(new_elem_id);
-        if (bid_i == bid_j)
-          new_elem->subdomain_id() =
-              bid_i; // assign block ID to PD elems based on block ID of PD nodes
-        else
-          new_elem->subdomain_id() = bid_i + bid_j; // assign a new block ID to PD interface elems
+        if (bid_i == bid_j) // assign block ID to PD non-interfacial elems
+          if (_single_converted_blk)
+            new_elem->subdomain_id() = min_converted_fe_blk_id + 1000;
+          else
+            new_elem->subdomain_id() = bid_i;
+        else if (_single_interface_blk) // assign block ID (max_fe_blk_id + 1 + 1000) to all PD
+                                        // interfacial elems
+          new_elem->subdomain_id() = max_fe_blk_id + 1 + 1000;
+        else // assign a new block ID (node i blk ID + node j blk ID) to this PD interfacial elems
+          new_elem->subdomain_id() = bid_i + bid_j;
 
         new_elem = new_mesh->add_elem(new_elem);
         new_elem->set_node(0) = new_mesh->node_ptr(i);
@@ -197,6 +278,9 @@ MeshGeneratorPD::generate()
       }
   }
 
+  if (_single_converted_blk) // update PD node block ID
+    pd_mesh.setNodeBlockID(min_converted_fe_blk_id + 1000);
+
   // then generate phantom elements for sidesets in PD mesh, this is optional
   std::map<std::pair<dof_id_type, dof_id_type>, std::set<dof_id_type>> elem_edge_node;
   if (_construct_pd_sideset)
@@ -205,7 +289,7 @@ MeshGeneratorPD::generate()
       {
         bool should_add = false;
         Elem * old_elem = old_mesh->elem_ptr(eidit);
-        if (_conv_block_ids.count(old_elem->subdomain_id()))
+        if (_conv_blk_ids.count(old_elem->subdomain_id()))
         {
           std::vector<dof_id_type> node_ids;
           if (new_mesh->mesh_dimension() == 2) // 2D
@@ -277,7 +361,10 @@ MeshGeneratorPD::generate()
             {
               Elem * new_elem = new Tri3;
               new_elem->set_id(new_elem_id);
-              new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+              if (_single_converted_blk)
+                new_elem->subdomain_id() = min_converted_fe_blk_id + 10000;
+              else
+                new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
               new_elem = new_mesh->add_elem(new_elem);
               new_elem->set_node(0) = new_mesh->node_ptr(node_ids[0]);
               new_elem->set_node(1) = new_mesh->node_ptr(node_ids[1]);
@@ -390,7 +477,10 @@ MeshGeneratorPD::generate()
                       // construct the new phantom element
                       Elem * new_elem = new Tet4;
                       new_elem->set_id(new_elem_id);
-                      new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+                      if (_single_converted_blk)
+                        new_elem->subdomain_id() = min_converted_fe_blk_id + 10000;
+                      else
+                        new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
                       new_elem = new_mesh->add_elem(new_elem);
                       new_elem->set_node(0) = new_mesh->node_ptr(node_ids[0]);
                       new_elem->set_node(1) = new_mesh->node_ptr(node_ids[1]);
@@ -427,7 +517,7 @@ MeshGeneratorPD::generate()
         }
       }
 
-  // then save FE elements, if any, to new mesh
+  // next, save non-converted or retained FE elements if any to new mesh
   std::map<dof_id_type, dof_id_type> fe_elems_map; // IDs of the same elem in the old and new meshes
   for (const auto & eid : fe_elems_ids)
   {
@@ -457,16 +547,16 @@ MeshGeneratorPD::generate()
 
   // first, create a tuple to collect all sidesets (including those converted from nodesets) in the
   // old mesh
-  auto old_side_bc_tuples = old_boundary_info.build_side_list();
+  auto old_fe_sbc_tuples = old_boundary_info.build_side_list();
   // 0: element ID, 1: side ID, 2: boundary ID
   // map of set of elem IDs connected to each boundary in the old mesh
-  std::map<boundary_id_type, std::set<dof_id_type>> old_bnd_elem_ids;
+  std::map<boundary_id_type, std::set<dof_id_type>> old_fe_bnd_elem_ids;
   // map of set of side ID for each elem in the old mesh
-  std::map<dof_id_type, std::map<boundary_id_type, dof_id_type>> old_bnd_elem_side_ids;
-  for (const auto & sbct : old_side_bc_tuples)
+  std::map<dof_id_type, std::map<boundary_id_type, dof_id_type>> old_fe_elem_bnd_side_ids;
+  for (const auto & sbct : old_fe_sbc_tuples)
   {
-    old_bnd_elem_ids[std::get<2>(sbct)].insert(std::get<0>(sbct));
-    old_bnd_elem_side_ids[std::get<0>(sbct)].insert(
+    old_fe_bnd_elem_ids[std::get<2>(sbct)].insert(std::get<0>(sbct));
+    old_fe_elem_bnd_side_ids[std::get<0>(sbct)].insert(
         std::make_pair(std::get<2>(sbct), std::get<1>(sbct)));
   }
 
@@ -475,7 +565,7 @@ MeshGeneratorPD::generate()
 
   // loop through all old FE _sideset_ boundaries
   for (const auto & sbid : old_side_bid)
-    for (const auto & beid : old_bnd_elem_ids[sbid])
+    for (const auto & beid : old_fe_bnd_elem_ids[sbid])
       if (conv_elem_ids.count(beid)) // for converted FE mesh
       {
         // save corresponding boundaries on converted FE mesh to PD nodes
@@ -488,19 +578,20 @@ MeshGeneratorPD::generate()
                              // from old mesh
         {
           new_boundary_info.add_side(
-              new_mesh->elem_ptr(fe_elems_map[beid]), old_bnd_elem_side_ids[beid][sbid], sbid);
+              new_mesh->elem_ptr(fe_elems_map[beid]), old_fe_elem_bnd_side_ids[beid][sbid], sbid);
           new_boundary_info.sideset_name(sbid) = old_boundary_info.get_sideset_name(sbid);
         }
       }
-      else // for unconverted FE mesh, if any, copy the corresponding boundaries to new mesh
+      else // for non-converted FE mesh, if any, copy the corresponding boundaries to new mesh
            // from old mesh
       {
         new_boundary_info.add_side(
-            new_mesh->elem_ptr(fe_elems_map[beid]), old_bnd_elem_side_ids[beid][sbid], sbid);
+            new_mesh->elem_ptr(fe_elems_map[beid]), old_fe_elem_bnd_side_ids[beid][sbid], sbid);
         new_boundary_info.sideset_name(sbid) = old_boundary_info.get_sideset_name(sbid);
       }
 
-  // similar for sideset above, save _nodesets_ of unconverted FE mesh, if any, to new mesh
+  // similar for sideset above, save _nodesets_ of non-converted and/or retained FE mesh, if any, to
+  // new mesh
   auto old_node_bc_tuples = old_boundary_info.build_node_list();
   // 0: node ID, 1: boundary ID
   std::map<boundary_id_type, std::set<dof_id_type>> old_bnd_node_ids;
@@ -520,19 +611,19 @@ MeshGeneratorPD::generate()
   // create nodesets to include all PD nodes for PD blocks in the new mesh
   for (unsigned int i = 0; i < n_pd_nodes; ++i)
   {
-    if (_conv_block_ids.size() > 1)
+    if (_conv_blk_ids.size() > 1 && !_single_converted_blk)
     {
       unsigned int j = 0;
-      for (const auto & bid : _conv_block_ids)
+      for (const auto & blk_id : _conv_blk_ids)
       {
         ++j;
-        unsigned int real_bid =
-            bid + 1000; // acount for the 1000 increment after converting to PD mesh
-        if (pd_mesh.getNodeBlockID(i) == real_bid)
+        unsigned int real_blk_id =
+            blk_id + 1000; // account for the 1000 increment after converting to PD mesh
+        if (pd_mesh.getNodeBlockID(i) == real_blk_id)
         {
           new_boundary_info.add_node(new_mesh->node_ptr(i), 999 - j);
           new_boundary_info.nodeset_name(999 - j) =
-              "pd_nodes_block_" + Moose::stringify(bid + 1000);
+              "pd_nodes_block_" + Moose::stringify(blk_id + 1000);
         }
       }
     }

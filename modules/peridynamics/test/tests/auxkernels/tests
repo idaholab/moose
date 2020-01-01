@@ -4,7 +4,8 @@
     input = 'planestrain_thermomechanics_ranktwotensor_OSPD.i'
     exodiff = 'planestrain_thermomechanics_ranktwotensor_OSPD.e'
     map = false
-    requirement = 'NodalRankTwoPD shall calculate the stress/strain tensors at a material point for elastic material.'
+    requirement = 'NodalRankTwoPD shall calculate the stress/strain tensors at
+                   a material point for elastic material.'
     design = 'modules/peridynamics/NodalRankTwoPD.md'
     issues = '#11561'
   [../]
@@ -22,7 +23,8 @@
     input = 'boundary_offset_2D.i'
     exodiff = 'boundary_offset_2D_out.e'
     map = false
-    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes from mesh for 2D geometries.'
+    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes
+                   from mesh for 2D geometries.'
     design = 'modules/peridynamics/BoundaryOffsetPD.md'
     issues = '#11561'
   [../]
@@ -31,7 +33,8 @@
     input = 'boundary_offset_3D.i'
     exodiff = 'boundary_offset_3D_out.e'
     map = false
-    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes from mesh for 3D geometries.'
+    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes
+                   from mesh for 3D geometries.'
     design = 'modules/peridynamics/BoundaryOffsetPD.md'
     issues = '#11561'
   [../]

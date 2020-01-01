@@ -51,7 +51,11 @@ public:
    * @param fe_mesh   The finite element mesh based on which the peridynamics mesh will be created
    * @param converted_elem_id  The IDs of finite elements to be converted to peridynamics mesh
    */
-  void createPeridynamicsMeshData(MeshBase & fe_mesh, std::set<dof_id_type> converted_elem_id);
+  void
+  createPeridynamicsMeshData(MeshBase & fe_mesh,
+                             std::set<dof_id_type> converted_elem_id,
+                             std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
+                             std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs);
 
   /**
    * Function to return neighbor nodes indices for node node_id
@@ -90,7 +94,13 @@ public:
    * @param node_id   The querying node index
    * @return The block ID of a node
    */
-  unsigned int getNodeBlockID(dof_id_type node_id);
+  SubdomainID getNodeBlockID(dof_id_type node_id);
+
+  /**
+   * Function to set block ID for all PD nodes
+   * @param id   The subdomain ID for all PD nodes
+   */
+  void setNodeBlockID(SubdomainID id);
 
   /**
    * Function to return coordinates for node node_id
@@ -166,11 +176,6 @@ protected:
   std::vector<Real> _cracks_width;
   ///@}
 
-  ///@{ Information on whether to create interfacial bonds or not
-  const bool _has_interface;
-  std::set<unsigned int> _interface_blocks;
-  ///@}
-
   /// Mesh dimension
   unsigned int & _dim;
 
@@ -186,8 +191,8 @@ protected:
   std::vector<Real> & _pdnode_horiz_rad;
   std::vector<Real> & _pdnode_vol;
   std::vector<Real> & _pdnode_horiz_vol;
-  std::vector<unsigned int> & _pdnode_blockID;
-  std::vector<unsigned int> & _pdnode_elemID;
+  std::vector<SubdomainID> & _pdnode_blockID;
+  std::vector<dof_id_type> & _pdnode_elemID;
   ///@}
 
   /// Neighbor lists for each material point determined using the horizon
@@ -197,7 +202,7 @@ protected:
   std::vector<std::vector<dof_id_type>> & _pdnode_bonds;
 
   /// Neighbor lists for deformation gradient calculation using bond-associated horizon
-  std::vector<std::vector<std::vector<unsigned int>>> & _dg_neighbors;
+  std::vector<std::vector<std::vector<dof_id_type>>> & _dg_neighbors;
 
   /// Volume fraction of deformation gradient region to its sum at a node
   std::vector<std::vector<Real>> & _dg_vol_frac;
@@ -207,8 +212,20 @@ protected:
 
   /**
    * Function to create neighbors and other data for each material point with given horizon
+   * @param connect_block_id_pairs   ID pairs of blocks to be connected via interfacial bonds
+   * @param non_connect_block_id_pairs   ID pairs of blocks not to be connected
    */
-  void createNodeHorizBasedData();
+  void createNodeHorizBasedData(std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
+                                std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs);
+
+  /**
+   * Function to check existence of interface between two blocks
+   * @param blockID_i & blockID_j   IDs of two querying blocks
+   * @param blockID_pairs   ID pairs of neighboring blocks
+   */
+  bool checkInterface(SubdomainID pdnode_blockID_i,
+                      SubdomainID pdnode_blockID_j,
+                      std::multimap<SubdomainID, SubdomainID> blockID_pairs);
 
   /**
    * Function to create node neighbors and other data for each material point based on

@@ -33,8 +33,6 @@ validParams<PeridynamicsMesh>()
   params.addParam<std::vector<Point>>("cracks_end",
                                       "Cartesian coordinates where predefined line cracks end");
   params.addParam<std::vector<Real>>("cracks_width", "Widths of predefined line cracks");
-  params.addParam<std::vector<unsigned int>>(
-      "interface_blocks", "List of blocks among which interfacial bonds will be constructed");
 
   params.set<bool>("_mesh_generator_mesh") = true;
 
@@ -48,7 +46,6 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _horiz_num(_has_horiz_num ? getParam<Real>("horizon_number") : 0),
     _bah_ratio(getParam<Real>("bond_associated_horizon_ratio")),
     _has_cracks(isParamValid("cracks_start") || isParamValid("cracks_end")),
-    _has_interface(isParamValid("interface_blocks")),
     _dim(declareRestartableData<unsigned int>("dim")),
     _n_pdnodes(declareRestartableData<unsigned int>("n_pdnodes")),
     _n_pdbonds(declareRestartableData<unsigned int>("n_pdbonds")),
@@ -56,13 +53,13 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _pdnode_horiz_rad(declareRestartableData<std::vector<Real>>("pdnode_horiz_radius")),
     _pdnode_vol(declareRestartableData<std::vector<Real>>("pdnode_vol")),
     _pdnode_horiz_vol(declareRestartableData<std::vector<Real>>("pdnode_horiz_vol")),
-    _pdnode_blockID(declareRestartableData<std::vector<unsigned int>>("pdnode_blockID")),
-    _pdnode_elemID(declareRestartableData<std::vector<unsigned int>>("pdnode_elemID")),
+    _pdnode_blockID(declareRestartableData<std::vector<SubdomainID>>("pdnode_blockID")),
+    _pdnode_elemID(declareRestartableData<std::vector<dof_id_type>>("pdnode_elemID")),
     _pdnode_neighbors(
         declareRestartableData<std::vector<std::vector<dof_id_type>>>("pdnode_neighbors")),
     _pdnode_bonds(declareRestartableData<std::vector<std::vector<dof_id_type>>>("pdnode_bonds")),
-    _dg_neighbors(declareRestartableData<std::vector<std::vector<std::vector<unsigned int>>>>(
-        "dg_neighbors")),
+    _dg_neighbors(
+        declareRestartableData<std::vector<std::vector<std::vector<dof_id_type>>>>("dg_neighbors")),
     _dg_vol_frac(declareRestartableData<std::vector<std::vector<Real>>>("dg_vol_fraction")),
     _boundary_node_offset(
         declareRestartableData<std::map<dof_id_type, Real>>("boundary_node_offset"))
@@ -102,16 +99,6 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
   }
   else
     _cracks_width.push_back(0);
-
-  if (_has_interface)
-  {
-    std::vector<unsigned int> blocks(getParam<std::vector<unsigned int>>("interface_blocks"));
-    for (unsigned int i = 0; i < blocks.size(); ++i)
-      _interface_blocks.insert(blocks[i] +
-                               1000); // acount for the 1000 increment after converting to PD mesh
-  }
-  else
-    _interface_blocks.insert(0);
 }
 
 std::unique_ptr<MooseMesh>
@@ -148,8 +135,11 @@ PeridynamicsMesh::nPDBonds() const
 }
 
 void
-PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
-                                             std::set<dof_id_type> converted_elem_id)
+PeridynamicsMesh::createPeridynamicsMeshData(
+    MeshBase & fe_mesh,
+    std::set<dof_id_type> converted_elem_id,
+    std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
+    std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs)
 {
   _dim = fe_mesh.mesh_dimension();
   _n_pdnodes = converted_elem_id.size();
@@ -221,7 +211,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
   }
 
   // search node neighbors and create other nodal data
-  createNodeHorizBasedData();
+  createNodeHorizBasedData(connect_block_id_pairs, non_connect_block_id_pairs);
 
   createNeighborHorizonBasedData(); // applies to non-ordinary state-based model only.
 
@@ -244,7 +234,9 @@ PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
 }
 
 void
-PeridynamicsMesh::createNodeHorizBasedData()
+PeridynamicsMesh::createNodeHorizBasedData(
+    std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
+    std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs)
 {
   // search neighbors
   for (unsigned int i = 0; i < _n_pdnodes; ++i)
@@ -253,51 +245,84 @@ PeridynamicsMesh::createNodeHorizBasedData()
     for (unsigned int j = 0; j < _n_pdnodes; ++j)
     {
       dis = (_pdnode_coord[i] - _pdnode_coord[j]).norm();
-      if ((_pdnode_blockID[i] == _pdnode_blockID[j] ||
-           (_interface_blocks.count(_pdnode_blockID[i]) &&
-            _interface_blocks.count(_pdnode_blockID[j]))) &&
-          dis <= 1.0001 * _pdnode_horiz_rad[i] && j != i)
+      if (dis <= 1.0001 * _pdnode_horiz_rad[i] && j != i)
       {
-        // check whether pdnode i falls in the region whose bonds may need to be removed due to
-        // the pre-existing cracks
-        bool intersect = false;
-        for (unsigned int k = 0; k < _cracks_start.size(); ++k)
+        bool is_interface = false;
+        if (!connect_block_id_pairs.empty())
+          is_interface =
+              checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], connect_block_id_pairs);
+
+        if (!non_connect_block_id_pairs.empty())
+          is_interface =
+              !checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], non_connect_block_id_pairs);
+
+        if (_pdnode_blockID[i] == _pdnode_blockID[j] || is_interface)
         {
-          if (checkPointInsideRectangle(_pdnode_coord[i],
-                                        _cracks_start[k],
-                                        _cracks_end[k],
-                                        _cracks_width[k] + 4.0 * _pdnode_horiz_rad[i],
-                                        4.0 * _pdnode_horiz_rad[i]))
-            intersect = intersect || checkCrackIntersectBond(_cracks_start[k],
-                                                             _cracks_end[k],
-                                                             _cracks_width[k],
-                                                             _pdnode_coord[i],
-                                                             _pdnode_coord[j]);
-        }
-        // remove bonds cross the crack to form crack surface
-        if (!intersect)
-        {
-          // Use the addition balance scheme to remove unbalanced interactions
-          // check whether j was already considered as a neighbor of i, if not, add j to i's
-          // neighborlist
-          if (std::find(_pdnode_neighbors[i].begin(), _pdnode_neighbors[i].end(), j) ==
-              _pdnode_neighbors[i].end())
+          // check whether pdnode i falls in the region whose bonds may need to be removed due to
+          // the pre-existing cracks
+          bool intersect = false;
+          for (unsigned int k = 0; k < _cracks_start.size(); ++k)
           {
-            _pdnode_neighbors[i].push_back(j);
-            _pdnode_horiz_vol[i] += _pdnode_vol[j];
+            if (checkPointInsideRectangle(_pdnode_coord[i],
+                                          _cracks_start[k],
+                                          _cracks_end[k],
+                                          _cracks_width[k] + 4.0 * _pdnode_horiz_rad[i],
+                                          4.0 * _pdnode_horiz_rad[i]))
+              intersect = intersect || checkCrackIntersectBond(_cracks_start[k],
+                                                               _cracks_end[k],
+                                                               _cracks_width[k],
+                                                               _pdnode_coord[i],
+                                                               _pdnode_coord[j]);
           }
-          // check whether i was also considered as a neighbor of j, if not, add i to j's
-          // neighborlist
-          if (std::find(_pdnode_neighbors[j].begin(), _pdnode_neighbors[j].end(), i) ==
-              _pdnode_neighbors[j].end())
+          // remove bonds cross the crack to form crack surface
+          if (!intersect)
           {
-            _pdnode_neighbors[j].push_back(i);
-            _pdnode_horiz_vol[j] += _pdnode_vol[i];
+            // Use the addition balance scheme to remove unbalanced interactions
+            // check whether j was already considered as a neighbor of i, if not, add j to i's
+            // neighborlist
+            if (std::find(_pdnode_neighbors[i].begin(), _pdnode_neighbors[i].end(), j) ==
+                _pdnode_neighbors[i].end())
+            {
+              _pdnode_neighbors[i].push_back(j);
+              _pdnode_horiz_vol[i] += _pdnode_vol[j];
+            }
+            // check whether i was also considered as a neighbor of j, if not, add i to j's
+            // neighborlist
+            if (std::find(_pdnode_neighbors[j].begin(), _pdnode_neighbors[j].end(), i) ==
+                _pdnode_neighbors[j].end())
+            {
+              _pdnode_neighbors[j].push_back(i);
+              _pdnode_horiz_vol[j] += _pdnode_vol[i];
+            }
           }
         }
       }
     }
   }
+}
+
+bool
+PeridynamicsMesh::checkInterface(SubdomainID pdnode_blockID_i,
+                                 SubdomainID pdnode_blockID_j,
+                                 std::multimap<SubdomainID, SubdomainID> blockID_pairs)
+{
+  bool is_interface = false;
+  std::pair<std::multimap<SubdomainID, SubdomainID>::iterator,
+            std::multimap<SubdomainID, SubdomainID>::iterator>
+      ret;
+  // check existence of the case when i is the key and j is the value
+  ret = blockID_pairs.equal_range(pdnode_blockID_i);
+  for (std::multimap<SubdomainID, SubdomainID>::iterator it = ret.first; it != ret.second; ++it)
+    if (pdnode_blockID_j == it->second)
+      is_interface = true;
+
+  // check existence of the case when j is the key and i is the value
+  ret = blockID_pairs.equal_range(pdnode_blockID_j);
+  for (std::multimap<SubdomainID, SubdomainID>::iterator it = ret.first; it != ret.second; ++it)
+    if (pdnode_blockID_i == it->second)
+      is_interface = true;
+
+  return is_interface;
 }
 
 void
@@ -376,13 +401,19 @@ PeridynamicsMesh::getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor
   return dg_neighbors;
 }
 
-unsigned int
+SubdomainID
 PeridynamicsMesh::getNodeBlockID(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
     mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_blockID[node_id];
+}
+
+void
+PeridynamicsMesh::setNodeBlockID(SubdomainID id)
+{
+  _pdnode_blockID.assign(_n_pdnodes, id);
 }
 
 Point
