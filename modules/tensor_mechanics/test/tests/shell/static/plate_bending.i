@@ -12,6 +12,9 @@
 # using a thin plate assumption for a square plate is
 # w = 16 q a^4/(D*pi^6) \sum_{m = 1,3,5, ..}^\inf \sum_{n = 1,3,5, ..}^\inf  (-1)^{(m+n-2)/2}/(mn*(m^2+n^2)^2)
 
+# The above solution is the Navier's series solution from the "Theory of plates
+# and shells" by Timoshenko and Woinowsky-Krieger (1959).
+
 # where a = 50 m, q = -10.816 N/m^2 and D = E/(12(1-v^2))
 # The analytical series solution converges to 2.998535904e-03 m
 # when the first 16 terms of the series are considered (i.e., until
@@ -131,35 +134,35 @@
     block = '0'
     component = 0
     variable = disp_x
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
     variable = rot_y
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
 []
 
@@ -169,7 +172,7 @@
     youngs_modulus = 1e9
     poissons_ratio = 0.3
     block = 0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./strain]
     type = ADComputeIncrementalShellStrain
@@ -177,12 +180,12 @@
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
     thickness = 1.0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./stress]
     type = ADComputeShellStress
     block = 0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
 []
 

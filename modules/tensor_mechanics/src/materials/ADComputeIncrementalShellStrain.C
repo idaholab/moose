@@ -35,8 +35,9 @@ defineADValidParams(
         "The displacements appropriate for the simulation geometry and coordinate system");
     params.addRequiredCoupledVar(
         "thickness",
-        "Cross-section area of the beam. Can be supplied as either a number or a variable name.");
-    params.addRequiredParam<std::string>("order", "Quadrature order in out of plane direction");
+        "Thickness of the shell. Can be supplied as either a number or a variable name.");
+    params.addRequiredParam<std::string>("through_thickness_order",
+                                         "Quadrature order in out of plane direction");
     params.addParam<bool>("large_strain",
                           false,
                           "Set to true to turn on finite strain calculations."););
@@ -68,21 +69,28 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
     _dxyz_dxi_old(),
     _dxyz_deta_old(),
     _dxyz_dzeta_old(),
-    _V1(4),
-    _V2(4),
+    _v1(4),
+    _v2(4),
     _B(),
     _B_old(),
     _ge(),
     _ge_old(),
-    _Jmap(),
-    _Jmap_old(),
+    _J_map(),
+    _J_map_old(),
+    _rotation_matrix(),
+    _total_global_strain(),
     _sol(_nonlinear_sys.currentSolution()),
     _sol_old(_nonlinear_sys.solutionOld())
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != 3 || _nrot != 2)
-    mooseError("ADComputeShellStrain: The number of variables supplied in 'displacements' "
-               "must be 3 and that in 'rotations' must be 2.");
+    mooseError(
+        "ADComputeIncrementalShellStrain: The number of variables supplied in 'displacements' "
+        "must be 3 and that in 'rotations' must be 2.");
+
+  if (_mesh.hasSecondOrderElements())
+    mooseError(
+        "ADComputeIncrementalShellStrain: Shell element is implemented only for linear elements.");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -98,7 +106,7 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
   }
 
   _t_qrule = libmesh_make_unique<QGauss>(
-      1, Utility::string_to_enum<Order>(getParam<std::string>("order")));
+      1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_points = _t_qrule->get_points();
   _strain_increment.resize(_t_points.size());
   _total_strain.resize(_t_points.size());
@@ -107,14 +115,16 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
   _B_old.resize(_t_points.size());
   _ge.resize(_t_points.size());
   _ge_old.resize(_t_points.size());
-  _Jmap.resize(_t_points.size());
-  _Jmap_old.resize(_t_points.size());
+  _J_map.resize(_t_points.size());
+  _J_map_old.resize(_t_points.size());
   _dxyz_dxi.resize(_t_points.size());
   _dxyz_deta.resize(_t_points.size());
   _dxyz_dzeta.resize(_t_points.size());
   _dxyz_dxi_old.resize(_t_points.size());
   _dxyz_deta_old.resize(_t_points.size());
   _dxyz_dzeta_old.resize(_t_points.size());
+  _rotation_matrix.resize(_t_points.size());
+  _total_global_strain.resize(_t_points.size());
   for (unsigned int i = 0; i < _t_points.size(); ++i)
   {
     _strain_increment[i] =
@@ -123,14 +133,12 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
         &declareADProperty<RankTwoTensor>("total_strain_t_points_" + std::to_string(i));
     _total_strain_old[i] =
         &getMaterialPropertyOldByName<RankTwoTensor>("total_strain_t_points_" + std::to_string(i));
-    _B[i] = &declareADProperty<DenseMatrix<Real>>("B_matrix_t_points_" + std::to_string(i));
-    _B_old[i] =
-        &getMaterialPropertyOldByName<DenseMatrix<Real>>("B_matrix_t_points_" + std::to_string(i));
-    _ge[i] = &declareADProperty<RankTwoTensor>("ge_matrix_t_points_" + std::to_string(i));
-    _ge_old[i] =
-        &getMaterialPropertyOldByName<RankTwoTensor>("ge_matrix_t_points_" + std::to_string(i));
-    _Jmap[i] = &declareADProperty<Real>("J_mapping_t_points_" + std::to_string(i));
-    _Jmap_old[i] = &getMaterialPropertyOldByName<Real>("J_mapping_t_points_" + std::to_string(i));
+    _B[i] = &declareADProperty<DenseMatrix<Real>>("B_t_points_" + std::to_string(i));
+    _B_old[i] = &getMaterialPropertyOldByName<DenseMatrix<Real>>("B_t_points_" + std::to_string(i));
+    _ge[i] = &declareADProperty<RankTwoTensor>("ge_t_points_" + std::to_string(i));
+    _ge_old[i] = &getMaterialPropertyOldByName<RankTwoTensor>("ge_t_points_" + std::to_string(i));
+    _J_map[i] = &declareADProperty<Real>("J_mapping_t_points_" + std::to_string(i));
+    _J_map_old[i] = &getMaterialPropertyOldByName<Real>("J_mapping_t_points_" + std::to_string(i));
     _dxyz_dxi[i] = &declareADProperty<RealVectorValue>("dxyz_dxi_t_points_" + std::to_string(i));
     _dxyz_dxi_old[i] =
         &getMaterialPropertyOldByName<RealVectorValue>("dxyz_dxi_t_points_" + std::to_string(i));
@@ -141,13 +149,27 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
         &declareADProperty<RealVectorValue>("dxyz_dzeta_t_points_" + std::to_string(i));
     _dxyz_dzeta_old[i] =
         &getMaterialPropertyOldByName<RealVectorValue>("dxyz_dzeta_t_points_" + std::to_string(i));
+    // Create rotation matrix and total strain global for output purposes only
+    _rotation_matrix[i] = &declareProperty<RankTwoTensor>("rotation_t_points_" + std::to_string(i));
+    _total_global_strain[i] =
+        &declareProperty<RankTwoTensor>("total_global_strain_t_points_" + std::to_string(i));
   }
+
+  // used later for computing local coordinate system
+  _x2(1) = 1;
+  _x3(2) = 1;
 }
 
 template <ComputeStage compute_stage>
 void
 ADComputeIncrementalShellStrain<compute_stage>::initQpStatefulProperties()
 {
+  unsigned int dim = _current_elem->dim();
+  if ((dim != 2))
+    mooseError(
+        "ADComputeIncrementalShellStrain: Shell element is implemented only for 2D elements");
+  if (_current_elem->n_nodes() != 4)
+    mooseError("ADComputeIncrementalShellStrain: Shell element needs to have exactly four nodes.");
   computeGMatrix();
   computeBMatrix();
 }
@@ -159,12 +181,9 @@ ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
   // quadrature points in isoparametric space
   _2d_points = _qrule->get_points(); // would be in 2D
 
-  unsigned int dim = _current_elem->dim();
-  if ((dim != 2))
-    mooseError("Shell element is implemented only for 2D Linear elements");
-
   // derivatives of shape functions (dphidxi, dphideta and dphidzeta) evaluated at quadrature points
   // (in isoparametric space).
+  unsigned int dim = _current_elem->dim();
   FEType fe_type(Utility::string_to_enum<Order>("First"),
                  Utility::string_to_enum<FEFamily>("LAGRANGE"));
   auto & fe = _fe_problem.assembly(_tid).getFE(fe_type, dim);
@@ -180,7 +199,7 @@ ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
     for (unsigned int j = 0; j < _t_points.size(); ++j)
     {
       (*_ge[j])[i] = (*_ge_old[j])[i];
-      (*_Jmap[j])[i] = (*_Jmap_old[j])[i];
+      (*_J_map[j])[i] = (*_J_map_old[j])[i];
       (*_dxyz_dxi[j])[i] = (*_dxyz_dxi_old[j])[i];
       (*_dxyz_deta[j])[i] = (*_dxyz_deta_old[j])[i];
       (*_dxyz_dzeta[j])[i] = (*_dxyz_dzeta_old[j])[i];
@@ -203,7 +222,6 @@ ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
         for (unsigned int temp2 = 0; temp2 < 20; ++temp2)
           _strain_vector(temp1) += (*_B[j])[i](temp1, temp2) * _soln_vector(temp2);
       }
-
       (*_strain_increment[j])[i](0, 0) = _strain_vector(0);
       (*_strain_increment[j])[i](1, 1) = _strain_vector(1);
       (*_strain_increment[j])[i](0, 1) = _strain_vector(2);
@@ -212,7 +230,14 @@ ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
       (*_strain_increment[j])[i](1, 0) = (*_strain_increment[j])[i](0, 1);
       (*_strain_increment[j])[i](2, 0) = (*_strain_increment[j])[i](0, 2);
       (*_strain_increment[j])[i](2, 1) = (*_strain_increment[j])[i](1, 2);
+
       (*_total_strain[j])[i] = (*_total_strain_old[j])[i] + (*_strain_increment[j])[i];
+
+      for (unsigned int ii = 0; ii < 3; ++ii)
+        for (unsigned int jj = 0; jj < 3; ++jj)
+          _unrotated_total_strain(ii, jj) = MetaPhysicL::raw_value((*_total_strain[j])[i](ii, jj));
+      (*_total_global_strain[j])[i] = (*_rotation_matrix[j])[i].transpose() *
+                                      _unrotated_total_strain * (*_rotation_matrix[j])[i];
     }
   }
   copyDualNumbersToValues();
@@ -226,8 +251,6 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
   _2d_points = _qrule->get_points(); // would be in 2D
 
   unsigned int dim = _current_elem->dim();
-  if ((dim != 2))
-    mooseError("Shell element is implemented only for 2D Linear elements");
 
   // derivatives of shape functions (dphidxi, dphideta and dphidzeta) evaluated at quadrature points
   // (in isoparametric space).
@@ -252,26 +275,22 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
   ADRankTwoTensor a;
   ADDenseMatrix b(5, 20);
   ADRealVectorValue c;
+  RankTwoTensor d;
   for (unsigned int t = 0; t < _t_points.size(); ++t)
   {
     (*_strain_increment[t])[_qp] = a;
     (*_total_strain[t])[_qp] = a;
     (*_B[t])[_qp] = b;
     (*_ge[t])[_qp] = a;
-    (*_Jmap[t])[_qp] = 0;
+    (*_J_map[t])[_qp] = 0;
     (*_dxyz_dxi[t])[_qp] = c;
     (*_dxyz_deta[t])[_qp] = c;
     (*_dxyz_dzeta[t])[_qp] = c;
+    (*_rotation_matrix[t])[_qp] = d;
   }
 
-  // calculating derivatives of shape function is physical space (dphi/dx, dphi/dy, dphi/dz) at
+  // calculating derivatives of shape function in physical space (dphi/dx, dphi/dy, dphi/dz) at
   // quadrature points these are g_{i} in Dvorkin's paper
-  ADRealVectorValue en;
-  ADRealVectorValue ex;
-  ADRealVectorValue ey;
-  en(2) = 1.0;
-  ex(0) = 1.0;
-  ey(1) = 1.0;
   for (unsigned int i = 0; i < _2d_points.size(); ++i)
   {
     for (unsigned int j = 0; j < _t_points.size(); ++j)
@@ -285,13 +304,14 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
 
         for (unsigned int k = 0; k < _nodes.size(); ++k)
         {
-          (*_dxyz_dxi[j])[i](component) +=
-              _dphidxi_map[k][i] * ((*_nodes[k])(component)) +
-              _t_points[j](0) / 2.0 * _thickness[i] * _dphidxi_map[k][i] * en(component);
-          (*_dxyz_deta[j])[i](component) +=
-              _dphideta_map[k][i] * ((*_nodes[k])(component)) +
-              _t_points[j](0) / 2.0 * _thickness[i] * _dphideta_map[k][i] * en(component);
-          (*_dxyz_dzeta[j])[i](component) += _thickness[i] * _phi_map[k][i] * en(component) / 2.0;
+          (*_dxyz_dxi[j])[i](component) += _dphidxi_map[k][i] * ((*_nodes[k])(component)) +
+                                           _t_points[j](0) / 2.0 * _thickness[i] *
+                                               _dphidxi_map[k][i] * _node_normal[k](component);
+          (*_dxyz_deta[j])[i](component) += _dphideta_map[k][i] * ((*_nodes[k])(component)) +
+                                            _t_points[j](0) / 2.0 * _thickness[i] *
+                                                _dphideta_map[k][i] * _node_normal[k](component);
+          (*_dxyz_dzeta[j])[i](component) +=
+              _thickness[i] * _phi_map[k][i] * _node_normal[k](component) / 2.0;
         }
       }
     }
@@ -303,6 +323,7 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
     {
       // calculate gij for elasticity tensor
       ADRankTwoTensor gmn;
+      RankTwoTensor J;
       for (unsigned int component = 0; component < 3; ++component)
       {
         gmn(0, 0) += (*_dxyz_dxi[j])[i](component) * (*_dxyz_dxi[j])[i](component);
@@ -311,13 +332,18 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
         gmn(0, 1) += (*_dxyz_dxi[j])[i](component) * (*_dxyz_deta[j])[i](component);
         gmn(0, 2) += (*_dxyz_dxi[j])[i](component) * (*_dxyz_dzeta[j])[i](component);
         gmn(1, 2) += (*_dxyz_deta[j])[i](component) * (*_dxyz_dzeta[j])[i](component);
+
+        J(0, component) = MetaPhysicL::raw_value((*_dxyz_dxi[j])[i](component));
+        J(1, component) = MetaPhysicL::raw_value((*_dxyz_deta[j])[i](component));
+        J(2, component) = MetaPhysicL::raw_value((*_dxyz_dzeta[j])[i](component));
       }
       gmn(1, 0) = gmn(0, 1);
       gmn(2, 0) = gmn(0, 2);
       gmn(2, 1) = gmn(1, 2);
 
-      ADRankTwoTensor gmninv = gmn.inverse();
-      (*_Jmap[j])[i] = std::sqrt(gmn.det());
+      ADRankTwoTensor gmninv_temp = gmn.inverse();
+      (*_J_map[j])[i] = std::sqrt(gmn.det());
+      (*_rotation_matrix[j])[i] = J;
 
       // calculate ge
       ADRealVectorValue e3 = (*_dxyz_dzeta[j])[i] / (*_dxyz_dzeta[j])[i].norm();
@@ -325,6 +351,19 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
       e1 /= e1.norm();
       ADRealVectorValue e2 = e3.cross(e1);
       e2 /= e2.norm();
+
+      ADRankTwoTensor local_rotation_mat;
+      local_rotation_mat(0, 0) = e1(0);
+      local_rotation_mat(0, 1) = e1(1);
+      local_rotation_mat(0, 2) = e1(2);
+      local_rotation_mat(1, 0) = e2(0);
+      local_rotation_mat(1, 1) = e2(1);
+      local_rotation_mat(1, 2) = e2(2);
+      local_rotation_mat(2, 0) = e3(0);
+      local_rotation_mat(2, 1) = e3(1);
+      local_rotation_mat(2, 2) = e3(2);
+
+      ADRankTwoTensor gmninv = local_rotation_mat.transpose() * gmninv_temp * local_rotation_mat;
 
       (*_ge[j])[i](0, 0) = (gmninv * (*_dxyz_dxi[j])[i]) * e1;
       (*_ge[j])[i](0, 1) = (gmninv * (*_dxyz_dxi[j])[i]) * e2;
@@ -352,19 +391,16 @@ void
 ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
 {
   // compute nodal local axis
-  _x2(1) = 1;
-  _x3(2) = 1;
-
   for (unsigned int k = 0; k < _nodes.size(); ++k)
   {
-    _V1[k] = _x2.cross(_node_normal[k]);
-    _V1[k] /= _x2.norm() * _node_normal[k].norm();
+    _v1[k] = _x2.cross(_node_normal[k]);
+    _v1[k] /= _x2.norm() * _node_normal[k].norm();
 
     // If x2 is parallel to node normal, set V1 to x3
-    if (MooseUtils::absoluteFuzzyEqual(_V1[k].norm(), 0.0, 1e-6))
-      _V1[k] = _x3;
+    if (MooseUtils::absoluteFuzzyEqual(_v1[k].norm(), 0.0, 1e-6))
+      _v1[k] = _x3;
 
-    _V2[k] = _node_normal[k].cross(_V1[k]);
+    _v2[k] = _node_normal[k].cross(_v1[k]);
   }
 
   // compute B matrix rows correspond to [ux1, ux2, ux3, ux4, uy1, uy2, uy3, uy4, uz1, uz2, uz3,
@@ -382,18 +418,18 @@ ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
         (*_B[j])[i](0, 4 + k) = _dphidxi_map[k][i] * (*_dxyz_dxi[j])[i](1);
         (*_B[j])[i](0, 8 + k) = _dphidxi_map[k][i] * (*_dxyz_dxi[j])[i](2);
         (*_B[j])[i](0, 12 + k) = _dphidxi_map[k][i] * _t_points[j](0) / 2.0 * _thickness[i] *
-                                 (-_V2[k] * (*_dxyz_dxi[j])[i]);
+                                 (-_v2[k] * (*_dxyz_dxi[j])[i]);
         (*_B[j])[i](0, 16 + k) = _dphidxi_map[k][i] * _t_points[j](0) / 2.0 * _thickness[i] *
-                                 (_V1[k] * (*_dxyz_dxi[j])[i]);
+                                 (_v1[k] * (*_dxyz_dxi[j])[i]);
 
         // corresponding to strain(1,1)
         (*_B[j])[i](1, k) = _dphideta_map[k][i] * (*_dxyz_deta[j])[i](0);
         (*_B[j])[i](1, 4 + k) = _dphideta_map[k][i] * (*_dxyz_deta[j])[i](1);
         (*_B[j])[i](1, 8 + k) = _dphideta_map[k][i] * (*_dxyz_deta[j])[i](2);
         (*_B[j])[i](1, 12 + k) = _dphideta_map[k][i] * _t_points[j](0) / 2.0 * _thickness[i] *
-                                 (-_V2[k] * (*_dxyz_deta[j])[i]);
+                                 (-_v2[k] * (*_dxyz_deta[j])[i]);
         (*_B[j])[i](1, 16 + k) = _dphideta_map[k][i] * _t_points[j](0) / 2.0 * _thickness[i] *
-                                 (_V1[k] * (*_dxyz_deta[j])[i]);
+                                 (_v1[k] * (*_dxyz_deta[j])[i]);
 
         // corresponding to strain(2,2) = 0
 
@@ -405,25 +441,25 @@ ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
         (*_B[j])[i](2, 8 + k) = 0.5 * (_dphideta_map[k][i] * (*_dxyz_dxi[j])[i](2) +
                                        _dphidxi_map[k][i] * (*_dxyz_deta[j])[i](2));
         (*_B[j])[i](2, 12 + k) =
-            0.25 * _t_points[j](0) * _thickness[i] * -_V2[k] *
+            0.25 * _t_points[j](0) * _thickness[i] * -_v2[k] *
             (_dphideta_map[k][i] * (*_dxyz_dxi[j])[i] + _dphidxi_map[k][i] * (*_dxyz_deta[j])[i]);
         (*_B[j])[i](2, 16 + k) =
-            0.25 * _t_points[j](0) * _thickness[i] * _V1[k] *
+            0.25 * _t_points[j](0) * _thickness[i] * _v1[k] *
             ((*_dxyz_deta[j])[i] * _dphidxi_map[k][i] + (*_dxyz_dxi[j])[i] * _dphideta_map[k][i]);
       }
 
-      _g3_A = _thickness[i] / 4.0 * (_node_normal[2] + _node_normal[3]);
-      _g3_C = _thickness[i] / 4.0 * (_node_normal[0] + _node_normal[1]);
-      _g3_B = _thickness[i] / 4.0 * (_node_normal[0] + _node_normal[3]);
-      _g3_D = _thickness[i] / 4.0 * (_node_normal[1] + _node_normal[2]);
+      _g3_a = _thickness[i] / 4.0 * (_node_normal[2] + _node_normal[3]);
+      _g3_c = _thickness[i] / 4.0 * (_node_normal[0] + _node_normal[1]);
+      _g3_b = _thickness[i] / 4.0 * (_node_normal[0] + _node_normal[3]);
+      _g3_d = _thickness[i] / 4.0 * (_node_normal[1] + _node_normal[2]);
 
-      _g1_A = 0.5 * ((*_nodes[2]) - (*_nodes[3])) +
+      _g1_a = 0.5 * ((*_nodes[2]) - (*_nodes[3])) +
               _t_points[j](0) / 4.0 * _thickness[i] * (_node_normal[2] - _node_normal[3]);
-      _g1_C = 0.5 * ((*_nodes[1]) - (*_nodes[0])) +
+      _g1_c = 0.5 * ((*_nodes[1]) - (*_nodes[0])) +
               _t_points[j](0) / 4.0 * _thickness[i] * (_node_normal[1] - _node_normal[0]);
-      _g2_B = 0.5 * ((*_nodes[3]) - (*_nodes[0])) +
+      _g2_b = 0.5 * ((*_nodes[3]) - (*_nodes[0])) +
               _t_points[j](0) / 4.0 * _thickness[i] * (_node_normal[3] - _node_normal[0]);
-      _g2_D = 0.5 * ((*_nodes[2]) - (*_nodes[1])) +
+      _g2_d = 0.5 * ((*_nodes[2]) - (*_nodes[1])) +
               _t_points[j](0) / 4.0 * _thickness[i] * (_node_normal[2] - _node_normal[1]);
 
       updateGVectors(); // for large strain problems
@@ -431,56 +467,38 @@ ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
       // corresponding to strain(0,2)
       for (unsigned int component = 0; component < 3; component++)
       {
-        (*_B[j])[i](3, 2 + component * 4) = 1.0 / 8.0 * (1.0 + _2d_points[i](1)) * _g3_A(component);
-        (*_B[j])[i](3, 3 + component * 4) =
-            1.0 / 8.0 * (1.0 + _2d_points[i](1)) * -_g3_A(component);
-        (*_B[j])[i](3, 1 + component * 4) = 1.0 / 8.0 * (1.0 - _2d_points[i](1)) * _g3_C(component);
-        (*_B[j])[i](3, component * 4) = 1.0 / 8.0 * (1.0 - _2d_points[i](1)) * -_g3_C(component);
+        (*_B[j])[i](3, 2 + component * 4) = 0.125 * (1.0 + _2d_points[i](1)) * _g3_a(component);
+        (*_B[j])[i](3, 3 + component * 4) = 0.125 * (1.0 + _2d_points[i](1)) * -_g3_a(component);
+        (*_B[j])[i](3, 1 + component * 4) = 0.125 * (1.0 - _2d_points[i](1)) * _g3_c(component);
+        (*_B[j])[i](3, component * 4) = 0.125 * (1.0 - _2d_points[i](1)) * -_g3_c(component);
       }
-      (*_B[j])[i](3, 14) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_A * -_V2[2];
-      (*_B[j])[i](3, 18) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_A * _V1[2];
-      (*_B[j])[i](3, 15) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_A * -_V2[3];
-      (*_B[j])[i](3, 19) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_A * _V1[3];
+      (*_B[j])[i](3, 14) = 0.125 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_a * -_v2[2];
+      (*_B[j])[i](3, 18) = 0.125 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_a * _v1[2];
+      (*_B[j])[i](3, 15) = 0.125 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_a * -_v2[3];
+      (*_B[j])[i](3, 19) = 0.125 * (1.0 + _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_a * _v1[3];
 
-      (*_B[j])[i](3, 13) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_C * -_V2[1];
-      (*_B[j])[i](3, 17) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_C * _V1[1];
-      (*_B[j])[i](3, 12) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_C * -_V2[0];
-      (*_B[j])[i](3, 16) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_C * _V1[0];
+      (*_B[j])[i](3, 13) = 0.125 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_c * -_v2[1];
+      (*_B[j])[i](3, 17) = 0.125 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_c * _v1[1];
+      (*_B[j])[i](3, 12) = 0.125 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_c * -_v2[0];
+      (*_B[j])[i](3, 16) = 0.125 * (1.0 - _2d_points[i](1)) * 0.5 * _thickness[i] * _g1_c * _v1[0];
 
       // corresponding to strain(1,2)
       for (unsigned int component = 0; component < 3; component++)
       {
-        (*_B[j])[i](4, 2 + component * 4) = 1.0 / 8.0 * (1.0 + _2d_points[i](0)) * _g3_D(component);
-        (*_B[j])[i](4, 1 + component * 4) =
-            1.0 / 8.0 * (1.0 + _2d_points[i](0)) * -_g3_D(component);
-        (*_B[j])[i](4, 3 + component * 4) = 1.0 / 8.0 * (1.0 - _2d_points[i](0)) * _g3_B(component);
-        (*_B[j])[i](4, component * 4) = 1.0 / 8.0 * (1.0 - _2d_points[i](0)) * -_g3_B(component);
+        (*_B[j])[i](4, 2 + component * 4) = 0.125 * (1.0 + _2d_points[i](0)) * _g3_d(component);
+        (*_B[j])[i](4, 1 + component * 4) = 0.125 * (1.0 + _2d_points[i](0)) * -_g3_d(component);
+        (*_B[j])[i](4, 3 + component * 4) = 0.125 * (1.0 - _2d_points[i](0)) * _g3_b(component);
+        (*_B[j])[i](4, component * 4) = 0.125 * (1.0 - _2d_points[i](0)) * -_g3_b(component);
       }
-      (*_B[j])[i](4, 14) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_D * -_V2[2];
-      (*_B[j])[i](4, 18) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_D * _V1[2];
-      (*_B[j])[i](4, 13) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_D * -_V2[1];
-      (*_B[j])[i](4, 17) =
-          1.0 / 8.0 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_D * _V1[1];
+      (*_B[j])[i](4, 14) = 0.125 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_d * -_v2[2];
+      (*_B[j])[i](4, 18) = 0.125 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_d * _v1[2];
+      (*_B[j])[i](4, 13) = 0.125 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_d * -_v2[1];
+      (*_B[j])[i](4, 17) = 0.125 * (1.0 + _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_d * _v1[1];
 
-      (*_B[j])[i](4, 15) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_B * -_V2[3];
-      (*_B[j])[i](4, 19) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_B * _V1[3];
-      (*_B[j])[i](4, 12) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_B * -_V2[0];
-      (*_B[j])[i](4, 16) =
-          1.0 / 8.0 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_B * _V1[0];
+      (*_B[j])[i](4, 15) = 0.125 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_b * -_v2[3];
+      (*_B[j])[i](4, 19) = 0.125 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_b * _v1[3];
+      (*_B[j])[i](4, 12) = 0.125 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_b * -_v2[0];
+      (*_B[j])[i](4, 16) = 0.125 * (1.0 - _2d_points[i](0)) * 0.5 * _thickness[i] * _g2_b * _v1[0];
     }
   }
 }

@@ -4,7 +4,7 @@
 
 ## Description
 
-This class computes the small strain increments for shell elements. Please refer to [ShellElements](/ShellElements.md) for details.
+This class computes the incremental small strain for shell elements. Please refer to [ShellElements](/ShellElements.md) for details.
 
 !syntax parameters /Materials/ADComputeIncrementalShellStrain
 

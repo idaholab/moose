@@ -4,7 +4,7 @@
 
 ## Description
 
-The `ADStressDivergenceShell` kernel calculates the residual of the stress divergence for shell elements. Forward mode automatic differentiation is used to compute an exact Jacobian. Please refer to [ShellElements](/ShellElements.md) for details.
+The `ADStressDivergenceShell` kernel calculates the contribution to the residual from the stress divergence for shell elements. Forward mode automatic differentiation is used to compute an exact Jacobian. Please refer to [ShellElements](/ShellElements.md) for details.
 
 ## Example Input File syntax
 

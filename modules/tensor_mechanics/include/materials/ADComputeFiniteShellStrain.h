@@ -12,13 +12,18 @@
 #include "ADComputeIncrementalShellStrain.h"
 #include "libmesh/dense_matrix.h"
 
-#define usingComputeFiniteShellStrainMembers usingComputeIncrementalShellStrainMembers;
+#define usingComputeFiniteShellStrainMembers usingComputeIncrementalShellStrainMembers
 
 // Forward Declarations
 template <ComputeStage>
 class ADComputeFiniteShellStrain;
 
 declareADValidParams(ADComputeFiniteShellStrain);
+
+/**
+ * ADComputeFiniteShellStrain computes the strain increment term for shell elements under finite
+ *displacement/rotation scenarios.
+ **/
 
 template <ComputeStage compute_stage>
 class ADComputeFiniteShellStrain : public ADComputeIncrementalShellStrain<compute_stage>
@@ -29,12 +34,15 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeProperties() override;
-  virtual void computeBNLMatrix();
   virtual void computeNodeNormal() override;
   virtual void updatedxyz() override;
   virtual void updateGVectors() override;
 
-  std::vector<ADMaterialProperty(DenseMatrix<Real>) *> _BNL;
+  /// Computes the B_nl matrix that connects the nonlinear strains to the nodal displacements and rotations
+  virtual void computeBNLMatrix();
+
+  /// Material property to store the B_nl matrix at each quadrature point
+  std::vector<ADMaterialProperty(DenseMatrix<Real>) *> _B_nl;
 
   usingComputeIncrementalShellStrainMembers;
 };

@@ -140,35 +140,35 @@
     block = '0'
     component = 0
     variable = disp_x
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
     variable = rot_y
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
 []
 
@@ -178,7 +178,7 @@
     youngs_modulus = 1e3
     poissons_ratio = 0.3
     block = 0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./strain]
     type = ADComputeIncrementalShellStrain
@@ -186,12 +186,12 @@
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
     thickness = 1.0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
   [./stress]
     type = ADComputeShellStress
     block = 0
-    order = SECOND
+    through_thickness_order = SECOND
   [../]
 []
 

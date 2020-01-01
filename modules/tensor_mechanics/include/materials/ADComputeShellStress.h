@@ -10,15 +10,21 @@
 #pragma once
 
 #include "ADMaterial.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 #include "ADComputeIsotropicElasticityTensorShell.h"
 
-#define usingComputeShellStressMembers usingMaterialMembers;
+#define usingComputeShellStressMembers usingMaterialMembers
 
 // Forward Declarations
 template <ComputeStage>
 class ADComputeShellStress;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 namespace libMesh
 {
@@ -51,6 +57,15 @@ protected:
 
   /// Quadrature points along thickness
   std::vector<Point> _t_points;
+
+  /// Rotation matrix material property
+  std::vector<const MaterialProperty<RankTwoTensor> *> _rotation_matrix;
+
+  /// Global stress tensor material property
+  std::vector<MaterialProperty<RankTwoTensor> *> _global_stress;
+
+  /// Real value of stress in the local coordinate system
+  RankTwoTensor _unrotated_stress;
 
   usingMaterialMembers;
 };

@@ -29,7 +29,8 @@ defineADValidParams(
     params.addRequiredRangeCheckedParam<Real>("youngs_modulus",
                                               "youngs_modulus > 0.0",
                                               "Young's modulus of the material.");
-    params.addRequiredParam<std::string>("order", "Quadrature order in out of plane direction"););
+    params.addRequiredParam<std::string>("through_thickness_order",
+                                         "Quadrature order in out of plane direction"););
 
 template <ComputeStage compute_stage>
 ADComputeIsotropicElasticityTensorShell<compute_stage>::ADComputeIsotropicElasticityTensorShell(
@@ -53,7 +54,7 @@ ADComputeIsotropicElasticityTensorShell<compute_stage>::ADComputeIsotropicElasti
 
   // get number of quadrature points along thickness based on order
   std::unique_ptr<QGauss> t_qrule = libmesh_make_unique<QGauss>(
-      1, Utility::string_to_enum<Order>(getParam<std::string>("order")));
+      1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_points = t_qrule->get_points();
   _elasticity_tensor.resize(_t_points.size());
   _ge.resize(_t_points.size());
@@ -61,7 +62,7 @@ ADComputeIsotropicElasticityTensorShell<compute_stage>::ADComputeIsotropicElasti
   {
     _elasticity_tensor[t] =
         &declareADProperty<RankFourTensor>("elasticity_tensor_t_points_" + std::to_string(t));
-    _ge[t] = &getADMaterialProperty<RankTwoTensor>("ge_matrix_t_points_" + std::to_string(t));
+    _ge[t] = &getADMaterialProperty<RankTwoTensor>("ge_t_points_" + std::to_string(t));
   }
 }
 

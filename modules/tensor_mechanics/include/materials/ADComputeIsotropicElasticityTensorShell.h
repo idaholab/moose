@@ -11,7 +11,7 @@
 
 #include "ADMaterial.h"
 
-#define usingComputeIsotropicElasticityTensorShellMembers usingMaterialMembers;
+#define usingComputeIsotropicElasticityTensorShellMembers usingMaterialMembers
 
 // Forward Declarations
 template <ComputeStage>

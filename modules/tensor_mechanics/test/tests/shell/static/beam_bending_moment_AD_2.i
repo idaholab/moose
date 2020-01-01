@@ -1,10 +1,10 @@
-# Test that models bending of a cantilever beam using shell elements
+# Test that models bending of a rotated cantilever beam using shell elements
 
-# A cantilever beam of length 10 m (in Y direction) and cross-section
+# A cantilever beam of length 10 m (in Z direction) and cross-section
 # 1 m x 0.1 m is modeled using 4 shell elements placed along the length
 # (Figure 6a from Dvorkin and Bathe, 1984). All displacements and
 # X rotations are fixed on the bottom boundary. E = 2100000 and v = 0.0.
-# A load of 0.5 N (in the Z direction) is applied at each node on the top
+# A load of 0.5 N (in the Y direction) is applied at each node on the top
 # boundary resulting in a total load of 1 N.
 
 # The analytical solution for displacement at tip using small strain/rotations # is PL^3/3EI + PL/AG = 1.90485714 m
@@ -14,22 +14,22 @@
 # Similarly, the analytical solution for slope at tip is PL^2/2EI = 0.285714286
 # The FEM solution is 0.2857143 and the relative error is 5e-6%.
 
-# The stress_yy for the four elements at z = -0.57735 * (t/2) (first qp below mid-surface of shell) are:
+# The stress_zz for the four elements at y = -0.57735 * (t/2) (first qp below mid-surface of shell) are:
 # 3031.089 Pa, 2165.064 Pa, 1299.038 Pa and 433.0127 Pa.
 # Note the above values are the average stresses in each element.
 
-# Analytically, stress_yy decreases linearly from y = 0 to y = 10 m.
-# The maximum value of stress_yy at y = 0 is Mz/I = PL * 0.57735*(t/2)/I = 3464.1 Pa
-# Therefore, the analytical value of stress at z = -0.57735 * (t/2) at the mid-point
+# Analytically, stress_zz decreases linearly from z = 0 to z = 10 m.
+# The maximum value of stress_zz at z = 0 is My/I = PL * 0.57735*(t/2)/I = 3464.1 Pa
+# Therefore, the analytical value of stress at y = -0.57735 * (t/2) at the mid-point
 # of the four elements are:
 # 3031.0875 Pa, 2165.0625 Pa, 1299.0375 Pa ,433.0125 Pa
 
-# The relative error in stress_yy is in the order of 5e-5%.
+# The relative error in stress_zz is in the order of 5e-5%.
 
-# The stress_yz at z = -0.57735 * (t/2) at all four elements from the simulation is 10 Pa.
-# The analytical solution for the shear stress is: V/2/I *((t^2)/4 - z^2), where the shear force (V)
-# is 1 N at any y along the length of the beam. Therefore, the analytical shear stress at
-# z = -0.57735 * (t/2) is 10 Pa at any location along the length of the beam.
+# The stress_yz at y = -0.57735 * (t/2) at all four elements from the simulation is 10 Pa.
+# The analytical solution for the shear stress is: V/2/I *((t^2)/4 - y^2), where the shear force (V)
+# is 1 N at any z along the length of the beam. Therefore, the analytical shear stress at
+# y = -0.57735 * (t/2) is 10 Pa at any location along the length of the beam.
 
 [Mesh]
   type = GeneratedMesh
@@ -40,6 +40,14 @@
   xmax = 1.0
   ymin = 0.0
   ymax = 10.0
+[]
+
+[MeshModifiers]
+  [./rotate]
+    type = Transform
+    transform = ROTATE
+    vector_value = '0 90 0'
+  [../]
 []
 
 [Variables]
@@ -66,7 +74,7 @@
 []
 
 [AuxVariables]
-  [./stress_yy]
+  [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -77,12 +85,12 @@
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [./stress_zz]
     type = RankTwoAux
-    variable = stress_yy
+    variable = stress_zz
     rank_two_tensor = global_stress_t_points_0
-    index_i = 1
-    index_j = 1
+    index_i = 2
+    index_j = 2
   [../]
   [./stress_yz]
     type = RankTwoAux
@@ -129,7 +137,7 @@
 [NodalKernels]
   [./force_y2]
     type = ConstantRate
-    variable = disp_z
+    variable = disp_y
     boundary = 'top'
     rate = 0.5
   [../]
@@ -218,33 +226,33 @@
 [Postprocessors]
   [./disp_z_tip]
     type = PointValue
-    point = '1.0 10.0 0.0'
-    variable = disp_z
+    point = '1.0 0.0 10.0'
+    variable = disp_y
   [../]
-  [./rot_x_tip]
+  [./rot_y_tip]
     type = PointValue
-    point = '0.0 10.0 0.0'
-    variable = rot_x
+    point = '0.0 0.0 10.0'
+    variable = rot_y
   [../]
-  [./stress_yy_el_0]
+  [./stress_zz_el_0]
     type = ElementalVariableValue
     elementid = 0
-    variable = stress_yy
+    variable = stress_zz
   [../]
-  [./stress_yy_el_1]
+  [./stress_zz_el_1]
     type = ElementalVariableValue
     elementid = 1
-    variable = stress_yy
+    variable = stress_zz
   [../]
-  [./stress_yy_el_2]
+  [./stress_zz_el_2]
     type = ElementalVariableValue
     elementid = 2
-    variable = stress_yy
+    variable = stress_zz
   [../]
-  [./stress_yy_el_3]
+  [./stress_zz_el_3]
     type = ElementalVariableValue
     elementid = 3
-    variable = stress_yy
+    variable = stress_zz
   [../]
   [./stress_yz_el_0]
     type = ElementalVariableValue

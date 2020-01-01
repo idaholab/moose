@@ -10,15 +10,21 @@
 #pragma once
 
 #include "ADKernel.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 #include "libmesh/quadrature_gauss.h"
 
-#define usingADStressDivergenceShellMembers usingKernelMembers;
+#define usingADStressDivergenceShellMembers usingKernelMembers
 
 // Forward Declarations
 template <ComputeStage>
 class ADStressDivergenceShell;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 namespace libMesh
 {
@@ -46,13 +52,13 @@ protected:
   std::vector<const ADMaterialProperty(RankTwoTensor) *> _stress;
   std::vector<const MaterialProperty<RankTwoTensor> *> _stress_old;
   std::vector<const ADMaterialProperty(DenseMatrix<Real>) *> _B_mat;
-  std::vector<const ADMaterialProperty(DenseMatrix<Real>) *> _B_NL;
-  std::vector<const ADMaterialProperty(Real) *> _Jmap;
+  std::vector<const ADMaterialProperty(DenseMatrix<Real>) *> _B_nl;
+  std::vector<const ADMaterialProperty(Real) *> _J_map;
 
   /// Quadrature rule in the out of plane direction
   std::unique_ptr<QGauss> _t_qrule;
 
-  /// Quadrature points in the out of plane direction in isoparametric coordinate system
+  /// Quadrature weights in the out of plane direction in isoparametric coordinate system
   std::vector<Real> _t_weights;
 
   /// Qrule weights in isoparametric coordinate system
