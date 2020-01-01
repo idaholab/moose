@@ -95,7 +95,7 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
 
     unsigned int nb =
         std::find(neighbors.begin(), neighbors.end(), end_nd->id()) - neighbors.begin();
-    std::vector<unsigned int> dg_neighbors = _pdmesh.getDefGradNeighbors(cur_nd->id(), nb);
+    std::vector<dof_id_type> dg_neighbors = _pdmesh.getDefGradNeighbors(cur_nd->id(), nb);
 
     // calculate the shape tensor and prepare the deformation gradient tensor
     Real dgnodes_vsum = 0.0;

@@ -30,9 +30,6 @@ GeneralizedPlaneStrainUserObjectNOSPD::GeneralizedPlaneStrainUserObjectNOSPD(
   : GeneralizedPlaneStrainUserObjectBasePD(parameters),
     _stress(getMaterialProperty<RankTwoTensor>("stress"))
 {
-  if (_strain == "Finite")
-    mooseError("Generalized plane strain model based on NOSPD doesnot support FINITE strain "
-               "formulation at this time!");
 }
 
 void
@@ -51,8 +48,8 @@ GeneralizedPlaneStrainUserObjectNOSPD::execute()
   Real nv_j = _pdmesh.getPDNodeVolume(node_j);
 
   // sum of volumes of material points used in bond-associated deformation gradient calculation
-  unsigned int id_j_in_i = _pdmesh.getNeighborIndex(node_i, node_j);
-  unsigned int id_i_in_j = _pdmesh.getNeighborIndex(node_j, node_i);
+  dof_id_type id_j_in_i = _pdmesh.getNeighborIndex(node_i, node_j);
+  dof_id_type id_i_in_j = _pdmesh.getNeighborIndex(node_j, node_i);
 
   Real dg_vol_frac_i = _pdmesh.getDefGradVolFraction(node_i, id_j_in_i);
   Real dg_vol_frac_j = _pdmesh.getDefGradVolFraction(node_j, id_i_in_j);

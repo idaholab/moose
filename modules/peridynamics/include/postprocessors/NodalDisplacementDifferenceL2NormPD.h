@@ -30,17 +30,10 @@ public:
 protected:
   virtual Real computeNodalValue() override;
 
-  ///@{ Known displacements analytical solutions
-  const bool _has_func_0;
-  const Function * _func_0;
-
-  const bool _has_func_1;
-  const Function * _func_1;
-
-  const bool _has_func_2;
-  const Function * _func_2;
-  ///@}
-
   /// Displacement variables
+  unsigned int _n_disps;
   std::vector<MooseVariable *> _disp_var;
+
+  /// Known analytic displacement functions
+  std::vector<const Function *> _funcs;
 };

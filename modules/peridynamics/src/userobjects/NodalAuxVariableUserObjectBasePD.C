@@ -20,14 +20,14 @@ validParams<NodalAuxVariableUserObjectBasePD>()
   params.addClassDescription("Base class for computing value for nodal AuxVariable from elemental "
                              "information in a peridynamic model");
 
-  params.addRequiredCoupledVar("aux_variable", "Name of AuxVariable this userobject is acting on");
+  params.addRequiredCoupledVar("variable", "Name of AuxVariable this userobject is acting on");
 
   return params;
 }
 
 NodalAuxVariableUserObjectBasePD::NodalAuxVariableUserObjectBasePD(
     const InputParameters & parameters)
-  : ElementUserObjectBasePD(parameters), _aux_var(getVar("aux_variable", 0))
+  : ElementUserObjectBasePD(parameters), _var(getVar("variable", 0))
 {
 }
 
@@ -35,7 +35,7 @@ void
 NodalAuxVariableUserObjectBasePD::initialize()
 {
   std::vector<std::string> zero_vars;
-  zero_vars.push_back(_aux_var->name());
+  zero_vars.push_back(_var->name());
   _aux.zeroVariables(zero_vars);
 }
 
@@ -44,7 +44,7 @@ NodalAuxVariableUserObjectBasePD::execute()
 {
   for (unsigned int i = 0; i < 2; ++i)
   {
-    dof_id_type dof = _current_elem->node_ptr(i)->dof_number(_aux.number(), _aux_var->number(), 0);
+    dof_id_type dof = _current_elem->node_ptr(i)->dof_number(_aux.number(), _var->number(), 0);
 
     computeValue(i, dof);
   }

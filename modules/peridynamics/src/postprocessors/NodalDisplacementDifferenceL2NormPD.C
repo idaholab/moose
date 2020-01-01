@@ -19,11 +19,10 @@ validParams<NodalDisplacementDifferenceL2NormPD>()
 {
   InputParameters params = validParams<NodalIntegralPostprocessorBasePD>();
   params.addClassDescription("Class for computing the L2 norm of the difference between "
-                             "displacement(s) and it/their analytical solution(s)");
+                             "displacements and their analytic solutions");
 
-  params.addParam<FunctionName>("function_0", "The known function for displacement component 0.");
-  params.addParam<FunctionName>("function_1", "The known function for displacement component 1.");
-  params.addParam<FunctionName>("function_2", "The known function for displacement component 2.");
+  params.addRequiredParam<std::vector<FunctionName>>(
+      "analytic_functions", "The known analytic functions for displacements");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements", "Nonlinear variable name for the displacements");
 
@@ -32,25 +31,27 @@ validParams<NodalDisplacementDifferenceL2NormPD>()
 
 NodalDisplacementDifferenceL2NormPD::NodalDisplacementDifferenceL2NormPD(
     const InputParameters & parameters)
-  : NodalIntegralPostprocessorBasePD(parameters),
-    _has_func_0(isParamValid("function_0")),
-    _func_0(_has_func_0 ? &getFunction("function_0") : nullptr),
-    _has_func_1(isParamValid("function_1")),
-    _func_1(_has_func_1 ? &getFunction("function_1") : nullptr),
-    _has_func_2(isParamValid("function_2")),
-    _func_2(_has_func_2 ? &getFunction("function_2") : nullptr)
+  : NodalIntegralPostprocessorBasePD(parameters)
 {
-  if (_has_func_0 + _has_func_1 + _has_func_2 == 0)
-    mooseError("Must provide at least one displacement function for integral error check!");
-
   const std::vector<NonlinearVariableName> & nl_vnames(
       getParam<std::vector<NonlinearVariableName>>("displacements"));
 
-  if (nl_vnames.size() > _dim)
-    mooseError("Number of displacements component should not greater than problem dimension!");
+  const std::vector<FunctionName> & func_names(
+      getParam<std::vector<FunctionName>>("analytic_functions"));
 
-  for (unsigned int i = 0; i < nl_vnames.size(); ++i)
+  _n_disps = nl_vnames.size();
+  if (_n_disps > _dim)
+    mooseError("Number of displacements components should not greater than problem dimension!");
+
+  if (_n_disps != func_names.size())
+    mooseError("Number of analytic_functions components should be the same as the number of "
+               "displacements components!");
+
+  for (unsigned int i = 0; i < _n_disps; ++i)
+  {
     _disp_var.push_back(&_subproblem.getStandardVariable(_tid, nl_vnames[i]));
+    _funcs.push_back(&getFunctionByName(func_names[i]));
+  }
 }
 
 Real
@@ -63,21 +64,9 @@ Real
 NodalDisplacementDifferenceL2NormPD::computeNodalValue()
 {
   Real diff = 0;
-  if (_has_func_0)
-  {
-    diff += (_disp_var[0]->getNodalValue(*_current_node) - _func_0->value(_t, *_current_node)) *
-            (_disp_var[0]->getNodalValue(*_current_node) - _func_0->value(_t, *_current_node));
-  }
-  if (_has_func_1)
-  {
-    diff += (_disp_var[1]->getNodalValue(*_current_node) - _func_1->value(_t, *_current_node)) *
-            (_disp_var[1]->getNodalValue(*_current_node) - _func_1->value(_t, *_current_node));
-  }
-  if (_has_func_2)
-  {
-    diff += (_disp_var[2]->getNodalValue(*_current_node) - _func_2->value(_t, *_current_node)) *
-            (_disp_var[2]->getNodalValue(*_current_node) - _func_2->value(_t, *_current_node));
-  }
+  for (unsigned int i = 0; i < _n_disps; ++i)
+    diff += (_disp_var[i]->getNodalValue(*_current_node) - _funcs[i]->value(_t, *_current_node)) *
+            (_disp_var[i]->getNodalValue(*_current_node) - _funcs[i]->value(_t, *_current_node));
 
   return diff;
 }

@@ -139,7 +139,7 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
     unsigned int nb =
         std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
         neighbors.begin();
-    std::vector<unsigned int> dg_neighbors =
+    std::vector<dof_id_type> dg_neighbors =
         _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
     std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < dg_neighbors.size(); ++k)

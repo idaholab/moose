@@ -32,8 +32,6 @@ GeneralizedPlaneStrainUserObjectOSPD::GeneralizedPlaneStrainUserObjectOSPD(
   : GeneralizedPlaneStrainUserObjectBasePD(parameters),
     _out_of_plane_stress_var(getVar("out_of_plane_stress_variable", 0))
 {
-  if (_strain == "Finite")
-    mooseError("Generalized plane strain model based on OSPD only support SMALL strain!");
 }
 
 void

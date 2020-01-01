@@ -364,7 +364,7 @@ PeridynamicsMesh::getNeighbors(dof_id_type node_id)
   return _pdnode_neighbors[node_id];
 }
 
-unsigned int
+dof_id_type
 PeridynamicsMesh::getNeighborIndex(dof_id_type node_i, dof_id_type node_j)
 {
   std::vector<dof_id_type> n_pd_neighbors = _pdnode_neighbors[node_i];
@@ -387,13 +387,13 @@ PeridynamicsMesh::getBonds(dof_id_type node_id)
   return _pdnode_bonds[node_id];
 }
 
-std::vector<unsigned int>
+std::vector<dof_id_type>
 PeridynamicsMesh::getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id)
 {
   if (node_id > _n_pdnodes)
     mooseError("Querying node ID exceeds the available PD node IDs!");
 
-  std::vector<unsigned int> dg_neighbors = _dg_neighbors[node_id][neighbor_id];
+  std::vector<dof_id_type> dg_neighbors = _dg_neighbors[node_id][neighbor_id];
   if (dg_neighbors.size() < _dim)
     mooseError("Not enough number of neighbors to calculate deformation gradient at PD node: ",
                node_id);
@@ -425,7 +425,7 @@ PeridynamicsMesh::getPDNodeCoord(dof_id_type node_id)
   return _pdnode_coord[node_id];
 }
 
-std::vector<unsigned int>
+std::vector<dof_id_type>
 PeridynamicsMesh::getPDNodeIDToFiniteElemIDMap()
 {
   return _pdnode_elemID;
@@ -450,7 +450,7 @@ PeridynamicsMesh::getHorizVolume(dof_id_type node_id)
 }
 
 Real
-PeridynamicsMesh::getDefGradVolFraction(dof_id_type node_id, unsigned int neighbor_id)
+PeridynamicsMesh::getDefGradVolFraction(dof_id_type node_id, dof_id_type neighbor_id)
 {
   if (node_id > _n_pdnodes)
     mooseError("Querying node ID exceeds the available PD node IDs!");

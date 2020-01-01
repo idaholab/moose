@@ -38,7 +38,7 @@ NodalRankTwoUserObjectBasePD::NodalRankTwoUserObjectBasePD(const InputParameters
 void
 NodalRankTwoUserObjectBasePD::computeValue(unsigned int id, dof_id_type dof)
 {
-  unsigned int id_j_in_i =
+  dof_id_type id_j_in_i =
       _pdmesh.getNeighborIndex(_current_elem->node_id(id), _current_elem->node_id(1 - id));
   Real dg_vol_frac = _pdmesh.getDefGradVolFraction(_current_elem->node_id(id), id_j_in_i);
 

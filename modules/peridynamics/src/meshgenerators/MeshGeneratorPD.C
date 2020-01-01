@@ -617,7 +617,7 @@ MeshGeneratorPD::generate()
       for (const auto & blk_id : _conv_blk_ids)
       {
         ++j;
-        unsigned int real_blk_id =
+        SubdomainID real_blk_id =
             blk_id + 1000; // account for the 1000 increment after converting to PD mesh
         if (pd_mesh.getNodeBlockID(i) == real_blk_id)
         {

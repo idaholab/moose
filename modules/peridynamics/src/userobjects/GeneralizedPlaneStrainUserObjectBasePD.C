@@ -18,7 +18,7 @@ validParams<GeneralizedPlaneStrainUserObjectBasePD>()
   params.addClassDescription("Base class for calculating the scalar residual and diagonal Jacobian "
                              "entry for generalized plane strain formulation");
 
-  MooseEnum strainType("SMALL FINITE", "SMALL");
+  MooseEnum strainType("SMALL", "SMALL");
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
   params.addParam<FunctionName>(
       "out_of_plane_pressure",

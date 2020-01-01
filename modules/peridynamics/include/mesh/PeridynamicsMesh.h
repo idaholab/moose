@@ -70,7 +70,7 @@ public:
    * @param node_j   The ID of the node querying the neighbor index
    * @return The local index in the neighbor list
    */
-  unsigned int getNeighborIndex(dof_id_type node_i, dof_id_type node_j);
+  dof_id_type getNeighborIndex(dof_id_type node_i, dof_id_type node_j);
 
   /**
    * Function to return the bond number connected with node node_id
@@ -87,7 +87,7 @@ public:
    * @return The neighbor list for calculation of bond-associated deformation gradient for the
    * neighbor
    */
-  std::vector<unsigned int> getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id);
+  std::vector<dof_id_type> getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id);
 
   /**
    * Function to return block ID for node node_id
@@ -113,7 +113,7 @@ public:
    * Function to return the correspondence between PD node IDs and FE element IDs
    * @return The coordinates of a node
    */
-  std::vector<unsigned int> getPDNodeIDToFiniteElemIDMap();
+  std::vector<dof_id_type> getPDNodeIDToFiniteElemIDMap();
 
   /**
    * Function to return nodal volume for node node_id
@@ -138,7 +138,7 @@ public:
    * @return The volume used in the calculation of bond-associated deformation gradeint for the
    * querying neighbor
    */
-  Real getDefGradVolFraction(dof_id_type node_id, unsigned int neighbor_id);
+  Real getDefGradVolFraction(dof_id_type node_id, dof_id_type neighbor_id);
 
   /**
    * Function to return the average spacing between node node_id with its most adjacent neighbors

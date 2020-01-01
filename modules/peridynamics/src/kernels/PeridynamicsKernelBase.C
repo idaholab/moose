@@ -45,7 +45,7 @@ PeridynamicsKernelBase::prepare()
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
     _vols_ij[nd] = _pdmesh.getPDNodeVolume(_current_elem->node_id(nd));
-    unsigned int id_ji_in_ij =
+    dof_id_type id_ji_in_ij =
         _pdmesh.getNeighborIndex(_current_elem->node_id(nd), _current_elem->node_id(1 - nd));
     _dg_vol_frac_ij[nd] = _pdmesh.getDefGradVolFraction(_current_elem->node_id(nd), id_ji_in_ij);
     _horiz_rad[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));

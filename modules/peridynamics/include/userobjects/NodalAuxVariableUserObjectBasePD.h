@@ -40,5 +40,5 @@ protected:
   virtual void computeValue(unsigned int id, dof_id_type dof) = 0;
 
   /// Pointer to the aux variable this userobject operates on
-  MooseVariable * _aux_var;
+  MooseVariable * _var;
 };
