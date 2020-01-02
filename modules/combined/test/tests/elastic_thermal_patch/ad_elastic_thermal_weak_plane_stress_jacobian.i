@@ -1,13 +1,11 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
   temperature = temp
   out_of_plane_strain = strain_zz
 []
 
 [Mesh]
-  file = 'gold/square.e'
+  file = square.e
 []
 
 [Variables]
@@ -15,33 +13,24 @@
   [../]
   [./disp_y]
   [../]
-
   [./strain_zz]
   [../]
-
   [./temp]
   [../]
 []
 
+[Modules/TensorMechanics/Master]
+  [./plane_stress]
+    planar_formulation = WEAK_PLANE_STRESS
+    strain = SMALL
+    eigenstrain_names = thermal_eigenstrain
+    use_automatic_differentiation = true
+  [../]
+[]
+
 [Kernels]
-  [./disp_x]
-    type = ADStressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./disp_y]
-    type = ADStressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-
-  [./solid_z]
-    type = ADWeakPlaneStress
-    variable = strain_zz
-  [../]
-
   [./heat]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temp
     use_displaced_mesh = false
   [../]
@@ -52,10 +41,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
-  [./strain]
-    type = ADComputePlaneSmallStrain
-    eigenstrain_names = thermal_eigenstrain
   [../]
   [./thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
