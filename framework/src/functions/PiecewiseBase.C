@@ -146,6 +146,15 @@ PiecewiseBase::buildFromFile()
 }
 
 void
+PiecewiseBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
+{
+  _raw_x = x;
+  _raw_y = y;
+  if (_raw_x.size() != _raw_y.size())
+    mooseError("In PiecewiseBase ", _name, ": Lengths of x and y data do not match.");
+}
+
+void
 PiecewiseBase::buildFromXandY()
 {
   _raw_x = getParam<std::vector<Real>>("x");

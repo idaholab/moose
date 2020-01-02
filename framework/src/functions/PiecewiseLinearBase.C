@@ -70,3 +70,10 @@ PiecewiseLinearBase::average() const
   return integral() /
          (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
 }
+
+void
+PiecewiseLinearBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
+{
+  PiecewiseBase::setData(x, y);
+  buildInterpolation();
+}

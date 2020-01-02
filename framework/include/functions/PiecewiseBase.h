@@ -38,7 +38,7 @@ public:
    * Provides a means for explicitly setting the x and y data. This must
    * be called in the constructor of inherited classes.
    */
-  void setData(const std::vector<Real> & x, const std::vector<Real> & y);
+  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y);
 
 protected:
   ///@{ raw function data as read
