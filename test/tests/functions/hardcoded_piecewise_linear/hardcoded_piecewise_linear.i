@@ -8,6 +8,9 @@
   xmin = 0
   xmax = 1
   nx = 1
+  # This test uses an ElementalVariableValue postprocessor on a specific
+  # element, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Problem]
