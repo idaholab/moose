@@ -39,6 +39,14 @@
     requirement = 'The system shall compute plane stress conditions with incremental strains with input provided using the Master action'
   [../]
 
+  [./ad_weak_plane_stress_incremental]
+    prereq = 'weak_plane_stress_incremental'
+    type = 'Exodiff'
+    input = 'ad_weak_plane_stress_incremental.i'
+    exodiff = 'weak_plane_stress_incremental_out.e'
+    requirement = 'The system shall compute plane stress conditions with incremental strains with input provided using the Master action'
+  [../]
+
   [./weak_plane_stress_finite]
     type = 'Exodiff'
     input = 'weak_plane_stress_finite.i'

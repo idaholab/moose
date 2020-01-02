@@ -5,7 +5,7 @@
 []
 
 [Mesh]
-  file = square.e
+  file = 'square.e'
 []
 
 [Variables]
@@ -119,12 +119,7 @@
 [Executioner]
   type = Transient
 
-  solve_type = PJFNK
-  line_search = none
-
-# controls for linear iterations
-  l_max_its = 100
-  l_tol = 1e-06
+  solve_type = 'NEWTON'
 
 # controls for nonlinear iterations
   nl_max_its = 15
@@ -139,5 +134,6 @@
 []
 
 [Outputs]
+  file_base = 'weak_plane_stress_incremental_out'
   exodus = true
 []

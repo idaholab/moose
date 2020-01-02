@@ -9,26 +9,27 @@
 
 #pragma once
 
-#include "ComputeStressBase.h"
+#include "ADComputeStressBase.h"
 
-class ComputeStrainIncrementBasedStress;
+template <ComputeStage>
+class ADComputeStrainIncrementBasedStress;
 
-template <>
-InputParameters validParams<ComputeStrainIncrementBasedStress>();
+declareADValidParams(ADComputeStrainIncrementBasedStress);
 
 /**
- * ComputeStrainIncrementBasedStress computes stress considering list of inelastic strain increments
+ * ADComputeStrainIncrementBasedStress computes stress considering list of inelastic strain
+ * increments
  */
-class ComputeStrainIncrementBasedStress : public ComputeStressBase
+template <ComputeStage compute_stage>
+class ADComputeStrainIncrementBasedStress : public ADComputeStressBase<compute_stage>
 {
 public:
   static InputParameters validParams();
 
-  ComputeStrainIncrementBasedStress(const InputParameters & parameters);
+  ADComputeStrainIncrementBasedStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStress();
-  virtual void computeQpJacobian();
 
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
@@ -36,7 +37,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   /// Old state of the stress tensor material property
   const MaterialProperty<RankTwoTensor> & _stress_old;
-  /// Old of the mechanical strain material property
+  /// Old state of the mechanical strain material property
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   ///
   ///@{ Vectors of current and old states of the inelastic strain material properties
@@ -48,4 +49,6 @@ protected:
   std::vector<MaterialPropertyName> _inelastic_strain_names;
   /// Number of inelastic models
   unsigned int _num_inelastic_strain_models;
+
+  usingComputeStressBaseMembers;
 };
