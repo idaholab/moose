@@ -352,10 +352,6 @@ TensorMechanicsAction::act()
         params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
       if (_diag_save_in.size() == _ndisp)
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
-
       if (isParamValid("out_of_plane_strain"))
         params.set<std::vector<VariableName>>("out_of_plane_strain") = {
             getParam<VariableName>("out_of_plane_strain")};
@@ -377,9 +373,6 @@ TensorMechanicsAction::act()
       auto params = getKernelParameters("WeakPlaneStress");
       std::string wps_kernel_name = "TM_WPS_" + name();
       params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
       _problem->addKernel("WeakPlaneStress", wps_kernel_name, params);
     }
   }
@@ -544,7 +537,6 @@ TensorMechanicsAction::getKernelParameters(std::string type)
                           "use_displaced_mesh",
                           "save_in",
                           "diag_save_in",
-                          "extra_vector_tags",
                           "out_of_plane_strain"});
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
