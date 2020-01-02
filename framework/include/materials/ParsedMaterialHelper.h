@@ -47,23 +47,6 @@ public:
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
 
-  void functionParse(const std::vector<std::string> & function_expression) { return; };
-  void functionParse(const std::vector<std::string> & function_expression,
-                     const std::vector<std::string> & constant_names,
-                     const std::vector<std::string> & constant_expressions)
-  {
-    return;
-  };
-  void functionParse(const std::vector<std::string> & function_expression,
-                     const std::vector<std::string> & constant_names,
-                     const std::vector<std::string> & constant_expressions,
-                     const std::vector<std::string> & mat_prop_names,
-                     const std::vector<std::string> & tol_names,
-                     const std::vector<Real> & tol_values)
-  {
-    return;
-  };
-
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();

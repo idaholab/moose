@@ -15,6 +15,7 @@
 
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
+#include "InputParameters.h"
 
 using namespace libMesh;
 
@@ -58,20 +59,45 @@ public:
   typedef std::vector<EBTermNode *> EBTermNodeList;
   typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
 
-  EBTerm makeGradEB(const std::string & var_name);
-  EBTerm makeSecondEB(const std::string & var_name);
+  template <typename T>
+  std::vector<std::string> getVarComps(const std::string & var_name);
 
-  EBTerm getEBTerm(const std::string & name) { return _coup_vars[name][0]; };
-  EBTermList getEBTermList(const std::string & name) { return _coup_vars[name]; };
-  EBTerm getGradEBTerm(const std::string & name) { return _grad_coup_vars[name][0]; };
-  EBTermList getGradEBTermList(const std::string & name) { return _grad_coup_vars[name]; };
-  EBTerm getSecondEBTerm(const std::string & name) { return _second_coup_vars[name][0]; };
-  EBTermList getSecondEBTermList(const std::string & name) { return _second_coup_vars[name]; };
+  EBTermNode * makeGradEBTerm(const std::string & base_name, const std::string & var_name);
+  EBTermNode * makeSecondEBTerm(const std::string & base_name, const std::string & var_name);
+
+  EBTerm getEBTerm(const std::string & name) { return _coup_vars[name]; };
+  EBTermList getEBTermList(const std::string & name) { return _coup_var_vecs[name]; };
+  EBTerm getGradEBTerm(const std::string & name) { return _grad_coup_vars[name]; };
+  EBTermList getGradEBTermList(const std::string & name) { return _grad_coup_var_vecs[name]; };
+  EBTerm getSecondEBTerm(const std::string & name) { return _second_coup_vars[name]; };
+  EBTermList getSecondEBTermList(const std::string & name) { return _second_coup_var_vecs[name]; };
+
+  template <typename T>
+  EBTerm getEBMaterial(const std::string & var_name, const EBTermList & coupled_depend);
+  template <typename T>
+  EBTermNode * EBMatDeriv(const std::string & var_base,
+                          std::vector<unsigned int> shape,
+                          const EBTermList & coupled_depend,
+                          unsigned int order);
+  template <typename T>
+  std::vector<std::vector<std::string>> getMatDerivNames(const std::string & var_base,
+                                                         const EBTermList & coupled_depend,
+                                                         bool add_to_props);
+  template <typename T>
+  std::vector<std::vector<std::vector<std::string>>>
+  getMatDerivNames(const std::string & var_base,
+                   const EBTermList & coupled_depend,
+                   bool add_to_props,
+                   bool dummy);
+  std::vector<std::string> _mat_prop_names;
 
 private:
-  std::map<std::string, EBTermList> _coup_vars;
-  std::map<std::string, EBTermList> _grad_coup_vars;
-  std::map<std::string, EBTermList> _second_coup_vars;
+  std::map<std::string, EBTermList> _coup_var_vecs;
+  std::map<std::string, EBTerm> _coup_vars;
+  std::map<std::string, EBTermList> _grad_coup_var_vecs;
+  std::map<std::string, EBTerm> _grad_coup_vars;
+  std::map<std::string, EBTermList> _second_coup_var_vecs;
+  std::map<std::string, EBTerm> _second_coup_vars;
 
 public:
   /// Base class for nodes in the expression tree
@@ -83,11 +109,15 @@ public:
     virtual ~EBTermNode(){};
     virtual EBTermNode * clone() const = 0;
 
-    virtual std::string stringify(std::vector<unsigned int> component) const = 0;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const = 0;
     std::vector<std::string> fullStringify() const;
     void getStringVector(std::vector<std::string> & string_vector,
                          std::vector<unsigned int> current_dim,
                          unsigned int position = 0) const;
+
+    virtual EBTermNode * takeDerivative() const = 0;
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & /*rule*/) { return 0; }
     virtual int precedence() const = 0;
@@ -101,6 +131,8 @@ public:
     virtual std::vector<unsigned int> setShape() = 0;
     void reshape(std::vector<unsigned int> shape) { _shape = shape; };
     void transpose();
+
+    virtual EBTermNode * getDeriv() { return takeDerivative(); };
 
   protected:
     void transposeComponent(std::vector<unsigned int> & component) const;
@@ -132,7 +164,13 @@ public:
       return new EBNumberNode(_value, _shape, _isTransposed);
     }
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string stringify(std::vector<unsigned int> component,
+                                  std::vector<unsigned int> deriv_comp) const;
+    virtual EBTermNode * takeDerivative() const
+    {
+      return new EBNumberNode<Real>(std::vector<Real>(_value.size(), 0), _shape);
+    }
+
     virtual int precedence() const { return 0; }
 
     virtual std::vector<unsigned int> setShape() { return _shape; };
@@ -142,9 +180,10 @@ public:
   class EBSymbolNode : public EBTermNode
   {
     std::vector<std::string> _symbol;
+    EBTermNode * _spat_deriv;
 
   public:
-    EBSymbolNode(std::string symbol)
+    EBSymbolNode(std::string symbol, EBTermNode * derivative) : _spat_deriv(derivative)
     {
       _symbol.push_back(symbol);
       _shape.push_back(1);
@@ -152,21 +191,43 @@ public:
 
     EBSymbolNode(std::vector<std::string> symbol,
                  std::vector<unsigned int> shape,
+                 EBTermNode * derivative,
                  bool isTransposed = false)
-      : EBTermNode(isTransposed), _symbol(symbol)
+      : EBTermNode(isTransposed), _symbol(symbol), _spat_deriv(derivative)
     {
       _shape = shape;
     };
 
     virtual EBSymbolNode * clone() const
     {
-      return new EBSymbolNode(_symbol, _shape, _isTransposed);
+      EBTermNode * deriv;
+      if (_spat_deriv == NULL)
+        deriv = NULL;
+      else
+        deriv = _spat_deriv->clone();
+      return new EBSymbolNode(_symbol, _shape, deriv, _isTransposed);
     }
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string stringify(std::vector<unsigned int> component,
+                                  std::vector<unsigned int> deriv_comp) const;
+    virtual EBTermNode * takeDerivative() const
+    {
+      EBTermNode * result_node = NULL;
+      if (_spat_deriv == NULL)
+        mooseError("Unable to take spatial derivative, order too high");
+      else
+      {
+        result_node = _spat_deriv->clone();
+        result_node->reshape(_shape);
+      }
+      return result_node;
+    };
+
     virtual int precedence() const { return 0; }
 
     virtual std::vector<unsigned int> setShape() { return _shape; };
+
+    virtual EBTermNode * getDeriv() { return _spat_deriv; };
   };
 
   /**
@@ -181,8 +242,11 @@ public:
     EBTempIDNode(unsigned int id) : _id(id){};
     virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id); }
 
-    virtual std::string
-    stringify(std::vector<unsigned int> component) const; // returns "[idnumber]"
+    virtual std::string stringify(std::vector<unsigned int> component,
+                                  std::vector<unsigned int> deriv_comp =
+                                      std::vector<unsigned int>(0)) const; // returns "[idnumber]"
+    virtual EBTermNode * takeDerivative() const { return new EBNumberNode<Real>(0); }
+
     virtual int precedence() const { return 0; }
 
     virtual std::vector<unsigned int> setShape() { return _shape; };
@@ -193,7 +257,10 @@ public:
   {
   public:
     EBUnaryTermNode(EBTermNode * subnode, bool isTransposed)
-      : EBTermNode(isTransposed), _subnode(subnode){};
+      : EBTermNode(isTransposed), _subnode(subnode)
+    {
+      subnode->stringify({0}, {0});
+    };
     virtual ~EBUnaryTermNode() { delete _subnode; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
@@ -218,7 +285,10 @@ public:
       LOG10,
       EXP,
       SINH,
-      COSH
+      COSH,
+      GRAD,
+      DIVERG,
+      CURL
     } _type;
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type, bool isTransposed = false)
@@ -228,7 +298,19 @@ public:
       return new EBUnaryFuncTermNode(_subnode->clone(), _type, _isTransposed);
     };
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const;
+    virtual EBTermNode * takeDerivative() const;
+    std::string gradRule(std::vector<unsigned int> component,
+                         std::vector<unsigned int> deriv_comp) const;
+    std::string divergenceRule(std::vector<unsigned int> component,
+                               std::vector<unsigned int> deriv_comp) const;
+    std::string curlRule(std::vector<unsigned int> component,
+                         std::vector<unsigned int> deriv_comp) const;
+    std::string laplaceRule(std::vector<unsigned int> component,
+                            std::vector<unsigned int> deriv_comp) const;
+
     virtual int precedence() const { return 2; }
 
     virtual std::vector<unsigned int> setShape();
@@ -251,7 +333,11 @@ public:
       return new EBUnaryOpTermNode(_subnode->clone(), _type, _isTransposed);
     };
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const;
+    virtual EBTermNode * takeDerivative() const;
+
     virtual int precedence() const { return 3; }
 
     virtual std::vector<unsigned int> setShape();
@@ -307,11 +393,17 @@ public:
       return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type, _isTransposed);
     };
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const;
+    virtual EBTermNode * takeDerivative() const;
+
     virtual int precedence() const;
 
-    std::string multRule(std::vector<unsigned int> component) const;
-    std::string crossRule(std::vector<unsigned int> component) const;
+    std::string multRule(std::vector<unsigned int> component,
+                         std::vector<unsigned int> deriv_comp) const;
+    std::string crossRule(std::vector<unsigned int> component,
+                          std::vector<unsigned int> deriv_comp) const;
 
     virtual std::vector<unsigned int> setShape();
 
@@ -342,7 +434,11 @@ public:
       return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
     };
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const;
+    virtual EBTermNode * takeDerivative() const;
+
     virtual int precedence() const { return 2; }
 
     virtual std::vector<unsigned int> setShape();
@@ -383,7 +479,11 @@ public:
           _left->clone(), _middle->clone(), _right->clone(), _type, _isTransposed);
     };
 
-    virtual std::string stringify(std::vector<unsigned int> component) const;
+    virtual std::string
+    stringify(std::vector<unsigned int> component,
+              std::vector<unsigned int> deriv_comp = std::vector<unsigned int>(0)) const;
+    virtual EBTermNode * takeDerivative() const;
+
     virtual int precedence() const { return 2; }
 
     virtual std::vector<unsigned int> setShape();
@@ -473,7 +573,8 @@ public:
     // construct from number or string
     EBTerm(int number) : _root(new EBNumberNode<int>(number)){};
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)){};
-    EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)){};
+    EBTerm(const char * symbol, EBTermNode * derivative = NULL)
+      : _root(new EBSymbolNode(symbol, derivative)){};
 
     EBTerm(std::initializer_list<int> list, std::vector<unsigned int> shape)
       : _root(new EBNumberNode<int>(list, shape)){};
@@ -483,8 +584,10 @@ public:
       : _root(new EBNumberNode<int>(list, shape)){};
     EBTerm(std::vector<Real> list, std::vector<unsigned int> shape)
       : _root(new EBNumberNode<Real>(list, shape)){};
-    EBTerm(std::vector<std::string> list, std::vector<unsigned int> shape)
-      : _root(new EBSymbolNode(list, shape)){};
+    EBTerm(std::vector<std::string> list,
+           std::vector<unsigned int> shape,
+           EBTermNode * derivative = NULL)
+      : _root(new EBSymbolNode(list, shape, derivative)){};
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
@@ -496,11 +599,6 @@ public:
 
     // dump term as FParser expression
     // cast into a string
-    std::string operator[](const std::initializer_list<unsigned int> component) const
-    {
-      checkShape(component);
-      return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
-    };
     std::string operator[](const std::vector<unsigned int> component) const
     {
       return _root->stringify(std::vector<unsigned int>(component.begin(), component.end()));
@@ -509,6 +607,7 @@ public:
     void checkShape(const std::vector<unsigned int> component) const;
 
     operator std::vector<std::string>();
+    operator std::string() { return (*this)[{0}]; };
 
     // assign a term
     EBTerm & operator=(const EBTerm & term)
@@ -530,12 +629,47 @@ public:
     unsigned int substitute(const EBSubstitutionRule & rule);
     unsigned int substitute(const EBSubstitutionRuleList & rules);
 
-    const EBTermNode * getRoot() const { return _root; }
+    EBTermNode * getRoot() const { return _root; }
     EBTermNode * cloneRoot() const { return _root == NULL ? NULL : _root->clone(); }
 
     static EBTerm identity(unsigned int mat_size, int k = 0);
 
-    void reshape(std::vector<unsigned int> shape) { _root->reshape(shape); }
+    void addDimensionLeft()
+    {
+      std::vector<unsigned int> shape = _root->getShape();
+      shape.insert(shape.begin(), 1);
+      _root->reshape(shape);
+    };
+    void removeDimensionLeft()
+    {
+      std::vector<unsigned int> shape = _root->getShape();
+      if (shape[0] == 1)
+      {
+        shape.erase(shape.begin());
+        _root->reshape(shape);
+      }
+      else
+        mooseError("Cannot reshape");
+    }
+    void addDimensionRight()
+    {
+      std::vector<unsigned int> shape = _root->getShape();
+      shape.push_back(1);
+      _root->reshape(shape);
+    }
+    void removeDimensionRight()
+    {
+      std::vector<unsigned int> shape = _root->getShape();
+      if (shape.back() == 1)
+      {
+        shape.pop_back();
+        _root->reshape(shape);
+      }
+      else
+        mooseError("Cannot reshape");
+    }
+
+    std::vector<unsigned int> getShape() const { return _root->getShape(); };
 
   protected:
     EBTermNode * _root;
@@ -566,6 +700,10 @@ public:
     friend EBTerm exp(const EBTerm &);
     friend EBTerm sinh(const EBTerm &);
     friend EBTerm cosh(const EBTerm &);
+    friend EBTerm grad(const EBTerm &);
+    friend EBTerm divergence(const EBTerm &);
+    friend EBTerm curl(const EBTerm &);
+    friend EBTerm laplacian(const EBTerm &);
 
 /*
  * Binary operators (including number,term operations)
@@ -733,6 +871,7 @@ public:
 
     /// cast into a string (via the cast into a term above)
     operator std::vector<std::string>() const;
+    operator std::string() const { return EBTerm(*this)[{0}]; };
 
     /// @{
     /// function definition (assignment)
@@ -825,7 +964,8 @@ pow(const ExpressionBuilder::EBTerm & left, T exponent)
 // convert a number node into a string
 template <typename T>
 std::string
-ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> component) const
+ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> component,
+                                              std::vector<unsigned int> deriv_comp) const
 {
   if (_isTransposed)
     transposeComponent(component);
@@ -840,7 +980,7 @@ ExpressionBuilder::EBNumberNode<T>::stringify(std::vector<unsigned int> componen
     position += component[i] * multiplier;
   }
   s << std::setprecision(12) << _value[position];
-
+  deriv_comp.clear(); // Suppress unused parameter warning
   return s.str();
 }
 
