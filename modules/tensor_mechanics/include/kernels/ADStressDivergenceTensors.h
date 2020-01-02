@@ -19,6 +19,8 @@
   using ADStressDivergenceTensors<compute_stage>::_ndisp;                                          \
   using ADStressDivergenceTensors<compute_stage>::_disp_var;                                       \
   using ADStressDivergenceTensors<compute_stage>::_avg_grad_test;                                  \
+  using ADStressDivergenceTensors<compute_stage>::_out_of_plane_strain_coupled;                    \
+  using ADStressDivergenceTensors<compute_stage>::_out_of_plane_strain;                            \
   using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction
 
 // Forward Declarations
@@ -59,6 +61,9 @@ protected:
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
   std::vector<ADReal> _avg_grad_test;
+
+  const bool _out_of_plane_strain_coupled;
+  const ADVariableValue * _out_of_plane_strain;
 
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;

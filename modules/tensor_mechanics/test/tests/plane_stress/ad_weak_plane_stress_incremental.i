@@ -1,13 +1,11 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
   temperature = temp
   out_of_plane_strain = strain_zz
 []
 
 [Mesh]
-  file = 'gold/square.e'
+  file = square.e
 []
 
 [Variables]
@@ -15,43 +13,12 @@
   [../]
   [./disp_y]
   [../]
-
   [./strain_zz]
   [../]
 []
 
 [AuxVariables]
   [./temp]
-  [../]
-
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./nl_strain_zz]
     order = CONSTANT
@@ -78,16 +45,14 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./plane_stress]
+    planar_formulation = WEAK_PLANE_STRESS
+    strain = SMALL
+    incremental = true
+    generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy'
+    eigenstrain_names = eigenstrain
     use_automatic_differentiation = true
-  [../]
-
-  [./solid_z]
-    type = ADWeakPlaneStress
-    variable = strain_zz
-    use_displaced_mesh = true
   [../]
 []
 
@@ -97,56 +62,6 @@
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
   [../]
   [./strain_zz]
     type = RankTwoAux
@@ -190,25 +105,21 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]
-  [./strain]
-    type = ADComputePlaneFiniteStrain
-    eigenstrain_names = eigenstrain
-  [../]
   [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ADComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
   [../]
   [./stress]
-    type = ADComputeFiniteStrainElasticStress
+    type = ADComputeStrainIncrementBasedStress
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  solve_type = 'NEWTON'
+  solve_type = PJFNK
   line_search = none
 
 # controls for linear iterations
@@ -217,8 +128,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-14
+  nl_abs_tol = 1e-12
 
 # time control
   start_time = 0.0
