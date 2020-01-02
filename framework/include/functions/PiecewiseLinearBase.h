@@ -31,6 +31,7 @@ public:
   virtual Real timeDerivative(Real t, const Point & pt) const override;
   virtual Real integral() const override;
   virtual Real average() const override;
+  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y) override;
 
 protected:
   /// build the linear interpolation object from the x/y data
