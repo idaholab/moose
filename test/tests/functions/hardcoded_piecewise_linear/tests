@@ -4,7 +4,7 @@
     type = 'CSVDiff'
     input = 'hardcoded_piecewise_linear.i'
     csvdiff = 'hardcoded_piecewise_linear_out.csv'
-    requirement = "The Function system shall allow for piecewise functions to directly set the xy data internally"
+    requirement = "The system shall allow for piecewise functions to directly set the x and y data internally."
     issues = '#14220'
   []
 []
