@@ -1943,18 +1943,13 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
-          // would be disastrous to add this rm because it's going to set a coupling matrix based on
-          // the non-linear system. So we don't add this rm to either system here if its also a
-          // coupling functor
+          // is no reason to add it to the DofMap twice. In the case of any other system, it
+          // actually would be disastrous to add this rm because it's going to set a coupling matrix
+          // based on the non-linear system. So we don't add this rm at all here if its also
+          // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-          {
-            problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-            problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-          }
+            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
         }
         else // undisplaced
         {
@@ -1965,18 +1960,13 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
-          // would be disastrous to add this rm because it's going to set a coupling matrix based on
-          // the non-linear system. So we don't add this rm to either system here if its also a
-          // coupling functor
+          // is no reason to add it to the DofMap twice. In the case of any other system, it
+          // actually would be disastrous to add this rm because it's going to set a coupling matrix
+          // based on the non-linear system. So we don't add this rm at all here if its also
+          // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-          {
-            problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-            problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-          }
+            problem.addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
         }
       }
     }

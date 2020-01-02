@@ -18,6 +18,10 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
+#include "libmesh/equation_systems.h"
+#include "libmesh/system.h"
+#include "libmesh/dof_map.h"
+
 defineLegacyParams(SubProblem);
 
 InputParameters
@@ -763,4 +767,14 @@ void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
   assembly(tid).reinitMortarElem(elem);
+}
+
+void
+SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+{
+  EquationSystems & eq = es();
+  auto n_sys = eq.n_systems();
+
+  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
+    eq.get_system(i).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
 }
