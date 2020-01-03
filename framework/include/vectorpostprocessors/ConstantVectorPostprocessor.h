@@ -28,6 +28,5 @@ public:
   virtual void execute() override;
 
 protected:
-  VectorPostprocessorValue & _value;
+  std::vector<VectorPostprocessorValue *> _value;
 };
-
