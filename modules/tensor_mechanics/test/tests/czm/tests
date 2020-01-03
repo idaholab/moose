@@ -11,7 +11,7 @@
     'compute a normal gap under purely normal loading.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -29,7 +29,7 @@
     'loading in the x-direction.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -47,7 +47,7 @@
     'loading in the y-direction.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -64,7 +64,7 @@
     'the correct response under mixed-mode loading.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -81,7 +81,7 @@
     'compute a normal gap under purely normal loading.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -98,7 +98,7 @@
     'a normal gap under purely normal loading.'
     #mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    #method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3

@@ -34,8 +34,6 @@ BreakMeshByBlockGenerator::validParams()
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
   : BreakMeshByBlockGeneratorBase(parameters), _input(getMesh("input"))
 {
-  // if (typeid(_input).name() == typeid(DistributedMesh).name())
-  //   mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 }
 
 std::unique_ptr<MeshBase>
@@ -49,15 +47,30 @@ BreakMeshByBlockGenerator::generate()
   if (!mesh->is_replicated())
     mesh->comm().max(_boundary_id_offset);
 
-  // std::ccout << "INTIAL NODE SETUP \n";
-  // for (const auto & elem : mesh->active_element_ptr_range())
-  // {
-  //  std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " ";
-  //   for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-  //  std::ccout << "node" << elem->node_id(node_id) << " ";
-  //
-  //  std::ccout << " nn " << elem->n_neighbors() << "\n";
-  // }
+  Moose::out << "OUT_ELEMENT_NODE_INITIAL_START\n";
+  for (const auto & elem : mesh->active_element_ptr_range())
+  {
+    Moose::out << elem->id() << " ";
+    for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
+      Moose::out << elem->node_id(node_id) << " ";
+    Moose::out << std::endl;
+  }
+  Moose::out << "OUT_ELEMENT_NODE_INITIAL_END\n\n";
+
+  Moose::out << "OUT_ELEMENT_SUBDOMAIN_START\n";
+  for (const auto & elem : mesh->active_element_ptr_range())
+    Moose::out << elem->id() << " " << elem->subdomain_id() << std::endl;
+  Moose::out << "OUT_ELEMENT_SUBDOMAIN_END\n\n";
+
+  Moose::out << "OUT_ELEMENT_PID_START\n";
+  for (const auto & elem : mesh->active_element_ptr_range())
+    Moose::out << elem->id() << " " << elem->processor_id() << std::endl;
+  Moose::out << "OUT_ELEMENT_PID_END\n\n";
+
+  Moose::out << "OUT_NODE_PID_INITIAL_START\n";
+  for (const auto & node : mesh->node_ptr_range())
+    Moose::out << node->id() << " " << node->processor_id() << std::endl;
+  Moose::out << "OUT_NODE_PID_INITIAL_END\n\n";
 
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
@@ -66,9 +79,9 @@ BreakMeshByBlockGenerator::generate()
       for (unsigned int n = 0; n < elem->n_nodes(); n++)
         node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
-  // construct the node to domain map <node, subdomain_id_type>
-  std::map<dof_id_type, std::set<subdomain_id_type>> node_to_domains_map;
-  std::set<subdomain_id_type> connected_blocks;
+  // construct the node to subdomain_pid map <node, <subdomain_id_type>
+  std::map<dof_id_type, std::map<subdomain_id_type, processor_id_type>> node_to_domains_pid_map;
+  std::map<subdomain_id_type, processor_id_type> connected_blocks_pid;
 
   for (const auto & node_it : node_to_elem_map)
   {
@@ -77,33 +90,42 @@ BreakMeshByBlockGenerator::generate()
     if (current_node != nullptr)
     {
       // find connected blocks
-      connected_blocks.clear();
+      connected_blocks_pid.clear();
       for (const auto & elem_id : node_it.second)
       {
         const Elem * current_elem = mesh->query_elem_ptr(elem_id);
         if (current_elem != nullptr)
-          connected_blocks.insert(current_elem->subdomain_id());
+        {
+          subdomain_id_type elem_sub_id = current_elem->subdomain_id();
+          processor_id_type elem_proc_id = current_elem->processor_id();
+          auto it = connected_blocks_pid.find(elem_sub_id);
+          if (it != connected_blocks_pid.end() && it->second > elem_proc_id)
+            it->second = elem_proc_id;
+          else if (it == connected_blocks_pid.end())
+            connected_blocks_pid[elem_sub_id] = elem_proc_id;
+        }
       }
-      if (connected_blocks.size() > 1) // add set do node to domain map
-        node_to_domains_map[current_node_id] = connected_blocks;
+      if (connected_blocks_pid.size() > 1) // add set do node to domain map
+        node_to_domains_pid_map[current_node_id] = connected_blocks_pid;
     }
   } // once we are done with this we want to make sure boundaires id are the same
 
-  // if the mesh is distributed do some communication to merge the node_to_domains_map
+  // if the mesh is distributed do some communication to merge the node_to_domains_pid_map
   if (!mesh->is_replicated())
   {
     /* need to do communication
      we can only use vectors and vectors of vectors for communication so we start unrolling the
-     node_to_domains_map */
+     node_to_domains_pid_map */
     std::map<processor_id_type, std::vector<dof_id_type>> data_to_send, received_data;
 
     std::vector<dof_id_type> flattened_data;
     // faltten data to send
-    for (auto it_node : node_to_domains_map)
+    for (auto it_node : node_to_domains_pid_map)
       for (auto it_sub : it_node.second)
       {
         flattened_data.push_back(it_node.first);
-        flattened_data.push_back(it_sub);
+        flattened_data.push_back(it_sub.first);
+        flattened_data.push_back(it_sub.second);
       }
 
     // we want to send the data of each cpu to all other cpus so we will have a fully dense map
@@ -113,36 +135,54 @@ BreakMeshByBlockGenerator::generate()
     // compose replies from each cpu
     auto gather_data = [&received_data](processor_id_type pid,
                                         const std::vector<dof_id_type> & query) {
-      // response = query;
       received_data[pid] = query;
     };
 
     Parallel::push_parallel_vector_data(mesh->comm(), data_to_send, gather_data);
 
     // recreate the map
-    node_to_domains_map.clear();
+    node_to_domains_pid_map.clear();
     for (auto const & x : received_data)
-      for (unsigned int k = 0; k < x.second.size(); k += 2)
-        node_to_domains_map[x.second[k]].insert(x.second[k + 1]);
+      for (unsigned int k = 0; k < x.second.size(); k += 3)
+      {
+        dof_id_type n_id = x.second[k];
+        subdomain_id_type s_id = x.second[k + 1];
+        processor_id_type p_id = x.second[k + 2];
+        // std::map<subdomain_id_type, processor_id_type> minimap = {{s_id, p_id}};
+        auto n_it = node_to_domains_pid_map.find(n_id);
+        if (n_it == node_to_domains_pid_map.end())
+          node_to_domains_pid_map[n_id] = {{s_id, p_id}};
+        else
+        {
+          auto s_it = n_it->second.find(s_id);
+          if (s_it == n_it->second.end())
+            n_it->second[s_id] = p_id;
+          else if (s_it != n_it->second.end() && s_it->second > p_id)
+            s_it->second = p_id;
+        }
+      }
   }
 
-  // assign unique new node ids based on domain id (every processr is doing this at the same so we
-  // don't need to broadcast again)
-  std::map<dof_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> new_node_id_map;
+  // assign unique new node id and pid given subdomain
+  // this map old_id->subddomain->(new_node_if, pid)
+  std::map<dof_id_type, std::map<subdomain_id_type, std::pair<dof_id_type, processor_id_type>>>
+      new_node_id_map;
+
   dof_id_type node_counter = n_total_nodes;
-  for (auto node_it = node_to_domains_map.begin(); node_it != node_to_domains_map.end(); ++node_it)
+  for (auto node_it = node_to_domains_pid_map.begin(); node_it != node_to_domains_pid_map.end();
+       ++node_it)
   {
     dof_id_type original_node_id = node_it->first;
-    auto connected_blocks = node_it->second;
-    const subdomain_id_type first_id = *connected_blocks.begin();
+    connected_blocks_pid = node_it->second;
+    const subdomain_id_type first_id = connected_blocks_pid.begin()->first;
 
-    connected_blocks.erase(connected_blocks.begin());
-    for (auto sub_it : connected_blocks)
+    connected_blocks_pid.erase(connected_blocks_pid.begin());
+    for (auto sub_it : connected_blocks_pid)
     {
-      new_node_id_map[original_node_id].push_back(std::make_pair(sub_it, node_counter));
+      new_node_id_map[original_node_id][sub_it.first] = std::make_pair(node_counter, sub_it.second);
       node_counter++;
-      mooseAssert(first_id < sub_it, "first_id > sub_it");
-      _neighboring_block_list.insert(std::make_pair(first_id, sub_it));
+      mooseAssert(first_id < sub_it.first, "first_id > sub_it.first");
+      _neighboring_block_list.insert(std::make_pair(first_id, sub_it.first));
     }
   } // done creating new unique node ids
 
@@ -156,15 +196,20 @@ BreakMeshByBlockGenerator::generate()
       auto connected_elem = node_to_elem_map.find(old_node_id);
       std::vector<boundary_id_type> node_boundary_ids;
       mesh->boundary_info->boundary_ids(old_node, node_boundary_ids);
-      for (auto sub_node : node_it->second)
+      for (auto sub_dofid_pid_it : node_it->second)
       {
+        subdomain_id_type sub_id = sub_dofid_pid_it.first;
+        dof_id_type new_node_id = sub_dofid_pid_it.second.first;
+        processor_id_type new_node_pid = sub_dofid_pid_it.second.second;
+
         Node * new_node = nullptr;
         new_node = Node::build(*old_node, DofObject::invalid_id).release();
-        new_node->set_id() = sub_node.second;
+        new_node->set_id() = new_node_id;
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-        new_node->set_unique_id() = sub_node.second;
+        new_node->set_unique_id() = new_node_id;
 #endif
-        new_node->processor_id() = old_node->processor_id();
+        // new_node->processor_id() = old_node->processor_id();
+        new_node->processor_id() = new_node_pid;
         mesh->add_node(new_node);
 
         mesh->boundary_info->add_node(new_node, node_boundary_ids);
@@ -172,18 +217,12 @@ BreakMeshByBlockGenerator::generate()
         {
           Elem * elem = mesh->query_elem_ptr(elem_id);
           if (elem != nullptr)
-            if (elem->subdomain_id() == sub_node.first)
+            if (elem->subdomain_id() == sub_id)
             {
               mooseAssert(elem->subdomain_id() > 0, "elem->subdomain_id() <= 0");
               for (unsigned int node_id = 0; node_id < elem->n_nodes(); node_id++)
                 if (elem->node_id(node_id) == old_node_id)
                   elem->set_node(node_id) = new_node;
-
-              // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem_id << " ";
-              // for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-              // std::ccout << "node" << elem->node_id(node_id) << " ";
-
-              // std::ccout << " nn " << elem->n_neighbors() << "\n";
             }
         }
       }
@@ -200,12 +239,6 @@ BreakMeshByBlockGenerator::generate()
               (current_elem_pt->subdomain_id() < connected_elem_pt->subdomain_id()))
             if (current_elem_pt->has_neighbor(connected_elem_pt))
             {
-              // std::ccout << "Rank " << mesh->processor_id() << "  curr_elem id "
-              //           << current_elem_pt->id() << "  connected_elem id "
-              //           << connected_elem_pt->id() << "  neigh curr_conn"
-              //           << current_elem_pt->which_neighbor_am_i(connected_elem_pt)
-              //           << "  neigh conn_curr"
-              //           << connected_elem_pt->which_neighbor_am_i(current_elem_pt) << std::endl;
               std::pair<subdomain_id_type, subdomain_id_type> blocks_pair = std::make_pair(
                   current_elem_pt->subdomain_id(), connected_elem_pt->subdomain_id());
               _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
@@ -217,32 +250,20 @@ BreakMeshByBlockGenerator::generate()
 
   // now we need a unique boundary id list
 
-  // // std::ccout << "FINAL NODE SETUP \n";
-  // for (const auto & elem : mesh->active_element_ptr_range())
-  // {
-  //   // std::ccout << "Rank " << mesh->processor_id() << " elem_id " << elem->id() << " nodes";
-  //   for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
-  //     std::ccout << elem->node_id(node_id) << " ";
-  //
-  //     std::ccout << " n_neighbors " << elem->n_neighbors() << " n_sides " << elem->n_sides()
-  //     << " neighbor ";
-  //   for (const auto & conn_elem : mesh->active_element_ptr_range())
-  //     if (elem->has_neighbor(conn_elem))
-  //   std::ccout << "  connelem_id " << conn_elem->id() << "   wNamI "
-  //   << elem->which_neighbor_am_i(conn_elem) << "  " << conn_elem->which_neighbor_am_i(elem)
-  //   << "; ";
+  Moose::out << "OUT_NODE_PID_START\n";
+  for (const auto & node : mesh->local_node_ptr_range())
+    Moose::out << node->id() << " " << node->processor_id() << std::endl;
+  Moose::out << "OUT_NODE_PID_END\n\n";
 
-  // std::ccout << std::endl;
-  // }
-
-  // for (const auto & elem : mesh->active_element_ptr_range())
-  //   if (elem != nullptr)
-  //     for (const auto & conn_elem : mesh->active_element_ptr_range())
-  //       if (conn_elem != nullptr && elem->has_neighbor(conn_elem))
-  //          // std::ccout << "Rank " << mesh->processor_id() << "  curr_elem id " << elem->id()
-  //                   << "  connected_elem id " << conn_elem->id() << "  neigh curr_conn"
-  //                   << elem->which_neighbor_am_i(conn_elem) << "  neigh conn_curr"
-  //                   << conn_elem->which_neighbor_am_i(elem) << std::endl;
+  Moose::out << "OUT_ELEMENT_NODE_START\n";
+  for (const auto & elem : mesh->active_element_ptr_range())
+  {
+    Moose::out << elem->id() << " ";
+    for (unsigned int node_id = 0; node_id < elem->n_nodes(); ++node_id)
+      Moose::out << elem->node_id(node_id) << " ";
+    Moose::out << std::endl;
+  }
+  Moose::out << "OUT_ELEMENT_NODE_END\n\n";
 
   addInterfaceBoundary(*mesh);
   return dynamic_pointer_cast<MeshBase>(mesh);

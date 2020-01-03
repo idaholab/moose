@@ -7,6 +7,7 @@
   [./breakmesh]
     type = BreakMeshByBlockGenerator
     input = fmg
+    split_interface = true
   []
 []
 
