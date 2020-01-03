@@ -251,7 +251,7 @@ BreakMeshByBlockGenerator::generate()
   // now we need a unique boundary id list
 
   Moose::out << "OUT_NODE_PID_START\n";
-  for (const auto & node : mesh->local_node_ptr_range())
+  for (const auto & node : mesh->node_ptr_range())
     Moose::out << node->id() << " " << node->processor_id() << std::endl;
   Moose::out << "OUT_NODE_PID_END\n\n";
 
