@@ -11,6 +11,8 @@
 
 #include "FEProblem.h"
 
+class AuxiliarySystem;
+
 /**
  * FEProblemBase derived class for customization of callbacks. In this instance we only print out
  * something in the c-tor and d-tor, so we know the class was build and used properly.
@@ -22,4 +24,7 @@ public:
 
   MooseTestProblem(const InputParameters & params);
   virtual ~MooseTestProblem();
+
+private:
+  std::shared_ptr<AuxiliarySystem> _test_aux;
 };

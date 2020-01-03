@@ -54,4 +54,9 @@
 
     requirement = "MOOSE shall ghost additional neighboring elements surrounding a partition when running in parallel with DistributedMesh with 3D"
   [../]
+  [all_systems_evaluable]
+    type = 'RunApp'
+    input = all-systems-evaluable.i
+    min_parallel = 2
+  []
 []
