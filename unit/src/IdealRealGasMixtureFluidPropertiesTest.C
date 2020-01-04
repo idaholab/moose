@@ -47,6 +47,14 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
   REL_TEST(p_mix, p, REL_TOL_CONSISTENCY);
   REL_TEST(T_mix, T, REL_TOL_CONSISTENCY);
 
+  // check T(p,v) and its derivatives
+  REL_TEST(T, _fp_mix->T_from_p_v(p, v_mix, x), REL_TOL_CONSISTENCY);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->T_from_p_v, p, v_mix, x, REL_TOL_DERIVATIVE);
+
+  // check e(p,rho) and its derivatives
+  REL_TEST(e_mix, _fp_mix->e_from_p_rho(p, rho_mix, x), REL_TOL_CONSISTENCY);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->e_from_p_rho, p, rho_mix, x, REL_TOL_DERIVATIVE);
+
   //////////////////////////////////////////////////////////////////////////////
   // note that the VAPOR_MIX_DERIV_TEST works for binary mixtures only (for now)
   //////////////////////////////////////////////////////////////////////////////

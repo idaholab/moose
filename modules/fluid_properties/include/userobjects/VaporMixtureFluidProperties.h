@@ -248,6 +248,35 @@ public:
   virtual Real k_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
+   * Specific internal energy from pressure and density
+   *
+   * @return        specific internal energy
+   * @param[in] p   pressure
+   * @param[in] rho density
+   * @param[in] x   vapor mass fraction values
+   */
+  virtual Real e_from_p_rho(Real p, Real rho, const std::vector<Real> & x) const = 0;
+
+  /**
+   * Specific internal energy and its derivatives from pressure and density
+   *
+   * @param[in] p   pressure
+   * @param[in] rho density
+   * @param[in] x   vapor mass fraction values
+   * @param[out] e       specific internal energy
+   * @param[out] de_dp   derivative of specific internal energy w.r.t. pressure
+   * @param[out] de_drho derivative of specific internal energy w.r.t. density
+   * @param[out] de_dx   derivative of specific internal energy w.r.t. vapor mass fraction values
+   */
+  virtual void e_from_p_rho(Real p,
+                            Real rho,
+                            const std::vector<Real> & x,
+                            Real & e,
+                            Real & de_dp,
+                            Real & de_drho,
+                            std::vector<Real> & de_dx) const = 0;
+
+  /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
    * secondary vapors.
    *
