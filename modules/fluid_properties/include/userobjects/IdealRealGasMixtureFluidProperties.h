@@ -279,6 +279,35 @@ public:
                           std::vector<Real> & dv_dx) const;
 
   /**
+   * Specific internal energy from pressure and density
+   *
+   * @param[in] p   pressure
+   * @param[in] rho density
+   * @param[in] x   vapor mass fraction values
+   * @return        specific internal energy
+   */
+  virtual Real e_from_p_rho(Real p, Real rho, const std::vector<Real> & x) const override;
+
+  /**
+   * Specific internal energy and its derivatives from pressure and density
+   *
+   * @param[in] p   pressure
+   * @param[in] rho density
+   * @param[in] x   vapor mass fraction values
+   * @param[out] e       specific internal energy
+   * @param[out] de_dp   derivative of specific internal energy w.r.t. pressure
+   * @param[out] de_drho derivative of specific internal energy w.r.t. density
+   * @param[out] de_dx   derivative of specific internal energy w.r.t. vapor mass fraction values
+   */
+  virtual void e_from_p_rho(Real p,
+                            Real rho,
+                            const std::vector<Real> & x,
+                            Real & e,
+                            Real & de_dp,
+                            Real & de_drho,
+                            std::vector<Real> & de_dx) const override;
+
+  /**
    * Pressure and temperature from specific volume and specific internal energy
    *
    * @param[in] v   specific volume
@@ -315,6 +344,35 @@ public:
                     Real & dT_dv,
                     Real & dT_de,
                     std::vector<Real> & dT_dx) const;
+
+  /**
+   * Temperature from pressure and specific volume
+   *
+   * @param[in] p   pressure
+   * @param[in] v   specific volume
+   * @param[in] x   vapor mass fraction values
+   * @return        temperature
+   */
+  Real T_from_p_v(Real p, Real v, const std::vector<Real> & x) const;
+
+  /**
+   * Temperature and its derivatives from pressure and specific volume
+   *
+   * @param[in] p   pressure
+   * @param[in] v   specific volume
+   * @param[in] x   vapor mass fraction values
+   * @param[out] T       temperature
+   * @param[out] dT_dp   derivative of temperature w.r.t. pressure
+   * @param[out] dT_dv   derivative of temperature w.r.t. specific volume
+   * @param[out] dT_dx   derivative of temperature w.r.t. vapor mass fraction values
+   */
+  void T_from_p_v(Real p,
+                  Real v,
+                  const std::vector<Real> & x,
+                  Real & T,
+                  Real & dT_dp,
+                  Real & dT_dv,
+                  std::vector<Real> & dT_dx) const;
 
   /**
    * Pressure from temperature and specific volume
