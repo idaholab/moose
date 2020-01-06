@@ -11,6 +11,16 @@
                   "This uses a penalty implementation that is optimally convergent."
   [../]
 
+  [./test_split]
+    type = 'Exodiff'
+    input = 'coupled_value_coupled_flux.i'
+    exodiff = 'coupled_value_coupled_flux_out.e'
+    issues = "#12033"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall operate with coupled variables in 2D and a split mesh. "
+                  "This uses a penalty implementation that is optimally convergent."
+  [../]
+
   [./test_dot]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux_dot.i'
