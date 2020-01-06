@@ -52,6 +52,11 @@ public:
    * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
    */
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
+  virtual void p_from_v_e(const DualReal & v,
+                          const DualReal & e,
+                          DualReal & p,
+                          DualReal & dp_dv,
+                          DualReal & dp_de) const override;
 
   /**
    * Temperature from specific volume and specific internal energy
@@ -72,8 +77,11 @@ public:
    * @param[out] dT_de   derivative of temperature w.r.t. specific internal energy
    */
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
-
-  using SinglePhaseFluidProperties::cp_from_v_e;
+  virtual void T_from_v_e(const DualReal & v,
+                          const DualReal & e,
+                          DualReal & T,
+                          DualReal & dT_dv,
+                          DualReal & dT_de) const override;
 
   /**
    * Isobaric specific heat from specific volume and specific internal energy
@@ -84,7 +92,16 @@ public:
    */
   virtual Real cp_from_v_e(Real v, Real e) const override;
 
-  using SinglePhaseFluidProperties::cv_from_v_e;
+  /**
+   * Isobaric specific heat and its derivatives from specific volume and specific internal energy
+   *
+   * @param[in] v       specific volume (m$^3$/kg)
+   * @param[in] e       specific internal energy (J/kg)
+   * @param[out] cp     isobaric specific heat (J/kg.K)
+   * @param[out] dcp_dv derivative of isobaric specific heat w.r.t. specific volume
+   * @param[out] dcp_de derivative of isobaric specific heat w.r.t. specific internal energy
+   */
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
 
   /**
    * Isochoric specific heat from specific volume and specific internal energy
@@ -94,6 +111,22 @@ public:
    * @return isochoric specific heat (J/kg.K)
    */
   virtual Real cv_from_v_e(Real v, Real e) const override;
+
+  /**
+   * Isochoric specific heat and its derivatives from specific volume and specific internal energy
+   *
+   * @param[in] v       specific volume (m$^3$/kg)
+   * @param[in] e       specific internal energy (J/kg)
+   * @param[out] cv     isochoric specific heat (J/kg.K)
+   * @param[out] dcv_dv derivative of isochoric specific heat w.r.t. specific volume
+   * @param[out] dcv_de derivative of isochoric specific heat w.r.t. specific internal energy
+   */
+  virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
+  virtual void cv_from_v_e(const DualReal & v,
+                           const DualReal & e,
+                           DualReal & cv,
+                           DualReal & dcv_dv,
+                           DualReal & dcv_de) const override;
 
   using SinglePhaseFluidProperties::mu_from_v_e;
 
@@ -137,6 +170,11 @@ public:
    */
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_from_p_T(const DualReal & pressure,
+                            const DualReal & temperature,
+                            DualReal & rho,
+                            DualReal & drho_dp,
+                            DualReal & drho_dT) const override;
 
   /**
    * Specific volume from pressure and temperature
