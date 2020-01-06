@@ -10,7 +10,7 @@
 
 from MooseDocs import common
 from MooseDocs.extensions import command
-from MooseDocs.base import RevealRenderer
+from MooseDocs.base import RevealRenderer, Translator
 
 def make_extension(**kwargs):
     return IncludeExtension(**kwargs)
@@ -30,15 +30,16 @@ class IncludeExtension(command.CommandExtension):
         else:
             self.addCommand(reader, IncludeCommand())
 
-    def initMetaData(self, page, meta):
-        meta.initData('dependencies', set())
+    #def initMetaData(self, page, meta):
+    #    page['dependencies'] = set()
+        #meta.initData('dependencies', set())
 
-    def postTokenize(self, ast, page, meta, reader):
-        meta.getData('dependencies').update(self.__dependencies)
-        self.__dependencies.clear()
+    #def postTokenize(self, ast, page, meta, reader):
+        #meta.getData('dependencies').update(self.__dependencies)
+        #self.__dependencies.clear()
 
-    def addDependency(self, page):
-        self.__dependencies.add(page.uid)
+    #def addDependency(self, page):
+    #    self.__dependencies.add(page.uid)
 
 class IncludeCommand(command.CommandComponent):
     COMMAND = 'include'
@@ -58,7 +59,9 @@ class IncludeCommand(command.CommandComponent):
         content, line = common.extractContent(self.reader.read(include_page), self.settings)
 
         self.reader.tokenize(parent, content, page, line=line)
-        self.extension.addDependency(include_page)
+        #with Translator.LOCK:
+        #    page['dependencies'].add(include_page.uid)
+        #self.extension.addDependency(include_page)
 
         return parent
 

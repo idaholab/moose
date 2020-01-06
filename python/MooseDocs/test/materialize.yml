@@ -61,6 +61,14 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+    MooseDocs.extensions.civet:
+        active: True
+        test_results_cache: '/tmp/civet/jobs'
+        remotes:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
+
     MooseDocs.extensions.navigation:
         active: True
         name: MOOSEDocs

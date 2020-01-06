@@ -432,3 +432,12 @@ def check_output(cmd, **kwargs):
         return subprocess.check_output(cmd, **kwargs)
     else:
         return subprocess.check_output(cmd, encoding='utf-8', **kwargs)
+
+def generate_filebase(string, replace='_', lowercase=True):
+    """
+    Convert the supplied string to a valid filename without spaces.
+    """
+    if lowercase:
+        string = string.lower()
+    string = re.sub(r'([\/\\\?%\*:\|\"<>\. ]+)', replace, string)
+    return string

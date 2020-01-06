@@ -289,7 +289,7 @@ class MaterializeRenderer(HTMLRenderer):
         self.addCSS('prism', "contrib/prism/prism.min.css")
         self.addCSS('moose', "css/moose.css")
 
-        self.addJavaScript('jquery', "contrib/jquery/jquery.min.js")
+        self.addJavaScript('jquery', "contrib/jquery/jquery.min.js", head=True)
         self.addJavaScript('materialize', "contrib/materialize/materialize.min.js")
         self.addJavaScript('clipboard', "contrib/clipboard/clipboard.min.js")
         self.addJavaScript('prism', "contrib/prism/prism.min.js")

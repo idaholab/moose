@@ -27,7 +27,8 @@ os.environ['ROOT_DIR'] = ROOT_DIR
 
 # File extensions to consider when building the content tree
 FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.webm', '.ogv', '.mp4', '.m4v', \
-            '.pdf', '.css', '.js', '.bib', '.woff', '.woff2', '.html', '.ico', 'md.template')
+            '.pdf', '.css', '.js', '.bib', '.woff', '.woff2', '.html', '.ico', 'md.template', \
+            'tar.gz')
 
 # Setup MOOSE_DIR/ROOT_DIR
 MOOSE_DIR = os.getenv('MOOSE_DIR', None)

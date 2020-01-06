@@ -16,6 +16,8 @@ import os
 import logging
 import multiprocessing
 import types
+import traceback
+import time
 
 import mooseutils
 
@@ -48,9 +50,6 @@ class Translator(mixins.ConfigObject):
     #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
     #  as well as during directory creation.
     LOCK = multiprocessing.Lock()
-
-    #: A code for indicating that parallel work is done
-    PROCESS_FINISHED = -1
 
     @staticmethod
     def defaultConfig():
@@ -237,16 +236,15 @@ class Translator(mixins.ConfigObject):
             raise exceptions.MooseDocsException(msg)
         return nodes[0]
 
-    def __buildMarkdownFileCache(self):
-        """Builds a list of markdown files, including the short-hand version for error reports."""
+    def executeExtensionFunction(self, name, page, args=tuple()):
+        """Helper to call pre/post functions for extensions, reader, and renderer."""
 
-        self.__markdown_file_list = set()
-        for local in [page.local for page in self.__content if isinstance(page, pages.Source)]:
-            self.__markdown_file_list.add(local)
-            parts = local.split(os.path.sep)
-            n = len(parts)
-            for i in range(n, 0, -1):
-                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            check_type('name', name, str)
+
+        for ext in self.extensions:
+            if ext.active:
+                Translator.callFunction(ext, name, page, args)
 
     def init(self):
         """
@@ -292,12 +290,18 @@ class Translator(mixins.ConfigObject):
         for ext in self.__extensions:
             self.__checkRequires(ext)
 
+        # Call Extension init() method
+        self.__initialized = True
+        LOG.info('Executing extension init() methods...')
+        t = time.time()
+        self.executeExtensionFunction('init', None)
+        LOG.info('Executing extension init() methods complete [%s sec.]', time.time() - t)
+
+        # Initialize the Page objects
         for node in self.__content:
             node.base = destination
             if isinstance(node, pages.Source):
                 node.output_extension = self.__renderer.EXTENSION
-
-        self.__initialized = True
 
     def execute(self, num_threads=1, nodes=None):
         """Perform build for all pages, see executioners."""
@@ -321,3 +325,29 @@ class Translator(mixins.ConfigObject):
 
         if messages:
             raise exceptions.MooseDocsException('\n'.join(messages))
+
+    def __buildMarkdownFileCache(self):
+        """Builds a list of markdown files, including the short-hand version for error reports."""
+
+        self.__markdown_file_list = set()
+        for local in [page.local for page in self.__content if isinstance(page, pages.Source)]:
+            self.__markdown_file_list.add(local)
+            parts = local.split(os.path.sep)
+            n = len(parts)
+            for i in range(n, 0, -1):
+
+                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+    @staticmethod
+    def callFunction(obj, name, page, args=tuple()):
+        """Helper for calling a function on the supplied object."""
+        func = getattr(obj, name, None)
+        if func is not None:
+            try:
+                func(*args)
+            except Exception:
+                msg = "Failed to execute '{}' method within the '{}' object.\n" \
+                      .format(name, obj.__class__.__name__)
+                if page is not None:
+                    msg += "  Error occurred in {}\n".format(page.local)
+                msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
+                LOG.critical(msg)#, name, obj.__class__.__name__)
