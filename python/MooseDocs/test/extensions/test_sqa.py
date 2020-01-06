@@ -13,13 +13,13 @@ import unittest
 import logging
 import collections
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, floats, autolink, heading, sqa
+from MooseDocs.extensions import core, command, floats, autolink, heading, civet, sqa
 from MooseDocs import base
 from MooseDocs.tree import pages
 logging.basicConfig()
 
 class TestSQARequirementsAST(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -45,8 +45,8 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         text = "!sqa requirements category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False"
         ast = self.tokenize(text)
 
-        self._assertAST_tree(ast(9), item_size=2)
-        self._assertAST_common(ast(0), item_size=2)
+        self._assertAST_tree(ast(9), item_size=3)
+        self._assertAST_common(ast(0), item_size=3)
 
         self.assertSize(ast, 14)
         for i in [1,2,3,4,5,6,7,8,10,11,12,13]:
@@ -71,8 +71,8 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=True link-issues=False link-prerequisites=False"
         ast = self.tokenize(text)
 
-        self._assertAST_tree(ast(1), item_size=2)
-        self._assertAST_common(ast(0), item_size=2)
+        self._assertAST_tree(ast(1), item_size=3)
+        self._assertAST_common(ast(0), item_size=3)
 
         self.assertToken(ast(1)(1)(1), 'SQARequirementDesign', design=['core.md'])
         self.assertToken(ast(1)(2)(1), 'SQARequirementDesign', design=['core.md'])
@@ -93,8 +93,8 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False"
         ast = self.tokenize(text)
 
-        self._assertAST_tree(ast(1), item_size=2)
-        self._assertAST_common(ast(0), item_size=2)
+        self._assertAST_tree(ast(1), item_size=3)
+        self._assertAST_common(ast(0), item_size=3)
 
         self.assertToken(ast(1)(1)(1), 'SQARequirementIssues', issues=['#1980'])
         self.assertToken(ast(1)(2)(1), 'SQARequirementIssues', issues=['#2011'])
@@ -116,15 +116,15 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         ast = self.tokenize(text)
 
         self.assertToken(ast(1)(0), 'SQARequirementMatrixHeading', size=1)
-        self.assertToken(ast(1)(1), 'SQARequirementMatrixItem', size=1)
-        self.assertToken(ast(1)(2), 'SQARequirementMatrixItem', size=1)
-        self.assertToken(ast(1)(3), 'SQARequirementMatrixItem', size=2)
-        self.assertToken(ast(1)(4), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(1)(1), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(1)(2), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(1)(3), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(1)(4), 'SQARequirementMatrixItem', size=3)
 
         self.assertToken(ast(1)(3)(1), 'SQARequirementPrequisites', size=0, specs=[('tree', 'r1', 'F1.2.2')])
         self.assertToken(ast(1)(4)(1), 'SQARequirementPrequisites', size=0, specs=[('tree', 'r1', 'F1.2.2')])
 
-        self._assertAST_common(ast(0), item_size=1)
+        self._assertAST_common(ast(0), item_size=2)
 
     def _assertHTML(self, res):
         self.assertSize(res, 1)
@@ -172,7 +172,7 @@ class TestSQARequirementsAST(MooseDocsTestCase):
             self.assertToken(ast(i+5)(0)(4), 'Word', size=0, content=s)
 
 class TestSQAVerificationAndValidation(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -266,7 +266,7 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
 
 
 class TestSQARequirementsMatrix(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -286,7 +286,7 @@ class TestSQARequirementsMatrix(MooseDocsTestCase):
 
 
 class TestSQARequirementsCrossReference(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
     NodeProxy = collections.namedtuple('NodeProxy', 'local')
 
     def setupExtension(self, ext):
@@ -299,12 +299,11 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
     def testCommand(self, mock_find_page):
         text = "!sqa cross-reference category=Demo"
         ast = self.tokenize(text)
-        print(ast)
         self.assertSize(ast, 15)
         self.assertToken(ast(0), 'SQARequirementMatrix', size=7)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo', size=1)
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='core.md', size=0)
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=4)
+        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=5)
 
         self.assertToken(ast(0)(1)(0), 'SQARequirementText', size=3)
         self.assertToken(ast(0)(1)(0)(0), 'Word', content='Requirement')
@@ -323,7 +322,7 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
         self.assertSize(ast, 0)
 
 class TestSQADependencies(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -352,7 +351,7 @@ class TestSQADependencies(MooseDocsTestCase):
         self.assertToken(ast(0)(1)(0), 'AutoLink', page='sqa/Demo2_foo.md', optional=True, warning=True)
 
 class TestSQADependenciesWithConfig(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -373,7 +372,7 @@ class TestSQADependenciesWithConfig(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='sqa/Demo2_foo.md', optional=True, warning=True)
 
 class TestSQADocument(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -388,7 +387,7 @@ class TestSQADocument(MooseDocsTestCase):
         self.assertToken(ast(0), 'AutoLink', page='sqa/Demo_foo.md', optional=True, warning=True)
 
 class TestSQARequirementsRender(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa]
 
     def setupExtension(self, ext):
         if ext == sqa:

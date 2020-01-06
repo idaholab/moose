@@ -9,5 +9,6 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The contact system shall enforce contact between three-dimensional non-conformal surfaces with Hex20 elements. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

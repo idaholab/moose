@@ -68,6 +68,7 @@
     issues = "#8642"
     requirement = "Moose shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and match the deprecated solid mechanics methods"
     design = "heat_conduction/index.md tensor_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./thermo_mech_sm]
@@ -79,6 +80,7 @@
     issues = "#2460"
     requirement = "Moose shall be able to run coupled thermo-mechanics simulations using deprecated solid mechanics methods"
     design = "heat_conduction/index.md solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./thermo_mech_smp_sm]
@@ -91,5 +93,6 @@
     issues = "#2460"
     requirement = "Moose shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and using deprecated solid mechanics methods"
     design = "heat_conduction/index.md solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 []

@@ -26,6 +26,7 @@
     requirement = 'The solid mechanics formulation of elastic plane strain and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./rz]
@@ -55,6 +56,7 @@
     requirement = 'The solid mechanics formulation of elastic 2DRZ solution and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./rz_nonlinear]
@@ -81,6 +83,7 @@
     requirement = 'The solid mechanics formulation of elastic 2DRZ eigenstrain solution and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./rspherical]
@@ -107,6 +110,7 @@
     requirement = 'The solid mechanics formulation of elastic spherical solution and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 
   [./sm_plane_strain_large_strain]
@@ -117,6 +121,7 @@
     requirement = 'The solid mechanics formulation of large elastic plane strain and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
   [./sm_rz_large_strain]
     type = Exodiff
@@ -126,5 +131,6 @@
     requirement = 'The solid mechanics formulation of large elastic 2DRZ strain and density shall match the analytical expression'
     issues = "#8642"
     design = "/solid_mechanics/index.md"
+    no_error_deprecated = true
   [../]
 []

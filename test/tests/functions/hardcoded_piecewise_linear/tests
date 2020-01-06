@@ -1,0 +1,10 @@
+[Tests]
+  design = 'PiecewiseLinear.md'
+  [hardcoded_piecewise_linear]
+    type = 'CSVDiff'
+    input = 'hardcoded_piecewise_linear.i'
+    csvdiff = 'hardcoded_piecewise_linear_out.csv'
+    requirement = "The system shall allow for piecewise functions to directly set the x and y data internally."
+    issues = '#14220'
+  []
+[]

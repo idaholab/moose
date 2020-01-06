@@ -8,5 +8,6 @@
     valgrind = 'NONE' # Uninitialized memory in Abaqus UMATs
     compiler = 'INTEL'
     skip = 'ill-posed test'
+    no_error_deprecated = true
   [../]
 []

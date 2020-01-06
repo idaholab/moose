@@ -9,8 +9,7 @@
 
 #include "FunctionDT.h"
 #include "Function.h"
-#include "PiecewiseLinear.h"
-#include "PiecewiseConstant.h"
+#include "PiecewiseBase.h"
 #include <limits>
 
 registerMooseObject("MooseApp", FunctionDT);
@@ -37,7 +36,7 @@ FunctionDT::validParams()
                         "Whether or not to interpolate DT between times.  "
                         "This is true by default for historical reasons.");
   params.addClassDescription(
-      "Timestepper whose steps vary over time according to a user-defined fuction");
+      "Timestepper whose steps vary over time according to a user-defined function");
 
   return params;
 }
@@ -92,14 +91,14 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
     _function = &getFunction("function");
     // If dt is given by piece-wise linear and constant function, we add the domain into
     // _time_knots, so that the time stepper hits those time points
-    if (dynamic_cast<const PiecewiseLinear *>(_function) ||
-        dynamic_cast<const PiecewiseConstant *>(_function))
+    const PiecewiseBase * pw = dynamic_cast<const PiecewiseBase *>(_function);
+    if (pw)
     {
-      const Piecewise * pw = dynamic_cast<const Piecewise *>(_function);
       unsigned int n_knots = pw->functionSize();
       for (unsigned int i = 0; i < n_knots; i++)
         _time_knots.push_back(pw->domain(i));
     }
+
     _use_function = true;
   }
 }

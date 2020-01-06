@@ -1,15 +1,21 @@
 [Tests]
+  issues = '#6125'
+  design = 'ComputeElasticityTensor.md'
   [./linear_elastic_material]
     type = 'Exodiff'
     input = 'linear_elastic_material.i'
     exodiff = 'linear_elastic_material_out.e'
     max_parallel = 1
+    requirement = 'The system shall compute the elasticity tensor for linear isotropic material.'
   [../]
 
   [./linear_anisotropic_material_sm]
     type = 'Exodiff'
     input = 'linear_anisotropic_material_sm.i'
     exodiff = 'linear_anisotropic_material_out.e'
+    no_error_deprecated = true
+    design = 'LinearGeneralAnisotropicMaterial.md'
+    requirement = 'The system shall compute the elasticity tensor for linear anisotropic material using deprecated solid_mechanics.'
   [../]
 
   [./linear_anisotropic_material]
@@ -17,18 +23,21 @@
     input = 'linear_anisotropic_material.i'
     exodiff = 'linear_anisotropic_material_out.e'
     prereq = 'linear_anisotropic_material_sm'
+    requirement = 'The system shall compute the elasticity tensor for linear anisotropic material using deprecated solid_mechanics.'
   [../]
 
   [./applied_strain]
     type = 'Exodiff'
     input = 'applied_strain.i'
     exodiff = 'applied_strain_out.e'
+    requirement = 'The system shall compute the response of elastic material with an applied eigenstrain.'
   [../]
 
   [./extra_stress]
     type = 'Exodiff'
     input = 'extra_stress.i'
     exodiff = 'extra_stress_out.e'
+    requirement = 'The system shall compute the response of elastic material with an applied extra stress.'
   [../]
 
   [./tensor]
@@ -36,11 +45,13 @@
     input = 'tensor.i'
     exodiff = 'tensor_out.e'
     max_parallel = 1
+    requirement = 'The system shall output the components of a rank 4 elasticity tensor.'
   [../]
 
   [./thermal_expansion]
     type = 'Exodiff'
     input = 'thermal_expansion.i'
     exodiff = 'thermal_expansion_out.e'
+    requirement = 'The system shall compute the response of elastic material with an applied eigenstrain to mimic thermal expansion.'
   [../]
 []

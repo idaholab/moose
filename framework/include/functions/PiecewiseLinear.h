@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Piecewise.h"
+#include "PiecewiseLinearBase.h"
 
 // Forward declarations
 class PiecewiseLinear;
@@ -21,30 +21,10 @@ InputParameters validParams<PiecewiseLinear>();
  * Function which provides a piecewise continuous linear interpolation
  * of a provided (x,y) point data set.
  */
-class PiecewiseLinear : public Piecewise
+class PiecewiseLinear : public PiecewiseLinearBase
 {
 public:
   static InputParameters validParams();
 
   PiecewiseLinear(const InputParameters & parameters);
-
-  /**
-   * Get the value of the function (based on time only)
-   * \param t The time
-   * \param pt The point in space (x,y,z) (unused)
-   * \return The value of the function at the specified time
-   */
-  virtual Real value(Real t, const Point & pt) const override;
-
-  /**
-   * Get the time derivative of the function (based on time only)
-   * \param t The time
-   * \param pt The point in space (x,y,z) (unused)
-   * \return The time derivative of the function at the specified time
-   */
-  virtual Real timeDerivative(Real t, const Point & pt) const override;
-
-  virtual Real integral() const override;
-
-  virtual Real average() const override;
 };

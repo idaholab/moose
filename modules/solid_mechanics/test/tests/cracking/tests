@@ -6,6 +6,7 @@
     exodiff = cracking_out.e
     abs_zero = 1e-4
     scale_refine = 4
+    no_error_deprecated = true
   [../]
 
   [./cracking_rz]
@@ -14,6 +15,7 @@
     exodiff = cracking_rz_out.e
     abs_zero = 1e-4
     scale_refine = 4
+    no_error_deprecated = true
   [../]
 
  [./cracking_function]
@@ -22,6 +24,7 @@
     exodiff = cracking_function_out.e
     abs_zero = 1e-4
     scale_refine = 4
+    no_error_deprecated = true
   [../]
 
   [./exponential]
@@ -34,6 +37,7 @@
     max_parallel = 1
     # Review needed on Intel compilers
     compiler = 'CLANG GCC'
+    no_error_deprecated = true
   [../]
 
   [./rz_exponential]
@@ -43,6 +47,7 @@
     abs_zero = 5e-4
     scale_refine = 0
     max_parallel = 1
+    no_error_deprecated = true
   [../]
 
   [./xyz]
@@ -53,6 +58,7 @@
     abs_zero = 1e-4
     scale_refine = 0
     max_parallel = 1
+    no_error_deprecated = true
   [../]
 
   [./plane_stress]
@@ -62,6 +68,7 @@
     abs_zero = 1e-4
     scale_refine = 0
     max_parallel = 1
+    no_error_deprecated = true
   [../]
 
 []

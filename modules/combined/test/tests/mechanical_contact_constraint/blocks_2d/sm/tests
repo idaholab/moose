@@ -9,6 +9,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./frictionless_kinematic_dirac_sm]
     type = 'Exodiff'
@@ -19,6 +20,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the DiracKernel system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./frictionless_penalty_sm]
     type = 'Exodiff'
@@ -28,6 +30,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./frictionless_penalty_dirac_sm]
     type = 'Exodiff'
@@ -38,6 +41,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the DiracKernel system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./glued_kinematic_sm]
     type = 'Exodiff'
@@ -47,6 +51,7 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./glued_kinematic_dirac_sm]
     type = 'Exodiff'
@@ -57,6 +62,7 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the DiracKernel system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./glued_penalty_sm]
     type = 'Exodiff'
@@ -66,6 +72,7 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
   [./glued_penalty_dirac_sm]
     type = 'Exodiff'
@@ -76,5 +83,6 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the DiracKernel system. Legacy Solid Mechanics."
+    no_error_deprecated = true
   [../]
 []

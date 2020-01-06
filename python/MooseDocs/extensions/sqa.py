@@ -16,14 +16,17 @@ import logging
 import collections
 import traceback
 import moosetree
+import uuid
+import json
+import time
 
 import mooseutils
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer, HTMLRenderer
-from MooseDocs.extensions import core, command, floats, autolink
-from MooseDocs.tree import tokens, html, latex
+from .. import common
+from ..common import exceptions
+from ..base import components, LatexRenderer, HTMLRenderer
+from ..tree import tokens, html, latex, pages
+from . import core, command, floats, autolink, civet
 
 LOG = logging.getLogger(__name__)
 
@@ -81,6 +84,7 @@ class SQAExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         # Build requirements sets
+        self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
         for index, (category, info) in enumerate(self.get('categories').items(), 1): #pylint: disable=no-member
@@ -118,6 +122,11 @@ class SQAExtension(command.CommandExtension):
         self['repos'].update(dict(moose="https://github.com/idaholab/moose",
                                   libmesh="https://github.com/libMesh/libmesh"))
 
+
+    def hasCivetExtension(self):
+        """Return True if the CivetExtension exists."""
+        return self.__has_civet
+
     def requirements(self, category):
         """Return the requirements dictionaries."""
         req = self.__requirements.get(category, None)
@@ -132,8 +141,8 @@ class SQAExtension(command.CommandExtension):
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return dep
 
-    def preExecute(self, root):
-        """Reset counts."""
+    def preExecute(self, content):
+        """Reset counts and create test pages."""
         self.__counts.clear()
 
     def increment(self, key):
@@ -143,6 +152,10 @@ class SQAExtension(command.CommandExtension):
 
     def extend(self, reader, renderer):
         self.requires(core, command, autolink, floats)
+
+        for ext in self.translator.extensions:
+            if ext.name == 'civet':
+                self.__has_civet = True
 
         self.addCommand(reader, SQARequirementsCommand())
         self.addCommand(reader, SQARequirementsMatrixCommand())
@@ -169,6 +182,8 @@ class SQAExtension(command.CommandExtension):
 
         if isinstance(renderer, HTMLRenderer):
             renderer.addCSS('sqa_moose', "css/sqa_moose.css")
+            renderer.addJavaScript('sqa_moose', "js/sqa_moose.js")
+
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -188,6 +203,7 @@ class SQARequirementsCommand(command.CommandComponent):
                                  "the 'link' setting must be true.")
         config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
                                         "the 'link' setting must be true.")
+        config['link-results'] = (True, "Enable/disable the link to the test results.")
 
         return config
 
@@ -264,6 +280,17 @@ class SQARequirementsCommand(command.CommandComponent):
 
                 SQARequirementPrequisites(item, specs=labels)
 
+            if self.settings.get('link-results', False):
+                keys = list()
+
+                for detail in req.details:
+                    keys.append('{}.{}/{}'.format(req.path, req.name, detail.name))
+
+                if not keys:
+                    keys.append('{}.{}'.format(req.path, req.name))
+
+                if self.extension.hasCivetExtension():
+                    civet.CivetTestBadges(item, tests=keys)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'

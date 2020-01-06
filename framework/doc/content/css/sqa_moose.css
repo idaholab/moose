@@ -1,3 +1,11 @@
+:root {
+    --badge-ok: rgba(0, 153, 0, 0.75);
+    --badge-fail: rgba(153, 0, 0, 0.75);
+    --badge-diff: rgba(204, 204, 0, 0.75);
+    --badge-timeout: rgba(255, 114, 33, 0.75);
+    --requirement-fail: rgba(255, 0, 0, 0.1);
+}
+
 .moose-sqa-requirement-number
 {
     font-weight: 600;

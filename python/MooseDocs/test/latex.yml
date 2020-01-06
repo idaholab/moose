@@ -44,6 +44,14 @@ Extensions:
     MooseDocs.extensions.gallery: disable
     MooseDocs.extensions.template:
         active: True
+    MooseDocs.extensions.civet:
+        active: True
+        test_results_cache: '/tmp/civet/jobs'
+        generate_test_reports: False
+        remotes:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
     MooseDocs.extensions.sqa:
         active: True
         categories:

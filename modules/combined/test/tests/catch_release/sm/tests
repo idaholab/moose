@@ -12,5 +12,6 @@
     # to numerical instability.
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce three-dimensional block to block interaction using a penalty approach. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

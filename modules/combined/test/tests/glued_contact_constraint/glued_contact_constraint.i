@@ -7,22 +7,16 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 [AuxVariables]
   [./penetration]
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    planar_formulation = PLANE_STRAIN
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
@@ -88,13 +82,13 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
+  [./elasticity]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
   [../]
 []
 

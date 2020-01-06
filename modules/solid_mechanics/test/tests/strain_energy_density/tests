@@ -5,6 +5,7 @@
    csvdiff = 'incr_model_out.csv'
    rel_err = 1e-6
    abs_zero = 1e-8
+   no_error_deprecated = true
  [../]
  [./incr_elas_plas]
    type = 'CSVDiff'
@@ -12,5 +13,6 @@
    csvdiff = 'incr_model_elas_plas_out.csv'
    rel_err = 8e-5
    abs_zero = 1e-6
+   no_error_deprecated = true
  [../]
 []

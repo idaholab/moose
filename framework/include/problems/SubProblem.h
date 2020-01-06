@@ -21,6 +21,7 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
+class GhostingFunctor;
 }
 
 class MooseMesh;
@@ -649,6 +650,11 @@ public:
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
   virtual const CouplingMatrix * couplingMatrix() const = 0;
+
+  /**
+   * Add an algebraic ghosting functor to this problem's DofMaps
+   */
+  void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
 protected:
   /**

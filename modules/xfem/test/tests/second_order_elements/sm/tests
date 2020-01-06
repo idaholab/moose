@@ -8,6 +8,7 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using QUAD8 elements using deprecated SolidMechanics methods.'
+    no_error_deprecated = true
   [../]
   [./square_branch_quad9_2d]
     type = Exodiff
@@ -16,6 +17,7 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using QUAD9 elements using deprecated SolidMechanics methods.'
+    no_error_deprecated = true
   [../]
   [./square_branch_tri6_2d]
     type = Exodiff
@@ -24,5 +26,6 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using TRI6 elements using deprecated SolidMechanics methods.'
+    no_error_deprecated = true
   [../]
 []

@@ -12,5 +12,6 @@
     requirement = 'The XFEM module shall retain the values of auxiliary variables on child nodes and elements after running the cutting algorithm, and initialize solution variables on newly created nodes with values from parent nodes in parallel using deprecated SolidMechanics methods.'
     design = 'XFEM/index.md'
     issues = '#8763'
+    no_error_deprecated = true
   [../]
 []

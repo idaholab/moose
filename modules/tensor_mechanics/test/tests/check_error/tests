@@ -1,0 +1,50 @@
+[Tests]
+  [./num_constants]
+    type = 'RunException'
+    input = 'num_constants.i'
+    expect_err = "Exactly two elastic constants must be defined for material 'elasticity_tensor'"
+    design = "ComputeIsotropicElasticityTensor.md"
+    issues = "#9438"
+    requirement = "The system shall generate an error if a number of elastic constants other than two is supplied for an isotropic elasticity tensor"
+  [../]
+  [./youngs_modulus]
+    type = 'RunException'
+    input = 'youngs_modulus.i'
+    expect_err = "Youngs modulus must be positive in material 'elasticity_tensor'"
+    design = "ComputeIsotropicElasticityTensor.md"
+    issues = "#9438"
+    requirement = "The system shall generate an error if a non-positive Youngs modulus is supplied for an isotropic elasticity tensor"
+  [../]
+  [./bulk_modulus]
+    type = 'RunException'
+    input = 'bulk_modulus.i'
+    expect_err = "Bulk modulus must be positive in material 'elasticity_tensor'"
+    design = "ComputeIsotropicElasticityTensor.md"
+    issues = "#9438"
+    requirement = "The system shall generate an error if a non-positive bulk modulus is supplied for an isotropic elasticity tensor"
+  [../]
+  [./poissons_ratio]
+    type = 'RunException'
+    input = 'poissons_ratio.i'
+    expect_err = "Poissons ratio must be greater than -1 and less than 0.5 in material 'elasticity_tensor'"
+    design = "ComputeIsotropicElasticityTensor.md"
+    issues = "#9438"
+    requirement = "The system shall generate an error if a Poissons ratio outside the range from -1 to 0.5 is supplied for an isotropic elasticity tensor"
+  [../]
+  [./shear_modulus]
+    type = 'RunException'
+    input = 'shear_modulus.i'
+    expect_err = "Shear modulus must not be negative in material 'elasticity_tensor'"
+    design = "ComputeIsotropicElasticityTensor.md"
+    issues = "#9438"
+    requirement = "The system shall generate an error if a non-positive shear modulus is supplied for an isotropic elasticity tensor"
+  [../]
+  [./pressure_component]
+    type = 'RunException'
+    input = 'pressure_component.i'
+    expect_err = "Invalid component given for fred: 123456789."
+    design = "/Pressure.md"
+    issues = "#4781"
+    requirement = "The system shall generate an error if a component outside the accepted range is supplied for the Pressure boundary condition" 
+  [../]
+[]

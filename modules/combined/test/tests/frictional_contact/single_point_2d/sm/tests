@@ -8,6 +8,7 @@
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
   [./single_point_2d_predictor_sm]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip. With predictor solver options. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
   [./single_point_2d_tp_sm]
     type = 'Exodiff'
@@ -24,5 +26,6 @@
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
     requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip when formulation selected is tangential_penalty contact. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

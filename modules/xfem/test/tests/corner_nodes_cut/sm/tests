@@ -10,6 +10,7 @@
                   'in 2D using deprecated SolidMechanics methods.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
+    no_error_deprecated = true
   [../]
   [./corner_edge_cut]
     type = Exodiff
@@ -23,6 +24,7 @@
                   'same mesh using deprecated SolidMechanics methods.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
+    no_error_deprecated = true
   [../]
   [./corner_node_cut]
     type = Exodiff
@@ -36,6 +38,7 @@
 		  'using deprecated SolidMechanics methods.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
+    no_error_deprecated = true
   [../]
   [./notch]
     type = Exodiff
@@ -48,5 +51,6 @@
 		  'SolidMechanics methods.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
+    no_error_deprecated = true
   [../]
 []

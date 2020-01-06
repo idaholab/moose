@@ -16,7 +16,7 @@ defineLegacyParams(PiecewiseConstant);
 InputParameters
 PiecewiseConstant::validParams()
 {
-  InputParameters params = Piecewise::validParams();
+  InputParameters params = PiecewiseBase::validParams();
   MooseEnum direction("left right", "left");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());
@@ -44,19 +44,15 @@ PiecewiseConstant::getDirection(const std::string & direction)
 }
 
 PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
-  : Piecewise(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
+  : PiecewiseBase(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
 {
 }
 
 Real
 PiecewiseConstant::value(Real t, const Point & p) const
 {
-  Real func_value(0);
-  Real x = t;
-  if (_has_axis)
-  {
-    x = p(_axis);
-  }
+  Real func_value = 0.0;
+  const Real x = _has_axis ? p(_axis) : t;
 
   unsigned i = 1;
   const unsigned len = functionSize();

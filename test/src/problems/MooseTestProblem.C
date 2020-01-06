@@ -8,6 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseTestProblem.h"
+#include "AuxiliarySystem.h"
+
+#include "libmesh/system.h"
+#include "libmesh/fe_type.h"
 
 registerMooseObject("MooseTestApp", MooseTestProblem);
 
@@ -23,6 +27,9 @@ MooseTestProblem::MooseTestProblem(const InputParameters & params) : FEProblem(p
   _console << "Hello, I am your FEProblemBase-derived class with coordinate type "
            << getParam<MultiMooseEnum>("coord_type") << " and my name is '" << this->name() << "'"
            << std::endl;
+
+  _test_aux = std::make_shared<AuxiliarySystem>(*this, "aux1");
+  _test_aux->system().add_variable("dummy", FEType());
 }
 
 MooseTestProblem::~MooseTestProblem() { _console << "Goodbye!" << std::endl; }

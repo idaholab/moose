@@ -1,0 +1,1 @@
+../../../../tensor_mechanics/test/tests/check_error/cube.e

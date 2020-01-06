@@ -148,6 +148,7 @@
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -163,6 +164,7 @@
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./frictionless_kin_sm]
     type = 'CSVDiff'
@@ -177,6 +179,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
@@ -191,6 +194,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./mu_0_0_kin_sm]
     type = 'CSVDiff'
@@ -205,6 +209,7 @@
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./mu_0_0_pen_sm]
     type = 'CSVDiff'
@@ -219,6 +224,7 @@
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane strain single point contact model with the deprecated solid
     mechanics module."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_kin_sm]
     type = 'CSVDiff'
@@ -233,6 +239,7 @@
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane strain single point contact model with a non-zero friction
     coefficient with the deprecated solid mechanics module."
+    no_error_deprecated = true
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
@@ -248,5 +255,6 @@
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane strain single point contact model with a non-zero friction
     coefficient with the deprecated solid mechanics module."
+    no_error_deprecated = true
   [../]
 []

@@ -5,6 +5,7 @@
     exodiff = 'out_rz.e'
     abs_zero = 1e-09
     scale_refine = 3
+    no_error_deprecated = true
   [../]
   [./test]
     type = 'Exodiff'
@@ -12,5 +13,6 @@
     exodiff = 'out.e'
     abs_zero = 1e-09
     scale_refine = 3
+    no_error_deprecated = true
   [../]
 []

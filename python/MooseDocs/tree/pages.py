@@ -26,7 +26,7 @@ class Page(mooseutils.AutoPropertyMixin):
     def __init__(self, fullname, **kwargs):
         super(Page, self).__init__(**kwargs)
         self._fullname = fullname            # local path of the node
-        self._name = fullname.split('/')[-1] # file/folder name
+        self._name = fullname.split('/')[-1] # folder/file name
         self.__unique_id = uuid.uuid4()      # a unique identifier
 
     @property

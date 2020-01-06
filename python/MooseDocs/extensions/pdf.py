@@ -95,7 +95,7 @@ class PDFExtension(command.CommandExtension):
                     ['pdflatex', '-halt-on-error', 'main']]
         for cmd in commands:
             try:
-                output = subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT)
+                output = subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT, encoding='utf8')
             except subprocess.CalledProcessError as e:
                 msg = 'Failed to run pdflatex command: {}\n\n{}'
                 raise exceptions.MooseDocsException(msg, ' '.join(cmd), e.output)

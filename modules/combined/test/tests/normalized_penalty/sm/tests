@@ -8,6 +8,7 @@
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Penalty contact. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
   [./normalized_penalty_Q8_sm]
     type = Exodiff
@@ -16,6 +17,7 @@
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
   [./normalized_penalty_kin_sm]
     type = Exodiff
@@ -27,6 +29,7 @@
     # changes in 3061bbd5d.
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
   [./normalized_penalty_kin_Q8_sm]
     type = Exodiff
@@ -38,5 +41,6 @@
     # changes in 3061bbd5d.
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Kinematic contact. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 []

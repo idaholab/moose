@@ -1,4 +1,5 @@
 [Tests]
+  issues = '#8905'
   [./elastic_plastic]
     type = 'Exodiff'
     input = 'elas_plas_nl1.i'
@@ -6,6 +7,8 @@
     cli_args = 'Outputs/file_base=elas_plas_nl1_6e-5_out'
     prereq = 'elastic_plastic_sm'
     abs_zero = 6e-5
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall compute and output the effective plastic strain.'
   [../]
   [./elastic_plastic_cycle]
     type = 'Exodiff'
@@ -14,17 +17,25 @@
     cli_args = 'Outputs/file_base=elas_plas_nl1_cycle_8e-5_out'
     prereq = 'elastic_plastic_cycle_sm'
     abs_zero = 8e-5
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall compute and output the effective plastic strain under cyclic loading.'
   [../]
   [./elastic_plastic_sm]
     type = 'Exodiff'
     input = 'elas_plas_nl1_sm.i'
     exodiff = 'elas_plas_nl1_out.e'
     abs_zero = 6e-5
+    no_error_deprecated = true
+    design = 'IsotropicPlasticity.md'
+    requirement = 'The system shall compute and output the effective plastic strain using deprecated solid_mechanics.'
   [../]
   [./elastic_plastic_cycle_sm]
     type = 'Exodiff'
     input = 'elas_plas_nl1_cycle_sm.i'
     exodiff = 'elas_plas_nl1_cycle_out.e'
     abs_zero = 6e-5
+    no_error_deprecated = true
+    design = 'IsotropicPlasticity.md'
+    requirement = 'The system shall compute and output the effective plastic strain under cyclic loading using deprecated solid_mechanics.'
   [../]
 []
