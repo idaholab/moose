@@ -6195,15 +6195,16 @@ FEProblemBase::serializeSolution()
 void
 FEProblemBase::setRestartFile(const std::string & file_name)
 {
-  _app.setRestart(true);
-
-  if (!_app.isRecovering())
+  if (_app.isRecovering())
   {
-    _app.setRestartRecoverFileBase(file_name);
     mooseInfo("Restart file ", file_name, " is NOT being used since we are performing recovery.");
   }
   else
+  {
+    _app.setRestart(true);
+    _app.setRestartRecoverFileBase(file_name);
     mooseInfo("Using ", file_name, " for restart.");
+  }
 }
 
 std::vector<VariableName>
