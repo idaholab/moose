@@ -154,15 +154,15 @@ class Tester(MooseObject):
 
     # Return a tuple (status, message, caveats) for this tester as found
     # in the .previous_test_results.json file (or supplied json object)
-    def previousTesterStatus(self, options, previous_results=None):
-        if not previous_results:
-            previous_results = options.results_storage
+    def previousTesterStatus(self, options, previous_storage=None):
+        if not previous_storage:
+            previous_storage = options.results_storage
 
-        status_exists = previous_results.get(self.getTestDir(), {}).get(self.getTestName(), None)
+        status_exists = previous_storage.get(self.getTestDir(), {}).get(self.getTestName(), None)
         status = (self.test_status.createStatus(), '', '')
         if status_exists:
-            status = (self.test_status.createStatus(status_exists['STATUS'].encode('ascii', 'ignore')),
-                      status_exists['STATUS_MESSAGE'].encode('ascii', 'ignore'),
+            status = (self.test_status.createStatus(str(status_exists['STATUS'])),
+                      str(status_exists['STATUS_MESSAGE']),
                       status_exists['CAVEATS'])
         return (status)
 
