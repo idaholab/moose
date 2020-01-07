@@ -99,8 +99,6 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   _func_F->ParseAndDeduceVariables(expression, _variable_names, false);
   _nargs = _variable_names.size();
 
-  variable_info.resize(_nargs);
-
   for (auto & var : _variable_names)
     getVariableValue(var, mat_prop_expressions);
 

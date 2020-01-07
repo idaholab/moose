@@ -130,12 +130,8 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   current._darg_names = parent_derivative._darg_names;
 
   // the moose variable name goes into the derivative property name
-  if (_map_mode == USE_PARAM_NAMES)
-    current._darg_names.push_back(map_to_arg_names[_variable_names[var]]);
-  else
-    current._darg_names.push_back(_variable_names[var]);
-
-  current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
+  current._darg_names.push_back(_arg_names[finder - _equation_args.begin()]);
+  current._F = std::make_shared<ADFunction>(*parent_derivative._F);
 
   // execute derivative
   if (current._F->AutoDiff(derivative_var) != -1)
