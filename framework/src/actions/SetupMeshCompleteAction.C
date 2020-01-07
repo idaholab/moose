@@ -26,11 +26,12 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
 
-template <>
+defineLegacyParams(SetupMeshCompleteAction);
+
 InputParameters
-validParams<SetupMeshCompleteAction>()
+SetupMeshCompleteAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 
@@ -75,6 +76,10 @@ SetupMeshCompleteAction::act()
     if (_app.isUseSplit())
       return;
 
+    // uniform refinement has been done on master, so skip
+    if (_app.masterMesh())
+      return;
+
     /**
      * If possible we'd like to refine the mesh here before the equation systems
      * are setup to avoid doing expensive projections. If however we are doing a
@@ -91,9 +96,17 @@ SetupMeshCompleteAction::act()
       if (_mesh->uniformRefineLevel())
       {
         Adaptivity::uniformRefine(_mesh.get());
+        // After refinement we need to make sure that all of our MOOSE-specific containers are
+        // up-to-date
+        _mesh->update();
 
         if (_displaced_mesh)
+        {
           Adaptivity::uniformRefine(_displaced_mesh.get());
+          // After refinement we need to make sure that all of our MOOSE-specific containers are
+          // up-to-date
+          _displaced_mesh->update();
+        }
       }
     }
   }

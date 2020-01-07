@@ -11,15 +11,11 @@
 
 #include "InternalSidePostprocessor.h"
 
-// Forward Declarations
-class InternalSideJump;
-
-template <>
-InputParameters validParams<InternalSideJump>();
-
 class InternalSideJump : public InternalSidePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InternalSideJump(const InputParameters & parameters);
 
   virtual PostprocessorValue getValue() override;
@@ -35,4 +31,3 @@ protected:
   const VariableValue & _sln_dofs_neig;
   Real _integral_value;
 };
-

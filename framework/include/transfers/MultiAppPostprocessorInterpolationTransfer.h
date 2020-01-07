@@ -25,6 +25,8 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>();
 class MultiAppPostprocessorInterpolationTransfer : public MultiAppTransfer
 {
 public:
+  static InputParameters validParams();
+
   MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -38,4 +40,3 @@ protected:
   MooseEnum _interp_type;
   Real _radius;
 };
-

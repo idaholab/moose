@@ -21,6 +21,8 @@ template <ComputeStage compute_stage>
 class ADMortarConstraint : public MortarConstraintBase
 {
 public:
+  static InputParameters validParams();
+
   ADMortarConstraint(const InputParameters & parameters);
 
   void computeResidual(bool has_master) final;

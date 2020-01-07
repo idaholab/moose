@@ -124,6 +124,8 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
 class MultiPlasticityLinearSystem : public MultiPlasticityRawComponentAssembler
 {
 public:
+  static InputParameters validParams();
+
   MultiPlasticityLinearSystem(const MooseObject * moose_object);
 
 protected:
@@ -272,4 +274,3 @@ private:
                                          const std::vector<bool> & active,
                                          std::vector<bool> & deactivated_due_to_ld);
 };
-

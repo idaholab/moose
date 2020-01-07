@@ -11,12 +11,12 @@
 #include "Factory.h"
 #include "Function.h"
 
-template <>
+defineLegacyParams(Problem);
+
 InputParameters
-validParams<Problem>()
+Problem::validParams()
 {
-  InputParameters params = emptyInputParameters();
-  params += validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   params.registerBase("Problem");
   return params;

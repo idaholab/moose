@@ -23,6 +23,8 @@ template <ComputeStage compute_stage>
 class ADComputeGreenLagrangeStrain : public ADComputeStrainBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeGreenLagrangeStrain(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,3 @@ protected:
 
   usingComputeStrainBaseMembers;
 };
-

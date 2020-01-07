@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-class CoupledValuesMaterial;
-
-template <>
-InputParameters validParams<CoupledValuesMaterial>();
-
 /**
  * A material that couples variables values and stores them into material property
  * This makes sure that everything is properly resized and can be indexed into.
@@ -23,6 +18,8 @@ InputParameters validParams<CoupledValuesMaterial>();
 class CoupledValuesMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   CoupledValuesMaterial(const InputParameters & parameters);
 
 protected:
@@ -41,4 +38,3 @@ protected:
   MaterialProperty<Real> & _dot_du_prop;
   MaterialProperty<Real> & _dot_dot_du_prop;
 };
-

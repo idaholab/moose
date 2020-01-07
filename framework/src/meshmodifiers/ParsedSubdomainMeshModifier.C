@@ -15,7 +15,10 @@
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", ParsedSubdomainMeshModifier);
+registerMooseObjectReplaced("MooseApp",
+                            ParsedSubdomainMeshModifier,
+                            "11/30/2019 00:00",
+                            ParsedSubdomainMeshGenerator);
 
 template <>
 InputParameters
@@ -52,7 +55,7 @@ ParsedSubdomainMeshModifier::ParsedSubdomainMeshModifier(const InputParameters &
     _excluded_ids(parameters.get<std::vector<SubdomainID>>("excluded_subdomain_ids"))
 {
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

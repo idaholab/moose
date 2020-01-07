@@ -115,6 +115,11 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
 
   _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
   _JxW_msm = &_fe_msm->get_JxW();
+  // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
+  // _coord_msm
+  _fe_msm->get_xyz();
+
+  _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers());
 }
 
 Assembly::~Assembly()
@@ -216,6 +221,7 @@ Assembly::~Assembly()
 
   _coord.release();
   _coord_neighbor.release();
+  _coord_msm.release();
 
   _ad_JxW.release();
   _ad_q_points.release();
@@ -362,15 +368,15 @@ Assembly::buildVectorFE(FEType type) const
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
@@ -394,16 +400,15 @@ Assembly::buildVectorFaceFE(FEType type) const
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
@@ -423,16 +428,15 @@ Assembly::buildVectorNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
@@ -452,16 +456,15 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = new VectorFEShapeData;
 
+  // Note that NEDELEC_ONE elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC)
+  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
   else
     min_dim = 2;
 
-  // Build an VectorFE object for this type for each dimension up to the dimension of the current
-  // mesh
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
-  // be modified for LAGRANGE_VEC
+  // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
+  // current mesh
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
@@ -600,9 +603,6 @@ Assembly::reinitFE(const Elem * elem)
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
-    _ad_JxW.resize(n_qp);
-    if (_calculate_xyz)
-      _ad_q_points.resize(n_qp);
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
@@ -664,6 +664,9 @@ Assembly::reinitFE(const Elem * elem)
     }
   }
 
+  for (unsigned int i = 0; i < _extra_elem_ids.size(); ++i)
+    _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
+
   if (_xfem != nullptr)
     modifyWeightsDueToXFEM(elem);
 }
@@ -676,6 +679,17 @@ Assembly::computeGradPhiAD(
     typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
     FEGenericBase<OutputType> * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_shape_functions which will have computed
+  // these quantities at the integration/quadrature points: dphidxi,
+  // dphideta, and dphidzeta (e.g. \nabla phi w.r.t. reference coordinates). These *phi* quantities
+  // are independent of mesh displacements when using a quadrature rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+
   auto dim = elem->dim();
   const auto & dphidxi = fe->get_dphidxi();
   const auto & dphideta = fe->get_dphideta();
@@ -697,9 +711,9 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) = dphidxi[i][qp] * _ad_dxidx_map[qp];
-          grad_phi[i][qp](1) = dphidxi[i][qp] * _ad_dxidy_map[qp];
-          grad_phi[i][qp](2) = dphidxi[i][qp] * _ad_dxidz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp];
         }
       break;
     }
@@ -709,11 +723,11 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) =
+          grad_phi[i][qp].slice(0) =
               dphidxi[i][qp] * _ad_dxidx_map[qp] + dphideta[i][qp] * _ad_detadx_map[qp];
-          grad_phi[i][qp](1) =
+          grad_phi[i][qp].slice(1) =
               dphidxi[i][qp] * _ad_dxidy_map[qp] + dphideta[i][qp] * _ad_detady_map[qp];
-          grad_phi[i][qp](2) =
+          grad_phi[i][qp].slice(2) =
               dphidxi[i][qp] * _ad_dxidz_map[qp] + dphideta[i][qp] * _ad_detadz_map[qp];
         }
       break;
@@ -724,15 +738,15 @@ Assembly::computeGradPhiAD(
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp](0) = dphidxi[i][qp] * _ad_dxidx_map[qp] +
-                               dphideta[i][qp] * _ad_detadx_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetadx_map[qp];
-          grad_phi[i][qp](1) = dphidxi[i][qp] * _ad_dxidy_map[qp] +
-                               dphideta[i][qp] * _ad_detady_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetady_map[qp];
-          grad_phi[i][qp](2) = dphidxi[i][qp] * _ad_dxidz_map[qp] +
-                               dphideta[i][qp] * _ad_detadz_map[qp] +
-                               dphidzeta[i][qp] * _ad_dzetadz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp] +
+                                     dphideta[i][qp] * _ad_detadx_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetadx_map[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp] +
+                                     dphideta[i][qp] * _ad_detady_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetady_map[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp] +
+                                     dphideta[i][qp] * _ad_detadz_map[qp] +
+                                     dphidzeta[i][qp] * _ad_dzetadz_map[qp];
         }
       break;
     }
@@ -764,6 +778,9 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
   }
 
   _ad_jac.resize(n_qp);
+  _ad_JxW.resize(n_qp);
+  if (_calculate_xyz)
+    _ad_q_points.resize(n_qp);
 }
 
 void
@@ -790,7 +807,9 @@ Assembly::computeAffineMapAD(const Elem * elem,
         VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          Moose::derivInsert(elem_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                             1.);
 
         _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
@@ -829,6 +848,43 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
                                   unsigned p,
                                   FEBase * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_reference_to_physical_map which will have computed
+  // these quantities at the integration/quadrature points: phi_map, dphidxi_map,
+  // dphideta_map, and dphidzeta_map (e.g. phi and \nabla phi w.r.t reference coordinates). *_map is
+  // used to denote that quantities are in reference to a mapping Lagrange FE object. The FE<Dim,
+  // LAGRANGE> objects used for mapping will in general have an order matching the order of the
+  // mesh. These *phi*_map quantities are independent of mesh displacements when using a quadrature
+  // rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*_map
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+  //
+  // Important quantities calculated by this method:
+  //   - _ad_JxW;
+  //   - _ad_q_points;
+  // And the following quantities are important because they are used in the computeGradPhiAD method
+  // to calculate the shape function gradients with respect to the physical coordinates
+  // dphi/dphys = dphi/dref * dref/dphys:
+  //   - _ad_dxidx_map;
+  //   - _ad_dxidy_map;
+  //   - _ad_dxidz_map;
+  //   - _ad_detadx_map;
+  //   - _ad_detady_map;
+  //   - _ad_detadz_map;
+  //   - _ad_dzetadx_map;
+  //   - _ad_dzetady_map;
+  //   - _ad_dzetadz_map;
+  //
+  // Some final notes. This method will be called both when we are reinit'ing in the volume and on
+  // faces. When reinit'ing on faces, computation of _ad_JxW will be garbage because we will be
+  // using dummy quadrature weights. _ad_q_points computation is also currently extraneous during
+  // face reinit because we compute _ad_q_points_face in the computeFaceMap method. However,
+  // computation of dref/dphys is absolutely necessary (and the reason we call this method for the
+  // face case) for both volume and face reinit
+
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
   auto num_shapes = fe->n_shape_functions();
@@ -861,7 +917,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          Moose::derivInsert(elem_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                             1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
@@ -908,7 +966,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          Moose::derivInsert(elem_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                             1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -982,7 +1042,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          Moose::derivInsert(elem_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                             1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1110,6 +1172,12 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 void
 Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side)
 {
+  // Important quantities calculated by this method:
+  //   - _ad_JxW_face
+  //   - _ad_q_points_face
+  //   - _ad_normals
+  //   - _ad_curvatures
+
   const auto n_qp = qw.size();
   const Elem * elem = side->parent();
   auto side_number = elem->which_side_am_i(side);
@@ -1146,8 +1214,9 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+          Moose::derivInsert(side_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                             1.);
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
@@ -1190,8 +1259,9 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+          Moose::derivInsert(side_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                             1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1256,8 +1326,9 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+          Moose::derivInsert(side_point(dimension++).derivatives(),
+                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                             1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1436,35 +1507,12 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
 
-    // set the coord transformation
-    _coord_neighbor.resize(qrule->n_points());
-    Moose::CoordinateSystemType coord_type =
-        _subproblem.getCoordSystem(_current_neighbor_subdomain_id);
-    unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
     const std::vector<Real> & JxW = fe->get_JxW();
-    const std::vector<Point> & q_points = fe->get_xyz();
+    MooseArray<Point> q_points;
+    q_points.shallowCopy(const_cast<std::vector<Point> &>(fe->get_xyz()));
 
-    switch (coord_type)
-    {
-      case Moose::COORD_XYZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 1.;
-        break;
-
-      case Moose::COORD_RZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-        break;
-
-      case Moose::COORD_RSPHERICAL:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-        break;
-
-      default:
-        mooseError("Unknown coordinate system");
-        break;
-    }
+    setCoordinateTransformation<RESIDUAL>(
+        qrule, q_points, _coord_neighbor, _current_neighbor_subdomain_id);
 
     _current_neighbor_volume = 0.;
     for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
@@ -1476,26 +1524,33 @@ template <ComputeStage compute_stage>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
                                       const ADPoint & q_points,
-                                      MooseArray<ADReal> & coord)
+                                      MooseArray<ADReal> & coord,
+                                      SubdomainID sub_id)
 {
-  coord.resize(qrule->n_points());
-  _coord_type = _subproblem.getCoordSystem(_current_elem->subdomain_id());
+  mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
+  auto n_points = qrule->n_points();
+  mooseAssert(n_points == q_points.size(),
+              "The number of points in the quadrature rule doesn't match the number of passed-in "
+              "points in Assembly::setCoordinateTransformation");
+
+  coord.resize(n_points);
+  _coord_type = _subproblem.getCoordSystem(sub_id);
   unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
   switch (_coord_type)
   {
     case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 1.;
       break;
 
     case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
       break;
 
     case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
       break;
 
@@ -1506,9 +1561,9 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
 }
 
 template void Assembly::setCoordinateTransformation<ComputeStage::RESIDUAL>(
-    const QBase *, const MooseArray<Point> &, MooseArray<Real> &);
+    const QBase *, const MooseArray<Point> &, MooseArray<Real> &, SubdomainID);
 template void Assembly::setCoordinateTransformation<ComputeStage::JACOBIAN>(
-    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &);
+    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &, SubdomainID);
 
 void
 Assembly::computeCurrentElemVolume()
@@ -1516,9 +1571,11 @@ Assembly::computeCurrentElemVolume()
   if (_current_elem_volume_computed)
     return;
 
-  setCoordinateTransformation<ComputeStage::RESIDUAL>(_current_qrule, _current_q_points, _coord);
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+      _current_qrule, _current_q_points, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_xyz)
-    setCoordinateTransformation<ComputeStage::JACOBIAN>(_current_qrule, _ad_q_points, _ad_coord);
+    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+        _current_qrule, _ad_q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -1534,10 +1591,10 @@ Assembly::computeCurrentFaceVolume()
     return;
 
   setCoordinateTransformation<ComputeStage::RESIDUAL>(
-      _current_qrule_face, _current_q_points_face, _coord);
+      _current_qrule_face, _current_q_points_face, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_face_xyz)
     setCoordinateTransformation<ComputeStage::JACOBIAN>(
-        _current_qrule_face, _ad_q_points_face, _ad_coord);
+        _current_qrule_face, _ad_q_points_face, _ad_coord, _current_elem->subdomain_id());
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
@@ -1976,6 +2033,11 @@ Assembly::reinitMortarElem(const Elem * elem)
               "You should be calling reinitMortarElem on a lower dimensional element");
 
   _fe_msm->reinit(elem);
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
+  setCoordinateTransformation<RESIDUAL>(
+      _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
 }
 
 void
@@ -3098,10 +3160,10 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // If we're computing the jacobian for automatically scaling variables we do not want
       // to constrain the element matrix because it introduces 1s on the diagonal for the
       // constrained dofs
-      if (!_sys.computingInitialJacobian())
+      if (!_sys.computingScalingJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
       jacobian.add_matrix(sub, di, dj);
@@ -3150,10 +3212,10 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // If we're computing the jacobian for automatically scaling variables we do not want
       // to constrain the element matrix because it introduces 1s on the diagonal for the
       // constrained dofs
-      if (!_sys.computingInitialJacobian())
+      if (!_sys.computingScalingJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
       for (MooseIndex(di) i = 0; i < di.size(); i++)
@@ -3241,10 +3303,10 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
 
-    // If we're computing the initial jacobian for automatically scaling variables we do not want to
+    // If we're computing the jacobian for automatically scaling variables we do not want to
     // constrain the element matrix because it introduces 1s on the diagonal for the constrained
     // dofs
-    if (!_sys.computingInitialJacobian())
+    if (!_sys.computingScalingJacobian())
       _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
@@ -3570,10 +3632,10 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
     jj = 0;
 
   auto sub = ke.sub_matrix(i * indof, indof, jj * jndof, jndof);
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
     dof_map.constrain_element_matrix(sub, di, dj, false);
 
   if (scaling_factor[i] != 1.0)
@@ -3623,10 +3685,10 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
     jj = 0;
 
   auto sub = keg.sub_matrix(i * indof, indof, jj * jndof, jndof);
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
     dof_map.constrain_element_matrix(sub, di, dj, false);
 
   if (scaling_factor[i] != 1.0)
@@ -3679,10 +3741,10 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto subne = kne.sub_matrix(i * nndof, nndof, jj * cndof, cndof);
   auto subnn = knn.sub_matrix(i * nndof, nndof, jj * nndof, nndof);
 
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
   {
     dof_map.constrain_element_matrix(suben, dc, dn, false);
     dof_map.constrain_element_matrix(subne, dn, dc, false);

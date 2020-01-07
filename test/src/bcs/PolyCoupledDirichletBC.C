@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PolyCoupledDirichletBC);
 
-template <>
 InputParameters
-validParams<PolyCoupledDirichletBC>()
+PolyCoupledDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.set<bool>("_integrated") = false;
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
 

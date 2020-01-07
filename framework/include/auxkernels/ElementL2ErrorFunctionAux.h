@@ -28,6 +28,8 @@ InputParameters validParams<ElementL2ErrorFunctionAux>();
 class ElementL2ErrorFunctionAux : public ElementLpNormAux
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param name Object name

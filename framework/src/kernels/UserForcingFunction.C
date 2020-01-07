@@ -12,11 +12,12 @@
 
 registerMooseObjectRenamed("MooseApp", UserForcingFunction, "04/01/2018 00:00", BodyForce);
 
-template <>
+defineLegacyParams(UserForcingFunction);
+
 InputParameters
-validParams<UserForcingFunction>()
+UserForcingFunction::validParams()
 {
-  return validParams<BodyForce>();
+  return BodyForce::validParams();
 }
 
 UserForcingFunction::UserForcingFunction(const InputParameters & parameters) : BodyForce(parameters)

@@ -33,6 +33,8 @@ template <typename T, ComputeStage compute_stage>
 class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T, compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADKernelSUPGTempl(const InputParameters & parameters);
 
 protected:

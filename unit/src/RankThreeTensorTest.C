@@ -101,7 +101,7 @@ TEST(RankThreeTensor, zero)
   RankThreeTensor r2(std::vector<Real>(27, 1980));
 
   r1.zero();
-  mooseSetToZero(r2);
+  MathUtils::mooseSetToZero(r2);
 
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)

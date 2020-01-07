@@ -44,6 +44,8 @@ class LineMaterialSamplerBase : public GeneralVectorPostprocessor,
                                 public BlockRestrictable
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * Sets up variables for output based on the properties to be output
@@ -96,6 +98,21 @@ protected:
   /// The quadrature points
   const MooseArray<Point> & _q_point;
 };
+
+template <typename T>
+InputParameters
+LineMaterialSamplerBase<T>::validParams()
+{
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SamplerBase::validParams();
+  params += BlockRestrictable::validParams();
+  params.addRequiredParam<Point>("start", "The beginning of the line");
+  params.addRequiredParam<Point>("end", "The end of the line");
+  params.addRequiredParam<std::vector<std::string>>(
+      "property", "Name of the material property to be output along a line");
+
+  return params;
+}
 
 template <typename T>
 LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters)

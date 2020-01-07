@@ -15,15 +15,25 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [velocity]
+    order = CONSTANT
+    family = MONOMIAL_VEC
+  []
 []
 
 [AuxKernels]
-  [velocity_x]
+  [velocity]
     type = DarcyVelocity
+    variable = velocity
+    execute_on = timestep_end
+    pressure = pressure
+  []
+  [velocity_x]
+    type = VectorVariableComponentAux
     variable = velocity_x
     component = x
     execute_on = timestep_end
-    pressure = pressure
+    vector_variable = velocity
   []
 []
 

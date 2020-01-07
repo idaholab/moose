@@ -11,11 +11,15 @@
 
 registerMooseObject("TensorMechanicsApp", DomainIntegralTopologicalQFunction);
 
-template <>
+defineLegacyParams(DomainIntegralTopologicalQFunction);
+
 InputParameters
-validParams<DomainIntegralTopologicalQFunction>()
+DomainIntegralTopologicalQFunction::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Determines if a node is within the ring of the crack front defintion; this object is "
+      "normally created by the DomainIntegralAction.");
   params.addRequiredParam<unsigned int>("ring_index",
                                         "The ring of elements that defines the integration domain");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

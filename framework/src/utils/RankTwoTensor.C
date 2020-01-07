@@ -18,8 +18,7 @@
 #include "Conversion.h"
 #include "MooseArray.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
@@ -38,6 +37,8 @@
 template <typename T>
 constexpr Real RankTwoTensorTempl<T>::identityCoords[];
 
+namespace MathUtils
+{
 template <>
 void
 mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
@@ -50,6 +51,7 @@ void
 mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v)
 {
   v.zero();
+}
 }
 
 template <typename T>

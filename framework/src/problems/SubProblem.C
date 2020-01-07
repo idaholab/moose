@@ -18,12 +18,16 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-template <>
+#include "libmesh/equation_systems.h"
+#include "libmesh/system.h"
+#include "libmesh/dof_map.h"
+
+defineLegacyParams(SubProblem);
+
 InputParameters
-validParams<SubProblem>()
+SubProblem::validParams()
 {
-  InputParameters params = validParams<Problem>();
-  params.addPrivateParam<MooseMesh *>("mesh");
+  InputParameters params = Problem::validParams();
 
   params.addParam<bool>(
       "default_ghosting",
@@ -601,6 +605,12 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
   return mesh().getMesh().get_boundary_info().sideset_name(check_id);
 }
 
+void
+SubProblem::setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid)
+{
+  assembly(tid).setCurrentBoundaryID(bid);
+}
+
 unsigned int
 SubProblem::getAxisymmetricRadialCoord() const
 {
@@ -757,4 +767,14 @@ void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
   assembly(tid).reinitMortarElem(elem);
+}
+
+void
+SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+{
+  EquationSystems & eq = es();
+  auto n_sys = eq.n_systems();
+
+  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
+    eq.get_system(i).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
 }

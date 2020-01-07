@@ -22,6 +22,8 @@ InputParameters validParams<LineFunctionSampler>();
 class LineFunctionSampler : public GeneralVectorPostprocessor, protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   LineFunctionSampler(const InputParameters & parameters);
 
   virtual void initialize() override;

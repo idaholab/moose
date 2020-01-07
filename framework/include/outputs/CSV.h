@@ -26,6 +26,8 @@ InputParameters validParams<CSV>();
 class CSV : public TableOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    *

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LayeredSideFluxAverage);
 
-template <>
+defineLegacyParams(LayeredSideFluxAverage);
+
 InputParameters
-validParams<LayeredSideFluxAverage>()
+LayeredSideFluxAverage::validParams()
 {
-  InputParameters params = validParams<LayeredSideIntegral>();
+  InputParameters params = LayeredSideIntegral::validParams();
   params.addRequiredParam<std::string>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");

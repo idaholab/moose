@@ -9,18 +9,29 @@
 
 #include "CommonTensorMechanicsAction.h"
 #include "TensorMechanicsAction.h"
+#include "ActionWarehouse.h"
 
 registerMooseAction("TensorMechanicsApp", CommonTensorMechanicsAction, "meta_action");
 
-template <>
+defineLegacyParams(CommonTensorMechanicsAction);
+
 InputParameters
-validParams<CommonTensorMechanicsAction>()
+CommonTensorMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsActionBase>();
+  InputParameters params = TensorMechanicsActionBase::validParams();
   return params;
 }
 
 CommonTensorMechanicsAction::CommonTensorMechanicsAction(const InputParameters & parameters)
   : Action(parameters)
 {
+}
+
+void
+CommonTensorMechanicsAction::act()
+{
+  // check if sub-blocks block are found which will use the common parameters
+  auto action = _awh.getActions<TensorMechanicsActionBase>();
+  if (action.size() == 0)
+    mooseWarning("Common parameters are supplied, but not used in ", parameters().blockLocation());
 }

@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class ADPressure : public ADIntegratedBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADPressure(const InputParameters & parameters);
 
 protected:

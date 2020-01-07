@@ -14,11 +14,12 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(TimeNodalKernel);
+
 InputParameters
-validParams<TimeNodalKernel>()
+TimeNodalKernel::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system";
@@ -39,6 +40,7 @@ TimeNodalKernel::computeResidual()
     const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
+    res *= _var.scalingFactor();
     _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
 
     if (_has_save_in)

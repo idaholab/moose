@@ -10,11 +10,12 @@
 #include "AuxNodalScalarKernel.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(AuxNodalScalarKernel);
+
 InputParameters
-validParams<AuxNodalScalarKernel>()
+AuxNodalScalarKernel::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<std::vector<dof_id_type>>("nodes", "Node ids");
   return params;
 }

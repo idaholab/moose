@@ -12,7 +12,7 @@
 
 #include "libmesh/mesh_modification.h"
 
-registerMooseObject("MooseApp", Transform);
+registerMooseObjectReplaced("MooseApp", Transform, "11/30/2019 00:00", TransformGenerator);
 
 template <>
 InputParameters

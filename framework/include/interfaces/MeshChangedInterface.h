@@ -28,6 +28,8 @@ InputParameters validParams<MeshChangedInterface>();
 class MeshChangedInterface
 {
 public:
+  static InputParameters validParams();
+
   MeshChangedInterface(const InputParameters & params);
   virtual ~MeshChangedInterface() = default;
 
@@ -40,4 +42,3 @@ protected:
   /// Reference to FEProblemBase instance
   FEProblemBase & _mci_feproblem;
 };
-

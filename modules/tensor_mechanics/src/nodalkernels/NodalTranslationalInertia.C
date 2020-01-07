@@ -15,12 +15,13 @@
 
 registerMooseObject("TensorMechanicsApp", NodalTranslationalInertia);
 
-template <>
+defineLegacyParams(NodalTranslationalInertia);
+
 InputParameters
-validParams<NodalTranslationalInertia>()
+NodalTranslationalInertia::validParams()
 {
-  InputParameters params = validParams<TimeNodalKernel>();
-  params.addClassDescription("Computes the interial forces and mass proportional damping terms "
+  InputParameters params = TimeNodalKernel::validParams();
+  params.addClassDescription("Computes the inertial forces and mass proportional damping terms "
                              "corresponding to nodal mass.");
   params.addCoupledVar("velocity", "velocity variable");
   params.addCoupledVar("acceleration", "acceleration variable");

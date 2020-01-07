@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", NumAdaptivityCycles);
 
-template <>
 InputParameters
-validParams<NumAdaptivityCycles>()
+NumAdaptivityCycles::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

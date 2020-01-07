@@ -19,6 +19,8 @@ InputParameters validParams<LaplacianJumpIndicator>();
 class LaplacianJumpIndicator : public InternalSideIndicator
 {
 public:
+  static InputParameters validParams();
+
   LaplacianJumpIndicator(const InputParameters & parameters);
 
 protected:
@@ -27,4 +29,3 @@ protected:
   const VariableSecond & _second_u;
   const VariableSecond & _second_u_neighbor;
 };
-

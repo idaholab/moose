@@ -79,9 +79,6 @@ PorousFlowFluidStateSingleComponent::PorousFlowFluidStateSingleComponent(
                                            "dPorousFlow_mass_frac_nodal_dvar")
                                      : declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                            "dPorousFlow_mass_frac_qp_dvar")),
-    _saturation_old(_nodal_material
-                        ? getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_nodal")
-                        : getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")),
 
     _fluid_density(_nodal_material
                        ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")
@@ -132,7 +129,7 @@ PorousFlowFluidStateSingleComponent::PorousFlowFluidStateSingleComponent(
                "correct");
 
   // Set the size of the FluidStateProperties vector
-  _fsp.resize(_num_phases, FluidStatePropertiesAD(_num_components));
+  _fsp.resize(_num_phases, FluidStateProperties(_num_components));
 }
 
 void
@@ -236,13 +233,11 @@ PorousFlowFluidStateSingleComponent::computeQpProperties()
     const Real dp = 1.0e-2;
     const Real dh = 1.0e-2;
 
-    std::vector<FluidStatePropertiesAD> fsp_dp(_num_phases,
-                                               FluidStatePropertiesAD(_num_components));
+    std::vector<FluidStateProperties> fsp_dp(_num_phases, FluidStateProperties(_num_components));
     _fs.thermophysicalProperties(
         _liquid_porepressure[_qp] + dp, _enthalpy[_qp], _qp, _phase_state, fsp_dp);
 
-    std::vector<FluidStatePropertiesAD> fsp_dh(_num_phases,
-                                               FluidStatePropertiesAD(_num_components));
+    std::vector<FluidStateProperties> fsp_dh(_num_phases, FluidStateProperties(_num_components));
     _fs.thermophysicalProperties(
         _liquid_porepressure[_qp], _enthalpy[_qp] + dh, _qp, _phase_state, fsp_dh);
 

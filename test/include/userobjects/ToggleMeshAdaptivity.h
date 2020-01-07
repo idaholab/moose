@@ -11,14 +11,11 @@
 
 #include "GeneralUserObject.h"
 
-class ToggleMeshAdaptivity;
-
-template <>
-InputParameters validParams<ToggleMeshAdaptivity>();
-
 class ToggleMeshAdaptivity : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ToggleMeshAdaptivity(const InputParameters & params);
 
   virtual void initialSetup();
@@ -34,4 +31,3 @@ protected:
 
   int _steps_to_wait;
 };
-

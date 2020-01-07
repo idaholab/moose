@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ElementVectorL2Error);
 
-template <>
+defineLegacyParams(ElementVectorL2Error);
+
 InputParameters
-validParams<ElementVectorL2Error>()
+ElementVectorL2Error::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function_x", "The analytic solution to compare against");
   params.addParam<FunctionName>("function_y", 0, "The analytic solution to compare against");
   params.addParam<FunctionName>("function_z", 0, "The analytic solution to compare against");

@@ -29,6 +29,8 @@ InputParameters validParams<StitchedMesh>();
 class StitchedMesh : public MooseMesh
 {
 public:
+  static InputParameters validParams();
+
   StitchedMesh(const InputParameters & parameters);
   StitchedMesh(const StitchedMesh & other_mesh);
 

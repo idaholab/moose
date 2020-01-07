@@ -33,6 +33,8 @@ InputParameters validParams<BoundingBoxNodeSetGenerator>();
 class BoundingBoxNodeSetGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   BoundingBoxNodeSetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./modifier_depend_order]
     type = 'Exodiff'
     input = 'modifier_depend_order.i'

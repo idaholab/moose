@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ScalarL2Error);
 
-template <>
+defineLegacyParams(ScalarL2Error);
+
 InputParameters
-validParams<ScalarL2Error>()
+ScalarL2Error::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "The name of the scalar variable");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;

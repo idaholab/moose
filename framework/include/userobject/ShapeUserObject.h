@@ -41,6 +41,8 @@ template <typename T>
 class ShapeUserObject : public T
 {
 public:
+  static InputParameters validParams();
+
   ShapeUserObject(const InputParameters & parameters, ShapeType type);
 
   /// check if jacobian is to be computed in user objects
@@ -60,8 +62,6 @@ public:
    */
   virtual void executeJacobianWrapper(unsigned int jvar,
                                       const std::vector<dof_id_type> & dof_indices);
-
-  static InputParameters validParams();
 
 protected:
   /**

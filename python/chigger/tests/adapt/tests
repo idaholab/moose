@@ -3,5 +3,7 @@
     type = ImageDiff
     command = adapt.py
     imagediff = 'adapt_0.png adapt_4.png adapt_9.png'
+    display_required = true
+    python = 3
   [../]
 []

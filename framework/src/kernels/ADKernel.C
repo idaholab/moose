@@ -21,6 +21,20 @@ defineADBaseValidParams(ADKernel, KernelBase, params.registerBase("Kernel"););
 defineADBaseValidParams(ADVectorKernel, KernelBase, params.registerBase("VectorKernel"););
 
 template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelTempl<T, compute_stage>::validParams()
+{
+  auto params = KernelBase::validParams();
+  if (std::is_same<T, Real>::value)
+    params.registerBase("Kernel");
+  else if (std::is_same<T, RealVectorValue>::value)
+    params.registerBase("VectorKernel");
+  else
+    ::mooseError("unsupported ADKernelTempl specialization");
+  return params;
+}
+
+template <typename T, ComputeStage compute_stage>
 ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameters)
   : KernelBase(parameters),
     MooseVariableInterface<T>(this,
@@ -32,13 +46,16 @@ ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameter
     _var(*this->mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.template adGradPhi<compute_stage>()),
+    _regular_grad_test(_var.gradPhi()),
     _u(_var.template adSln<compute_stage>()),
     _grad_u(_var.template adGradSln<compute_stage>()),
     _ad_JxW(_assembly.adJxW<compute_stage>()),
     _ad_coord(_assembly.adCoordTransformation<compute_stage>()),
     _ad_q_point(_assembly.template adQPoints<compute_stage>()),
     _phi(_assembly.phi(_var)),
-    _grad_phi(_assembly.template adGradPhi<T, compute_stage>(_var))
+    _grad_phi(_assembly.template adGradPhi<T, compute_stage>(_var)),
+    _regular_grad_phi(_assembly.gradPhi(_var)),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   addMooseVariableDependency(this->mooseVariable());
   _save_in.resize(_save_in_strings.size());
@@ -83,6 +100,12 @@ ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameter
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
+
+  if (_use_displaced_mesh && _displacements.empty())
+    mooseError("ADKernel ",
+               name(),
+               "has been asked to act on the displaced mesh, but no displacements have been "
+               "coupled in. Your Jacobian will be wrong without that coupling");
 }
 
 template <typename T, ComputeStage compute_stage>
@@ -92,9 +115,15 @@ ADKernelTempl<T, compute_stage>::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _test.size(); _i++)
-      _local_re(_i) += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
+
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        _local_re(_i) += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
   accumulateTaggedLocalResidual();
 
@@ -127,19 +156,27 @@ ADKernelTempl<T, compute_stage>::computeJacobian()
   size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
 
   precalculateResidual();
-  for (_i = 0; _i < _test.size(); _i++)
-  {
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
-      for (_j = 0; _j < _var.phiSize(); _j++)
-        _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-    }
-  }
+
+  if (_use_displaced_mesh)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
+        DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
+        for (_j = 0; _j < _var.phiSize(); _j++)
+          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+      }
+  else
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
+        DualReal residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
+        for (_j = 0; _j < _var.phiSize(); _j++)
+          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+      }
 
   accumulateTaggedLocalMatrix();
 
-  if (_has_diag_save_in)
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
     unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
@@ -173,13 +210,18 @@ ADKernelTempl<T, compute_stage>::computeADOffDiagJacobian()
     r = 0;
 
   precalculateResidual();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    _r = _ad_JxW[_qp];
-    _r *= _ad_coord[_qp];
-    for (_i = 0; _i < _test.size(); _i++)
-      _residuals[_i] += _r * computeQpResidual();
-  }
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      _r = _ad_JxW[_qp];
+      _r *= _ad_coord[_qp];
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _r * computeQpResidual();
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
   auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)

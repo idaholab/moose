@@ -46,6 +46,8 @@ public:
   /**
    * Class constructor
    */
+  static InputParameters validParams();
+
   OrientedBoxInterface(const InputParameters & parameters);
 
   /**

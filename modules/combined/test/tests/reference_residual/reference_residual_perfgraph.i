@@ -12,8 +12,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y disp_z temp'
-  reference_residual_variables = 'saved_x saved_y saved_z saved_t'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [Variables]
@@ -57,6 +57,7 @@
     eigenstrain_names = thermal_expansion
     strain = FINITE
     decomposition_method = EigenSolution
+    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -65,6 +66,7 @@
     type = HeatConduction
     variable = temp
     save_in = saved_t
+    extra_vector_tags = 'ref'
   [../]
 []
 

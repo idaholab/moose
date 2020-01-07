@@ -10,12 +10,13 @@
 #include "Postprocessor.h"
 #include "UserObject.h"
 
-template <>
+defineLegacyParams(Postprocessor);
+
 InputParameters
-validParams<Postprocessor>()
+Postprocessor::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<OutputInterface>();
+  InputParameters params = UserObject::validParams();
+  params += OutputInterface::validParams();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_TRANSFER);

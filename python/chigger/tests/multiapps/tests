@@ -3,5 +3,7 @@
     type = ImageDiff
     command = multiapp.py
     imagediff = 'multiapp.png'
+    python = 3
+    display_required = true
   [../]
 []

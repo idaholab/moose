@@ -3,20 +3,26 @@
     type = ImageDiff
     command = line.py
     imagediff = 'line.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.94
     requirement = 'Chigger shall provide a line plot widget'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./single_point]
     type = ImageDiff
     command = single_point.py
     imagediff = 'single_point.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.94
     requirement = 'Chigger shall provide a scatter plot widget'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./empty]
@@ -27,6 +33,8 @@
     requirement = 'An empty graph shall be a valid chigger widget'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./color]
@@ -37,6 +45,8 @@
     requirement = 'Chigger shall provide the capability to assign colors to curves in a graph'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./legend]
@@ -48,6 +58,8 @@
     requirement = 'Chigger shall provide an optional legend widget for curves in a graph'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./legend_viewport]
@@ -59,6 +71,8 @@
     requirement = 'Chigger shall scale teh legend position relative to the graph viewport'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./update]
@@ -69,16 +83,21 @@
     requirement = 'Chigger shall provide a capability for incremental curves updates in a graph'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./secondary]
     type = ImageDiff
     command = secondary.py
     imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
-    allowed_linux = 0.94
+    allowed_linux = 0.97
+    allowed_darwin = 0.95
     requirement = 'Chigger shall provide a capability for multiple curves and secondary axis in a graph'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 
   [./tracer]
@@ -90,5 +109,7 @@
     requirement = 'Chigger shall provide a tracer line indicator capability'
     design = ''
     issues = '#7451'
+    python = 3
+    display_required = true
   [../]
 []

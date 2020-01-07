@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledForceLagged);
 
-template <>
 InputParameters
-validParams<CoupledForceLagged>()
+CoupledForceLagged::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   return params;
 }

@@ -25,6 +25,8 @@ InputParameters validParams<CrystalPlasticitySlipRate>();
 class CrystalPlasticitySlipRate : public CrystalPlasticityUOBase
 {
 public:
+  static InputParameters validParams();
+
   CrystalPlasticitySlipRate(const InputParameters & parameters);
 
   virtual void calcFlowDirection(unsigned int qp,
@@ -67,4 +69,3 @@ protected:
   /// Crystal rotation
   const MaterialProperty<RankTwoTensor> & _crysrot;
 };
-

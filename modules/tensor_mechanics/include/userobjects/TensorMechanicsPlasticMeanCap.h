@@ -27,6 +27,8 @@ InputParameters validParams<TensorMechanicsPlasticMeanCap>();
 class TensorMechanicsPlasticMeanCap : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticMeanCap(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -50,4 +52,3 @@ protected:
   /// strength
   const TensorMechanicsHardeningModel & _strength;
 };
-

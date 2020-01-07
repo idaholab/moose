@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", CappedDruckerPragerCosseratStressUpdate);
 
-template <>
+defineLegacyParams(CappedDruckerPragerCosseratStressUpdate);
+
 InputParameters
-validParams<CappedDruckerPragerCosseratStressUpdate>()
+CappedDruckerPragerCosseratStressUpdate::validParams()
 {
-  InputParameters params = validParams<CappedDruckerPragerStressUpdate>();
+  InputParameters params = CappedDruckerPragerStressUpdate::validParams();
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator for the Cosserat "
                              "situation where the host medium (ie, the limit where all Cosserat "
                              "effects are zero) is isotropic.  Note that the return-map flow rule "

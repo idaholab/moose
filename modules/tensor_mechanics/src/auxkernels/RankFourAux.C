@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", RankFourAux);
 
-template <>
+defineLegacyParams(RankFourAux);
+
 InputParameters
-validParams<RankFourAux>()
+RankFourAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Access a component of a RankFourTensor");
 
   // add stuff here

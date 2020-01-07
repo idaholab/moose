@@ -11,12 +11,6 @@
 
 #include "ShapeElementUserObject.h"
 
-// Forward Declarations
-class ExampleShapeElementUserObject;
-
-template <>
-InputParameters validParams<ExampleShapeElementUserObject>();
-
 /**
  * Test and proof of concept class for computing UserObject Jacobians using the
  * ShapeElementUserObject base class. This object computes the integral
@@ -28,6 +22,8 @@ InputParameters validParams<ExampleShapeElementUserObject>();
 class ExampleShapeElementUserObject : public ShapeElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   ExampleShapeElementUserObject(const InputParameters & parameters);
 
   virtual ~ExampleShapeElementUserObject() {}
@@ -52,4 +48,3 @@ protected:
   const VariableValue & _v_value;
   unsigned int _v_var;
 };
-

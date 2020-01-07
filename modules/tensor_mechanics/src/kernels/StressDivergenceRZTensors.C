@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceRZTensors);
 
-template <>
+defineLegacyParams(StressDivergenceRZTensors);
+
 InputParameters
-validParams<StressDivergenceRZTensors>()
+StressDivergenceRZTensors::validParams()
 {
-  InputParameters params = validParams<StressDivergenceTensors>();
+  InputParameters params = StressDivergenceTensors::validParams();
   params.addClassDescription(
       "Calculate stress divergence for an axisymmetric problem in cylindrical coordinates.");
   params.addRequiredRangeCheckedParam<unsigned int>(

@@ -23,6 +23,8 @@ InputParameters validParams<ComputeAxisymmetricRZSmallStrain>();
 class ComputeAxisymmetricRZSmallStrain : public Compute2DSmallStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -30,4 +32,3 @@ public:
 protected:
   virtual Real computeOutOfPlaneStrain() override;
 };
-

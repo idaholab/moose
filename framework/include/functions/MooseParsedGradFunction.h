@@ -33,6 +33,8 @@ public:
    * Class constructor
    * @param parameters The input parameters
    */
+  static InputParameters validParams();
+
   MooseParsedGradFunction(const InputParameters & parameters);
 
   /**

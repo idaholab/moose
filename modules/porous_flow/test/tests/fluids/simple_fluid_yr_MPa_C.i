@@ -66,17 +66,14 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
     temperature = T
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = false
     porepressure = pp
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
-    at_nodes = false
     temperature_unit = Celsius
     pressure_unit = MPa
     time_unit = years

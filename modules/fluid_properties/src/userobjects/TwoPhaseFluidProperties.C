@@ -15,7 +15,8 @@ InputParameters
 validParams<TwoPhaseFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
-
+  params.addCustomTypeParam<std::string>(
+      "fp_type", "two-phase-fp", "FPType", "Type of the fluid property object");
   params.addParam<UserObjectName>("fp_liquid",
                                   "Liquid single-phase fluid properties user object name");
   params.addParam<UserObjectName>("fp_vapor",

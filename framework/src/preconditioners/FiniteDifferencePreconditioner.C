@@ -18,11 +18,12 @@
 
 registerMooseObjectAliased("MooseApp", FiniteDifferencePreconditioner, "FDP");
 
-template <>
+defineLegacyParams(FiniteDifferencePreconditioner);
+
 InputParameters
-validParams<FiniteDifferencePreconditioner>()
+FiniteDifferencePreconditioner::validParams()
 {
-  InputParameters params = validParams<MoosePreconditioner>();
+  InputParameters params = MoosePreconditioner::validParams();
 
   params.addParam<std::vector<std::string>>(
       "off_diag_row",

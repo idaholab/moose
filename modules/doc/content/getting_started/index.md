@@ -6,18 +6,20 @@ your operating system/platform and follow the instructions:
 
 - +MacOS+:
 
+  - [Catalina](getting_started/installation/macos_catalina.md)
   - [Mojave](getting_started/installation/macos_mojave.md)
-  - [High Sierra or older](getting_started/installation/macos_other.md)
+  - [High Sierra](getting_started/installation/macos_other.md)
 
 - +Linux+:
 
   - [getting_started/installation/ubuntu.md]
   - [getting_started/installation/mint.md]
-  - [getting_started/installation/opensuse.md]
   - [getting_started/installation/fedora.md]
+  - [getting_started/installation/opensuse.md]
   - [getting_started/installation/centos.md]
 
 - [getting_started/installation/windows10.md]
+- [getting_started/installation/docker.md]
 - Advanced Instructions:
 
   - [getting_started/installation/hpc_install_moose.md]
@@ -63,3 +65,20 @@ your application is ready to be further developed.
 !include getting_started/installation/post_moose_install.md
 
 !include getting_started/installation/installation_troubleshooting.md
+
+## Customizing MOOSE configuration
+
+MOOSE can be customized by running a `configure` script in
+`$MOOSE_DIR/framework`. Below we summarize the configuration options available:
+
+### Automatic differentiation
+
+- `--with-derivative-type`: Specify the derivative storage type to use for
+  MOOSE's `DualReal` object. Options are `sparse` and `nonsparse`. `sparse`
+  selects `SemiDynamicSparseNumberArray` as the derivative storage type;
+  `nonsparse` selects `NumberArray`. A more detailed overview of these storage
+  types can be found in the [`DualReal` documentation](/DualReal.md).
+- `--with-derivative-size=<n>`: Specify the length of the underlying derivative
+  storage array. The default is 50. A smaller number may be chosen for increased
+  speed; a larger number may be required for 3D problems or problems with
+  coupling between many variables.

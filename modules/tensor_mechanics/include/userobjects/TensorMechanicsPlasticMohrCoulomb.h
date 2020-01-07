@@ -33,6 +33,8 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticMohrCoulomb(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -161,4 +163,3 @@ private:
    */
   RankTwoTensor df_dsig(const RankTwoTensor & stress, const Real sin_angle) const;
 };
-

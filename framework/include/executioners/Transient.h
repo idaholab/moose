@@ -36,6 +36,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
+  static InputParameters validParams();
+
   Transient(const InputParameters & parameters);
 
   virtual void init() override;
@@ -172,12 +174,6 @@ public:
   Real & timestepTol() { return _timestep_tolerance; }
 
   /**
-   * Get the verbose output flag
-   * @return The verbose output flag
-   */
-  bool & verbose() { return _verbose; }
-
-  /**
    * Is the current step at a sync point (sync times, time interval, target time, etc)?
    * @return Bool indicataing whether we are at a sync point
    */
@@ -237,8 +233,6 @@ protected:
   bool _steady_state_detection;
   Real _steady_state_tolerance;
   Real _steady_state_start_time;
-  Real & _sln_diff_norm;
-  Real & _old_time_solution_norm;
 
   std::set<Real> & _sync_times;
 
@@ -254,10 +248,7 @@ protected:
   Real & _target_time;
   bool _use_multiapp_dt;
 
-  ///should detailed diagnostic output be printed
-  bool _verbose;
-
-  Real _solution_change_norm;
+  Real & _solution_change_norm;
 
   /// The difference of current and old solutions
   NumericVector<Number> & _sln_diff;
@@ -266,4 +257,3 @@ protected:
 
   PerfID _final_timer;
 };
-

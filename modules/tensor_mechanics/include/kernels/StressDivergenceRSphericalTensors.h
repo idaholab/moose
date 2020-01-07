@@ -34,6 +34,8 @@ InputParameters validParams<StressDivergenceRSphericalTensors>();
 class StressDivergenceRSphericalTensors : public StressDivergenceTensors
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceRSphericalTensors(const InputParameters & parameters);
 
 protected:
@@ -45,4 +47,3 @@ protected:
 
   Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
-

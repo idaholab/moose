@@ -23,6 +23,8 @@ InputParameters validParams<NodalBC>();
 class EigenDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   EigenDirichletBC(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,3 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 };
-

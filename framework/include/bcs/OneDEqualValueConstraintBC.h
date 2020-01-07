@@ -25,6 +25,8 @@ InputParameters validParams<OneDEqualValueConstraintBC>();
 class OneDEqualValueConstraintBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   OneDEqualValueConstraintBC(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
   unsigned int _component;
   Real _vg;
 };
-

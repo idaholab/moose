@@ -22,71 +22,11 @@ enum class FluidStatePhaseEnum
   TWOPHASE
 };
 
-/// Data structure to pass calculated thermophysical properties
+/// AD data structure to pass calculated thermophysical properties
 struct FluidStateProperties
 {
   FluidStateProperties(){};
   FluidStateProperties(unsigned int n)
-    : pressure(0.0),
-      saturation(0.0),
-      density(0.0),
-      viscosity(1.0), // to guard against division by zero
-      enthalpy(0.0),
-      mass_fraction(n, 0.0),
-      dsaturation_dp(0.0),
-      dsaturation_dT(0.0),
-      dsaturation_dZ(0.0),
-      dsaturation_dX(0.0),
-      ddensity_dp(0.0),
-      ddensity_dT(0.0),
-      ddensity_dZ(0.0),
-      ddensity_dX(0.0),
-      dviscosity_dp(0.0),
-      dviscosity_dT(0.0),
-      dviscosity_dZ(0.0),
-      dviscosity_dX(0.0),
-      denthalpy_dp(0.0),
-      denthalpy_dT(0.0),
-      denthalpy_dZ(0.0),
-      denthalpy_dX(0.0),
-      dmass_fraction_dp(n, 0.0),
-      dmass_fraction_dT(n, 0.0),
-      dmass_fraction_dZ(n, 0.0),
-      dmass_fraction_dX(n, 0.0){};
-
-  Real pressure;
-  Real saturation;
-  Real density;
-  Real viscosity;
-  Real enthalpy;
-  std::vector<Real> mass_fraction;
-  Real dsaturation_dp;
-  Real dsaturation_dT;
-  Real dsaturation_dZ;
-  Real dsaturation_dX;
-  Real ddensity_dp;
-  Real ddensity_dT;
-  Real ddensity_dZ;
-  Real ddensity_dX;
-  Real dviscosity_dp;
-  Real dviscosity_dT;
-  Real dviscosity_dZ;
-  Real dviscosity_dX;
-  Real denthalpy_dp;
-  Real denthalpy_dT;
-  Real denthalpy_dZ;
-  Real denthalpy_dX;
-  std::vector<Real> dmass_fraction_dp;
-  std::vector<Real> dmass_fraction_dT;
-  std::vector<Real> dmass_fraction_dZ;
-  std::vector<Real> dmass_fraction_dX;
-};
-
-/// AD Data structure to pass calculated thermophysical properties
-struct FluidStatePropertiesAD
-{
-  FluidStatePropertiesAD(){};
-  FluidStatePropertiesAD(unsigned int n)
     : pressure(0.0),
       temperature(0, 0),
       saturation(0.0),
@@ -173,7 +113,6 @@ public:
    * @param[out] fsp FluidStateProperties data structure with all data initialized to 0
    */
   void clearFluidStateProperties(std::vector<FluidStateProperties> & fsp) const;
-  void clearFluidStateProperties(std::vector<FluidStatePropertiesAD> & fsp) const;
 
 protected:
   /// Number of phases
@@ -196,5 +135,6 @@ protected:
   const Real _T_c2k;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc;
+  /// Empty FluidStateProperties object
+  FluidStateProperties _empty_fsp;
 };
-

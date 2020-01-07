@@ -12,15 +12,21 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeVariableIsotropicElasticityTensor);
 
-defineADValidParams(
-    ADComputeVariableIsotropicElasticityTensor,
-    ADComputeElasticityTensorBase,
-    params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that "
-                               "change as a function of material properties");
-    params.addRequiredParam<MaterialPropertyName>("youngs_modulus",
-                                                  "Name of material defining the Young's Modulus");
-    params.addRequiredParam<MaterialPropertyName>(
-        "poissons_ratio", "Name of material defining the Poisson's Ratio"););
+defineADLegacyParams(ADComputeVariableIsotropicElasticityTensor);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeVariableIsotropicElasticityTensor<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeElasticityTensorBase<compute_stage>::validParams();
+  params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that "
+                             "change as a function of material properties");
+  params.addRequiredParam<MaterialPropertyName>("youngs_modulus",
+                                                "Name of material defining the Young's Modulus");
+  params.addRequiredParam<MaterialPropertyName>("poissons_ratio",
+                                                "Name of material defining the Poisson's Ratio");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeVariableIsotropicElasticityTensor<

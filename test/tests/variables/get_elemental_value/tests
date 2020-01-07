@@ -1,20 +1,35 @@
 [Tests]
-  [./current]
-    type = 'CSVDiff'
-    input = 'get_elemental_value.i'
-    csvdiff = 'get_elemental_value_current.csv'
-    cli_args = 'AuxKernels/test_var_aux/time_level=current Outputs/file_base=get_elemental_value_current'
-  [../]
-  [./old]
-    type = 'CSVDiff'
-    input = 'get_elemental_value.i'
-    csvdiff = 'get_elemental_value_old.csv'
-    cli_args = 'AuxKernels/test_var_aux/time_level=old Outputs/file_base=get_elemental_value_old'
-  [../]
-  [./older]
-    type = 'CSVDiff'
-    input = 'get_elemental_value.i'
-    csvdiff = 'get_elemental_value_older.csv'
-    cli_args = 'AuxKernels/test_var_aux/time_level=older Outputs/file_base=get_elemental_value_older'
-  [../]
+  issues = '#11451'
+  design = 'syntax/Variables/index.md'
+
+  [get_elemental_val]
+    requirement = 'The system shall support the direct retrieval of "elemental solution" or "degree '
+                  'of freedom" values without the need to sample the finite element shape function:'
+    [current]
+      type = 'CSVDiff'
+      input = 'get_elemental_value.i'
+      csvdiff = 'get_elemental_value_current.csv'
+      cli_args = 'AuxKernels/test_var_aux/time_level=current '
+                 'Outputs/file_base=get_elemental_value_current'
+
+      detail = 'for current solution values,'
+    []
+    [old]
+      type = 'CSVDiff'
+      input = 'get_elemental_value.i'
+      csvdiff = 'get_elemental_value_old.csv'
+      cli_args = 'AuxKernels/test_var_aux/time_level=old Outputs/file_base=get_elemental_value_old'
+
+      detail = 'for previous solution values (old), and'
+    []
+    [older]
+      type = 'CSVDiff'
+      input = 'get_elemental_value.i'
+      csvdiff = 'get_elemental_value_older.csv'
+      cli_args = 'AuxKernels/test_var_aux/time_level=older '
+                 'Outputs/file_base=get_elemental_value_older'
+
+      detail = 'for solution values calculated two steps back (older).'
+    []
+  []
 []

@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddMarkerAction, "add_marker");
 
-template <>
+defineLegacyParams(AddMarkerAction);
+
 InputParameters
-validParams<AddMarkerAction>()
+AddMarkerAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Action for adding Marker object to a simulation.");
   return params;
 }

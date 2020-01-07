@@ -22,6 +22,8 @@ InputParameters validParams<ScalarComponentIC>();
 class ScalarComponentIC : public ScalarInitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ScalarComponentIC(const InputParameters & parameters);
 
 protected:
@@ -29,4 +31,3 @@ protected:
 
   std::vector<Real> _initial_values;
 };
-

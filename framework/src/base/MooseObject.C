@@ -20,9 +20,19 @@ class SystemBase;
 class AuxiliarySystem;
 class Transient;
 
-template <>
+std::string
+paramErrorPrefix(const InputParameters & params, const std::string & param)
+{
+  auto prefix = param + ":";
+  if (!params.inputLocation(param).empty())
+    prefix = params.inputLocation(param) + ": (" + params.paramFullpath(param) + ")";
+  return prefix;
+}
+
+defineLegacyParams(MooseObject);
+
 InputParameters
-validParams<MooseObject>()
+MooseObject::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<bool>("enable", true, "Set the enabled status of the MooseObject.");
@@ -52,9 +62,12 @@ MooseObject::MooseObject(const InputParameters & parameters)
     _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
     _type(getParam<std::string>("_type")),
     _name(getParam<std::string>("_object_name")),
-    _enabled(getParam<bool>("enable")){}
+    _enabled(getParam<bool>("enable"))
+{
+}
 
-        [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app)
+[[noreturn]] void
+callMooseErrorRaw(std::string & msg, MooseApp * app)
 {
   app->getOutputWarehouse().mooseConsole();
   std::string prefix;

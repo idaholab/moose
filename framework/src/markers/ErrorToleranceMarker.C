@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ErrorToleranceMarker);
 
-template <>
+defineLegacyParams(ErrorToleranceMarker);
+
 InputParameters
-validParams<ErrorToleranceMarker>()
+ErrorToleranceMarker::validParams()
 {
-  InputParameters params = validParams<IndicatorMarker>();
+  InputParameters params = IndicatorMarker::validParams();
   params.addParam<Real>("coarsen", 0, "Elements with error less than this will be coarsened.");
   params.addParam<Real>("refine",
                         std::numeric_limits<Real>::max(),

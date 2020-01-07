@@ -23,6 +23,8 @@ InputParameters validParams<NodalTranslationalInertia>();
 class NodalTranslationalInertia : public TimeNodalKernel
 {
 public:
+  static InputParameters validParams();
+
   NodalTranslationalInertia(const InputParameters & parameters);
 
 protected:
@@ -83,4 +85,3 @@ protected:
   /// du_dotdot_du variable value
   const MooseArray<Number> * _du_dotdot_du;
 };
-

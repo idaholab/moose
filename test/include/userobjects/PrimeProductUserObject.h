@@ -11,11 +11,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-class PrimeProductUserObject;
-
-template <>
-InputParameters validParams<PrimeProductUserObject>();
-
 /**
  * Computes a product of prime numbers. Each threads picks an n-th prime number where n is equal to
  * its thread ID. Then when threads join the product of all prime numbers is computed, which is the
@@ -24,6 +19,8 @@ InputParameters validParams<PrimeProductUserObject>();
 class PrimeProductUserObject : public ThreadedGeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PrimeProductUserObject(const InputParameters & params);
 
   virtual void initialize() override;
@@ -43,4 +40,3 @@ protected:
   /// Product for all prime numbers
   unsigned int _product;
 };
-

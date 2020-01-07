@@ -6,10 +6,10 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
-#ifdef MOOSE_HAVE_LIBPNG
-
 #pragma once
+
+#include "MooseConfig.h"
+#ifdef MOOSE_HAVE_LIBPNG
 
 // pnglib includes
 #include <png.h>

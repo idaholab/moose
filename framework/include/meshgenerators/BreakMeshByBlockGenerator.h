@@ -19,6 +19,8 @@ InputParameters validParams<BreakMeshByBlockGenerator>();
 class BreakMeshByBlockGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:
+  static InputParameters validParams();
+
   BreakMeshByBlockGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

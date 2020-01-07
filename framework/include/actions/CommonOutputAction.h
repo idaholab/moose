@@ -31,6 +31,8 @@ public:
   /**
    * Class constructor
    */
+  static InputParameters validParams();
+
   CommonOutputAction(InputParameters params);
 
   virtual void act() override;

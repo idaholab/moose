@@ -1,7 +1,12 @@
 [Tests]
+  design = 'SideAverageValue.md'
+  issues = '#9103'
+
   [./test]
     type = RunException
     input = side_no_boundary.i
     expect_err = "missing required parameter 'Postprocessors/avg/boundary'"
+
+    requirement = "The system shall error if the boundary is not specified when computing the average value of a variable on a boundary."
   [../]
 []

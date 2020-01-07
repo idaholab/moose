@@ -1,30 +1,31 @@
 [Mesh]
-  type = GeneratedMesh
-  elem_type = HEX8
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
-  xmin=0.0
-  xmax=1.0
-  ymin=0.0
-  ymax=1.0
-  zmin=0.0
-  zmax=1.0
   displacements = 'x_disp y_disp z_disp'
-[]
-
-[MeshModifiers]
-  [./cnode]
-    type = AddExtraNodeset
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    elem_type = HEX8
+    dim = 3
+    nx = 1
+    ny = 1
+    nz = 1
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 1.0
+    zmin = 0.0
+    zmax = 1.0
+  []
+  [cnode]
+    type = ExtraNodesetGenerator
     coord = '0.0 0.0 0.0'
     new_boundary = 6
-  [../]
-  [./snode]
-    type = AddExtraNodeset
+    input = generated_mesh
+  []
+  [snode]
+    type = ExtraNodesetGenerator
     coord = '1.0 0.0 0.0'
     new_boundary = 7
-  [../]
+    input = cnode
+  []
 []
 
 [Variables]

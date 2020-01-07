@@ -60,12 +60,16 @@ InputParameters validParams<CappedDruckerPragerStressUpdate>();
 class CappedDruckerPragerStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedDruckerPragerStressUpdate(const InputParameters & parameters);
 
   /**
    * Does the model require the elasticity tensor to be isotropic?
    */
   bool requiresIsotropicTensor() override { return true; }
+
+  bool isIsotropic() override { return true; };
 
 protected:
   /// Hardening model for cohesion, friction and dilation angles
@@ -189,4 +193,3 @@ protected:
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
-

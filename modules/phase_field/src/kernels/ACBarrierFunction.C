@@ -19,7 +19,7 @@ validParams<ACBarrierFunction>()
   InputParameters params = validParams<ACGrGrBase>();
   params.addRequiredParam<MaterialPropertyName>(
       "gamma", "The interface profile coefficient to use with the kernel");
-  params.addClassDescription("Allen Cahn kernel used when 'mu' is a function of variables");
+  params.addClassDescription("Allen-Cahn kernel used when 'mu' is a function of variables");
   return params;
 }
 

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", TimeSequenceStepper);
 
-template <>
+defineLegacyParams(TimeSequenceStepper);
+
 InputParameters
-validParams<TimeSequenceStepper>()
+TimeSequenceStepper::validParams()
 {
-  InputParameters params = validParams<TimeSequenceStepperBase>();
+  InputParameters params = TimeSequenceStepperBase::validParams();
   params.addRequiredParam<std::vector<Real>>("time_sequence", "The values of t");
   params.addClassDescription("Solves the Transient problem at a sequence of given time points.");
   return params;

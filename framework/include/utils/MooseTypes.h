@@ -488,6 +488,27 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
   }                                                                                                \
   void mooseClangFormatFunction()
 
+#define defineLegacyParams(ObjectType)                                                             \
+  template <>                                                                                      \
+  InputParameters validParams<ObjectType>()                                                        \
+  {                                                                                                \
+    return ObjectType::validParams();                                                              \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineADLegacyParams(ADObjectType)                                                         \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    return ADObjectType<RESIDUAL>::validParams();                                                  \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return ADObjectType<JACOBIAN>::validParams();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
 #define defineADBaseValidParams(ADObjectType, BaseObjectType, addedParamCode)                      \
   template <>                                                                                      \
   InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
@@ -520,6 +541,7 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 
 namespace Moose
 {
+extern const processor_id_type INVALID_PROCESSOR_ID;
 extern const SubdomainID ANY_BLOCK_ID;
 extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
@@ -537,7 +559,8 @@ enum MaterialDataType
   BLOCK_MATERIAL_DATA,
   BOUNDARY_MATERIAL_DATA,
   FACE_MATERIAL_DATA,
-  NEIGHBOR_MATERIAL_DATA
+  NEIGHBOR_MATERIAL_DATA,
+  INTERFACE_MATERIAL_DATA
 };
 
 /**
@@ -615,6 +638,15 @@ enum class MortarType : unsigned int
   Slave = static_cast<unsigned int>(Moose::ElementType::Element),
   Master = static_cast<unsigned int>(Moose::ElementType::Neighbor),
   Lower = static_cast<unsigned int>(Moose::ElementType::Lower)
+};
+
+/**
+ * The filter type applied to a particular piece of "restartable" data. These filters
+ * will be applied during deserialization to include or exclude data as appropriate.
+ */
+enum class RESTARTABLE_FILTER : unsigned char
+{
+  RECOVERABLE
 };
 
 enum ConstraintJacobianType
@@ -759,6 +791,7 @@ enum LineSearchType
 #else
   LS_SHELL,
   LS_CONTACT,
+  LS_PROJECT,
   LS_L2,
   LS_BT,
   LS_CP
@@ -796,6 +829,13 @@ enum class RelationshipManagerType : unsigned char
   GEOMETRIC = 1 << 0,
   ALGEBRAIC = 1 << 1,
   COUPLING = 1 << 2
+};
+
+enum RMSystemType
+{
+  NONLINEAR,
+  AUXILIARY,
+  NONE
 };
 
 /**
@@ -916,3 +956,6 @@ DerivativeStringClass(TagName);
 
 /// Name of MeshGenerators
 DerivativeStringClass(MeshGeneratorName);
+
+/// Name of extra element IDs
+DerivativeStringClass(ExtraElementIDName);

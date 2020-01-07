@@ -11,17 +11,14 @@
 
 #include "FEProblem.h"
 
-class FixedPointProblem;
-
-template <>
-InputParameters validParams<FixedPointProblem>();
-
 /**
  * FEProblem derived class for lagging a tagged residual.
  */
 class FixedPointProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   FixedPointProblem(const InputParameters & params);
 
   virtual void computeResidual(const NumericVector<Number> & soln,

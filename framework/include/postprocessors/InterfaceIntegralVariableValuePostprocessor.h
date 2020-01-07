@@ -28,6 +28,8 @@ class InterfaceIntegralVariableValuePostprocessor : public InterfaceIntegralPost
                                                     public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   InterfaceIntegralVariableValuePostprocessor(const InputParameters & parameters);
 
 protected:

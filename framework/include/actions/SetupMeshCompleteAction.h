@@ -19,6 +19,8 @@ InputParameters validParams<SetupMeshCompleteAction>();
 class SetupMeshCompleteAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   SetupMeshCompleteAction(InputParameters params);
 
   bool completeSetup(MooseMesh * mesh);

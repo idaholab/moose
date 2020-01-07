@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", NumShapeSideUserObject);
 
-template <>
 InputParameters
-validParams<NumShapeSideUserObject>()
+NumShapeSideUserObject::validParams()
 {
-  InputParameters params = validParams<ShapeSideUserObject>();
+  InputParameters params = ShapeSideUserObject::validParams();
   params.addRequiredCoupledVar("u", "Charged species density.");
   return params;
 }

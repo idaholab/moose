@@ -28,6 +28,8 @@ InputParameters validParams<GenericFunctionMaterial>();
 class GenericFunctionMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   GenericFunctionMaterial(const InputParameters & parameters);
 
 protected:

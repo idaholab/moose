@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class EqualGradientConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   EqualGradientConstraint(const InputParameters & parameters);
 
 protected:

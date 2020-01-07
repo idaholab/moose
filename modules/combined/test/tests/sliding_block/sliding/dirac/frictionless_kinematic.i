@@ -14,14 +14,8 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -44,10 +38,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -131,23 +125,17 @@
 []
 
 [Materials]
-  [./left]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+  [./stiffStuff]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
-  [../]
-  [./right]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
     poissons_ratio = 0.3
-    youngs_modulus = 1e6
   [../]
-[]
+  [./stiffStuff_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
+  [../]
+[]  # Materials
 
 [Executioner]
   type = Transient
@@ -159,10 +147,10 @@
   line_search = 'none'
 
   nl_abs_tol = 1e-7
-  l_max_its = 100
+  l_max_its = 200
   nl_max_its = 1000
-  dt = 0.1
-  end_time = 15
+  dt = 0.05
+  end_time = 10
   num_steps = 1000
   nl_rel_tol = 1e-6
   dtmin = 0.01
@@ -175,9 +163,8 @@
 []
 
 [Outputs]
-  file_base = frictionless_kinematic_out
   interval = 10
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -195,5 +182,6 @@
     penalty = 1e+6
     formulation = kinematic
     normal_smoothing_distance = 0.1
+    system = DiracKernel
   [../]
 []

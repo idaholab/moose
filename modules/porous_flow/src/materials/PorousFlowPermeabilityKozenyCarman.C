@@ -85,6 +85,9 @@ PorousFlowPermeabilityKozenyCarman::PorousFlowPermeabilityKozenyCarman(
       _A = _k0 * std::pow(1.0 - _phi0, _m) / std::pow(_phi0, _n);
       break;
   }
+
+  // Make sure that derivatives are included in the Jacobian calculations
+  _dictator.usePermDerivs(true);
 }
 
 void

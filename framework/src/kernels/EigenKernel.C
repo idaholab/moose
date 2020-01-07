@@ -19,11 +19,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(EigenKernel);
+
 InputParameters
-validParams<EigenKernel>()
+EigenKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<bool>(
       "eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
   params.addParam<PostprocessorName>(
@@ -146,10 +147,14 @@ EigenKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     _local_ke.resize(ke.m(), ke.n());
     _local_ke.zero();
 
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
     mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
     Real one_over_eigen = 1.0 / *_eigenvalue;
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
+      for (_j = 0; _j < phi_size; _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) +=
               _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar_num);

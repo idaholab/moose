@@ -31,6 +31,8 @@ class BoundingBox;
 class SubdomainBoundingBoxGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SubdomainBoundingBoxGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
@@ -47,4 +49,3 @@ protected:
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;
 };
-

@@ -30,6 +30,8 @@ InputParameters validParams<Nemesis>();
 class Nemesis : public AdvancedOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */
@@ -46,14 +48,14 @@ public:
   virtual void initialSetup() override;
 
   /**
-   * Creates a new NemesisII_IO output object for outputing a new mesh
+   * Creates a new NemesisII_IO output object for outputting a new mesh
    */
   virtual void meshChanged() override;
 
 protected:
   /**
    * Overload the Output::output method, this is required for Nemesis
-   * output due to the method utilized for outputing single/global parameters
+   * output due to the method utilized for outputting single/global parameters
    */
   virtual void output(const ExecFlagType & type) override;
 

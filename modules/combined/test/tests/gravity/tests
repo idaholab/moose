@@ -8,6 +8,7 @@
     abs_zero = 1e-09
     use_old_floor = True
     requirement = 'The system shall compute a gravity body force in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
   [./rz_quad8_sm]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
     abs_zero = 1e-07
     use_old_floor = True
     requirement = 'The system shall compute a gravity body force in axisymmetric coordinates with quad8 elements in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
   [./rz_quad4_sm]
     type = 'Exodiff'
@@ -24,6 +26,7 @@
     abs_zero = 1e-07
     use_old_floor = True
     requirement = 'The system shall compute a gravity body force in axisymmetric coordinates in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
   [./xyz_hex20_sm]
     type = 'Exodiff'
@@ -33,6 +36,7 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The system shall compute a gravity body force with hex20 elements in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
   [./xyz_quad4_qp_select_sm]
     type = 'Exodiff'
@@ -43,6 +47,7 @@
     max_parallel = 1
     issues = '#4011'
     requirement = 'The system shall report material properties at integration points in the solid_mechanics module'
+    no_error_deprecated = true
   [../]
   [./xyz_hex8]
     type = 'Exodiff'

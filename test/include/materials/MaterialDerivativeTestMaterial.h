@@ -12,17 +12,14 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-class MaterialDerivativeTestMaterial;
-
-template <>
-InputParameters validParams<MaterialDerivativeTestMaterial>();
-
 /**
  * A material used for testing the material derivative test kernel
  */
 class MaterialDerivativeTestMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   MaterialDerivativeTestMaterial(const InputParameters & parameters);
 
 protected:
@@ -39,4 +36,3 @@ protected:
   /// nonlinear variable 2
   const VariableValue & _v;
 };
-

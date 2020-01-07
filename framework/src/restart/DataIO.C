@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseConfig.h"
 #include "MooseADWrapper.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
@@ -17,6 +18,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/elem.h"
+
+#include "DualRealOps.h"
 
 template <>
 void
@@ -77,8 +80,17 @@ dataStore(std::ostream & stream, DualReal & dn, void * context)
   dataStore(stream, dn.value(), context);
 
   auto & derivatives = dn.derivatives();
-  for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
+  std::size_t size = derivatives.size();
+  dataStore(stream, size, context);
+  for (MooseIndex(size) i = 0; i < size; ++i)
+  {
+#ifdef MOOSE_SPARSE_AD
+    dataStore(stream, derivatives.raw_index(i), context);
+    dataStore(stream, derivatives.raw_at(i), context);
+#else
     dataStore(stream, derivatives[i], context);
+#endif
+  }
 }
 
 template <>
@@ -257,6 +269,43 @@ dataStore(std::ostream & stream, Point & p, void * context)
   }
 }
 
+template <>
+void
+dataStore(std::ostream & stream, libMesh::Parameters & p, void * context)
+{
+  // First store the size of the map
+  unsigned int size = p.n_parameters();
+  stream.write((char *)&size, sizeof(size));
+
+  auto it = p.begin();
+  auto end = p.end();
+
+  for (; it != end; ++it)
+  {
+    auto & key = const_cast<std::string &>(it->first);
+    auto type = it->second->type();
+
+    storeHelper(stream, key, context);
+    storeHelper(stream, type, context);
+
+#define storescalar(ptype)                                                                         \
+  else if (it->second->type() == demangle(typeid(ptype).name())) storeHelper(                      \
+      stream, (dynamic_cast<libMesh::Parameters::Parameter<ptype> *>(it->second))->get(), context)
+
+    if (false)
+      ;
+    storescalar(Real);
+    storescalar(short);
+    storescalar(int);
+    storescalar(long);
+    storescalar(unsigned short);
+    storescalar(unsigned int);
+    storescalar(unsigned long);
+
+#undef storescalar
+  }
+}
+
 // global load functions
 
 template <>
@@ -301,8 +350,21 @@ dataLoad(std::istream & stream, DualReal & dn, void * context)
   dataLoad(stream, dn.value(), context);
 
   auto & derivatives = dn.derivatives();
+  std::size_t size = 0;
+  stream.read((char *)&size, sizeof(size));
+#ifdef MOOSE_SPARSE_AD
+  derivatives.resize(size);
+#endif
+
   for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
+  {
+#ifdef MOOSE_SPARSE_AD
+    dataLoad(stream, derivatives.raw_index(i), context);
+    dataLoad(stream, derivatives.raw_at(i), context);
+#else
     dataLoad(stream, derivatives[i], context);
+#endif
+  }
 }
 
 template <>
@@ -503,5 +565,43 @@ dataLoad(std::istream & stream, Point & p, void * context)
     Real r = 0;
     dataLoad(stream, r, context);
     p(i) = r;
+  }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, libMesh::Parameters & p, void * context)
+{
+  p.clear();
+
+  // First read the size of the map
+  unsigned int size = 0;
+  stream.read((char *)&size, sizeof(size));
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    std::string key, type;
+    loadHelper(stream, key, context);
+    loadHelper(stream, type, context);
+
+#define loadscalar(ptype)                                                                          \
+  else if (type == demangle(typeid(ptype).name())) do                                              \
+  {                                                                                                \
+    ptype & value = p.set<ptype>(key);                                                             \
+    loadHelper(stream, value, context);                                                            \
+  }                                                                                                \
+  while (0)
+
+    if (false)
+      ;
+    loadscalar(Real);
+    loadscalar(short);
+    loadscalar(int);
+    loadscalar(long);
+    loadscalar(unsigned short);
+    loadscalar(unsigned int);
+    loadscalar(unsigned long);
+
+#undef loadscalar
   }
 }

@@ -13,12 +13,14 @@
 #include "InputParameters.h"
 #include "MooseError.h"
 
-// libMesh incluces
+#include "libmesh/auto_ptr.h"
 
-template <>
+defineLegacyParams(OrientedBoxInterface);
+
 InputParameters
-validParams<OrientedBoxInterface>()
+OrientedBoxInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
   params.addRequiredParam<Point>("center",
                                  "The center (many people spell this 'center') of the box.");

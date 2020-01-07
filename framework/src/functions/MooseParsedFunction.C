@@ -16,14 +16,18 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
 
-template <>
+defineLegacyParams(MooseParsedFunction);
+
 InputParameters
-validParams<MooseParsedFunction>()
+MooseParsedFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
-  params += validParams<MooseParsedFunctionBase>();
+  InputParameters params = Function::validParams();
+  params += MooseParsedFunctionBase::validParams();
   params.addRequiredCustomTypeParam<std::string>(
       "value", "FunctionExpression", "The user defined function.");
+
+  params.addClassDescription("Function created by parsing a string");
+
   return params;
 }
 

@@ -60,20 +60,19 @@
 []
 
 [Materials]
-  [./temperature_qp]
+  [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./ppss_qp]
+  [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
   [../]
-  [./massfrac_qp]
+  [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b'
   [../]
   [./predis]
     type = PorousFlowAqueousPreDisChemistry
-    at_nodes = false
     primary_concentrations = 'a b'
     num_reactions = 1
     equilibrium_constants = eqm_k
@@ -86,14 +85,13 @@
   [../]
   [./mineral]
     type = PorousFlowAqueousPreDisMineral
-    at_nodes = false
     initial_concentrations = 'ini_conc_0 ini_conc_0'
   [../]
-  [./porosity_qp]
+  [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
   [../]
-  [./simple_fluid_qp]
+  [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0

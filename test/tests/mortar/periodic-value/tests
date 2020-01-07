@@ -13,7 +13,7 @@
     input = periodic.i
     run_sim = True
     difference_tol = 1e-7
-    cli_args = 'Mesh/file=square_coarse.msh'
+    cli_args = 'Mesh/file/file=square_coarse.msh'
     mesh_mode = replicated
     requirement = 'The Jacobian for mortar enforcement of periodic boundary conditions shall be perfect'
   []

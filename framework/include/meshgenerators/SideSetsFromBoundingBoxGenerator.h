@@ -25,6 +25,8 @@ InputParameters validParams<SideSetsFromBoundingBoxGenerator>();
 class SideSetsFromBoundingBoxGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SideSetsFromBoundingBoxGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

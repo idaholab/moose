@@ -1,4 +1,7 @@
 [Tests]
+  design = 'MooseApp.md'
+  issues = '#6126'
+
   [./minimal]
     # Make sure --minimal flag is working
     type = RunApp
@@ -7,5 +10,7 @@
     input = 'IGNORED'
     input_switch = ''
     display_required = True
+
+    requirement = "The system shall support the programmatic creation of a simulation tools without the need of an input file."
   [../]
 []

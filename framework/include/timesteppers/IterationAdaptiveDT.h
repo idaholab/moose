@@ -32,6 +32,8 @@ class PiecewiseLinear;
 class IterationAdaptiveDT : public TimeStepper, public PostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   IterationAdaptiveDT(const InputParameters & parameters);
 
   virtual void init() override;

@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#13261'
+  design = 'bcs/ADFunctionDirichletBC.md'
+  [./ad]
+    requirement = 'The system shall support Dirichlet type boundary conditions defined by a function'
+    [./test]
+      type = 'Exodiff'
+      input = 'test.i'
+      exodiff = 'test_out.e'
+      detail = 'using automatic differentiation.'
+    [../]
+    [./test-jac]
+      type = 'PetscJacobianTester'
+      input = 'test.i'
+      run_sim = False
+      ratio_tol = 3e-8
+      difference_tol = 3e-6
+      method = 'opt'
+      detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
+    [../]
+  [../]
+[]

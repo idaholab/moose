@@ -11,14 +11,11 @@
 
 #include "NodalBC.h"
 
-class PolyCoupledDirichletBC;
-
-template <>
-InputParameters validParams<PolyCoupledDirichletBC>();
-
 class PolyCoupledDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   PolyCoupledDirichletBC(const InputParameters & parameters);
 
   virtual ~PolyCoupledDirichletBC() {}
@@ -28,4 +25,3 @@ protected:
 
   Real _value; // Multiplier on the boundary
 };
-

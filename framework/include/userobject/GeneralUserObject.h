@@ -35,6 +35,8 @@ class GeneralUserObject : public UserObject,
                           protected VectorPostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   GeneralUserObject(const InputParameters & parameters);
 
   const std::set<std::string> & getRequestedItems() override;
@@ -53,7 +55,8 @@ public:
   /**
    * Store dependency among same object types for proper execution order
    */
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                           unsigned int index = 0);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   virtual const VectorPostprocessorValue &
@@ -75,4 +78,3 @@ protected:
   std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 };
-

@@ -11,11 +11,11 @@
 import os
 import vtk
 
-import base
-import annotations
-import observers
-import misc
 import mooseutils
+from . import base
+from . import annotations
+from . import observers
+from . import misc
 
 VTK_MAJOR_VERSION = vtk.vtkVersion.GetVTKMajorVersion()
 
@@ -42,7 +42,7 @@ class RenderWindow(base.ChiggerObject):
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
         opt.add('antialiasing', 0, "Number of antialiasing frames to perform "
-                                   "(set vtkRenderWindow::SetAAFrames).", vtype=int)
+                                   "(set vtkRenderWindow::SetMultiSamples).", vtype=int)
 
         # Observers
         opt.add('observers', [], "A list of ChiggerObserver objects, once added they are not " \
@@ -65,6 +65,7 @@ class RenderWindow(base.ChiggerObject):
         super(RenderWindow, self).__init__(**kwargs)
 
         self._results = [misc.ChiggerBackground()]
+        self._groups = []
         self.__active = None
 
         self.__watermark = annotations.ImageAnnotation(filename='chigger_white.png',
@@ -104,6 +105,7 @@ class RenderWindow(base.ChiggerObject):
             mooseutils.mooseDebug('RenderWindow.append {}'.format(type(result).__name__))
             if isinstance(result, base.ResultGroup):
                 self.append(*result.getResults())
+                self._groups.append(result)
             elif not isinstance(result, self.RESULT_TYPE):
                 n = result.__class__.__name__
                 t = self.RESULT_TYPE.__name__
@@ -228,6 +230,10 @@ class RenderWindow(base.ChiggerObject):
 
         # Setup the result objects
         n = self.__vtkwindow.GetNumberOfLayers()
+        for group in self._groups:
+            if group.needsUpdate():
+                group.update()
+
         for result in self._results:
             renderer = result.getVTKRenderer()
             if self.isOptionValid('antialiasing'):

@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#8437'
+  design = 'syntax/Materials/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'generic_constant_material_test.i'
     exodiff = 'out.e'
+
+    requirement = 'The system shall be able to produce a valid material object on the fly for use in calculations requiring material properties.'
   [../]
   # Run this test after the main test, setting the constant_on_elem
   # flag to true for one of the Materials.  There should be no
@@ -13,5 +18,7 @@
     exodiff = 'out.e'
     prereq = test
     cli_args = 'Materials/dm1/constant_on=ELEMENT'
+
+    requirement = 'The system shall be able to compute a single value per element for efficiency that is made available to all quadrature points in a coupled calculation.'
   [../]
 []

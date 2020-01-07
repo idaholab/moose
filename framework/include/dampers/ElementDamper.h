@@ -33,6 +33,8 @@ InputParameters validParams<ElementDamper>();
 class ElementDamper : public Damper, protected MaterialPropertyInterface
 {
 public:
+  static InputParameters validParams();
+
   ElementDamper(const InputParameters & parameters);
 
   /**

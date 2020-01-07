@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionValuePostprocessor);
 
-template <>
+defineLegacyParams(FunctionValuePostprocessor);
+
 InputParameters
-validParams<FunctionValuePostprocessor>()
+FunctionValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function",
                                         "The function which supplies the postprocessor value.");
   params.addParam<Point>(

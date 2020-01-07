@@ -14,11 +14,12 @@
 registerMooseAction("MooseApp", CheckIntegrityAction, "check_integrity");
 registerMooseAction("MooseApp", CheckIntegrityAction, "check_integrity_early");
 
-template <>
+defineLegacyParams(CheckIntegrityAction);
+
 InputParameters
-validParams<CheckIntegrityAction>()
+CheckIntegrityAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

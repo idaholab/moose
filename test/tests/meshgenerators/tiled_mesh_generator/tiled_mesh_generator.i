@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = cube.e
@@ -23,10 +23,6 @@
     # algorithm, stitch_meshes(), only works with ReplicatedMesh.
     parallel_type = replicated
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

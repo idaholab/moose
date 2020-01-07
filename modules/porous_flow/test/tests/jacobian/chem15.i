@@ -84,18 +84,12 @@
 []
 
 [Materials]
-  [./porosity_qp]
-    type = PorousFlowPorosity
-    porosity_zero = 0.9
-  [../]
   [./temperature]
     type = PorousFlowTemperature
     temperature = temp
-    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
     porepressure = pressure
   [../]
   [./massfrac]
@@ -108,18 +102,15 @@
     reactions = '1 2
                  2.2 -1
                  -2 1'
-    at_nodes = true
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
-    at_nodes = true
     phase = 0
   [../]
   [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-    at_nodes = true
   [../]
 []
 

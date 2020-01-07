@@ -15,10 +15,10 @@ validParams<GBEvolutionBase>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription(
-      "Computes necessary material properties for the isotropic grian growth model");
+      "Computes necessary material properties for the isotropic grain growth model");
   params.addRequiredCoupledVar("T", "Temperature in Kelvin");
   params.addParam<Real>("f0s", 0.125, "The GB energy constant ");
-  params.addRequiredParam<Real>("wGB", "Diffuse GB width in the lengthscale of the model");
+  params.addRequiredParam<Real>("wGB", "Diffuse GB width in the length scale of the model");
   params.addParam<Real>("length_scale", 1.0e-9, "Length scale in m, where default is nm");
   params.addParam<Real>("time_scale", 1.0e-9, "Time scale in s, where default is ns");
   params.addParam<Real>(

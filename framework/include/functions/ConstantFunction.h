@@ -22,6 +22,8 @@ InputParameters validParams<ConstantFunction>();
 class ConstantFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   ConstantFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

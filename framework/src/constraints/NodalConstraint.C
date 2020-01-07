@@ -16,11 +16,12 @@
 
 #include "libmesh/sparse_matrix.h"
 
-template <>
+defineLegacyParams(NodalConstraint);
+
 InputParameters
-validParams<NodalConstraint>()
+NodalConstraint::validParams()
 {
-  InputParameters params = validParams<Constraint>();
+  InputParameters params = Constraint::validParams();
   MooseEnum formulationtype("penalty kinematic", "penalty");
   params.addParam<MooseEnum>("formulation",
                              formulationtype,

@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", FullSolveMultiApp);
 
-template <>
+defineLegacyParams(FullSolveMultiApp);
+
 InputParameters
-validParams<FullSolveMultiApp>()
+FullSolveMultiApp::validParams()
 {
-  InputParameters params = validParams<MultiApp>();
+  InputParameters params = MultiApp::validParams();
   params.addClassDescription("Performs a complete simulation during each execution.");
   params.addParam<bool>(
       "no_backup_and_restore",

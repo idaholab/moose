@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class TagTestProblem;
-
-template <>
-InputParameters validParams<TagTestProblem>();
-
 /**
  * FEProblem derived class for customization of callbacks. In this instance we only print out
  * something in the c-tor and d-tor, so we know the class was build and used properly.
@@ -23,6 +18,8 @@ InputParameters validParams<TagTestProblem>();
 class TagTestProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   TagTestProblem(const InputParameters & params);
 
   virtual void computeResidual(const NumericVector<Number> & soln,
@@ -35,4 +32,3 @@ protected:
 
   std::set<std::string> mtags;
 };
-

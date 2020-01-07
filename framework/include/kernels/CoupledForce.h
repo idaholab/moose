@@ -23,6 +23,8 @@ InputParameters validParams<CoupledForce>();
 class CoupledForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledForce(const InputParameters & parameters);
 
 protected:

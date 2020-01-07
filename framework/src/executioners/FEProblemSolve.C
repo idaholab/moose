@@ -12,9 +12,18 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
-template <>
+defineLegacyParams(FEProblemSolve);
+
+std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
+
+const std::set<std::string> &
+FEProblemSolve::mooseLineSearches()
+{
+  return _moose_line_searches;
+}
+
 InputParameters
-validParams<FEProblemSolve>()
+FEProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -23,7 +32,10 @@ validParams<FEProblemSolve>()
                                             "hierarchical decomposition into "
                                             "subsystems to help the solver.");
 
-  std::set<std::string> line_searches = {"contact", "default", "none", "basic"};
+  std::set<std::string> line_searches = mooseLineSearches();
+
+  std::set<std::string> alias_line_searches = {"default", "none", "basic"};
+  line_searches.insert(alias_line_searches.begin(), alias_line_searches.end());
 #ifdef LIBMESH_HAVE_PETSC
   std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
   line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
@@ -53,20 +65,21 @@ validParams<FEProblemSolve>()
   params += Moose::PetscSupport::getPetscValidParams();
 #endif // LIBMESH_HAVE_PETSC
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Tolerance");
-  params.addDeprecatedParam<Real>(
-      "l_abs_step_tol", -1, "Linear Absolute Step Tolerance", "Please use l_abs_tol instead");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
   params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
+  params.addParam<Real>("nl_div_tol", -1, "Nonlinear Divergence Tolerance");
   params.addParam<Real>("nl_abs_step_tol", 1.0e-50, "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 1.0e-50, "Nonlinear Relative step Tolerance");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
       "Specifies whether or not to reuse the base vector for matrix-free calculation");
+  params.addParam<bool>(
+      "skip_exception_check", false, "Specifies whether or not to skip exception check");
   params.addParam<bool>("compute_initial_residual_before_preset_bcs",
                         false,
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
@@ -78,10 +91,18 @@ validParams<FEProblemSolve>()
       "Whether the scaling factors should only be computed once at the beginning of the simulation "
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
+  params.addParam<bool>("verbose", false, "Set to true to print additional information");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_grids",
+      1,
+      "num_grids>0",
+      "The number of grids to use for a grid sequencing algorithm. This includes the final grid, "
+      "so num_grids = 1 indicates just one solve in a time-step");
 
-  params.addParamNamesToGroup("l_tol l_abs_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
+  params.addParamNamesToGroup("l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
-                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs",
+                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
+                              "automatic_scaling compute_scaling_once num_grids",
                               "Solver");
   return params;
 }
@@ -89,7 +110,8 @@ validParams<FEProblemSolve>()
 FEProblemSolve::FEProblemSolve(Executioner * ex)
   : SolveObject(ex), _splitting(getParam<std::vector<std::string>>("splitting"))
 {
-  if (_pars.isParamSetByUser("line_search"))
+  if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
+      _moose_line_searches.end())
     _problem.addLineSearch(_pars);
 
 // Extract and store PETSc related settings on FEProblemBase
@@ -117,6 +139,8 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
   es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
       getParam<Real>("nl_rel_tol");
 
+  es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
+
   es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
       getParam<Real>("nl_abs_step_tol");
 
@@ -126,8 +150,12 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
   _nl._compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");
 
+  _nl.setVerboseFlag(getParam<bool>("verbose"));
+
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
+
+  _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
   _nl.setDecomposition(_splitting);
 }

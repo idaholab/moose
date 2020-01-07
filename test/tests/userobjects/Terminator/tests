@@ -1,8 +1,13 @@
 [Tests]
+  design = 'Terminator.md'
+  issues = '#3735'
+
   [./test]
     type = 'Exodiff'
     input = 'terminator.i'
     exodiff = 'terminator_out.e'
     group = 'requirements'
+
+    requirement = "The system shall be able to terminate the execution of a solve based on post-processing calculations performed within the simulation."
   [../]
 []

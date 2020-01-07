@@ -31,6 +31,8 @@ public:
    * Class constructor
    * @param params Parameters for this Action
    */
+  static InputParameters validParams();
+
   AddControlAction(InputParameters parameters);
 
   virtual void act() override;

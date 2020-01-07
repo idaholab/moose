@@ -42,6 +42,18 @@ namespace MooseUtils
 {
 
 std::string
+replaceAll(std::string str, const std::string & from, const std::string & to)
+{
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+  {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+  }
+  return str;
+}
+
+std::string
 convertLatestCheckpoint(std::string orig, bool base_only)
 {
   auto slash_pos = orig.find_last_of("/");
@@ -318,7 +330,7 @@ splitFileName(std::string full_file)
 std::string
 camelCaseToUnderscore(const std::string & camel_case_name)
 {
-  string replaced = camel_case_name;
+  std::string replaced = camel_case_name;
   // Put underscores in front of each contiguous set of capital letters
   pcrecpp::RE("(?!^)(?<![A-Z_])([A-Z]+)").GlobalReplace("_\\1", &replaced);
 
@@ -691,7 +703,6 @@ stringToInteger(const std::string & input, bool throw_on_failure)
 }
 
 void
-
 linearPartitionItems(dof_id_type num_items,
                      dof_id_type num_chunks,
                      dof_id_type chunk_id,
@@ -748,7 +759,7 @@ split(const std::string & str, const std::string & delimiter)
     pos = str.find(delimiter, prev);
     output.push_back(str.substr(prev, pos - prev));
     prev = pos + delimiter.length();
-  } while (pos != string::npos);
+  } while (pos != std::string::npos);
   return output;
 }
 

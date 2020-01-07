@@ -86,14 +86,6 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./simple_fluid]
-      type = SimpleFluidProperties
-    [../]
-  [../]
-[]
-
 [AuxVariables]
   [./pressure]
   [../]
@@ -103,22 +95,18 @@
   [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.9
-    at_nodes = true
   [../]
   [./temperature]
     type = PorousFlowTemperature
     temperature = temp
-    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-    at_nodes = true
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b c'
-    at_nodes = true
   [../]
   [./predis]
     type = PorousFlowAqueousPreDisChemistry
@@ -138,18 +126,10 @@
     gas_constant = 7.4
     theta_exponent = '1.0 1.1 1.2 0.9'
     eta_exponent = '1.2 1.01 1.1 1.2'
-    at_nodes = true
   [../]
   [./mineral]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = 'ini_sec_conc0 ini_sec_conc1 ini_sec_conc2 ini_sec_conc3'
-    at_nodes = true
-  [../]
-  [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-    at_nodes = true
   [../]
 []
 

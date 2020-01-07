@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -34,7 +34,7 @@ def read_all_times(prefix=''):
         times = reader.getTimes()
         for t in times:
             reader.update(timestep=None, time=t)
-    print prefix, time.time() - start_time, 'sec.'
+    print(prefix, time.time() - start_time, 'sec.')
 
 # Default settings
 read_all_times('Default:')

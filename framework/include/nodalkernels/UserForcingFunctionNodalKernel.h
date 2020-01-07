@@ -27,6 +27,8 @@ public:
   /**
    * Constructor grabs the Function
    */
+  static InputParameters validParams();
+
   UserForcingFunctionNodalKernel(const InputParameters & parameters);
 
 protected:

@@ -13,14 +13,11 @@
 
 #include "FixedPointProblem.h"
 
-class FixedPoint;
-
-template <>
-InputParameters validParams<FixedPoint>();
-
 class FixedPoint : public SolveObject
 {
 public:
+  static InputParameters validParams();
+
   FixedPoint(Executioner * ex);
 
   virtual bool solve() override;

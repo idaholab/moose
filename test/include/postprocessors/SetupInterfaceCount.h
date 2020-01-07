@@ -22,18 +22,6 @@ class ElementSetupInterfaceCount;
 class SideSetupInterfaceCount;
 class InternalSideSetupInterfaceCount;
 class NodalSetupInterfaceCount;
-
-template <>
-InputParameters validParams<GeneralSetupInterfaceCount>();
-template <>
-InputParameters validParams<ElementSetupInterfaceCount>();
-template <>
-InputParameters validParams<SideSetupInterfaceCount>();
-template <>
-InputParameters validParams<InternalSideSetupInterfaceCount>();
-template <>
-InputParameters validParams<NodalSetupInterfaceCount>();
-
 /**
  * A class for testing the number of calls to the various SetupInterface methods.
  */
@@ -132,6 +120,8 @@ SetupInterfaceCount<T>::threadJoinHelper(const UserObject & uo)
 class GeneralSetupInterfaceCount : public SetupInterfaceCount<GeneralPostprocessor>
 {
 public:
+  static InputParameters validParams();
+
   GeneralSetupInterfaceCount(const InputParameters & parameters);
 };
 

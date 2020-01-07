@@ -12,7 +12,7 @@
 
 #include "libmesh/dense_vector.h"
 
-#include "metaphysicl/dualnumberarray.h"
+#include "DualRealOps.h"
 
 #include "gtest/gtest.h"
 

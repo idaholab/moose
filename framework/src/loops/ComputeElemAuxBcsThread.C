@@ -14,6 +14,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
+#include "SwapBackSentinel.h"
 
 #include "libmesh/threads.h"
 
@@ -59,6 +60,9 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
 
+    // need to update the boundary ID in assembly
+    _problem.setCurrentBoundaryID(boundary_id, _tid);
+
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
@@ -74,6 +78,16 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
 
+        const Elem * neighbor = elem->neighbor_ptr(side);
+
+        // The last check here is absolutely necessary otherwise we will attempt to evaluate
+        // neighbor materials on neighbor elements that aren't evaluable, e.g. don't have algebraic
+        // ghosting
+        bool compute_interface =
+            neighbor && neighbor->active() &&
+            _problem.getResidualInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id,
+                                                                                       _tid);
+
         if (_need_materials)
         {
           std::set<unsigned int> needed_mat_props;
@@ -83,8 +97,17 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
           }
           _problem.setActiveMaterialProperties(needed_mat_props, _tid);
+
           _problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
+
+          if (compute_interface)
+          {
+            _problem.reinitNeighbor(elem, side, _tid);
+            _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+            _problem.reinitMaterialsInterface(boundary_id, _tid);
+          }
         }
 
         for (const auto & aux : iter->second)
@@ -93,6 +116,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         if (_need_materials)
         {
           _problem.swapBackMaterialsFace(_tid);
+          if (compute_interface)
+            _problem.swapBackMaterialsNeighbor(_tid);
           _problem.clearActiveMaterialProperties(_tid);
         }
       }

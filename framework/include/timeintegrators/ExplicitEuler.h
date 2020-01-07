@@ -22,6 +22,8 @@ InputParameters validParams<ExplicitEuler>();
 class ExplicitEuler : public TimeIntegrator
 {
 public:
+  static InputParameters validParams();
+
   ExplicitEuler(const InputParameters & parameters);
 
   virtual void preSolve() override;

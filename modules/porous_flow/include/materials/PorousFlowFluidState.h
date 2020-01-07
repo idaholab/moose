@@ -109,14 +109,16 @@ protected:
   const MaterialProperty<RealGradient> & _gradT_qp;
   /// Derivative of temperature wrt PorousFlow variables
   const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
+  /// Moose variable number of the temperature
+  const unsigned int _temperature_varnum;
+  /// PorousFlow variable number of the temperature
+  const unsigned int _Tvar;
   /// Mass fraction matrix
   MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
   /// Gradient of the mass fraction matrix (only defined at the qps)
   MaterialProperty<std::vector<std::vector<RealGradient>>> * _grad_mass_frac_qp;
   /// Derivative of the mass fraction matrix with respect to the Porous Flow variables
   MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
-  /// Old value of saturation
-  const MaterialProperty<std::vector<Real>> & _saturation_old;
 
   /// Fluid density of each phase
   MaterialProperty<std::vector<Real>> & _fluid_density;
@@ -130,6 +132,10 @@ protected:
   MaterialProperty<std::vector<Real>> & _fluid_enthalpy;
   /// Derivative of the fluid enthalpy for each phase wrt PorousFlow variables
   MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_enthalpy_dvar;
+  /// Internal energy of each phase
+  MaterialProperty<std::vector<Real>> & _fluid_internal_energy;
+  /// Derivative of the fluid internal energy for each phase wrt PorousFlow variables
+  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_internal_energy_dvar;
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
@@ -139,5 +145,12 @@ protected:
   std::vector<FluidStateProperties> _fsp;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc;
+  /// Index of derivative wrt pressure
+  const unsigned int _pidx;
+  /// Index of derivative wrt temperature
+  const unsigned int _Tidx;
+  /// Index of derivative wrt total mass fraction Z
+  const unsigned int _Zidx;
+  /// Index of derivative wrt salt mass fraction X
+  const unsigned int _Xidx;
 };
-

@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#14519'
+  design = 'SideSetHeatTransferKernel.md SideSetHeatTransferMaterial.md'
+  [group]
+    requirement = 'The system shall solve the side set heat transfer model with:'
+    [./1D_gap]
+      type = 'Exodiff'
+      input = 'gap_thermal_1D.i'
+      exodiff = 'gap_thermal_1D_out.e'
+      abs_zero = 1e-6
+      detail = 'discontinuous finite elements, '
+    [../]
+    [./1D_gap_Tbulk_var]
+      type = 'Exodiff'
+      input = 'gap_thermal_1D.i'
+      exodiff = 'gap_thermal_1D_Tbulk_var.e'
+      cli_args = 'InterfaceKernels/active="gap_var"
+                  Outputs/file_base=gap_thermal_1D_Tbulk_var'
+      abs_zero = 1e-6
+      detail = 'bulk gap temperature as an auxiliary variable, '
+    [../]
+    [./1D_gap_ktemp]
+      type = 'Exodiff'
+      input = 'gap_thermal_ktemp_1D.i'
+      exodiff = 'gap_thermal_ktemp_1D_out.e'
+      abs_zero = 1e-6
+      detail = 'temperature dependent gap conductivity, and'
+    [../]
+    [./CFEM_gap]
+      type = 'Exodiff'
+      input = 'cfem_gap.i'
+      exodiff = 'cfem_gap_out.e'
+      abs_zero = 1e-6
+      detail = 'block restricted continuous finite element variables.'
+    [../]
+  []
+  [./1D_gap_err]
+    type = RunException
+    input = 'gap_thermal_1D.i'
+    cli_args = 'DGKernels/dg_diff/exclude_boundary="fake_interface another_fake last_one"'
+    expect_err = "DGKernel 'dg_diff' contains the following boundary names that do not exist on the mesh: fake_interface, another_fake, last_one"
+    requirement = 'MOOSE shall throw an error if the inputted boundary does not exist.'
+  [../]
+[]

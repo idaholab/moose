@@ -75,13 +75,12 @@ protected:
   /// Derivative of fluid enthalpy wrt temperature at the qps or nodes
   MaterialProperty<Real> * const _denthalpy_dT;
 
-  /// Brine Fluid properties UserObject
+  /// Brine fluid properties UserObject
   const BrineFluidProperties * _brine_fp;
 
-  /// Water Fluid properties UserObject
+  /// Water fluid properties UserObject
   const SinglePhaseFluidProperties * _water_fp;
 
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;
 };
-

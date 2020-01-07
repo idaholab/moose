@@ -7,14 +7,14 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import anytree
+import moosetree
 from MooseDocs.base import components
 from MooseDocs.extensions import core
 
 def make_extension(**kwargs):
     return HeadingExtension(**kwargs)
 
-def find_heading(translator, node, bookmark=u''):
+def find_heading(translator, node, bookmark=''):
     """Helper for returning a copy of the heading tokens."""
 
     data = translator.getMetaData(node, 'heading')
@@ -37,8 +37,8 @@ class HeadingExtension(components.Extension):
     def postTokenize(self, ast, page, meta, reader):
         data = dict()
         func = lambda n: (n.name == 'Heading')
-        for node in anytree.PreOrderIter(ast.root, filter_=func):
-            id_ = node.get('id', u'')
+        for node in moosetree.iterate(ast.root, func):
+            id_ = node.get('id', '')
             if id_ not in data:
                 data[id_] = node.copy()
 

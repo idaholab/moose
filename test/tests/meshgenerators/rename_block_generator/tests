@@ -1,23 +1,28 @@
 [Tests]
-  [./rename_block_generator_test]
-    type = 'Exodiff'
-    input = 'rename_block1.i'
-    exodiff = 'rename_block1_out.e'
-    requirement = 'MOOSE shall be able to crate different subdomains.'
-    design = 'meshgenerators/RenameBlockGenerator.md'
+  [rename_blocks]
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    design = 'meshgenerators/RenameBlockGenerator.md'
+    requirement = 'The system shall be able to rename or renumber mesh subdomains prior to running the '
+                  'simulation:'
 
-  [./rename_block_generator_test2]
-    type = 'Exodiff'
-    input = 'rename_block2.i'
-    exodiff = 'rename_block2_out.e'
-    requirement = 'MOOSE shall be able to crate different subdomains.'
-    design = 'meshgenerators/RenameBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [rename_block_generator_test]
+      type = 'Exodiff'
+      input = 'rename_block1.i'
+      exodiff = 'rename_block1_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'using a sequence of renaming operations, or'
+    []
+
+    [rename_block_generator_test2]
+      type = 'Exodiff'
+      input = 'rename_block2.i'
+      exodiff = 'rename_block2_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'by renaming several blocks simultaneously.'
+    []
+  []
 []

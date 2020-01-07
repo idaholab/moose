@@ -23,6 +23,8 @@ InputParameters validParams<RinglebMeshGenerator>();
 class RinglebMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   RinglebMeshGenerator(const InputParameters & parameters);
 
   // No copy

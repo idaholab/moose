@@ -20,6 +20,8 @@ InputParameters validParams<MortarConstraint>();
 class MortarConstraint : public MortarConstraintBase
 {
 public:
+  static InputParameters validParams();
+
   MortarConstraint(const InputParameters & parameters);
 
   // Using declarations necessary to pull in computeResidual with different parameter list and avoid

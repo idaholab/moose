@@ -26,6 +26,8 @@ InputParameters validParams<NodalVariablePostprocessor>();
 class NodalVariablePostprocessor : public NodalPostprocessor, public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   NodalVariablePostprocessor(const InputParameters & parameters);
 
 protected:

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "AutomaticMortarGeneration.h"
 #include "MortarSegmentInfo.h"
 #include "NanoflannMeshAdaptor.h"
@@ -18,6 +27,8 @@
 #include "libmesh/quadrature_trap.h"
 
 #include "metaphysicl/dualnumber.h"
+
+#include <array>
 
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
@@ -68,7 +79,7 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     mooseError("Must specify slave and master boundary ids before building node-to-elem maps.");
 
   // Construct nodes_to_slave_elem_map
-  for (const auto & slave_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & slave_elem : as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional slave side elements, go on to the next one.
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
@@ -82,7 +93,8 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 
   // Construct nodes_to_master_elem_map
-  for (const auto & master_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & master_elem :
+       as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional master side elements, go on to the next one.
     if (!this->master_boundary_subdomain_ids.count(master_elem->subdomain_id()))
@@ -129,6 +141,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem = mortar_segment_mesh.add_elem(new Edge2);
 
     new_elem->processor_id() = slave_elem->processor_id();
+    new_elem->set_parent(const_cast<Elem *>(slave_elem->parent()));
+    new_elem->set_interior_parent(const_cast<Elem *>(slave_elem->interior_parent()));
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
@@ -207,12 +221,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     Elem * current_mortar_segment = nullptr;
     for (const auto & mortar_segment_candidate : mortar_segment_set)
     {
-      // Test whether new_pt lies in the element by checking
-      // whether the sum of the distances from the endpoints to
-      // the new point is approximately equal to the distance
-      // between the endpoints.
-      Point a = mortar_segment_candidate->point(0), b = mortar_segment_candidate->point(1);
-      if (std::abs((a - new_pt).norm() + (b - new_pt).norm() - (b - a).norm()) < TOLERANCE)
+      MortarSegmentInfo * info;
+      try
+      {
+        info = &msm_elem_to_info.at(mortar_segment_candidate);
+      }
+      catch (std::out_of_range &)
+      {
+        mooseError("MortarSegmentInfo not found for the mortar segment candidate");
+      }
+      if (info->xi1_a < xi1 && xi1 < info->xi1_b)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;
@@ -232,6 +250,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
       new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
+    new_elem_left->set_interior_parent(current_mortar_segment->interior_parent());
+    new_elem_left->set_parent(current_mortar_segment->parent());
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
@@ -260,6 +280,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
       new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
+    new_elem_right->set_interior_parent(current_mortar_segment->interior_parent());
+    new_elem_right->set_parent(current_mortar_segment->parent());
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
 
@@ -426,7 +448,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh.allow_renumbering(true);
   mortar_segment_mesh.skip_partitioning(true);
-  mortar_segment_mesh.prepare_for_use();
+  mortar_segment_mesh.prepare_for_use(/*skip_renumbering=*/false, /*skip_find_neighbors=*/true);
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -513,6 +535,9 @@ AutomaticMortarGeneration::computeNodalNormals()
     // Which side of the parent are we? We need to know this to know
     // which side to reinit.
     const Elem * interior_parent = slave_elem->interior_parent();
+    mooseAssert(interior_parent,
+                "No interior parent exists for element "
+                    << slave_elem->id() << ". There may be a problem with your sideset set-up.");
 
     // Look up which side of the interior parent slave_elem is.
     auto s = interior_parent->which_side_am_i(slave_elem);

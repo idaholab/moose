@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticDruckerPrager);
+
 InputParameters
-validParams<TensorMechanicsPlasticDruckerPrager>()
+TensorMechanicsPlasticDruckerPrager::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   MooseEnum mc_interpolation_scheme("outer_tip=0 inner_tip=1 lode_zero=2 inner_edge=3 native=4",
                                     "lode_zero");
   params.addParam<MooseEnum>(
@@ -25,11 +26,12 @@ validParams<TensorMechanicsPlasticDruckerPrager>()
       mc_interpolation_scheme,
       "Scheme by which the Drucker-Prager cohesion, friction angle and dilation angle are set from "
       "the Mohr-Coulomb parameters mc_cohesion, mc_friction_angle and mc_dilation_angle.  Consider "
-      "the DP and MC yield surfaces on the devatoric (octahedral) plane.  Outer_tip: the DP circle "
-      "touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner tips of "
-      "the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  Inner_edge: "
-      "the DP circle is the largest circle that wholey fits inside the MC hex.  Native: The DP "
-      "cohesion, friction angle and dilation angle are set equal to the mc_ parameters entered.");
+      "the DP and MC yield surfaces on the deviatoric (octahedral) plane.  Outer_tip: the DP "
+      "circle touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner "
+      "tips of the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  "
+      "Inner_edge: the DP circle is the largest circle that wholly fits inside the MC hex.  "
+      "Native: The DP cohesion, friction angle and dilation angle are set equal to the mc_ "
+      "parameters entered.");
   params.addRequiredParam<UserObjectName>(
       "mc_cohesion",
       "A TensorMechanicsHardening UserObject that defines hardening of the "

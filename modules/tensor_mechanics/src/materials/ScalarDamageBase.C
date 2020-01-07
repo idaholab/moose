@@ -10,11 +10,12 @@
 #include "ScalarDamageBase.h"
 #include "MooseUtils.h"
 
-template <>
+defineLegacyParams(ScalarDamageBase);
+
 InputParameters
-validParams<ScalarDamageBase>()
+ScalarDamageBase::validParams()
 {
-  InputParameters params = validParams<DamageBase>();
+  InputParameters params = DamageBase::validParams();
   params.addClassDescription("Base class for damage model based on a scalar damage parameter");
   params.addParam<bool>(
       "use_old_damage",
@@ -30,7 +31,7 @@ validParams<ScalarDamageBase>()
       "maximum_damage_increment",
       0.1,
       "maximum_damage_increment>0 & maximum_damage_increment<1",
-      "maximum damage increment allowed for simulations with adaptative time step");
+      "maximum damage increment allowed for simulations with adaptive time step");
   params.addParam<std::string>("damage_index_name",
                                "damage_index",
                                "name of the material property where the damage index is stored");

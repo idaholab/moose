@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", VectorCoeffReaction);
 
-template <>
 InputParameters
-validParams<VectorCoeffReaction>()
+VectorCoeffReaction::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addRequiredParam<Real>("coefficient",
                                 "The rate coefficient. Positive = sink. Negative = source.");
   return params;

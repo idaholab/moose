@@ -27,6 +27,8 @@ InputParameters validParams<TensorMechanicsHardeningModel>();
 class TensorMechanicsHardeningModel : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsHardeningModel(const InputParameters & parameters);
 
   void initialize();
@@ -50,4 +52,3 @@ public:
    */
   virtual std::string modelName() const = 0;
 };
-

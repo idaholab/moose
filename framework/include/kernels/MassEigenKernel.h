@@ -20,6 +20,8 @@ InputParameters validParams<MassEigenKernel>();
 class MassEigenKernel : public EigenKernel
 {
 public:
+  static InputParameters validParams();
+
   MassEigenKernel(const InputParameters & parameters);
 
 protected:

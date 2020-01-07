@@ -22,11 +22,14 @@
 
 registerMooseObject("MooseApp", MultiAppPostprocessorInterpolationTransfer);
 
-template <>
+defineLegacyParams(MultiAppPostprocessorInterpolationTransfer);
+
 InputParameters
-validParams<MultiAppPostprocessorInterpolationTransfer>()
+MultiAppPostprocessorInterpolationTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
+  params.addClassDescription("Transfer postprocessor data from sub-application into field data on "
+                             "the master application.");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
@@ -58,6 +61,8 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _interp_type(getParam<MooseEnum>("interp_type")),
     _radius(getParam<Real>("radius"))
 {
+  if (_directions.contains(TO_MULTIAPP))
+    paramError("Can't interpolate to a MultiApp!");
 }
 
 void
@@ -65,7 +70,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 {
   _console << "Beginning PostprocessorInterpolationTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {

@@ -28,6 +28,8 @@ InputParameters validParams<TransientMultiApp>();
 class TransientMultiApp : public MultiApp
 {
 public:
+  static InputParameters validParams();
+
   TransientMultiApp(const InputParameters & parameters);
 
   virtual NumericVector<Number> & appTransferVector(unsigned int app,
@@ -114,4 +116,3 @@ public:
 
   ~MultiAppSolveFailure() throw() {}
 };
-

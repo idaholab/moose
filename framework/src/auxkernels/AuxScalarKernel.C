@@ -14,13 +14,14 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(AuxScalarKernel);
+
 InputParameters
-validParams<AuxScalarKernel>()
+AuxScalarKernel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
-  params += validParams<MeshChangedInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += SetupInterface::validParams();
+  params += MeshChangedInterface::validParams();
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this kernel operates on");

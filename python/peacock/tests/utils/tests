@@ -3,35 +3,42 @@
     type = PythonUnitTest
     input = test_ExeLauncher.py
     display_required = True
+    python = 3
   [../]
   [./RecentlyUsedMenu]
     type = PythonUnitTest
     input = test_RecentlyUsedMenu.py
     display_required = True
+    python = 3
   [../]
   [./ExeFinder]
     type = PythonUnitTest
     input = test_ExeFinder.py
     display_required = True
+    python = 3
   [../]
   [./FileCache]
     type = PythonUnitTest
     input = test_FileCache.py
     display_required = True
+    python = 3
   [../]
   [./TerminalUtils]
     type = PythonUnitTest
     input = test_TerminalUtils.py
     display_required = True
+    python = 3
   [../]
   [./Widgetutils]
     type = PythonUnitTest
     input = test_WidgetUtils.py
     display_required = True
+    python = 3
   [../]
   [./loadstore]
     type = PythonUnitTest
     input = test_StoreLoadWidgetState.py
     display_required = True
+    python = 3
   [../]
 []

@@ -12,15 +12,19 @@
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "Exodus.h"
+#include "TimedPrint.h"
+
 #include "libmesh/exodusII_io.h"
+#include "libmesh/checkpoint_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
-template <>
+defineLegacyParams(MeshOnlyAction);
+
 InputParameters
-validParams<MeshOnlyAction>()
+MeshOnlyAction::validParams()
 {
-  return validParams<Action>();
+  return Action::validParams();
 }
 
 MeshOnlyAction::MeshOnlyAction(InputParameters params) : Action(params) {}
@@ -68,7 +72,23 @@ MeshOnlyAction::act()
 
     Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
 
+    TimedPrint tp(std ::cout,
+                  std::chrono::duration<double>(0.),
+                  std::chrono::duration<double>(1.),
+                  "Writing Exodus");
+
     exio.write(mesh_file);
+  }
+  else if (mesh_file.find(".cpr") + 4 == mesh_file.size())
+  {
+    TimedPrint tp(std ::cout,
+                  std::chrono::duration<double>(0.),
+                  std::chrono::duration<double>(1.),
+                  "Writing Checkpoint");
+
+    CheckpointIO io(mesh_ptr->getMesh(), true);
+
+    io.write(mesh_file);
   }
   else
   {

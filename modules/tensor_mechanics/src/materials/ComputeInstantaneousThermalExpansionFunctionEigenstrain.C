@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
 
-template <>
+defineLegacyParams(ComputeInstantaneousThermalExpansionFunctionEigenstrain);
+
 InputParameters
-validParams<ComputeInstantaneousThermalExpansionFunctionEigenstrain>()
+ComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
 {
-  InputParameters params = validParams<ComputeThermalExpansionEigenstrainBase>();
+  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the instantaneous thermal expansion as a function of "
                              "temperature");

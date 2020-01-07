@@ -18,7 +18,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("SolidMechanicsApp", StressDivergenceRZ);
+registerMooseObjectDeprecated("SolidMechanicsApp", StressDivergenceRZ, "07/30/2020 24:00");
 
 template <>
 InputParameters
@@ -62,14 +62,18 @@ StressDivergenceRZ::StressDivergenceRZ(const InputParameters & parameters)
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
+  mooseDeprecated(name(), ": StressDivergenceRZ is deprecated. \
+                  The solid_mechanics module will be removed from MOOSE on July 31, 2020. \
+                  Please update your input files to utilize the tensor_mechanics equivalents of \
+                  models based on solid_mechanics. A detailed migration guide that was developed \
+                  for BISON, but which is generally applicable to any MOOSE model is available at: \
+                  https://mooseframework.org/bison/tutorials/mechanics_conversion/overview.html");
 }
 
 void
 StressDivergenceRZ::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   if (_volumetric_locking_correction)
   {
@@ -98,7 +102,7 @@ StressDivergenceRZ::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -147,9 +151,7 @@ StressDivergenceRZ::computeQpResidual()
 void
 StressDivergenceRZ::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   if (_volumetric_locking_correction)
   {
@@ -199,11 +201,11 @@ StressDivergenceRZ::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
@@ -299,6 +301,10 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     computeJacobian();
   else
   {
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
     if (_volumetric_locking_correction)
     {
       // calculate volume averaged value of shape function derivative
@@ -320,8 +326,8 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         _avg_grad_test[_i][_component] /= _current_elem_volume;
       }
 
-      _avg_grad_phi.resize(jvar.phiSize());
-      for (_i = 0; _i < jvar.phiSize(); _i++)
+      _avg_grad_phi.resize(phi_size);
+      for (_i = 0; _i < phi_size; _i++)
       {
         _avg_grad_phi[_i].resize(3);
         for (unsigned int component = 0; component < 2; component++)
@@ -343,12 +349,14 @@ StressDivergenceRZ::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       }
     }
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
+      for (_j = 0; _j < phi_size; _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+
+    accumulateTaggedLocalMatrix();
   }
 }
 

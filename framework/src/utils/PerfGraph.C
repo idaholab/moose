@@ -18,6 +18,9 @@
 // don't want to expose to EVERY file in MOOSE...
 #include "VariadicTable.h"
 
+// libMesh Includes
+#include "libmesh/auto_ptr.h"
+
 // System Includes
 #include <chrono>
 

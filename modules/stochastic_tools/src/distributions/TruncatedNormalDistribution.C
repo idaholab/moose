@@ -11,11 +11,12 @@
 
 registerMooseObject("StochasticToolsApp", TruncatedNormalDistribution);
 
-template <>
+defineLegacyParams(TruncatedNormalDistribution);
+
 InputParameters
-validParams<TruncatedNormalDistribution>()
+TruncatedNormalDistribution::validParams()
 {
-  InputParameters params = validParams<NormalDistribution>();
+  InputParameters params = NormalDistribution::validParams();
   params.addClassDescription("Truncated normal distribution");
   params.addParam<Real>(
       "lower_bound", -std::numeric_limits<Real>::max(), "Lower bound of the distribution ");
@@ -38,7 +39,7 @@ TruncatedNormalDistribution::pdf(const Real & x,
                                  const Real & mean,
                                  const Real & std_dev,
                                  const Real & lower_bound,
-                                 const Real & upper_bound) const
+                                 const Real & upper_bound)
 {
   if (x <= lower_bound || x >= upper_bound)
     return 0.0;
@@ -53,7 +54,7 @@ TruncatedNormalDistribution::cdf(const Real & x,
                                  const Real & mean,
                                  const Real & std_dev,
                                  const Real & lower_bound,
-                                 const Real & upper_bound) const
+                                 const Real & upper_bound)
 {
 
   if (x <= lower_bound || x >= upper_bound)
@@ -70,7 +71,7 @@ TruncatedNormalDistribution::quantile(const Real & p,
                                       const Real & mean,
                                       const Real & std_dev,
                                       const Real & lower_bound,
-                                      const Real & upper_bound) const
+                                      const Real & upper_bound)
 {
   return NormalDistribution::quantile(NormalDistribution::cdf(lower_bound, mean, std_dev) +
                                           p * (NormalDistribution::cdf(upper_bound, mean, std_dev) -
@@ -82,17 +83,20 @@ TruncatedNormalDistribution::quantile(const Real & p,
 Real
 TruncatedNormalDistribution::pdf(const Real & x) const
 {
+  TIME_SECTION(_perf_pdf);
   return pdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }
 
 Real
 TruncatedNormalDistribution::cdf(const Real & x) const
 {
+  TIME_SECTION(_perf_cdf);
   return cdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }
 
 Real
 TruncatedNormalDistribution::quantile(const Real & p) const
 {
+  TIME_SECTION(_perf_quantile);
   return quantile(p, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }

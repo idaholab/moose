@@ -9,11 +9,12 @@
 
 #include "ComputeEigenstrainBeamBase.h"
 
-template <>
+defineLegacyParams(ComputeEigenstrainBeamBase);
+
 InputParameters
-validParams<ComputeEigenstrainBeamBase>()
+ComputeEigenstrainBeamBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("eigenstrain_name",
                                        "Material property name for the eigenstrain vector computed "
                                        "by this model. IMPORTANT: The name of this property must "

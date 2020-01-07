@@ -62,20 +62,17 @@
 []
 
 [Materials]
-  [./temperature_nodal]
+  [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
   [../]
-  [./ppss_nodal]
+  [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
-    at_nodes = true
     capillary_pressure = pc
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
-    at_nodes = true
     phase = 0
   [../]
   [./permeability]
@@ -86,7 +83,6 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-    at_nodes = true
   [../]
 []
 

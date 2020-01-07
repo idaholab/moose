@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", SpatialStatefulMaterial);
 
-template <>
 InputParameters
-validParams<SpatialStatefulMaterial>()
+SpatialStatefulMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   return params;
 }

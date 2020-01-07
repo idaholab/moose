@@ -35,6 +35,8 @@ InputParameters validParams<PatternedMesh>();
 class PatternedMesh : public MooseMesh
 {
 public:
+  static InputParameters validParams();
+
   PatternedMesh(const InputParameters & parameters);
   PatternedMesh(const PatternedMesh & other_mesh);
   virtual ~PatternedMesh() = default;

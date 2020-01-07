@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#7485'
+  design = 'FieldSplitPreconditioner.md'
   [./2block-3D]
     type = 'Exodiff'
     input = '2blocks3d.i'
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
+    requirement = 'The system shall allow for split preconditioning based on contact surfaces.'
   [../]
   [./2block-3D-sm]
     type = 'Exodiff'
@@ -11,5 +14,7 @@
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
     prereq = '2block-3D'
+    no_error_deprecated = true
+    requirement = 'The system shall allow for split preconditioning based on contact surfaces using deprecated solid_mechanics.'
   [../]
 []

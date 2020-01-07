@@ -11,20 +11,19 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 
-template <>
+defineLegacyParams(MeshGenerator);
+
 InputParameters
-validParams<MeshGenerator>()
+MeshGenerator::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   params.registerBase("MeshGenerator");
   return params;
 }
 
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
-  : MooseObject(parameters),
-    Restartable(this, "MeshGenerators"),
-    _mesh(_app.actionWarehouse().mesh())
+  : MooseObject(parameters), MeshMetaDataInterface(this), _mesh(_app.actionWarehouse().mesh())
 {
 }
 

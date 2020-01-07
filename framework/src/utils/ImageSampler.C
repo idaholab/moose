@@ -14,13 +14,14 @@
 
 #include "libmesh/mesh_tools.h"
 
-template <>
+defineLegacyParams(ImageSampler);
+
 InputParameters
-validParams<ImageSampler>()
+ImageSampler::validParams()
 {
   // Define the general parameters
   InputParameters params = emptyInputParameters();
-  params += validParams<FileRangeBuilder>();
+  params += FileRangeBuilder::validParams();
 
   params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions",

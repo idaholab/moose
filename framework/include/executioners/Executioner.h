@@ -45,6 +45,8 @@ public:
 
   virtual ~Executioner() {}
 
+  static InputParameters validParams();
+
   /**
    * Initialize the executioner
    */
@@ -113,16 +115,26 @@ public:
   /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const { return false; }
 
+  /**
+   * Get the verbose output flag
+   * @return The verbose output flag
+   */
+  const bool & verbose() const { return _verbose; }
+
+  /**
+   * Get the number of grid sequencing steps
+   */
+  unsigned int numGridSteps() const { return _num_grid_steps; }
+
 protected:
   /**
-   * Adds a postprocessor to report a Real class attribute
+   * Adds a postprocessor that the executioner can directly assign values to
    * @param name The name of the postprocessor to create
-   * @param attribute The Real class attribute to report
-   * @param execute_on When to execute the postprocessor that is created
+   * @param initial_value The initial value of the postprocessor value
+   * @return Reference to the postprocessor data that to be used by this executioner
    */
-  virtual void addAttributeReporter(const std::string & name,
-                                    Real & attribute,
-                                    const std::string execute_on = "");
+  virtual PostprocessorValue & addAttributeReporter(const std::string & name,
+                                                    Real initial_value = 0);
 
   FEProblemBase & _fe_problem;
 
@@ -131,5 +143,15 @@ protected:
 
   // Restart
   std::string _restart_file_base;
-};
 
+  /// True if printing out additional information
+  const bool & _verbose;
+
+  /// The number of steps to perform in a grid sequencing algorithm. This is one
+  /// less than the number of grids requested by the user in their input,
+  /// e.g. if they requested num_grids = 1, then there won't be any steps
+  /// because we only need to perform one solve per time-step. Storing this
+  /// member in this way allows for easy boolean operations, e.g. if (_num_grid_steps)
+  /// as opposed to if (_num_grids)
+  const unsigned int _num_grid_steps;
+};

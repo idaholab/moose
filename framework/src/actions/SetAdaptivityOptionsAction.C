@@ -17,11 +17,12 @@ registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_opti
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_geometric_rm");
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_algebraic_rm");
 
-template <>
+defineLegacyParams(SetAdaptivityOptionsAction);
+
 InputParameters
-validParams<SetAdaptivityOptionsAction>()
+SetAdaptivityOptionsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Action for defining adaptivity parameters.");
   params.addParam<MarkerName>("marker",
                               "The name of the Marker to use to actually adapt the mesh.");

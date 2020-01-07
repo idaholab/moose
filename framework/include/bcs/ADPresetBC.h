@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class ADPresetBC : public ADPresetNodalBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADPresetBC(const InputParameters & parameters);
 
 protected:

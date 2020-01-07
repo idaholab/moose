@@ -107,7 +107,7 @@ def _get_module(ext):
             ext = importlib.import_module(name)
         except ImportError as e:
             msg = "Failed to import the supplied '{}' module.\n{}"
-            raise exceptions.MooseDocsException(msg, name, e.message)
+            raise exceptions.MooseDocsException(msg, name, e)
     else:
         msg = "The supplied module ({}) must be a module type or a string, but a {} object "\
               "was provided."
@@ -132,7 +132,7 @@ def _yaml_load_extensions(config):
             ext_configs[ext] = dict()
 
     # Get configuration items from configuration
-    for ext_type, settings in options.iteritems():
+    for ext_type, settings in options.items():
         if (settings is not None) and ('type' in settings):
             msg = "Using 'type' for the extensions is deprecated, the type should be supplied " \
                   "as the key to the dictionary, rather than an arbitrary name."
@@ -156,7 +156,7 @@ def _yaml_load_extensions(config):
                   "keyword should be used."
             LOG.error(msg, ext_type)
 
-    return load_extensions(ext_configs.keys(), ext_configs)
+    return load_extensions(list(ext_configs.keys()), ext_configs)
 
 def _yaml_load_object(name, config, default, *args):
     """Helper for loading MooseDocs objects: Reader, Renderer, Translator"""

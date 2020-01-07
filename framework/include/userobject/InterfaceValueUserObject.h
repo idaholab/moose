@@ -23,6 +23,8 @@ InputParameters validParams<InterfaceValueUserObject>();
 class InterfaceValueUserObject : public InterfaceUserObject
 {
 public:
+  static InputParameters validParams();
+
   InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:

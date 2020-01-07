@@ -4,10 +4,11 @@
     input = 'parsed_subdomain_mg.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_subdomain_mg_in.e'
-    requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'meshgenerators/ParsedSubdomainMeshGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions.'
+    design = 'meshgenerators/ParsedSubdomainMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

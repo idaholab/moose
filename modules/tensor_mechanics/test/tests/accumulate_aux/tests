@@ -1,0 +1,11 @@
+[Tests]
+  [./accumulate_aux]
+    type = 'Exodiff'
+    input = 'accumulate_aux.i'
+    exodiff = 'accumulate_aux_out.e'
+    max_parallel = 1 # This mesh only has a single element
+    issues = '#7091'
+    design = 'AccumulateAux.md'
+    requirement = 'The system shall provide an aux kernel that accumulates the values of a given variable.'
+  [../]
+[]

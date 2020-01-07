@@ -11,6 +11,7 @@
 
 // MOOSE Includes
 #include "FEProblemBase.h"
+#include "Eigenvalue.h"
 
 // Forward declarations
 class EigenProblem;
@@ -25,6 +26,8 @@ InputParameters validParams<EigenProblem>();
 class EigenProblem : public FEProblemBase
 {
 public:
+  static InputParameters validParams();
+
   EigenProblem(const InputParameters & parameters);
 
   virtual void solve() override;
@@ -44,8 +47,18 @@ public:
   NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
 
   virtual void checkProblemIntegrity() override;
+
+  /**
+   * A flag indicates if a negative sign is used in eigen kernels.
+   * If the negative sign is used, eigen kernels are consistent in nonlinear solver.
+   * In nonlinear solver, RHS kernels always have a negative sign.
+   */
+  bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
+
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
+
+  virtual Real computeResidualL2Norm() override;
 
   /**
    * Form a Jacobian matrix for all kernels and BCs with a given tag
@@ -86,6 +99,9 @@ protected:
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
 
+  bool _negative_sign_eigen_kernel;
+
+  unsigned int _active_eigen_index;
   /// Timers
   PerfID _compute_jacobian_tag_timer;
   PerfID _compute_jacobian_ab_timer;
@@ -93,4 +109,3 @@ protected:
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
 };
-

@@ -30,6 +30,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
+  static InputParameters validParams();
+
   Eigenvalue(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -37,4 +39,3 @@ public:
 protected:
   EigenProblem & _eigen_problem;
 };
-

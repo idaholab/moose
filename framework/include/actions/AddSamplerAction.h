@@ -26,6 +26,8 @@ InputParameters validParams<AddSamplerAction>();
 class AddSamplerAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddSamplerAction(InputParameters params);
 
   virtual void act() override;

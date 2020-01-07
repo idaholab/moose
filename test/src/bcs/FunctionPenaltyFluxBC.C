@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", FunctionPenaltyFluxBC);
 
-template <>
 InputParameters
-validParams<FunctionPenaltyFluxBC>()
+FunctionPenaltyFluxBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addRequiredParam<FunctionName>("function",
                                         "Function used to compute the desired normal flux");

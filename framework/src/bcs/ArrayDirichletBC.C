@@ -11,18 +11,19 @@
 
 registerMooseObject("MooseApp", ArrayDirichletBC);
 
-template <>
+defineLegacyParams(ArrayDirichletBC);
+
 InputParameters
-validParams<ArrayDirichletBC>()
+ArrayDirichletBC::validParams()
 {
-  InputParameters p = validParams<ArrayNodalBC>();
-  p.addRequiredParam<RealEigenVector>("values",
-                                      "The values the components must take on the boundary");
-  p.declareControllable("values");
-  p.addClassDescription(
+  InputParameters params = ArrayNodalBC::validParams();
+  params.addRequiredParam<RealEigenVector>("values",
+                                           "The values the components must take on the boundary");
+  params.declareControllable("values");
+  params.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "are constant, controllable values.");
-  return p;
+  return params;
 }
 
 ArrayDirichletBC::ArrayDirichletBC(const InputParameters & parameters)

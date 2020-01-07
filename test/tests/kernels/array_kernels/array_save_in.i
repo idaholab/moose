@@ -1,13 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 4
-  ny = 4
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+  []
   [subdomain1]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0.5 0.5 0'
     top_right = '1 1 0'
     block_id = 1
@@ -67,7 +67,6 @@
   [reaction]
     type = ArrayReaction
     variable = u
-    reaction_coefficient_type = full
     reaction_coefficient = rc
   []
 []

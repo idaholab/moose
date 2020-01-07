@@ -32,10 +32,11 @@ InputParameters validParams<WeakGradientBC>();
 class WeakGradientBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   WeakGradientBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 };
-

@@ -12,16 +12,21 @@
 
 registerMooseObject("HeatConductionApp", SemiconductorLinearConductivity);
 
-template <>
+defineLegacyParams(SemiconductorLinearConductivity);
+
 InputParameters
-validParams<SemiconductorLinearConductivity>()
+SemiconductorLinearConductivity::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temp", "Variable for temperature in Kelvin.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<Real>("sh_coeff_A", "Steinhart_Hart coefficient A of the material");
   params.addRequiredRangeCheckedParam<Real>(
       "sh_coeff_B", "sh_coeff_B != 0", "Steinhart_Hart coefficient B of the material.");
+
+  params.addClassDescription(
+      "Calculates electrical conductivity of a semiconductor from temperature");
+
   return params;
 }
 

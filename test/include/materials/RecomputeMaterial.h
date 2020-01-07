@@ -12,12 +12,6 @@
 // Moose includes
 #include "Material.h"
 
-// Forward declarations
-class RecomputeMaterial;
-
-template <>
-InputParameters validParams<RecomputeMaterial>();
-
 /**
  * A test material for testing the ability for properties to be recomputed
  *
@@ -26,6 +20,8 @@ InputParameters validParams<RecomputeMaterial>();
 class RecomputeMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   RecomputeMaterial(const InputParameters & parameters);
 
 protected:
@@ -38,4 +34,3 @@ private:
   const MaterialProperty<Real> & _p;
   const Real & _constant;
 };
-

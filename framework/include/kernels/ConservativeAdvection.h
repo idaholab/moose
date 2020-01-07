@@ -24,6 +24,8 @@ InputParameters validParams<ConservativeAdvection>();
 class ConservativeAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ConservativeAdvection(const InputParameters & parameters);
 
 protected:

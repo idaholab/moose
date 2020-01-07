@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", TimePeriod);
 
-template <>
+defineLegacyParams(TimePeriod);
+
 InputParameters
-validParams<TimePeriod>()
+TimePeriod::validParams()
 {
-  InputParameters params = validParams<ConditionalEnableControl>();
+  InputParameters params = ConditionalEnableControl::validParams();
 
   params.addClassDescription("Control the enabled/disabled state of objects with time.");
 

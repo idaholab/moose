@@ -131,6 +131,9 @@ protected:
   /// Gravity. Defaults to 9.81 m/s^2
   const RealVectorValue _gravity;
 
+  /// Flag to check whether permeabiity derivatives are non-zero
+  const bool _perm_derivs;
+
   /**
    * If the number of upwind-downwind swaps is less than this amount then
    * full upwinding is used.  Otherwise the fallback scheme is employed
@@ -203,4 +206,3 @@ protected:
    */
   void harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
 };
-

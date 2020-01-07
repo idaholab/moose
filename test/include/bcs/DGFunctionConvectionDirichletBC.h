@@ -11,11 +11,7 @@
 
 #include "IntegratedBC.h"
 
-class DGFunctionConvectionDirichletBC;
 class Function;
-
-template <>
-InputParameters validParams<DGFunctionConvectionDirichletBC>();
 
 /**
  * Implements a simple BC for DG
@@ -33,10 +29,8 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>();
 class DGFunctionConvectionDirichletBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   DGFunctionConvectionDirichletBC(const InputParameters & parameters);
 
   virtual ~DGFunctionConvectionDirichletBC() {}

@@ -23,6 +23,8 @@ InputParameters validParams<DiffusionFluxAux>();
 class DiffusionFluxAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DiffusionFluxAux(const InputParameters & parameters);
 
 protected:

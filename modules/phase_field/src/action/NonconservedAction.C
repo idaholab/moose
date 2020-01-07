@@ -28,7 +28,7 @@ validParams<NonconservedAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription(
-      "Set up the variable and the kernels needed for a nonconserved phase field variable");
+      "Set up the variable and the kernels needed for a non-conserved phase field variable");
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
@@ -76,8 +76,14 @@ NonconservedAction::act()
   //
   if (_current_task == "add_variable")
   {
+    auto type = AddVariableAction::determineType(_fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+
+    var_params.applySpecificParameters(_pars, {"family", "order"});
+    var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
     // Create nonconserved variable
-    _problem->addVariable(_var_name, _fe_type, getParam<Real>("scaling"));
+    _problem->addVariable(type, _var_name, var_params);
   }
 
   //

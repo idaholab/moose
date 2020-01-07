@@ -26,8 +26,8 @@ validParams<LevelSetMeshRefinementTransfer>()
   params.addClassDescription("Transfers the mesh from the master application to the sub "
                              "application for the purposes of level set reinitialization problems "
                              "with mesh adaptivity.");
-  params.set<MooseEnum>("direction") = "TO_MULTIAPP";
-  params.suppressParameter<MooseEnum>("direction");
+  params.set<MultiMooseEnum>("direction") = "TO_MULTIAPP";
+  params.suppressParameter<MultiMooseEnum>("direction");
 
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
   exec.addAvailableFlags(LevelSet::EXEC_ADAPT_MESH, LevelSet::EXEC_COMPUTE_MARKERS);

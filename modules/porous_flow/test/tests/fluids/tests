@@ -39,6 +39,17 @@
     issues = "#11716"
     design = 'PorousFlowBrine.md'
   [../]
+  [./brine1_tab]
+    type = 'CSVDiff'
+    input = 'brine1_tabulated.i'
+    csvdiff = 'brine1.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    prereq = 'brine1'
+    requirement = "PorousFlow shall be able to use a given UserObject for water properties"
+    issues = "#11716 #13882"
+    design = 'PorousFlowBrine.md'
+  [../]
   [./co2]
     type = 'CSVDiff'
     input = 'co2.i'

@@ -13,15 +13,14 @@
 
 class DotCouplingKernel;
 
-template <>
-InputParameters validParams<DotCouplingKernel>();
-
 /**
  * Kernel that is calling coupledDot
  */
 class DotCouplingKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DotCouplingKernel(const InputParameters & parameters);
   virtual ~DotCouplingKernel(){};
 

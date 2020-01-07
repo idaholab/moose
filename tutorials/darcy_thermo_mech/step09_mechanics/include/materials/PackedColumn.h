@@ -14,11 +14,6 @@
 // A helper class from MOOSE that linear interpolates x,y data
 #include "LinearInterpolation.h"
 
-template <ComputeStage>
-class PackedColumn;
-
-declareADValidParams(PackedColumn);
-
 /**
  * Material-derived objects override the computeQpProperties()
  * function.  They must declare and compute material properties for
@@ -29,6 +24,8 @@ template <ComputeStage compute_stage>
 class PackedColumn : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   PackedColumn(const InputParameters & parameters);
 
 protected:

@@ -32,6 +32,8 @@ InputParameters validParams<SinNeumannBC>();
 class SinNeumannBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   SinNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -42,4 +44,3 @@ private:
   Real _final;
   Real _duration;
 };
-

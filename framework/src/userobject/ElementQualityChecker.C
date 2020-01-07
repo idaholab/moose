@@ -30,11 +30,12 @@ ElementQualityChecker::FailureMessageType()
 
 registerMooseObject("MooseApp", ElementQualityChecker);
 
-template <>
+defineLegacyParams(ElementQualityChecker);
+
 InputParameters
-validParams<ElementQualityChecker>()
+ElementQualityChecker::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Class to check the quality of each element using different metrics "
                              "from libmesh.");
 

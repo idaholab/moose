@@ -6,22 +6,22 @@
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = SIXTH
-  [../]
+  []
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -30,21 +30,21 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = 'sub.i'
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppScalarToAuxScalarTransfer
     multi_app = sub
     source_variable = 'b'
     to_aux_scalar = 'a'
     direction = from_multiapp
-  [../]
+  []
 []
 
 [Outputs]

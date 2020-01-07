@@ -25,13 +25,14 @@
 
 #include "libmesh/equation_systems.h"
 
-template <>
+defineLegacyParams(Output);
+
 InputParameters
-validParams<Output>()
+Output::validParams()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += SetupInterface::validParams();
 
   // Displaced Mesh options
   params.addParam<bool>(
@@ -165,7 +166,7 @@ Output::solveSetup()
 void
 Output::outputStep(const ExecFlagType & type)
 {
-  CONSOLE_TIMED_PRINT("Outputing ", name());
+  CONSOLE_TIMED_PRINT("Outputting ", name());
 
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)

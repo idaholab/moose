@@ -11,24 +11,21 @@
 
 #include "Steady.h"
 
-class TestSteady;
-
-template <>
-InputParameters validParams<TestSteady>();
-
 /**
  * Test executioner to show exception handling
  */
 class TestSteady : public Steady
 {
 public:
+  static InputParameters validParams();
+
   TestSteady(const InputParameters & parameters);
   virtual ~TestSteady();
 
   /**
    * This will call solve() on the NonlinearSystem.
    */
-  virtual void execute() override;
+  virtual void preExecute() override;
 
   /**
    * Calls a custom execution flag for testing.
@@ -40,6 +37,5 @@ private:
   MooseEnum _test_type;
 
   /// A value to report (used for addAttributeReporter test)
-  Real _some_value_that_needs_to_be_reported;
+  PostprocessorValue * _some_value_that_needs_to_be_reported;
 };
-

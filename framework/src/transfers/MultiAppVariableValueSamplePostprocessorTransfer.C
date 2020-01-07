@@ -22,15 +22,19 @@
 
 registerMooseObject("MooseApp", MultiAppVariableValueSamplePostprocessorTransfer);
 
-template <>
+defineLegacyParams(MultiAppVariableValueSamplePostprocessorTransfer);
+
 InputParameters
-validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
+MultiAppVariableValueSamplePostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
+  params.addClassDescription(
+      "Transfers the value of a variable within the master application at each sub-application "
+      "position and transfers the value to a postprocessor on the sub-application(s).");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor",
       "The name of the postprocessor in the MultiApp to transfer the value to.  "
-      "This should most likely be a Reporter Postprocessor.");
+      "This should most likely be a Reciever Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
@@ -41,6 +45,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -48,7 +54,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 {
   _console << "Beginning VariableValueSamplePostprocessorTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {
@@ -78,6 +84,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
           if (elem && elem->processor_id() == from_mesh.processor_id())
           {
+            from_sub_problem.setCurrentSubdomainID(elem, 0);
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
             mooseAssert(from_var.sln().size() == 1, "No values in u!");

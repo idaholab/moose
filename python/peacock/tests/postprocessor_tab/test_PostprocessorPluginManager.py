@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -87,6 +87,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         self.plot()
         self.assertImage('testWidgets.png')
 
+    @unittest.skip("Broken by #12702")
     def testOutput(self):
         """
         Test that the python output is working.
@@ -115,7 +116,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         subprocess.call(['python', name], stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
         self.assertTrue(os.path.exists('output.png'))
         differ = mooseutils.ImageDiffer(os.path.join('gold', 'output.png'), 'output.png', allowed=0.99)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail(), "{} does not match the gold file.".format(name))
 
         # Test pdf output

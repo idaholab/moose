@@ -485,6 +485,10 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
   moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.eigenMatrixTag());
+
+  if (eigen_problem->negativeSignEigenKernel())
+    MatScale(jac, -1.);
+
   PetscFunctionReturn(0);
 }
 
@@ -528,6 +532,10 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
   moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
+
+  if (eigen_problem->negativeSignEigenKernel())
+    VecScale(r, -1.);
+
   PetscFunctionReturn(0);
 }
 
@@ -553,6 +561,9 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 
   AX.close();
   BX.close();
+
+  if (eigen_problem->negativeSignEigenKernel())
+    VecScale(Bx, -1.);
 
   PetscFunctionReturn(0);
 }

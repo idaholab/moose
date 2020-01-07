@@ -20,9 +20,11 @@
     issues = '#12053'
     requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to physical displacement quantities in a solid mechanics module input file.'
     prereq = test
+    no_error_deprecated = true
   [../]
   [./test_scaling]
     type = 'Exodiff'
+    custom_cmp = 'reference_residual.cmp'
     input = 'reference_residual.i'
     exodiff = 'reference_residual_out.e'
     cli_args = 'Variables/disp_x/scaling=2

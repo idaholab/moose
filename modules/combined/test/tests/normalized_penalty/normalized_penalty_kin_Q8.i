@@ -1,6 +1,4 @@
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
   order = SECOND
   displacements = 'disp_x disp_y'
 []
@@ -11,8 +9,15 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
+[]
+
+[AuxVariables]
+  [./saved_x]
+  [../]
+  [./saved_y]
+  [../]
 []
 
 [Functions]
@@ -23,29 +28,14 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_xx'
+    save_in = 'saved_x saved_y'
+    extra_vector_tags = 'ref'
+  []
 []
 
 [Contact]
@@ -56,16 +46,6 @@
     normalize_penalty = true
     tangential_tolerance = 1e-3
     system = Constraint
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-    execute_on = timestep_end
   [../]
 []
 
@@ -94,11 +74,14 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
+    type = ComputeIsotropicElasticityTensor
     block = '1 2 3 4 1000'
-
     youngs_modulus = 3e8
     poissons_ratio = 0.0
+  [../]
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2 3 4 1000'
   [../]
 []
 
@@ -112,12 +95,12 @@
   line_search = 'none'
 
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 5e-8
 
   l_max_its = 100
-  nl_max_its = 10
-  dt = 1.0
-  num_steps = 2
+  nl_max_its = 20
+  dt = 0.5
+  num_steps = 4
 []
 
 [Outputs]

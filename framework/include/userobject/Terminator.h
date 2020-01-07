@@ -44,6 +44,8 @@ InputParameters validParams<Terminator>();
 class Terminator : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   Terminator(const InputParameters & parameters);
   /// The Terminator DEFINITELY needs a destructor!
   virtual ~Terminator();

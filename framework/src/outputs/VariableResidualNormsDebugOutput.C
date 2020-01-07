@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", VariableResidualNormsDebugOutput);
 
-template <>
+defineLegacyParams(VariableResidualNormsDebugOutput);
+
 InputParameters
-validParams<VariableResidualNormsDebugOutput>()
+VariableResidualNormsDebugOutput::validParams()
 {
-  InputParameters params = validParams<PetscOutput>();
+  InputParameters params = PetscOutput::validParams();
   params.addClassDescription("Reports the residual norm for each variable.");
 
   // By default this outputs on every nonlinear iteration

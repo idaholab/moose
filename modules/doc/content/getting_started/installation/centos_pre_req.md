@@ -14,12 +14,13 @@ sudo -E yum install gcc \
   tcl-devel \
   libX11-devel \
   git \
-  zlib-devel
+  zlib-devel \
+  xz-devel
 ```
 
 Download and install one our redistributable packages according to your version of CentOS
 
-- CentOS 7: [!package!name arch=centos7]
+- CentOS 8: [!package!name arch=centos8]
 
 Once downloaded, the package can be installed via the rpm utility:
 

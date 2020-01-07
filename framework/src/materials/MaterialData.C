@@ -11,7 +11,7 @@
 #include "Material.h"
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage)
-  : _storage(storage), _n_qpoints(0), _swapped(false)
+  : _storage(storage), _n_qpoints(0), _swapped(false), _resize_only_if_smaller(false)
 {
 }
 
@@ -29,6 +29,9 @@ void
 MaterialData::resize(unsigned int n_qpoints)
 {
   if (n_qpoints == _n_qpoints)
+    return;
+
+  if (_resize_only_if_smaller && n_qpoints < _n_qpoints)
     return;
 
   _props.resizeItems(n_qpoints);
@@ -64,14 +67,14 @@ MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 }
 
 void
-MaterialData::reinit(const std::vector<std::shared_ptr<Material>> & mats)
+MaterialData::reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 {
   for (const auto & mat : mats)
     mat->computeProperties();
 }
 
 void
-MaterialData::reset(const std::vector<std::shared_ptr<Material>> & mats)
+MaterialData::reset(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 {
   for (const auto & mat : mats)
     mat->resetProperties();

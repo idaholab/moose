@@ -24,6 +24,8 @@ InputParameters validParams<DirichletBC>();
 class DirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   DirichletBC(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
   /// The value for this BC
   const Real & _value;
 };
-

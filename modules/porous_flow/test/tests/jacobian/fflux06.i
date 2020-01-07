@@ -64,51 +64,28 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
-  [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseMD_Gaussian
-    at_nodes = false
     mass_density = md
-    al = 1.1
-    density_P0 = 0.8
-    bulk_modulus = 1.5
-  [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseMD_Gaussian
-    mass_density = md
-    at_nodes = true
     al = 1.1
     density_P0 = 0.8
     bulk_modulus = 1.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    at_nodes = true
-    phase = 0
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 2
     phase = 0
   [../]

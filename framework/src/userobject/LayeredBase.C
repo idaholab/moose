@@ -18,9 +18,10 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/point.h"
 
-template <>
+defineLegacyParams(LayeredBase);
+
 InputParameters
-validParams<LayeredBase>()
+LayeredBase::validParams()
 {
   InputParameters params = emptyInputParameters();
   MooseEnum directions("x y z");

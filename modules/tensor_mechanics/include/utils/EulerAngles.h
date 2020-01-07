@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
+#include <Eigen/Geometry>
 
 // forward declaration
 class MooseRandom;
@@ -23,9 +24,15 @@ class EulerAngles
 public:
   Real phi1, Phi, phi2;
 
+  // default constructor
+  EulerAngles();
+  // Quaternions to Euler Angles
+  EulerAngles(Eigen::Quaternion<Real> & q);
+
   operator RealVectorValue() const { return RealVectorValue(phi1, Phi, phi2); }
 
   void random();
   void random(MooseRandom & random);
+  // Euler to Quaternions
+  Eigen::Quaternion<Real> toQuaternion();
 };
-

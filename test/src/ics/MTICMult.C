@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MTICMult);
 
-template <>
 InputParameters
-validParams<MTICMult>()
+MTICMult::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("var1", "Coupled variable");
   params.addRequiredParam<Real>("factor", "Some factor");
 

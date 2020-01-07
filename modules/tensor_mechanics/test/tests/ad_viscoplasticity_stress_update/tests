@@ -1,0 +1,153 @@
+[Tests]
+  issues = '#13494'
+  design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultiplePorousInelasticStress.md'
+  [./regular_creep]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_out.csv
+    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep'"
+    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The ADPowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading.'
+  [../]
+  [./regular_creep-jac]
+    type = 'PetscJacobianTester'
+    input = 'creep.i'
+    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep' -snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 1e-7
+    difference_tol = 1e8
+    prereq = regular_creep
+    requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
+    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+  [../]
+
+  [./porous_creep]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_out.csv
+    prereq = regular_creep-jac
+    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress.'
+  [../]
+  [./porous_creep-jac]
+    type = 'PetscJacobianTester'
+    input = 'creep.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 1e-7
+    difference_tol = 1e4
+    prereq = porous_creep
+    requirement = 'The Jacobian for the AD porous creep problem shall be perfect'
+  [../]
+
+  [./exact_spherical]
+    type = CSVDiff
+    input = exact.i
+    csvdiff = exact_spherical_out.csv
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry.'
+  [../]
+  [./exact_spherical-jac]
+    type = 'PetscJacobianTester'
+    input = 'exact.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 1e-7
+    difference_tol = 1e4
+    prereq = exact_spherical
+    requirement = 'The Jacobian for the AD exact spherical problem shall be perfect'
+  [../]
+
+  [./exact_cylindrical]
+    type = CSVDiff
+    input = exact.i
+    csvdiff = exact_cylindrical_out.csv
+    cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
+    prereq = exact_spherical
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry.'
+  [../]
+  [./exact_cylindrical-jac]
+    type = 'PetscJacobianTester'
+    input = 'exact.i'
+    cli_args = "-snes_test_err 1e-11 GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 1e-7
+    difference_tol = 1e4
+    prereq = exact_cylindrical
+    requirement = 'The Jacobian for the AD exact cylindrical problem shall be perfect'
+  [../]
+
+  [./lps_single]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_out.csv'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with LPS spherical formulation that increases the porosity due to an external strain.'
+  [../]
+  [./lps_single-jac]
+    type = 'PetscJacobianTester'
+    input = 'lps_single.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 3e-7
+    difference_tol = 1e8
+    prereq = lps_single
+    requirement = 'The Jacobian for the AD lps single problem shall be perfect'
+  [../]
+
+  [./lps_single_split]
+    type = CSVDiff
+    input = 'lps_single_split.i'
+    csvdiff = 'lps_single_split_out.csv'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and the same stress exponential that is close to combining the models into a single ADViscoplasticityStressUpdate instance.'
+  [../]
+  [./lps_single_split-jac]
+    type = 'PetscJacobianTester'
+    input = 'lps_single_split.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 3e-7
+    difference_tol = 1e8
+    prereq = lps_single_split
+    requirement = 'The Jacobian for the AD lps single split problem shall be perfect'
+  [../]
+
+  [./lps_dual]
+    type = CSVDiff
+    input = 'lps_dual.i'
+    csvdiff = 'lps_dual_out.csv'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and two different stress exponents that increases the porosity due to an external strain.'
+  [../]
+  [./lps_dual-jac]
+    type = 'PetscJacobianTester'
+    input = 'lps_dual.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 3e-7
+    difference_tol = 1e8
+    prereq = lps_dual
+    requirement = 'The Jacobian for the AD lps dual problem shall be perfect'
+  [../]
+
+  [./gtn_single]
+    type = CSVDiff
+    input = 'gtn_single.i'
+    csvdiff = 'gtn_single_out.csv'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with GTN formulation that increases the porosity due to an external strain.'
+  [../]
+  [./gtn_single-jac]
+    type = 'PetscJacobianTester'
+    input = 'gtn_single.i'
+    cli_args = "-snes_test_err 1e-11"
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 3e-7
+    difference_tol = 1e8
+    prereq = gtn_single
+    requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
+  [../]
+[]

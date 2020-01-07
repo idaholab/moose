@@ -759,6 +759,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
+  [./waterncg_twophase_nonisothermal]
+    type = 'PetscJacobianTester'
+    input = 'waterncg_twophase_nonisothermal.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all Kernels"
+    issues = '#6845 #10167'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  [../]
   [./brineco2_twophase]
     type = 'PetscJacobianTester'
     input = 'brineco2_twophase.i'
@@ -792,15 +803,16 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
-  [./brineco2_twophase_2]
+  [./brineco2_twophase_nonisothermal]
     type = 'PetscJacobianTester'
-    input = 'brineco2_twophase_2.i'
-    ratio_tol = 1e-5 # Lots of chain rule derivatives
+    input = 'brineco2_twophase_nonisothermal.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
     cli_args = '-mat_fd_type ds Executioner/num_steps=1'
     threading = '!pthreads'
+    petsc_version = '>=3.9.0'
     requirement = "PorousFlow shall compute all Jacobian entries of all Kernels"
-    issues = '#6845'
+    issues = '#6845 #10167'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
   [./brineco2_liquid_2]

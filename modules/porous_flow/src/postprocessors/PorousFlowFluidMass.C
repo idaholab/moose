@@ -60,7 +60,11 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters)
         getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
     _saturation_threshold(getParam<Real>("saturation_threshold")),
     _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables()
-             ? _dictator.getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+             ? &_fe_problem.getStandardVariable(
+                   _tid,
+                   _dictator
+                       .getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+                       ->name())
              : nullptr)
 {
   const unsigned int num_phases = _dictator.numPhases();
@@ -93,6 +97,10 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters)
                ", however you have used ",
                getParam<unsigned>("kernel_variable_number"),
                ". This is an error");
+
+  // Now that we know kernel_variable_number is OK, _var must be OK,
+  // so ensure that reinit is called on _var:
+  addMooseVariableDependency(_var);
 
   // Also check that the phase indices entered are not greater than the number of phases
   // to avoid a segfault. Note that the input parser takes care of negative inputs so we

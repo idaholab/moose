@@ -6,7 +6,7 @@ Getting a proper LLVM/MPICH compiler built is substantially more difficult than 
 Furthermore, your millage will vary depending on the operating system. Building LLVM is a finicky process. If you are unsure as to why you are building an LLVM compiler, it might be best to build the [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) compiler stack instead.
 !alert-end!
 
-!include getting_started/minimum_requirements.md
+!include sqa/minimum_requirements.md
 
 ## Prerequisites
 
@@ -82,4 +82,3 @@ command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
 ## Compiler Stack Finished
 
 With the compiler stack ready, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
-

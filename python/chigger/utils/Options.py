@@ -8,7 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#!/usr/bin/env python2
+#!/usr/bin/env python
+from __future__ import print_function
 import sys
 import textwrap
 from collections import OrderedDict
@@ -125,7 +126,7 @@ class Option(object):
         # If the Option is storing another Set of options and is passed a dict(), then
         # loop through the dictionary and update each option in the set of options.
         if (self.vtype is Options) and isinstance(value, dict):
-            for k, v in value.iteritems():
+            for k, v in value.items():
                 self.__value[k] = v
 
         else:
@@ -254,8 +255,8 @@ class Options(object):
         """
         #@todo warning
         if name not in self.__options:
-            print 'No option with the name:', name
-            print self.__options.keys()
+            print('No option with the name:', name)
+            print(self.__options.keys())
             traceback.print_stack()
             sys.exit()
             return None
@@ -317,7 +318,7 @@ class Options(object):
                     unused.add(key)
 
         # Update from kwargs
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             if k in self.__options:
                 changed = True
                 self[k] = v

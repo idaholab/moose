@@ -7,26 +7,35 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Kernels]
-  active = 'diff'
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
 
+[Kernels]
   [./diff]
     type = Diffusion
     variable = u
   [../]
 []
 
-[BCs]
-  active = 'left right'
+[AuxKernels]
+  [pid_aux]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
+  []
+[]
 
+[BCs]
   [./left]
     type = DirichletBC
     variable = u
@@ -65,6 +74,40 @@
 []
 
 [Outputs]
+  [out]
+    type = CSV
+    execute_on = FINAL
+  []
   file_base = repartitioned
   nemesis = true
+[]
+
+[VectorPostprocessors]
+  [./nl_wb_element]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    outputs  = none
+    balances = 'num_elems num_nodes'
+  []
+
+  [./bl_element]
+    type = StatisticsVectorPostprocessor
+    vpp = nl_wb_element
+    stats = 'min max sum average ratio'
+  [../]
+
+  [./nl_wb_edgecuts]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    outputs  = none
+    balances = 'num_partition_sides'
+  []
+
+  [./bl_edgecuts]
+    type = StatisticsVectorPostprocessor
+    vpp = nl_wb_edgecuts
+    stats = 'sum'
+  [../]
 []

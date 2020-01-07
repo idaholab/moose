@@ -24,6 +24,8 @@ InputParameters validParams<ArrayDirichletBC>();
 class ArrayDirichletBC : public ArrayNodalBC
 {
 public:
+  static InputParameters validParams();
+
   ArrayDirichletBC(const InputParameters & parameters);
 
 protected:

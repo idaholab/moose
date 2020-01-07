@@ -8,6 +8,8 @@
     part_package = parmetis
   []
   parallel_type = distributed
+  # Need a fine enough mesh to have good partition
+  uniform_refine = 1
 []
 
 [Variables]
@@ -46,6 +48,10 @@
 
 [Outputs]
   exodus = true
+  [out]
+    type = CSV
+    execute_on = FINAL
+  []
 []
 
 [AuxVariables]
@@ -70,4 +76,34 @@
     variable = npid
     execute_on = 'INITIAL'
   []
+[]
+
+[VectorPostprocessors]
+  [./nl_wb_element]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    outputs  = none
+    balances = 'num_elems num_nodes'
+  []
+
+  [./bl_element]
+    type = StatisticsVectorPostprocessor
+    vpp = nl_wb_element
+    stats = 'min max sum average ratio'
+  [../]
+
+  [./nl_wb_edgecuts]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    outputs  = none
+    balances = 'num_partition_sides'
+  []
+
+  [./bl_edgecuts]
+    type = StatisticsVectorPostprocessor
+    vpp = nl_wb_edgecuts
+    stats = 'sum'
+  [../]
 []

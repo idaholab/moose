@@ -6,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import os
 import traceback
 from mooseutils import colorText
@@ -94,7 +93,7 @@ def mooseMessage(*args, **kwargs):
     # Print the message to screen
     if color:
         message = colorText(message, color)
-    print message
+    print(message)
     # Show the traceback
     if trace and MOOSE_USE_QT5:
         traceback.print_stack()

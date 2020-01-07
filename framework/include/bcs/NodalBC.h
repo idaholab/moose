@@ -26,6 +26,8 @@ InputParameters validParams<NodalBC>();
 class NodalBC : public NodalBCBase, public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   NodalBC(const InputParameters & parameters);
 
   /**
@@ -43,8 +45,9 @@ protected:
   /// current node being processed
   const Node * const & _current_node;
 
-  /// Quadrature point index
-  unsigned int _qp;
+  /// Pseudo-"quadrature point" index (Always zero for the current node)
+  const unsigned int _qp = 0;
+
   /// Value of the unknown variable this BC is acting on
   const VariableValue & _u;
 
@@ -62,4 +65,3 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-

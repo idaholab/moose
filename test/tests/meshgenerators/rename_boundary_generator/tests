@@ -1,13 +1,66 @@
 [Tests]
-  [./rename_block_generator_test]
-    type = 'Exodiff'
+  design = 'meshgenerators/RenameBoundaryGenerator.md'
+  issues = '#11640 #14128'
+
+  [rename]
+    requirement = 'The shall be able to rename or renumber mesh boundaries prior to running the simulation:'
+
+    [ids_only]
+      type = 'Exodiff'
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary_id="0 1" Mesh/rename/new_boundary_id="10 0" --mesh-only'
+      exodiff = 'rename_boundary_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'by identifying both old and new boundaries by ID,'
+    []
+
+    [old_ids_new_names]
+      type = 'Exodiff'
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary_id="0 1" Mesh/rename/new_boundary_name="new_bottom new_right" --mesh-only'
+      exodiff = 'rename_boundary_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      prereq = 'rename/ids_only'
+
+      detail = 'by identifying old boundaries by ID and new boundaries by name,'
+    []
+
+    [old_names_new_ids]
+      type = 'Exodiff'
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary_name="bottom right" Mesh/rename/new_boundary_id="10 0" --mesh-only'
+      exodiff = 'rename_boundary_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      prereq = 'rename/old_ids_new_names'
+
+      detail = 'by identifying old boundaries by name and new boundaries by ID, and'
+    []
+
+    [names_only]
+      type = 'Exodiff'
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary_name="bottom right" Mesh/rename/new_boundary_name="new_bottom new_right" --mesh-only'
+      exodiff = 'rename_boundary_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      prereq = 'rename/old_names_new_ids'
+
+      detail = 'by identifying both old and new boundaries by name.'
+    []
+  []
+
+  [error_check]
+    type = 'RunException'
     input = 'rename_boundary.i'
-    cli_args = '--mesh-only'
-    exodiff = 'rename_boundary_in.e'
-    requirement = 'MOOSE shall be able to rename boundary ids and names.'
-    design = 'meshgenerators/RenameBoundaryGenerator.md'
-    issues = '#11640'
+    cli_args = 'Mesh/rename/old_boundary_id="42 0 1" Mesh/rename/new_boundary_id="0 1 2" --mesh-only'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+    expect_err = 'The following boundary IDs were requested to be renamed, but do not exist: \d+'
+
+    requirement = 'The system shall throw and error when renaming boundaries when an existing boundary cannot be found on the mesh.'
+  []
 []

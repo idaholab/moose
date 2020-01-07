@@ -23,6 +23,8 @@ InputParameters validParams<NodalNormalsEvaluator>();
 class NodalNormalsEvaluator : public NodalUserObject
 {
 public:
+  static InputParameters validParams();
+
   NodalNormalsEvaluator(const InputParameters & parameters);
 
   virtual void initialize() override;

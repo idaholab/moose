@@ -11,11 +11,7 @@
 
 #include "IntegratedBC.h"
 
-class FunctionPenaltyFluxBC;
 class Function;
-
-template <>
-InputParameters validParams<FunctionPenaltyFluxBC>();
 
 /**
  * Penalizes the difference between the current flux and desired flux,
@@ -34,10 +30,8 @@ InputParameters validParams<FunctionPenaltyFluxBC>();
 class FunctionPenaltyFluxBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   FunctionPenaltyFluxBC(const InputParameters & parameters);
 
 protected:

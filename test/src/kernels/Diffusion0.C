@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", Diffusion0);
 
-template <>
 InputParameters
-validParams<Diffusion0>()
+Diffusion0::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.set<Real>("Ak") = 1.0;
   params.set<Real>("Bk") = 1.0;

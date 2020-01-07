@@ -67,6 +67,7 @@
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
+    at_nodes = true # Needed to force expected error
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

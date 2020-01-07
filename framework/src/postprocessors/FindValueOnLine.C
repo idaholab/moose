@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", FindValueOnLine);
 
-template <>
+defineLegacyParams(FindValueOnLine);
+
 InputParameters
-validParams<FindValueOnLine>()
+FindValueOnLine::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Find a specific target value along a sampling line. The variable "
                              "values along the line should change monotonically. The target value "
                              "is searched using a bisection algorithm.");

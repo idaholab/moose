@@ -7,38 +7,39 @@
 #
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 50
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 50
+    ny = 50
+  []
   [./box1]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '0.51 1 0'
   [../]
   [./box2]
-    type = SubdomainBoundingBox
+    input = box1
+    type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '0.49 0 0'
     top_right = '1 1 0'
   [../]
   [./iface_u]
-    type = SideSetsBetweenSubdomains
+    type = SideSetsBetweenSubdomainsGenerator
     master_block = 1
     paired_block = 2
     new_boundary = 10
-    depends_on = 'box1 box2'
+    input = box2
   [../]
   [./iface_v]
-    type = SideSetsBetweenSubdomains
+    type = SideSetsBetweenSubdomainsGenerator
     master_block = 2
     paired_block = 1
     new_boundary = 11
-    depends_on = 'box1 box2'
+    input = iface_u
   [../]
 []
 

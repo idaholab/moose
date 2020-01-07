@@ -27,9 +27,9 @@ template <class T, class U>
 class CompositeTensorBase : public DerivativeMaterialInterface<U>
 {
 public:
-  CompositeTensorBase(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  CompositeTensorBase(const InputParameters & parameters);
 
 protected:
   /**
@@ -101,7 +101,7 @@ template <class T, class U>
 InputParameters
 CompositeTensorBase<T, U>::validParams()
 {
-  InputParameters params = ::validParams<U>();
+  InputParameters params = U::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("tensors", "Component tensors");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("weights", "Component weights");
   params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");

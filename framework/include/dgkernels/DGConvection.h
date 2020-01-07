@@ -19,6 +19,8 @@ InputParameters validParams<DGConvection>();
 class DGConvection : public DGKernel
 {
 public:
+  static InputParameters validParams();
+
   DGConvection(const InputParameters & parameters);
 
 protected:

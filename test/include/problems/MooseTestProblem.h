@@ -11,10 +11,7 @@
 
 #include "FEProblem.h"
 
-class MooseTestProblem;
-
-template <>
-InputParameters validParams<MooseTestProblem>();
+class AuxiliarySystem;
 
 /**
  * FEProblemBase derived class for customization of callbacks. In this instance we only print out
@@ -23,7 +20,11 @@ InputParameters validParams<MooseTestProblem>();
 class MooseTestProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   MooseTestProblem(const InputParameters & params);
   virtual ~MooseTestProblem();
-};
 
+private:
+  std::shared_ptr<AuxiliarySystem> _test_aux;
+};

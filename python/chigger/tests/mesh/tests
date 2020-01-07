@@ -4,6 +4,8 @@
     command = mesh.py
     imagediff = 'mesh.png'
     allowed_linux = 0.97
-    allowed_darwin = 0.97
+    allowed_darwin = 0.95
+    python = 3
+    display_required = true
   [../]
 []

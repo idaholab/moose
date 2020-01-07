@@ -86,14 +86,12 @@
 [Materials]
   [./ppss]
     type = PorousFlow2PhasePP
-    at_nodes = false
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
     capillary_pressure = pc
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
-    at_nodes = false
   [../]
 []
 

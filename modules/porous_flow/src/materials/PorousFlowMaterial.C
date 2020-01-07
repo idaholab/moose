@@ -38,14 +38,21 @@ PorousFlowMaterial::PorousFlowMaterial(const InputParameters & parameters)
 }
 
 void
+PorousFlowMaterial::initialSetup()
+{
+  if (_nodal_material)
+    _material_data->onlyResizeIfSmaller(true);
+}
+
+void
 PorousFlowMaterial::initStatefulProperties(unsigned int n_points)
 {
   if (_nodal_material)
   {
-    // size the Properties to max(number_of_nodes, number_of_quadpoints)
-    sizeAllSuppliedProperties();
+    // size the properties to max(number_of_nodes, number_of_quadpoints)
+    sizeNodalProperties();
 
-    // compute the values only for number_of_nodes
+    // compute the values for number_of_nodes
     Material::initStatefulProperties(_current_elem->n_nodes());
   }
   else
@@ -57,10 +64,10 @@ PorousFlowMaterial::computeProperties()
 {
   if (_nodal_material)
   {
-    // size the Properties to max(number_of_nodes, number_of_quadpoints)
-    sizeAllSuppliedProperties();
+    // size the properties to max(number_of_nodes, number_of_quadpoints)
+    sizeNodalProperties();
 
-    // compute the values only for number_of_nodes
+    // compute the values for number_of_nodes
     for (_qp = 0; _qp < _current_elem->n_nodes(); ++_qp)
       computeQpProperties();
   }
@@ -69,7 +76,7 @@ PorousFlowMaterial::computeProperties()
 }
 
 void
-PorousFlowMaterial::sizeNodalProperty(const std::string & prop_name)
+PorousFlowMaterial::sizeNodalProperties()
 {
   /*
    * For nodal materials, the Properties should be sized as the maximum of
@@ -79,21 +86,12 @@ PorousFlowMaterial::sizeNodalProperty(const std::string & prop_name)
    * elements at the end of the std::vector will always be zero, but they
    * are needed because MOOSE does copy operations (etc) that assumes that
    * the std::vector is sized to number of quadpoints.
+   *
+   * On boundary materials, the number of nodes may be larger than the number of
+   * qps on the face of the element, in which case the remaining entries in the
+   * material properties storage will be zero.
    */
-  mooseAssert(_material_data->getMaterialPropertyStorage().hasProperty(prop_name),
-
-              "PorousFlowMaterial can not find nodal property " << prop_name);
-  const unsigned prop_id =
-      _material_data->getMaterialPropertyStorage().retrievePropertyId(prop_name);
-  // _material_data->props() returns MaterialProperties, which is a std::vector of PropertyValue.
-  _material_data->props()[prop_id]->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
-}
-
-void
-PorousFlowMaterial::sizeAllSuppliedProperties()
-{
-  for (auto prop_name : getSuppliedItems())
-    sizeNodalProperty(prop_name);
+  _material_data->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
 }
 
 unsigned
@@ -103,7 +101,7 @@ PorousFlowMaterial::nearestQP(unsigned nodenum) const
   Real smallest_dist = std::numeric_limits<Real>::max();
   for (unsigned qp = 1; qp < _qrule->n_points(); ++qp)
   {
-    const Real this_dist = (_current_elem->point(nodenum) - _q_point[qp]).size();
+    const Real this_dist = (_current_elem->point(nodenum) - _q_point[qp]).norm();
     if (this_dist < smallest_dist)
     {
       nearest_qp = qp;

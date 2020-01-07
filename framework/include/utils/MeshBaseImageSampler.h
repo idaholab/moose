@@ -59,6 +59,8 @@ public:
    *
    * @see ImageFunction
    */
+  static InputParameters validParams();
+
   MeshBaseImageSampler(const InputParameters & parameters);
 
   /**
@@ -160,4 +162,3 @@ private:
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
 };
-

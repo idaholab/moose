@@ -20,6 +20,6 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'should_execute')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, r'test_harness\.should_execute_true_ok.*?OK')
-        self.assertRegexpMatches(e.output, r'test_harness\.should_execute_false_ok.*?OK')
-        self.assertRegexpMatches(e.output, r'test_harness\.should_execute_true_fail.*?FAILED \(EXODIFF\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.should_execute_true_ok.*?OK')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.should_execute_false_ok.*?OK')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.should_execute_true_fail.*?FAILED \(EXODIFF\)')

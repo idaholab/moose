@@ -38,7 +38,7 @@ class GraphExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['prefix'] = (u'Figure', "The caption prefix (e.g., Fig.).")
+        config['prefix'] = ('Figure', "The caption prefix (e.g., Fig.).")
         config['draft'] = (False, "Enable draft mode for LaTeX output.")
         return config
 
@@ -102,8 +102,8 @@ class GraphScatter(command.CommandComponent):
             reader = mooseutils.PostprocessorReader(filename)
 
             for i, line in enumerate(data):
-                data[i]['x'] = reader(line['x']).tolist()
-                data[i]['y'] = reader(line['y']).tolist()
+                data[i]['x'] = reader[line['x']].tolist()
+                data[i]['y'] = reader[line['y']].tolist()
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True)
@@ -149,7 +149,7 @@ class RenderScatter(components.RenderComponent):
     HTML_TEMPLATE = GraphTemplate('scatter.js')
 
     def createHTML(self, parent, token, page):
-        plot_id = unicode(uuid.uuid4())
+        plot_id = str(uuid.uuid4())
         content = self.HTML_TEMPLATE(id_=plot_id,
                                      data=repr(token['data']),
                                      layout=repr(token['layout']))

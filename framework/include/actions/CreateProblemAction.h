@@ -20,6 +20,8 @@ InputParameters validParams<CreateProblemAction>();
 class CreateProblemAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   CreateProblemAction(InputParameters parameters);
 
   virtual void act() override;

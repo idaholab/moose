@@ -182,4 +182,10 @@
     requirement = "TestHarness shall detect and report race conditions that exist in the supplied tests"
     issues = '#13186'
   [../]
+  [./unreadable_output]
+    type = PythonUnitTest
+    input = test_UnreadableOutput.py
+    requirement = "TestHarness shall detect and report unreadable output in executed commands"
+    issues = '#14370'
+  [../]
 []

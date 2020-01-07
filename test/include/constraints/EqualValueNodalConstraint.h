@@ -11,14 +11,11 @@
 
 #include "NodalConstraint.h"
 
-class EqualValueNodalConstraint;
-
-template <>
-InputParameters validParams<EqualValueNodalConstraint>();
-
 class EqualValueNodalConstraint : public NodalConstraint
 {
 public:
+  static InputParameters validParams();
+
   EqualValueNodalConstraint(const InputParameters & parameters);
   virtual ~EqualValueNodalConstraint();
 
@@ -28,4 +25,3 @@ protected:
 
   Real _penalty;
 };
-

@@ -18,8 +18,7 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/point.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -214,6 +213,12 @@ public:
   const MooseArray<Real> & coordTransformation() const { return _coord; }
 
   /**
+   * Returns the reference to the coordinate transformation coefficients on the mortar segment mesh
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<Real> & mortarCoordTransformation() const { return _coord_msm; }
+
+  /**
    * Returns the reference to the AD version of the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -270,6 +275,11 @@ public:
    */
   const MooseArray<std::vector<Point>> & tangents() const { return _current_tangents; }
 
+  /**
+   * Returns an integer ID of the current element given the index associated with the integer
+   */
+  const dof_id_type & extraElemID(unsigned int id) const { return _extra_elem_ids[id]; }
+
   template <ComputeStage compute_stage>
   const ADPoint & adNormals() const
   {
@@ -303,6 +313,16 @@ public:
    * set the current subdomain ID
    */
   void setCurrentSubdomainID(SubdomainID i) { _current_subdomain_id = i; }
+
+  /**
+   * Return the current boundary ID
+   */
+  const BoundaryID & currentBoundaryID() const { return _current_boundary_id; }
+
+  /**
+   * set the current boundary ID
+   */
+  void setCurrentBoundaryID(BoundaryID i) { _current_boundary_id = i; }
 
   /**
    * Returns the reference to the current element volume
@@ -1353,7 +1373,8 @@ protected:
   template <ComputeStage compute_stage>
   void setCoordinateTransformation(const QBase * qrule,
                                    const ADPoint & q_points,
-                                   MooseArray<ADReal> & coord);
+                                   MooseArray<ADReal> & coord,
+                                   SubdomainID sub_id);
 
   void computeCurrentElemVolume();
 
@@ -1664,6 +1685,8 @@ private:
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
   MooseArray<std::vector<Point>> _current_tangents;
+  /// Extra element IDs
+  std::vector<dof_id_type> _extra_elem_ids;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
   /// Holds pointers to the dimension's q_points on a face
@@ -1711,6 +1734,9 @@ private:
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord_neighbor;
+  /// The coordinate transformation coefficients evaluated on the quadrature points of the mortar
+  /// segment mesh
+  MooseArray<Real> _coord_msm;
 
   /********** mortar stuff *************/
 
@@ -1730,6 +1756,8 @@ private:
   const Elem * _current_elem;
   /// The current subdomain ID
   SubdomainID _current_subdomain_id;
+  /// The current boundary ID
+  BoundaryID _current_boundary_id;
   /// Volume of the current element
   Real _current_elem_volume;
   /// The current side of the selected element (valid only when working with sides)
@@ -1997,17 +2025,6 @@ inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JA
 Assembly::feADGradPhiFace<RealVectorValue>(FEType type) const
 {
   return _ad_vector_grad_phi_data_face[type];
-}
-
-template <>
-inline void
-Assembly::computeGradPhiAD<RealVectorValue>(
-    const Elem *,
-    unsigned int,
-    typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &,
-    FEGenericBase<RealVectorValue> *)
-{
-  mooseError("Not implemented");
 }
 
 template <>

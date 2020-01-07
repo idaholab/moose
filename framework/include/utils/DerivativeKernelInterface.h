@@ -41,7 +41,7 @@ template <class T>
 InputParameters
 DerivativeKernelInterface<T>::validParams()
 {
-  InputParameters params = ::validParams<T>();
+  InputParameters params = T::validParams();
   params.addRequiredParam<std::string>(
       "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;

@@ -43,6 +43,8 @@ class AuxScalarKernel : public MooseObject,
                         public MeshChangedInterface
 {
 public:
+  static InputParameters validParams();
+
   AuxScalarKernel(const InputParameters & parameters);
 
   virtual ~AuxScalarKernel();

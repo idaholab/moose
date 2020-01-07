@@ -6,16 +6,18 @@
 ## Description
 
 The material `ComputePlaneFiniteStrain` calculates the finite strain for 2D
-plane strain problems. It can be used for  classical
-[thick body plane strain](https://en.wikipedia.org/wiki/Plane_stress)
-problems, [Weak Plane Stress](/WeakPlaneStress.md) models, or in
+plane strain problems. It can be used for classical
+[plane strain or plane stress](https://en.wikipedia.org/wiki/Plane_stress)
+problems, or in
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
 
 ## Out of Plane Strain
 
-In the classical thick body plane strain problem, the strain and deformation
-gradient components in the out-of-plane direction (the infinitely thick
-direction) are held constant at zero:
+In the classical plane strain problem, it is assumed that the front and back
+surfaces of the body are constrained in the out-of-plane direction, and that
+the displacements in that direction on those surfaces are zero. As a 
+result, the strain and deformation gradient components in the out-of-plane
+direction are held constant at zero:
 \begin{equation}
   \label{eqn:classical_dop_deform_grad}
   F|^{dop} = 0 \text{  and  } \epsilon|^{dop} = 0
@@ -24,9 +26,9 @@ $F|^{dop}$ is the deformation gradient tensor diagonal component for the
 direction of the out-of-plane strain and $\epsilon|^{dop}$ is the corresponding
 strain component.
 
-### Generalized Plane Strain
+### Plane Stress and Generalized Plane Strain
 
-In the cases of the generalized plane strain and weak plane stress models, the
+In the cases of the plane stress and generalized plane strain assumptions, the
 component of strain and the deformation gradient in the out-of-plane direction
 is non-zero. To solve for this out-of-plane strain, we invoke the approximation
 of the stretch rate tensor
@@ -42,7 +44,15 @@ and define the deformation gradient component in the out-of-plane direction as
 where $F|^{dop}$ is the deformation gradient tensor diagonal component for the
 direction of the out-of-plane strain and $\epsilon|^{op}$ is a prescribed
 out-of-plane strain value: this strain value can be given either as a scalar
-variable or a nonlinear variable.
+variable or a nonlinear field variable.
+
+For the case of plane stress, the [WeakPlaneStress](WeakPlaneStress.md) kernel
+is used to integrate the out-of-plane component of the stress over the area of
+each element, and assemble that integral to the residual of the out-of-plane
+strain field variable. This results in a weak enforcement of the condition that
+the out-of-plane stress is zero, which allows for re-use of the same constitutive
+models for models of all dimensionality.
+
 The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 problems use scalar variables. Multiple scalar variables can be provided such
 that one strain calculator is needed for multiple generalized plane strain
@@ -151,14 +161,30 @@ the deformation gradient is passed to the strain and rotation methods used by th
 3D Cartesian simulations, as described in the [Finite Strain Class](ComputeFiniteStrain.md)
 documentation.
 
-## Example Input File
+## Example Input Files
+
+### Plane Stress
+
+The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
+can be used to create the `ComputePlaneFiniteStrain` class by setting
+`planar_formulation = WEAK_PLANE_STRESS` and `strain = FINITE` in the
+`Master` action block.
+
+!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Modules/TensorMechanics/Master
+
+Note that for plane stress analysis, the `out_of_plane_strain` parameter must be
+defined, and is the name of the out-of-plane strain field variable.
+
+!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Variables/strain_zz
+
+In the case of this example, `out_of_plane_strain` is defined in the `GlobalParams` block.
 
 ### Generalized Plane Strain
 
-As an example, the use of this plane strain class with the
+The use of this plane strain class for
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 simulations uses the scalar out-of-plane strains. The tensor mechanics
-[MasterAction](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
 `ComputePlaneFiniteStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`
 and the `strain = FINITE` settings.
 
@@ -168,7 +194,6 @@ Note that the argument for the `scalar_out_of_plane_strain` parameter is the
 name of the scalar strain variable
 
 !listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Variables/scalar_strain_zz
-
 
 !syntax parameters /Materials/ComputePlaneFiniteStrain
 

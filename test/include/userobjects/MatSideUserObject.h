@@ -11,18 +11,14 @@
 
 #include "SideUserObject.h"
 
-// Forward Declarations
-class MatSideUserObject;
-
-template <>
-InputParameters validParams<MatSideUserObject>();
-
 /*
  * This is for testing error message only. It does nothing.
  */
 class MatSideUserObject : public SideUserObject
 {
 public:
+  static InputParameters validParams();
+
   MatSideUserObject(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void execute() override {}
@@ -32,4 +28,3 @@ public:
 protected:
   const MaterialProperty<Real> & _mat_prop;
 };
-

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ChannelGradientBC);
 
-template <>
 InputParameters
-validParams<ChannelGradientBC>()
+ChannelGradientBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<VectorPostprocessorName>(
       "channel_gradient_pps", "The vector postprocessor name that holds the channel gradient.");
   MooseEnum axis_options("x y z");

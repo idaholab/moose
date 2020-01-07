@@ -19,6 +19,8 @@ InputParameters validParams<ArrayPenaltyDirichletBC>();
 class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ArrayPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:

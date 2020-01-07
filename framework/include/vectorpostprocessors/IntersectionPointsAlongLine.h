@@ -23,6 +23,8 @@ InputParameters validParams<IntersectionPointsAlongLine>();
 class IntersectionPointsAlongLine : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   IntersectionPointsAlongLine(const InputParameters & parameters);
 
   virtual void initialize() override;

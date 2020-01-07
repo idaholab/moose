@@ -30,6 +30,8 @@ InputParameters validParams<ElementPointNeighborLayers>();
 class ElementPointNeighborLayers : public FunctorRelationshipManager
 {
 public:
+  static InputParameters validParams();
+
   ElementPointNeighborLayers(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;

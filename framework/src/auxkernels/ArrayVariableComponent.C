@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ArrayVariableComponent);
 
-template <>
+defineLegacyParams(ArrayVariableComponent);
+
 InputParameters
-validParams<ArrayVariableComponent>()
+ArrayVariableComponent::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("array_variable", "The name of the array variable");
   params.addParam<unsigned int>("component", 0, "Component of the array variable to be extracted");
   params.addClassDescription("Copy a component of an array variable.");

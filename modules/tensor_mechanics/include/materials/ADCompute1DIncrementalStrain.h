@@ -33,6 +33,8 @@ template <ComputeStage compute_stage>
 class ADCompute1DIncrementalStrain : public ADComputeIncrementalSmallStrain<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCompute1DIncrementalStrain(const InputParameters & parameters);
 
 protected:
@@ -68,4 +70,3 @@ protected:
 
   usingComputeIncrementalSmallStrainMembers;
 };
-

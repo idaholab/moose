@@ -1,5 +1,5 @@
 [Tests]
-  design = "\restart_recover"
+  design = "heat_conduction/index.md"
   issues = "#10079"
   [./recover_1]
     type = Exodiff
@@ -64,7 +64,6 @@
     cli_args = 'Executioner/num_steps=2'
     skip = 'AD Thermal Contact not yet implemented'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
 []

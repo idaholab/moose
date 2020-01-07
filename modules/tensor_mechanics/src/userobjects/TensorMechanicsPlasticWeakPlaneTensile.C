@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensile);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticWeakPlaneTensile);
+
 InputParameters
-validParams<TensorMechanicsPlasticWeakPlaneTensile>()
+TensorMechanicsPlasticWeakPlaneTensile::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addParam<Real>("stress_coefficient",
                         1.0,
                         "The yield function is stress_coefficient * stress_zz - tensile_strength");

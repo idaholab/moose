@@ -21,6 +21,8 @@ InputParameters validParams<PenetrationAux>();
 class PenetrationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PenetrationAux(const InputParameters & parameters);
 
 protected:

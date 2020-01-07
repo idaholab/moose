@@ -9,10 +9,10 @@
 
 import peacock
 from PyQt5 import QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
-from PostprocessorTableWidget import PostprocessorTableWidget
 from peacock.utils import WidgetUtils
 import mooseutils
+from .PostprocessorPlugin import PostprocessorPlugin
+from .PostprocessorTableWidget import PostprocessorTableWidget
 
 class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
     """
@@ -85,9 +85,9 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
 
 def main(filenames):
 
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from PostprocessorSelectPlugin import PostprocessorSelectPlugin
-    from MediaControlPlugin import MediaControlPlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
+    from .MediaControlPlugin import MediaControlPlugin
 
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, timeout=None, plugins=[OutputPlugin, PostprocessorSelectPlugin, MediaControlPlugin])
     widget.onSetFilenames(filenames)

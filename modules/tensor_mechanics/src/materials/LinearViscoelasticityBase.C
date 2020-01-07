@@ -10,20 +10,21 @@
 #include "LinearViscoelasticityBase.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(LinearViscoelasticityBase);
+
 InputParameters
-validParams<LinearViscoelasticityBase>()
+LinearViscoelasticityBase::validParams()
 {
   MooseEnum integration("backward-euler mid-point newmark zienkiewicz", "backward-euler");
 
-  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addParam<MooseEnum>("integration_rule",
                              integration,
                              "describes how the viscoelastic behavior is integrated through time");
   params.addRangeCheckedParam<Real>("theta",
                                     1,
                                     "theta > 0 & theta <= 1",
-                                    "coefficient for newmark integration rule (between 0 and 1)");
+                                    "coefficient for Newmark integration rule (between 0 and 1)");
   params.addParam<std::string>("driving_eigenstrain",
                                "name of the eigenstrain that increases the creep strains");
   params.addParam<std::string>(

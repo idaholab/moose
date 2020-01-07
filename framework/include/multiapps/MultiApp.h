@@ -57,6 +57,8 @@ class SubAppBackups : public std::vector<std::shared_ptr<Backup>>
 class MultiApp : public MooseObject, public SetupInterface, public Restartable
 {
 public:
+  static InputParameters validParams();
+
   MultiApp(const InputParameters & parameters);
 
   virtual void preExecute() {}

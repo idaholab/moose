@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", TestNewmarkTI);
 
-template <>
+defineLegacyParams(TestNewmarkTI);
+
 InputParameters
-validParams<TestNewmarkTI>()
+TestNewmarkTI::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Assigns the velocity/acceleration calculated by time integrator to "
                              "the velocity/acceleration auxvariable.");
   params.addRequiredCoupledVar(

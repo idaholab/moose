@@ -23,6 +23,8 @@ InputParameters validParams<AverageElementSize>();
 class AverageElementSize : public ElementPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   AverageElementSize(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -33,6 +35,5 @@ public:
 
 protected:
   Real _total_size;
-  int _elems;
+  dof_id_type _elems;
 };
-

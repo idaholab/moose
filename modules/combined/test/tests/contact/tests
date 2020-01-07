@@ -1,46 +1,53 @@
 [Tests]
-  [./pressureAugLag_test]
+  issues = '#3418'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./pressureAugLag]
     type = 'Exodiff'
     input = 'pressureAugLag.i'
     exodiff = 'pressureAugLag_out.e'
     custom_cmp = 'pressure.exodiff'
     petsc_version = '>=3.1'
     max_parallel = 1
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
   [../]
 
-  [./pressurePenalty_test]
+  [./pressurePenalty]
     type = 'Exodiff'
     input = 'pressurePenalty.i'
     exodiff = 'pressurePenalty_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'    
   [../]
 
-  [./pressurePenalty_test_2]
+  [./pressurePenalty_mechanical_constraint]
     type = 'Exodiff'
     input = 'pressurePenalty_mechanical_constraint.i'
     exodiff = 'pressurePenalty_mechanical_constraint_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
+   requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
   [../]
 
-  [./4ElemTensionRelease_dirac]
+  [./4ElemTensionRelease]
     type = 'Exodiff'
     input = 4ElemTensionRelease.i
     exodiff = 4ElemTensionRelease_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements.'
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
   [../]
 
-  [./4ElemTensionRelease_constraint]
+  [./4ElemTensionRelease_mechanical_constraint]
     type = 'Exodiff'
     input = 4ElemTensionRelease_mechanical_constraint.i
     exodiff = 4ElemTensionRelease_mechanical_constraint_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and mechanical constraints.'
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
@@ -56,6 +63,8 @@
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and ensure no new Jacobian allocations.'
+
   [../]
 
   [./8ElemTensionRelease]
@@ -68,5 +77,7 @@
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
+    requirement = 'The contact system shall enforce and release contact conditions. 8 elements.'
+
   [../]
 []

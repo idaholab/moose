@@ -1,16 +1,18 @@
 [Mesh]
-  file = 2blk-conf.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = 2blk-conf.e
+  []
   [slave]
-    type = LowerDBlockFromSideset
+    input = file
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '101'
     new_block_id = '10001'
     new_block_name = 'slave_lower'
   []
   [master]
-    type = LowerDBlockFromSideset
+    input = slave
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '100'
     new_block_id = '10000'
     new_block_name = 'master_lower'

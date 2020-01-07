@@ -22,15 +22,16 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 
-template <>
+defineLegacyParams(TableOutput);
+
 InputParameters
-validParams<TableOutput>()
+TableOutput::validParams()
 {
   // Fit mode selection Enum
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<AdvancedOutput>();
+  InputParameters params = AdvancedOutput::validParams();
   params += AdvancedOutput::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
   // Option for writing vector_postprocessor time file

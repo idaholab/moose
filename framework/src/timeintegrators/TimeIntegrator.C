@@ -15,11 +15,12 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-template <>
+defineLegacyParams(TimeIntegrator);
+
 InputParameters
-validParams<TimeIntegrator>()
+TimeIntegrator::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.registerBase("TimeIntegrator");
   return params;
 }
@@ -30,7 +31,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystemBase()),
-    _nonlinear_implicit_system(dynamic_cast<const NonlinearImplicitSystem *>(&_sys.system())),
+    _nonlinear_implicit_system(dynamic_cast<NonlinearImplicitSystem *>(&_sys.system())),
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionOld()),

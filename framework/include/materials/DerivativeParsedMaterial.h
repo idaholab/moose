@@ -25,6 +25,8 @@ InputParameters validParams<DerivativeParsedMaterial>();
 class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper, public ParsedMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   DerivativeParsedMaterial(const InputParameters & parameters);
 };
 

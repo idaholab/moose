@@ -12,7 +12,7 @@ describes the architecture of the system and all of its parts.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SDD) for {{app}} is dependent upon the following documents.
 
-!sqa dependencies suffix=sdd
+!sqa dependencies suffix=sdd category={{category}}
 
 ## Requirements Cross Reference
 

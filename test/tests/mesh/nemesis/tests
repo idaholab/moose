@@ -1,4 +1,7 @@
 [Tests]
+  design = 'Mesh/index.md outputs/Nemesis.md'
+  issues = '#2520'
+
   [./nemesis_test]
     type = 'Exodiff'
     input = 'nemesis_test.i'
@@ -8,25 +11,20 @@
     recover = false
     group = 'requirements nemesis'
 
-    requirement = 'MOOSE shall support writing out a solution in a parallel file format (domain decomposition solution files).'
-    issues = '#2520'
-    design = 'Mesh/index.md outputs/Nemesis.md'
+    requirement = 'The system shall support writing solution data in the Nemesis parallel file format.'
 [../]
 
   [./nemesis_repartitioning_test]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'nemesis_repartitioning_test.i'
-    exodiff = 'repartitioned.e.4.0 repartitioned.e.4.1 repartitioned.e.4.2 repartitioned.e.4.3 repartitioned.e-s0002.4.0 repartitioned.e-s0002.4.1 repartitioned.e-s0002.4.2 repartitioned.e-s0002.4.3'
-    rel_err = 5.e-5
+    csvdiff = 'repartitioned_bl_edgecuts_0003.csv 	repartitioned_bl_element_0003.csv'
     max_parallel = 4
     min_parallel = 4
     recover = false
     group = 'nemesis'
+    expect_out = 'Solve Converged!'
+    rel_err = '1e-1'
 
-    # There appears to be a platform specific issue with the
-    # nemesis repartitioning. While we do receive consistent
-    # results on each platform they do not produce the
-    # same results.
-    platform = 'LINUX'
+    requirement = "The system shall support the re-partitioning of mesh files input using the Nemesis format."
   [../]
 []

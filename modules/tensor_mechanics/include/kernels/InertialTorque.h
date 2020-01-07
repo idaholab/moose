@@ -28,6 +28,8 @@ InputParameters validParams<InertialTorque>();
 class InertialTorque : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   InertialTorque(const InputParameters & parameters);
 
 protected:
@@ -88,4 +90,3 @@ private:
   /// Derivative of velocity with respect to displacement
   std::vector<Real> _dvel;
 };
-

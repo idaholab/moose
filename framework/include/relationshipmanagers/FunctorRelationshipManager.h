@@ -28,6 +28,8 @@ InputParameters validParams<FunctorRelationshipManager>();
 class FunctorRelationshipManager : public RelationshipManager
 {
 public:
+  static InputParameters validParams();
+
   FunctorRelationshipManager(const InputParameters & parameters);
 
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,

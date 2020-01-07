@@ -28,6 +28,8 @@ class ADPiecewiseLinearInterpolationMaterial : public ADMaterial<compute_stage>,
                                                public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADPiecewiseLinearInterpolationMaterial(const InputParameters & parameters);
 
 protected:

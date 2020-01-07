@@ -1,6 +1,6 @@
 # ADAllenCahn
 
-!syntax description /Kernels/ADAllenCahn<RESIDUAL>
+!syntax description /Kernels/ADAllenCahn
 
 Implements the term
 
@@ -16,10 +16,10 @@ The $\nabla \eta$ dependent terms in the free energy functional of the system
 that arise from the gradient interface energy are handled separately in the
 [`ADACInterface`](/ADACInterface.md) kernel.
 
-!syntax parameters /Kernels/ADAllenCahn<RESIDUAL>
+!syntax parameters /Kernels/ADAllenCahn
 
-!syntax inputs /Kernels/ADAllenCahn<RESIDUAL>
+!syntax inputs /Kernels/ADAllenCahn
 
-!syntax children /Kernels/ADAllenCahn<RESIDUAL>
+!syntax children /Kernels/ADAllenCahn
 
 !bibtex bibliography

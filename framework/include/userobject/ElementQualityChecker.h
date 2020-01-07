@@ -21,6 +21,8 @@ InputParameters validParams<ElementQualityChecker>();
 class ElementQualityChecker : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   ElementQualityChecker(const InputParameters & parameters);
 
   static MooseEnum QualityMetricType();

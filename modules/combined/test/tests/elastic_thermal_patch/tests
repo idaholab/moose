@@ -50,6 +50,7 @@
     abs_zero = 1e-08
     use_old_floor = True
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature for the solid_mechanics module'
+    no_error_deprecated = true
   [../]
 
   [./elastic_thermal_jacobian_rz_smp_sm]
@@ -60,6 +61,7 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The system shall compute consistent nonlinear solver behavior for thermal strain problems for the solid_mechanics module'
+    no_error_deprecated = true
   [../]
 
   [./elastic_thermal_patch_rz_sm]
@@ -69,6 +71,7 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates for the solid_mechanics module'
+    no_error_deprecated = true
   [../]
 
   [./elastic_thermal_patch_rz_smp_sm]
@@ -79,6 +82,7 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates with a full preconditioning matrix for the solid_mechanics module'
+    no_error_deprecated = true
   [../]
 
   [./elastic_thermal_weak_plane_stress_jacobian]

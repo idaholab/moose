@@ -30,6 +30,8 @@ InputParameters validParams<SideSetsGeneratorBase>();
 class SideSetsGeneratorBase : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SideSetsGeneratorBase(const InputParameters & parameters);
   virtual ~SideSetsGeneratorBase(); // dtor required for unique_ptr with forward declarations
 
@@ -58,8 +60,10 @@ protected:
   Real _variance;
   bool _fixed_normal;
 
+  /// Whether or not to remove the old sidesets (if any) when adding sidesets
+  bool _replace;
+
   std::unique_ptr<FEBase> _fe_face;
   std::unique_ptr<QGauss> _qface;
   std::map<boundary_id_type, std::set<const Elem *>> _visited;
 };
-

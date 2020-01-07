@@ -5,38 +5,40 @@
 # Bottom block: tracer is defined here, with velocity = (-0.1, 0, 0)
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  xmin = 0
-  xmax = 1
-  ny = 5
-  ymin = 0
-  ymax = 1
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    xmin = 0
+    xmax = 1
+    ny = 5
+    ymin = 0
+    ymax = 1
+  []
   [./top]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0.6 0'
     top_right = '1 1 0'
     block_id = 1
   [../]
   [./center]
-    type = SubdomainBoundingBox
+    input = bottom
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0.4 0'
     top_right = '1 0.6 0'
     block_id = 2
   [../]
   [./bottom]
-    type = SubdomainBoundingBox
+    input = top
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 0.6 0'
     block_id = 3
   [../]
   [./split_bdys]
-    type = BreakBoundaryOnSubdomain
-    depends_on = 'top center bottom'
+    type = BreakBoundaryOnSubdomainGenerator
+    input = center
     boundaries = 'left right'
   [../]
 []

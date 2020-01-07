@@ -18,11 +18,10 @@
 
 registerMooseObject("MooseTestApp", DGMDDBC);
 
-template <>
 InputParameters
-validParams<DGMDDBC>()
+DGMDDBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");

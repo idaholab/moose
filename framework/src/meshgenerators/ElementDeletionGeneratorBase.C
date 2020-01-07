@@ -13,11 +13,12 @@
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
-template <>
+defineLegacyParams(ElementDeletionGeneratorBase);
+
 InputParameters
-validParams<ElementDeletionGeneratorBase>()
+ElementDeletionGeneratorBase::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<BoundaryName>("new_boundary",

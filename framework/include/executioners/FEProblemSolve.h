@@ -21,6 +21,10 @@ class FEProblemSolve : public SolveObject
 public:
   FEProblemSolve(Executioner * ex);
 
+  static InputParameters validParams();
+
+  static const std::set<std::string> & mooseLineSearches();
+
   /**
    * Picard solve the FEProblem.
    * @return True if solver is converged.
@@ -35,4 +39,7 @@ public:
 protected:
   /// Splitting
   std::vector<std::string> _splitting;
+
+  /// Moose provided line searches
+  static std::set<std::string> const _moose_line_searches;
 };

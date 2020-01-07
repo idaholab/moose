@@ -24,6 +24,8 @@ InputParameters validParams<FEProblem>();
 class FEProblem : public FEProblemBase
 {
 public:
+  static InputParameters validParams();
+
   FEProblem(const InputParameters & parameters);
 
   virtual bool getUseNonlinear() const { return _use_nonlinear; }

@@ -19,6 +19,8 @@ InputParameters validParams<InitProblemAction>();
 class InitProblemAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   InitProblemAction(InputParameters params);
 
   virtual void act() override;

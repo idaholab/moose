@@ -14,11 +14,12 @@
 
 registerMooseObjectAliased("MooseApp", VTKOutput, "VTK");
 
-template <>
+defineLegacyParams(VTKOutput);
+
 InputParameters
-validParams<VTKOutput>()
+VTKOutput::validParams()
 {
-  InputParameters params = validParams<OversampleOutput>();
+  InputParameters params = OversampleOutput::validParams();
   params.addClassDescription("Output data using the Visualization Toolkit (VTK).");
 
   // Set default padding to 3

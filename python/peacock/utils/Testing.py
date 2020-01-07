@@ -10,12 +10,12 @@
 import os, contextlib
 from mooseutils.ImageDiffer import ImageDiffer
 from mooseutils import message
-import qtutils
+from . import qtutils
 import time
 import unittest
 import glob, shutil
 from PyQt5 import QtCore, QtWidgets
-from peacock import PeacockApp
+from .. import PeacockApp
 import inspect
 
 def find_moose_test_exe(dirname="test", exe_base="moose_test"):
@@ -229,7 +229,7 @@ class PeacockImageTestCase(unittest.TestCase):
         """
         self._window.onWrite(filename, **kwargs)
 
-    def assertImage(self, basename, allowed=0.99, **kwargs):
+    def assertImage(self, basename, allowed=0.97, **kwargs):
         """
         Create the supplied image and assert that it is same to the gold standard.
         """
@@ -238,7 +238,7 @@ class PeacockImageTestCase(unittest.TestCase):
 
         self.write(filename, **kwargs)
         differ = ImageDiffer(goldname, filename, allowed=allowed)
-        print differ.message()
+        print(differ.message())
         self.assertFalse(differ.fail(), "{} does not match the gold file.".format(filename))
 
     def sleepIfSlow(self):

@@ -18,8 +18,6 @@
 []
 
 [Preconditioning]
-  active = 'PBP'
-
   [./PBP]
     type = PBP
     solve_order = 'u v'
@@ -29,6 +27,11 @@
 
     petsc_options = ''  # Test petsc options in PBP block
   [../]
+[]
+
+[Problem]
+  type = FEProblem
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [Kernels]

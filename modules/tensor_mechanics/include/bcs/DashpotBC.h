@@ -24,6 +24,8 @@ InputParameters validParams<DashpotBC>();
 class DashpotBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -47,4 +49,3 @@ private:
   const VariableValue & _disp_y_dot;
   const VariableValue & _disp_z_dot;
 };
-

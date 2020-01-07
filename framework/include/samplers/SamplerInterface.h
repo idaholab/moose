@@ -37,6 +37,8 @@ public:
    */
   SamplerInterface(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   /**
    * Get a sampler with a given name
    * @param name The name of the parameter key of the sampler to retrieve
@@ -61,4 +63,3 @@ private:
   /// Thread ID
   THREAD_ID _smi_tid;
 };
-

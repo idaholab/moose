@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", ScalarVariable);
 
-template <>
+defineLegacyParams(ScalarVariable);
+
 InputParameters
-validParams<ScalarVariable>()
+ScalarVariable::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "Name of the variable");
   params.addParam<unsigned int>("component", 0, "Component to output for this variable");
   return params;

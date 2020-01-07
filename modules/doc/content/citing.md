@@ -5,16 +5,19 @@
 If you use MOOSE for your publication, please cite the following:
 
 ```
-@Misc{moose-web-page,
-  author = {Brian Alger and David Andr{\v{s}} and Robert W. Carlsen and Derek R.
-            Gaston and Fande Kong and Alexander D. Lindsay and Jason M. Miller and
-            Cody J. Permann and John W. Peterson and Andrew E. Slaughter and Roy Stogner},
-  title = {{MOOSE} {W}eb page},
-  url = {https://mooseframework.org},
-  howpublished = {\url{https://mooseframework.org}},
-  year = {2019}
+@misc{permann2019moose,
+    title={MOOSE: Enabling Massively Parallel Multiphysics Simulation},
+    author={Cody J. Permann and Derek R. Gaston and David Andrs and Robert W. Carlsen and Fande Kong and Alexander D. Lindsay and Jason M. Miller and John W. Peterson and Andrew E. Slaughter and Roy H. Stogner and Richard C. Martineau},
+    year={2019},
+    eprint={1911.04488},
+    archivePrefix={arXiv},
+    primaryClass={cs.MS}
 }
+```
 
+Another reference you may consider for a good demonstration problem:
+
+```
 @article{gaston2015physics,
   title = {Physics-based multiscale coupling for full core nuclear reactor simulation},
   author = {Derek R. Gaston and Cody J. Permann and John W. Peterson and

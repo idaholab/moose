@@ -12,12 +12,13 @@
 
 registerMooseObject("MooseApp", Gnuplot);
 
-template <>
+defineLegacyParams(Gnuplot);
+
 InputParameters
-validParams<Gnuplot>()
+Gnuplot::validParams()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<TableOutput>();
+  InputParameters params = TableOutput::validParams();
   params.addClassDescription("Output for postprocessors and scalar variables in GNU plot format.");
 
   // Set an enum for the possible file extensions

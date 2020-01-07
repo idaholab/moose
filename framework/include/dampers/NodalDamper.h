@@ -32,6 +32,8 @@ InputParameters validParams<NodalDamper>();
 class NodalDamper : public Damper, protected MaterialPropertyInterface
 {
 public:
+  static InputParameters validParams();
+
   NodalDamper(const InputParameters & parameters);
 
   /**

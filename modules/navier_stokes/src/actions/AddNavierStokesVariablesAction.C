@@ -77,28 +77,25 @@ AddNavierStokesVariablesAction::act()
     _block_ids.insert(id);
   }
 
-  if (_block_ids.size() == 0)
-  {
-    // Add the variables to the FEProblemBase
-    for (unsigned int i = 0; i < _vars.size(); ++i)
-      _problem->addVariable(_vars[i], fe_type, _scaling[i]);
+  auto var_type = AddVariableAction::determineType(fe_type, 1);
+  auto base_params = _factory.getValidParams(var_type);
+  base_params.set<MooseEnum>("order") = fe_type.order.get_order();
+  base_params.set<MooseEnum>("family") = Moose::stringify(fe_type.family);
+  if (_block_ids.size() != 0)
+    for (const SubdomainID & id : _block_ids)
+      base_params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
-    // Add Aux variables.  These are all required in order for the code
-    // to run, so they should not be independently selectable by the
-    // user.
-    for (const auto & aux_name : _auxs)
-      _problem->addAuxVariable(aux_name, fe_type);
-  }
-  else
+  // Add the variables to the FEProblemBase
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
-    // Add the variables to the FEProblemBase
-    for (unsigned int i = 0; i < _vars.size(); ++i)
-      _problem->addVariable(_vars[i], fe_type, _scaling[i], &_block_ids);
-
-    // Add Aux variables.  These are all required in order for the code
-    // to run, so they should not be independently selectable by the
-    // user.
-    for (const auto & aux_name : _auxs)
-      _problem->addAuxVariable(aux_name, fe_type, &_block_ids);
+    InputParameters var_params(base_params);
+    var_params.set<std::vector<Real>>("scaling") = {_scaling[i]};
+    _problem->addVariable(var_type, _vars[i], var_params);
   }
+
+  // Add Aux variables.  These are all required in order for the code
+  // to run, so they should not be independently selectable by the
+  // user.
+  for (const auto & aux_name : _auxs)
+    _problem->addAuxVariable(var_type, aux_name, base_params);
 }

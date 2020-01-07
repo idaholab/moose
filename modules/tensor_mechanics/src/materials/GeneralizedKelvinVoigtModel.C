@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedKelvinVoigtModel);
 
-template <>
+defineLegacyParams(GeneralizedKelvinVoigtModel);
+
 InputParameters
-validParams<GeneralizedKelvinVoigtModel>()
+GeneralizedKelvinVoigtModel::validParams()
 {
-  InputParameters params = validParams<GeneralizedKelvinVoigtBase>();
+  InputParameters params = GeneralizedKelvinVoigtBase::validParams();
   params.addClassDescription(
       "Generalized Kelvin-Voigt model composed of a serial assembly of unit Kelvin-Voigt modules");
   params.addRequiredParam<Real>("young_modulus", "initial elastic modulus of the material");

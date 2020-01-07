@@ -5,6 +5,8 @@
     command = default.py
     imagediff = 'default.png'
     allowed_linux = 0.97
+    python = 3
+    display_required = true
   [../]
 
   [./blocks]
@@ -12,13 +14,16 @@
     type = ImageDiff
     command = block.py
     imagediff = 'block.png'
+    python = 3
+    display_required = true
   [../]
 
   [./block_elem]
     type = RunException
     command = block_elem.py
     expect_err = "ContourFilter currently only works with nodal variables."
-    display_required = True
+    python = 3
+    display_required = true
   [../]
 
   [./levels]
@@ -26,6 +31,8 @@
     type = ImageDiff
     command = levels.py
     imagediff = 'levels.png'
+    python = 3
+    display_required = true
   [../]
 
   [./combo]
@@ -33,6 +40,8 @@
     type = ImageDiff
     command = combo.py
     imagediff = 'combo.png'
+    python = 3
+    display_required = true
   [../]
 
   [./inline]
@@ -40,11 +49,15 @@
     command = inline.py
     imagediff = 'inline.png'
     allowed_linux = 0.97
+    python = 3
+    display_required = true
   [../]
 
   [./inline_clip]
     type = ImageDiff
     command = inline_clip.py
     imagediff = 'inline_clip.png'
+    python = 3
+    display_required = true
   [../]
 []

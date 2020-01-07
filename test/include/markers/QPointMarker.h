@@ -13,21 +13,17 @@
 
 #include "libmesh/mesh_tools.h"
 
-class QPointMarker;
-
-template <>
-InputParameters validParams<QPointMarker>();
-
 /**
  * Simple Marker for testing q_qpoint in Markers.
  */
 class QPointMarker : public QuadraturePointMarker
 {
 public:
+  static InputParameters validParams();
+
   QPointMarker(const InputParameters & parameters);
   virtual ~QPointMarker(){};
 
 protected:
   virtual MarkerValue computeQpMarker();
 };
-

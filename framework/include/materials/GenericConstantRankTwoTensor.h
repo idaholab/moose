@@ -23,6 +23,8 @@ InputParameters validParams<GenericConstantRankTwoTensor>();
 class GenericConstantRankTwoTensor : public Material
 {
 public:
+  static InputParameters validParams();
+
   GenericConstantRankTwoTensor(const InputParameters & parameters);
 
 protected:

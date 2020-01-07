@@ -36,6 +36,7 @@ class TransientInterface
 {
 public:
   TransientInterface(const MooseObject * moose_object);
+  static InputParameters validParams();
   virtual ~TransientInterface();
 
   bool isImplicit() { return _is_implicit; }
@@ -71,4 +72,3 @@ protected:
 private:
   const std::string _ti_name;
 };
-

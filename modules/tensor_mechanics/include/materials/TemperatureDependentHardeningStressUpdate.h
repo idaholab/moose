@@ -27,6 +27,8 @@ InputParameters validParams<TemperatureDependentHardeningStressUpdate>();
 class TemperatureDependentHardeningStressUpdate : public IsotropicPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   TemperatureDependentHardeningStressUpdate(const InputParameters & parameters);
 
 protected:

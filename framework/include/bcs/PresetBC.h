@@ -23,6 +23,8 @@ InputParameters validParams<PresetBC>();
 class PresetBC : public PresetNodalBC
 {
 public:
+  static InputParameters validParams();
+
   PresetBC(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,3 @@ protected:
 
   const Real & _value;
 };
-

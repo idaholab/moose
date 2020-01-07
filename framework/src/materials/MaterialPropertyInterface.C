@@ -10,11 +10,12 @@
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
-#include "Material.h"
+#include "MaterialBase.h"
 
-template <>
+defineLegacyParams(MaterialPropertyInterface);
+
 InputParameters
-validParams<MaterialPropertyInterface>()
+MaterialPropertyInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam<Moose::MaterialDataType>(
@@ -201,30 +202,31 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
 void
-MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete)
+MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
+    std::shared_ptr<MaterialBase> discrete)
 {
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name()
-        << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name
-        << "':\n";
-    oss << "  " << discrete->name();
+    oss << "Incompatible material and object blocks:";
+
+    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "block")
+        << " material defined on blocks ";
     for (const auto & sbd_id : discrete->blockIDs())
-      oss << " " << sbd_id;
-    oss << "\n";
-    oss << "  " << _mi_name;
+      oss << sbd_id << ", ";
+
+    oss << "\n    " << paramErrorPrefix(_mi_params, "block") << " object needs material on blocks ";
     for (const auto & block_id : _mi_block_ids)
-      oss << " " << block_id;
-    oss << "\n";
+      oss << block_id << ", ";
+
     mooseError(oss.str());
   }
 
@@ -232,39 +234,41 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Ma
   if (!discrete->hasBoundary(_mi_boundary_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name()
-        << "' is defined on boundaries that are incompatible with the retrieving object '"
-        << _mi_name << "':\n";
-    oss << "  " << discrete->name();
+    oss << "Incompatible material and object boundaries:";
+
+    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "boundary")
+        << " material defined on boundaries ";
     for (const auto & bnd_id : discrete->boundaryIDs())
-      oss << " " << bnd_id;
-    oss << "\n";
-    oss << "  " << _mi_name;
+      oss << bnd_id << ", ";
+
+    oss << "\n    " << paramErrorPrefix(_mi_params, "boundary")
+        << " object needs material on boundaries ";
     for (const auto & bnd_id : _mi_boundary_ids)
-      oss << " " << bnd_id;
-    oss << "\n";
+      oss << bnd_id << ", ";
+
     mooseError(oss.str());
   }
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete =
+  std::shared_ptr<MaterialBase> discrete =
       _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
+
   checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
 }
 
 template <ComputeStage compute_stage>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName<compute_stage>(_mi_params.get<MaterialName>(name));
 }
 
 template <>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
 {
   const std::string new_name = name + "_residual";
@@ -272,20 +276,20 @@ MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name,
 }
 
 template <>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
 {
   const std::string new_name = name + "_jacobian";
   return getMaterialByName(new_name, no_warn);
 }
 
-template Material & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
-template Material & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
+template MaterialBase & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
+template MaterialBase & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
 
 void
 MaterialPropertyInterface::checkExecutionStage()
 {
   if (_mi_feproblem.startedInitialSetup())
-    mooseError("Material properties must be retrieved during object construction to ensure correct "
-               "problem integrity validation.");
+    mooseError("Material properties must be retrieved during object construction. This is a code "
+               "problem.");
 }

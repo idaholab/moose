@@ -19,6 +19,8 @@
 class MatDiffusion : public MatDiffusionBase<Real>
 {
 public:
+  static InputParameters validParams();
+
   MatDiffusion(const InputParameters & parameters);
 };
 

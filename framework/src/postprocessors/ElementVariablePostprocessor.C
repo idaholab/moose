@@ -14,11 +14,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ElementVariablePostprocessor);
+
 InputParameters
-validParams<ElementVariablePostprocessor>()
+ElementVariablePostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
   params.addRequiredCoupledVar("variable",
                                "The name of the variable that this postprocessor operates on");
   return params;

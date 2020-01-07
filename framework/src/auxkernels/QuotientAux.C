@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", QuotientAux);
 
-template <>
+defineLegacyParams(QuotientAux);
+
 InputParameters
-validParams<QuotientAux>()
+QuotientAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Divides two coupled variables.");
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
   params.addCoupledVar("denominator", "The downstairs of the quotient variable");

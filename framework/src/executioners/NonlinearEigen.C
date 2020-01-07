@@ -11,20 +11,17 @@
 
 registerMooseObject("MooseApp", NonlinearEigen);
 
-template <>
+defineLegacyParams(NonlinearEigen);
+
 InputParameters
-validParams<NonlinearEigen>()
+NonlinearEigen::validParams()
 {
-  InputParameters params = validParams<EigenExecutionerBase>();
+  InputParameters params = EigenExecutionerBase::validParams();
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
-  params.addParam<Real>("source_abs_tol", 1e-06, "Absolute tolernance on residual norm");
-  params.addParam<Real>(
-      "source_rel_tol", 1e-50, "Relative tolernance on residual norm after free power iterations");
-  params.addParam<Real>(
-      "pfactor",
-      1e-2,
-      "The factor of residual to be reduced per free power iteration or per nonlinear step");
-  params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
+  params.set<Real>("nl_abs_tol", true) = 1.0e-06;
+  params.set<Real>("nl_rel_tol", true) = 1e-50;
+  params.set<Real>("l_tol", true) = 1e-2;
+  params.addParam<Real>("free_l_tol", 1e-2, "Relative linear tolerance in free power iteration");
   params.addParam<bool>(
       "output_after_power_iterations", true, "True to output solution after free power iterations");
   return params;
@@ -33,15 +30,12 @@ validParams<NonlinearEigen>()
 NonlinearEigen::NonlinearEigen(const InputParameters & parameters)
   : EigenExecutionerBase(parameters),
     _free_iter(getParam<unsigned int>("free_power_iterations")),
-    _abs_tol(getParam<Real>("source_abs_tol")),
-    _rel_tol(getParam<Real>("source_rel_tol")),
-    _pfactor(getParam<Real>("pfactor")),
+    _nl_abs_tol(getParam<Real>("nl_abs_tol")),
+    _nl_rel_tol(getParam<Real>("nl_rel_tol")),
+    _l_tol(getParam<Real>("l_tol")),
+    _free_l_tol(getParam<Real>("free_l_tol")),
     _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
-  if (!_app.isRecovering() && !_app.isRestarting())
-    _eigenvalue = getParam<Real>("k0");
-
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
 }
 
 void
@@ -74,7 +68,7 @@ NonlinearEigen::init()
     Real initial_res;
     inversePowerIteration(_free_iter,
                           _free_iter,
-                          _pfactor,
+                          _free_l_tol,
                           false,
                           std::numeric_limits<Real>::min(),
                           true,
@@ -121,7 +115,7 @@ NonlinearEigen::takeStep()
   _problem.advanceState();
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  _last_solve_converged = nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
+  _last_solve_converged = nonlinearSolve(_nl_rel_tol, _nl_abs_tol, _l_tol, _eigenvalue);
   postSolve();
 
   if (lastSolveConverged())

@@ -12,17 +12,18 @@
 
 registerMooseObject("TensorMechanicsApp", TensileStressUpdate);
 
-template <>
+defineLegacyParams(TensileStressUpdate);
+
 InputParameters
-validParams<TensileStressUpdate>()
+TensileStressUpdate::validParams()
 {
-  InputParameters params = validParams<MultiParameterPlasticityStressUpdate>();
+  InputParameters params = MultiParameterPlasticityStressUpdate::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
   params.addParam<bool>("perfect_guess",
                         true,
-                        "Provide a guess to the Newton-Raphson proceedure "
+                        "Provide a guess to the Newton-Raphson procedure "
                         "that is the result from perfect plasticity.  With "
                         "severe hardening/softening this may be "
                         "suboptimal.");

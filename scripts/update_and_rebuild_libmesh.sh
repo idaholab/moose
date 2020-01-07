@@ -145,6 +145,7 @@ if [ -z "$go_fast" ]; then
                                    --enable-silent-rules \
                                    --enable-unique-id \
                                    --disable-warnings \
+                                   --enable-glibcxx-debugging \
                                    --with-thread-model=openmp \
                                    --disable-maintainer-mode \
                                    --enable-petsc-hypre-required \

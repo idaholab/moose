@@ -59,11 +59,12 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
-template <>
+defineLegacyParams(MooseMesh);
+
 InputParameters
-validParams<MooseMesh>()
+MooseMesh::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   MooseEnum parallel_type("DEFAULT REPLICATED DISTRIBUTED", "DEFAULT");
   params.addParam<MooseEnum>("parallel_type",
@@ -139,6 +140,10 @@ validParams<MooseMesh>()
                                 "KDTree construction becomes faster but the nearest neighbor search"
                                 "becomes slower.");
 
+  // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
+  // derived types that do so.
+  params.addPrivateParam<bool>("_mesh_generator_mesh", false);
+
   params.registerBase("MooseMesh");
 
   // groups
@@ -158,6 +163,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _use_distributed_mesh(false),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
+    _mesh(nullptr),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
@@ -221,14 +227,17 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _parallel_type(other_mesh._parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
+    _parallel_type_overridden(other_mesh._parallel_type_overridden),
     _mesh(other_mesh.getMesh().clone()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
+    _custom_partitioner_requested(other_mesh._custom_partitioner_requested),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_nemesis(false),
     _is_prepared(false),
-    _needs_prepare_for_use(false),
+    _needs_prepare_for_use(other_mesh._needs_prepare_for_use),
     _node_to_elem_map_built(false),
+    _node_to_active_semilocal_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
@@ -264,7 +273,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _change_boundary_id_timer(registerTimedSection("changeBoundaryId", 5)),
     _init_timer(registerTimedSection("init", 2)),
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
-    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3))
+    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
+    _need_delete(other_mesh._need_delete)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -750,7 +760,7 @@ MooseMesh::getActiveLocalElementRange()
   if (!_active_local_elem_range)
   {
     TIME_SECTION(_get_active_local_element_range_timer);
-    CONSOLE_TIMED_PRINT("Caching active local element rage");
+    CONSOLE_TIMED_PRINT("Caching active local element range");
 
     _active_local_elem_range = libmesh_make_unique<ConstElemRange>(
         getMesh().active_local_elements_begin(), getMesh().active_local_elements_end(), GRAIN_SIZE);
@@ -1148,9 +1158,15 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 }
 
 void
-MooseMesh::setSubdomainName(SubdomainID subdomain_id, SubdomainName name)
+MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
   getMesh().subdomain_name(subdomain_id) = name;
+}
+
+void
+MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
+{
+  mesh.subdomain_name(subdomain_id) = name;
 }
 
 const std::string &
@@ -1946,15 +1962,23 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id,
                             bool delete_prev)
 {
   TIME_SECTION(_change_boundary_id_timer);
+  changeBoundaryId(getMesh(), old_id, new_id, delete_prev);
+}
 
+void
+MooseMesh::changeBoundaryId(MeshBase & mesh,
+                            const boundary_id_type old_id,
+                            const boundary_id_type new_id,
+                            bool delete_prev)
+{
   // Get a reference to our BoundaryInfo object, we will use it several times below...
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   // Container to catch ids passed back from BoundaryInfo
   std::vector<boundary_id_type> old_ids;
 
   // Only level-0 elements store BCs.  Loop over them.
-  for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
+  for (auto & elem : as_range(mesh.level_elements_begin(0), mesh.level_elements_end(0)))
   {
     unsigned int n_sides = elem->n_sides();
     for (unsigned int s = 0; s != n_sides; ++s)
@@ -2089,54 +2113,7 @@ MooseMesh::init()
     getMesh().partitioner().reset(_custom_partitioner.release());
   }
   else
-  {
-    // Set standard partitioner
-    // Set the partitioner based on partitioner name
-    switch (_partitioner_name)
-    {
-      case -3: // default
-        // We'll use the default partitioner, but notify the user of which one is being used...
-        if (_use_distributed_mesh)
-          _partitioner_name = "parmetis";
-        else
-          _partitioner_name = "metis";
-        break;
-
-      // No need to explicitily create the metis or parmetis partitioners,
-      // They are the default for serial and parallel mesh respectively
-      case -2: // metis
-      case -1: // parmetis
-        break;
-
-      case 0: // linear
-        getMesh().partitioner().reset(new LinearPartitioner);
-        break;
-      case 1: // centroid
-      {
-        if (!isParamValid("centroid_partitioner_direction"))
-          mooseError("If using the centroid partitioner you _must_ specify "
-                     "centroid_partitioner_direction!");
-
-        MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
-
-        if (direction == "x")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-        else if (direction == "y")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
-        else if (direction == "z")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
-        else if (direction == "radial")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-        break;
-      }
-      case 2: // hilbert_sfc
-        getMesh().partitioner().reset(new HilbertSFCPartitioner);
-        break;
-      case 3: // morton_sfc
-        getMesh().partitioner().reset(new MortonSFCPartitioner);
-        break;
-    }
-  }
+    setPartitionerHelper();
 
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
   {
@@ -2153,7 +2130,8 @@ MooseMesh::init()
     {
       TIME_SECTION(_read_recovered_mesh_timer);
       CONSOLE_TIMED_PRINT("Rcovering mesh");
-      getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
+      getMesh().read(_app.getRestartRecoverFileBase() + "_mesh." +
+                     _app.getRestartRecoverFileSuffix());
     }
 
     getMesh().allow_renumbering(allow_renumbering_later);
@@ -2231,6 +2209,12 @@ std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
 MooseMesh::buildSideList()
 {
   return getMesh().get_boundary_info().build_side_list();
+}
+
+std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+MooseMesh::buildActiveSideList()
+{
+  return getMesh().get_boundary_info().build_active_side_list();
 }
 
 unsigned int
@@ -2500,13 +2484,11 @@ MooseMesh::ghostGhostedBoundaries()
 
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
-  // We would like to clear ghosted elements that were added by
-  // previous invocations of this method; however we can't do so
-  // simply without also clearing ghosted elements that were added by
-  // other code; e.g.  OversampleOutput.  So for now we'll just
-  // swallow the inefficiency that can come from leaving unnecessary
-  // elements ghosted after AMR.
-  //  mesh.clear_extra_ghost_elems();
+  // We clear ghosted elements that were added by previous invocations of this
+  // method but leave ghosted elements that were added by other code, e.g.
+  // OversampleOutput, untouched
+  mesh.clear_extra_ghost_elems(_ghost_elems_from_ghost_boundaries);
+  _ghost_elems_from_ghost_boundaries.clear();
 
   std::set<const Elem *, CompareElemsByLevel> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;
@@ -2550,6 +2532,9 @@ MooseMesh::ghostGhostedBoundaries()
     }
   }
 
+  // We really do want to store this by value instead of by reference
+  const auto prior_ghost_elems = mesh.extra_ghost_elems();
+
   mesh.comm().allgather_packed_range(&mesh,
                                      connected_nodes_to_ghost.begin(),
                                      connected_nodes_to_ghost.end(),
@@ -2558,6 +2543,15 @@ MooseMesh::ghostGhostedBoundaries()
                                      boundary_elems_to_ghost.begin(),
                                      boundary_elems_to_ghost.end(),
                                      extra_ghost_elem_inserter<Elem>(mesh));
+
+  const auto & current_ghost_elems = mesh.extra_ghost_elems();
+
+  std::set_difference(current_ghost_elems.begin(),
+                      current_ghost_elems.end(),
+                      prior_ghost_elems.begin(),
+                      prior_ghost_elems.end(),
+                      std::inserter(_ghost_elems_from_ghost_boundaries,
+                                    _ghost_elems_from_ghost_boundaries.begin()));
 }
 
 unsigned int
@@ -2728,6 +2722,67 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
                " with DistributedMesh!\n",
                "Consider specifying parallel_type = 'replicated' in your input file\n",
                "to prevent it from being run with DistributedMesh.");
+}
+
+void
+MooseMesh::setPartitionerHelper()
+{
+  setPartitioner(getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
+}
+
+void
+MooseMesh::setPartitioner(MeshBase & mesh_base,
+                          MooseEnum & partitioner,
+                          bool use_distributed_mesh,
+                          const InputParameters & params,
+                          MooseObject & context_obj)
+{
+  // Set the partitioner based on partitioner name
+  switch (partitioner)
+  {
+    case -3: // default
+      // We'll use the default partitioner, but notify the user of which one is being used...
+      if (use_distributed_mesh)
+        partitioner = "parmetis";
+      else
+        partitioner = "metis";
+      break;
+
+    // No need to explicitily create the metis or parmetis partitioners,
+    // They are the default for serial and parallel mesh respectively
+    case -2: // metis
+    case -1: // parmetis
+      break;
+
+    case 0: // linear
+      mesh_base.partitioner().reset(new LinearPartitioner);
+      break;
+    case 1: // centroid
+    {
+      if (!params.isParamValid("centroid_partitioner_direction"))
+        context_obj.paramError(
+            "centroid_partitioner_direction",
+            "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+      MooseEnum direction = params.get<MooseEnum>("centroid_partitioner_direction");
+
+      if (direction == "x")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+      else if (direction == "y")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
+      else if (direction == "z")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
+      else if (direction == "radial")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      break;
+    }
+    case 2: // hilbert_sfc
+      mesh_base.partitioner().reset(new HilbertSFCPartitioner);
+      break;
+    case 3: // morton_sfc
+      mesh_base.partitioner().reset(new MortonSFCPartitioner);
+      break;
+  }
 }
 
 void

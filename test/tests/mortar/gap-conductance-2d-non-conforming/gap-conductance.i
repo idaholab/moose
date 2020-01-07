@@ -1,15 +1,17 @@
 [Mesh]
-  file = nodal_normals_test_offset_nonmatching_gap.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = nodal_normals_test_offset_nonmatching_gap.e
+  []
   [./master]
-    type = LowerDBlockFromSideset
+    input = file
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
   [./slave]
-    type = LowerDBlockFromSideset
+    input = master
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
   [../]

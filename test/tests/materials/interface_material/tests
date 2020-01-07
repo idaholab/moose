@@ -1,0 +1,40 @@
+[Tests]
+  [jump]
+    type = Exodiff
+    input = interface_value_material.i
+    exodiff = interface_value_material_out.e
+    design = 'Materials/index.md'
+    issues = '#12066'
+    requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface'
+  []
+  [jump_split]
+    type = Exodiff
+    input = interface_value_material_split_mesh.i
+    exodiff = interface_value_material_split_mesh_out.e
+    design = 'Materials/index.md'
+    issues = '#12066'
+    requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface when the mesh is split'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+  []
+  [jump_split_stateful]
+    type = Exodiff
+    input = interface_value_material_split_mesh_stateful.i
+    exodiff = interface_value_material_split_mesh_stateful_out.e
+    design = 'Materials/index.md'
+    issues = '#12066'
+    requirement = 'The system shall be able to calculate stateful material properties in an interface material object'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    method = '!dbg' # issue 12033
+  []
+  [boundary_elem_aux]
+    type = Exodiff
+    input = interface_value_material_noIK.i
+    exodiff = interface_value_material_noIK_out.e
+    requirement = 'The system shall evaluate interface materials such that they can be used in boundary restricted elemental auxiliary kernels'
+    issues = '#14387'
+    design = 'Materials/index.md'
+  []
+[]

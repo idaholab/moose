@@ -11,10 +11,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
 
-defineADValidParams(
-    ADComputeFiniteStrainElasticStress,
-    ADComputeStressBase,
-    params.addClassDescription("Compute stress using elasticity for finite strains"););
+defineADLegacyParams(ADComputeFiniteStrainElasticStress);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeFiniteStrainElasticStress<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeStressBase<compute_stage>::validParams();
+  params.addClassDescription("Compute stress using elasticity for finite strains");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeFiniteStrainElasticStress<compute_stage>::ADComputeFiniteStrainElasticStress(

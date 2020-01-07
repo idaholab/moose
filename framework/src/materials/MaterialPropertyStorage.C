@@ -73,16 +73,36 @@ void
 MaterialPropertyStorage::releaseProperties()
 {
   for (auto & i : *_props_elem)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_old)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_older)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
+}
+
+void
+MaterialPropertyStorage::releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map)
+{
+  for (auto & i : inner_map)
+    i.second.destroy();
+}
+
+void
+MaterialPropertyStorage::eraseProperty(const Elem * elem)
+{
+  if (_props_elem->contains(elem))
+    releasePropertyMap((*_props_elem)[elem]);
+  _props_elem->erase(elem);
+
+  if (_props_elem_old->contains(elem))
+    releasePropertyMap((*_props_elem_old)[elem]);
+  _props_elem_old->erase(elem);
+
+  if (_props_elem_older->contains(elem))
+    releasePropertyMap((*_props_elem_older)[elem]);
+  _props_elem_older->erase(elem);
 }
 
 void
@@ -219,7 +239,7 @@ MaterialPropertyStorage::restrictStatefulProps(
 
 void
 MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
-                                           const std::vector<std::shared_ptr<Material>> & mats,
+                                           const std::vector<std::shared_ptr<MaterialBase>> & mats,
                                            unsigned int n_qpoints,
                                            const Elem & elem,
                                            unsigned int side /* = 0*/)
@@ -401,6 +421,10 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 {
   material_data.resize(n_qpoints);
   auto n = _stateful_prop_id_to_prop_id.size();
+
+  // In some special cases, material_data might be larger than n_qpoints
+  if (material_data.isOnlyResizeIfSmaller())
+    n_qpoints = material_data.nQPoints();
 
   if (props(&elem, side).size() < n)
     props(&elem, side).resize(n, nullptr);

@@ -31,6 +31,8 @@ template <ComputeStage compute_stage>
 class ADDGDiffusion : public ADDGKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADDGDiffusion(const InputParameters & parameters);
 
 protected:

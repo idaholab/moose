@@ -10,10 +10,16 @@
 #include "ADRadialReturnCreepStressUpdateBase.h"
 #include "RankTwoTensor.h"
 
-defineADValidParams(
-    ADRadialReturnCreepStressUpdateBase,
-    ADRadialReturnStressUpdate,
-    params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";);
+defineADLegacyParams(ADRadialReturnCreepStressUpdateBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADRadialReturnCreepStressUpdateBase<compute_stage>::validParams()
+{
+  InputParameters params = ADRadialReturnStressUpdate<compute_stage>::validParams();
+  params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADRadialReturnCreepStressUpdateBase<compute_stage>::ADRadialReturnCreepStressUpdateBase(

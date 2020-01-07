@@ -14,7 +14,7 @@ import logging
 import traceback
 import codecs
 import shutil
-import anytree
+import moosetree
 
 import MooseDocs
 from MooseDocs import common
@@ -53,7 +53,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             compoment[RenderComponent]: The component to execute with the associated token type.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type("name", name, unicode)
+            common.check_type("name", name, str)
             common.check_type("component", component, MooseDocs.base.components.RenderComponent)
         component.setRenderer(self)
         self.addComponent(component)
@@ -87,12 +87,12 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             else:
                 line = None
                 src = ''
-            msg = common.report_error(e.message,
+            msg = common.report_error(e,
                                       page.source,
                                       line,
                                       src,
                                       traceback.format_exc(),
-                                      u'RENDER ERROR')
+                                      'RENDER ERROR')
             with MooseDocs.base.translators.Translator.LOCK:
                 LOG.error(msg)
 
@@ -186,6 +186,7 @@ class HTMLRenderer(Renderer):
         config = Renderer.defaultConfig()
         config['google_analytics'] = (False, "Enable Google Analytics.")
         config['favicon'] = (None, "The location of the website favicon.")
+        config['extra-css'] = ([], "List of additional CSS files to include.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -222,15 +223,23 @@ class HTMLRenderer(Renderer):
 
         def rel(path):
             """Helper to create relative paths for js/css dependencies."""
+            if path.startswith('http'):
+                return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
-        head = anytree.search.find_by_attr(root, 'head')
-        body = anytree.search.find_by_attr(root, 'body')
+        head = moosetree.find(root, lambda n: n.name == 'head')
+        body = moosetree.find(root, lambda n: n.name == 'body')
 
         favicon = self.get('favicon')
         if favicon:
             html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), \
                      sizes="16x16 32x32 64x64 128x128")
+
+        # Add the extra-css, this is done here to make sure it shows up last
+        for i, css in enumerate(self.get('extra-css')):
+            key = 'extra-css-{}'.format(i)
+            if key not in self.__css:
+                self.addCSS(key, css)
 
         for name, kwargs in self.__css:
             html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
@@ -280,7 +289,7 @@ class MaterializeRenderer(HTMLRenderer):
         self.addCSS('prism', "contrib/prism/prism.min.css")
         self.addCSS('moose', "css/moose.css")
 
-        self.addJavaScript('jquery', "contrib/jquery/jquery.min.js")
+        self.addJavaScript('jquery', "contrib/jquery/jquery.min.js", head=True)
         self.addJavaScript('materialize', "contrib/materialize/materialize.min.js")
         self.addJavaScript('clipboard', "contrib/clipboard/clipboard.min.js")
         self.addJavaScript('prism', "contrib/prism/prism.min.js")

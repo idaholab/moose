@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", AddICAction, "add_ic");
 
-template <>
+defineLegacyParams(AddICAction);
+
 InputParameters
-validParams<AddICAction>()
+AddICAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 

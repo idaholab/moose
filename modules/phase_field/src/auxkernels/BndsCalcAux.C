@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BndsCalcAux.h"
+#include "BndsCalculator.h"
 
 registerMooseObject("PhaseFieldApp", BndsCalcAux);
 
@@ -32,10 +33,5 @@ BndsCalcAux::BndsCalcAux(const InputParameters & parameters)
 Real
 BndsCalcAux::computeValue()
 {
-  Real value = 0.0;
-
-  for (unsigned int i = 0; i < _op_num; ++i)
-    value += (*_vals[i])[_qp] * (*_vals[i])[_qp];
-
-  return value;
+  return BndsCalculator::computeBndsVariable(_vals, _qp);
 }

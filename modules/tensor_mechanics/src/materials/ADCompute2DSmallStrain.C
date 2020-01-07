@@ -11,14 +11,19 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(
-    ADCompute2DSmallStrain,
-    ADComputeSmallStrain,
-    params.addClassDescription("Compute a small strain in a plane strain configuration.");
-    MooseEnum outOfPlaneDirection("x y z", "z");
-    params.addParam<MooseEnum>("out_of_plane_direction",
-                               outOfPlaneDirection,
-                               "The direction of the out-of-plane strain."););
+defineADLegacyParams(ADCompute2DSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCompute2DSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeSmallStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain in a plane strain configuration.");
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCompute2DSmallStrain<compute_stage>::ADCompute2DSmallStrain(const InputParameters & parameters)

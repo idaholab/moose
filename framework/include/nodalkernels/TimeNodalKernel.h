@@ -27,6 +27,8 @@ public:
   /**
    * Constructor initializes the rate
    */
+  static InputParameters validParams();
+
   TimeNodalKernel(const InputParameters & parameters);
 
 protected:

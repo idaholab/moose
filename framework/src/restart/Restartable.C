@@ -13,6 +13,8 @@
 #include "FEProblem.h"
 #include "MooseObject.h"
 #include "MooseApp.h"
+#include "MooseMesh.h"
+#include "MeshMetaDataInterface.h"
 
 Restartable::Restartable(const MooseObject * moose_object, const std::string & system_name)
   : Restartable(moose_object->getMooseApp(),
@@ -42,16 +44,17 @@ Restartable::Restartable(MooseApp & moose_app,
 {
 }
 
-void
-Restartable::registerRestartableDataOnApp(std::string name,
+RestartableDataValue &
+Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
-  _restartable_app.registerRestartableData(name, std::move(data), tid);
+  return _restartable_app.registerRestartableData(name, std::move(data), tid, false, false);
 }
 
 void
-Restartable::registerRecoverableDataOnApp(std::string name)
+Restartable::registerRestartableNameWithFilterOnApp(const std::string & name,
+                                                    Moose::RESTARTABLE_FILTER filter)
 {
-  _restartable_app.registerRecoverableData(name);
+  _restartable_app.registerRestartableNameWithFilter(name, filter);
 }

@@ -28,6 +28,8 @@ InputParameters validParams<SideSetsAroundSubdomainGenerator>();
 class SideSetsAroundSubdomainGenerator : public SideSetsGeneratorBase
 {
 public:
+  static InputParameters validParams();
+
   SideSetsAroundSubdomainGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

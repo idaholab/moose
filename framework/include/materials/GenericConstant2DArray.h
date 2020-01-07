@@ -20,6 +20,8 @@ InputParameters validParams<GenericConstant2DArray>();
 class GenericConstant2DArray : public Material
 {
 public:
+  static InputParameters validParams();
+
   GenericConstant2DArray(const InputParameters & parameters);
 
 protected:

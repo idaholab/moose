@@ -25,6 +25,8 @@ InputParameters validParams<NodalRotationalInertia>();
 class NodalRotationalInertia : public TimeNodalKernel
 {
 public:
+  static InputParameters validParams();
+
   NodalRotationalInertia(const InputParameters & parameters);
 
 protected:
@@ -105,4 +107,3 @@ protected:
   /// du_dotdot_du value
   const VariableValue * _du_dotdot_du;
 };
-

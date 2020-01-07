@@ -13,9 +13,10 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredAverage);
 
-template <>
+defineLegacyParams(NearestPointLayeredAverage);
+
 InputParameters
-validParams<NearestPointLayeredAverage>()
+NearestPointLayeredAverage::validParams()
 {
   InputParameters params =
       nearestPointBaseValidParams<LayeredAverage, ElementIntegralVariableUserObject>();

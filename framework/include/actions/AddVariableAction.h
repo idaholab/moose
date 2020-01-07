@@ -9,9 +9,7 @@
 
 #pragma once
 
-// MOOSE includes
-#include "Action.h"
-#include "OutputInterface.h"
+#include "MooseObjectAction.h"
 
 #include "libmesh/fe_type.h"
 
@@ -24,12 +22,14 @@ InputParameters validParams<AddVariableAction>();
 /**
  * Adds nonlinear variable
  */
-class AddVariableAction : public Action, public OutputInterface
+class AddVariableAction : public MooseObjectAction
 {
 public:
   /**
    * Class constructor
    */
+  static InputParameters validParams();
+
   AddVariableAction(InputParameters params);
 
   virtual void act() override;
@@ -46,7 +46,22 @@ public:
    */
   static MooseEnum getNonlinearVariableOrders();
 
+  /**
+   * determine the FEType by examining family and order in the provided parameters
+   */
+  static FEType feType(const InputParameters & params);
+
+  /**
+   * determine the variable type given an FEType and number of components
+   */
+  static std::string determineType(const FEType & fe_type, unsigned int components);
+
 protected:
+  /**
+   * Initialize the action's member variables
+   */
+  virtual void init();
+
   /**
    * Adds a nonlinear variable to the system.
    *
@@ -77,6 +92,6 @@ protected:
   /// Number of components for an array variable
   unsigned int _components;
 
-  /// Absolute zero tolerance
-  static const Real _abs_zero_tol;
+  std::function<void(FEProblemBase &, const std::string &, const std::string &, InputParameters &)>
+      _problem_add_var_method;
 };

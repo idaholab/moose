@@ -27,6 +27,8 @@ InputParameters validParams<ComputeVariableBaseEigenStrain>();
 class ComputeVariableBaseEigenStrain : public ComputeEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeVariableBaseEigenStrain(const InputParameters & parameters);
 
 protected:
@@ -36,4 +38,3 @@ protected:
   const MaterialProperty<Real> & _prefactor;
   RankTwoTensor _offset_tensor;
 };
-

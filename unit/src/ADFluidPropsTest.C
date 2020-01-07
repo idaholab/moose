@@ -21,14 +21,14 @@ TEST_F(ADFluidPropsTest, ad_basic)
   Real dpde = 0;
   _fp->p_from_v_e(v, e, p, dpdv, dpde);
 
-  NumberArray<50, Real> dvdx;
-  NumberArray<50, Real> dedx;
-  dvdx[0] = 1;
-  dvdx[1] = 2;
-  dvdx[2] = 3;
-  dedx[0] = 1;
-  dedx[1] = 0;
-  dedx[2] = 2;
+  DNDerivativeType dvdx;
+  DNDerivativeType dedx;
+  Moose::derivInsert(dvdx, 0, 1);
+  Moose::derivInsert(dvdx, 1, 2);
+  Moose::derivInsert(dvdx, 2, 3);
+  Moose::derivInsert(dedx, 0, 1);
+  Moose::derivInsert(dedx, 1, 0);
+  Moose::derivInsert(dedx, 2, 2);
 
   DualReal v_ad(v, dvdx);
   DualReal e_ad(e, dedx);

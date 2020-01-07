@@ -184,6 +184,16 @@
     requirement = 'The system shall dump line information along with JSON formatted syntax.'
   [../]
 
+  [./json_no_template]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+    test_case = "TestNoTemplate"
+    max_buffer_size = -1
+    issues = '#12960'
+    design = 'JsonInputFileFormatter.md'
+    requirement = 'The system shall not include RESIDUAL and JACOBIAN template arguments in the JSON syntax format.'
+  [../]
+
   [./hit]
     type = 'PythonUnitTest'
     input = 'test_hit_output.py'
@@ -204,7 +214,7 @@
     requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'
   [../]
 
-  [./definition_existsin_test]
+  [./definition_exists_in_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = 'ExistsIn=\[\s*?EXTRA:"all"\s*?EXTRA:"none"\s*?"../../../../../Outputs/["*"]/decl"\s*?\]'
@@ -215,6 +225,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ExistsIn'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'HEAVY'
   [../]
 
   [./definition_childatleastone_test]
@@ -228,6 +239,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ChildAtLeastOne'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_valenum_test]
@@ -241,6 +253,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ValEnums'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_active_parameter_test]
@@ -254,6 +267,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check active parameter'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_normal_sub_test]
@@ -267,6 +281,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check normal_sub'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_type_sub_test]
@@ -280,6 +295,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check type_sub'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_default_type_test]
@@ -293,6 +309,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default type'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_minvalinc_inputdefault_test]
@@ -306,6 +323,7 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check MinValInc'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 
   [./definition_expressions_are_okay_test]
@@ -319,5 +337,48 @@
     issues = '#9651'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ExpressionsAreOkay'
     design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
+  [../]
+
+  [./definition_block_type_maxoccurs_nolimit_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?ValEnums=\[ "AuxVariables" \]'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
+  [../]
+
+  [./definition_functionname_type_maxoccurs_nolimit_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'x_forcing_func\'{.*?\'value\'{.*?MaxOccurs=NoLimit.*?}.*?} % end parameter x_forcing_func'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
+  [../]
+
+  [./definition_array_type_minoccurs_zero_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'active\'{.*?\'value\'{.*?MinOccurs=0.*?}.*?} % end parameter active'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#14277'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_exists_in_test"
   [../]
 []

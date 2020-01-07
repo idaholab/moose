@@ -10,19 +10,19 @@
 import re
 import codecs
 import logging
-import anytree
+import moosetree
 
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
-from MooseDocs.base import components
+from MooseDocs.base import components, Translator
 from MooseDocs.extensions import core, command, include, alert, floats, materialicon
 from MooseDocs.tree import tokens
 
 LOG = logging.getLogger(__name__)
 
-TemplateItem = tokens.newToken('TemplateItem', key=u'')
-TemplateField = tokens.newToken('TemplateField', key=u'', required=True)
+TemplateItem = tokens.newToken('TemplateItem', key='')
+TemplateField = tokens.newToken('TemplateField', key='', required=True)
 TemplateSubField = tokens.newToken('TemplateSubField')
 
 def make_extension(**kwargs):
@@ -59,7 +59,7 @@ class TemplateExtension(include.IncludeExtension):
         items = set()
         fields = set()
 
-        for node in anytree.PreOrderIter(ast):
+        for node in moosetree.iterate(ast):
             if node.name == 'TemplateItem':
                 items.add(node['key'])
             elif node.name == 'TemplateField':
@@ -74,7 +74,7 @@ class TemplateExtension(include.IncludeExtension):
         """
         Helper for applying template args (e.g., {{app}})
         """
-        if not isinstance(content, (str, unicode)):
+        if not isinstance(content, (str, str)):
             return content
 
         template_args = self.get('args', dict())
@@ -88,7 +88,7 @@ class TemplateExtension(include.IncludeExtension):
                 raise exceptions.MooseDocsException(msg, key)
             return arg
 
-        content = re.sub(ur'{{(?P<key>.*?)}}', sub, content)
+        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
         return content
 
 
@@ -116,9 +116,9 @@ class TemplateLoadCommand(command.CommandComponent):
         settings, t_args = common.match_settings(self.defaultSettings(), info['settings'])
 
         location = self.translator.findPage(settings['file'])
-        self.extension.addDependency(location)
-        with codecs.open(location.source, 'r', encoding='utf-8') as fid:
-            content = fid.read()
+        #with Translator.LOCK:
+        #    page['dependencies'].add(location.uid)
+        content = common.read(location.source)
 
         content = self.extension.applyTemplateArguments(content, **t_args)
         self.reader.tokenize(parent, content, page, line=info.line)
@@ -185,7 +185,7 @@ class RenderTemplateField(components.RenderComponent):
         # Locate the replacement
         key = token['key']
         func = lambda n: (n.name == 'TemplateItem') and (n['key'] == key)
-        replacement = anytree.search.find(token.root, filter_=func)
+        replacement = moosetree.find(token.root, func)
 
         if replacement:
             # Add beginning TemplateSubField
@@ -202,7 +202,9 @@ class RenderTemplateField(components.RenderComponent):
                     self.renderer.render(parent, child, page)
 
             # Remove the TemplateFieldItem, otherwise the content will be rendered again
-            replacement.remove()
+            replacement.parent = None
+            for child in replacement.children:
+                child.parent = None
 
         elif not token['required']:
             tok = tokens.Token(None)
@@ -217,29 +219,29 @@ class RenderTemplateField(components.RenderComponent):
 
         filename = page.local
         key = token['key']
-        err = alert.AlertToken(None, brand=u'error')
+        err = alert.AlertToken(None, brand='error')
         alert_title = alert.AlertTitle(err,
-                                       brand=u'error',
-                                       string=u'Missing Template Item: "{}"'.format(key))
-        alert_content = alert.AlertContent(err, brand=u'error')
+                                       brand='error',
+                                       string='Missing Template Item: "{}"'.format(key))
+        alert_content = alert.AlertContent(err, brand='error')
         token.copyToToken(alert_content)
 
         if modal_flag:
             modal_content = tokens.Token(None)
             core.Paragraph(modal_content,
-                           string=u"The document must include the \"{0}\" template item, this can "\
-                           u"be included by add adding the following to the markdown " \
-                           u"file ({1}):".format(key, filename))
+                           string="The document must include the \"{0}\" template item, this can "\
+                           "be included by add adding the following to the markdown " \
+                           "file ({1}):".format(key, filename))
 
             core.Code(modal_content,
-                      content=u"!template! item key={0}\nInclude text (in MooseDocs format) " \
-                      u"regarding the \"{0}\" template item here.\n" \
-                      u"!template-end!".format(key))
+                      content="!template! item key={0}\nInclude text (in MooseDocs format) " \
+                      "regarding the \"{0}\" template item here.\n" \
+                      "!template-end!".format(key))
 
             link = floats.create_modal_link(alert_title,
-                                            title=u'Missing Template Item "{}"'.format(key),
+                                            title='Missing Template Item "{}"'.format(key),
                                             content=modal_content)
-            materialicon.Icon(link, icon=u'help_outline',
+            materialicon.Icon(link, icon='help_outline',
                               class_='small',
                               style='float:right;color:white;margin-bottom:5px;')
 

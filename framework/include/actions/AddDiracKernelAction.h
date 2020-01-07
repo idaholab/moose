@@ -19,6 +19,8 @@ InputParameters validParams<AddDiracKernelAction>();
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddDiracKernelAction(InputParameters params);
 
   virtual void act() override;

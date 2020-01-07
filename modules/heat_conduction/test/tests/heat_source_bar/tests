@@ -5,7 +5,7 @@
     exodiff = 'heat_source_bar_out.e'
     abs_zero = 1e-7
     requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar'
-    design = "\HeatSource.md"
+    design = "HeatSource.md"
     issues = "#2582"
   [../]
   [./ad_heat_source_bar]
@@ -14,7 +14,7 @@
     exodiff = 'ad_heat_source_bar_out.e'
     abs_zero = 1e-7
     requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels'
-    design = "\ADMatHeatSource"
+    design = "ADMatHeatSource.md"
     issues = "#12633"
     custom_cmp = 'ad_heat_source_bar.cmp'
   [../]
@@ -26,7 +26,7 @@
     run_sim = True
     petsc_version = '>=3.9.4'
     requirement = 'The AD heat conduction and heat source Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
+    design = "ADMatHeatSource.md"
     issues = "#5658 #12633"
     prereq = 'ad_heat_source_bar' # same input file
   [../]

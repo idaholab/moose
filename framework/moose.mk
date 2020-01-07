@@ -35,19 +35,31 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
+python_version 	:= $(shell python -c 'import sys;print(sys.version_info[0])')
+pyhit_srcfiles  := $(hit_DIR)/hit$(python_version).cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
-# some systems have python2 but no python2-config command - fall back to python-config for them
-pyconfig := python2-config
-ifeq (, $(shell which python2-config 2>/dev/null))
-  pyconfig := python-config
+# some systems have python2/3 but no python2/3-config command - fall back to python-config for them
+ifeq ($(python_version), 2)
+	pyconfig := python2-config
+else
+	pyconfig := python3-config
+endif
+
+ifeq (, $(shell which $(pyconfig) 2>/dev/null))
+	pyconfig := python-config
+endif
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+else
+	DYNAMIC_LOOKUP :=
 endif
 
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` `$(pyconfig) --ldflags` $^ -o $(pyhit_LIB))'
-
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` $(DYNAMIC_LOOKUP) $^ -o $(pyhit_LIB))'
 #
 # gtest
 #
@@ -57,6 +69,16 @@ gtest_objects   := $(patsubst %.cc, %.$(obj-suffix), $(gtest_srcfiles))
 gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
+
+#
+# MooseConfigure
+#
+moose_config := $(FRAMEWORK_DIR)/include/base/MooseConfig.h
+moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
+
+$(moose_config):
+	@echo "Copying default MOOSE configuration to: "$@"..."
+	@cp $(moose_default_config) $(moose_config)
 
 #
 # header symlinks
@@ -72,7 +94,7 @@ $(1):
 	@$$(shell mkdir -p $$@)
 endef
 
-include_files	:= $(shell find $(FRAMEWORK_DIR)/include -regex "[^\#~]*\.h")
+include_files	:= $(shell find $(FRAMEWORK_DIR)/include \( -regex "[^\#~]*\.h" ! -name "*MooseConfig.h" \))
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 # Create a rule for one symlink for one header file
@@ -94,6 +116,11 @@ endef
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
+
+moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
+$(moose_config_symlink): $(moose_config) | $(moose_all_header_dir)
+	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
+	@ln -sf $(moose_config) $(moose_config_symlink)
 
 header_symlinks: $(all_header_dir) $(link_names)
 moose_INC_DIRS := $(all_header_dir)
@@ -257,6 +284,16 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+$(moose_objects): $(moose_config_symlink)
+
+else
+
+$(moose_objects): $(moose_config)
+
+endif
 
 ## Clang static analyzer
 sa: $(moose_analyzer)

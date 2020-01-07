@@ -28,6 +28,8 @@ class ComputeThermalExpansionEigenstrainBase
   : public DerivativeMaterialInterface<ComputeEigenstrainBase>
 {
 public:
+  static InputParameters validParams();
+
   ComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
@@ -48,4 +50,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
   const VariableValue & _stress_free_temperature;
 };
-

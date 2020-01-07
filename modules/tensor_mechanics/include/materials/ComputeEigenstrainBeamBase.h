@@ -22,6 +22,8 @@ InputParameters validParams<ComputeEigenstrainBeamBase>();
 class ComputeEigenstrainBeamBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputeEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
@@ -43,4 +45,3 @@ protected:
   /// Restartable data to check for the zeroth and first time steps for thermal calculations
   bool & _step_zero;
 };
-

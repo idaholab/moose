@@ -1,50 +1,74 @@
 [Tests]
-  [./no_upwinding_jacobian]
-    type = PetscJacobianTester
-    input = no_upwinding_jacobian.i
-    ratio_tol = 1E-7
-    difference_tol = 1E-7
-  [../]
-  [./full_upwinding_jacobian]
-    type = PetscJacobianTester
-    input = full_upwinding_jacobian.i
-    ratio_tol = 1E-7
-    difference_tol = 1E-7
-  [../]
-  [./no_upwinding_1D]
-    type = Exodiff
-    input = no_upwinding_1D.i
-    exodiff = no_upwinding_1D_out.e
-    abs_zero = 1E-7
-  [../]
-  [./full_upwinding_1D]
-    type = Exodiff
-    input = full_upwinding_1D.i
-    exodiff = full_upwinding_1D_out.e
-    abs_zero = 1E-7
-  [../]
-  [./no_upwinding_2D]
-    type = Exodiff
-    input = no_upwinding_2D.i
-    exodiff = no_upwinding_2D_out.e
-    abs_zero = 1E-7
-  [../]
-  [./full_upwinding_2D]
-    type = Exodiff
-    input = full_upwinding_2D.i
-    exodiff = full_upwinding_2D_out.e
-    abs_zero = 1E-7
-  [../]
-  [./none_in_all_out]
-    type = Exodiff
-    input = none_in_all_out.i
-    exodiff = none_in_all_out_out.e
-    abs_zero = 1E-7
-  [../]
-  [./none_in_none_out]
-    type = CSVDiff
-    input = none_in_none_out.i
-    csvdiff = none_in_none_out_out.csv
-    abs_zero = 1E-7
-  [../]
+  design = 'ConservativeAdvection.md'
+  issues = '#11852'
+
+  [upwinding]
+    requirement = 'The system shall include the ability to compute the residual contribution from '
+                  'the conservative form of the advection operator'
+
+    [no_upwinding_jacobian]
+      type = PetscJacobianTester
+      input = no_upwinding_jacobian.i
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+
+      detail = 'without upwinding in 3D,'
+    []
+    [full_upwinding_jacobian]
+      type = PetscJacobianTester
+      input = full_upwinding_jacobian.i
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+
+      detail = 'with upwinding in 3D,'
+    []
+    [no_upwinding_1D]
+      type = Exodiff
+      input = no_upwinding_1D.i
+      exodiff = no_upwinding_1D_out.e
+      abs_zero = 1E-7
+
+      detail = 'without upwinding in 1D,'
+    []
+    [full_upwinding_1D]
+      type = Exodiff
+      input = full_upwinding_1D.i
+      exodiff = full_upwinding_1D_out.e
+      abs_zero = 1E-7
+
+      detail = 'with upwinding in 1D,'
+    []
+    [no_upwinding_2D]
+      type = Exodiff
+      input = no_upwinding_2D.i
+      exodiff = no_upwinding_2D_out.e
+      abs_zero = 1E-7
+
+      detail = 'without upwinding in 2D,'
+    []
+    [full_upwinding_2D]
+      type = Exodiff
+      input = full_upwinding_2D.i
+      exodiff = full_upwinding_2D_out.e
+      abs_zero = 1E-7
+
+      detail = 'with upwinding in 2D,'
+    []
+    [none_in_all_out]
+      type = Exodiff
+      input = none_in_all_out.i
+      exodiff = none_in_all_out_out.e
+      abs_zero = 1E-7
+
+      detail = 'with upwinding and an outflow boundary condition, and'
+    []
+    [none_in_none_out]
+      type = CSVDiff
+      input = none_in_none_out.i
+      csvdiff = none_in_none_out_out.csv
+      abs_zero = 1E-7
+
+      detail = 'without any outflow boundary conditions.'
+    []
+  []
 []

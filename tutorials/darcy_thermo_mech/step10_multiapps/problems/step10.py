@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import os
 import vtk
 import chigger
@@ -68,7 +77,7 @@ def frames():
                                          colorbar_origin=[0.2, 0.725],
                                          location='top')
     cbar.setOptions('primary', title='Temperature (K)', font_size=FONTSIZE, font_color=[0,0,0], num_ticks=6)
-    cbar.setOptions('secondary', title='Phase (0=water; 1=steel)', font_size=FONTSIZE, font_color=[0,0,0], num_ticks=2)
+    cbar.setOptions('secondary', title='Phase (0=water; 1=steel)', font_size=FONTSIZE, font_color=[0,0,0], num_ticks=3)
 
     time = chigger.annotations.TextAnnotation(position=[0.1,0.725], font_size=FONTSIZE, text_color=[0,0,0],
                                               justification='center', vertical_alignment='middle')
@@ -85,19 +94,20 @@ def frames():
     line5 = chigger.graphs.Line(width=3, label='Sub5')
 
     # VTK messes up the order, that is why the strange input
-    graph = chigger.graphs.Graph(line1, line5, line0, line2, line3, line4, color_scheme='BREWER_QUALITATIVE_DARK2',
+    graph = chigger.graphs.Graph(line3, line0, line2, line4, line5, line1, color_scheme='BREWER_QUALITATIVE_DARK2',
                                  viewport=[0,0,1,1/3.])
 
     graph.setOptions('xaxis', title='Time (s)', lim=[0,80], font_color=[0,0,0], font_size=FONTSIZE, num_ticks=9)
     graph.setOptions('yaxis', title='k (W/mK)', lim=[0.5, 12.5], font_color=[0,0,0], font_size=FONTSIZE, num_ticks=5)
     graph.setOptions('legend', label_color=[0,0,0], label_font_size=0.75*FONTSIZE, opacity=1, background=[1,1,1], border=True, border_width=1, border_color=[0,0,0])
 
-    lab0 = chigger.annotations.TextAnnotation(text='Sub0: x=0', position=[1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
-    lab1 = chigger.annotations.TextAnnotation(text='Sub1: x=0.0608', position=[1/6. + 1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
-    lab2 = chigger.annotations.TextAnnotation(text='Sub2: x=0.1216', position=[2/6. + 1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
-    lab3 = chigger.annotations.TextAnnotation(text='Sub3: x=0.1824', position=[3/6. + 1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
-    lab4 = chigger.annotations.TextAnnotation(text='Sub4: x=0.2432', position=[4/6. + 1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
-    lab5 = chigger.annotations.TextAnnotation(text='Sub5: x=0.304', position=[5/6. + 1/12., 1/3.], font_size=0.75*FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    laby = 1/3. - 1/64.
+    lab0 = chigger.annotations.TextAnnotation(text='Sub0: x=0', position=[1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    lab1 = chigger.annotations.TextAnnotation(text='Sub1: x=0.0608', position=[1/6. + 1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    lab2 = chigger.annotations.TextAnnotation(text='Sub2: x=0.1216', position=[2/6. + 1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    lab3 = chigger.annotations.TextAnnotation(text='Sub3: x=0.1824', position=[3/6. + 1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    lab4 = chigger.annotations.TextAnnotation(text='Sub4: x=0.2432', position=[4/6. + 1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
+    lab5 = chigger.annotations.TextAnnotation(text='Sub5: x=0.304', position=[5/6. + 1/12., laby], font_size=FONTSIZE, text_color=[0.5]*3, justification='center', vertical_alignment='top')
 
     subs += [lab0, lab1, lab2, lab3, lab4, lab5]
     window = chigger.RenderWindow(temp, cbar, time, tdisp, graph, *subs, size=[1920, 1080],

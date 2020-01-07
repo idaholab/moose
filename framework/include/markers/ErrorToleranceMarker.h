@@ -19,6 +19,8 @@ InputParameters validParams<ErrorToleranceMarker>();
 class ErrorToleranceMarker : public IndicatorMarker
 {
 public:
+  static InputParameters validParams();
+
   ErrorToleranceMarker(const InputParameters & parameters);
 
 protected:

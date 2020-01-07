@@ -23,11 +23,15 @@
 
 registerMooseObject("MooseApp", MultiAppVariableValueSampleTransfer);
 
-template <>
+defineLegacyParams(MultiAppVariableValueSampleTransfer);
+
 InputParameters
-validParams<MultiAppVariableValueSampleTransfer>()
+MultiAppVariableValueSampleTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
+  params.addClassDescription(
+      "Transfers the value of a variable within the master application at each sub-application "
+      "position and transfers the value to a field variable on the sub-application(s).");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
@@ -40,6 +44,8 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -55,7 +61,7 @@ MultiAppVariableValueSampleTransfer::execute()
 {
   _console << "Beginning VariableValueSampleTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {

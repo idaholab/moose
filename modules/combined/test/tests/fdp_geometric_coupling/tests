@@ -1,4 +1,6 @@
 [Tests]
+  Design = 'FiniteDifferencePreconditioner.md'
+  issues = '#2816'
   [./test_sm]
     type = 'Exodiff'
     input = 'fdp_geometric_coupling_sm.i'
@@ -8,6 +10,8 @@
     max_parallel = 1
     valgrind = 'HEAVY'
     prereq = test
+    no_error_deprecated = true
+    requirement = 'The finite difference preconditioner shall allow for implicit coupling with the geometric search with deprecated solid_mechanics'
   [../]
   [./test]
     type = 'Exodiff'
@@ -16,5 +20,6 @@
     abs_zero = 1e-10
     max_parallel = 1
     valgrind = 'HEAVY'
+    requirement = 'The finite difference preconditioner shall allow for implicit coupling with the geometric search'
   [../]
 []

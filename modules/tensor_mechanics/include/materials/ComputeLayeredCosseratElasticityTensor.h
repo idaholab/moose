@@ -26,6 +26,8 @@ InputParameters validParams<ComputeLayeredCosseratElasticityTensor>();
 class ComputeLayeredCosseratElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeLayeredCosseratElasticityTensor(const InputParameters & parameters);
 
 protected:
@@ -50,4 +52,3 @@ protected:
   /// Compliance tensor (_Eijkl^-1) at the qps
   MaterialProperty<RankFourTensor> & _compliance;
 };
-

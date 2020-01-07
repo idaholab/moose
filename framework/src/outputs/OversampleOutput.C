@@ -20,13 +20,14 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
-template <>
+defineLegacyParams(OversampleOutput);
+
 InputParameters
-validParams<OversampleOutput>()
+OversampleOutput::validParams()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<AdvancedOutput>();
+  InputParameters params = AdvancedOutput::validParams();
   params.addParam<unsigned int>("refinements",
                                 0,
                                 "Number of uniform refinements for oversampling "
@@ -80,7 +81,7 @@ OversampleOutput::initialSetup()
 void
 OversampleOutput::outputStep(const ExecFlagType & type)
 {
-  CONSOLE_TIMED_PRINT("Outputing ", name());
+  CONSOLE_TIMED_PRINT("Outputting ", name());
 
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)

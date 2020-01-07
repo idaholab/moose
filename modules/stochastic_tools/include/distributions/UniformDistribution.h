@@ -21,11 +21,13 @@ InputParameters validParams<UniformDistribution>();
 class UniformDistribution : public Distribution
 {
 public:
+  static InputParameters validParams();
+
   UniformDistribution(const InputParameters & parameters);
 
-  Real pdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const;
-  Real cdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const;
-  Real quantile(const Real & y, const Real & lower_bound, const Real & upper_bound) const;
+  static Real pdf(const Real & x, const Real & lower_bound, const Real & upper_bound);
+  static Real cdf(const Real & x, const Real & lower_bound, const Real & upper_bound);
+  static Real quantile(const Real & y, const Real & lower_bound, const Real & upper_bound);
 
   virtual Real pdf(const Real & x) const override;
   virtual Real cdf(const Real & x) const override;
@@ -38,4 +40,3 @@ protected:
   /// The upper bound for the uniform distribution
   const Real & _upper_bound;
 };
-

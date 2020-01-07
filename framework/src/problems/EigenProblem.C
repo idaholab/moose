@@ -26,11 +26,23 @@
 
 registerMooseObject("MooseApp", EigenProblem);
 
-template <>
+defineLegacyParams(EigenProblem);
+
 InputParameters
-validParams<EigenProblem>()
+EigenProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
+  params.addParam<bool>("negative_sign_eigen_kernel",
+                        true,
+                        "Whether or not to use a negative sign for eigenvalue kernels. "
+                        "Using a negative sign makes eigenvalue kernels consistent with "
+                        "a nonlinear solver");
+
+  params.addParam<unsigned int>(
+      "active_eigen_index",
+      0,
+      "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
+
   return params;
 }
 
@@ -40,6 +52,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
+    _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
+    _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
@@ -55,7 +69,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
-
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
@@ -208,6 +221,32 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
 
+Real
+EigenProblem::computeResidualL2Norm()
+{
+  computeResidualAB(*_nl_eigen->currentSolution(),
+                    _nl_eigen->residualVectorAX(),
+                    _nl_eigen->residualVectorBX(),
+                    _nl_eigen->nonEigenVectorTag(),
+                    _nl_eigen->eigenVectorTag());
+
+  Real eigenvalue = 1.0;
+
+  if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
+    eigenvalue = _nl_eigen->getNthConvergedEigenvalue(_active_eigen_index).first;
+
+  // Scale BX with eigenvalue
+  _nl_eigen->residualVectorBX() *= eigenvalue;
+
+  // Compute entire residual
+  if (_negative_sign_eigen_kernel)
+    _nl_eigen->residualVectorAX() += _nl_eigen->residualVectorBX();
+  else
+    _nl_eigen->residualVectorAX() -= _nl_eigen->residualVectorBX();
+
+  return _nl_eigen->residualVectorAX().l2_norm();
+}
+
 #endif
 
 void
@@ -220,6 +259,10 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsPush(_petsc_option_data_base);
+#endif
+
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
@@ -231,6 +274,10 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsPop();
+#endif
 }
 
 bool

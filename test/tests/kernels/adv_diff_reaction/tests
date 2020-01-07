@@ -1,8 +1,27 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'adv_diff_reaction_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-  [../]
+  issues = '#1410'
+  design = 'syntax/Kernels/index.md'
+
+  [adv_diff_reaction]
+    requirement = 'The system shall run a coupled diffusion-advection problem with higher-order '
+                  'variables on a non-regular mesh domain:'
+
+    [steady]
+      type = 'Exodiff'
+      input = 'adv_diff_reaction_test.i'
+      exodiff = 'adv_diff_reaction_test_out.e'
+      max_parallel = 1
+
+      detail = 'in a steady-state calculation, and'
+    []
+
+    [transient]
+      type = 'Exodiff'
+      input = 'adv_diff_reaction_transient_test.i'
+      exodiff = 'adv_diff_reaction_transient_test_out.e'
+      abs_zero = 1e-9
+
+      detail = 'in a transient calculation.'
+    []
+  []
 []

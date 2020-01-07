@@ -29,6 +29,8 @@ public:
    * Class constructor
    * @param parameters The parameters object holding data for the class to use.
    */
+  static InputParameters validParams();
+
   ImageFunction(const InputParameters & parameters);
 
   /**

@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ScalarUOIC);
 
-template <>
 InputParameters
-validParams<ScalarUOIC>()
+ScalarUOIC::validParams()
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
+  InputParameters params = ScalarInitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("user_object",
                                           "The MTUserObject to be coupled into this IC");
   return params;

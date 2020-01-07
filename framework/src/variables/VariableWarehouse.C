@@ -14,33 +14,28 @@
 
 VariableWarehouse::VariableWarehouse() {}
 
-VariableWarehouse::~VariableWarehouse()
-{
-  for (auto & var : _all_objects)
-    delete var.second;
-}
-
 void
-VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
+VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariableBase> var)
 {
   _names.push_back(var_name);
-  _var_name[var_name] = var;
+  auto * raw_var = var.get();
   _all_objects[var->number()] = var;
+  _var_name[var_name] = raw_var;
 
-  if (auto * tmp_var = dynamic_cast<MooseVariableFEBase *>(var))
+  if (auto * tmp_var = dynamic_cast<MooseVariableFEBase *>(raw_var))
   {
     _vars.push_back(tmp_var);
-    if (auto * tmp_var = dynamic_cast<MooseVariable *>(var))
+    if (auto * tmp_var = dynamic_cast<MooseVariable *>(raw_var))
     {
       _regular_vars_by_number[tmp_var->number()] = tmp_var;
       _regular_vars_by_name[var_name] = tmp_var;
     }
-    else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(var))
+    else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(raw_var))
     {
       _vector_vars_by_number[tmp_var->number()] = tmp_var;
       _vector_vars_by_name[var_name] = tmp_var;
     }
-    else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(var))
+    else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(raw_var))
     {
       _array_vars_by_number[tmp_var->number()] = tmp_var;
       _array_vars_by_name[var_name] = tmp_var;
@@ -48,7 +43,7 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
     else
       mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
   }
-  else if (auto * tmp_var = dynamic_cast<MooseVariableScalar *>(var))
+  else if (auto * tmp_var = dynamic_cast<MooseVariableScalar *>(raw_var))
     _scalar_vars.push_back(tmp_var);
   else
     mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
@@ -90,7 +85,7 @@ VariableWarehouse::getVariable(unsigned int var_number)
 {
   auto it = _all_objects.find(var_number);
   if (it != _all_objects.end())
-    return it->second;
+    return it->second.get();
   else
     return nullptr;
 }

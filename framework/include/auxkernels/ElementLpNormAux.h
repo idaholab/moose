@@ -25,6 +25,8 @@ InputParameters validParams<ElementLpNormAux>();
 class ElementLpNormAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param name Object name

@@ -12,14 +12,8 @@
   dim = 2
   nx = 2
   ny = 2
-  nz = 0
-  xmin = 0
   xmax = 2
-  ymin = 0
   ymax = 2
-  zmin = 0
-  zmax = 0
-  elem_type = QUAD4
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -32,9 +26,9 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = symmetric9
-    C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e6
+    poissons_ratio = 0
   [../]
   [./stress]
     type = ADComputeLinearElasticStress

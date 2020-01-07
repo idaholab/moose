@@ -1,0 +1,9 @@
+[Tests]
+  [quadrature_locator_plus_constraint]
+    type = RunApp
+    input = quadrature_locator_plus_constraint.i
+    issues = '#5234'
+    requirement = 'The nonlinear system shall be able to augment its sparsity based on constraints when we have a quadrature nearest-node locator.'
+    design = 'GeometricSearchData.md'
+  []
+[]

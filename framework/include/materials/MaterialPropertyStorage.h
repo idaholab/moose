@@ -15,7 +15,7 @@
 #include "MaterialProperty.h"
 
 // Forward declarations
-class Material;
+class MaterialBase;
 class MaterialData;
 class QpMap;
 
@@ -36,8 +36,6 @@ class MaterialPropertyStorage
 public:
   MaterialPropertyStorage();
   virtual ~MaterialPropertyStorage();
-
-  void releaseProperties();
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
@@ -114,7 +112,7 @@ public:
    * @param side Side of the element 'elem' (0 for volumetric material properties)
    */
   void initStatefulProps(MaterialData & material_data,
-                         const std::vector<std::shared_ptr<Material>> & mats,
+                         const std::vector<std::shared_ptr<MaterialBase>> & mats,
                          unsigned int n_qpoints,
                          const Elem & elem,
                          unsigned int side = 0);
@@ -241,6 +239,15 @@ public:
   }
 
 protected:
+  /// Release all internal data structures
+  void releaseProperties();
+
+  /// Remove the property storage and element pointer from internal data structures
+  void eraseProperty(const Elem * elem);
+
+  /// Internal property storage release helper
+  void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);
+
   // indexing: [element][side]->material_properties
   std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem;
   std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem_old;
@@ -278,6 +285,9 @@ private:
                  const Elem & elem,
                  unsigned int side,
                  unsigned int n_qpoints);
+
+  // Need to be able to eraseProperty from here
+  friend class ProjectMaterialProperties;
 };
 
 template <>
@@ -301,4 +311,3 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   if (storage.hasOlderProperties())
     dataLoad(stream, storage.propsOlder(), context);
 }
-

@@ -1,6 +1,11 @@
 [Tests]
+  issues = '#8496'
+  design = 'syntax/Materials/index.md'
+
   [./test]
     type = RunApp
     input = 'test.i'
+
+    requirement = 'The system shall not create a dependency when old versions of material properties are retrieved and used in calculations.'
   [../]
 []

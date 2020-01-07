@@ -20,7 +20,7 @@ class RunApp(Tester):
         params.addParam('test_name',          "The name of the test - populated automatically")
         params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
         params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
-        params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
+        params.addParam('expect_out',         "A regular expression or literal string that must occur in the input in order for the test to be considered passing (see match_literal).")
         params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
         params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
         params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
@@ -52,7 +52,7 @@ class RunApp(Tester):
 
     def __init__(self, name, params):
         Tester.__init__(self, name, params)
-        if os.environ.has_key("MOOSE_MPI_COMMAND"):
+        if os.environ.get("MOOSE_MPI_COMMAND"):
             self.mpi_command = os.environ['MOOSE_MPI_COMMAND']
             self.force_mpi = True
         else:
@@ -193,44 +193,77 @@ class RunApp(Tester):
     def testFileOutput(self, moose_dir, options, output):
         """ Set a failure status for expressions found in output """
         reason = ''
+        errors = ''
         specs = self.specs
-        if specs.isValid('expect_out'):
-            mode = ""
-            if specs['match_literal']:
-                have_expected_out = util.checkOutputForLiteral(output, specs['expect_out'])
-                mode = 'literal'
-            else:
-                have_expected_out = util.checkOutputForPattern(output, specs['expect_out'])
-                mode = 'pattern'
 
-            if (not have_expected_out):
-                reason = 'EXPECTED OUTPUT MISSING'
-                output += "#"*80 + "\n\nUnable to match the following " + mode + " against the program's output:\n\n" + specs['expect_out'] + "\n"
+        params_and_msgs = {'expect_err':
+                              {'error_missing': True,
+                               'modes': ['ALL'],
+                               'reason': "EXPECTED ERROR MISSING",
+                               'message': "Unable to match the following {} against the program's output:"},
+                           'expect_assert':
+                              {'error_missing': True,
+                               'modes': ['dbg', 'devel'],
+                               'reason': "EXPECTED ASSERT MISSING",
+                               'message': "Unable to match the following {} against the program's output:"},
+                           'expect_out':
+                               {'error_missing': True,
+                                'modes': ['ALL'],
+                                'reason': "EXPECTED OUTPUT MISSING",
+                                'message': "Unable to match the following {} against the program's output:"},
+                           'absent_out':
+                               {'error_missing': False,
+                                'modes': ['ALL'],
+                                'reason': "OUTPUT NOT ABSENT",
+                                'message': "Matched the following {}, which we did NOT expect:"}
+                           }
 
-        if reason == '' and specs.isValid('absent_out'):
-            have_absent_out = util.checkOutputForPattern(output, specs['absent_out'])
-            if (have_absent_out):
-                reason = 'OUTPUT NOT ABSENT'
-                output += "#"*80 + "\n\nMatched the following pattern, which we did NOT expect:\n\n" + specs['absent_out'] + "\n"
+        for param,attr in params_and_msgs.items():
+            if specs.isValid(param) and (options.method in attr['modes'] or attr['modes'] == ['ALL']):
+                match_type = ""
+                if specs['match_literal']:
+                    have_expected_out = util.checkOutputForLiteral(output, specs[param])
+                    match_type = 'literal'
+                else:
+                    have_expected_out = util.checkOutputForPattern(output, specs[param])
+                    match_type = 'pattern'
 
-        if reason == '':
-            # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
-            # since a message to standard error might actually be a real error.  This case should be handled
-            # in the derived class.
-            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
-                reason = 'ERRMSG'
-            elif self.exit_code == 0 and specs['should_crash'] == True:
-                reason = 'NO CRASH'
-            elif self.exit_code != 0 and specs['should_crash'] == False:
-                reason = 'CRASH'
-            # Valgrind runs
-            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
-                reason = 'MEMORY ERROR'
+                # Exclusive OR test
+                if attr['error_missing'] ^ have_expected_out:
+                    reason = attr['reason']
+                    errors += "#"*80 + "\n\n" + attr['message'].format(match_type) + "\n\n" + specs[param] + "\n"
+                    break
 
         if reason != '':
             self.setStatus(self.fail, reason)
 
-        return output
+        return errors
+
+    def testExitCodes(self, moose_dir, options, output):
+        # Don't do anything if we already have a status set
+        reason = ''
+        if self.isNoStatus():
+            specs = self.specs
+            # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
+            # since a message to standard error might actually be a real error.  This case should be handled
+            # in the derived class.
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
+                reason = 'ERRMSG'
+            elif self.exit_code == 0 and specs['should_crash'] == True:
+                reason = 'NO CRASH'
+            elif self.exit_code != 0 and specs['should_crash'] == False:
+                # Let's look at the error code to see if we can perhaps further split this out later with a post exam
+                reason = 'CRASH'
+                return "\n\nExit Code: " + str(self.exit_code)
+            # Valgrind runs
+            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+                reason = 'MEMORY ERROR'
+
+            if reason != '':
+                self.setStatus(self.fail, reason)
+
+        # Return anything extra here that we want to tack onto the Output for when it gets printed later
+        return ''
 
     def processResults(self, moose_dir, options, output):
         """
@@ -246,4 +279,7 @@ class RunApp(Tester):
         # TODO: because RunParallel is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
-        return self.testFileOutput(moose_dir, options, output)
+        output += self.testFileOutput(moose_dir, options, output)
+        output += self.testExitCodes(moose_dir, options, output)
+
+        return output

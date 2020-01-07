@@ -14,11 +14,12 @@
 
 registerMooseAction("MooseApp", AddFieldSplitAction, "add_field_split");
 
-template <>
+defineLegacyParams(AddFieldSplitAction);
+
 InputParameters
-validParams<AddFieldSplitAction>()
+AddFieldSplitAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addParam<std::string>("type", "Split", "Classname of the split object");
   params.addParam<std::vector<NonlinearVariableName>>("vars", "variables for this field");
   params.addParam<MultiMooseEnum>(

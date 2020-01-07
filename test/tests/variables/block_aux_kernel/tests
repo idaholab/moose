@@ -1,8 +1,13 @@
 [Tests]
+  design = 'syntax/AuxVariables/index.md'
+  issues = '76ddaa1961753020e57d62d2b8f29e0638e40c28'
+
   [./block_aux_kernel_test]
     type = 'Exodiff'
     input = 'block_aux_kernel_test.i'
     exodiff = 'out.e'
     group = 'requirements geometric'
+
+    requirement = "The system shall support direct calculation of field variables on multiple mesh subdomains."
   [../]
 []

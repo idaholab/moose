@@ -15,20 +15,19 @@
 
 #include "libmesh/threads.h"
 
-template <>
+defineLegacyParams(ElementIndicator);
+
 InputParameters
-validParams<ElementIndicator>()
+ElementIndicator::validParams()
 {
-  InputParameters params = validParams<Indicator>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = Indicator::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable that this Indicator operates on");
-
   std::vector<SubdomainName> everywhere(1, "ANY_BLOCK_ID");
   params.addParam<std::vector<SubdomainName>>(
       "block", everywhere, "block ID or name where the object works");
-
-  params += validParams<TransientInterface>();
   return params;
 }
 

@@ -12,12 +12,13 @@
 
 registerMooseObject("TensorMechanicsApp", InertialForce);
 
-template <>
+defineLegacyParams(InertialForce);
+
 InputParameters
-validParams<InertialForce>()
+InertialForce::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
-  params.addClassDescription("Calculates the residual for the interial force "
+  InputParameters params = TimeKernel::validParams();
+  params.addClassDescription("Calculates the residual for the inertial force "
                              "($M \\cdot acceleration$) and the contribution of mass"
                              " dependent Rayleigh damping and HHT time "
                              " integration scheme ($\\eta \\cdot M \\cdot"
@@ -68,8 +69,9 @@ InertialForce::InertialForce(const InputParameters & parameters)
     _du_dotdot_du = &(_var.duDotDotDu());
   }
   else
-    mooseError("InertialForce: Either all or none of `beta`, `gamma`, `velocity`and `acceleration` "
-               "should be provided as input.");
+    mooseError(
+        "InertialForce: Either all or none of `beta`, `gamma`, `velocity`, and `acceleration` "
+        "should be provided as input.");
 }
 
 Real

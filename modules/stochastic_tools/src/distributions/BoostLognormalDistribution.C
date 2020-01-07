@@ -9,13 +9,16 @@
 
 #include "BoostLognormalDistribution.h"
 
+#include "libmesh/auto_ptr.h"
+
 registerMooseObject("StochasticToolsApp", BoostLognormalDistribution);
 
-template <>
+defineLegacyParams(BoostLognormalDistribution);
+
 InputParameters
-validParams<BoostLognormalDistribution>()
+BoostLognormalDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Boost Lognormal distribution.");
   params.addRequiredParam<Real>("location", "The Lognormal location parameter.");
   params.addRequiredParam<Real>("scale", "The Lognormal scale parameter.");

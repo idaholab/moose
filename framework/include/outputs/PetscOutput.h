@@ -24,6 +24,8 @@ InputParameters validParams<PetscOutput>();
 class PetscOutput : public Output
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Outputter input file parameters

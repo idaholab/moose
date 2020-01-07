@@ -19,6 +19,8 @@ InputParameters validParams<AddTransferAction>();
 class AddTransferAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddTransferAction(InputParameters params);
 
   virtual void act() override;

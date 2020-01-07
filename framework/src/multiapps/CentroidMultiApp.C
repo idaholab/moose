@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", CentroidMultiApp);
 
-template <>
+defineLegacyParams(CentroidMultiApp);
+
 InputParameters
-validParams<CentroidMultiApp>()
+CentroidMultiApp::validParams()
 {
-  InputParameters params = validParams<TransientMultiApp>();
-  params += validParams<BlockRestrictable>();
+  InputParameters params = TransientMultiApp::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Automatically generates Sub-App positions from centroids of elements in the master mesh.");
   params.suppressParameter<std::vector<Point>>("positions");

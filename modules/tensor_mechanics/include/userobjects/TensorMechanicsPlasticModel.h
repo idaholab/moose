@@ -42,6 +42,8 @@ InputParameters validParams<TensorMechanicsPlasticModel>();
 class TensorMechanicsPlasticModel : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticModel(const InputParameters & parameters);
 
   void initialize();
@@ -369,4 +371,3 @@ protected:
    */
   virtual Real dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
 };
-

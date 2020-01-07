@@ -16,11 +16,10 @@
 
 registerMooseObject("MooseTestApp", IntermittentFailureUO);
 
-template <>
 InputParameters
-validParams<IntermittentFailureUO>()
+IntermittentFailureUO::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addParam<unsigned int>("timestep_to_fail", 1, "The timestep number to error out");
 
   MooseEnum failure_type("RUN_SLOW", "RUN_SLOW");

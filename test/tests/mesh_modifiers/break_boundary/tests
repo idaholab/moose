@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./break_all]
     type = 'Exodiff'
     input = 'break_boundary_on_subdomain.i'

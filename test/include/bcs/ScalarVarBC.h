@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class ScalarVarBC;
-
-template <>
-InputParameters validParams<ScalarVarBC>();
-
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
@@ -23,10 +18,8 @@ InputParameters validParams<ScalarVarBC>();
 class ScalarVarBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   ScalarVarBC(const InputParameters & parameters);
 
 protected:
@@ -36,4 +29,3 @@ protected:
   unsigned int _alpha_var;
   VariableValue & _alpha;
 };
-

@@ -26,6 +26,8 @@ InputParameters validParams<ComputeVolumetricDeformGrad>();
 class ComputeVolumetricDeformGrad : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ComputeVolumetricDeformGrad(const InputParameters & parameters);
 
 protected:
@@ -37,4 +39,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _volumetric_deform_grad;
   MaterialProperty<RankTwoTensor> & _post_deform_grad;
 };
-

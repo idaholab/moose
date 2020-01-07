@@ -68,7 +68,7 @@ public:
 
   virtual void init() override;
 
-  bool computingInitialJacobian() const final { return _computing_initial_jacobian; }
+  bool computedScalingJacobian() const { return _computed_scaling; }
 
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
@@ -121,7 +121,7 @@ public:
    */
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
-                         InputParameters parameters) override;
+                         InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
   /**
@@ -136,8 +136,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void
-  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -147,7 +148,7 @@ public:
    */
   virtual void addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters);
+                              InputParameters & parameters);
 
   /**
    * Adds a scalar kernel
@@ -157,7 +158,7 @@ public:
    */
   void addScalarKernel(const std::string & kernel_name,
                        const std::string & name,
-                       InputParameters parameters);
+                       InputParameters & parameters);
 
   /**
    * Adds a boundary condition
@@ -167,7 +168,7 @@ public:
    */
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
-                            InputParameters parameters);
+                            InputParameters & parameters);
 
   /**
    * Adds a Constraint
@@ -176,7 +177,7 @@ public:
    * @param parameters Constraint parameters
    */
   void
-  addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
+  addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Adds a Dirac kernel
@@ -186,7 +187,7 @@ public:
    */
   void addDiracKernel(const std::string & kernel_name,
                       const std::string & name,
-                      InputParameters parameters);
+                      InputParameters & parameters);
 
   /**
    * Adds a DG kernel
@@ -195,7 +196,7 @@ public:
    * @param parameters DG kernel parameters
    */
   void
-  addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
+  addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Adds an interface kernel
@@ -205,7 +206,7 @@ public:
    */
   void addInterfaceKernel(std::string interface_kernel_name,
                           const std::string & name,
-                          InputParameters parameters);
+                          InputParameters & parameters);
 
   /**
    * Adds a damper
@@ -213,8 +214,9 @@ public:
    * @param name The name of the damper
    * @param parameters Damper parameters
    */
-  void
-  addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
+  void addDamper(const std::string & damper_name,
+                 const std::string & name,
+                 InputParameters & parameters);
 
   /**
    * Adds a split
@@ -223,7 +225,7 @@ public:
    * @param parameters Split parameters
    */
   void
-  addSplit(const std::string & split_name, const std::string & name, InputParameters parameters);
+  addSplit(const std::string & split_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Retrieves a split by name
@@ -300,7 +302,7 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  void computeScalingJacobian(NonlinearImplicitSystem & sys);
+  virtual void computeScalingJacobian();
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -543,6 +545,12 @@ public:
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
 
   /**
+   * Indicated whether this system needs material properties on interfaces.
+   * @return Boolean if IntegratedBCs are active
+   */
+  bool needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
+
+  /**
    * Indicates whether this system needs material properties on internal sides.
    * @return Boolean if DGKernels are active
    */
@@ -630,11 +638,37 @@ public:
 
   virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
 
+  /**
+   * Sets the verbose flag
+   * @param[in] verbose   Verbose flag
+   */
+  void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
+
+  bool automaticScaling() const { return _automatic_scaling; }
+  void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
+
+  bool computeScalingOnce() const { return _compute_scaling_once; }
+  void computeScalingOnce(bool compute_scaling_once)
+  {
+    _compute_scaling_once = compute_scaling_once;
+  }
+
+#ifndef MOOSE_SPARSE_AD
+  /**
+   * Set the required size of the derivative vector
+   */
+  void setRequiredDerivativeSize(std::size_t size) { _required_derivative_size = size; }
+
+  /**
+   * Return the required size of the derivative vector
+   */
+  std::size_t requiredDerivativeSize() const { return _required_derivative_size; }
+#endif
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
-  Real _last_rnorm;
   Real _last_nl_rnorm;
   Real _initial_residual_before_preset_bcs;
   Real _initial_residual_after_preset_bcs;
@@ -691,6 +725,9 @@ protected:
   void mortarJacobianConstraints(bool displaced);
 
 protected:
+  /// True if printing out additional information
+  bool _verbose;
+
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
@@ -873,11 +910,16 @@ protected:
   PerfID _compute_dirac_timer;
   PerfID _compute_scaling_jacobian_timer;
 
-  /// Flag used to indicate whether we are computing the initial Jacobian
-  bool _computing_initial_jacobian;
+  /// Flag used to indicate whether we have already computed the scaling Jacobian
+  bool _computed_scaling;
 
-  /// A vector to be filled by the preconditioning matrix diagonal
-  NumericVector<Number> * _pmat_diagonal;
+  /// Whether to automatically scale the variables
+  bool _automatic_scaling;
+
+  /// Whether the scaling factors should only be computed once at the beginning of the simulation
+  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
+  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
+  bool _compute_scaling_once;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints
@@ -899,4 +941,9 @@ private:
   std::unordered_map<std::pair<BoundaryID, BoundaryID>,
                      ComputeMortarFunctor<ComputeStage::JACOBIAN>>
       _displaced_mortar_jacobian_functors;
+
+#ifndef MOOSE_SPARSE_AD
+  /// The required size of the derivative storage array
+  std::size_t _required_derivative_size;
+#endif
 };

@@ -11,17 +11,14 @@
 
 #include "AuxKernel.h"
 
-class DotCouplingAux;
-
-template <>
-InputParameters validParams<DotCouplingAux>();
-
 /**
  * Couples in the time derivatives of a NL variable
  */
 class DotCouplingAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DotCouplingAux(const InputParameters & parameters);
   virtual ~DotCouplingAux();
 
@@ -30,4 +27,3 @@ protected:
 
   const VariableValue & _v_dot;
 };
-

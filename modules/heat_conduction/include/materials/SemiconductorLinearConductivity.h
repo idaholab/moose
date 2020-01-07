@@ -30,6 +30,8 @@ InputParameters validParams<SemiconductorLinearConductivity>();
 class SemiconductorLinearConductivity : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   SemiconductorLinearConductivity(const InputParameters & parameters);
 
 protected:

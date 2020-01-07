@@ -12,11 +12,13 @@
 
 registerMooseObject("MooseApp", GenericFunctionMaterial);
 
-template <>
+defineLegacyParams(GenericFunctionMaterial);
+
 InputParameters
-validParams<GenericFunctionMaterial>()
+GenericFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+
+  InputParameters params = Material::validParams();
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
   params.addParam<std::vector<FunctionName>>("prop_values",

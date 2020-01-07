@@ -24,6 +24,8 @@ InputParameters validParams<ParsedODEKernel>();
 class ParsedODEKernel : public ODEKernel, public FunctionParserUtils
 {
 public:
+  static InputParameters validParams();
+
   ParsedODEKernel(const InputParameters & parameters);
 
 protected:
@@ -51,8 +53,10 @@ protected:
   /// number of non-linear variables in the problem
   const unsigned int _number_of_nl_variables;
 
+  /// coupled postprocessors
+  std::vector<const PostprocessorValue *> _pp;
+
 private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;
 };
-

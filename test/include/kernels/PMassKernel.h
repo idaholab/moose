@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class PMassKernel;
-
-template <>
-InputParameters validParams<PMassKernel>();
-
 /**
  * This kernel implements (v, |u|^(p-2) u)/k, where u is the variable, v is the test function
  * and k is the eigenvalue. When p=2, this kernel is equivalent with MassEigenKernel.
@@ -24,12 +18,16 @@ InputParameters validParams<PMassKernel>();
 class PMassKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PMassKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
+private:
   Real _p;
+  /// input parameter multiplied by the  kernel
+  Real _coef;
 };
-

@@ -104,22 +104,7 @@
     type = PorousFlowTemperature
     temperature = 50
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    temperature = 50
-    at_nodes = true
-  [../]
   [./brineco2]
-    type = PorousFlowFluidState
-    gas_porepressure = pgas
-    z = zi
-    at_nodes = true
-    temperature_unit = Celsius
-    xnacl = xnacl
-    capillary_pressure = pc
-    fluid_state = fs
-  [../]
-  [./brineco2_qp]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
@@ -136,18 +121,15 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-    at_nodes = true
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
-    at_nodes = true
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-    at_nodes = true
   [../]
 []
 

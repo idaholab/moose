@@ -95,7 +95,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 {
   // FIXME: continuity of FE type seems equivalent with the definition of nodal variables.
   //        Continuity does not depend on the FE dimension, so we just pass in a valid dimension.
-  if (_fe_type.family == NEDELEC_ONE || _fe_type.family == LAGRANGE_VEC)
+  if (_fe_type.family == NEDELEC_ONE || _fe_type.family == LAGRANGE_VEC ||
+      _fe_type.family == MONOMIAL_VEC)
     _continuity = _assembly.getVectorFE(_fe_type, _sys.mesh().dimension())->get_continuity();
   else
     _continuity = _assembly.getFE(_fe_type, _sys.mesh().dimension())->get_continuity();
@@ -242,6 +243,65 @@ MooseVariableData<OutputType>::sln(Moose::SolutionState state) const
 }
 
 template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::uDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_u_dot = true;
+    return _u_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::uDotDot() const
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_u_dotdot = true;
+    return _u_dotdot;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::uDotOld() const
+{
+  if (_sys.solutionUDotOld())
+  {
+    _need_u_dot_old = true;
+    return _u_dot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+               "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+               "`u_dot_old`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::uDotDotOld() const
+{
+  if (_sys.solutionUDotDotOld())
+  {
+    _need_u_dotdot_old = true;
+    return _u_dotdot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+               "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+               "requesting `u_dotdot_old`");
+}
+
+template <typename OutputType>
 const typename MooseVariableData<OutputType>::FieldVariableGradient &
 MooseVariableData<OutputType>::gradSln(Moose::SolutionState state) const
 {
@@ -273,6 +333,35 @@ MooseVariableData<OutputType>::gradSln(Moose::SolutionState state) const
       // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
       mooseError("Unknown SolutionState!");
   }
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableGradient &
+MooseVariableData<OutputType>::gradSlnDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_grad_dot = true;
+    return _grad_u_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableGradient &
+MooseVariableData<OutputType>::gradSlnDotDot() const
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_grad_dotdot = true;
+    return _grad_u_dotdot;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
 }
 
 template <typename OutputType>
@@ -1242,10 +1331,15 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 
-  // Hopefully this problem can go away at some point
-  if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
-    mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of ",
-               AD_MAX_DOFS_PER_ELEM);
+#ifndef MOOSE_SPARSE_AD
+  if (ad_offset + num_dofs > MOOSE_AD_MAX_DOFS_PER_ELEM)
+    mooseError("Current number of dofs per element ",
+               ad_offset + num_dofs,
+               " is greater than AD_MAX_DOFS_PER_ELEM of ",
+               MOOSE_AD_MAX_DOFS_PER_ELEM,
+               ". You can run `configure --with-derivative-size=<n>` to request a larger "
+               "derivative container.");
+#endif
 
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
@@ -1268,7 +1362,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     // NOTE!  You have to do this AFTER setting the value!
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
 
     if (_need_ad_u_dot && _time_integrator)
     {
@@ -1297,13 +1391,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
 
       if (_need_ad_second_u)
-      {
-        if (_displaced)
-          mooseError("Support for second order shape function derivatives on the displaced mesh "
-                     "has not been added yet!");
-        else
-          _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
-      }
+        // Note that this will not carry any derivatives with respect to displacements because those
+        // calculations have not yet been implemented in Assembly
+        _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
 
       if (_need_ad_u_dot && _time_integrator)
         _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
@@ -1345,6 +1435,20 @@ MooseVariableData<RealVectorValue>::setNodalValue(const RealVectorValue & value,
 
   _has_dof_values = true;
   _nodal_value = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+{
+  _dof_values[index] = value;
+  _has_dof_values = true;
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+  {
+    _u[qp] = (*_phi)[0][qp] * _dof_values[0];
+    for (unsigned int i = 1; i < _dof_values.size(); i++)
+      _u[qp] += (*_phi)[i][qp] * _dof_values[i];
+  }
 }
 
 template <typename OutputType>
@@ -2246,7 +2350,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
   {
     _ad_dof_values[i] = _dof_values[i];
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
     assignADNodalValue(_ad_dof_values[i], i);
   }
 }

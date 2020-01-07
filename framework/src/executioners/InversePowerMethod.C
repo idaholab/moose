@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", InversePowerMethod);
 
-template <>
+defineLegacyParams(InversePowerMethod);
+
 InputParameters
-validParams<InversePowerMethod>()
+InversePowerMethod::validParams()
 {
-  InputParameters params = validParams<EigenExecutionerBase>();
+  InputParameters params = EigenExecutionerBase::validParams();
   params.addClassDescription("Inverse power method for Eigen value problems.");
   params.addParam<PostprocessorName>(
       "xdiff", "", "To evaluate |x-x_previous| for power iterations");
@@ -26,10 +27,9 @@ validParams<InversePowerMethod>()
   params.addParam<Real>("sol_check_tol",
                         std::numeric_limits<Real>::max(),
                         "Convergence tolerance on |x-x_previous| when provided");
-  params.addParam<Real>("pfactor", 1e-2, "Reduce residual norm per power iteration by this factor");
+  params.set<Real>("l_tol", true) = 1e-2;
   params.addParam<bool>(
       "Chebyshev_acceleration_on", true, "If Chebyshev acceleration is turned on");
-  params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
   return params;
 }
 
@@ -40,20 +40,15 @@ InversePowerMethod::InversePowerMethod(const InputParameters & parameters)
     _max_iter(getParam<unsigned int>("max_power_iterations")),
     _eig_check_tol(getParam<Real>("eig_check_tol")),
     _sol_check_tol(getParam<Real>("sol_check_tol")),
-    _pfactor(getParam<Real>("pfactor")),
+    _l_tol(getParam<Real>("l_tol")),
     _cheb_on(getParam<bool>("Chebyshev_acceleration_on"))
 {
-  if (!_app.isRecovering() && !_app.isRestarting())
-    _eigenvalue = getParam<Real>("k0");
-
-  addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
-
   if (_max_iter < _min_iter)
     mooseError("max_power_iterations<min_power_iterations!");
   if (_eig_check_tol < 0.0)
     mooseError("eig_check_tol<0!");
-  if (_pfactor < 0.0)
-    mooseError("pfactor<0!");
+  if (_l_tol < 0.0)
+    paramError("l_tol", "l_tol<0!");
 }
 
 void
@@ -99,7 +94,7 @@ InversePowerMethod::takeStep()
   Real initial_res;
   _last_solve_converged = inversePowerIteration(_min_iter,
                                                 _max_iter,
-                                                _pfactor,
+                                                _l_tol,
                                                 _cheb_on,
                                                 _eig_check_tol,
                                                 true,

@@ -17,14 +17,15 @@
 
 #include "libmesh/threads.h"
 
-template <>
+defineLegacyParams(Indicator);
+
 InputParameters
-validParams<Indicator>()
+Indicator::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<OutputInterface>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += BlockRestrictable::validParams();
+  params += OutputInterface::validParams();
+  params += MaterialPropertyInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

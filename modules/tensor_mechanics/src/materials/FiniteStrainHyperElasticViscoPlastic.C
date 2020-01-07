@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainHyperElasticViscoPlastic);
 
-template <>
+defineLegacyParams(FiniteStrainHyperElasticViscoPlastic);
+
 InputParameters
-validParams<FiniteStrainHyperElasticViscoPlastic>()
+FiniteStrainHyperElasticViscoPlastic::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addParam<Real>(
       "resid_abs_tol", 1e-10, "Absolute Tolerance for flow rate residual equation");
   params.addParam<Real>(
@@ -35,7 +36,7 @@ validParams<FiniteStrainHyperElasticViscoPlastic>()
   params.addParam<std::vector<UserObjectName>>(
       "internal_var_rate_user_objects",
       "List of User object names that computes internal variable rates and derivatives");
-  params.addClassDescription("Material class for hyper-elastic visco-platic flow: Can handle "
+  params.addClassDescription("Material class for hyper-elastic viscoplatic flow: Can handle "
                              "multiple flow models defined by flowratemodel type user objects");
 
   return params;

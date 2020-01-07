@@ -10,7 +10,7 @@
 #include "SolidMechImplicitEuler.h"
 #include "SubProblem.h"
 
-registerMooseObject("SolidMechanicsApp", SolidMechImplicitEuler);
+registerMooseObjectDeprecated("SolidMechanicsApp", SolidMechImplicitEuler, "07/30/2020 24:00");
 
 template <>
 InputParameters
@@ -28,6 +28,12 @@ SolidMechImplicitEuler::SolidMechImplicitEuler(const InputParameters & parameter
     _artificial_scaling_set(parameters.isParamValid("artificial_scaling")),
     _artificial_scaling(_artificial_scaling_set ? getParam<Real>("artificial_scaling") : 1)
 {
+  mooseDeprecated(name(), ": SolidMechImplicitEuler is deprecated. \
+                  The solid_mechanics module will be removed from MOOSE on July 31, 2020. \
+                  Please update your input files to utilize the tensor_mechanics equivalents of \
+                  models based on solid_mechanics. A detailed migration guide that was developed \
+                  for BISON, but which is generally applicable to any MOOSE model is available at: \
+                  https://mooseframework.org/bison/tutorials/mechanics_conversion/overview.html");
 }
 
 Real

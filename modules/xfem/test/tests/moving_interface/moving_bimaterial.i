@@ -23,28 +23,28 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 5
-  xmin = 0.0
-  xmax = 5.
-  ymin = 0.0
-  ymax = 5.
-  elem_type = QUAD4
-  displacements = 'disp_x disp_y'
-[]
-
-[MeshModifiers]
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 5
+    ny = 5
+    xmin = 0.0
+    xmax = 5.
+    ymin = 0.0
+    ymax = 5.
+    elem_type = QUAD4
+  []
   [./left_bottom]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = 'left_bottom'
     coord = '0.0 0.0'
+    input = generated_mesh
   [../]
   [./left_top]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = 'left_top'
     coord = '0.0 5.'
+    input = left_bottom
   [../]
 []
 

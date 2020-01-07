@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", Eigenvalues);
 
-template <>
+defineLegacyParams(Eigenvalues);
+
 InputParameters
-validParams<Eigenvalues>()
+Eigenvalues::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   return params;
 }
 

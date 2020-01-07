@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-import GeometricSourceMeta
+from . import GeometricSourceMeta
 from .. import base
 
 BaseType = GeometricSourceMeta.create(base.ChiggerSource)

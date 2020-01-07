@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", RandomHitMarker);
 
-template <>
 InputParameters
-validParams<RandomHitMarker>()
+RandomHitMarker::validParams()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<UserObjectName>(
       "random_hits", "The name of the UserObject to use for the positions of the random hits");
   return params;

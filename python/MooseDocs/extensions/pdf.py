@@ -12,7 +12,7 @@ import re
 import subprocess
 import logging
 import collections
-import anytree
+import moosetree
 import mooseutils
 from MooseDocs.base import renderers
 from MooseDocs.common import exceptions, box
@@ -55,7 +55,7 @@ class PDFExtension(command.CommandExtension):
         """
 
         depth = page.depth if page.depth < 2 else 2
-        for node in anytree.PreOrderIter(ast):
+        for node in moosetree.iterate(ast):
 
             if node.name == 'Heading':
                 lvl = node['level'] + depth
@@ -75,7 +75,6 @@ class PDFExtension(command.CommandExtension):
         """
         Combines all the LaTeX files into a single file.
         """
-
         files = []
         for page in content:
             if isinstance(page, pages.Source):
@@ -96,15 +95,15 @@ class PDFExtension(command.CommandExtension):
                     ['pdflatex', '-halt-on-error', 'main']]
         for cmd in commands:
             try:
-                output = subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT)
+                output = subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT, encoding='utf8')
             except subprocess.CalledProcessError as e:
                 msg = 'Failed to run pdflatex command: {}\n\n{}'
                 raise exceptions.MooseDocsException(msg, ' '.join(cmd), e.output)
 
         # Process output
         root = self.processLatexOutput(output, content)
-        for node in anytree.PreOrderIter(root):
-            if node.warnings:
+        for node in moosetree.iterate(root):
+            if node['warnings']:
                 self._reportLatexWarnings(node, content)
 
     def _processPages(self, root):
@@ -113,35 +112,35 @@ class PDFExtension(command.CommandExtension):
         """
 
         main = base.NodeBase(None, None)
-        latex.Command(main, 'documentclass', string=u'report', end='')
-        for package, options in self.translator.renderer.getPackages().iteritems():
+        latex.Command(main, 'documentclass', string='report', end='')
+        for package, options in self.translator.renderer.getPackages().items():
             args = []
             if options[0] or options[1]:
                 args = [self._getOptions(*options)]
 
             latex.Command(main, 'usepackage', args=args, string=package, start='\n', end='')
 
-        latex.String(main, content=u'\\setlength{\\parindent}{0pt}', start=u'\n', escape=False)
+        latex.String(main, content='\\setlength{\\parindent}{0pt}', start='\n', escape=False)
 
         for preamble in self.translator.renderer.getPreamble():
             latex.String(main, content='\n' + preamble, escape=False)
 
         # New Commands
-        for cmd in self.translator.renderer.getNewCommands().itervalues():
+        for cmd in self.translator.renderer.getNewCommands().values():
             cmd.parent = main
 
         doc = latex.Environment(main, 'document', end='\n')
-        for node in anytree.PreOrderIter(root, filter_=lambda n: 'page' in n):
+        for node in moosetree.iterate(root, lambda n: 'page' in n):
             page = node['page']
             if self.translator.getMetaData(page, 'active'):
                 cmd = latex.Command(doc, 'input', start='\n')
-                latex.String(cmd, content=unicode(page.destination), escape=False)
+                latex.String(cmd, content=str(page.destination), escape=False)
 
         # BibTeX
         bib_files = [n.source for n in self.translator.content if n.source.endswith('.bib')]
         if bib_files:
-            latex.Command(doc, 'bibliographystyle', start='\n', string=u'unsrtnat')
-            latex.Command(doc, 'bibliography', string=u','.join(bib_files), start='\n',
+            latex.Command(doc, 'bibliographystyle', start='\n', string='unsrtnat')
+            latex.Command(doc, 'bibliography', string=','.join(bib_files), start='\n',
                           escape=False)
 
         return main
@@ -152,7 +151,7 @@ class PDFExtension(command.CommandExtension):
         # Locate the Page object where the error was producec.
         pnode = None
         for page in content:
-            if lnode.filename in page.destination:
+            if lnode['filename'] in page.destination:
                 pnode = page
                 break
 
@@ -164,12 +163,12 @@ class PDFExtension(command.CommandExtension):
             self._lineCounter(result)
 
         # Report warning(s)
-        for w in lnode.warnings:
+        for w in lnode['warnings']:
 
             # Locate the rendered node that that caused the error
             r_node = None
             if result:
-                for r in anytree.PreOrderIter(result):
+                for r in moosetree.iterate(result):
                     if w.line >= r.get('_start_line', float('Inf')):
                         r_node = r
 
@@ -211,9 +210,9 @@ class PDFExtension(command.CommandExtension):
         txt = []
         for key in args:
             txt.append(key)
-        for key, value in kwargs.iteritems():
-            txt.append(u'{}={}'.format(key, str(value)))
-        return latex.Bracket(string=u','.join(txt), escape=False)
+        for key, value in kwargs.items():
+            txt.append('{}={}'.format(key, str(value)))
+        return latex.Bracket(string=','.join(txt), escape=False)
 
     @staticmethod
     def processLatexOutput(output, nodes):
@@ -234,34 +233,34 @@ class PDFExtension(command.CommandExtension):
         root = PDFExtension.parseOutput(output)
 
         # Loop through the result and capture filenames and warnings
-        for n in anytree.PreOrderIter(root):
-            match = regex.search(n.content)
+        for n in moosetree.iterate(root):
+            match = regex.search(n['content'])
             if match:
-                n.content = match.group('content')
-                n.filename = match.group('filename').replace('\n', '')
-            n.content = [c.strip().replace('\n', '') for c in re.split(r'\n{2,}', n.content) if c]
+                n['content'] = match.group('content')
+                n['filename'] = match.group('filename').replace('\n', '')
+            n['content'] = [c.strip().replace('\n', '') for c in re.split(r'\n{2,}', n['content']) if c]
 
-            for c in n.content:
+            for c in n['content']:
                 if 'LaTeX Warning' in c:
                     c = c.replace('LaTeX Warning:', '').strip()
                     match = line_re.search(c)
                     line = int(match.group('line')) if match else None
-                    n.warnings.append(warn(content=c, line=line))
+                    n['warnings'].append(warn(content=c, line=line))
 
         return root
 
     @staticmethod
     def parseOutput(content):
-        """Convert the nested paranthesis output from pdflatex to a tree structure."""
-        root = anytree.AnyNode(content='', filename='', warnings=[])
+        """Convert the nested parenthesis output from pdflatex to a tree structure."""
+        root = moosetree.Node(None, 'root', content='', filename='', warnings=[])
         node = root
         for char in content:
             if char == '(':
-                node = anytree.AnyNode(parent=node, content='', filename='', warnings=[])
+                node = moosetree.Node(node, 'paren', content='', filename='', warnings=[])
             elif char == ')':
                 node = node.parent
             else:
-                node.content += char
+                node['content'] += str(char)
         return root
 
     @staticmethod
@@ -269,23 +268,23 @@ class PDFExtension(command.CommandExtension):
         """Create a tree structure from the supplied page objects."""
 
         tree = dict()
-        root = base.NodeBase(u'', None)
-        tree[(u'',)] = root
+        root = base.NodeBase('', None)
+        tree[('',)] = root
 
         # Sort
         nodes = sorted(files, key=lambda f: f.local)
 
         # Build directories
         for node in nodes:
-            key = tuple([u''] + node.local.split(os.sep))[:-1]
-            for i in xrange(1, len(key) + 1):
+            key = tuple([''] + node.local.split(os.sep))[:-1]
+            for i in range(1, len(key) + 1):
                 k = key[:i]
                 if k not in tree:
                     tree[k] = base.NodeBase(k[-1], tree[k[:-1]])
 
         # Insert pages
         for node in nodes:
-            key = tuple([u''] + node.local.split(os.sep))
+            key = tuple([''] + node.local.split(os.sep))
             if key[-1] == 'index.md':
                 tree[key[:-1]]['page'] = node
             else:

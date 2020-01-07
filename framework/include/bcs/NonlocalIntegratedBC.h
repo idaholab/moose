@@ -27,6 +27,8 @@ InputParameters validParams<NonlocalIntegratedBC>();
 class NonlocalIntegratedBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NonlocalIntegratedBC(const InputParameters & parameters);
 
   /**
@@ -69,4 +71,3 @@ protected:
 
   unsigned int _k;
 };
-

@@ -20,6 +20,8 @@ InputParameters validParams<NumNodes>();
 class NumNodes : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumNodes(const InputParameters & parameters);
 
   virtual void initialize() override {}

@@ -12,11 +12,12 @@
 
 registerMooseObject("HeatConductionApp", AnisoHeatConduction);
 
-template <>
+defineLegacyParams(AnisoHeatConduction);
+
 InputParameters
-validParams<AnisoHeatConduction>()
+AnisoHeatConduction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }

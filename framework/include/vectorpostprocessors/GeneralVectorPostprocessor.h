@@ -27,6 +27,8 @@ InputParameters validParams<GeneralVectorPostprocessor>();
 class GeneralVectorPostprocessor : public GeneralUserObject, public VectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GeneralVectorPostprocessor(const InputParameters & parameters);
 
   /**

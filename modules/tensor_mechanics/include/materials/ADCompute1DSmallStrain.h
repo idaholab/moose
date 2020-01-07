@@ -31,6 +31,8 @@ template <ComputeStage compute_stage>
 class ADCompute1DSmallStrain : public ADComputeSmallStrain<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCompute1DSmallStrain(const InputParameters & parameters);
 
   void computeProperties() override;
@@ -46,4 +48,3 @@ protected:
 
   usingComputeSmallStrainMembers;
 };
-

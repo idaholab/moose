@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = cylinder.e
@@ -13,10 +13,6 @@
               0   0 -0.5'
     new_boundary = 'top side bottom'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

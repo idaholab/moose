@@ -11,14 +11,11 @@
 
 #include "VectorKernel.h"
 
-class CoupledVectorDiffusion;
-
-template <>
-InputParameters validParams<CoupledVectorDiffusion>();
-
 class CoupledVectorDiffusion : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledVectorDiffusion(const InputParameters & parameters);
 
 protected:
@@ -30,4 +27,3 @@ protected:
   const VectorVariableGradient & _grad_v;
   unsigned _v_id;
 };
-

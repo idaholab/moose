@@ -92,7 +92,7 @@ Factory::getADValidParams(const std::string & obj_name)
 MooseObjectPtr
 Factory::create(const std::string & obj_name,
                 const std::string & name,
-                InputParameters parameters,
+                InputParameters & parameters,
                 THREAD_ID tid /* =0 */,
                 bool print_deprecated /* =true */)
 {

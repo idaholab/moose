@@ -21,7 +21,7 @@ validParams<PFParamsPolyFreeEnergy>()
   params.addCoupledVar("T", "Temperature variable in Kelvin");
   params.addRequiredCoupledVar("c", "Concentration");
   params.addRequiredParam<Real>(
-      "int_width", "The interfacial width of void surface in the lengthscale of the problem");
+      "int_width", "The interfacial width of void surface in the length scale of the problem");
   params.addParam<Real>(
       "length_scale", 1.0e-9, "defines the base length scale of the problem in m");
   params.addParam<Real>("time_scale", 1.0e-9, "defines the base time scale of the problem");

@@ -20,6 +20,8 @@ InputParameters validParams<InversePowerMethod>();
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:
+  static InputParameters validParams();
+
   InversePowerMethod(const InputParameters & parameters);
 
   virtual void init() override;
@@ -44,10 +46,9 @@ protected:
   /// convergence tolerance on solution difference
   const Real & _sol_check_tol;
   /// tolerance on each power iteration (always one nonlinear iteration)
-  const Real & _pfactor;
+  const Real & _l_tol;
   /// indicating if Chebyshev acceleration is turned on
   const bool & _cheb_on;
   /// flag to indicate if inverse power iteration converged
   bool _last_solve_converged;
 };
-

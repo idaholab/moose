@@ -22,12 +22,13 @@
 
 registerMooseObject("MooseApp", Exodus);
 
-template <>
+defineLegacyParams(Exodus);
+
 InputParameters
-validParams<Exodus>()
+Exodus::validParams()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
+  InputParameters params = OversampleOutput::validParams();
   params += AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor input");
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on
@@ -430,4 +431,10 @@ Exodus::outputEmptyTimestep()
     _exodus_num++;
 
   _exodus_initialized = true;
+}
+
+void
+Exodus::clear()
+{
+  _exodus_io_ptr.reset();
 }

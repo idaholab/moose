@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CheckCurrentExecAux);
 
-template <>
 InputParameters
-validParams<CheckCurrentExecAux>()
+CheckCurrentExecAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

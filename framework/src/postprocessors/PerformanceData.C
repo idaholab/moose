@@ -14,11 +14,12 @@
 
 registerMooseObjectReplaced("MooseApp", PerformanceData, "02/01/2019 00:00", PerfGraphData);
 
-template <>
+defineLegacyParams(PerformanceData);
+
 InputParameters
-validParams<PerformanceData>()
+PerformanceData::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   MooseEnum column_options("n_calls total_time average_time total_time_with_sub "
                            "average_time_with_sub percent_of_active_time "

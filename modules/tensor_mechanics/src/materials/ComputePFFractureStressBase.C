@@ -9,11 +9,12 @@
 
 #include "ComputePFFractureStressBase.h"
 
-template <>
+defineLegacyParams(ComputePFFractureStressBase);
+
 InputParameters
-validParams<ComputePFFractureStressBase>()
+ComputePFFractureStressBase::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addRequiredCoupledVar("c", "Name of damage variable");
   params.addParam<bool>(
       "use_current_history_variable", false, "Use the current value of the history variable.");

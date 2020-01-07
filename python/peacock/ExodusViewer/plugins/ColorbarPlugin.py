@@ -12,7 +12,7 @@ import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 import glob
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -388,7 +388,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         colorbar_options, colorbar_sub_options = self._colorbar.options().toScriptString()
         output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
         output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(colorbar_options))]
-        for key, value in colorbar_sub_options.iteritems():
+        for key, value in colorbar_sub_options.items():
             output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
         return output
 
@@ -396,9 +396,9 @@ def main(size=None):
     """
     Run the VTKFilePlugin all by its lonesome.
     """
-    from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    from VTKWindowPlugin import VTKWindowPlugin
-    from FilePlugin import FilePlugin
+    from ..ExodusPluginManager import ExodusPluginManager
+    from .VTKWindowPlugin import VTKWindowPlugin
+    from .FilePlugin import FilePlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ColorbarPlugin])
     widget.show()
 

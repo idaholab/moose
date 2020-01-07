@@ -9,11 +9,12 @@
 
 #include "ComputeCosseratStressBase.h"
 
-template <>
+defineLegacyParams(ComputeCosseratStressBase);
+
 InputParameters
-validParams<ComputeCosseratStressBase>()
+ComputeCosseratStressBase::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Compute stress and couple stress in the Cosserat situation");
   return params;
 }

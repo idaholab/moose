@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorFunction);
 
-template <>
+defineLegacyParams(VectorPostprocessorFunction);
+
 InputParameters
-validParams<VectorPostprocessorFunction>()
+VectorPostprocessorFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component < 3",
@@ -29,6 +30,10 @@ validParams<VectorPostprocessorFunction>()
                                        "VectorPostprocessor column tabulating the "
                                        "ordinate (function values) of the sampled "
                                        "function");
+
+  params.addClassDescription(
+      "Provides piecewise linear interpolation of from two columns of a VectorPostprocessor");
+
   return params;
 }
 

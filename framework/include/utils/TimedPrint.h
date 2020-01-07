@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "Moose.h" // Color constants
 #include "ConsoleStream.h"
 #include "StreamArguments.h"
 
@@ -19,6 +20,8 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <ios>
+#include <iomanip>
 
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
     !defined(__clang__)
@@ -26,14 +29,16 @@
 #include <tuple>
 #endif
 
-#define CONSOLE_TIMED_PRINT(...)                                                                   \
+#define CONTROLLED_CONSOLE_TIMED_PRINT(initial_wait, dot_interval, ...)                            \
   std::unique_ptr<TimedPrint> tpc =                                                                \
       _communicator.rank() == 0                                                                    \
           ? libmesh_make_unique<TimedPrint>(_console,                                              \
-                                            std::chrono::duration<double>(1),                      \
-                                            std::chrono::duration<double>(1),                      \
+                                            std::chrono::duration<double>(initial_wait),           \
+                                            std::chrono::duration<double>(dot_interval),           \
                                             __VA_ARGS__)                                           \
           : nullptr;
+
+#define CONSOLE_TIMED_PRINT(...) CONTROLLED_CONSOLE_TIMED_PRINT(1, 1, __VA_ARGS__)
 
 /**
  * Object to print a message after enough time has passed.
@@ -76,6 +81,10 @@ public:
 #define ARGS args_in...
 
 #endif
+    if (_active_instance)
+      return;
+
+    _active_instance = this;
 
     // This is using move assignment
     _thread = std::thread{[&out, initial_wait, dot_interval, this, ARGS] {
@@ -84,7 +93,8 @@ public:
       auto start = std::chrono::steady_clock::now();
 
       unsigned int offset = 0;
-      if (done_future.wait_for(initial_wait) == std::future_status::timeout)
+      if (done_future.wait_for(initial_wait) == std::future_status::timeout ||
+          initial_wait == std::chrono::duration<double>::zero())
       {
         streamArguments(out, ARGS);
         offset = out.tellp();
@@ -112,9 +122,16 @@ public:
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration = end - start;
 
+        auto original_precision = out.precision();
+        auto original_flags = out.flags();
+
         out << std::setw(WRAP_LENGTH - offset) << ' ' << " [" << COLOR_YELLOW << std::setw(6)
             << std::fixed << std::setprecision(2) << duration.count() << " s" << COLOR_DEFAULT
             << ']';
+
+        // Restore the original stream state
+        out.precision(original_precision);
+        out.flags(original_flags);
       }
 
       out << std::endl;
@@ -126,14 +143,21 @@ public:
    */
   ~TimedPrint()
   {
-    // Tell the thread to end
-    _done.set_value(true);
+    if (_active_instance == this)
+    {
+      // Tell the thread to end
+      _done.set_value(true);
 
-    // Wait for it to end
-    _thread.join();
+      // Wait for it to end
+      _thread.join();
+
+      _active_instance = nullptr;
+    }
   }
 
-protected:
+private:
   std::promise<bool> _done;
   std::thread _thread;
+
+  static TimedPrint * _active_instance;
 };

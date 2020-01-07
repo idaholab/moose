@@ -25,12 +25,13 @@
 
 registerMooseObject("MooseApp", TransientMultiApp);
 
-template <>
+defineLegacyParams(TransientMultiApp);
+
 InputParameters
-validParams<TransientMultiApp>()
+TransientMultiApp::validParams()
 {
-  InputParameters params = validParams<MultiApp>();
-  params += validParams<TransientInterface>();
+  InputParameters params = MultiApp::validParams();
+  params += TransientInterface::validParams();
   params.addClassDescription("MultiApp for performing coupled simulations with the master and "
                              "sub-application both progressing in time.");
 

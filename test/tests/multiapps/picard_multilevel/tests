@@ -13,7 +13,7 @@
     input = 'picard_master.i'
     cli_args = 'Executioner/picard_force_norms=true Outputs/file_base=picard_master_out_extra'
 
-    exodiff = 'picard_master_out_extra.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+    exodiff = 'picard_master_out_extra.e picard_master_out_extra_sub10.e picard_master_out_extra_sub10_sub20.e'
     prereq = test
 
     issues = '#12709'

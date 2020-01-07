@@ -9,8 +9,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from ExodusReader import ExodusReader
 import mooseutils
+from .ExodusReader import ExodusReader
 from .. import utils
 from .. import base
 from .. import filters
@@ -89,7 +89,7 @@ class ExodusSource(base.ChiggerSource):
 
     def getVTKSource(self):
         """
-        Returns the vtkExtractBlock object used for pulling subdomsin/sideset/nodeset data from the
+        Returns the vtkExtractBlock object used for pulling subdomain/sideset/nodeset data from the
         reader. (override)
 
         Returns:
@@ -217,7 +217,7 @@ class ExodusSource(base.ChiggerSource):
         for item in ['block', 'boundary', 'nodeset']:
             if self.isOptionValid(item) and self.getOption(item) == []:
                 self.setOption(item, [item.name for item in \
-                                      block_info[getattr(ExodusReader, item.upper())].itervalues()])
+                                      block_info[getattr(ExodusReader, item.upper())].values()])
         self.setNeedsUpdate(False) # this function does not need to update again
 
         def get_indices(option, vtk_type):
@@ -227,7 +227,7 @@ class ExodusSource(base.ChiggerSource):
             indices = []
             if self.isOptionValid(option):
                 blocks = self.getOption(option)
-                for vtkid, item in block_info[vtk_type].iteritems():
+                for vtkid, item in block_info[vtk_type].items():
                     for name in blocks:
                         if (item.name == str(name)) or (str(name) == vtkid):
                             indices.append(item.multiblock_index)
@@ -284,7 +284,7 @@ class ExodusSource(base.ChiggerSource):
         if not available:
             return
 
-        default = available[available.keys()[0]]
+        default = available[list(available.keys())[0]]
         if not self.isOptionValid('variable'):
             varinfo = default
         else:
@@ -351,3 +351,19 @@ class ExodusSource(base.ChiggerSource):
             rng = list(self.__getRange())
 
         self.getVTKMapper().SetScalarRange(rng)
+
+        # Handle Elemental variables that are not everywhere on the domain
+        varname = self.__current_variable.name
+        block = self.getOption('block')
+        if (self.__current_variable.object_type == ExodusReader.ELEMENTAL) and (block is not None):
+            for i in range(self.__vtkextractblock.GetOutput().GetNumberOfBlocks()):
+                if not hasattr(self.__vtkextractblock.GetOutput().GetBlock(i), 'GetNumberOfBlocks'):
+                    continue
+                for j in range(self.__vtkextractblock.GetOutput().GetBlock(i).GetNumberOfBlocks()):
+                    blk = self.__vtkextractblock.GetOutput().GetBlock(i).GetBlock(j)
+                    if not blk.GetCellData().HasArray(varname):
+                        data = vtk.vtkDoubleArray()
+                        data.SetName(varname)
+                        data.SetNumberOfTuples(blk.GetCellData().GetArray(0).GetNumberOfTuples())
+                        data.FillComponent(0, vtk.vtkMath.Nan())
+                        blk.GetCellData().AddArray(data)

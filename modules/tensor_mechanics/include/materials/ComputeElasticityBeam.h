@@ -24,6 +24,8 @@ InputParameters validParams<ComputeElasticityBeam>();
 class ComputeElasticityBeam : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputeElasticityBeam(const InputParameters & parameters);
 
 protected:

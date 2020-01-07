@@ -40,6 +40,8 @@ template <typename T>
 class InterfaceKernelTempl : public InterfaceKernelBase, public NeighborMooseVariableInterface<T>
 {
 public:
+  static InputParameters validParams();
+
   InterfaceKernelTempl(const InputParameters & parameters);
 
   /// The master variable that this interface kernel operates on

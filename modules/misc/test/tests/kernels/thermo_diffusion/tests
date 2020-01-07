@@ -5,7 +5,7 @@
     exodiff = 'thermo_diffusion_out.e'
     abs_zero = 1e-8
     requirement = 'Thermo diffusion shall reproduce an analytical solution'
-    design = "thermodiffusion.md"
+    design = "ThermoDiffusion.md"
     issues = "#3392"
   [../]
   [./ad_thermo_diffusion]
@@ -14,7 +14,7 @@
     exodiff = 'ad_thermo_diffusion_out.e'
     abs_zero = 1e-8
     requirement = 'AD thermo diffusion shall reproduce an analytical solution'
-    design = ""
+    design = "ADThermoDiffusion.md"
     issues = "#12633"
     allow_test_objects = true
   [../]
@@ -26,7 +26,7 @@
     run_sim = True
     petsc_version = '>=3.9.4'
     requirement = 'AD thermo diffusion shall work with material properties and the Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
+    design = "ADThermoDiffusion.md"
     issues = "#5658"
     allow_test_objects = true
   [../]

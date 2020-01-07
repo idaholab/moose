@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", LinearViscoelasticityManager);
 
-template <>
+defineLegacyParams(LinearViscoelasticityManager);
+
 InputParameters
-validParams<LinearViscoelasticityManager>()
+LinearViscoelasticityManager::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Manages the updating of the semi-implicit "
                              "single-step first-order finite difference "
                              "time-stepping scheme");
@@ -62,7 +63,7 @@ LinearViscoelasticityManager::execute()
 void
 LinearViscoelasticityManager::initialize()
 {
-  std::shared_ptr<Material> test =
+  std::shared_ptr<MaterialBase> test =
       _mi_feproblem.getMaterial(_viscoelastic_model_name, _material_data_type, _mi_tid, true);
 
   if (!test)

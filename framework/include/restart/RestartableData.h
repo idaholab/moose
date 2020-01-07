@@ -14,6 +14,8 @@
 
 // C++ includes
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
 
 // Forward declarations
 class RestartableDataValue;
@@ -152,7 +154,20 @@ RestartableData<T>::load(std::istream & stream)
 }
 
 /**
- * Container for storing material properties
+ * Struct and Aliases for Restartable/Recoverable structures
  */
-using RestartableDatas = std::vector<std::map<std::string, std::unique_ptr<RestartableDataValue>>>;
+struct RestartableDataValuePair
+{
+  RestartableDataValuePair(std::unique_ptr<RestartableDataValue> v, bool d)
+    : value(std::move(v)), declared(d)
+  {
+  }
 
+  std::unique_ptr<RestartableDataValue> value;
+  bool declared;
+};
+
+using RestartableDataMap = std::unordered_map<std::string, RestartableDataValuePair>;
+using RestartableDataMaps = std::vector<RestartableDataMap>;
+
+using DataNames = std::unordered_set<std::string>;

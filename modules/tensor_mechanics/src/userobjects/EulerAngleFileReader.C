@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", EulerAngleFileReader);
 
-template <>
+defineLegacyParams(EulerAngleFileReader);
+
 InputParameters
-validParams<EulerAngleFileReader>()
+EulerAngleFileReader::validParams()
 {
-  InputParameters params = validParams<EulerAngleProvider>();
+  InputParameters params = EulerAngleProvider::validParams();
   params.addClassDescription("Read Euler angle data from a file and provide it to other objects.");
   params.addRequiredParam<FileName>("file_name", "Euler angle data file name");
   return params;

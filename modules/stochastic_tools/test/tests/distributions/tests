@@ -1,133 +1,161 @@
 [Tests]
   issues = '#12688'
-  [./uniform]
-    type = CSVDiff
-    input = uniform.i
-    csvdiff = 'uniform_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a uniform distribution.'
-    design = 'UniformDistribution.md'
-  [../]
-  [./weibull]
-    type = CSVDiff
-    input = weibull.i
-    csvdiff = 'weibull_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a translated weibull (3 parameters) distribution.'
-    design = 'WeibullDistribution.md'
-  [../]
-  [./boost_weibull]
-    type = CSVDiff
-    input = boost_weibull.i
-    csvdiff = 'weibull_out.csv'
-    boost = true
-    allow_test_objects = true
-    prereq = 'weibull'
-    rel_err= 1e-8
-    abs_zero = 1e-8
-    requirement = 'MOOSE shall provide an ability to define a weibull (2 parameters) distribution based on Boost library.'
-    design = 'BoostWeibullDistribution.md'
-  [../]
-  [./weibull_no_boost]
-    type = RunException
-    input = boost_weibull.i
-    expect_err = "The BoostWeibullDistribution distribution named 'weibull' requires that libMesh"
-    boost = false
-    allow_test_objects = true
-    prereq = 'weibull'
-    requirement = 'BoostWeibullDistribution shall error if libMesh is not configured to utilize Boost library.'
-    design = 'BoostWeibullDistribution.md'
-  [../]
-  [./normal]
-    type = CSVDiff
-    input = normal.i
-    csvdiff = 'normal_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a normal distribution.'
-    design = 'NormalDistribution.md'
-  [../]
-  [./truncated_normal]
-    type = CSVDiff
-    input = truncated_normal.i
-    csvdiff = 'truncated_normal_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a truncated normal distribution.'
-    design = 'TruncatedNormalDistribution.md'
-  [../]
-  [./boost_normal]
-    type = CSVDiff
-    input = boost_normal.i
-    csvdiff = 'normal_out.csv'
-    boost = true
-    allow_test_objects = true
-    prereq = 'normal'
-    rel_err = 1e-6
-    abs_zero = 1e-7
-    requirement = 'MOOSE shall provide an ability to define a normal distribution based on Boost library.'
-    design = 'BoostNormalDistribution.md'
-  [../]
-  [./normal_no_boost]
-    type = RunException
-    input = boost_normal.i
-    expect_err = "The BoostNormalDistribution distribution named 'normal_test' requires that libMesh"
-    boost = false
-    allow_test_objects = true
-    prereq = 'normal'
-    requirement = 'BoostNormalDistribution shall error if libMesh is not configured to utilize Boost library.'
-    design = 'BoostNormalDistribution.md'
-  [../]
-  [./boost_lognormal]
-    type = CSVDiff
-    input = boost_lognormal.i
-    csvdiff = 'boost_lognormal_out.csv'
-    boost = true
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a lognormal distribution based on Boost library.'
-    design = 'BoostLognormalDistribution.md'
-  [../]
-  [./lognormal_no_boost]
-    type = RunException
-    input = boost_lognormal.i
-    expect_err = "The BoostLognormalDistribution distribution named 'lognormal_test' requires that libMesh"
-    boost = false
-    allow_test_objects = true
-    requirement = 'BoostLognormalDistribution shall error if libMesh is not configured to utilize Boost library.'
-    design = 'BoostLognormalDistribution.md'
-  [../]
-  [./normal_direct]
+  [distributions]
+    requirement = 'The system shall provide distribution function including'
+    design = 'UniformDistribution.md WeibullDistribution.md NormalDistribution.md '
+             'TruncatedNormalDistribution.md JohnsonSBDistribution.md LogisticDistribution.md'
+    issues = '#12720'
+
+    [uniform]
+      type = CSVDiff
+      input = uniform.i
+      csvdiff = 'uniform_out.csv'
+      allow_test_objects = true
+
+      detail = 'uniform,'
+    []
+    [weibull]
+      type = CSVDiff
+      input = weibull.i
+      csvdiff = 'weibull_out.csv'
+      allow_test_objects = true
+
+      detail = 'Weibull (3 parameter),'
+    []
+
+    [normal]
+      type = CSVDiff
+      input = normal.i
+      csvdiff = 'normal_out.csv'
+      allow_test_objects = true
+
+      detail = 'normal,'
+    []
+    [truncated_normal]
+      type = CSVDiff
+      input = truncated_normal.i
+      csvdiff = 'truncated_normal_out.csv'
+      allow_test_objects = true
+
+      detail = 'truncated normal,'
+    []
+
+    [johnsonsb]
+      type = CSVDiff
+      input = johnsonsb.i
+      csvdiff = 'johnsonsb_out.csv'
+      allow_test_objects = true
+
+      detail = 'Johnson Special Bounded (SB), and'
+    []
+    [logistic]
+      type = CSVDiff
+      input = logistic.i
+      csvdiff = 'logistic_out.csv'
+      allow_test_objects = true
+
+      detail = 'logistic distributions.'
+    []
+  []
+
+  [boost]
+    requirement = 'The system shall provide distribution functions based on Boost library including'
+    design = 'BoostNormalDistribution.md BoostWeibullDistribution.md'
+
+    [weibull]
+      type = CSVDiff
+      input = boost_weibull.i
+      csvdiff = 'weibull_out.csv'
+      boost = true
+      allow_test_objects = true
+      rel_err = 1e-8
+      abs_zero = 1e-8
+      prereq = 'distributions/weibull'
+
+      detail = 'Weibull (2 parameter),'
+    []
+    [normal]
+      type = CSVDiff
+      input = boost_normal.i
+      csvdiff = 'normal_out.csv'
+      boost = true
+      allow_test_objects = true
+      prereq = 'distributions/normal'
+      rel_err = 1e-6
+      abs_zero = 1e-7
+
+      detail = 'normal, and'
+    []
+
+    [lognormal]
+      type = CSVDiff
+      input = boost_lognormal.i
+      csvdiff = 'boost_lognormal_out.csv'
+      boost = true
+      allow_test_objects = true
+
+      detail = 'lognormal distributions.'
+    []
+
+  []
+
+  [no_boost]
+    requirement = 'The system shall error if a distribution defined using Boost is used but the '
+                  'system has not been configured to utilize the Boost library:'
+    design = 'BoostWeibullDistribution.md BoostNormalDistribution.md BoostLognormalDistribution.md'
+
+    [weibull]
+      type = RunException
+      input = boost_weibull.i
+      expect_err = "The BoostWeibullDistribution distribution named 'weibull' requires that libMesh"
+      boost = false
+      allow_test_objects = true
+
+      detail = 'for a Weibull distribion,'
+    []
+
+    [normal]
+      type = RunException
+      input = boost_normal.i
+      expect_err = "The BoostNormalDistribution distribution named 'normal_test' requires that "
+                   "libMesh"
+      boost = false
+      allow_test_objects = true
+
+      detail = 'a normal distribution, and'
+    []
+
+    [lognormal]
+      type = RunException
+      input = boost_lognormal.i
+      expect_err = "The BoostLognormalDistribution distribution named 'lognormal_test' requires that "
+                   "libMesh"
+      boost = false
+      allow_test_objects = true
+
+      detail = 'a lognormal distribution.'
+    []
+  []
+
+  [normal_direct]
     type = CSVDiff
     input = normal_direct.i
     csvdiff = 'normal_direct_out.csv'
     allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a normal distribution and directly call methods with distribution inputs.'
+    requirement = 'The system shall provide a normal distribution with the ability to directly call '
+                  'methods with distribution inputs.'
     design = 'NormalDistribution.md'
     issues = '#12720'
-  [../]
-  [./normal_direct_type_error]
+  []
+  [normal_direct_type_error]
     type = RunException
     input = normal_direct_type_error.i
     allow_test_objects = true
-    expect_err = "The 'cdf' object failed to retrieve 'this_is_the_wrong_type' distribution with the desired type."
-    requirement = 'MOOSE shall provide produce an error if a Distribution is retrieved with the differing type than supplied.'
+    expect_err = "The 'cdf' object failed to retrieve 'this_is_the_wrong_type' distribution with the "
+                 "desired type."
+    requirement = 'The system shall produce an error if a distribution is retrieved with the '
+                  'differing type than supplied.'
     design = 'NormalDistribution.md'
     issues = '#12720'
-  [../]
-  [./johnsonsb]
-    type = CSVDiff
-    input = johnsonsb.i
-    csvdiff = 'johnsonsb_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a Johnson Special Bounded (SB) distribution.'
-    design = 'JohnsonSBDistribution.md'
-    issues = '#12720'
-  [../]
-  [./logistic]
-    type = CSVDiff
-    input = logistic.i
-    csvdiff = 'logistic_out.csv'
-    allow_test_objects = true
-    requirement = 'MOOSE shall provide an ability to define a logistic distribution.'
-    design = 'LogisticDistribution.md'
-    issues = '#12720'
-  [../]
+  []
 []

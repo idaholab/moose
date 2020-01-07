@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # This script checks and can optionally update MOOSE source files.
 # You should always run this script without the "-u" option
@@ -8,7 +8,7 @@
 import os, string, re, shutil
 from optparse import OptionParser
 
-global_ignores = ['contrib', '.svn', '.git', 'libmesh']
+global_ignores = ['contrib', '.svn', '.git', 'libmesh', 'unity_src']
 
 unified_header = """\
 //* This file is part of the MOOSE framework
@@ -61,12 +61,12 @@ def checkAndUpdateCPlusPlus(filename):
     header = unified_header
 
     # Check (exact match only)
-    if (string.find(text, header) == -1 or global_options.force == True):
+    if (text.find(header) == -1 or global_options.force == True):
         # print the first 10 lines or so of the file
         if global_options.update == False: # Report only
-            print filename + ' does not contain an up to date header'
+            print(filename + ' does not contain an up to date header')
             if global_options.verbose == True:
-                print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
+                print('>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5)
         else:
             # Make sure any previous C-style header version is removed
             text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
@@ -103,12 +103,12 @@ def checkAndUpdatePython(filename):
     header = python_header
 
     # Check (exact match only)
-    if (string.find(text, header) == -1):
+    if (text.find(header) == -1):
         # print the first 10 lines or so of the file
         if global_options.update == False: # Report only
-            print filename + ' does not contain an up to date header'
+            print(filename + ' does not contain an up to date header')
             if global_options.verbose == True:
-                print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
+                print('>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5)
         else:
             # Save off the shebang line if it exists
             m = re.match(r'#!.*\n', text)

@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
 
-template <>
+defineLegacyParams(PatternedMeshGenerator);
+
 InputParameters
-validParams<PatternedMeshGenerator>()
+PatternedMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   params.addRangeCheckedParam<Real>(
@@ -61,6 +62,14 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
+  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
+      if (_pattern[i][j] >= _input_names.size())
+        paramError("pattern",
+                   "Index " + Moose::stringify(_pattern[i][j]) +
+                       " is larger than the the maximum possible index, which is determined by the "
+                       "number of MeshGenerators provided in inputs");
+
   _mesh_ptrs.reserve(_input_names.size());
   for (auto & input_name : _input_names)
     _mesh_ptrs.push_back(&getMeshByName(input_name));

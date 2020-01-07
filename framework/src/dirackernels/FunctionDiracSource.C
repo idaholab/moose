@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionDiracSource);
 
-template <>
+defineLegacyParams(FunctionDiracSource);
+
 InputParameters
-validParams<FunctionDiracSource>()
+FunctionDiracSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<FunctionName>(
       "function", "The function to use for controlling the specified dirac source.");
   params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");

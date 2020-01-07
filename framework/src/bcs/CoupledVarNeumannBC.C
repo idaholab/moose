@@ -11,12 +11,15 @@
 
 registerMooseObject("MooseApp", CoupledVarNeumannBC);
 
-template <>
+defineLegacyParams(CoupledVarNeumannBC);
+
 InputParameters
-validParams<CoupledVarNeumannBC>()
+CoupledVarNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the gradient on the boundary.");
+  params.addParam<Real>(
+      "coef", 1.0, "Coefficent ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=v$, "
                              "where $v$ is a variable.");
@@ -24,12 +27,12 @@ validParams<CoupledVarNeumannBC>()
 }
 
 CoupledVarNeumannBC::CoupledVarNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _coupled_var(coupledValue("v"))
+  : IntegratedBC(parameters), _coupled_var(coupledValue("v")), _coef(getParam<Real>("coef"))
 {
 }
 
 Real
 CoupledVarNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * _coupled_var[_qp];
+  return -_coef * _test[_i][_qp] * _coupled_var[_qp];
 }

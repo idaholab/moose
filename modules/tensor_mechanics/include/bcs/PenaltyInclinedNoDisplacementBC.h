@@ -23,6 +23,8 @@ InputParameters validParams<PenaltyInclinedNoDisplacementBC>();
 class PenaltyInclinedNoDisplacementBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   PenaltyInclinedNoDisplacementBC(const InputParameters & parameters);
 
 protected:
@@ -40,4 +42,3 @@ protected:
 private:
   Real _penalty;
 };
-

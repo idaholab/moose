@@ -15,11 +15,10 @@
 
 registerMooseObject("DarcyThermoMechApp", RandomCorrosion);
 
-template <>
 InputParameters
-validParams<RandomCorrosion>()
+RandomCorrosion::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<Real>("tolerance",
                         1e-3,
                         "When acting as a nodal AuxKernel determine if the "

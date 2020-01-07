@@ -24,6 +24,8 @@ class NodalConstraint : public Constraint,
                         public NeighborMooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   NodalConstraint(const InputParameters & parameters);
 
   /**

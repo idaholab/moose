@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", FixedPointProblem);
 
-template <>
 InputParameters
-validParams<FixedPointProblem>()
+FixedPointProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
   params.addParam<TagName>("fp_tag_name", "fp_previous", "Tag name for the fixed point iteration");
   return params;
 }

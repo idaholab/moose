@@ -20,6 +20,8 @@ InputParameters validParams<TimestepSize>();
 class TimestepSize : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TimestepSize(const InputParameters & parameters);
 
   virtual void initialize() override {}

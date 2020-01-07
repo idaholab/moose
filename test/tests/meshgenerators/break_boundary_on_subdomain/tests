@@ -1,25 +1,30 @@
 [Tests]
-  [./break_boundary_on_subdomain_generator_test]
-    type = 'Exodiff'
-    input = 'break_boundary_on_subdomain.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_boundary_on_subdomain_in.e'
-    requirement = 'MOOSE shall be able to crate different subdomains'
-    design = 'meshgenerators/BreakBoundaryOnSubdomainGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  issues = '#7887 #11640'
+  design = 'meshgenerators/BreakBoundaryOnSubdomainGenerator.md'
 
-  [./break_bottom_interface_generator_test]
-    type = 'Exodiff'
-    input = 'break_bottom_interface_on_subdomain.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_bottom_interface_on_subdomain_in.e'
-    requirement = 'MOOSE shall be able to crate different subdomains'
-    design = 'meshgenerators/BreakBoundaryOnSubdomainGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  [boundary_type]
+    requirement = 'The system shall be capable of splitting existing mesh boundary sets where their '
+                  'underlying subdomain changes'
+    [external]
+      type = 'Exodiff'
+      input = 'break_boundary_on_subdomain.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_boundary_on_subdomain_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'on external boundaries, and'
+    []
+
+    [internal]
+      type = 'Exodiff'
+      input = 'break_bottom_interface_on_subdomain.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_bottom_interface_on_subdomain_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'on internal boundaries.'
+    []
+  []
 []

@@ -12,6 +12,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
 
 registerMooseAction("RichardsApp", Q2PAction, "add_kernel");
@@ -78,11 +79,11 @@ validParams<Q2PAction>()
                         false,
                         "Save the diagonal component of the Q2PSaturationFlux Jacobian into the "
                         "AuxVariable called Q2PWaterJacobian");
-  params.addParam<MooseEnum>("ORDER",
-                             orders,
-                             "The order for the porepressure and saturation: " +
-                                 orders.getRawNames() +
-                                 " (only needed if you're calculating masses)");
+  params.addParam<MooseEnum>(
+      "ORDER",
+      orders,
+      "The order for the porepressure and saturation: " + orders.getRawNames() +
+          " (only needed if you're calculating masses)");
   return params;
 }
 
@@ -212,32 +213,27 @@ Q2PAction::act()
 
   if (_current_task == "add_aux_variable")
   {
+    FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                   Utility::string_to_enum<FEFamily>("LAGRANGE"));
+    auto type = AddVariableAction::determineType(fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+    var_params.set<MooseEnum>("family") = "LAGRANGE";
+    var_params.set<MooseEnum>("order") = getParam<MooseEnum>("ORDER");
+
     if (!_no_mass_calculations)
     {
       // user wants nodal masses or total masses
-      _problem->addAuxVariable("Q2P_nodal_water_mass_divided_by_dt",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
-      _problem->addAuxVariable("Q2P_nodal_gas_mass_divided_by_dt",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+      _problem->addAuxVariable(type, "Q2P_nodal_water_mass_divided_by_dt", var_params);
+      _problem->addAuxVariable(type, "Q2P_nodal_gas_mass_divided_by_dt", var_params);
     }
     if (_save_gas_flux_in_Q2PGasFluxResidual)
-      _problem->addAuxVariable("Q2PGasFluxResidual",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+      _problem->addAuxVariable(type, "Q2PGasFluxResidual", var_params);
     if (_save_water_flux_in_Q2PWaterFluxResidual)
-      _problem->addAuxVariable("Q2PWaterFluxResidual",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+      _problem->addAuxVariable(type, "Q2PWaterFluxResidual", var_params);
     if (_save_gas_Jacobian_in_Q2PGasJacobian)
-      _problem->addAuxVariable("Q2PGasJacobian",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+      _problem->addAuxVariable(type, "Q2PGasJacobian", var_params);
     if (_save_water_Jacobian_in_Q2PWaterJacobian)
-      _problem->addAuxVariable("Q2PWaterJacobian",
-                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+      _problem->addAuxVariable(type, "Q2PWaterJacobian", var_params);
   }
 
   if (_current_task == "add_function" && _output_total_masses_to.size() > 0)

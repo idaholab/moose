@@ -7,8 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDataFrame import MooseDataFrame
-import message
+from .MooseDataFrame import MooseDataFrame
+from . import message
 
 class PostprocessorReader(MooseDataFrame):
     """
@@ -21,7 +21,7 @@ class PostprocessorReader(MooseDataFrame):
     def __init__(self, filename, **kwargs):
         super(PostprocessorReader, self).__init__(filename, **kwargs)
 
-    def __call__(self, keys, time=None, warning=True, **kwargs):
+    def __getitem__(self, keys):
         """
         Return the data for the supplied keys.
 
@@ -30,9 +30,7 @@ class PostprocessorReader(MooseDataFrame):
             time: Required for consistent calls in Peacock, but not used in general.
             warning: When true (default) an error is produced if the users tries to use 'time' option, which does nothing.
         """
-        if time != None and warning:
-            message.mooseWarning('Supplying a time argument is not supported in the PostprocessorReader.')
-        return self.data[keys]
+        return self._data[keys]
 
     def __contains__(self, variable):
         """
@@ -40,17 +38,8 @@ class PostprocessorReader(MooseDataFrame):
         """
         return variable in self.variables()
 
-    def times(self):
-        """
-        Returns the list of available times.
-
-        This returns an empty list and only exists to be in agreement with the VectorPostprocessorReader for use
-        by the PostprocessorDataWidget.
-        """
-        return []
-
     def variables(self):
-        return self.data.keys()
+        return self._data.keys()
 
     def repr(self):
         """

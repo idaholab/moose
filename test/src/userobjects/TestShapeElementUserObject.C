@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", TestShapeElementUserObject);
 
-template <>
 InputParameters
-validParams<TestShapeElementUserObject>()
+TestShapeElementUserObject::validParams()
 {
-  InputParameters params = validParams<ShapeElementUserObject>();
+  InputParameters params = ShapeElementUserObject::validParams();
   params.addCoupledVar("u", "first coupled variable");
   params.addRequiredParam<unsigned int>("u_dofs", "Number of degrees of freedom per element for u");
   params.addCoupledVar("v", "second coupled variable");

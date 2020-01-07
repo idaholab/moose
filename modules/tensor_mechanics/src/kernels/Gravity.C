@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", Gravity);
 
-template <>
+defineLegacyParams(Gravity);
+
 InputParameters
-validParams<Gravity>()
+Gravity::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Apply gravity. Value is in units of acceleration.");
   params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
   params.addRequiredParam<Real>(

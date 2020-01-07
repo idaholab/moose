@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class PPSDiffusion;
-
-template <>
-InputParameters validParams<PPSDiffusion>();
-
 class PPSDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PPSDiffusion(const InputParameters & parameters);
 
 protected:
@@ -27,4 +23,3 @@ protected:
   virtual Real computeQpJacobian();
   const PostprocessorValue & _pps_value;
 };
-

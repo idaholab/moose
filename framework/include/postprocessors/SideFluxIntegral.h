@@ -24,6 +24,8 @@ InputParameters validParams<SideFluxIntegral>();
 class SideFluxIntegral : public SideIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   SideFluxIntegral(const InputParameters & parameters);
 
 protected:

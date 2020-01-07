@@ -23,6 +23,8 @@ InputParameters validParams<OldEqualValueConstraint>();
 class OldEqualValueConstraint : public MortarConstraint
 {
 public:
+  static InputParameters validParams();
+
   OldEqualValueConstraint(const InputParameters & parameters);
 
 protected:

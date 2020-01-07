@@ -8,14 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConservativeAdvection.h"
+#include "SystemBase.h"
 
 registerMooseObject("MooseApp", ConservativeAdvection);
 
-template <>
+defineLegacyParams(ConservativeAdvection);
+
 InputParameters
-validParams<ConservativeAdvection>()
+ConservativeAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                              "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");

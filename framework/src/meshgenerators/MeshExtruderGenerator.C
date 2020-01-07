@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", MeshExtruderGenerator);
 
-template <>
+defineLegacyParams(MeshExtruderGenerator);
+
 InputParameters
-validParams<MeshExtruderGenerator>()
+MeshExtruderGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "the mesh we want to extrude");
   params.addClassDescription("Takes a 1D or 2D mesh and extrudes the entire structure along the "
@@ -72,7 +73,8 @@ MeshExtruderGenerator::generate()
 {
   std::unique_ptr<MeshBase> source_mesh = std::move(_input);
 
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm());
+  std::unique_ptr<MeshBase> dest_mesh = source_mesh->clone();
+  dest_mesh->clear();
 
   if (source_mesh->mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh !");
@@ -82,11 +84,14 @@ MeshExtruderGenerator::generate()
     elem_subdomain_id = libmesh_make_unique<QueryElemSubdomainID>(
         _existing_subdomains, _layers, _new_ids, _num_layers);
 
-  MeshTools::Generation::build_extrusion(
-      *mesh, *source_mesh, _num_layers, _extrusion_vector, elem_subdomain_id.get());
+  MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh &>(*dest_mesh),
+                                         *source_mesh,
+                                         _num_layers,
+                                         _extrusion_vector,
+                                         elem_subdomain_id.get());
 
   // See if the user has requested specific sides for the top and bottom
-  std::set<boundary_id_type> side_ids = mesh->get_boundary_info().get_side_boundary_ids();
+  std::set<boundary_id_type> side_ids = dest_mesh->get_boundary_info().get_side_boundary_ids();
 
   // Handle distributed meshes: processors may not know all side ids
   _communicator.set_union(side_ids);
@@ -99,11 +104,11 @@ MeshExtruderGenerator::generate()
 
   // Update the IDs
   if (isParamValid("bottom_sideset"))
-    changeID(*mesh, getParam<std::vector<BoundaryName>>("bottom_sideset"), old_bottom);
+    changeID(*dest_mesh, getParam<std::vector<BoundaryName>>("bottom_sideset"), old_bottom);
   if (isParamValid("top_sideset"))
-    changeID(*mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
+    changeID(*dest_mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return dynamic_pointer_cast<MeshBase>(dest_mesh);
 }
 
 void

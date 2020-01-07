@@ -22,6 +22,8 @@ InputParameters validParams<ScalePostprocessor>();
 class ScalePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ScalePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}

@@ -2,10 +2,10 @@
 
 ## Overview
 
-In general, MOOSE is not designed for generating finite element meshes. Generally,
-[CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/) is
-recommended for creating meshes, especially complex geometries, for use in MOOSE. CUBIT can be
-licensed from CSimSoft for a fee depending that varies based on the type of organization and work
+There are two primary ways of creating a mesh for use in a MOOSE simulation: "offline generation" through
+a tool like [CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/), and
+"online generation" through programmatic interfaces. CUBIT is useful for creating complex geometries, and can be
+licensed from CSimSoft for a fee depending on the type of organization and work
 being performed. Other mesh generators can work as long as they output a file format that is
 supported by the [FileMesh](/FileMesh.md) object.
 
@@ -23,7 +23,25 @@ of Mesh objects refer to the individual object pages listed below.
 
 !syntax list /Mesh objects=False actions=True subsystems=False
 
-## Outputing The Mesh
+## MeshGenerator System
+
+The MeshGenerator System is useful for programmatically constructing a mesh. This includes generating the mesh
+from a serious of points and connectivity, adding features on the fly, linearly transforming the mesh, stitching
+together pieces of meshes, etc. There are several built-in generators but this system is also extendable. MeshGenerators
+may or may not consumer the output from other generators and produce a single mesh. They can be chained together
+through dependencies so that complex meshes may be built up from a series of simple processes.
+
+### DAG and final mesh selection
+
+When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
+MOOSE evaluates and generates the individual objects to build up your final mesh. If your input file has
+multiple end points, (e.g. B->A and C->A) then MOOSE will issue an error and terminate. Generally, it doesn't
+make sense to have multiple end points since the output of one would simply be discarded anyway. It is possible
+to force the selection of a particular end point by using the "final_generator" parameter in the Mesh block.
+This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
+
+
+## Outputting The Mesh
 
 Since MOOSE contains a lot of ability to read/generate/modify meshes - it's often useful to be able to run all of
 the Mesh related portions of the input file and then output the mesh.  This mesh can then be viewed (such as
@@ -42,6 +60,9 @@ Here are a couple of examples showing the usage of `--mesh-only`:
 
 # Will do the same but write out mesh_file.e
 ./myapp-opt -i input_file.i --mesh-only mesh_file.e
+
+# Run in parallel and write out parllel checkpoint format (which can be read as a split)
+mpiexec -n 3 ./myapp-opt -i input_file.i Mesh/parallel_type=distributed --mesh-only mesh_file.cpr
 ```
 
 ## Named Entity Support
@@ -148,3 +169,24 @@ recycled (because it might be a key to an important map), you should use unique_
 The MooseMesh object has a method for building a map (technically a multimap) of paired periodic nodes in the
 simulation. This map provides a quick lookup of all paired nodes on a periodic boundary. in the 2D and 3D cases
 each corner node will map to 2 or 3 other nodes (respectively).
+
+## Extra integer IDs
+
+Extra integer IDs for all the elements of a mesh can be useful for handling complicated material assignment, performing specific calculations on groups of elements, etc.
+Often times, we do not want to use subdomain IDs for these tasks because otherwise too many subdomains could be needed, and in turn large penalty on run-time performance could be introduced.
+
+MooseMesh[MooseMesh.md] has a parameter `extra_integers` to allow users to introduce more integer IDs for elements each identified with a name in the parameter.
+When this parameter is specified, extra integers will be made available for all elements through `Assembly` in MOOSE objects such as kernels, aux kernels, materials, initial conditions, element user objects, etc.
+To retrieve the integer on an element, one needs to simply call
+```
+getElementID(integer_name_parameter, comp),
+```
+within the initialization list of your constructor.
+`integer_name_parameter` is the name of the parameter in type of `std::vector<ExtraElementIDName>` of this object listing all integer names.
+`comp` is the index into the integer names if multiple are specified for `integer_name_parameter`.
+It is noticed that the returned value of this function call must be in type of `const dof_id_type &`, which is used to refer the value set by MOOSE in `Assembly`.
+The returned reference should be held in a class member variable for later use.
+Based on this ID, one can proceed with any particular operations, for example, choosing a different set of data for evaluating material properties.
+
+IDs can be assigned to the mesh elements with `MeshGenerators` in a similar way to assigning subdomain IDs.
+We note that the element IDs are part of the mesh and will be initialized properly for restart/recover.

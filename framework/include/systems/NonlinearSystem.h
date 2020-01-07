@@ -12,6 +12,11 @@
 #include "NonlinearSystemBase.h"
 #include "ComputeResidualFunctor.h"
 #include "ComputeFDResidualFunctor.h"
+#include "SubProblem.h"
+#include "MooseError.h"
+
+#include "libmesh/transient_system.h"
+#include "libmesh/nonlinear_implicit_system.h"
 
 /**
  * Nonlinear system to be solved
@@ -27,6 +32,8 @@ public:
   virtual SparseMatrix<Number> & addMatrix(TagID tag) override;
 
   virtual void solve() override;
+
+  void init() override;
 
   /**
    * Quit the current solve as soon as possible.
@@ -71,6 +78,8 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
+  void computeScalingJacobian() override;
+
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
   ComputeResidualFunctor _nl_residual_functor;
@@ -97,7 +106,4 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-
-  /// Whether we've computed the variable scaling factors
-  bool _computed_scaling;
 };

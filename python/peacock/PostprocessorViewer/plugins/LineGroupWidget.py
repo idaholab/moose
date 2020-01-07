@@ -9,9 +9,9 @@
 
 import collections
 from PyQt5 import QtCore, QtWidgets
-from LineSettingsWidget import LineSettingsWidget
 import peacock
 import mooseutils
+from .LineSettingsWidget import LineSettingsWidget
 
 
 class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
@@ -109,7 +109,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         """
         Clears all lines created by this widget.
         """
-        for artists in self._artists.itervalues():
+        for artists in self._artists.values():
             for artist in artists:
                 artist.remove()
                 del artist
@@ -154,12 +154,12 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
             # Loop through all the line settings toggles and create lines
             y_vars = [[], []]
-            for variable, toggle in self._toggles.iteritems():
+            for variable, toggle in self._toggles.items():
                 if toggle.isValid():
                     settings = toggle.settings()
                     i = settings.pop('axis')
                     y_vars[i].append(variable)
-                    y = self._data(variable, time=self._time, warning=False)
+                    y = self._data(variable, time=self._time)
                     if self._axes[i]:
                         self._artists[variable] = self._axes[i].plot(x, y, **settings)
 
@@ -179,7 +179,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
         y_vars = []
         y2_vars = []
-        for variable, toggle in self._toggles.iteritems():
+        for variable, toggle in self._toggles.items():
             if toggle.isValid():
                 if toggle.axis() == 'right':
                     y2_vars.append(variable)
@@ -192,7 +192,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         """
         Returns True if any lines are active.
         """
-        return any([toggle.isValid() for toggle in self._toggles.itervalues()])
+        return any([toggle.isValid() for toggle in self._toggles.values()])
 
     def repr(self):
         """
@@ -202,7 +202,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         """
 
         # Do nothing if no data is selectd
-        if not any([toggle.isValid() for toggle in self._toggles.itervalues()]):
+        if not any([toggle.isValid() for toggle in self._toggles.values()]):
             return [], []
 
         # Read the data
@@ -215,7 +215,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
             output += ['x = data({})'.format(repr(str(self.AxisVariable.currentText())))]
 
         # Plot the results
-        for toggle in self._toggles.itervalues():
+        for toggle in self._toggles.values():
             if toggle.isValid():
                 out, imp = toggle.repr(time=self._time)
                 output += ['']
@@ -232,7 +232,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.clear()
 
         # Clear the widgets
-        for toggle in self._toggles.itervalues():
+        for toggle in self._toggles.values():
             toggle.setVisible(False) # If I don't do this, there is a ghosted image of the widget hanging around
             self.MainLayout.removeWidget(toggle)
             toggle.setParent(None)
@@ -296,7 +296,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         Callback for primary variable selection.
         """
         var = self.AxisVariable.currentText()
-        for toggle in self._toggles.itervalues():
+        for toggle in self._toggles.values():
             toggle.setEnabled(True)
         self._toggles[var].setEnabled(False)
         self.clear()
@@ -332,8 +332,8 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     """
     Create widgets for running LineGroupWidget
     """
-    from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from FigurePlugin import FigurePlugin
+    from ..PostprocessorViewer import PostprocessorViewer
+    from .FigurePlugin import FigurePlugin
     import matplotlib.pyplot as plt
     import numpy as np
     import itertools
@@ -370,7 +370,7 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
 if __name__ == '__main__':
     import sys
     import mooseutils
-    from peacock.PostprocessorViewer.PostprocessorDataWidget import PostprocessorDataWidget
+    from ..PostprocessorDataWidget import PostprocessorDataWidget
 
     app = QtWidgets.QApplication(sys.argv)
     filename = '../../../tests/input/white_elephant_jan_2016.csv'

@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADDiffusion : public ADKernelGrad<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADDiffusion(const InputParameters & parameters);
 
 protected:

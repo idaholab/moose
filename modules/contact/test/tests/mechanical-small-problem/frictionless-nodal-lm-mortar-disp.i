@@ -1,23 +1,59 @@
-[Mesh]
-  file = mesh.e
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
-[MeshModifiers]
+[Mesh]
+  [./simple_mesh]
+    type = FileMeshGenerator
+    file = mesh.e
+  [../]
   [./master]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
+    input = simple_mesh
     sidesets = '2'
-    new_block_id = '20'
+    new_block_id = '3'
   [../]
   [./slave]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
+    input = master
     sidesets = '1'
-    new_block_id = '10'
+    new_block_id = '4'
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
+[Constraints]
+  [./lm]
+    type = NormalNodalLMMechanicalContact
+    slave = 1
+    master = 2
+    variable = frictionless_normal_lm
+    master_variable = disp_x
+    disp_y = disp_y
+  [../]
+  [x]
+    type = NormalMortarMechanicalContact
+    master_boundary = '2'
+    slave_boundary = '1'
+    master_subdomain = '3'
+    slave_subdomain = '4'
+    variable = frictionless_normal_lm
+    slave_variable = disp_x
+    component = x
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+  []
+  [y]
+    type = NormalMortarMechanicalContact
+    master_boundary = '2'
+    slave_boundary = '1'
+    master_subdomain = '3'
+    slave_subdomain = '4'
+    variable = frictionless_normal_lm
+    slave_variable = disp_y
+    component = y
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+  []
 []
 
 [Variables]
@@ -27,8 +63,8 @@
   [./disp_y]
     block = '1 2'
   [../]
-  [./lambda]
-    block = '10'
+  [./frictionless_normal_lm]
+    block = 4
   [../]
 []
 
@@ -76,42 +112,6 @@
   show_var_residual_norms = 1
 []
 
-[Constraints]
-  [./lm]
-    type = NormalNodalLMMechanicalContact
-    slave = 1
-    master = 2
-    variable = lambda
-    master_variable = disp_x
-    disp_y = disp_y
-  [../]
-  [x]
-    type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '1'
-    master_subdomain = '20'
-    slave_subdomain = '10'
-    variable = lambda
-    slave_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [y]
-    type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '1'
-    master_subdomain = '20'
-    slave_subdomain = '10'
-    variable = lambda
-    slave_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-[]
-
-
 [Preconditioning]
   [./smp]
     type = SMP
@@ -136,8 +136,8 @@
 [Postprocessors]
   [contact]
     type = ContactDOFSetSize
-    variable = lambda
-    subdomain = '10'
+    variable = frictionless_normal_lm
+    subdomain = '4'
     execute_on = 'nonlinear timestep_end'
   []
 []

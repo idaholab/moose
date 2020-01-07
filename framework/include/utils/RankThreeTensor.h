@@ -36,6 +36,8 @@ class RankTwoTensorTempl;
 template <typename>
 class RankFourTensorTempl;
 
+namespace MathUtils
+{
 template <typename T>
 void mooseSetToZero(T & v);
 
@@ -47,6 +49,7 @@ template <>
 void mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v);
 template <>
 void mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v);
+}
 
 /**
  * RankThreeTensor is designed to handle any N-dimensional third order tensor, r.
@@ -76,6 +79,9 @@ public:
 
   /// Default constructor; fills to zero
   RankThreeTensorTempl();
+
+  /// Copy assignment operator must be defined if used
+  RankThreeTensorTempl(const RankThreeTensorTempl<T> & a) = default;
 
   /**
    * Construct from other class template instantiation
@@ -275,4 +281,3 @@ RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorT
 
   return result;
 }
-

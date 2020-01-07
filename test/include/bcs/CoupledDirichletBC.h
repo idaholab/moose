@@ -11,11 +11,6 @@
 
 #include "DirichletBC.h"
 
-class CoupledDirichletBC;
-
-template <>
-InputParameters validParams<CoupledDirichletBC>();
-
 /**
  * Implements the Dirichlet boundary condition
  * c*u + u^2 + v^2 = _value
@@ -26,6 +21,8 @@ InputParameters validParams<CoupledDirichletBC>();
 class CoupledDirichletBC : public DirichletBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledDirichletBC(const InputParameters & parameters);
 
 protected:
@@ -42,4 +39,3 @@ protected:
   // The constant (not user-selectable for now)
   Real _c;
 };
-

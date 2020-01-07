@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", PolyTestFunction);
 
-template <>
 InputParameters
-validParams<PolyTestFunction>()
+PolyTestFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<std::vector<Real>>("coefficients",
                                              "Coefficients to use for the polynomial evaluation");
   params.addParam<bool>(

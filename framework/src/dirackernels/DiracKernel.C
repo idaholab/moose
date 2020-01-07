@@ -16,13 +16,14 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DiracKernel);
+
 InputParameters
-validParams<DiracKernel>()
+DiracKernel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<MaterialPropertyInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params += TaggingInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this kernel operates on");
 

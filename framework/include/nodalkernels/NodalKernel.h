@@ -66,6 +66,8 @@ public:
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
+  static InputParameters validParams();
+
   NodalKernel(const InputParameters & parameters);
 
   /**

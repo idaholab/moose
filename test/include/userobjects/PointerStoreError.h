@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class PointerStoreError;
-
-template <>
-InputParameters validParams<PointerStoreError>();
-
 class TypeWithNoStore
 {
 public:
@@ -25,6 +20,8 @@ public:
 class PointerStoreError : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PointerStoreError(const InputParameters & params);
   virtual ~PointerStoreError();
 
@@ -38,4 +35,3 @@ public:
 protected:
   TypeWithNoStore *& _pointer_data;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressBasedChemicalPotential);
 
-template <>
+defineLegacyParams(StressBasedChemicalPotential);
+
 InputParameters
-validParams<StressBasedChemicalPotential>()
+StressBasedChemicalPotential::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Chemical potential from stress");
   params.addRequiredParam<MaterialPropertyName>("property_name",
                                                 "Name of stress based chemical potential");

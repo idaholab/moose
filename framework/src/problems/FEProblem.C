@@ -14,14 +14,16 @@
 #include "MooseEigenSystem.h"
 #include "NonlinearSystem.h"
 #include "LineSearch.h"
+#include "MooseEnum.h"
 
 registerMooseObject("MooseApp", FEProblem);
 
-template <>
+defineLegacyParams(FEProblem);
+
 InputParameters
-validParams<FEProblem>()
+FEProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.addClassDescription("A normal (default) Problem object that contains a single "
                              "NonlinearSystem and a single AuxiliarySystem object.");
 
@@ -61,28 +63,41 @@ FEProblem::addLineSearch(const InputParameters & parameters)
 {
   MooseEnum line_search = parameters.get<MooseEnum>("line_search");
   Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-  if (enum_line_search == Moose::LS_CONTACT)
+  if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PROJECT)
   {
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3, 6, 0)
     mooseError("Shell line searches only became available in Petsc in version 3.6.0!");
 #else
-    InputParameters ls_params = _factory.getValidParams("PetscContactLineSearch");
+    if (enum_line_search == Moose::LS_CONTACT)
+    {
+      InputParameters ls_params = _factory.getValidParams("PetscContactLineSearch");
 
-    bool affect_ltol = parameters.isParamValid("contact_line_search_ltol");
-    ls_params.set<bool>("affect_ltol") = affect_ltol;
-    ls_params.set<unsigned>("allowed_lambda_cuts") =
-        parameters.get<unsigned>("contact_line_search_allowed_lambda_cuts");
-    ls_params.set<Real>("contact_ltol") = affect_ltol
-                                              ? parameters.get<Real>("contact_line_search_ltol")
-                                              : parameters.get<Real>("l_tol");
-    ls_params.set<FEProblem *>("_fe_problem") = this;
+      bool affect_ltol = parameters.isParamValid("contact_line_search_ltol");
+      ls_params.set<bool>("affect_ltol") = affect_ltol;
+      ls_params.set<unsigned>("allowed_lambda_cuts") =
+          parameters.get<unsigned>("contact_line_search_allowed_lambda_cuts");
+      ls_params.set<Real>("contact_ltol") = affect_ltol
+                                                ? parameters.get<Real>("contact_line_search_ltol")
+                                                : parameters.get<Real>("l_tol");
+      ls_params.set<FEProblem *>("_fe_problem") = this;
 
-    _line_search =
-        _factory.create<LineSearch>("PetscContactLineSearch", "contact_line_search", ls_params);
+      _line_search =
+          _factory.create<LineSearch>("PetscContactLineSearch", "contact_line_search", ls_params);
+    }
+    else
+    {
+      InputParameters ls_params = _factory.getValidParams("PetscProjectSolutionOntoBounds");
+      ls_params.set<FEProblem *>("_fe_problem") = this;
+
+      _line_search = _factory.create<LineSearch>(
+          "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
+    }
 #endif
 #else
-    mooseError("Currently contact line search requires use of Petsc.");
+    mooseError("Currently the MOOSE implemented line searches require use of Petsc.");
 #endif
   }
+  else
+    mooseError("Requested line search ", line_search.operator std::string(), " is not supported");
 }

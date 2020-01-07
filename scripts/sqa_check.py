@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -15,11 +15,8 @@ import argparse
 
 moose_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(moose_dir, 'python'))
-
-skip = [os.path.join('modules', 'richards'),
-        os.path.join('modules', 'solid_mechanics')]
-
 import mooseutils
+
 def get_options():
     """Command-line options."""
     parser = argparse.ArgumentParser(description='SQA Requirement checking tool.')
@@ -45,6 +42,7 @@ if __name__ == '__main__':
     cmd = ['git', 'fetch', opt.remote]
     subprocess.call(cmd)
 
+    opt.skip += 'python'
     count = mooseutils.sqa_check(opt.directory, opt.remote, opt.branch, opt.specs, opt.skip)
 
     if opt.duplicates:

@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./simple]
     type = 'Exodiff'
     input = 'simple.i'

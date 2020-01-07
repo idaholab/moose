@@ -1,20 +1,36 @@
 [Tests]
-  [./test]
+  design = 'NodalKernels/index.md'
+  issues = '#3029 #10620'
+
+  [test]
     type = 'Exodiff'
     input = 'jac_test.i'
     exodiff = 'jac_test_out.e'
     max_parallel = 1 # Because we're using LU
-  [../]
-  [./block_jacobian_test]
-    type = 'PetscJacobianTester'
-    input = 'block_jacobian_test.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E-10
-  [../]
-  [./bc_jacobian_test]
-    type = 'PetscJacobianTester'
-    input = 'bc_jacobian_test.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E-10
-  [../]
+
+    requirement = "The system shall include ability to include contributions to the residual nodes "
+                  "of a finite element mesh using an LU preconditioner."
+  []
+
+  [group]
+    requirement = "The system shall include ability to include contributions to the residual nodes "
+                  "of a finite element mesh and compute the correct Jacobian terms for"
+
+    [block_jacobian_test]
+      type = 'PetscJacobianTester'
+      input = 'block_jacobian_test.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E-10
+
+      detail = "subdomain and"
+    []
+    [bc_jacobian_test]
+      type = 'PetscJacobianTester'
+      input = 'bc_jacobian_test.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E-10
+
+      detail = "boundary restricted terms."
+    []
+  []
 []

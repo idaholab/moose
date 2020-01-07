@@ -12,23 +12,29 @@
 
 registerADMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
 
-defineADValidParams(
-    ADDynamicStressDivergenceTensors,
-    ADStressDivergenceTensors,
-    params.addClassDescription(
-        "Residual due to stress related Rayleigh damping and HHT time integration terms");
-    params.addParam<MaterialPropertyName>("zeta",
-                                          0.0,
-                                          "Name of material property or a constant real "
-                                          "number defining the zeta parameter for the "
-                                          "Rayleigh damping.");
-    params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
-    params.addParam<bool>("static_initialization",
-                          false,
-                          "Set to true to get the system to "
-                          "equillibrium under gravity by running a "
-                          "quasi-static analysis (by solving Ku = F) "
-                          "in the first time step"););
+defineADLegacyParams(ADDynamicStressDivergenceTensors);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADDynamicStressDivergenceTensors<compute_stage>::validParams()
+{
+  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  params.addClassDescription(
+      "Residual due to stress related Rayleigh damping and HHT time integration terms");
+  params.addParam<MaterialPropertyName>("zeta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the zeta parameter for the "
+                                        "Rayleigh damping.");
+  params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
+  params.addParam<bool>("static_initialization",
+                        false,
+                        "Set to true to get the system to "
+                        "equilibrium under gravity by running a "
+                        "quasi-static analysis (by solving Ku = F) "
+                        "in the first time step");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDynamicStressDivergenceTensors<compute_stage>::ADDynamicStressDivergenceTensors(

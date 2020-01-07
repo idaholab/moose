@@ -23,6 +23,8 @@ InputParameters validParams<ChangeOverTimePostprocessor>();
 class ChangeOverTimePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ChangeOverTimePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

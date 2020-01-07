@@ -12,8 +12,17 @@
 // MOOSE includes
 #include "MooseVariable.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
-defineADBaseValidParams(ADMortarConstraint, MortarConstraintBase, );
+defineADLegacyParams(ADMortarConstraint);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADMortarConstraint<compute_stage>::validParams()
+{
+  InputParameters params = MortarConstraintBase::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMortarConstraint<compute_stage>::ADMortarConstraint(const InputParameters & parameters)

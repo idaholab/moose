@@ -1,38 +1,57 @@
 [Tests]
-  [./1d-linear]
-    type = 'Exodiff'
-    input = 'ee-1d-linear.i'
-    exodiff = 'ee-1d-linear_out.e'
-  [../]
+  design = 'ExplicitEuler.md'
+  issues = '#1953'
 
-  [./1d-quadratic]
-    type = 'Exodiff'
-    input = 'ee-1d-quadratic.i'
-    exodiff = 'ee-1d-quadratic_out.e'
-  [../]
+  [group]
+    requirement = "The system shall support the use of quasi-explicit Euler solver with"
 
-  [./1d-quadratic-neumann]
-    type = 'Exodiff'
-    input = 'ee-1d-quadratic-neumann.i'
-    exodiff = 'ee-1d-quadratic-neumann_out.e'
-  [../]
+    [1d-linear]
+      type = 'Exodiff'
+      input = 'ee-1d-linear.i'
+      exodiff = 'ee-1d-linear_out.e'
 
-  [./2d-linear]
-    type = 'Exodiff'
-    input = 'ee-2d-linear.i'
-    exodiff = 'ee-2d-linear_out.e'
-  [../]
+      detail = "1D elements with first order shape functions and Dirichlet boundary conditions;"
+    []
 
-  [./2d-linear-adapt]
-    type = 'Exodiff'
-    input = 'ee-2d-linear-adapt.i'
-    exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
-    abs_zero = 1e-8
-  [../]
+    [1d-quadratic]
+      type = 'Exodiff'
+      input = 'ee-1d-quadratic.i'
+      exodiff = 'ee-1d-quadratic_out.e'
 
-  [./2d-quadratic]
-    type = 'Exodiff'
-    input = 'ee-2d-quadratic.i'
-    exodiff = 'ee-2d-quadratic_out.e'
-  [../]
+      detail = "1D elements with second order shape functions and Dirichlet boundary conditions;"
+    []
+
+    [1d-quadratic-neumann]
+      type = 'Exodiff'
+      input = 'ee-1d-quadratic-neumann.i'
+      exodiff = 'ee-1d-quadratic-neumann_out.e'
+
+      detail = "1D elements with second order shape functions and Neumann boundary conditions;"
+    []
+
+    [2d-linear]
+      type = 'Exodiff'
+      input = 'ee-2d-linear.i'
+      exodiff = 'ee-2d-linear_out.e'
+
+      detail = "2D elements with first order shape functions and Dirichlet boundary conditions;"
+    []
+
+    [2d-linear-adapt]
+      type = 'Exodiff'
+      input = 'ee-2d-linear-adapt.i'
+      exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
+      abs_zero = 1e-8
+
+      detail = "2D elements with second order shape functions and Dirichlet boundary conditions; and"
+    []
+
+    [2d-quadratic]
+      type = 'Exodiff'
+      input = 'ee-2d-quadratic.i'
+      exodiff = 'ee-2d-quadratic_out.e'
+
+      detail = "2D elements with second order shape functions and Neumann boundary conditions."
+    []
+  []
 []

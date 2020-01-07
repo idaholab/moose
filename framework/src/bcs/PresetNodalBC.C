@@ -14,12 +14,13 @@
 
 #include "libmesh/numeric_vector.h"
 
-template <>
+defineLegacyParams(PresetNodalBC);
+
 InputParameters
-validParams<PresetNodalBC>()
+PresetNodalBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  return p;
+  InputParameters params = NodalBC::validParams();
+  return params;
 }
 
 PresetNodalBC::PresetNodalBC(const InputParameters & parameters) : NodalBC(parameters) {}
@@ -28,7 +29,6 @@ void
 PresetNodalBC::computeValue(NumericVector<Number> & current_solution)
 {
   const dof_id_type & dof_idx = _var.nodalDofIndex();
-  _qp = 0;
   current_solution.set(dof_idx, computeQpValue());
 }
 

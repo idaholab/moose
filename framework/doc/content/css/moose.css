@@ -94,6 +94,10 @@ a {
     width:100%;
 }
 
+.card .card-title{
+    font-weight:100;
+    font-size:130%;
+}
 
 .moose-exception {
   color: red;
@@ -300,6 +304,10 @@ ul {
   font-size: 75%;
   font-weight: 100;
   margin: 0;
+}
+
+.modal-content.container.moose-search-modal-content{
+    padding:0;
 }
 
 /* NAME/HOME link */
@@ -769,11 +777,38 @@ li p {
   margin-bottom: 0;
 }
 
-.card .card-content{
-  padding-top: 6px;
-  padding-bottom: 6px;
+.moose-card{
+    height:340px;
+    width:100%;
+    display:block;
 }
 
+.moose-card .card-image{
+    height:260px;
+}
+
+.moose-card .card-content{
+    height: auto;
+    width: auto;
+}
+
+.moose-card .card-image .material-placeholder .moose-image{
+    max-height:260px;
+    max-width:100%;
+    margin:auto;
+    width:auto;
+}
+
+/*
+.card{
+  display:table;
+}
+
+.card .card-image,
+.card .card-content{
+  display:table-row;
+}
+*/
 
 .moose-error,
 .moose-katex-error{

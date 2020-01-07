@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "InternalSidePostprocessor.h"
 
-// Forward declerations
-class NumInternalSides;
-
-template <>
-InputParameters validParams<NumInternalSides>();
-
 /**
  * An object for testing the block restricted behavior of InternalSideUserObject, it
  * simply counts the number of sides
@@ -25,6 +19,8 @@ InputParameters validParams<NumInternalSides>();
 class NumInternalSides : public InternalSidePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumInternalSides(const InputParameters & parameters);
   virtual ~NumInternalSides();
   virtual void execute();
@@ -37,4 +33,3 @@ public:
 private:
   unsigned int _count;
 };
-

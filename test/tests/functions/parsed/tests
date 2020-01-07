@@ -1,11 +1,11 @@
 [Tests]
-  issues = ''
   design = 'source/functions/MooseParsedFunction.md'
   [./steady]
     type = 'Exodiff'
     input = 'steady.i'
     exodiff = 'steady_out.e'
     requirement = "The Function system shall support the creation of objects that execute a function defined within the input file."
+    issues = '#1902'
   [../]
   [./transient]
     type = 'Exodiff'
@@ -13,12 +13,14 @@
     exodiff = 'mms_transient_coupled_out.e'
     requirement = "The ParsedFunction object shall be capable of defining function within the input file for use with the method of manufactured solutions."
     verification = parsed_function_verification.md
+    issues = '#1902'
   [../]
   [./vector]
     type = 'Exodiff'
     input = 'vector_function.i'
     exodiff = 'vector_function_out.e'
     requirement = "The Function system shall support the creation of objects that execute a vector function defined within the input file."
+    issues = '#2273'
   [../]
 
   [./scalar]
@@ -27,6 +29,7 @@
     input = scalar.i
     exodiff = 'scalar_out.e'
     requirement = "The Function system shall support the creation of objects that execute a function defined within the input file that includes a scalar variable."
+    issues = '#5041'
   [../]
 
   [./function]
@@ -42,6 +45,7 @@
     input = combined.i
     exodiff = 'combined_out.e'
     requirement = "The ParsedFunction object shall support the use of functions, scalar values and postprocessor values specified by their names in its expression at the same time."
+    issues = '#12179'
   [../]
 
   [./function_curl]
@@ -51,5 +55,13 @@
     abs_zero = 3e-09
     requirement = "The Function system shall support the creation of objects that execute a curl of a vector function defined within the input file."
     issues = '#13041'
+  [../]
+
+  [./vals_error]
+    type = 'RunException'
+    input = 'vals_error.i'
+    expect_err = 'No postprocessor, scalar variable, or function with the name \'invalid\' found. Unable to convert \'invalid\' to type double'
+    requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
+    issues = '#14169'
   [../]
 []

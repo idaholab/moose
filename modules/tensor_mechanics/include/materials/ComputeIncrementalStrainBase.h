@@ -22,6 +22,8 @@ InputParameters validParams<ComputeIncrementalStrainBase>();
 class ComputeIncrementalStrainBase : public ComputeStrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeIncrementalStrainBase(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -44,4 +46,3 @@ protected:
 
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
 };
-

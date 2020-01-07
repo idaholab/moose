@@ -2,7 +2,9 @@
   [./test]
     type = PythonUnitTest
     input = test_exodus_state.py
-    platform = "DARWIN"
+    platform = "LINUX"
     separate = True
+    python = 3
+    display_required = true
   [../]
 []

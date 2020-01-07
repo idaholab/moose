@@ -66,4 +66,19 @@ public:
    */
   virtual Real totalMassFraction(
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const = 0;
+
+  unsigned int getPressureIndex() const { return _pidx; };
+  unsigned int getTemperatureIndex() const { return _Tidx; };
+  unsigned int getZIndex() const { return _Zidx; };
+  unsigned int getXIndex() const { return _Xidx; };
+
+protected:
+  /// Index of derivative wrt pressure
+  const unsigned int _pidx;
+  /// Index of derivative wrt total mass fraction Z
+  const unsigned int _Zidx;
+  /// Index of derivative wrt temperature
+  const unsigned int _Tidx;
+  /// Index of derivative wrt salt mass fraction X
+  const unsigned int _Xidx;
 };

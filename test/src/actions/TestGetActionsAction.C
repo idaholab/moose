@@ -17,11 +17,10 @@
 
 registerMooseAction("MooseTestApp", TestGetActionsAction, "meta_action");
 
-template <>
 InputParameters
-validParams<TestGetActionsAction>()
+TestGetActionsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "An action demonstrating how an action can interact with other actions");
   return params;

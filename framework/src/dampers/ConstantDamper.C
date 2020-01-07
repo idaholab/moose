@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ConstantDamper);
 
-template <>
+defineLegacyParams(ConstantDamper);
+
 InputParameters
-validParams<ConstantDamper>()
+ConstantDamper::validParams()
 {
-  InputParameters params = validParams<GeneralDamper>();
+  InputParameters params = GeneralDamper::validParams();
   params.addRequiredParam<Real>("damping",
                                 "The percentage (between 0 and 1) of the newton update to take.");
   return params;

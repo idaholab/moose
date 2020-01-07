@@ -2,27 +2,27 @@ minimum_gcc: 4.8.4
 minimum_clang: 3.5.1
 minimum_intel: 2017
 mpich: 3.3
-petsc_alt: 3.9.4
-slepc_alt: 3.9.2
-petsc_default: 3.10.5
-slepc_default: 3.10.0
+petsc_alt: 3.10.5
+slepc_alt: 3.10
+petsc_default: 3.11.4
+slepc_default: 3.11
 autoconf: 2.69
 automake: 1.16
-gcc: 8.3.0
-llvm: 8.0.0
-llvm_release: 80
-cmake: 3.9.4
+gcc: 9.2.0
+llvm: 9.0.0
+llvm_release: 90
+cmake: 3.15.4
 gnuplot: 4.6.5
-doxygen: 1.8.14
+doxygen: 1.8.15
 graphviz: 2.38.0
 lcov: 1.14
-miniconda: 4.6.14
+miniconda: Miniconda3-4.7.10
 vtk: 7.1.0
 tbb: 2018_U3
 cppunit: 1.12.1
 ccache: 3.2.1
 tcl: 8.5.14
-modules: 3.2.10
+modules: 4.3.1
 trilinos: 12-6-2
 dtk: 2.0.0
 pkg_config: 0.29.1
@@ -40,16 +40,16 @@ harfbuzz: 1.3.2
 git_lfs: 1.4.3
 valgrind: 3.13.0
 blas_lapack: 3.7.1
-conda_python: 2.7
-conda_vtk: 7.1.0
+conda_python: 3.7
+conda_vtk: 8.2
 pip_pylint: 1.6.5
 pip_livereload: 2.5.1
 moose_packages:
-    osx10.14: moose-environment_osx-mojave_20190709_x86_64.pkg
-    osx10.13: moose-environment_osx-highsierra_20190709_x86_64.pkg
-    osx10.12: moose-environment_osx-sierra_20190709_x86_64.pkg
-    ubuntu16: moose-environment_ubuntu-16.04_20190710_x86_64.deb
-    ubuntu18: moose-environment_ubuntu-18.04_20190710_x86_64.deb
-    opensuse15: moose-environment_opensuse-15.0_20190710_x86_64.rpm
-    fedora28: moose-environment_fedora-29_20190710_x86_64.rpm
-    centos7: moose-environment_centos-7.6.1810_20190710_x86_64.rpm
+    osx10.15: moose-environment_osx-catalina_20191125_x86_64.pkg
+    osx10.14: moose-environment_osx-mojave_20191125_x86_64.pkg
+    osx10.13: moose-environment_osx-highsierra_20191125_x86_64.pkg
+    ubuntu16: moose-environment_ubuntu-16.04_20191125_x86_64.deb
+    ubuntu18: moose-environment_ubuntu-18.04_20191125_x86_64.deb
+    opensuse15: moose-environment_opensuse-15.0_20191125_x86_64.rpm
+    fedora31: moose-environment_fedora-31_20191125_x86_64.rpm
+    centos8: moose-environment_centos-8.0.1905_20191125_x86_64.rpm

@@ -29,6 +29,8 @@ InputParameters validParams<FunctionParserUtils>();
 class FunctionParserUtils
 {
 public:
+  static InputParameters validParams();
+
   FunctionParserUtils(const InputParameters & parameters);
 
   /// Shorthand for an autodiff function parser object.
@@ -66,4 +68,3 @@ protected:
   /// Array to stage the parameters passed to the functions when calling Eval.
   std::vector<Real> _func_params;
 };
-

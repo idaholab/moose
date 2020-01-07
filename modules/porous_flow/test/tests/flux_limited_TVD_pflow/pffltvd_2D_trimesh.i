@@ -162,7 +162,6 @@
   [./basic]
     type = SMP
     full = true
-    petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = ' asm      lu           NONZERO                   2'
   [../]
@@ -195,8 +194,9 @@
 []
 
 [Outputs]
-  exodus = true
-  csv = true
   print_linear_residuals = false
-  execute_on = final
+  [./out]
+    type = CSV
+    execute_on = final
+  [../]
 []

@@ -48,6 +48,8 @@ class InterfaceKernelBase : public MooseObject,
                             public TaggingInterface
 {
 public:
+  static InputParameters validParams();
+
   InterfaceKernelBase(const InputParameters & parameters);
 
   /// The master variable that this interface kernel operates on

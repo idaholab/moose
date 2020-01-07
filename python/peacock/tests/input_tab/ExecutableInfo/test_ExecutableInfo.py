@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -89,11 +89,10 @@ class Tests(Testing.PeacockTester):
         self.checkPath(e, "/Preconditioning", True, True)
         self.checkPath(e, "/BCs", True, True)
         self.checkPath(e, "/BCs/Pressure", True, True)
-        self.checkPath(e, "/SolidMechanics", True, True)
         self.checkPath(e, "/Adaptivity", False, True)
         self.checkPath(e, "/Adaptivity/Markers", True, True)
         self.checkPath(e, "/GlobalParams", False, True)
-        self.checkPath(e, "/Mesh", False, True)
+        self.checkPath(e, "/Mesh", True, True)
         self.checkPath(e, "/AuxVariables", True, True)
         self.checkPath(e, "/AuxVariables/*/InitialCondition", False, False)
         self.checkPath(e, "/Variables/*/InitialCondition", False, False)

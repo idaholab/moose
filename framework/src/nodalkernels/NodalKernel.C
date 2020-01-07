@@ -14,16 +14,17 @@
 #include "MooseVariableFE.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(NodalKernel);
+
 InputParameters
-validParams<NodalKernel>()
+NodalKernel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<RandomInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TransientInterface::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += RandomInterface::validParams();
+  params += TaggingInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -150,6 +151,7 @@ NodalKernel::computeResidual()
     const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
+    res *= _var.scalingFactor();
     _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
 
     if (_has_save_in)
@@ -170,6 +172,8 @@ NodalKernel::computeJacobian()
     Real cached_val = computeQpJacobian();
     dof_id_type cached_row = _var.nodalDofIndex();
 
+    cached_val *= _var.scalingFactor();
+
     _assembly.cacheJacobianContribution(cached_row, cached_row, cached_val, _matrix_tags);
 
     if (_has_diag_save_in)
@@ -184,17 +188,23 @@ NodalKernel::computeJacobian()
 void
 NodalKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.number())
-    computeJacobian();
-  else
+  if (_var.isNodalDefined())
   {
-    _qp = 0;
-    Real cached_val = computeQpOffDiagJacobian(jvar);
-    dof_id_type cached_row = _var.nodalDofIndex();
-    // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+    if (jvar == _var.number())
+      computeJacobian();
+    else
+    {
+      _qp = 0;
+      Real cached_val = computeQpOffDiagJacobian(jvar);
+      dof_id_type cached_row = _var.nodalDofIndex();
 
-    _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
+      // Note: this only works for equal order Lagrange variables...
+      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+
+      cached_val *= _var.scalingFactor();
+
+      _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
+    }
   }
 }
 

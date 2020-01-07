@@ -32,6 +32,8 @@ class Damper : public MooseObject,
                public MeshChangedInterface
 {
 public:
+  static InputParameters validParams();
+
   Damper(const InputParameters & parameters);
 
   /**

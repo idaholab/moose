@@ -12,7 +12,7 @@ describe the expected interactions that the software shall provide.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SRS) for {{app}} is dependent upon the following documents.
 
-!sqa dependencies suffix=srs
+!sqa dependencies suffix=srs category={{category}}
 
 ## Requirements
 

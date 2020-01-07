@@ -2,7 +2,7 @@
   [./test]
     type = 'Exodiff'
     input = 'picard_master.i'
-    exodiff = 'picard_master_out.e'
+    exodiff = 'picard_master_out.e picard_master_out_sub0.e'
     rel_err = 5e-5  # Loosened for recovery tests
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'

@@ -1,34 +1,40 @@
 [Tests]
-  [./sideset_between_subdomains_generator_test]
-    type = 'Exodiff'
-    input = 'sideset_between_subdomains.i'
-    cli_args = '--mesh-only'
-    exodiff = 'sideset_between_subdomains_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+  design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
+  issues = '#11640'
 
-  [./sideset_between_subdomains_vector_generator_test]
-    type = 'Exodiff'
-    input = 'sideset_between_vector_subdomains_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'sideset_between_vector_subdomains_generator_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+  [group]
+    requirement = 'The system shall have the ability to create new side sets between adjacent '
+                  'subdomains:'
 
-  [./sideset_between_subdomains_generator_test2]
-    type = 'Exodiff'
-    input = 'between.i'
-    cli_args = '--mesh-only'
-    exodiff = 'between_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+    [adjacent_subs]
+      type = 'Exodiff'
+      input = 'sideset_between_subdomains.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sideset_between_subdomains_in.e'
+      recover = false
+
+      detail = 'on a mesh with several adjacent subdomains,'
+    []
+
+    [nonadjacent_subs]
+      type = 'Exodiff'
+      input = 'sideset_between_vector_subdomains_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sideset_between_vector_subdomains_generator_in.e'
+      recover = false
+
+      detail = 'where some subdomains are adjacent and not where paired subdomains are not adjacent, '
+               'and'
+    []
+
+    [two_subs]
+      type = 'Exodiff'
+      input = 'between.i'
+      cli_args = '--mesh-only'
+      exodiff = 'between_in.e'
+      recover = false
+
+      detail = 'between two subdomains in a mesh with two adjacent subdomains.'
+    []
+  []
 []

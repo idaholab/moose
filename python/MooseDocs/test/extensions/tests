@@ -22,6 +22,7 @@
     input = test_sqa.py
     requirement = "The documentation system shall include tools for building software quality documents."
     issues = '#6699 #12049'
+    python = 3
   []
   [autolink]
     type = PythonUnitTest
@@ -39,6 +40,12 @@
     type = PythonUnitTest
     input = test_content.py
     requirement = "The documentation system shall include tools for listing and linking to content within and across documents."
+    issues = '#9638'
+  []
+  [appsyntax]
+    type = PythonUnitTest
+    input = test_appsyntax.py
+    requirement = "The documentation system shall include tools for automatically retrieving application syntax."
     issues = '#9638'
   []
 []

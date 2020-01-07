@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", IsotropicPlasticityStressUpdate);
 
-template <>
+defineLegacyParams(IsotropicPlasticityStressUpdate);
+
 InputParameters
-validParams<IsotropicPlasticityStressUpdate>()
+IsotropicPlasticityStressUpdate::validParams()
 {
-  InputParameters params = validParams<RadialReturnStressUpdate>();
+  InputParameters params = RadialReturnStressUpdate::validParams();
   params.addClassDescription("This class uses the discrete material in a radial return isotropic "
                              "plasticity model.  This class is one of the basic radial return "
                              "constitutive models, yet it can be used in conjunction with other "

@@ -5,6 +5,7 @@
     type = PythonUnitTest
     input = test_components.py
     requirement = "MooseDocs shall include a TokenComponent and RenderComponent objects for creating extensions."
+    required_python_packages = 'mock'
   []
   [lexer]
     type = PythonUnitTest

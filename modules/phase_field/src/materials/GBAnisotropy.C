@@ -16,7 +16,7 @@ InputParameters
 validParams<GBAnisotropy>()
 {
   InputParameters params = validParams<GBAnisotropyBase>();
-  params.addRequiredParam<Real>("wGB", "Diffuse GB width in nm ");
+  params.addRequiredParam<Real>("wGB", "Diffuse GB width in nm");
   return params;
 }
 

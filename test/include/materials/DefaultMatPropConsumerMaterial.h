@@ -12,15 +12,11 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward declarations
-class DefaultMatPropConsumerMaterial;
-
-template <>
-InputParameters validParams<DefaultMatPropConsumerMaterial>();
-
 class DefaultMatPropConsumerMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   DefaultMatPropConsumerMaterial(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
   std::string _prop_name;
   const MaterialProperty<Real> & _prop;
 };
-

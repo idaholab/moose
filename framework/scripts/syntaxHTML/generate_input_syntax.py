@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -11,7 +11,7 @@
 import sys, os
 
 if len(sys.argv) < 2:
-    print 'Usage: generate_input_syntax.py app_path app_name'
+    print('Usage: generate_input_syntax.py app_path app_name')
     exit(1)
 
 app_path = sys.argv[1]
@@ -22,10 +22,10 @@ MOOSE_DIR = os.path.abspath(os.path.join(os.path.abspath(os.path.join(os.path.di
 
 FRAMEWORK_DIR = os.path.abspath(os.path.join(MOOSE_DIR, 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
-if os.environ.has_key("MOOSE_DIR"):
+if "MOOSE_DIR" in os.environ:
     MOOSE_DIR = os.environ['MOOSE_DIR']
     FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
-if os.environ.has_key("FRAMEWORK_DIR"):
+if "FRAMEWORK_DIR" in os.environ:
     FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
 sys.path.append(MOOSE_DIR + '/framework/scripts/syntaxHTML')

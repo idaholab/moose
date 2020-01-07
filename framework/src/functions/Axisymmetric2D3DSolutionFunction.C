@@ -13,12 +13,13 @@
 
 registerMooseObject("MooseApp", Axisymmetric2D3DSolutionFunction);
 
-template <>
+defineLegacyParams(Axisymmetric2D3DSolutionFunction);
+
 InputParameters
-validParams<Axisymmetric2D3DSolutionFunction>()
+Axisymmetric2D3DSolutionFunction::validParams()
 {
   // Get the Function input parameters
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   // Add parameters specific to this object
   params.addRequiredParam<UserObjectName>("solution",

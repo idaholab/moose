@@ -22,6 +22,8 @@ InputParameters validParams<ElementVectorL2Error>();
 class ElementVectorL2Error : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementVectorL2Error(const InputParameters & parameters);
 
   virtual Real getValue() override;

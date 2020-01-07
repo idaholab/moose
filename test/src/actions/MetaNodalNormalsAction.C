@@ -13,11 +13,10 @@
 
 registerMooseAction("MooseTestApp", MetaNodalNormalsAction, "meta_action");
 
-template <>
 InputParameters
-validParams<MetaNodalNormalsAction>()
+MetaNodalNormalsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

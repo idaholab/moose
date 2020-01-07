@@ -12,9 +12,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeGreenLagrangeStrain);
 
-defineADValidParams(ADComputeGreenLagrangeStrain,
-                    ADComputeStrainBase,
-                    params.addClassDescription("Compute a Green-Lagrange strain."););
+defineADLegacyParams(ADComputeGreenLagrangeStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeGreenLagrangeStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeStrainBase<compute_stage>::validParams();
+  params.addClassDescription("Compute a Green-Lagrange strain.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeGreenLagrangeStrain<compute_stage>::ADComputeGreenLagrangeStrain(

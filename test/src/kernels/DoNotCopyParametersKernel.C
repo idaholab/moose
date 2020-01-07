@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DoNotCopyParametersKernel);
 
-template <>
 InputParameters
-validParams<DoNotCopyParametersKernel>()
+DoNotCopyParametersKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

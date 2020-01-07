@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import sys, os
 
 MOOSE_DIR = os.path.abspath(os.environ.get('MOOSE_DIR', os.path.join(os.path.dirname(__file__), '..', 'moose')))
@@ -9,4 +9,4 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR', MOOSE_DIR)
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 
 from TestHarness import TestHarness
-TestHarness.buildAndRun(sys.argv, None, MOOSE_DIR)
+TestHarness.buildAndRun(sys.argv, 'stork', MOOSE_DIR)

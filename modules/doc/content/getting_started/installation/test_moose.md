@@ -1,7 +1,5 @@
 ## Compile and Test MOOSE
 
-After libMesh has compiled the next step is to compile and test MOOSE.
-
 ```bash
 cd ~/projects/moose/test
 make -j 4

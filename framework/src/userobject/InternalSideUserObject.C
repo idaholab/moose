@@ -10,14 +10,15 @@
 #include "InternalSideUserObject.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(InternalSideUserObject);
+
 InputParameters
-validParams<InternalSideUserObject>()
+InternalSideUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<TwoMaterialPropertyInterface>();
-  params += validParams<TransientInterface>();
+  InputParameters params = UserObject::validParams();
+  params += BlockRestrictable::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
 
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",

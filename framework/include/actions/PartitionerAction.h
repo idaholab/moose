@@ -19,6 +19,8 @@ InputParameters validParams<PartitionerAction>();
 class PartitionerAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   PartitionerAction(InputParameters params);
 
   virtual void act() override;

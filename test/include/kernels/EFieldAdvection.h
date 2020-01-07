@@ -11,14 +11,11 @@
 
 #include "Kernel.h"
 
-class EFieldAdvection;
-
-template <>
-InputParameters validParams<EFieldAdvection>();
-
 class EFieldAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   EFieldAdvection(const InputParameters & parameters);
 
 protected:
@@ -34,4 +31,3 @@ protected:
   const Real _mobility;
   Real _sgn;
 };
-

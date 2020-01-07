@@ -23,6 +23,8 @@ InputParameters validParams<SmoothMeshGenerator>();
 class SmoothMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SmoothMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

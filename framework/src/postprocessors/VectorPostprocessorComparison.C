@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorComparison);
 
-template <>
+defineLegacyParams(VectorPostprocessorComparison);
+
 InputParameters
-validParams<VectorPostprocessorComparison>()
+VectorPostprocessorComparison::validParams()
 {
-  InputParameters params = validParams<ComparisonPostprocessor>();
+  InputParameters params = ComparisonPostprocessor::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>(
       "vectorpostprocessor_a", "The first vector post-processor in the comparison");

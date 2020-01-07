@@ -4,5 +4,9 @@
     type = RunException
     input = error.i
     expect_err = "The following material properties are declared on block 10 by multiple materials:"
+
+    issues = '#6533'
+    design = 'syntax/Materials/index.md'
+    requirement = 'The system shall issue an error when multiple materials properties with the same name are declared on the same block.'
   [../]
 []

@@ -23,6 +23,8 @@ InputParameters validParams<RenameBlockGenerator>();
 class RenameBlockGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   RenameBlockGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

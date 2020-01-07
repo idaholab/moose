@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", StitchedMeshGenerator);
 
-template <>
+defineLegacyParams(StitchedMeshGenerator);
+
 InputParameters
-validParams<StitchedMeshGenerator>()
+StitchedMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
 

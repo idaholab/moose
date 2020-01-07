@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeDamageStress);
 
-template <>
+defineLegacyParams(ComputeDamageStress);
+
 InputParameters
-validParams<ComputeDamageStress>()
+ComputeDamageStress::validParams()
 {
-  InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
+  InputParameters params = ComputeFiniteStrainElasticStress::validParams();
   params.addClassDescription(
       "Compute stress for damaged elastic materials in conjunction with a damage model.");
   params.addRequiredParam<MaterialName>("damage_model", "Name of the damage model");

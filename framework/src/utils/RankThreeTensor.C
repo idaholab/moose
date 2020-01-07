@@ -22,13 +22,14 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 // C++ includes
 #include <iomanip>
 #include <ostream>
 
+namespace MathUtils
+{
 template <>
 void
 mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v)
@@ -41,6 +42,7 @@ void
 mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v)
 {
   v.zero();
+}
 }
 
 template <typename T>

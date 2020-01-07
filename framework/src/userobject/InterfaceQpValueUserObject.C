@@ -11,11 +11,12 @@
 #include "MooseMesh.h"
 registerMooseObject("MooseApp", InterfaceQpValueUserObject);
 
-template <>
+defineLegacyParams(InterfaceQpValueUserObject);
+
 InputParameters
-validParams<InterfaceQpValueUserObject>()
+InterfaceQpValueUserObject::validParams()
 {
-  InputParameters params = validParams<InterfaceValueUserObject>();
+  InputParameters params = InterfaceValueUserObject::validParams();
   params.addRequiredCoupledVar("var", "The variable name");
   params.addCoupledVar("var_neighbor", "The variable name");
   params.addClassDescription("Test Interfae User Object computing and storing average values at "

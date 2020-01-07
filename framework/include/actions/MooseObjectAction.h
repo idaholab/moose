@@ -21,6 +21,8 @@ InputParameters validParams<MooseObjectAction>();
 class MooseObjectAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MooseObjectAction(InputParameters params);
 
   using Action::addRelationshipManagers;
@@ -48,4 +50,3 @@ protected:
   /// The parameters for the object to be created
   InputParameters _moose_object_pars;
 };
-

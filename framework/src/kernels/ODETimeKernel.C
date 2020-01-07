@@ -14,11 +14,12 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-template <>
+defineLegacyParams(ODETimeKernel);
+
 InputParameters
-validParams<ODETimeKernel>()
+ODETimeKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";

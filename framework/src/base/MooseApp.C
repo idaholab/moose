@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef HAVE_GPERFTOOLS
+#include "gperftools/profiler.h"
+#endif
+
 // MOOSE includes
 #include "MooseRevision.h"
 #include "AppFactory.h"
@@ -66,9 +70,10 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-template <>
+defineLegacyParams(MooseApp);
+
 InputParameters
-validParams<MooseApp>()
+MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -254,6 +259,8 @@ validParams<MooseApp>()
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
   params.addPrivateParam<unsigned int>("_multiapp_level");
   params.addPrivateParam<unsigned int>("_multiapp_number");
+  params.addPrivateParam<const MooseMesh *>("_master_mesh");
+  params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
 
   return params;
 }
@@ -268,6 +275,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _perf_graph(type() + " (" + name() + ')'),
     _rank_map(*_comm, _perf_graph),
+    _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -294,7 +302,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _recover_suffix("cpr"),
+    _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
@@ -302,6 +310,11 @@ MooseApp::MooseApp(InputParameters parameters)
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
         isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
+    _master_mesh(isParamValid("_master_mesh") ? parameters.get<const MooseMesh *>("_master_mesh")
+                                              : nullptr),
+    _master_displaced_mesh(isParamValid("_master_displaced_mesh")
+                               ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
+                               : nullptr),
     _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2)),
     _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
     _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
@@ -314,8 +327,19 @@ MooseApp::MooseApp(InputParameters parameters)
         _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
-    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _popped_final_mesh_generator(false)
 {
+#ifdef HAVE_GPERFTOOLS
+  if (std::getenv("MOOSE_PROFILE_BASE"))
+  {
+    static std::string profile_file =
+        std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+    _profiling = true;
+    ProfilerStart(profile_file.c_str());
+  }
+#endif
+
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
@@ -406,6 +430,12 @@ MooseApp::MooseApp(InputParameters parameters)
     // Sleep to allow time for the debugger to attach
     std::this_thread::sleep_for(std::chrono::seconds(getParam<unsigned int>("stop_for_debugger")));
   }
+
+  if (_master_mesh && _multiapp_level == 0)
+    mooseError("Mesh can be passed in only for sub-apps");
+
+  if (_master_displaced_mesh && !_master_mesh)
+    mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
 }
 
 void
@@ -416,6 +446,10 @@ MooseApp::checkRegistryLabels()
 
 MooseApp::~MooseApp()
 {
+#ifdef HAVE_GPERFTOOLS
+  if (_profiling)
+    ProfilerStop();
+#endif
   _action_warehouse.clear();
   _executioner.reset();
   _the_warehouse.reset();
@@ -718,6 +752,12 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
+  else if (getParam<bool>("apptype"))
+  {
+    Moose::perf_log.disable_logging();
+    Moose::out << "MooseApp Type: " << type() << std::endl;
+    _ready_to_exit = true;
+  }
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename
   {
@@ -736,7 +776,7 @@ MooseApp::setupOptions()
       // If the argument following --recover is non-existent or begins with
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
-        _recover_base = recover_following_arg;
+        _restart_recover_base = recover_following_arg;
     }
 
     // Optionally get command line argument following --recoversuffix
@@ -744,7 +784,7 @@ MooseApp::setupOptions()
     // recovery and restart files.
     if (isParamValid("recoversuffix"))
     {
-      _recover_suffix = getParam<std::string>("recoversuffix");
+      _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
     _parser.parse(_input_filename);
@@ -763,14 +803,35 @@ MooseApp::setupOptions()
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
+
+    // Setup the AppFileBase for use by the Outputs or other systems that need output file info
+    {
+      // Extract the CommonOutputAction
+      const auto & common_actions = _action_warehouse.getActionListByName("common_output");
+      mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
+
+      const Action * common = *common_actions.begin();
+
+      // If file_base is set in CommonOutputAction through parsing input, obtain the file_base
+      if (common->isParamValid("file_base"))
+      {
+        _output_file_base = common->getParamTempl<std::string>("file_base");
+        _file_base_set_by_user = true;
+      }
+      else if (isUltimateMaster())
+      {
+        // if this app is a master, we use the input file name as the default file base
+        std::string base = getInputFileName();
+        size_t pos = base.find_last_of('.');
+        _output_file_base = base.substr(0, pos);
+        // Note: we did not append "_out" in the file base here because we do not want to
+        //       have it in betwen the input file name and the object name for Output/*
+        //       syntax.
+      }
+      // default file base for multiapps is set by MultiApp
+    }
   }
-  else if (getParam<bool>("apptype"))
-  {
-    Moose::perf_log.disable_logging();
-    Moose::out << "MooseApp Type: " << type() << std::endl;
-    _ready_to_exit = true;
-  }
-  else
+  else /* The catch-all case for bad options or missing options, etc. */
   {
     Moose::perf_log.disable_logging();
 
@@ -784,15 +845,18 @@ MooseApp::setupOptions()
 }
 
 void
-MooseApp::setInputFileName(std::string input_filename)
+MooseApp::setInputFileName(const std::string & input_filename)
 {
   _input_filename = input_filename;
 }
 
 std::string
-MooseApp::getOutputFileBase() const
+MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 {
-  return _output_file_base;
+  if (_file_base_set_by_user || for_non_moose_build_output || _multiapp_level)
+    return _output_file_base;
+  else
+    return _output_file_base + "_out";
 }
 
 void
@@ -883,15 +947,32 @@ MooseApp::isUseSplit() const
 }
 
 bool
-MooseApp::hasRecoverFileBase()
+MooseApp::hasRestartRecoverFileBase() const
 {
-  return !_recover_base.empty();
+  return !_restart_recover_base.empty();
+}
+
+bool
+MooseApp::hasRecoverFileBase() const
+{
+  mooseDeprecated("MooseApp::hasRecoverFileBase is deprecated, use "
+                  "MooseApp::hasRestartRecoverFileBase() instead.");
+  return !_restart_recover_base.empty();
 }
 
 void
-MooseApp::registerRecoverableData(std::string name)
+MooseApp::registerRestartableNameWithFilter(const std::string & name,
+                                            Moose::RESTARTABLE_FILTER filter)
 {
-  _recoverable_data.insert(name);
+  using Moose::RESTARTABLE_FILTER;
+  switch (filter)
+  {
+    case RESTARTABLE_FILTER::RECOVERABLE:
+      _recoverable_data_names.insert(name);
+      break;
+    default:
+      mooseError("Unknown filter");
+  }
 }
 
 std::shared_ptr<Backup>
@@ -973,7 +1054,7 @@ MooseApp::run()
 }
 
 void
-MooseApp::setOutputPosition(Point p)
+MooseApp::setOutputPosition(const Point & p)
 {
   _output_position_set = true;
   _output_position = p;
@@ -989,24 +1070,10 @@ MooseApp::getCheckpointDirectories() const
   // Storage for the directory names
   std::list<std::string> checkpoint_dirs;
 
-  // Extract the CommonOutputAction
-  const auto & common_actions = _action_warehouse.getActionListByName("common_output");
-  mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
+  // Add the directories added with Outputs/checkpoint=true input syntax
+  checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
 
-  const Action * common = *common_actions.begin();
-
-  // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint
-  // files
-  if (common->isParamValid("file_base"))
-    checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
-  // Case for normal application or master in a Multiapp setting
-  else if (getOutputFileBase().empty())
-    checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, "_out_cp"));
-  // Case for a sub app in a Multiapp setting
-  else
-    checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
-
-  // Add the directories from any existing checkpoint objects
+  // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
   for (const auto & action : actions)
   {
@@ -1016,19 +1083,8 @@ MooseApp::getCheckpointDirectories() const
       continue;
 
     const InputParameters & params = moose_object_action->getObjectParams();
-
-    // Loop through the actions and add the necessary directories to the list to check
     if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
-    {
-      if (params.isParamValid("file_base"))
-        checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
-      else
-      {
-        std::ostringstream oss;
-        oss << "_" << action->name() << "_cp";
-        checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
-      }
-    }
+      checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
 
   return checkpoint_dirs;
@@ -1042,7 +1098,7 @@ MooseApp::getCheckpointFiles() const
 }
 
 void
-MooseApp::setStartTime(const Real time)
+MooseApp::setStartTime(Real time)
 {
   _start_time_set = true;
   _start_time = time;
@@ -1088,16 +1144,36 @@ MooseApp::libNameToAppName(const std::string & library_name) const
   return MooseUtils::underscoreToCamelCase(app_name, true);
 }
 
-void
-MooseApp::registerRestartableData(std::string name,
+RestartableDataValue &
+MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
-                                  THREAD_ID tid)
+                                  THREAD_ID tid,
+                                  bool mesh_meta_data,
+                                  bool read_only)
 {
-  auto & restartable_data = _restartable_data[tid];
-  auto insert_pair = moose_try_emplace(restartable_data, name, std::move(data));
+  // Select the data store for saving this piece of restartable data (mesh or everything else)
+  auto & data_ref = mesh_meta_data ? _mesh_meta_data_map : _restartable_data[tid];
 
+  auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
+
+  // Does the storage for this data already exist?
   if (!insert_pair.second)
-    mooseError("Attempted to declare restartable twice with the same name: ", name);
+  {
+    auto & data = insert_pair.first->second;
+
+    // Are we really declaring or just trying to get a reference to the data?
+    if (!read_only)
+    {
+      if (data.declared)
+        mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
+                   name);
+      else
+        // The data wasn't previously declared, but now it is!
+        data.declared = true;
+    }
+  }
+
+  return *insert_pair.first->second.value;
 }
 
 void
@@ -1504,46 +1580,106 @@ MooseApp::executeMeshGenerators()
       }
     }
 
-    const auto & ordered_generators = resolver.getSortedValues();
+    const auto & ordered_generators = resolver.getSortedValuesSets();
 
     if (ordered_generators.size())
     {
-      // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
-      auto final_generator_name = ordered_generators.back()->name();
+      auto & final_generators = ordered_generators.back();
 
-      _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(final_generator_name));
+      if (_final_generator_name.empty())
+      {
+        // If the _final_generated_mesh wasn't set from MeshGeneratorMesh, set it now
+        _final_generator_name = final_generators.back()->name();
+
+        // See if we have multiple independent trees of generators
+        const auto ancestor_list = resolver.getAncestors(final_generators.back());
+        if (ancestor_list.size() != resolver.size())
+        {
+          // Need to remove duplicates and possibly perform a difference so we'll import out list
+          // into a set for these operations.
+          std::set<std::shared_ptr<MeshGenerator>> ancestors(ancestor_list.begin(),
+                                                             ancestor_list.end());
+          // Get all of the items from the resolver so we can compare against the tree from the
+          // final generator we just pulled.
+          const auto & allValues = resolver.getSortedValues();
+          decltype(ancestors) all(allValues.begin(), allValues.end());
+
+          decltype(ancestors) ind_tree;
+          std::set_difference(all.begin(),
+                              all.end(),
+                              ancestors.begin(),
+                              ancestors.end(),
+                              std::inserter(ind_tree, ind_tree.end()));
+
+          std::ostringstream oss;
+          oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
+              << _final_generator_name
+              << " and one or more of the following from an independent set: \"";
+          bool first = true;
+          for (const auto & gen : ind_tree)
+          {
+            if (!first)
+              oss << ", ";
+            else
+              first = false;
+
+            oss << gen->name();
+          }
+          oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
+                 "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
+                 "parameter or add additional dependencies to remove the ambiguity.";
+          mooseError(oss.str());
+        }
+      }
+
+      // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
+      _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
 
       // Need to grab two if we're going to be making a displaced mesh
       if (_action_warehouse.displacedMesh())
-        _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(final_generator_name));
+        _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
 
       // Run the MeshGenerators in the proper order
-      for (const auto & generator : ordered_generators)
+      for (const auto & generator_set : ordered_generators)
       {
-        auto name = generator->name();
-
-        auto current_mesh = generator->generate();
-
-        // Now we need to possibly give this mesh to downstream generators
-        auto & outputs = _mesh_generator_outputs[name];
-
-        if (outputs.size())
+        for (const auto & generator : generator_set)
         {
-          auto & first_output = *outputs.begin();
+          auto name = generator->name();
 
-          first_output = std::move(current_mesh);
+          auto current_mesh = generator->generate();
 
-          const auto & copy_from = *first_output;
+          // Now we need to possibly give this mesh to downstream generators
+          auto & outputs = _mesh_generator_outputs[name];
 
-          auto output_it = ++outputs.begin();
+          if (outputs.size())
+          {
+            auto & first_output = *outputs.begin();
 
-          // For all of the rest we need to make a copy
-          for (; output_it != outputs.end(); ++output_it)
-            (*output_it) = copy_from.clone();
+            first_output = std::move(current_mesh);
+
+            const auto & copy_from = *first_output;
+
+            auto output_it = ++outputs.begin();
+
+            // For all of the rest we need to make a copy
+            for (; output_it != outputs.end(); ++output_it)
+              (*output_it) = copy_from.clone();
+          }
+
+          // Once we hit the generator we want, we'll terminate the loops (this might be the last
+          // iteration anyway)
+          if (_final_generator_name == name)
+            return;
         }
       }
     }
   }
+}
+
+void
+MooseApp::setFinalMeshGeneratorName(const std::string & generator_name)
+{
+  _final_generator_name = generator_name;
 }
 
 void
@@ -1552,16 +1688,37 @@ MooseApp::clearMeshGenerators()
   _mesh_generators.clear();
 }
 
-void
-MooseApp::setRestart(const bool & value)
+std::unique_ptr<MeshBase>
+MooseApp::getMeshGeneratorMesh(bool check_unique)
 {
-  _restart = value;
+  if (_popped_final_mesh_generator == true)
+    mooseError("MooseApp::getMeshGeneratorMesh is being called for a second time. You cannot do "
+               "this because the final generated mesh was popped from its storage container the "
+               "first time this method was called");
 
-  std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
+  if (_final_generated_meshes.empty())
+    mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
+               "[MeshGenerators] block.");
+
+  auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
+  _final_generated_meshes.pop_front();
+  _popped_final_mesh_generator = true;
+
+  if (check_unique && !_final_generated_meshes.empty())
+    mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "
+               "the selection of the final mesh is non-deterministic.");
+
+  return std::move(*mesh_unique_ptr_ptr);
 }
 
 void
-MooseApp::setRecover(const bool & value)
+MooseApp::setRestart(bool value)
+{
+  _restart = value;
+}
+
+void
+MooseApp::setRecover(bool value)
 {
   _recover = value;
 }
@@ -1784,18 +1941,13 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
-          // would be disastrous to add this rm because it's going to set a coupling matrix based on
-          // the non-linear system. So we don't add this rm to either system here if its also a
-          // coupling functor
+          // is no reason to add it to the DofMap twice. In the case of any other system, it
+          // actually would be disastrous to add this rm because it's going to set a coupling matrix
+          // based on the non-linear system. So we don't add this rm at all here if its also
+          // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-          {
-            problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-            problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-          }
+            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
         }
         else // undisplaced
         {
@@ -1806,18 +1958,13 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
-          // would be disastrous to add this rm because it's going to set a coupling matrix based on
-          // the non-linear system. So we don't add this rm to either system here if its also a
-          // coupling functor
+          // is no reason to add it to the DofMap twice. In the case of any other system, it
+          // actually would be disastrous to add this rm because it's going to set a coupling matrix
+          // based on the non-linear system. So we don't add this rm at all here if its also
+          // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-          {
-            problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-            problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(
-                *rm, /*to_mesh = */ false);
-          }
+            problem.addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
         }
       }
     }
@@ -1883,4 +2030,24 @@ MooseApp::meshReinitForRMs()
 {
   for (auto & rm : _relationship_managers)
     rm->mesh_reinit();
+}
+
+void
+MooseApp::checkMeshMetaDataIntegrity() const
+{
+  std::vector<std::string> not_declared;
+
+  for (const auto & pair : _mesh_meta_data_map)
+    if (!pair.second.declared)
+      not_declared.push_back(pair.first);
+
+  if (!not_declared.empty())
+  {
+    std::ostringstream oss;
+    std::copy(
+        not_declared.begin(), not_declared.end(), infix_ostream_iterator<std::string>(oss, ", "));
+
+    mooseError("The following Mesh meta-data properties were retrieved but never declared: ",
+               oss.str());
+  }
 }

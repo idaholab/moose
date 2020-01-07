@@ -10,12 +10,20 @@
 #include "ADKernelGrad.h"
 #include "MathUtils.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADValidParams(ADKernelGrad, ADKernel, );
-defineADValidParams(ADVectorKernelGrad, ADVectorKernel, );
+defineADLegacyParams(ADKernelGrad);
+defineADLegacyParams(ADVectorKernelGrad);
+
+template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelGradTempl<T, compute_stage>::validParams()
+{
+  return ADKernelTempl<T, compute_stage>::validParams();
+}
 
 template <typename T, ComputeStage compute_stage>
 ADKernelGradTempl<T, compute_stage>::ADKernelGradTempl(const InputParameters & parameters)
@@ -31,12 +39,21 @@ ADKernelGradTempl<T, compute_stage>::computeResidual()
 
   precalculateResidual();
   const unsigned int n_test = _grad_test.size();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-    for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-      _local_re(_i) += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
-  }
+
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
+      for (_i = 0; _i < n_test; _i++) // target for auto vectorization
+        _local_re(_i) += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
+      for (_i = 0; _i < n_test; _i++) // target for auto vectorization
+        _local_re(_i) += MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]);
+    }
 
   accumulateTaggedLocalResidual();
 
@@ -69,17 +86,32 @@ ADKernelGradTempl<T, compute_stage>::computeJacobian()
   size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
 
   precalculateResidual();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    // This will also compute the derivative with respect to all dofs
-    const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-    for (_i = 0; _i < _grad_test.size(); _i++)
+
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      const auto residual = MathUtils::dotProduct(value, _grad_test[_i][_qp]);
-      for (_j = 0; _j < _var.phiSize(); _j++)
-        _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+      // This will also compute the derivative with respect to all dofs
+      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
+      for (_i = 0; _i < _grad_test.size(); _i++)
+      {
+        const auto residual = MathUtils::dotProduct(value, _grad_test[_i][_qp]);
+        for (_j = 0; _j < _var.phiSize(); _j++)
+          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+      }
     }
-  }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      // This will also compute the derivative with respect to all dofs
+      const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
+      for (_i = 0; _i < _grad_test.size(); _i++)
+      {
+        const auto residual = MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]);
+        for (_j = 0; _j < _var.phiSize(); _j++)
+          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+      }
+    }
+
   accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
@@ -114,12 +146,20 @@ ADKernelGradTempl<T, compute_stage>::computeADOffDiagJacobian()
   std::vector<DualReal> residuals(_grad_test.size(), 0);
 
   precalculateResidual();
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-    for (_i = 0; _i < _grad_test.size(); _i++)
-      residuals[_i] += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
-  }
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
+      for (_i = 0; _i < _grad_test.size(); _i++)
+        residuals[_i] += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
+      for (_i = 0; _i < _grad_test.size(); _i++)
+        residuals[_i] += MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]);
+    }
 
   auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)

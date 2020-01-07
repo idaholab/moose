@@ -59,6 +59,8 @@ public:
    *
    * @see ImageFunction
    */
+  static InputParameters validParams();
+
   ImageSampler(const InputParameters & parameters);
 
   /**

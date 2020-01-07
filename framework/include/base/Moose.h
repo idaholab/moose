@@ -33,14 +33,16 @@ class ExecFlagEnum;
 class MooseVariableFEBase;
 
 void MooseVecView(NumericVector<Number> & vector);
+void MooseVecView(const NumericVector<Number> & vector);
 void MooseMatView(SparseMatrix<Number> & mat);
+void MooseMatView(const SparseMatrix<Number> & mat);
 
 /**
  * MOOSE now contains C++11 code, so give a reasonable error message
  * stating the minimum required compiler versions.
  */
 #ifndef LIBMESH_HAVE_CXX11
-#error MOOSE requires a C++11 compatible compiler (GCC >= 4.8.4, Clang >= 3.4.0, Intel >= 20130607). Please update your compiler and try again.
+#error MOOSE requires a C++11 compatible compiler (GCC >= 4.8.4, Clang >= 3.5.1). Please update your compiler and try again.
 #endif
 
 /**
@@ -111,6 +113,18 @@ extern const ExecFlagType EXEC_TRANSFER;
 
 namespace Moose
 {
+
+/**
+ * Set to true (the default) to print the stack trace with error and warning
+ * messages - false to omit it.
+ */
+extern bool show_trace;
+
+/**
+ * Set to false (the default) to display an error message only once for each error call code
+ * location (as opposed to every time the code is executed).
+ */
+extern bool show_multiple;
 
 /**
  * Perflog to be used by applications.
@@ -220,4 +234,3 @@ private:
 #endif
 
 } // namespace Moose
-

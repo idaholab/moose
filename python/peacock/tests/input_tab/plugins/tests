@@ -3,5 +3,7 @@
     type = PythonUnitTest
     input = test_MeshViewerPlugin.py
     display_required = true
+    python = 3
+    platform = LINUX
   []
 []

@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainUObasedCP);
 
-template <>
+defineLegacyParams(FiniteStrainUObasedCP);
+
 InputParameters
-validParams<FiniteStrainUObasedCP>()
+FiniteStrainUObasedCP::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("UserObject based Crystal Plasticity system.");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");
@@ -86,7 +87,7 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
     _fp_old(getMaterialPropertyOld<RankTwoTensor>(
         "fp")), // Plastic deformation gradient of previous increment
-    _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
+    _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola-Kirchoff Stress
     _pk2_old(getMaterialPropertyOld<RankTwoTensor>(
         "pk2")), // 2nd Piola Kirchoff Stress of previous increment
     _lag_e(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VectorPostprocessorScalarKernel);
 
-template <>
 InputParameters
-validParams<VectorPostprocessorScalarKernel>()
+VectorPostprocessorScalarKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>("vpp",
                                                    "VectorPostprocessor to pull the values out of");

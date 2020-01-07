@@ -24,6 +24,8 @@ InputParameters validParams<MaxIncrement>();
 class MaxIncrement : public ElementDamper
 {
 public:
+  static InputParameters validParams();
+
   MaxIncrement(const InputParameters & parameters);
 
 protected:

@@ -1,10 +1,5 @@
 # MOOSE Software Quality
 
-!alert construction
-The software quality documents as well as the system to create them is under heavy development, this
-page will be expanding shortly to include more information about the software quality standards
-employed by MOOSE.
-
 Within MOOSE, code reliability is paramount, so MOOSE employs a rigorous and well-documented
 development strategy.  In order to accomplish this task, a comprehensive set of tools for testing and
 documentation are being developed continuously and included within the framework for use by
@@ -34,4 +29,6 @@ quality.
 - [what_is_a_requirement.md]
 
 MOOSE employs a continuous integration strategy using [!ac](CIVET); the testing results for
-this version of the documentation is available: [!civet!results](Testing Results).
+this version of the documentation is available at the following links:
+
+!civet mergeresults

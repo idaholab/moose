@@ -14,11 +14,13 @@
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
-template <>
+defineLegacyParams(ArrayNodalBC);
+
 InputParameters
-validParams<ArrayNodalBC>()
+ArrayNodalBC::validParams()
 {
-  return validParams<NodalBCBase>();
+  InputParameters params = NodalBCBase::validParams();
+  return params;
 }
 
 ArrayNodalBC::ArrayNodalBC(const InputParameters & parameters)

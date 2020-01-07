@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ValueTest);
 
-template <>
 InputParameters
-validParams<ValueTest>()
+ValueTest::validParams()
 {
-  return validParams<Kernel>();
+  return Kernel::validParams();
 }
 
 ValueTest::ValueTest(const InputParameters & parameters) : Kernel(parameters) {}

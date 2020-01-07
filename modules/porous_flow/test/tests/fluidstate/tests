@@ -46,6 +46,16 @@
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
   [../]
+  [./theis_nonisothermal]
+    type = 'CSVDiff'
+    input = 'theis_nonisothermal.i'
+    csvdiff = "theis_nonisothermal_out.csv"
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as a gas component is added in a nonisothermal water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818 #10167'
+    petsc_version = '>=3.9.0'
+  [../]
   [./brineco2]
     type = 'CSVDiff'
     input = 'brineco2.i'
@@ -78,10 +88,21 @@
     input = 'theis_brineco2.i'
     csvdiff = "theis_brineco2_csvout.csv theis_brineco2_csvout_line_0028.csv"
     heavy = true
+    max_time = 1000
     threading = '!pthreads'
     requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
+  [../]
+  [./theis_brineco2_nonisothermal]
+    type = 'CSVDiff'
+    input = 'theis_brineco2_nonisothermal.i'
+    csvdiff = "theis_brineco2_nonisothermal_out.csv"
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase in a nonisothermal model'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818 #10167'
+    petsc_version = '>=3.9.0'
   [../]
   [./waterncg_ic]
     type = 'CSVDiff'

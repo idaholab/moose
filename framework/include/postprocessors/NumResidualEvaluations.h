@@ -23,6 +23,8 @@ InputParameters validParams<NumResidualEvaluations>();
 class NumResidualEvaluations : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NumResidualEvaluations(const InputParameters & parameters);
 
   virtual void initialize() override {}

@@ -26,6 +26,8 @@ public:
   /**
    * Constructor initializes the rate
    */
+  static InputParameters validParams();
+
   ConstantRate(const InputParameters & parameters);
 
 protected:

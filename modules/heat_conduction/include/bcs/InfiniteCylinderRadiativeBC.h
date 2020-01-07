@@ -23,6 +23,8 @@ InputParameters validParams<InfiniteCylinderRadiativeBC>();
 class InfiniteCylinderRadiativeBC : public RadiativeHeatFluxBCBase
 {
 public:
+  static InputParameters validParams();
+
   InfiniteCylinderRadiativeBC(const InputParameters & parameters);
 
 protected:

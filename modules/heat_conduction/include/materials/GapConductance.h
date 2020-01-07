@@ -23,6 +23,7 @@ public:
     CYLINDER,
     SPHERE
   };
+  static InputParameters validParams();
 
   GapConductance(const InputParameters & parameters);
 

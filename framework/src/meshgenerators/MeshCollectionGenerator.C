@@ -17,11 +17,12 @@
 
 registerMooseObject("MooseApp", MeshCollectionGenerator);
 
-template <>
+defineLegacyParams(MeshCollectionGenerator);
+
 InputParameters
-validParams<MeshCollectionGenerator>()
+MeshCollectionGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Collects multiple meshes into a single (unconnected) mesh.");
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   return params;

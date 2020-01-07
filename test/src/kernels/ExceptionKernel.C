@@ -27,15 +27,19 @@ bool ExceptionKernel::_jac_has_thrown = false;
 
 registerMooseObject("MooseTestApp", ExceptionKernel);
 
-template <>
 InputParameters
-validParams<ExceptionKernel>()
+ExceptionKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   MooseEnum when("residual=0 jacobian initial_condition", "residual");
   params.addParam<MooseEnum>("when", when, "When to throw the exception");
   params.addParam<bool>(
       "should_throw", true, "Toggle between throwing an exception or triggering an error");
+  params.addParam<bool>("throw_std_exception",
+                        false,
+                        "A standard exception won't be caught by MOOSE's exception handling. This "
+                        "can be useful for checking other failure modes.");
+
   params.addParam<processor_id_type>(
       "rank", DofObject::invalid_processor_id, "Isolate an exception to a particular rank");
   return params;
@@ -45,6 +49,7 @@ ExceptionKernel::ExceptionKernel(const InputParameters & parameters)
   : Kernel(parameters),
     _when(static_cast<WhenType>((int)getParam<MooseEnum>("when"))),
     _should_throw(getParam<bool>("should_throw")),
+    _throw_std_exception(getParam<bool>("throw_std_exception")),
     _rank(getParam<processor_id_type>("rank"))
 {
 }
@@ -70,7 +75,12 @@ ExceptionKernel::computeQpResidual()
     _res_has_thrown = true;
 
     if (_should_throw)
-      throw MooseException("MooseException thrown during residual calculation");
+    {
+      if (_throw_std_exception)
+        throw std::exception();
+      else
+        throw MooseException("MooseException thrown during residual calculation");
+    }
     else
       mooseError("Intentional error triggered during residual calculation");
   }

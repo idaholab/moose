@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class StatefulSpatialTest;
-
-template <>
-InputParameters validParams<StatefulSpatialTest>();
-
 /**
  * Empty material for use in simple applications that don't need material properties.
  */
 class StatefulSpatialTest : public Material
 {
 public:
+  static InputParameters validParams();
+
   StatefulSpatialTest(const InputParameters & parameters);
 
 protected:
@@ -32,4 +28,3 @@ protected:
   MaterialProperty<Real> & _thermal_conductivity;
   const MaterialProperty<Real> & _thermal_conductivity_old;
 };
-

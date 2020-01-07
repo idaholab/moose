@@ -12,11 +12,12 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template <>
+defineLegacyParams(ExplicitRK2);
+
 InputParameters
-validParams<ExplicitRK2>()
+ExplicitRK2::validParams()
 {
-  InputParameters params = validParams<TimeIntegrator>();
+  InputParameters params = TimeIntegrator::validParams();
 
   return params;
 }

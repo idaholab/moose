@@ -83,6 +83,14 @@ PorousFlowFluidStateFlash::vaporMassFraction(Real Z0, Real K0, Real K1) const
   return (Z0 * (K1 - K0) - (K1 - 1.0)) / ((K0 - 1.0) * (K1 - 1.0));
 }
 
+DualReal
+PorousFlowFluidStateFlash::vaporMassFraction(const DualReal & Z0,
+                                             const DualReal & K0,
+                                             const DualReal & K1) const
+{
+  return (Z0 * (K1 - K0) - (K1 - 1.0)) / ((K0 - 1.0) * (K1 - 1.0));
+}
+
 Real
 PorousFlowFluidStateFlash::vaporMassFraction(std::vector<Real> & Zi, std::vector<Real> & Ki) const
 {

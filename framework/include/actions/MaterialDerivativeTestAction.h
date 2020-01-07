@@ -24,6 +24,8 @@ InputParameters validParams<MaterialDerivativeTestAction>();
 class MaterialDerivativeTestAction : public Action, public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   MaterialDerivativeTestAction(const InputParameters & parameters);
 
   virtual void act() override;

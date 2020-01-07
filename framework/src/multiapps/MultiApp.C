@@ -38,12 +38,13 @@
 // Call to "uname"
 #include <sys/utsname.h>
 
-template <>
+defineLegacyParams(MultiApp);
+
 InputParameters
-validParams<MultiApp>()
+MultiApp::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<SetupInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += SetupInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -158,6 +159,9 @@ validParams<MultiApp>()
   params.addParam<std::vector<std::string>>("relaxed_variables",
                                             std::vector<std::string>(),
                                             "List of variables to relax during Picard Iteration");
+
+  params.addParam<bool>(
+      "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -635,6 +639,15 @@ MultiApp::createApp(unsigned int i, Real start_time)
            << ":" << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
+  if (getParam<bool>("clone_master_mesh"))
+  {
+    _console << COLOR_CYAN << "Cloned master mesh will be used for subapp " << name()
+             << COLOR_DEFAULT << std::endl;
+    app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+    auto displaced_problem = _fe_problem.getDisplacedProblem();
+    if (displaced_problem)
+      app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
+  }
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
@@ -644,24 +657,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     input_file = _input_files[_first_local_app + i];
 
-  std::ostringstream output_base;
-
-  // Create an output base by taking the output base of the master problem and appending
-  // the name of the multiapp + a number to it
-  if (!_app.getOutputFileBase().empty())
-    output_base << _app.getOutputFileBase() + "_";
-  else
-  {
-    std::string base = _app.getFileName();
-    size_t pos = base.find_last_of('.');
-    output_base << base.substr(0, pos) + "_out_";
-  }
-
-  // Append the sub app name to the output file base
-  output_base << multiapp_name.str();
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
-  app->setOutputFileBase(output_base.str());
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());
@@ -678,6 +675,12 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
+  // if multiapp does not have file base in Outputs input block, output file base will
+  // be empty here since setupOptions() does not set the default file base with the multiapp
+  // input file name. Master will create the default file base for multiapp by taking the
+  // output base of the master problem and appending the name of the multiapp plus a number to it
+  if (app->getOutputFileBase().empty())
+    app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
   preRunInputFile();
   app->runInputFile();
 

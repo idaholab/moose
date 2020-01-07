@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#2972'
+  design = 'syntax/Materials/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'internal_side_uo_stateful.i'
     exodiff = 'internal_side_uo_stateful_out.e'
+
+    requirement = 'The system shall allow the retrieval of stateful material properties for calculations on internal sides within a mesh.'
   [../]
 []

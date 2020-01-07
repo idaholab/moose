@@ -15,10 +15,10 @@ import subprocess
 import numpy as np
 import vtk
 import mooseutils
-from Options import Option, Options
-import AxisOptions
-import FontOptions
-import LegendOptions
+from .Options import Option, Options
+from . import AxisOptions
+from . import FontOptions
+from . import LegendOptions
 
 def get_active_filenames(basename, pattern=None):
     """
@@ -109,7 +109,7 @@ def print_camera(camera, prefix='camera', precision=10):
     Prints vtkCamera object to screen.
     """
     if not isinstance(camera, vtk.vtkCamera):
-        print "You must supply a vtkCarmera object."
+        print("You must supply a vtkCarmera object.")
         return
 
     view_up = camera.GetViewUp()
@@ -146,7 +146,7 @@ def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     subprocess.call(cmd)
 
 def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitrate='10M',
-            num_threads=1, quality=1, dry_run=False, output_framerate_increase=0):
+            num_threads=1, quality=1, dry_run=False, output_framerate_increase=0, overwrite=False):
     """
     Use ffmpeg to convert a series of images to a movie.
 
@@ -167,7 +167,7 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
     # Compute framerate from the duration if framerate is not given
     if not framerate:
         n = len(glob.glob(pattern))
-        framerate = n/duration
+        framerate = int(n/duration)
 
     # Build the command
     cmd = [ffmpeg]
@@ -179,9 +179,11 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
     cmd += ['-q:v', str(quality)]
     cmd += ['-threads', str(num_threads)]
     cmd += ['-framerate', str(framerate + output_framerate_increase)]
+    if overwrite:
+        cmd += ['-y']
     cmd += [output]
 
     c = ' '.join(cmd)
-    print '{0}\n{1}\n{0}'.format('-'*(len(c)), c)
+    print('{0}\n{1}\n{0}'.format('-'*(len(c)), c))
     if not dry_run:
         subprocess.call(cmd)

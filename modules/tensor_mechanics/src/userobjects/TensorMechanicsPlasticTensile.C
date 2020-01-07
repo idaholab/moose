@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensile);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticTensile);
+
 InputParameters
-validParams<TensorMechanicsPlasticTensile>()
+TensorMechanicsPlasticTensile::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
@@ -49,7 +50,7 @@ validParams<TensorMechanicsPlasticTensile>()
   params.addParam<Real>("tensile_lode_cutoff",
                         "If the second invariant of stress is less than "
                         "this amount, the Lode angle is assumed to be zero. "
-                        " This is to gaurd against precision-loss problems, "
+                        "This is to guard against precision-loss problems, "
                         "and this parameter should be set small.  Default = "
                         "0.00001*((yield_Function_tolerance)^2)");
   params.addClassDescription(

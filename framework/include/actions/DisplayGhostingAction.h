@@ -25,6 +25,8 @@ InputParameters validParams<DisplayGhostingAction>();
 class DisplayGhostingAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   DisplayGhostingAction(InputParameters params);
 
 protected:

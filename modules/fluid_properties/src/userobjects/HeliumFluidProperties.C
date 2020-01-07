@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "HeliumFluidProperties.h"
 
 registerMooseObject("FluidPropertiesApp", HeliumFluidProperties);
@@ -100,11 +109,11 @@ void
 HeliumFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
   DualReal myv = v;
-  myv.derivatives()[0] = 1;
-  myv.derivatives()[1] = 0;
+  Moose::derivInsert(myv.derivatives(), 0, 1);
+  Moose::derivInsert(myv.derivatives(), 1, 0);
   DualReal mye = e;
-  mye.derivatives()[0] = 0;
-  mye.derivatives()[1] = 1;
+  Moose::derivInsert(mye.derivatives(), 0, 0);
+  Moose::derivInsert(mye.derivatives(), 1, 1);
 
   auto p = SinglePhaseFluidProperties::p_from_v_e(myv, mye);
   auto T = SinglePhaseFluidProperties::T_from_v_e(myv, mye);

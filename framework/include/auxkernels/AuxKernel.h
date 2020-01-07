@@ -28,6 +28,7 @@
 #include "VectorPostprocessorInterface.h"
 #include "MooseVariableInterface.h"
 #include "MemberTemplateMacros.h"
+#include "ElementIDInterface.h"
 
 // forward declarations
 template <typename ComputeValueType>
@@ -68,9 +69,12 @@ class AuxKernelTempl : public MooseObject,
                        protected GeometricSearchInterface,
                        public Restartable,
                        public MeshChangedInterface,
-                       protected VectorPostprocessorInterface
+                       protected VectorPostprocessorInterface,
+                       public ElementIDInterface
 {
 public:
+  static InputParameters validParams();
+
   AuxKernelTempl(const InputParameters & parameters);
 
   /**
@@ -212,6 +216,9 @@ protected:
 
   /// Current node (valid only for nodal kernels)
   const Node * const & _current_node;
+
+  /// The current boundary ID
+  const BoundaryID & _current_boundary_id;
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;

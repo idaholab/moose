@@ -11,9 +11,14 @@
 
 registerADMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
 
-defineADValidParams(HeatConductionOutflow,
-                    ADIntegratedBC,
-                    params.addClassDescription("Compute the outflow boundary condition."););
+template <ComputeStage compute_stage>
+InputParameters
+HeatConductionOutflow<compute_stage>::validParams()
+{
+  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  params.addClassDescription("Compute the outflow boundary condition.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 HeatConductionOutflow<compute_stage>::HeatConductionOutflow(const InputParameters & parameters)

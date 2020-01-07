@@ -41,6 +41,8 @@ template <ComputeStage compute_stage>
 class ADComputeStressBase : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeStressBase(const InputParameters & parameters);
 
 protected:
@@ -53,6 +55,9 @@ protected:
   const ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
   ADMaterialProperty(RankTwoTensor) & _stress;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
+
+  /// Extra stress tensors
+  std::vector<const MaterialProperty<RankTwoTensor> *> _extra_stresses;
 
   /// initial stress components
   std::vector<const Function *> _initial_stress_fcn;

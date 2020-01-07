@@ -21,14 +21,17 @@ InputParameters validParams<MonteCarloSampler>();
 class MonteCarloSampler : public Sampler
 {
 public:
+  static InputParameters validParams();
+
   MonteCarloSampler(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<DenseMatrix<Real>> sample() override;
+  /// Return the sample for the given row and column
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
 
-  /// Number of matrices
-  const dof_id_type _num_matrices;
+  /// Storage for distribution objects to be utilized
+  std::vector<Distribution const *> _distributions;
 
-  /// Number of monte carlo samples to create for each distribution
-  const dof_id_type _num_samples;
+  /// Distribution names
+  const std::vector<DistributionName> & _distribution_names;
 };

@@ -22,6 +22,8 @@ InputParameters validParams<CSVReader>();
 class CSVReader : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   CSVReader(const InputParameters & parameters);
   void virtual initialize() override;
   void virtual execute() override;

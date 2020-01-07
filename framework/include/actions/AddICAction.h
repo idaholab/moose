@@ -19,6 +19,8 @@ InputParameters validParams<AddICAction>();
 class AddICAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddICAction(InputParameters params);
 
   virtual void act() override;

@@ -11,7 +11,7 @@ import re
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -133,7 +133,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             options, sub_options = self._contour.options().toScriptString()
             output['filters'] = ['contour = chigger.filters.ContourFilter()']
             output['filters'] += ['contour.setOptions({})'.format(', '.join(options))]
-            for key, value in sub_options.iteritems():
+            for key, value in sub_options.items():
                 output['filters'] += ['contour.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output

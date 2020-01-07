@@ -23,6 +23,8 @@ InputParameters validParams<VectorMagnitudeAux>();
 class VectorMagnitudeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorMagnitudeAux(const InputParameters & parameters);
 
 protected:

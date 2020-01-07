@@ -29,6 +29,8 @@ InputParameters validParams<ShapeElementUserObject>();
 class ShapeElementUserObject : public ShapeUserObject<ElementUserObject>
 {
 public:
+  static InputParameters validParams();
+
   ShapeElementUserObject(const InputParameters & parameters);
 };
 

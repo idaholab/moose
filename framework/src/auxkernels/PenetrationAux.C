@@ -20,13 +20,14 @@ const Real PenetrationAux::NotPenetrated = -999999;
 
 registerMooseObject("MooseApp", PenetrationAux);
 
-template <>
+defineLegacyParams(PenetrationAux);
+
 InputParameters
-validParams<PenetrationAux>()
+PenetrationAux::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Auxiliary Kernel for computing several geometry related quantities "
                              "between two contacting bodies.");
 

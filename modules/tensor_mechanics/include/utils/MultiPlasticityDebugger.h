@@ -24,6 +24,8 @@ InputParameters validParams<MultiPlasticityDebugger>();
 class MultiPlasticityDebugger : public MultiPlasticityLinearSystem
 {
 public:
+  static InputParameters validParams();
+
   MultiPlasticityDebugger(const MooseObject * moose_object);
 
   /**
@@ -147,4 +149,3 @@ private:
 
   bool dof_included(unsigned int dof, const std::vector<bool> & deactivated_due_to_ld);
 };
-

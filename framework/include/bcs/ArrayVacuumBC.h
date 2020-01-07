@@ -19,6 +19,8 @@ InputParameters validParams<ArrayVacuumBC>();
 class ArrayVacuumBC : public ArrayIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ArrayVacuumBC(const InputParameters & parameters);
 
 protected:

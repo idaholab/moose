@@ -7,14 +7,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 """Module for defining Executioner objects, which are helpers for tokenization and rendering."""
+import sys
 import time
 import logging
 import traceback
 import multiprocessing
 import mooseutils
 import MooseDocs
-from MooseDocs.tree import pages
-from MooseDocs.common import exceptions, mixins, check_type
+from ..tree import pages
+from ..common import exceptions, mixins, check_type
 
 LOG = logging.getLogger('MooseDocs.Executioner')
 
@@ -169,14 +170,14 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         total = time.time()
         self.assertInitialized()
 
+        LOG.info('Executing preExecute methods...')
+        t = time.time()
+        self.translator.executeExtensionFunction('preExecute', None, args=(self.translator.content,))
+        LOG.info('Finished preExecute methods [%s sec.]', time.time() - t)
+
         nodes = nodes or self.translator.content
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
-
-        LOG.info('Executing preExecute methods...')
-        t = time.time()
-        self._executeExtensionFunction('preExecute', None, args=(self.translator.content,))
-        LOG.info('Finished preExecute methods [%s sec.]', time.time() - t)
 
         if source_nodes:
             t = time.time()
@@ -195,7 +196,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
         LOG.info('Executing postExecute methods...')
         t = time.time()
-        self._executeExtensionFunction('postExecute', None, args=(self.translator.content,))
+        self.translator.executeExtensionFunction('postExecute', None, args=(self.translator.content,))
         LOG.info('Finished postExecute methods [%s sec.]', time.time() - t)
 
         LOG.info('Total Time [%s sec.]', time.time() - total)
@@ -204,20 +205,21 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Perform tokenization and call all associated callbacks for the supplied page."""
 
         meta = Meta()
-        self._executeExtensionFunction('initMetaData', node, args=(node, meta))
-        content = self.translator.reader.read(node)
-        self._executeExtensionFunction('postRead', node, args=(content, node, meta))
+        self.translator.executeExtensionFunction('initMetaData', node, args=(node, meta))
+        content = self.translator.reader.read(node) if node.get('read', True) else ''
+        self.translator.executeExtensionFunction('postRead', node, args=(content, node, meta))
 
         ast = self.translator.reader.getRoot()
         if meta.getData('active', True):
-            self._callFunction(self.translator.reader, 'preTokenize', node, args=(ast, node, meta))
-            self._executeExtensionFunction('preTokenize', node,
-                                           args=(ast, node, meta, self.translator.reader))
+            self.translator.callFunction(self.translator.reader, 'preTokenize', node, args=(ast, node, meta))
+            self.translator.executeExtensionFunction('preTokenize', node,
+                                                     args=(ast, node, meta, self.translator.reader))
 
-            self.translator.reader.tokenize(ast, content, node)
+            if node.get('tokenize', True):
+                self.translator.reader.tokenize(ast, content, node)
 
-            self._callFunction(self.translator.reader, 'postTokenize', node, args=(ast, node, meta))
-            self._executeExtensionFunction('postTokenize', node,
+            self.translator.callFunction(self.translator.reader, 'postTokenize', node, args=(ast, node, meta))
+            self.translator.executeExtensionFunction('postTokenize', node,
                                            args=(ast, node, meta, self.translator.reader))
 
         return ast, meta
@@ -226,23 +228,23 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Perform rendering and call all associated callbacks for the supplied page."""
 
         result = self.translator.renderer.getRoot()
-
         if meta.getData('active', True):
-            self._callFunction(self.translator.renderer, 'preRender', node,
-                               args=(result, node, meta))
-            self._executeExtensionFunction('preRender', node,
+            self.translator.callFunction(self.translator.renderer, 'preRender', node,
+                                    args=(result, node, meta))
+            self.translator.executeExtensionFunction('preRender', node,
                                            args=(result, node, meta, self.translator.renderer))
 
+            #if node.get('render', True):
             self.translator.renderer.render(result, ast, node)
 
-            self._callFunction(self.translator.renderer, 'postRender', node,
-                               args=(result, node, ast))
-            self._executeExtensionFunction('postRender', node,
-                                           args=(result, node, meta, self.translator.renderer))
+            self.translator.callFunction(self.translator.renderer, 'postRender', node,
+                                         args=(result, node, ast))
+            self.translator.executeExtensionFunction('postRender', node,
+                                                     args=(result, node, meta, self.translator.renderer))
 
         if meta.getData('output', True):
             self.translator.renderer.write(node, result.root)
-            self._executeExtensionFunction('postWrite', node)
+            self.translator.executeExtensionFunction('postWrite', node)
 
         return result
 
@@ -252,31 +254,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         for node in other_nodes:
             self.translator.renderer.write(node)
         return time.time() - start
-
-    def _executeExtensionFunction(self, name, page, args=tuple()):
-        """Helper to call pre/post functions for extensions, reader, and renderer."""
-
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            check_type('name', name, str)
-
-        for ext in self.translator.extensions:
-            if ext.active:
-                self._callFunction(ext, name, page, args)
-
-    @staticmethod
-    def _callFunction(obj, name, page, args=tuple()):
-        """Helper for calling a function on the supplied object."""
-        func = getattr(obj, name, None)
-        if func is not None:
-            try:
-                func(*args)
-            except Exception:
-                msg = "Failed to execute '{}' method within the '{}' object.\n" \
-                      .format(name, obj.__class__.__name__)
-                if page is not None:
-                    msg += "  Error occurred in {}\n".format(page.local)
-                msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
-                LOG.critical(msg)#, name, obj.__class__.__name__)
 
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging."""
@@ -313,7 +290,7 @@ class ParallelBarrier(Executioner):
     for all pages prior to beginning rendering.
 
     The Manager dict() are "shared" across processes, so in essence this class
-    performs tokenzation and broadcasts the AST and meta data to all other processes,
+    performs tokenization and broadcasts the AST and meta data to all other processes,
     so when tokenization is completed all processors have the data.
     """
 
@@ -336,13 +313,16 @@ class ParallelBarrier(Executioner):
         if num_threads > len(nodes):
             num_threads = len(nodes)
 
-        barrier = mooseutils.parallel.Barrier(num_threads)
+        if sys.version_info[0] == 2:
+            barrier = mooseutils.parallel.Barrier(num_threads)
+        else:
+            barrier = multiprocessing.Barrier(num_threads)
 
         jobs = []
         for chunk in mooseutils.make_chunks(nodes, num_threads):
             p = multiprocessing.Process(target=self.__target, args=(chunk, barrier))
-            p.start()
             jobs.append(p)
+            p.start()
 
         for job in jobs:
             job.join()
@@ -350,19 +330,29 @@ class ParallelBarrier(Executioner):
     def __target(self, nodes, barrier):
         """Target function for multiprocessing.Process calls."""
 
+        local_ast = dict()
+        local_meta = dict()
+        local_result = dict()
         for node in nodes:
             ast, meta = self.tokenize(node)
-            self._tree_data[node.uid] = ast
-            self._meta_data[node.uid] = meta
+            local_ast[node.uid] = ast
+            local_meta[node.uid] = meta
+
+        with self.translator.LOCK:
+            self._tree_data.update(local_ast)
+            self._meta_data.update(local_meta)
 
         barrier.wait()
         self._ast_available.value = True
 
         for node in nodes:
-            ast = self._tree_data[node.uid]
-            meta = self._meta_data[node.uid]
+            ast = local_ast[node.uid]
+            meta = local_meta[node.uid]
             result = self.render(node, ast, meta)
-            self._result_data[node.uid] = result
+            local_result[node.uid] = result
+
+        with self.translator.LOCK:
+            self._result_data.update(local_result)
 
         self._result_available.value = True
 

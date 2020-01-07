@@ -8,9 +8,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 #pylint: enable=missing-docstring
-import cgi
-import anytree
-from base import NodeBase
+import html
+import re
+import moosetree
+from .base import NodeBase
 
 class Tag(NodeBase):
     """
@@ -29,13 +30,13 @@ class Tag(NodeBase):
         kwargs.setdefault('close', True)
         kwargs.setdefault('string', None)
         if token is not None:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', u'')))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', u'')))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', u'')))
+            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', '')))
+            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', '')))
+            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', '')))
         else:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', u''))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', u''))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', u''))
+            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', ''))
+            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', ''))
+            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', ''))
         super(Tag, self).__init__(name=name, parent=parent, **kwargs)
 
         string = self.attributes.pop('string', None)
@@ -56,27 +57,27 @@ class Tag(NodeBase):
         """
         c = self.get('class', '').strip().split(' ')
         c += [a.strip() for a in args]
-        self.set('class', ' '.join(c).strip())
+        self['class'] = ' '.join(c).strip()
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
         out = ''
         attr_list = []
         skip_list = ('close', 'string')
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if value and (key not in skip_list):
-                attr_list.append(u'{}="{}"'.format(key, unicode(value).strip()))
+                attr_list.append('{}="{}"'.format(key, str(value).strip()))
 
-        attr = u' '.join(attr_list)
+        attr = ' '.join(attr_list)
         if attr:
-            out += u'<{} {}>'.format(self.name, attr)
+            out += '<{} {}>'.format(self.name, attr)
         else:
-            out += u'<{}>'.format(self.name)
+            out += '<{}>'.format(self.name)
 
         for child in self.children:
             out += child.write()
         if self.get('close'): #pylint: disable=no-member
-            out += u'</{}>'.format(self.name)
+            out += '</{}>'.format(self.name)
         return out
 
     def text(self):
@@ -84,10 +85,10 @@ class Tag(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in anytree.PreOrderIter(self):
+        for node in moosetree.iterate(self):
             if node.name == 'String':
                 strings.append(node['content'])
-        return u' '.join(strings)
+        return re.sub(r' {2,}', ' ', ' '.join(strings))
 
     def copy(self, _parent=None):
         """Copy the tree from this node."""
@@ -101,19 +102,43 @@ class String(NodeBase):
     A node for containing string content.
     """
     def __init__(self, parent=None, **kwargs):
-        kwargs.setdefault('content', u'')
-        kwargs.setdefault('escape', u'')
+        kwargs.setdefault('content', '')
+        kwargs.setdefault('escape', '')
         super(String, self).__init__('String', parent, **kwargs)
 
         if self.get('content') is None:
-            self.set('content', u'')
+            self['content'] = ''
 
     def write(self):
         if self.get('escape'):
-            return cgi.escape(self.get('content'), quote=True)
+            return html.escape(str(self.get('content')), quote=True)
         else:
             return self.get('content')
 
     def copy(self, _parent=None):
         """Copy the String. These shouldn't have children, so don't worry about them."""
         return String(_parent, **self.attributes)
+
+if __name__ == '__main__':
+    import mooseutils
+
+    class Node(object):
+        def __init__(self, parent, name, **kwargs):
+            self.children = list()
+            self.attributes = dict()
+            self.attributes.update(kwargs)
+            if parent is not None:
+                parent.children.append(self)
+
+    def createTree(N, cls):
+        body = cls(None, 'body')
+        for i in range(N):
+            div0 = cls(body, 'div')
+            for j in range(N):
+                div1 = cls(div0, 'div')
+                for k in range(N):
+                    p = cls(div1, 'p', string='STUFF')
+
+
+    mooseutils.run_profile(createTree, 100, Tag)
+    mooseutils.run_profile(createTree, 100, Node)

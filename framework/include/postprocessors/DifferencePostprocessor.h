@@ -24,6 +24,8 @@ InputParameters validParams<DifferencePostprocessor>();
 class DifferencePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   DifferencePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

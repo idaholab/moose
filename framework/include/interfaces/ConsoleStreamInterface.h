@@ -30,4 +30,3 @@ public:
   /// An instance of helper class to write streams to the Console objects
   const ConsoleStream _console;
 };
-

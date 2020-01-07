@@ -24,6 +24,8 @@ InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>();
 class ComputeAxisymmetric1DFiniteStrain : public Compute1DFiniteStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters);
 
   void initialSetup() override;
@@ -63,4 +65,3 @@ protected:
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
 };
-

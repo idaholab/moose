@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+function exitIfExitCode() {
+    if [ $1 -ne 0 ]; then
+        printf "There was an error. Exiting...\n"
+        exit 1
+    fi
+}
+
 # Set go_fast flag if "--fast" is found in command line args.
 for i in "$@"
 do
@@ -64,6 +71,12 @@ if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]
   fi
 fi
 
+# Set installation prefix if given
+PFX_STR=''
+if [ ! -z "$PETSC_PREFIX" ]; then
+  PFX_STR="--prefix=$PETSC_PREFIX"
+fi
+
 
 cd $SCRIPT_DIR/../petsc
 
@@ -71,14 +84,10 @@ cd $SCRIPT_DIR/../petsc
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure --download-hypre=1 \
-      --with-ssl=0 \
+  ./configure $(echo $PFX_STR) \
+      --download-hypre=1 \
       --with-debugging=no \
-      --with-pic=1 \
       --with-shared-libraries=1 \
-      --with-cc=mpicc \
-      --with-cxx=mpicxx \
-      --with-fc=mpif90 \
       --download-fblaslapack=1 \
       --download-metis=1 \
       --download-ptscotch=1 \
@@ -86,19 +95,23 @@ if [ -z "$go_fast" ]; then
       --download-superlu_dist=1 \
       --download-mumps=1 \
       --download-scalapack=1 \
-      --CC=mpicc --CXX=mpicxx --FC=mpif90 --F77=mpif77 --F90=mpif90 \
-      --CFLAGS='-fPIC -fopenmp' \
-      --CXXFLAGS='-fPIC -fopenmp' \
-      --FFLAGS='-fPIC -fopenmp' \
-      --FCFLAGS='-fPIC -fopenmp' \
-      --F90FLAGS='-fPIC -fopenmp' \
-      --F77FLAGS='-fPIC -fopenmp' \
+      --download-slepc=git://https://gitlab.com/slepc/slepc.git \
+      --download-slepc-commit= 59ff81b \
+      --with-mpi=1 \
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
-      $* \
+      $*
 
-   make all
-else
-   make all
+  exitIfExitCode $?
 fi
+
+make all -j ${MOOSE_JOBS:-1}
+exitIfExitCode $?
+
+if [ ! -z "$PETSC_PREFIX" ]; then
+  make install
+  exitIfExitCode $?
+fi
+
+exit 0

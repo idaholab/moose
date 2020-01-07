@@ -33,6 +33,8 @@ InputParameters validParams<Predictor>();
 class Predictor : public MooseObject, public Restartable
 {
 public:
+  static InputParameters validParams();
+
   Predictor(const InputParameters & parameters);
   virtual ~Predictor();
 

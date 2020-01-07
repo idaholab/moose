@@ -1,44 +1,63 @@
 [Tests]
-  requirement = 'MOOSE shall allow efficient execution of explicit solves'
   design = '/ActuallyExplicitEuler.md'
-  issues = '10837'
+  issues = '#10837'
 
-  [./test]
-    type = 'Exodiff'
-    input = 'actually_explicit_euler.i'
-    exodiff = 'actually_explicit_euler_out.e'
-  [../]
+  [group]
+    requirement = 'The system shall support the use of explicit solvers, including'
 
-  [./lumped]
-    type = 'Exodiff'
-    input = 'actually_explicit_euler_lumped.i'
-    exodiff = 'actually_explicit_euler_lumped_out.e'
-  [../]
+    [test]
+      type = 'Exodiff'
+      input = 'actually_explicit_euler.i'
+      exodiff = 'actually_explicit_euler_out.e'
 
-  [./lump_preconditioned]
-    type = 'Exodiff'
-    input = 'actually_explicit_euler_lump_preconditioned.i'
-    exodiff = 'actually_explicit_euler_lump_preconditioned_out.e'
-  [../]
+      detail = "first-order, forward Euler,"
+    []
 
-  [./diverged]
-    type = 'RunException'
-    input = 'diverged.i'
-    expect_err = 'Solve failed and timestep already at or below dtmin'
-    cli_args = '--no-trap-fpe'
-  [../]
+    [lumped]
+      type = 'Exodiff'
+      input = 'actually_explicit_euler_lumped.i'
+      exodiff = 'actually_explicit_euler_lumped_out.e'
 
-  [./diverged_lumped]
-    type = 'RunException'
-    input = 'diverged.i'
-    expect_err = 'Solve failed and timestep already at or below dtmin'
-    cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lumped'
-  [../]
+      detail = "with mass lumping, and"
+    []
 
-  [./diverged_lump_prec]
-    type = 'RunException'
-    input = 'diverged.i'
-    expect_err = 'Solve failed and timestep already at or below dtmin'
-    cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lump_preconditioned'
-  [../]
+    [lump_preconditioned]
+      type = 'Exodiff'
+      input = 'actually_explicit_euler_lump_preconditioned.i'
+      exodiff = 'actually_explicit_euler_lump_preconditioned_out.e'
+
+      detail = "with mass lumping and preconditioning."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall report an error if an explicit solver fails to converge with"
+
+    [diverged]
+      type = 'RunException'
+      input = 'diverged.i'
+      expect_err = 'Solve failed and timestep already at or below dtmin'
+      cli_args = '--no-trap-fpe'
+
+      detail = "first-order, forward Euler,"
+    []
+
+    [diverged_lumped]
+      type = 'RunException'
+      input = 'diverged.i'
+      expect_err = 'Solve failed and timestep already at or below dtmin'
+      cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lumped'
+
+      detail = "with mass lumping, and"
+    []
+
+    [diverged_lump_prec]
+      type = 'RunException'
+      input = 'diverged.i'
+      expect_err = 'Solve failed and timestep already at or below dtmin'
+      cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lump_preconditioned'
+
+      detail = "with mass lumping and preconditioning."
+    []
+  []
 []

@@ -19,6 +19,8 @@ InputParameters validParams<ConstantDT>();
 class ConstantDT : public TimeStepper
 {
 public:
+  static InputParameters validParams();
+
   ConstantDT(const InputParameters & parameters);
 
 protected:

@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddConstraintAction, "add_constraint");
 
-template <>
+defineLegacyParams(AddConstraintAction);
+
 InputParameters
-validParams<AddConstraintAction>()
+AddConstraintAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddConstraintAction::AddConstraintAction(InputParameters params) : MooseObjectAction(params) {}

@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADMatDiffusion : public ADMatDiffusionBase<compute_stage, Real>
 {
 public:
+  static InputParameters validParams();
+
   ADMatDiffusion(const InputParameters & parameters);
 };
 

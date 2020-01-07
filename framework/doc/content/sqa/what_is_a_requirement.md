@@ -18,6 +18,10 @@ When writing a requirement, simply ask the question: "+Is the requirement unambi
 test was created for a specific reason, the requirement text should reflect this fact. Use this
 as a means to communicate what the test is testing, i.e., what is the software required to
 perform to satisfy the test.
+
+Note that the requirement should be fairly concise, generally no longer than a sentence. If the
+requirement is longer than a sentence, consider transferring some of the content into the
+accompanying `design` markdown file.
 !alert-end!
 
 

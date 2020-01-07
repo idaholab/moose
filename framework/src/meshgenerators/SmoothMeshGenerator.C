@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", SmoothMeshGenerator);
 
-template <>
+defineLegacyParams(SmoothMeshGenerator);
+
 InputParameters
-validParams<SmoothMeshGenerator>()
+SmoothMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to smooth.");
   params.addClassDescription("Utilizes a simple Laplacian based smoother to attempt to improve "

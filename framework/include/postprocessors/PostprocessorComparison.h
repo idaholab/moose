@@ -35,6 +35,8 @@ InputParameters validParams<PostprocessorComparison>();
 class PostprocessorComparison : public ComparisonPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PostprocessorComparison(const InputParameters & parameters);
 
   virtual void initialize() override;

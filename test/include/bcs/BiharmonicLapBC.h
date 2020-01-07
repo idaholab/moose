@@ -11,12 +11,6 @@
 
 #include "IntegratedBC.h"
 
-// Forward Declarations
-class BiharmonicLapBC;
-
-template <>
-InputParameters validParams<BiharmonicLapBC>();
-
 /**
  * The weak form of the biharmonic equation has a term
  * \int -Lap(u) * dv/dn ds
@@ -25,6 +19,8 @@ InputParameters validParams<BiharmonicLapBC>();
 class BiharmonicLapBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   BiharmonicLapBC(const InputParameters & parameters);
 
 protected:

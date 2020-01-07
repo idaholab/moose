@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class RandomAux;
 class RandomElementalUserObject;
-
-template <>
-InputParameters validParams<RandomAux>();
 
 /**
  * An AuxKernel that uses built-in Random number generation.
@@ -24,6 +20,8 @@ InputParameters validParams<RandomAux>();
 class RandomAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RandomAux(const InputParameters & params);
 
   virtual ~RandomAux();
@@ -34,4 +32,3 @@ protected:
   const RandomElementalUserObject * _random_uo;
   bool _generate_ints;
 };
-

@@ -9,13 +9,16 @@
 
 #include "BoostWeibullDistribution.h"
 
+#include "libmesh/auto_ptr.h"
+
 registerMooseObject("StochasticToolsApp", BoostWeibullDistribution);
 
-template <>
+defineLegacyParams(BoostWeibullDistribution);
+
 InputParameters
-validParams<BoostWeibullDistribution>()
+BoostWeibullDistribution::validParams()
 {
-  InputParameters params = validParams<Distribution>();
+  InputParameters params = Distribution::validParams();
   params.addClassDescription("Boost Weibull distribution.");
   params.addRequiredParam<Real>("shape", "The Weibull shape parameter.");
   params.addParam<Real>("scale", 1, "The Weibull scale parameter.");

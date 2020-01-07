@@ -64,10 +64,9 @@ EulerAngle2RGBAction::act()
 
     if (_current_task == "add_aux_variable")
     {
+      auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
       // Create scalar auxvariables for the three components of the RGB vector
-      _problem->addAuxVariable(var_name,
-                               FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                      Utility::string_to_enum<FEFamily>("MONOMIAL")));
+      _problem->addAuxVariable("MooseVariableConstMonomial", var_name, var_params);
     }
     else if (_current_task == "add_aux_kernel")
     {

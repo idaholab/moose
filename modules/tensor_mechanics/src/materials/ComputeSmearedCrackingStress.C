@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeSmearedCrackingStress);
 
-template <>
+defineLegacyParams(ComputeSmearedCrackingStress);
+
 InputParameters
-validParams<ComputeSmearedCrackingStress>()
+ComputeSmearedCrackingStress::validParams()
 {
-  InputParameters params = validParams<ComputeMultipleInelasticStress>();
+  InputParameters params = ComputeMultipleInelasticStress::validParams();
   params.addClassDescription("Compute stress using a fixed smeared cracking model");
   MooseEnum cracking_release("abrupt exponential power", "abrupt");
   params.addDeprecatedParam<MooseEnum>(
@@ -53,7 +54,7 @@ validParams<ComputeSmearedCrackingStress>()
                                     0,
                                     "cracking_neg_fraction <= 1 & cracking_neg_fraction >= 0",
                                     "The fraction of the cracking strain at which "
-                                    "a transitition begins during decreasing "
+                                    "a transition begins during decreasing "
                                     "strain to the original stiffness.");
   params.addDeprecatedParam<Real>(
       "cracking_beta",

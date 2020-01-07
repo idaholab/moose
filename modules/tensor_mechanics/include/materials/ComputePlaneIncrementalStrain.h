@@ -24,6 +24,8 @@ InputParameters validParams<ComputePlaneIncrementalStrain>();
 class ComputePlaneIncrementalStrain : public Compute2DIncrementalStrain
 {
 public:
+  static InputParameters validParams();
+
   ComputePlaneIncrementalStrain(const InputParameters & parameters);
 
 protected:
@@ -47,4 +49,3 @@ protected:
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
 };
-

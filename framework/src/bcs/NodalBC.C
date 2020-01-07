@@ -14,12 +14,12 @@
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
-template <>
+defineLegacyParams(NodalBC);
+
 InputParameters
-validParams<NodalBC>()
+NodalBC::validParams()
 {
-  InputParameters params = validParams<NodalBCBase>();
-  params += validParams<RandomInterface>();
+  InputParameters params = NodalBCBase::validParams();
 
   return params;
 }
@@ -80,7 +80,6 @@ NodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
-    _qp = 0;
     Real res = computeQpResidual();
 
     for (auto tag_id : _vector_tags)
@@ -105,7 +104,6 @@ NodalBC::computeJacobian()
   // all the assembly is done.
   if (_var.isNodalDefined())
   {
-    _qp = 0;
     Real cached_val = 0.;
     cached_val = computeQpJacobian();
 
@@ -132,7 +130,6 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
     computeJacobian();
   else
   {
-    _qp = 0;
     Real cached_val = 0.0;
     cached_val = computeQpOffDiagJacobian(jvar);
 

@@ -34,6 +34,8 @@ public:
    * Created from MooseSystem via the FunctionFactory.
    * @param parameters The input parameters
    */
+  static InputParameters validParams();
+
   MooseParsedFunction(const InputParameters & parameters);
 
   /**

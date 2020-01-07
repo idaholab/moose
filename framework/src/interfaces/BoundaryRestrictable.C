@@ -13,10 +13,12 @@
 #include "MooseMesh.h"
 #include "MooseObject.h"
 
-template <>
+defineLegacyParams(BoundaryRestrictable);
+
 InputParameters
-validParams<BoundaryRestrictable>()
+BoundaryRestrictable::validParams()
 {
+
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 
@@ -105,9 +107,10 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_bnd_dual_restrictable && !_bnd_ids.empty() && !_block_ids.empty())
     if (!_block_ids.empty() && _block_ids.find(Moose::ANY_BLOCK_ID) == _block_ids.end())
-      mooseError("Attempted to restrict the object '",
-                 name,
-                 "' to a boundary, but the object is already restricted by block(s)");
+      moose_object->paramError("boundary",
+                               "Attempted to restrict the object '",
+                               name,
+                               "' to a boundary, but the object is already restricted by block(s)");
 
   // Store ANY_BOUNDARY_ID if empty
   if (_bnd_ids.empty())
@@ -144,8 +147,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << name << "' contains the following " << message_ptr
-          << " ids that do not exist on the mesh:";
+      msg << "the following " << message_ptr << " ids do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
 
@@ -157,7 +159,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
                "Try setting \"Mesh/construct_side_set_from_node_set=true\" if you see this error.\n"
                "Note: If you are running with adaptivity you should prefer using side sets.";
 
-      mooseError(msg.str());
+      moose_object->paramError("boundary", msg.str());
     }
   }
 }
@@ -304,7 +306,8 @@ BoundaryRestrictable::hasBoundaryMaterialPropertyHelper(const std::string & prop
     // If boundary materials exist, populated the set of properties that were declared
     if (warehouse.hasActiveBoundaryObjects(id))
     {
-      const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBoundaryObjects(id);
+      const std::vector<std::shared_ptr<MaterialBase>> & mats =
+          warehouse.getActiveBoundaryObjects(id);
       for (const auto & mat : mats)
       {
         const std::set<std::string> & mat_props = mat->getSuppliedItems();

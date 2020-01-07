@@ -1,21 +1,35 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'layered_integral_test.i'
-    exodiff = 'out.e'
-    group = 'requirements'
-  [../]
+  design = 'LayeredIntegral.md'
+  issues = '#1289'
 
-  [./cumulative]
-    type = 'Exodiff'
-    input = 'cumulative_layered_integral.i'
-    exodiff = 'cumulative_layered_integral_out.e'
-  [../]
+  [group]
+    requirement = 'The system shall include the ability to computes volume integrals of a variable '
+                  'storing partial sums for the specified number of intervals in a direction (x,y,z)'
 
-  [./average_sample]
-    type = 'Exodiff'
-    input = 'average_sample.i'
-    exodiff = 'average_sample_out.e'
-  [../]
+    [test]
+      type = 'Exodiff'
+      input = 'layered_integral_test.i'
+      exodiff = 'out.e'
+      group = 'requirements'
+
+      detail = 'using 3 layers with'
+    []
+
+    [cumulative]
+      type = 'Exodiff'
+      input = 'cumulative_layered_integral.i'
+      exodiff = 'cumulative_layered_integral_out.e'
+
+      detail = 'as a cumulative calculation and'
+    []
+
+    [average_sample]
+      type = 'Exodiff'
+      input = 'average_sample.i'
+      exodiff = 'average_sample_out.e'
+
+      detail = 'as an average calculation.'
+    []
+  []
 
 []

@@ -27,6 +27,8 @@ InputParameters validParams<LayeredSideIntegral>();
 class LayeredSideIntegral : public SideIntegralVariableUserObject, public LayeredBase
 {
 public:
+  static InputParameters validParams();
+
   LayeredSideIntegral(const InputParameters & parameters);
 
   /**

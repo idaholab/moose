@@ -262,13 +262,18 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_i
 }
 
 void
-GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id)
+GeometricSearchData::generateQuadratureNodes(unsigned int slave_id,
+                                             unsigned int qslave_id,
+                                             bool reiniting)
 {
   // Have we already generated quadrature nodes for this boundary id?
   if (_quadrature_boundaries.find(slave_id) != _quadrature_boundaries.end())
-    return;
-
-  _quadrature_boundaries.insert(slave_id);
+  {
+    if (!reiniting)
+      return;
+  }
+  else
+    _quadrature_boundaries.insert(slave_id);
 
   const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
 
@@ -283,9 +288,10 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        // All we should need to do here is reinit the underlying libMesh::FE object because that
+        // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.prepare(elem, 0);
-        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+        _subproblem.assembly(0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
@@ -317,9 +323,10 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        // All we should need to do here is reinit the underlying libMesh::FE object because that
+        // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.prepare(elem, 0);
-        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+        _subproblem.assembly(0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];
@@ -333,7 +340,7 @@ GeometricSearchData::reinitQuadratureNodes(unsigned int /*slave_id*/)
 {
   // Regenerate the quadrature nodes
   for (const auto & it : _slave_to_qslave)
-    generateQuadratureNodes(it.first, it.second);
+    generateQuadratureNodes(it.first, it.second, /*reiniting=*/true);
 }
 
 void

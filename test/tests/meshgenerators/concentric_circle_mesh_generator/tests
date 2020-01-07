@@ -4,10 +4,11 @@
     input = 'concentric_circle_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'concentric_circle_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to create a mesh based on elements.'
-    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = 'The system shall have the capability to generate a mesh pattern consisting of concentric circles contained within a square.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

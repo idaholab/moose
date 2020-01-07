@@ -27,9 +27,9 @@ public:
   /**
    * Class constructor
    */
-  AddAuxVariableAction(InputParameters params);
+  static InputParameters validParams();
 
-  virtual void act() override;
+  AddAuxVariableAction(InputParameters params);
 
   /**
    * Returns available families for AuxVariables
@@ -42,5 +42,7 @@ public:
    * @return MooseEnum with valid orders
    */
   static MooseEnum getAuxVariableOrders();
-};
 
+protected:
+  void init() override;
+};

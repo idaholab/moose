@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", MaterialPropertyDebugOutput);
 
-template <>
+defineLegacyParams(MaterialPropertyDebugOutput);
+
 InputParameters
-validParams<MaterialPropertyDebugOutput>()
+MaterialPropertyDebugOutput::validParams()
 {
-  InputParameters params = validParams<Output>();
+  InputParameters params = Output::validParams();
   params.addClassDescription("Debug output object for displaying material property information.");
 
   // This object only outputs data once, in the constructor, so disable fine control
@@ -115,7 +116,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
 void
 MaterialPropertyDebugOutput::printMaterialProperties(
-    std::stringstream & output, const std::vector<std::shared_ptr<Material>> & materials) const
+    std::stringstream & output, const std::vector<std::shared_ptr<MaterialBase>> & materials) const
 {
   // Loop through all material objects
   for (const auto & mat : materials)

@@ -28,6 +28,8 @@ public:
    * Class constructor
    * @param params Input parameters for this action
    */
+  static InputParameters validParams();
+
   SetupRecoverFileBaseAction(InputParameters params);
 
   virtual void act() override;

@@ -20,6 +20,8 @@ InputParameters validParams<CreateProblemDefaultAction>();
 class CreateProblemDefaultAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   CreateProblemDefaultAction(InputParameters parameters);
 
   virtual void act() override;

@@ -26,11 +26,12 @@
 
 const BoundaryID InternalSideIndicator::InternalBndId = 12345;
 
-template <>
+defineLegacyParams(InternalSideIndicator);
+
 InputParameters
-validParams<InternalSideIndicator>()
+InternalSideIndicator::validParams()
 {
-  InputParameters params = validParams<Indicator>();
+  InputParameters params = Indicator::validParams();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this side indicator applies to");
   params.addParam<bool>("scale_by_flux_faces",

@@ -11,6 +11,8 @@
 #include "Legendre.h"
 #include "Zernike.h"
 
+#include "libmesh/auto_ptr.h"
+
 CylindricalDuo::CylindricalDuo(const std::string & who_is_using_me)
   : CompositeSeriesBasisInterface(who_is_using_me)
 {

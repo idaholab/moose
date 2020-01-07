@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", NanKernel);
 
-template <>
 InputParameters
-validParams<NanKernel>()
+NanKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<unsigned int>("timestep_to_nan", 1, "The timestep number to throw a nan on");
 
   // Parameters for testing deprecated message

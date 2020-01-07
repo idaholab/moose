@@ -38,6 +38,8 @@ InputParameters validParams<FiniteStrainUObasedCP>();
 class FiniteStrainUObasedCP : public ComputeStressBase
 {
 public:
+  static InputParameters validParams();
+
   FiniteStrainUObasedCP(const InputParameters & parameters);
 
 protected:
@@ -272,4 +274,3 @@ protected:
   /// Scales the substepping increment to obtain deformation gradient at a substep iteration
   Real _dfgrd_scale_factor;
 };
-

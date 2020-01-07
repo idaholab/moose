@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppFieldTransfer.h"
+#include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
 namespace libMesh
@@ -25,9 +25,11 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 /**
  * Project values from one domain to another
  */
-class MultiAppProjectionTransfer : public MultiAppFieldTransfer
+class MultiAppProjectionTransfer : public MultiAppConservativeTransfer
 {
 public:
+  static InputParameters validParams();
+
   MultiAppProjectionTransfer(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -59,4 +61,3 @@ protected:
   std::vector<std::vector<Point>> _cached_qps;
   std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> _cached_index_map;
 };
-

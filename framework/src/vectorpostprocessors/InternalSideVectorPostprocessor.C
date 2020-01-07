@@ -9,12 +9,13 @@
 
 #include "InternalSideVectorPostprocessor.h"
 
-template <>
+defineLegacyParams(InternalSideVectorPostprocessor);
+
 InputParameters
-validParams<InternalSideVectorPostprocessor>()
+InternalSideVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<InternalSideUserObject>();
-  params += validParams<VectorPostprocessor>();
+  InputParameters params = InternalSideUserObject::validParams();
+  params += VectorPostprocessor::validParams();
   return params;
 }
 

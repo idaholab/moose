@@ -21,6 +21,8 @@ InputParameters validParams<ArrayFunctionIC>();
 class ArrayFunctionIC : public ArrayInitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ArrayFunctionIC(const InputParameters & parameters);
 
 protected:

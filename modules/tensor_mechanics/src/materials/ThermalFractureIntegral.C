@@ -12,13 +12,14 @@
 
 registerMooseObject("TensorMechanicsApp", ThermalFractureIntegral);
 
-template <>
+defineLegacyParams(ThermalFractureIntegral);
+
 InputParameters
-validParams<ThermalFractureIntegral>()
+ThermalFractureIntegral::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
-      "Calculates summation of the derivative of the eigenstrains with respect to temparture.");
+      "Calculates summation of the derivative of the eigenstrains with respect to temperature.");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");

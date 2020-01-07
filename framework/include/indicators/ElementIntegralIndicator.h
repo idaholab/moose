@@ -19,6 +19,8 @@ InputParameters validParams<ElementIntegralIndicator>();
 class ElementIntegralIndicator : public ElementIndicator
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegralIndicator(const InputParameters & parameters);
 
   virtual void computeIndicator() override;
@@ -26,4 +28,3 @@ public:
 protected:
   virtual Real computeQpIntegral();
 };
-

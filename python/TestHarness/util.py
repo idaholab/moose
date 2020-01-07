@@ -16,6 +16,25 @@ import json
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
+MOOSE_OPTIONS = {
+    'ad_mode' :   { 're_option' : r'#define\s+MOOSE_SPARSE_AD\s+(\d+)',
+                    'default'   : 'NONSPARSE',
+                    'options'   :
+                    { 'SPARSE'    : '1',
+                      'NONSPARSE' : '0'
+                    }
+                  },
+
+    'libpng' :    { 're_option' : r'#define\s+MOOSE_HAVE_LIBPNG\s+(\d+)',
+                    'default'   : 'FALSE',
+                    'options'   :
+                    { 'TRUE'    : '1',
+                      'FALSE'   : '0'
+                    }
+                  }
+}
+
+
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
                      'default'   : 'REPLICATED',
@@ -154,7 +173,7 @@ def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
     p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = p.communicate()[0]
+    output = p.communicate()[0].decode('utf-8')
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
@@ -164,7 +183,7 @@ def runCommand(cmd, cwd=None):
 def resultCharacterCount(results_dict):
     # { formatted_result_key : ( text, color ) }
     printable_items = []
-    for result_key, printable in results_dict.iteritems():
+    for result_key, printable in results_dict.items():
         if printable:
             printable_items.append(printable[0])
     return len(' '.join(printable_items))
@@ -184,7 +203,7 @@ def formatStatusMessage(job, status, message, options):
 
     # Add caveats if requested
     if job.isPass() and options.extra_info:
-        for check in options._checks.keys():
+        for check in list(options._checks.keys()):
             if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
                 job.addCaveats(check)
 
@@ -285,7 +304,7 @@ def formatResult(job, options, result='', color=True, **kwargs):
 
     # If color, decorate those items which support it
     if color:
-        for format_rule, printable in formatted_results.iteritems():
+        for format_rule, printable in formatted_results.items():
             if printable and (printable[0] and printable[1]):
                 formatted_results[format_rule] = (colorText(printable[0], printable[1], **color_opts), printable[1])
 
@@ -344,7 +363,7 @@ def runExecutable(libmesh_dir, location, bin, args):
         libmesh_exe = libmesh_uninstalled2
 
     else:
-        print("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!")
+        print(("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"))
         exit(1)
 
     return runCommand(libmesh_exe + " " + args).rstrip()
@@ -354,7 +373,7 @@ def getCompilers(libmesh_dir):
     # Supported compilers are GCC, INTEL or ALL
     compilers = set(['ALL'])
 
-    mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
+    mpicxx_cmd = str(runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx"))
 
     # Account for usage of distcc or ccache
     if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
@@ -396,7 +415,7 @@ def getPetscVersion(libmesh_dir):
     minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
     subminor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_subminor')
     if len(major_version) != 1 or len(minor_version) != 1:
-        print "Error determining PETSC version"
+        print("Error determining PETSC version")
         exit(1)
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
@@ -419,13 +438,13 @@ def checkLogicVersionSingle(checks, iversion, package):
             return False
 
     # Logical match
-    if logic == '>' and map(int, checks[package].split(".")) > map(int, version.split(".")):
+    if logic == '>' and list(map(int, checks[package].split("."))) > list(map(int, version.split("."))):
         return True
-    elif logic == '>=' and map(int, checks[package].split(".")) >= map(int, version.split(".")):
+    elif logic == '>=' and list(map(int, checks[package].split("."))) >= list(map(int, version.split("."))):
         return True
-    elif logic == '<' and map(int, checks[package].split(".")) < map(int, version.split(".")):
+    elif logic == '<' and list(map(int, checks[package].split("."))) < list(map(int, version.split("."))):
         return True
-    elif logic == '<=' and map(int, checks[package].split(".")) <= map(int, version.split(".")):
+    elif logic == '<=' and list(map(int, checks[package].split("."))) <= list(map(int, version.split("."))):
         return True
 
     return False
@@ -483,31 +502,26 @@ def getIfAsioExists(moose_dir):
         option_set.add('FALSE')
     return option_set
 
-def getLibMeshConfigOption(libmesh_dir, option):
+def getConfigOption(config_files, option, options):
     # Some tests work differently with parallel mesh enabled
     # We need to detect this condition
     option_set = set(['ALL'])
 
-    filenames = [
-      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
-      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
-      ];
-
     success = 0
-    for filename in filenames:
+    for config_file in config_files:
         if success == 1:
             break
 
         try:
-            f = open(filename)
+            f = open(config_file)
             contents = f.read()
             f.close()
 
-            info = LIBMESH_OPTIONS[option]
+            info = options[option]
             m = re.search(info['re_option'], contents)
             if m != None:
                 if 'options' in info:
-                    for value, option in info['options'].iteritems():
+                    for value, option in info['options'].items():
                         if m.group(1) == option:
                             option_set.add(value)
                 else:
@@ -519,14 +533,27 @@ def getLibMeshConfigOption(libmesh_dir, option):
             success = 1
 
         except IOError:
-            # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
             pass
 
     if success == 0:
-        print "Error! Could not find libmesh_config.h in any of the usual locations!"
+        print("Error! Could not find libmesh_config.h in any of the usual locations!")
         exit(1)
 
     return option_set
+
+def getMooseConfigOption(moose_dir, option):
+    filenames = [moose_dir + '/framework/include/base/MooseConfig.h']
+
+    return getConfigOption(filenames, option, MOOSE_OPTIONS)
+
+
+def getLibMeshConfigOption(libmesh_dir, option):
+    filenames = [
+      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
+      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
+      ];
+
+    return getConfigOption(filenames, option, LIBMESH_OPTIONS)
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
@@ -555,7 +582,7 @@ def getInitializedSubmodules(root_dir):
     Return:
       list[str]: List of iniitalized submodule names or an empty list if there was an error.
     """
-    output = runCommand("git submodule status", cwd=root_dir)
+    output = str(runCommand("git submodule status", cwd=root_dir))
     if output.startswith("ERROR"):
         return []
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
@@ -568,7 +595,7 @@ def addObjectsFromBlock(objs, node, block_name):
     """
     data = node.get(block_name, {})
     if data: # could be None so we can't just iterate over items
-        for name, block in data.iteritems():
+        for name, block in data.items():
             objs.add(name)
             addObjectNames(objs, block)
 
@@ -644,7 +671,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
             try:
                 os.remove(full_path)
             except:
-                print("Unable to remove file: " + full_path)
+                print(("Unable to remove file: " + full_path))
 
     # Now try to delete directories that might have been created
     if delete_folders:
@@ -680,20 +707,26 @@ def getOutputFromFiles(tester, options):
     file_output = ''
     output_files = checkOutputReady(tester, options)
     for file_path in output_files:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r+b') as f:
             file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None)
+                           + "\n" + "#"*80 + "\n" + readOutput(f, None, tester)
     return file_output
 
 # Read stdout and stderr file objects, append error and return the string
-def readOutput(stdout, stderr):
+def readOutput(stdout, stderr, tester):
     output = ''
-    if stdout:
-        stdout.seek(0)
-        output += stdout.read()
-    if stderr:
-        stderr.seek(0)
-        output += stderr.read()
+    try:
+        if stdout:
+            stdout.seek(0)
+            output += stdout.read().decode('utf-8')
+        if stderr:
+            stderr.seek(0)
+            output += stderr.read().decode('utf-8')
+    except UnicodeDecodeError:
+        tester.setStatus(tester.fail, 'non-unicode characters in output')
+    except:
+        tester.setStatus(tester.fail, 'error while attempting to read output files')
+
     return output
 
 # Trimming routines for job output

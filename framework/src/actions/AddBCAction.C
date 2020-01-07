@@ -13,12 +13,13 @@
 
 registerMooseAction("MooseApp", AddBCAction, "add_bc");
 
-template <>
+defineLegacyParams(AddBCAction);
+
 InputParameters
-validParams<AddBCAction>()
+AddBCAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  params += validParams<BoundaryCondition>();
+  InputParameters params = MooseObjectAction::validParams();
+  params += BoundaryCondition::validParams();
   return params;
 }
 

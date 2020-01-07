@@ -25,12 +25,9 @@ InputParameters validParams<SamplerTransientMultiApp>();
 class SamplerTransientMultiApp : public TransientMultiApp, public SamplerInterface
 {
 public:
-  SamplerTransientMultiApp(const InputParameters & parameters);
+  static InputParameters validParams();
 
-  /**
-   * Return the Sampler object for this MultiApp.
-   */
-  Sampler & getSampler() const { return _sampler; }
+  SamplerTransientMultiApp(const InputParameters & parameters);
 
   /**
    * Override solveStep to allow for batch execution.
@@ -63,7 +60,7 @@ private:
    * a few lines of copied code is better for now.
    */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
-  getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
+  getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
 
   /// Storage for batch-restore mode; the outer vector if for the local stochastic data and the
   /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included

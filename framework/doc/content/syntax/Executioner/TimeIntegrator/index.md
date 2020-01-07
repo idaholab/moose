@@ -26,11 +26,6 @@ after each stage, then only the last stage will be required to converge; other
 stages could just reach the maximum number of nonlinear iterations without
 convergence and proceed to the next stage anyway.
 
-<!-- Currently there are no subsystems of the TimeIntegrator system, so there
-  is no description here. -->
-
-!syntax list /Executioner/TimeIntegrator objects=False actions=False subsystems=True
-
 ## Actions
 
 Actions associated with the `TimeIntegrator` system are the following:

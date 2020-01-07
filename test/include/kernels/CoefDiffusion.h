@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class CoefDiffusion;
-
-template <>
-InputParameters validParams<CoefDiffusion>();
-
 class CoefDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoefDiffusion(const InputParameters & parameters);
 
 protected:
@@ -28,4 +24,3 @@ protected:
 
   const Real & _coef;
 };
-

@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./test_add_side_sets_from_bounding_box]
     type = 'Exodiff'
     input = 'add_side_sets_from_bounding_box.i'

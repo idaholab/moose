@@ -6,6 +6,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+from __future__ import print_function
 
 import os
 import copy
@@ -32,6 +33,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
                   is assumed to be the standard output name if Outputs/csv=true in the input file
         rtype[int]: SPATIAL or TEMPORAL
         dt[float]: The initial timestep, only used with rtype=TEMPORAL (default: 1)
+        file_base[str]: A string pattern for outputting files
 
     All additional arguments are passed to the executable
     """
@@ -44,6 +46,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     mpi = kwargs.get('mpi', None)
     rtype = kwargs.get('rtype') # SPATIAL or TEMPORAL
     dt = kwargs.pop('dt', 1) # only used with rtype=TEMPORAL
+    file_base = kwargs.pop('file_base', None)
 
     # Check that input file exists
     if not os.path.isfile(input_file):
@@ -51,7 +54,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
 
     # Assume output CSV file, if not specified
     if csv is None:
-        csv = input_file.replace('.i', '_out.csv')
+        fcsv = input_file.replace('.i', '_out.csv')
 
     # Locate the executable
     if executable is None:
@@ -71,7 +74,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     # Run input file and build up output
     x = []
     y = []
-    for step in xrange(0, num_refinements):
+    for step in range(0, num_refinements):
         a = copy.copy(cli_args)
         if rtype == SPATIAL:
             a.append('Mesh/uniform_refine={}'.format(step))
@@ -79,15 +82,21 @@ def _runner(input_file, num_refinements, *args, **kwargs):
             a.append('Executioner/dt={}'.format(dt))
             dt = dt / 2.
 
-        print 'Running:', executable, ' '.join(a)
+        if file_base:
+            fbase = file_base.format(step)
+            a.append('Outputs/file_base={}'.format(fbase))
+            if csv is None:
+                fcsv = '{}.csv'.format(fbase)
+
+        print('Running:', executable, ' '.join(a))
         out = mooseutils.run_executable(executable, a, mpi=mpi, suppress_output=not console)
 
         # Check that CSV file exists
-        if not os.path.isfile(csv):
+        if not os.path.isfile(fcsv):
             raise IOError("The CSV output does not exist: {}".format(csv))
 
         # Load data for h and error
-        current = pandas.read_csv(csv)
+        current = pandas.read_csv(fcsv)
 
         if rtype == SPATIAL:
             x.append(current[x_pp].iloc[-1])

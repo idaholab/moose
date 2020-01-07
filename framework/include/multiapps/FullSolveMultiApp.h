@@ -24,6 +24,8 @@ InputParameters validParams<FullSolveMultiApp>();
 class FullSolveMultiApp : public MultiApp
 {
 public:
+  static InputParameters validParams();
+
   FullSolveMultiApp(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -41,4 +43,3 @@ public:
 private:
   std::vector<Executioner *> _executioners;
 };
-

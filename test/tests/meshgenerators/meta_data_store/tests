@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#13841'
+  design = '/MeshMetaDataInterface.md'
+
+  [meta_data_store]
+    type = 'CSVDiff'
+    input = 'mesh_meta_data_store.i'
+    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv
+               mesh_meta_data_store_out_line_sampler_between_elems_0010.csv
+               mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
+
+    issues = '#000'
+    design = 'TimeDerivative.md'
+    requirement = 'The system shall support the ability for mesh generators to save attributes to a stateful
+                   data store available for use when recovering a simulation.'
+  []
+
+  [meta_data_error_check]
+    type = RunException
+    input = 'mesh_meta_data_store.i'
+
+    cli_args = 'AutoLineSamplerTest/test_request_invalid_property=true'
+    expect_err = 'The following Mesh meta-data properties were retrieved but never declared: \S+'
+
+    requirement = 'The system shall issue an error when mesh meta-data properties are requested but never declared.'
+  []
+[]

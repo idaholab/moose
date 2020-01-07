@@ -19,6 +19,8 @@ InputParameters validParams<CreateExecutionerAction>();
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   CreateExecutionerAction(InputParameters params);
 
   virtual void act() override;

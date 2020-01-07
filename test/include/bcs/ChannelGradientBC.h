@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class ChannelGradientBC;
-
-template <>
-InputParameters validParams<ChannelGradientBC>();
-
 /**
  * ChannelGradientBC implements a boundary condition like that for heat transfer
  * between a convecting fluid and a solid surface: \f$q = h(T_{\infty} - T_s)\f$
@@ -29,6 +24,8 @@ InputParameters validParams<ChannelGradientBC>();
 class ChannelGradientBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ChannelGradientBC(const InputParameters & parameters);
 
 protected:
@@ -51,4 +48,3 @@ protected:
   const VectorPostprocessorValue & _channel_gradient_value;
   const MaterialProperty<Real> & _h;
 };
-

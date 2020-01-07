@@ -1,4 +1,7 @@
 [Tests]
+  design = 'DT2.md'
+  issues = '#1953'
+
   [./testdt2]
     type = 'Exodiff'
     input = 'dt2_adapt.i'
@@ -7,5 +10,7 @@
     method = '!DBG'
     valgrind = 'HEAVY'
     deleted = true
+
+    requirement = "The system shall include an adaptive, error-estimate based multi-step time step calculation scheme."
   [../]
 []

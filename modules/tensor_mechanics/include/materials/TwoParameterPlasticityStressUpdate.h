@@ -29,6 +29,8 @@ InputParameters validParams<TwoParameterPlasticityStressUpdate>();
 class TwoParameterPlasticityStressUpdate : public MultiParameterPlasticityStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   TwoParameterPlasticityStressUpdate(const InputParameters & parameters,
                                      unsigned num_yf,
                                      unsigned num_intnl);
@@ -337,4 +339,3 @@ protected:
    */
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
 };
-

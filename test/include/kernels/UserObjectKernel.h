@@ -12,17 +12,14 @@
 #include "Kernel.h"
 #include "MTUserObject.h"
 
-class UserObjectKernel;
-
-template <>
-InputParameters validParams<UserObjectKernel>();
-
 /**
  * This kernel user user-data object
  */
 class UserObjectKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   UserObjectKernel(const InputParameters & params);
   virtual ~UserObjectKernel();
 
@@ -32,4 +29,3 @@ protected:
   /// Mutley - do a google search on him if you do not know him
   const MTUserObject & _mutley;
 };
-

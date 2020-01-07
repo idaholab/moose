@@ -10,17 +10,26 @@
 #include "Distribution.h"
 #include "MooseRandom.h"
 
-template <>
+defineLegacyParams(Distribution);
+
 InputParameters
-validParams<Distribution>()
+Distribution::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addRequiredParam<std::string>("type", "class/type name identifying the distribution");
   params.registerBase("Distribution");
   return params;
 }
 
-Distribution::Distribution(const InputParameters & parameters) : MooseObject(parameters) {}
+Distribution::Distribution(const InputParameters & parameters)
+  : MooseObject(parameters),
+    PerfGraphInterface(this),
+    _perf_pdf(registerTimedSection("pdf", 4)),
+    _perf_cdf(registerTimedSection("cdf", 4)),
+    _perf_quantile(registerTimedSection("quantile", 4)),
+    _perf_median(registerTimedSection("median", 4))
+{
+}
 
 Real
 Distribution::median() const

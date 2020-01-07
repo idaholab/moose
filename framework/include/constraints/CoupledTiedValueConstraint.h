@@ -25,6 +25,8 @@ InputParameters validParams<CoupledTiedValueConstraint>();
 class CoupledTiedValueConstraint : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   CoupledTiedValueConstraint(const InputParameters & parameters);
 
 protected:

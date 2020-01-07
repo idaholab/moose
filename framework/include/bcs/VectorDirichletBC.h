@@ -24,6 +24,8 @@ InputParameters validParams<VectorDirichletBC>();
 class VectorDirichletBC : public VectorNodalBC
 {
 public:
+  static InputParameters validParams();
+
   VectorDirichletBC(const InputParameters & parameters);
 
 protected:

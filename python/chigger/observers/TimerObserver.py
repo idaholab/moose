@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import vtk
-from ChiggerObserver import ChiggerObserver
+from .ChiggerObserver import ChiggerObserver
 class TimerObserver(ChiggerObserver):
     """
     Class for creating timers to be passed in to RenderWindow object.

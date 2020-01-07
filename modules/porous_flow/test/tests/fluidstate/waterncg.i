@@ -4,8 +4,10 @@
 # single phase gas, or two phases.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+  [../]
 []
 
 [GlobalParams]
@@ -51,6 +53,22 @@
     family = MONOMIAL
   [../]
   [./viscosity_gas]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./enthalpy_water]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./enthalpy_gas]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./internal_energy_water]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./internal_energy_gas]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -126,6 +144,34 @@
     type = PorousFlowPropertyAux
     variable = viscosity_gas
     property = viscosity
+    phase = 1
+    execute_on = timestep_end
+  [../]
+  [./enthalpy_water]
+    type = PorousFlowPropertyAux
+    variable = enthalpy_water
+    property = enthalpy
+    phase = 0
+    execute_on = timestep_end
+  [../]
+  [./enthalpy_gas]
+    type = PorousFlowPropertyAux
+    variable = enthalpy_gas
+    property = enthalpy
+    phase = 1
+    execute_on = timestep_end
+  [../]
+  [./internal_energy_water]
+    type = PorousFlowPropertyAux
+    variable = internal_energy_water
+    property = internal_energy
+    phase = 0
+    execute_on = timestep_end
+  [../]
+  [./internal_energy_gas]
+    type = PorousFlowPropertyAux
+    variable = internal_energy_gas
+    property = internal_energy
     phase = 1
     execute_on = timestep_end
   [../]
@@ -270,6 +316,22 @@
   [./viscosity_gas]
     type = ElementIntegralVariablePostprocessor
     variable = viscosity_gas
+  [../]
+  [./enthalpy_water]
+    type = ElementIntegralVariablePostprocessor
+    variable = enthalpy_water
+  [../]
+  [./enthalpy_gas]
+    type = ElementIntegralVariablePostprocessor
+    variable = enthalpy_gas
+  [../]
+  [./internal_energy_water]
+    type = ElementIntegralVariablePostprocessor
+    variable = internal_energy_water
+  [../]
+  [./internal_energy_gas]
+    type = ElementIntegralVariablePostprocessor
+    variable = internal_energy_gas
   [../]
   [./x1_water]
     type = ElementIntegralVariablePostprocessor

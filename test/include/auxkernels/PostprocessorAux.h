@@ -11,22 +11,14 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class PostprocessorAux;
-
-template <>
-InputParameters validParams<PostprocessorAux>();
-
 /**
  * Testing object that just utilizes the value of a Postprocessor for the value of the Aux Variable
  */
 class PostprocessorAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
+  static InputParameters validParams();
+
   PostprocessorAux(const InputParameters & parameters);
 
   virtual ~PostprocessorAux();
@@ -36,4 +28,3 @@ protected:
 
   const PostprocessorValue & _pp_val;
 };
-

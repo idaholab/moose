@@ -10,6 +10,7 @@
                   " tensor_mechanics system."
     design = "Elastic.md MaterialTensorAux.md"
     issues = "#11743"
+    no_error_deprecated = true
   [../]
   [./test_mechanical]
     type = 'CSVDiff'
@@ -21,5 +22,6 @@
                   " causes the same deformation of that model."
     design = "MaterialTensorAux.md"
     issues = "#11743"
+    no_error_deprecated = true
   [../]
 []

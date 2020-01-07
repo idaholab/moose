@@ -7,47 +7,47 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_elemental]
+  [u_elemental]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./fun_aux]
+  [fun_aux]
     type = FunctionAux
     function = 'x + y'
     variable = u_elemental
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,42 +66,42 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
     positions = '0.48 0.01 0'
     input_files = tosub_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./to_sub_nodal_to_nodal]
+  [to_sub_nodal_to_nodal]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = nodal_source_from_master_nodal
-  [../]
-  [./to_sub_nodal_to_elemental]
+  []
+  [to_sub_nodal_to_elemental]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = nodal_source_from_master_elemental
-  [../]
-  [./to_sub_elemental_to_nodal]
+  []
+  [to_sub_elemental_to_nodal]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_master_nodal
-  [../]
-  [./to_sub_elemental_to_elemental]
+  []
+  [to_sub_elemental_to_elemental]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_master_elemental
-  [../]
+  []
 []

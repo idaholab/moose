@@ -31,6 +31,8 @@ InputParameters validParams<PatternedMeshGenerator>();
 class PatternedMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   PatternedMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

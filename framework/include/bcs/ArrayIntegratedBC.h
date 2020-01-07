@@ -25,6 +25,8 @@ InputParameters validParams<ArrayIntegratedBC>();
 class ArrayIntegratedBC : public IntegratedBCBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
+  static InputParameters validParams();
+
   ArrayIntegratedBC(const InputParameters & parameters);
 
   virtual ArrayMooseVariable & variable() override { return _var; }

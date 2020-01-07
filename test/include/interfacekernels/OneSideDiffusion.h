@@ -11,18 +11,14 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class OneSideDiffusion;
-
-template <>
-InputParameters validParams<OneSideDiffusion>();
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
 class OneSideDiffusion : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   OneSideDiffusion(const InputParameters & parameters);
 
 protected:
@@ -31,4 +27,3 @@ protected:
 
   Real _D;
 };
-

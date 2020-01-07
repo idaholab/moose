@@ -1,15 +1,15 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
   block_id = '0 1'
   block_name = 'block_zero block_one'
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  []
   [./subdomain_id]
-    type = AssignSubdomainID
+    input = gen
+    type = SubdomainIDGenerator
     subdomain_id = 1
   [../]
 []

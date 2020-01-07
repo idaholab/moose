@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", VariableResidual);
 
-template <>
+defineLegacyParams(VariableResidual);
+
 InputParameters
-validParams<VariableResidual>()
+VariableResidual::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to compute the residual for");
 

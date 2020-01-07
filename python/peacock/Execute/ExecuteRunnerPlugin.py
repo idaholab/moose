@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 from peacock.base.Plugin import Plugin
 from peacock.utils import WidgetUtils
-from JobRunner import JobRunner
+from .JobRunner import JobRunner
 import mooseutils
 import time
 import math

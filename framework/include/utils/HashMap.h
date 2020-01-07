@@ -25,9 +25,15 @@ public:
     return std::unordered_map<Key, T>::operator[](k);
   }
 
+  inline std::size_t erase(const Key & k)
+  {
+    libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
+
+    return std::unordered_map<Key, T>::erase(k);
+  }
+
   inline bool contains(const Key & key) { return this->find(key) != this->end(); }
 
 private:
   libMesh::Threads::spin_mutex spin_mutex;
 };
-

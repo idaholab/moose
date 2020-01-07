@@ -19,6 +19,8 @@ InputParameters validParams<HeatConductionApp>();
 class HeatConductionApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   HeatConductionApp(const InputParameters & parameters);
   virtual ~HeatConductionApp();
 

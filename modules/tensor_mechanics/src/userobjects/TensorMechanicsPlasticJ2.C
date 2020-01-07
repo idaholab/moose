@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticJ2);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticJ2);
+
 InputParameters
-validParams<TensorMechanicsPlasticJ2>()
+TensorMechanicsPlasticJ2::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addRequiredParam<UserObjectName>(
       "yield_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the yield strength");

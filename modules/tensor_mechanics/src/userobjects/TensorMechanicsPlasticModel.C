@@ -12,11 +12,12 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "RankFourTensor.h"
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticModel);
+
 InputParameters
-validParams<TensorMechanicsPlasticModel>()
+TensorMechanicsPlasticModel::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredRangeCheckedParam<Real>("yield_function_tolerance",
                                             "yield_function_tolerance>0",
                                             "If the yield function is less than this amount, the "

@@ -12,12 +12,6 @@
 // Include the base class so it can be extended
 #include "ADIntegratedBC.h"
 
-// Forward declare the class being created and the validParams function
-template <ComputeStage>
-class HeatConductionOutflow;
-
-declareADValidParams(HeatConductionOutflow);
-
 /**
  * An IntegratedBC representing the "No BC" boundary condition for
  * heat conduction.
@@ -35,6 +29,8 @@ template <ComputeStage compute_stage>
 class HeatConductionOutflow : public ADIntegratedBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   HeatConductionOutflow(const InputParameters & parameters);
 
 protected:

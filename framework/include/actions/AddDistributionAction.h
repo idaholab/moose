@@ -22,6 +22,8 @@ InputParameters validParams<AddDistributionAction>();
 class AddDistributionAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddDistributionAction(InputParameters params);
 
   virtual void act() override;

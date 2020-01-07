@@ -17,7 +17,7 @@ InputParameters
 validParams<RandomEulerAngleProvider>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
-  params.addClassDescription("Assign random euler angles for each grain.");
+  params.addClassDescription("Assign random Euler angles for each grain.");
   params.addRequiredParam<UserObjectName>("grain_tracker_object",
                                           "The FeatureFloodCount UserObject to get values from.");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");

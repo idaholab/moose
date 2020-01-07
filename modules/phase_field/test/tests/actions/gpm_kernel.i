@@ -69,9 +69,9 @@
   [./PhaseField]
     [./GrandPotential]
       switching_function_names = 'hb hm'
-      anisotropic = false
 
       chemical_potentials = 'w'
+      anisotropic = 'false'
       mobilities = 'chiD'
       susceptibilities = 'chi'
       free_energies_w = 'rhob rhom'

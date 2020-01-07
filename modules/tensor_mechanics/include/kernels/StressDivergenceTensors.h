@@ -27,6 +27,8 @@ InputParameters validParams<StressDivergenceTensors>();
 class StressDivergenceTensors : public ALEKernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceTensors(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
@@ -70,8 +72,12 @@ protected:
   const MaterialProperty<RankTwoTensor> * const _deigenstrain_dT;
 
   const bool _out_of_plane_strain_coupled;
+  const VariableValue * _out_of_plane_strain;
   const unsigned int _out_of_plane_strain_var;
   const unsigned int _out_of_plane_direction;
+
+  /// Whether this object is acting on the displaced mesh
+  const bool _use_displaced_mesh;
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
   std::vector<std::vector<Real>> _avg_grad_test;
@@ -82,4 +88,3 @@ protected:
   /// Flag for volumetric locking correction
   bool _volumetric_locking_correction;
 };
-

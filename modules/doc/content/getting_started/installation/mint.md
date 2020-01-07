@@ -1,6 +1,6 @@
 # Mint
 
-!include getting_started/minimum_requirements.md
+!include sqa/minimum_requirements.md
 
 !include getting_started/installation/mint_pre_req.md
 

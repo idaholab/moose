@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", VectorOfPostprocessors);
 
-template <>
+defineLegacyParams(VectorOfPostprocessors);
+
 InputParameters
-validParams<VectorOfPostprocessors>()
+VectorOfPostprocessors::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "postprocessors", "The postprocessors whose values are to be reported");

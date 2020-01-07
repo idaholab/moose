@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", AverageNodalVariableValue);
 
-template <>
+defineLegacyParams(AverageNodalVariableValue);
+
 InputParameters
-validParams<AverageNodalVariableValue>()
+AverageNodalVariableValue::validParams()
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
 
   params.addClassDescription("Computes the average value of a field by sampling all nodal "
                              "solutions on the domain or within a subdomain");

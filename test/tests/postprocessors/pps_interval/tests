@@ -16,7 +16,7 @@
       type = 'RunApp'
       input = 'pps_out_interval.i'
       expect_out = '(?:^\|\s+\d\.\d.*\n){11}'
-      prereq = 'test_interval'
+      prereq = 'interval_output/test_interval'
 
       detail = 'to the console.'
     []

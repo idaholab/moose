@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ElementalVariableValue);
 
-template <>
+defineLegacyParams(ElementalVariableValue);
+
 InputParameters
-validParams<ElementalVariableValue>()
+ElementalVariableValue::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("elementid", "The ID of the element where we monitor");
   params.addClassDescription("Outputs an elemental variable value at a particular location");

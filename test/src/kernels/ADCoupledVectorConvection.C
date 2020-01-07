@@ -11,11 +11,15 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledVectorConvection);
 
-defineADValidParams(ADCoupledVectorConvection,
-                    ADKernel,
-                    params.addParam<bool>("use_grad_row", false, "Use first row of gradient.");
-                    params.addRequiredCoupledVar("velocity_vector",
-                                                 "Velocity Vector for the Convection ADKernel"););
+template <ComputeStage compute_stage>
+InputParameters
+ADCoupledVectorConvection<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addParam<bool>("use_grad_row", false, "Use first row of gradient.");
+  params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection ADKernel");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCoupledVectorConvection<compute_stage>::ADCoupledVectorConvection(

@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -15,13 +15,9 @@
     input = gmg
     num_layers = 6
     extrusion_vector = '1 0 1'
-    bottom_sideset = '10'
-    top_sideset = '20'
+    bottom_sideset = 'new_front'
+    top_sideset = 'new_back'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]
@@ -39,17 +35,17 @@
 []
 
 [BCs]
-  [./bottom]
+  [./first]
     type = DirichletBC
     variable = u
-    boundary = 10
+    boundary = 'new_front'
     value = 0
   [../]
 
-  [./top]
+  [./second]
     type = DirichletBC
     variable = u
-    boundary = 20
+    boundary = 'new_back'
     value = 1
   [../]
 []
@@ -61,6 +57,5 @@
 []
 
 [Outputs]
-  file_base = out_gen
   exodus = true
 []

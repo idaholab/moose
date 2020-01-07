@@ -35,11 +35,12 @@
 
 registerMooseObject("MooseApp", FancyExtruderGenerator);
 
-template <>
+defineLegacyParams(FancyExtruderGenerator);
+
 InputParameters
-validParams<FancyExtruderGenerator>()
+FancyExtruderGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
@@ -134,6 +135,11 @@ FancyExtruderGenerator::generate()
   auto mesh = _mesh->buildMeshBaseObject();
 
   std::unique_ptr<MeshBase> input = std::move(_input);
+
+  // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
+  // around
+  if (!input->is_serial())
+    mesh->delete_remote_elements();
 
   unsigned int total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
 
@@ -555,12 +561,6 @@ FancyExtruderGenerator::generate()
       }
     }
   }
-
-  // Done building the mesh->  Now prepare it for use.
-  auto part = mesh->skip_partitioning();
-  mesh->skip_partitioning(true);
-  mesh->prepare_for_use(/*skip_renumber =*/true);
-  mesh->skip_partitioning(part);
 
   return mesh;
 }

@@ -20,12 +20,13 @@ registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "validate_coordin
 
 registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "add_kernel");
 
-template <>
+defineLegacyParams(PoroMechanicsAction);
+
 InputParameters
-validParams<PoroMechanicsAction>()
+PoroMechanicsAction::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsAction>();
-  params.addRequiredParam<VariableName>("porepressure", "The porepressure variable");
+  InputParameters params = TensorMechanicsAction::validParams();
+  params.addRequiredParam<VariableName>("porepressure", "The pore pressure variable");
   return params;
 }
 
@@ -47,7 +48,7 @@ PoroMechanicsAction::act()
     std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
     unsigned int dim = displacements.size();
 
-    // all the kernels added below have porepressure as a coupled variable
+    // all the kernels added below have pore pressure as a coupled variable
     // add this to the kernel's params
     std::string type("PoroMechanicsCoupling");
     InputParameters params = _factory.getValidParams(type);

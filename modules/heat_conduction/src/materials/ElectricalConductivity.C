@@ -12,14 +12,15 @@
 
 registerMooseObject("HeatConductionApp", ElectricalConductivity);
 
-template <>
+defineLegacyParams(ElectricalConductivity);
+
 InputParameters
-validParams<ElectricalConductivity>()
+ElectricalConductivity::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addCoupledVar("temp", 300.0, "variable for temperature");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<Real>("length_scale", 1.0e-9, "Lengthscale of model");
+  params.addParam<Real>("length_scale", 1.0e-9, "Length scale of model");
   params.addParam<Real>(
       "ref_resistivity",
       6.5e-6,

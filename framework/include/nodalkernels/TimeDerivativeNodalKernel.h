@@ -26,6 +26,8 @@ public:
   /**
    * Constructor (Comment here for @aeslaughter :-)
    */
+  static InputParameters validParams();
+
   TimeDerivativeNodalKernel(const InputParameters & parameters);
 
 protected:

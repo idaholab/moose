@@ -19,6 +19,8 @@ InputParameters validParams<ArrayVariableComponent>();
 class ArrayVariableComponent : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayVariableComponent(const InputParameters & parameters);
 
 protected:

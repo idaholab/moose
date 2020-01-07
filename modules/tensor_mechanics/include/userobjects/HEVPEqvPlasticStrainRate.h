@@ -23,6 +23,8 @@ InputParameters validParams<HEVPEqvPlasticStrainRate>();
 class HEVPEqvPlasticStrainRate : public HEVPInternalVarRateUOBase
 {
 public:
+  static InputParameters validParams();
+
   HEVPEqvPlasticStrainRate(const InputParameters & parameters);
 
   virtual bool computeValue(unsigned int, Real &) const;
@@ -31,4 +33,3 @@ public:
 protected:
   Real _h;
 };
-

@@ -90,6 +90,8 @@ introductory theory pages on the various models:
 - Crystal Plasticity
 - [C0 Timoshenko Beam](tensor_mechanics/C0TimoshenkoBeam.md)
 - [Dynamics](tensor_mechanics/Dynamics.md)
+- [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
+- [Cohesive Zone Modeling](CohesiveZoneMaster/index.md)
 
 !col-end!
 !row-end!

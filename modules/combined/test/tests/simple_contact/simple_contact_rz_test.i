@@ -16,6 +16,7 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
 []
 
@@ -32,49 +33,12 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = FINITE
+    generate_output = 'stress_xx stress_xy stress_zx stress_yy stress_zz stress_yz'
   [../]
 []
 
@@ -84,50 +48,6 @@
     slave = 2
     penalty = 1e5
     system = constraint
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-
-  [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xy
-    index = 3
-  [../]
-
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-
-  [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zx
-    index = 5
   [../]
 []
 
@@ -150,33 +70,20 @@
     [./right_pressure]
       boundary = 4
       function = pressure
-      disp_x = disp_x
-      disp_y = disp_y
     [../]
   [../]
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_r = disp_x
-    disp_z = disp_y
-
+  [./stiffStuff]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_r = disp_x
-    disp_z = disp_y
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
+  [./stiffStuff_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -199,8 +106,7 @@
 []
 
 [Outputs]
-  file_base = out_rz
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

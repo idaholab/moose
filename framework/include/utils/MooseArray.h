@@ -293,6 +293,7 @@ template <typename T>
 inline void
 MooseArray<T>::shallowCopy(const MooseArray & rhs)
 {
+  _data_ptr.release();
   _data = rhs._data;
   _size = rhs._size;
   _allocated_size = rhs._allocated_size;
@@ -302,6 +303,7 @@ template <typename T>
 inline void
 MooseArray<T>::shallowCopy(std::vector<T> & rhs)
 {
+  _data_ptr.release();
   _data = &rhs[0];
   _size = rhs.size();
   _allocated_size = rhs.size();
@@ -350,4 +352,3 @@ freeDoubleMooseArray(MooseArray<MooseArray<T>> & a)
     a[i].release();
   a.release();
 }
-

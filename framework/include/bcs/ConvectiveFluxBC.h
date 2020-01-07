@@ -24,6 +24,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
+  static InputParameters validParams();
+
   ConvectiveFluxBC(const InputParameters & parameters);
 
 protected:
@@ -39,4 +41,3 @@ private:
   Real _rate;
   Real _duration;
 };
-

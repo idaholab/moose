@@ -25,6 +25,8 @@ InputParameters validParams<CosseratStressDivergenceTensors>();
 class CosseratStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
+  static InputParameters validParams();
+
   CosseratStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
@@ -36,4 +38,3 @@ protected:
   /// The MOOSE variable numbers of the Cosserat rotation variables
   std::vector<unsigned int> _wc_var;
 };
-

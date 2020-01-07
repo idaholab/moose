@@ -11,15 +11,11 @@
 
 #include "GeneralUserObject.h"
 
-// Forward Declarations
-class MaterialCopyUserObject;
-
-template <>
-InputParameters validParams<MaterialCopyUserObject>();
-
 class MaterialCopyUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   MaterialCopyUserObject(const InputParameters & parameters);
 
   virtual ~MaterialCopyUserObject() {}
@@ -43,4 +39,3 @@ protected:
   unsigned int _copy_to_element;
   Real _time_tol;
 };
-

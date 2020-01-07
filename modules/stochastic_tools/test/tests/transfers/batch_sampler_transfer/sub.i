@@ -57,5 +57,4 @@
 []
 
 [Outputs]
-  exodus = true
 []

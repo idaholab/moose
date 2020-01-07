@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", GenericDiffusion);
 
-template <>
 InputParameters
-validParams<GenericDiffusion>()
+GenericDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<std::string>(
       "property", "The name of the material property to use as the diffusivity.");
   return params;

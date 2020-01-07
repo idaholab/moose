@@ -32,6 +32,8 @@ class AugmentSparsityOnInterface : public RelationshipManager
 public:
   AugmentSparsityOnInterface(const InputParameters &);
 
+  static InputParameters validParams();
+
   /**
    * This function must be overriden by application codes to add
    * required elements from (range_begin, range_end) to the

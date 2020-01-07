@@ -31,6 +31,8 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
+  static InputParameters validParams();
+
   EigenExecutionerBase(const InputParameters & parameters);
 
   virtual void init() override;
@@ -130,7 +132,7 @@ protected:
   MooseEigenSystem & _eigen_sys;
 
   /// Storage for the eigenvalue computed by the executioner
-  Real & _eigenvalue;
+  PostprocessorValue & _eigenvalue;
 
   // postprocessor for eigenvalue
   const Real & _source_integral;
@@ -166,4 +168,3 @@ protected:
                  unsigned int iter,
                  const PostprocessorValue * solution_diff);
 };
-

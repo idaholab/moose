@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", CylindricalAverage);
 
-template <>
+defineLegacyParams(CylindricalAverage);
+
 InputParameters
-validParams<CylindricalAverage>()
+CylindricalAverage::validParams()
 {
-  InputParameters params = validParams<SpatialAverageBase>();
+  InputParameters params = SpatialAverageBase::validParams();
   params.addRequiredParam<Point>("cylinder_axis", "Vector along cylinder coordinate axis");
   params.addClassDescription("Compute a cylindrical average of a variableas a function of radius "
                              "throughout the simulation domain.");

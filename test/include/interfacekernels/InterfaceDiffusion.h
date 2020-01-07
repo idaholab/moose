@@ -11,18 +11,14 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class InterfaceDiffusion;
-
-template <>
-InputParameters validParams<InterfaceDiffusion>();
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
 class InterfaceDiffusion : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   InterfaceDiffusion(const InputParameters & parameters);
 
 protected:
@@ -32,4 +28,3 @@ protected:
   const MaterialProperty<Real> & _D;
   const MaterialProperty<Real> & _D_neighbor;
 };
-

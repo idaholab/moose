@@ -11,12 +11,14 @@
 
 registerMooseObject("MooseApp", ParsedMaterial);
 
-template <>
+defineLegacyParams(ParsedMaterial);
+
 InputParameters
-validParams<ParsedMaterial>()
+ParsedMaterial::validParams()
 {
-  InputParameters params = validParams<ParsedMaterialHelper>();
-  params += validParams<ParsedMaterialBase>();
+
+  InputParameters params = ParsedMaterialHelper::validParams();
+  params += ParsedMaterialBase::validParams();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }

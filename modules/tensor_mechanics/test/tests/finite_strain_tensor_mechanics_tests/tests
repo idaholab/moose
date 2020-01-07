@@ -1,0 +1,21 @@
+[Tests]
+  design = 'StressDivergence.md'
+  [./rotation_test]
+    type = 'Exodiff'
+    input = 'elastic_rotation.i'
+    exodiff = 'elastic_rotation_out.e'
+    exodiff_opts = '-F 1e-8'
+    requirement = 'The system shall track a changing global stress state when a model undergoes rigid body rotation'
+    issues = '#8422'
+  [../]
+
+  [./patch_test]
+    type = 'Exodiff'
+    input = 'finite_strain_patch.i'
+    exodiff = 'finite_strain_patch_out.e'
+    scale_refine = 1
+    max_parallel = 1
+    requirement = 'The system shall compute a uniform stress state given a uniform strain state with finite strains'
+    issues = '#12584'
+  [../]
+[]

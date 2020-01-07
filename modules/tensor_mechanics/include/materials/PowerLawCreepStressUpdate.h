@@ -29,6 +29,8 @@ InputParameters validParams<PowerLawCreepStressUpdate>();
 class PowerLawCreepStressUpdate : public RadialReturnCreepStressUpdateBase
 {
 public:
+  static InputParameters validParams();
+
   PowerLawCreepStressUpdate(const InputParameters & parameters);
 
 protected:
@@ -67,4 +69,3 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 };
-

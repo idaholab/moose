@@ -9,8 +9,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
-from box import box
-def report_error(message, filename, line=None, src='', traceback=None, prefix=u'ERROR'):
+from .box import box
+def report_error(message, filename, line=None, src='', traceback=None, prefix='ERROR'):
     """
     Helper for reporting error to logging module.
 
@@ -29,5 +29,5 @@ def report_error(message, filename, line=None, src='', traceback=None, prefix=u'
     else:
         filename = mooseutils.colorText('{}\n'.format(filename), 'RESET')
 
-    trace = u'\n' + mooseutils.colorText(traceback, 'GREY') if traceback else ''
-    return u'\n{}\n{}{}{}\n'.format(title, filename, src, trace)
+    trace = '\n' + mooseutils.colorText(traceback, 'GREY') if traceback else ''
+    return '\n{}\n{}{}{}\n'.format(title, filename, src, trace)

@@ -24,6 +24,8 @@ InputParameters validParams<ArrayNodalBC>();
 class ArrayNodalBC : public NodalBCBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
+  static InputParameters validParams();
+
   ArrayNodalBC(const InputParameters & parameters);
 
   /**

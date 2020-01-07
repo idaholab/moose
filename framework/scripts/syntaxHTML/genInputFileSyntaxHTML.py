@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys, os, time, shutil
-import commands # probably only available on unix-like OSes
+import subprocess # probably only available on unix-like OSes
 from socket import gethostname
 
 EXTENSIONS = [ 'opt', 'dbg', 'pro', 'oprof' ]
@@ -33,10 +33,10 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
     # of on all four targets. So bitten passes the --helios-only option, then this
     # script does nothing if it is not run on helios
     if len(argv) == 2 and argv[1] == '--helios-only' and gethostname() != 'helios':
-        print 'Syntax NOT generated because this is not helios'
+        print('Syntax NOT generated because this is not helios')
         sys.exit(0)
     else:
-        print 'Generating syntax html'
+        print('Generating syntax html')
 
     # Try to import the required modules and die gracefully if they don't load
     test_import_modules()
@@ -51,18 +51,18 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
                 fname = exe
 
     if fname == None:
-        print 'ERROR: You must build a ' + \
-              app_name + ' executable in ' + app_path + ' first.'
+        print('ERROR: You must build a ' + \
+              app_name + ' executable in ' + app_path + ' first.')
         sys.exit(1)
 
-    data = commands.getoutput( fname + " --yaml" )
+    data = subprocess.getoutput( fname + " --yaml" )
 
     # test if YAML DATA is in the output. This is so we can give a clear error
     # message if the program doesn't run to completion (instead of an IndexError)
     if data.find( 'YAML DATA' ) < 0:
-        print 'File Data' + '-'*50 + '\n' + data
-        print 'End File Data' + '-'*46
-        print 'ERROR: The yaml data is not being printed by: ' + fname
+        print('File Data' + '-'*50 + '\n' + data)
+        print('End File Data' + '-'*46)
+        print('ERROR: The yaml data is not being printed by: ' + fname)
         sys.exit(1)
 
     # ignore the first part of the file, up to START YAML DATA
@@ -150,5 +150,5 @@ def test_import_modules():
     if not mako_loaded:
         msg += 'ImportError: No module named mako.template\nPlease easy_install Mako\n'
     if not msg == '':
-        print msg
+        print(msg)
         exit(1)

@@ -37,11 +37,14 @@ assemble_l2(EquationSystems & es, const std::string & system_name)
 
 registerMooseObject("MooseApp", MultiAppProjectionTransfer);
 
-template <>
+defineLegacyParams(MultiAppProjectionTransfer);
+
 InputParameters
-validParams<MultiAppProjectionTransfer>()
+MultiAppProjectionTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
+  params.addClassDescription(
+      "Perform a projection between a master and sub-application mesh of a field variable.");
 
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");
@@ -60,7 +63,7 @@ validParams<MultiAppProjectionTransfer>()
 }
 
 MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _proj_type(getParam<MooseEnum>("proj_type")),
     _compute_matrix(true),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
@@ -76,7 +79,7 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
 void
 MultiAppProjectionTransfer::initialSetup()
 {
-  MultiAppFieldTransfer::initialSetup();
+  MultiAppConservativeTransfer::initialSetup();
 
   getAppInfo();
 
@@ -371,7 +374,7 @@ MultiAppProjectionTransfer::execute()
     }
 
     outgoing_evals[i_proc].resize(incoming_qps.size(), OutOfMeshValue);
-    if (_direction == FROM_MULTIAPP)
+    if (_current_direction == FROM_MULTIAPP)
       outgoing_ids[i_proc].resize(incoming_qps.size(), libMesh::invalid_uint);
     for (unsigned int qp = 0; qp < incoming_qps.size(); qp++)
     {
@@ -384,7 +387,7 @@ MultiAppProjectionTransfer::execute()
         if (local_bboxes[i_from].contains_point(qpt))
         {
           outgoing_evals[i_proc][qp] = (*local_meshfuns[i_from])(qpt - _from_positions[i_from]);
-          if (_direction == FROM_MULTIAPP)
+          if (_current_direction == FROM_MULTIAPP)
             outgoing_ids[i_proc][qp] = _local2global_map[i_from];
         }
       }
@@ -393,13 +396,13 @@ MultiAppProjectionTransfer::execute()
     if (i_proc == processor_id())
     {
       incoming_evals[i_proc] = outgoing_evals[i_proc];
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
         incoming_app_ids[i_proc] = outgoing_ids[i_proc];
     }
     else
     {
       _communicator.send(i_proc, outgoing_evals[i_proc], send_evals[i_proc]);
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
         _communicator.send(i_proc, outgoing_ids[i_proc], send_ids[i_proc]);
     }
   }
@@ -412,7 +415,7 @@ MultiAppProjectionTransfer::execute()
     if (i_proc == processor_id())
       continue;
     _communicator.receive(i_proc, incoming_evals[i_proc]);
-    if (_direction == FROM_MULTIAPP)
+    if (_current_direction == FROM_MULTIAPP)
       _communicator.receive(i_proc, incoming_app_ids[i_proc]);
   }
 
@@ -455,7 +458,7 @@ MultiAppProjectionTransfer::execute()
 
           // Ignore the selected processor if it's app has a higher rank than the
           // previously found lowest app rank.
-          if (_direction == FROM_MULTIAPP)
+          if (_current_direction == FROM_MULTIAPP)
             if (incoming_app_ids[i_proc][qp0 + qp] >= lowest_app_rank)
               continue;
 
@@ -508,7 +511,7 @@ MultiAppProjectionTransfer::execute()
     if (!_qps_cached)
       send_qps[i_proc].wait();
     send_evals[i_proc].wait();
-    if (_direction == FROM_MULTIAPP)
+    if (_current_direction == FROM_MULTIAPP)
       send_ids[i_proc].wait();
   }
 

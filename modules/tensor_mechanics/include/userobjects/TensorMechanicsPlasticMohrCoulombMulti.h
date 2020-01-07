@@ -24,6 +24,8 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulombMulti>();
 class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticModel
 {
 public:
+  static InputParameters validParams();
+
   TensorMechanicsPlasticMohrCoulombMulti(const InputParameters & parameters);
 
   /// The number of yield surfaces for this plasticity model
@@ -324,4 +326,3 @@ private:
     plane000100 = 4
   };
 };
-

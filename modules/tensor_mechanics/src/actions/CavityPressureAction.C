@@ -14,11 +14,12 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressureAction, "add_bc");
 
-template <>
+defineLegacyParams(CavityPressureAction);
+
 InputParameters
-validParams<CavityPressureAction>()
+CavityPressureAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
   params.addRequiredParam<std::vector<VariableName>>("displacements",
@@ -28,10 +29,16 @@ validParams<CavityPressureAction>()
   params.addParam<std::string>("output", "The name to use for the cavity pressure value");
   params.addParam<bool>(
       "use_displaced_mesh", true, "Whether to use displaced mesh in the boundary condition");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
   return params;
 }
 
-CavityPressureAction::CavityPressureAction(const InputParameters & params) : Action(params) {}
+CavityPressureAction::CavityPressureAction(const InputParameters & params)
+  : Action(params), _use_ad(getParam<bool>("use_automatic_differentiation"))
+{
+}
 
 void
 CavityPressureAction::act()
@@ -44,7 +51,17 @@ CavityPressureAction::act()
     mooseError("Number of save_in variables should equal to the number of displacement variables ",
                ndisp);
 
-  InputParameters params = _factory.getValidParams("Pressure");
+  std::string ad_append = "";
+  std::string ad_prepend = "";
+  if (_use_ad)
+  {
+    ad_append = "<RESIDUAL>";
+    ad_prepend = "AD";
+  }
+
+  std::string kernel_name = ad_prepend + "Pressure";
+
+  InputParameters params = _factory.getValidParams(kernel_name + ad_append);
   params.applyParameters(parameters());
 
   params.set<PostprocessorName>("postprocessor") =
@@ -56,7 +73,19 @@ CavityPressureAction::act()
     params.set<NonlinearVariableName>("variable") = displacements[i];
     if (!save_in.empty())
       params.set<std::vector<AuxVariableName>>("save_in") = {save_in[i]};
+    std::string unique_kernel_name = _name + "_" + Moose::stringify(i);
 
-    _problem->addBoundaryCondition("Pressure", _name + "_" + Moose::stringify(i), params);
+    if (_use_ad)
+    {
+      _problem->addBoundaryCondition(
+          kernel_name + ad_append, unique_kernel_name + "_residual", params);
+      _problem->addBoundaryCondition(
+          kernel_name + "<JACOBIAN>", unique_kernel_name + "_jacobian", params);
+      _problem->haveADObjects(true);
+    }
+    else
+    {
+      _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
+    }
   }
 }

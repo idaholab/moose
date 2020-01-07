@@ -24,13 +24,15 @@ validParams<InterfaceOrientationMultiphaseMaterial>()
   params.addRequiredParam<MaterialPropertyName>("kappa_name",
                                                 "Name of the kappa for the given phase");
   params.addRequiredParam<MaterialPropertyName>(
-      "dkappadgrad_etaa_name", "Name of the derivative of kappa wrt the gradient of eta");
+      "dkappadgrad_etaa_name", "Name of the derivative of kappa w.r.t. the gradient of eta");
   params.addRequiredParam<MaterialPropertyName>(
-      "d2kappadgrad_etaa_name", "Name of the second derivative of kappa wrt the gradient of eta");
+      "d2kappadgrad_etaa_name",
+      "Name of the second derivative of kappa w.r.t. the gradient of eta");
   params.addParam<Real>(
       "anisotropy_strength", 0.04, "Strength of the anisotropy (typically < 0.05)");
   params.addParam<unsigned int>("mode_number", 4, "Mode number for anisotropy");
-  params.addParam<Real>("reference_angle", 90, "Reference angle for defining anistropy in degrees");
+  params.addParam<Real>(
+      "reference_angle", 90, "Reference angle for defining anisotropy in degrees");
   params.addParam<Real>("kappa_bar", 0.1125, "Average value of the interface parameter kappa");
   params.addRequiredCoupledVar("etaa", "Order parameter for the current phase alpha");
   params.addRequiredCoupledVar("etab", "Order parameter for the neighboring phase beta");

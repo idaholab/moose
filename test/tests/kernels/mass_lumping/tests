@@ -1,12 +1,19 @@
 [Tests]
+  design = 'MassLumpedTimeDerivative.md'
+  issues = '#2689'
+
   [./mass_lumping]
     type = 'Exodiff'
     input = 'mass_lumping.i'
     exodiff = 'mass_lumping_out.e'
+
+    requirement = "The system shall support the ability to use mass lumping for time derivative terms."
   [../]
 
   [./mass_lumping_jacobian]
     type = 'PetscJacobianTester'
     input = 'mass_lumping_jacobian.i'
+
+    requirement = "The system shall verify that the Jacobian terms when using mass lumping for time derivative terms are computed correctly."
   [../]
 []

@@ -25,6 +25,8 @@ InputParameters validParams<BoundingValueNodalDamper>();
 class BoundingValueNodalDamper : public NodalDamper
 {
 public:
+  static InputParameters validParams();
+
   BoundingValueNodalDamper(const InputParameters & parameters);
 
 protected:

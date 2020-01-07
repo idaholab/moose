@@ -1,7 +1,108 @@
 [Tests]
-  [./InputTree]
-    type = PythonUnitTest
-    input = test_InputTree.py
-    display_required = True
-  [../]
+  design = 'peacock.md'
+  issues = '#7451'
+
+  [input]
+    requirement = "The system shall support a graphical interface that includes:"
+
+    [InputFileOnly]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testInputFileOnly
+
+      detail = " the ability to read and display application input files;"
+      python = 3
+    []
+
+    [testTransient]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testTransient
+
+      detail = "support for input files with transient solves;"
+      python = 3
+    []
+
+    [testLCF]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testLCF
+
+      detail = "support for input files with a linear combination function;"
+      python = 3
+    []
+
+    [testFSP]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testFSP
+
+      detail = "support for input files with a field split preconditioner;"
+      python = 3
+    []
+
+    [testSimpleDiffusion]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testSimpleDiffusion
+
+      detail = "the ability to read and write a complete input file;"
+      python = 3
+    []
+
+    [testChangingInputFiles]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testChangingInputFiles
+
+      detail = "the ability to change input files;"
+      python = 3
+    []
+
+    [testTreeWithOnlyApp]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testTreeWithOnlyApp
+
+      detail = "the ability to open without an input file;"
+      python = 3
+    []
+
+    [testAddVectorPostprocessor]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testAddVectorPostprocessor
+
+      detail = "the capability to add input file blocks graphically;"
+      python = 3
+    []
+
+    [testBlocks]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testBlocks
+
+      detail = "supports the creation of input file blocks; and"
+      python = 3
+    []
+
+    [testIncompatible]
+      type = PythonUnitTest
+      input = test_InputTree.py
+      display_required = True
+      test_case = Tests.testIncompatible
+
+      detail = "handles incompatible parameter changes without failure."
+      python = 3
+    []
+  []
 []

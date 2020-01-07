@@ -17,11 +17,12 @@
 
 registerMooseObject("TensorMechanicsApp", ElementJacobianDamper);
 
-template <>
+defineLegacyParams(ElementJacobianDamper);
+
 InputParameters
-validParams<ElementJacobianDamper>()
+ElementJacobianDamper::validParams()
 {
-  InputParameters params = validParams<GeneralDamper>();
+  InputParameters params = GeneralDamper::validParams();
   params.addClassDescription("Damper that limits the change in element Jacobians");
   params.addParam<std::vector<VariableName>>("displacements",
                                              "The nonlinear displacement variables");

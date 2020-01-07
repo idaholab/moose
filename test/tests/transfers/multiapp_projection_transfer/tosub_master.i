@@ -10,53 +10,53 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./x]
+  [x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./x_func]
+  [x_func]
     type = ParsedFunction
     value = x
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./x_func_aux]
+  [x_func_aux]
     type = FunctionAux
     variable = x
     function = x_func
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,42 +76,42 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
     positions = '1 1 0 5 5 0'
     input_files = tosub_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./tosub]
+  [tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = u_nodal
-  [../]
-  [./elemental_tosub]
+  []
+  [elemental_tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = u_elemental
-  [../]
-  [./elemental_to_sub_elemental]
+  []
+  [elemental_to_sub_elemental]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = x
     variable = x_elemental
-  [../]
-  [./elemental_to_sub_nodal]
+  []
+  [elemental_to_sub_nodal]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = x
     variable = x_nodal
-  [../]
+  []
 []

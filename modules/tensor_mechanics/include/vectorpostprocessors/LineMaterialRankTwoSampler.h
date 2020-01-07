@@ -25,6 +25,8 @@ InputParameters validParams<LineMaterialRankTwoSampler>();
 class LineMaterialRankTwoSampler : public LineMaterialSamplerBase<RankTwoTensor>
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * Sets up variables for output based on the properties to be output
@@ -44,4 +46,3 @@ public:
   const unsigned int _i;
   const unsigned int _j;
 };
-

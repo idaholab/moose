@@ -26,6 +26,8 @@ class ElemElemConstraint : public Constraint,
                            public NeighborMooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ElemElemConstraint(const InputParameters & parameters);
 
   /**

@@ -1,26 +1,40 @@
 [Tests]
-  [./custom_linear_partitioner]
-    type = 'Exodiff'
-    input = 'custom_linear_partitioner_test.i'
-    exodiff = 'custom_linear_partitioner_test_out.e'
-    min_parallel = 2
-    max_parallel = 2
-    group = 'requirements'
-  [../]
-  [./custom_linear_partitioner_displacement]
-    type = 'Exodiff'
-    input = 'custom_linear_partitioner_test_displacement.i'
-    exodiff = 'custom_linear_partitioner_test_displacement.e'
-    min_parallel = 2
-    max_parallel = 2
-    group = 'requirements'
-  [../]
-  [./custom_linear_partitioner_restart]
-    type = 'Exodiff'
-    input = 'custom_linear_partitioner_restart_test.i'
-    exodiff = 'custom_linear_partitioner_restart_test_out.e'
-    min_parallel = 2
-    max_parallel = 2
-    group = 'requirements'
-  [../]
+  design = 'Partitioner/index.md'
+  issues = '#5543'
+
+  [group]
+    requirement = "The system shall support the ability to create custom objects for performing mesh "
+                  "partitioning, for example"
+
+    [custom_linear_partitioner]
+      type = 'Exodiff'
+      input = 'custom_linear_partitioner_test.i'
+      exodiff = 'custom_linear_partitioner_test_out.e'
+      min_parallel = 2
+      max_parallel = 2
+      group = 'requirements'
+
+      detail = "a linear partitioner that"
+    []
+    [custom_linear_partitioner_displacement]
+      type = 'Exodiff'
+      input = 'custom_linear_partitioner_test_displacement.i'
+      exodiff = 'custom_linear_partitioner_test_displacement.e'
+      min_parallel = 2
+      max_parallel = 2
+      group = 'requirements'
+
+      detail = "operates with a displaced configuration and"
+    []
+    [custom_linear_partitioner_restart]
+      type = 'Exodiff'
+      input = 'custom_linear_partitioner_restart_test.i'
+      exodiff = 'custom_linear_partitioner_restart_test_out.e'
+      min_parallel = 2
+      max_parallel = 2
+      group = 'requirements'
+
+      detail = "is capable of restarting."
+    []
+  []
 []

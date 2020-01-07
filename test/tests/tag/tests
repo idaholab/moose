@@ -1,87 +1,97 @@
 [Tests]
   issues = '#9669'
   design = 'interfaces/TaggingInterface.md'
-  [./testtagvector]
-    type = 'Exodiff'
-    input = '2d_diffusion_tag_vector.i'
-    exodiff = 'tag_vector_out.e'
 
-    requirement = 'tagging system shall be able to have vector tags'
-  [../]
+  [general]
+    requirement = 'The system shall support the ability for a specific calculation to fill a labeled '
+                  'or "tagged"'
 
-  [./testtagmatrix]
-    type = 'Exodiff'
-    input = '2d_diffusion_tag_matrix.i'
-    exodiff = 'tag_matrix_out.e'
+    [tag_vector]
+      type = 'Exodiff'
+      input = '2d_diffusion_tag_vector.i'
+      exodiff = 'tag_vector_out.e'
 
-    requirement = 'tagging system shall be able to have matrix tags'
-  [../]
+      detail = 'numeric vector,'
+    []
 
-  [./test_tag_two_vectors]
-    type = 'Exodiff'
-    input = '2d_diffusion_vector_tag_test.i'
-    exodiff = 'vector_tag_test_out.e'
+    [tag_matrix]
+      type = 'Exodiff'
+      input = '2d_diffusion_tag_matrix.i'
+      exodiff = 'tag_matrix_out.e'
 
-    requirement = 'tagging system shall be able to have more than one vector tags'
-  [../]
+      detail = 'numeric matrix,'
+    []
 
-  [./test_tag_two_matrices]
-    type = 'Exodiff'
-    input = '2d_diffusion_matrix_tag_test.i'
-    exodiff = 'matrix_tag_test_out.e'
+    [tag_multiple_vectors]
+      type = 'Exodiff'
+      input = '2d_diffusion_vector_tag_test.i'
+      exodiff = 'vector_tag_test_out.e'
 
-    requirement = 'tagging system shall be able to have more than one matrix tags'
-  [../]
+      detail = 'multiple numeric vectors simultaneously, or'
+    []
 
-  [./test_tag_scalar_kernels]
-    type = 'CSVDiff'
-    input = 'scalar_tag_vector.i'
-    csvdiff = 'scalar_tag_vector_out.csv'
-    # System of equations has one dof only
-    # so that we do not need to run the test
-    # in parallel
-    max_parallel = 1
+    [tag_multiple_matrices]
+      type = 'Exodiff'
+      input = '2d_diffusion_matrix_tag_test.i'
+      exodiff = 'matrix_tag_test_out.e'
 
-    requirement = 'tagging system shall support scalar kernels'
-  [../]
+      detail = 'multiple numeric matrices simultaneously.'
+    []
+  []
 
-  [./test_tag_DG_kernels]
-    type = 'Exodiff'
-    input = '2d_diffusion_dg_tag.i'
-    exodiff = '2d_diffusion_dg_tag_out.e'
+  [systems]
+    requirement = 'The system shall support filling in labeled or "tagged" vectors or matrices from:'
 
-    requirement = 'tagging system shall support DG kernels'
-  [../]
+    [test_tag_scalar_kernels]
+      type = 'CSVDiff'
+      input = 'scalar_tag_vector.i'
+      csvdiff = 'scalar_tag_vector_out.csv'
+      # System of equations has one dof only
+      # so that we do not need to run the test
+      # in parallel
+      max_parallel = 1
 
-  [./test_tag_integratedBCs]
-    type = 'Exodiff'
-    input = 'tag_neumann.i'
-    exodiff = 'tag_neumann_out.e'
+      detail = 'the scalar kernel system,'
+    []
 
-    requirement = 'tagging system shall support integratedBCs'
-  [../]
+    [test_tag_DG_kernels]
+      type = 'Exodiff'
+      input = '2d_diffusion_dg_tag.i'
+      exodiff = '2d_diffusion_dg_tag_out.e'
 
-  [./test_tag_interface_kernels]
-    type = 'Exodiff'
-    input = 'tag_interface_kernels.i'
-    exodiff = 'tag_interface_kernels_out.e'
+      detail = 'the discontinous Galerkin system,'
+    []
 
-    requirement = 'tagging system shall support interface kernels'
-  [../]
+    [test_tag_itegratedBCs]
+      type = 'Exodiff'
+      input = 'tag_neumann.i'
+      exodiff = 'tag_neumann_out.e'
 
-  [./test_tag_dirac_kernels]
-    type = 'Exodiff'
-    input = 'tag_dirac_kernels.i'
-    exodiff = 'tag_dirac_kernels_out.e'
+      detail = 'integrated boundary conditions,'
+    []
 
-    requirement = 'tagging system shall support Dirac kernels'
-  [../]
+    [test_tag_interface_kernels]
+      type = 'Exodiff'
+      input = 'tag_interface_kernels.i'
+      exodiff = 'tag_interface_kernels_out.e'
 
-  [./test_tag_nodal_kernels]
-    type = 'Exodiff'
-    input = 'tag_nodal_kernels.i'
-    exodiff = 'tag_nodal_kernels_out.e'
+      detail = 'the interface kernels system,'
+    []
 
-    requirement = 'tagging system shall support nodal kernels'
-  [../]
+    [test_tag_dirac_kernels]
+      type = 'Exodiff'
+      input = 'tag_dirac_kernels.i'
+      exodiff = 'tag_dirac_kernels_out.e'
+
+      detail = 'the Dirac kernel system, and'
+    []
+
+    [test_tag_nodal_kernels]
+      type = 'Exodiff'
+      input = 'tag_nodal_kernels.i'
+      exodiff = 'tag_nodal_kernels_out.e'
+
+      detail = 'the nodal kernel system.'
+    []
+  []
 []

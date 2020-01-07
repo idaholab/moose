@@ -26,6 +26,8 @@ InputParameters validParams<PiecewiseLinearInterpolationMaterial>();
 class PiecewiseLinearInterpolationMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   PiecewiseLinearInterpolationMaterial(const InputParameters & parameters);
 
 protected:

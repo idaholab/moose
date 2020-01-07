@@ -31,6 +31,8 @@ InputParameters validParams<FunctionIC>();
 class FunctionIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   FunctionIC(const InputParameters & parameters);
 
 protected:

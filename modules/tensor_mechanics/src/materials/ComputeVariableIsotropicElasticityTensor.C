@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVariableIsotropicElasticityTensor);
 
-template <>
+defineLegacyParams(ComputeVariableIsotropicElasticityTensor);
+
 InputParameters
-validParams<ComputeVariableIsotropicElasticityTensor>()
+ComputeVariableIsotropicElasticityTensor::validParams()
 {
-  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that "
                              "change as a function of material properties");
   params.addRequiredParam<MaterialPropertyName>("youngs_modulus",

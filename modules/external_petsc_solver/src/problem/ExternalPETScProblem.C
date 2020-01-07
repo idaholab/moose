@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExternalPETScProblem.h"
+#include "SystemBase.h"
 
 registerMooseObject("ExternalPetscSolverApp", ExternalPETScProblem);
 

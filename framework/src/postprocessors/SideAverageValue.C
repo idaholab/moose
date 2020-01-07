@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SideAverageValue);
 
-template <>
+defineLegacyParams(SideAverageValue);
+
 InputParameters
-validParams<SideAverageValue>()
+SideAverageValue::validParams()
 {
-  InputParameters params = validParams<SideIntegralVariablePostprocessor>();
+  InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addClassDescription("Computes the average value of a variable on a "
                              "sideset. Note that this cannot be used on the "
                              "centerline of an axisymmetric model.");

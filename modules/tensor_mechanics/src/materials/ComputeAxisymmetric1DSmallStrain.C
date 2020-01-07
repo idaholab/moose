@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DSmallStrain);
 
-template <>
+defineLegacyParams(ComputeAxisymmetric1DSmallStrain);
+
 InputParameters
-validParams<ComputeAxisymmetric1DSmallStrain>()
+ComputeAxisymmetric1DSmallStrain::validParams()
 {
-  InputParameters params = validParams<Compute1DSmallStrain>();
+  InputParameters params = Compute1DSmallStrain::validParams();
   params.addClassDescription("Compute a small strain in an Axisymmetric 1D problem");
   params.addParam<UserObjectName>("subblock_index_provider",
                                   "SubblockIndexProvider user object name");

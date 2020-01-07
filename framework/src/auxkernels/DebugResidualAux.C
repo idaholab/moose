@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", DebugResidualAux);
 
-template <>
+defineLegacyParams(DebugResidualAux);
+
 InputParameters
-validParams<DebugResidualAux>()
+DebugResidualAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<NonlinearVariableName>("debug_variable",
                                                  "The variable that is being debugged.");
   return params;

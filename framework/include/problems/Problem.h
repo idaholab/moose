@@ -24,6 +24,8 @@ InputParameters validParams<Problem>();
 class Problem : public MooseObject, public PerfGraphInterface
 {
 public:
+  static InputParameters validParams();
+
   Problem(const InputParameters & parameters);
   virtual ~Problem();
 

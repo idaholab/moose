@@ -11,18 +11,14 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class ComputingInitialTest;
-
-template <>
-InputParameters validParams<ComputingInitialTest>();
-
 /**
  * Empty material for use in simple applications that don't need material properties.
  */
 class ComputingInitialTest : public Material
 {
 public:
+  static InputParameters validParams();
+
   ComputingInitialTest(const InputParameters & parameters);
 
 protected:
@@ -32,4 +28,3 @@ protected:
   MaterialProperty<Real> & _thermal_conductivity;
   const MaterialProperty<Real> & _thermal_conductivity_old;
 };
-

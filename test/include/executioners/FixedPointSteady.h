@@ -13,15 +13,11 @@
 
 #include "FixedPoint.h"
 
-// Forward Declarations
-class FixedPointSteady;
-
-template <>
-InputParameters validParams<FixedPointSteady>();
-
 class FixedPointSteady : public Steady
 {
 public:
+  static InputParameters validParams();
+
   FixedPointSteady(const InputParameters & parameters);
 
 protected:

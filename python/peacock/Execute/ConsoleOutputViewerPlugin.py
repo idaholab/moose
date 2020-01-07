@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.base.Plugin import Plugin
-from TerminalTextEdit import TerminalTextEdit
+from .TerminalTextEdit import TerminalTextEdit
 
 class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
     """

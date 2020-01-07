@@ -25,6 +25,8 @@ InputParameters validParams<AllSideSetsByNormalsGenerator>();
 class AllSideSetsByNormalsGenerator : public SideSetsGeneratorBase
 {
 public:
+  static InputParameters validParams();
+
   AllSideSetsByNormalsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

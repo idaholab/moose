@@ -3,5 +3,7 @@
     type = ImageDiff
     command = mesh_only.py
     imagediff = 'mesh_only.png'
+    python = 3
+    display_required = true
   [../]
 []

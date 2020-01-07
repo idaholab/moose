@@ -9,11 +9,12 @@
 
 #include "GeneralizedKelvinVoigtBase.h"
 
-template <>
+defineLegacyParams(GeneralizedKelvinVoigtBase);
+
 InputParameters
-validParams<GeneralizedKelvinVoigtBase>()
+GeneralizedKelvinVoigtBase::validParams()
 {
-  InputParameters params = validParams<LinearViscoelasticityBase>();
+  InputParameters params = LinearViscoelasticityBase::validParams();
   params.set<bool>("need_viscoelastic_properties_inverse") = true;
   params.suppressParameter<bool>("need_viscoelastic_properties_inverse");
   return params;

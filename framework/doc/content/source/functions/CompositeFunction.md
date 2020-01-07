@@ -12,7 +12,7 @@ parameter.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/function_dirichlet_bc/function_dirichlet_bc_test.i block=Functions
+!listing test/tests/bcs/function_dirichlet_bc/test.i block=Functions
 
 !syntax parameters /Functions/CompositeFunction
 

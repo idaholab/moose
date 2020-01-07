@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MultipleUpdateElemAux);
 
-template <>
 InputParameters
-validParams<MultipleUpdateElemAux>()
+MultipleUpdateElemAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addRequiredCoupledVar("vars", "unknown (nl-variable)");
 

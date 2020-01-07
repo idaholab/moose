@@ -14,7 +14,7 @@
 
     [second]
       type = 'Exodiff'
-      prereq = 'first'
+      prereq = 'group/first'
       input = 'master2.i'
       exodiff = 'master2_out_sub_app0.e'
       abs_zero = 1e-8

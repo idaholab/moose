@@ -26,6 +26,8 @@ class NodalScalarKernel : public ScalarKernel,
                           public MooseVariableDependencyInterface
 {
 public:
+  static InputParameters validParams();
+
   NodalScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() override;

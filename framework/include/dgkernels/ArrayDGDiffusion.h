@@ -22,6 +22,8 @@ InputParameters validParams<ArrayDGDiffusion>();
 class ArrayDGDiffusion : public ArrayDGKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayDGDiffusion(const InputParameters & parameters);
 
 protected:

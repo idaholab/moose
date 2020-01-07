@@ -14,12 +14,13 @@
 
 registerMooseObject("MooseApp", RandomIC);
 
-template <>
+defineLegacyParams(RandomIC);
+
 InputParameters
-validParams<RandomIC>()
+RandomIC::validParams()
 {
-  InputParameters params = validParams<RandomICBase>();
-  params += validParams<DistributionInterface>();
+  InputParameters params = RandomICBase::validParams();
+  params += DistributionInterface::validParams();
   params.addParam<Real>(
       "min", 0.0, "Lower bound of uniformly distributed randomly generated values");
   params.addParam<Real>(

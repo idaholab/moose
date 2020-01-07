@@ -23,6 +23,8 @@ InputParameters validParams<ConditionalFunctionEnableControl>();
 class ConditionalFunctionEnableControl : public ConditionalEnableControl
 {
 public:
+  static InputParameters validParams();
+
   ConditionalFunctionEnableControl(const InputParameters & parameters);
 
 protected:

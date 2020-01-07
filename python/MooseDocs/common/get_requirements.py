@@ -77,7 +77,7 @@ def get_requirements(directories, specs, prefix='F', category=None):
             if fname in specs:
                 _add_requirements(out, location, filename)
 
-    for i, requirements in enumerate(out.itervalues()):
+    for i, requirements in enumerate(out.values()):
         for j, req in enumerate(requirements):
             if category:
                 req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
@@ -102,12 +102,33 @@ def _add_requirements(out, location, filename):
     design_line = root.children[0].line('design', None)
     issues = root.children[0].get('issues', None)
     issues_line = root.children[0].line('issues', None)
+    deprecated = root.children[0].get('deprecated', False)
+    deprecated_line = root.children[0].line('deprecated', None)
+
     for child in root.children[0]:
         if 'requirement' in child:
+            requirement_line = child.line('requirement')
+
+            # Deprecation
+            local_deprecated = child.get('deprecated', deprecated)
+            local_deprecated_line = child.line('deprecated', deprecated_line)
+            if local_deprecated:
+                msg = "%s:%s\nThe 'requirement' parameter is specified for %s, but the test is " \
+                      "marked as deprecated on line %s."
+                LOG.error(msg, filename, requirement_line, child.name, local_deprecated_line)
+                continue
+
+            # Deprecation
+            local_deprecated = child.get('deprecated', deprecated)
+            local_deprecated_line = child.line('deprecated', deprecated_line)
+            if local_deprecated:
+                msg = "The 'requirment' parameter is specified for %s, but the test is marked as " \
+                      "deprecated on line %s."
+                LOG.error(msg, child.name, local_deprecated_line)
+                continue
 
             local_design = child.get('design', design)
             local_design_line = child.line('design', design_line)
-
             if local_design is None:
                 msg = "The 'design' parameter is missing from '%s' in %s. It must be defined at " \
                       "the top level and/or within the individual test specification. It " \
@@ -135,7 +156,7 @@ def _add_requirements(out, location, filename):
             req = Requirement(name=child.name,
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
-                              text=unicode(text),
+                              text=str(text),
                               text_line=child.line('requirement', None),
                               design=local_design.split(),
                               design_line=local_design_line,
@@ -166,7 +187,7 @@ def _add_requirements(out, location, filename):
                 req.details.append(Detail(name=grandchild.name,
                                           path=req.path,
                                           filename=filename,
-                                          text=unicode(detail),
+                                          text=str(detail),
                                           text_line=grandchild.line('detail')))
 
 

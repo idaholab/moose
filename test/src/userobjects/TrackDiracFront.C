@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", TrackDiracFront);
 
-template <>
 InputParameters
-validParams<TrackDiracFront>()
+TrackDiracFront::validParams()
 {
-  InputParameters params = validParams<NodalUserObject>();
+  InputParameters params = NodalUserObject::validParams();
 
   params.addRequiredCoupledVar(
       "var", "Wherever this variable is close to 0.5 a Dirac point will be generated");

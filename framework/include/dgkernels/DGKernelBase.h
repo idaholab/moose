@@ -63,6 +63,8 @@ public:
    * @param parameters The parameters object for holding additional parameters for kernels and
    * derived kernels
    */
+  static InputParameters validParams();
+
   DGKernelBase(const InputParameters & parameters);
 
   virtual ~DGKernelBase();
@@ -171,4 +173,11 @@ protected:
 
   static Threads::spin_mutex _resid_vars_mutex;
   static Threads::spin_mutex _jacoby_vars_mutex;
+
+private:
+  /// Broken boundaries
+  std::set<BoundaryID> _excluded_boundaries;
+
+  /// Check current element if it contains broken boundary
+  bool excludeBoundary() const;
 };

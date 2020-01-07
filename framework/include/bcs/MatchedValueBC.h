@@ -23,6 +23,8 @@ InputParameters validParams<MatchedValueBC>();
 class MatchedValueBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   MatchedValueBC(const InputParameters & parameters);
 
 protected:
@@ -34,4 +36,3 @@ protected:
   /// The id of the coupled variable
   unsigned int _v_num;
 };
-

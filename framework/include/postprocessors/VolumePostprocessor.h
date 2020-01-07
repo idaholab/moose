@@ -23,6 +23,8 @@ InputParameters validParams<VolumePostprocessor>();
 class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   VolumePostprocessor(const InputParameters & parameters);
 
   virtual void threadJoin(const UserObject & y) override;

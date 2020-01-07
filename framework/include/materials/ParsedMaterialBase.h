@@ -24,6 +24,8 @@ InputParameters validParams<ParsedMaterialBase>();
 class ParsedMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   ParsedMaterialBase(const InputParameters & parameters);
 
 protected:

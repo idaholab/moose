@@ -4,6 +4,7 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = true
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -31,11 +32,9 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
@@ -83,27 +82,33 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
+  [./stiffStuff1_strain]
+    type= ComputeFiniteStrain
+    block = '1'
+  [../]
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
 
   [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+  [./stiffStuff2_strain]
+    type= ComputeFiniteStrain
+    block = '2'
+  [../]
+  [./stiffStuff2_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
   [../]
 []
 

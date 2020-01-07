@@ -14,11 +14,13 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DerivativeParsedMaterialHelper);
+
 InputParameters
-validParams<DerivativeParsedMaterialHelper>()
+DerivativeParsedMaterialHelper::validParams()
 {
-  InputParameters params = validParams<ParsedMaterialHelper>();
+
+  InputParameters params = ParsedMaterialHelper::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   params.addDeprecatedParam<bool>("third_derivatives",
                                   "Flag to indicate if third derivatives are needed",
@@ -128,21 +130,12 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   current._darg_names = parent_derivative._darg_names;
 
   // the moose variable name goes into the derivative property name
-<<<<<<< HEAD
-<<<<<<< HEAD
   if (_map_mode == USE_PARAM_NAMES)
     current._darg_names.push_back(map_to_arg_names[_variable_names[var]]);
   else
     current._darg_names.push_back(_variable_names[var]);
 
   current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
-=======
-  current._darg_names.push_back(_variable_names[var]);
-=======
-  current._darg_names.push_back(_arg_names[finder - _equation_args.begin()]);
->>>>>>> fd40bf1c23... Update and change branch
-  current._F = std::make_shared<ADFunction>(*parent_derivative._F);
->>>>>>> 788a1d59b3... Deduces variables retrieved from fparser, classifying them as coupled values or material properties
 
   // execute derivative
   if (current._F->AutoDiff(derivative_var) != -1)
@@ -187,7 +180,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   {
     // get the master object from thread 0
     const MaterialWarehouse & material_warehouse = _fe_problem.getMaterialWarehouse();
-    const MooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
+    const MooseObjectWarehouse<MaterialBase> & warehouse = material_warehouse[_material_data_type];
 
     MooseSharedPointer<DerivativeParsedMaterialHelper> master =
         MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(
@@ -198,7 +191,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     {
       Derivative newderivative;
       newderivative._mat_prop = &declarePropertyDerivative<Real>(_F_name, D._darg_names);
-      newderivative._F = ADFunctionPtr(new ADFunction(*D._F));
+      newderivative._F = std::make_shared<ADFunction>(*D._F);
       _derivatives.push_back(newderivative);
     }
     // copy coupled material properties

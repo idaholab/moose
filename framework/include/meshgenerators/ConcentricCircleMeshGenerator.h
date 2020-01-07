@@ -23,6 +23,8 @@ InputParameters validParams<ConcentricCircleMeshGenerator>();
 class ConcentricCircleMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   ConcentricCircleMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

@@ -17,11 +17,12 @@
 // PETSc includes
 #include <petscblaslapack.h> // LAPACKgesv_
 
-template <>
+defineLegacyParams(MultiParameterPlasticityStressUpdate);
+
 InputParameters
-validParams<MultiParameterPlasticityStressUpdate>()
+MultiParameterPlasticityStressUpdate::validParams()
 {
-  InputParameters params = validParams<StressUpdateBase>();
+  InputParameters params = StressUpdateBase::validParams();
   params.addClassDescription("Return-map and Jacobian algorithms for plastic models where the "
                              "yield function and flow directions depend on multiple functions of "
                              "stress");

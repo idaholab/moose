@@ -41,5 +41,10 @@ protected:
 
   /// Second derivative of the double well function \f$ \frac {d^2}{d\eta^2} g(\eta) \f$
   const MaterialProperty<Real> & _prop_d2g;
-};
 
+  /// Value of the free energy function \f$ F_b \f$
+  const MaterialProperty<Real> & _prop_Fb;
+
+  /// Derivative of the free energy function \f$ \frac d{d\eta} F_b \f$
+  const MaterialProperty<Real> & _prop_dFb;
+};

@@ -14,15 +14,16 @@
 
 #include "libmesh/elem.h"
 
-template <>
+defineLegacyParams(ElementUserObject);
+
 InputParameters
-validParams<ElementUserObject>()
+ElementUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<MaterialPropertyInterface>();
-  params += validParams<TransientInterface>();
-  params += validParams<RandomInterface>();
+  InputParameters params = UserObject::validParams();
+  params += BlockRestrictable::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
+  params += RandomInterface::validParams();
   return params;
 }
 
@@ -36,6 +37,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters)
     TransientInterface(this),
     PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
+    ElementIDInterface(this),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),

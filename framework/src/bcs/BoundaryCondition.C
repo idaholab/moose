@@ -16,10 +16,16 @@ template <>
 InputParameters
 validParams<BoundaryCondition>()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BoundaryRestrictableRequired>();
-  params += validParams<TaggingInterface>();
+  return BoundaryCondition::validParams();
+}
+
+InputParameters
+BoundaryCondition::validParams()
+{
+  InputParameters params = MooseObject::validParams();
+  params += TransientInterface::validParams();
+  params += BoundaryRestrictableRequired::validParams();
+  params += TaggingInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -30,15 +36,6 @@ validParams<BoundaryCondition>()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
-
-  // BoundaryConditions do not need any ghosting, but they do need to tell the sparsity pattern that
-  // there is coupling between intra-element dofs or at nodes. This is done through the coupling
-  // functor
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 0;
-                                });
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");

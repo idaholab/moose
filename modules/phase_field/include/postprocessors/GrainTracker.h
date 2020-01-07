@@ -12,7 +12,7 @@
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 class GrainTracker;
 class PolycrystalUserObjectBase;
@@ -67,6 +67,7 @@ public:
   virtual std::size_t getNumberActiveGrains() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
+  virtual bool doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const override;
   virtual bool isFeaturePercolated(unsigned int feature_id) const override;
   virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
@@ -155,15 +156,15 @@ protected:
    * This method returns the minimum periodic distance between two vectors of bounding boxes. If the
    * bounding boxes overlap the result is always -1.0.
    */
-  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1,
-                              std::vector<MeshTools::BoundingBox> & bboxes2) const;
+  Real boundingRegionDistance(std::vector<BoundingBox> & bboxes1,
+                              std::vector<BoundingBox> & bboxes2) const;
 
   /**
    * This method returns the minimum periodic distance between the centroids of two vectors of
    * bounding boxes.
    */
-  Real centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1,
-                              std::vector<MeshTools::BoundingBox> & bboxes2) const;
+  Real centroidRegionDistance(std::vector<BoundingBox> & bboxes1,
+                              std::vector<BoundingBox> & bboxes2) const;
 
   /**
    * Retrieve the next unique grain number if a new grain is detected during trackGrains. This
@@ -288,4 +289,3 @@ template <>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
 template <>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
-

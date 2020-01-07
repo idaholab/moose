@@ -21,6 +21,8 @@ InputParameters validParams<VerifyNodalUniqueID>();
 class VerifyNodalUniqueID : public NodalUserObject
 {
 public:
+  static InputParameters validParams();
+
   VerifyNodalUniqueID(const InputParameters & parameters);
 
   virtual void initialize() override;

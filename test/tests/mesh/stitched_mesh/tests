@@ -1,13 +1,20 @@
 [Tests]
+  design = 'StitchedMesh.md'
+  issues = '#8308'
+
   [./test]
     type = 'Exodiff'
     input = 'stitched_mesh.i'
     exodiff = 'stitched_mesh_out.e'
+
+    requirement = "The system shall support the creating a single mesh from multiple meshes stitched together."
   [../]
   [./files_error]
     type = 'RunException'
     input = 'stitched_mesh.i'
     cli_args = Mesh/files=''
     expect_err = 'Must specify at least one mesh file for StitchedMesh'
+
+    requirement = "The system shall error if at least one mesh file is not supplied when creating a mesh from multiple meshes stitched together."
   [../]
 []

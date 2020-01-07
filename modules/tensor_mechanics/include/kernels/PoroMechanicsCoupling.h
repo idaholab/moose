@@ -23,6 +23,8 @@ InputParameters validParams<PoroMechanicsCoupling>();
 class PoroMechanicsCoupling : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PoroMechanicsCoupling(const InputParameters & parameters);
 
 protected:
@@ -42,4 +44,3 @@ private:
 
   unsigned int _component;
 };
-

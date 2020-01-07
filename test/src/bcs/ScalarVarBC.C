@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", ScalarVarBC);
 
-template <>
 InputParameters
-validParams<ScalarVarBC>()
+ScalarVarBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("alpha", "The scalar variable coupled in");
   return params;
 }

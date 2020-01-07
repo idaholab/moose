@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", EFieldAdvection);
 
-template <>
 InputParameters
-validParams<EFieldAdvection>()
+EFieldAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("efield", {1, 1, 1}, "The electric field responsible for charge advection");
   MooseEnum charge("positive negative", "positive");
   params.addParam<MooseEnum>(

@@ -14,9 +14,14 @@
 
 registerADMooseObject("MooseTestApp", ADMatchedScalarValueBC);
 
-defineADValidParams(ADMatchedScalarValueBC,
-                    ADNodalBC,
-                    params.addRequiredCoupledVar("v", "The scalar variable to match"););
+template <ComputeStage compute_stage>
+InputParameters
+ADMatchedScalarValueBC<compute_stage>::validParams()
+{
+  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  params.addRequiredCoupledVar("v", "The scalar variable to match");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMatchedScalarValueBC<compute_stage>::ADMatchedScalarValueBC(const InputParameters & parameters)

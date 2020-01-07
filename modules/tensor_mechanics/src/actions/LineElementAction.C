@@ -32,11 +32,12 @@ registerMooseAction("TensorMechanicsApp", LineElementAction, "add_nodal_kernel")
 
 registerMooseAction("TensorMechanicsApp", LineElementAction, "add_material");
 
-template <>
+defineLegacyParams(LineElementAction);
+
 InputParameters
-validParams<LineElementAction>()
+LineElementAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Sets up variables, stress divergence kernels and materials required "
                              "for a static analysis with beam or truss elements. Also sets up aux "
                              "variables, aux kernels, and consistent or nodal inertia kernels for "
@@ -49,7 +50,7 @@ validParams<LineElementAction>()
   params.addParam<bool>("add_variables",
                         false,
                         "Add the displacement variables for truss elements "
-                        "and both diplacement and rotation variables for "
+                        "and both displacement and rotation variables for "
                         "beam elements.");
   params.addParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
@@ -108,7 +109,7 @@ LineElementAction::beamParameters()
                        "as either a number or a variable name.");
   params.addCoupledVar("Az",
                        0.0,
-                       "First moment of area of the beam about z asix. Can be supplied "
+                       "First moment of area of the beam about z axis. Can be supplied "
                        "as either a number or a variable name.");
   params.addCoupledVar("Ix",
                        "Second moment of area of the beam about x axis. Can be supplied as "
@@ -454,21 +455,22 @@ LineElementAction::actAddVariables()
 {
   if (getParam<bool>("add_variables"))
   {
+    auto params = _factory.getValidParams("MooseVariable");
+
     // determine order of elements in mesh
     const bool second = _problem->mesh().hasSecondOrderElements();
     if (second)
       mooseError("LineElementAction: Only linear truss and beam elements are currently supported. "
                  "Please change the order of elements in the mesh to use first order elements.");
 
+    params.set<MooseEnum>("order") = "FIRST";
+    params.set<MooseEnum>("family") = "LAGRANGE";
+
     // Loop through the displacement variables
     for (const auto & disp : _displacements)
     {
       // Create displacement variables
-      _problem->addVariable(disp,
-                            FEType(Utility::string_to_enum<Order>("FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0,
-                            _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
+      _problem->addVariable("MooseVariable", disp, params);
     }
 
     // Add rotation variables if line element is a beam.
@@ -477,11 +479,7 @@ LineElementAction::actAddVariables()
       for (const auto & rot : _rotations)
       {
         // Create rotation variables
-        _problem->addVariable(rot,
-                              FEType(Utility::string_to_enum<Order>("FIRST"),
-                                     Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                              1.0,
-                              _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
+        _problem->addVariable("MooseVariable", rot, params);
       }
     }
   }
@@ -625,37 +623,22 @@ LineElementAction::actAddAuxVariables()
 {
   if (_add_dynamic_variables && !_truss)
   {
+    auto params = _factory.getValidParams("MooseVariable");
+
+    params.set<MooseEnum>("order") = "FIRST";
+    params.set<MooseEnum>("family") = "LAGRANGE";
+
     for (auto vel : _velocities)
-    {
-      _problem->addAuxVariable(vel,
-                               FEType(Utility::string_to_enum<Order>("FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
-    }
+      _problem->addAuxVariable("MooseVariable", vel, params);
 
     for (auto accel : _accelerations)
-    {
-      _problem->addAuxVariable(accel,
-                               FEType(Utility::string_to_enum<Order>("FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
-    }
+      _problem->addAuxVariable("MooseVariable", accel, params);
 
     for (auto rot_vel : _rot_velocities)
-    {
-      _problem->addAuxVariable(rot_vel,
-                               FEType(Utility::string_to_enum<Order>("FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
-    }
+      _problem->addAuxVariable("MooseVariable", rot_vel, params);
 
     for (auto rot_accel : _rot_accelerations)
-    {
-      _problem->addAuxVariable(rot_accel,
-                               FEType(Utility::string_to_enum<Order>("FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
-    }
+      _problem->addAuxVariable("MooseVariable", rot_accel, params);
   }
 }
 

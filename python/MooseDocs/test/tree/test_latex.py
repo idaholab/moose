@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -34,7 +34,7 @@ class TestLatex(unittest.TestCase):
         enc = latex.EnclosureBase('foo', None, enclose=('#','@'))
         self.assertEqual(enc['enclose'], ('#','@'))
 
-        enc = latex.EnclosureBase('foo', None, enclose=(';',';'), string=u'foo')
+        enc = latex.EnclosureBase('foo', None, enclose=(';',';'), string='foo')
         self.assertIsInstance(enc(0), latex.String)
         self.assertEqual(enc(0)['content'], 'foo')
 
@@ -54,7 +54,7 @@ class TestLatex(unittest.TestCase):
         cmd = latex.Command(None, 'foo')
         self.assertEqual(cmd.write(), '\\foo')
 
-        cmd = latex.Command(None, 'foo', string=u'bar')
+        cmd = latex.Command(None, 'foo', string='bar')
         self.assertIsInstance(cmd(0), latex.String)
         self.assertEqual(cmd(0)['content'], 'bar')
         self.assertEqual(cmd.write(), '\\foo{bar}')
@@ -67,7 +67,7 @@ class TestLatex(unittest.TestCase):
         self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}\n')
 
     def testString(self):
-        s = latex.String(None, content=u'foo')
+        s = latex.String(None, content='foo')
         self.assertEqual(s['content'], 'foo')
 
 

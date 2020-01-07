@@ -113,9 +113,6 @@ public:
 
   virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 
-  virtual Real henryConstant(Real temperature) const override;
-  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
-
   // Methods used by Navier-Stokes module
   virtual Real gamma() const { return _gamma; };
   virtual Real cv() const { return _cv; };
@@ -123,25 +120,26 @@ public:
 
 protected:
   /// Adiabatic index (ratio of specific heats cp/cv)
-  Real _gamma;
+  const Real & _gamma;
+  /// molar mass
+  const Real & _molar_mass;
+
   /// Specific gas constant (R / molar mass)
-  Real _R_specific;
-  /// Specific heat at constant volume
-  Real _cv;
+  const Real _R_specific;
   /// Specific heat at constant pressure
-  Real _cp;
+  const Real _cp;
+  /// Specific heat at constant volume
+  const Real _cv;
+
   /// Dynamic viscosity
   const Real _mu;
   /// Thermal conductivity
   const Real _k;
-  /// molar mass
-  Real _molar_mass;
+
   // properties at critical point (used by IdealRealGasMixtureFluidProperties (primary component))
   Real _T_c;
   Real _rho_c;
   Real _e_c;
-  /// Henry constant
-  const Real _henry_constant;
 };
 
 #pragma GCC diagnostic pop

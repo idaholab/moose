@@ -23,6 +23,8 @@ InputParameters validParams<NodalGravity>();
 class NodalGravity : public NodalKernel
 {
 public:
+  static InputParameters validParams();
+
   NodalGravity(const InputParameters & parameters);
 
 protected:

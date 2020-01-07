@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,16 +8,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from Input import OutputNames
-from PythonConsoleWidget import PythonConsoleWidget
-from ExodusViewer.ExodusViewer import ExodusViewer
-from PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-from peacock.utils import WidgetUtils
-from peacock.BasePeacockMainWindow import BasePeacockMainWindow
+from .Input import OutputNames
+from .PythonConsoleWidget import PythonConsoleWidget
+from .ExodusViewer.ExodusViewer import ExodusViewer
+from .PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
+from .utils import WidgetUtils
+from .BasePeacockMainWindow import BasePeacockMainWindow
 import mooseutils
-from peacock.PostprocessorViewer.VectorPostprocessorViewer import VectorPostprocessorViewer
-from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
-from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
+from .PostprocessorViewer.VectorPostprocessorViewer import VectorPostprocessorViewer
+from .Input.InputFileEditorWithMesh import InputFileEditorWithMesh
+from .Execute.ExecuteTabPlugin import ExecuteTabPlugin
 import os
 
 class PeacockMainWindow(BasePeacockMainWindow):

@@ -12,12 +12,15 @@
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegralBenchmarkBC);
 
-template <>
+defineLegacyParams(InteractionIntegralBenchmarkBC);
+
 InputParameters
-validParams<InteractionIntegralBenchmarkBC>()
+InteractionIntegralBenchmarkBC::validParams()
 {
   MooseEnum disp_component("x=0 y=1 z=2");
-  InputParameters params = validParams<PresetNodalBC>();
+  InputParameters params = PresetNodalBC::validParams();
+  params.addClassDescription("Implements a boundary condition that enforces a displacement field "
+                             "around a crack tip based on applied stress intensity factors.");
   params.addRequiredParam<MooseEnum>(
       "component", disp_component, "The component of the displacement to apply BC on.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

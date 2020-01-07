@@ -28,6 +28,8 @@ public:
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
+  static InputParameters validParams();
+
   TimePeriod(const InputParameters & parameters);
 
 protected:

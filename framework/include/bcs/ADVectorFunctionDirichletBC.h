@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class ADVectorFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADVectorFunctionDirichletBC(const InputParameters & parameters);
 
 protected:

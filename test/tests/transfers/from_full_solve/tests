@@ -1,8 +1,13 @@
 [Tests]
+  design = 'FullSolveMultiApp.md'
+  issues = '#1940'
+
   [./test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_full_solve0.e'
     recover = false
+
+    requirement = "The system shall support the transfer of data from a completed solve within sub-application to the master application."
   [../]
 []

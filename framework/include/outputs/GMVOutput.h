@@ -24,6 +24,8 @@ InputParameters validParams<GMVOutput>();
 class GMVOutput : public OversampleOutput
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    */
@@ -32,7 +34,7 @@ public:
 protected:
   /**
    * Overload the Output::output method, this is required for GMVOutput
-   * output due to the method utilized for outputing
+   * output due to the method utilized for outputting
    */
   virtual void output(const ExecFlagType & type) override;
 

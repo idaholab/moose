@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticOrthotropic);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticOrthotropic);
+
 InputParameters
-validParams<TensorMechanicsPlasticOrthotropic>()
+TensorMechanicsPlasticOrthotropic::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticIsotropicSD>();
+  InputParameters params = TensorMechanicsPlasticIsotropicSD::validParams();
   params.addRequiredParam<std::vector<Real>>("c1", "The six coefficients of L prime");
   params.addRequiredParam<std::vector<Real>>("c2", "The six coefficients of L prime prime");
   params.addClassDescription("Orthotropic plasticity for pressure sensitive materials and also "

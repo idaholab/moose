@@ -14,11 +14,12 @@
 
 registerMooseObject("TensorMechanicsApp", TemperatureDependentHardeningStressUpdate);
 
-template <>
+defineLegacyParams(TemperatureDependentHardeningStressUpdate);
+
 InputParameters
-validParams<TemperatureDependentHardeningStressUpdate>()
+TemperatureDependentHardeningStressUpdate::validParams()
 {
-  InputParameters params = validParams<IsotropicPlasticityStressUpdate>();
+  InputParameters params = IsotropicPlasticityStressUpdate::validParams();
   params.addClassDescription("Computes the stress as a function of temperature "
                              "and plastic strain from user-supplied hardening "
                              "functions. This class can be used in conjunction "

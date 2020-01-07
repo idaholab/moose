@@ -13,7 +13,7 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   [../]
 []

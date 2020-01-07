@@ -11,11 +11,6 @@
 
 #include "ExternalProblem.h"
 
-class DummyExternalProblem;
-
-template <>
-InputParameters validParams<DummyExternalProblem>();
-
 /**
  * ExternalProblem derived class that just exercises a portion of the new interface. It demonstrates
  * the limited interface necessary for creating a external problem wrapper.
@@ -23,10 +18,11 @@ InputParameters validParams<DummyExternalProblem>();
 class DummyExternalProblem : public ExternalProblem
 {
 public:
+  static InputParameters validParams();
+
   DummyExternalProblem(const InputParameters & params);
 
   virtual void externalSolve() override { _console << "Dummy External Solve!" << std::endl; }
   virtual void syncSolutions(Direction /*direction*/) override {}
   virtual bool converged() override { return true; }
 };
-

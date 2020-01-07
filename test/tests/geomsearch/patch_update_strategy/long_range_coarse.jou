@@ -1,0 +1,39 @@
+reset
+create surface rectangle width 1.2 height 1.2
+create surface rectangle width 2 height 100
+surface 1 move -2.6  10.6
+surface 2 move 0 50
+
+curve 1 2 3 4 5 7 interval 1
+curve 6 8 interval 50
+
+sideset 10 curve 2 # leftleft
+sideset 11 curve 4 # leftright
+sideset 12 curve 6 # rightleft
+sideset 13 curve 8 # rightright
+sideset 14 curve 7 # rightbottom
+sideset 15 curve 5 # righttop
+sideset 16 curve 1 # lefttop
+sideset 17 curve 3 # leftbottom
+
+sideset 10 name 'leftleft'
+sideset 11 name 'leftright'
+sideset 12 name 'rightleft'
+sideset 13 name 'rightright'
+sideset 14 name 'rightbottom'
+sideset 15 name 'righttop'
+sideset 16 name 'lefttop'
+sideset 17 name 'leftbottom'
+
+mesh curve all
+mesh surface all
+
+block 1 surface 1
+block 2 surface 2
+
+block 1 2 element type QUAD4
+
+block 1 name 'left'
+block 2 name 'right'
+
+export mesh "long_range_coarse.e" overwrite

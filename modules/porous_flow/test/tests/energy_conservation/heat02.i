@@ -73,35 +73,29 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
     temperature = temp
   [../]
   [./porosity]
     type = PorousFlowPorosity
-    at_nodes = true
     porosity_zero = 0.1
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
-    at_nodes = true
     specific_heat_capacity = 2.2
     density = 0.5
   [../]
   [./ppss]
     type = PorousFlow1PhaseP
-    at_nodes = true
     porepressure = pp
     capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
   [../]
 []
 

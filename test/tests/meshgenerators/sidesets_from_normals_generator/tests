@@ -1,23 +1,29 @@
 [Tests]
-  [./sidesets_from_normals_generator_test]
-    type = 'Exodiff'
-    input = 'sidesets_cylinder_normals.i'
-    exodiff = 'sidesets_cylinder_normals_out.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
+  issues = '#11640'
 
-  [./sidesets_from_normals_generator_fixed_test]
-    type = 'Exodiff'
-    input = 'sidesets_cylinder_normals_fixed.i'
-    exodiff = 'sidesets_cylinder_normals_fixed_out.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  [generate]
+    requirement = 'The system shall support the generation of multiple mesh side sets on the '
+                  'exterior surfaces of a mesh grouped by normal:'
+
+    [normals_follow]
+      type = 'Exodiff'
+      input = 'sidesets_cylinder_normals.i'
+      exodiff = 'sidesets_cylinder_normals_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the normal varies within a tolerance from element to element,'
+    []
+
+    [normals_fixed]
+      type = 'Exodiff'
+      input = 'sidesets_cylinder_normals_fixed.i'
+      exodiff = 'sidesets_cylinder_normals_fixed_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the normal is fixed within a specified tolerance.'
+    []
+  []
 []

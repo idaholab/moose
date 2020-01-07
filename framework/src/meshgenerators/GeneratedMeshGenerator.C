@@ -23,11 +23,12 @@
 
 registerMooseObject("MooseApp", GeneratedMeshGenerator);
 
-template <>
+defineLegacyParams(GeneratedMeshGenerator);
+
 InputParameters
-validParams<GeneratedMeshGenerator>()
+GeneratedMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   MooseEnum elem_types(
       "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
@@ -72,6 +73,9 @@ validParams<GeneratedMeshGenerator>()
 
   params.addParamNamesToGroup("dim", "Main");
 
+  params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
+                                                   "Names of extra element integers");
+
   params.addClassDescription(
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
 
@@ -81,15 +85,15 @@ validParams<GeneratedMeshGenerator>()
 GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<unsigned int>("nx")),
-    _ny(getParam<unsigned int>("ny")),
-    _nz(getParam<unsigned int>("nz")),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
+    _nx(declareMeshProperty("num_elements_x", getParam<unsigned int>("nx"))),
+    _ny(declareMeshProperty("num_elements_y", getParam<unsigned int>("ny"))),
+    _nz(declareMeshProperty("num_elements_z", getParam<unsigned int>("nz"))),
+    _xmin(declareMeshProperty("xmin", getParam<Real>("xmin"))),
+    _xmax(declareMeshProperty("xmax", getParam<Real>("xmax"))),
+    _ymin(declareMeshProperty("ymin", getParam<Real>("ymin"))),
+    _ymax(declareMeshProperty("ymax", getParam<Real>("ymax"))),
+    _zmin(declareMeshProperty("zmin", getParam<Real>("zmin"))),
+    _zmax(declareMeshProperty("zmax", getParam<Real>("zmax"))),
     _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
@@ -104,6 +108,12 @@ GeneratedMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
   auto mesh = _mesh->buildMeshBaseObject();
+
+  if (isParamValid("extra_element_integers"))
+  {
+    for (auto & name : getParam<std::vector<ExtraElementIDName>>("extra_element_integers"))
+      mesh->add_elem_integer(name);
+  }
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

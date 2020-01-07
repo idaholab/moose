@@ -9,11 +9,12 @@
 
 #include "CrystalPlasticitySlipResistance.h"
 
-template <>
+defineLegacyParams(CrystalPlasticitySlipResistance);
+
 InputParameters
-validParams<CrystalPlasticitySlipResistance>()
+CrystalPlasticitySlipResistance::validParams()
 {
-  InputParameters params = validParams<CrystalPlasticityUOBase>();
+  InputParameters params = CrystalPlasticityUOBase::validParams();
   params.addClassDescription("Crystal plasticity slip resistance base class.  Override the virtual "
                              "functions in your class");
   return params;

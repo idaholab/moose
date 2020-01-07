@@ -39,14 +39,13 @@ class VariableWarehouse
 {
 public:
   VariableWarehouse();
-  virtual ~VariableWarehouse();
 
   /**
    * Add a variable
    * @param var_name The name of the variable
    * @param var Variable
    */
-  void add(const std::string & var_name, MooseVariableBase * var);
+  void add(const std::string & var_name, std::shared_ptr<MooseVariableBase> var);
 
   /**
    * Add a boundary variable
@@ -163,7 +162,7 @@ protected:
   std::vector<MooseVariableScalar *> _scalar_vars;
 
   /// All instances of objects (raw pointers)
-  std::map<unsigned int, MooseVariableBase *> _all_objects;
+  std::map<unsigned int, std::shared_ptr<MooseVariableBase>> _all_objects;
 };
 
 template <>

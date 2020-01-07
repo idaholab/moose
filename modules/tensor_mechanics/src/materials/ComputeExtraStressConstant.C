@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeExtraStressConstant);
 
-template <>
+defineLegacyParams(ComputeExtraStressConstant);
+
 InputParameters
-validParams<ComputeExtraStressConstant>()
+ComputeExtraStressConstant::validParams()
 {
-  InputParameters params = validParams<ComputeExtraStressBase>();
+  InputParameters params = ComputeExtraStressBase::validParams();
   params.addClassDescription("Computes a constant extra stress that is added to the stress "
                              "calculated by the constitutive model");
   params.addRequiredParam<std::vector<Real>>("extra_stress_tensor",

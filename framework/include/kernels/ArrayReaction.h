@@ -19,6 +19,8 @@ InputParameters validParams<ArrayReaction>();
 class ArrayReaction : public ArrayKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayReaction(const InputParameters & parameters);
 
 protected:
@@ -26,8 +28,6 @@ protected:
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
-  /// diffusion coefficient type
-  unsigned int _r_type;
   /// scalar diffusion coefficient
   const MaterialProperty<Real> * _r;
   /// array diffusion coefficient

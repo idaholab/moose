@@ -27,14 +27,17 @@ registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_postprocess
 
 registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_material");
 
-template <>
+defineLegacyParams(DomainIntegralAction);
+
 InputParameters
-validParams<DomainIntegralAction>()
+DomainIntegralAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   addCrackFrontDefinitionParams(params);
   MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII "
                               "InteractionIntegralKIII InteractionIntegralT");
+  params.addClassDescription(
+      "Creates the MOOSE objects needed to compute fraction domain integrals");
   params.addRequiredParam<MultiMooseEnum>("integrals",
                                           integral_vec,
                                           "Domain integrals to calculate.  Choices are: " +
@@ -352,13 +355,26 @@ DomainIntegralAction::act()
   {
     for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
     {
+      std::string aux_var_type;
+      if (_family == "LAGRANGE")
+        aux_var_type = "MooseVariable";
+      else if (_family == "MONOMIAL")
+        aux_var_type = "MooseVariableConstMonomial";
+      else if (_family == "SCALAR")
+        aux_var_type = "MooseVariableScalar";
+      else
+        mooseError("Unsupported finite element family in, " + name() +
+                   ".  Please use LAGRANGE, MONOMIAL, or SCALAR");
+
+      auto params = _factory.getValidParams(aux_var_type);
+      params.set<MooseEnum>("order") = _order;
+      params.set<MooseEnum>("family") = _family;
+
       if (_treat_as_2d)
       {
         std::ostringstream av_name_stream;
         av_name_stream << av_base_name << "_" << _ring_vec[ring_index];
-        _problem->addAuxVariable(av_name_stream.str(),
-                                 FEType(Utility::string_to_enum<Order>(_order),
-                                        Utility::string_to_enum<FEFamily>(_family)));
+        _problem->addAuxVariable(aux_var_type, av_name_stream.str(), params);
       }
       else
       {
@@ -366,9 +382,7 @@ DomainIntegralAction::act()
         {
           std::ostringstream av_name_stream;
           av_name_stream << av_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-          _problem->addAuxVariable(av_name_stream.str(),
-                                   FEType(Utility::string_to_enum<Order>(_order),
-                                          Utility::string_to_enum<FEFamily>(_family)));
+          _problem->addAuxVariable(aux_var_type, av_name_stream.str(), params);
         }
       }
     }

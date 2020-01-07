@@ -22,7 +22,7 @@ validParams<MultiAuxVariablesAction>()
   params.addClassDescription("Set up auxvariables for components of "
                              "MaterialProperty<std::vector<data_type> > for polycrystal sample.");
   params.addRequiredParam<unsigned int>(
-      "grain_num", "Specifies the number of grains to create the aux varaivles for.");
+      "grain_num", "Specifies the number of grains to create the aux variables for.");
   params.addRequiredParam<std::vector<std::string>>(
       "variable_base", "Vector that specifies the base name of the variables.");
   MultiMooseEnum data_type("Real RealGradient", "Real");
@@ -46,11 +46,10 @@ MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params)
 void
 MultiAuxVariablesAction::act()
 {
+  init();
+
   if (_num_var != _data_size)
     mooseError("Data type not provided for all the AuxVariables in MultiAuxVariablesAction");
-
-  // Blocks from the input
-  std::set<SubdomainID> blocks = getSubdomainIDs();
 
   // mesh dimension & components required for gradient variables
   const unsigned int dim = _mesh->dimension();
@@ -67,10 +66,7 @@ MultiAuxVariablesAction::act()
         // to.
         std::string var_name = _var_name_base[val] + Moose::stringify(gr);
 
-        if (blocks.empty())
-          _problem->addAuxVariable(var_name, _fe_type);
-        else
-          _problem->addAuxVariable(var_name, _fe_type, &blocks);
+        _problem->addAuxVariable(_type, var_name, _moose_object_pars);
       }
       /// for exatrcting data from MaterialProperty<std::vector<RealGradient> >
       if (_data_type[val] == "RealGradient")
@@ -82,10 +78,7 @@ MultiAuxVariablesAction::act()
            */
           std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x];
 
-          if (blocks.empty())
-            _problem->addAuxVariable(var_name, _fe_type);
-          else
-            _problem->addAuxVariable(var_name, _fe_type, &blocks);
+          _problem->addAuxVariable(_type, var_name, _moose_object_pars);
         }
     }
 }

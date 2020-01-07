@@ -9,11 +9,12 @@
 
 #include "InterfaceTimeKernel.h"
 
-template <>
+defineLegacyParams(InterfaceTimeKernel);
+
 InputParameters
-validParams<InterfaceTimeKernel>()
+InterfaceTimeKernel::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";

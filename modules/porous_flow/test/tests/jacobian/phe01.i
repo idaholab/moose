@@ -113,19 +113,16 @@
   [./temp]
     type = PorousFlowTemperature
     temperature = temperature
-    at_nodes = true
   [../]
   [./porosity]
     type = PorousFlowPorosity
     thermal = true
     mechanical = true
-    at_nodes = true
     porosity_zero = 0.3
     thermal_expansion_coeff = 1.3
   [../]
   [./volstrain]
     type = PorousFlowVolumetricStrain
-    at_nodes = false
   [../]
   [./phe]
     type = ComputePlasticHeatEnergy

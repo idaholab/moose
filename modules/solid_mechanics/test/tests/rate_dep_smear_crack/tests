@@ -6,6 +6,7 @@
     custom_cmp = 'crack_one_elem.cmp'
     scale_refine = 1
     allow_warnings = true
+    no_error_deprecated = true
   [../]
   [./sent_test]
     type = 'Exodiff'
@@ -17,5 +18,6 @@
     # This test has been known to timeout in debug mode, so it's
     # probably just a bit too expensive to be a regression test.
     method = 'OPT'
+    no_error_deprecated = true
   [../]
 []

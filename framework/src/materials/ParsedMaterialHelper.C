@@ -11,12 +11,14 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ParsedMaterialHelper);
+
 InputParameters
-validParams<ParsedMaterialHelper>()
+ParsedMaterialHelper::validParams()
 {
-  InputParameters params = validParams<FunctionMaterialBase>();
-  params += validParams<FunctionParserUtils>();
+
+  InputParameters params = FunctionMaterialBase::validParams();
+  params += FunctionParserUtils::validParams();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }
@@ -75,7 +77,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 {
   std::string expression = function_expression;
   // build base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);
@@ -93,46 +95,11 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   for (unsigned int i = 0; i < _nargs; ++i)
     replaceDuplicates(expression, _equation_args[i]);
 
-<<<<<<< HEAD
-    case USE_PARAM_NAMES:
-<<<<<<< HEAD
-<<<<<<< HEAD
-      _variable_names.resize(_nargs * 10);
-=======
->>>>>>> f29640c62d... Fix Error of Fix
-=======
-      // replace duplicate derivative terms (i.e. D[c,xy] == D[c,yx])
->>>>>>> 6b9de55e13... Allowed for FParser to deduce the variables used, and only allocating memory for the ones that were used #14366
-      for (unsigned i = 0; i < _nargs; ++i)
-      {
-        if (_arg_param_numbers[i] < 0)
-          replaceDuplicates(expression, _arg_param_names[i]);
-        else
-          replaceDuplicates(expression,
-                            _arg_param_names[i] + std::to_string(_arg_param_numbers[i]));
-      }
-      // get variable names from FParser
-      _func_F->ParseAndDeduceVariables(expression, _variable_names, false);
-      _nargs = _variable_names.size();
-      variable_info.resize(_nargs);
-      // get our coupled values
-      for (unsigned i = 0; i < _arg_param_names.size(); ++i)
-      {
-        if (_arg_param_numbers[i] < 0)
-          setCoupledValues(_arg_param_names[i], _nargs);
-        else
-          setCoupledValues(_arg_param_names[i], _arg_param_numbers[i]);
-      }
-      break;
-=======
   // get variable names from FParser
   _func_F->ParseAndDeduceVariables(expression, _variable_names, false);
   _nargs = _variable_names.size();
-<<<<<<< HEAD
+
   variable_info.resize(_nargs);
->>>>>>> 788a1d59b3... Deduces variables retrieved from fparser, classifying them as coupled values or material properties
-=======
->>>>>>> 62f950033f... VariableInfo for Material Properties weren't being added, so I changed that #14366
 
   for (auto & var : _variable_names)
     getVariableValue(var, mat_prop_expressions);

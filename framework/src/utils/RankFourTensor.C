@@ -17,8 +17,7 @@
 #include "MatrixTools.h"
 #include "PermutationTensor.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/tensor_value.h"
@@ -28,6 +27,8 @@
 #include <iomanip>
 #include <ostream>
 
+namespace MathUtils
+{
 template <>
 void
 mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
@@ -39,6 +40,7 @@ void
 mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
 {
   v.zero();
+}
 }
 
 template <typename T>

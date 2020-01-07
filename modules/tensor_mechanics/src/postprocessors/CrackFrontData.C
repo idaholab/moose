@@ -18,11 +18,13 @@
 
 registerMooseObject("TensorMechanicsApp", CrackFrontData);
 
-template <>
+defineLegacyParams(CrackFrontData);
+
 InputParameters
-validParams<CrackFrontData>()
+CrackFrontData::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Determines which nodes are along the crack front");
   params.addRequiredParam<VariableName>(
       "variable", "The name of a variable whose value at the crack front is to be reported");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

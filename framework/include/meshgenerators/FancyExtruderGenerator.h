@@ -25,6 +25,8 @@ InputParameters validParams<FancyExtruderGenerator>();
 class FancyExtruderGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   FancyExtruderGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

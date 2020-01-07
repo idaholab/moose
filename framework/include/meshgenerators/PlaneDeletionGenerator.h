@@ -28,6 +28,8 @@ InputParameters validParams<PlaneDeletionGenerator>();
 class PlaneDeletionGenerator : public ElementDeletionGeneratorBase
 {
 public:
+  static InputParameters validParams();
+
   PlaneDeletionGenerator(const InputParameters & parameters);
 
 protected:

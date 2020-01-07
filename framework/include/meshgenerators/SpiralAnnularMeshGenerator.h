@@ -23,6 +23,8 @@ InputParameters validParams<SpiralAnnularMeshGenerator>();
 class SpiralAnnularMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SpiralAnnularMeshGenerator(const InputParameters & parameters);
 
   // No copy

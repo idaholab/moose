@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", FunctionPenaltyDirichletBC);
 
-template <>
+defineLegacyParams(FunctionPenaltyDirichletBC);
+
 InputParameters
-validParams<FunctionPenaltyDirichletBC>()
+FunctionPenaltyDirichletBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addRequiredParam<FunctionName>("function", "Forcing function");
 

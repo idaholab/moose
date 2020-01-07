@@ -1,14 +1,27 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'calc_const_dt.i'
-    exodiff = 'calc_const_dt_out.e'
-  [../]
+  issues = '#5095'
+  design = 'Executioner/TimeStepper/index.md'
 
-  [./test_with_start_time]
-    type = 'Exodiff'
-    input = 'calc_const_dt.i'
-    cli_args = 'Executioner/start_time=0.5 Outputs/file_base=calc_dt_with_start_out'
-    exodiff = 'calc_dt_with_start_out.e'
-  [../]
+  [calc_dt_from_inputs]
+    requirement = 'The system shall calculate the time step size based one the number of steps and '
+                  'the end time of the simulation when the initial time step size is not supplied:'
+
+    [no_start_time]
+      type = 'Exodiff'
+      input = 'calc_const_dt.i'
+      exodiff = 'calc_const_dt_out.e'
+
+      detail = 'when the start time is not supplied, and'
+
+    []
+
+    [with_start_time]
+      type = 'Exodiff'
+      input = 'calc_const_dt.i'
+      cli_args = 'Executioner/start_time=0.5 Outputs/file_base=calc_dt_with_start_out'
+      exodiff = 'calc_dt_with_start_out.e'
+
+      detail = 'when the start time is supplied.'
+    []
+  []
 []

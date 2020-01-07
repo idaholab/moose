@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -50,16 +50,6 @@ class TestrPostprocessorReader(unittest.TestCase):
         self.assertEqual(x.loc[10][self._keys[0]], 2.12)
         self.assertEqual(x.loc[10][self._keys[1]], 51.00)
 
-    def testCallWarning(self):
-        """
-        Test that a warning appears if 'time' is used.
-        """
-        data = mooseutils.PostprocessorReader(self._filename)
-        data(self._keys[0], time=76)
-        output = sys.stdout.getvalue()
-
-        self.assertIn(" Supplying a time argument is not supported in the PostprocessorReader", output)
-
     def testCall(self):
         """
         Test that operator() method is working.
@@ -67,11 +57,11 @@ class TestrPostprocessorReader(unittest.TestCase):
         data = mooseutils.PostprocessorReader(self._filename)
 
         # Single key
-        x = data(self._keys[0])
+        x = data[self._keys[0]]
         self.assertEqual(x.loc[10], 2.12)
 
         # Multiple keys
-        x = data(self._keys)
+        x = data[self._keys]
         self.assertEqual(x.loc[10][self._keys[0]], 2.12)
         self.assertEqual(x.loc[10][self._keys[1]], 51.00)
 
@@ -118,8 +108,8 @@ class TestrPostprocessorReader(unittest.TestCase):
         output, imports = data.repr()
 
         # Append testing content
-        output += ["print 'SHAPE:', data.data.shape"]
-        output += ["print 'VALUE:', data['snow_depth_set_1'][10]"]
+        output += ["print('SHAPE:', data.data.shape)"]
+        output += ["print('VALUE:', data['snow_depth_set_1'][10])"]
 
         # Write the test script
         script = '{}_repr.py'.format(self.__class__.__name__)
@@ -132,8 +122,8 @@ class TestrPostprocessorReader(unittest.TestCase):
         out = subprocess.check_output(['python', script])
 
         # Test for output
-        self.assertIn('SHAPE: (742, 8)', out)
-        self.assertIn('VALUE: 51', out)
+        self.assertIn('SHAPE: (742, 8)', out.decode())
+        self.assertIn('VALUE: 51', out.decode())
 
         # Remove the script
         os.remove(script)

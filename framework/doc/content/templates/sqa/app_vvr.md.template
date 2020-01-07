@@ -11,7 +11,7 @@ The [!ac](VVR) for {{app}} provides evidence that {{app}} fullfills its intended
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](VVR) for {{app}} is dependent upon the following documents.
 
-!sqa dependencies suffix=vvr
+!sqa dependencies suffix=vvr category={{category}}
 
 ## Verification
 

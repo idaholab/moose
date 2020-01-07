@@ -34,4 +34,3 @@ public:
 };
 
 // Specializations for dataLoad and dataStore appear in DataIO.C
-

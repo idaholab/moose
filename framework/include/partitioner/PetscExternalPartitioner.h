@@ -26,6 +26,8 @@ InputParameters validParams<PetscExternalPartitioner>();
 class PetscExternalPartitioner : public MoosePartitioner
 {
 public:
+  static InputParameters validParams();
+
   PetscExternalPartitioner(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
@@ -37,6 +39,10 @@ public:
   using Partitioner::partition;
 
   virtual void partition(MeshBase & mesh, const unsigned int n) override;
+
+  bool applySideWeight() { return _apply_side_weight; }
+
+  bool applyElementEeight() { return _apply_element_weight; }
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;

@@ -12,140 +12,146 @@
 []
 
 [Variables]
-  [./porepressure]
+  [porepressure]
     initial_condition = 20e6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = 50
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     initial_condition = 0.1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     family = MONOMIAL
     order = CONSTANT
     initial_from_file_var = poro
-  [../]
-  [./permx_md]
+  []
+  [permx_md]
     family = MONOMIAL
     order = CONSTANT
     initial_from_file_var = permX
-  [../]
-  [./permy_md]
+  []
+  [permy_md]
     family = MONOMIAL
     order = CONSTANT
     initial_from_file_var = permY
-  [../]
-  [./permz_md]
+  []
+  [permz_md]
     family = MONOMIAL
     order = CONSTANT
     initial_from_file_var = permZ
-  [../]
-  [./permx]
+  []
+  [permx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permy]
+  []
+  [permy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permz]
+  []
+  [permz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./permx]
+  [permx]
     type = ParsedAux
     variable = permx
     args = permx_md
     function = '9.869233e-16*permx_md'
     execute_on = initial
-  [../]
-  [./permy]
+  []
+  [permy]
     type = ParsedAux
     variable = permy
     args = permy_md
     function = '9.869233e-16*permy_md'
     execute_on = initial
-  [../]
-  [./permz]
+  []
+  [permz]
     type = ParsedAux
     variable = permz
     args = permz_md
     function = '9.869233e-16*permz_md'
     execute_on = initial
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = porepressure
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowFullySaturatedDarcyFlow
     variable = porepressure
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = porepressure
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./brine]
-      type = BrineFluidProperties
-    [../]
-  [../]
+  [FluidProperties]
+    [water]
+      type = Water97FluidProperties
+    []
+    [watertab]
+      type = TabulatedFluidProperties
+      fp = water
+      save_file = false
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./ps]
+  []
+  [ps]
     type = PorousFlow1PhaseFullySaturated
     porepressure = porepressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./brine]
+  []
+  [brine]
     type = PorousFlowBrine
     compute_enthalpy = false
     compute_internal_energy = false
     xnacl = xnacl
     phase = 0
-  [../]
-  [./porosity]
+    water_fp = watertab
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = porosity
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConstFromVar
     perm_xx = permx
     perm_yy = permy
     perm_zz = permz
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

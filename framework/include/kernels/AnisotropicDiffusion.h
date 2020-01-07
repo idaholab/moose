@@ -25,6 +25,8 @@ InputParameters validParams<AnisotropicDiffusion>();
 class AnisotropicDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   AnisotropicDiffusion(const InputParameters & parameters);
 
 protected:

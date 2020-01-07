@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", BadStatefulMaterial);
 
-template <>
 InputParameters
-validParams<BadStatefulMaterial>()
+BadStatefulMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<bool>("get_older", false, "true to retrieve older property instead of old");
   return params;
 }

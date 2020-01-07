@@ -16,7 +16,10 @@
 #include "libmesh/elem.h"
 #include "libmesh/fe_base.h"
 
-registerMooseObject("MooseApp", ParsedAddSideset);
+registerMooseObjectReplaced("MooseApp",
+                            ParsedAddSideset,
+                            "11/30/2019 00:00",
+                            ParsedGenerateSideset);
 
 template <>
 InputParameters
@@ -60,7 +63,7 @@ ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters)
     _normal(getParam<Point>("normal"))
 {
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

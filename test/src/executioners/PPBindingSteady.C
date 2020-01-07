@@ -13,11 +13,10 @@
 
 registerMooseObject("MooseTestApp", PPBindingSteady);
 
-template <>
 InputParameters
-validParams<PPBindingSteady>()
+PPBindingSteady::validParams()
 {
-  InputParameters params = validParams<Steady>();
+  InputParameters params = Steady::validParams();
   params.addParam<PostprocessorName>(
       "postprocessor", 1, "A postprocessor to be used by this executioner");
   return params;

@@ -25,6 +25,8 @@ InputParameters validParams<ElementQualityAux>();
 class ElementQualityAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElementQualityAux(const InputParameters & parameters);
 
 protected:

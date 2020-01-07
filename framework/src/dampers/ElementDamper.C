@@ -18,12 +18,13 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ElementDamper);
+
 InputParameters
-validParams<ElementDamper>()
+ElementDamper::validParams()
 {
-  InputParameters params = validParams<Damper>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = Damper::validParams();
+  params += MaterialPropertyInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this damper operates on");
   return params;

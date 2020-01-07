@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", SplineFunction);
 
-template <>
+defineLegacyParams(SplineFunction);
+
 InputParameters
-validParams<SplineFunction>()
+SplineFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   MooseEnum component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>(
       "component", component, "The component of the geometry point to interpolate with");

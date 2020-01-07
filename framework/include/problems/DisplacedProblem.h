@@ -24,6 +24,7 @@ class DisplacedProblem;
 class MooseMesh;
 class Assembly;
 class FEProblemBase;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -38,6 +39,8 @@ InputParameters validParams<DisplacedProblem>();
 class DisplacedProblem : public SubProblem
 {
 public:
+  static InputParameters validParams();
+
   DisplacedProblem(const InputParameters & parameters);
 
   virtual EquationSystems & es() override { return _eq; }
@@ -87,8 +90,15 @@ public:
   /**
    * Copy the solutions on the undisplaced systems to the displaced systems and
    * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   * The parameter \p mesh_changing indicates whether this method is getting called because of mesh
+   * changes, e.g. due to mesh adaptivity. If \p mesh_changing we need to renitialize the
+   * GeometricSearchData instead of simply update. Reinitialization operations are a super-set of
+   * update operations. Reinitialization for example re-generates neighbor nodes in
+   * NearestNodeLocators, while update does not. Additionally we do not want to use the undisplaced
+   * mesh solution because it may be out-of-sync, whereas our displaced mesh solution should be in
+   * the correct state after getting restricted/prolonged in EquationSystems::reinit
    */
-  virtual void updateMesh();
+  virtual void updateMesh(bool mesh_changing = false);
 
   /**
    * Synchronize the solutions on the displaced systems to the given solutions and
@@ -131,31 +141,12 @@ public:
                                                   const std::string & var_name) override;
   virtual System & getSystem(const std::string & var_name) override;
 
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addArrayVariable(const std::string & var_name,
-                                const FEType & type,
-                                unsigned int components,
-                                const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addAuxVariable(const std::string & var_name,
-                              const FEType & type,
-                              const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addAuxArrayVariable(const std::string & var_name,
-                                   const FEType & type,
-                                   unsigned int components,
-                                   const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addScalarVariable(const std::string & var_name,
-                                 Order order,
-                                 Real scale_factor = 1.,
-                                 const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addAuxScalarVariable(const std::string & var_name,
-                                    Order order,
-                                    Real scale_factor = 1.,
-                                    const std::set<SubdomainID> * const active_subdomains = NULL);
-
+  virtual void
+  addVariable(const std::string & var_type, const std::string & name, InputParameters & parameters);
+  virtual void addAuxVariable(const std::string & var_type,
+                              const std::string & name,
+                              InputParameters & parameters);
+  //
   // Adaptivity /////
   virtual void initAdaptivity();
   virtual void meshChanged() override;
@@ -291,6 +282,10 @@ public:
    * refining the DisplacedMesh.
    */
   void undisplaceMesh();
+
+  LineSearch * getLineSearch() override;
+
+  const CouplingMatrix * couplingMatrix() const override;
 
 protected:
   FEProblemBase & _mproblem;

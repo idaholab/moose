@@ -65,4 +65,8 @@
        detail = 8D
     []
   []
+
+  [dep]
+    deprecated = True
+  []
 []

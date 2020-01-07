@@ -36,6 +36,8 @@ class NodeElemConstraint : public Constraint,
                            public NeighborMooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   NodeElemConstraint(const InputParameters & parameters);
   virtual ~NodeElemConstraint();
 

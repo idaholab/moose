@@ -9,11 +9,12 @@
 
 #include "NodalNormalBC.h"
 
-template <>
+defineLegacyParams(NodalNormalBC);
+
 InputParameters
-validParams<NodalNormalBC>()
+NodalNormalBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addCoupledVar("nx", "x-component of the normal");
   params.addCoupledVar("ny", "y-component of the normal");
   params.addCoupledVar("nz", "z-component of the normal");
@@ -33,7 +34,6 @@ NodalNormalBC::NodalNormalBC(const InputParameters & parameters)
 void
 NodalNormalBC::computeResidual()
 {
-  _qp = 0;
   _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
   computeQpResidual();
 }

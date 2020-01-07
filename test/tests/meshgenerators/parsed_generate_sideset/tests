@@ -4,10 +4,11 @@
     input = 'parsed_generate_sideset.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_generate_sideset_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/ParsedGenerateSideset.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#11640'
   [../]
 []

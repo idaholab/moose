@@ -19,6 +19,8 @@ template <typename T, ComputeStage compute_stage>
 class ADIntegratedBCTempl : public IntegratedBCBase, public MooseVariableInterface<T>
 {
 public:
+  static InputParameters validParams();
+
   ADIntegratedBCTempl(const InputParameters & parameters);
 
   virtual MooseVariableFE<T> & variable() override { return _var; }
@@ -60,6 +62,9 @@ protected:
 
   /// The AD version of coord
   const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_coord;
+
+  /// Whether this object is acting on the displaced mesh
+  const bool _use_displaced_mesh;
 };
 
 template <ComputeStage compute_stage>

@@ -12,15 +12,11 @@
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class LinearVectorPoisson;
-
-template <>
-InputParameters validParams<LinearVectorPoisson>();
-
 class LinearVectorPoisson : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   LinearVectorPoisson(const InputParameters & parameters);
 
 protected:

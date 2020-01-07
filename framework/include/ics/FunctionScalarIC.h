@@ -21,6 +21,8 @@ InputParameters validParams<FunctionScalarIC>();
 class FunctionScalarIC : public ScalarInitialCondition
 {
 public:
+  static InputParameters validParams();
+
   FunctionScalarIC(const InputParameters & parameters);
 
 protected:

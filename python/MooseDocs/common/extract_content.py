@@ -10,8 +10,8 @@
 
 import copy
 import re
-from regex import regex
-from exceptions import MooseDocsException
+from .regex import regex
+from .exceptions import MooseDocsException
 
 
 def extractContentSettings():
@@ -26,7 +26,7 @@ def extractContentSettings():
     settings['indent'] = (0, "The level of indenting to apply to the included text.")
     settings['strip-header'] = (True, "When True the MOOSE header is removed for display.")
     settings['fix-moose-header'] = (True, "In C/h files within MOOSE the '//*' is used for the "
-                                          "header at the top. This breaks the higlighting, this "
+                                          "header at the top. This breaks the highlighting, this "
                                           "option removes these and replaces them with '//'.")
     settings['strip-extra-newlines'] = (True, "Removes extraneous new lines from the text.")
     settings['strip-leading-whitespace'] = (False, "When True leading white-space is removed "
@@ -56,7 +56,7 @@ def extractContent(content, settings):
     Extract the desired content from the supplied raw text from a file.
 
     Inputs:
-        filename[unicode]: The file to read (known to exist already).
+        filename[str]: The file to read (known to exist already).
         settings[dict]: The setting from the createToken method.
     """
     raw = copy.copy(content) # complete copy of original
@@ -91,7 +91,7 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
     Apply the various filters and adjustment to the supplied text.
 
     Inputs:
-        content[unicode]: The extracted content.
+        content[str]: The extracted content.
         settings[dict]: The setting from the createToken method.
     """
     # Strip leading/trailing newlines
@@ -125,10 +125,10 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
     if settings['header'] is not None:
-        content = u'{}{}{}'.format(settings['header'], '\n'*settings['header-newlines'], content)
+        content = '{}{}{}'.format(settings['header'], '\n'*settings['header-newlines'], content)
 
     if settings['footer'] is not None:
-        content = u'{}{}{}'.format(content, '\n'*settings['footer-newlines'], settings['footer'])
+        content = '{}{}{}'.format(content, '\n'*settings['footer-newlines'], settings['footer'])
 
     if settings['fix-moose-header']:
         content = fix_moose_header(content)
@@ -139,7 +139,7 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
         if len(pairs) % 2:
             msg = "The 'replace' input must be a list of replacement string pairs."
             raise MooseDocsException(msg)
-        for f, r in [(pairs[i], pairs[i+1]) for i in xrange(0, len(pairs), 2)]:
+        for f, r in [(pairs[i], pairs[i+1]) for i in range(0, len(pairs), 2)]:
             content = content.replace(f, r)
 
     return content
@@ -149,7 +149,7 @@ def fix_moose_header(content):
     Fixes up MOOSE CPP headers so they are highlighted correctly on the website.
 
     Input:
-        content[str|unicode]: The source code to modify.
+        content[str]: The source code to modify.
     """
     return re.sub(r'^//\*', '//', content, flags=re.MULTILINE|re.UNICODE)
 

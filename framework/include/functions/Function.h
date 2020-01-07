@@ -51,6 +51,8 @@ public:
    * Class constructor
    * \param parameters The input parameters for the function
    */
+  static InputParameters validParams();
+
   Function(const InputParameters & parameters);
 
   /**

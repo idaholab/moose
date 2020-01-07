@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class EqualValueConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   EqualValueConstraint(const InputParameters & parameters);
 
 protected:

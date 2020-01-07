@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", CoupledScalarAux);
 
-template <>
 InputParameters
-validParams<CoupledScalarAux>()
+CoupledScalarAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addCoupledVar("coupled", 2.71828, "Coupled Scalar Value for Calculation");
 

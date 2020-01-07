@@ -29,12 +29,13 @@
 
 registerMooseObject("MooseApp", SolutionUserObject);
 
-template <>
+defineLegacyParams(SolutionUserObject);
+
 InputParameters
-validParams<SolutionUserObject>()
+SolutionUserObject::validParams()
 {
   // Get the input parameters from the parent class
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>(

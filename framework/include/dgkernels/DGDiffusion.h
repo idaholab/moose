@@ -30,6 +30,8 @@ InputParameters validParams<DGDiffusion>();
 class DGDiffusion : public DGKernel
 {
 public:
+  static InputParameters validParams();
+
   DGDiffusion(const InputParameters & parameters);
 
 protected:

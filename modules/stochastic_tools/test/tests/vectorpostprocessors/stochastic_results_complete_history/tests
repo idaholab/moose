@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#14412'
+  design = 'StochasticResults.md'
+
+  [data]
+    requirement = "The system shall support the collection of stochastic data that"
+
+    [complete]
+      type = CSVDiff
+      input = master.i
+      csvdiff = master_out_storage.csv
+
+      detail = "can be appended into a single data set or"
+    []
+
+    [time]
+      type = CSVDiff
+      input = master.i
+      cli_args = VectorPostprocessors/storage/contains_complete_history=false
+      csvdiff = 'master_out_storage_0000.csv master_out_storage_0001.csv master_out_storage_0002.csv'
+
+      detail = "or contain a single file per timestep."
+    []
+  []
+[]

@@ -151,4 +151,7 @@ protected:
 
   /// d(multiplier)/d(Porous flow variable pvar)
   virtual Real dmultiplier_dvar(unsigned int pvar) const;
+
+  /// Flag to check whether permeabiity derivatives are non-zero
+  const bool _perm_derivs;
 };

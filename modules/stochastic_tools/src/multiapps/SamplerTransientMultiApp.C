@@ -14,12 +14,13 @@
 
 registerMooseObject("StochasticToolsApp", SamplerTransientMultiApp);
 
-template <>
+defineLegacyParams(SamplerTransientMultiApp);
+
 InputParameters
-validParams<SamplerTransientMultiApp>()
+SamplerTransientMultiApp::validParams()
 {
-  InputParameters params = validParams<TransientMultiApp>();
-  params += validParams<SamplerInterface>();
+  InputParameters params = TransientMultiApp::validParams();
+  params += SamplerInterface::validParams();
   params.addClassDescription("Creates a sub-application for each row of each Sampler matrix.");
   params.addParam<SamplerName>("sampler", "The Sampler object to utilize for creating MultiApps.");
   params.suppressParameter<std::vector<Point>>("positions");
@@ -52,7 +53,7 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
   else if (_mode == StochasticTools::MultiAppMode::NORMAL)
-    init(_sampler.getTotalNumberOfRows());
+    init(_sampler.getNumberOfRows());
   else
     paramError("mode",
                "The supplied mode, '",
@@ -69,7 +70,7 @@ SamplerTransientMultiApp::initialSetup()
   // Perform initial backup for the batch sub-applications
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
   {
-    dof_id_type n = _sampler.getLocalNumerOfRows();
+    dof_id_type n = _sampler.getNumberOfLocalRows();
     _batch_backup.resize(n);
     for (MooseIndex(n) i = 0; i < n; ++i)
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
@@ -107,7 +108,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->initializeFromMultiapp();
 
   // Perform batch MultiApp solves
-  dof_id_type num_items = _sampler.getLocalNumerOfRows();
+  dof_id_type num_items = _sampler.getNumberOfLocalRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
   {
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
@@ -137,7 +138,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 }
 
 std::vector<std::shared_ptr<StochasticToolsTransfer>>
-SamplerTransientMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction)
+SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION direction)
 {
   std::vector<std::shared_ptr<StochasticToolsTransfer>> output;
   const ExecuteMooseObjectWarehouse<Transfer> & warehouse =

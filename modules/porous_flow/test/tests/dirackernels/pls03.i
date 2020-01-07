@@ -101,12 +101,6 @@
     porepressure = pp
     capillary_pressure = pc
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseP
-    at_nodes = false
-    porepressure = pp
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
   [../]
@@ -121,7 +115,6 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityFLAC
-    at_nodes = true
     phase = 0
     m = 2
     s_res = 0.99

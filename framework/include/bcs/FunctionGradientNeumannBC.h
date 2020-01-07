@@ -24,6 +24,8 @@ InputParameters validParams<FunctionGradientNeumannBC>();
 class FunctionGradientNeumannBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   FunctionGradientNeumannBC(const InputParameters & parameters);
 
 protected:

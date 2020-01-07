@@ -1,21 +1,16 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
-    ny = 10
+    nx = 2
+    ny = 2
   []
 
+  # Rename parameters supplied through the "tests" specifications
   [./rename]
     type = RenameBoundaryGenerator
     input = gmg
-    old_boundary_id = '0 1 10'
-    new_boundary_id = '10 0 1'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

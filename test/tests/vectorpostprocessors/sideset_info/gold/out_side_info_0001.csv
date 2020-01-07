@@ -1,0 +1,4 @@
+Boundary IDs,centroid_x,centroid_y,min_x,min_y,max_x,max_y,area
+0,0.5,-0.4,0,-0.4,1,-0.4,1
+1,1,5,1,-0.4,1,10.4,10.8
+3,0,5,0,-0.4,0,10.4,10.8

@@ -9,11 +9,12 @@
 
 #include "GeneralDamper.h"
 
-template <>
+defineLegacyParams(GeneralDamper);
+
 InputParameters
-validParams<GeneralDamper>()
+GeneralDamper::validParams()
 {
-  InputParameters params = validParams<Damper>();
+  InputParameters params = Damper::validParams();
   return params;
 }
 

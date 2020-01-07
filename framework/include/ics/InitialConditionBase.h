@@ -19,6 +19,7 @@
 #include "BoundaryRestrictable.h"
 #include "MooseTypes.h"
 #include "MemberTemplateMacros.h"
+#include "ElementIDInterface.h"
 
 // forward declarations
 class InitialConditionBase;
@@ -45,7 +46,8 @@ class InitialConditionBase : public MooseObject,
                              public UserObjectInterface,
                              public BoundaryRestrictable,
                              public DependencyResolverInterface,
-                             public Restartable
+                             public Restartable,
+                             public ElementIDInterface
 {
 public:
   /**
@@ -56,6 +58,8 @@ public:
   InitialConditionBase(const InputParameters & parameters);
 
   virtual ~InitialConditionBase();
+
+  static InputParameters validParams();
 
   /**
    * retrieves the MOOSE variable that this initial condition acts upon

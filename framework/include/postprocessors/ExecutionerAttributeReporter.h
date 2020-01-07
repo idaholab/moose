@@ -28,6 +28,8 @@ InputParameters validParams<ExecutionerAttributeReporter>();
 class ExecutionerAttributeReporter : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters

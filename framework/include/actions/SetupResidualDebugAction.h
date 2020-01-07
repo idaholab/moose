@@ -23,6 +23,8 @@ InputParameters validParams<SetupResidualDebugAction>();
 class SetupResidualDebugAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   SetupResidualDebugAction(InputParameters parameters);
 
   virtual void act() override;

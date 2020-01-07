@@ -3,14 +3,18 @@
     type = ImageDiff
     command = dual.py
     imagediff = 'dual.png'
-    allowed_darwin = 0.96
-    allowed_linux = 0.94
+    allowed_darwin = 0.94
+    allowed_linux = 0.96
+    python = 3
+    display_required = true
   [../]
   [./dualx]
     type = ImageDiff
     command = dualx.py
     imagediff = 'dualx.png'
-    allowed_linux = 0.94
-    allowed_darwin = 0.96
+    allowed_linux = 0.96
+    allowed_darwin = 0.94
+    python = 3
+    display_required = true
   [../]
 []

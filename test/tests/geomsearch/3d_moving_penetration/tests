@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '5478df0f0897ed7ac3dd3a3de1785a7948c75cfe'
   design = 'source/auxkernels/PenetrationAux.md'
 
   [./pl_test1]

@@ -56,18 +56,18 @@ TEST_F(HydrogenFluidPropertiesTest, vapor)
 }
 
 /**
- * Verify calculation of Henry's constant using data from
+ * Verify that the coefficients for Henry's constant are correct using
  * Guidelines on the Henry's constant and vapour liquid distribution constant
  * for gases in H20 and D20 at high temperatures, IAPWS (2004).
  */
 TEST_F(HydrogenFluidPropertiesTest, henry)
 {
   const Real tol = REL_TOL_EXTERNAL_VALUE;
+  const std::vector<Real> hc = _fp->henryCoefficients();
 
-  REL_TEST(_fp->henryConstant(300.0), 7.17211e9, tol);
-  REL_TEST(_fp->henryConstant(400.0), 6.33697e9, tol);
-  REL_TEST(_fp->henryConstant(500.0), 2.86137e9, tol);
-  REL_TEST(_fp->henryConstant(600.0), 8.31271e8, tol);
+  REL_TEST(hc[0], -4.73284, tol);
+  REL_TEST(hc[1], 6.08954, tol);
+  REL_TEST(hc[2], 6.06066, tol);
 }
 
 /**
@@ -201,13 +201,6 @@ TEST_F(HydrogenFluidPropertiesTest, derivatives)
   dmu_dT_fd = (_fp->mu_from_p_T(p, T + dT) - _fp->mu_from_p_T(p, T - dT)) / (2.0 * dT);
 
   REL_TEST(dmu_dT, dmu_dT_fd, tol);
-
-  // Henry's constant
-  Real dKh_dT_fd = (_fp->henryConstant(T + dT) - _fp->henryConstant(T - dT)) / (2.0 * dT);
-  Real Kh = 0.0, dKh_dT = 0.0;
-  _fp->henryConstant(T, Kh, dKh_dT);
-  REL_TEST(Kh, _fp->henryConstant(T), REL_TOL_CONSISTENCY);
-  REL_TEST(dKh_dT_fd, dKh_dT, REL_TOL_DERIVATIVE);
 }
 
 /**

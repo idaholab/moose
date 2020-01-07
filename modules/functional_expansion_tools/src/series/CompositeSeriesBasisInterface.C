@@ -10,6 +10,8 @@
 #include "CompositeSeriesBasisInterface.h"
 #include "Legendre.h"
 
+#include "libmesh/auto_ptr.h"
+
 /*
  * Default constructor creates a functional basis with one term. In order for the _series member to
  * be initialized, we initialized it with a Legendre series.

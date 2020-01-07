@@ -7,6 +7,7 @@
     display_required = True
     test_case = Tests.testPeacockApp
     requirement = "The system shall include a graphical interface that opens without any input arguments."
+    python = 3
   []
   [PeacockAppWithExec]
     type = PythonUnitTest
@@ -15,6 +16,7 @@
     test_case = Tests.testPeacockAppWithExe
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application executable."
     prereq = PeacockApp
+    python = 3
   []
   [PeacockAppWithInput]
     type = PythonUnitTest
@@ -23,6 +25,7 @@
     test_case = Tests.testPeacockAppWithInput
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application input file."
     prereq = PeacockAppWithExec
+    python = 3
   []
   [Results]
     type = PythonUnitTest
@@ -31,6 +34,8 @@
     test_case = Tests.testResults
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application Exodus result."
     prereq = PeacockAppWithInput
+    platform = linux
+    python = 3
   []
   [ResultsNoOption]
     type = PythonUnitTest
@@ -39,6 +44,7 @@
     test_case = Tests.testResultsNoOption
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application Exodus result without using the '-r' flag."
     prereq = Results
+    python = 3
   []
   [Postprocessor]
     type = PythonUnitTest
@@ -47,6 +53,7 @@
     test_case = Tests.testPostprocessor
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application CSV result."
     prereq = ResultsNoOption
+    python = 3
   []
   [PostprocessorNoOption]
     type = PythonUnitTest
@@ -55,6 +62,7 @@
     test_case = Tests.testPostprocessorNoOption
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application CSV result without using the '-p' flag."
     prereq = Postprocessor
+    python = 3
   []
   [AllCommandLine]
     type = PythonUnitTest
@@ -63,6 +71,7 @@
     test_case = Tests.testAllCommandLine
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application executable, input, Exodus, and CSV results."
     prereq = PostprocessorNoOption
+    python = 3
   []
   [OnlyInputFileWithExeInPath]
     type = PythonUnitTest
@@ -71,6 +80,7 @@
     test_case = Tests.testOnlyInputFileWithExeInPath
     requirement = "The system shall include a graphical interface that opens with a MOOSE-based application input file without the '-i' flag."
     prereq = AllCommandLine
+    python = 3
   []
   [WrongExe]
     type = PythonUnitTest
@@ -79,6 +89,7 @@
     test_case = Tests.testWrongExe
     requirement = "The system shall include a graphical interface that opens with an invalid MOOSE-based application executable."
     prereq = OnlyInputFileWithExeInPath
+    python = 3
   []
   [BadInput]
     type = PythonUnitTest
@@ -87,6 +98,7 @@
     test_case = Tests.testBadInput
     requirement = "The system shall include a graphical interface that opens with an invalid MOOSE-based application input file."
     prereq = WrongExe
+    python = 3
   []
   [ClearSettings]
     type = PythonUnitTest
@@ -95,6 +107,7 @@
     test_case = Tests.testClearSettings
     requirement = "The system shall include a graphical interface that includes the ability to clear stored settings."
     prereq = BadInput
+    python = 3
   []
   [BadMesh]
     type = PythonUnitTest
@@ -103,6 +116,7 @@
     test_case = Tests.testBadMesh
     requirement = "The system shall include a graphical interface that opens a MOOSE-based application input file that includes an invalid mesh."
     prereq = ClearSettings
+    python = 3
   []
   [ExodusChangedFile]
     type = PythonUnitTest
@@ -111,6 +125,7 @@
     test_case = Tests.testExodusChangedFile
     requirement = "The system shall include a graphical interface that includes the ability to change MOOSE-based application input files."
     prereq = BadMesh
+    python = 3
   []
   [ExodusExtentsReload]
     type = PythonUnitTest
@@ -120,5 +135,6 @@
     requirement = "The system shall include a graphical interface that includes the ability to visualize and reload Exodus result extents."
     prereq = ExodusChangedFile
     skip = '#11756'
+    python = 3
   []
 []

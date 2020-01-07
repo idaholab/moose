@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", OldEqualValueConstraint);
 
-template <>
+defineLegacyParams(OldEqualValueConstraint);
+
 InputParameters
-validParams<OldEqualValueConstraint>()
+OldEqualValueConstraint::validParams()
 {
-  InputParameters params = validParams<MortarConstraint>();
+  InputParameters params = MortarConstraint::validParams();
   params.addClassDescription(
       "OldEqualValueConstraint enforces solution continuity between slave and "
       "master sides of a mortar interface using lagrange multipliers");

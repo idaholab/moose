@@ -19,14 +19,21 @@
 
 #include <limits>
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
-                                         const FEType & fe_type,
-                                         SystemBase & sys,
-                                         Assembly & assembly,
-                                         Moose::VarKindType var_kind,
-                                         THREAD_ID tid)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid),
-    _assembly(assembly),
+registerMooseObject("MooseApp", MooseVariableScalar);
+
+defineLegacyParams(MooseVariableScalar);
+
+InputParameters
+MooseVariableScalar::validParams()
+{
+  auto params = MooseVariableBase::validParams();
+  params.addClassDescription("Moose wrapper class around scalar variables");
+  params.set<MooseEnum>("family") = "SCALAR";
+  return params;
+}
+
+MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
+  : MooseVariableBase(parameters),
     _need_u_dot(false),
     _need_u_dotdot(false),
     _need_u_dot_old(false),
@@ -301,7 +308,7 @@ MooseVariableScalar::computeAD(bool nodal_ordering)
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _dual_u[i] = _u[i];
-      _dual_u[i].derivatives()[ad_offset + i] = 1;
+      Moose::derivInsert(_dual_u[i].derivatives(), ad_offset + i, 1.);
     }
   }
 }

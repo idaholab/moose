@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneIncrementalStrain);
 
-template <>
+defineLegacyParams(ComputePlaneIncrementalStrain);
+
 InputParameters
-validParams<ComputePlaneIncrementalStrain>()
+ComputePlaneIncrementalStrain::validParams()
 {
-  InputParameters params = validParams<Compute2DIncrementalStrain>();
+  InputParameters params = Compute2DIncrementalStrain::validParams();
   params.addClassDescription(
       "Compute strain increment for small strain under 2D planar assumptions.");
   params.addParam<UserObjectName>("subblock_index_provider",

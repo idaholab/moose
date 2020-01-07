@@ -47,6 +47,8 @@ class MortarConstraintBase : public Constraint,
                              public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   MortarConstraintBase(const InputParameters & parameters);
 
   /**

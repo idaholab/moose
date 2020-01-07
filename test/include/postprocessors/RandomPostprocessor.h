@@ -12,18 +12,14 @@
 #include "GeneralPostprocessor.h"
 #include "MooseRandom.h"
 
-// Forward Declarations
-class RandomPostprocessor;
-
-template <>
-InputParameters validParams<RandomPostprocessor>();
-
 /**
  * Just returns a random number.
  */
 class RandomPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RandomPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}
@@ -36,4 +32,3 @@ private:
 
   MooseRandom & _random;
 };
-

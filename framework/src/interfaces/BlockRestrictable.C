@@ -17,10 +17,12 @@
 #include "SystemBase.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(BlockRestrictable);
+
 InputParameters
-validParams<BlockRestrictable>()
+BlockRestrictable::validParams()
 {
+
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
 
@@ -30,7 +32,7 @@ validParams<BlockRestrictable>()
 
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
-  if (!params.isParamValid("_dual_restrictable"))
+  if (!params.have_parameter<bool>("_dual_restrictable"))
     params.addPrivateParam<bool>("_dual_restrictable", false);
 
   // Return the parameters
@@ -38,7 +40,7 @@ validParams<BlockRestrictable>()
 }
 
 // Standard constructor
-BlockRestrictable::BlockRestrictable(const MooseObject * moose_object)
+BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool initialize /*=true*/)
   : _blk_dual_restrictable(moose_object->getParamTempl<bool>("_dual_restrictable")),
     _blk_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParamTempl<FEProblemBase *>("_fe_problem_base")
@@ -51,7 +53,8 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object)
                                                 : 0),
     _blk_name(moose_object->getParamTempl<std::string>("_object_name"))
 {
-  initializeBlockRestrictable(moose_object);
+  if (initialize)
+    initializeBlockRestrictable(moose_object);
 }
 
 // Dual restricted constructor
@@ -120,9 +123,10 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
     if (!_boundary_ids.empty() && _boundary_ids.find(Moose::ANY_BOUNDARY_ID) == _boundary_ids.end())
-      mooseError("Attempted to restrict the object '",
-                 _blk_name,
-                 "' to a block, but the object is already restricted by boundary");
+      moose_object->paramError("block",
+                               "Attempted to restrict the object '",
+                               _blk_name,
+                               "' to a block, but the object is already restricted by boundary");
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty() && !moose_object->isParamValid("boundary"))
@@ -146,11 +150,10 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << _blk_name
-          << "' contains the following block ids that do not exist on the mesh:";
+      msg << "the following block ids do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
-      mooseError(msg.str());
+      moose_object->paramError("block", msg.str());
     }
   }
 }
@@ -268,7 +271,7 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
     // If block materials exist, populated the set of properties that were declared
     if (warehouse.hasActiveBlockObjects(id))
     {
-      const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBlockObjects(id);
+      const std::vector<std::shared_ptr<MaterialBase>> & mats = warehouse.getActiveBlockObjects(id);
       for (const auto & mat : mats)
       {
         const std::set<std::string> & mat_props = mat->getSuppliedItems();

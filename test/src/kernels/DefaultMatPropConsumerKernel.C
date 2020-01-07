@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", DefaultMatPropConsumerKernel);
 
-template <>
 InputParameters
-validParams<DefaultMatPropConsumerKernel>()
+DefaultMatPropConsumerKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<MaterialPropertyName>("mat_prop", "prop", "Material property name to fetch");
   return params;
 }

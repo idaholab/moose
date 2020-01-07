@@ -23,6 +23,8 @@ InputParameters validParams<CentroidMultiApp>();
 class CentroidMultiApp : public TransientMultiApp, public BlockRestrictable
 {
 public:
+  static InputParameters validParams();
+
   CentroidMultiApp(const InputParameters & parameters);
 
 protected:
@@ -31,4 +33,3 @@ protected:
    */
   virtual void fillPositions() override;
 };
-

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ChangeOverTimePostprocessor);
 
-template <>
+defineLegacyParams(ChangeOverTimePostprocessor);
+
 InputParameters
-validParams<ChangeOverTimePostprocessor>()
+ChangeOverTimePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
   params.addParam<bool>("change_with_respect_to_initial",

@@ -11,14 +11,11 @@
 
 #include "Material.h"
 
-class RandomMaterial;
-
-template <>
-InputParameters validParams<RandomMaterial>();
-
 class RandomMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   RandomMaterial(const InputParameters & parameters);
   virtual void computeQpProperties();
 
@@ -26,4 +23,3 @@ protected:
   MaterialProperty<Real> & _rand_real;
   MaterialProperty<unsigned long> & _rand_long;
 };
-

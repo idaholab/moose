@@ -10,7 +10,15 @@
 #include "ADComputeIncrementalStrainBase.h"
 #include "MooseMesh.h"
 
-defineADValidParams(ADComputeIncrementalStrainBase, ADComputeStrainBase, );
+defineADLegacyParams(ADComputeIncrementalStrainBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeIncrementalStrainBase<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeStrainBase<compute_stage>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeIncrementalStrainBase<compute_stage>::ADComputeIncrementalStrainBase(

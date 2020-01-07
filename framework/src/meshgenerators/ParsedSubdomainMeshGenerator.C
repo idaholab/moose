@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", ParsedSubdomainMeshGenerator);
 
-template <>
+defineLegacyParams(ParsedSubdomainMeshGenerator);
+
 InputParameters
-validParams<ParsedSubdomainMeshGenerator>()
+ParsedSubdomainMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = MeshGenerator::validParams();
+  params += FunctionParserUtils::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",
@@ -57,7 +58,7 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
     _excluded_ids(parameters.get<std::vector<SubdomainID>>("excluded_subdomain_ids"))
 {
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

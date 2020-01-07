@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", LinearVectorPoisson);
 
-template <>
 InputParameters
-validParams<LinearVectorPoisson>()
+LinearVectorPoisson::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addParam<FunctionName>("x_exact_sln", 0, "The x forcing function.");
   params.addParam<FunctionName>("y_exact_sln", 0, "The y forcing function.");
   return params;

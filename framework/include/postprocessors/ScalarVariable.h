@@ -23,6 +23,8 @@ InputParameters validParams<ScalarVariable>();
 class ScalarVariable : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ScalarVariable(const InputParameters & parameters);
 
   virtual void initialize() override;

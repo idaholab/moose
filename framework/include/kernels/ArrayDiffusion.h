@@ -19,6 +19,8 @@ InputParameters validParams<ArrayDiffusion>();
 class ArrayDiffusion : public ArrayKernel
 {
 public:
+  static InputParameters validParams();
+
   ArrayDiffusion(const InputParameters & parameters);
 
 protected:
@@ -26,8 +28,6 @@ protected:
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
-  /// diffusion coefficient type
-  unsigned int _dc_type;
   /// scalar diffusion coefficient
   const MaterialProperty<Real> * _d;
   /// array diffusion coefficient

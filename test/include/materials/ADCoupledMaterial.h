@@ -11,11 +11,6 @@
 
 #include "ADMaterial.h"
 
-template <ComputeStage>
-class ADCoupledMaterial;
-
-declareADValidParams(ADCoupledMaterial);
-
 /**
  * A material that couples a material property
  */
@@ -23,6 +18,8 @@ template <ComputeStage compute_stage>
 class ADCoupledMaterial : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCoupledMaterial(const InputParameters & parameters);
 
 protected:
@@ -35,4 +32,3 @@ protected:
 
   usingMaterialMembers;
 };
-

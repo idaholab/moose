@@ -24,6 +24,8 @@ InputParameters validParams<Receiver>();
 class Receiver : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters The input parameters

@@ -9,14 +9,13 @@
 #
 
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
+  volumetric_locking_correction = false
+  displacements = 'disp_x disp_y disp_z'
   disp_z = disp_z
 [../]
 
 [Mesh]#Comment
   file = pressure_test.e
-  displacements = 'disp_x disp_y disp_z'
 [] # Mesh
 
 [Functions]
@@ -40,37 +39,14 @@
   [../]
 [] # Functions
 
-[Variables]
-
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-[] # Variables
-
-[SolidMechanics]
-
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-
-[] # SolidMechanics
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = SMALL
+  []
+[]
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -106,38 +82,30 @@
       function = rampUnramp
     [../]
   [../]
-
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
+  [./constant]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
+    youngs_modulus = 1.0e6
     poissons_ratio = 0.0
-    thermal_expansion = 1e-5
   [../]
+  [./constant_stress]
+    type = ComputeLinearElasticStress
+    block = '1'
+  [../]
+[]
 
-[] # Materials
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
 
-
-
   nl_abs_tol = 1e-10
-
   l_max_its = 20
 
   start_time = 0.0

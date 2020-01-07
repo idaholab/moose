@@ -26,6 +26,8 @@ class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
                                     public GuaranteeProvider
 {
 public:
+  static InputParameters validParams();
+
   ComputeElasticityTensorBase(const InputParameters & parameters);
 
 protected:
@@ -36,6 +38,7 @@ protected:
   std::string _elasticity_tensor_name;
 
   MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  MaterialProperty<Real> & _effective_stiffness;
 
   /// prefactor function to multiply the elasticity tensor with
   const Function * const _prefactor_function;

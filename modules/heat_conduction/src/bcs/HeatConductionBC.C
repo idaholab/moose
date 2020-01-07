@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionBC);
 
-template <>
+defineLegacyParams(HeatConductionBC);
+
 InputParameters
-validParams<HeatConductionBC>()
+HeatConductionBC::validParams()
 {
-  InputParameters params = validParams<FluxBC>();
+  InputParameters params = FluxBC::validParams();
 
   return params;
 }

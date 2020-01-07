@@ -19,7 +19,7 @@
 [Samplers]
   [mc]
     type = MonteCarloSampler
-    n_samples = 5
+    num_rows = 5
     distributions = 'uniform_0'
   []
 []
@@ -41,14 +41,16 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
-    vector_postprocessor = storage
-    postprocessor = average
+    sampler = mc
+    to_vector_postprocessor = storage
+    from_postprocessor = average
   []
 []
 
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
+    samplers = mc
   []
 []
 

@@ -190,7 +190,9 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), tol);
-  ABS_TEST(_tab_fp->henryConstant(T), _co2_fp->henryConstant(T), tol);
+  ABS_TEST(_tab_fp->henryCoefficients()[0], _co2_fp->henryCoefficients()[0], tol);
+  ABS_TEST(_tab_fp->henryCoefficients()[1], _co2_fp->henryCoefficients()[1], tol);
+  ABS_TEST(_tab_fp->henryCoefficients()[2], _co2_fp->henryCoefficients()[2], tol);
 
   // Use a temperature less than the critical point
   T = 300.0;

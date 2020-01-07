@@ -12,18 +12,14 @@
 #include "IntegratedBC.h"
 #include "MaterialProperty.h"
 
-// Forward Declarations
-class MTBC;
-
-template <>
-InputParameters validParams<MTBC>();
-
 /**
  * Implements a simple Neumann BC with material where grad(u)=value on the boundary.
  */
 class MTBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   MTBC(const InputParameters & parameters);
 
   virtual ~MTBC() {}
@@ -39,4 +35,3 @@ private:
   std::string _prop_name;
   const MaterialProperty<Real> & _mat;
 };
-

@@ -11,17 +11,11 @@
 
 #include "ScalarKernel.h"
 
-class AlphaCED;
-
-template <>
-InputParameters validParams<AlphaCED>();
-
-/**
- *
- */
 class AlphaCED : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   AlphaCED(const InputParameters & parameters);
   virtual ~AlphaCED();
 
@@ -39,4 +33,3 @@ protected:
 
   Real _value;
 };
-

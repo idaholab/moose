@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", InflowBC);
 
-template <>
 InputParameters
-validParams<InflowBC>()
+InflowBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
   params.addRequiredParam<Real>("inlet_conc", "The inlet concentration");
   return params;

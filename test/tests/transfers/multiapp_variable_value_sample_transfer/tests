@@ -1,26 +1,43 @@
 [Tests]
-  [./test]
+  issues = '#1737'
+  design = 'MultiAppVariableValueSampleTransfer.md'
+
+  [test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e master_out_sub1.e'
-  [../]
 
-  [./pp_test]
-    type = 'Exodiff'
-    input = 'pp_master.i'
-    exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
-  [../]
+    requirement = "The system shall include the ability to transfer a field variable sampled at a "
+                  "point to populate a field variable on the sub-application with the supplied "
+                  "value."
+  []
 
-  [./monomial_to_sub_pp]
-    type = 'Exodiff'
-    input = 'master_quad.i'
-    exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e master_quad_out_quad2.e master_quad_out_quad3.e'
-  [../]
+  [pp]
+    requirement = "The system shall include the ability to transfer a field variable sampled at a "
+                  "point to post processing variable on the sub-application"
+    [pp_test]
+      type = 'Exodiff'
+      input = 'pp_master.i'
+      exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
 
-  [./silence_barriers]
+      detail = "from a linear Lagrange source variable and"
+    []
+    [monomial_to_sub_pp]
+      type = 'Exodiff'
+      input = 'master_quad.i'
+      exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e '
+                'master_quad_out_quad2.e master_quad_out_quad3.e'
+
+      detail = "from a constant monomial source variable."
+    []
+  []
+  [silence_barriers]
     type = 'RunApp'
     input = 'master.i'
     prereq = 'test'
     absent_out = "Jobs complete:"
-  [../]
+
+    requirement = "The system shall support the ability to disable the use of parallel barriers when "
+                  "streaming text to the screen."
+  []
 []

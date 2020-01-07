@@ -10,6 +10,8 @@
 #include "MomentumFreeSlipBC.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "SystemBase.h"
+#include "FEProblemBase.h"
 #include "libmesh/numeric_vector.h"
 
 registerMooseObject("NavierStokesApp", MomentumFreeSlipBC);

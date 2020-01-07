@@ -14,10 +14,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalSmallStrain);
 
-defineADValidParams(
-    ADComputeRSphericalSmallStrain,
-    ADComputeSmallStrain,
-    params.addClassDescription("Compute a small strain 1D spherical symmetry case."););
+defineADLegacyParams(ADComputeRSphericalSmallStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeRSphericalSmallStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeSmallStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain 1D spherical symmetry case.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeRSphericalSmallStrain<compute_stage>::ADComputeRSphericalSmallStrain(

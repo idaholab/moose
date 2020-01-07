@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", ElementH1Error);
 
-template <>
+defineLegacyParams(ElementH1Error);
+
 InputParameters
-validParams<ElementH1Error>()
+ElementH1Error::validParams()
 {
-  InputParameters params = validParams<ElementW1pError>();
+  InputParameters params = ElementW1pError::validParams();
   return params;
 }
 

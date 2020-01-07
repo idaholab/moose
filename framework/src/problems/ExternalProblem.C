@@ -12,11 +12,12 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 
-template <>
+defineLegacyParams(ExternalProblem);
+
 InputParameters
-validParams<ExternalProblem>()
+ExternalProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.set<bool>("skip_nl_system_check") = true;
 
   params.addClassDescription("Problem extension point for wrapping external applications");

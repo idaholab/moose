@@ -17,6 +17,7 @@
 #include "Assembly.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "TimedPrint.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_tools.h"
@@ -52,7 +53,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
 
 template <>
 void
-dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
@@ -83,15 +84,15 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
 
 template <>
 void
-dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
 }
 
 // Utility routines
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node);
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem);
 bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
                            const std::list<dof_id_type> & elem_list2,
                            MeshBase & mesh);
@@ -150,6 +151,10 @@ validParams<FeatureFloodCount>()
   params.addParam<std::vector<BoundaryName>>(
       "secondary_percolation_boundaries",
       "Paired boundaries with \"primaryary_percolation_boundaries\" parameter");
+  params.addParam<std::vector<BoundaryName>>(
+      "specified_boundaries",
+      "An optional list of boundaries; if supplied, each feature is checked to determine whether "
+      "it intersects any of the specified boundaries in this list.");
 
   /**
    * The FeatureFloodCount and derived objects should not to operate on the displaced mesh. These
@@ -262,6 +267,10 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     paramError("primary_percolation_boundaries",
                "primary_percolation_boundaries and secondary_percolation_boundaries must both be "
                "supplied when checking for percolation");
+
+  if (parameters.isParamValid("specified_boundaries"))
+    _specified_bnds =
+        _mesh.getBoundaryIDs(parameters.get<std::vector<BoundaryName>>("specified_boundaries"));
 }
 
 void
@@ -349,6 +358,7 @@ void
 FeatureFloodCount::execute()
 {
   TIME_SECTION(_execute_timer);
+  CONSOLE_TIMED_PRINT("Flooding Features");
 
   // Iterate only over boundaries if restricted
   if (_is_boundary_restricted)
@@ -671,6 +681,7 @@ void
 FeatureFloodCount::finalize()
 {
   TIME_SECTION(_finalize_timer);
+  CONSOLE_TIMED_PRINT("Finalizing Feature Identification");
 
   // Gather all information on processor zero and merge
   communicateAndMerge();
@@ -829,6 +840,30 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
     return _feature_sets[local_index]._status != Status::INACTIVE
                ? _feature_sets[local_index]._boundary_intersection != BoundaryIntersection::NONE
+               : false;
+  }
+
+  return false;
+}
+
+bool
+FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const
+{
+  // TODO: This information is not parallel consistent when using FeatureFloodCounter
+
+  // Some processors don't contain the largest feature id, in that case we just return invalid_id
+  if (feature_id >= _feature_id_to_local_index.size())
+    return false;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? ((_feature_sets[local_index]._boundary_intersection &
+                   BoundaryIntersection::SPECIFIED_BOUNDARY) ==
+                  BoundaryIntersection::SPECIFIED_BOUNDARY)
                : false;
   }
 
@@ -1014,7 +1049,7 @@ FeatureFloodCount::prepareDataForTransfer()
       else
       {
         for (auto & halo_id : feature._halo_ids)
-          updateBBoxExtremesHelper(feature._bboxes[0], mesh.node(halo_id));
+          updateBBoxExtremesHelper(feature._bboxes[0], mesh.point(halo_id));
       }
 
       mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
@@ -1718,6 +1753,16 @@ FeatureFloodCount::updateBoundaryIntersections(FeatureData & feature) const
           if (_mesh.isBoundaryElem(entity, secondary_id))
             feature._boundary_intersection |= BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY;
       }
+
+      // See if the feature contacts any of the user-specified boundaries if we haven't
+      // done so already
+      if ((feature._boundary_intersection & BoundaryIntersection::SPECIFIED_BOUNDARY) ==
+          BoundaryIntersection::NONE)
+      {
+        for (auto specified_id : _specified_bnds)
+          if (_mesh.isBoundaryElem(entity, specified_id))
+            feature._boundary_intersection |= BoundaryIntersection::SPECIFIED_BOUNDARY;
+      }
     }
   }
 }
@@ -1780,9 +1825,9 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 {
   // First update the primary bounding box (all topologically connected)
   for (auto & halo_id : _halo_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(halo_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(halo_id));
   for (auto & ghost_id : _ghosted_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(ghost_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(ghost_id));
 
   // Remove all of the IDs that are in the primary region
   std::list<dof_id_type> disjoint_elem_id_list;
@@ -1860,8 +1905,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox,
-                                                   const MeshTools::BoundingBox & rhs_bbox)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox, const BoundingBox & rhs_bbox)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2159,7 +2203,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
  *****************************************************************************************
  */
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2169,7 +2213,7 @@ updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
 }
 
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
   for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));

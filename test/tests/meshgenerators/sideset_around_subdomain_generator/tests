@@ -1,45 +1,48 @@
 [Tests]
-  [./sideset_around_subdomain_generator_test]
-    type = 'Exodiff'
-    input = 'sideset_around_subdomain.i'
-    cli_args = '--mesh-only'
-    exodiff = 'sideset_around_subdomain_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+  design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
+  issues = '#11640'
 
-  [./sideset_around_subdomain_normal_generator_test]
-    type = 'Exodiff'
-    input = 'around_normals_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'around_normals_generator_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+  [group]
+    requirement = 'The system shall have the ability to create new mesh side sets around subdomains:'
 
-  [./sideset_around_subdomain_multi_generator_test]
-    type = 'Exodiff'
-    input = 'around_multi_created_subdomain.i'
-    cli_args = '--mesh-only'
-    exodiff = 'around_multi_created_subdomain_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+    [inside]
+      type = 'Exodiff'
+      input = 'sideset_around_subdomain.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sideset_around_subdomain_in.e'
+      recover = false
 
-  [./sideset_around_subdomain_generator_test2]
-    type = 'Exodiff'
-    input = 'around.i'
-    cli_args = '--mesh-only'
-    exodiff = 'around_in.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-    issues = '#11640'
-    recover = false
-  [../]
+      detail = 'for a subdomain contained completely within a larger domain,'
+    []
+
+    [one_side]
+      type = 'Exodiff'
+      input = 'around_normals_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'around_normals_generator_in.e'
+      recover = false
+
+      detail = 'on specific sides of a subdomain based upon the normal to that side,'
+    []
+
+    [multi_subs]
+      type = 'Exodiff'
+      input = 'around_multi_created_subdomain.i'
+      cli_args = '--mesh-only'
+      exodiff = 'around_multi_created_subdomain_in.e'
+      recover = false
+
+      detail = 'around multiple subdomains within a larger domain, and'
+    []
+
+    [two_inside]
+      type = 'Exodiff'
+      input = 'around.i'
+      cli_args = '--mesh-only'
+      exodiff = 'around_in.e'
+      recover = false
+
+      detail = 'around two blocks within a domain.'
+    []
+  []
 []

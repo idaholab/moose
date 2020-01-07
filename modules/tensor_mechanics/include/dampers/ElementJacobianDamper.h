@@ -28,6 +28,8 @@ InputParameters validParams<ElementJacobianDamper>();
 class ElementJacobianDamper : public GeneralDamper
 {
 public:
+  static InputParameters validParams();
+
   ElementJacobianDamper(const InputParameters & parameters);
 
   virtual void initialSetup() override;

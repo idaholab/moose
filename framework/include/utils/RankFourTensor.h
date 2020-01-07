@@ -36,6 +36,8 @@ class RankTwoTensorTempl;
 template <typename>
 class RankFourTensorTempl;
 
+namespace MathUtils
+{
 template <typename T>
 void mooseSetToZero(T & v);
 
@@ -47,6 +49,7 @@ template <>
 void mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v);
 template <>
 void mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v);
+}
 
 /**
  * RankFourTensorTempl is designed to handle any N-dimensional fourth order tensor, C.
@@ -121,6 +124,9 @@ public:
 
   /// Fill from vector
   RankFourTensorTempl(const std::vector<T> &, FillMethod);
+
+  /// Copy assignment operator must be defined if used
+  RankFourTensorTempl(const RankFourTensorTempl<T> & a) = default;
 
   /**
    * Copy constructor
@@ -462,4 +468,3 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
-

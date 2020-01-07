@@ -4,14 +4,8 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -34,10 +28,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -106,20 +100,20 @@
 
 [Materials]
   [./left]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e7
+    poissons_ratio = 0.3
   [../]
   [./right]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -150,8 +144,7 @@
 []
 
 [Outputs]
-  file_base = frictionless_penalty_dirac_out
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -168,6 +161,6 @@
     model = frictionless
     formulation = penalty
     penalty = 1e+7
-    system = Constraint
+    system = diracKernel
   [../]
 []

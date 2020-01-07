@@ -1,20 +1,20 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 20
-  ny = 20
-  nz = 20
-  xmin = -0.5
-  xmax = 0.5
-  ymin = -0.5
-  ymax = 0.5
-  zmin = -0.5
-  zmax = 0.5
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 20
+    ny = 20
+    nz = 20
+    xmin = -0.5
+    xmax = 0.5
+    ymin = -0.5
+    ymax = 0.5
+    zmin = -0.5
+    zmax = 0.5
+  []
   [./cnode]
-    type = AddExtraNodeset
+    input = gen
+    type = ExtraNodesetGenerator
     coord = '0.0 0.0 0.0'
     new_boundary = 100
   [../]

@@ -31,10 +31,11 @@ InputParameters validParams<DiffusionFluxBC>();
 class DiffusionFluxBC : public FluxBC
 {
 public:
+  static InputParameters validParams();
+
   DiffusionFluxBC(const InputParameters & parameters);
 
 protected:
   virtual RealGradient computeQpFluxResidual() override;
   virtual RealGradient computeQpFluxJacobian() override;
 };
-

@@ -84,8 +84,6 @@ protected:
   MaterialProperty<std::vector<std::vector<RealGradient>>> * _grad_mass_frac_qp;
   /// Derivative of the mass fraction matrix with respect to the Porous Flow variables
   MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
-  /// Old value of saturation
-  const MaterialProperty<std::vector<Real>> & _saturation_old;
   /// Fluid density of each phase
   MaterialProperty<std::vector<Real>> & _fluid_density;
   /// Derivative of the fluid density for each phase wrt PorousFlow variables
@@ -107,7 +105,7 @@ protected:
   /// Flag to indicate whether to calculate stateful properties
   bool _is_initqp;
   /// FluidStateProperties data structure
-  std::vector<FluidStatePropertiesAD> _fsp;
+  std::vector<FluidStateProperties> _fsp;
   /// FluidStatePhaseEnum
   FluidStatePhaseEnum _phase_state;
   /// Capillary pressure UserObject

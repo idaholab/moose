@@ -1,18 +1,14 @@
-[MeshGenerators]
+[Mesh]
   [./amg]
     type = AnnularMeshGenerator
     nr = 10
     nt = 12
     rmin = 1
     rmax = 5
-    tmin = 0.785398163
-    tmax = 2.356194490
+    dmin = 45
+    dmax = 135
     growth_r = 1.3
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

@@ -14,6 +14,8 @@
 class CoupledConvectiveFlux : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledConvectiveFlux(const InputParameters & parameters);
   virtual ~CoupledConvectiveFlux() {}
 

@@ -3,5 +3,7 @@
     type = ImageDiff
     command = window_clear.py
     imagediff = 'window_clear.png'
+    python = 3
+    display_required = true
   [../]
 []

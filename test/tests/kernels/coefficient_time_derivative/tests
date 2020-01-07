@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#11047'
+  design = 'CoefTimeDerivative.md'
+
   [./test]
     type = 'Exodiff'
     input = 'coefficient_time_derivative_diffusion.i'
     exodiff = 'coefficient_time_derivative_diffusion_out.e'
+
+    requirement = 'The system shall support scaling the computed time derivative by a scalar coefficient.'
   [../]
 []

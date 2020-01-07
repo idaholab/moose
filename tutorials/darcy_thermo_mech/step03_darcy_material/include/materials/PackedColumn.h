@@ -14,11 +14,6 @@
 // A helper class from MOOSE that linear interpolates x,y data
 #include "LinearInterpolation.h"
 
-class PackedColumn;
-
-template <>
-InputParameters validParams<PackedColumn>();
-
 /**
  * Material objects inherit from Material and override computeQpProperties.
  *
@@ -28,6 +23,8 @@ InputParameters validParams<PackedColumn>();
 class PackedColumn : public Material
 {
 public:
+  static InputParameters validParams();
+
   PackedColumn(const InputParameters & parameters);
 
 protected:

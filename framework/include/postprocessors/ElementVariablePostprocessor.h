@@ -22,6 +22,8 @@ class ElementVariablePostprocessor : public ElementPostprocessor,
                                      public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ElementVariablePostprocessor(const InputParameters & parameters);
 
   virtual void execute() override;

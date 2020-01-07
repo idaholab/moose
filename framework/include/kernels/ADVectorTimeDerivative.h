@@ -21,6 +21,8 @@ template <ComputeStage compute_stage>
 class ADVectorTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADVectorTimeDerivative(const InputParameters & parameters);
 
 protected:

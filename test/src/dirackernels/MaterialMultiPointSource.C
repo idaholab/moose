@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MaterialMultiPointSource);
 
-template <>
 InputParameters
-validParams<MaterialMultiPointSource>()
+MaterialMultiPointSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<std::vector<Point>>("points", "The x,y,z coordinates of the points");
   return params;
 }

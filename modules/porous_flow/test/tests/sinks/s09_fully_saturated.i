@@ -125,10 +125,9 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    at_nodes = false
     permeability = '1.1 0 0 0 1.1 0 0 0 1.1'
   [../]
-  [./relperm_qp]
+  [./relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2 # irrelevant in this fully-saturated situation
     phase = 0

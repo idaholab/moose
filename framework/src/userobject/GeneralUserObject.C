@@ -9,12 +9,13 @@
 
 #include "GeneralUserObject.h"
 
-template <>
+defineLegacyParams(GeneralUserObject);
+
 InputParameters
-validParams<GeneralUserObject>()
+GeneralUserObject::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<MaterialPropertyInterface>();
+  InputParameters params = UserObject::validParams();
+  params += MaterialPropertyInterface::validParams();
   params.addParam<bool>(
       "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
   params.addParamNamesToGroup("force_preaux", "Advanced");
@@ -46,10 +47,15 @@ GeneralUserObject::getSuppliedItems()
 }
 
 const PostprocessorValue &
-GeneralUserObject::getPostprocessorValue(const std::string & name)
+GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int index)
 {
-  _depend_vars.insert(_pars.get<PostprocessorName>(name));
-  return PostprocessorInterface::getPostprocessorValue(name);
+  // is this a vector of pp names, we use the number of default entries
+  // to figure that out
+  if (_pars.isSinglePostprocessor(name))
+    _depend_vars.insert(_pars.get<PostprocessorName>(name));
+  else
+    _depend_vars.insert(_pars.get<std::vector<PostprocessorName>>(name)[index]);
+  return PostprocessorInterface::getPostprocessorValue(name, index);
 }
 
 const PostprocessorValue &

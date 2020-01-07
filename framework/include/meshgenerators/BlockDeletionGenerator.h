@@ -23,6 +23,8 @@ InputParameters validParams<BlockDeletionGenerator>();
 class BlockDeletionGenerator : public ElementDeletionGeneratorBase
 {
 public:
+  static InputParameters validParams();
+
   BlockDeletionGenerator(const InputParameters & parameters);
 
 protected:

@@ -24,11 +24,15 @@
 
 registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
 
-template <>
+defineLegacyParams(MultiAppMeshFunctionTransfer);
+
 InputParameters
-validParams<MultiAppMeshFunctionTransfer>()
+MultiAppMeshFunctionTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
+  params.addClassDescription(
+      "Transfers field data at the MultiApp position using solution the finite element function "
+      "from the master application, via a 'libMesh::MeshFunction' object.");
 
   params.addParam<bool>(
       "error_on_miss",
@@ -38,7 +42,7 @@ validParams<MultiAppMeshFunctionTransfer>()
 }
 
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -68,7 +72,7 @@ MultiAppMeshFunctionTransfer::execute()
         continue;
       _send_points[i][i_proc].wait();
       _send_evals[i][i_proc].wait();
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
         _send_ids[i][i_proc].wait();
     }
 
@@ -307,7 +311,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         if (local_bboxes[i_from].contains_point(pt))
         {
           outgoing_evals[i_pt] = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
-          if (_direction == FROM_MULTIAPP)
+          if (_current_direction == FROM_MULTIAPP)
             outgoing_ids[i_pt] = _local2global_map[i_from];
         }
       }
@@ -316,13 +320,13 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     if (i_proc == processor_id())
     {
       incoming_evals[i_proc] = outgoing_evals;
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
         incoming_app_ids[i_proc] = outgoing_ids;
     }
     else
     {
       _communicator.send(i_proc, outgoing_evals, _send_evals[i][i_proc]);
-      if (_direction == FROM_MULTIAPP)
+      if (_current_direction == FROM_MULTIAPP)
         _communicator.send(i_proc, outgoing_ids, _send_ids[i][i_proc]);
     }
   }
@@ -340,7 +344,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
       continue;
 
     _communicator.receive(i_proc, incoming_evals[i_proc]);
-    if (_direction == FROM_MULTIAPP)
+    if (_current_direction == FROM_MULTIAPP)
       _communicator.receive(i_proc, incoming_app_ids[i_proc]);
   }
 
@@ -352,7 +356,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     unsigned int var_num = to_sys->variable_number(_to_var_names[i]);
 
     NumericVector<Real> * solution = nullptr;
-    switch (_direction)
+    switch (_current_direction)
     {
       case TO_MULTIAPP:
         solution = &getTransferVector(i_to, _to_var_names[i]);
@@ -390,7 +394,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
           // Ignore this proc if it's app has a higher rank than the
           // previously found lowest app rank.
-          if (_direction == FROM_MULTIAPP)
+          if (_current_direction == FROM_MULTIAPP)
           {
             if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
               continue;
@@ -466,7 +470,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
             // Ignore this proc if it's app has a higher rank than the
             // previously found lowest app rank.
-            if (_direction == FROM_MULTIAPP)
+            if (_current_direction == FROM_MULTIAPP)
             {
               if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
                 continue;

@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RestartableTypes;
-
-template <>
-InputParameters validParams<RestartableTypes>();
-
 class Dummy
 {
 public:
@@ -86,6 +81,8 @@ dataLoad(std::istream & stream, DummyNeedingContext & v, void * context)
 class RestartableTypes : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RestartableTypes(const InputParameters & params);
   virtual ~RestartableTypes();
 
@@ -108,5 +105,5 @@ protected:
   std::map<unsigned int, Real> & _map_data;
   DenseVector<Real> & _dense_vector_data;
   DenseMatrix<Real> & _dense_matrix_data;
+  Parameters & _raw_parameters;
 };
-

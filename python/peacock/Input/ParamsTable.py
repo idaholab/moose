@@ -6,13 +6,13 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import functools
+import os
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtCore import pyqtSignal, Qt
 from peacock.base.MooseWidget import MooseWidget
-from ParameterInfo import ParameterInfo
-import os
+from .ParameterInfo import ParameterInfo
 
 class EditingDelegate(QtWidgets.QStyledItemDelegate):
     """
@@ -47,6 +47,9 @@ def paramSort(a, b):
     After the required params, the rest of the params
     are sorted normally.
     """
+    def cmp(a, b):
+        return (a>b)-(a<b)
+
     if a.required and b.required:
         if a.name == "Name":
             return -1
@@ -111,7 +114,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.name_param = None
         self.removed_params = []
         self.type_to_block_map = type_block_map
-        for p in sorted(self.params, cmp=paramSort):
+        for p in sorted(self.params, key=functools.cmp_to_key(paramSort)):
             self.addParam(p)
 
         self.updateWatchers()
@@ -198,7 +201,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
                     combo.addItem("Select option")
                     combo.setCurrentIndex(0)
                     combo.blockSignals(False)
-            self.needBlockList.emit(self.watch_blocks_params.keys())
+            self.needBlockList.emit(list(self.watch_blocks_params.keys()))
 
     def onCellChanged(self, row, col):
         self.changed.emit()
@@ -488,7 +491,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         Return:
             list of paths that will be used as options, or None
         """
-        for key, value in self.type_to_block_map.iteritems():
+        for key, value in self.type_to_block_map.items():
             # The key (ie something like VectorPostprocessorName) can
             # also be inside a vector
             vector_key = "vector<%s>" % key

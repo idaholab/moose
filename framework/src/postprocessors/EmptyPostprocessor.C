@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", EmptyPostprocessor);
 
-template <>
+defineLegacyParams(EmptyPostprocessor);
+
 InputParameters
-validParams<EmptyPostprocessor>()
+EmptyPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   return params;
 }
 

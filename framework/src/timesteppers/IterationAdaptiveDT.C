@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", IterationAdaptiveDT);
 
-template <>
+defineLegacyParams(IterationAdaptiveDT);
+
 InputParameters
-validParams<IterationAdaptiveDT>()
+IterationAdaptiveDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addClassDescription("Adjust the timestep based on the number of iterations");
   params.addParam<int>("optimal_iterations",
                        "The target number of nonlinear iterations for adaptive timestepping");
@@ -33,11 +34,6 @@ validParams<IterationAdaptiveDT>()
                             "to determine target linear iterations and "
                             "window for adaptive timestepping (default = "
                             "25)");
-  params.addDeprecatedParam<PostprocessorName>("postprocessor_dtlim",
-                                               "If specified, the postprocessor value "
-                                               "is used as an upper limit for the "
-                                               "current time step length",
-                                               "Use 'timestep_limiting_postprocessor' instead");
   params.addParam<PostprocessorName>("timestep_limiting_postprocessor",
                                      "If specified, the postprocessor value "
                                      "is used as an upper limit for the "
@@ -97,8 +93,6 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _adaptive_timestepping(false),
     _pps_value(isParamValid("timestep_limiting_postprocessor")
                    ? &getPostprocessorValue("timestep_limiting_postprocessor")
-                   : isParamValid("postprocessor_dtlim")
-                         ? &getPostprocessorValue("postprocessor_dtlim")
                          : nullptr),
     _timestep_limiting_function(nullptr),
     _piecewise_timestep_limiting_function(nullptr),

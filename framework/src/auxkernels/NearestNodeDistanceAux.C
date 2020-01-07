@@ -14,11 +14,12 @@
 
 registerMooseObject("MooseApp", NearestNodeDistanceAux);
 
-template <>
+defineLegacyParams(NearestNodeDistanceAux);
+
 InputParameters
-validParams<NearestNodeDistanceAux>()
+NearestNodeDistanceAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Stores the distance between a block and boundary or between two boundaries.");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to find the distance to.");

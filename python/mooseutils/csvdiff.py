@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -45,7 +45,7 @@ class CSVTools:
             # Exceptions occur if you try to parse a .e file
             try:
                 lines = text.split('\n')
-                headers = lines.pop(0).split(',')
+                headers = [x.strip() for x in lines.pop(0).split(',')]
                 table = {}
                 for header in headers:
                     table[header] = []
@@ -149,7 +149,7 @@ class CSVSummary(CSVTools):
 
         field_len = []
         value_len = []
-        for field, value in table1.iteritems():
+        for field, value in table1.items():
             field_len.append(len(field))
             value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)))))
 
@@ -161,7 +161,7 @@ class CSVSummary(CSVTools):
             value_count = len(table1[table1.keys()[0]]) - 1
             formatted_messages.insert(0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
 
-        for field, value in table1.iteritems():
+        for field, value in table1.items():
             if field.lower() == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
                 formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
@@ -222,7 +222,7 @@ class CSVDiffer(CSVTools):
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
-            for field_id, value in custom_params['FIELDS'].iteritems():
+            for field_id, value in custom_params['FIELDS'].items():
                 self.custom_columns.append(field_id)
                 self.custom_abs_zero.append(value.get('ZERO', abs_zero))
                 self.custom_rel_err.append(value.get('RELATIVE', rel_tol))
@@ -353,7 +353,7 @@ def verifyArgs(args):
         problems.append('Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
 
     elif args.summary and args.comparison_file:
-        print 'Ignoring request to use config file while being asked to display a summary\n'
+        print('Ignoring request to use config file while being asked to display a summary\n')
 
     # Check if all custom args are populated correctly
     unify_custom_args = [x for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err] if x != None]
@@ -367,7 +367,7 @@ def verifyArgs(args):
         problems.append('When supplying a config file (--comparison-file|-c), you can not use any --custom-* args')
 
     for a_problem in problems:
-        print a_problem
+        print(a_problem)
     if problems:
         sys.exit(1)
 
@@ -400,10 +400,10 @@ if __name__ == '__main__':
             errors = csv_differ.getNumErrors()
 
     for a_message in messages:
-        print a_message
+        print(a_message)
 
     if not errors and not args.summary:
-        print "Files are the same"
+        print("Files are the same")
 
     if errors:
         sys.exit(1)

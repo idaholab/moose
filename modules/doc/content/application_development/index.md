@@ -14,6 +14,8 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Performance Benchmarking](/performance_benchmarking.md) - How to perform benchmarking
 
+[Profiling](/profiling.md) - How to profile your application in order to determine what functions are hogging compute time.
+
 [MooseUtils](/MooseUtils.md) - General utilities used throughout the Framework and applications
 
 [Utils](utils/index.md) - General utilities used throughout the Framework and applications
@@ -30,4 +32,3 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
 
-[Profiling](/profiling.md) - How to profile your application in order to determine what functions are hogging compute time.

@@ -21,6 +21,8 @@ InputParameters validParams<ElementPostprocessor>();
 class ElementPostprocessor : public ElementUserObject, public Postprocessor
 {
 public:
+  static InputParameters validParams();
+
   ElementPostprocessor(const InputParameters & parameters);
 
   /**

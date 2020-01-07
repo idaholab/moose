@@ -1,47 +1,58 @@
 [Tests]
-
-  [./3D_dirac]
+  issues = '#3958'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./simple_contact_dirac_test]
     type = Exodiff
     input = 'simple_contact_dirac_test.i'
-    exodiff = 'dirac_out.e'
+    exodiff = 'simple_contact_dirac_test_out.e'
+    allow_warnings = true
+    no_error_deprecated = true
+    design = 'ContactMaster.md SlaveConstraint.md'
+    requirement = ''
   [../]
-  [./3D]
+  [./simple_contact_test]
     type = Exodiff
     input = 'simple_contact_test.i'
-    exodiff = 'out.e'
+    exodiff = 'simple_contact_test_out.e'
   [../]
-  [./3D_2]
+  [./simple_contact_test2]
     type = Exodiff
     input = 'simple_contact_test2.i'
-    exodiff = 'out2.e'
+    exodiff = 'simple_contact_test2_out.e'
   [../]
-  [./RZ]
+  [./simple_contact_rz_test]
     type = Exodiff
     input = 'simple_contact_rz_test.i'
-    exodiff = 'out_rz.e'
+    exodiff = 'simple_contact_rz_test_out.e'
     abs_zero = 1e-7
     scale_refine = 1
     max_parallel = 1
   [../]
-  [./RZ_dirac]
+  [./simple_contact_rz_dirac_test]
     type = Exodiff
     input = 'simple_contact_rz_dirac_test.i'
-    exodiff = 'out_rz_dirac.e'
+    exodiff = 'simple_contact_rz_dirac_test_out.e'
+    allow_warnings = true
+    no_error_deprecated = true
     abs_zero = 1e-7
     scale_refine = 1
     max_parallel = 1
+    design = 'ContactMaster.md SlaveConstraint.md'
   [../]
-  [./RSpherical]
+  [./simple_contact_rspherical]
     type = Exodiff
     input = 'simple_contact_rspherical.i'
-    exodiff = 'out_rspherical.e'
+    exodiff = 'simple_contact_rspherical_out.e'
     max_parallel = 1
   [../]
-  [./RSpherical_dirac]
+  [./simple_contact_rspherical_dirac]
     type = Exodiff
     input = 'simple_contact_rspherical_dirac.i'
-    exodiff = 'out_rspherical_dirac.e'
+    exodiff = 'simple_contact_rspherical_dirac_out.e'
+    allow_warnings = true
+    no_error_deprecated = true
     max_parallel = 1
+    design = 'ContactMaster.md SlaveConstraint.md'
   [../]
 
 []

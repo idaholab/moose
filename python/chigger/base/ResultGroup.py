@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ChiggerResult import ChiggerResult
+from .ChiggerResult import ChiggerResult
 
 class ResultGroup(ChiggerResult):
     """
@@ -47,8 +47,7 @@ class ResultGroup(ChiggerResult):
         """
         Call update on all children.
         """
-        for result in self._results:
-            result.update(**kwargs)
+        pass
 
     def setOptions(self, *args, **kwargs):
         """

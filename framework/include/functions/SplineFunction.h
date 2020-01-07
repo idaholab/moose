@@ -23,6 +23,8 @@ InputParameters validParams<SplineFunction>();
 class SplineFunction : public Function
 {
 public:
+  static InputParameters validParams();
+
   SplineFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", VarCouplingMaterial);
 
-template <>
 InputParameters
-validParams<VarCouplingMaterial>()
+VarCouplingMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
   params.addParam<Real>("base", 0.0, "The baseline of the property");
   params.addParam<Real>("coef", 1.0, "The linear coefficient of the coupled var");

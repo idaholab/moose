@@ -11,14 +11,11 @@
 
 #include "Function.h"
 
-class MTPiecewiseConst2D;
-
-template <>
-InputParameters validParams<MTPiecewiseConst2D>();
-
 class MTPiecewiseConst2D : public Function
 {
 public:
+  static InputParameters validParams();
+
   MTPiecewiseConst2D(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;

@@ -29,6 +29,8 @@ InputParameters validParams<PiecewiseMulticonstant>();
 class PiecewiseMulticonstant : public PiecewiseMultiInterpolation
 {
 public:
+  static InputParameters validParams();
+
   PiecewiseMulticonstant(const InputParameters & parameters);
 
 protected:

@@ -19,6 +19,8 @@ InputParameters validParams<IndicatorMarker>();
 class IndicatorMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   IndicatorMarker(const InputParameters & parameters);
 
 protected:

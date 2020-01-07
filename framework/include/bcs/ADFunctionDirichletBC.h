@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class ADFunctionDirichletBC : public ADNodalBC<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADFunctionDirichletBC(const InputParameters & parameters);
 
 protected:

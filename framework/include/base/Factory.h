@@ -284,7 +284,7 @@ public:
    */
   std::shared_ptr<MooseObject> create(const std::string & obj_name,
                                       const std::string & name,
-                                      InputParameters parameters,
+                                      InputParameters & parameters,
                                       THREAD_ID tid = 0,
                                       bool print_deprecated = true);
 
@@ -299,7 +299,7 @@ public:
   template <typename T>
   std::shared_ptr<T> create(const std::string & obj_name,
                             const std::string & name,
-                            InputParameters parameters,
+                            InputParameters & parameters,
                             THREAD_ID tid = 0)
   {
     std::shared_ptr<T> new_object =

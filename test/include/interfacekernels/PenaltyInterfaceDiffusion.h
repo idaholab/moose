@@ -11,18 +11,14 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class PenaltyInterfaceDiffusion;
-
-template <>
-InputParameters validParams<PenaltyInterfaceDiffusion>();
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
 class PenaltyInterfaceDiffusion : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   PenaltyInterfaceDiffusion(const InputParameters & parameters);
 
 protected:
@@ -30,4 +26,7 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   const Real _penalty;
+
+  std::string _jump_prop_name;
+  const MaterialProperty<Real> * _jump;
 };

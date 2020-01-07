@@ -34,17 +34,11 @@ protected:
   /// Quadpoint or nodal porepressure of each phase
   const MaterialProperty<std::vector<Real>> & _porepressure;
 
-  /// Old value of quadpoint or nodal porepressure of each phase
-  const MaterialProperty<std::vector<Real>> & _porepressure_old;
-
   /// d(porepressure)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
 
   /// Quadpoint or nodal saturation of each phase
   const MaterialProperty<std::vector<Real>> & _saturation;
-
-  /// Old value of quadpoint or nodal saturation of each phase
-  const MaterialProperty<std::vector<Real>> & _saturation_old;
 
   /// d(saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
@@ -55,4 +49,3 @@ protected:
   /// d(_pf)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
-

@@ -11,11 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class PrimeProductPostprocessor;
 class PrimeProductUserObject;
-
-template <>
-InputParameters validParams<PrimeProductPostprocessor>();
 
 /**
  * Get the value of proproduct from PrimeProductUserObject
@@ -23,6 +19,8 @@ InputParameters validParams<PrimeProductPostprocessor>();
 class PrimeProductPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PrimeProductPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}
@@ -33,4 +31,3 @@ public:
 protected:
   const PrimeProductUserObject & _prime_product;
 };
-

@@ -26,6 +26,8 @@ InputParameters validParams<LinearNodalConstraint>();
 class LinearNodalConstraint : public NodalConstraint
 {
 public:
+  static InputParameters validParams();
+
   LinearNodalConstraint(const InputParameters & parameters);
 
 protected:

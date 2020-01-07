@@ -17,13 +17,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  volumetric_locking_correction = false
 []
 
 [AuxVariables]
@@ -50,10 +44,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -137,21 +131,15 @@
 []
 
 [Materials]
-  [./left]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+  [./constitutive]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./right]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
-    youngs_modulus = 1e6
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -159,8 +147,9 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg  4    101'
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
@@ -202,5 +191,6 @@
     formulation = penalty
     friction_coefficient = 0.2
     normal_smoothing_distance = 0.1
+    system = DiracKernel
   [../]
 []

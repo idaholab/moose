@@ -65,6 +65,8 @@ public:
    */
   BoundaryCondition(const InputParameters & parameters, bool nodal);
 
+  static InputParameters validParams();
+
   /**
    * Get a reference to the MooseVariableFE
    * @return Reference to MooseVariableFE

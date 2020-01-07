@@ -18,7 +18,7 @@ InputParameters
 validParams<AllenCahnElasticEnergyOffDiag>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("This kernel calculates off-diagonal jacobian of elastic energy in "
+  params.addClassDescription("This kernel calculates off-diagonal Jacobian of elastic energy in "
                              "AllenCahn with respect to displacements");
   params.addCoupledVar("displacements",
                        "The vector of displacements suitable for the problem statement");

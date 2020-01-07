@@ -1,8 +1,12 @@
 [Tests]
+  design = 'AB2PredictorCorrector.md'
+  issues = '#1288'
   [./test]
     type = 'Exodiff'
     input = 'aee.i'
     exodiff = 'aee_out.e'
     rel_err = 0.003
+
+    requirement = "The system shall support the use of the Adams Bashforth predictor for time integration."
   [../]
 []

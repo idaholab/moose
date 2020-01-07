@@ -23,6 +23,8 @@ InputParameters validParams<LinearCombinationFunction>();
 class LinearCombinationFunction : public Function, protected FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   LinearCombinationFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & pt) const override;

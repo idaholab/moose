@@ -1,89 +1,136 @@
 [Tests]
-  [./timesequence_no_start_time]
-    type = 'Exodiff'
-    input = 'timesequence.i'
-    exodiff = 'timesequence_no_start_time.e'
-    cli_args = 'Outputs/file_base=timesequence_no_start_time'
-  [../]
-  [./timesequence_earlier_start_time]
-    type = 'Exodiff'
-    input = 'timesequence.i'
-    exodiff = 'timesequence_earlier_start_time.e'
-    cli_args = 'Executioner/start_time=-1.0
-                Outputs/file_base=timesequence_earlier_start_time'
-  [../]
-  [./timesequence_later_start_time]
-    type = 'Exodiff'
-    input = 'timesequence.i'
-    exodiff = 'timesequence_later_start_time.e'
-    cli_args = 'Executioner/start_time=1.1
-                Outputs/file_base=timesequence_later_start_time'
-  [../]
-  [./timesequence_failed]
+  issues = '#9698 #6353 #6795'
+  design = 'TimeSequenceStepper.md'
+
+  [time_sequence]
+    requirement = 'The system shall support the ability to choose time step sizes based on a '
+                  'sequence of increasing numbers:'
+
+    [timesequence_no_start_time]
+      type = 'Exodiff'
+      input = 'timesequence.i'
+      exodiff = 'timesequence_no_start_time.e'
+      cli_args = 'Outputs/file_base=timesequence_no_start_time'
+
+      detail = 'beginning at the default start time,'
+
+    []
+    [timesequence_earlier_start_time]
+      type = 'Exodiff'
+      input = 'timesequence.i'
+      exodiff = 'timesequence_earlier_start_time.e'
+      cli_args = 'Executioner/start_time=-1.0
+                '
+                 'Outputs/file_base=timesequence_earlier_start_time'
+
+      detail = 'beginning at an earlier time than the sequence numbers,'
+    []
+    [timesequence_later_start_time]
+      type = 'Exodiff'
+      input = 'timesequence.i'
+      exodiff = 'timesequence_later_start_time.e'
+      cli_args = 'Executioner/start_time=1.1
+                '
+                 'Outputs/file_base=timesequence_later_start_time'
+
+      detail = 'beginning at a time somewhere in-between existing sequence numbers, and'
+    []
+
+    [exodustimesequence]
+      type = 'Exodiff'
+      prereq = 'time_sequence/timesequence_no_start_time'
+      input = 'exodustimesequence.i'
+      exodiff = 'exodustimesequence_out.e'
+
+      detail = 'when reading the sequence from an ExodusII formatted input file.'
+    []
+
+    [csvtimesequence]
+      type = 'Exodiff'
+      prereq = 'time_sequence/timesequence_no_start_time'
+      input = 'csvtimesequence.i'
+      exodiff = 'csvtimesequence_out.e'
+
+      detail = 'when reading the sequence from a comma-separated input file.'
+    []
+  []
+
+  [timesequence_failed]
     type = 'Exodiff'
     input = 'timesequence_failed_solve.i'
     exodiff = 'timesequence_failed_solve.e'
     max_threads = 1
     max_parallel = 1
-  [../]
 
-  [./exodustimesequence]
-    type = 'Exodiff'
-    prereq = timesequence_no_start_time
-    input = 'exodustimesequence.i'
-    exodiff = 'exodustimesequence_out.e'
-  [../]
+    requirement = 'The system shall support the ability to override time sequence time step sizes '
+                  'when solves fail.'
+  []
 
-  [./timesequence_restart1]
-    type = 'Exodiff'
-    input = 'timesequence_restart1.i'
-    exodiff = 'timesequence_restart1.e'
-    cli_args = 'Outputs/file_base=timesequence_restart1'
-    recover = false
-  [../]
+  [restart]
+    requirement = 'The system shall support the ability to run a calculation for the purpose of '
+                  'creating a time sequence restart file:'
+    [timesequence_restart1]
+      type = 'Exodiff'
+      input = 'timesequence_restart1.i'
+      exodiff = 'timesequence_restart1.e'
+      cli_args = 'Outputs/file_base=timesequence_restart1'
+      recover = false
 
-  [./timesequence_restart2]
-    type = 'Exodiff'
-    input = 'timesequence_restart2.i'
-    exodiff = 'timesequence_restart2.e'
-    cli_args = 'Outputs/file_base=timesequence_restart2'
-    recover = false
-    prereq = timesequence_restart1
-  [../]
+      detail = 'when writing the checkpoint file,'
+    []
 
-  [./timesequence_restart3]
-    type = 'Exodiff'
-    input = 'timesequence_restart3.i'
-    exodiff = 'timesequence_restart3.e'
-    cli_args = 'Outputs/file_base=timesequence_restart3'
-    recover = false
-    prereq = timesequence_restart1
-  [../]
+    [timesequence_restart2]
+      type = 'Exodiff'
+      input = 'timesequence_restart2.i'
+      exodiff = 'timesequence_restart2.e'
+      cli_args = 'Outputs/file_base=timesequence_restart2'
+      recover = false
+      prereq = 'restart/timesequence_restart1'
 
-  [./timesequence_restart_failure_1]
-    type = 'Exodiff'
-    input = 'timesequence_restart1.i'
-    exodiff = 'timesequence_restart_failure1.e'
-    cli_args = 'Outputs/file_base=timesequence_restart_failure1'
-    recover = false
-    max_threads = 1
-    max_parallel = 1
-  [../]
+      detail = 'when restarting where the time sequence is identical, and'
+    []
 
-  [./timesequence_restart_failure2]
-    type = 'RunException'
-    input = 'timesequence_restart_failure.i'
-    expect_err = "The timesequence provided in the restart file must be identical"
-    recover = false
-    prereq = timesequence_restart_failure_1
-    max_threads = 1
-    max_parallel = 1
-  [../]
+    [timesequence_restart3]
+      type = 'Exodiff'
+      input = 'timesequence_restart3.i'
+      exodiff = 'timesequence_restart3.e'
+      cli_args = 'Outputs/file_base=timesequence_restart3'
+      recover = false
+      prereq = 'restart/timesequence_restart1'
 
-  [./csvtimesequence]
-    type = 'Exodiff'
-    prereq = timesequence_no_start_time
-    input = 'csvtimesequence.i'
-    exodiff = 'csvtimesequence_out.e'
-  [../]
+      detail = 'when restarting where the time sequence is different after the point of the '
+               'checkpoint.'
+    []
+  []
+
+  [restart_failure]
+
+    requirement = 'The system shall support the ability to run a calculation for the purpose of '
+                  'creating a time sequence restart file suitable for failure:'
+
+    [timesequence_restart_failure_1]
+      type = 'Exodiff'
+      input = 'timesequence_restart1.i'
+      exodiff = 'timesequence_restart_failure1.e'
+      cli_args = 'Outputs/file_base=timesequence_restart_failure1'
+      recover = false
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'when writing the checkpoint file,'
+
+    []
+
+    [timesequence_restart_failure2]
+      type = 'RunException'
+      input = 'timesequence_restart_failure.i'
+      expect_err = "The timesequence provided in the restart file must be identical"
+      recover = false
+      prereq = 'restart_failure/timesequence_restart_failure_1'
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'when restarting where the time sequence is different prior to the failure.'
+    []
+  []
 []

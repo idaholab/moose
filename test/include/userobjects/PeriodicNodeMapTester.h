@@ -11,11 +11,6 @@
 
 #include "ElementUserObject.h"
 
-class PeriodicNodeMapTester;
-
-template <>
-InputParameters validParams<PeriodicNodeMapTester>();
-
 /**
  * Test object to verify that the map built by MooseMesh::buildPeriodicNodeMap() contains all
  * necessary entries. In particular this object is designed to verify corner cases (e.g. in 2D
@@ -27,6 +22,8 @@ InputParameters validParams<PeriodicNodeMapTester>();
 class PeriodicNodeMapTester : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   PeriodicNodeMapTester(const InputParameters & parameters);
 
   virtual void initialSetup() override;

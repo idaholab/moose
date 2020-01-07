@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", MMSConvection);
 
-template <>
 InputParameters
-validParams<MMSConvection>()
+MMSConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<Real>("x", "Component of velocity in the x direction");
   params.addRequiredParam<Real>("y", "Component of velocity in the y direction");
   params.addParam<Real>("z", 0.0, "Component of velocity in the z direction");

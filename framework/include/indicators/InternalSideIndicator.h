@@ -40,6 +40,8 @@ public:
    * Factory constructor initializes all internal references needed for indicator computation.
    *
    */
+  static InputParameters validParams();
+
   InternalSideIndicator(const InputParameters & parameters);
 
   /**
@@ -103,4 +105,3 @@ public:
   // number)
   static const BoundaryID InternalBndId;
 };
-

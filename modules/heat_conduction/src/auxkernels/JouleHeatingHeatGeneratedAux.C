@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", JouleHeatingHeatGeneratedAux);
 
-template <>
+defineLegacyParams(JouleHeatingHeatGeneratedAux);
+
 InputParameters
-validParams<JouleHeatingHeatGeneratedAux>()
+JouleHeatingHeatGeneratedAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute heat generated from Joule heating "
                              "$(d\\vv{P}/d\\vv{V} = \\vv{E}^2 \\sigma )$.");
   params.addRequiredCoupledVar("elec", "Electric potential for joule heating.");
@@ -29,7 +30,6 @@ validParams<JouleHeatingHeatGeneratedAux>()
 JouleHeatingHeatGeneratedAux::JouleHeatingHeatGeneratedAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _grad_elec(coupledGradient("elec")),
-    //    _elec_var(coupled("elec")),
     _elec_cond(getMaterialProperty<Real>("electrical_conductivity"))
 {
 }

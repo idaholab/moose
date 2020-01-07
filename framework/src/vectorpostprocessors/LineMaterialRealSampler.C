@@ -12,11 +12,14 @@
 
 registerMooseObject("MooseApp", LineMaterialRealSampler);
 
-template <>
+defineLegacyParams(LineMaterialRealSampler);
+
 InputParameters
-validParams<LineMaterialRealSampler>()
+LineMaterialRealSampler::validParams()
 {
-  InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
+  InputParameters params = LineMaterialSamplerBase<Real>::validParams();
+  params.addClassDescription("Samples real-valued material properties for all quadrature points in "
+                             "all elements that are intersected by a specified line");
   return params;
 }
 

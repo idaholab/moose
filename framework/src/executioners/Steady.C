@@ -18,11 +18,12 @@
 
 registerMooseObject("MooseApp", Steady);
 
-template <>
+defineLegacyParams(Steady);
+
 InputParameters
-validParams<Steady>()
+Steady::validParams()
 {
-  InputParameters params = validParams<Executioner>();
+  InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for steady-state simulations.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
@@ -82,12 +83,18 @@ Steady::execute()
 #endif // LIBMESH_ENABLE_AMR
     _problem.timestepSetup();
 
-    _last_solve_converged = _picard_solve.solve();
-
-    if (!lastSolveConverged())
+    for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
     {
-      _console << "Aborting as solve did not converge\n";
-      break;
+      _last_solve_converged = _picard_solve.solve();
+
+      if (!lastSolveConverged())
+      {
+        _console << "Aborting as solve did not converge\n";
+        break;
+      }
+
+      if (grid_step != _num_grid_steps)
+        _problem.uniformRefine();
     }
 
     _problem.computeIndicators();

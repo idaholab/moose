@@ -14,7 +14,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", AddSideSetsFromBoundingBox);
+registerMooseObjectReplaced("MooseApp",
+                            AddSideSetsFromBoundingBox,
+                            "11/30/2019 00:00",
+                            SideSetsFromBoundingBoxGenerator);
 
 template <>
 InputParameters

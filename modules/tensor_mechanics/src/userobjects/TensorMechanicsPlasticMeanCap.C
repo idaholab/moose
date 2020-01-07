@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCap);
 
-template <>
+defineLegacyParams(TensorMechanicsPlasticMeanCap);
+
 InputParameters
-validParams<TensorMechanicsPlasticMeanCap>()
+TensorMechanicsPlasticMeanCap::validParams()
 {
-  InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  InputParameters params = TensorMechanicsPlasticModel::validParams();
   params.addParam<Real>("a", 1.0, "Yield function = a*mean_stress - strength");
   params.addRequiredParam<UserObjectName>("strength", "Yield function = a*mean_stress - strength");
   params.addClassDescription("Class that limits the mean stress.  Yield function = a*mean_stress - "

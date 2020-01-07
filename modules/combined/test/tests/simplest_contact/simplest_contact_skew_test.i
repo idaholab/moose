@@ -3,14 +3,8 @@
 []
 
 [GlobalParams]
+  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -20,11 +14,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+  []
 []
 
 [AuxKernels]
@@ -90,17 +84,16 @@
 
 [Materials]
   [./stiffStuff1]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
+  [./stiffStuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
 []
-
 
 [Executioner]
   type = Transient
@@ -122,8 +115,7 @@
 []
 
 [Outputs]
-  file_base = out_skew
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

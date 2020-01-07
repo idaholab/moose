@@ -30,6 +30,8 @@ template <ComputeStage compute_stage>
 class ADRadialReturnCreepStressUpdateBase : public ADRadialReturnStressUpdate<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADRadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
 protected:
@@ -43,4 +45,3 @@ protected:
 
   usingRadialReturnStressUpdateMembers;
 };
-

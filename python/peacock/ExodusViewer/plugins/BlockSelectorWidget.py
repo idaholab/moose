@@ -78,7 +78,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Populate the items
         blocks = reader.getBlockInformation()[self._type]
-        for i, block in enumerate(blocks.itervalues()):
+        for i, block in enumerate(blocks.values()):
             item = QtGui.QStandardItem()
             item.setFlags(QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
             item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)

@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./quad_test]
     type = 'Exodiff'
     input = 'extruder_quad.i'

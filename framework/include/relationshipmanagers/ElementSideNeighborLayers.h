@@ -28,6 +28,8 @@ InputParameters validParams<ElementSideNeighborLayers>();
 class ElementSideNeighborLayers : public FunctorRelationshipManager
 {
 public:
+  static InputParameters validParams();
+
   ElementSideNeighborLayers(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;

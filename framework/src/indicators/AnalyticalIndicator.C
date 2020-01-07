@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", AnalyticalIndicator);
 
-template <>
+defineLegacyParams(AnalyticalIndicator);
+
 InputParameters
-validParams<AnalyticalIndicator>()
+AnalyticalIndicator::validParams()
 {
-  InputParameters params = validParams<ElementIntegralIndicator>();
+  InputParameters params = ElementIntegralIndicator::validParams();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   params.addClassDescription("Compute the square of the error as the difference between an unknown "
                              "variable and an analytical solution.");

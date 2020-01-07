@@ -11,11 +11,12 @@
 #include "Function.h"
 #include "MathUtils.h"
 
-template <>
+defineLegacyParams(RadiativeHeatFluxBCBase);
+
 InputParameters
-validParams<RadiativeHeatFluxBCBase>()
+RadiativeHeatFluxBCBase::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
   params.addParam<FunctionName>(
       "Tinfinity", "0", "Temperature of the body in radiative heat transfer.");

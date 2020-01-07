@@ -38,7 +38,8 @@ Software test records shall include:
 1. Simulation models used, where applicable
 1. Test problems. Results and applicability
 1. Action taken in connection with any deviations
-1. Person evaluating the test results 11. Customer approval.
+1. Person evaluating the test results
+1. Customer approval
 !alert-end!
 !template-end!
 

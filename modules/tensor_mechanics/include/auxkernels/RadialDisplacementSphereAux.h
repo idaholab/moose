@@ -24,6 +24,8 @@ InputParameters validParams<RadialDisplacementSphereAux>();
 class RadialDisplacementSphereAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RadialDisplacementSphereAux(const InputParameters & parameters);
 
   virtual ~RadialDisplacementSphereAux() {}
@@ -44,4 +46,3 @@ protected:
   /// 3D Cartesian systems.
   RealVectorValue _origin;
 };
-

@@ -11,11 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class InsideValuePPS;
 class InsideUserObject;
-
-template <>
-InputParameters validParams<InsideValuePPS>();
 
 /**
  * This PPS just retrieves the value from InsideUserObject
@@ -23,6 +19,8 @@ InputParameters validParams<InsideValuePPS>();
 class InsideValuePPS : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InsideValuePPS(const InputParameters & parameters);
   virtual ~InsideValuePPS();
 
@@ -34,4 +32,3 @@ protected:
   const InsideUserObject & _uo;
   Real _value;
 };
-

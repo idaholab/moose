@@ -13,22 +13,16 @@
 #include "MooseParsedVectorFunction.h"
 #include "MaterialProperty.h"
 
-// Forward Declaration
-class DiffTensorKernel;
-
-template <>
-InputParameters validParams<DiffTensorKernel>();
-
 /**
  * A Kernel for Testing ParsedVectorFunction
  */
 class DiffTensorKernel : public Kernel
 {
 public:
-  /** Class constructor */
+  static InputParameters validParams();
+
   DiffTensorKernel(const InputParameters & parameters);
 
-  /** Class destructor */
   virtual ~DiffTensorKernel() {}
 
 protected:

@@ -24,6 +24,8 @@ InputParameters validParams<RadialDisplacementCylinderAux>();
 class RadialDisplacementCylinderAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RadialDisplacementCylinderAux(const InputParameters & parameters);
 
   virtual ~RadialDisplacementCylinderAux() {}
@@ -46,4 +48,3 @@ protected:
   /// Point used to define the origin of the cylinder axis for Cartesian systems
   RealVectorValue _origin;
 };
-

@@ -13,10 +13,9 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-#include "metaphysicl/dualnumberarray.h"
+#include "DualRealOps.h"
 
 using MetaPhysicL::DualNumber;
-using MetaPhysicL::NumberArray;
 
 registerMooseObject("MooseApp", NormalNodalLMMechanicalContact);
 
@@ -37,7 +36,8 @@ validParams<NormalNodalLMMechanicalContact>()
 
   params.addClassDescription("Implements the KKT conditions for normal contact using an NCP "
                              "function. Requires that either the gap distance or the normal "
-                             "contact pressure (represented by the value of `variable`) is zero.");
+                             "contact pressure (represented by the value of `variable`) is zero. "
+                             "The LM variable must be of the same order as the mesh");
   return params;
 }
 
@@ -116,6 +116,10 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
     if (pinfo != NULL)
     {
       Real a = -pinfo->_distance * _c;
+      mooseAssert(
+          _qp < _u_slave.size(),
+          "qp is greater than the size of u_slave in NormalNodalLMMechanicalContact. Check and "
+          "make sure that your Lagrange multiplier variable has the same order as the mesh");
       Real b = _u_slave[_qp];
 
       if (_ncp_type == "fb")
@@ -139,7 +143,7 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      DualNumber<Real> dual_u_slave(_u_slave[_qp]);
+      DualNumber<Real, Real> dual_u_slave(_u_slave[_qp]);
       dual_u_slave.derivatives() = 1.;
 
       auto a = -pinfo->_distance * _c;
@@ -165,7 +169,7 @@ NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobi
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      DualNumber<Real> gap(-pinfo->_distance);
+      DualNumber<Real, Real> gap(-pinfo->_distance);
 
       unsigned comp;
       if (jvar == _master_var_num)

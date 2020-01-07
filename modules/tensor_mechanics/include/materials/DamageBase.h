@@ -28,6 +28,8 @@ InputParameters validParams<DamageBase>();
 class DamageBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   DamageBase(const InputParameters & parameters);
 
   /**

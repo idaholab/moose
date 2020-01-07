@@ -11,15 +11,12 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage>
-class GapHeatConductanceTest;
-
-declareADValidParams(GapHeatConductanceTest);
-
 template <ComputeStage compute_stage>
 class GapHeatConductanceTest : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   GapHeatConductanceTest(const InputParameters & parameters);
 
 protected:

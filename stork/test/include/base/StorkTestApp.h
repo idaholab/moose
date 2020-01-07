@@ -11,14 +11,11 @@
 
 #include "MooseApp.h"
 
-class StorkTestApp;
-
-template <>
-InputParameters validParams<StorkTestApp>();
-
 class StorkTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   StorkTestApp(InputParameters parameters);
   virtual ~StorkTestApp();
 

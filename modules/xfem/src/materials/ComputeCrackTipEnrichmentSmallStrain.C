@@ -21,6 +21,8 @@ InputParameters
 validParams<ComputeCrackTipEnrichmentSmallStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
+  params.addClassDescription(
+      "Computes the crack tip enrichment at a point within a small strain formulation.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("enrichment_displacements",
                                                               "The enrichment displacement");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

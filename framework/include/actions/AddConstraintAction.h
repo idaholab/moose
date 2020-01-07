@@ -19,6 +19,8 @@ InputParameters validParams<AddConstraintAction>();
 class AddConstraintAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddConstraintAction(InputParameters params);
 
   virtual void act() override;

@@ -1,31 +1,48 @@
 [Tests]
+  issues = '#1228 #5055'
+  design = 'syntax/Materials/index.md'
+
   [./property_on_all_blocks]
     type = 'Exodiff'
     input = 'has_block_prop.i'
     exodiff = 'has_block_prop_out.e'
     cli_args = 'Kernels/u_diff/conductivity=k'
+
+    requirement = 'The system shall support retrieving a single property (name) supplied by different materials on different mesh blocks.'
   [../]
+
   [./property_on_one_block]
     type = 'RunException'
     input = 'has_block_prop.i'
     expect_err = 'The material property k_right is not defined on all blocks of the kernel'
     cli_args = 'Kernels/u_diff/conductivity=k_right'
+
+    requirement = 'The system shall report an error if a material property is needed on the entire domain but is only supplied on a subset of the subdomains.'
   [../]
+
   [./hasMaterialProperty]
     type = 'RunException'
     input = 'has_block_prop.i'
     expect_err = 'hasMaterialProperty test passed'
     cli_args = 'Kernels/u_diff/conductivity=k_right Kernels/u_diff/test=hasMaterialProperty'
+
+    requirement = 'The system shall report that a material property is available when it is defined on a subdomain.'
   [../]
+
   [./property_on_boundary]
     type = 'Exodiff'
     input = 'has_boundary_prop.i'
     exodiff = 'has_boundary_prop_out.e'
+
+    requirement = 'The system shall support retrieving a boundary restricted material property for performing a calculation on a boundary.'
   [../]
+
   [./property_not_on_boundary]
     type = 'RunException'
     input = 'has_boundary_prop.i'
     expect_err = 'The material property other_value is not defined on all boundaries'
     cli_args = 'BCs/right/mat_prop=other_value'
+
+    requirement = 'The system shall report and error when a boundary restricted material is not defined on the same boundary as a boundary restricted object using that property in a calculation.'
   [../]
 []

@@ -24,6 +24,8 @@ InputParameters validParams<FluxBC>();
 class FluxBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   FluxBC(const InputParameters & params);
 
 protected:
@@ -33,4 +35,3 @@ protected:
   virtual RealGradient computeQpFluxResidual() = 0;
   virtual RealGradient computeQpFluxJacobian() = 0;
 };
-

@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", ValueRangeMarker);
 
-template <>
+defineLegacyParams(ValueRangeMarker);
+
 InputParameters
-validParams<ValueRangeMarker>()
+ValueRangeMarker::validParams()
 {
-  InputParameters params = validParams<QuadraturePointMarker>();
+  InputParameters params = QuadraturePointMarker::validParams();
 
   params.addRequiredParam<Real>("lower_bound", "The lower bound value for the range.");
   params.addRequiredParam<Real>("upper_bound", "The upper bound value for the range.");

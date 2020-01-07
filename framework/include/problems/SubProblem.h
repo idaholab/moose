@@ -21,6 +21,7 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
+class GhostingFunctor;
 }
 
 class MooseMesh;
@@ -36,6 +37,7 @@ typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -60,6 +62,8 @@ InputParameters validParams<SubProblem>();
 class SubProblem : public Problem
 {
 public:
+  static InputParameters validParams();
+
   SubProblem(const InputParameters & parameters);
   virtual ~SubProblem();
 
@@ -369,6 +373,9 @@ public:
   virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
 
+  /// sets the current boundary ID in assembly
+  void setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid);
+
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference
    * points and then compute variable data. Note that this method makes no assumptions about what's
@@ -593,7 +600,7 @@ public:
   bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
 
   /// Set whether residual being evaulated is non-linear
-  void computingNonlinearResid(bool computing_nonlinear_residual)
+  virtual void computingNonlinearResid(bool computing_nonlinear_residual)
   {
     _computing_nonlinear_residual = computing_nonlinear_residual;
   }
@@ -636,6 +643,18 @@ public:
    * Method for reading wehther we have any ad objects
    */
   bool haveADObjects() const { return _have_ad_objects; }
+
+  virtual LineSearch * getLineSearch() = 0;
+
+  /**
+   * The coupling matrix defining what blocks exist in the preconditioning matrix
+   */
+  virtual const CouplingMatrix * couplingMatrix() const = 0;
+
+  /**
+   * Add an algebraic ghosting functor to this problem's DofMaps
+   */
+  void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
 protected:
   /**

@@ -19,7 +19,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'diff_golds')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
-        self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
-        self.assertRegexpMatches(e.output, r'test_harness\.exodiff.*?Running exodiff')
-        self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?Running csvdiff')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.exodiff.*?Running exodiff')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?Running csvdiff')

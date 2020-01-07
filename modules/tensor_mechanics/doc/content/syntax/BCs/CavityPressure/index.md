@@ -38,15 +38,15 @@ the Associated Actions block below, which are all created within the same block.
 
 ## Example Input Syntax
 
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=BCs/CavityPressure
+!listing modules/combined/test/tests/cavity_pressure/3d.i block=BCs/CavityPressure
 
 Postprocessors for both the average temperature and the internal volume are also required for the
 Cavity Pressure Action system. Note that the name of the postprocessors correspond to the arguments
 for the parameters `temperature` and `internal_volume` in the `CavityPressure` block.
 
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=Postprocessors/aveTempInterior
+!listing modules/combined/test/tests/cavity_pressure/3d.i block=Postprocessors/aveTempInterior
 
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=Postprocessors/internalVolume
+!listing modules/combined/test/tests/cavity_pressure/3d.i block=Postprocessors/internalVolume
 
 !syntax parameters /BCs/CavityPressure/CavityPressureAction
 

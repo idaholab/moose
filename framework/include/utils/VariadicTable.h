@@ -221,6 +221,9 @@ protected:
   {
     auto & val = std::get<I>(t);
 
+    auto original_precision = stream.precision();
+    auto original_flags = stream.flags();
+
     // Set the precision
     if (!_precision.empty())
     {
@@ -249,12 +252,13 @@ protected:
     stream << std::string(_cell_padding, ' ') << std::setw(_column_sizes[I])
            << justify<decltype(val)>(0) << val << std::string(_cell_padding, ' ') << "|";
 
-    // Unset the format
+    // Restore the format
     if (!_column_format.empty())
-    {
-      // Because "stream << std::defaultfloat;" won't compile with old GCC or Clang
-      stream.unsetf(std::ios_base::floatfield);
-    }
+      stream.flags(original_flags);
+
+    // Restore the precision
+    if (!_precision.empty())
+      stream.precision(original_precision);
 
     // Recursive call to print the next item
     print_each(std::forward<TupleType>(t), stream, std::integral_constant<size_t, I + 1>());

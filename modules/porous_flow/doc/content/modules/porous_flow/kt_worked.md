@@ -54,7 +54,7 @@ k^{\mathrm{ele}} = \left(
 k^{\mathrm{ele}}_{ll} & k^{\mathrm{ele}}_{lr} \\
 k^{\mathrm{ele}}_{rl} & k^{\mathrm{ele}}_{rr}
 \end{array}
-\right) = 
+\right) =
 \frac{v}{2} \left(
 \begin{array}{cc}
 -1 & -1 \\
@@ -103,7 +103,7 @@ Here and below it is assumed $v>0$, otherwise the upwinding goes the opposite wa
 KT eliminate these negative off-diagonal entries in the following way.  Introduce the symmetric matrix $D$, with entries
 \begin{equation}
 d_{ij} = d_{ji} = \mathrm{max}\left\{ 0, -k_{ij}, -k_{ji} \right\}
-\ \ \mathrm{and}\ \ 
+\ \ \mathrm{and}\ \
 d_{ii} = -\sum_{j\neq i}d_{ij} \ .
 \end{equation}
 (KT Eqn (32)).  So:
@@ -190,7 +190,7 @@ The controlling factor is the flux limiter, $\Phi$.  Note that it is a function 
 \begin{equation}
 \Phi_{i} = \Phi\left( \frac{u_{i}-u_{i-1}}{u_{i+1}-u_{i}} \right) \ .
 \end{equation}
-This is described in KT Figure 1.  Note that it is exactly the flux-limiter used in RDG(P0P1) (see the [RDG page](rdg/index.md)), so identical results to RDG(P0P1) should be expected in simple situations.
+This is described in KT Figure 1.  Note that it is exactly the flux-limiter used in RDG(P0P1) (see the [RDG page](rdg/index.md optional=True)), so identical results to RDG(P0P1) should be expected in simple situations.
 
 It is possible to choose all sorts of functional forms for $\Phi$.  KT write 4 possibilities on page 135.  All these possibilities satisfy $0\leq \Phi \leq 2$.  This means that the antidiffusive flux will always be
 \begin{equation}
@@ -220,4 +220,3 @@ Notice that the VanLeer limiter is smoother than the others, so it is likely to 
 The effect of choosing different flux limiters for this worked example is shown in [flux_limiter_choice].  In this case, the superbee flux limiter performs best.  Note that the timestep is rather large in this example, to emphasize the differences between the flux limiters, however, if this were a real simulation that was trying to reduce numerical diffusion, the timestep should be chosen smaller, and then the results would look more like [fltvd_all].
 
 !media porous_flow/flux_limiter_choice.gif style=width:70%;margin-left:10px caption=The effect of flux limiter on the advective profile.  Note that the timestep is rather large here, to emphasise the difference between the flux limiters.  If a smaller timestep is chosen the results all look similar and like [fltvd_all].  id=flux_limiter_choice
-

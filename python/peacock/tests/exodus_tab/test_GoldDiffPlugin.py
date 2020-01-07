@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -61,7 +61,8 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
         self.assertTrue(self._widget.GoldDiffPlugin.isEnabled())
         self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
         self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
-        self.assertImage('testGold.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
+        if self._window.devicePixelRatio() == 1:
+            self.assertImage('testGold.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
 
     def testDiff(self):
         """
@@ -70,7 +71,8 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
         self.assertTrue(self._widget.GoldDiffPlugin.isEnabled())
         self._widget.GoldDiffPlugin.DiffToggle.setChecked(QtCore.Qt.Checked)
         self._widget.GoldDiffPlugin.DiffToggle.clicked.emit(True)
-        self.assertImage('testDiff.png', window=self._widget.GoldDiffPlugin.DiffVTKWindow)
+        if self._window.devicePixelRatio() == 1:
+            self.assertImage('testDiff.png', window=self._widget.GoldDiffPlugin.DiffVTKWindow)
 
     def testCameraLink(self):
         """
@@ -126,7 +128,8 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
         self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
         self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
-        self.assertImage('testChangeVariable.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
+        if self._window.devicePixelRatio() == 1:
+            self.assertImage('testChangeVariable.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
 
     def testChangeFileWhenSelected(self):
         """

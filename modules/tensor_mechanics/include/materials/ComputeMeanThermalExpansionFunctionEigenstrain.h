@@ -24,6 +24,8 @@ class ComputeMeanThermalExpansionFunctionEigenstrain
     : public ComputeMeanThermalExpansionEigenstrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
 
 protected:

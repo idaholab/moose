@@ -1,4 +1,4 @@
-# Restarting from previous simulations
+# Restarting and recovering from previous simulations
 
 MOOSE provides several options for [restarting or recovering](application_usage/restart_recover.md optional=True) from previous simulations. In this example, we demonstrate how this capability can be used in the PorousFlow module by considering a simple two-part problem. The first is to establish the hydrostatic pressure gradient in a reservoir that is due to gravity. This is the equilibrium state of the reservoir, and will be used as the initial condition for porepressure in the second part of this problem, where gas is injected into the reservoir in a single injection well.
 
@@ -62,7 +62,7 @@ The input file for this case is
 
 The input mesh for this problem is the output mesh from the gravity equilibrium simulation, which we uniformly refine once to increase the spatial resolution, translate horizontally and rotate about the Y-axis to form a two-dimensional mesh with an injection well at the centre
 
-!listing modules/porous_flow/examples/restart/gas_injection.i block=Mesh MeshModifiers Problem
+!listing modules/porous_flow/examples/restart/gas_injection.i block=Mesh Problem
 
 The initial condition for the liquid porepressure is read directly from the input mesh
 
@@ -116,3 +116,19 @@ Due to the additional refinement near the well and the top of the reservoir, the
 ## Generalisation to more complicated models
 
 The above example of the restart capability demonstrates how PorousFlow can use the results of previous simulations as initial conditions of new simulations, even when changing from single-phase models to a more complex two-phase model. Of course, these approaches can be extended to models where heat and geomechanics are involved by setting initial conditions for additional variables using an identical approach to that demonstrated in this simple example.
+
+## Recovery
+
+A simulation may fail prematurely due to external factors (such as exceeding the wall time on a cluster). In these cases a simulation may be recovered provided that checkpointing has been enabled.
+
+!listing modules/porous_flow/examples/restart/gas_injection.i block=Outputs
+
+If the simulation `gas_injection.i` is interrupted for any reason, it may be recovered using the checkpoint data
+
+```language=bash
+porous_flow-opt -i gas_injection.i --recover
+```
+
+whereby the simulation will continue from the latest checkpoint data.
+
+For this reason, it is strongly recommended that checkpointing is enabled in long-running jobs.

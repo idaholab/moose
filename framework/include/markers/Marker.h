@@ -48,6 +48,8 @@ class Marker : public MooseObject,
                public OutputInterface
 {
 public:
+  static InputParameters validParams();
+
   Marker(const InputParameters & parameters);
   virtual ~Marker() {}
 

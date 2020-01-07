@@ -25,6 +25,8 @@ InputParameters validParams<ImageMeshGenerator>();
 class ImageMeshGenerator : public GeneratedMeshGenerator, public FileRangeBuilder
 {
 public:
+  static InputParameters validParams();
+
   ImageMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

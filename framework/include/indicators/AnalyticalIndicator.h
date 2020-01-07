@@ -19,6 +19,8 @@ InputParameters validParams<AnalyticalIndicator>();
 class AnalyticalIndicator : public ElementIntegralIndicator
 {
 public:
+  static InputParameters validParams();
+
   AnalyticalIndicator(const InputParameters & parameters);
 
 protected:

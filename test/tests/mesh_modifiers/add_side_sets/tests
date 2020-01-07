@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./cylinder_points]
     type = 'Exodiff'
     input = 'cylinder_points.i'

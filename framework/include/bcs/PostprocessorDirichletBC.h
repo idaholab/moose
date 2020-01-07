@@ -24,6 +24,8 @@ InputParameters validParams<PostprocessorDirichletBC>();
 class PostprocessorDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   PostprocessorDirichletBC(const InputParameters & parameters);
 
 protected:
@@ -32,4 +34,3 @@ protected:
   /// The value for this BC
   const PostprocessorValue & _postprocessor_value;
 };
-

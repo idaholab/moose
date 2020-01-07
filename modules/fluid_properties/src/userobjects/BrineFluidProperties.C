@@ -25,27 +25,43 @@ validParams<BrineFluidProperties>()
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   : MultiComponentFluidProperties(parameters), _water_fp_derivs(true)
 {
-  // SinglePhaseFluidPropertiesPT UserObject for water
+  // There are two possibilities to consider:
+  // 1) No water_fp has been supplied (in which case one is constructed)
+  // 2) A water_fp hase been supplied (in which case it is used)
+  // In both cases, though, a Water97FluidProperties UserObject must be added
+  // Note: this UserObject is only used to gain access to the Henry's constant
+  // formulation. All property calculations are performed using _water_fp
+  const std::string water_name = name() + ":water";
+  {
+    const std::string class_name = "Water97FluidProperties";
+    InputParameters params = _app.getFactory().getValidParams(class_name);
+    if (_tid == 0)
+      _fe_problem.addUserObject(class_name, water_name, params);
+  }
+  _water97_fp = &_fe_problem.getUserObjectTempl<Water97FluidProperties>(water_name);
+
   if (parameters.isParamSetByUser("water_fp"))
+  {
+    // SinglePhaseFluidPropertiesPT UserObject for water
     _water_fp = &getUserObject<SinglePhaseFluidProperties>("water_fp");
+
+    // Check that a water userobject has actually been supplied
+    if (_water_fp->fluidName() != "water")
+      paramError("water_fp", "A water FluidProperties UserObject must be supplied");
+  }
   else
   {
-    // Construct a Water97FluidProperties UserObject
-    const std::string water_name = name() + ":water";
-    {
-      const std::string class_name = "Water97FluidProperties";
-      InputParameters params = _app.getFactory().getValidParams(class_name);
-      _fe_problem.addUserObject(class_name, water_name, params);
-    }
+    // Construct a SinglePhaseFluidProperties UserObject for water
     _water_fp = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(water_name);
   }
 
-  // SinglePhaseFluidPropertiesPT UserObject for NaCl
+  // SinglePhaseFluidProperties UserObject for NaCl
   const std::string nacl_name = name() + ":nacl";
   {
     const std::string class_name = "NaClFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
-    _fe_problem.addUserObject(class_name, nacl_name, params);
+    if (_tid == 0)
+      _fe_problem.addUserObject(class_name, nacl_name, params);
   }
   _nacl_fp = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(nacl_name);
 
@@ -141,9 +157,7 @@ BrineFluidProperties::rho_from_p_T_X(const FPDualReal & pressure,
     _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k, rho, drho_dp, drho_dT);
     water_density = rho;
 
-    for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
-      water_density.derivatives()[i] =
-          pressure.derivatives()[i] * drho_dp + Tv.derivatives()[i] * drho_dT;
+    water_density.derivatives() = pressure.derivatives() * drho_dp + Tv.derivatives() * drho_dT;
   }
   else
     water_density = _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k);
@@ -178,11 +192,11 @@ BrineFluidProperties::rho_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_rho = this->rho_from_p_T_X(p, T, x);
@@ -288,8 +302,7 @@ BrineFluidProperties::h_from_p_T_X(const FPDualReal & pressure,
     _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k, h, dh_dp, dh_dT);
     enthalpy = h;
 
-    for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
-      enthalpy.derivatives()[i] = pressure.derivatives()[i] * dh_dp + Th.derivatives()[i] * dh_dT;
+    enthalpy.derivatives() = pressure.derivatives() * dh_dp + Th.derivatives() * dh_dT;
   }
   else
     enthalpy = _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k);
@@ -320,11 +333,11 @@ BrineFluidProperties::h_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_h = h_from_p_T_X(p, T, x);
@@ -403,11 +416,11 @@ BrineFluidProperties::e_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_e = e_from_p_T_X(p, T, x);
@@ -485,4 +498,32 @@ BrineFluidProperties::massFractionToMoleFraction(const FPDualReal & xnacl) const
   FPDualReal Mbrine = molarMass(xnacl);
   // The mole fraction is then
   return xnacl * Mbrine / _Mnacl;
+}
+
+Real
+BrineFluidProperties::henryConstant(Real temperature, const std::vector<Real> & coeffs) const
+{
+  return _water97_fp->henryConstant(temperature, coeffs);
+}
+
+void
+BrineFluidProperties::henryConstant(Real temperature,
+                                    const std::vector<Real> & coeffs,
+                                    Real & Kh,
+                                    Real & dKh_dT) const
+{
+  _water97_fp->henryConstant(temperature, coeffs, Kh, dKh_dT);
+}
+
+DualReal
+BrineFluidProperties::henryConstant(const DualReal & temperature,
+                                    const std::vector<Real> & coeffs) const
+{
+  Real Kh, dKh_dT;
+  henryConstant(temperature.value(), coeffs, Kh, dKh_dT);
+
+  DualReal henry = Kh;
+  henry.derivatives() = temperature.derivatives() * dKh_dT;
+
+  return henry;
 }

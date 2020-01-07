@@ -3,6 +3,9 @@
     type = 'Exodiff'
     input = 'mixed_order_variables_test.i'
     exodiff = 'out.e'
-    max_parallel = 1
+
+    issues = '76ddaa1961753020e57d62d2b8f29e0638e40c28'
+    design = 'syntax/Variables/index.md'
+    requirement = 'The system shall support the ability to have mixed field variable orders on the same mesh.'
   [../]
 []

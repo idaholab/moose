@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", CoupledTimeDerivative);
 
-template <>
+defineLegacyParams(CoupledTimeDerivative);
+
 InputParameters
-validParams<CoupledTimeDerivative>()
+CoupledTimeDerivative::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
                              "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");

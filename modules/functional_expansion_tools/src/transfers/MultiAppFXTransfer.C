@@ -44,6 +44,8 @@ MultiAppFXTransfer::MultiAppFXTransfer(const InputParameters & parameters)
     getMultiAppObject(NULL),
     getSubAppObject(NULL)
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -156,7 +158,7 @@ MultiAppFXTransfer::execute()
 {
   _console << "Beginning MultiAppFXTransfer: " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     // LocalApp -> MultiApp
     case TO_MULTIAPP:

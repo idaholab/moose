@@ -23,6 +23,8 @@ InputParameters validParams<Pressure>();
 class Pressure : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   Pressure(const InputParameters & parameters);
 
 protected:

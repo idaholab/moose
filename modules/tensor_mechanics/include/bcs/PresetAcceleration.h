@@ -20,6 +20,8 @@
 class PresetAcceleration : public PresetNodalBC
 {
 public:
+  static InputParameters validParams();
+
   PresetAcceleration(const InputParameters & parameters);
 
 protected:

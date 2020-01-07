@@ -109,26 +109,21 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
     temperature = temperature
   [../]
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-    at_nodes = false
   [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
-    at_nodes = false
   [../]
   [./ppss]
     type = PorousFlow1PhaseP
-    at_nodes = false
     porepressure = porepressure
     capillary_pressure = pc
   [../]
   [./porosity]
     type = PorousFlowPorosity
-    at_nodes = false
     mechanical = true
     thermal = true
     ensure_positive = false

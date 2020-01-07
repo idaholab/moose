@@ -174,7 +174,7 @@ public:
    * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
    * property to the Real version for the specified quadrature point
    */
-  void copyDualNumberToValue(const unsigned int i) override { _value[i].copyDualNumberToValue(); }
+  void copyDualNumberToValue(const unsigned int i) override { _value[i].synchronizeToVal(); }
 
   void markAD(bool use_ad) override;
 
@@ -206,8 +206,6 @@ inline void
 MaterialProperty<T>::markAD(bool use_ad)
 {
   _use_ad = use_ad;
-  for (auto && moose_wrapper : _value)
-    moose_wrapper.markAD(use_ad);
 }
 
 template <typename T>
@@ -233,7 +231,7 @@ MaterialProperty<T>::resize(int n)
     _value.erase(_value.end() + diff, _value.end());
   else
     for (decltype(diff) i = 0; i < diff; ++i)
-      _value.emplace_back(MooseADWrapper<T>(_use_ad));
+      _value.emplace_back(MooseADWrapper<T>());
 }
 
 template <typename T>

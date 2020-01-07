@@ -83,8 +83,10 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
     _c_weights(isParamValid("chemical_weights") ? getParam<std::vector<Real>>("chemical_weights")
                                                 : std::vector<Real>(_num_c_ref, 1.0)),
 
-    _porosity_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")
-                                  : getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
+    _porosity_old(_chemical ? (_nodal_material
+                                   ? &getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")
+                                   : &getMaterialPropertyOld<Real>("PorousFlow_porosity_qp"))
+                            : nullptr),
     _vol_strain_qp(_mechanical ? &getMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")
                                : nullptr),
     _dvol_strain_qp_dvar(_mechanical ? &getMaterialProperty<std::vector<RealGradient>>(
@@ -194,7 +196,7 @@ PorousFlowPorosity::atNegInfinityQp() const
         result -= _c_weights[i] * (*_initial_c[i])[_qp];
     else
       for (unsigned i = 0; i < _num_c_ref; ++i)
-        result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] + _dt * _porosity_old[_qp] *
+        result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] + _dt * (*_porosity_old)[_qp] *
                                                                       (*_saturation)[_qp][_aq_ph] *
                                                                       (*_reaction_rate)[_qp][i]);
   }
@@ -207,7 +209,7 @@ PorousFlowPorosity::datNegInfinityQp(unsigned pvar) const
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
     for (unsigned i = 0; i < _num_c_ref; ++i)
-      result -= _c_weights[i] * _dt * _porosity_old[_qp] *
+      result -= _c_weights[i] * _dt * (*_porosity_old)[_qp] *
                 ((*_saturation)[_qp][_aq_ph] * (*_dreaction_rate_dvar)[_qp][i][pvar] +
                  (*_dsaturation_dvar)[_qp][_aq_ph][pvar] * (*_reaction_rate)[_qp][i]);
   return result;
@@ -226,7 +228,7 @@ PorousFlowPorosity::atZeroQp() const
     else
       for (unsigned i = 0; i < _num_c_ref; ++i)
         result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] +
-                                   _dt * _porosity_old[_qp] * (*_saturation)[_qp][_aq_ph] *
+                                   _dt * (*_porosity_old)[_qp] * (*_saturation)[_qp][_aq_ph] *
                                        (*_reaction_rate)[_qp][i] -
                                    (*_c_reference[i])[_qp]);
   }
@@ -239,7 +241,7 @@ PorousFlowPorosity::datZeroQp(unsigned pvar) const
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
     for (unsigned i = 0; i < _num_c_ref; ++i)
-      result -= _c_weights[i] * _dt * _porosity_old[_qp] *
+      result -= _c_weights[i] * _dt * (*_porosity_old)[_qp] *
                 ((*_saturation)[_qp][_aq_ph] * (*_dreaction_rate_dvar)[_qp][i][pvar] +
                  (*_dsaturation_dvar)[_qp][_aq_ph][pvar] * (*_reaction_rate)[_qp][i]);
   return result;
@@ -287,7 +289,7 @@ PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
 RealGradient
 PorousFlowPorosity::ddecayQp_dgradvar(unsigned pvar) const
 {
-  RealGradient result;
+  RealGradient result(0.0, 0.0, 0.0);
   if (_mechanical)
   {
     const unsigned qp_to_use =

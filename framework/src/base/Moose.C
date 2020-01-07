@@ -55,9 +55,25 @@ MooseVecView(NumericVector<Number> & vector)
 }
 
 void
+MooseVecView(const NumericVector<Number> & vector)
+{
+  PetscVector<Number> & petsc_vec =
+      static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
+  VecView(petsc_vec.vec(), 0);
+}
+
+void
 MooseMatView(SparseMatrix<Number> & mat)
 {
   PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  MatView(petsc_mat.mat(), 0);
+}
+
+void
+MooseMatView(const SparseMatrix<Number> & mat)
+{
+  PetscMatrix<Number> & petsc_mat =
+      static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   MatView(petsc_mat.mat(), 0);
 }
 
@@ -125,9 +141,13 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
   appendMooseObjectTask  ("add_kernel",                   ArrayKernel);
 
+  registerMooseObjectTask("add_variable",                 MooseVariableBase,      false);
+  registerMooseObjectTask("add_aux_variable",             MooseVariableBase,      false);
+  registerMooseObjectTask("add_elemental_field_variable", MooseVariableBase,      false);
+
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
-  registerMooseObjectTask("add_material",                 Material,               false);
+  registerMooseObjectTask("add_material",                 MaterialBase,           false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
 
   registerMooseObjectTask("add_function",                 Function,               false);
@@ -136,7 +156,6 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
-  registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -179,6 +198,7 @@ addActionTypes(Syntax & syntax)
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
+  registerTask("recover_mesh_meta_data", true);
 
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
@@ -257,6 +277,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"
+                           "(recover_mesh_meta_data)"
                            "(set_mesh_base)"
                            "(check_copy_nodal_vars)"
                            "(add_partitioner)"
@@ -285,10 +306,10 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_function)"
-                           "(add_distribution)"
-                           "(add_sampler)"
                            "(add_periodic_bc)"
                            "(add_user_object)"
+                           "(add_distribution)"
+                           "(add_sampler)"
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
@@ -422,7 +443,14 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DisplayGhostingAction", "Mesh");
 
   registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
+
+  // Deprecated MeshGeneratorSyntax
   registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
+  syntax.deprecateActionSyntax("MeshGenerators/*",
+                               "The top-level [MeshGenerators] syntax is deprecated, please nest "
+                               "your generators under [Mesh]");
+
+  registerSyntax("AddMeshGeneratorAction", "Mesh/*");
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
@@ -572,9 +600,9 @@ setColorConsole(bool use_color, bool force)
 }
 
 bool _warnings_are_errors = false;
-
 bool _deprecated_is_error = false;
-
 bool _throw_on_error = false;
+bool show_trace = true;
+bool show_multiple = false;
 
 } // namespace Moose

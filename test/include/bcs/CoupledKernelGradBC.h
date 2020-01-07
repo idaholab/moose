@@ -11,15 +11,13 @@
 
 #include "IntegratedBC.h"
 
-class CoupledKernelGradBC;
 class Function;
-
-template <>
-InputParameters validParams<CoupledKernelGradBC>();
 
 class CoupledKernelGradBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledKernelGradBC(const InputParameters & parameters);
 
   virtual ~CoupledKernelGradBC();
@@ -30,4 +28,3 @@ protected:
   RealVectorValue _beta;
   const VariableValue & _var2;
 };
-

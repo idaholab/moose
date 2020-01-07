@@ -14,15 +14,16 @@
 
 registerMooseObject("MooseApp", TimeExtremeValue);
 
-template <>
+defineLegacyParams(TimeExtremeValue);
+
 InputParameters
-validParams<TimeExtremeValue>()
+TimeExtremeValue::validParams()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1 abs_max=2 abs_min=3", "max");
 
   // Define the parameters
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<MooseEnum>("value_type",
                              type_options,
                              "Type of extreme value to return."

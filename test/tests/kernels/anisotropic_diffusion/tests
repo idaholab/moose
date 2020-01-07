@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'aniso_diffusion.i'
     exodiff = 'aniso_diffusion_out.e'
+
+    issues = '#1405'
+    design = 'AnisotropicDiffusion.md'
+    requirement = 'The system shall support direct tensor-vector products and vector dot products to maintain dimension agnostic formulations where possible.'
   [../]
 []

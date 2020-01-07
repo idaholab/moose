@@ -41,6 +41,8 @@ InputParameters validParams<SimplePredictor>();
 class SimplePredictor : public Predictor
 {
 public:
+  static InputParameters validParams();
+
   SimplePredictor(const InputParameters & parameters);
 
   virtual bool shouldApply() override;

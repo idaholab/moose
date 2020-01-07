@@ -15,14 +15,15 @@
 []
 
 [Mesh]
-  file = cyl2D.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = cyl2D.e
+  []
   [./rotate]
-    type = Transform
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '0 90 0'
+    input = file
   [../]
 []
 

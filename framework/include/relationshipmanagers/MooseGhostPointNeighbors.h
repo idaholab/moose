@@ -27,6 +27,8 @@ InputParameters validParams<MooseGhostPointNeighbors>();
 class MooseGhostPointNeighbors : public FunctorRelationshipManager
 {
 public:
+  static InputParameters validParams();
+
   MooseGhostPointNeighbors(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;

@@ -28,6 +28,8 @@ InputParameters validParams<CappedMohrCoulombCosseratStressUpdate>();
 class CappedMohrCoulombCosseratStressUpdate : public CappedMohrCoulombStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedMohrCoulombCosseratStressUpdate(const InputParameters & parameters);
 
   /**
@@ -78,4 +80,3 @@ protected:
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
 };
-

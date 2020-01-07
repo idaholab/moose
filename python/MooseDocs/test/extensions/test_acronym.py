@@ -1,4 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
@@ -8,7 +17,7 @@ logging.basicConfig()
 
 class TestInlineAcronym(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = u"[!ac!INL] and [!ac!INL]"
+    TEXT = "[!ac!INL] and [!ac!INL]"
 
     def setupExtension(self, ext):
         if ext == acronym:
@@ -71,14 +80,13 @@ class TestInlineAcronym(MooseDocsTestCase):
 
 class TestAcronymList(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = u"!acronym list"
+    TEXT = "!acronym list"
 
     def setupExtension(self, ext):
         if ext == acronym:
-            return dict(acronyms=dict(MTU="Michigan Technological University",
+            return dict(acronyms=dict(MSU="Montana State University",
                                       WSU="Washington State University",
-                                      MSU="Montana State University"))
-
+                                      MTU="Michigan Technological University"))
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self._assertAST(ast)

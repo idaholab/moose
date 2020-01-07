@@ -11,16 +11,17 @@
 
 registerMooseObject("MooseApp", PresetBC);
 
-template <>
+defineLegacyParams(PresetBC);
+
 InputParameters
-validParams<PresetBC>()
+PresetBC::validParams()
 {
-  InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<Real>("value", "Value of the BC");
-  p.declareControllable("value");
-  p.addClassDescription(
+  InputParameters params = NodalBC::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.declareControllable("value");
+  params.addClassDescription(
       "Similar to DirichletBC except the value is applied before the solve begins");
-  return p;
+  return params;
 }
 
 PresetBC::PresetBC(const InputParameters & parameters)

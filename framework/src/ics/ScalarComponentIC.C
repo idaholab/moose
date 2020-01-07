@@ -12,14 +12,14 @@
 
 registerMooseObject("MooseApp", ScalarComponentIC);
 
-template <>
+defineLegacyParams(ScalarComponentIC);
+
 InputParameters
-validParams<ScalarComponentIC>()
+ScalarComponentIC::validParams()
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
+  InputParameters params = ScalarInitialCondition::validParams();
   params.addRequiredParam<std::vector<Real>>("values",
                                              "Initial values to initialize the scalar variable.");
-
   return params;
 }
 

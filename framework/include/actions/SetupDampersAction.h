@@ -19,6 +19,8 @@ InputParameters validParams<SetupDampersAction>();
 class SetupDampersAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   SetupDampersAction(InputParameters params);
 
   virtual void act() override;

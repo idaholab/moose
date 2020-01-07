@@ -14,29 +14,34 @@
 
 registerADMooseObject("TensorMechanicsApp", ADIsotropicPlasticityStressUpdate);
 
-defineADValidParams(
-    ADIsotropicPlasticityStressUpdate,
-    ADRadialReturnStressUpdate,
-    params.addClassDescription("This class uses the discrete material in a radial return isotropic "
-                               "plasticity model.  This class is one of the basic radial return "
-                               "constitutive models, yet it can be used in conjunction with other "
-                               "creep and plasticity materials for more complex simulations.");
-    // Linear strain hardening parameters
-    params.addParam<FunctionName>("yield_stress_function",
-                                  "Yield stress as a function of temperature");
-    params.addParam<Real>("yield_stress",
-                          0.0,
-                          "The point at which plastic strain begins accumulating");
-    params.addParam<FunctionName>("hardening_function",
-                                  "True stress as a function of plastic strain");
-    params.addParam<Real>("hardening_constant", 0.0, "Hardening slope");
-    params.addCoupledVar("temperature", 0.0, "Coupled Temperature");
-    params.addDeprecatedParam<std::string>(
-        "plastic_prepend",
-        "",
-        "String that is prepended to the plastic_strain Material Property",
-        "This has been replaced by the 'base_name' parameter");
-    params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";);
+defineADLegacyParams(ADIsotropicPlasticityStressUpdate);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADIsotropicPlasticityStressUpdate<compute_stage>::validParams()
+{
+  InputParameters params = ADRadialReturnStressUpdate<compute_stage>::validParams();
+  params.addClassDescription("This class uses the discrete material in a radial return isotropic "
+                             "plasticity model.  This class is one of the basic radial return "
+                             "constitutive models, yet it can be used in conjunction with other "
+                             "creep and plasticity materials for more complex simulations.");
+  // Linear strain hardening parameters
+  params.addParam<FunctionName>("yield_stress_function",
+                                "Yield stress as a function of temperature");
+  params.addParam<Real>(
+      "yield_stress", 0.0, "The point at which plastic strain begins accumulating");
+  params.addParam<FunctionName>("hardening_function",
+                                "True stress as a function of plastic strain");
+  params.addParam<Real>("hardening_constant", 0.0, "Hardening slope");
+  params.addCoupledVar("temperature", 0.0, "Coupled Temperature");
+  params.addDeprecatedParam<std::string>(
+      "plastic_prepend",
+      "",
+      "String that is prepended to the plastic_strain Material Property",
+      "This has been replaced by the 'base_name' parameter");
+  params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADIsotropicPlasticityStressUpdate<compute_stage>::ADIsotropicPlasticityStressUpdate(
@@ -241,3 +246,6 @@ ADIsotropicPlasticityStressUpdate<JACOBIAN>::computeYieldStress(
                      ") is less than zero");
   }
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADIsotropicPlasticityStressUpdate);

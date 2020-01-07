@@ -27,6 +27,8 @@ InputParameters validParams<InterfacePostprocessor>();
 class InterfacePostprocessor : public InterfaceUserObject, public Postprocessor
 {
 public:
+  static InputParameters validParams();
+
   InterfacePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

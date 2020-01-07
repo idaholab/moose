@@ -8,20 +8,16 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
-if sys.version_info[0:2] != (2, 7):
-    print("python 2.7 is required to run the test harness")
-    sys.exit(1)
-
 import itertools
 import os, re, inspect, errno, copy, json
 import shlex
-import RaceChecker
+from . import RaceChecker
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-import util
+from . import util
 import hit
 from mooseutils import HitNode, hit_parse
 
@@ -36,7 +32,7 @@ def readTestRoot(fname):
     if root.find('run_tests_args'):
         args = shlex.split(root.param('run_tests_args'))
 
-    hit_node = HitNode(hitnode=root)
+    hit_node = HitNode(None, root)
     hit_parse(hit_node, root, '')
 
     # TODO: add check to see if the binary exists before returning. This can be used to
@@ -67,7 +63,7 @@ class TestHarness:
         os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
 
         if app_name:
-            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(hitnode=hit.parse('',''))
+            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(None, hit.parse('',''))
         else:
             rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
 
@@ -109,11 +105,11 @@ class TestHarness:
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
         self.results_storage = '.previous_test_results.json'
-        self.code = '2d2d6769726c2d6d6f6465'
+        self.code = b'2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         self.keyboard_talk = True
         # Assume libmesh is a peer directory to MOOSE if not defined
-        if os.environ.has_key("LIBMESH_DIR"):
+        if "LIBMESH_DIR" in os.environ:
             self.libmesh_dir = os.environ['LIBMESH_DIR']
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
@@ -140,6 +136,7 @@ class TestHarness:
             checks['slepc_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
+            checks['ad_mode'] = set(['ALL'])
             checks['dtk'] = set(['ALL'])
             checks['unique_ids'] = set(['ALL'])
             checks['vtk'] = set(['ALL'])
@@ -159,6 +156,7 @@ class TestHarness:
             checks['asio'] =  set(['ALL'])
             checks['boost'] = set(['ALL'])
             checks['fparser_jit'] = set(['ALL'])
+            checks['libpng'] = set(['ALL'])
         else:
             checks['compiler'] = util.getCompilers(self.libmesh_dir)
             checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
@@ -166,6 +164,7 @@ class TestHarness:
             checks['slepc_version'] = util.getSlepcVersion(self.libmesh_dir)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
             checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+            checks['ad_mode'] = util.getMooseConfigOption(self.moose_dir, 'ad_mode')
             checks['dtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'dtk')
             checks['unique_ids'] = util.getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
             checks['vtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'vtk')
@@ -185,6 +184,7 @@ class TestHarness:
             checks['asio'] =  util.getIfAsioExists(self.moose_dir)
             checks['boost'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'boost')
             checks['fparser_jit'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
+            checks['libpng'] = util.getMooseConfigOption(self.moose_dir, 'libpng')
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -365,7 +365,8 @@ class TestHarness:
                 relative_path = relative_path.replace('/' + infile + '/', ':')
                 break
         relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
-        formatted_name = relative_path + '.' + tester.name()
+        relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[1:])  # Trim root node "[Tests]"
+        formatted_name = relative_path + '.' + relative_hitpath
 
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir
@@ -379,7 +380,7 @@ class TestHarness:
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
-                print("Option 'prereq' needs to be of type list in " + params['test_name'])
+                print(("Option 'prereq' needs to be of type list in " + params['test_name']))
                 sys.exit(1)
             params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
@@ -462,19 +463,19 @@ class TestHarness:
         if not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
-                status, message, color, exit_code = job.getJointStatus()
-                self.error_code = self.error_code | exit_code
+                status, message, color, status_code = job.getJointStatus()
+                self.error_code = self.error_code | status_code
 
                 # perform printing of application output if so desired
                 self.printOutput(job, color)
 
                 # Print status with caveats
-                print(util.formatResult(job, self.options, caveats=True))
+                print((util.formatResult(job, self.options, caveats=True)))
 
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, exit_code, timing) )
+                self.test_table.append( (job, status_code, timing) )
 
                 self.postRun(job.specs, timing)
 
@@ -489,7 +490,7 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print(util.formatResult(job, self.options, result='RUNNING', caveats=False))
+                print((util.formatResult(job, self.options, result='RUNNING', caveats=False)))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -504,18 +505,18 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
-            print('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS)))
+            print(('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS))))
             for err in self.parse_errors:
-                print(util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code))
+                print((util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code)))
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
-            for (job, exit_code, timing) in sorted(self.test_table, key=lambda x: x[1]):
-                print(util.formatResult(job, self.options, caveats=True))
+            print(('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS))))
+            for (job, status_code, timing) in sorted(self.test_table, key=lambda x: x[1]):
+                print((util.formatResult(job, self.options, caveats=True)))
 
         time = clock() - self.start_time
 
-        print('-' * (util.TERM_COLS))
+        print(('-' * (util.TERM_COLS)))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
@@ -525,19 +526,19 @@ class TestHarness:
 
         # Alert the user to their session file
         if self.options.queueing:
-            print('Your session file is %s' % self.results_storage)
+            print(('Your session file is %s' % self.results_storage))
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time))
+            print(('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time)))
             summary = '<b>%d would run</b>'
             summary += ', <b>%d would be skipped</b>'
             summary += fatal_error
-            print(util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
+            print((util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )))
 
         else:
-            print('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time))
+            print(('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time)))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -558,8 +559,8 @@ class TestHarness:
 
             summary += fatal_error
 
-            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
+            print((util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )))
 
             # Perform any write-to-disc operations
             self.writeResults()
@@ -592,7 +593,7 @@ class TestHarness:
                 if job.isSilent() and self.options.queueing:
                     continue
 
-                status, message, message_color, exit_code = job.getJointStatus()
+                status, message, message_color, status_code = job.getJointStatus()
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
@@ -647,7 +648,7 @@ class TestHarness:
                 or (self.options.fail_files and self.num_failed)):
                 for job_group in all_jobs:
                     for job in job_group:
-                        status, message, message_color, exit_code = job.getJointStatus()
+                        status, message, message_color, status_code = job.getJointStatus()
 
                         if self.options.output_dir:
                             output_dir = self.options.output_dir
@@ -736,7 +737,7 @@ class TestHarness:
                     # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
                     # and exit. Perhaps a warning instead, and create a new file? Down the road, when
                     # we use this file for PBS etc, this should probably result in an exception.
-                    print('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage))
+                    print(('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage)))
 
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
@@ -824,8 +825,8 @@ class TestHarness:
         queuegroup.add_argument('--queue-cleanup', action="store_true", help='Deprecated. Use --pbs-cleanup')
 
         code = True
-        if self.code.decode('hex') in argv:
-            del argv[argv.index(self.code.decode('hex'))]
+        if self.code.decode() in argv:
+            del argv[argv.index(self.code.decode())]
             code = False
         self.options = parser.parse_args(argv[1:])
         self.options.code = code
@@ -833,7 +834,7 @@ class TestHarness:
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
         # Convert all list based options of length one to scalars
-        for key, value in vars(self.options).items():
+        for key, value in list(vars(self.options).items()):
             if type(value) == list and len(value) == 1:
                 setattr(self.options, key, value[0])
 
@@ -892,7 +893,7 @@ class TestHarness:
 
         # Update any keys from the environment as necessary
         if not self.options.method:
-            if os.environ.has_key('METHOD'):
+            if 'METHOD' in os.environ:
                 self.options.method = os.environ['METHOD']
             else:
                 self.options.method = 'opt'

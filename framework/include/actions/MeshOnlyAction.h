@@ -21,6 +21,8 @@ InputParameters validParams<MeshOnlyAction>();
 class MeshOnlyAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MeshOnlyAction(InputParameters params);
 
   virtual void act() override;

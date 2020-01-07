@@ -21,12 +21,13 @@
 
 registerMooseObject("MooseApp", ParsedGenerateSideset);
 
-template <>
+defineLegacyParams(ParsedGenerateSideset);
+
 InputParameters
-validParams<ParsedGenerateSideset>()
+ParsedGenerateSideset::validParams()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = SideSetsGeneratorBase::validParams();
+  params += FunctionParserUtils::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",
@@ -70,7 +71,7 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
 
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

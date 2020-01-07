@@ -31,7 +31,7 @@ corresponding to the boundary subset $\partial \Omega_D$ via the
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/function_dirichlet_bc/function_dirichlet_bc_test.i block=BCs
+!listing test/tests/bcs/function_dirichlet_bc/test.i block=BCs
 
 !syntax parameters /BCs/FunctionDirichletBC
 

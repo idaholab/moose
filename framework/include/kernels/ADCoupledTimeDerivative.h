@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class ADCoupledTimeDerivative : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:

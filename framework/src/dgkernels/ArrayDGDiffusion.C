@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", ArrayDGDiffusion);
 
-template <>
+defineLegacyParams(ArrayDGDiffusion);
+
 InputParameters
-validParams<ArrayDGDiffusion>()
+ArrayDGDiffusion::validParams()
 {
-  InputParameters params = validParams<ArrayDGKernel>();
+  InputParameters params = ArrayDGKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "diff", "The diffusion (or thermal conductivity or viscosity) coefficient.");
   params.addParam<Real>("sigma", 4, "sigma");

@@ -12,16 +12,21 @@
 
 #include "libmesh/mesh_modification.h"
 
+#include <set>
+#include <algorithm>
+#include <sstream>
+
 registerMooseObject("MooseApp", RenameBoundaryGenerator);
 
-template <>
+defineLegacyParams(RenameBoundaryGenerator);
+
 InputParameters
-validParams<RenameBoundaryGenerator>()
+RenameBoundaryGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<boundary_id_type>>(
+  params.addParam<std::vector<BoundaryID>>(
       "old_boundary_id",
       "Elements with this boundary number will be given the new_boundary_number or "
       "new_boundary_name.  You must supply either old_boundary_id or old_boundary_name.  "
@@ -33,7 +38,7 @@ validParams<RenameBoundaryGenerator>()
       "new_boundary_name.  You must supply either old_boundary_id or old_boundary_name.  "
       "You may supply a vector of old_boundary_name, in which case the new_boundary "
       "information must also be a vector.");
-  params.addParam<std::vector<boundary_id_type>>(
+  params.addParam<std::vector<BoundaryID>>(
       "new_boundary_id",
       "Elements with the old boundary number (or name) will be given this boundary "
       "number.  If the old boundaries are named, their names will be passed onto the "
@@ -89,12 +94,12 @@ RenameBoundaryGenerator::generate()
   if (isParamValid("old_boundary_id"))
   {
     // user must have supplied old_boundary_id
-    _old_boundary_id = getParam<std::vector<boundary_id_type>>("old_boundary_id");
+    _old_boundary_id = getParam<std::vector<BoundaryID>>("old_boundary_id");
   }
 
   if (isParamValid("old_boundary_name"))
   {
-    _old_boundary_name = getParam<std::vector<BoundaryName>>("old_boundary_id");
+    _old_boundary_name = getParam<std::vector<BoundaryName>>("old_boundary_name");
 
     _old_boundary_id.reserve(_old_boundary_name.size());
 
@@ -102,9 +107,31 @@ RenameBoundaryGenerator::generate()
       _old_boundary_id.emplace_back(boundary_info.get_id_by_name(old_name));
   }
 
+  // Sort the ids for use in the error check (make a copy so we don't mess up original order)
+  const std::set<BoundaryID> old_ids(_old_boundary_id.begin(), _old_boundary_id.end());
+
+  const std::set<BoundaryID> & mesh_boundary_ids = boundary_info.get_boundary_ids();
+
+  std::set<BoundaryID> difference;
+  std::set_difference(old_ids.begin(),
+                      old_ids.end(),
+                      mesh_boundary_ids.begin(),
+                      mesh_boundary_ids.end(),
+                      std::inserter(difference, difference.end()));
+  if (!difference.empty())
+  {
+    std::stringstream missing_boundary_ids;
+    std::copy(difference.begin(),
+              difference.end(),
+              std::ostream_iterator<unsigned int>(missing_boundary_ids, " "));
+    paramError("old_boundary_id",
+               "The following boundary IDs were requested to be renamed, but do not exist: " +
+                   missing_boundary_ids.str());
+  }
+
   if (isParamValid("new_boundary_id"))
   {
-    _new_boundary_id = getParam<std::vector<boundary_id_type>>("new_boundary_id");
+    _new_boundary_id = getParam<std::vector<BoundaryID>>("new_boundary_id");
 
     if (_new_boundary_id.size() != _old_boundary_id.size())
       mooseError(

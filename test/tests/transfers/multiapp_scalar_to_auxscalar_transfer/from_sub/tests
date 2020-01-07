@@ -1,12 +1,22 @@
 [Tests]
-  [./sub_to_master]
+  issues = '#9444'
+  design = 'MultiAppScalarToAuxScalarTransfer.md'
+
+  [sub_to_master]
     type = Exodiff
     input = master.i
     exodiff = 'master_out.e master_out_sub0.e'
-  [../]
-  [./sub_to_master_wrong_order]
+
+    requirement = "The system shall include the ability to transfer scalar variables to an "
+                  "applications from sub-applications."
+  []
+  [sub_to_master_wrong_order]
     type = 'RunException'
     input = master_wrong_order.i
-    expect_err = "Order of SCALAR variables do not match for sending and receiving data for the MultiAppScalarToAuxScalarTransfer!"
-  [../]
+    expect_err = "Order of SCALAR variables do not match for sending and receiving data for the "
+                 "MultiAppScalarToAuxScalarTransfer!"
+
+    requirement = "The system shall error if the variable order does not match when transferring "
+                  "scalar variables to an application from sub-applications."
+  []
 []

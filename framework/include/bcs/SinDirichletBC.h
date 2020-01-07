@@ -31,6 +31,8 @@ InputParameters validParams<SinDirichletBC>();
 class SinDirichletBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   SinDirichletBC(const InputParameters & parameters);
 
 protected:
@@ -41,4 +43,3 @@ private:
   Real _final;
   Real _duration;
 };
-

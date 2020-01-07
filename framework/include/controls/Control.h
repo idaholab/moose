@@ -48,6 +48,8 @@ public:
    * Class constructor
    * @param parameters The input parameters for this control object
    */
+  static InputParameters validParams();
+
   Control(const InputParameters & parameters);
 
   /**

@@ -20,15 +20,16 @@ class NumericVector;
 class Point;
 }
 
+class MooseVariableFEBase;
+template <>
+InputParameters validParams<MooseVariableFEBase>();
+
 class MooseVariableFEBase : public MooseVariableBase
 {
 public:
-  MooseVariableFEBase(unsigned int var_num,
-                      const FEType & fe_type,
-                      SystemBase & sys,
-                      Moose::VarKindType var_kind,
-                      THREAD_ID tid,
-                      unsigned int count);
+  static InputParameters validParams();
+
+  MooseVariableFEBase(const InputParameters & parameters);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at
@@ -69,6 +70,12 @@ public:
    * @returns true if this is a vector-valued element, false otherwise.
    */
   virtual bool isVector() const = 0;
+
+  /**
+   * Is this variable defined at nodes
+   * @return true if it the variable is defined at nodes, otherwise false
+   */
+  virtual bool isNodalDefined() const = 0;
 
   virtual const dof_id_type & nodalDofIndex() const = 0;
   virtual const dof_id_type & nodalDofIndexNeighbor() const = 0;

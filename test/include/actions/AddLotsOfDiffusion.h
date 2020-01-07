@@ -9,18 +9,14 @@
 
 #pragma once
 
-#include "AddVariableAction.h"
+#include "Action.h"
 
-class AddLotsOfDiffusion;
-
-template <>
-InputParameters validParams<AddLotsOfDiffusion>();
-
-class AddLotsOfDiffusion : public AddVariableAction
+class AddLotsOfDiffusion : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddLotsOfDiffusion(const InputParameters & params);
 
   virtual void act();
 };
-

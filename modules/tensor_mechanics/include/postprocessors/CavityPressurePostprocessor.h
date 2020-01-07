@@ -16,15 +16,15 @@ class CavityPressureUserObject;
 class CavityPressurePostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   CavityPressurePostprocessor(const InputParameters & parameters);
 
-  virtual ~CavityPressurePostprocessor() {}
+  virtual void initialize() override {}
 
-  virtual void initialize() {}
+  virtual void execute() override {}
 
-  virtual void execute() {}
-
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() override;
 
 protected:
   const CavityPressureUserObject & _cpuo;
@@ -34,4 +34,3 @@ protected:
 
 template <>
 InputParameters validParams<CavityPressurePostprocessor>();
-

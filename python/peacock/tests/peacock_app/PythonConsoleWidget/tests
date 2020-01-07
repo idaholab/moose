@@ -2,6 +2,7 @@
   [./PythonConsoleWidget]
     type = PythonUnitTest
     input = test_PythonConsoleWidget.py
-    display_required = True    
+    display_required = True
+    python = 3
   [../]
 []

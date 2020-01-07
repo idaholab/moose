@@ -22,6 +22,8 @@ InputParameters validParams<ElementExtremeValue>();
 class ElementExtremeValue : public ElementVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   /// Type of extreme value we are going to compute
   enum ExtremeType
   {

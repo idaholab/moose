@@ -1,21 +1,33 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'constant_rate.i'
-    exodiff = 'constant_rate_out.e'
-    rel_err = 1e-05
-    use_old_floor = True
-    abs_zero = 1e-08
-  [../]
+  design = 'NodalKernels/index.md'
+  issues = '#3029'
 
-  [./threaded]
-    type = 'Exodiff'
-    input = 'constant_rate.i'
-    exodiff = 'constant_rate_out.e'
-    min_threads = 3
-    prereq = 'test' # Force ordering since they output the same files
-    rel_err = 1e-05
-    use_old_floor = True
-    abs_zero = 1e-08
-  [../]
+  [group]
+    requirement = "The system shall include ability to include contributions to the residual nodes "
+                  "of a finite element mesh"
+
+    [test]
+      type = 'Exodiff'
+      input = 'constant_rate.i'
+      exodiff = 'constant_rate_out.e'
+      rel_err = 1e-05
+      use_old_floor = True
+      abs_zero = 1e-08
+
+      detail = "on a single and"
+    []
+
+    [threaded]
+      type = 'Exodiff'
+      input = 'constant_rate.i'
+      exodiff = 'constant_rate_out.e'
+      min_threads = 3
+      prereq = group/test # Force ordering since they output the same files
+      rel_err = 1e-05
+      use_old_floor = True
+      abs_zero = 1e-08
+
+      detail = "multiple threads."
+    []
+  []
 []

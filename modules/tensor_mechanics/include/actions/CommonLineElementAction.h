@@ -22,8 +22,9 @@ InputParameters validParams<CommonLineElementAction>();
 class CommonLineElementAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   CommonLineElementAction(const InputParameters & parameters);
 
   virtual void act() override{};
 };
-

@@ -11,10 +11,12 @@
 
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(MeshChangedInterface);
+
 InputParameters
-validParams<MeshChangedInterface>()
+MeshChangedInterface::validParams()
 {
+
   InputParameters params = emptyInputParameters();
   return params;
 }

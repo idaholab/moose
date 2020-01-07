@@ -24,6 +24,8 @@ InputParameters validParams<VectorNodalBC>();
 class VectorNodalBC : public NodalBCBase, public MooseVariableInterface<RealVectorValue>
 {
 public:
+  static InputParameters validParams();
+
   VectorNodalBC(const InputParameters & parameters);
 
   /**
@@ -59,4 +61,3 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-

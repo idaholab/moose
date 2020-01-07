@@ -11,13 +11,14 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 
-template <>
+defineLegacyParams(InitialConditionBase);
+
 InputParameters
-validParams<InitialConditionBase>()
+InitialConditionBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
+  InputParameters params = MooseObject::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addRequiredParam<VariableName>("variable",
                                         "The variable this initial condition is "
@@ -48,6 +49,7 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
     BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(this, "InitialConditionBases"),
+    ElementIDInterface(this),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
 {

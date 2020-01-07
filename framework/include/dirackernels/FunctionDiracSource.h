@@ -22,6 +22,8 @@ InputParameters validParams<FunctionDiracSource>();
 class FunctionDiracSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   FunctionDiracSource(const InputParameters & parameters);
 
   virtual void addPoints() override;

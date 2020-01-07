@@ -23,6 +23,8 @@ InputParameters validParams<ImageMesh>();
 class ImageMesh : public GeneratedMesh, public FileRangeBuilder
 {
 public:
+  static InputParameters validParams();
+
   ImageMesh(const InputParameters & parameters);
   ImageMesh(const ImageMesh & other_mesh);
 

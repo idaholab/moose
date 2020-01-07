@@ -20,7 +20,7 @@ InputParameters
 validParams<MultiGrainRigidBodyMotion>()
 {
   InputParameters params = validParams<GrainRigidBodyMotionBase>();
-  params.addClassDescription("Adds rigid mody motion to grains");
+  params.addClassDescription("Adds rigid body motion to grains");
   return params;
 }
 

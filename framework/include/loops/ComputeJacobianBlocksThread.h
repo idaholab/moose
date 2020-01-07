@@ -53,6 +53,12 @@ public:
 protected:
   virtual void postElement(const Elem * elem) override;
 
-  std::vector<JacobianBlock *> _blocks;
-};
+  virtual void postInternalSide(const Elem * elem, unsigned int side) override;
 
+  std::vector<JacobianBlock *> _blocks;
+
+private:
+  std::vector<dof_id_type> _dof_indices;
+
+  std::vector<dof_id_type> _dof_neighbor_indices;
+};

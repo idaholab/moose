@@ -11,12 +11,6 @@
 
 #include "ADMaterial.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADStatefulMaterial;
-
-declareADValidParams(ADStatefulMaterial);
-
 /**
  * Stateful material class that defines a few properties.
  */
@@ -24,6 +18,8 @@ template <ComputeStage compute_stage>
 class ADStatefulMaterial : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADStatefulMaterial(const InputParameters & parameters);
 
 protected:
@@ -43,4 +39,3 @@ private:
 
   usingMaterialMembers;
 };
-

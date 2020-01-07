@@ -15,11 +15,12 @@
 
 registerMooseAction("MooseApp", AddMeshModifierAction, "add_mesh_modifier");
 
-template <>
+defineLegacyParams(AddMeshModifierAction);
+
 InputParameters
-validParams<AddMeshModifierAction>()
+AddMeshModifierAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   return params;
 }
 
@@ -28,8 +29,8 @@ AddMeshModifierAction::AddMeshModifierAction(InputParameters params) : MooseObje
 void
 AddMeshModifierAction::act()
 {
-  // Don't do mesh modifiers when recovering!
-  if (_app.isRecovering())
+  // Don't do mesh modifiers when recovering or using master mesh!
+  if (_app.isRecovering() || _app.masterMesh())
     return;
 
   // Add a pointer to the mesh, this is required for this MeshModifier to inherit from the

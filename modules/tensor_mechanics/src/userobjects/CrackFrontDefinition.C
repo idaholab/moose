@@ -20,12 +20,15 @@
 
 registerMooseObject("TensorMechanicsApp", CrackFrontDefinition);
 
-template <>
+defineLegacyParams(CrackFrontDefinition);
+
 InputParameters
-validParams<CrackFrontDefinition>()
+CrackFrontDefinition::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  params += validParams<BoundaryRestrictable>();
+  InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Gathers information about nodes at the crack front; this object is "
+                             "normally created by the DomainIntegralAction.");
+  params += BoundaryRestrictable::validParams();
   addCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;
   return params;

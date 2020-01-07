@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#14396'
+  design = 'ADCHSoretMobility.md'
+  [./simple_transient_diffusion_with_soret]
+    type = 'Exodiff'
+    input = 'simple_transient_diffusion_with_soret.i'
+    exodiff = 'simple_transient_diffusion_with_soret_out.e'
+    requirement = 'A temperature gradient driving force for diffusion shall be added to the split '
+                  'form of the Cahn-Hilliard equation and solved using automatic differentiation.'
+  [../]
+  [./simple_transient_diffusion_with_soret-jac]
+    type = 'PetscJacobianTester'
+    input = 'simple_transient_diffusion_with_soret.i'
+    run_sim = true
+    difference_tol = 1e-7
+    cli_args = 'Outputs/exodus=false'
+    allow_test_objects = true
+    requirement = 'The Jacobians for the automatic differentiation ADCHSplitChemicalPotential and '
+                  'ADCHSplitConcentration kernels shall be accurate.'
+  [../]
+[]

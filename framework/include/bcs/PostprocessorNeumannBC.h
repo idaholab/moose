@@ -27,6 +27,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
+  static InputParameters validParams();
+
   PostprocessorNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -35,4 +37,3 @@ protected:
   /// Value of grad(u) on the boundary.
   const PostprocessorValue & _value;
 };
-

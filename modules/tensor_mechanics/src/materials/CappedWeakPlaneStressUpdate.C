@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", CappedWeakPlaneStressUpdate);
 
-template <>
+defineLegacyParams(CappedWeakPlaneStressUpdate);
+
 InputParameters
-validParams<CappedWeakPlaneStressUpdate>()
+CappedWeakPlaneStressUpdate::validParams()
 {
-  InputParameters params = validParams<TwoParameterPlasticityStressUpdate>();
+  InputParameters params = TwoParameterPlasticityStressUpdate::validParams();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "cohesion",
@@ -48,7 +49,7 @@ validParams<CappedWeakPlaneStressUpdate>()
       "the given amount.  Typical value is 0.1*cohesion");
   params.addParam<bool>("perfect_guess",
                         true,
-                        "Provide a guess to the Newton-Raphson proceedure "
+                        "Provide a guess to the Newton-Raphson procedure "
                         "that is the result from perfect plasticity.  With "
                         "severe hardening/softening this may be "
                         "suboptimal.");

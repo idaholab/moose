@@ -21,6 +21,8 @@ InputParameters validParams<SetupDebugAction>();
 class SetupDebugAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   SetupDebugAction(InputParameters parameters);
 
   virtual void act() override;

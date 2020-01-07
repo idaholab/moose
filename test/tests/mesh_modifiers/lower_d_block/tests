@@ -1,12 +1,9 @@
 [Tests]
+  deprecated = True
   [./lower_d]
     type = Exodiff
     exodiff = 'lower_d_out.e'
     input = 'lower_d.i'
-    design = 'LowerDBlockFromSideset.md'
-    issues = '#5967'
-    requirement = 'A LowerDBlockFromSideset mesh modifier shall create a lower dimensional element block '
-                  'from a list of sidesets'
   [../]
   [./second_order]
     type = Exodiff
@@ -14,9 +11,5 @@
     input = 'lower_d.i'
     cli_args = 'Mesh/second_order=true Outputs/file_base=lower_d_second_order_out GlobalParams/order=SECOND '
                'Mesh/nx=5 Mesh/ny=5'
-    design = 'LowerDBlockFromSideset.md'
-    issues = '#5967'
-    requirement = 'A LowerDBlockFromSideset mesh modifier shall create a second order lower dimensional '
-                  'block from second order parents'
   [../]
 []

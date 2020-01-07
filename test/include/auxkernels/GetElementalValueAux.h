@@ -11,17 +11,14 @@
 
 #include "AuxKernel.h"
 
-class GetElementalValueAux;
-
-template <>
-InputParameters validParams<GetElementalValueAux>();
-
 /**
  * Tests the \c getElementalValue() function of \c MooseVariableFE.
  */
 class GetElementalValueAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   GetElementalValueAux(const InputParameters & params);
 
 protected:
@@ -33,4 +30,3 @@ protected:
   /// Time level of the copied variable
   const MooseEnum & _time_level;
 };
-

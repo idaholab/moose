@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddUserObjectAction, "add_user_object");
 
-template <>
+defineLegacyParams(AddUserObjectAction);
+
 InputParameters
-validParams<AddUserObjectAction>()
+AddUserObjectAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddUserObjectAction::AddUserObjectAction(InputParameters params) : MooseObjectAction(params) {}

@@ -13,4 +13,3 @@ configuration for either or both the source and target.
 !syntax inputs /Transfers/MultiAppInterpolationTransfer
 
 !syntax children /Transfers/MultiAppInterpolationTransfer
-xf

@@ -23,12 +23,13 @@
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
 
-template <>
+defineLegacyParams(EqualValueEmbeddedConstraint);
+
 InputParameters
-validParams<EqualValueEmbeddedConstraint>()
+EqualValueEmbeddedConstraint::validParams()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  InputParameters params = validParams<NodeElemConstraint>();
+  InputParameters params = NodeElemConstraint::validParams();
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;

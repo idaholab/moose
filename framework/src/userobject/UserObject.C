@@ -13,14 +13,15 @@
 
 #include "libmesh/sparse_matrix.h"
 
-template <>
+defineLegacyParams(UserObject);
+
 InputParameters
-validParams<UserObject>()
+UserObject::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_end'
-  params += validParams<SetupInterface>();
+  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
 
   params.addParam<bool>("use_displaced_mesh",
@@ -51,6 +52,7 @@ UserObject::UserObject(const InputParameters & parameters)
     FunctionInterface(this),
     DistributionInterface(this),
     Restartable(this, "UserObjects"),
+    MeshMetaDataInterface(this),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
     PerfGraphInterface(this),

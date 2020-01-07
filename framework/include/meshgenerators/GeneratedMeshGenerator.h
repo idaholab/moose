@@ -24,6 +24,8 @@ InputParameters validParams<GeneratedMeshGenerator>();
 class GeneratedMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   GeneratedMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
@@ -33,10 +35,10 @@ protected:
   MooseEnum _dim;
 
   /// Number of elements in x, y, z direction
-  unsigned int _nx, _ny, _nz;
+  unsigned int &_nx, &_ny, &_nz;
 
   /// The min/max values for x,y,z component
-  Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
+  Real &_xmin, &_xmax, &_ymin, &_ymax, &_zmin, &_zmax;
 
   /// All of the libmesh build_line/square/cube routines support an
   /// option to grade the mesh into the boundaries according to the
@@ -52,4 +54,3 @@ protected:
   /// _bias_x > 1 implies cells are growing in the x-direction.
   Real _bias_x, _bias_y, _bias_z;
 };
-

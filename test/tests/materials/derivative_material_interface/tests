@@ -1,0 +1,80 @@
+[Tests]
+  design = 'DerivativeMaterialInterface.md'
+  issues = '#4299 #6360 #5055 #6901 #5039'
+
+  [analytic_derivatives]
+    requirement = 'The system shall be capable of producing analytic derivatives of material '
+                  'properties:'
+
+    [property_names]
+      type = 'RunApp'
+      input = 'test.i'
+      recover = false
+
+      detail = 'defined by function expressions,'
+    []
+
+    [material_chaining]
+      type = CSVDiff
+      input = 'material_chaining.i'
+      csvdiff = 'material_chaining_out.csv'
+
+      detail = 'involving chain rules of material properties defined by function expressions, and'
+    []
+    [parsed_material]
+      type = 'Exodiff'
+      input = 'parsed_material.i'
+      exodiff = 'parsed_material_out.e'
+
+      detail = 'for the free energy Allen-Cahn Bulk material function.'
+    []
+  []
+
+  [ordering]
+    requirement = 'The system shall support late binding of derivative material properties:'
+    [construction]
+      type = 'Exodiff'
+      input = 'construction_order.i'
+      exodiff = 'construction_order_out.e'
+
+      detail = 'so that construction order does not influence the outcome of the tests, and'
+    []
+
+    [execution]
+      type = 'RunApp'
+      input = 'execution_order.i'
+      recover = false
+
+      detail = 'so that they may be retrieved before being declared.'
+    []
+  []
+
+  [new_getproperty_semantics]
+    type = 'Exodiff'
+    input = 'const.i'
+    exodiff = 'const_out.e'
+    recover = false
+
+    requirement = 'The system shall support supplying a constant literal in place of a property name '
+                  'for material property derivative consumers.'
+  []
+
+  [mutliblock]
+    # Test the default property behavior of DerivativeMaterialInterface
+    type = 'RunApp'
+    input = 'multiblock.i'
+
+    requirement = 'The system shall support optional coupling where materials that do not exist are '
+                  'returned as valid objects containing zero.'
+  []
+
+  [warn]
+    type = 'RunException'
+    input = 'warn.i'
+    expect_err = "The material property 'prop' does not exist."
+    recover = false
+
+    requirement = 'The system shall issue an error when required derivative materials that are '
+                  'retrieved are never declared.'
+  []
+[]

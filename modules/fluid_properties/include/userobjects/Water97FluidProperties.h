@@ -242,6 +242,21 @@ public:
    */
   Real b3ab(Real pressure) const;
 
+  /**
+   * IAPWS formulation of Henry's law constant for dissolution in water
+   * From Guidelines on the Henry's constant and vapour
+   * liquid distribution constant for gases in H20 and D20 at high
+   * temperatures, IAPWS (2004)
+   * @param T fluid temperature (K)
+   * @param coeffs Henry's constant coefficients of gas
+   * @param[out] Kh Henry's constant
+   * @param[out] dKh_dT derivative of Kh wrt temperature
+   */
+  Real henryConstant(Real temperature, const std::vector<Real> & coeffs) const;
+  void
+  henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
+  DualReal henryConstant(const DualReal & temperature, const std::vector<Real> & coeffs) const;
+
 protected:
   /**
    * Gibbs free energy in Region 1 - single phase liquid region
@@ -1322,4 +1337,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-

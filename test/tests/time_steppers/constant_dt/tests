@@ -1,8 +1,13 @@
 [Tests]
+  design = 'TimeStepper/index.md'
+  issues = '#1953'
+
   [./constant_dt]
     type = 'Exodiff'
     input = 'constant_dt.i'
     exodiff = 'constant_dt_out.e'
     group = 'requirements'
+
+    requirement = 'The system shall include a means for performing simulations with a constant time step.'
   [../]
 []

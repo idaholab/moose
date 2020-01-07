@@ -29,6 +29,8 @@ InputParameters validParams<Split>();
 class Split : public MooseObject, public Restartable
 {
 public:
+  static InputParameters validParams();
+
   Split(const InputParameters & parameters);
   virtual ~Split() = default;
 

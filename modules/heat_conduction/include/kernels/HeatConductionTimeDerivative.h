@@ -31,6 +31,8 @@ class HeatConductionTimeDerivative : public TimeDerivative
 {
 public:
   /// Contructor for Heat Equation time derivative term.
+  static InputParameters validParams();
+
   HeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:

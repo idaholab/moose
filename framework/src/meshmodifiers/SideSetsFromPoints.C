@@ -21,7 +21,10 @@
 #include "libmesh/elem.h"
 #include "libmesh/fe_base.h"
 
-registerMooseObject("MooseApp", SideSetsFromPoints);
+registerMooseObjectReplaced("MooseApp",
+                            SideSetsFromPoints,
+                            "11/30/2019 00:00",
+                            SideSetsFromPointsGenerator);
 
 template <>
 InputParameters

@@ -13,11 +13,7 @@
 #include "MooseEnum.h"
 #include "PetscExternalPartitioner.h"
 
-class PartitionerWeightTest;
 class MooseMesh;
-
-template <>
-InputParameters validParams<PartitionerWeightTest>();
 
 /**
  * Partitions a mesh based on a weighted graph
@@ -25,6 +21,8 @@ InputParameters validParams<PartitionerWeightTest>();
 class PartitionerWeightTest : public PetscExternalPartitioner
 {
 public:
+  static InputParameters validParams();
+
   PartitionerWeightTest(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
@@ -33,4 +31,3 @@ public:
 
   virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side) override;
 };
-

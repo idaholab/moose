@@ -19,6 +19,8 @@ InputParameters validParams<EqualValueBoundaryConstraint>();
 class EqualValueBoundaryConstraint : public NodalConstraint
 {
 public:
+  static InputParameters validParams();
+
   EqualValueBoundaryConstraint(const InputParameters & parameters);
 
   /**

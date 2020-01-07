@@ -11,15 +11,17 @@
 
 registerMooseObject("MooseApp", TagVectorAux);
 
-template <>
+defineLegacyParams(TagVectorAux);
+
 InputParameters
-validParams<TagVectorAux>()
+TagVectorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
 
   params.addClassDescription("Couple a tag vector, and return its nodal value");
   return params;
@@ -30,6 +32,9 @@ TagVectorAux::TagVectorAux(const InputParameters & parameters)
     _tag_id(_subproblem.getVectorTagID(getParam<std::string>("vector_tag"))),
     _v(coupledVectorTagValue("v", _tag_id))
 {
+  auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+  if (execute_on.size() != 1 || !execute_on.contains(EXEC_TIMESTEP_END))
+    mooseError("execute_on for TagVectorAux must be set to EXEC_TIMESTEP_END");
 }
 
 Real

@@ -11,18 +11,14 @@
 
 #include "ElementUserObject.h"
 
-// Forward Declarations
-class RandomElementalUserObject;
-
-template <>
-InputParameters validParams<RandomElementalUserObject>();
-
 /**
  * An Elemental user object tha uses built-in Random number generation.
  */
 class RandomElementalUserObject : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   RandomElementalUserObject(const InputParameters & parameters);
 
   virtual ~RandomElementalUserObject();
@@ -37,4 +33,3 @@ public:
 protected:
   std::map<dof_id_type, unsigned long> _random_data;
 };
-

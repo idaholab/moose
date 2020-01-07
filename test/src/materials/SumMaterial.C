@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", SumMaterial);
 
-template <>
 InputParameters
-validParams<SumMaterial>()
+SumMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "sum_prop_name", "The name of the property that holds the summation");
   params.addRequiredParam<MaterialPropertyName>(

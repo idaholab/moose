@@ -18,11 +18,12 @@
 
 #include "libmesh/string_to_enum.h"
 
-template <>
+defineLegacyParams(NodeElemConstraint);
+
 InputParameters
-validParams<NodeElemConstraint>()
+NodeElemConstraint::validParams()
 {
-  InputParameters params = validParams<Constraint>();
+  InputParameters params = Constraint::validParams();
   params.addRequiredParam<SubdomainName>("slave", "slave block id");
   params.addRequiredParam<SubdomainName>("master", "master block id");
   params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");

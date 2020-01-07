@@ -19,6 +19,8 @@ InputParameters validParams<AddScalarKernelAction>();
 class AddScalarKernelAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddScalarKernelAction(InputParameters params);
 
   virtual void act() override;

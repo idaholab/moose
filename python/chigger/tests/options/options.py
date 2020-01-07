@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
@@ -31,7 +31,7 @@ if args.type == 'run' or args.type == 'dump':
         opt2.add('item', 1, 'An item')
         opt2.add('item2', 2, 'An item')
         opt.add('sub', opt2, "A sub parameters")
-        print opt
+        print(opt)
 
 elif args.type == 'bad-type':
     opt.add('param', 'string', 'Doc', vtype=int)

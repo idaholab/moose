@@ -23,7 +23,7 @@
 [Samplers]
   [sample]
     type = MonteCarloSampler
-    n_samples = 3
+    num_rows = 3
     distributions = 'uniform'
     execute_on = 'PRE_MULTIAPP_SETUP'
   []
@@ -42,14 +42,16 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    vector_postprocessor = storage
-    postprocessor = size
+    sampler = sample
+    to_vector_postprocessor = storage
+    from_postprocessor = size
   []
 []
 
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
+    samplers = sample
   []
 []
 

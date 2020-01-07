@@ -16,11 +16,10 @@
 
 registerMooseObject("MooseTestApp", UseOldVectorPostprocessor);
 
-template <>
 InputParameters
-validParams<UseOldVectorPostprocessor>()
+UseOldVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("A test Postprocessor that couples to old values of a "
                              "VectorPostprocessor and verifies that the the current value matches "
                              "the previous old value before outputting the old value.");

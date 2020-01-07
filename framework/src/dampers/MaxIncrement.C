@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", MaxIncrement);
 
-template <>
+defineLegacyParams(MaxIncrement);
+
 InputParameters
-validParams<MaxIncrement>()
+MaxIncrement::validParams()
 {
-  InputParameters params = validParams<ElementDamper>();
+  InputParameters params = ElementDamper::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "max_increment", "max_increment > 0", "The maximum newton increment for the variable.");
   MooseEnum increment_type("absolute fractional", "absolute");
@@ -24,6 +25,9 @@ validParams<MaxIncrement>()
       increment_type,
       "Type of increment to compare against max_increment. 'absolute': use variable increment. "
       "'fractional': use variable increment divided by the variable value.");
+
+  params.addClassDescription("Limits a variable's update by some max fraction");
+
   return params;
 }
 

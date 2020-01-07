@@ -13,7 +13,7 @@ Tools for parsing key value pairs from a raw string (e.g., 'key=value foo=bar')
 import re
 import copy
 
-from exceptions import MooseDocsException
+from .exceptions import MooseDocsException
 
 SETTINGS_RE = re.compile(r'(?P<key>[^\s\\=]+)=(?P<value>.*?)(?=(?:\s[^\s\\=]+=|$))',
                          flags=re.MULTILINE|re.UNICODE)
@@ -21,7 +21,7 @@ SETTINGS_RE = re.compile(r'(?P<key>[^\s\\=]+)=(?P<value>.*?)(?=(?:\s[^\s\\=]+=|$
 def get_settings_as_dict(settings):
     """Return a dict() of the settings without the description."""
     output = dict()
-    for key, value in settings.iteritems():
+    for key, value in settings.items():
         output[key] = value[0]
     return output
 
@@ -70,11 +70,11 @@ def parse_settings(defaults, local, error_on_unknown=True):
         error_on_unknown[bool]: If True through an exception if values are provided that are not
                                 in the default list.
     """
-    known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).iteritems())
+    known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).items())
     settings, unknown = match_settings(known, local)
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"
-        for key, value in unknown.iteritems():
+        for key, value in unknown.items():
             msg += '\n{}{}={}'.format(' '*4, key, repr(value))
         raise MooseDocsException(msg)
     return settings, unknown

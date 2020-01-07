@@ -21,7 +21,7 @@
   [dynamic_gap_conductance_fine]
     type = Exodiff
     input = 'gap-conductance.i'
-    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=gap-conductance-fine_out'
+    cli_args = 'Mesh/file/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=gap-conductance-fine_out'
     exodiff = 'gap-conductance-fine_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to do gap conductance on a dynamic mesh using auxiliary displacements on a fine mesh'
@@ -29,7 +29,7 @@
   [linear_exact_verification]
     type = Exodiff
     input = 'gap-conductance.i'
-    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e AuxKernels/function_y/function=0 Outputs/file_base=linear-verification_out'
+    cli_args = 'Mesh/file/file=nodal_normals_test_offset_nonmatching_gap_fine.e AuxKernels/function_y/function=0 Outputs/file_base=linear-verification_out'
     exodiff = 'linear-verification_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall generate the exact expected analytic solution for the gap conductance problem'

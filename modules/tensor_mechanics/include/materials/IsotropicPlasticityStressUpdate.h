@@ -37,6 +37,8 @@ InputParameters validParams<IsotropicPlasticityStressUpdate>();
 class IsotropicPlasticityStressUpdate : public RadialReturnStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   IsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
 protected:

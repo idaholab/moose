@@ -19,11 +19,12 @@
 
 registerMooseObject("TensorMechanicsApp", MaterialTimeStepPostprocessor);
 
-template <>
+defineLegacyParams(MaterialTimeStepPostprocessor);
+
 InputParameters
-validParams<MaterialTimeStepPostprocessor>()
+MaterialTimeStepPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
 
   params.addClassDescription("This postprocessor estimates a timestep that reduces the increment "
                              "change in a material property below a given threshold.");

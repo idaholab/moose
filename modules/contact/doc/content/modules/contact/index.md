@@ -1,12 +1,12 @@
 # Contact Module
 
-The interaction of moving bodies is a common occurrence in our world, and therefore modeling such problems is essential to accurately represent the mechanical behavior of the physic world. However, finite element methods do not have an inherent means of modeling contact. Therefore, specific contact algorithms are required. These algorithms enforce constraints between surfaces in the mesh, to prevent penetration and develop contact forces. The MOOSE contact module provides the necessary tools for modeling mechanical contact.
+The interaction of moving bodies is a common occurrence in our world, and therefore modeling such problems is essential to accurately represent the mechanical behavior of the physical world. However, finite element methods do not have an inherent means of modeling contact. Therefore, specific contact algorithms are required. These algorithms enforce constraints between surfaces in the mesh, to prevent penetration and develop contact forces. The MOOSE contact module provides the necessary tools for modeling mechanical contact.
 
 [](---)
 
 ## Theory
 
-Mechanical contact between fuel pellets and the inside surface of the cladding is based on three requirements.
+Mechanical contact between two deformable bodies is based on three requirements.
 
 \begin{equation*}
 g \le 0,
@@ -21,16 +21,13 @@ t_N g = 0.
 
 That is, the penetration distance (typically referred to as the gap $g$ in the contact literature) of one of the body into another must not be positive; the contact force $t_N$ opposing penetration must be positive in the normal direction; and either the penetration distance or the contact force must be zero at all times.
 
-In the MOOSE Contact Module, these contact constraints are enforced through the use of node/face constraints. Specifically, the nodes of the fuel pellets are prevented from penetrating cladding faces. This is accomplished in a manner similar to that detailed by Heinstein and Laursen. First, a geometric search determines which master nodes have penetrated slave faces. For those nodes, the internal force computed by the divergence of stress is moved to the appropriate slave face at the point of contact. Those forces are distributed to slave nodes by employing the finite element shape functions. Additionally, the master nodes are constrained to remain on the pellet faces, preventing penetration. The module currently supports frictionless and tied contact. Friction is an important capability, and preliminary support for frictional contact is available.
-
-Finite element contact is notoriously difficult to make efficient and robust in three dimensions. That being the case, effort is underway to improve contact algorithm.
+In the MOOSE Contact Module, these contact constraints are enforced through the use of node/face constraints. This is accomplished in a manner similar to that detailed by [!cite](heinstein_algorithm_1999). First, a geometric search determines which slave nodes have penetrated master faces. For those nodes, the internal force computed by the divergence of stress is moved to the appropriate master face at the point of contact. Those forces are distributed to master nodes by employing the finite element shape functions. Additionally, the slave nodes are constrained to remain on the master faces, preventing penetration. The module currently supports frictionless, frictional, and glued contact.
 
 [](---)
 
 ## Procedure for using mechanical contact
 
-In the contact module there are currently two sytems to choose from mechanical contact : Dirac and Constraint. Constraint based contact is recommended for two-dimensional problems and Dirac for three-dimensional problems. Constraint contact is more robust but due to the patch size requirement specified in the `Mesh` block, Constraint contact uses too much memory on 3D problems. Depending upon the contact formalism chosen, the solver options to be used change. The details of the solver parameters recommended for Dirac and Constraint contact formalisms are provided below.
-
+In the contact module there are currently two systems to choose from mechanical contact : Dirac and Constraint.  The Constraint system is recommended for all problems, as the Dirac system will be removed in the future.
 The contact block in the MOOSE input file looks like this :
 
 ```puppet
@@ -58,7 +55,7 @@ The contact block in the MOOSE input file looks like this :
 
 The parameters descriptions are :
 
-- `disp_x` (+Required+) Variable name for displacement variable in x direction. Tipically `disp_x`.
+- `disp_x` (+Required+) Variable name for displacement variable in x direction. Typically `disp_x`.
 - `disp_y` Variable name for displacement variable in y direction. Typically `disp_y`.
 - `disp_z` Variable name for displacement variable in z direction. Typically `disp_z`
 - `formulation` Select either `DEFAULT`, `KINEMATIC`, or `PENALTY`. `DEFAULT` is `KINEMATIC`.
@@ -80,28 +77,38 @@ It is good practice to make the surface with the coarser mesh to be the master s
 
 The robustness and accuracy of the mechanical contact algorithm is strongly dependent on the penalty parameter. If the parameter is too small, inaccurate solutions are more likely. If the parameter is too large, the solver may struggle.
 
-The `DEFAULT` option uses an enforcement algorithmn that moves th internal forces at a slave node to th master face. The distance between the slave node and the master face is penalized, The `PENALTY` algorithm is the traditional penalty enforcement technique.
+The `DEFAULT` option uses an enforcement algorithm that moves the internal forces at a slave node to Thu master face. The distance between the slave node and the master face is penalized, The `PENALTY` algorithm is the traditional penalty enforcement technique.
 
 [](---)
 
 ## Mortar-Based Mechanical Contact
 
 The [mortar constraint system](Constraints/index.md) provides an alternative
-discretization technique for solving mechanical contact. The
-`contact/test/tests/bouncing-block-contact` directory provides a series of
+discretization technique for solving mechanical contact. Some results are summarized below.
+
+ The `contact/test/tests/bouncing-block-contact` directory provides a series of
 input files testing different algorithms for solving both normal and tangential
-frictional contact. Some results are summarized below.
+frictional contact. Mortar contact can also be specified using the `Contact` block
+similar to pure node-face discretization contact. For normal mortar contact:
 
-### Frictionless contact algorithm comparison
+!listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
 
-| Lagrange multiplier | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
-| ------------------- | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
-| Nodal | Mortar | Min | 14.401 | 40 | 104 |
-| Nodal | Mortar | FB | 17.752 | 40 | 135 |
-| Nodal | Nodal | Min | 5.438 | 41 | 104 |
-| Nodal | Nodal | FB | 6.770 | 41 | 149 |
-| Mortar | Mortar | Min | 14.454 | 40 | 106 |
-| Mortar | Mortar | FB | 19.027 | 40 | 136 |
+For normal and tangential (frictional) mortar contact:
+
+!listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+
+
+### Frictionless contact algorithm comparison id=frictionless_table
+
+| Constraint | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
+| ---------- | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
+| Nodal | Mortar | Min | 4.164 | 40 | 104 |
+| Nodal | Mortar | FB | 5.020 | 40 | 135 |
+| Nodal | Nodal | Min | 3.124 | 41 | 104 |
+| Nodal | Nodal | FB | 4.014 | 41 | 149 |
+| Mortar | Mortar | Min | 4.461 | 40 | 106 |
+| Mortar | Mortar | FB | 5.577 | 40 | 136 |
+| Nodal | Nodal | RANFS | 2.700 | 40 | 99 |
 
 The first column denotes the discretization algorithm used for applying the
 frictionless contact constraints. Nodal denotes use of a `NodeFaceConstraint`;
@@ -111,7 +118,10 @@ residuals. The third column denotes the type of non-linear complimentarity
 problem (NCP) function used to ensure that the contact constraints are
 satisfied. Min indicates the canonical min function (see
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min)); FB represents the
-Fischer-Burmeister function. The fourth column is the simulation time in
+Fischer-Burmeister function. `RANFS` denotes the Reduced Active Nonlinear
+Function Set scheme in which no Lagrange Multipliers are used, and instead the
+non-linear residual equations at the slave nodes are replaced with the gap
+function. The fourth column in the table is the simulation time in
 arbitrary units (since timings will be different across machines). The fifth
 column is the number of time steps required to reach the simulation end
 time. The final, sixth column is the cumulative number of non-linear iterations
@@ -176,7 +186,7 @@ The number of nodes in contact is 11
  8 Nonlinear |R| = 4.432194e-04
 ```
 
-### Frictional contact algorithm comparison
+### Frictional contact algorithm comparison id=frictional_table
 
 | LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations | CLI PETSc options |
 | --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- | --- |
@@ -253,18 +263,6 @@ The recommended PETSc options for use with `NodeFaceConstraint` based contact ar
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap
                         -ksp_gmres_restart'
   petsc_options_value = 'asm lu 20 101'
-  ...
-[../]
-```
-
-The recommended PETSc options for use with Dirac based contact are given below:
-
-```puppet
-[Executioner]
-  ...
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type
-                        -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201 hypre boomeramg 4'
   ...
 [../]
 ```

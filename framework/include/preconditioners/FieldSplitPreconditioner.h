@@ -28,6 +28,8 @@ public:
   /**
    *  Constructor. Initializes SplitBasedPreconditioner data structures
    */
+  static InputParameters validParams();
+
   FieldSplitPreconditioner(const InputParameters & parameters);
 
   /**

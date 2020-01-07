@@ -22,11 +22,12 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceBeam);
 
-template <>
+defineLegacyParams(StressDivergenceBeam);
+
 InputParameters
-validParams<StressDivergenceBeam>()
+StressDivergenceBeam::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Quasi-static and dynamic stress divergence kernel for Beam element");
   params.addRequiredParam<unsigned int>(
       "component",
@@ -101,10 +102,10 @@ StressDivergenceBeam::StressDivergenceBeam(const InputParameters & parameters)
 void
 StressDivergenceBeam::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == 2, "StressDivergenceBeam: Beam element must have two nodes only.");
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
+
+  mooseAssert(_local_re.size() == 2,
+              "StressDivergenceBeam: Beam element must have two nodes only.");
 
   _global_force_res.resize(_test.size());
   _global_moment_res.resize(_test.size());
@@ -124,7 +125,7 @@ StressDivergenceBeam::computeResidual()
       _local_re(_i) = _global_moment_res[_i](_component - 3);
   }
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -137,9 +138,7 @@ StressDivergenceBeam::computeResidual()
 void
 StressDivergenceBeam::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (unsigned int i = 0; i < _test.size(); ++i)
   {
@@ -161,11 +160,11 @@ StressDivergenceBeam::computeJacobian()
   if (_isDamped && _dt > 0.0)
     _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; ++i)
       diag(i) = _local_ke(i, i);
@@ -208,9 +207,7 @@ StressDivergenceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       }
     }
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-    _local_ke.resize(ke.m(), ke.n());
-    _local_ke.zero();
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     if (disp_coupled || rot_coupled)
     {
@@ -249,7 +246,7 @@ StressDivergenceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     if (_isDamped && _dt > 0.0)
       _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
 
-    ke += _local_ke;
+    accumulateTaggedLocalMatrix();
   }
 }
 

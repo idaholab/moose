@@ -23,6 +23,8 @@ class QuadraturePointMarker : public Marker,
                               public MaterialPropertyInterface
 {
 public:
+  static InputParameters validParams();
+
   QuadraturePointMarker(const InputParameters & parameters);
 
 protected:

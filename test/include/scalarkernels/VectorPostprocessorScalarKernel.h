@@ -11,18 +11,11 @@
 
 #include "ODEKernel.h"
 
-// Forward Declarations
-class VectorPostprocessorScalarKernel;
-
-template <>
-InputParameters validParams<VectorPostprocessorScalarKernel>();
-
-/**
- *
- */
 class VectorPostprocessorScalarKernel : public ODEKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorPostprocessorScalarKernel(const InputParameters & parameters);
   virtual ~VectorPostprocessorScalarKernel();
 
@@ -34,4 +27,3 @@ protected:
 
   unsigned int _index;
 };
-

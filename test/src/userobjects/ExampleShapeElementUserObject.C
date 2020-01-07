@@ -12,11 +12,10 @@
 
 registerMooseObject("MooseTestApp", ExampleShapeElementUserObject);
 
-template <>
 InputParameters
-validParams<ExampleShapeElementUserObject>()
+ExampleShapeElementUserObject::validParams()
 {
-  InputParameters params = validParams<ShapeElementUserObject>();
+  InputParameters params = ShapeElementUserObject::validParams();
   params.addRequiredCoupledVar("u", "first coupled variable");
   params.addRequiredCoupledVar("v", "second coupled variable");
   return params;

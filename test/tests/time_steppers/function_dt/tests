@@ -1,12 +1,19 @@
 [Tests]
+  issues = '#10612 #9498 #6337'
+  design = 'Executioner/TimeStepper/index.md'
+
   [./function_dt_min]
     type = 'Exodiff'
     input = 'function_dt_min.i'
     exodiff = 'function_dt_min_out.e'
+
+    requirement = 'The system shall suppport the ability to sample a piecewise linear function for time step sizes while supporting a minimum time step size.'
   [../]
   [./function_dt_no_interpolation]
     type = 'Exodiff'
     input = 'function_dt_no_interpolation.i'
     exodiff = 'function_dt_no_interpolation_out.e'
+
+    requirement = 'The system shall support the ability to sample a piecewise constant function for time step sizes choosing either the left or right values between adjacent constants.'
   [../]
 []

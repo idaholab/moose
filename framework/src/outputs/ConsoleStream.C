@@ -35,3 +35,27 @@ ConsoleStream::unsetf(std::ios_base::fmtflags mask) const
 {
   _oss.unsetf(mask);
 }
+
+std::streamsize
+ConsoleStream::precision() const
+{
+  return _oss.precision();
+}
+
+std::streamsize
+ConsoleStream::precision(std::streamsize new_precision) const
+{
+  return _oss.precision(new_precision);
+}
+
+std::ios_base::fmtflags
+ConsoleStream::flags() const
+{
+  return _oss.flags();
+}
+
+std::ios_base::fmtflags
+ConsoleStream::flags(std::ios_base::fmtflags new_flags) const
+{
+  return _oss.flags(new_flags);
+}

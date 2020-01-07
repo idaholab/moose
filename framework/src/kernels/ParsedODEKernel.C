@@ -17,12 +17,13 @@
 
 registerMooseObject("MooseApp", ParsedODEKernel);
 
-template <>
+defineLegacyParams(ParsedODEKernel);
+
 InputParameters
-validParams<ParsedODEKernel>()
+ParsedODEKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
-  params += validParams<FunctionParserUtils>();
+  InputParameters params = ODEKernel::validParams();
+  params += FunctionParserUtils::validParams();
   params.addClassDescription("Parsed ODE function kernel.");
 
   params.addRequiredParam<std::string>("function", "function expression");
@@ -32,6 +33,8 @@ validParams<ParsedODEKernel>()
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<PostprocessorName>>(
+      "postprocessors", "Vector of postprocessor names used in the function expression");
 
   return params;
 }
@@ -63,8 +66,17 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
       _arg_index[number] = i;
   }
 
+  // add postprocessors
+  auto pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
+  _pp.resize(pp_names.size());
+  for (unsigned int i = 0; i < pp_names.size(); ++i)
+  {
+    variables += "," + pp_names[i];
+    _pp[i] = &getPostprocessorValueByName(pp_names[i]);
+  }
+
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = std::make_shared<ADFunction>();
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);
@@ -84,7 +96,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
                _func_F->ErrorMsg());
 
   // on-diagonal derivative
-  _func_dFdu = ADFunctionPtr(new ADFunction(*_func_F));
+  _func_dFdu = std::make_shared<ADFunction>(*_func_F);
 
   if (_func_dFdu->AutoDiff(_var.name()) != -1)
     mooseError("Failed to take first derivative w.r.t. ", _var.name());
@@ -92,7 +104,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   // off-diagonal derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    _func_dFdarg[i] = ADFunctionPtr(new ADFunction(*_func_F));
+    _func_dFdarg[i] = std::make_shared<ADFunction>(*_func_F);
 
     if (_func_dFdarg[i]->AutoDiff(_arg_names[i]) != -1)
       mooseError("Failed to take first derivative w.r.t. ", _arg_names[i]);
@@ -117,7 +129,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + 1);
+  _func_params.resize(1 + _nargs + _pp.size());
 }
 
 void
@@ -127,6 +139,8 @@ ParsedODEKernel::updateParams()
 
   for (unsigned int j = 0; j < _nargs; ++j)
     _func_params[j + 1] = (*_args[j])[_i];
+  for (unsigned int j = 0; j < _pp.size(); ++j)
+    _func_params[j + 1 + _nargs] = *_pp[j];
 }
 
 Real

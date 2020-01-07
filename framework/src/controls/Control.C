@@ -11,14 +11,15 @@
 #include "Control.h"
 #include "InputParameterWarehouse.h"
 
-template <>
+defineLegacyParams(Control);
+
 InputParameters
-validParams<Control>()
+Control::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<SetupInterface>();
-  params += validParams<FunctionInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TransientInterface::validParams();
+  params += SetupInterface::validParams();
+  params += FunctionInterface::validParams();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);

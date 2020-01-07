@@ -25,7 +25,7 @@ validParams<BarrierFunctionMaterial>()
                         false,
                         "Make the g zero in [0:1] so it only contributes to "
                         "enforcing the eta range and not to the phase "
-                        "transformation berrier.");
+                        "transformation barrier.");
   params.set<std::string>("function_name") = std::string("g");
   return params;
 }

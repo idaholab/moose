@@ -26,7 +26,7 @@ MooseEigenSystem::~MooseEigenSystem() {}
 void
 MooseEigenSystem::addKernel(const std::string & kernel_name,
                             const std::string & name,
-                            InputParameters parameters)
+                            InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {

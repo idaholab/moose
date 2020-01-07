@@ -31,6 +31,8 @@ InputParameters validParams<AdamsPredictor>();
 class AdamsPredictor : public Predictor
 {
 public:
+  static InputParameters validParams();
+
   AdamsPredictor(const InputParameters & parameters);
 
   virtual int order() override { return _order; }

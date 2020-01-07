@@ -29,6 +29,8 @@ public:
   /** Constructor
    * @param parameters The input parameters for the function
    */
+  static InputParameters validParams();
+
   SolutionFunction(const InputParameters & parameters);
 
   /**

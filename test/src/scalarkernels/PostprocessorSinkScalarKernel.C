@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseTestApp", PostprocessorSinkScalarKernel);
 
-template <>
 InputParameters
-validParams<PostprocessorSinkScalarKernel>()
+PostprocessorSinkScalarKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "Name of the Postprocessor whose value will be the sink");
 

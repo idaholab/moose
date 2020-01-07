@@ -9,12 +9,13 @@
 
 #include "SidePostprocessor.h"
 
-template <>
+defineLegacyParams(SidePostprocessor);
+
 InputParameters
-validParams<SidePostprocessor>()
+SidePostprocessor::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
-  params += validParams<Postprocessor>();
+  InputParameters params = SideUserObject::validParams();
+  params += Postprocessor::validParams();
   return params;
 }
 

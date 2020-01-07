@@ -18,7 +18,7 @@ TEST_F(PorousFlowWaterVaporTest, name) { EXPECT_EQ("water-vapor", _fp->fluidStat
 TEST_F(PorousFlowWaterVaporTest, properties)
 {
   FluidStatePhaseEnum phase_state;
-  std::vector<FluidStatePropertiesAD> fsp(2, FluidStatePropertiesAD(1));
+  std::vector<FluidStateProperties> fsp(2, FluidStateProperties(1));
 
   // Single phase liquid region
   Real p = 1.0e6;

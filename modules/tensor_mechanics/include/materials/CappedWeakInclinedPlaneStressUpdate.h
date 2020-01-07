@@ -30,6 +30,8 @@ InputParameters validParams<CappedWeakInclinedPlaneStressUpdate>();
 class CappedWeakInclinedPlaneStressUpdate : public CappedWeakPlaneStressUpdate
 {
 public:
+  static InputParameters validParams();
+
   CappedWeakInclinedPlaneStressUpdate(const InputParameters & parameters);
 
   /**
@@ -102,4 +104,3 @@ protected:
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
-

@@ -1,5 +1,18 @@
 [Mesh]
-  type = MeshGeneratorMesh
+  [deleter]
+    type = PlaneDeletionGenerator
+    point = '0.5 0.5 0'
+    normal = '-1 0 0'
+    input = generated
+    new_boundary = 6
+  []
+  [generated]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 4
+    ny = 4
+    nz = 4
+  []
 []
 
 [Variables]
@@ -38,21 +51,4 @@
 
 [Outputs]
   exodus = true
-[]
-
-[MeshGenerators]
-  [deleter]
-    type = PlaneDeletionGenerator
-    point = '0.5 0.5 0'
-    normal = '-1 0 0'
-    input = generated
-    new_boundary = 6
-  []
-  [generated]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 4
-    ny = 4
-    nz = 4
-  []
 []

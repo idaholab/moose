@@ -23,6 +23,8 @@ InputParameters validParams<CoupledVarNeumannBC>();
 class CoupledVarNeumannBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledVarNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,7 @@ protected:
 
   /// Variable providing the value of grad(u) on the boundary.
   const VariableValue & _coupled_var;
+
+  /// A coefficient that is multiplied with the residual contribution
+  const Real _coef;
 };

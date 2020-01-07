@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", SolutionScalarAux);
 
-template <>
+defineLegacyParams(SolutionScalarAux);
+
 InputParameters
-validParams<SolutionScalarAux>()
+SolutionScalarAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addClassDescription(
       "Sets scalar variable by using information from a SolutionUserObject.");
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");

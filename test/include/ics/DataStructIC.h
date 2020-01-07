@@ -12,11 +12,6 @@
 #include "InitialCondition.h"
 #include "MooseMesh.h"
 
-class DataStructIC;
-
-template <>
-InputParameters validParams<DataStructIC>();
-
 /**
  * This initial condition builds a data structure that is queried
  * for initial condition information
@@ -24,6 +19,8 @@ InputParameters validParams<DataStructIC>();
 class DataStructIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   DataStructIC(const InputParameters & parameters);
   virtual ~DataStructIC();
 
@@ -35,4 +32,3 @@ private:
   MooseMesh & _mesh;
   std::map<dof_id_type, Real> _data;
 };
-

@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from AxisSource import AxisSource
+from .AxisSource import AxisSource
 from .. import base
 from .. import geometric
 
@@ -120,7 +120,7 @@ class ColorBar(base.ChiggerResult):
 
         data = vtk.vtkFloatArray()
         data.SetNumberOfTuples(n+1)
-        for i in xrange(n+1):
+        for i in range(n+1):
             data.SetValue(i, rng[0] + i*step)
         plane.setOptions(data=data)
 

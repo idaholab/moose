@@ -23,18 +23,14 @@ InputParameters validParams<DistributionInterface>();
 /**
  * Interface for objects that need to use distributions
  *
- * Inherit from this class at a very low level to make the getDistribution method
- * available.
+ * Inherit from this class at a very low level to make the getDistribution method available.
  */
 class DistributionInterface
 {
 public:
-  /**
-   * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the distribution named in the input file,
-   *        but the object calling getDistribution only needs to use the name on the
-   *        left hand side of the statement "distribution = dist_name"
-   */
+
+  static InputParameters validParams();
+
   DistributionInterface(const MooseObject * moose_object);
 
   ///@{
@@ -110,4 +106,3 @@ DistributionInterface::getDistributionByName(const std::string & name) const
                "' distribution with the desired type.");
   }
 }
-

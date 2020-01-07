@@ -16,11 +16,12 @@
 
 registerMooseObject("MooseApp", VolumeHistogram);
 
-template <>
+defineLegacyParams(VolumeHistogram);
+
 InputParameters
-validParams<VolumeHistogram>()
+VolumeHistogram::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
   params.addCoupledVar("variable", "Variable to bin the volume of");
   params.addRequiredParam<Real>("min_value", "Minimum variable value");

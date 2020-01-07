@@ -31,6 +31,8 @@ MOOSE performs several sanity checks just before the simulation runs. This inclu
 - All Postprocessors must refer to valid Postprocessors in the input file.
 - All other system "coupling" parameters are checked for validity
 - All pluggable systems must refer to the right type of variable (scalar, vector, array, "nonlinear", "auxiliary", etc)
+- Material properties must be defined on every block or boundary where they are consumed.
+- Multiple material properties with the same name be defined on overlapping blocks/boundaries.
 
 Some of these checks can be disabled. This often comes in handy for testing purposes. One of the most common
 pair of parameters used in testing can be used to disable the kernel coverage check when a solve is not necessary.

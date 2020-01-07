@@ -1,15 +1,30 @@
 [Tests]
-  [./fe_problem_null]
-    type = 'RunException'
-    input = 'check_error.i'
-    cli_args = "Kernels/diff/test=fe_problem_null"
-    expect_err = "The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
-  [../]
+  design = 'BlockRestrictable.md'
+  issues = '#2411'
 
-  [./mesh_null]
-    type = 'RunException'
-    input = 'check_error.i'
-    cli_args = "Kernels/diff/test=mesh_null"
-    expect_err = "The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
-  [../]
+  [errors]
+    requirement = "The system shall error if an object restricted to subdomains is created without "
+                  "valid data"
+
+    [fe_problem_null]
+      type = 'RunException'
+      input = 'check_error.i'
+      cli_args = "Kernels/diff/test=fe_problem_null"
+      expect_err = "The input parameters must contain a pointer to FEProblem via '_fe_problem' or a "
+                   "pointer to the MooseMesh via '_mesh'"
+
+      detail = "regarding the problem being solved or"
+
+    []
+
+    [mesh_null]
+      type = 'RunException'
+      input = 'check_error.i'
+      cli_args = "Kernels/diff/test=mesh_null"
+      expect_err = "The input parameters must contain a pointer to FEProblem via '_fe_problem' or a "
+                   "pointer to the MooseMesh via '_mesh'"
+
+      detail = "information regarding the finite element mesh."
+    []
+  []
 []

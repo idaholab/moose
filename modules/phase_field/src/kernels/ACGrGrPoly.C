@@ -16,7 +16,7 @@ InputParameters
 validParams<ACGrGrPoly>()
 {
   InputParameters params = validParams<ACGrGrBase>();
-  params.addClassDescription("Grain-Boundary model poly-crystaline interface Allen-Cahn Kernel");
+  params.addClassDescription("Grain-Boundary model poly-crystalline interface Allen-Cahn Kernel");
   return params;
 }
 

@@ -27,6 +27,8 @@ InputParameters validParams<ParsedGenerateSideset>();
 class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils
 {
 public:
+  static InputParameters validParams();
+
   ParsedGenerateSideset(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

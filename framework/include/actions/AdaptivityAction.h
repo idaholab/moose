@@ -21,6 +21,8 @@ InputParameters validParams<AdaptivityAction>();
 class AdaptivityAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AdaptivityAction(InputParameters params);
 
   virtual void act() override;

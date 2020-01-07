@@ -29,6 +29,8 @@ template <ComputeStage compute_stage>
 class ADComputeFiniteStrain : public ADComputeIncrementalStrainBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeFiniteStrain(const InputParameters & parameters);
 
   void computeProperties() override;
@@ -53,4 +55,3 @@ private:
 protected:
   usingComputeIncrementalStrainBaseMembers;
 };
-

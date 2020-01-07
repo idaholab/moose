@@ -67,9 +67,9 @@ MovingPlanarFront::MovingPlanarFront(const InputParameters & parameters)
     _deactivation_time(getParam<Real>("deactivation_time")),
     _front_normal(_end_posn - _start_posn)
 {
-  if (_front_normal.size() == 0)
+  if (_front_normal.norm() == 0)
     mooseError("MovingPlanarFront: start_posn and end_posn must be different points");
-  _front_normal /= _front_normal.size();
+  _front_normal /= _front_normal.norm();
 }
 
 Real

@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeStrainIncrementBasedStress);
 
-template <>
+defineLegacyParams(ComputeStrainIncrementBasedStress);
+
 InputParameters
-validParams<ComputeStrainIncrementBasedStress>()
+ComputeStrainIncrementBasedStress::validParams()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Compute stress after subtracting inelastic strain increments");
   params.addParam<std::vector<MaterialPropertyName>>("inelastic_strain_names",
                                                      "Names of inelastic strain properties");

@@ -12,11 +12,12 @@
 
 registerMooseAction("MooseApp", AddFunctionAction, "add_function");
 
-template <>
+defineLegacyParams(AddFunctionAction);
+
 InputParameters
-validParams<AddFunctionAction>()
+AddFunctionAction::validParams()
 {
-  return validParams<MooseObjectAction>();
+  return MooseObjectAction::validParams();
 }
 
 AddFunctionAction::AddFunctionAction(InputParameters params) : MooseObjectAction(params) {}

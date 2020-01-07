@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#1405'
+  design = 'FunctionNeumannBC.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'neumannbc_out.e'
+    requirement = 'The system shall support applying a function of space-time as a Neumann boundary condition.'
+  [../]
+[]

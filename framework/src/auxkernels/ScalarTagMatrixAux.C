@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ScalarTagMatrixAux);
 
-template <>
+defineLegacyParams(ScalarTagMatrixAux);
+
 InputParameters
-validParams<ScalarTagMatrixAux>()
+ScalarTagMatrixAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
 
   params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",

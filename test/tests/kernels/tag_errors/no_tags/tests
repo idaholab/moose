@@ -1,7 +1,12 @@
 [Tests]
+  design = 'syntax/Kernels/index.md'
+  issues = '#9669'
+
   [./test]
     type = 'RunException'
     input = 'no_tags.i'
     expect_err = 'MUST provide at least one vector_tag for Kernel'
+
+    requirement = "The system shall error if the volumetric residual calculation is not assigned an associated vector within the numerical solving routine."
   [../]
 []

@@ -12,7 +12,7 @@ documentation and associated test case.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](RTM) for {{app}} is dependent upon the following documents.
 
-!sqa dependencies suffix=rtm
+!sqa dependencies suffix=rtm category={{category}}
 
 ## Requirements
 

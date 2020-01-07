@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", DGConvection);
 
-template <>
+defineLegacyParams(DGConvection);
+
 InputParameters
-validParams<DGConvection>()
+DGConvection::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
   params.addClassDescription("DG upwinding for the convection");
   return params;

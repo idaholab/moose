@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./layer1]
     type = GeneratedMeshGenerator
     dim = 2
@@ -57,10 +57,6 @@
     dim = 2
     bottom_height = 3
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

@@ -60,6 +60,26 @@ public:
 
   std::streampos tellp() const { return _oss.tellp(); }
 
+  /**
+   * Return the current precision
+   */
+  std::streamsize precision() const;
+
+  /**
+   * Set the precision and return the old precision
+   */
+  std::streamsize precision(std::streamsize new_precision) const;
+
+  /**
+   * Return the current flags
+   */
+  std::ios_base::fmtflags flags() const;
+
+  /**
+   * Set the flags and return the old flags
+   */
+  std::ios_base::fmtflags flags(std::ios_base::fmtflags new_flags) const;
+
 private:
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;

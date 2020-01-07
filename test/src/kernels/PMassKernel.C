@@ -11,29 +11,29 @@
 
 registerMooseObject("MooseTestApp", PMassKernel);
 
-template <>
 InputParameters
-validParams<PMassKernel>()
+PMassKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The actual exponent is p-2");
+  params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }
 
 PMassKernel::PMassKernel(const InputParameters & parameters)
-  : Kernel(parameters), _p(getParam<Real>("p") - 2.0)
+  : Kernel(parameters), _p(getParam<Real>("p") - 2.0), _coef(getParam<Real>("coefficient"))
 {
 }
 
 Real
 PMassKernel::computeQpResidual()
 {
-  return std::pow(std::fabs(_u[_qp]), _p) * _u[_qp] * _test[_i][_qp];
+  return _coef * std::pow(std::fabs(_u[_qp]), _p) * _u[_qp] * _test[_i][_qp];
 }
 
 Real
 PMassKernel::computeQpJacobian()
 {
   // Note: this jacobian evaluation is not exact when p!=2.
-  return std::pow(std::fabs(_phi[_j][_qp]), _p) * _phi[_j][_qp] * _test[_i][_qp];
+  return _coef * std::pow(std::fabs(_phi[_j][_qp]), _p) * _phi[_j][_qp] * _test[_i][_qp];
 }

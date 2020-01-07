@@ -17,8 +17,9 @@ public:
   SymmAnisotropicElasticityTensor();
   SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool all_21);
   SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a);
+  SymmAnisotropicElasticityTensor & operator=(const SymmAnisotropicElasticityTensor & a) = default;
 
-  virtual ~SymmAnisotropicElasticityTensor() {}
+  virtual ~SymmAnisotropicElasticityTensor() = default;
 
   /**
    * Set the first euler angle
@@ -117,4 +118,3 @@ protected:
 
   virtual void calculateEntries(unsigned int qp);
 };
-

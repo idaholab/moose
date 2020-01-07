@@ -20,11 +20,12 @@
 
 registerMooseObject("MooseApp", MultiAppVectorPostprocessorTransfer);
 
-template <>
+defineLegacyParams(MultiAppVectorPostprocessorTransfer);
+
 InputParameters
-validParams<MultiAppVectorPostprocessorTransfer>()
+MultiAppVectorPostprocessorTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
   params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",
@@ -48,6 +49,8 @@ MultiAppVectorPostprocessorTransfer::MultiAppVectorPostprocessorTransfer(
     _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor")),
     _vector_name(getParam<std::string>("vector_name"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -100,7 +103,7 @@ MultiAppVectorPostprocessorTransfer::execute()
 {
   _console << "Beginning VectorPostprocessorTransfer " << name() << std::endl;
 
-  if (_direction == FROM_MULTIAPP)
+  if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else
     executeToMultiapp();

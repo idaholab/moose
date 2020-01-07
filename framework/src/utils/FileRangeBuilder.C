@@ -15,9 +15,10 @@
 #include "pcrecpp.h"
 #include "tinydir.h"
 
-template <>
+defineLegacyParams(FileRangeBuilder);
+
 InputParameters
-validParams<FileRangeBuilder>()
+FileRangeBuilder::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<FileName>("file",

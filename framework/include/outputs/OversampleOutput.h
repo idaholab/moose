@@ -42,6 +42,8 @@ InputParameters validParams<OversampleOutput>();
 class OversampleOutput : public AdvancedOutput
 {
 public:
+  static InputParameters validParams();
+
   OversampleOutput(const InputParameters & parameters);
 
   virtual ~OversampleOutput();

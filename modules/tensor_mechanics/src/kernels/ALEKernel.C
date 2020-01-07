@@ -12,12 +12,13 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-template <>
+defineLegacyParams(ALEKernel);
+
 InputParameters
-validParams<ALEKernel>()
+ALEKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Sets up derivetives with respect to initial configuration");
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription("Sets up derivatives with respect to initial configuration");
   return params;
 }
 

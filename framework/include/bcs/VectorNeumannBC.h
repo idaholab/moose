@@ -27,6 +27,8 @@ InputParameters validParams<VectorNeumannBC>();
 class VectorNeumannBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   VectorNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -35,4 +37,3 @@ protected:
   /// Vector to dot with the normal.
   const RealVectorValue & _value;
 };
-

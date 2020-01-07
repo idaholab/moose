@@ -28,11 +28,12 @@
 
 registerMooseObject("MooseApp", MultiAppUserObjectTransfer);
 
-template <>
+defineLegacyParams(MultiAppUserObjectTransfer);
+
 InputParameters
-validParams<MultiAppUserObjectTransfer>()
+MultiAppUserObjectTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppFieldTransfer>();
+  InputParameters params = MultiAppConservativeTransfer::validParams();
   //  MultiAppUserObjectTransfer does not need source variable since it query values from user
   //  objects
   params.suppressParameter<std::vector<VariableName>>("source_variable");
@@ -46,13 +47,23 @@ validParams<MultiAppUserObjectTransfer>()
                         "the subApps during a transfer from sub App to Master App. If master node "
                         "cannot be found within bounding boxes of any of the subApps, an error is "
                         "generated.");
+  params.addParam<bool>(
+      "skip_bounding_box_check",
+      false,
+      "Skip the check if the to_elem is within the bounding box of the from_app.");
+
+  params.addClassDescription(
+      "Samples a variable's value in the Master domain at the point where the MultiApp is and "
+      "copies that value into a post-processor in the MultiApp");
+
   return params;
 }
 
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppConservativeTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
-    _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app"))
+    _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app")),
+    _skip_bbox_check(getParam<bool>("skip_bounding_box_check"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
@@ -71,7 +82,7 @@ MultiAppUserObjectTransfer::execute()
 {
   _console << "Beginning MultiAppUserObjectTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {
@@ -331,7 +342,7 @@ MultiAppUserObjectTransfer::execute()
             if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
-              if (app_box.contains_point(*node))
+              if (_skip_bbox_check || app_box.contains_point(*node))
               {
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
@@ -386,7 +397,7 @@ MultiAppUserObjectTransfer::execute()
             for (auto & point : points) // If this variable has dofs at this elem
             {
               // See if this elem falls in this bounding box
-              if (app_box.contains_point(point))
+              if (_skip_bbox_check || app_box.contains_point(point))
               {
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
 

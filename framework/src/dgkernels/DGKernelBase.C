@@ -22,17 +22,18 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(DGKernelBase);
+
 InputParameters
-validParams<DGKernelBase>()
+DGKernelBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TwoMaterialPropertyInterface>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<TaggingInterface>();
+  InputParameters params = MooseObject::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
+  params += TransientInterface::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
+  params += MeshChangedInterface::validParams();
+  params += TaggingInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",
@@ -61,6 +62,9 @@ validParams<DGKernelBase>()
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
                                     Moose::RelationshipManagerType::COUPLING);
+
+  params.addParam<std::vector<BoundaryName>>(
+      "exclude_boundary", "The internal side sets to be excluded from this kernel.");
   params.registerBase("DGKernel");
 
   return params;
@@ -108,6 +112,27 @@ DGKernelBase::DGKernelBase(const InputParameters & parameters)
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
+  // Gather information on broken boundaries
+  std::vector<BoundaryName> bnd = isParamValid("exclude_boundary")
+                                      ? getParam<std::vector<BoundaryName>>("exclude_boundary")
+                                      : std::vector<BoundaryName>(0);
+  auto bnd_ids = _mesh.getBoundaryIDs(bnd);
+
+  // check if the broken boundary ids are valid
+  auto & valid_ids = _mesh.meshSidesetIds();
+  std::vector<BoundaryName> diff;
+  for (unsigned int i = 0; i < bnd_ids.size(); ++i)
+    if (valid_ids.find(bnd_ids[i]) == valid_ids.end())
+      diff.push_back(bnd[i]);
+  if (!diff.empty())
+  {
+    auto msg = "DGKernel '" + name() +
+               "' contains the following boundary names that do not exist on the mesh: " +
+               Moose::stringify(diff, ", ");
+    paramError("exclude_boundary", msg);
+  }
+
+  _excluded_boundaries.insert(bnd_ids.begin(), bnd_ids.end());
 }
 
 DGKernelBase::~DGKernelBase() {}
@@ -115,46 +140,76 @@ DGKernelBase::~DGKernelBase() {}
 void
 DGKernelBase::computeResidual()
 {
-  // Compute the residual for this element
-  computeElemNeighResidual(Moose::Element);
+  if (!excludeBoundary())
+  {
+    // Compute the residual for this element
+    computeElemNeighResidual(Moose::Element);
 
-  // Compute the residual for the neighbor
-  computeElemNeighResidual(Moose::Neighbor);
+    // Compute the residual for the neighbor
+    computeElemNeighResidual(Moose::Neighbor);
+  }
 }
 
 void
 DGKernelBase::computeJacobian()
 {
-  // Compute element-element Jacobian
-  computeElemNeighJacobian(Moose::ElementElement);
+  if (!excludeBoundary())
+  {
+    // Compute element-element Jacobian
+    computeElemNeighJacobian(Moose::ElementElement);
 
-  // Compute element-neighbor Jacobian
-  computeElemNeighJacobian(Moose::ElementNeighbor);
+    // Compute element-neighbor Jacobian
+    computeElemNeighJacobian(Moose::ElementNeighbor);
 
-  // Compute neighbor-element Jacobian
-  computeElemNeighJacobian(Moose::NeighborElement);
+    // Compute neighbor-element Jacobian
+    computeElemNeighJacobian(Moose::NeighborElement);
 
-  // Compute neighbor-neighbor Jacobian
-  computeElemNeighJacobian(Moose::NeighborNeighbor);
+    // Compute neighbor-neighbor Jacobian
+    computeElemNeighJacobian(Moose::NeighborNeighbor);
+  }
 }
 
 void
 DGKernelBase::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == variable().number())
-    computeJacobian();
-  else
+  if (!excludeBoundary())
   {
-    // Compute element-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
+    if (jvar == variable().number())
+      computeJacobian();
+    else
+    {
+      // Compute element-element Jacobian
+      computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
-    // Compute element-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
+      // Compute element-neighbor Jacobian
+      computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
 
-    // Compute neighbor-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
+      // Compute neighbor-element Jacobian
+      computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
 
-    // Compute neighbor-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
+      // Compute neighbor-neighbor Jacobian
+      computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
+    }
   }
+}
+
+bool
+DGKernelBase::excludeBoundary() const
+{
+  if (_excluded_boundaries.empty())
+    return false;
+
+  auto boundary_ids = _mesh.getBoundaryIDs(_current_elem, _current_side);
+  for (auto bid : boundary_ids)
+    if (_excluded_boundaries.find(bid) != _excluded_boundaries.end())
+      return true;
+
+  // make sure we will also break on the neighboring side
+  unsigned int neighbor_side = _neighbor_elem->which_neighbor_am_i(_current_elem);
+  boundary_ids = _mesh.getBoundaryIDs(_neighbor_elem, neighbor_side);
+  for (auto bid : boundary_ids)
+    if (_excluded_boundaries.find(bid) != _excluded_boundaries.end())
+      return true;
+
+  return false;
 }

@@ -227,4 +227,3 @@ protected:
 
   FileLineInfoMap _syntax_to_line;
 };
-

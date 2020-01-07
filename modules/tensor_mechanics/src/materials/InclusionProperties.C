@@ -12,11 +12,12 @@
 
 registerMooseObject("TensorMechanicsApp", InclusionProperties);
 
-template <>
+defineLegacyParams(InclusionProperties);
+
 InputParameters
-validParams<InclusionProperties>()
+InclusionProperties::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<Real>("a", "Ellipse semiaxis");
   params.addRequiredParam<Real>("b", "Ellipse semiaxis");
   params.addRequiredParam<Real>("lambda", "Lame's first parameter");

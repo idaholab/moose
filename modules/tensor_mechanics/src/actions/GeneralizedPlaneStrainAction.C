@@ -20,11 +20,12 @@ registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_ker
 
 registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_user_object");
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainAction);
+
 InputParameters
-validParams<GeneralizedPlaneStrainAction>()
+GeneralizedPlaneStrainAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up the GeneralizedPlaneStrain environment");
   params.addRequiredParam<std::vector<VariableName>>("displacements", "The displacement variables");
   params.addRequiredParam<VariableName>("scalar_out_of_plane_strain",
@@ -48,6 +49,9 @@ validParams<GeneralizedPlaneStrainAction>()
                                               "The list of ids of the blocks (subdomain) "
                                               "that the GeneralizedPlaneStrain kernels "
                                               "will be applied to");
+  params.addParam<std::vector<TagName>>(
+      "extra_vector_tags",
+      "The tag names for extra vectors that residual data should be saved into");
 
   return params;
 }
@@ -133,6 +137,10 @@ GeneralizedPlaneStrainAction::act()
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = uo_name;
+
+    if (isParamValid("extra_vector_tags"))
+      params.set<std::vector<TagName>>("extra_vector_tags") =
+          getParam<std::vector<TagName>>("extra_vector_tags");
 
     _problem->addScalarKernel(sk_type, _name + "_GeneralizedPlaneStrain", params);
   }

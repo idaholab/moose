@@ -11,8 +11,7 @@
 
 #include "DGKernelBase.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 #define usingDGKernelMembers                                                                       \
   usingDGKernelBaseMembers;                                                                        \
@@ -41,6 +40,8 @@ template <ComputeStage compute_stage>
 class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ADDGKernel(const InputParameters & parameters);
 
   virtual ~ADDGKernel();

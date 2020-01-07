@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
   [./test]
     type = 'Exodiff'
     input = 'glued_contact_test.i'
     exodiff = 'out.e'
     abs_zero = 5e-05
     max_parallel = 1
+    requirement = 'The contact system shall enforce a glued contact constraint using the dirac kernel system that ties together two blocks that are separated by an initial gap when the come in contact with each other so that the blocks move together.'
+    design = 'ContactMaster.md SlaveConstraint.md'
   [../]
   [./test2]
     type = 'Exodiff'
@@ -12,5 +16,6 @@
     exodiff = 'mechanical_constraint_out.e'
     abs_zero = 5e-05
     max_parallel = 1
+    requirement = 'The contact system shall enforce a glued contact constraint that ties together two blocks that are separated by an initial gap when the come in contact with each other so that the blocks move together.'
   [../]
 []

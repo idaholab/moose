@@ -46,6 +46,13 @@ SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
+relative_excluded_srcfiles := $(foreach i, $(excluded_srcfiles), $(shell find $(SRC_DIRS) -name $(i)))
+ifeq ($(LIBRARY_SUFFIX),yes)
+excluded_objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(relative_excluded_srcfiles))
+else
+excluded_objects	    := $(patsubst %.C, %.$(obj-suffix), $(relative_excluded_srcfiles))
+endif
+
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
 srcfiles    := $(shell find $(SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes))
 
@@ -126,6 +133,20 @@ test_cobjects:= $(patsubst %.c, %.$(obj-suffix), $(test_csrcfiles))
 test_fobjects:= $(patsubst %.f, %.$(obj-suffix), $(test_fsrcfiles))
 test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
 app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+$(app_objects): $(moose_config_symlink)
+$(app_test_objects): $(moose_config_symlink)
+$(excluded_objects): $(moose_config_symlink)
+
+else
+
+$(app_objects): $(moose_config)
+$(app_test_objects): $(moose_config)
+$(excluded_objects): $(moose_config_symlink)
+
+endif
 
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
@@ -361,13 +382,16 @@ endif
 # Codesign command (OS X Only)
 codesign :=
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	get_task_allow_entitlement := $(FRAMEWORK_DIR)/build_support/get_task_allow.plist
-	codesign := codesign -s - --entitlements $(get_task_allow_entitlement) $(app_EXEC)
+  ifeq (x$(MOOSE_NO_CODESIGN), x)
+    get_task_allow_entitlement := $(FRAMEWORK_DIR)/build_support/get_task_allow.plist
+    codesign := codesign -s - --entitlements $(get_task_allow_entitlement) $(app_EXEC)
+  endif
 endif
+
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(depend_test_libs_flags) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
 	@$(codesign)
 
 # Clang static analyzer

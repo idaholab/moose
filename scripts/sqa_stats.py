@@ -15,7 +15,7 @@ import mooseutils
 
 if __name__ == '__main__':
     data = mooseutils.SQAStats('Total')
-    data += mooseutils.compute_requirement_stats('test/tests')
+    data += mooseutils.compute_requirement_stats('test/tests', list_missing=True)
     data += mooseutils.compute_requirement_stats('stork')
     data += mooseutils.compute_requirement_stats('tutorials')
     data += mooseutils.compute_requirement_stats('examples')

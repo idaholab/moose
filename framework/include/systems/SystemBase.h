@@ -15,6 +15,8 @@
 #include "MooseTypes.h"
 #include "VariableWarehouse.h"
 #include "InputParameters.h"
+#include "MooseObjectWarehouseBase.h"
+#include "MooseVariableBase.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
@@ -34,6 +36,7 @@ class MooseMesh;
 class SubProblem;
 class SystemBase;
 class TimeIntegrator;
+class InputParameters;
 
 // libMesh forward declarations
 namespace libMesh
@@ -115,7 +118,15 @@ public:
   /**
    * Whether we are computing an initial Jacobian for automatic variable scaling
    */
-  virtual bool computingInitialJacobian() const { return false; }
+  bool computingScalingJacobian() const { return _computing_scaling_jacobian; }
+
+  /**
+   * Setter for whether we're computing the scaling jacobian
+   */
+  void computingScalingJacobian(bool computing_scaling_jacobian)
+  {
+    _computing_scaling_jacobian = computing_scaling_jacobian;
+  }
 
   /**
    * Gets writeable reference to the dof map
@@ -351,32 +362,14 @@ public:
                                std::vector<dof_id_type> & n_oz) = 0;
 
   /**
-   * Adds a variable to the system
-   *
-   * @param var_name name of the variable
-   * @param type FE type of the variable
-   * @param scale_factor the scaling factor for the variable
-   * @param active_subdomains a list of subdomain ids this variable is active on
+   * Canonical method for adding a variable
+   * @param var_type the type of the variable, e.g. MooseVariableScalar
+   * @param var_name the variable name, e.g. 'u'
+   * @param params the InputParameters from which to construct the variable
    */
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = nullptr);
-
-  /**
-   * Adds an array variable to the system
-   *
-   * @param var_name Name of the array variable
-   * @param type FE type of the array variable
-   * @param components Number of components for this array variable
-   * @param scale_factor The scaling factors for the array variable
-   * @param active_subdomains A list of subdomain ids this array variable is active on
-   */
-  virtual void addArrayVariable(const std::string & var_name,
-                                const FEType & type,
-                                unsigned int components,
-                                const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains = nullptr);
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & var_name,
+                           InputParameters & parameters);
 
   /**
    * If a variable is an array variable
@@ -471,24 +464,24 @@ public:
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerElem() const { return _max_var_n_dofs_per_elem; }
+  std::size_t getMaxVarNDofsPerElem() const { return _max_var_n_dofs_per_elem; }
 
   /**
    * Gets the maximum number of dofs used by any one variable on any one node
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerNode() const { return _max_var_n_dofs_per_node; }
+  std::size_t getMaxVarNDofsPerNode() const { return _max_var_n_dofs_per_node; }
 
   /**
    * assign the maximum element dofs
    */
-  void assignMaxVarNDofsPerElem(const size_t & max_dofs) { _max_var_n_dofs_per_elem = max_dofs; }
+  void assignMaxVarNDofsPerElem(std::size_t max_dofs) { _max_var_n_dofs_per_elem = max_dofs; }
 
   /**
    * assign the maximum node dofs
    */
-  void assignMaxVarNDofsPerNode(const size_t & max_dofs) { _max_var_n_dofs_per_node = max_dofs; }
+  void assignMaxVarNDofsPerNode(std::size_t max_dofs) { _max_var_n_dofs_per_node = max_dofs; }
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
@@ -730,17 +723,6 @@ public:
 
   virtual const std::string & name() const;
 
-  /**
-   * Adds a scalar variable
-   * @param var_name The name of the variable
-   * @param order The order of the variable
-   * @param scale_factor The scaling factor to be used with this scalar variable
-   */
-  virtual void addScalarVariable(const std::string & var_name,
-                                 Order order,
-                                 Real scale_factor,
-                                 const std::set<SubdomainID> * const active_subdomains = NULL);
-
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
   /**
@@ -759,7 +741,7 @@ public:
 
   virtual void addTimeIntegrator(const std::string & /*type*/,
                                  const std::string & /*name*/,
-                                 InputParameters /*parameters*/)
+                                 InputParameters & /*parameters*/)
   {
   }
 
@@ -824,6 +806,12 @@ protected:
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
+
+  /// Storage for MooseVariable objects
+  MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;
+
+  /// Flag used to indicate whether we are computing the scaling Jacobian
+  bool _computing_scaling_jacobian;
 };
 
 #define PARALLEL_TRY

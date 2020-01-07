@@ -25,12 +25,13 @@
 
 registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
 
-template <>
+defineLegacyParams(DOFMapOutput);
+
 InputParameters
-validParams<DOFMapOutput>()
+DOFMapOutput::validParams()
 {
   // Get the parameters from the base class
-  InputParameters params = validParams<FileOutput>();
+  InputParameters params = FileOutput::validParams();
   params.addClassDescription("Output degree-of-freedom (DOF) map.");
 
   // Screen and file output toggles

@@ -23,6 +23,8 @@ InputParameters validParams<MultiAppPostprocessorTransfer>();
 class MultiAppPostprocessorTransfer : public MultiAppTransfer
 {
 public:
+  static InputParameters validParams();
+
   MultiAppPostprocessorTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -40,4 +42,3 @@ protected:
   PostprocessorName _to_pp_name;
   MooseEnum _reduction_type;
 };
-

@@ -9,9 +9,11 @@
 
 #include "MooseTypes.h"
 #include "libmesh/elem.h"
+#include "libmesh/libmesh.h"
 
 namespace Moose
 {
+const processor_id_type INVALID_PROCESSOR_ID = libMesh::DofObject::invalid_processor_id;
 const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);

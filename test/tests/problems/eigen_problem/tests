@@ -1,6 +1,7 @@
 [Tests]
    design = "Eigenvalue.md"
    issues = "#7398"
+
   [./test]
     type = 'CSVDiff'
     input = 'ipm.i'
@@ -8,12 +9,21 @@
     slepc = true
     requirement = "Eigenvalue system should support standard eigenvalue problems"
   [../]
+
   [./gipm_test]
     type = 'CSVDiff'
     input = 'gipm.i'
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
     slepc = true
     requirement = "Eigenvalue system should support generalized eigenvalue problems"
+  [../]
+
+  [./gipm_ibc]
+    type = 'CSVDiff'
+    input = 'gipm_ibc.i'
+    csvdiff = 'gipm_ibc_out_eigenvalues_0001.csv'
+    slepc = true
+    requirement = "Eigenvalue system should support IntegratedBC"
   [../]
 
   [./wrong_dirichlet_value_eigen]
@@ -23,15 +33,6 @@
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
     slepc = true
     requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
-  [../]
-
-  [./wrong_boundary_type_eigen]
-    type = 'RunException'
-    input = 'gipm.i'
-    cli_args = 'BCs/homogeneous/type=NeumannBC'
-    expect_err = "Can.t set an inhomogeneous integrated boundary condition for eigenvalue problems."
-    slepc = true
-    requirement = "Eigenvalue system should not allow users to use inhomogeneous integral boundary conditions"
   [../]
 
   [./wrong_NodalBC_type_eigen]
@@ -109,4 +110,21 @@
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
+
+  [./ne_coupled_picard_eigen_master]
+    type = 'CSVDiff'
+    input = 'ne_coupled_picard.i'
+    csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.12.0'
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master"
+  []
+
+  [./ne_coupled_picard_eigen_sub]
+    type = 'CSVDiff'
+    input = 'ne_coupled_picard_subT.i'
+    csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
+    slepc_version = '>=3.12.0'
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app"
+  []
+
 []

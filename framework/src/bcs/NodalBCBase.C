@@ -13,8 +13,14 @@ template <>
 InputParameters
 validParams<NodalBCBase>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
+  return NodalBCBase::validParams();
+}
+
+InputParameters
+NodalBCBase::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
+  params += RandomInterface::validParams();
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
       "The name of auxiliary variables to save this BC's residual contributions to.  "

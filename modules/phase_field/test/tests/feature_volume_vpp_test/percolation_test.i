@@ -1,3 +1,10 @@
+# This tests the percolation detection capability in FeatureFloodCount. One feature
+# exists that intersects both left and right boundaries, so the FeatureVolumeVPP
+# will return true for that feature based on the specified values of parameters
+# primary_percolation_boundaries and secondary_percolation_boundaries.
+# It also tests the capabilility of FeatureFloodCount to detect whether each feature
+# is in contact with the boundaries set by the specified_boundaries parameter.
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -49,6 +56,7 @@
     execute_on = INITIAL
     primary_percolation_boundaries = 'left'
     secondary_percolation_boundaries = 'right'
+    specified_boundaries = 'left right'
   [../]
 []
 

@@ -8,11 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowAddMaterialAction.h"
+#include "AddBCAction.h"
+#include "AddDiracKernelAction.h"
 #include "AddKernelAction.h"
 #include "AddMaterialAction.h"
 #include "AddPostprocessorAction.h"
 #include "AddUserObjectAction.h"
-#include "AddBCAction.h"
 #include "PorousFlowActionBase.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
@@ -138,6 +139,11 @@ PorousFlowAddMaterialAction::createDependencyList()
   auto bcs = _awh.getActions<AddBCAction>();
   for (auto & bc : bcs)
     _dependency_list.insert(bc->getMooseObjectType());
+
+  // Unique list of Dirac kernels added in input file
+  auto diracs = _awh.getActions<AddDiracKernelAction>();
+  for (auto & dirac : diracs)
+    _dependency_list.insert(dirac->getMooseObjectType());
 }
 
 bool

@@ -26,11 +26,12 @@ registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_variable"
 
 registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(GlobalStrainAction);
+
 InputParameters
-validParams<GlobalStrainAction>()
+GlobalStrainAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up the GlobalStrainAction environment");
   params.addRequiredParam<VariableName>("scalar_global_strain",
                                         "Scalar variable for global strain");
@@ -124,26 +125,25 @@ GlobalStrainAction::act()
   //
   else if (_current_task == "add_aux_variable")
   {
+    auto params = _factory.getValidParams("MooseVariable");
+    // determine necessary order
     const bool second = _problem->mesh().hasSecondOrderElements();
+
+    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
+    params.set<MooseEnum>("family") = "LAGRANGE";
 
     for (unsigned int i = 0; i < _aux_disp.size(); ++i)
     {
       std::string aux_var_name = _aux_disp[i];
 
-      _problem->addAuxVariable(aux_var_name,
-                               FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _block_ids.empty() ? nullptr : &_block_ids);
+      _problem->addAuxVariable("MooseVariable", aux_var_name, params);
     }
 
     for (unsigned int i = 0; i < _global_disp.size(); ++i)
     {
       std::string aux_var_name = _global_disp[i];
 
-      _problem->addAuxVariable(aux_var_name,
-                               FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                               _block_ids.empty() ? nullptr : &_block_ids);
+      _problem->addAuxVariable("MooseVariable", aux_var_name, params);
     }
   }
 

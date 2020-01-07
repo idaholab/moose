@@ -13,11 +13,12 @@
 
 registerMooseObject("TensorMechanicsApp", AbruptSoftening);
 
-template <>
+defineLegacyParams(AbruptSoftening);
+
 InputParameters
-validParams<AbruptSoftening>()
+AbruptSoftening::validParams()
 {
-  InputParameters params = validParams<SmearedCrackSofteningBase>();
+  InputParameters params = SmearedCrackSofteningBase::validParams();
   params.addClassDescription("Softening model with an abrupt stress release upon cracking. This "
                              "class is intended to be used with ComputeSmearedCrackingStress.");
   params.addRangeCheckedParam<Real>(

@@ -29,6 +29,8 @@ InputParameters validParams<LinearCombinationPostprocessor>();
 class LinearCombinationPostprocessor : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   LinearCombinationPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -36,8 +38,6 @@ public:
   virtual PostprocessorValue getValue() override;
 
 protected:
-  /// List of names of post-processors to include in linear combination
-  const std::vector<PostprocessorName> & _pp_names;
   /// Number of post-processors in linear combination
   const unsigned int _n_pp;
   /// List of linear combination coefficients for each post-processor value
@@ -48,4 +48,3 @@ protected:
   /// List of post-processor values
   std::vector<const PostprocessorValue *> _pp_values;
 };
-

@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'logconstant_dt.i'
     exodiff = 'logconstant_dt_out.e'
+
+    issues = '#9312'
+    design = 'LogConstantDT.md'
+    requirement = 'The system shall support the ability to select a time step size based upon a scaled log-constant calculation.'
   [../]
 []

@@ -11,11 +11,12 @@
 
 registerMooseObject("HeatConductionApp", GapConductanceConstant);
 
-template <>
+defineLegacyParams(GapConductanceConstant);
+
 InputParameters
-validParams<GapConductanceConstant>()
+GapConductanceConstant::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params += GapConductanceConstant::actionParameters();
   // We can't just make it required in the first place because then it would always
   // be required in the Action, even if this model isn't used.

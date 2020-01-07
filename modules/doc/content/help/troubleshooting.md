@@ -11,3 +11,5 @@ The content you find here, is a collection of issues commonly experienced by all
 !include help/build_issues.md
 
 !include help/failing_tests.md
+
+!include help/catalina_caveats.md

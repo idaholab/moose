@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -47,13 +47,13 @@ class TestHitLoad(unittest.TestCase):
     def testFind(self):
         root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertIs(root.find('A'), root.children[0])
-        self.assertEqual(root.findall('A'), [root.children[0], root.children[0].children[0]])
-        self.assertEqual(root.findall('-1'),
+        self.assertEqual(list(root.findall('A')), [root.children[0], root.children[0].children[0]])
+        self.assertEqual(list(root.findall('-1')),
                          [root.children[0].children[0],
                           root.children[1].children[0],
                           root.children[1].children[0].children[0]])
 
-        self.assertEqual(root.children[1].findall('-1'),
+        self.assertEqual(list(root.children[1].findall('-1')),
                          [root.children[1].children[0],
                           root.children[1].children[0].children[0]])
 
@@ -63,10 +63,46 @@ class TestHitLoad(unittest.TestCase):
             self.assertEqual(k, 'param')
             self.assertEqual(v, 'foo')
 
-    def getGetParam(self):
+    def testGetParam(self):
         root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
         p = root.get('nope', 'default')
         self.assertEqual(p, 'default')
+
+    def testAddParam(self):
+        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        self.assertIsNone(root(1).get('year'))
+        root(1).addParam('year', 1980)
+        self.assertEqual(len(root(1)), 2)
+        self.assertEqual(root(1).get('year'), 1980)
+
+    def testRemoveParam(self):
+        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(root(0)['param'], 'foo')
+        root(0).removeParam('param')
+        self.assertIsNone(root(0).get('param'))
+
+    def testAddSection(self):
+        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        sec = root(1).append('B-3')
+        self.assertEqual(len(root(1)), 3)
+        self.assertIsNone(sec.get('year'))
+        sec.addParam('year', 1980)
+        self.assertEqual(sec.get('year'), 1980)
+
+    def testRemoveSection(self):
+        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root), 2)
+        root(1).remove()
+        self.assertEqual(len(root), 1)
+
+    def testAddSectionWithParameters(self):
+        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        sec = root(1).append('B-3', year=1980)
+        self.assertEqual(len(root(1)), 3)
+        self.assertEqual(sec.get('year'), 1980)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

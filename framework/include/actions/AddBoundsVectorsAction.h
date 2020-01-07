@@ -19,6 +19,8 @@ InputParameters validParams<AddBoundsVectorsAction>();
 class AddBoundsVectorsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddBoundsVectorsAction(InputParameters params);
 
   virtual void act() override;

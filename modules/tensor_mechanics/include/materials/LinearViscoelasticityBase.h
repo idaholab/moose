@@ -96,6 +96,8 @@ public:
     Zienkiewicz,
   };
 
+  static InputParameters validParams();
+
   LinearViscoelasticityBase(const InputParameters & parameters);
 
   /**
@@ -268,4 +270,3 @@ protected:
   /// checks whether we are at the first time step
   bool & _step_zero;
 };
-

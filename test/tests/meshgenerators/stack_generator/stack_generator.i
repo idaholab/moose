@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./layer1]
     type = GeneratedMeshGenerator
     dim = 3
@@ -48,10 +48,6 @@
   []
 
 
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

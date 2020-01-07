@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseTestApp", PotentialAdvection);
 
-template <>
 InputParameters
-validParams<PotentialAdvection>()
+PotentialAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("potential", "The potential responsible for charge advection");
   params.addParam<bool>("positive_charge",
                         true,

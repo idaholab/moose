@@ -140,7 +140,7 @@
 
 [VectorPostprocessors]
   [./forces]
-    # VectorPostprocessor for outputing grain forces and torques
+    # VectorPostprocessor for outputting grain forces and torques
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]

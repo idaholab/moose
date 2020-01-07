@@ -11,26 +11,27 @@
 
 registerMooseObject("MooseTestApp", RobinBC);
 
-template <>
 InputParameters
-validParams<RobinBC>()
+RobinBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
+  params.addParam<Real>("coef", 2, "The cofficient multiplying this BC's residual/Jacobian");
   return params;
 }
 
-RobinBC::RobinBC(const InputParameters & parameters) : IntegratedBC(parameters) {}
+RobinBC::RobinBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _coef(getParam<Real>("coef"))
+{
+}
 
 Real
 RobinBC::computeQpResidual()
 {
-  return _test[_i][_qp] * 2. * _u[_qp];
-  // return _test[_i][_qp] * -2. * _grad_u[_qp] * _normals[_qp];
+  return _test[_i][_qp] * _coef * _u[_qp];
 }
 
 Real
 RobinBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * 2. * _phi[_j][_qp];
-  // return _test[_i][_qp] * -2. * _grad_phi[_j][_qp] * _normals[_qp];
+  return _test[_i][_qp] * _coef * _phi[_j][_qp];
 }

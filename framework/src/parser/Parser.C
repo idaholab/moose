@@ -407,16 +407,16 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
     else if (arg.find("=", 0) != std::string::npos)
       afterDoubleDash = true;
 
+    // skip over args that don't look like or are before hit parameters
+    if (!afterDoubleDash)
+      continue;
     // skip arguments with no equals sign
     if (arg.find("=", 0) == std::string::npos)
       continue;
     // skip cli flags (i.e. start with dash)
-    else if (arg.find("-", 0) == 0)
+    if (arg.find("-", 0) == 0)
       continue;
-    // skip over args that don't look like or are before hit parameters
-    else if (!afterDoubleDash)
-      continue;
-    else if (appname == "main")
+    if (appname == "main")
     {
       auto pos = arg.find(":", 0);
       if (pos == 0) // trim leading colon
@@ -424,7 +424,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
       else if (pos != std::string::npos && pos < arg.find("=", 0)) // param is for non-main subapp
         continue;
     }
-    else if (appname != "main") // app we are loading is a multiapp subapp
+    else // app we are loading is a multiapp subapp
     {
       std::string name;
       std::string num;
@@ -482,9 +482,15 @@ void
 Parser::parse(const std::string & input_filename)
 {
   // Save the filename
-  char abspath[PATH_MAX + 1];
-  realpath(input_filename.c_str(), abspath);
-  _input_filename = std::string(abspath);
+  _input_filename = input_filename;
+  std::string use_rel_paths_str =
+      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
+  if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
+  {
+    char abspath[PATH_MAX + 1];
+    realpath(input_filename.c_str(), abspath);
+    _input_filename = std::string(abspath);
+  }
 
   // vector for initializing active blocks
   std::vector<std::string> all = {"__all__"};
@@ -710,6 +716,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
         // restricted
         // in any way by the user.
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
+        std::string moose_obj_name = moose_obj->first;
 
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
@@ -719,7 +726,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
                                           task) &&             // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
-            moose_obj->first.find("<JACOBIAN>") ==
+            moose_obj_name.find("<JACOBIAN>") ==
                 std::string::npos) // And it is not a Jacobian templated AD object
         {
           std::string name;
@@ -731,27 +738,29 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             pos = act_name.size();
 
             if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + moose_obj->first;
+              name = act_name.substr(0, pos - 1) + moose_obj_name;
             else
             {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
+              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
               is_action_params = true;
             }
           }
           else
           {
-            name = act_name + "/<type>/" + moose_obj->first;
+            name = act_name + "/<type>/" + moose_obj_name;
             is_type = true;
           }
+          moose_obj_params.set<std::string>("type") = moose_obj_name;
 
-          moose_obj_params.set<std::string>("type") = moose_obj->first;
-
-          auto lineinfo = _factory.getLineInfo(moose_obj->first);
-          std::string classname = _factory.associatedClassName(moose_obj->first);
+          auto lineinfo = _factory.getLineInfo(moose_obj_name);
+          std::string classname = _factory.associatedClassName(moose_obj_name);
+          name = name.substr(0, name.find("<RESIDUAL>"));
+          moose_obj_name = moose_obj_name.substr(0, moose_obj_name.find("<RESIDUAL>"));
+          classname = classname.substr(0, classname.find("<RESIDUAL>"));
           root.addParameters(act_name,
                              name,
                              is_type,
-                             moose_obj->first,
+                             moose_obj_name,
                              is_action_params,
                              &moose_obj_params,
                              lineinfo,
@@ -954,6 +963,14 @@ Parser::setVectorParameter<Point, Point>(const std::string & full_name,
                                          GlobalParamsAction * global_block);
 
 template <>
+void Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
+template <>
 void Parser::setVectorParameter<MooseEnum, MooseEnum>(
     const std::string & full_name,
     const std::string & short_name,
@@ -991,6 +1008,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
   _current_error_stream = &error_stream;
   for (const auto & it : p)
   {
+    if (p.shouldIgnore(it.first))
+      continue;
+
     bool found = false;
     bool in_global = false;
     std::string orig_name = prefix + "/" + it.first;
@@ -1151,6 +1171,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(SamplerName, string);
       setscalar(TagName, string);
       setscalar(MeshGeneratorName, string);
+      setscalar(ExtraElementIDName, string);
 
       setscalar(PostprocessorName, PostprocessorName);
 
@@ -1200,7 +1221,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(IndicatorName, string);
       setvector(MarkerName, string);
       setvector(MultiAppName, string);
-      setvector(PostprocessorName, string);
+      setvector(PostprocessorName, PostprocessorName);
       setvector(VectorPostprocessorName, string);
       setvector(OutputName, string);
       setvector(MaterialPropertyName, string);
@@ -1210,6 +1231,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(TagName, string);
       setvector(VariableName, VariableName);
       setvector(MeshGeneratorName, string);
+      setvector(ExtraElementIDName, string);
 
       // Double indexed types
       setvectorvector(Real);
@@ -1315,7 +1337,6 @@ Parser::setScalarParameter(const std::string & full_name,
                            bool in_global,
                            GlobalParamsAction * global_block)
 {
-
   try
   {
     param->set() = _root->param<Base>(full_name);
@@ -1921,6 +1942,39 @@ Parser::setVectorParameter<MooseEnum, MooseEnum>(
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec.size(), enum_values[0]);
     for (unsigned int i = 0; i < vec.size(); ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
+  }
+}
+
+template <>
+void
+Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  std::vector<std::string> pps_names = _root->param<std::vector<std::string>>(full_name);
+  unsigned int n = pps_names.size();
+  param->set().resize(n);
+  _current_params->setVectorOfPostprocessors(short_name, true);
+  _current_params->reserveDefaultPostprocessorValueStorage(short_name, n);
+
+  for (unsigned int j = 0; j < n; ++j)
+  {
+    param->set()[j] = pps_names[j];
+    Real real_value = -std::numeric_limits<Real>::max();
+    std::istringstream ss(pps_names[j]);
+    if (ss >> real_value && ss.eof())
+      _current_params->setDefaultPostprocessorValue(short_name, real_value, j);
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<PostprocessorName>(short_name).resize(n, "");
+    for (unsigned int j = 0; j < n; ++j)
+      global_block->setVectorParam<PostprocessorName>(short_name)[j] = pps_names[j];
   }
 }
 

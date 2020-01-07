@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", BoundingBoxNodeSetGenerator);
 
-template <>
+defineLegacyParams(BoundingBoxNodeSetGenerator);
+
 InputParameters
-validParams<BoundingBoxNodeSetGenerator>()
+BoundingBoxNodeSetGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");

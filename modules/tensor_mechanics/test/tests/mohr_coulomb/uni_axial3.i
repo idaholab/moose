@@ -240,8 +240,8 @@
   solve_type = NEWTON
   type = Transient
 
-  nl_abs_tol = 1E-5
-  nl_rel_tol = 1E-7
+  nl_abs_tol = 1E-10
+  nl_rel_tol = 1E-12
   l_tol = 1E-2
   l_max_its = 50
   nl_max_its = 400

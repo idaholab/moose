@@ -18,11 +18,12 @@
 
 registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
 
-template <>
+defineLegacyParams(CreateExecutionerAction);
+
 InputParameters
-validParams<CreateExecutionerAction>()
+CreateExecutionerAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addParam<bool>(
       "auto_preconditioning",
       true,
@@ -63,9 +64,11 @@ CreateExecutionerAction::act()
 void
 CreateExecutionerAction::setupAutoPreconditioning()
 {
-  // If using NEWTON then automatically create SingleMatrixPreconditioner object with full=true
+  // If using NEWTON or LINEAR then automatically create SingleMatrixPreconditioner object with
+  // full=true
   const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
-  if ((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON"))
+  if (((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON")) ||
+      ((solve_type.find("LINEAR") != solve_type.items().end()) && (solve_type == "LINEAR")))
   {
     // Action Parameters
     InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");

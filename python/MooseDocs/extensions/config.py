@@ -54,14 +54,14 @@ class ConfigExtension(command.CommandExtension):
             meta.setData('active', False)
 
     def preTokenize(self, ast, page, meta, reader):
-        for key, value in self.__configurations[page.uid].iteritems():
+        for key, value in self.__configurations[page.uid].items():
             self.translator.updateConfiguration(key, **value)
 
     def postTokenize(self, ast, page, meta, reader):
         self.translator.resetConfigurations()
 
     def preRender(self, result, page, meta, renderer):
-        for key, value in self.__configurations[page.uid].iteritems():
+        for key, value in self.__configurations[page.uid].items():
             self.translator.updateConfiguration(key, **value)
 
     def postWrite(self, *args):

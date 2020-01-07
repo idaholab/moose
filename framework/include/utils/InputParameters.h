@@ -600,24 +600,30 @@ public:
    * Get the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @param suppress_error If true, the error check is suppressed
+   * @param index The index in the default postprocessor vector
    * @return The default value for the postprocessor
    */
   const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name,
-                                                          bool suppress_error = false) const;
+                                                          bool suppress_error = false,
+                                                          unsigned int index = 0) const;
 
   /**
    * Set the default value for a postprocessor added with addPostprocessor
    * @param name The name of the postprocessor
    * @value value The value of the postprocessor default to set
+   * @param index The index in the default postprocessor vector
    */
-  void setDefaultPostprocessorValue(const std::string & name, const PostprocessorValue & value);
+  void setDefaultPostprocessorValue(const std::string & name,
+                                    const PostprocessorValue & value,
+                                    unsigned int index = 0);
 
   /**
    * Returns true if a default PostprocessorValue is defined
    * @param name The name of the postprocessor
+   * @param index The index in the default postprocessor vector
    * @return True if a default value exists
    */
-  bool hasDefaultPostprocessorValue(const std::string & name) const;
+  bool hasDefaultPostprocessorValue(const std::string & name, unsigned int index = 0) const;
 
   // BEGIN APPLY PARAMETER METHODS
   /**
@@ -785,6 +791,29 @@ public:
    */
   std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; };
 
+  /**
+   * Informs this object that values for this parameter set from the input file or from the command
+   * line should be ignored
+   */
+  template <typename T>
+  void ignoreParameter(const std::string & name);
+
+  /**
+   * Whether to ignore the value of an input parameter set in the input file or from the command
+   * line.
+   */
+  bool shouldIgnore(const std::string & name);
+
+  /**
+   * Getter for the _vector_of_postprocessors flag in parameters
+   *
+   * @param pp_name The name of the postprocessor parameter
+   */
+  bool isSinglePostprocessor(const std::string & pp_name) const
+  {
+    return !_params.find(pp_name)->second._vector_of_postprocessors;
+  }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -814,8 +843,10 @@ private:
     bool _have_coupled_default = false;
     /// The default value for optionally coupled variables
     std::vector<Real> _coupled_default = {0};
-    bool _have_default_postprocessor_val = false;
-    PostprocessorValue _default_postprocessor_val = 0;
+    /// are pps provided as single pp or as vector of pps
+    bool _vector_of_postprocessors = false;
+    std::vector<bool> _have_default_postprocessor_val = {false};
+    std::vector<PostprocessorValue> _default_postprocessor_val = {0};
     /// True if a parameters value was set by addParam, and not set again.
     bool _set_by_add_param = false;
     /// The reserved option names for a parameter
@@ -832,6 +863,8 @@ private:
     bool _controllable = false;
     /// Controllable execute flag restriction
     std::set<ExecFlagType> _controllable_flags;
+    /// whether user setting of this parameter should be ignored
+    bool _ignore = false;
   };
 
   Metadata & at(const std::string & param)
@@ -869,6 +902,24 @@ private:
    */
   template <typename T, typename S>
   void setParamHelper(const std::string & name, T & l_value, const S & r_value);
+
+  /**
+   * Reserve space for default postprocessor values
+   * @param name The name of the postprocessor
+   * @param size Number of entries required in default p
+   */
+  void reserveDefaultPostprocessorValueStorage(const std::string & name, unsigned int size);
+
+  /**
+   * Setter for the _vector_of_postprocessors flag in parameters
+   *
+   * @param pp_name The name of the postprocessor parameter
+   * @param b value that _vector_of_postprocessors is set to
+   */
+  void setVectorOfPostprocessors(const std::string & pp_name, bool b)
+  {
+    _params[pp_name]._vector_of_postprocessors = b;
+  }
 
   /// original location of input block (i.e. filename,linenum) - used for nice error messages.
   std::string _block_location;
@@ -917,6 +968,7 @@ private:
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
+  friend class Parser;
 };
 
 // Template and inline function implementations
@@ -1311,6 +1363,14 @@ InputParameters::suppressParameter(const std::string & name)
 
 template <typename T>
 void
+InputParameters::ignoreParameter(const std::string & name)
+{
+  suppressParameter<T>(name);
+  _params[name]._ignore = true;
+}
+
+template <typename T>
+void
 InputParameters::makeParamRequired(const std::string & name)
 {
   if (!this->have_parameter<T>(name))
@@ -1437,6 +1497,9 @@ template <>
 void InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/,
                                                                 MaterialPropertyName & l_value,
                                                                 const int & r_value);
+template <>
+std::vector<PostprocessorName> &
+InputParameters::set<std::vector<PostprocessorName>>(const std::string & name, bool quiet_mode);
 
 template <typename T>
 const T &
@@ -1476,7 +1539,12 @@ template <class T>
 InputParameters
 validParams()
 {
-  static_assert(false && sizeof(T), "Missing validParams declaration!");
-
-  mooseError("Missing validParams declaration!");
+  // If users forgot to make their (old) validParams, they screwed up and
+  // should get an error - so it is okay for us to try to call the new
+  // validParams static function - which will error if they didn't implement
+  // the new function.  We can't have the old static assert that use to be
+  // here because then the sfinae for toggling between old and new-style
+  // templating will always see this function and call it even if an object
+  // has *only* the new style validParams.
+  return T::validParams();
 }

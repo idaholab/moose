@@ -19,14 +19,15 @@ registerMooseObject("MooseApp", GridPartitioner);
 
 #include <memory>
 
-template <>
+defineLegacyParams(GridPartitioner);
+
 InputParameters
-validParams<GridPartitioner>()
+GridPartitioner::validParams()
 {
   // These two are in this order because they are from different systems
   // so you have to apply _this_ system's second to override the base
-  InputParameters params = validParams<GeneratedMesh>();
-  params += validParams<MoosePartitioner>();
+  InputParameters params = GeneratedMesh::validParams();
+  params += MoosePartitioner::validParams();
 
   // These are suppressed because they're going to get set programmatically
   params.suppressParameter<MooseEnum>("elem_type");

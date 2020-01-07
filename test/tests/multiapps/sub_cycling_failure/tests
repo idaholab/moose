@@ -22,7 +22,7 @@
       # sub apps fail due to communicators in a bad state
       max_time = 60
       min_parallel = 2
-      prereq = test_failure
+      prereq = 'group/test_failure'
       superlu = true
       allow_warnings = true
       compiler = 'INTEL GCC' # 6855

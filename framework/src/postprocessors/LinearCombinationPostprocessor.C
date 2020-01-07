@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", LinearCombinationPostprocessor);
 
-template <>
+defineLegacyParams(LinearCombinationPostprocessor);
+
 InputParameters
-validParams<LinearCombinationPostprocessor>()
+LinearCombinationPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
 
   params.addRequiredParam<std::vector<PostprocessorName>>("pp_names", "List of post-processors");
   params.addRequiredParam<std::vector<Real>>(
@@ -27,8 +28,7 @@ validParams<LinearCombinationPostprocessor>()
 
 LinearCombinationPostprocessor::LinearCombinationPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _pp_names(getParam<std::vector<PostprocessorName>>("pp_names")),
-    _n_pp(_pp_names.size()),
+    _n_pp(coupledPostprocessors("pp_names")),
     _pp_coefs(getParam<std::vector<Real>>("pp_coefs")),
     _b_value(getParam<Real>("b"))
 {
@@ -37,7 +37,7 @@ LinearCombinationPostprocessor::LinearCombinationPostprocessor(const InputParame
 
   _pp_values.resize(_n_pp);
   for (unsigned int i = 0; i < _n_pp; i++)
-    _pp_values[i] = &getPostprocessorValueByName(_pp_names[i]);
+    _pp_values[i] = &getPostprocessorValue("pp_names", i);
 }
 
 void

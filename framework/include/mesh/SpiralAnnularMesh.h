@@ -22,6 +22,8 @@ InputParameters validParams<SpiralAnnularMesh>();
 class SpiralAnnularMesh : public MooseMesh
 {
 public:
+  static InputParameters validParams();
+
   SpiralAnnularMesh(const InputParameters & parameters);
   SpiralAnnularMesh(const SpiralAnnularMesh & /* other_mesh */) = default;
 

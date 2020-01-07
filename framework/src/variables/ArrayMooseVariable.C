@@ -1,0 +1,22 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ArrayMooseVariable.h"
+
+registerMooseObject("MooseApp", ArrayMooseVariable);
+
+template <>
+InputParameters
+validParams<ArrayMooseVariable>()
+{
+  auto params = validParams<MooseVariableFEBase>();
+  params.addClassDescription(
+      "Used for grouping standard field variables with the same finite element family and order");
+  return params;
+}

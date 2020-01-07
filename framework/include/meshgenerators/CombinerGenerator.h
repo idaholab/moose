@@ -25,6 +25,8 @@ InputParameters validParams<CombinerGenerator>();
 class CombinerGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   CombinerGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

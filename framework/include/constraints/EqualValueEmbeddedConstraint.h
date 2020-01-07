@@ -25,6 +25,8 @@ InputParameters validParams<EqualValueEmbeddedConstraint>();
 class EqualValueEmbeddedConstraint : public NodeElemConstraint
 {
 public:
+  static InputParameters validParams();
+
   EqualValueEmbeddedConstraint(const InputParameters & parameters);
 
   virtual void timestepSetup() override{};

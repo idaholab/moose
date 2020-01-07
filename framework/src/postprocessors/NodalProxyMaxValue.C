@@ -15,11 +15,12 @@
 
 registerMooseObject("MooseApp", NodalProxyMaxValue);
 
-template <>
+defineLegacyParams(NodalProxyMaxValue);
+
 InputParameters
-validParams<NodalProxyMaxValue>()
+NodalProxyMaxValue::validParams()
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
   return params;
 }
 

@@ -121,7 +121,18 @@ MooseParsedFunctionWrapper::initialize()
     // Case when a Real is supplied
     else
     {
-      Real val = MooseUtils::convert<Real>(_vals_input[i], true);
+      Real val;
+      try
+      {
+        val = MooseUtils::convert<Real>(_vals_input[i], true);
+      }
+      catch (const std::invalid_argument & e)
+      {
+        mooseError("'No postprocessor, scalar variable, or function with the name '",
+                   _vals_input[i],
+                   "' found. ",
+                   e.what());
+      }
       _initial_vals.push_back(val);
     }
   }

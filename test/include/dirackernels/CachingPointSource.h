@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class CachingPointSource;
-
-template <>
-InputParameters validParams<CachingPointSource>();
-
 /**
  * Adds a number of Dirac points with user-specified IDs to test
  * the Dirac point caching algorithm.
@@ -25,9 +19,10 @@ InputParameters validParams<CachingPointSource>();
 class CachingPointSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   CachingPointSource(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();
 };
-

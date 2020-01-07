@@ -11,18 +11,14 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class ExceptionKernel;
-
-template <>
-InputParameters validParams<ExceptionKernel>();
-
 /**
  * Kernel that generates MooseException
  */
 class ExceptionKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ExceptionKernel(const InputParameters & parameters);
 
 protected:
@@ -39,6 +35,9 @@ protected:
   // Determine whether we should throw an exception or just trigger an error (abort)
   const bool _should_throw;
 
+  // Determine the type of exception to throw (something not normally caught versus normally caught)
+  const bool _throw_std_exception;
+
   // The rank to isolate the exception to if valid
   const processor_id_type _rank;
 
@@ -51,4 +50,3 @@ protected:
   /// Function which returns true if it's time to throw
   bool time_to_throw() const;
 };
-

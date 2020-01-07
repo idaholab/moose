@@ -67,7 +67,6 @@ def _doc_import(root_dir, content=None):
         content[list]: List of file/path globs to include, relative to the 'base' directory, paths
                        beginning with '~' are excluded.
     """
-
     # Check root_dir
     if not os.path.isdir(root_dir):
         LOG.error('The "root_dir" must be a valid directory: %s', root_dir)
@@ -152,11 +151,11 @@ def get_items(options):
     if isinstance(options, list):
         for value in options:
             if isinstance(value, dict):
-                items.append(dict(value[value.keys()[0]]))
+                items.append(dict(value[list(value.keys())[0]]))
             else:
                 items.append(dict(root_dir=value, content=None))
     elif isinstance(options, dict):
-        for _, value in options.iteritems():
+        for _, value in options.items():
             content = value.get('content', None)
             items.append(dict(root_dir=value['root_dir'], content=content))
 
@@ -203,4 +202,4 @@ def get_content(items, in_ext):
         else:
             MooseDocs.PROJECT_FILES.update(mooseutils.list_files(root))
 
-    return nodes.values()
+    return list(nodes.values())

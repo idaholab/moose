@@ -9,15 +9,10 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
+#include "MultiAppFieldTransfer.h"
 
 // Forward declarations
 class MultiAppCopyTransfer;
-class MooseVariableFEBase;
-namespace libMesh
-{
-class DofObject;
-}
 
 template <>
 InputParameters validParams<MultiAppCopyTransfer>();
@@ -25,15 +20,12 @@ InputParameters validParams<MultiAppCopyTransfer>();
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppCopyTransfer : public MultiAppTransfer
+class MultiAppCopyTransfer : public MultiAppFieldTransfer
 {
 public:
-  MultiAppCopyTransfer(const InputParameters & parameters);
+  static InputParameters validParams();
 
-  /**
-   * Performs basic error checking that the variable exists on MultiApp.
-   */
-  virtual void initialSetup() override;
+  MultiAppCopyTransfer(const InputParameters & parameters);
 
   /**
    * Performs the transfer of a variable (Nonlinear or Auxiliary) to/from the Multiapp.
@@ -41,22 +33,15 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Performs the transfer of a variable between two problems.
-   */
-  void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
+  virtual std::vector<VariableName> getFromVarNames() const override { return _from_var_names; }
+  virtual std::vector<AuxVariableName> getToVarNames() const override { return _to_var_names; }
 
-  /**
-   * Performs the transfer of values between a node or element.
-   */
-  void transferDofObject(libMesh::DofObject * to_object,
-                         libMesh::DofObject * from_object,
-                         MooseVariableFEBase & to_var,
-                         MooseVariableFEBase & from_var);
+  /// Name of variables transfering from
+  const std::vector<VariableName> _from_var_names;
+  /// Name of variables transfering to
+  const std::vector<AuxVariableName> _to_var_names;
 
-  /// The name of the variable to transfer to
-  const VariableName & _to_var_name;
-
-  /// Name of variable transfering from
-  const VariableName & _from_var_name;
+  /// This values are used if a derived class only supports one variable
+  VariableName _from_var_name;
+  AuxVariableName _to_var_name;
 };

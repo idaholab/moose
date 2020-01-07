@@ -23,6 +23,8 @@ InputParameters validParams<ComputeIncrementalSmallStrain>();
 class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeIncrementalSmallStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
@@ -32,4 +34,3 @@ protected:
   /// total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 };
-

@@ -28,8 +28,9 @@ public:
    * @param name The name of the kernel.
    * @param parameters Kernel parameters.
    */
-  virtual void
-  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /**
    * Mark a variable as a variable of the eigen system
@@ -107,4 +108,3 @@ protected:
   /// counter of eigen kernels
   unsigned int _eigen_kernel_counter;
 };
-

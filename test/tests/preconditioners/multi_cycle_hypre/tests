@@ -1,7 +1,12 @@
 [Tests]
+  design = 'Preconditioning/index.md'
+  issues = '#1048'
+
   [./test]
     type = 'Exodiff'
     input = 'multi_cycle_hypre.i'
     exodiff = 'multi_cycle_hypre_out.e'
+
+    requirement = "The system shall support the ability to use multiple cycles within hypre during preconditioning with PETSc."
   [../]
 []

@@ -19,6 +19,8 @@ template <typename T, ComputeStage compute_stage>
 class ADTimeKernelTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADTimeKernelTempl(const InputParameters & parameters);
 
 protected:

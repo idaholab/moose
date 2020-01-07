@@ -10,11 +10,12 @@
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
 
-template <>
+defineLegacyParams(ComputeElasticityTensorBase);
+
 InputParameters
-validParams<ComputeElasticityTensorBase>()
+ComputeElasticityTensorBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<FunctionName>(
       "elasticity_tensor_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity tensor.");
@@ -31,6 +32,7 @@ ComputeElasticityTensorBase::ComputeElasticityTensorBase(const InputParameters &
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(declareProperty<RankFourTensor>(_elasticity_tensor_name)),
+    _effective_stiffness(declareProperty<Real>(_base_name + "effective_stiffness")),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor")
                             ? &getFunction("elasticity_tensor_prefactor")
                             : nullptr)
@@ -40,9 +42,13 @@ ComputeElasticityTensorBase::ComputeElasticityTensorBase(const InputParameters &
 void
 ComputeElasticityTensorBase::computeQpProperties()
 {
+  _effective_stiffness[_qp] = 0; // Currently overriden by ComputeIsotropicElasticityTensor
   computeQpElasticityTensor();
 
   // Multiply by prefactor
   if (_prefactor_function)
+  {
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+    _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
+  }
 }

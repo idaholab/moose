@@ -20,11 +20,12 @@ Threads::spin_mutex nodal_normals_corner_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsCorner);
 
-template <>
+defineLegacyParams(NodalNormalsCorner);
+
 InputParameters
-validParams<NodalNormalsCorner>()
+NodalNormalsCorner::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
   params.addRequiredParam<BoundaryName>(
       "corner_boundary", "Node set ID which contains the nodes that are in 'corners'.");
   return params;

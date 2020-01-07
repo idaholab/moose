@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", NodalSum);
 
-template <>
+defineLegacyParams(NodalSum);
+
 InputParameters
-validParams<NodalSum>()
+NodalSum::validParams()
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = NodalVariablePostprocessor::validParams();
   params.set<bool>("unique_node_execute") = true;
 
   params.addClassDescription("Computes the sum of all of the nodal values of the specified "

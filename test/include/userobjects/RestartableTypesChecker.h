@@ -11,17 +11,14 @@
 
 #include "RestartableTypes.h"
 
-class RestartableTypesChecker;
-
-template <>
-InputParameters validParams<RestartableTypesChecker>();
-
 /**
  * User Object for testing Restartable data types
  */
 class RestartableTypesChecker : public RestartableTypes
 {
 public:
+  static InputParameters validParams();
+
   RestartableTypesChecker(const InputParameters & parameters);
   virtual ~RestartableTypesChecker();
 
@@ -35,4 +32,3 @@ public:
   void checkData();
   void clearTypes();
 };
-

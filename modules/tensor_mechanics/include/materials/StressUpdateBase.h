@@ -52,6 +52,8 @@ InputParameters validParams<StressUpdateBase>();
 class StressUpdateBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   StressUpdateBase(const InputParameters & parameters);
 
   /**
@@ -104,6 +106,11 @@ public:
    */
   virtual bool requiresIsotropicTensor() = 0;
 
+  /**
+   * Is the implmented model isotropic? The safe default is 'false'.
+   */
+  virtual bool isIsotropic() { return false; };
+
   virtual Real computeTimeStepLimit();
 
   virtual TangentCalculationMethod getTangentCalculationMethod()
@@ -120,4 +127,3 @@ protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
 };
-

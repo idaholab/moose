@@ -1,27 +1,40 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'pbp_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-  [../]
+  design = PhysicsBasedPreconditioner.md
+  issues = '#1048'
 
-  [./pbp_adapt_test]
-    type = 'Exodiff'
-    input = 'pbp_adapt_test.i'
-    exodiff = 'out_pbp_adapt.e-s004'
-    custom_cmp = 'pbp_adapt_test.cmp'
-    group = 'adaptive'
-  [../]
+  [pbp]
+    requirement = "The system shall support the use of a physics based preconditioner"
+    [test]
+      type = 'Exodiff'
+      input = 'pbp_test.i'
+      exodiff = 'out.e'
+      max_parallel = 1
 
-  [./check_petsc_options_test]
+      detail = "without and"
+    []
+
+    [pbp_adapt_test]
+      type = 'Exodiff'
+      input = 'pbp_adapt_test.i'
+      exodiff = 'out_pbp_adapt.e-s004'
+      custom_cmp = 'pbp_adapt_test.cmp'
+      group = 'adaptive'
+
+      detail = "with mesh adaptivity."
+    []
+  []
+
+  [check_petsc_options_test]
     type = 'RunApp'
     input = 'pbp_test_options.i'
     expect_out = 'Linear'
     max_parallel = 1
-  [../]
 
-  [./lots_of_variables]
+    requirement = "The system shall support the ability to add arbitrary options to the solver when "
+                  "using a physics based precondioner."
+  []
+
+  [lots_of_variables]
     type = 'Exodiff'
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
@@ -34,5 +47,8 @@
     # It is related to communcators in VTK
     # We will fix it in the new release
     petsc_version_release = true
-  [../]
+
+    requirement = "The system shall support the ability to control the variable solve order when "
+                  "using a physics base preconditioner."
+  []
 []

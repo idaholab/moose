@@ -7,19 +7,11 @@
 [GlobalParams]
   order = SECOND
   displacements = 'disp_x disp_y disp_z'
+  volumetric_locking_correction = false
 []
 
 [Mesh]
   file = ring_contact.e
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
 []
 
 [Functions]
@@ -31,11 +23,10 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
 
@@ -43,9 +34,6 @@
   [./dummy_name]
     master = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     penalty = 1e3
     tension_release = -1
     system = Constraint
@@ -98,28 +86,22 @@
 
 [Materials]
   [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
   [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e3
     poissons_ratio = 0.3
   [../]
-[]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
+  [../]
+[]  # Materials
 
 [Preconditioning]
   [./SMP]
@@ -135,7 +117,6 @@
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
   line_search = 'none'
-
   nl_rel_tol = 1.e-10
   l_max_its = 100
   nl_max_its = 10
@@ -148,6 +129,5 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

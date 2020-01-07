@@ -15,12 +15,13 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(VectorPostprocessor);
+
 InputParameters
-validParams<VectorPostprocessor>()
+VectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<UserObject>();
-  params += validParams<OutputInterface>();
+  InputParameters params = UserObject::validParams();
+  params += OutputInterface::validParams();
   params.addParam<bool>("contains_complete_history",
                         false,
                         "Set this flag to indicate that the values in all vectors declared by this "

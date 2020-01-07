@@ -13,7 +13,7 @@ import re
 import collections
 import logging
 
-import anytree
+import moosetree
 
 from MooseDocs import common
 from MooseDocs.tree import syntax
@@ -85,7 +85,7 @@ def check(translator,
 
     # Dump the complete syntax for the application
     if dump:
-        print app_syntax
+        print(app_syntax)
 
     # The default build for any application creates the test app (e.g., FrogTestApp), therefore
     # the actual application name must be captured from this name to properly generate stub pages.
@@ -98,7 +98,7 @@ def check(translator,
     app_name = extension.apptype.replace('TestApp', 'App')
 
     # Perform check for all the nodes
-    for node in anytree.PreOrderIter(app_syntax):
+    for node in moosetree.iterate(app_syntax):
         if node.is_root or node.removed:
             continue
         elif isinstance(node, syntax.ObjectNode):
@@ -155,7 +155,7 @@ def _check_syntax_node(node, app_name, generate, update, prefix):
     # Build a set if information tuples to consider
     filenames = set()
     func = lambda n: isinstance(n, syntax.ActionNode) and not n.removed
-    actions = anytree.search.PreOrderIter(node, filter_=func)
+    actions = moosetree.iterate(node, func)
     for action in actions:
         idx = action.source().find('/src/')
         name = os.path.join(action.source()[:idx], prefix,
@@ -207,7 +207,8 @@ def _check_page_for_stub(node, app_name, filename, update):
     with open(filename, 'r') as fid:
         content = fid.read()
 
-    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content):
+    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content) or \
+       ('MOOSE Documentation Stub' in content):
         if update and (app_name in node.groups):
             LOG.info("Updating stub page for %s in file %s.", node.fullpath, filename)
             with open(filename, 'w') as fid:

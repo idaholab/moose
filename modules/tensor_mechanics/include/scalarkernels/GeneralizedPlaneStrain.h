@@ -11,6 +11,8 @@
 
 #include "ScalarKernel.h"
 
+#include <set>
+
 // Forward Declarations
 class GeneralizedPlaneStrain;
 class GeneralizedPlaneStrainUserObject;
@@ -21,6 +23,8 @@ InputParameters validParams<GeneralizedPlaneStrain>();
 class GeneralizedPlaneStrain : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrain(const InputParameters & parameters);
 
   virtual void reinit(){};
@@ -29,4 +33,10 @@ public:
 
   const GeneralizedPlaneStrainUserObject & _gps;
   const unsigned int _scalar_var_id;
+
+  /// The reference vector tag ID
+  std::set<TagID> _ref_tag_id;
+
+  /// The non-reference vector tag IDs
+  std::set<TagID> _non_ref_tags;
 };
