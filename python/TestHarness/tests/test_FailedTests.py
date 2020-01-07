@@ -22,7 +22,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertNotIn(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
+        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
         self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
 
         with self.assertRaises(subprocess.CalledProcessError) as cm:
@@ -30,5 +30,8 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertNotIn(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
+        # Verify the passing test is not present
+        self.assertNotRegex(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
+
+        # Verify the caveat represents a previous result
         self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')
