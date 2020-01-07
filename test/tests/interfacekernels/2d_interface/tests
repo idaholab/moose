@@ -19,6 +19,8 @@
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall operate with coupled variables in 2D and a split mesh. "
                   "This uses a penalty implementation that is optimally convergent."
+    min_parallel = 2
+    max_parallel = 2
   [../]
 
   [./test_dot]

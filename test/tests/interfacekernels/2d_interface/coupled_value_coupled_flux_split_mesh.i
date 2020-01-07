@@ -21,15 +21,14 @@
     paired_block = '1'
     new_boundary = 'master0_interface'
   [../]
-  [./split]
-    type = BreakMeshByBlockGenerator
-    input = interface
-  [../]
   [./break_boundary]
-    input = split
+    input = interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
-
+  [./split]
+    input = break_boundary
+    type = BreakMeshByBlockGenerator
+  [../]
 []
 
 [Variables]
