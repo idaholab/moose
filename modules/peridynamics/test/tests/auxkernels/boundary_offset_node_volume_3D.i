@@ -29,12 +29,18 @@
 [AuxVariables]
   [./gap_offset]
   [../]
+  [./node_volume]
+  [../]
 []
 
 [AuxKernels]
   [./gap_offset]
     type = BoundaryOffsetPD
     variable = gap_offset
+  [../]
+  [./node_volume]
+    type = NodalVolumePD
+    variable = node_volume
   [../]
 []
 

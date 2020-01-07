@@ -18,24 +18,24 @@
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
-  [./boundary_offset_2D]
+  [./offset_and_area_2D]
     type = 'Exodiff'
-    input = 'boundary_offset_2D.i'
-    exodiff = 'boundary_offset_2D_out.e'
+    input = 'boundary_offset_node_area_2D.i'
+    exodiff = 'boundary_offset_node_area_2D_out.e'
     map = false
-    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes
-                   from mesh for 2D geometries.'
-    design = 'modules/peridynamics/BoundaryOffsetPD.md'
+    requirement = 'BoundaryOffsetPD and NodalVolumePD shall retrieve the offset of boundary nodes
+                   and nodal area from mesh for 2D geometries.'
+    design = 'modules/peridynamics/BoundaryOffsetPD.md; modules/peridynamics/NodalVolumePD.md'
     issues = '#11561'
   [../]
-  [./boundary_offset_3D]
+  [./offset_and_volume_3D]
     type = 'Exodiff'
-    input = 'boundary_offset_3D.i'
-    exodiff = 'boundary_offset_3D_out.e'
+    input = 'boundary_offset_node_volume_3D.i'
+    exodiff = 'boundary_offset_node_volume_3D_out.e'
     map = false
-    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes
-                   from mesh for 3D geometries.'
-    design = 'modules/peridynamics/BoundaryOffsetPD.md'
+    requirement = 'BoundaryOffsetPD and NodalVolumePD shall retrieve the offset of boundary nodes
+                   and nodal volume from mesh for 3D geometries.'
+    design = 'modules/peridynamics/BoundaryOffsetPD.md; modules/peridynamics/NodalVolumePD.md'
     issues = '#11561'
   [../]
 []

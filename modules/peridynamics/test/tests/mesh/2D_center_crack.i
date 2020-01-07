@@ -3,8 +3,8 @@
 [Mesh]
   type = PeridynamicsMesh
   horizon_number = 3
-  cracks_start = '0 0.5 0'
-  cracks_end = '0.5 0.5 0'
+  cracks_start = '0.25 0.5 0'
+  cracks_end = '0.75 0.5 0'
 
   [./gmg]
     type = GeneratedMeshGenerator
