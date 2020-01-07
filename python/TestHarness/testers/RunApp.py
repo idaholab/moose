@@ -260,10 +260,10 @@ class RunApp(Tester):
 
             if reason != '':
                 self.setStatus(self.fail, str(reason))
-                reason += "\n\nExit Code: " + str(self.exit_code)
+                return "\n\nExit Code: " + str(self.exit_code)
 
         # Return anything extra here that we want to tack onto the Output for when it gets printed later
-        return reason
+        return ''
 
     def processResults(self, moose_dir, options, output):
         """
