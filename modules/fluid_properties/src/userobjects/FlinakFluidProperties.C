@@ -72,6 +72,24 @@ FlinakFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real &
   dp_dv = -dp_de * de_dv_at_constant_p;
 }
 
+void
+FlinakFluidProperties::p_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+{
+  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+
+  // chain rule, (dp_de)_v = (dp_dT)_v * (dT_de)_v
+  DualReal T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+  dp_de = _dp_dT_at_constant_v * dT_de;
+
+  // cyclic relation, (dP_dv)_e = - (dp_de)_v * (de_dv)_p
+  auto cp = SinglePhaseFluidProperties::cp_from_v_e(v, e);
+  auto dT_dv_at_constant_p = -1.0 / (_drho_dT * v * v);
+  auto de_dv_at_constant_p = cp * dT_dv_at_constant_p - p;
+  dp_dv = -dp_de * de_dv_at_constant_p;
+}
+
 Real
 FlinakFluidProperties::T_from_v_e(Real v, Real e) const
 {
@@ -108,7 +126,32 @@ FlinakFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real &
   dT_dv = -dT_de * de_dv_at_constant_T;
 }
 
+void
+FlinakFluidProperties::T_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+{
+  T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+
+  // reciprocity relation based on the definition of cv
+  auto cv = SinglePhaseFluidProperties::cv_from_v_e(v, e);
+  dT_de = 1.0 / cv;
+
+  // cyclic relation, (dT_dv)_e = -(dT_de)_v * (de_dv)_T
+  auto p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  auto dp_dv_at_constant_T = -1.0 / (_drho_dp * v * v);
+  auto de_dv_at_constant_T = -(p + v * dp_dv_at_constant_T);
+  dT_dv = -dT_de * de_dv_at_constant_T;
+}
+
 Real FlinakFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
+
+void
+FlinakFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
+{
+  cp = cp_from_v_e(v, e);
+  dcp_dv = 0.0;
+  dcp_de = 0.0;
+}
 
 Real
 FlinakFluidProperties::cv_from_v_e(Real v, Real e) const
@@ -116,6 +159,26 @@ FlinakFluidProperties::cv_from_v_e(Real v, Real e) const
   // definition of Cv by replacing e by h + p * v
   Real cp = cp_from_v_e(v, e);
   return cp - _dp_dT_at_constant_v * v;
+}
+
+void
+FlinakFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
+{
+  cv = cv_from_v_e(v, e);
+  dcv_dv = -_dp_dT_at_constant_v;
+  dcv_de = 0.0;
+}
+
+void
+FlinakFluidProperties::cv_from_v_e(const DualReal & v,
+                                   const DualReal & e,
+                                   DualReal & cv,
+                                   DualReal & dcv_dv,
+                                   DualReal & dcv_de) const
+{
+  cv = SinglePhaseFluidProperties::cv_from_v_e(v, e);
+  dcv_dv = -_dp_dT_at_constant_v;
+  dcv_de = 0.0;
 }
 
 Real
@@ -143,6 +206,18 @@ FlinakFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
+  drho_dp = _drho_dp;
+  drho_dT = _drho_dT;
+}
+
+void
+FlinakFluidProperties::rho_from_p_T(const DualReal & pressure,
+                                    const DualReal & temperature,
+                                    DualReal & rho,
+                                    DualReal & drho_dp,
+                                    DualReal & drho_dT) const
+{
+  rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
   drho_dp = _drho_dp;
   drho_dT = _drho_dT;
 }
