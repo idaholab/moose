@@ -22,17 +22,17 @@ class TestTranslator(unittest.TestCase):
 
     def setUp(self):
         command.CommandExtension.EXTENSION_COMMANDS.clear()
-        config = os.path.join('..', '..', '..', '..', 'modules', 'doc', 'config.yml')
+        config = os.path.join('MooseDocs', 'test', 'config.yml')
         self.translator, _ = common.load_config(config)
         self.translator.init()
 
     def testFindPage(self):
-        page = self.translator.findPage('MooseDocs/index.md')
-        self.assertEqual(page.local, 'python/MooseDocs/index.md')
+        page = self.translator.findPage('core.md')
+        self.assertEqual(page.local, 'extensions/core.md')
 
     def testFindPageError(self):
         with self.assertRaises(exceptions.MooseDocsException) as cm:
-            page = self.translator.findPage('Mooseocs/index.md')
+            page = self.translator.findPage('wrong.md')
             self.assertIn('Did you mean', ex.exception.message)
 
 if __name__ == '__main__':

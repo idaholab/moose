@@ -45,7 +45,7 @@ Extensions:
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.civet:
-        active: True
+        active: False
         test_results_cache: '/tmp/civet/jobs'
         generate_test_reports: False
         remotes:
