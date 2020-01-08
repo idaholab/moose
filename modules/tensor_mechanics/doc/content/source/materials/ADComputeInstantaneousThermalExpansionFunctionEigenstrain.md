@@ -1,6 +1,6 @@
-# ComputeInstantaneousThermalExpansionFunctionEigenstrain
+# ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax description /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax description /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
 ## Description
 
@@ -28,8 +28,8 @@ parameter setting is shown below:
 !listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
          block=Modules/TensorMechanics/Master
 
-!syntax parameters /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax parameters /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax inputs /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax inputs /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax children /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax children /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain

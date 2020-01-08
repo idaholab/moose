@@ -21,9 +21,9 @@ declareADValidParams(ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
  * ADComputeInstantaneousThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to an instantaneous thermal expansion function.
  */
- template <ComputeStage compute_stage>
+template <ComputeStage compute_stage>
 class ADComputeInstantaneousThermalExpansionFunctionEigenstrain
-    : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
+  : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
 {
 public:
   static InputParameters validParams();

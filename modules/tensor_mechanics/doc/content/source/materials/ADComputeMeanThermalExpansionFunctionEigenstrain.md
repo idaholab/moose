@@ -1,6 +1,6 @@
-# ComputeMeanThermalExpansionFunctionEigenstrain
+# ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax description /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax description /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
 ## Description
 
@@ -39,13 +39,13 @@ is not strictly necessary to include that correction, but it is done here for co
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example
 parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
+!listing modules/tensor_mechanics/test/tests/ad_thermal_expansion_function/finite_const.i
          block=Modules/TensorMechanics/Master
 
-!syntax parameters /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax parameters /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax inputs /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax inputs /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax children /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax children /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
 !bibtex bibliography
