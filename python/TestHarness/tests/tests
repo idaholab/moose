@@ -188,4 +188,10 @@
     requirement = "TestHarness shall detect and report unreadable output in executed commands"
     issues = '#14370'
   [../]
+  [./failed_tests]
+    type = PythonUnitTest
+    input = test_FailedTests.py
+    requirement = "TestHarness shall run only tests which previously has failed"
+    issues = '#14512'
+  [../]
 []

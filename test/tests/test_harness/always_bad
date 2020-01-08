@@ -1,0 +1,10 @@
+[Tests]
+  [./always_ok]
+    type = RunApp
+    input = good.i
+  [../]
+  [./always_bad]
+    type = RunCommand
+    command = "false"
+  [../]
+[]

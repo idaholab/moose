@@ -104,7 +104,6 @@ class TestHarness:
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
-        self.results_storage = '.previous_test_results.json'
         self.code = b'2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         self.keyboard_talk = True
@@ -494,10 +493,9 @@ class TestHarness:
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
-        # Not interesting in printing any final results if we are cleaning up old queue manager runs
-        if self.options.queue_cleanup:
+        if self.options.queue_cleanup and self.options.results_file:
             try:
-                os.remove(self.results_storage)
+                os.remove(self.options.results_file)
             except OSError:
                 pass
             return
@@ -526,7 +524,7 @@ class TestHarness:
 
         # Alert the user to their session file
         if self.options.queueing:
-            print(('Your session file is %s' % self.results_storage))
+            print(('Your session file is %s' % self.options.results_file))
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
@@ -612,17 +610,17 @@ class TestHarness:
                 self.options.results_storage[job.getTestDir()].update(job.getMetaData())
 
         if self.options.output_dir:
-            self.results_storage = os.path.join(self.options.output_dir, self.results_storage)
+            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
 
-        if self.options.results_storage:
+        if self.options.results_storage and self.options.results_file:
             try:
-                with open(self.results_storage, 'w') as data_file:
+                with open(self.options.results_file, 'w') as data_file:
                     json.dump(self.options.results_storage, data_file, indent=2)
             except UnicodeDecodeError:
                 print('\nERROR: Unable to write results due to unicode decode/encode error')
 
                 # write to a plain file to aid in reproducing error
-                with open(self.results_storage + '.unicode_error' , 'w') as f:
+                with open(self.options.results_file + '.unicode_error' , 'w') as f:
                     f.write(self.options.results_storage)
 
                 sys.exit(1)
@@ -686,9 +684,12 @@ class TestHarness:
 
         self.options.queueing = False
         if self.options.pbs:
-            # The results .json file will be this new session file
-            self.original_storage = self.results_storage
-            self.results_storage = os.path.abspath(self.options.pbs)
+            # original_storage will become the results file for each test being launched by PBS, and will be
+            # saved in the same directory as the test spec file. This is so we can launch multiple 'run_tests'
+            # without clobbering the parent results_file. Meanwhile, the new results_file is going to be
+            # renamed to whatever the user decided to identify their PBS launch with.
+            self.original_storage = self.options.results_file
+            self.options.results_file = os.path.abspath(self.options.pbs)
             self.options.queueing = True
             scheduler_plugin = 'RunPBS'
 
@@ -723,7 +724,7 @@ class TestHarness:
         # Use a previous results file, or declare the variable
         self.options.results_storage = {}
         if self.useExistingStorage():
-            with open(self.results_storage, 'r') as f:
+            with open(self.options.results_file, 'r') as f:
                 try:
                     self.options.results_storage = json.load(f)
 
@@ -741,7 +742,7 @@ class TestHarness:
 
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
-        if (os.path.exists(self.results_storage)
+        if (os.path.exists(self.options.results_file)
             and (self.options.failed_tests or self.options.pbs)):
             return True
 
@@ -813,11 +814,12 @@ class TestHarness:
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
         outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
+        outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
         queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='session_name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
         queuegroup.add_argument('--pbs-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='source file', help='Source specified file before launching tests')
-        queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='project', help='Identify your job(s) with this project (default:  moose)')
+        queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='project', help='Identify your job(s) with this project (default:  %(default)s)')
         queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='queue', help='Submit jobs to the specified queue')
         queuegroup.add_argument('--pbs-cleanup', nargs=1, action="store", metavar='session_name', help='Clean up files generated by supplied session_name')
         queuegroup.add_argument('--queue-project', nargs=1, action='store', type=str, default='moose', metavar='project', help='Deprecated. Use --pbs-project')
@@ -875,7 +877,7 @@ class TestHarness:
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and not os.path.exists(self.results_storage):
+        if opts.failed_tests and not os.path.exists(opts.results_file):
             print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
         if opts.pbs and opts.pedantic_checks:
