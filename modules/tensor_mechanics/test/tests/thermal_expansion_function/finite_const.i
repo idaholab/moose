@@ -13,8 +13,9 @@
 # where Tref is the reference temperature used to define the mean CTE
 # function, and Tsf is the stress-free temperature.
 
-# This version of the test uses small deformation theory.  The results
-# from the two models are identical.
+# This version of the test uses finite deformation theory.
+# The two models produce very similar results.  There are slight
+# differences due to the large deformation treatment.
 
 [Mesh]
   file = 'blocks.e'
@@ -33,8 +34,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = SMALL
-    incremental = false
+    strain = FINITE
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
@@ -80,7 +80,7 @@
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
   [../]
   [./thermal_expansion_strain1]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
@@ -151,7 +151,5 @@
 []
 
 [Outputs]
-  file_base = small_const_alpha_out
-  exodus = true
   csv = true
 []

@@ -35,7 +35,6 @@
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE
-    incremental = true
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
@@ -152,7 +151,5 @@
 []
 
 [Outputs]
-  file_base = finite_linear_alpha_out
-  exodus = true
   csv = true
 []
