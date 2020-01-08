@@ -663,13 +663,32 @@ InputParameters::setDefaultPostprocessorValue(const std::string & name,
                                               const PostprocessorValue & value,
                                               unsigned int index)
 {
-  _params[name]._default_postprocessor_val[index] = value;
-  _params[name]._have_default_postprocessor_val[index] = true;
+  if (_params.at(name)._default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._default_postprocessor_val.size());
+  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _have_default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._have_default_postprocessor_val.size(),
+               ". This can be caused by trying to assign default postprocessor values "
+               "programmatically (by using set method).");
+  _params.at(name)._default_postprocessor_val[index] = value;
+  _params.at(name)._have_default_postprocessor_val[index] = true;
 }
 
 bool
 InputParameters::hasDefaultPostprocessorValue(const std::string & name, unsigned int index) const
 {
+  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _have_default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._have_default_postprocessor_val.size(),
+               ". This can be caused by trying to assign default postprocessor values "
+               "programmatically (by using set method).");
   return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val[index];
 }
 
