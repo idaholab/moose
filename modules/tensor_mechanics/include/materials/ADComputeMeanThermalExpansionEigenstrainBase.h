@@ -14,10 +14,7 @@
 #define usingComputeMeanThermalExpansionEigenstrainBaseMembers                                     \
   usingComputeThermalExpansionEigenstrainBaseMembers;                                              \
   using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::referenceTemperature;         \
-  using ADComputeMeanThermalExpansionEigenstrainBase<                                              \
-      compute_stage>::meanThermalExpansionCoefficient;                                             \
-  using ADComputeMeanThermalExpansionEigenstrainBase<                                              \
-      compute_stage>::meanThermalExpansionCoefficientDerivative
+  using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::meanThermalExpansionCoefficient
 
 template <ComputeStage>
 class ADComputeMeanThermalExpansionEigenstrainBase;
@@ -49,10 +46,8 @@ protected:
    * Compute the total thermal strain relative to the stress-free temperature at the
    * current temperature, as well as the current instantaneous thermal expansion coefficient.
    * param thermal_strain    The current total linear thermal strain (\f$\delta L / L\f$)
-   * param instantaneous_cte The current instantaneous coefficient of thermal expansion
-   *                         (derivative of thermal_strain wrt temperature
    */
-  virtual void computeThermalStrain(ADReal & thermal_strain, ADReal & instantaneous_cte) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain) override;
 
   /*
    * Get the reference temperature for the mean thermal expansion relationship.  This is
@@ -67,13 +62,6 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual ADReal meanThermalExpansionCoefficient(const ADReal & temperature) = 0;
-
-  /*
-   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
-   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * param temperature  temperature at which this is evaluated
-   */
-  virtual ADReal meanThermalExpansionCoefficientDerivative(const ADReal & temperature) = 0;
 
   usingComputeThermalExpansionEigenstrainBaseMembers;
 };

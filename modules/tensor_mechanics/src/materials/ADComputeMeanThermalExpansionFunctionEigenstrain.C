@@ -56,11 +56,3 @@ ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::meanThermalExpa
 {
   return _thermal_expansion_function.value(MetaPhysicL::raw_value(temperature), Point());
 }
-
-template <ComputeStage compute_stage>
-ADReal
-ADComputeMeanThermalExpansionFunctionEigenstrain<
-    compute_stage>::meanThermalExpansionCoefficientDerivative(const ADReal & temperature)
-{
-  return _thermal_expansion_function.timeDerivative(MetaPhysicL::raw_value(temperature), Point());
-}

@@ -33,10 +33,8 @@ ADComputeMeanThermalExpansionEigenstrainBase<
 template <ComputeStage compute_stage>
 void
 ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
-    ADReal & thermal_strain, ADReal & instantaneous_cte)
+    ADReal & thermal_strain)
 {
-  const Real small = libMesh::TOLERANCE;
-
   const Real reference_temperature = referenceTemperature();
   const ADReal & current_temp = _temperature[_qp];
   const ADReal current_alphabar = meanThermalExpansionCoefficient(current_temp);
@@ -61,14 +59,6 @@ ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrai
 
   thermal_strain =
       (thexp_current_temp - thexp_stress_free_temperature) / (1.0 + thexp_stress_free_temperature);
-
-  const ADReal dalphabar_dT = meanThermalExpansionCoefficientDerivative(current_temp);
-  const ADReal numerator = dalphabar_dT * (current_temp - reference_temperature) + current_alphabar;
-  const ADReal denominator = 1.0 + alphabar_stress_free_temperature *
-                                       (_stress_free_temperature[_qp] - reference_temperature);
-  if (denominator < small)
-    mooseError("Denominator too small in thermal strain calculation");
-  instantaneous_cte = numerator / denominator;
 }
 
 adBaseClass(ADComputeMeanThermalExpansionEigenstrainBase);

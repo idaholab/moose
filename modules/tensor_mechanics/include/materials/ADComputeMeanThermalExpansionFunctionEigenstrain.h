@@ -44,13 +44,6 @@ protected:
    */
   virtual ADReal meanThermalExpansionCoefficient(const ADReal & temperature) override;
 
-  /*
-   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
-   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * param temperature  temperature at which this is evaluated
-   */
-  virtual ADReal meanThermalExpansionCoefficientDerivative(const ADReal & temperature) override;
-
   const Function & _thermal_expansion_function;
 
   const Real & _thexp_func_ref_temp;

@@ -32,7 +32,7 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeThermalStrain(ADReal & thermal_strain, ADReal & instantaneous_cte) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain) override;
 
   const VariableValue & _temperature_old;
   const Function & _thermal_expansion_function;

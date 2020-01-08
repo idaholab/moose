@@ -55,7 +55,7 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::initQp
 template <ComputeStage compute_stage>
 void
 ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::computeThermalStrain(
-    ADReal & thermal_strain, ADReal & instantaneous_cte)
+    ADReal & thermal_strain)
 {
   if (_t_step > 1)
     _step_one = false;
@@ -74,6 +74,4 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::comput
 
   thermal_strain = old_thermal_strain + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
   _thermal_strain[_qp] = thermal_strain;
-
-  instantaneous_cte = alpha_current_temp;
 }

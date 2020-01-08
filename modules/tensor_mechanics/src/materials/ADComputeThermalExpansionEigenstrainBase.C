@@ -30,8 +30,6 @@ ADComputeThermalExpansionEigenstrainBase<compute_stage>::ADComputeThermalExpansi
     const InputParameters & parameters)
   : ADComputeEigenstrainBase<compute_stage>(parameters),
     _temperature(adCoupledValue("temperature")),
-    _deigenstrain_dT(declareADProperty<RankTwoTensor>(
-        derivativePropertyNameFirst(_eigenstrain_name, this->getVar("temperature", 0)->name()))),
     _stress_free_temperature(adCoupledValue("stress_free_temperature"))
 {
 }
@@ -41,15 +39,11 @@ void
 ADComputeThermalExpansionEigenstrainBase<compute_stage>::computeQpEigenstrain()
 {
   ADReal thermal_strain = 0.0;
-  ADReal instantaneous_cte = 0.0;
 
-  computeThermalStrain(thermal_strain, instantaneous_cte);
+  computeThermalStrain(thermal_strain);
 
   _eigenstrain[_qp].zero();
   _eigenstrain[_qp].addIa(thermal_strain);
-
-  _deigenstrain_dT[_qp].zero();
-  _deigenstrain_dT[_qp].addIa(instantaneous_cte);
 }
 
 adBaseClass(ADComputeThermalExpansionEigenstrainBase);
