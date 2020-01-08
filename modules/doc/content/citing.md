@@ -53,17 +53,32 @@ If you use the incompressible portion of the Navier Stokes module, please cite:
 
 ### Tensor Mechanics
 
-If you use the multi-surface plasticity capability, `ComputeMultiPlasticityStress`, of the Tensor Mechanics module, or if you just want to demonstrate MOOSE's advanced plasticity features, please cite:
+If you use the multi-surface plasticity capability, `ComputeMultiPlasticityStress`, of the Tensor Mechanics module (feel free to contact Andy Wilkins if unsure) or if you just want to demonstrate MOOSE's advanced plasticity features, please cite:
 
 ```
-@article{article,
-author = {Deepak P. Adhikary and  Chandana Jayasundara and Robert K. Podgorney and Andy H. Wilkins},
-year = {2016},
-month = {01},
-pages = {218--234},
-title = {A robust return-map algorithm for general multisurface plasticity},
-volume = {109},
-journal = {International Journal for Numerical Methods in Engineering},
-doi = {10.1002/nme.5284}
+@article{wilkins_multisurface_plasticity,
+  author = {Deepak P. Adhikary and  Chandana Jayasundara and Robert K. Podgorney and Andy H. Wilkins},
+  year = {2016},
+  month = {01},
+  pages = {218--234},
+  title = {A robust return-map algorithm for general multisurface plasticity},
+  volume = {109},
+  journal = {International Journal for Numerical Methods in Engineering},
+  doi = {10.1002/nme.5284}
+}
+```
+
+If you use smoothed multi-surface plasticity, such plasticity models derived from `MultiParameterPlasticityStressUpdate` (`CappedMohrCoulombStressUpdate`, `TensileStressUpdate`, `CappedDruckerPragerStressUpdate`, `CappedWeakPlaneStressUpdate`, etc - feel free to contact Andy Wilkins if unsure) of if you just want to demonstrate MOOSE's advanced plasticity features, please cite the following.
+
+```
+@article{wilkins_smooth_plasticity,
+  author = {Andy Wilkins and Benjamin W. Spencer and Amit Jain and Bora Gencturk},
+  title = {A method for smoothing multiple yield functions},
+  journal = {International Journal for Numerical Methods in Engineering},
+  volume = {121},
+  number = {3},
+  pages = {434--449},
+  doi = {10.1002/nme.6215},
+  year = {2020}
 }
 ```
