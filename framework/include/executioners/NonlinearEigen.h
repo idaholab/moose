@@ -39,13 +39,6 @@ protected:
   const Real & _l_tol;
   const Real & _free_l_tol;
 
-  // We will delete these three parameters once Rattlesnake is updated.
-  // These parameters are used in PicardEigen.C
-  //  _eigen_solve.passRequiredParams(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
-  Real _abs_tol;
-  Real _rel_tol;
-  Real _pfactor;
-
   bool _output_pi;
   bool _output_after_pi;
   bool _last_solve_converged;

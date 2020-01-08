@@ -62,7 +62,7 @@ Extensions:
                 specs:
                     - demo
     MooseDocs.extensions.civet:
-        active: True
+        active: False
         test_results_cache: '/tmp/civet/jobs'
         remotes:
             moose:
