@@ -259,3 +259,32 @@ TEST(InputParameters, makeParamRequired)
         << "failed with unexpected error: " << msg;
   }
 }
+
+TEST(InputParameters, setPPandVofPP)
+{
+  // programmatically set default value of PPName parameter
+  InputParameters p1 = emptyInputParameters();
+  p1.addParam<std::vector<PostprocessorName>>("pp_name", "testing");
+  p1.set<std::vector<PostprocessorName>>("pp_name") = {"first", "second", "third"};
+
+  // check if we have a vector of pps
+  EXPECT_TRUE(!p1.isSinglePostprocessor("pp_name")) << "Failed to detect vector of PPs";
+
+  // check what happens if default value is requested
+  /*
+  try
+  {
+    p1.hasDefaultPostprocessorValue("pp_name", 2);
+    FAIL() << "failed to error on supression of nonexisting parameter";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Attempting to access _have_default_postprocessor_val") !=
+  std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+  */
+
+  // EXPECT_EQ(p1.getDefaultPostprocessorValue("pp_name"), 1);
+}

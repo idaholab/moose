@@ -663,13 +663,32 @@ InputParameters::setDefaultPostprocessorValue(const std::string & name,
                                               const PostprocessorValue & value,
                                               unsigned int index)
 {
-  _params[name]._default_postprocessor_val[index] = value;
-  _params[name]._have_default_postprocessor_val[index] = true;
+  if (_params.at(name)._default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._default_postprocessor_val.size());
+  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _have_default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._have_default_postprocessor_val.size(),
+               ". This can be caused by trying to assign default postprocessor values "
+               "programmatically (by using set method).");
+  _params.at(name)._default_postprocessor_val[index] = value;
+  _params.at(name)._have_default_postprocessor_val[index] = true;
 }
 
 bool
 InputParameters::hasDefaultPostprocessorValue(const std::string & name, unsigned int index) const
 {
+  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
+    mooseError("Attempting to access _have_default_postprocessor_val with index ",
+               index,
+               " but size is ",
+               _params.at(name)._have_default_postprocessor_val.size(),
+               ". This can be caused by trying to assign default postprocessor values "
+               "programmatically (by using set method).");
   return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val[index];
 }
 
@@ -1032,23 +1051,10 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
 }
 
 template <>
-std::vector<PostprocessorName> &
-InputParameters::set<std::vector<PostprocessorName>>(const std::string & name, bool quiet_mode)
+void
+InputParameters::setHelper<std::vector<PostprocessorName>>(const std::string & name)
 {
-  checkParamName(name);
-  checkConsistentType<std::vector<PostprocessorName>>(name);
-
-  if (!this->have_parameter<std::vector<PostprocessorName>>(name))
-    _values[name] = new Parameter<std::vector<PostprocessorName>>;
-
-  set_attributes(name, false);
-
-  if (quiet_mode)
-    _params[name]._set_by_add_param = true;
-
   _params[name]._vector_of_postprocessors = true;
-
-  return cast_ptr<Parameter<std::vector<PostprocessorName>> *>(_values[name])->set();
 }
 
 template <>
