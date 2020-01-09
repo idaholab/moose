@@ -65,6 +65,38 @@ stringify(const T & t)
   return os.str();
 }
 
+// overloads for integer types where std::to_string gives the same result and is faster
+inline std::string
+stringify(int v)
+{
+  return std::to_string(v);
+}
+inline std::string
+stringify(long v)
+{
+  return std::to_string(v);
+}
+inline std::string
+stringify(long long v)
+{
+  return std::to_string(v);
+}
+inline std::string
+stringify(unsigned int v)
+{
+  return std::to_string(v);
+}
+inline std::string
+stringify(unsigned long v)
+{
+  return std::to_string(v);
+}
+inline std::string
+stringify(unsigned long long v)
+{
+  return std::to_string(v);
+}
+
 /// Convert solve type into human readable string
 std::string stringify(const SolveType & t);
 
