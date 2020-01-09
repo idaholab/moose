@@ -76,6 +76,10 @@ public:
    */
   virtual void set_attributes(const std::string & name, bool inserted_only) override;
 
+  /// This functions is called in set as a 'callback' to avoid code duplication
+  template <typename T>
+  void setHelper(const std::string & name);
+
   /**
    * Returns a writable reference to the named parameters.  Note: This is not a virtual
    * function! Use caution when comparing to the parent class implementation
@@ -971,6 +975,12 @@ private:
   friend class Parser;
 };
 
+template <typename T>
+void
+InputParameters::setHelper(const std::string & /*name*/)
+{
+}
+
 // Template and inline function implementations
 template <typename T>
 T &
@@ -986,6 +996,8 @@ InputParameters::set(const std::string & name, bool quiet_mode)
 
   if (quiet_mode)
     _params[name]._set_by_add_param = true;
+
+  setHelper<T>(name);
 
   return cast_ptr<Parameter<T> *>(_values[name])->set();
 }
@@ -1498,8 +1510,7 @@ void InputParameters::setParamHelper<MaterialPropertyName, int>(const std::strin
                                                                 MaterialPropertyName & l_value,
                                                                 const int & r_value);
 template <>
-std::vector<PostprocessorName> &
-InputParameters::set<std::vector<PostprocessorName>>(const std::string & name, bool quiet_mode);
+void InputParameters::setHelper<std::vector<PostprocessorName>>(const std::string & name);
 
 template <typename T>
 const T &
