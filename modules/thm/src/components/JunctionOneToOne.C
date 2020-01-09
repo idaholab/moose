@@ -2,6 +2,7 @@
 #include "GeometricalFlowComponent.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
+#include "FlowModelTwoPhaseNCG.h"
 
 registerMooseObject("THMApp", JunctionOneToOne);
 
@@ -23,8 +24,6 @@ JunctionOneToOne::check() const
 {
   FlowJunction::check();
 
-  if ((_flow_model_id != THM::FM_SINGLE_PHASE) && (_flow_model_id != THM::FM_TWO_PHASE))
-    logModelNotImplementedError(_flow_model_id);
   if (_spatial_discretization != FlowModel::rDG)
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 
@@ -53,7 +52,7 @@ JunctionOneToOne::addMooseObjects()
 {
   if (_flow_model_id == THM::FM_SINGLE_PHASE)
     addMooseObjects1Phase();
-  else if (_flow_model_id == THM::FM_TWO_PHASE)
+  else if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
     addMooseObjects2Phase();
   else
     mooseError(name() + ": Not implemented.");
@@ -115,6 +114,13 @@ JunctionOneToOne::addMooseObjects2Phase() const
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
+  std::vector<VariableName> ncg_vars;
+  if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
+  {
+    const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
+    ncg_vars = fm.getNCGSolutionVars();
+  }
+
   // Add user object for computing and storing the fluxes
   const std::string junction_uo_name = genName(name(), "junction_uo");
   {
@@ -135,18 +141,22 @@ JunctionOneToOne::addMooseObjects2Phase() const
     params.set<std::vector<VariableName>>("arhoA_vapor") = {FlowModelTwoPhase::ALPHA_RHO_A_VAPOR};
     params.set<std::vector<VariableName>>("arhouA_vapor") = {FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR};
     params.set<std::vector<VariableName>>("arhoEA_vapor") = {FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
+    if (ncg_vars.size() > 0)
+      params.set<std::vector<VariableName>>("aXrhoA_vapor") = ncg_vars;
     params.set<std::string>("junction_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, junction_uo_name, params);
   }
 
-  const std::vector<NonlinearVariableName> var_names{FlowModelTwoPhase::BETA,
-                                                     FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
-                                                     FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID,
-                                                     FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID,
-                                                     FlowModelTwoPhase::ALPHA_RHO_A_VAPOR,
-                                                     FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR,
-                                                     FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
+  std::vector<NonlinearVariableName> var_names{FlowModelTwoPhase::BETA,
+                                               FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
+                                               FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID,
+                                               FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID,
+                                               FlowModelTwoPhase::ALPHA_RHO_A_VAPOR,
+                                               FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR,
+                                               FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
+  var_names.reserve(var_names.size() + ncg_vars.size());
+  var_names.insert(var_names.end(), ncg_vars.begin(), ncg_vars.end());
 
   // Add BC to each of the connected flow channels
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
@@ -173,6 +183,8 @@ JunctionOneToOne::addMooseObjects2Phase() const
           FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR};
       params.set<std::vector<VariableName>>("arhoEA_vapor") = {
           FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
+      if (ncg_vars.size() > 0)
+        params.set<std::vector<VariableName>>("aXrhoA_vapor") = ncg_vars;
       params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
       _sim.addBoundaryCondition(
           class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
