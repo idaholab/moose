@@ -298,8 +298,8 @@ class Job(object):
     def createStatus(self):
         return self.job_status.createStatus()
 
-    def previousTesterStatus(self, options, previous_results=None):
-        return self.__tester.previousTesterStatus(options, previous_results)
+    def previousTesterStatus(self, options, previous_storage=None):
+        return self.__tester.previousTesterStatus(options, previous_storage)
 
     def getStatusMessage(self):
         return self.__job_message

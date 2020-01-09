@@ -254,13 +254,13 @@ class RunApp(Tester):
             elif self.exit_code != 0 and specs['should_crash'] == False:
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
                 reason = 'CRASH'
-                return "\n\nExit Code: " + str(self.exit_code)
             # Valgrind runs
             elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
 
             if reason != '':
-                self.setStatus(self.fail, reason)
+                self.setStatus(self.fail, str(reason))
+                return "\n\nExit Code: " + str(self.exit_code)
 
         # Return anything extra here that we want to tack onto the Output for when it gets printed later
         return ''

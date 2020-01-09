@@ -17,18 +17,45 @@ InputParameters
 ConstantVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-
-  params.addRequiredParam<VectorPostprocessorValue>("value",
-                                                    "The vector value this object will have.");
+  params.addParam<std::vector<std::string>>("vector_names",
+                                            "Names of the column vectors in this object");
+  params.addRequiredParam<std::vector<std::vector<Real>>>(
+      "value",
+      "Vector values this object will have. Leading dimension must be equal to leading dimension "
+      "of vector_names parameter.");
 
   return params;
 }
 
 ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters), _value(declareVector("value"))
+  : GeneralVectorPostprocessor(parameters)
 {
+  std::vector<std::string> names;
+  if (isParamValid("vector_names"))
+    names = getParam<std::vector<std::string>>("vector_names");
+  else
+    names = {"value"};
+  unsigned int nvec = names.size();
+
+  _value.resize(nvec);
+  for (unsigned int j = 0; j < nvec; ++j)
+    _value[j] = &declareVector(names[j]);
+
+  std::vector<std::vector<Real>> v = getParam<std::vector<std::vector<Real>>>("value");
+  if (v.size() != nvec)
+    paramError("value",
+               "Leading dimension must be equal to leading dimension of vector_names parameter.");
+
   if (processor_id() == 0)
-    _value = getParam<VectorPostprocessorValue>("value");
+  {
+    for (unsigned int j = 0; j < nvec; ++j)
+    {
+      unsigned int ne = v[j].size();
+      _value[j]->resize(ne);
+      for (unsigned int l = 0; l < ne; ++l)
+        (*_value[j])[l] = v[j][l];
+    }
+  }
 }
 
 void

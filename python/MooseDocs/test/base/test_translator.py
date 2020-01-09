@@ -22,7 +22,7 @@ class TestTranslator(unittest.TestCase):
 
     def setUp(self):
         command.CommandExtension.EXTENSION_COMMANDS.clear()
-        config = os.path.join('MooseDocs', 'test', 'config.yml')
+        config = os.path.join('..', 'config.yml')
         self.translator, _ = common.load_config(config)
         self.translator.init()
 
