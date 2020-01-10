@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADComputeElongationThermalExpansionEigenstrainBase.h"
+#include "ADComputeDilatationThermalExpansionEigenstrainBase.h"
 
-defineADLegacyParams(ADComputeElongationThermalExpansionEigenstrainBase);
+defineADLegacyParams(ADComputeDilatationThermalExpansionEigenstrainBase);
 
 template <ComputeStage compute_stage>
 InputParameters
-ADComputeElongationThermalExpansionEigenstrainBase<compute_stage>::validParams()
+ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::validParams()
 {
   return ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams();
 }
 
 template <ComputeStage compute_stage>
-ADComputeElongationThermalExpansionEigenstrainBase<compute_stage>::
-    ADComputeElongationThermalExpansionEigenstrainBase(const InputParameters & parameters)
+ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::
+    ADComputeDilatationThermalExpansionEigenstrainBase(const InputParameters & parameters)
   : ADComputeThermalExpansionEigenstrainBase<compute_stage>(parameters)
 {
 }
 
 template <ComputeStage compute_stage>
 void
-ADComputeElongationThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
+ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
     ADReal & thermal_strain)
 {
-  const ADReal stress_free_thexp = computeElongation(_stress_free_temperature[_qp]);
-  thermal_strain = computeElongation(_temperature[_qp]) - stress_free_thexp;
+  const ADReal stress_free_thexp = computeDilatation(_stress_free_temperature[_qp]);
+  thermal_strain = computeDilatation(_temperature[_qp]) - stress_free_thexp;
 
   // Per M. Niffenegger and K. Reichlin (2012), thermal_strain should be divided
   // by (1.0 + thexp_stress_free_temperature) to account for the ratio of
@@ -41,4 +41,4 @@ ADComputeElongationThermalExpansionEigenstrainBase<compute_stage>::computeTherma
   thermal_strain /= (1.0 + stress_free_thexp);
 }
 
-adBaseClass(ADComputeElongationThermalExpansionEigenstrainBase);
+adBaseClass(ADComputeDilatationThermalExpansionEigenstrainBase);

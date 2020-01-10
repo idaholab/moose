@@ -39,7 +39,7 @@
   [../]
   [./individual]
     issues = '#13634 #14595'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeElongationThermalExpansionFunctionEigenstrain.md'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeDilatationThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
                    negative to positive strain across the reference temperature and compare favorably
                    to hand calculations'
@@ -55,11 +55,11 @@
       csvdiff = 'instantaneous_out.csv'
       detail = 'using a instantaneous thermal expansion coefficient'
     [../]
-    [./elongation]
+    [./dilatation]
       type = CSVDiff
-      input = 'elongation.i'
-      csvdiff = 'elongation_out.csv'
-      detail = 'using a elongation thermal expansion coefficient'
+      input = 'dilatation.i'
+      csvdiff = 'dilatation_out.csv'
+      detail = 'using a dilatation thermal expansion coefficient'
     [../]
   [../]
 []

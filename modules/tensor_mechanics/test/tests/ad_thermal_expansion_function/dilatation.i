@@ -1,4 +1,4 @@
-# This test checks the thermal expansion calculated via an elongation function.
+# This test checks the thermal expansion calculated via an dilatation function.
 # The coefficient is selected so as to result in a 1e-4 strain in the x-axis, and to cross over
 # from positive to negative strain.
 
@@ -69,8 +69,8 @@
     type = ADComputeLinearElasticStress
   [../]
   [./thermal_expansion_strain]
-    type = ADComputeElongationThermalExpansionFunctionEigenstrain
-    elongation_function = cte_elongation
+    type = ADComputeDilatationThermalExpansionFunctionEigenstrain
+    dilatation_function = cte_dilatation
     stress_free_temperature = 1.5
     temperature = temp
     eigenstrain_name = eigenstrain
@@ -78,7 +78,7 @@
 []
 
 [Functions]
-  [./cte_elongation]
+  [./cte_dilatation]
     type = PiecewiseLinear
     x = '1 2'
     y = '-1e-4 1e-4'

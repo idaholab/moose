@@ -12,37 +12,37 @@
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-#define usingComputeElongationThermalExpansionEigenstrainBaseMembers                               \
+#define usingComputeDilatationThermalExpansionEigenstrainBaseMembers                               \
   usingComputeThermalExpansionEigenstrainBaseMembers;                                              \
-  using ADComputeElongationThermalExpansionEigenstrainBase<compute_stage>::computeElongation
+  using ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeDilatation
 
 template <ComputeStage compute_stage>
-class ADComputeElongationThermalExpansionEigenstrainBase;
+class ADComputeDilatationThermalExpansionEigenstrainBase;
 
-declareADValidParams(ADComputeElongationThermalExpansionEigenstrainBase);
+declareADValidParams(ADComputeDilatationThermalExpansionEigenstrainBase);
 
 /**
- * ADComputeElongationThermalExpansionEigenstrainBase computes an eigenstrain for thermal expansion
- * from an elongation equation.
+ * ADComputeDilatationThermalExpansionEigenstrainBase computes an eigenstrain for thermal expansion
+ * from an dilatation equation.
  */
 template <ComputeStage compute_stage>
-class ADComputeElongationThermalExpansionEigenstrainBase
+class ADComputeDilatationThermalExpansionEigenstrainBase
   : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeElongationThermalExpansionEigenstrainBase(const InputParameters & parameters);
+  ADComputeDilatationThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
   virtual void computeThermalStrain(ADReal & thermal_strain) override;
 
   /*
-   * Compute the fractional linear elongation due to thermal expansion delta L / L
+   * Compute the fractional linear dilatation due to thermal expansion delta L / L
    * @param temperature current temperature
-   * @return fractional linear elongation due
+   * @return fractional linear dilatation due
    */
-  virtual ADReal computeElongation(const ADReal & temperature) = 0;
+  virtual ADReal computeDilatation(const ADReal & temperature) = 0;
 
   usingComputeThermalExpansionEigenstrainBaseMembers;
 };

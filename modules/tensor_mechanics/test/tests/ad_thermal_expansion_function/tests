@@ -37,4 +37,29 @@
       detail = 'and the small strain formulation'
     [../]
   [../]
+  [./individual]
+    issues = '#13634 #14595'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md ADComputeDilatationThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
+                   negative to positive strain across the reference temperature and compare favorably
+                   to hand calculations'
+    [./mean]
+      type = CSVDiff
+      input = 'mean.i'
+      csvdiff = 'mean_out.csv'
+      detail = 'using a mean thermal expansion coefficient'
+    [../]
+    [./instantaneous]
+      type = CSVDiff
+      input = 'instantaneous.i'
+      csvdiff = 'instantaneous_out.csv'
+      detail = 'using a instantaneous thermal expansion coefficient'
+    [../]
+    [./dilatation]
+      type = CSVDiff
+      input = 'dilatation.i'
+      csvdiff = 'dilatation_out.csv'
+      detail = 'using a dilatation thermal expansion coefficient'
+    [../]
+  [../]
 []

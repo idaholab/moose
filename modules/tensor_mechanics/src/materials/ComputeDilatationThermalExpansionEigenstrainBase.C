@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeElongationThermalExpansionEigenstrainBase.h"
+#include "ComputeDilatationThermalExpansionEigenstrainBase.h"
 
-defineLegacyParams(ComputeElongationThermalExpansionEigenstrainBase);
+defineLegacyParams(ComputeDilatationThermalExpansionEigenstrainBase);
 
 InputParameters
-ComputeElongationThermalExpansionEigenstrainBase::validParams()
+ComputeDilatationThermalExpansionEigenstrainBase::validParams()
 {
   return ComputeThermalExpansionEigenstrainBase::validParams();
 }
 
-ComputeElongationThermalExpansionEigenstrainBase::ComputeElongationThermalExpansionEigenstrainBase(
+ComputeDilatationThermalExpansionEigenstrainBase::ComputeDilatationThermalExpansionEigenstrainBase(
     const InputParameters & parameters)
   : ComputeThermalExpansionEigenstrainBase(parameters)
 {
 }
 
 void
-ComputeElongationThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
+ComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
                                                          Real & dthermal_strain_dT)
 {
-  const Real stress_free_thexp = computeElongation(_stress_free_temperature[_qp]);
-  thermal_strain = computeElongation(_temperature[_qp]) - stress_free_thexp;
-  dthermal_strain_dT = computeElongationDerivative(_temperature[_qp]);
+  const Real stress_free_thexp = computeDilatation(_stress_free_temperature[_qp]);
+  thermal_strain = computeDilatation(_temperature[_qp]) - stress_free_thexp;
+  dthermal_strain_dT = computeDilatationDerivative(_temperature[_qp]);
 
   // Per M. Niffenegger and K. Reichlin (2012), thermal_strain should be divided
   // by (1.0 + thexp_stress_free_temperature) to account for the ratio of
