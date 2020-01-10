@@ -10,16 +10,12 @@ total dilatation as a function of temperature, $T$.
 
 The thermal strain is given by,
 \begin{equation}
-  \boldsymbol{\epsilon}^{th} = \frac{\lambda (T) - \lambda(T_0)}{1+\lambda(T_0)}
+  \boldsymbol{\epsilon}^{th} = \lambda (T) - \lambda(T_0) \boldsymbol{I}
   \label{eq:epsilon}
 \end{equation}
-where $T_0$ is the stress free temperature and $\lambda$ is the function that describes dilatation
-as a function of temperature. For this material model, $\lambda$ must be provided as a function.
-
-Note that the denominator in [eq:epsilon] is a correction to account for the ratio of
-$L_{(T_{sf})}$ to $L_{(T_{ref})}$. As discussed in [!cite](niffenegger2012proper), that ratio is
-very close to 1, so it is not strictly necessary to include that correction, but it is done here for
-completeness.
+where $T_0$ is the stress free temperature, $\lambda$ is the function that describes dilatation as a
+function of temperature, and $\boldsymbol{I}$ is the identity matrix. For this material model,
+$\lambda$ must be provided as a function.
 
 !alert warning
 Functions are not able to handle dual numbers at this time, so no automatic differentiation

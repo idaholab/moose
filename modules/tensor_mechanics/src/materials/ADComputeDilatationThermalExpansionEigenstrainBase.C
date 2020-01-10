@@ -30,15 +30,8 @@ void
 ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
     ADReal & thermal_strain)
 {
-  const ADReal stress_free_thexp = computeDilatation(_stress_free_temperature[_qp]);
-  thermal_strain = computeDilatation(_temperature[_qp]) - stress_free_thexp;
-
-  // Per M. Niffenegger and K. Reichlin (2012), thermal_strain should be divided
-  // by (1.0 + thexp_stress_free_temperature) to account for the ratio of
-  // the length at the stress-free temperature to the length at the reference
-  // temperature. It can be neglected because it is very close to 1,
-  // but we include it for completeness here.
-  thermal_strain /= (1.0 + stress_free_thexp);
+  thermal_strain =
+      computeDilatation(_temperature[_qp]) - computeDilatation(_stress_free_temperature[_qp]);
 }
 
 adBaseClass(ADComputeDilatationThermalExpansionEigenstrainBase);

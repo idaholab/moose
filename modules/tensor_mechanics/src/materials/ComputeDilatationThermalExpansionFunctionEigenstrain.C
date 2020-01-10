@@ -9,6 +9,8 @@
 
 #include "ComputeDilatationThermalExpansionFunctionEigenstrain.h"
 
+#include "Function.h"
+
 registerMooseObject("TensorMechanicsApp", ComputeDilatationThermalExpansionFunctionEigenstrain);
 
 defineLegacyParams(ComputeDilatationThermalExpansionFunctionEigenstrain);
@@ -17,6 +19,8 @@ InputParameters
 ComputeDilatationThermalExpansionFunctionEigenstrain::validParams()
 {
   InputParameters params = ComputeDilatationThermalExpansionEigenstrainBase::validParams();
+  params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
+                             "describes the total dilatation as a function of temperature");
   params.addRequiredParam<FunctionName>(
       "dilatation_function",
       "Function describing the thermal dilatation as a function of temperature");
