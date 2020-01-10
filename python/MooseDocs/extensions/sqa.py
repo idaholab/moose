@@ -252,7 +252,7 @@ class SQARequirementsCommand(command.CommandComponent):
             if self.settings['link-spec']:
                 p = SQARequirementSpecification(item, spec_path=req.path, spec_name=req.name)
 
-                hit_root = mooseutils.hit_load(req.filename)
+                hit_root = pyhit.load(req.filename)
                 h = hit_root.find(req.name)
                 content = h.render()
 

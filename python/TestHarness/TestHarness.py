@@ -19,7 +19,7 @@ from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 from . import util
 import hit
-from mooseutils import HitNode, hit_parse
+import pyhit
 
 import argparse
 from timeit import default_timer as clock
@@ -32,8 +32,8 @@ def readTestRoot(fname):
     if root.find('run_tests_args'):
         args = shlex.split(root.param('run_tests_args'))
 
-    hit_node = HitNode(None, root)
-    hit_parse(hit_node, root, '')
+    hit_node = pyhit.Node(None, root)
+    pyhit.parse(hit_node, root, '')
 
     # TODO: add check to see if the binary exists before returning. This can be used to
     # allow users to control fallthrough for e.g. individual module binaries vs. the

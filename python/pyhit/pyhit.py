@@ -11,19 +11,18 @@
 import os
 import hit
 import moosetree
-from . import message
+from mooseutils import message
 
-
-class HitNode(moosetree.Node):
+class Node(moosetree.Node):
     """
     An moosetree.Node object for building a hit tree.
 
     Inputs:
-        parent[HitNode]: The parent of the node being created
+        parent[Node]: The parent of the node being created
         hitnode[hit.Node|hit.Kind]: The node or kind being created
     """
-    def __init__(self, parent, hitnode):
-        super(HitNode, self).__init__(parent, hitnode.path())
+    def __init__(self, parent=None, hitnode=hit.parse('', '')):
+        super().__init__(parent, hitnode.path())
         self.__hitnode = hitnode     # hit.Node object
 
     @property
@@ -38,32 +37,6 @@ class HitNode(moosetree.Node):
             node = node.parent
         return '/'.join(reversed(out))
 
-    def find(self, name, fuzzy=True):
-        """
-        Locate first occurrence of a node by name starting from this node.
-
-        Inputs:
-            name[str]: The name to search for within the tree.
-            fuzzy[bool]: When True (the default) a "fuzzy" search is performed, meaning that the
-                         provide name must be in the node name. If this is set to False the names
-                         must match exact.
-        """
-        func = lambda n: (fuzzy and name in n.fullpath) or (not fuzzy and name == n.fullpath)
-        return moosetree.find(self, func, method=moosetree.IterMethod.PRE_ORDER)
-
-    def findall(self, name, fuzzy=True):
-        """
-        Locate all nodes withing the tree starting from this node.
-
-        Inputs:
-            name[str]: The name to search for within the tree.
-            fuzzy[bool]: When True (the default) a "fuzzy" search is performed, meaning that the
-                         provide name must be in the node name. If this is set to False the names
-                         must match exact.
-        """
-        func = lambda n: (fuzzy and name in n.fullpath) or (not fuzzy and name == n.fullpath)
-        return moosetree.findall(self, func, method=moosetree.IterMethod.PRE_ORDER)
-
     def append(self, name, **kwargs):
         """
         Append a new input file block.
@@ -74,9 +47,9 @@ class HitNode(moosetree.Node):
         """
         new = hit.NewSection(name)
         self.__hitnode.addChild(new)
-        node = HitNode(self, new)
+        node = Node(self, new)
         for key, value in kwargs.items():
-            node.addParam(key, value)
+            node.__addParam(key, value)
         return node
 
     def remove(self):
@@ -86,28 +59,6 @@ class HitNode(moosetree.Node):
         self.__hitnode.remove()
         self.__hitnode = None
         self.parent = None
-
-    def addParam(self, name, value):
-        """
-        Add a new parameter to the given node.
-
-        Inputs:
-            name[str]: The name of the parameter
-            value[Int|Float|Bool|String]: The parameter value
-        """
-        if isinstance(value, int):
-            kind = hit.FieldKind.Int
-        elif isinstance(value, float):
-            kind = hit.FieldKind.Float
-        elif isinstance(value, bool):
-            kind = hit.FieldKind.Bool
-        elif isinstance(value, str):
-            kind = hit.FieldKind.String
-        else:
-            kind = hit.FieldKind.NotField
-
-        param = hit.NewField(name, kind, str(value))
-        self.__hitnode.addChild(param)
 
     def removeParam(self, name):
         """
@@ -148,25 +99,19 @@ class HitNode(moosetree.Node):
         """
         return self.__hitnode.param(name) is not None
 
-    def __iter__(self):
-        """
-        Provides simple looping over children.
-
-            for child in node:
-                ...
-        """
-        for child in self.children:
-            yield child
-
-    def iterparams(self):
+    def params(self, raw=False):
         """
         Return key, value for the parameters of this node.
 
-        for k, v in node.iterparams():
+        for k, v in node.params():
             ...
         """
-        for child in self.__hitnode.children(hit.NodeType.Field):
-            yield child.path(), child.param()
+        if raw:
+            for child in self.__hitnode.children(hit.NodeType.Field):
+                yield child.path(), child.raw()
+        else:
+            for child in self.__hitnode.children(hit.NodeType.Field):
+                yield child.path(), child.param()
 
     def get(self, name, default=None):
         """
@@ -200,15 +145,50 @@ class HitNode(moosetree.Node):
         """
         return self.__hitnode.param(name)
 
+    def __setitem__(self, name, value):
+        """
+        Provide operator [] for modifying or adding parameters to this node.
 
-def hit_load(filename):
+        Inputs:
+            name[str]: The name of the parameter
+            value[int|float|bool|str]: The parameter value
+        """
+        if name not in self:
+            self.__addParam(name, value)
+        else:
+            self.__editParam(name, value)
+
+    def __addParam(self, name, value):
+        """(private) Add a new parameter to the given node."""
+        if isinstance(value, int):
+            kind = hit.FieldKind.Int
+        elif isinstance(value, float):
+            kind = hit.FieldKind.Float
+        elif isinstance(value, bool):
+            kind = hit.FieldKind.Bool
+        elif isinstance(value, str):
+            kind = hit.FieldKind.String
+        else:
+            kind = hit.FieldKind.NotField
+
+        param = hit.NewField(name, kind, str(value))
+        self.__hitnode.addChild(param)
+
+    def __editParam(self, name, value):
+        """(private) Edit an existing parameter"""
+        retcode = self.__hitnode.setParam(name, str(value))
+        if retcode != 0:
+            raise KeyError("Unknown parameter name '{}'".format(name))
+
+
+def load(filename, root=None):
     """
     Read and parse a hit file (MOOSE input file format).
 
     Inputs:
         filename[str]: The filename to open and parse.
 
-    Returns a HitNode object, which is the root of the tree. HitNode objects are custom
+    Returns a Node object, which is the root of the tree. Node objects are custom
     versions of the moosetree.Node objects.
     """
     if os.path.exists(filename):
@@ -220,25 +200,25 @@ def hit_load(filename):
         message.mooseError("Unable to load the hit file ", filename)
 
     hit_node = hit.parse(filename, content)
-    root = HitNode(None, hit_node)
-    hit_parse(root, hit_node, filename)
+    root = Node(root, hit_node) if root is not None else Node(None, hit_node)
+    parse(root, hit_node, filename)
     return root
 
-def hit_parse(root, hit_node, filename):
+def parse(root, hit_node, filename):
     """
     Parse the supplied content into a hit tree.
 
     Inputs:
-        root[HitNode]: The HitNode object that the raw hit content will be inserted
+        root[Node]: The Node object that the raw hit content will be inserted
         content[str]: The raw hit content to parse.
         filename[str]: (optional) The filename for error reporting.
 
-    Returns a HitNode object, which is the root of the tree. HitNode objects are custom
+    Returns a Node object, which is the root of the tree. Node objects are custom
     versions of the moosetree.Node objects.
     """
     for hit_child in hit_node.children():
         if hit_child.type() == hit.NodeType.Section:
-            new = HitNode(root, hit_child)
-            hit_parse(new, hit_child, filename)
+            new = Node(root, hit_child)
+            parse(new, hit_child, filename)
 
     return root

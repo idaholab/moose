@@ -142,7 +142,7 @@ class Parser:
             params.addParam('hit_path', node.fullpath(), 'HIT path to test in spec file')
 
             # Apply any new defaults
-            for key, value in default_values.iterparams():
+            for key, value in default_values.params():
                 if key in params.keys():
                     if key == 'cli_args':
                       params[key].append(value)

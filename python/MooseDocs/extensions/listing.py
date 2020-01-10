@@ -181,7 +181,7 @@ class InputListingCommand(FileListingCommand):
     @staticmethod
     def extractInputBlocks(filename, blocks):
         """Remove input file block(s)"""
-        hit = mooseutils.hit_load(filename)
+        hit = pyhit.load(filename)
         out = []
         for block in blocks.split(' '):
             node = hit.find(block)

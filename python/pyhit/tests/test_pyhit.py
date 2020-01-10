@@ -10,22 +10,22 @@
 
 import os
 import unittest
-import mooseutils
+import pyhit
 
 class TestHitLoad(unittest.TestCase):
     """
-    Test the hit_load function.
+    Test the load function.
     """
 
     def testRender(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         out = root.render()
         self.assertIn('[A]', out)
         self.assertIn('param = bar', out)
         self.assertIn('comment', out)
 
     def testBasic(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
 
         self.assertEqual(root.children[0].name, 'A')
         self.assertEqual(root.children[0]['param'], 'foo')
@@ -44,65 +44,85 @@ class TestHitLoad(unittest.TestCase):
         for i, child in enumerate(root):
             self.assertEqual(child.name, gold[i])
 
-    def testFind(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
-        self.assertIs(root.find('A'), root.children[0])
-        self.assertEqual(list(root.findall('A')), [root.children[0], root.children[0].children[0]])
-        self.assertEqual(list(root.findall('-1')),
-                         [root.children[0].children[0],
-                          root.children[1].children[0],
-                          root.children[1].children[0].children[0]])
-
-        self.assertEqual(list(root.children[1].findall('-1')),
-                         [root.children[1].children[0],
-                          root.children[1].children[0].children[0]])
-
     def testIterParam(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
-        for k, v in root.children[0].iterparams():
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        for k, v in root.children[0].params():
             self.assertEqual(k, 'param')
             self.assertEqual(v, 'foo')
 
     def testGetParam(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         p = root.get('nope', 'default')
         self.assertEqual(p, 'default')
 
     def testAddParam(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertEqual(len(root(1)), 2)
         self.assertIsNone(root(1).get('year'))
-        root(1).addParam('year', 1980)
+        root(1)['year'] = 1980
         self.assertEqual(len(root(1)), 2)
         self.assertEqual(root(1).get('year'), 1980)
 
+    def testEditParam(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        self.assertIsNone(root(1).get('year'))
+        root(1)['year'] = 1980
+        self.assertEqual(len(root(1)), 2)
+        self.assertEqual(root(1).get('year'), 1980)
+        root(1)['year'] = 1949
+        self.assertEqual(len(root(1)), 2)
+        self.assertEqual(root(1).get('year'), 1949)
+
     def testRemoveParam(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertEqual(root(0)['param'], 'foo')
         root(0).removeParam('param')
         self.assertIsNone(root(0).get('param'))
 
-    def testAddSection(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+    def testAppend(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertEqual(len(root(1)), 2)
         sec = root(1).append('B-3')
         self.assertEqual(len(root(1)), 3)
         self.assertIsNone(sec.get('year'))
-        sec.addParam('year', 1980)
+        sec['year'] = 1980
+        self.assertEqual(sec.get('year'), 1980)
+
+    def testAppendWithKwargs(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        sec = root(1).append('B-3', year=1980)
+        self.assertEqual(len(root(1)), 3)
         self.assertEqual(sec.get('year'), 1980)
 
     def testRemoveSection(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertEqual(len(root), 2)
         root(1).remove()
         self.assertEqual(len(root), 1)
 
     def testAddSectionWithParameters(self):
-        root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
         self.assertEqual(len(root(1)), 2)
         sec = root(1).append('B-3', year=1980)
         self.assertEqual(len(root(1)), 3)
         self.assertEqual(sec.get('year'), 1980)
+
+    def testCreate(self):
+        root = pyhit.Node()
+        bcs = root.append('BCs')
+        bcs.append('left', type='NeumannBC', value=1980, boundary='left')
+        self.assertEqual(len(root), 1)
+        out =  root.render()
+        self.assertIn('[BCs]', out)
+        self.assertIn('type = NeumannBC', out)
+        self.assertIn('boundary = left', out)
+
+    def testTestRoot(self):
+        root = pyhit.load(os.path.join('..', '..', 'testroot'))
+        self.assertIn('app_name', root)
+        self.assertEqual(root['app_name'], 'moose_python')
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
