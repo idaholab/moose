@@ -9,8 +9,6 @@
 
 #include "ADComputeMeanThermalExpansionEigenstrainBase.h"
 
-#include "Function.h"
-
 defineADLegacyParams(ADComputeMeanThermalExpansionEigenstrainBase);
 
 template <ComputeStage compute_stage>
