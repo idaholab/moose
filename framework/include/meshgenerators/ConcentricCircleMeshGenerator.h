@@ -39,9 +39,6 @@ protected:
   /// Number of rings in each circle or in the enclosing square
   std::vector<unsigned int> _rings;
 
-  /// Size of inner square in relation to radius of the innermost concentric circle
-  Real _inner_mesh_fraction;
-
   /// Adding the enclosing square is optional
   bool _has_outer_square;
   Real _pitch;
