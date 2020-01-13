@@ -373,9 +373,6 @@ TensorMechanicsAction::act()
       auto params = getKernelParameters(ad_prepend + "WeakPlaneStress" + ad_append);
       std::string wps_kernel_name = "TM_WPS_" + name();
       params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
 
       if (_use_ad)
       {
