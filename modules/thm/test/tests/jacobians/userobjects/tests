@@ -165,7 +165,7 @@
     type = 'PetscJacobianTester'
     input = 'boundary_flux_7eqn_ncg_ghost_wall.i'
     ratio_tol = 1e-12
-    difference_tol = 0.004
+    difference_tol = 0.005
     max_threads = 1
     allow_test_objects = true
   [../]
