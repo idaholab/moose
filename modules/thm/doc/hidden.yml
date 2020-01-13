@@ -179,6 +179,9 @@
 - /JacobianTest2Phase/JacobianTest2PhaseAction
 - /JacobianTest2PhaseNCG
 - /JacobianTest2PhaseNCG/JacobianTest2PhaseNCGAction
+- /JacobianTest2PhaseNCGRDG
+- /JacobianTest2PhaseNCGRDG/JacobianTest2PhaseNCGRDGBaseAction
+- /JacobianTest2PhaseNCGBoundaryFlux
 
 - /JacobianTestGeneral
 - /JacobianTestGeneral/JacobianTestGeneralAction
