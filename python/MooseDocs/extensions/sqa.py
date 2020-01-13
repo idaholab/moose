@@ -19,7 +19,7 @@ import moosetree
 import uuid
 import json
 import time
-
+import pyhit
 import mooseutils
 import MooseDocs
 from .. import common
@@ -253,7 +253,7 @@ class SQARequirementsCommand(command.CommandComponent):
                 p = SQARequirementSpecification(item, spec_path=req.path, spec_name=req.name)
 
                 hit_root = pyhit.load(req.filename)
-                h = hit_root.find(req.name)
+                h = moosetree.find(hit_root, lambda n: n.name==req.name)
                 content = h.render()
 
                 floats.create_modal_link(p,

@@ -193,11 +193,6 @@
     input = test_FailedTests.py
     requirement = "TestHarness shall run only tests which previously has failed"
     issues = '#14512'
-  [./python_version]
-    type = PythonUnitTest
-    input = test_PythonVersion.py
-    requirement = "TestHarness shall support restrictions based on the python version available."
-    issues = '#13903'
   [../]
   [./python_version]
     type = PythonUnitTest

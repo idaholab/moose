@@ -185,21 +185,21 @@ def build_hit(expr, name, **kwargs):
         name[str]: The name of the input file block to create
         kwargs: Key, value pairs for val, vals input parameters (defaults to 1.0) if not provided
     """
-    import hit
+    import pyhit
 
     symbols = set([str(s) for s in expr.free_symbols]).difference(set(['R.x', 'R.y', 'R.z', 't']))
     for symbol in symbols:
         kwargs.setdefault(symbol, 1.)
 
-    root = hit.NewSection(name)
-    root.addChild(hit.NewField('type', hit.FieldKind.String, 'ParsedFunction'))
-    root.addChild(hit.NewField('value', hit.FieldKind.String, "'{}'".format(str(fparser(expr)))))
+    root = pyhit.Node(None, name)
+    root['type'] = 'ParsedFunction'
+    root['value'] = "'{}'".format(str(fparser(expr)))
 
     if kwargs:
         pvars = ' '.join(kwargs.keys())
         pvals = ' '.join([str(v) for v in kwargs.values()])
-        root.addChild(hit.NewField('vars', hit.FieldKind.String, "'{}'".format(pvars)))
-        root.addChild(hit.NewField('vals', hit.FieldKind.String, "'{}'".format(pvals)))
+        root['vars'] = "'{}'".format(pvars)
+        root['vals'] = "'{}'".format(pvals)
 
     return root
 

@@ -737,7 +737,7 @@ def trimOutput(job, options):
         or options.no_trimmed_output):
         return output
     elif job.specs.isValid('max_buffer_size'):
-        max_size = job.specs['max_buffer_size']
+        max_size = int(job.specs['max_buffer_size'])
     else:
         max_size = 100000
 

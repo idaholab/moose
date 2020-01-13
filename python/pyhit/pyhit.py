@@ -19,9 +19,13 @@ class Node(moosetree.Node):
 
     Inputs:
         parent[Node]: The parent of the node being created
-        hitnode[hit.Node|hit.Kind]: The node or kind being created
+        name[str] or hitnode[hit.Node]: The name of the node or the hit.Node parent
     """
-    def __init__(self, parent=None, hitnode=hit.parse('', '')):
+    def __init__(self, parent=None, hitnode=None):
+        if isinstance(hitnode, str):
+            hitnode = hit.NewSection(hitnode)
+        elif hitnode is None:
+            hitnode = hit.NewSection('')
         super().__init__(parent, hitnode.path())
         self.__hitnode = hitnode     # hit.Node object
 
@@ -187,6 +191,7 @@ def load(filename, root=None):
 
     Inputs:
         filename[str]: The filename to open and parse.
+        root[Node]: (Optional) The root node of the tree
 
     Returns a Node object, which is the root of the tree. Node objects are custom
     versions of the moosetree.Node objects.
@@ -199,26 +204,28 @@ def load(filename, root=None):
     else:
         message.mooseError("Unable to load the hit file ", filename)
 
-    hit_node = hit.parse(filename, content)
-    root = Node(root, hit_node) if root is not None else Node(None, hit_node)
-    parse(root, hit_node, filename)
-    return root
+    return parse(content, root, filename)
 
-def parse(root, hit_node, filename):
+def parse(content, root=None, filename=''):
     """
-    Parse the supplied content into a hit tree.
+    Parse a hit tree from a string.
 
     Inputs:
-        root[Node]: The Node object that the raw hit content will be inserted
-        content[str]: The raw hit content to parse.
-        filename[str]: (optional) The filename for error reporting.
+       content[str]: string to process
+       root[Node]: (Optional) root node of the tree
+       filename[str]: (Optional) filename for error reporting
 
-    Returns a Node object, which is the root of the tree. Node objects are custom
-    versions of the moosetree.Node objects.
     """
+    hit_node = hit.parse(filename, content)
+    hit.explode(hit_node)
+    root = Node(root, hit_node) if root is not None else Node(None, hit_node)
+    _parse_hit(root, hit_node, filename)
+    return root
+
+def _parse_hit(root, hit_node, filename):
+    """Internal helper for parsing HIT tree"""
     for hit_child in hit_node.children():
         if hit_child.type() == hit.NodeType.Section:
             new = Node(root, hit_child)
-            parse(new, hit_child, filename)
-
+            _parse_hit(new, hit_child, filename)
     return root

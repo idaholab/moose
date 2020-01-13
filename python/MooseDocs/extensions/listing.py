@@ -9,9 +9,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-
+import pyhit
+import moosetree
 import mooseutils
-
 import MooseDocs
 from MooseDocs.base import LatexRenderer
 from MooseDocs import common
@@ -171,11 +171,11 @@ class InputListingCommand(FileListingCommand):
 
     def extractContent(self, filename):
         """Extract the file contents for display."""
-        content = common.read(filename)
         if self.settings['block']:
-            content = self.extractInputBlocks(content, self.settings['block'])
-
-        content, _ = common.extractContent(content, self.settings)
+            content = self.extractInputBlocks(filename, self.settings['block'])
+        else:
+            content = common.read(filename)
+            content, _ = common.extractContent(content, self.settings)
         return content
 
     @staticmethod
@@ -184,7 +184,7 @@ class InputListingCommand(FileListingCommand):
         hit = pyhit.load(filename)
         out = []
         for block in blocks.split(' '):
-            node = hit.find(block)
+            node = moosetree.find(hit, lambda n: n.fullpath.strip('/') == block)
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)

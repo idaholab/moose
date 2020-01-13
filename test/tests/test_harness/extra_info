@@ -8,7 +8,7 @@
     petsc_version_release = true
     petsc_debug = true
     slepc_version = '>=3.7.4'
-    library_mode = true
+    library_mode = 'DYNAMIC'
     mesh_mode = 'distributed'
     dtk = true
     unique_ids = true
