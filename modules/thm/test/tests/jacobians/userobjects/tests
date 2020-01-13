@@ -189,6 +189,15 @@
     allow_test_objects = true
   [../]
 
+  [./numerical_flux_7eqn_ncg_conservative_centered_rdg]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_7eqn_ncg_conservative_centered_rdg.i'
+    ratio_tol = 8e-5
+    difference_tol = 3e5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
   # non-conservative flux
   [./numerical_flux_7eqn_nonconservative]
     type = 'PetscJacobianTester'
