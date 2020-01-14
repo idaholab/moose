@@ -81,7 +81,7 @@ class Parser:
         # using the GetPotParser.  We'll loop over the parsed node
         # so that we can keep track of ignored parameters as well
         local_parsed = set()
-        for key, value in getpot_node.params(raw=False):
+        for key, value in getpot_node.params():
             self.params_parsed.add(os.path.join(getpot_node.fullpath, key))
             local_parsed.add(key)
             if key in params:

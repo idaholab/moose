@@ -249,6 +249,13 @@ Node::addChild(Node * child)
   _children.push_back(child);
 }
 
+void
+Node::insertChild(std::size_t index, Node * child)
+{
+  child->_parent = this;
+  _children.insert(_children.begin() + index, child);
+}
+
 std::vector<Node *>
 Node::children(NodeType t)
 {
@@ -378,6 +385,12 @@ Comment::clone()
   auto n = new Comment(_text, _isinline);
   n->tokens() = tokens();
   return n;
+}
+
+void
+Comment::setText(const std::string & text)
+{
+  _text = text;
 }
 
 Section::Section(const std::string & path) : Node(NodeType::Section), _path(pathNorm(path)) {}

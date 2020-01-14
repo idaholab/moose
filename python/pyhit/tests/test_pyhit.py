@@ -85,6 +85,17 @@ class TestHitLoad(unittest.TestCase):
         self.assertEqual(len(root(1)), 2)
         sec = root(1).append('B-3')
         self.assertEqual(len(root(1)), 3)
+        self.assertIs(root(1)(2), sec)
+        self.assertIsNone(sec.get('year'))
+        sec['year'] = 1980
+        self.assertEqual(sec.get('year'), 1980)
+
+    def testInsert(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(len(root(1)), 2)
+        sec = root(1).insert(0, 'B-3')
+        self.assertEqual(len(root(1)), 3)
+        self.assertIs(root(1)(0), sec)
         self.assertIsNone(sec.get('year'))
         sec['year'] = 1980
         self.assertEqual(sec.get('year'), 1980)
@@ -109,6 +120,35 @@ class TestHitLoad(unittest.TestCase):
         self.assertEqual(len(root(1)), 3)
         self.assertEqual(sec.get('year'), 1980)
 
+    def testComment(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertEqual(root(1).comment(), "section comment")
+        self.assertEqual(root(0,0).comment(), "sub-section comment")
+        self.assertEqual(root(1,0,0).comment('type'), "param comment")
+
+    def testSetComment(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        root(1).setComment('update section comment')
+        self.assertEqual(root(1).comment(), "update section comment")
+
+        root(0,0).setComment('update sub-section comment')
+        self.assertEqual(root(0,0).comment(), "update sub-section comment")
+
+        root(1,0,0).setComment('type', 'update param comment')
+        self.assertEqual(root(1,0,0).comment('type'), "update param comment")
+
+    def testAddComment(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+
+        root(0).setComment('Section A')
+        self.assertEqual(root(0).comment(), "Section A")
+
+        root(1,0).setComment('Section B-1')
+        self.assertEqual(root(1,0).comment(), "Section B-1")
+
+        root(0,0).setComment('param', "inline comment")
+        self.assertEqual(root(0,0).comment('param'), "inline comment")
+
     def testCreate(self):
         root = pyhit.Node()
         bcs = root.append('BCs')
@@ -123,6 +163,7 @@ class TestHitLoad(unittest.TestCase):
         root = pyhit.load(os.path.join('..', '..', 'testroot'))
         self.assertIn('app_name', root)
         self.assertEqual(root['app_name'], 'moose_python')
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

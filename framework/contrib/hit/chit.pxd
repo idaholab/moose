@@ -32,6 +32,7 @@ cdef extern from "parse.h" namespace "hit":
         #std::vector<std::string> vecStrVal()
 
         void addChild(Node * child)
+        void insertChild(int, Node * child)
         vector[Node *] children(NodeType t)
         Node * parent()
         Node * root()
@@ -84,6 +85,7 @@ cdef extern from "parse.h" namespace "hit":
 cdef extern from "parse.h" namespace "hit":
     cdef cppclass Comment "hit::Comment":
         Comment(const string & text, bool is_inline)
+        void setText(const string & text)
 
 cdef extern from "parse.h" namespace "hit":
     cdef cppclass Blank "hit::Blank":

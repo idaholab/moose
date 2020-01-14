@@ -9,9 +9,9 @@
 
 """Wrapper for hit parser."""
 import os
-import hit
 import moosetree
 from mooseutils import message
+from . import hit
 
 class Node(moosetree.Node):
     """
@@ -21,13 +21,17 @@ class Node(moosetree.Node):
         parent[Node]: The parent of the node being created
         name[str] or hitnode[hit.Node]: The name of the node or the hit.Node parent
     """
-    def __init__(self, parent=None, hitnode=None):
+    def __init__(self, parent=None, hitnode=None, offset=0):
         if isinstance(hitnode, str):
             hitnode = hit.NewSection(hitnode)
         elif hitnode is None:
             hitnode = hit.NewSection('')
         super().__init__(parent, hitnode.path())
-        self.__hitnode = hitnode     # hit.Node object
+        self.__hitnode = hitnode         # hit.Node object
+        self.__hitblockcomment = None    # hit.Comment object for this block
+        self.__hitparamcomments = dict() # hit.Comment objects for the parameters within this block
+        self.__hitoffset = offset        # hit index used for inserting new hit nodes
+        self.__reinitComments()
 
     @property
     def fullpath(self):
@@ -40,6 +44,32 @@ class Node(moosetree.Node):
             out.append(node.name)
             node = node.parent
         return '/'.join(reversed(out))
+
+    def insert(self, index, name, **kwargs):
+        """
+        Insert a new input file block before the supplied index
+
+        Inputs:
+            index[int]: The index to insert before
+            name[str]: The name of the section to add
+            kwargs[dict]: Parameters to populate to the new section
+        """
+        count = 0
+        hit_index = 0
+        for child in self.__hitnode.children():
+            if count == index:
+                break
+            hit_index += 1
+            if child.type() == hit.NodeType.Section:
+                count += 1
+
+        new = hit.NewSection(name)
+        self.__hitnode.insertChild(hit_index, new)
+        node = Node(None, new)
+        super().insert(index, node)
+        for key, value in kwargs.items():
+            node.__addParam(key, value)
+        return node
 
     def append(self, name, **kwargs):
         """
@@ -55,6 +85,43 @@ class Node(moosetree.Node):
         for key, value in kwargs.items():
             node.__addParam(key, value)
         return node
+
+    def comment(self, param=None):
+        """
+        Return a copy of the comment for the block or parameter
+        """
+        comment = self.__hitparamcomments.get(param, self.__hitblockcomment)
+        if comment is not None:
+            return str(comment).strip('\n# ')
+
+    def setComment(self, *args):
+        """
+        Add/Set comment for the block or parameter.
+
+        Usage:
+            setComment("comment")
+            setComment("param", "comment")
+        """
+        if len(args) == 1:
+            param = None
+            text = args[0]
+        elif len(args) == 2:
+            param, text = args
+
+        comment = self.__hitparamcomments.get(param, self.__hitblockcomment)
+        if comment is not None:
+            comment.setText('# {}'.format(text))
+
+        elif (comment is None) and (param is None):
+            self.parent.__hitnode.insertChild(self.__hitoffset, hit.NewComment('# {}'.format(text)))
+            self.__reinitComments()
+
+        elif (comment is None) and (param is not None):
+            for child in self.__hitnode.children(hit.NodeType.Field):
+                if child.path() == param:
+                    child.addChild(hit.NewComment('# {}'.format(text), True))
+                    self.__reinitComments()
+                    break
 
     def remove(self):
         """
@@ -103,19 +170,15 @@ class Node(moosetree.Node):
         """
         return self.__hitnode.param(name) is not None
 
-    def params(self, raw=False):
+    def params(self):
         """
         Return key, value for the parameters of this node.
 
         for k, v in node.params():
             ...
         """
-        if raw:
-            for child in self.__hitnode.children(hit.NodeType.Field):
-                yield child.path(), child.raw()
-        else:
-            for child in self.__hitnode.children(hit.NodeType.Field):
-                yield child.path(), child.param()
+        for child in self.__hitnode.children(hit.NodeType.Field):
+            yield child.path(), child.param()
 
     def get(self, name, default=None):
         """
@@ -184,6 +247,25 @@ class Node(moosetree.Node):
         if retcode != 0:
             raise KeyError("Unknown parameter name '{}'".format(name))
 
+    def __reinitComments(self):
+        """(private) Cache comment items for easy access"""
+
+        self.__hitparamcomments.clear()
+        for child in self.__hitnode.children(hit.NodeType.Field):
+            comment = None
+            if child.children() and (child.children()[0].type() == hit.NodeType.Comment):
+                comment = child.children()[0]
+            self.__hitparamcomments[child.path()] = comment
+
+        self.__hitblockcomment = None
+        if (self.parent is not None):
+            comment = None
+            for child in self.parent.__hitnode.children():
+                if child.type() == hit.NodeType.Comment:
+                    comment = child
+                if (child.path() == self.__hitnode.path()) and (comment is not None):
+                    self.__hitblockcomment = comment
+                    break
 
 def load(filename, root=None):
     """
@@ -224,8 +306,10 @@ def parse(content, root=None, filename=''):
 
 def _parse_hit(root, hit_node, filename):
     """Internal helper for parsing HIT tree"""
+    offset = 0
     for hit_child in hit_node.children():
         if hit_child.type() == hit.NodeType.Section:
-            new = Node(root, hit_child)
+            new = Node(root, hit_child, offset=offset)
             _parse_hit(new, hit_child, filename)
+        offset += 1
     return root
