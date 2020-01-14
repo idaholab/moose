@@ -54,7 +54,7 @@
   [../]
 
   # 2-phase
-  [./aV_liquid]
+  [./beta_J]
     type = 'PetscJacobianTester'
     input = '2phase.i'
     ratio_tol = 1e-6

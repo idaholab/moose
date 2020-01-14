@@ -290,6 +290,7 @@
 - /Postprocessors/SumPostprocessor
 
 - /ScalarKernels/ODECoefTimeDerivative
+- /ScalarKernels/VolumeJunction2PhaseVolumeFractionTimeDerivative
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/BoundaryFlux7EqnNCGGhostDensityVelocity
