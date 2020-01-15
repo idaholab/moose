@@ -40,18 +40,21 @@
   [./left_x]
     type = DirichletBC
     variable = u_x
+    preset = false
     boundary = left
     value = 0
   [../]
   [./right_x]
     type = DirichletBC
     variable = u_x
+    preset = false
     boundary = right
     value = 1
   [../]
   [./left_y]
     type = DirichletBC
     variable = u_y
+    preset = false
     boundary = left
     value = 0
   [../]

@@ -27,12 +27,14 @@
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = left
     value = -1000
   [../]
   [./right]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = right
     value = 100000
   [../]

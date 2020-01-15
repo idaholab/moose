@@ -20,12 +20,14 @@
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = left
     value = 0
   [../]
   [./right]
     type = FunctionDirichletBC
     variable = u
+    preset = false
     boundary = right
     function = constant
   [../]

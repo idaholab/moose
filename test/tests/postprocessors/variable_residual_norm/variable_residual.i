@@ -46,6 +46,7 @@
   [./left_u]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 1
     value = 0
   [../]
@@ -53,6 +54,7 @@
   [./right_u]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 2
     value = 1
   [../]
@@ -60,6 +62,7 @@
   [./left_v]
     type = DirichletBC
     variable = v
+    preset = false
     boundary = 1
     value = 200
   [../]
@@ -67,6 +70,7 @@
   [./right_v]
     type = DirichletBC
     variable = v
+    preset = false
     boundary = 2
     value = 100
   [../]
