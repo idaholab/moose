@@ -56,19 +56,19 @@
 
 [BCs]
   [./x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = 'if(t<1.5,-1E-7*x,1E-7*x)'
   [../]
   [./y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = 'if(t<1.5,3E-7*y,1E-7*y)'
   [../]
   [./z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = 'if(t<1.5,5E-7*z,4E-7*z)'

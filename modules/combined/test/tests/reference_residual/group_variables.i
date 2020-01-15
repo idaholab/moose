@@ -219,25 +219,25 @@
 
 [BCs]
   [./bottom1x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
   [./bottom1y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
   [../]
   [./bottom2x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
   [../]
   [./bottom2y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 2
     variable = disp_y
     value = 0.0

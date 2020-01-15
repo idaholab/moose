@@ -37,7 +37,7 @@
 
 [BCs]
   [./pbdy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = porepressure
     function = 'x*t'
     boundary = 'left right'

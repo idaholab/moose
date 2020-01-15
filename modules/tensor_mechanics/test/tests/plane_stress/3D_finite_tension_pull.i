@@ -61,25 +61,25 @@
 
 [BCs]
   [leftx]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0.0
   []
   [bottomy]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   []
   [backz]
-    type = PresetBC
+    type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0.0
   []
   [rightx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = right
     variable = disp_x
     function = 't'

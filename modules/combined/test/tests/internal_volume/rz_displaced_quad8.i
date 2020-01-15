@@ -96,13 +96,13 @@
   [../]
 
   [./x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 3
     variable = disp_x
     function = disp_x
   [../]
   [./x2]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 4
     variable = disp_x
     function = disp_x2

@@ -61,19 +61,19 @@
 
 [BCs]
   [./symmy]
-    type = PresetBC
+    type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
   [../]
   [./symmx]
-    type = PresetBC
+    type = DirichletBC
     variable = ux
     boundary = left
     value = 0
   [../]
   [./tdisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uy
     boundary = top
     function = tdisp

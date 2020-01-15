@@ -225,25 +225,25 @@
 
 [BCs]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp

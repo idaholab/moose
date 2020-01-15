@@ -36,7 +36,7 @@
 
 [BCs]
   [./lateral]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0.0
@@ -50,14 +50,14 @@
   [../]
 
   [./out]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0
   [../]
 
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0

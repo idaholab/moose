@@ -49,13 +49,13 @@
 
 [BCs]
   [./ppwater]
-    type = PresetBC
+    type = DirichletBC
     boundary = right
     variable = ppwater
     value = -1
   [../]
   [./ppgas]
-    type = PresetBC
+    type = DirichletBC
     boundary = right
     variable = ppgas
     value = 0

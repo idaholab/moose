@@ -34,7 +34,7 @@
 
 [BCs]
   [./plane_strain]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'
@@ -62,19 +62,19 @@
   [../]
 
   [./outer_temperature]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 0
     boundary = right
   [../]
   [./outer_pressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 0
     boundary = right
   [../]
   [./fixed_outer_disp]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     value = 0
     boundary = right

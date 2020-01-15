@@ -39,38 +39,38 @@
 
 [BCs]
   [./zmax_xfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = front
     value = 0
   [../]
   [./zmax_yfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = front
     value = 0
   [../]
   [./zmax_zfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0
   [../]
 
   [./zmin_xfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0
   [../]
   [./zmin_yfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0
   [../]
   [./zmin_zfixed]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0

@@ -435,25 +435,25 @@
   # the boundary conditions on the displacement enforce periodicity
   # at zero total shear and constant volume
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
   [./top_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'top'
     value = 0
   [../]
   [./left_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
   [../]
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'right'
     value = 0

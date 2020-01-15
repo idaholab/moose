@@ -61,7 +61,7 @@
 
 [BCs]
   [./p]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = 'front back'
     value = 0

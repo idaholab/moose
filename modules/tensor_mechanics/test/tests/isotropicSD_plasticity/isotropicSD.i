@@ -34,31 +34,31 @@
 
 [BCs]
   [./xdisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'right'
     function = '0.005*t'
   [../]
   [./ydisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top'
     function = '0.005*t'
   [../]
   [./yfix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
   [./xfix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
   [../]
   [./zfix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0

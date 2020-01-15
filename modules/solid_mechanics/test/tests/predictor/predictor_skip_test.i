@@ -51,38 +51,38 @@
 [BCs]
 
   [./ss1_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
   [./ss1_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
   [../]
   [./ss1_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 4
     value = 0.0
   [../]
 
   [./ss2_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 2
     function = ramp1
   [../]
   [./ss2_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = ramp1
   [../]
   [./ss2_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0

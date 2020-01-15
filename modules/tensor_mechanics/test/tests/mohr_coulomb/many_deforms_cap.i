@@ -35,38 +35,38 @@
 
 [BCs]
   [./bottomx]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '(sin(0.05*t)+x)/1E0'
   [../]
   [./topy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = '(cos(0.04*t)+x*y)/1E0'
   [../]
   [./topz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 't/1E2'

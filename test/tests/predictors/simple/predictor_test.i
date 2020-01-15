@@ -40,13 +40,13 @@
 
 [BCs]
   [./bot]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
   [../]
   [./ss2_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     boundary = top
     function = ramp1

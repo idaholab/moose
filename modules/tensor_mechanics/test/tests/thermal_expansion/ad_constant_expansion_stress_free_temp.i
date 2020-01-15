@@ -156,7 +156,7 @@
     value = 0.0
   [../]
   [./temp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = temp
     function = temperature_load
     boundary = 'left right'

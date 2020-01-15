@@ -81,21 +81,21 @@
 
 [BCs]
   [./no_disp_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
 
   [./no_disp_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
 
   [./pull_disp_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull

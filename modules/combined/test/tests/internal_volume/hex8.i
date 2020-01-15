@@ -81,7 +81,7 @@
   [../]
 
   [./prescribed_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 100
     function = step

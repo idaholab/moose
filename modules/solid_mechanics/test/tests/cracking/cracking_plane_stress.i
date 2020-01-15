@@ -240,25 +240,25 @@
 
 [BCs]
   [./pull_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = displ
   [../]
   [./pin_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '1  4'
     value = 0.0
   [../]
   [./pin_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
   [./back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '3'
     value = 0.0

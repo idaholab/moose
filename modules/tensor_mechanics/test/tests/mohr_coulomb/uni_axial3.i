@@ -21,25 +21,25 @@
 
 [BCs]
   [./zmin_zzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'zmin'
     value = '0'
   [../]
   [./xmin_xzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'xmin'
     value = '0'
   [../]
   [./ymin_yzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'ymin'
     value = '0'
   [../]
   [./ymax_disp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'ymax'
     function = '-1E-4*t'

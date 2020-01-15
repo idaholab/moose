@@ -74,19 +74,19 @@
 
 [BCs]
   [./outer_T] #Temperature on outer edge is fixed at 800K
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = 1
     value = 800
   [../]
   [./outer_x] #Displacements in the x-direction are fixed in the center
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0
   [../]
   [./outer_y] #Displacements in the y-direction are fixed in the center
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0

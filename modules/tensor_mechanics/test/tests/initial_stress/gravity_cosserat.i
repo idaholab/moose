@@ -91,19 +91,19 @@
   # left = xmin
   # right = xmax
   [./x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0
   [../]
   [./y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0
   [../]
   [./z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0

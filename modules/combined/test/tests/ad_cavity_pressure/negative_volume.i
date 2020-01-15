@@ -55,13 +55,13 @@
 
 [BCs]
   [./no_x]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
   [./no_y]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0

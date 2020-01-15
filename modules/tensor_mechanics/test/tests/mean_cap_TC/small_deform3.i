@@ -40,19 +40,19 @@
 
 [BCs]
   [./x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '1E-7*x'
   [../]
   [./y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '-4E-7*y'
   [../]
   [./z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '-5E-7*z'

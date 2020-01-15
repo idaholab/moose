@@ -125,13 +125,13 @@
 
 [BCs]
   [./mid]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 5
     variable = temp
     function = temp
   [../]
   [./temp_far_right]
-    type = PresetBC
+    type = DirichletBC
     boundary = 4
     variable = temp
     value = 100

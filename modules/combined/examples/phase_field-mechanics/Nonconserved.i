@@ -180,19 +180,19 @@
 
 [BCs]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
   [./top_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'top'
     value = 5
   [../]
   [./left_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0

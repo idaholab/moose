@@ -43,14 +43,14 @@
   active = 'left right'
 
    [./left]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = u
     boundary = 3
     function = left
   [../]
 
   [./right]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = u
     boundary = 1
     function = right

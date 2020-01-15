@@ -33,19 +33,19 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0035

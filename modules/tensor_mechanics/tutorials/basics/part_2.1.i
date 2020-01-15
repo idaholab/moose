@@ -36,19 +36,19 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r #change the variable to reflect the new displacement names
     boundary = left
     value = 0.0
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z #change the variable to reflect the new displacement names
     boundary = bottom
     value = 0.0
   [../]
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z #change the variable to reflect the new displacement names
     boundary = top
     value = 0.0035

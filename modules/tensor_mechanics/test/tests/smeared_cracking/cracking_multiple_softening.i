@@ -48,37 +48,37 @@
 
 [BCs]
   [./pullx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = displx
   [../]
   [./pully]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = disply
   [../]
   [./pullz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = displz
   [../]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0

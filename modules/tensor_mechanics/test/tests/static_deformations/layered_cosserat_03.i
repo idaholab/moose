@@ -108,13 +108,13 @@
   # xmin is called left
   # xmax is called right
   [./wc_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_x
     boundary = 'left right'
     function = 'x+2*y+3*z'
   [../]
   [./wc_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_y
     boundary = 'left right'
     function = '-1.1*x-2.2*y-3.3*z'

@@ -88,13 +88,13 @@
     function = right_trac_x
   [../]
   [./bottom_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 0
     variable = disp_y
     function = bottom_disp_y
   [../]
   [./left_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 3
     variable = disp_x
     value = 0.0

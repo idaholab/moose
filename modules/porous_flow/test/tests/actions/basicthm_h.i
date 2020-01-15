@@ -65,7 +65,7 @@
 
 [BCs]
   [./constant_injection_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 1.5e6
     boundary = injection_area

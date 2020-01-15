@@ -77,13 +77,13 @@
     variable = disp_y
   [../]
   [./sliding_1]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     function = sliding_fn
     variable = disp_x
     boundary = '4'
   [../]
   [./normal_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '4'
     value = -0.01

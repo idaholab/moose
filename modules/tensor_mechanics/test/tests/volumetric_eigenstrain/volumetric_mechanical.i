@@ -81,19 +81,19 @@
     value = 0.0
   [../]
   [./right]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = pres_disp
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pres_disp
   [../]
   [./front]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = pres_disp

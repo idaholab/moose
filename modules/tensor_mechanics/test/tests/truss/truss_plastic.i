@@ -51,7 +51,7 @@
     value = 0.0
   [../]
   [./load]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = 't'

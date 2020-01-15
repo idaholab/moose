@@ -120,7 +120,7 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     value = 3E6
     variable = pp

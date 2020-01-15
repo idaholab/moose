@@ -233,19 +233,19 @@
     function = displacement_front
   [../]
   [./anchor_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./anchor_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./anchor_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0

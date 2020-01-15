@@ -37,38 +37,38 @@
   # rotate:
   # ynew = c*y + s*z.  znew = -s*y + c*z
   [./bottomx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = back
     function = '0'
   [../]
   [./bottomy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = back
     function = '0.70710678*y+0.70710678*z-y'
   [../]
   [./bottomz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = back
     function = '-0.70710678*y+0.70710678*z-z'
   [../]
 
   [./topx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '0'
   [../]
   [./topy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = '0.70710678*y+0.70710678*z-y+if(t>0,1,0)'
   [../]
   [./topz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '-0.70710678*y+0.70710678*z-z+if(t>0,1,0)'

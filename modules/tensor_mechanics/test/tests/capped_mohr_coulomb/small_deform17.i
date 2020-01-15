@@ -31,19 +31,19 @@
 
 [BCs]
   [./x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '-2*x*t'
   [../]
   [./y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '-2*y*t'
   [../]
   [./z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '-0.4*z*(t+2*t*t)'

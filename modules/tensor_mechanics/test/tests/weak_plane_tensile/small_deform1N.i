@@ -37,38 +37,38 @@
 
 [BCs]
   [./bottomx]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = front
     value = 0E-6
   [../]
   [./topy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = front
     value = 0E-6
   [../]
   [./topz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = front
     value = 1E-6

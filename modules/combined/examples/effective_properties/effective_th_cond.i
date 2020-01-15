@@ -85,7 +85,7 @@
     [../]
   [../]
   [./left_T] #Fix temperature on the left side
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = left
     value = 800

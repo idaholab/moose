@@ -75,55 +75,55 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   [../]
   [./x_200]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 200
     function = x_200
   [../]
   [./y_200]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 200
     function = y_200
   [../]
   [./x_300]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 300
     function = x_300
   [../]
   [./y_300]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 300
     function = y_300
   [../]
   [./x_400]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 400
     function = x_400
   [../]
   [./y_400]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 400
     function = y_400
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '100 200 300 400'
     value = 0.0

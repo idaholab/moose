@@ -44,7 +44,7 @@
 
 [BCs]
   [./y_pull_function]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = top_pull

@@ -32,14 +32,14 @@
 
   # We will use preset BCs
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
   [./right]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     boundary = 1
     value = 1

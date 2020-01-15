@@ -35,38 +35,38 @@
   # rotate:
   # ynew = c*y + s*z.  znew = -s*y + c*z
   [./bottomx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = back
     function = '0'
   [../]
   [./bottomy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = back
     function = '0*y+1*z-y'
   [../]
   [./bottomz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = back
     function = '-1*y+0*z-z+if(t>0,0.5-y,0)' # note that this uses original nodal values of (x,y,z)
   [../]
 
   [./topx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '0'
   [../]
   [./topy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = '0*y+1*z-y'
   [../]
   [./topz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '-1*y+0*z-z+if(t>0,0.5-y,0)' # note that this uses original nodal values of (x,y,z)

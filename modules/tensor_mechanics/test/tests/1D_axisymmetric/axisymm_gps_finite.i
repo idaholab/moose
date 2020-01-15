@@ -135,13 +135,13 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     value = 0
     variable = disp_x
   [../]
   [./disp_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 2
     function = disp_x
     variable = disp_x

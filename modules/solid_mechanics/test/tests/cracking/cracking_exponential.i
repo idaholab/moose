@@ -158,35 +158,35 @@
 
 [BCs]
   [./pullx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     #type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = displx
   [../]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
   [./fix_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '11 12'
     value = 0.0
   [../]
 
   [./move_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = '15 16'
     function = disply
   [../]
 
   [./back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '3'
     value = 0.0

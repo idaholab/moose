@@ -45,19 +45,19 @@
     constant = -10.0e6
   [../]
   [./u_bottom_fix]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./u_yz_fix]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./u_xy_fix]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0

@@ -44,7 +44,7 @@
 
 [BCs]
   [./lefttemp]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = temp
     value = 600

@@ -86,19 +86,19 @@
 
 [BCs]
   [./roller_xmin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left'
   [../]
   [./roller_ymin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom'
   [../]
   [./plane_strain]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'back front'
@@ -110,7 +110,7 @@
     boundary = right
   [../]
   [./top_velocity]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     function = top_velocity
     boundary = top

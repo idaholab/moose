@@ -48,25 +48,25 @@
 
 [BCs]
   [./p]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 'bottom top'
     variable = p
     function = t
   [../]
   [./xmin]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0
   [../]
   [./ymin]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0
   [../]
   [./zmin]
-    type = PresetBC
+    type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0

@@ -51,28 +51,28 @@
 
 [BCs]
   [./bottom_lateral]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = lateral
   [../]
 
   [./bottom_up]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
   [../]
 
   [./bottom_out]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0

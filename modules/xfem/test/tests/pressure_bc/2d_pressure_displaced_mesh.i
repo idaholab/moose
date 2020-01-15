@@ -63,13 +63,13 @@
 
 [BCs]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
   [../]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 0
     variable = disp_x
     value = 0.0

@@ -369,19 +369,19 @@
 
 [BCs]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '11 12'
     value = 0.0
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '16'
     value = 0.0
   [../]
   [./no_wc_x]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_x
     boundary = '11 12'
     value = 0.0

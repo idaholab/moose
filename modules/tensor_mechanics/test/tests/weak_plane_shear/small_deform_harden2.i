@@ -34,38 +34,38 @@
 
 [BCs]
   [./bottomx]
-    type = PresetBC
+    type = DirichletBC
     variable = x_disp
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     variable = y_disp
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
-    type = PresetBC
+    type = DirichletBC
     variable = z_disp
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = x_disp
     boundary = front
     function = 'if(t<1E-6,0,3*t)'
   [../]
   [./topy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = y_disp
     boundary = front
     function = 'if(t<1E-6,0,5*(t-0.01E-6))'
   [../]
   [./topz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = z_disp
     boundary = front
     function = 'if(t<1E-6,t,2E-6-t)'

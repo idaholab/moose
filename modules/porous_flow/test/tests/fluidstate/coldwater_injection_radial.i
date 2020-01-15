@@ -77,19 +77,19 @@
     boundary = left
   [../]
   [./pright]
-    type = PresetBC
+    type = DirichletBC
     variable = pliquid
     value = 5e6
     boundary = right
   [../]
   [./hleft]
-    type = PresetBC
+    type = DirichletBC
     variable = h
     value = 678.52e3
     boundary = left
   [../]
   [./hright]
-    type = PresetBC
+    type = DirichletBC
     variable = h
     value = 721.4e3
     boundary = right
