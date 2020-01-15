@@ -71,6 +71,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./one_d_3eqn_energy_heat_source]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_energy_heat_source.i'
+    ratio_tol = 1e-20
+    difference_tol = 1e-20
+    max_threads = 1
+    allow_test_objects = true
+  [../]
 
   [./one_d_7eqn_vf_time_derivative]
     type = 'PetscJacobianTester'
@@ -375,6 +383,14 @@
     input = 'one_d_7eqn_energy_wall_boiling_interface_heat_flux.i'
     ratio_tol = 4e-8
     difference_tol = 4e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_energy_heat_source]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_energy_heat_source.i'
+    ratio_tol = 2e-9
+    difference_tol = 1e-7
     max_threads = 1
     allow_test_objects = true
   [../]
