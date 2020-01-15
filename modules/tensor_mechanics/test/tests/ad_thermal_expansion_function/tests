@@ -1,45 +1,45 @@
 [Tests]
   [./constant]
-    issues = '#13634'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    issues = '#12650'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due to '
                   'thermal expansion using a function that describes a constant mean and instantaneous '
-                  'thermal expansion'
+                  'thermal expansion using the AD formulation'
     [./finite]
       type = CSVDiff
       input = 'finite_const.i'
       csvdiff = 'finite_const_out.csv'
-      detail = 'using finite strain formulation'
+      detail = 'and the finite strain formulation'
     [../]
     [./small_const]
       type = CSVDiff
       input = 'small_const.i'
       csvdiff = 'small_const_out.csv'
-      detail = 'using small strain formulation'
+      detail = 'and the small strain formulation'
     [../]
   [../]
   [./linear]
-    issues = '#13634'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    issues = '#12650'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due to '
                   'thermal expansion using a function that describes a mean and instantaneous '
-                  'thermal expansion with a linear relationship to temperature'
+                  'thermal expansion with a linear relationship to temperature using the AD formulation'
     [./finite]
       type = CSVDiff
       input = 'finite_linear.i'
       csvdiff = 'finite_linear_out.csv'
-      detail = 'using finite strain formulation'
+      detail = 'and the finite strain formulation'
     [../]
     [./small_const]
       type = CSVDiff
       input = 'small_linear.i'
       csvdiff = 'small_linear_out.csv'
-      detail = 'using small strain formulation'
+      detail = 'and the small strain formulation'
     [../]
   [../]
   [./individual]
     issues = '#13634 #14595'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeDilatationThermalExpansionFunctionEigenstrain.md'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md ADComputeDilatationThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
                    negative to positive strain across the reference temperature and compare favorably
                    to hand calculations'

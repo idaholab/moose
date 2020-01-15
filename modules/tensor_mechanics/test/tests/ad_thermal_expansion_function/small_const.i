@@ -3,7 +3,7 @@
 # two blocks, each containing a single element, and these use the
 # two variants of the function.
 
-# In this test, the instantaneous CTE function is a linear function
+# In this test, the instantaneous CTE function has a constant value,
 # while the mean CTE function is an analytic function designed to
 # give the same response.  If \bar{alpha}(T) is the mean CTE function,
 # and \alpha(T) is the instantaneous CTE function,
@@ -13,9 +13,8 @@
 # where Tref is the reference temperature used to define the mean CTE
 # function, and Tsf is the stress-free temperature.
 
-# This version of the test uses finite deformation theory.
-# The two models produce very similar results.  There are slight
-# differences due to the large deformation treatment.
+# This version of the test uses small deformation theory.  The results
+# from the two models are identical.
 
 [Mesh]
   file = 'blocks.e'
@@ -34,11 +33,11 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = FINITE
-    incremental = true
+    strain = SMALL
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -81,10 +80,10 @@
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeLinearElasticStress
   [../]
   [./thermal_expansion_strain1]
-    type = ComputeMeanThermalExpansionFunctionEigenstrain
+    type = ADComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func_mean
     thermal_expansion_function_reference_temperature = 0.5
@@ -93,7 +92,7 @@
     eigenstrain_name = eigenstrain
   [../]
   [./thermal_expansion_strain2]
-    type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
+    type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0
@@ -107,12 +106,12 @@
     type = ParsedFunction
     vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-4'
-    value = 'scale * (0.5 * t^2 - 0.5 * tsf^2) / (t - tref)'
+    value = 'scale * (t - tsf) / (t - tref)'
   [../]
   [./cte_func_inst]
     type = PiecewiseLinear
-    xy_data = '0 0.0
-               2 2.0'
+    xy_data = '0 1.0
+               2 1.0'
     scale_factor = 1e-4
   [../]
 
@@ -140,7 +139,7 @@
 [Executioner]
   type = Transient
 
-  solve_type = PJFNK
+  solve_type = NEWTON
   l_max_its = 100
   l_tol = 1e-4
   nl_abs_tol = 1e-8
@@ -152,7 +151,5 @@
 []
 
 [Outputs]
-  file_base = finite_linear_alpha_out
-  exodus = true
   csv = true
 []

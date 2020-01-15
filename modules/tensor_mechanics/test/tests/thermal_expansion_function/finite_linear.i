@@ -3,7 +3,7 @@
 # two blocks, each containing a single element, and these use the
 # two variants of the function.
 
-# In this test, the instantaneous CTE function has a constant value,
+# In this test, the instantaneous CTE function is a linear function
 # while the mean CTE function is an analytic function designed to
 # give the same response.  If \bar{alpha}(T) is the mean CTE function,
 # and \alpha(T) is the instantaneous CTE function,
@@ -35,7 +35,6 @@
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE
-    incremental = true
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
@@ -107,12 +106,12 @@
     type = ParsedFunction
     vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-4'
-    value = 'scale * (t - tsf) / (t - tref)'
+    value = 'scale * (0.5 * t^2 - 0.5 * tsf^2) / (t - tref)'
   [../]
   [./cte_func_inst]
     type = PiecewiseLinear
-    xy_data = '0 1.0
-               2 1.0'
+    xy_data = '0 0.0
+               2 2.0'
     scale_factor = 1e-4
   [../]
 
@@ -152,7 +151,5 @@
 []
 
 [Outputs]
-  file_base = finite_const_alpha_out
-  exodus = true
   csv = true
 []

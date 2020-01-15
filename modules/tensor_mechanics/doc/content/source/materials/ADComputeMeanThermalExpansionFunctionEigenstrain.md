@@ -1,6 +1,6 @@
-# ComputeMeanThermalExpansionFunctionEigenstrain
+# ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax description /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax description /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
 ## Description
 
@@ -31,21 +31,25 @@ denominator in this equation is a correction to account for the ratio of $L_{(T_
 $L_{(T_{ref})}$. As discussed in [!cite](niffenegger2012proper), that ratio is very close to 1, so it
 is not strictly necessary to include that correction, but it is done here for completeness.
 
+!alert warning
+Functions are not able to handle dual numbers at this time, so no automatic differentiation
+information can be retained via the $\bar{\alpha}$ function
+
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
+!listing modules/tensor_mechanics/test/tests/ad_thermal_expansion_function/finite_const.i
          block=Materials/thermal_expansion_strain1
 
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example
 parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
+!listing modules/tensor_mechanics/test/tests/ad_thermal_expansion_function/finite_const.i
          block=Modules/TensorMechanics/Master
 
-!syntax parameters /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax parameters /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax inputs /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax inputs /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
-!syntax children /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
+!syntax children /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
 !bibtex bibliography

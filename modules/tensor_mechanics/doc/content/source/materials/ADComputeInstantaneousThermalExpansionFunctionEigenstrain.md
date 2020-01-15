@@ -1,6 +1,6 @@
-# ComputeInstantaneousThermalExpansionFunctionEigenstrain
+# ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax description /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax description /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
 ## Description
 
@@ -17,19 +17,23 @@ is the temperature, $\alpha_{(T)}$ is the instantaneous thermal expansion at a g
 $\boldsymbol{I}$ is the identity matrix. On the first step, the stress-free temperature is used as the
 previous step's temperature.
 
+!alert warning
+Functions are not able to handle dual numbers at this time, so no automatic differentiation
+information can be retained via the $\alpha_{(T)}$ function
+
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
+!listing modules/tensor_mechanics/test/tests/ad_thermal_expansion_function/finite_const.i
          block=Materials/thermal_expansion_strain1
 
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example
 parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/finite_const.i
+!listing modules/tensor_mechanics/test/tests/ad_thermal_expansion_function/finite_const.i
          block=Modules/TensorMechanics/Master
 
-!syntax parameters /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax parameters /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax inputs /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax inputs /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain
 
-!syntax children /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+!syntax children /Materials/ADComputeInstantaneousThermalExpansionFunctionEigenstrain

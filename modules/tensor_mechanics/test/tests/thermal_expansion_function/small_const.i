@@ -34,7 +34,6 @@
 [Modules/TensorMechanics/Master]
   [./all]
     strain = SMALL
-    incremental = false
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
@@ -151,7 +150,5 @@
 []
 
 [Outputs]
-  file_base = small_const_alpha_out
-  exodus = true
   csv = true
 []

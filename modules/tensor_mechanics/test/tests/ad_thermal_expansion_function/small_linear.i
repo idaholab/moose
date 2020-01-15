@@ -34,10 +34,10 @@
 [Modules/TensorMechanics/Master]
   [./all]
     strain = SMALL
-    incremental = false
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -80,10 +80,10 @@
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ComputeLinearElasticStress
+    type = ADComputeLinearElasticStress
   [../]
   [./thermal_expansion_strain1]
-    type = ComputeMeanThermalExpansionFunctionEigenstrain
+    type = ADComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func_mean
     thermal_expansion_function_reference_temperature = 0.5
@@ -92,7 +92,7 @@
     eigenstrain_name = eigenstrain
   [../]
   [./thermal_expansion_strain2]
-    type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
+    type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0
@@ -151,7 +151,5 @@
 []
 
 [Outputs]
-  file_base = small_linear_alpha_out
-  exodus = true
   csv = true
 []
