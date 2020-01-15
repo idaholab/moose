@@ -77,6 +77,7 @@
 - /Components/HeatGeneration
 - /Components/HeatSourceFromPowerDensity
 - /Components/HeatSourceFromTotalPower
+- /Components/HeatSourceVolumetric
 - /Components/HeatStructureCylindrical
 - /Components/HeatStructurePlate
 - /Components/HeatTransferFromExternalAppHeatFlux1Phase
@@ -194,6 +195,7 @@
 - /Kernels/OneD3EqnEnergyFlux
 - /Kernels/OneD3EqnEnergyFriction
 - /Kernels/OneD3EqnEnergyGravity
+- /Kernels/OneD3EqnEnergyHeatSource
 - /Kernels/OneD7EqnEnergyHeatFlux
 - /Kernels/HeatConductionRZ
 - /Kernels/HeatConductionTimeDerivativeRZ
@@ -204,6 +206,7 @@
 - /Kernels/OneD7EqnEnergyFlux
 - /Kernels/OneD7EqnEnergyFriction
 - /Kernels/OneD7EqnEnergyGravity
+- /Kernels/OneD7EqnEnergyHeatSource
 - /Kernels/OneD7EqnEnergyInterfacialHeatTransfer
 - /Kernels/OneD7EqnEnergyInterfacialMassTransfer
 - /Kernels/OneD7EqnEnergyPressureRelaxation
