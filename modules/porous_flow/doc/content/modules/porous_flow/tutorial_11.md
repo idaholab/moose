@@ -127,7 +127,7 @@ Finally, the value of this `Function` is placed into the `Postprocessor` used in
 
 !listing modules/porous_flow/examples/tutorial/11.i start=[./constrained_effective_fluid_pressure_at_wellbore] end=[]
 
-The boundary conditions for temperature is a simple PresetBC on the injection_area:
+The boundary conditions for temperature is a simple preset `DirichletBC` on the injection_area:
 
 !listing modules/porous_flow/examples/tutorial/11.i start=[./cold_co2] end=[./constant_co2_injection]
 

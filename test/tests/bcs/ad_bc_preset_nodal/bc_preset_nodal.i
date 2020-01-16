@@ -30,7 +30,7 @@
 [BCs]
   active = 'left right'
 
-  # We will use PresetBCs
+  # We will use preset BCs
   [./left]
     type = ADPresetBC
     variable = u

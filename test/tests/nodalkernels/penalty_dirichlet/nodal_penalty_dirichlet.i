@@ -1,4 +1,4 @@
-#In order to compare the solution generated using PresetBC, the penalty was set to 1e10.
+#In order to compare the solution generated using preset BC, the penalty was set to 1e10.
 #Large penalty number should be used with caution.
 
 [Mesh]
@@ -56,7 +56,8 @@
 
 # [BCs]
 #   [./fix]
-#     type = PresetBC
+#     type = DirichletBC
+#     preset = true
 #     variable = u
 #     value = 0
 #     boundary = 'top left right bottom'
