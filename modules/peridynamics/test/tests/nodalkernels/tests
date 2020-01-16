@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'penalty_dirichlet_old_value.i'
+    exodiff = 'preset_bc_out.e'
+    map = false
+
+    requirement = "PenaltyDirichletOldValuePD shall support enforcement of
+                   Dirichlet boundary condition of old value by penalty method for nodesets."
+    design = 'modules/peridynamics/nodalkernels/PenaltyDirichletOldValuePD.md'
+    issues = '#11561'
+  [../]
+[]

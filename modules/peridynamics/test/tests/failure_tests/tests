@@ -1,0 +1,20 @@
+[Tests]
+  [./2D_stretch_failure_BPD]
+    type = 'Exodiff'
+    input = '2D_stretch_failure_BPD.i'
+    exodiff = '2D_stretch_failure_BPD.e'
+    map = false
+    requirement = 'StretchBasedFailureCriterionPD shall determine the bond status based on given critical stretch.'
+    design = 'modules/peridynamics/StretchBasedFailureCriterionPD.md'
+    issues = '#11561'
+  [../]
+  [./2D_stress_failure_NOSPD]
+    type = 'Exodiff'
+    input = '2D_stress_failure_NOSPD.i'
+    exodiff = '2D_stress_failure_NOSPD.e'
+    map = false
+    requirement = 'RankTwoBasedFailureCriteriaNOSPD shall determine the bond status based on given critical stress.'
+    design = 'modules/peridynamics/RankTwoBasedFailureCriteriaNOSPD.md'
+    issues = '#11561'
+  [../]
+[]

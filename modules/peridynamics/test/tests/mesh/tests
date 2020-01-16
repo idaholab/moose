@@ -1,0 +1,133 @@
+[Tests]
+  [./center_crack]
+    type = 'Exodiff'
+    input = '2D_center_crack.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_center_crack_in.e'
+    recover = false
+    map = false
+    requirement = 'PeridynamicsMesh shall generate peridynamic mesh with
+                   pre-existing center crack.'
+    design = 'modules/peridynamics/PeridynamicsMesh.md'
+    issues = '#11561'
+  [../]
+
+  [./double_edged_cracks]
+    type = 'Exodiff'
+    input = '2D_double_edged_cracks.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_double_edged_cracks_in.e'
+    recover = false
+    map = false
+    requirement = 'PeridynamicsMesh shall generate peridynamic mesh with
+                   pre-existing double edged cracks.'
+    design = 'modules/peridynamics/PeridynamicsMesh.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_one_delete]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_one_delete.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_one_delete_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given
+                   mesh block and delete the converted FE mesh.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_one_retain]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_one_retain.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_one_retain_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given
+                   mesh block and retain the converted FE mesh.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_all_delete]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_all_delete.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_all_delete_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+                   mesh blocks and delete the converted FE meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_all_retain]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_all_retain.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_all_retain_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+                   mesh blocks and retain the converted FE meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./generate_2D_sideset]
+    type = 'Exodiff'
+    input = '2D_sideset_generation.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_sideset_generation_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+                   based on sidesets of FE meshes for 2D peridynamic meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./generate_3D_sideset]
+    type = 'Exodiff'
+    input = '3D_sideset_generation.i'
+    cli_args = '--mesh-only'
+    exodiff = '3D_sideset_generation_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+                   based on sidesets of FE meshes for 3D peridynamic meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./interface]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_interface.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_interface_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+                   mesh blocks and build interfacial bonds between specified mesh blocks.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./single_blocks]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_single_blocks.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_single_blocks_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+                   mesh blocks and build interfacial bonds between specified mesh blocks.
+                   Mesh blocks can be combined to a single mesh block for
+                   both converted blocks and interface blocks'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+[]

@@ -1,0 +1,12 @@
+[Tests]
+  [./2D_steady_state_BPD]
+    type = 'Exodiff'
+    input = '2D_steady_state_BPD.i'
+    exodiff = '2D_steady_state_BPD.e'
+    map = false
+    requirement = 'HeatConductionBPD shall model heat conduction using bond-based
+                   peridynamics model.'
+    design = 'modules/peridynamics/HeatConductionBPD.md'
+    issues = '#11561'
+  [../]
+[]
