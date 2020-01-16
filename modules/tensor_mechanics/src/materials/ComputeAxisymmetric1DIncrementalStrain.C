@@ -44,9 +44,6 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(
   if (_has_out_of_plane_strain && _has_scalar_out_of_plane_strain)
     mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
 
-  if (!_has_out_of_plane_strain && !_has_scalar_out_of_plane_strain)
-    mooseError("Must define either out_of_plane_strain or scalar_out_of_plane_strain");
-
   if (_has_scalar_out_of_plane_strain)
   {
     _scalar_out_of_plane_strain.resize(_nscalar_strains);

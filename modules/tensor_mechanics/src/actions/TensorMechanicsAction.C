@@ -130,12 +130,6 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   // plane strain consistency check
   if (_planar_formulation != PlanarFormulation::None)
   {
-    if (_out_of_plane_direction == OutOfPlaneDirection::z && _ndisp != 2)
-      mooseError(
-          "Must specify two displacements for plane strain when the out of plane direction is z");
-    else if (_out_of_plane_direction != OutOfPlaneDirection::z && _ndisp != 3)
-      mooseError("Must specify three displacements for plane strain when the out of plane "
-                 "direction is x or y");
     if (params.isParamSetByUser("out_of_plane_strain") &&
         _planar_formulation != PlanarFormulation::WeakPlaneStress)
       mooseError(
@@ -170,7 +164,7 @@ TensorMechanicsAction::act()
   }
 
   //
-  // Consistency check for the coordinate system
+  // Consistency checks across subdomains
   //
   actSubdomainChecks();
 
@@ -276,13 +270,19 @@ TensorMechanicsAction::act()
             "use_ad",
             "AD not setup for use with WeakPlaneStress, PlaneStrain, or GeneralizedPlaneStrain");
 
-      std::map<StrainAndIncrement, std::string> type_map = {
-          {StrainAndIncrement::SmallTotal, "ComputePlaneSmallStrain"},
-          {StrainAndIncrement::SmallIncremental, "ComputePlaneIncrementalStrain"},
-          {StrainAndIncrement::FiniteIncremental, "ComputePlaneFiniteStrain"}};
+      std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
+          {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputePlaneSmallStrain"},
+          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental},
+           "ComputePlaneIncrementalStrain"},
+          {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputePlaneFiniteStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetric1DSmallStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
+           "ComputeAxisymmetric1DIncrementalStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
+           "ComputeAxisymmetric1DFiniteStrain"}};
 
       // choose kernel type based on coordinate system
-      auto type_it = type_map.find(_strain_and_increment);
+      auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
       if (type_it != type_map.end())
         type = type_it->second;
       else
@@ -406,8 +406,20 @@ TensorMechanicsAction::actSubdomainChecks()
         mooseError("The TensorMechanics action requires all subdomains to have the same coordinate "
                    "system.");
 
-    if (_coord_system == Moose::COORD_RZ && _out_of_plane_direction != OutOfPlaneDirection::z)
-      paramError("out_of_plane_direction", "must be set to z for axisymmetric simulations.");
+    if (_coord_system == Moose::COORD_RZ)
+    {
+      if (_out_of_plane_direction != OutOfPlaneDirection::z)
+        mooseError("'out_of_plane_direction' must be 'z' for axisymmetric simulations");
+    }
+    else if (_planar_formulation != PlanarFormulation::None)
+    {
+      if (_out_of_plane_direction == OutOfPlaneDirection::z && _ndisp != 2)
+        mooseError(
+            "Must specify two displacements for plane strain when the out of plane direction is z");
+      else if (_out_of_plane_direction != OutOfPlaneDirection::z && _ndisp != 3)
+        mooseError("Must specify three displacements for plane strain when the out of plane "
+                   "direction is x or y");
+    }
   }
 }
 
