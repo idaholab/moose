@@ -42,10 +42,6 @@ JunctionOneToOne1PhaseUserObject::JunctionOneToOne1PhaseUserObject(const InputPa
     _rhouA(coupledValue("rhouA")),
     _rhoEA(coupledValue("rhoEA")),
 
-    _rhoA_jvar(coupled("rhoA")),
-    _rhouA_jvar(coupled("rhouA")),
-    _rhoEA_jvar(coupled("rhoEA")),
-
     _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux")),
 
     _junction_name(getParam<std::string>("junction_name")),

@@ -56,13 +56,6 @@ protected:
   /// rho*E*A of the connected flow channels
   const VariableValue & _rhoEA;
 
-  /// Flow channel rho*A coupled variable index
-  const unsigned int _rhoA_jvar;
-  /// Flow channel rho*u*A coupled variable index
-  const unsigned int _rhouA_jvar;
-  /// Flow channel rho*E*A coupled variable index
-  const unsigned int _rhoEA_jvar;
-
   /// Numerical flux user object
   const NumericalFlux3EqnBase & _numerical_flux;
 
