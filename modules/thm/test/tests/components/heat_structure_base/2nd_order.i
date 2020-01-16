@@ -68,8 +68,6 @@
   [./SMP_PJFNK]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-    petsc_options_value = 'lu       mumps'
   [../]
 []
 
@@ -89,9 +87,4 @@
 
   l_tol = 1e-4
   l_max_its = 300
-
-  [./Quadrature]
-    type = GAUSS
-    order = SECOND
-  [../]
 []

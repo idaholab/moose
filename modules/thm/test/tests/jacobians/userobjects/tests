@@ -165,7 +165,7 @@
     type = 'PetscJacobianTester'
     input = 'boundary_flux_7eqn_ncg_ghost_wall.i'
     ratio_tol = 1e-12
-    difference_tol = 0.004
+    difference_tol = 0.005
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -185,6 +185,15 @@
     input = 'numerical_flux_7eqn_conservative_centered_rdg.i'
     ratio_tol = 1e-6
     difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./numerical_flux_7eqn_ncg_conservative_centered_rdg]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_7eqn_ncg_conservative_centered_rdg.i'
+    ratio_tol = 8e-5
+    difference_tol = 3e5
     max_threads = 1
     allow_test_objects = true
   [../]
