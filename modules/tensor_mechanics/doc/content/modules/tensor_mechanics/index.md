@@ -92,6 +92,7 @@ introductory theory pages on the various models:
 - [Dynamics](tensor_mechanics/Dynamics.md)
 - [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
 - [Cohesive Zone Modeling](CohesiveZoneMaster/index.md)
+- [Shell elements](tensor_mechanics/ShellElements.md)
 
 !col-end!
 !row-end!
