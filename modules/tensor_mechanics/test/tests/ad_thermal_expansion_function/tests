@@ -1,0 +1,65 @@
+[Tests]
+  [./constant]
+    issues = '#12650'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due to '
+                  'thermal expansion using a function that describes a constant mean and instantaneous '
+                  'thermal expansion using the AD formulation'
+    [./finite]
+      type = CSVDiff
+      input = 'finite_const.i'
+      csvdiff = 'finite_const_out.csv'
+      detail = 'and the finite strain formulation'
+    [../]
+    [./small_const]
+      type = CSVDiff
+      input = 'small_const.i'
+      csvdiff = 'small_const_out.csv'
+      detail = 'and the small strain formulation'
+    [../]
+  [../]
+  [./linear]
+    issues = '#12650'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due to '
+                  'thermal expansion using a function that describes a mean and instantaneous '
+                  'thermal expansion with a linear relationship to temperature using the AD formulation'
+    [./finite]
+      type = CSVDiff
+      input = 'finite_linear.i'
+      csvdiff = 'finite_linear_out.csv'
+      detail = 'and the finite strain formulation'
+    [../]
+    [./small_const]
+      type = CSVDiff
+      input = 'small_linear.i'
+      csvdiff = 'small_linear_out.csv'
+      detail = 'and the small strain formulation'
+    [../]
+  [../]
+  [./individual]
+    issues = '#13634 #14595'
+    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md ADComputeDilatationThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
+                   negative to positive strain across the reference temperature and compare favorably
+                   to hand calculations'
+    [./mean]
+      type = CSVDiff
+      input = 'mean.i'
+      csvdiff = 'mean_out.csv'
+      detail = 'using a mean thermal expansion coefficient'
+    [../]
+    [./instantaneous]
+      type = CSVDiff
+      input = 'instantaneous.i'
+      csvdiff = 'instantaneous_out.csv'
+      detail = 'using a instantaneous thermal expansion coefficient'
+    [../]
+    [./dilatation]
+      type = CSVDiff
+      input = 'dilatation.i'
+      csvdiff = 'dilatation_out.csv'
+      detail = 'using a dilatation thermal expansion coefficient'
+    [../]
+  [../]
+[]

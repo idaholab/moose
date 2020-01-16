@@ -15,7 +15,6 @@
 #define usingComputeThermalExpansionEigenstrainBaseMembers                                         \
   usingComputeEigenstrainBaseMembers;                                                              \
   using ADComputeThermalExpansionEigenstrainBase<compute_stage>::_temperature;                     \
-  using ADComputeThermalExpansionEigenstrainBase<compute_stage>::_deigenstrain_dT;                 \
   using ADComputeThermalExpansionEigenstrainBase<compute_stage>::_stress_free_temperature;         \
   using ADComputeThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain
 
@@ -49,14 +48,10 @@ protected:
    * expansion coefficient.
    * param thermal_strain    The current total linear thermal strain
    *                         (\delta L / L)
-   * param instantaneous_cte The current instantaneous coefficient of thermal
-   *                         expansion (derivative of thermal_strain wrt
-   *                         temperature
    */
-  virtual void computeThermalStrain(ADReal & thermal_strain, ADReal & instantaneous_cte) = 0;
+  virtual void computeThermalStrain(ADReal & thermal_strain) = 0;
 
   const ADVariableValue & _temperature;
-  ADMaterialProperty(RankTwoTensor) & _deigenstrain_dT;
   const ADVariableValue & _stress_free_temperature;
 
   usingComputeEigenstrainBaseMembers;

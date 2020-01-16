@@ -38,6 +38,8 @@ void
 ComputeThermalExpansionEigenstrainBase::computeQpEigenstrain()
 {
   Real thermal_strain = 0.0;
+
+  // instantaneous_cte is just the derivative of thermal_strain with respect to temperature
   Real instantaneous_cte = 0.0;
 
   computeThermalStrain(thermal_strain, instantaneous_cte);

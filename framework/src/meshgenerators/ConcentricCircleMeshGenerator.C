@@ -38,8 +38,6 @@ ConcentricCircleMeshGenerator::validParams()
   params.addRequiredParam<std::vector<Real>>("radii", "Radii of major concentric circles");
   params.addRequiredParam<std::vector<unsigned int>>(
       "rings", "Number of rings in each circle or in the enclosing square");
-  params.addRequiredParam<Real>("inner_mesh_fraction",
-                                "Length of inner square / radius of the innermost circle");
   params.addRequiredParam<bool>(
       "has_outer_square",
       "It determines if meshes for a outer square are added to concentric circle meshes.");
@@ -65,7 +63,6 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _num_sectors(getParam<unsigned int>("num_sectors")),
     _radii(getParam<std::vector<Real>>("radii")),
     _rings(getParam<std::vector<unsigned int>>("rings")),
-    _inner_mesh_fraction(getParam<Real>("inner_mesh_fraction")),
     _has_outer_square(getParam<bool>("has_outer_square")),
     _pitch(getParam<Real>("pitch")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
@@ -86,9 +83,6 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
                  "must be provided in order by starting with the smallest radius providing the "
                  "following gradual radii.");
   }
-  // condition for setting the size of inner squares.
-  if (_inner_mesh_fraction > std::cos(M_PI / 4))
-    paramError("inner_mesh_fraction", "The aspect ratio can not be larger than cos(PI/4).");
 
   // size of 'rings' check
   if (_has_outer_square)
@@ -128,9 +122,8 @@ ConcentricCircleMeshGenerator::generate()
     if (j == 0)
       while (i < _rings[j])
       {
-        total_concentric_circles.push_back(_inner_mesh_fraction * _radii[j] +
-                                           (_radii[j] - _inner_mesh_fraction * _radii[j]) /
-                                               _rings[j] * (i + 1));
+        total_concentric_circles.push_back(_radii[j] / (_num_sectors / 2 + _rings[j]) *
+                                           (i + _num_sectors / 2 + 1));
         ++i;
       }
     else
@@ -188,13 +181,18 @@ ConcentricCircleMeshGenerator::generate()
   unsigned node_id = 0;
 
   // for adding nodes for the square at the center of the circle
+  Real xx = total_concentric_circles[0] / (_num_sectors / 2 + 1) * _num_sectors / 2;
+  Point p1 = Point(xx, 0, 0);
+  Point p2 = Point(0, xx, 0);
+  Point p3 = Point(xx * std::sqrt(2.0) / 2, xx * std::sqrt(2.0) / 2, 0);
   for (unsigned i = 0; i <= _num_sectors / 2; ++i)
   {
-    const Real x = i * _inner_mesh_fraction * total_concentric_circles[0] / (_num_sectors / 2);
+    Real fx = i / (_num_sectors / 2.0);
     for (unsigned j = 0; j <= _num_sectors / 2; ++j)
     {
-      const Real y = j * _inner_mesh_fraction * total_concentric_circles[0] / (_num_sectors / 2);
-      nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
+      Real fy = j / (_num_sectors / 2.0);
+      Point p = p1 * fx * (1 - fy) + p2 * fy * (1 - fx) + p3 * fx * fy;
+      nodes[node_id] = mesh->add_point(p, node_id);
       ++node_id;
     }
   }
@@ -224,7 +222,7 @@ ConcentricCircleMeshGenerator::generate()
     // putting nodes for the left side of the enclosing square.
     for (unsigned i = 0; i <= _num_sectors / 2; ++i)
     {
-      const Real a1 = (_pitch / 4) * i / (_num_sectors / 2);
+      const Real a1 = (_pitch / 2) * i / (_num_sectors / 2 + _rings.back() + 1);
       const Real b1 = _pitch / 2;
 
       const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 2 - i * d_angle);
@@ -242,11 +240,12 @@ ConcentricCircleMeshGenerator::generate()
     unsigned k = 1;
     for (unsigned i = 1; i <= _rings.back() + 1; ++i)
     {
-      const Real a1 = (_pitch / 4) + (_pitch / 4) * i / (_rings.back() + 1);
+      const Real a1 =
+          (_pitch / 2) * (i + _num_sectors / 2) / (_num_sectors / 2 + _rings.back() + 1);
       const Real b1 = _pitch / 2;
 
       const Real a2 = _pitch / 2;
-      const Real b2 = _pitch / 4;
+      const Real b2 = (_pitch / 2) * (_num_sectors / 2) / (_num_sectors / 2 + _rings.back() + 1);
 
       const Real a3 = total_concentric_circles.back() * std::cos(M_PI / 4);
       const Real b3 = total_concentric_circles.back() * std::sin(M_PI / 4);
@@ -268,7 +267,8 @@ ConcentricCircleMeshGenerator::generate()
     for (unsigned i = 1; i <= _num_sectors / 2; ++i)
     {
       const Real a1 = _pitch / 2;
-      const Real b1 = _pitch / 4 - (_pitch / 4) * i / (_num_sectors / 2);
+      const Real b1 =
+          (_pitch / 2) * (_num_sectors / 2 - i) / (_num_sectors / 2 + _rings.back() + 1);
 
       const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 4 - i * d_angle);
       const Real b2 = total_concentric_circles.back() * std::sin(M_PI / 4 - i * d_angle);

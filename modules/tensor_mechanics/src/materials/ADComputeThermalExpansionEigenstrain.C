@@ -34,9 +34,7 @@ ADComputeThermalExpansionEigenstrain<compute_stage>::ADComputeThermalExpansionEi
 
 template <ComputeStage compute_stage>
 void
-ADComputeThermalExpansionEigenstrain<compute_stage>::computeThermalStrain(
-    ADReal & thermal_strain, ADReal & instantaneous_cte)
+ADComputeThermalExpansionEigenstrain<compute_stage>::computeThermalStrain(ADReal & thermal_strain)
 {
   thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
-  instantaneous_cte = _thermal_expansion_coeff;
 }

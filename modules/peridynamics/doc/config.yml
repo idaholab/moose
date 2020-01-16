@@ -1,0 +1,27 @@
+Content:
+    - framework/doc/content
+    - modules/tensor_mechanics/doc/content
+    - modules/peridynamics/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Peridynamics Module
+    repo: https://github.com/idaholab/moose
+    home: /modules/peridynamics
+
+Extensions:
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/peridynamics
+        hide:
+            framework: !include framework/doc/hidden.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/peridynamics/include
+            - modules/tensor_mechanics/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
