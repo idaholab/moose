@@ -144,12 +144,14 @@
   [./ur]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 10
     function = ur
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 10
     function = uz
   [../]
@@ -157,6 +159,7 @@
   [./temp]
     type = DirichletBC
     variable = temp
+    preset = false
     boundary = 10
     value = 117.56
   [../]

@@ -158,6 +158,7 @@
   [./top_y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 2
     function = pull
   [../]

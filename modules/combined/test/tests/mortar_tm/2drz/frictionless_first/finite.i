@@ -135,6 +135,7 @@ name = 'finite'
   [./right_y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = block_right
     function = '-t'
   [../]

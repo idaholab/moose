@@ -45,34 +45,40 @@
   [./left_x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = left
     value = 0.0
   [../]
   [./left_y]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = left
     value = 0.0
   [../]
   [./left_z]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = left
     value = 0.0
   [../]
   [./right_x]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = right
   [../]
   [./right_y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = right
   [../]
   [./right_z]
     type = FunctionDirichletBC
     variable = disp_z
+    preset = false
     boundary = right
   [../]
 []

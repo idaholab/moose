@@ -131,6 +131,7 @@
   [./temp_bc_1]
     type = FunctionDirichletBC
     variable = temp
+    preset = false
     boundary = '1 2 3 4'
     function = temperature_function
   [../]

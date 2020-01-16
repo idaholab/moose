@@ -48,54 +48,63 @@
   [./fixx1]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 1
     value = 0.0
   [../]
   [./fixx2]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 2
     function = x2
   [../]
   [./fixx3]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 3
     value = 0.0
   [../]
   [./fixy1]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 1
     value = 0
   [../]
   [./fixy2]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 2
     function = y2
   [../]
   [./fixy3]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 3
     value = 0
   [../]
   [./fixz1]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = 1
     value = 0
   [../]
   [./fixz2]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = 2
     value = 0
   [../]
   [./fixz3]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = 3
     value = 0
   [../]

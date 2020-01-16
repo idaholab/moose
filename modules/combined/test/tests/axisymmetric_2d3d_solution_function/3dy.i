@@ -94,18 +94,21 @@
   [./x_soln_bc]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = '1 2'
     function = soln_func_disp_x
   [../]
   [./y_soln_bc]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = '1 2'
     function = soln_func_disp_y
   [../]
   [./z_soln_bc]
     type = FunctionDirichletBC
     variable = disp_z
+    preset = false
     boundary = '1 2'
     function = soln_func_disp_z
   [../]

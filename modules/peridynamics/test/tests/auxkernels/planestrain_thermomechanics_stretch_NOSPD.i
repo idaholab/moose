@@ -81,12 +81,14 @@
   [./left_x]
     type = PresetBC
     boundary = 1003
+    preset = false
     variable = disp_x
     value = 0.0
   [../]
   [./bottom_y]
     type = PresetBC
     boundary = 1000
+    preset = false
     variable = disp_y
     value = 0.0
   [../]

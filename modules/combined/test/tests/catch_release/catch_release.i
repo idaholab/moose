@@ -45,6 +45,7 @@
   [./bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 1
     function = up
   [../]

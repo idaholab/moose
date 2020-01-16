@@ -64,6 +64,7 @@
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = left
     value = 1
   [../]
@@ -71,12 +72,14 @@
   [./leftt]
     type = DirichletBC
     variable = temp
+    preset = false
     boundary = left
     value = 1
   [../]
   [./rightt]
     type = DirichletBC
     variable = temp
+    preset = false
     boundary = right
     value = 2
   [../]

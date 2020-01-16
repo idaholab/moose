@@ -86,6 +86,7 @@
   [../]
   [./temperatureInterior]
     type = ADFunctionDirichletBC
+    preset = false
     boundary = 2
     function = temperature
     variable = temp

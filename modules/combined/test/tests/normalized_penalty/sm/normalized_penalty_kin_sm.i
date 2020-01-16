@@ -74,6 +74,7 @@
   [./left_x]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 1
     function = left_x
   [../]

@@ -65,24 +65,28 @@
   [./bottom_y]
     type = DirichletBC
     boundary = 0
+    preset = false
     variable = disp_y
     value = 0.0
   [../]
   [./bottom_x]
     type = DirichletBC
     boundary = 0
+    preset = false
     variable = disp_x
     value = 0.0
   [../]
   [./top_right_y]
     type = FunctionDirichletBC
     boundary = 2
+    preset = false
     variable = disp_y
     function = bc_func_ty
   [../]
   [./top_right_x]
     type = FunctionDirichletBC
     boundary = 2
+    preset = false
     variable = disp_x
     function = bc_func_tx
   [../]
