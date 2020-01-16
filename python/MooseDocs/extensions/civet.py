@@ -97,11 +97,11 @@ class CivetExtension(command.CommandExtension):
 
             LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
-        if self.get('generate_test_reports', True):
-            if not self.__database:
-                LOG.error("'generate_test_reports' requires results to exist.")
-                return
+        if not self.__database and self.get('generate_test_reports', True):
+            LOG.warning("'generate_test_reports' is being disabled, it requires results to exist but none were located.")
+            self.update(generate_test_reports=False)
 
+        if self.get('generate_test_reports', True):
             self.__has_test_reports = True
             start = time.time()
             LOG.info("Creating CIVET result pages...")
