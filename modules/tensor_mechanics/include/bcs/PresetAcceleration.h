@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 
 /**
  * This class prescribes the acceleration on a given boundary in a given direction.
@@ -17,7 +17,7 @@
  * displacement is applied on the boundary.
  **/
 
-class PresetAcceleration : public PresetNodalBC
+class PresetAcceleration : public DirichletBCBase
 {
 public:
   static InputParameters validParams();
