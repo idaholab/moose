@@ -9,31 +9,22 @@
 
 #include "PresetNodalBC.h"
 
-// MOOSE includes
-#include "MooseVariableFE.h"
-
-#include "libmesh/numeric_vector.h"
-
 defineLegacyParams(PresetNodalBC);
 
 InputParameters
 PresetNodalBC::validParams()
 {
-  InputParameters params = NodalBC::validParams();
+  InputParameters params = DirichletBCBase::validParams();
+
+  // Utilize the new DirichletBC with preset, set true and don't let the user change it
+  params.set<bool>("preset") = true;
+  params.suppressParameter<bool>("preset");
+
   return params;
 }
 
-PresetNodalBC::PresetNodalBC(const InputParameters & parameters) : NodalBC(parameters) {}
-
-void
-PresetNodalBC::computeValue(NumericVector<Number> & current_solution)
+PresetNodalBC::PresetNodalBC(const InputParameters & parameters) : DirichletBCBase(parameters)
 {
-  const dof_id_type & dof_idx = _var.nodalDofIndex();
-  current_solution.set(dof_idx, computeQpValue());
-}
-
-Real
-PresetNodalBC::computeQpResidual()
-{
-  return _u[_qp] - computeQpValue();
+  mooseDeprecated(name(),
+                  ": inherit from DirichletBCBase with preset = true instead of PresetNodalBC");
 }

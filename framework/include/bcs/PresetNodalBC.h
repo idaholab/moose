@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "NodalBC.h"
+#include "DirichletBCBase.h"
 
 class PresetNodalBC;
 
@@ -18,17 +18,14 @@ InputParameters validParams<PresetNodalBC>();
 
 /**
  * Base class for nodal BCs that (pre)set the solution vector entries.
+ *
+ * Deprecated: inherit from DirichletBCBase instead and set the parameter
+ * preset = true for the same behavior.
  */
-class PresetNodalBC : public NodalBC
+class PresetNodalBC : public DirichletBCBase
 {
 public:
   static InputParameters validParams();
 
   PresetNodalBC(const InputParameters & parameters);
-
-  void computeValue(NumericVector<Number> & current_solution);
-
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpValue() = 0;
 };

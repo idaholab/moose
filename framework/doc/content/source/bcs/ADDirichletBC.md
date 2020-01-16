@@ -1,10 +1,10 @@
-# DirichletBC
+# ADDirichletBC
 
-!syntax description /BCs/DirichletBC
+!syntax description /BCs/ADDirichletBC
 
 ## Description
 
-`DirichletBC` is the simplest type of `NodalBC`, and is used for
+`ADDirichletBC` is the simplest type of `NodalBC`, and is used for
 imposing so-called "essential" boundary conditions on systems of
 partial differential equations (PDEs).  Such boundary conditions force
 a particular set of degrees of freedom (DOFs) defined by the
@@ -21,10 +21,12 @@ class is appropriate to use for PDEs of the form
 
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
-this case, a `DirichletBC` object is used to impose the condition (2)
+this case, a `ADDirichletBC` object is used to impose the condition (2)
 on the subset of the boundary denoted by $\partial \Omega_D$. In this case, the
 `value` corresponds to the constant $g$, and the user must define one
 or more sidesets corresponding to the boundary subset $\partial \Omega_D$.
+
+Note that `ADDirichletBC` computes its Jacobian using automatic differentiation.
 
 ## Preset boundary conditions
 
@@ -39,10 +41,10 @@ your application to the preferred behavior (setting `preset = true` as the defau
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/matched_value_bc/matched_value_bc_test.i start=[./right_v] end=[../] include-end=true
+!listing test/tests/bcs/ad_bc_preset_nodal/bc_preset_nodal.i block=BCs
 
-!syntax parameters /BCs/DirichletBC
+!syntax parameters /BCs/ADDirichletBC
 
-!syntax inputs /BCs/DirichletBC
+!syntax inputs /BCs/ADDirichletBC
 
-!syntax children /BCs/DirichletBC
+!syntax children /BCs/ADDirichletBC

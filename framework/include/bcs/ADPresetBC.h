@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADPresetNodalBC.h"
+#include "ADDirichletBC.h"
 
 template <ComputeStage>
 class ADPresetBC;
@@ -21,7 +21,7 @@ declareADValidParams(ADPresetBC);
  * to be a user specified value.
  */
 template <ComputeStage compute_stage>
-class ADPresetBC : public ADPresetNodalBC<compute_stage>
+class ADPresetBC : public ADDirichletBC<compute_stage>
 {
 public:
   static InputParameters validParams();
@@ -29,9 +29,5 @@ public:
   ADPresetBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpValue() override;
-
-  const Real & _value;
-
-  usingPresetNodalBCMembers;
+  usingDirichletBCMembers;
 };

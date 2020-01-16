@@ -32,7 +32,7 @@
 #include "ComputeNodalKernelBCJacobiansThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 #include "NodalBCBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
@@ -66,7 +66,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "FloatingPointExceptionGuard.h"
 #include "ADKernel.h"
-#include "ADPresetNodalBC.h"
+#include "ADDirichletBCBase.h"
 #include "Moose.h"
 #include "TimedPrint.h"
 #include "ConsoleStream.h"
@@ -489,15 +489,15 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
     if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
       _has_nodalbc_diag_save_in = true;
 
-    // PresetNodalBC
-    std::shared_ptr<PresetNodalBC> pnbc = std::dynamic_pointer_cast<PresetNodalBC>(bc);
-    if (pnbc)
-      _preset_nodal_bcs.addObject(pnbc);
+    // DirichletBCs that are preset
+    std::shared_ptr<DirichletBCBase> dbc = std::dynamic_pointer_cast<DirichletBCBase>(bc);
+    if (dbc && dbc->preset())
+      _preset_nodal_bcs.addObject(dbc);
 
-    std::shared_ptr<ADPresetNodalBC<RESIDUAL>> adpnbc =
-        std::dynamic_pointer_cast<ADPresetNodalBC<RESIDUAL>>(bc);
-    if (adpnbc)
-      _ad_preset_nodal_bcs.addObject(adpnbc);
+    std::shared_ptr<ADDirichletBCBase<RESIDUAL>> addbc =
+        std::dynamic_pointer_cast<ADDirichletBCBase<RESIDUAL>>(bc);
+    if (addbc && addbc->preset())
+      _ad_preset_nodal_bcs.addObject(addbc);
   }
 
   // IntegratedBCBase

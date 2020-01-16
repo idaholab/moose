@@ -17,7 +17,7 @@ defineLegacyParams(FunctionDirichletBC);
 InputParameters
 FunctionDirichletBC::validParams()
 {
-  InputParameters params = NodalBC::validParams();
+  InputParameters params = DirichletBCBase::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addClassDescription(
       "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "
@@ -26,18 +26,12 @@ FunctionDirichletBC::validParams()
 }
 
 FunctionDirichletBC::FunctionDirichletBC(const InputParameters & parameters)
-  : NodalBC(parameters), _func(getFunction("function"))
+  : DirichletBCBase(parameters), _func(getFunction("function"))
 {
 }
 
 Real
-FunctionDirichletBC::f()
+FunctionDirichletBC::computeQpValue()
 {
   return _func.value(_t, *_current_node);
-}
-
-Real
-FunctionDirichletBC::computeQpResidual()
-{
-  return _u[_qp] - f();
 }

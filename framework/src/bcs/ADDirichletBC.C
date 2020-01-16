@@ -7,16 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DirichletBC.h"
+#include "ADDirichletBC.h"
 
-registerMooseObject("MooseApp", DirichletBC);
+registerADMooseObject("MooseApp", ADDirichletBC);
 
-defineLegacyParams(DirichletBC);
+defineADLegacyParams(ADDirichletBC);
 
+template <ComputeStage compute_stage>
 InputParameters
-DirichletBC::validParams()
+ADDirichletBC<compute_stage>::validParams()
 {
-  InputParameters params = DirichletBCBase::validParams();
+  InputParameters params = ADDirichletBCBase<compute_stage>::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -24,13 +25,15 @@ DirichletBC::validParams()
   return params;
 }
 
-DirichletBC::DirichletBC(const InputParameters & parameters)
-  : DirichletBCBase(parameters), _value(getParam<Real>("value"))
+template <ComputeStage compute_stage>
+ADDirichletBC<compute_stage>::ADDirichletBC(const InputParameters & parameters)
+  : ADDirichletBCBase<compute_stage>(parameters), _value(getParam<Real>("value"))
 {
 }
 
-Real
-DirichletBC::computeQpValue()
+template <ComputeStage compute_stage>
+ADReal
+ADDirichletBC<compute_stage>::computeQpValue()
 {
   return _value;
 }

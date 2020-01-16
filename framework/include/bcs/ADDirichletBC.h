@@ -11,35 +11,33 @@
 
 #include "ADDirichletBCBase.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADFunctionPresetBC;
-class Function;
+#define usingDirichletBCMembers                                                                    \
+  usingDirichletBCBaseMembers;                                                                     \
+  using ADDirichletBC<compute_stage>::computeQpValue
 
-declareADValidParams(ADFunctionPresetBC);
+template <ComputeStage>
+class ADDirichletBC;
+
+declareADValidParams(ADDirichletBC);
 
 /**
- * Defines a boundary condition that forces the value to be a user specified
- * function at the boundary.
+ * Boundary condition of a Dirichlet type
  *
- * Deprecated: use FunctionDirichletBC with preset = true instead.
+ * Sets the values of a nodal variable at nodes
  */
 template <ComputeStage compute_stage>
-class ADFunctionPresetBC : public ADDirichletBCBase<compute_stage>
+class ADDirichletBC : public ADDirichletBCBase<compute_stage>
 {
 public:
   static InputParameters validParams();
 
-  ADFunctionPresetBC(const InputParameters & parameters);
+  ADDirichletBC(const InputParameters & parameters);
 
 protected:
-  /**
-   * Evaluate the function at the current quadrature point and timestep.
-   */
   virtual ADReal computeQpValue() override;
 
-  /// Function being used for evaluation of this BC
-  const Function & _func;
+  /// The value for this BC
+  const Real & _value;
 
   usingDirichletBCBaseMembers;
 };
