@@ -62,6 +62,8 @@ make -j4
 If your application is working correctly, you should see one passing test. This indicates that
 your application is ready to be further developed.
 
+!include getting_started/installation/update_moose.md
+
 !include getting_started/installation/post_moose_install.md
 
 !include getting_started/installation/installation_troubleshooting.md
