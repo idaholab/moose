@@ -1,11 +1,5 @@
-!config renderer name=Config Extension
-
-!config media prefix=Flag
+!config navigation name=Config Extension
 
 # Config Extension
 
-!media Flag_of_Michigan.svg
-       latex_src=Flag_of_Michigan.pdf
-       caption=Michigan
-       id=michigan-flag
-       style=width:50%;text-align:center;
+The page name has been modified.

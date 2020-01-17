@@ -21,11 +21,6 @@
     input = test_box.py
     requirement = "MooseDocs shall include a utility for creating text boxes suitable for terminal output."
   []
-  [check_types]
-    type = PythonUnitTest
-    input = test_check_type.py
-    requirement = "MooseDocs shall include a utility for perform variable type checking."
-  []
   [mixins]
     type = PythonUnitTest
     input = test_mixins.py

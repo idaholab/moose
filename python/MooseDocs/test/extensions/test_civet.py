@@ -16,9 +16,7 @@ from MooseDocs.tree import pages
 from MooseDocs import base
 logging.basicConfig()
 
-@unittest.skip("Disabled to avoid excessive network access")
 class CivetTestCase(MooseDocsTestCase):
-
     def assertURL(self, node):
         url = node['url']
         self.assertIn('https://civet.inl.gov/sha_events/idaholab/moose/', url)

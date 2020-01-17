@@ -295,7 +295,7 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
                         categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
 
-    @mock.patch.object(base.translators.Translator, 'findPage', side_effect=lambda x: TestSQARequirementsCrossReference.NodeProxy(local=x))
+    @mock.patch.object(base.Translator, 'findPage', side_effect=lambda x: TestSQARequirementsCrossReference.NodeProxy(local=x))
     def testCommand(self, mock_find_page):
         text = "!sqa cross-reference category=Demo"
         ast = self.tokenize(text)
