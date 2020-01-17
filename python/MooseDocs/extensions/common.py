@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -28,7 +27,7 @@ class CommonExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(core)
 
-    def postTokenize(self, page, ast): #pylint: disable=unused-argument
+    def postTokenize(self, page, ast):
         if ast.is_root:
             shortcuts = self.get('shortcuts', dict())
             for key, value in shortcuts.items():

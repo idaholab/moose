@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -121,7 +120,7 @@ class NavigationExtension(Extension):
         self._addTitle(head, root, page)
         self._addName(nav, page)
 
-    def _addName(self, nav, page): #pylint: disable=unused-argument
+    def _addName(self, nav, page):
         """
         Add the page name to the left-hand side of the top bar.
 
@@ -136,7 +135,7 @@ class NavigationExtension(Extension):
                          string=str(name))
             nav.insert(0, a)
 
-    def _addRepo(self, nav, page): #pylint: disable=no-self-use
+    def _addRepo(self, nav, page):
         """
         Add the repository link to the navigation bar.
 
@@ -160,7 +159,7 @@ class NavigationExtension(Extension):
 
         nav.insert(0, a)
 
-    def _addTitle(self, head, root, page): #pylint: disable=unused-argument
+    def _addTitle(self, head, root, page):
         """
         Add content to <title> tag.
 
@@ -216,7 +215,7 @@ class NavigationExtension(Extension):
         ul = html.Tag(parent, 'ul', class_="sidenav", id_=id_)
         self._createNavigation(ul, page, mega=False)
 
-    def _addBreadcrumbs(self, container, page): #pylint: disable=no-self-use
+    def _addBreadcrumbs(self, container, page):
         """
         Inserts breadcrumb links at the top of the page.
 
@@ -235,7 +234,7 @@ class NavigationExtension(Extension):
 
         parts = page.local.split(os.sep)
         for i in range(1, len(parts)):
-            current = self.translator.findPage(lambda p: p.local == os.path.join(*parts[:i])) #pylint: disable=cell-var-from-loop
+            current = self.translator.findPage(lambda p: p.local == os.path.join(*parts[:i]))
 
             if isinstance(current, pages.Directory):
                 idx = self.translator.findPages(os.path.join(current.local, 'index.md'), exact=True)
@@ -259,7 +258,7 @@ class NavigationExtension(Extension):
             html.Tag(div, 'a', href='#', class_="breadcrumb",
                      string=os.path.splitext(page.name)[0])
 
-    def _addSections(self, container, page): #pylint: disable=unused-argument
+    def _addSections(self, container, page):
         """
         Group content into <section> tags based on the heading tag.
 
@@ -314,7 +313,7 @@ class NavigationExtension(Extension):
                 icon = html.Tag(None, 'span', class_='moose-section-icon')
                 summary(0).children = [icon] + list(summary(0).children)
 
-    def _addContents(self, toc, content, page): #pylint: disable=unused-argument,no-self-use
+    def _addContents(self, toc, content, page):
         """
         Add the table of contents right-side bar that used scrollspy.
 
@@ -340,7 +339,7 @@ class NavigationExtension(Extension):
     def _createNavigation(self, ul, page, mega=True):
         """Helper for creating navigation lists."""
 
-        for key, value in self.get('menu', dict()).items(): #pylint: disable=no-member
+        for key, value in self.get('menu', dict()).items():
 
             li = html.Tag(ul, 'li')
             if isinstance(value, str) and value.endswith('menu.md') and mega:

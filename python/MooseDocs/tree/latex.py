@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,no-member
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
 import re
 import copy
 from ..common import exceptions
@@ -43,7 +41,7 @@ def escape(text):
     }
 
     regex_list = []
-    for key in sorted(conv.keys(), key=lambda item: - len(item)): #pylint: disable=consider-iterating-dictionary
+    for key in sorted(conv.keys(), key=lambda item: - len(item)):
         regex_list.append(re.escape(str(key)))
     regex = re.compile('|'.join(regex_list))
     return regex.sub(lambda match: conv[match.group()], text)

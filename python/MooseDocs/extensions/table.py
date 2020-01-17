@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -147,14 +146,14 @@ class TableComponent(components.ReaderComponent):
                 row = TableRow(TableBody(table))
                 items = [item.strip() for item in self.SPLIT_RE.split(line) if item]
                 for i, content in enumerate(items):
-                    item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
+                    item = TableItem(row, align=form[i])
                     self.reader.tokenize(item, content, page, MarkdownReader.INLINE)
 
         table['form'] = form
         return table
 
 class RenderTable(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
         div = html.Tag(parent, 'div', **token.attributes)
         div.addClass('moose-table-div')
         tbl = html.Tag(div, 'table')
@@ -177,7 +176,7 @@ class RenderTag(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
         return self.createHTML(parent, token, page)
 
-    def createHTML(self, parent, token, page): #pylint: disable=unused-argument
+    def createHTML(self, parent, token, page):
         return html.Tag(parent, self.__tag)
 
     def createLatex(self, parent, token, page):

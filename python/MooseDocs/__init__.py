@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring, wrong-import-position
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*

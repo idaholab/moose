@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -88,7 +87,7 @@ class SQAExtension(command.CommandExtension):
         self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
-        for index, (category, info) in enumerate(self.get('categories').items(), 1): #pylint: disable=no-member
+        for index, (category, info) in enumerate(self.get('categories').items(), 1):
             specs = info.get('specs', ['tests'])
             directories = []
             for d in info.get('directories'):
@@ -504,7 +503,7 @@ class RenderSQARequirementMatrixItem(core.RenderListItem):
 
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         attributes = copy.copy(token.attributes)
         id_ = token['reqname']
 
@@ -538,7 +537,7 @@ class RenderSQARequirementMatrixListItem(RenderSQARequirementMatrixItem):
         html.Tag(li, 'span', string=token['label'], class_='moose-sqa-requirement-number')
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         li = html.Tag(parent, 'li', token, class_="collection-item")
         html.Tag(li, 'span', string=token['label'], class_='moose-sqa-requirement-number')
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')

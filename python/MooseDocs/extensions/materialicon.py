@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,attribute-defined-outside-init
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -54,7 +53,7 @@ class RenderIcon(components.RenderComponent):
     def createHTML(self, parent, token, page):
         pass
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         i = html.Tag(parent, 'i', token, string=token['icon'])
         i.addClass('material-icons')
         i.addClass('moose-inline-icon')

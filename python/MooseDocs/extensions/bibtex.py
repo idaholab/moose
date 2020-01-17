@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -136,7 +135,7 @@ class BibtexCommand(command.CommandComponent):
         config['title-level'] = (2, "The heading level for the section title for the references.")
         return config
 
-    def createToken(self, parent, token, page): #pylint: disable=unused-argument
+    def createToken(self, parent, token, page):
         if self.settings['title']:
             h = core.Heading(parent, level=int(self.settings['title-level']))
             self.reader.tokenize(h, self.settings['title'], page, MarkdownReader.INLINE)

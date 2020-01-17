@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -144,7 +143,7 @@ class FloatExtension(Extension):
         page['counts'] = counts
 
 class RenderFloat(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
         div = html.Tag(parent, 'div', token)
         div.addClass('moose-float-div')
 
@@ -155,7 +154,7 @@ class RenderFloat(components.RenderComponent):
 
         return div
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use
+    def createMaterialize(self, parent, token, page):
         div = html.Tag(parent, 'div', token)
         div.addClass('card moose-float')
         content = html.Tag(div, 'div')
@@ -187,7 +186,7 @@ class RenderFloat(components.RenderComponent):
         return env
 
 class RenderFloatCaption(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
 
         caption = html.Tag(parent, 'p', class_="moose-caption")
         prefix = token.get('prefix', None)

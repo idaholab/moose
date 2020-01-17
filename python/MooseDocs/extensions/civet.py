@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,attribute-defined-outside-init
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*

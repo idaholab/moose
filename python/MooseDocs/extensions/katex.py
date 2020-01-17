@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -60,13 +59,13 @@ class KatexExtension(command.CommandExtension):
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
 
             if self.get('macros', None):
-                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items()) #pylint: disable=no-member
+                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
                 self.macros = '{' + mc + '}'
 
         elif isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
             if self.get('macros', None):
-                for k, v in self.get('macros').items(): #pylint: disable=no-member
+                for k, v in self.get('macros').items():
                     renderer.addNewCommand(k, v)
 
     def postTokenize(self, page, ast):
@@ -160,7 +159,7 @@ class KatexInlineEquationComponent(components.ReaderComponent):
 
 class RenderLatexEquation(components.RenderComponent):
     """Render LatexBlockEquation and LatexInlineEquation tokens"""
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
 
         if token.name == 'LatexInlineEquation':
             div = html.Tag(parent, 'span', class_='moose-katex-inline-equation',
@@ -200,7 +199,7 @@ class RenderLatexEquation(components.RenderComponent):
 
         return parent
 
-    def createLatex(self, parent, token, page): #pylint: disable=no-self-use
+    def createLatex(self, parent, token, page):
         if token.name == 'LatexInlineEquation':
             latex.String(parent, content='${}$'.format(token['tex']), escape=False)
         else:

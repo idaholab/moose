@@ -225,7 +225,7 @@ class Lexer(object):
                     info = LexerInformation(match, pattern, line)
                     try:
                         obj = self.buildToken(parent, pattern, info, page)
-                    except Exception as e: #pylint: disable=broad-except
+                    except Exception as e:
                         obj = tokens.ErrorToken(parent,
                                                 message=str(e),
                                                 traceback=traceback.format_exc())
@@ -247,7 +247,7 @@ class Lexer(object):
             msg = 'Unprocessed text exists.'
             tokens.ErrorToken(parent, message=msg)
 
-    def buildToken(self, parent, pattern, info, page): #pylint: disable=no-self-use
+    def buildToken(self, parent, pattern, info, page):
         """
         Return a token object for the given lexer information.
         """

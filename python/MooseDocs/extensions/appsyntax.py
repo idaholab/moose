@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,attribute-defined-outside-init
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -150,7 +149,7 @@ class AppSyntaxExtension(command.CommandExtension):
                     msg += "    {} --type".format(exe)
                     LOG.error(msg)
 
-            except Exception as e: #pylint: disable=broad-except
+            except Exception as e:
                 msg = "Failed to load application executable from '%s', " \
                       "application syntax is being disabled:\n%s"
                 self.setActive(False)

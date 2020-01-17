@@ -150,7 +150,7 @@ def _check_syntax_node(node, app_name, generate, update, prefix):
     """
 
     # Tuple for storing filename and existence
-    FileInfo = collections.namedtuple('FileInfo', 'name exists') #pylint: disable=invalid-name
+    FileInfo = collections.namedtuple('FileInfo', 'name exists')
 
     # Build a set if information tuples to consider
     filenames = set()

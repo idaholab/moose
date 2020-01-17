@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
 import sys
 import collections
 import logging
@@ -36,7 +34,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         raw = raw.split('**END JSON DATA**')[0]
         tree = mooseutils.json_parse(raw)
 
-    except Exception as e: #pylint: disable=broad-except
+    except Exception as e:
         LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e)
         sys.exit(1)
 

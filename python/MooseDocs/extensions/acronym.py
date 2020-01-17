@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -39,7 +38,7 @@ class AcronymExtension(command.CommandExtension):
         self.__used = set()
 
         # Initialize the available acronyms
-        for key, value in self.get('acronyms').items(): #pylint: disable=no-member
+        for key, value in self.get('acronyms').items():
             if isinstance(value, dict):
                 self.__acronyms.update(value)
             else:

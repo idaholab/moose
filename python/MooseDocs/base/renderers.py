@@ -84,7 +84,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             func = self.__getFunction(token)
             el = func(parent, token, page) if func else parent
 
-        except Exception as e: #pylint: disable=broad-except
+        except Exception as e:
             el = None
             if token.info is not None:
                 line = token.info.line

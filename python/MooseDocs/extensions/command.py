@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Extension for adding commands to Markdown syntax."""
-#pylint: disable=missing-docstring
 import re
 
 from .. import common
@@ -59,7 +58,7 @@ class CommandExtension(Extension):
         reader.addBlock(BlockInlineCommand(), location='<BlockBlockCommand')
         reader.addInline(InlineCommand(), location='_begin')
 
-class CommandComponent(components.ReaderComponent): #pylint: disable=abstract-method
+class CommandComponent(components.ReaderComponent):
     COMMAND = None
     SUBCOMMAND = None
 
