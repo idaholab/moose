@@ -20,10 +20,10 @@ except ImportError:
     HAVE_PYTHON_PLOTLY = False
 
 import mooseutils
-from MooseDocs import common
-from MooseDocs.extensions import command, floats
-from MooseDocs.base import components, renderers
-from MooseDocs.tree import tokens, html, latex
+from .. import common
+from ..base import components, renderers
+from ..tree import tokens, html, latex
+from . import command, floats
 
 def make_extension(**kwargs):
     return GraphExtension(**kwargs)

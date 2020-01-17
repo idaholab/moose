@@ -13,7 +13,7 @@ Contains base classes intended to be used internal to this module.
 import uuid
 import copy
 import MooseDocs
-from MooseDocs.common import exceptions, check_type
+from ..common import exceptions
 
 #: A value for allowing ConfigObject.get method to work with a default of None
 UNSET = uuid.uuid4()
@@ -22,6 +22,9 @@ class ConfigObject(object):
     """
     Base class for objects that contain configure options.
     """
+    #: A value for allowing ConfigObject.get method to work with a default of None
+    UNSET = UNSET
+
     @staticmethod
     def defaultConfig():
         """
@@ -30,32 +33,52 @@ class ConfigObject(object):
         """
         return dict()
 
-    def __init__(self, **kwargs):
-        self.__config = self.defaultConfig()
-        if not isinstance(self.__config, dict):
+    def __init__(self, *args, **kwargs):
+        config = self.defaultConfig()
+        if not isinstance(config, dict):
             msg = "The return type from 'defaultConfig' must be a 'dict', but a {} was provided."
-            raise exceptions.MooseDocsException(msg, type(self.__config))
+            raise exceptions.MooseDocsException(msg, type(config))
+        self.__config = {key:value[0] for key, value in config.items()}
         self.update(**kwargs)
+        self.__name = args[0] if args else None
 
-        # Stores the configuration that was established upon object creation, this allows the
-        # config extension to mess with configuration items during execute but then restore
-        # prior to processing the next page.
-        self.__initial_config = copy.copy(self.__config)
+    @property
+    def name(self):
+        """Return the name of the extension."""
+        return self.__name
+
+    def initConfig(self, page, *keys):
+        """Initialize page config for the supplied keys"""
+        if self.name is None:
+            raise exceptions.MooseDocsException('Page level config items are not available for this object.')
+
+        for key in keys:
+            self.setConfig(page, key, self.get(key))
+
+    def getConfig(self, page, key):
+        """Return a per page config item"""
+        if self.name is None:
+            raise exceptions.MooseDocsException('Page level config items are not available for this object.')
+        return page['__{}__'.format(self.name)][key]
+
+    def setConfig(self, page, key, value):
+        """Set a per page config item"""
+        if self.name is None:
+            raise exceptions.MooseDocsException('Page level config items are not available for this object.')
+        page['__{}__'.format(self.name)][key] = value
 
     def update(self, **kwargs):
         """
         Update the configuration with the supplied key-value pairs.
         """
-        set_initial = kwargs.pop('set_initial', False)
         error_on_unknown = kwargs.pop('error_on_unknown', True)
 
         unknown = []
         for key, value in kwargs.items():
-
             if key not in self.__config:
                 unknown.append(key)
             else:
-                self.__config[key] = (value, self.__config[key][1]) #TODO: type check???
+                self.__config[key] = value#(value, self.__config[key][1]) #TODO: type check???
 
         if unknown and error_on_unknown:
             msg = "The following config options were not found in the default config options for " \
@@ -63,15 +86,6 @@ class ConfigObject(object):
             for key in unknown:
                 msg += '\n{}{}'.format(' '*4, key)
             raise exceptions.MooseDocsException(msg.format(type(self)))
-
-        if set_initial:
-            self.__initial_config = copy.copy(self.__config)
-
-    def resetConfig(self):
-        """
-        Reset configuration to original state.
-        """
-        self.__config = copy.copy(self.__initial_config)
 
     def keys(self):
         """
@@ -92,7 +106,7 @@ class ConfigObject(object):
         if (default is not UNSET) and (name not in self.__config):
             return default
         else:
-            return self.__config[name][0]
+            return self.__config[name]
 
     def __contains__(self, name):
         """
@@ -109,7 +123,6 @@ class ReaderObject(object):
 
     def setReader(self, reader):
         """Initialize the class with the Reader object."""
-        check_type('reader', reader, MooseDocs.base.readers.Reader)
         self.__reader = reader
 
     @property
@@ -133,7 +146,6 @@ class RendererObject(object):
 
     def setRenderer(self, renderer):
         """Initialize the class with the Renderer object."""
-        check_type('renderer', renderer, MooseDocs.base.renderers.Renderer)
         self.__renderer = renderer
 
     @property
@@ -165,7 +177,6 @@ class ComponentObject(object):
         """
         Add a Component object.
         """
-        check_type("component", comp, MooseDocs.base.components.Component)
         self.__components.append(comp)
 
 class TranslatorObject(object):
@@ -179,7 +190,6 @@ class TranslatorObject(object):
         """
         Method called by Translator to allow find methods to operate.
         """
-        check_type('translator', translator, MooseDocs.base.translators.Translator)
         self.__translator = translator
 
     @property

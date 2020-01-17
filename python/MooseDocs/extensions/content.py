@@ -14,11 +14,11 @@ import collections
 import logging
 import moosetree
 import mooseutils
-from MooseDocs import common
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, renderers, LatexRenderer
-from MooseDocs.tree import pages, tokens, html, latex
-from MooseDocs.extensions import core, command, heading
+from .. import common
+from ..common import exceptions
+from ..base import components, renderers, LatexRenderer
+from ..tree import pages, tokens, html, latex
+from . import core, command, heading
 
 LOG = logging.getLogger(__name__)
 
@@ -79,13 +79,12 @@ class ContentExtension(command.CommandExtension):
         headings = collections.defaultdict(list)
         func = lambda n: n.local.startswith(location) and isinstance(n, pages.Source)
         for node in nodes:
-            h_node = heading.find_heading(self.translator, node)
+            h_node = heading.find_heading(node)
 
             if h_node is None:
-                pass
-                #msg = "The page, '%s', does not have a title, it will be ignored in the " \
-                #      "content output."
-                #LOG.warning(msg, node.local)
+                msg = "The page, '%s', does not have a title, it will be ignored in the " \
+                      "content output."
+                LOG.warning(msg, node.local)
 
             else:
                 text = h_node.text()

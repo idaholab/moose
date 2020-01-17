@@ -18,11 +18,10 @@ from pylatexenc.latex2text import LatexNodes2Text
 
 import moosetree
 
-import MooseDocs
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.tree import tokens, html, latex
-from MooseDocs.extensions import core, command
+from ..common import exceptions
+from ..base import components, LatexRenderer, MarkdownReader
+from ..tree import tokens, html, latex
+from . import core, command
 
 LOG = logging.getLogger('MooseDocs.extensions.bibtex')
 
@@ -47,19 +46,16 @@ class BibtexExtension(command.CommandExtension):
         self.__database = None
         self.__citations = list()
 
-    def initMetaData(self, page, meta):
-        meta.initData('citations', list())
-
     def addCitations(self, *args):
         self.__citations.extend(args)
 
-    def preExecute(self, content):
+    def preExecute(self):
 
         duplicates = self.get('duplicates', list())
         self.__database = BibliographyData()
 
         bib_files = []
-        for node in content:
+        for node in self.translator.getPages():
             if node.source.endswith('.bib'):
                 bib_files.append(node.source)
 
@@ -83,10 +79,13 @@ class BibtexExtension(command.CommandExtension):
                 elif not duplicate_key:
                     self.__database.add_entry(key, db.entries[key])
 
-    def postTokenize(self, ast, page, meta, reader):
+    def preTokenize(self, page, ast):
+        page['citations'] = list()
+
+    def postTokenize(self, page, ast):
         if self.__citations:
-            meta.getData('citations').extend(self.__citations)
-            del self.__citations[:] # TODO: In python 3 this should be a clear()
+            page['citations'].extend(self.__citations)
+            self.__citations.clear()
 
             has_bib = False
             for node in moosetree.iterate(ast):
@@ -140,7 +139,7 @@ class BibtexCommand(command.CommandComponent):
     def createToken(self, parent, token, page): #pylint: disable=unused-argument
         if self.settings['title']:
             h = core.Heading(parent, level=int(self.settings['title-level']))
-            self.reader.tokenize(h, self.settings['title'], page, MooseDocs.INLINE)
+            self.reader.tokenize(h, self.settings['title'], page, MarkdownReader.INLINE)
         BibtexBibliography(parent, bib_style=self.settings['style'])
         return parent
 
@@ -232,7 +231,7 @@ class RenderBibtexBibliography(components.RenderComponent):
             msg = 'Unknown bibliography style "{}".'
             raise exceptions.MooseDocsException(msg, token['bib_style'])
 
-        citations = list(self.translator.getMetaData(page, 'citations'))
+        citations = page.get('citations', list())
         formatted_bibliography = style().format_bibliography(self.extension.database, citations)
         html_backend = find_plugin('pybtex.backends', 'html')
 

@@ -16,9 +16,8 @@ import traceback
 import types
 import re
 
-import MooseDocs
-from MooseDocs import common
-from MooseDocs.tree import tokens, pages
+from .. import common
+from ..tree import tokens, pages
 
 LOG = logging.getLogger(__name__)
 
@@ -32,12 +31,6 @@ class Pattern(object):
          function: The function to call when a match occurs (components.Component.__call__).
     """
     def __init__(self, name, regex, function):
-
-        # Perform input type checking
-        common.check_type('name', name, str)
-        common.check_type('regex', regex, type(re.compile('')))
-        common.check_type('function', function, types.FunctionType)
-
         self.name = name
         self.regex = regex
         self.function = function
@@ -79,7 +72,6 @@ class Grammar(object):
                                                 named 'foo'.
         """
         # Add the supplied information to the storage.
-        common.check_type('location', location, (int, str))
         self.__patterns.add(name, Pattern(name, regex, function), location)
 
     def __contains__(self, key):
@@ -169,7 +161,7 @@ class LexerInformation(object):
         """
         return self.__match.keys()
 
-    def iteritems(self):
+    def items(self):
         """
         Iterate over the named groups.
         """
@@ -218,10 +210,6 @@ class Lexer(object):
               be caught by this object and converted into an Exception token. This allows for
               the entire text to be tokenized and have the errors report upon completion.
         """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('page', page, pages.Page)
-            common.check_type('line', line, int)
-
         if not isinstance(text, str):
             msg = "EXCEPTION: {}:{}\n{}".format(page.source, line,
                                                 "The supplied text must be str.")
@@ -313,10 +301,6 @@ class RecursiveLexer(Lexer):
         """
         Override the Lexer.buildToken method to recursively tokenize base on group names.
         """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('parent', parent, tokens.Token)
-            common.check_type('info', info, LexerInformation)
-
         obj = super(RecursiveLexer, self).buildToken(parent, pattern, info, page)
 
         if (obj is not None) and (obj is not parent) and obj.get('recursive'):

@@ -20,9 +20,6 @@ Content:
     - modules/xfem/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE
-    repo: https://github.com/idaholab/moose
-    home: https://www.mooseframework.org
     favicon: media/moose.ico
     google_analytics: True
 

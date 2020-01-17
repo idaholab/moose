@@ -10,10 +10,10 @@
 
 import collections
 
-from MooseDocs.base import components, renderers
-from MooseDocs.common import exceptions
-from MooseDocs.extensions import command, table, floats
-from MooseDocs.tree import tokens, html, latex
+from ..base import components, renderers
+from ..common import exceptions
+from ..tree import tokens, html, latex
+from . import command, table, floats
 
 def make_extension(**kwargs):
     return AcronymExtension(**kwargs)
@@ -45,7 +45,7 @@ class AcronymExtension(command.CommandExtension):
             else:
                 self.__acronyms[key] = value
 
-    def preExecute(self, root):
+    def preExecute(self):
         """
         Reinitialize the list of acronyms being used.
         """

@@ -10,7 +10,7 @@
 #pylint: enable=missing-docstring
 import re
 import copy
-from MooseDocs.common import exceptions
+from ..common import exceptions
 from .base import NodeBase
 
 def parse_style(token):

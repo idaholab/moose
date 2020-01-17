@@ -16,9 +16,9 @@ import logging
 
 import moosetree
 
-from MooseDocs.base import components, renderers, Translator
-from MooseDocs.common import exceptions
-from MooseDocs.tree import tokens, html, latex
+from ..base import components, renderers, Executioner, Extension
+from ..common import exceptions
+from ..tree import tokens, html, latex
 
 LOG = logging.getLogger(__name__)
 
@@ -54,14 +54,14 @@ Superscript = tokens.newToken('Superscript')
 Subscript = tokens.newToken('Subscript')
 LineBreak = tokens.newToken('LineBreak')
 
-class CoreExtension(components.Extension):
+class CoreExtension(Extension):
     """
     The core markdown extension object. Extension objects add the tokenize and rendering components.
     """
     @staticmethod
     def defaultConfig():
         """CoreExtension configuration options."""
-        config = components.Extension.defaultConfig()
+        config = Extension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
@@ -135,7 +135,7 @@ class CoreExtension(components.Extension):
 # Documenting all these classes is far to repetitive and useless.
 #pylint: disable=missing-docstring
 
-class CodeBlock(components.TokenComponent):
+class CodeBlock(components.ReaderComponent):
     RE = re.compile(r'(?:\A|\n{2,})^'         # start of string or empty line
                     r'`{3}(?P<settings>.*?)$' # start of code with key=value settings
                     r'(?P<code>.*?)^`{3}'     # code and end of fenced block
@@ -144,7 +144,7 @@ class CodeBlock(components.TokenComponent):
 
     @staticmethod
     def defaultSettings():
-        settings = components.TokenComponent.defaultSettings()
+        settings = components.ReaderComponent.defaultSettings()
         settings['language'] = ('text', "The code language to use for highlighting.")
         return settings
 
@@ -156,7 +156,7 @@ class CodeBlock(components.TokenComponent):
         return Code(parent, content=info['code'], language=self.settings['language'],
                     **self.attributes)
 
-class QuoteBlock(components.TokenComponent):
+class QuoteBlock(components.ReaderComponent):
     RE = re.compile(r'(?:\A|\n{2,})'         # start of string or empty line
                     r'(?P<quote>^>[ $].*?)'  # quote content
                     r'(?=\n*\Z|\n{2,})',        # end of string or empty line
@@ -177,7 +177,7 @@ class QuoteBlock(components.TokenComponent):
         self.reader.tokenize(quote, '\n'.join(content), page, line=info.line)
         return quote
 
-class HeadingBlock(components.TokenComponent):
+class HeadingBlock(components.ReaderComponent):
     """
     Hash style markdown headings with settings.
 
@@ -195,7 +195,7 @@ class HeadingBlock(components.TokenComponent):
         heading = Heading(parent, level=info['level'].count('#'), **self.attributes)
         return heading
 
-class ListBlock(components.TokenComponent):
+class ListBlock(components.ReaderComponent):
     RE = None
     ITEM_RE = None
     TOKEN = None
@@ -252,7 +252,7 @@ class OrderedListBlock(ListBlock):
         token['start'] = int(info['marker'].strip('. '))
         return token
 
-class ShortcutBlock(components.TokenComponent):
+class ShortcutBlock(components.ReaderComponent):
     RE = re.compile(r'(?:\A|\n{2,})^\[(?P<key>\w+)\]: ' # shortcut key
                     r'(?P<link>.*?)'                    # shortcut link
                     r'(?=\Z|\n{2,})',                   # stop new line or end of file
@@ -261,7 +261,7 @@ class ShortcutBlock(components.TokenComponent):
     def createToken(self, parent, info, page):
         return Shortcut(parent, key=info['key'], link=info['link'], string=info['key'])
 
-class ParagraphBlock(components.TokenComponent):
+class ParagraphBlock(components.ReaderComponent):
     RE = re.compile(r'(?:\A|\n{2,})'   # start of string of empty line
                     r'(?P<inline>.*?)' # content
                     r'(?=\Z|\n{2,})',  # stop with end or empty line
@@ -270,12 +270,12 @@ class ParagraphBlock(components.TokenComponent):
     def createToken(self, parent, info, page): #pylint: disable=unused-argument
         return Paragraph(parent)
 
-class EndOfFileBlock(components.TokenComponent):
+class EndOfFileBlock(components.ReaderComponent):
     RE = re.compile(r'.*', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
     def createToken(self, parent, info, page):
         return parent
 
-class LinkInline(components.TokenComponent):
+class LinkInline(components.ReaderComponent):
     """
     Links are defined as: [link text](link address).
 
@@ -298,7 +298,7 @@ class LinkInline(components.TokenComponent):
     def createToken(self, parent, info, page):
         return Link(parent, url=info['url'], **self.attributes)
 
-class ShortcutLinkInline(components.TokenComponent):
+class ShortcutLinkInline(components.ReaderComponent):
     """https://regex101.com/r/JLAaBU/1"""
     RE = re.compile(r'\['                        # opening [
                     r'(?P<key>\S+?)'             # key (anything but space)
@@ -309,43 +309,43 @@ class ShortcutLinkInline(components.TokenComponent):
         ShortcutLink(parent, key=info['key'], **self.attributes)
         return parent
 
-class BreakInline(components.TokenComponent):
+class BreakInline(components.ReaderComponent):
     RE = re.compile(r'(?P<break>\n+)')
     def createToken(self, parent, info, page):
         Break(parent, count=len(info['break']))
         return parent
 
-class LineBreakInline(components.TokenComponent):
+class LineBreakInline(components.ReaderComponent):
     RE = re.compile(r'(?P<break>\\{2}[\s+$])', flags=re.MULTILINE)
     def createToken(self, parent, info, page):
         LineBreak(parent)
         return parent
 
-class SpaceInline(components.TokenComponent):
+class SpaceInline(components.ReaderComponent):
     RE = re.compile(r'(?P<space> +)')
     def createToken(self, parent, info, page):
         Space(parent, count=len(info['space']))
         return parent
 
-class PunctuationInline(components.TokenComponent):
+class PunctuationInline(components.ReaderComponent):
     RE = re.compile(r'(([^A-Za-z0-9\s])\2*)')
     def createToken(self, parent, info, page):
         Punctuation(parent, content=info[0])
         return parent
 
-class NumberInline(components.TokenComponent):
+class NumberInline(components.ReaderComponent):
     RE = re.compile(r'([0-9]+)')
     def createToken(self, parent, info, page):
         Number(parent, content=info[0])
         return parent
 
-class WordInline(components.TokenComponent):
+class WordInline(components.ReaderComponent):
     RE = re.compile(r'([A-Za-z]+)')
     def createToken(self, parent, info, page):
         Word(parent, content=info[0])
         return parent
 
-class FormatInline(components.TokenComponent):
+class FormatInline(components.ReaderComponent):
     RE = re.compile(r'(?P<token>[\@|\^|\=|\*|\+|~`])(?=\S)(?P<inline>.*?)(?<=\S)(?:\1)',
                     flags=re.MULTILINE|re.DOTALL|re.DOTALL)
 
@@ -374,7 +374,7 @@ class FormatInline(components.TokenComponent):
         elif tok == '`':
             return Monospace(parent, content=info['inline'], recursive=False)
 
-class EscapeCharacter(components.TokenComponent):
+class EscapeCharacter(components.ReaderComponent):
     RE = re.compile(r'\\(?P<char>\[|\]|!|\@|\^|\=|\*|\+|~|-)',
                     flags=re.MULTILINE|re.DOTALL)
 
@@ -463,8 +463,7 @@ class RenderShortcutLink(components.RenderComponent):
         #TODO: error if more than one found
         for node in moosetree.iterate(token.root):
             if node.name == 'Shortcut' and node['key'] == key:
-                with Translator.LOCK:
-                    self.__cache[key] = node
+                self.__cache[key] = node
                 return node
 
         msg = "The shortcut link key '{}' was not located in the list of shortcuts."

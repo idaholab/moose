@@ -15,8 +15,6 @@ from .lexers import Lexer, RecursiveLexer, Grammar
 from .readers import Reader, MarkdownReader
 from .renderers import Renderer, HTMLRenderer, MaterializeRenderer, LatexRenderer
 from .renderers import RevealRenderer
-from .translators import Translator
-from .executioners import Serial, ParallelBarrier, ParallelPipe, ParallelDemand
-#import components
-#from components import Extension, RenderComponent, TokenComponent
-#TODO: TokenComponent -> ReaderComponent
+from .Extension import Extension
+from .Translator import Translator
+from .executioners import Executioner, Serial, ParallelBarrier, ParallelPipe, ParallelQueue

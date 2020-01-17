@@ -17,8 +17,7 @@ import moosetree
 
 import mooseutils
 
-from MooseDocs import common
-from MooseDocs.tree.syntax import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
+from ..tree.syntax import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
 
 LOG = logging.getLogger(__name__)
 
@@ -31,11 +30,6 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
     """
-    common.check_type('exe', exe, str)
-    common.check_type('remove', remove, (type(None), dict, list, set))
-    common.check_type('hide', hide, (type(None), dict, list, set))
-    common.check_type('allow_test_objects', allow_test_objects, bool)
-
     try:
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         raw = raw.split('**START JSON DATA**\n')[1]

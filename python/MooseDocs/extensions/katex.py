@@ -11,9 +11,9 @@ import sys
 import re
 import uuid
 import moosetree
-from MooseDocs.base import components, renderers
-from MooseDocs.tree import tokens, html, latex
-from MooseDocs.extensions import command, core, floats
+from ..base import components, renderers
+from ..tree import tokens, html, latex
+from . import command, core, floats
 
 def make_extension(**kwargs):
     """Create an instance of the Extension object."""
@@ -42,9 +42,6 @@ class KatexExtension(command.CommandExtension):
         super(KatexExtension, self).__init__(*args, **kwargs)
         self.macros = None
 
-    def initMetaData(self, page, meta):
-        meta.initData('labels', set())
-
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -72,7 +69,7 @@ class KatexExtension(command.CommandExtension):
                 for k, v in self.get('macros').items(): #pylint: disable=no-member
                     renderer.addNewCommand(k, v)
 
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
         labels = set()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
@@ -88,7 +85,7 @@ class KatexExtension(command.CommandExtension):
                                   string='{} ({})'.format(self.get('prefix'), count),
                                   link='#{}'.format(node['bookmark']))
 
-        meta.setData('labels', labels)
+        page['labels'] = labels
 
 class KatexBlockEquationCommand(command.CommandComponent):
     COMMAND = 'equation'
@@ -114,7 +111,7 @@ class KatexBlockEquationCommand(command.CommandComponent):
         LatexBlockEquation(parent, tex=tex, bookmark=eq_id, label=self.settings['id'])
         return parent
 
-class KatexBlockEquationComponent(components.TokenComponent):
+class KatexBlockEquationComponent(components.ReaderComponent):
     """
     Component for reading LaTeX block equations.
     """
@@ -144,7 +141,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
             token['tex'] = token['tex'].replace(label.group(), '')
         return parent
 
-class KatexInlineEquationComponent(components.TokenComponent):
+class KatexInlineEquationComponent(components.ReaderComponent):
     RE = re.compile(r'(?P<token>\$)(?=\S)(?P<equation>.*?)(?<=\S)(?:\1)',
                     flags=re.MULTILINE|re.DOTALL|re.DOTALL)
 
@@ -218,9 +215,8 @@ class RenderLatexEquation(components.RenderComponent):
 class RenderEquationLink(core.RenderShortcutLink):
 
     def createLatex(self, parent, token, page):
-        labels = self.translator.getMetaData(page, 'labels')
         key = token['key']
-        if key in labels:
+        if key in page.get('labels'):
             latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
             latex.Command(parent, 'eqref', string=key)
             return parent

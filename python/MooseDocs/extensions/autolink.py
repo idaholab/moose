@@ -12,11 +12,12 @@ import os
 import re
 import logging
 import moosetree
+
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.base import components
-from MooseDocs.extensions import core, floats, heading
-from MooseDocs.tree import tokens, latex
+from .. import common
+from ..base import components, Extension
+from ..tree import tokens, latex
+from . import core, floats, heading
 
 def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
@@ -29,7 +30,7 @@ LocalLink = tokens.newToken('LocalLink', bookmark='')
 AutoLink = tokens.newToken('AutoLink', page='', bookmark='', optional=False, warning=False,
                            exact=False)
 
-class AutoLinkExtension(components.Extension):
+class AutoLinkExtension(Extension):
     """
     Extension that replaces the default Link and LinkShortcut behavior and handles linking to
     other files. This includes the ability to extract the content from the linked page (i.e.,
@@ -38,7 +39,7 @@ class AutoLinkExtension(components.Extension):
 
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = Extension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
@@ -142,18 +143,15 @@ class RenderLinkBase(components.RenderComponent):
 
         link = core.Link(None, url=url, info=token.info)
         if len(token.children) == 0:
-            head = None
-            if desired is page:
-                for n in moosetree.iterate(token.root,
-                                           lambda n: bookmark == n.get('id', None)):
-                    head = n
-                    break
-            else:
-                head = heading.find_heading(self.translator, desired, bookmark)
+            head = heading.find_heading(desired, bookmark)
 
             if head is not None:
                 head.copyToToken(link)
             else:
+                if desired.local.endswith('sqa.md'):
+                    import multiprocessing
+                    print("DESIRED HEADING:", multiprocessing.current_process().name, page.local, desired['heading'].keys())
+
                 link['class'] = 'moose-error'
                 tokens.String(link, content=url)
         else:
@@ -173,7 +171,7 @@ class RenderLinkBase(components.RenderComponent):
             return None
 
         url = str(desired.relativeDestination(page))
-        head = heading.find_heading(self.translator, desired, bookmark)
+        head = heading.find_heading(desired, bookmark)
 
         tok = tokens.Token(None)
         if head is None:
@@ -222,8 +220,8 @@ class RenderAutoLink(RenderLinkBase):
     def createHTML(self, parent, token, page):
         desired = self.translator.findPage(token['page'],
                                            throw_on_zero=not token['optional'],
-                                           warn_on_zero=token['warning'],
-                                           exact=token['exact'])
+                                           exact=token['exact'],
+                                           warn_on_zero=token['warning'])
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):

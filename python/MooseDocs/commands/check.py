@@ -15,9 +15,9 @@ import logging
 
 import moosetree
 
-from MooseDocs import common
-from MooseDocs.tree import syntax
-from MooseDocs.common import exceptions
+from .. import common
+from ..common import exceptions
+from ..tree import syntax
 
 LOG = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def check(translator,
     for ext in translator.extensions:
         if ext.name == 'appsyntax':
             extension = ext
-            extension.preExecute(translator.content)
+            extension.preExecute()
             app_syntax = ext.syntax
             break
 

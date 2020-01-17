@@ -1,4 +1,4 @@
-!config renderer collapsible-sections=[None, 'open', 'open', 'open', 'open', 'open']
+!config navigation collapsible-sections=[None, 'open', 'open', 'open', 'open', 'open']
 
 # Source Documentation
 

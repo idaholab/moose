@@ -1,3 +1,3 @@
 # Config Extension
 
-!config renderer breadcrumbs=False
+!config navigation breadcrumbs=False

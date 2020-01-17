@@ -108,10 +108,11 @@ class CivetExtension(command.CommandExtension):
 
             report_root = self.get('test_reports_location')
             if not self.translator.findPage(report_root, exact=True, throw_on_zero=False):
-                self.translator.addContent(pages.Directory(report_root, source=report_root))
-            self.translator.addContent(pages.Source('{}/index.md'.format(report_root),
-                                                    source='{}/index.md'.format(report_root),
-                                                    read=False, tokenize=False))
+                self.translator.addPage(pages.Directory(report_root, source=report_root))
+
+            src = pages.Source('{}/index.md'.format(report_root), source='{}/index.md'.format(report_root),
+                               read=False, tokenize=False)
+            self.translator.addPage(src)
 
             count = 0
             for key, item in self.__database.items():
@@ -120,13 +121,12 @@ class CivetExtension(command.CommandExtension):
                 count += 1
 
                 fullname = '{}/{}.md'.format(report_root, name)
-                self.translator.addContent(pages.Source(fullname, source=fullname, read=False,
-                                                        tokenize=False,
-                                                        key=key))
+                src = pages.Source(fullname, source=fullname, read=False, tokenize=False, key=key)
+                self.translator.addPage(src)
 
             LOG.info("Creating CIVET result pages complete [%s sec.]", time.time() - start)
 
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
         """
         Add CIVET test report token.
         """
@@ -134,7 +134,7 @@ class CivetExtension(command.CommandExtension):
         if key is not None:
             CivetTestReport(ast, tests=[key])
 
-    def postRender(self, results, page, meta, renderer):
+    def postRender(self, page, results):
         """
         Add CIVET links to test result pages.
         """

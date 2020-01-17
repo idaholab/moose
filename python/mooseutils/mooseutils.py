@@ -436,3 +436,9 @@ def generate_filebase(string, replace='_', lowercase=True):
         string = string.lower()
     string = re.sub(r'([\/\\\?%\*:\|\"<>\. ]+)', replace, string)
     return string
+
+def recursive_update(d, u):
+    """Recursive update nested dict(), see https://stackoverflow.com/a/3233356/1088076"""
+    for k, v in u.items():
+        d[k] = recursive_update(d.get(k, dict()), v) if isinstance(v, dict) else v
+    return d

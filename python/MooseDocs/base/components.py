@@ -10,149 +10,9 @@
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
 """
-from MooseDocs.common import exceptions, parse_settings, mixins
-from MooseDocs.tree import tokens
 
-class Extension(mixins.ConfigObject, mixins.TranslatorObject):
-    """
-    Base class for creating extensions. An extension is simply a mechanism to allow for
-    the creation of reader/renderer components to be added to the translation process.
-
-    All aspects of the MooseDocs system rely on Extension objects. These extensions are passed
-    to the Translator object. The translator calls the extend method of the extension.
-
-    Inputs:
-        kwargs: All key-value pairs are treated as configure options, see ConfigObject.
-    """
-    @staticmethod
-    def defaultConfig():
-        """Basic Extension configuration options."""
-        config = mixins.ConfigObject.defaultConfig()
-        config['active'] = (True, "Toggle for disabling the extension. This only changes "
-                                  "the initial active state, use setActive to control at runtime.")
-        return config
-
-    def __init__(self, **kwargs):
-        mixins.ConfigObject.__init__(self, **kwargs)
-        mixins.TranslatorObject.__init__(self)
-        self.__requires = set()
-        self.__active = self.get('active')
-
-        # Extension name
-        self.__name = self.__class__.__name__.split('.')[-1].replace('Extension', '').lower()
-
-    @property
-    def name(self):
-        """Return the name of the extension."""
-        return self.__name
-
-    @property
-    def active(self):
-        """Return the 'active' status of the Extension."""
-        return self.__active
-
-    def setActive(self, value):
-        """
-        Set the active state for the extension.
-
-        The default 'active' setting must be able to be set outside of the configure options to
-        allow for object constructors (i.e., appsyntax) to disable an extension internally. Because,
-        if only the config is used it is reset after building the page to the default to
-        support the config extension.
-        """
-        self.__active = value
-        self._ConfigObject__initial_config['active'] = value #pylint: disable=no-member
-
-    def extend(self, reader, renderer):
-        """
-        Method for adding reader and renderering components.
-        """
-        pass
-
-    def requires(self, *args):
-        """
-        Require that the supplied extension module exists within the Translator object. This
-        method cannot be called before init().
-        """
-        self.__requires.update(args)
-
-    def init(self):
-        """
-        Called after Translator is set, prior to initializing pages.
-        """
-        pass
-
-    def postRead(self, content, page, meta):
-        """
-        Called after to reading the file.
-
-        Input:
-             content[str]: A copy of the content read from the page.
-             page[pages.Source]: The source object representing the content.
-             meta[Meta]: Meta data object for storing data on the node (see translators.py)
-        """
-        pass
-
-    def postWrite(self):
-        """
-        Called after renderer has written content.
-
-        """
-        pass
-
-    def preExecute(self, content):
-        """
-        Called by Translator prior to beginning conversion.
-
-        Input:
-            content[list]: List of all Page objects.
-        """
-        pass
-
-    def postExecute(self, content):
-        """
-        Called by Translator after all conversion is complete.
-
-        Input:
-            content[list]: List of all Page objects.
-        """
-        pass
-
-    def preTokenize(self, ast, page, meta, reader):
-        """
-        Called by Translator prior to tokenization.
-
-        Inputs:
-            ast[tokens.Token]: The root node of the token tree.
-        """
-        pass
-
-    def postTokenize(self, ast, page, meta, reader):
-        """
-        Called by Translator after tokenization.
-
-        Inputs:
-            ast[tokens.Token]: The root node of the token tree.
-        """
-        pass
-
-    def preRender(self, result, page, meta, renderer):
-        """
-        Called by Translator prior to rendering.
-
-        Inputs:
-            result[tree.base.NodeBase]: The root node of the result tree.
-        """
-        pass
-
-    def postRender(self, result, page, meta, renderer):
-        """
-        Called by Translator after rendering.
-
-        Inputs:
-            result[tree.base.NodeBase]: The root node of the result tree.
-        """
-        pass
+from ..common import exceptions, parse_settings, mixins
+from ..tree import tokens
 
 class Component(mixins.TranslatorObject):
     """
@@ -175,13 +35,13 @@ class Component(mixins.TranslatorObject):
         """
         self.__extension = extension
 
-class TokenComponent(Component, mixins.ReaderObject):
+class ReaderComponent(Component, mixins.ReaderObject):
     """
     Base class for creating components designed to create a token during tokenization.
 
     # Overview
-    TokenComponent objects are designed to be created by Extension objects and added to the Reader
-    object in the Extension:extend method. The purpose of a TokenComponent is to define a regular
+    ReaderComponent objects are designed to be created by Extension objects and added to the Reader
+    object in the Extension:extend method. The purpose of a ReaderComponent is to define a regular
     expression, that when match returns a token that is added to the AST.
 
     The codebase of MooseDocs (Translator, Reader, Renderer) is certainly capable of tokenizing

@@ -8,14 +8,14 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Tool for loading MooseDocs config hit file."""
-import collections
 import types
 import importlib
 import logging
-
+import collections
+from mooseutils import recursive_update
 from mooseutils.yaml_load import yaml_load
 import MooseDocs
-from MooseDocs.common import check_type, exceptions
+from ..common import exceptions
 
 LOG = logging.getLogger(__name__)
 
@@ -51,14 +51,14 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_TRANSLATOR = 'MooseDocs.base.Translator'
-DEFAULT_EXECUTIONER = 'MooseDocs.base.ParallelBarrier'
+DEFAULT_EXECUTIONER = 'MooseDocs.base.ParallelQueue'
 
 def load_config(filename, **kwargs):
     """
     Read the config.yml file and create the Translator object.
     """
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
-    config.update(kwargs)
+    recursive_update(config, kwargs)
 
     extensions = _yaml_load_extensions(config)
     reader = _yaml_load_object('Reader', config, DEFAULT_READER)
@@ -67,6 +67,7 @@ def load_config(filename, **kwargs):
     executioner = _yaml_load_object('Executioner', config, DEFAULT_EXECUTIONER)
     translator = _yaml_load_object('Translator', config, DEFAULT_TRANSLATOR,
                                    content, reader, renderer, extensions, executioner)
+
     return translator, config
 
 def load_extensions(ext_list, ext_configs=None):
@@ -80,8 +81,6 @@ def load_extensions(ext_list, ext_configs=None):
     """
     if ext_configs is None:
         ext_configs = dict()
-    check_type('ext_list', ext_list, list)
-    check_type('ext_configs', ext_configs, dict)
 
     extensions = []
     for ext in ext_list:
@@ -114,9 +113,6 @@ def _get_module(ext):
         raise exceptions.MooseDocsException(msg, ext, type(ext))
 
     return name, ext
-
-def _yaml_load_executioner(config):
-    """Load the Executioner object for the translator."""
 
 def _yaml_load_extensions(config):
     """Load extensions from the Extensions block of the YAML configuration file."""
@@ -163,11 +159,11 @@ def _yaml_load_object(name, config, default, *args):
 
     options = config.get(name, dict())
     obj_type = options.pop('type', default)
-    #try:
-    return eval(obj_type)(*args, **options)
-    #except NameError:
-    #    msg = "ERROR: The %s block must contain a valid object name."
-    #    LOG.error(msg, name)
+    try:
+        return eval(obj_type)(*args, **options)
+    except NameError:
+        msg = "ERROR: The %s block must contain a valid object name."
+        LOG.error(msg, name)
 
 
 def _yaml_load_content(config, in_ext):

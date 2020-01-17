@@ -13,7 +13,9 @@ import sys
 import re
 import subprocess
 import mooseutils
+
 import MooseDocs
+from .. import common
 
 try:
     import bs4
@@ -75,7 +77,7 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
     gold_fname = out_fname.replace(out_dir, gold_dir)
 
     # Read the content to be tested
-    out_content = MooseDocs.common.read(out_fname)
+    out_content = common.read(out_fname)
     out_content = prepare_content(out_content)
 
     # Update gold content
@@ -116,11 +118,11 @@ def main(options):
 
     # Create the content
     config = options.form + '.yml'
-    subprocess.check_output(['python', 'moosedocs.py', 'build',
-                             '--config', config,
-                             '--executioner', options.executioner,
-                             '--disable', ' '.join(options.disable)],
-                            cwd=os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'test'))
+    cmd = ['python', 'moosedocs.py', 'build', '--config', config, '--executioner', options.executioner]
+    if options.disable:
+        cmd += ['--disable', ' '.join(options.disable)]
+    print(' '.join(cmd))
+    subprocess.check_output(cmd, cwd=os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'test'))
 
     # Define output and gold directories
     out_dir = os.path.join('output', options.form)

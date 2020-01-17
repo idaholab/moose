@@ -73,6 +73,14 @@ class Node(object):
         """Return a list of all descendants, children's children etc."""
         return search.iterate(self, method=search.IterMethod.PRE_ORDER)
 
+    @property
+    def count(self):
+        """Return the number of all descendents"""
+        count = len(self.__children)
+        for child in self.__children:
+            count += child.count
+        return count
+
     def __iter__(self):
         """Iterate of the children (e.g., `for child in node:`)"""
         return iter(self.__children)

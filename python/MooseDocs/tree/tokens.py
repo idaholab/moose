@@ -11,7 +11,7 @@ import logging
 import copy
 import moosetree
 import MooseDocs
-from MooseDocs.tree.base import NodeBase
+from .base import NodeBase
 
 LOG = logging.getLogger(__name__)
 

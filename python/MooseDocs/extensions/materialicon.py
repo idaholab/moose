@@ -8,9 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.tree import html, tokens, latex
-from MooseDocs.extensions import command, core
+from ..base import components, LatexRenderer
+from ..tree import html, tokens, latex
+from . import command, core
 
 def make_extension(**kwargs):
     return MaterialIconExtension(**kwargs)
@@ -22,7 +22,7 @@ class MaterialIconExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
