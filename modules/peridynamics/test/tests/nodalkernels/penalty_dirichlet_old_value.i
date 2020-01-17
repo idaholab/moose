@@ -65,7 +65,7 @@
 
 # [BCs]
 #   [./fix]
-#     type = PresetBC
+#     type = DirichletBC
 #     variable = temp
 #     value = 0
 #     boundary = 'pd_nodes_top pd_nodes_left pd_nodes_right pd_nodes_bottom'
