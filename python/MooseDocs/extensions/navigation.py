@@ -375,16 +375,21 @@ class NavigationExtension(Extension):
         parent['data-target'] = id_
 
         node = self.translator.findPage(filename)
-        wrap = html.Tag(div, 'div', class_='moose-mega-menu-wrapper')
 
-        # TODO: This needs to be improved because every page is performing this action, but caching
-        #       the rendering is not possible because the relative links that are created. The
-        #       re-calculation isn't much of a problem until the CIVET/SQA extensions are used and
-        #       1000s of pages are being generated.
-        ast = tokens.Token(None)
-        content = self.translator.reader.read(node)
-        self.translator.reader.tokenize(ast, content, page)
-        self.translator.renderer.render(wrap, ast, page)
+        # The "mega" menus appear on every page so the results of the rendered the mega menu
+        # page(s) and cache the results. When the CIVET/SQA extensions are
+        # enabled 7000+ pages are generated, thus this cache becomes very important.
+        key = (os.path.dirname(page.local), node.local) # cache on current directory and menu name
+        if key not in self.__menu_cache:
+            wrap = html.Tag(div, 'div', class_='moose-mega-menu-wrapper')
+            ast = tokens.Token(None)
+            content = self.translator.reader.read(node)
+            self.translator.reader.tokenize(ast, content, page)
+            self.translator.renderer.render(wrap, ast, page)
+            self.__menu_cache[key] = wrap.copy()
+        else:
+            wrap = self.__menu_cache[key].copy()
+            wrap.parent = div
 
     def _buildDropdown(self, parent, page, tag_id, items):
         """Creates sublist for dropdown navigation."""
