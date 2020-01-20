@@ -191,7 +191,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             self.translator.executePageMethod('preRead', node)
             content = self.translator.reader.read(node) if node.get('read', True) else ''
             self.translator.executePageMethod('postRead', node, args=(copy.copy(content),))
-            self._resetConfig()
 
         return content
 
@@ -204,7 +203,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             if node.get('tokenize', True):
                 self.translator.reader.tokenize(ast, content, node)
             self.translator.executePageMethod('postTokenize', node, args=(ast,))
-            self._resetConfig()
 
         return ast
 
@@ -217,7 +215,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             if node.get('render', True):
                 self.translator.renderer.render(result, ast, node)
             self.translator.executePageMethod('postRender', node, args=(result,))
-            self._resetConfig()
 
         return result
 
@@ -237,14 +234,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         for node in other_nodes:
             self.translator.renderer.write(node)
         return time.time() - start
-
-    def _resetConfig(self):
-        """Reset the config data for the Translator, Renderer, an Extensions"""
-        pass
-        #self.translator.resetConfig()
-        #self.translator.renderer.resetConfig()
-        #for ext in self.translator.extensions:
-        #    ext.resetConfig()
 
 
 class Serial(Executioner):

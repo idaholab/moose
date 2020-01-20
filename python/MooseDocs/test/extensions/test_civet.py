@@ -126,12 +126,10 @@ class TestInlineCivetWithConfig(CivetTestCase):
     def testReportMaterialize(self):
         ast = self.tokenize(self.REPORT)
         res = self.render(ast, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', size=3, class_='moose-content')
-        self.assertHTMLTag(res(0), 'h1', size=1, string='Test Results')
-        self.assertHTMLTag(res(1), 'p', size=1, string='kernels/simple_diffusion.test')
-        self.assertHTMLTag(res(2), 'div', size=1, class_='moose-civet-test-report')
-        self.assertHTMLTag(res(2,0), 'table')
-        self.assertGreater(len(res(2,0)), 1)
+        self.assertHTMLTag(res, 'div', size=1, class_='moose-content')
+        self.assertHTMLTag(res(0), 'div', size=1, class_='moose-civet-test-report')
+        self.assertHTMLTag(res(0,0), 'table')
+        self.assertGreater(len(res(0,0)), 1)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
