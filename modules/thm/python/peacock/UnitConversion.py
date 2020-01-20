@@ -628,6 +628,100 @@ class EnergyGroup(UnitGroup):
         return "Energy"
 
 
+# Time units
+
+class SecondUnit(Unit):
+
+    def name(self):
+        return "Second"
+
+    def unit(self):
+        return [ "s", "sec", "secs", "second", "seconds" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class MinuteUnit(Unit):
+
+    def name(self):
+        return "Minute"
+
+    def unit(self):
+        return [ "min", "mins", "minute", "minutes" ]
+
+    def to(self, value):
+        return value * 60.
+
+    def frm(self, value):
+        return value / 60.
+
+
+class HourUnit(Unit):
+
+    def name(self):
+        return "Hour"
+
+    def unit(self):
+        return [ "h", "hr", "hrs", "hour", "hours" ]
+
+    def to(self, value):
+        return value * 3600.
+
+    def frm(self, value):
+        return value / 3600.
+
+
+class DayUnit(Unit):
+
+    def name(self):
+        return "Day"
+
+    def unit(self):
+        return [ "day", "days" ]
+
+    def to(self, value):
+        return value * 86400.
+
+    def frm(self, value):
+        return value / 86400.
+
+
+class YearUnit(Unit):
+
+    def name(self):
+        return "Year"
+
+    def unit(self):
+        return [ "year", "years" ]
+
+    def to(self, value):
+        # assuming 365 days in a year
+        return value * 31536000.
+
+    def frm(self, value):
+        return value / 31536000.
+
+
+class TimeGroup(UnitGroup):
+    """
+    Group of time units
+    """
+    def __init__(self):
+        super(TimeGroup, self).__init__([
+        SecondUnit(),
+        MinuteUnit(),
+        HourUnit(),
+        DayUnit(),
+        YearUnit()
+    ])
+
+    def name(self):
+        return "Time"
+
 # Unit groups
 
 GROUPS = [
@@ -638,5 +732,6 @@ GROUPS = [
     VolumeGroup(),
     MassGroup(),
     MassFlowRateGroup(),
-    EnergyGroup()
+    EnergyGroup(),
+    TimeGroup()
 ]

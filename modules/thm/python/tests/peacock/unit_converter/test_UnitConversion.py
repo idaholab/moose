@@ -226,5 +226,39 @@ class TestUnitConversion(unittest.TestCase):
         self.assertTrue(energy.name() == 'Energy')
 
 
+    def testTime(self):
+        sec = SecondUnit()
+        self.assertTrue(sec.name() == 'Second')
+        self.assertTrue(sec.unit() == [ "s", "sec", "secs", "second", "seconds" ])
+        self.assertAlmostEqual(sec.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(sec.frm(123.456), 123.456, places = 6)
+
+        min = MinuteUnit()
+        self.assertTrue(min.name() == 'Minute')
+        self.assertTrue(min.unit() == [ "min", "mins", "minute", "minutes" ])
+        self.assertAlmostEqual(min.to(1.), 60., places = 6)
+        self.assertAlmostEqual(min.frm(60), 1., places = 6)
+
+        hour = HourUnit()
+        self.assertTrue(hour.name() == 'Hour')
+        self.assertTrue(hour.unit() == [ "h", "hr", "hrs", "hour", "hours" ])
+        self.assertAlmostEqual(hour.to(1.), 3600, places = 6)
+        self.assertAlmostEqual(hour.frm(3600.), 1., places = 6)
+
+        day = DayUnit()
+        self.assertTrue(day.name() == 'Day')
+        self.assertTrue(day.unit() == [ "day", "days" ])
+        self.assertAlmostEqual(day.to(1.), 86400., places = 6)
+        self.assertAlmostEqual(day.frm(86400.), 1., places = 6)
+
+        year = YearUnit()
+        self.assertTrue(year.name() == 'Year')
+        self.assertTrue(year.unit() == [ "year", "years" ])
+        self.assertAlmostEqual(year.to(1.), 31536000., places = 6)
+        self.assertAlmostEqual(year.frm(31536000.), 1., places = 6)
+
+        t = TimeGroup()
+        self.assertTrue(t.name() == 'Time')
+
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)

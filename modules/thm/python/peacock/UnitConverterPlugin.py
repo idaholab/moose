@@ -22,7 +22,8 @@ class UnitConverterPlugin(QtWidgets.QWidget):
             'Length': 'Meter',
             'Temperature': 'Kelvin',
             'Energy': 'Joule per kilogram',
-            'Mass flow rate': 'Kilogram per second'
+            'Mass flow rate': 'Kilogram per second',
+            'Time': 'Second'
         }
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
