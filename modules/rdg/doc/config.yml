@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE rDG Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/rdg
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE rDG Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/rdg
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/rdg
         hide: !include framework/doc/hidden.yml

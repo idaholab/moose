@@ -5,11 +5,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Peridynamics Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/peridynamics
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Peridynamics Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/peridynamics
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/peridynamics
         hide:

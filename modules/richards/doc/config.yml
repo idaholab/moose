@@ -11,10 +11,11 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Richards Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/richards
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Richards Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/richards
     MooseDocs.extensions.appsyntax:
         active: False
