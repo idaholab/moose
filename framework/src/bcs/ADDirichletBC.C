@@ -37,3 +37,6 @@ ADDirichletBC<compute_stage>::computeQpValue()
 {
   return _value;
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADDirichletBC);
