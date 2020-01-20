@@ -568,7 +568,7 @@ class MassGroup(UnitGroup):
 
 # Energy/enthalpy units
 
-class JoulePerKilogramlUnit(Unit):
+class JoulePerKilogramUnit(Unit):
 
     def name(self):
         return "Joule per kilogram"
@@ -583,7 +583,7 @@ class JoulePerKilogramlUnit(Unit):
         return value
 
 
-class KilojoulePerKilogramlUnit(Unit):
+class KilojoulePerKilogramUnit(Unit):
 
     def name(self):
         return "Kilojoule per kilogram"
@@ -598,7 +598,7 @@ class KilojoulePerKilogramlUnit(Unit):
         return value / 1000
 
 
-class BtuPerPoundlUnit(Unit):
+class BtuPerPoundUnit(Unit):
 
     def name(self):
         return "British thermal unit per pound"
@@ -619,9 +619,9 @@ class EnergyGroup(UnitGroup):
     """
     def __init__(self):
         super(EnergyGroup, self).__init__([
-        BtuPerPoundlUnit(),
-        JoulePerKilogramlUnit(),
-        KilojoulePerKilogramlUnit()
+        BtuPerPoundUnit(),
+        JoulePerKilogramUnit(),
+        KilojoulePerKilogramUnit()
     ])
 
     def name(self):
