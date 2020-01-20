@@ -116,25 +116,25 @@
 
 [BCs]
   [./no_disp_r_left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
   [./no_disp_r_right]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     boundary = right
     value = 0.0
   [../]
   [./no_disp_z_bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = 't'

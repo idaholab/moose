@@ -101,45 +101,45 @@
 
 [BCs]
   [./no_x2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.0
   [../]
   [./no_x1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./no_y1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./no_y2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0
   [../]
 
   [./z_fixed_sides_xmin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0
   [../]
   [./z_fixed_sides_xmax]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = right
     value = 0
   [../]
 
   [./bottomz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = bottomz_middle
     function = min(10*t,1)

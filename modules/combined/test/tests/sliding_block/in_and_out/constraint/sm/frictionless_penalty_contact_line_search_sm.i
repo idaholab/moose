@@ -128,13 +128,13 @@
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = horizontal_movement
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement

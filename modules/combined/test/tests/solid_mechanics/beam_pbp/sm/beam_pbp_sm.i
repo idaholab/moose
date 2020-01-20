@@ -44,21 +44,21 @@
 
 [BCs]
   [./x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
   [./y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 10
     value = 0.0
   [../]
 
   [./z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 3
     value = 0.0

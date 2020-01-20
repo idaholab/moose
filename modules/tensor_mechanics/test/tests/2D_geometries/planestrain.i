@@ -27,19 +27,19 @@
 
 [BCs]
   [./leftx]
-    type = PresetBC
+    type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
   [../]
   [./pull]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 3
     variable = disp_y
     function = pull

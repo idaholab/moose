@@ -41,7 +41,7 @@
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 1001
     function = '0.01*t'

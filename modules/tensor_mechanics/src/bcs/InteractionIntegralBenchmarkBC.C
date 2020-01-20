@@ -18,7 +18,7 @@ InputParameters
 InteractionIntegralBenchmarkBC::validParams()
 {
   MooseEnum disp_component("x=0 y=1 z=2");
-  InputParameters params = PresetNodalBC::validParams();
+  InputParameters params = DirichletBCBase::validParams();
   params.addClassDescription("Implements a boundary condition that enforces a displacement field "
                              "around a crack tip based on applied stress intensity factors.");
   params.addRequiredParam<MooseEnum>(
@@ -35,11 +35,12 @@ InteractionIntegralBenchmarkBC::validParams()
                                         "Function describing the Mode II stress intensity factor.");
   params.addRequiredParam<FunctionName>(
       "KIII_function", "Function describing the Mode III stress intensity factor.");
+  params.set<bool>("preset") = true;
   return params;
 }
 
 InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const InputParameters & parameters)
-  : PresetNodalBC(parameters),
+  : DirichletBCBase(parameters),
     _component(getParam<MooseEnum>("component")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),

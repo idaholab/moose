@@ -60,18 +60,21 @@
   [./no_x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 'left'
     value = 0.0
   [../]
   [./no_y]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 'bottom'
     value = 0.0
   [../]
   [./top_disp]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 'top'
     function = ramp_disp_y
   [../]

@@ -9,11 +9,10 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "FunctionDirichletBC.h"
 
 // Forward Declarations
 class FunctionPresetBC;
-class Function;
 
 template <>
 InputParameters validParams<FunctionPresetBC>();
@@ -21,20 +20,13 @@ InputParameters validParams<FunctionPresetBC>();
 /**
  * Defines a boundary condition that forces the value to be a user specified
  * function at the boundary.
+ *
+ * Deprecated: use FunctionDirichletBC with preset = true instead.
  */
-class FunctionPresetBC : public PresetNodalBC
+class FunctionPresetBC : public FunctionDirichletBC
 {
 public:
   static InputParameters validParams();
 
   FunctionPresetBC(const InputParameters & parameters);
-
-protected:
-  /**
-   * Evaluate the function at the current quadrature point and timestep.
-   */
-  virtual Real computeQpValue() override;
-
-  /// Function being used for evaluation of this BC
-  const Function & _func;
 };

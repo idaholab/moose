@@ -198,7 +198,7 @@
     value=0.0
   [../]
   [./bottom_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
     function = displacement_bc

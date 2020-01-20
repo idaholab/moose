@@ -29,13 +29,13 @@
 
 [BCs]
   [./symmy]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0

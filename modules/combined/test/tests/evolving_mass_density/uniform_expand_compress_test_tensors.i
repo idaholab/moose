@@ -90,18 +90,21 @@
   [./top]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 11
     function = rampConstant2
   [../]
   [./front]
     type = FunctionDirichletBC
     variable = disp_z
+    preset = false
     boundary = 13
     function = rampConstant2
   [../]
   [./side]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 12
     function = rampConstant2
   [../]

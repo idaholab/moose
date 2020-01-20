@@ -29,38 +29,38 @@
 
 [BCs]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     variable = 'disp_x'
     boundary = bottom
     value = 0
   [../]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = 'disp_y'
     boundary = bottom
     value = 0
   [../]
   [./bottom_z]
-    type = PresetBC
+    type = DirichletBC
     variable = 'disp_z'
     boundary = bottom
     value = 0
   [../]
 
   [./top_x]
-    type = PresetBC
+    type = DirichletBC
     variable = 'disp_x'
     boundary = top
     value = 0
   [../]
   [./top_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = 'disp_y'
     boundary = top
     function = top_displacement
   [../]
   [./top_z]
-    type = PresetBC
+    type = DirichletBC
     variable = 'disp_z'
     boundary = top
     value = 0

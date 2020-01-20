@@ -123,19 +123,19 @@
 
 [BCs]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'bottom top'
     variable = disp_x
     value = 0.0
   [../]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'bottom top'
     variable = disp_y
     value = 0.0
   [../]
   [./bottom_z]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'bottom top'
     variable = disp_z
     value = 0.0

@@ -31,13 +31,13 @@
     value = 0
   [../]
   [./right]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     boundary = right
     function = 't'
   [../]
   [./left_v]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = v
     boundary = left
     function = 't'

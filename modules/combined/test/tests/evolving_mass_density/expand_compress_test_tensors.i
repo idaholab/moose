@@ -81,6 +81,7 @@
   [../]
   [./top]
     type = FunctionDirichletBC
+    preset = false
     function = rampConstant1
   [../]
 []

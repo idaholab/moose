@@ -75,37 +75,37 @@
 
 [BCs]
   [./bottomx]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
   [./topx]
-    type = PresetBC
+    type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
   [../]
   [./topy]
-    type = PresetBC
+    type = DirichletBC
     boundary = top
     variable = disp_y
     value = 0.0
   [../]
   [./topt]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = top
     variable = temp
     function = 273-t*27.3
   [../]
   [./bott]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = bottom
     variable = temp
     function = 273

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBC.h"
 
 class PresetBC;
 
@@ -19,8 +19,10 @@ InputParameters validParams<PresetBC>();
 /**
  * Defines a boundary condition that (pre)sets the solution at the boundary
  * to be a user specified value.
+ *
+ * Deprecated: use DirichletBC with preset = true instead.
  */
-class PresetBC : public PresetNodalBC
+class PresetBC : public DirichletBC
 {
 public:
   static InputParameters validParams();
@@ -29,6 +31,4 @@ public:
 
 protected:
   virtual Real computeQpValue() override;
-
-  const Real & _value;
 };

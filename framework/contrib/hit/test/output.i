@@ -62,13 +62,13 @@
   [../]
 
   [left]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     function = 0.02*t
     boundary = 3
   []
   [back]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     function = 0.01*t
     boundary = 1

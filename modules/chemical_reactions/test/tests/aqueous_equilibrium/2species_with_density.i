@@ -93,6 +93,7 @@
   [./a_left]
     type = DirichletBC
     variable = a
+    preset = false
     boundary = left
     value = 1.0e-2
   [../]
@@ -104,6 +105,7 @@
   [./b_left]
     type = DirichletBC
     variable = b
+    preset = false
     boundary = left
     value = 1.0e-2
   [../]
@@ -115,12 +117,14 @@
   [./pleft]
     type = DirichletBC
     variable = pressure
+    preset = false
     value = 2
     boundary = left
   [../]
   [./pright]
     type = DirichletBC
     variable = pressure
+    preset = false
     value = 1
     boundary = right
   [../]

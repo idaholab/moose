@@ -319,7 +319,7 @@
     value = 0.0
   [../]
   [./roof]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 21
     function = excav_sideways

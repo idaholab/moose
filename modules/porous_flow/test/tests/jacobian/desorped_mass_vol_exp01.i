@@ -71,19 +71,19 @@
 [BCs]
   # necessary otherwise volumetric strain rate will be zero
   [./disp_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
   [../]
   [./disp_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'left right'
   [../]
   [./disp_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'left right'

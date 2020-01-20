@@ -108,67 +108,67 @@
 [BCs]
   active = 'bcside1 bcside2ux bcside2uy bcside4ux bcside4uy bcside3uy bcside3ux bcx'
   [./bcside1]
-    type = PresetBC
+    type = DirichletBC
     variable = 'uy uz'
     boundary = '6 7'
     value = 0
   [../]
   [./bcside2ux]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uy
     boundary = '8 9'
     function = side2uxfunc
   [../]
   [./bcside2uy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uz
     boundary = '8 9'
     function = side2uyfunc
   [../]
   [./bcside3ux]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uy
     boundary = '10 11'
     function = side3uxfunc
   [../]
   [./bcside3uy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uz
     boundary = '10 11'
     function = side3uyfunc
   [../]
   [./bcside4ux]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uy
     boundary = '12 13'
     function = side4uxfunc
   [../]
   [./bcside4uy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = uz
     boundary = '12 13'
     function = side4uyfunc
   [../]
   [./bot]
-    type = PresetBC
+    type = DirichletBC
     variable = 'ux uy uz'
     boundary = back
     value = 0
   [../]
   [./topxz]
-    type = PresetBC
+    type = DirichletBC
     variable = 'ux uz'
     boundary = front
     value = 0
   [../]
   [./topy]
-    type = PresetBC
+    type = DirichletBC
     variable = uy
     boundary = front
     value = 1
   [../]
   [./bcx]
-    type = PresetBC
+    type = DirichletBC
     variable = ux
     boundary = '6 7 8 9 10 11 12 13'
     value = 0

@@ -270,25 +270,25 @@
 
 [BCs]
   [./roller_tmax]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = dmax
   [../]
   [./roller_tmin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = dmin
   [../]
   [./pinned_top_bottom_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'top bottom'
   [../]
   [./pinned_top_bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'top bottom'
@@ -311,7 +311,7 @@
   [../]
 
   [./cold_co2]
-    type = PresetBC
+    type = DirichletBC
     boundary = injection_area
     variable = T
     value = 290  # injection temperature

@@ -112,6 +112,7 @@
   [./left]
     type = DirichletBC
     boundary = left
+    preset = false
     value = 3E6
     variable = pp
   [../]

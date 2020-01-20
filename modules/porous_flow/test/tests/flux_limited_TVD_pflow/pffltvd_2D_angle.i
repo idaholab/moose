@@ -61,13 +61,13 @@
 
 [BCs]
   [./constant_boundary_porepressure]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = porepressure
     function = '1 - x - 2 * y'
     boundary = 'left right top bottom'
   [../]
   [./no_tracer_at_boundary]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer
     value = 0
     boundary = 'left right top bottom'

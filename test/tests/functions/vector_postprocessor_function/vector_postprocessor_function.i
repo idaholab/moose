@@ -74,7 +74,7 @@
     function = ramp_u
   [../]
   [./bottom_u]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = u
     value = 0

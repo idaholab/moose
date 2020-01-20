@@ -220,6 +220,7 @@
   [./b1x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 1
     value = 0
   [../]
@@ -227,6 +228,7 @@
   [./b1y]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 1
     value = 0
   [../]
@@ -234,6 +236,7 @@
   [./b1z]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = 1
     value = 0
   [../]
@@ -241,6 +244,7 @@
   [./b2x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 2
     value = 0
   [../]
@@ -248,6 +252,7 @@
   [./b2y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 2
     function = disp_y
   [../]
@@ -255,6 +260,7 @@
   [./b2z]
     type = DirichletBC
     variable = disp_z
+    preset = false
     boundary = 2
     value = 0
   [../]

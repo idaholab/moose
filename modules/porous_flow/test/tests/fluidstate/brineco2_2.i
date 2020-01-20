@@ -35,13 +35,13 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     value = 20e6
     variable = pgas
     boundary = left
   [../]
   [./right]
-    type = PresetBC
+    type = DirichletBC
     value = 20e6
     variable = pgas
     boundary = right

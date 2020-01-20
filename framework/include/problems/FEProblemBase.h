@@ -196,7 +196,7 @@ public:
    * @param abstol         Absolute residual convergence tolerance
    * @param nfuncs         Number of function evaluations
    * @param max_funcs      Maximum Number of function evaluations
-   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of PresetBC
+   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of preset BCs
    * values on solution vector
    * @param div_threshold  Maximum value of residual before triggering divergence check
    */

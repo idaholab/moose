@@ -60,7 +60,7 @@
 
 [BCs]
   [./z]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = right
     value = -1

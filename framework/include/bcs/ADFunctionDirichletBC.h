@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADNodalBC.h"
+#include "ADDirichletBCBase.h"
 
 template <ComputeStage>
 class ADFunctionDirichletBC;
@@ -22,7 +22,7 @@ declareADValidParams(ADFunctionDirichletBC);
  * Sets the values of a nodal variable at nodes to values specified by a function
  */
 template <ComputeStage compute_stage>
-class ADFunctionDirichletBC : public ADNodalBC<compute_stage>
+class ADFunctionDirichletBC : public ADDirichletBCBase<compute_stage>
 {
 public:
   static InputParameters validParams();
@@ -30,10 +30,10 @@ public:
   ADFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual ADReal computeQpValue() override;
 
   /// The function describing the Dirichlet condition
   const Function & _function;
 
-  usingNodalBCMembers;
+  usingDirichletBCBaseMembers;
 };

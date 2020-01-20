@@ -30,19 +30,19 @@
 
 [BCs]
   [./symmetry_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     value = 0
     boundary = left
   [../]
   [./roller_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = bottom
   [../]
   [./top_load]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     function = -0.01*t
     boundary = top

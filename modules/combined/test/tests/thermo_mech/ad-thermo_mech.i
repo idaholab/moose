@@ -54,6 +54,7 @@
   [./bottom_temp]
     type = DirichletBC
     variable = temp
+    preset = false
     boundary = 1
     value = 10.0
   [../]

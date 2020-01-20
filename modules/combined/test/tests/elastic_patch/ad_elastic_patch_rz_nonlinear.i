@@ -58,12 +58,14 @@
   [./ur]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 10
     function = '1e-2*x'
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 10
     function = '1e-2*y'
   [../]

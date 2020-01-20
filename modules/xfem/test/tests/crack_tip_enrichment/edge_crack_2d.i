@@ -149,19 +149,19 @@
     factor = -1
   [../]
   [./fix_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = right_bottom_node
     variable = disp_y
     value = 0.0
   [../]
   [./fix_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = right_bottom_node
     variable = disp_x
     value =  0.0
   [../]
   [./fix_x2]
-    type = PresetBC
+    type = DirichletBC
     boundary = right_top_node
     variable = disp_x
     value =  0.0

@@ -60,24 +60,28 @@ starting_point = .5
   [./botx]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 40
     value = 0.0
   [../]
   [./topx]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 30
     value = 0.0
   [../]
   [./boty]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 40
     value = 0.0
   [../]
   [./topy]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 30
     function = '${starting_point} - t'
   [../]

@@ -360,7 +360,7 @@
 
 [BCs]
   [./left_r]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "NodalBC.h"
+#include "DirichletBCBase.h"
 
 class DirichletBC;
 
@@ -21,7 +21,7 @@ InputParameters validParams<DirichletBC>();
  *
  * Sets the value in the node
  */
-class DirichletBC : public NodalBC
+class DirichletBC : public DirichletBCBase
 {
 public:
   static InputParameters validParams();
@@ -29,7 +29,7 @@ public:
   DirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpValue() override;
 
   /// The value for this BC
   const Real & _value;

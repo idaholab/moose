@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 #include "CrackFrontDefinition.h"
 
 // Forward Declarations
@@ -25,7 +25,7 @@ void addInteractionIntegralBenchmarkBCParams(InputParameters & params);
  * crack tip based on applied stress intensity factors KI, KII, and KIII. This
  * is used to test the interaction integral capability.
  */
-class InteractionIntegralBenchmarkBC : public PresetNodalBC
+class InteractionIntegralBenchmarkBC : public DirichletBCBase
 {
 public:
   static InputParameters validParams();

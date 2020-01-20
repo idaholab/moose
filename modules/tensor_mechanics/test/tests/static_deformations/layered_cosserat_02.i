@@ -118,31 +118,31 @@
   # xmin is called left
   # xmax is called right
   [./strain_xx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'left right'
     function = 'y+2*z'
   [../]
   [./strain_yy]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'bottom top'
     function = 'x-1.5*z'
   [../]
   [./strain_zz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'back front'
     function = '1.1*x-2.2*y'
   [../]
   [./wc_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_x
     boundary = 'left right'
     function = 0.5
   [../]
   [./wc_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_y
     boundary = 'left right'
     function = 0.8

@@ -205,7 +205,7 @@
 
 [BCs]
   [./cold_gas]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = temperature
     value = 20

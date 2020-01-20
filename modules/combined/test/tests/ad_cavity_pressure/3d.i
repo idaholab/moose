@@ -195,13 +195,13 @@
     value = 0.0
   [../]
   [./prescribed_left]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 13
     function = displ_positive
   [../]
   [./prescribed_right]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 14
     function = displ_negative
@@ -237,13 +237,13 @@
     value = 0.0
   [../]
   [./temperatureInterior]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     boundary = 100
     function = temp1
     variable = temp
   [../]
   [./MaterialInput]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     boundary = '100 13 14 15 16'
     function = material_input_function
     variable = material_input

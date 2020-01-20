@@ -96,21 +96,21 @@
 [BCs]
 # pin particle along symmetry planes
   [./no_disp_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = xzero
     value = 0.0
   [../]
 
   [./no_disp_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = yzero
     value = 0.0
   [../]
 
   [./no_disp_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = zzero
     value = 0.0

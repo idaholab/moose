@@ -110,13 +110,13 @@
     value = 0.0
   [../]
   [./top_shear_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = '0.01*t'
   [../]
   [./top_shear_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = top
     function = '0.01*t'

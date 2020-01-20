@@ -175,7 +175,7 @@
     value = 0.0
   [../]
   [./tramp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = '6'
     function = tempramp

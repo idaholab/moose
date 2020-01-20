@@ -77,24 +77,28 @@
   [./a_left]
     type = DirichletBC
     variable = a
+    preset = false
     boundary = left
     value = 1.0e-2
   [../]
   [./a_right]
     type = DirichletBC
     variable = a
+    preset = false
     boundary = right
     value = 0
   [../]
   [./b_left]
     type = DirichletBC
     variable = b
+    preset = false
     boundary = left
     value = 0
   [../]
   [./b_right]
     type = DirichletBC
     variable = b
+    preset = false
     boundary = right
     value = 1.0e-2
   [../]

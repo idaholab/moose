@@ -623,6 +623,9 @@ Console::outputSystemInformation()
 
   if (_system_info_flags.contains("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
+
+  // Output the legacy flags, these cannot be turned off so they become annoying to people.
+  _console << ConsoleUtils::outputLegacyInformation(_app);
 }
 
 void

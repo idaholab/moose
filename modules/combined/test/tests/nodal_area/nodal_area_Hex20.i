@@ -45,7 +45,7 @@
 
 [BCs]
   [./move_right]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = '1'
     variable = displ_x
     function = disp

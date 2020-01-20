@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 #include "PeridynamicsMesh.h"
 
 class RBMPresetOldValuePD;
@@ -21,7 +21,7 @@ InputParameters validParams<RBMPresetOldValuePD>();
  * Class to apply preset BC of old variable solution based on the singularity of nodal shape tensor.
  * Used to fix nodes with rigid body motion.
  */
-class RBMPresetOldValuePD : public PresetNodalBC
+class RBMPresetOldValuePD : public DirichletBCBase
 {
 public:
   RBMPresetOldValuePD(const InputParameters & parameters);

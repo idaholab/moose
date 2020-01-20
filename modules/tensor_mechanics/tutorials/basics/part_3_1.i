@@ -62,25 +62,25 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x #change the variable to reflect the new displacement names
     boundary = 1
     value = 0.0
   [../]
   [./back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z #change the variable to reflect the new displacement names
     boundary = back
     value = 0.0
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y #change the variable to reflect the new displacement names
     boundary = 3
     value = 0.0
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y #change the variable to reflect the new displacement names
     boundary = 4
     function = '0.0007*t'

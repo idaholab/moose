@@ -35,38 +35,38 @@
 
 [BCs]
   [./no_x2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.0
   [../]
   [./no_x1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./no_y1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./no_y2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0
   [../]
 
   [./topz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0
   [../]
   [./bottomz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = back
     function = 'if(t>1,-2.0+t,-t)'

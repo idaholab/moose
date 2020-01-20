@@ -260,7 +260,7 @@
     value = 0.0
   [../]
   [./top_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = appl_dispy

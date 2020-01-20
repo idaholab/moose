@@ -59,25 +59,25 @@
 
 [BCs]
   [./xleft]
-    type = PresetBC
+    type = DirichletBC
     value = 1
     variable = massfrac0
     boundary = left
   [../]
   [./xright]
-    type = PresetBC
+    type = DirichletBC
     value = 0
     variable = massfrac0
     boundary = right
   [../]
   [./pright]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = right
     value = 1e5
   [../]
   [./pleft]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = left
     value = 1.1e5

@@ -74,6 +74,7 @@
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 1
     value = 10
     extra_vector_tags = vec_tag1
@@ -82,6 +83,7 @@
   [./right]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 2
     value = 100
     extra_vector_tags = vec_tag2
@@ -90,6 +92,7 @@
   [./right1]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 2
     value = 100
   [../]
@@ -97,6 +100,7 @@
   [./right2]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 2
     value = 100
   [../]

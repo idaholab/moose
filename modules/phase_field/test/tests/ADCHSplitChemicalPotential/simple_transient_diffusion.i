@@ -46,13 +46,13 @@
 
 [BCs]
   [./leftc]
-    type = PresetBC
+    type = DirichletBC
     variable = c
     boundary = left
     value = 0
   [../]
   [./rightc]
-    type = PresetBC
+    type = DirichletBC
     variable = c
     boundary = right
     value = 1

@@ -35,26 +35,31 @@
 []
 
 [BCs]
+  # BCs cannot be preset due to Jacobian tests
   [./u_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'left'
     variable = u
   [../]
   [./u_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'right'
     variable = u
   [../]
   [./disp_r_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'left'
     variable = disp_r
   [../]
   [./disp_r_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'right'
     variable = disp_r

@@ -104,21 +104,21 @@
 
 [BCs]
   [./top_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
     function = disp_top_y
   [../]
 
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
   [../]
 
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0

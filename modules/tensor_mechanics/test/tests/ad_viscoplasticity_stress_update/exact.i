@@ -199,19 +199,19 @@
 
 [BCs]
   [./no_disp_x]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./no_disp_y]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./no_disp_z]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0

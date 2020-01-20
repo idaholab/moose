@@ -85,7 +85,7 @@
     value = 0.0
   [../]
   [./right_shear_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = right
     function = '0.001*t'

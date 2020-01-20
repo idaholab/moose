@@ -10,9 +10,9 @@ If MOOSE keeps sampling outside the region of validity of your equation of state
 
 ## Boundary conditions
 
-Inspect your boundary conditions very closely.  If variable $v$ is associated to the mass-balance equation for component $c$, then a `PresetBC` for `variable = v` is physically saying "add or remove component $c$ in order to keep variable $v$ fixed".  Is this really what you want?  What if you're trying to remove component $c$ but there is no component $c$ at the node in question?
+Inspect your boundary conditions very closely.  If variable $v$ is associated to the mass-balance equation for component $c$, then a preset `DirichletBC` for `variable = v` is physically saying "add or remove component $c$ in order to keep variable $v$ fixed".  Is this really what you want?  What if you're trying to remove component $c$ but there is no component $c$ at the node in question?
 
-Almost always it is better to use a [`PorousFlowSink`](PorousFlowSink.md) (see also [boundaries](boundaries.md)) instead.  This is numerically "smoother" than a `PresetBC` and also may be more easily interpreted physically as the influence of a boundary situated at $\infty$.
+Almost always it is better to use a [`PorousFlowSink`](PorousFlowSink.md) (see also [boundaries](boundaries.md)) instead.  This is numerically "smoother" than a preset `DirichletBC` and also may be more easily interpreted physically as the influence of a boundary situated at $\infty$.
 
 ## External fluxes
 
@@ -127,6 +127,3 @@ PorousFlow allows the use of other variables, not just porepressures, but mixtur
 ## Component disappearance
 
 Similar remarks may be made about component disappearance.  Often times it is useful to explicitly write the equations to determine where the zeroes (and noninvertability) are occuring.
-
-
-

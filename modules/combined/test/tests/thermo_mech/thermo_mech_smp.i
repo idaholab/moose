@@ -32,26 +32,26 @@
 
 [BCs]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
   [./bottom_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
   [./bottom_temp]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 1
     value = 10.0

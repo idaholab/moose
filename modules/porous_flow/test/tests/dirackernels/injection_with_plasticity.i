@@ -77,26 +77,26 @@ porosity0 = 0.1
 
 [BCs]
   [./p_top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = pp
     boundary = front
     function = ini_pp
   [../]
 
   [./x_roller]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0
   [../]
   [./y_roller]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'top bottom'
     value = 0
   [../]
   [./z_confined]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back front'
     value = 0

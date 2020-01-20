@@ -46,25 +46,25 @@
 
 [BCs]
   [./push_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = horizontal_movement
   [../]
   [./fix_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
   [./fix_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
   [../]
   [./fix_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0

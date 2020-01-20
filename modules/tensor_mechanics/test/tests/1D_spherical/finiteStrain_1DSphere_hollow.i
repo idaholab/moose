@@ -71,7 +71,7 @@
 
 [BCs]
   [./innerDisp]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = disp_r
     value = 0.0

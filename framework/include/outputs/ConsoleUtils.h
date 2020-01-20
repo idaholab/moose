@@ -81,9 +81,13 @@ std::string outputOutputInformation(MooseApp & app);
 std::string outputSystemInformationHelper(System & system);
 
 /**
+ * Output the legacy flag information
+ */
+std::string outputLegacyInformation(MooseApp & app);
+
+/**
  * Helper function function for stringstream formatting
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);
 
 } // ConsoleUtils namespace
-

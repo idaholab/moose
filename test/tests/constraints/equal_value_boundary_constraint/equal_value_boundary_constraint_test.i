@@ -26,12 +26,14 @@
   [./left]
     type = DirichletBC
     variable = diffused
+    preset = false
     boundary = 'left'
     value = 1.0
   [../]
   [./right]
     type = DirichletBC
     variable = diffused
+    preset = false
     boundary = 'right'
     value = 0.0
   [../]

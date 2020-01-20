@@ -54,7 +54,7 @@
 [BCs]
 # Define boundary conditions
   [./left_temp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = 3
     function = temp_left

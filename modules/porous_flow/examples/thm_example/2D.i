@@ -340,7 +340,7 @@
     variable = temp
   [../]
   [./fixed_outer_r]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     value = 0
     boundary = right
@@ -355,7 +355,7 @@
     flux_function = 'min(t/100.0,1)*(-2.294001475)' # 5.0E5 T/year = 15.855 kg/s, over area of 2Pi*0.1*11
   [../]
   [./cold_co2]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     variable = temp
     value = 294

@@ -253,7 +253,7 @@
 
 [BCs]
   [./hco3-_left]
-    type = PresetBC
+    type = DirichletBC
     variable = hco3-
     boundary = left
     value = 5E-2
@@ -265,25 +265,25 @@
     value = 5E-2
   [../]
   [./ca2+_left]
-    type = PresetBC
+    type = DirichletBC
     variable = ca2+
     boundary = left
     value = 5E-2
   [../]
   [./mg2+_left]
-    type = PresetBC
+    type = DirichletBC
     variable = mg2+
     boundary = left
     value = 5E-2
   [../]
   [./fe2+_left]
-    type = PresetBC
+    type = DirichletBC
     variable = fe2+
     boundary = left
     value = 5E-2
   [../]
   [./hco3-_right]
-    type = PresetBC
+    type = DirichletBC
     variable = hco3-
     boundary = right
     value = 1E-6
@@ -295,19 +295,19 @@
     value = 1e-6
   [../]
   [./ca2+_right]
-    type = PresetBC
+    type = DirichletBC
     variable = ca2+
     boundary = right
     value = 1E-6
   [../]
   [./mg2+_right]
-    type = PresetBC
+    type = DirichletBC
     variable = mg2+
     boundary = right
     value = 1E-6
   [../]
   [./fe2+_right]
-    type = PresetBC
+    type = DirichletBC
     variable = fe2+
     boundary = right
     value = 1E-6

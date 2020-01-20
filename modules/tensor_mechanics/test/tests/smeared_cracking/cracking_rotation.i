@@ -75,49 +75,49 @@
 
 [BCs]
   [./x_pin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '15 16'
     value = 0.0
   [../]
   [./y_pin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '15 16'
     value = 0.0
   [../]
   [./z_all]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '11 12 13 14 15 16 17 18'
     value = 0.0
   [../]
   [./x_lb]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = '11 12'
     function = 'if(t<10,0,if(t>=100,1,1-cos((t-10)*pi/180)))'
   [../]
   [./y_lb]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = '11 12'
     function = 'if(t<10,0,if(t>=100,1,sin((t-10)*pi/180)))'
   [../]
   [./x_lt]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = '13 14'
     function = '2+(t-100)*0.01'
   [../]
   [./x_rt]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = '17 18'
     function = '1+(t-100)*0.01'
   [../]
   [./top_pull]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = '13 14 17 18'
     function = 'if(t<5,t*0.01,0.05-(t-5)*0.01)'

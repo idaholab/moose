@@ -69,25 +69,25 @@
 
 [BCs]
   [./zbc]
-    type = PresetBC
+    type = DirichletBC
     variable = z_disp
     boundary = back
     value = 0
   [../]
   [./ybc]
-    type = PresetBC
+    type = DirichletBC
     variable = y_disp
     boundary = bottom
     value = 0
   [../]
   [./xbc]
-    type = PresetBC
+    type = DirichletBC
     variable = x_disp
     boundary = left
     value = 0
   [../]
   [./zmove]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = z_disp
     boundary = front
     function = topdisp

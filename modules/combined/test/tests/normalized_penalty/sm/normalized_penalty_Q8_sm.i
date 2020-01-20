@@ -81,14 +81,14 @@
   [../]
 
   [./y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '1 2 3 4'
     value = 0.0
   [../]
 
   [./right]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '3 4'
     value = 0

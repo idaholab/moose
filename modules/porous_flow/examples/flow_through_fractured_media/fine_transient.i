@@ -60,25 +60,25 @@
 
 [BCs]
   [./top]
-    type = PresetBC
+    type = DirichletBC
     value = 0
     variable = massfrac0
     boundary = top
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     value = 1
     variable = massfrac0
     boundary = bottom
   [../]
   [./ptop]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary =  top
     value = 1e6
   [../]
   [./pbottom]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = bottom
     value = 1.002e6

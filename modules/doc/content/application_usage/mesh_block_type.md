@@ -90,7 +90,8 @@ An illustration for mesh in UNV file format for having names for blocks and boun
 ...
 [BCs]
   [./left_bc] #Temperature on left edge is fixed at 800K
-    type = PresetBC
+    type = DirichletBC
+    preset = true
     variable = T
     #boundary = '1'
     boundary = 'left'
@@ -111,8 +112,8 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
 ```puppet
 [Mesh]
   file = three_block.unv
-  #the numbers should be verified from the 
-  #unv mesh format to be represented for a 
+  #the numbers should be verified from the
+  #unv mesh format to be represented for a
   #particular block and boundary of the geometry
   #The random BC ids 7 and 48 are written here
   #to highlight the role of verification from within
@@ -126,7 +127,8 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
 ...
 [BCs]
   [./left_bc] #Temperature on left edge is fixed at 800K
-    type = PresetBC
+    type = DirichletBC
+    preset = true
     variable = T
     #boundary = '7'
     boundary = 'left'
@@ -176,4 +178,3 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
   ```
 
 - This can also be set in the input file, but it is a good idea to do it in the code if you have a pure Lagrangian formulation.
-

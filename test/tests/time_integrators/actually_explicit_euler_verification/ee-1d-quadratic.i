@@ -58,6 +58,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
+    preset = false
     boundary = '0 1'
     function = exact_fn
   [../]

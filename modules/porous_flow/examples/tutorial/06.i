@@ -75,19 +75,19 @@
 
 [BCs]
   [./constant_injection_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 1E6
     boundary = injection_area
   [../]
   [./constant_outer_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 0
     boundary = rmax
   [../]
   [./injected_tracer]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer_concentration
     value = 0.5
     boundary = injection_area

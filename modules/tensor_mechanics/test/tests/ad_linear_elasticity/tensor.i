@@ -329,37 +329,37 @@
 
 [BCs]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = diffused
     boundary = 'right'
     value = 1
   [../]
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 0
   [../]
   [./disp_x_BC]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'bottom top'
     value = 0.5
   [../]
   [./disp_x_BC2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0.01
   [../]
   [./disp_y_BC]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.8
   [../]
   [./disp_y_BC2]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'left right'
     value = 0.02

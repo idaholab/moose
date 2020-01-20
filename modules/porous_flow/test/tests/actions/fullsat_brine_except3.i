@@ -35,13 +35,13 @@
 
 [BCs]
   [./t_bdy]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 'left right'
     value = 323.15
   [../]
   [./p_bdy]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = 'left right'
     value = 20E6

@@ -44,13 +44,13 @@
 
 [BCs]
   [./constant_injection_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 1
     boundary = left
   [../]
   [./no_tracer_on_left]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer
     value = 0
     boundary = left

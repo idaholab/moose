@@ -79,21 +79,21 @@
   [../]
   [./anchor_x]
     #Anchors the bottom and sides against deformation in the x-direction
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
   [../]
   [./anchor_y]
     #Anchors the bottom and sides against deformation in the y-direction
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
   [../]
   [./anchor_z]
     #Anchors the bottom and sides against deformation in the z-direction
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0

@@ -136,13 +136,13 @@
 
 [BCs]
   [./lhs_fixed_a]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'left'
     variable = frac
     value = 1
   [../]
   [./lhs_fixed_b]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'left'
     variable = pp
     value = 1

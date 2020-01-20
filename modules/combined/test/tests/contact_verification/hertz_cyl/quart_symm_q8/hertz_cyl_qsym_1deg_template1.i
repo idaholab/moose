@@ -203,7 +203,7 @@
     value = 0.0
   [../]
   [./top_y_disp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = disp_ramp_vert

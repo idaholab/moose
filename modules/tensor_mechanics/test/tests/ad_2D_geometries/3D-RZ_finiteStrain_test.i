@@ -98,21 +98,21 @@
 [BCs]
 # pin particle along symmetry planes
   [./no_disp_x]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = xzero
     value = 0.0
   [../]
 
   [./no_disp_y]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = yzero
     value = 0.0
   [../]
 
   [./no_disp_z]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = zzero
     value = 0.0

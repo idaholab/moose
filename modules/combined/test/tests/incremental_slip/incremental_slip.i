@@ -101,18 +101,21 @@
   [./slave_x]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 4
     function = slave_x
   [../]
   [./slave_y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 4
     function = slave_y
   [../]
   [./slave_z]
     type = FunctionDirichletBC
     variable = disp_z
+    preset = false
     boundary = 4
     function = slave_z
   [../]

@@ -81,6 +81,7 @@
 [BCs]
   [./bottom_left]
     type = DirichletBC
+    preset = false
     variable = temperature
     boundary = bottom_to_1
     value = 1500
@@ -88,6 +89,7 @@
 
   [./top_right]
     type = DirichletBC
+    preset = false
     variable = temperature
     boundary = top_to_3
     value = 300

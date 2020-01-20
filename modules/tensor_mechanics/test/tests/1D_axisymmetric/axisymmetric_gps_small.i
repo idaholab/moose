@@ -150,7 +150,7 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1000
     value = 0
     variable = disp_x
