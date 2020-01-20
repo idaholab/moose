@@ -133,12 +133,9 @@ class RenderLinkBase(components.RenderComponent):
             self._createOptionalContent(parent, token, page)
             return None
 
-        if desired is page:
-            url = '#{}'.format(bookmark) if bookmark else '#'
-        else:
-            url = str(desired.relativeDestination(page))
-            if bookmark:
-                url += '#{}'.format(bookmark)
+        url = str(desired.relativeDestination(page))
+        if bookmark:
+            url += '#{}'.format(bookmark)
 
         link = core.Link(None, url=url, info=token.info)
         if len(token.children) == 0:
@@ -147,10 +144,6 @@ class RenderLinkBase(components.RenderComponent):
             if head is not None:
                 head.copyToToken(link)
             else:
-                if desired.local.endswith('sqa.md'):
-                    import multiprocessing
-                    print("DESIRED HEADING:", multiprocessing.current_process().name, page.local, desired['heading'].keys())
-
                 link['class'] = 'moose-error'
                 tokens.String(link, content=url)
         else:
