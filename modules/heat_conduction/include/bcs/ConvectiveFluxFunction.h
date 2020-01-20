@@ -20,11 +20,26 @@ public:
   virtual ~ConvectiveFluxFunction() {}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
+  /// Far-field temperature
   const Function & _T_infinity;
-  const Real _coefficient;
+
+  /// Heat transfer coefficient
+  const Function & _coefficient;
+
+  /// Enum used to define the type of function used for the heat transfer coefficient
+  enum class CoefFuncType
+  {
+    TIME_AND_POSITION,
+    TEMPERATURE
+  };
+
+  /// Type of function used for the heat transfer coefficient
+  const CoefFuncType _coef_func_type;
+
+  /// Heat transfer coefficient function (Deprecated -- being replaced by _coefficient)
   const Function * const _coef_func;
 };
 
