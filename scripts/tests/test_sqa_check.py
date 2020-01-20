@@ -19,7 +19,6 @@ from mooseutils import check_requirement
 
 class Test(unittest.TestCase):
 
-    @unittest.skipIf(sys.version_info[0] < 3, "Python 3 required.")
     def testScript(self):
         """Test the SQA checker."""
         check_requirement('[Tests][foo][][]')

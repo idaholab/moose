@@ -27,10 +27,6 @@ def read(filename):
     """
     with codecs.open(filename, encoding='utf-8') as fid:
         content = fid.read()
-
-    if sys.version_info[0] == 2:
-        content = str(content)
-
     return content
 
 def write(filename, content):

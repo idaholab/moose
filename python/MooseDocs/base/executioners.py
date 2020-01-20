@@ -313,10 +313,7 @@ class ParallelBarrier(Executioner):
         if num_threads > len(nodes):
             num_threads = len(nodes)
 
-        if sys.version_info[0] == 2:
-            barrier = mooseutils.parallel.Barrier(num_threads)
-        else:
-            barrier = multiprocessing.Barrier(num_threads)
+        barrier = multiprocessing.Barrier(num_threads)
 
         jobs = []
         for chunk in mooseutils.make_chunks(nodes, num_threads):

@@ -49,7 +49,6 @@
     type = PythonUnitTest
     input = test_mms.py
     requirement = "The system shall include a tool for computing forcing functions for the method of manufactured solutions."
-    python = 3
     required_python_packages = 'sympy'
   []
 []

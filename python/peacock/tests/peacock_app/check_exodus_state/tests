@@ -4,7 +4,6 @@
     input = test_exodus_state.py
     platform = "LINUX"
     separate = True
-    python = 3
     display_required = true
   [../]
 []
