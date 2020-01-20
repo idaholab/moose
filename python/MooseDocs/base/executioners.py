@@ -70,10 +70,10 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     complete MOOSE website in modules/doc using 12 cores on a Mac trash can ("Mac Pro (Late 2013)"):
 
                      Total / Translate (sec.)
-             Serial:   412 / 388
-    ParallelBarrier:   118 / 96
-      ParallelQueue:   101 / 77
-       ParallelPipe:   154 / 128
+             Serial:   819 / 792
+    ParallelBarrier:   233 / 210
+      ParallelQueue:   187 / 163
+       ParallelPipe:   296 / 269
     """
     #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
     #  as well as during directory creation.
@@ -115,15 +115,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
                 node['__{}__'.format(ext.name)] = dict()
             self.translator.executePageMethod('initPage', node)
             Executioner.setMutable(node, False)
-
-            #print('Executioner::init()', node.local)
-            #node['__config__'] = dict()
-            ##node['config']['translator'] = self.translator._ConfigObject__config
-            #node['__config__']['renderer'] = self.translator.renderer._ConfigObject__config
-            #for ext in self.translator.extensions:
-            #    print('    ', ext.name)
-            #    node['__config__']['__{}__'.format(ext.name)] = ext._ConfigObject__config
-            #Executioner.setMutable(node, False)
 
         LOG.info('Executing extension initPage() methods complete [%s sec.]', time.time() - t)
 

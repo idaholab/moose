@@ -131,6 +131,12 @@ class CivetExtension(command.CommandExtension):
         """
         key = page.get('key', None)
         if key is not None:
+            h = core.Heading(ast, level=1)
+            tokens.String(h, content='Test Results')
+            core.Punctuation(h, content=':')
+            core.LineBreak(h)
+            core.Space(h)
+            tokens.String(h, content=key)
             CivetTestReport(ast, tests=[key])
 
     def postRender(self, page, results):
@@ -273,9 +279,6 @@ class RenderCivetTestReport(components.RenderComponent):
 
         for key in token['tests']:
             results = self.extension.results(key)
-
-            html.Tag(parent, 'h1', string='Test Results')
-            html.Tag(parent, 'p', string=key)
 
             div = html.Tag(parent, 'div', class_='moose-civet-test-report')
 

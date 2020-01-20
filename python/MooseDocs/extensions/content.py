@@ -80,12 +80,7 @@ class ContentExtension(command.CommandExtension):
         for node in nodes:
             h_node = heading.find_heading(node)
 
-            if h_node is None:
-                msg = "The page, '%s', does not have a title, it will be ignored in the " \
-                      "content output."
-                LOG.warning(msg, node.local)
-
-            else:
+            if h_node is not None:
                 text = h_node.text()
                 label = text.replace(' ', '-').lower()
                 if method == ContentExtension.LETTER:
