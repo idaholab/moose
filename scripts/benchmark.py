@@ -15,7 +15,7 @@ import os
 import os.path
 import sys
 import collections
-import urlparse
+from urllib.parse import urlparse
 
 # this is a hack to prevent matplotlib from trying to do interactive plot crap with e.g. Qt on
 # remote machines.  See:
