@@ -62,6 +62,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
+    preset = false
   [../]
 []
 
