@@ -27,10 +27,6 @@ SamplerData::validParams()
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
 
-  // The execute method computes the complete vectors on all processes, so broadcasting the data
-  // is not required.
-  // params.set<bool>("_is_broadcast") = false;
-
   // Control for
   MooseEnum method("get_global_samples get_local_samples get_next_local_row", "get_next_local_row");
   params.addParam<MooseEnum>(
