@@ -47,7 +47,7 @@ StochasticResults::validParams()
       "for output. This is mainly for testing since the data from that rank will override the data "
       "on the root process.");
 
-  params.set<bool>("_is_broadcast") = false;
+  params.set<bool>("_auto_broadcast") = false;
   return params;
 }
 

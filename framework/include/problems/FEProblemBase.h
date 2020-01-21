@@ -914,7 +914,8 @@ public:
   VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
                                                               const std::string & vector_name,
                                                               bool contains_complete_history,
-                                                              bool is_broadcast);
+                                                              bool is_broadcast,
+                                                              bool is_distributed);
 
   /**
    * Whether or not the specified VectorPostprocessor has declared any vectors

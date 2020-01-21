@@ -3306,9 +3306,11 @@ VectorPostprocessorValue &
 FEProblemBase::declareVectorPostprocessorVector(const VectorPostprocessorName & name,
                                                 const std::string & vector_name,
                                                 bool contains_complete_history,
-                                                bool is_broadcast)
+                                                bool is_broadcast,
+                                                bool is_distributed)
 {
-  return _vpps_data.declareVector(name, vector_name, contains_complete_history, is_broadcast);
+  return _vpps_data.declareVector(
+      name, vector_name, contains_complete_history, is_broadcast, is_distributed);
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
