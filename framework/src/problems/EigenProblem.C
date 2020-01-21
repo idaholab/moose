@@ -247,6 +247,26 @@ EigenProblem::computeResidualL2Norm()
   return _nl_eigen->residualVectorAX().l2_norm();
 }
 
+void
+EigenProblem::scaleEigenvector(const Real scaling_factor)
+{
+  std::vector<VariableName> var_names = getVariableNames();
+  for (auto & vn : var_names)
+  {
+    MooseVariableFEBase & var = getVariable(0, vn);
+    if (var.parameters().get<bool>("eigen"))
+      for (unsigned int vc = 0; vc < var.count(); ++vc)
+      {
+        std::set<dof_id_type> var_indices;
+        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        for (const auto & dof : var_indices)
+          _nl_eigen->solution().set(dof, _nl_eigen->solution()(dof) * scaling_factor);
+      }
+  }
+  _nl_eigen->solution().close();
+  _nl_eigen->update();
+}
+
 #endif
 
 void
@@ -293,28 +313,4 @@ EigenProblem::isNonlinearEigenvalueSolver()
          solverParams()._eigen_solve_type == Moose::EST_MF_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
-}
-
-void
-EigenProblem::scaleEigenvector(const Real scaling_factor)
-{
-// FIXME: This needs to be protected since NonlinearEigenSystem derives from ParallelObject (instead
-// of NonlinearSystemBase) when SLEPc isn't installed
-#if LIBMESH_HAVE_SLEPC
-  std::vector<VariableName> var_names = getVariableNames();
-  for (auto & vn : var_names)
-  {
-    MooseVariableFEBase & var = getVariable(0, vn);
-    if (var.parameters().get<bool>("eigen"))
-      for (unsigned int vc = 0; vc < var.count(); ++vc)
-      {
-        std::set<dof_id_type> var_indices;
-        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
-        for (const auto & dof : var_indices)
-          _nl_eigen->solution().set(dof, _nl_eigen->solution()(dof) * scaling_factor);
-      }
-  }
-  _nl_eigen->solution().close();
-  _nl_eigen->update();
-#endif /* LIBMESH_HAVE_SLEPC */
 }

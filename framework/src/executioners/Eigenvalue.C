@@ -86,6 +86,7 @@ Eigenvalue::execute()
 void
 Eigenvalue::postSolve()
 {
+#ifdef LIBMESH_HAVE_SLEPC
   if (_normalization)
   {
     Real val = getParam<Real>("normal_factor");
@@ -103,4 +104,5 @@ Eigenvalue::postSolve()
         _problem.execute(flag);
     }
   }
+#endif
 }
