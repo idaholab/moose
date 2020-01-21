@@ -1,0 +1,26 @@
+[Tests]
+  design = 'ConvectiveFluxFunction.md'
+  issues = '#14418'
+  [./constant]
+    type = 'CSVDiff'
+    input = 'convective_flux_function.i'
+    csvdiff = 'convective_flux_function_out.csv'
+    requirement = 'The system shall allow prescribing a convective flux boundary condition using a constant heat transfer coefficient.'
+  [../]
+  [./time_dependent]
+    prereq = constant
+    type = 'CSVDiff'
+    input = 'convective_flux_function.i'
+    cli_args = "BCs/right/coefficient='t*10.0'"
+    csvdiff = 'convective_flux_function_out.csv'
+    requirement = 'The system shall allow prescribing a convective flux boundary condition using a heat transfer coefficient that is a function of position and time.'
+  [../]
+  [./temperature_dependent]
+    prereq = time_dependent
+    type = 'CSVDiff'
+    input = 'convective_flux_function.i'
+    cli_args = "BCs/right/coefficient='t/15.0' BCs/right/coefficient_function_type=TEMPERATURE"
+    csvdiff = 'convective_flux_function_out.csv'
+    requirement = 'The system shall allow prescribing a convective flux boundary condition using a heat transfer coefficient that is a function of temperature.'
+  [../]
+[]
