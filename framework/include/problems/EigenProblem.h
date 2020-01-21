@@ -55,8 +55,6 @@ public:
    */
   bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
 
-  void scaleEigenvector(const Real scaling_factor);
-
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
@@ -95,7 +93,10 @@ public:
                                  NumericVector<Number> & residualB,
                                  TagID tagA,
                                  TagID tagB);
+
+  void scaleEigenvector(const Real scaling_factor);
 #endif
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
