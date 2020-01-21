@@ -75,7 +75,9 @@ protected:
    * Generates a filename pattern for Vectorpostprocessors
    * filebase + VPP name + time step + ".csv"
    */
-  std::string getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step);
+  std::string getVectorPostprocessorFileName(const std::string & vpp_name,
+                                             bool include_time_step,
+                                             bool is_distributed);
 
 private:
   /// Flag for aligning data in .csv file
@@ -106,13 +108,12 @@ private:
   bool _create_latest_symlink;
 
   /// Current list of VPP filenames for creating _LATEST/_FINAL symlinks
-  // The pair is composed of the complete filename (foo_variable_0001.csv) and the incomplete name
-  // (foo_variable) to which the _FINAL or _LATEST is to be applied.
-  std::vector<std::pair<std::string, std::string>> _latest_vpp_filenames;
+  // The pair is composed of the complete filename (foo_variable_0001.csv), the incomplete name
+  // (foo_variable) to which the _FINAL or _LATEST is to be applied, and the "is_distributed" flag
+  std::vector<std::tuple<std::string, std::string, bool>> _latest_vpp_filenames;
 
   /**
    * Returns the filename without the time/timestep information.
    */
   std::string getVectorPostprocessorFilePrefix(const std::string & vpp_name);
 };
-
