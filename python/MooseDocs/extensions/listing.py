@@ -175,7 +175,8 @@ class InputListingCommand(FileListingCommand):
             content = self.extractInputBlocks(filename, self.settings['block'])
         else:
             content = common.read(filename)
-            content, _ = common.extractContent(content, self.settings)
+
+        content, _ = common.extractContent(content, self.settings)
         return content
 
     @staticmethod
@@ -184,7 +185,7 @@ class InputListingCommand(FileListingCommand):
         hit = pyhit.load(filename)
         out = []
         for block in blocks.split(' '):
-            node = moosetree.find(hit, lambda n: n.fullpath.strip('/') == block)
+            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
