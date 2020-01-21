@@ -44,7 +44,7 @@ DomainIntegralAction::validParams()
                                           "Domain integrals to calculate.  Choices are: " +
                                               integral_vec.getRawNames());
   params.addParam<std::vector<BoundaryName>>(
-      "boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+      "boundary", "Boundary containing the crack front points");
   params.addParam<std::vector<Point>>("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>(
       "order", "FIRST", "Specifies the order of the FE shape function to use for q AuxVariables");
@@ -107,9 +107,12 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _family(getParam<std::string>("family")),
     _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
     _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
-    _have_crack_direction_vector(false),
-    _have_crack_direction_vector_end_1(false),
-    _have_crack_direction_vector_end_2(false),
+    _have_crack_direction_vector(isParamValid("crack_direction_vector")),
+    _crack_direction_vector(_have_crack_direction_vector ? getParam<RealVectorValue>("crack_direction_vector") : 0.0),
+    _have_crack_direction_vector_end_1(isParamValid("crack_direction_vector_end_1")),
+    _crack_direction_vector_end_1(_have_crack_direction_vector_end_1 ? getParam<RealVectorValue>("crack_direction_vector_end_1") : 0.0),
+    _have_crack_direction_vector_end_2(isParamValid("crack_direction_vector_end_2")),
+    _crack_direction_vector_end_2(_have_crack_direction_vector_end_2 ? getParam<RealVectorValue>("crack_direction_vector_end_2") : 0.0),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _convert_J_to_K(false),
@@ -168,21 +171,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     mooseError("DomainIntegral error: number_points_from_provider is provided but "
                "crack_front_points_provider cannot "
                "be found.");
-  if (isParamValid("crack_direction_vector"))
-  {
-    _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
-    _have_crack_direction_vector = true;
-  }
-  if (isParamValid("crack_direction_vector_end_1"))
-  {
-    _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
-    _have_crack_direction_vector_end_1 = true;
-  }
-  if (isParamValid("crack_direction_vector_end_2"))
-  {
-    _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
-    _have_crack_direction_vector_end_2 = true;
-  }
   if (isParamValid("crack_mouth_boundary"))
     _crack_mouth_boundary_names = getParam<std::vector<BoundaryName>>("crack_mouth_boundary");
   if (isParamValid("intersecting_boundary"))
