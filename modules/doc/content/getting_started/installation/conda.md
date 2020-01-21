@@ -16,7 +16,7 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
 
   ```bash
   conda config --add channels conda-forge
-  conda config --add channels idaholab
+  conda config --add channels https://mooseframework.org/conda/moose
   ```
 
 - Install the moose-env package from Idaholab and name your environment 'moose':
