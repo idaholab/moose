@@ -9,10 +9,37 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-from FactorySystem import Parser
 import mooseutils
-import pyhit
 from peacock.PeacockException import PeacockException
+from pyhit import hit
+
+
+class DupWalker(object):
+    def __init__(self, fname):
+        self.have = {}
+        self.dups = {}
+        self.errors = []
+        self._fname = fname
+
+    def _duperr(self, node):
+        if node.type() == hit.NodeType.Section:
+            ntype = 'section'
+        elif node.type() == hit.NodeType.Field:
+            ntype = 'parameter'
+        self.errors.append('{}:{}: duplicate {} "{}"'.format(self._fname, node.line(), ntype, node.fullpath()))
+
+    def walk(self, fullpath, path, node):
+        if node.type() != hit.NodeType.Field and node.type() != hit.NodeType.Section:
+            return
+
+        if fullpath in self.have:
+            if fullpath not in self.dups:
+                self._duperr(self.have[fullpath])
+                self.dups[fullpath] = True
+            self._duperr(node)
+        else:
+            self.have[fullpath] = node
+
 
 class InputFile(object):
     """
@@ -71,15 +98,13 @@ class InputFile(object):
     def readInputData(self, data, filename):
         try:
             self.filename = os.path.abspath(filename)
-            root = pyhit.parse(data, os.path.abspath(filename))
-            errors = Parser.duplcateCheck(root)
-            if errors:
-                for err in errors:
-                    if len(err) == 3:
-                        mooseutils.mooseWarning('{}:{}: {}'.format(self.filename, err[1].line(err[2]), err[1]))
-                    else:
-                        mooseutils.mooseWarning('{}: {}'.format(self.filename, err[1]))
-
+            root = hit.parse(os.path.abspath(filename), data)
+            hit.explode(root)
+            w = DupWalker(os.path.abspath(filename))
+            root.walk(w, hit.NodeType.Field)
+            if w.errors:
+                for err in w.errors:
+                    mooseutils.mooseWarning(err)
                 raise PeacockException("Parser errors")
             self.original_text = data
             self.root_node = root
