@@ -18,7 +18,7 @@ import tempfile
 import threading
 import resource
 
-from .Tester import Tester
+from TestHarness.testers.Tester import Tester
 
 def process_timeout(proc, timeout_sec):
   kill_proc = lambda p: p.kill()
