@@ -73,9 +73,11 @@ protected:
 
   /**
    * Generates a filename pattern for Vectorpostprocessors
-   * filebase + VPP name + time step + ".csv"
+   * filebase + VPP name + time step (+ nonlinear index) + ".csv"
    */
-  std::string getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step);
+  std::string getVectorPostprocessorFileName(const std::string & vpp_name,
+                                             bool include_time_step,
+                                             const ExecFlagType & type);
 
 private:
   /// Flag for aligning data in .csv file
@@ -115,4 +117,3 @@ private:
    */
   std::string getVectorPostprocessorFilePrefix(const std::string & vpp_name);
 };
-

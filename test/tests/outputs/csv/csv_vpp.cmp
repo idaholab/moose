@@ -1,0 +1,7 @@
+TIME STEPS relative 5.5e-06 floor 1e-11
+
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+    x
+    y
+    z
+    id

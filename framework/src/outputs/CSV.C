@@ -11,6 +11,7 @@
 #include "CSV.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "NonlinearSystemBase.h"
 
 registerMooseObject("MooseApp", CSV);
 
@@ -120,7 +121,9 @@ CSV::outputVectorPostprocessors()
 }
 
 std::string
-CSV::getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step)
+CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
+                                    bool include_time_step,
+                                    const ExecFlagType & type)
 {
   std::ostringstream file_name;
   file_name << _file_base;
@@ -132,6 +135,10 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name, bool include_t
   if (include_time_step)
     file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
               << std::right << timeStep();
+  if (type == EXEC_NONLINEAR)
+    file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+              << std::right
+              << _problem_ptr->getNonlinearSystemBase().getCurrentNonlinearIterationNumber();
   file_name << ".csv";
 
   return file_name.str();
@@ -172,7 +179,7 @@ CSV::output(const ExecFlagType & type)
         it.second.sortColumns();
 
       auto include_time_suffix = !vpp_data.containsCompleteHistory(vpp_name);
-      std::string fname = getVectorPostprocessorFileName(vpp_name, include_time_suffix);
+      std::string fname = getVectorPostprocessorFileName(vpp_name, include_time_suffix, type);
       std::string fprefix = getVectorPostprocessorFilePrefix(vpp_name);
       _latest_vpp_filenames.emplace_back(fname, fprefix);
       it.second.printCSV(fname, 1, _align);

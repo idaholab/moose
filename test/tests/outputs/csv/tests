@@ -83,4 +83,16 @@
     requirement = "The system shall support CSV output to the console that is sorted by the variable name."
     issues = "#8974"
   [../]
+
+  [./vpp]
+    type = CSVDiff
+    input = 'csv_vpp.i'
+    csvdiff = 'csv_vpp_out_myvpp_0001_0001.csv'
+    comparison_file = csv_vpp.cmp
+    recover = false
+    max_parallel = 1
+
+    requirement = "The system shall support the output of vector data to CSV files at each nonlinear iteration."
+    issues = "#14618"
+  [../]
 []
