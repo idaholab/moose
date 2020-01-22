@@ -18,7 +18,7 @@ import tempfile
 import threading
 import resource
 
-from Tester import Tester
+from TestHarness.testers.Tester import Tester
 
 def process_timeout(proc, timeout_sec):
   kill_proc = lambda p: p.kill()
@@ -389,6 +389,6 @@ def git_revision(dir='.'):
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise RuntimeError('failed to retrieve git revision')
-    commit = stdout.strip().split(' ')[0]
-    date = int(stdout.strip().split(' ')[1])
+    commit = str(stdout).strip().split(' ')[0]
+    date = int(str(stdout).strip().split(' ')[1])
     return commit, date

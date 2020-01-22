@@ -15,7 +15,7 @@ import os
 import os.path
 import sys
 import collections
-import urlparse
+from urllib.parse import urlparse, urljoin
 
 # this is a hack to prevent matplotlib from trying to do interactive plot crap with e.g. Qt on
 # remote machines.  See:
@@ -211,8 +211,8 @@ def buildpage(fname, plotnames, db, psig, lastn=60, method='opt', baseurl='https
 
             t1 = datetime.datetime.fromtimestamp(t1).strftime(tformat)
             t2 = datetime.datetime.fromtimestamp(t2).strftime(tformat)
-            link1 = urlparse.urljoin(baseurl, rev1)
-            link2 = urlparse.urljoin(baseurl, rev2)
+            link1 = urljoin(baseurl, rev1)
+            link2 = urljoin(baseurl, rev2)
             c = Comp(rev1, rev2, t1, t2, link1, link2, s)
             comparisons.append(c)
 
@@ -225,8 +225,8 @@ def buildpage(fname, plotnames, db, psig, lastn=60, method='opt', baseurl='https
             s += '\n' + BenchComp.footer()
 
             t2 = datetime.datetime.fromtimestamp(t2).strftime(tformat)
-            link1 = urlparse.urljoin(baseurl, rev1)
-            link2 = urlparse.urljoin(baseurl, rev2)
+            link1 = urljoin(baseurl, rev1)
+            link2 = urljoin(baseurl, rev2)
             c = Comp(rev1, rev2, t1, t2, link1, link2, s)
             refcomparisons.append(c)
 
@@ -284,7 +284,7 @@ def plot(revisions, benchmarks, subdir='.', baseurl='https://github.com/idaholab
     ax = fig.axes[0]
     labels = ax.get_xticklabels()
     for label in labels:
-        label.set_url(urlparse.urljoin(baseurl, label.get_text()))
+        label.set_url(urljoin(baseurl, label.get_text()))
 
     legend = ax.legend(loc='upper right')
 
@@ -326,4 +326,3 @@ def read_benchmarks(benchlist):
 
 if __name__ == '__main__':
     main()
-
