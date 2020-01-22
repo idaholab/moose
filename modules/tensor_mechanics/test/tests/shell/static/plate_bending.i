@@ -70,31 +70,31 @@
 
 [BCs]
   [./symm_left_rot]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
   [../]
   [./symm_bottom_rot]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_x
     boundary = bottom
     value = 0.0
   [../]
   [./simply_support_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'right top bottom left'
     value = 0.0
   [../]
   [./simply_support_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'right top bottom left'
     value = 0.0
   [../]
   [./simply_support_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'right top'
     value = 0.0

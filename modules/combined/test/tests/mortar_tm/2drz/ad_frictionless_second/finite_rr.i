@@ -127,24 +127,28 @@ name = 'finite_rr'
   [./left_x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = block_right
     value = 0
   [../]
   [./right_y]
     type = ADFunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = block_right
     function = '-t'
   [../]

@@ -153,24 +153,28 @@ name = 'finite_noaction'
   [./left_x]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = block_right
     function = '-0.04*sin(4*(t+1.5))+0.02'
   [../]
   [./right_y]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = block_right
     function = '-t'
   [../]

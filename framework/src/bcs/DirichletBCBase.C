@@ -39,8 +39,11 @@ DirichletBCBase::computeValue(NumericVector<Number> & current_solution)
 {
   mooseAssert(_preset, "BC is not preset");
 
-  const dof_id_type & dof_idx = _var.nodalDofIndex();
-  current_solution.set(dof_idx, computeQpValue());
+  if (_var.isNodalDefined())
+  {
+    const dof_id_type & dof_idx = _var.nodalDofIndex();
+    current_solution.set(dof_idx, computeQpValue());
+  }
 }
 
 Real

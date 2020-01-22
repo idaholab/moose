@@ -53,31 +53,31 @@
 
 [BCs]
   [./fixy1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./fixz1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
   [./fixr1]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_x
     boundary = bottom
     value = 0.0
   [../]
   [./fixr2]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_y
     boundary = bottom
     value = 0.0
   [../]
   [./fixx1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
