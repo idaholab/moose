@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "GeneralVectorPostprocessor.h"
 
 /**
  * Test class to make certain that CSV data is broadcast correctly.
