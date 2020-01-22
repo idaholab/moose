@@ -12,8 +12,8 @@ import os, sys
 import subprocess
 import json
 import unittest
-from FactorySystem.Parser import DupWalker
-import hit
+from FactorySystem import Parser
+import pyhit
 
 def find_app():
     """
@@ -140,13 +140,9 @@ class TestJSONBase(unittest.TestCase):
         output = output.split('### END DUMP DATA ###')[0]
 
         self.assertNotEqual(len(output), 0)
-        root = hit.parse("dump.i", output)
-        hit.explode(root)
-        w = DupWalker("dump.i")
-        root.walk(w, hit.NodeType.All)
-        if w.errors:
-            print("\n".join(w.errors))
-        self.assertEqual(len(w.errors), 0)
+        root = pyhit.parse(output)
+        errors = list(Parser.checkDuplicates(root))
+        self.assertEqual(errors, [])
         return root
 
 

@@ -8,7 +8,7 @@ This material, `LevelSetBiMaterialRankTwo` determines the global material proper
 
 ## Example Input File Syntax
 
-!listing modules/xfem/test/tests/bimaterials/glued_bimaterials_2d.i block=Materials/combined
+!listing modules/xfem/test/tests/bimaterials/glued_bimaterials_2d.i block=Materials/combined_stress
 
 !syntax parameters /Materials/LevelSetBiMaterialRankTwo
 

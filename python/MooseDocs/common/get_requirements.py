@@ -10,7 +10,7 @@
 import os
 import collections
 import logging
-
+import pyhit
 import mooseutils
 
 LOG = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ def _check_extra_param(node, param_name, filename):
 
 def _add_requirements(out, location, filename):
     """Opens tests specification and extracts requirement items."""
-    root = mooseutils.hit_load(filename)
+    root = pyhit.load(filename)
     design = root.children[0].get('design', None)
     design_line = root.children[0].line('design', None)
     issues = root.children[0].get('issues', None)

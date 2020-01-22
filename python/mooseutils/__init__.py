@@ -22,7 +22,6 @@ from .AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
 from .compute_requirement_stats import compute_requirement_stats, SQAStats
 from .levenshtein import levenshtein, levenshteinDistance
 from .json_load import json_load, json_parse
-from .hit_load import hit_load, HitNode, hit_parse
 from .civet_results import get_civet_results
 
 try:

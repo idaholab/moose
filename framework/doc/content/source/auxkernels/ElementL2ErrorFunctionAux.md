@@ -4,7 +4,7 @@ A class for computing the element-wise $L^2$ error (actually $L^p$ error, if you
 
 ## Example syntax
 
-!listing test/tests/auxkernels/error_function_aux/error_function_aux.i block=l2_error_aux
+!listing test/tests/auxkernels/error_function_aux/error_function_aux.i block=AuxKernels/l2_error_aux
 
 !syntax description /AuxKernels/ElementL2ErrorFunctionAux
 

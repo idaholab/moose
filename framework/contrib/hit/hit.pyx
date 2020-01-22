@@ -203,6 +203,30 @@ cdef class Node:
             return bool(f.boolVal())
         return f.strVal().decode('utf-8')
 
+    def setParam(self, path, val):
+        cpath = <string> path.encode('utf-8')
+        n = self._cnode.find(cpath)
+        if path != '' and n == NULL:
+            return 1
+        elif path == '':
+            n = self._cnode
+
+        cdef Node nn = _initpynode(n)
+        if nn.type() != NodeType.Field:
+            return 1
+
+        f = <chit.Field *> nn._cnode
+        f.setVal(<string> str(val).encode('utf-8'), f.kind())
+        return 0
+
+    def setText(self, text):
+        if self.type() != NodeType.Comment:
+            return 1
+
+        f = <chit.Comment *> self._cnode
+        f.setText(<string> str(text).encode('utf-8'))
+        return 0
+
     def walk(self, walker, node_type=NodeType.All):
         if self.type() == node_type or node_type == NodeType.All:
             walker.walk(self.fullpath(), self.path(), self);
@@ -217,6 +241,8 @@ cdef class Node:
         return _initpynode(self._cnode.root())
     def addChild(self, Node child):
         self._cnode.addChild(child._cnode)
+    def insertChild(self, index, Node child):
+        self._cnode.insertChild(index, child._cnode)
     def children(self, node_type = NodeType.All):
         ckids = self._cnode.children(_nodetype_enum(node_type));
         kids = []

@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#11189'
+  design = 'python/index.md'
+  [pyhit]
+    type = PythonUnitTest
+    input = test_pyhit.py
+    requirement = "MOOSE python utilities shall include a tool for reading hit files."
+  []
+[]
