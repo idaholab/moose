@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,19 +7,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs import common
-from MooseDocs.extensions import command
-from MooseDocs.base import RevealRenderer, Translator
+from .. import common
+from ..base import RevealRenderer, Translator
+from . import command
 
 def make_extension(**kwargs):
     return IncludeExtension(**kwargs)
 
 class IncludeExtension(command.CommandExtension):
     """Enables the !include command for including files in other files."""
-
-    def __init__(self, *args, **kwargs):
-        super(IncludeExtension, self).__init__(*args, **kwargs)
-        self.__dependencies = set()
 
     def extend(self, reader, renderer):
         self.requires(command)
@@ -30,16 +25,8 @@ class IncludeExtension(command.CommandExtension):
         else:
             self.addCommand(reader, IncludeCommand())
 
-    #def initMetaData(self, page, meta):
-    #    page['dependencies'] = set()
-        #meta.initData('dependencies', set())
-
-    #def postTokenize(self, ast, page, meta, reader):
-        #meta.getData('dependencies').update(self.__dependencies)
-        #self.__dependencies.clear()
-
-    #def addDependency(self, page):
-    #    self.__dependencies.add(page.uid)
+    def preRead(self, page):
+        page['dependencies'] = set()
 
 class IncludeCommand(command.CommandComponent):
     COMMAND = 'include'
@@ -59,10 +46,7 @@ class IncludeCommand(command.CommandComponent):
         content, line = common.extractContent(self.reader.read(include_page), self.settings)
 
         self.reader.tokenize(parent, content, page, line=line)
-        #with Translator.LOCK:
-        #    page['dependencies'].add(include_page.uid)
-        #self.extension.addDependency(include_page)
-
+        page['dependencies'].add(include_page.uid)
         return parent
 
 class IncludeSlides(IncludeCommand):

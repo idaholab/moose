@@ -21,11 +21,9 @@ import time
 
 import mooseutils
 
-import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import mixins, exceptions
-from MooseDocs.tree import pages
-from .components import Extension
+from ..common import mixins, exceptions
+from ..tree import pages
+from .Extension import Extension
 from .readers import Reader
 from .renderers import Renderer
 from .executioners import ParallelBarrier
@@ -44,12 +42,9 @@ class Translator(mixins.ConfigObject):
         extensions[list]: A list of extensions objects to use.
         kwargs[dict]: Key, value pairs applied to the configuration options.
 
-    This class is the workhorse of MOOSEDocs, it is the hub for all data in and out.  It is not
-    designed to be customized and extensions have no access to this the class.
+    This class is the workhorse of MooseDocs, it is the hub for all data in and out. It is not
+    designed to be customized.
     """
-    #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
-    #  as well as during directory creation.
-    LOCK = multiprocessing.Lock()
 
     @staticmethod
     def defaultConfig():
@@ -66,16 +61,7 @@ class Translator(mixins.ConfigObject):
     def __init__(self, content, reader, renderer, extensions, executioner=None, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
 
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('content', content, pages.Page)
-            common.check_type('reader', reader, Reader)
-            common.check_type('renderer', renderer, Renderer)
-            common.check_type('extensions', extensions, list)
-            for ext in extensions:
-                common.check_type('extensions', ext, Extension)
-
         self.__initialized = False
-        self.__content = content
         self.__extensions = extensions
         self.__reader = reader
         self.__renderer = renderer
@@ -84,6 +70,10 @@ class Translator(mixins.ConfigObject):
         self.__executioner = executioner
         if executioner is None:
             self.__executioner = ParallelBarrier()
+
+        # Populate the content list
+        for p in content:
+            self.addPage(p)
 
         # Caching for page searches (see findPages)
         self.__page_cache = dict()
@@ -108,13 +98,8 @@ class Translator(mixins.ConfigObject):
         return self.__renderer
 
     @property
-    def content(self):
-        """Return the content."""
-        return self.__content
-
-    @property
     def executioner(self):
-        """Return the Executioner instance."""
+        """Return the Executioner object."""
         return self.__executioner
 
     @property
@@ -122,9 +107,24 @@ class Translator(mixins.ConfigObject):
         """Return the destination directory."""
         return self.get('destination')
 
-    def addContent(self, page):
-        """Add an additional page to the list of available pages."""
-        self.__content.append(page)
+    def addPage(self, page):
+        """
+        Add an additional page to the list of available pages.
+
+        Inputs:
+          page[pages.Page]: The object to insert into the list
+        """
+        if self.__initialized:
+            msg = "The {} object has already been initialized, the addPage method must be called " \
+                  "prior to initialization. Extension objects can add pages within the init() " \
+                  "method."
+            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
+
+        self.__executioner.addPage(page)
+
+    def getPages(self):
+        """Return the Page objects"""
+        return self.__executioner.getPages()
 
     def update(self, **kwargs):
         """Update configuration and handle destination."""
@@ -132,40 +132,6 @@ class Translator(mixins.ConfigObject):
         if dest is not None:
             kwargs['destination'] = mooseutils.eval_path(dest)
         mixins.ConfigObject.update(self, **kwargs)
-
-    def updateConfiguration(self, obj_name, **kwargs):
-        """Update configuration from meta data."""
-        if obj_name == 'reader':
-            self.__reader.update(error_on_unknown=False, **kwargs)
-        elif obj_name == 'renderer':
-            self.__renderer.update(error_on_unknown=False, **kwargs)
-        else:
-            for ext in self.__extensions:
-                if ext.name == obj_name:
-                    ext.update(error_on_unknown=False, **kwargs)
-
-    def resetConfigurations(self):
-        """Reset configuration to original state."""
-        self.__reader.resetConfig()
-        self.__renderer.resetConfig()
-        for ext in self.extensions:
-            ext.resetConfig()
-
-    def getMetaData(self, page, key):
-        """Return the Meta data for the supplied page and key."""
-        return self.__executioner.getMetaData(page, key)
-
-    def getMetaDataObject(self, page):
-        """Return the Meta data object for the supplied page."""
-        return self.__executioner.getMetaDataObject(page)
-
-    def getSyntaxTree(self, page):
-        """Return the AST for the supplied page."""
-        return self.__executioner.getSyntaxTree(page)
-
-    def getResultTree(self, page):
-        """Return the rendered tree for the supplied page."""
-        return self.__executioner.getResultTree(page)
 
     def findPages(self, arg, exact=False):
         """
@@ -180,19 +146,16 @@ class Translator(mixins.ConfigObject):
                               to test for matches.
             exact[bool]: (False) When True an exact path match is required.
         """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('name', arg, (str, types.FunctionType))
-
         if isinstance(arg, str):
             items = self.__page_cache.get(arg, None)
             if items is None:
                 func = lambda p: (p.local == arg) or \
                                  (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
-                items = [page for page in self.__content if func(page)]
+                items = [page for page in self.__executioner.getPages() if func(page)]
                 self.__page_cache[arg] = items
 
         else:
-            items = [page for page in self.__content if arg(page)]
+            items = [page for page in self.__executioner.getPages() if arg(page)]
 
         return items
 
@@ -236,16 +199,6 @@ class Translator(mixins.ConfigObject):
             raise exceptions.MooseDocsException(msg)
         return nodes[0]
 
-    def executeExtensionFunction(self, name, page, args=tuple()):
-        """Helper to call pre/post functions for extensions, reader, and renderer."""
-
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            check_type('name', name, str)
-
-        for ext in self.extensions:
-            if ext.active:
-                Translator.callFunction(ext, name, page, args)
-
     def init(self):
         """
         Initialize the translator with the output destination for the converted content.
@@ -267,9 +220,7 @@ class Translator(mixins.ConfigObject):
 
         # Initialize the extension and call the extend method, then set the extension object
         # on each of the extensions.
-        destination = self.get("destination")
         for ext in self.__extensions:
-            common.check_type('extensions', ext, MooseDocs.base.components.Extension)
             ext.setTranslator(self)
             ext.extend(self.__reader, self.__renderer)
             for comp in self.__reader.components:
@@ -290,20 +241,11 @@ class Translator(mixins.ConfigObject):
         for ext in self.__extensions:
             self.__checkRequires(ext)
 
-        # Call Extension init() method
-        self.__initialized = True
-        LOG.info('Executing extension init() methods...')
-        t = time.time()
-        self.executeExtensionFunction('init', None)
-        LOG.info('Executing extension init() methods complete [%s sec.]', time.time() - t)
-
         # Initialize the Page objects
-        for node in self.__content:
-            node.base = destination
-            if isinstance(node, pages.Source):
-                node.output_extension = self.__renderer.EXTENSION
+        self.__executioner.init(self.get("destination"))
+        self.__initialized = True
 
-    def execute(self, num_threads=1, nodes=None):
+    def execute(self, nodes=None, num_threads=1):
         """Perform build for all pages, see executioners."""
         self.__assertInitialize()
         self.__executioner(nodes, num_threads)
@@ -318,7 +260,7 @@ class Translator(mixins.ConfigObject):
         """Helper to check the loaded extensions."""
         available = [e.__module__ for e in self.__extensions]
         messages = []
-        for ext in extension._Extension__requires: #pylint: disable=protected-access
+        for ext in extension._Extension__requires:
             if ext.__name__ not in available:
                 msg = "The {} extension is required but not included.".format(ext.__name__)
                 messages.append(msg)
@@ -330,15 +272,46 @@ class Translator(mixins.ConfigObject):
         """Builds a list of markdown files, including the short-hand version for error reports."""
 
         self.__markdown_file_list = set()
-        for local in [page.local for page in self.__content if isinstance(page, pages.Source)]:
+        for local in [page.local for page in self.__executioner.getPages() if isinstance(page, pages.Source)]:
             self.__markdown_file_list.add(local)
             parts = local.split(os.path.sep)
             n = len(parts)
             for i in range(n, 0, -1):
-
                 self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+
+    def executePageMethod(self, method, page, args=tuple()):
+        """Helper for calling per Page object methods."""
+        if page.get(method, True):
+            self.executeMethod(method, args=(page, *args), log=False)
+
+    def executeMethod(self, method, args=tuple(), log=False):
+        """Helper to call pre/post methods for extensions, reader, and renderer."""
+
+        if log:
+            LOG.info('Executing {} methods...'.format(method))
+            t = time.time()
+
+        if method.startswith('pre'):
+            if method in self.__reader.__TRANSLATOR_METHODS__:
+                Translator.callFunction(self.__reader, method, args)
+            if method in self.__renderer.__TRANSLATOR_METHODS__:
+                Translator.callFunction(self.__renderer, method, args)
+
+        for ext in self.extensions:
+            if ext.active and (method in ext.__TRANSLATOR_METHODS__):
+                Translator.callFunction(ext, method, args)
+
+        if method.startswith('post'):
+            if method in self.__reader.__TRANSLATOR_METHODS__:
+                Translator.callFunction(self.__reader, method, args)
+            if method in self.__renderer.__TRANSLATOR_METHODS__:
+                Translator.callFunction(self.__renderer, method, args)
+
+        if log:
+            LOG.info('Executing {} methods complete [%s sec.]'.format(method), time.time() - t)
+
     @staticmethod
-    def callFunction(obj, name, page, args=tuple()):
+    def callFunction(obj, name, args=tuple()):
         """Helper for calling a function on the supplied object."""
         func = getattr(obj, name, None)
         if func is not None:
@@ -347,7 +320,5 @@ class Translator(mixins.ConfigObject):
             except Exception:
                 msg = "Failed to execute '{}' method within the '{}' object.\n" \
                       .format(name, obj.__class__.__name__)
-                if page is not None:
-                    msg += "  Error occurred in {}\n".format(page.local)
                 msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
-                LOG.critical(msg)#, name, obj.__class__.__name__)
+                LOG.critical(msg)

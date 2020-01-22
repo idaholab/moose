@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.extensions import core, command
+from . import core, command
 
 def make_extension(**kwargs):
     return CommonExtension(**kwargs)
@@ -28,7 +27,7 @@ class CommonExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(core)
 
-    def postTokenize(self, ast, page, meta, reader): #pylint: disable=unused-argument
+    def postTokenize(self, page, ast):
         if ast.is_root:
             shortcuts = self.get('shortcuts', dict())
             for key, value in shortcuts.items():

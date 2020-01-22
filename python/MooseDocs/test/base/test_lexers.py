@@ -30,25 +30,6 @@ class TestGrammar(unittest.TestCase):
     """
     Test Grammar object.
     """
-    def testGrammar(self):
-        grammar = lexers.Grammar()
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammar.add(1, [], [], '_end')
-        self.assertIn("'name' must be of type", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammar.add('foo', 1, [], '_end')
-        self.assertIn("'regex' must be of type", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammar.add('foo', re.compile(''), 1, '_end')
-        self.assertIn("'function' must be callable", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammar.add('foo', re.compile(''), Proxy(), [])
-        self.assertIn("'location' must be of type", str(e.exception))
-
     def testPatterns(self):
         """
         Test the multiple patterns can be added.

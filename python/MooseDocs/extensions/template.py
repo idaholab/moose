@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -13,11 +12,11 @@ import logging
 import moosetree
 
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, Translator
-from MooseDocs.extensions import core, command, include, alert, floats, materialicon
-from MooseDocs.tree import tokens
+from .. import common
+from ..common import exceptions
+from ..base import components, Executioner, MarkdownReader
+from ..extensions import core, command, include, alert, floats, materialicon
+from ..tree import tokens
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ class TemplateExtension(include.IncludeExtension):
 
         renderer.add('TemplateField', RenderTemplateField())
 
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
 
         items = set()
         fields = set()
@@ -116,8 +115,7 @@ class TemplateLoadCommand(command.CommandComponent):
         settings, t_args = common.match_settings(self.defaultSettings(), info['settings'])
 
         location = self.translator.findPage(settings['file'])
-        #with Translator.LOCK:
-        #    page['dependencies'].add(location.uid)
+        page['dependencies'].add(location.uid)
         content = common.read(location.source)
 
         content = self.extension.applyTemplateArguments(content, **t_args)
@@ -150,7 +148,7 @@ class TemplateItemCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         item = TemplateItem(parent, key=self.settings['key'])
-        group = MooseDocs.INLINE if MooseDocs.INLINE in info else MooseDocs.BLOCK
+        group = MarkdownReader.INLINE if MarkdownReader.INLINE in info else MarkdownReader.BLOCK
         content = self.extension.applyTemplateArguments(info[group])
         if content:
             self.reader.tokenize(item, content, page, line=info.line, group=group)

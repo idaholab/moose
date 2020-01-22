@@ -17,9 +17,10 @@ import shutil
 import livereload
 import mooseutils
 from mooseutils.yaml_load import yaml_load
+
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.tree import pages
+from .. import common
+from ..tree import pages
 from .check import check
 
 def command_line_options(subparser, parent):
@@ -40,8 +41,6 @@ def command_line_options(subparser, parent):
                              "(default: MooseDocs.base.ParallelBarrier).")
     parser.add_argument('--profile', action='store_true',
                         help="Build the pages with python profiling.")
-    parser.add_argument('--serve-with-google-cse', action='store_true',
-                        help="Allow Google custom search to operate with --serve.")
     parser.add_argument('--destination',
                         default=None,
                         help="Destination for writing build content.")
@@ -51,7 +50,7 @@ def command_line_options(subparser, parent):
                         help="Show page tree to the screen.")
     parser.add_argument('--grammar', action='store_true',
                         help='Show the lexer components in order.')
-    parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(),
+    parser.add_argument('--num-threads', '-j', type=int, default=int(multiprocessing.cpu_count()/2),
                         help="Specify the number of threads to build pages with.")
     parser.add_argument('--port', default='8000', type=str,
                         help="The host port for live web server (default: %(default)s).")
@@ -110,18 +109,18 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
         # Build a list of pages to be translated including the dependencies
         nodes = [page]
-        for node in self._translator.content:
+        for node in self._translator.getPages():
             uids = node['dependencies'] if 'dependencies' in node else set()
             if page.uid in uids:
                 nodes.append(node)
 
-        self._translator.execute(self._options.num_threads, nodes)
+        self._translator.execute(nodes, self._options.num_threads)
 
     def _getPage(self, source):
         """Search the existing content for pages, if it doesn't exist create it."""
 
         # Search for the page based on the source name, if it is found return the page
-        for page in self._translator.content:
+        for page in self._translator.getPages():
             if source == page.source:
                 return page
 
@@ -167,6 +166,15 @@ def main(options):
     if options.executioner:
         kwargs['Executioner'] = {'type':options.executioner}
 
+    # Disable extensions
+    if options.fast:
+        options.disable += ['MooseDocs.extensions.appsyntax', 'MooseDocs.extensions.navigation',
+                            'MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet']
+
+    kwargs['Extensions'] = dict()
+    for name in options.disable:
+        kwargs['Extensions'][name] = dict(active=False)
+
     # Create translator
     translator, _ = common.load_config(options.config, **kwargs)
     if options.destination:
@@ -175,35 +183,19 @@ def main(options):
         translator.executioner.update(profile=True)
     translator.init()
 
-    # Disable slow extensions for --fast
-    if options.fast:
-        options.disable.append('appsyntax')
-        options.disable.append('navigation')
-        #options.disable.append('sqa')
-
-    # Disable extensions based on command line arguments
-    if options.disable:
-        for ext in translator.extensions:
-            if ext.name in options.disable: #pylint: disable=protected-access
-                ext.setActive(False)
-
     # Replace "home" with local server
     home = options.home
     if options.serve:
         home = 'http://127.0.0.1:{}'.format(options.port)
-        if not options.serve_with_google_cse:
-            for ext in translator.extensions:
-                if 'google-cse' in ext:
-                    ext.update(**{'google-cse':None, 'set_initial':True})
 
     if home is not None:
         for ext in translator.extensions:
             if 'home' in ext:
-                ext.update(home=home, set_initial=True)
+                ext.update(home=home)
 
     # Dump page tree
     if options.dump:
-        for page in translator.content:
+        for page in translator.getPages():
             print('{}: {}'.format(page.local, page.source))
         sys.exit()
 
@@ -227,9 +219,9 @@ def main(options):
         nodes = []
         for filename in options.files:
             nodes += translator.findPages(filename)
-        translator.execute(options.num_threads, nodes)
+        translator.execute(nodes, options.num_threads)
     else:
-        translator.execute(options.num_threads)
+        translator.execute(None, options.num_threads)
 
     if options.serve:
         watcher = MooseDocsWatcher(translator, options)

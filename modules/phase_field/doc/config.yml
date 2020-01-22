@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Phase Field Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/phase_field
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Phase Field Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/phase_field
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/phase_field
         hide:

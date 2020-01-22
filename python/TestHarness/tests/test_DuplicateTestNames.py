@@ -15,7 +15,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for duplicate test names
         """
-
         # Duplicate tests are considered a Fatal Parser Error, hence the 'with assertRaises'
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'duplicate_test_names', '--no-color')

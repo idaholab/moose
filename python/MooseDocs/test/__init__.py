@@ -21,15 +21,14 @@ class MooseDocsTestCase(unittest.TestCase):
     EXTENSIONS = []
     READER = base.MarkdownReader
     RENDERER = base.HTMLRenderer
-    EXECUTIONER = None
+    EXECUTIONER = base.Serial
 
     def __init__(self, *args, **kwargs):
         super(MooseDocsTestCase, self).__init__(*args, **kwargs)
         self.__ast = None
-        self.__meta = None
         self.__result = None
         self.__translator = None
-        self.__text = pages.Text()
+        self.__text = pages.Text(mutable=True)
 
     def __setup(self, reader=None, renderer=None, extensions=None, executioner=None):
         """Helper method for setting up MOOSEDocs objects. This is called automatically."""
@@ -40,7 +39,7 @@ class MooseDocsTestCase(unittest.TestCase):
         reader = self.READER() if reader is None else reader
         renderer = self.RENDERER() if renderer is None else renderer
         extensions = extensions or self.EXTENSIONS
-        executioner = executioner or self.EXECUTIONER
+        executioner = executioner or self.EXECUTIONER()
 
         config = dict()
         for ext in extensions:
@@ -66,17 +65,19 @@ class MooseDocsTestCase(unittest.TestCase):
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
 
-        self.__text.content = text
-        self.__ast, self.__meta = self.__translator.executioner.tokenize(self.__text)
-        self.__text.content = ''
+        base.Executioner.setMutable(self.__text, True)
+        self.__ast = self.__translator.executioner.tokenize(self.__text, text)
+        base.Executioner.setMutable(self.__text, False)
         return self.__ast
 
     def render(self, ast, *args, **kwargs):
         """Helper for rendering AST"""
+        base.Executioner.setMutable(self.__text, True)
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
             self.tokenize('')
-        self.__result = self.__translator.executioner.render(self.__text, ast, self.__meta)
+        self.__result = self.__translator.executioner.render(self.__text, ast)
+        base.Executioner.setMutable(self.__text, False)
         return self.__result
 
     def execute(self, text, *args, **kwargs):

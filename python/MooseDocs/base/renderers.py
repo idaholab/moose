@@ -17,15 +17,14 @@ import shutil
 import moosetree
 
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import exceptions, mixins
-from MooseDocs.tree import html, latex, pages
+from ..common import exceptions, mixins, report_error, Storage
+from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
 
 def create_directory(location):
     """Helper for creating a directory."""
-    with MooseDocs.base.Translator.LOCK:
+    with MooseDocs.base.Executioner.LOCK:
         dirname = os.path.dirname(location)
         if dirname and not os.path.isdir(dirname):
             LOG.debug('CREATE DIR %s', dirname)
@@ -36,11 +35,20 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
     Base renderer for converting AST to an output format.
     """
 
+    __TRANSLATOR_METHODS__ = ['init',
+                              'initPage',
+                              'render',
+                              'write',
+                              'preExecute', 'postExecute',
+                              'preRender', 'postRender',
+                              'preWrite', 'postWrite']
+
+
     #:[str] The name of the method to call on RendererComponent objects.
     METHOD = None
 
     def __init__(self, **kwargs):
-        mixins.ConfigObject.__init__(self, **kwargs)
+        mixins.ConfigObject.__init__(self, 'renderer', **kwargs)
         mixins.ComponentObject.__init__(self)
         self.__functions = dict()  # functions on the RenderComponent to call
 
@@ -52,9 +60,6 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             name[str]: The token name (e.g., "String") to associate with the supplied component.
             compoment[RenderComponent]: The component to execute with the associated token type.
         """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type("name", name, str)
-            common.check_type("component", component, MooseDocs.base.components.RenderComponent)
         component.setRenderer(self)
         self.addComponent(component)
         self.__functions[name] = self._method(component)
@@ -79,7 +84,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             func = self.__getFunction(token)
             el = func(parent, token, page) if func else parent
 
-        except Exception as e: #pylint: disable=broad-except
+        except Exception as e:
             el = None
             if token.info is not None:
                 line = token.info.line
@@ -87,34 +92,73 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             else:
                 line = None
                 src = ''
-            msg = common.report_error(e,
-                                      page.source,
-                                      line,
-                                      src,
-                                      traceback.format_exc(),
-                                      'RENDER ERROR')
-            with MooseDocs.base.translators.Translator.LOCK:
-                LOG.error(msg)
+            msg = report_error(e, page.source, line, src, traceback.format_exc(), 'RENDER ERROR')
+            LOG.error(msg)
 
         if el is not None:
             for child in token.children:
                 self.render(el, child, page)
 
-    def preRender(self, result, page, meta):
+    def init(self):
         """
-        Called by Translator prior to rendereing.
-
-        Inputs:
-            result[tree.base.NodeBase]: The root node of the result tree.
+        Called after Translator is set, prior to initializing pages.
         """
         pass
 
-    def postRender(self, result, page, meta):
+    def initPage(self, page):
         """
-        Called by Translator after rendereing.
+        Called for each Page object during initialization.
+        """
+        pass
+
+    def preExecute(self):
+        """
+        Called by Translator prior to beginning conversion.
+        """
+        pass
+
+    def postExecute(self):
+        """
+        Called by Translator after all conversion is complete.
+        """
+        pass
+
+    def preRender(self, page, result):
+        """
+        Called by Translator prior to rendering.
 
         Inputs:
-            result[tree.base.NodeBase]: The root node of the result tree.
+            page[pages.Source]: The source object representing the content
+            result[tree.base.NodeBase]: The root node of the result tree
+        """
+        pass
+
+    def postRender(self, page, result):
+        """
+        Called by Translator after rendering.
+
+        Inputs:
+            page[pages.Source]: The source object representing the content
+            result[tree.base.NodeBase]: The root node of the result tree
+        """
+        pass
+
+    def preWrite(self, page, result):
+        """
+        Called after renderer has written content.
+
+        Inputs:
+            page[pages.Source]: The source object representing the content
+            result[tree.base.NodeBase]: The root node of the result tree
+        """
+        pass
+
+    def postWrite(self, page):
+        """
+        Called after renderer has written content.
+
+        Inputs:
+            page[pages.Source]: The source object representing the content
         """
         pass
 
@@ -191,10 +235,9 @@ class HTMLRenderer(Renderer):
 
     def __init__(self, *args, **kwargs):
         Renderer.__init__(self, *args, **kwargs)
-        self.__head_javascript = common.Storage()
-        self.__javascript = common.Storage()
-
-        self.__css = common.Storage()
+        self.__head_javascript = Storage()
+        self.__javascript = Storage()
+        self.__css = Storage()
 
         if self.get('google_analytics', False):
             self.addJavaScript('google_analytics', 'js/google_analytics.js')
@@ -217,7 +260,7 @@ class HTMLRenderer(Renderer):
         """Add a CSS dependency."""
         self.__css.add(key, (filename, kwargs), location)
 
-    def postRender(self, result, page, meta):
+    def postRender(self, page, result):
         """Insert CSS/JS dependencies into html node tree."""
         root = result.root
 
@@ -262,26 +305,10 @@ class MaterializeRenderer(HTMLRenderer):
         Return the default configuration.
         """
         config = HTMLRenderer.defaultConfig()
-        config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
-        config['sections'] = (True, "Group heading content into <section> tags.")
-        config['collapsible-sections'] = ([None, None, None, None, None, None],
-                                          "Collapsible setting for the six heading level " \
-                                          "sections, possible values include None, 'open', and " \
-                                          "'close'. Each indicates if the associated section " \
-                                          "should be collapsible, if so should it be open or " \
-                                          "closed initially. The 'sections' setting must be " \
-                                          "True for this to operate.")
-        config['navigation'] = (None, "Top bar website navigation items.")
-        config['repo'] = (None, "The source code repository.")
-        config['name'] = (None, "The name of the website (e.g., MOOSE)")
-        config['home'] = ('/', "The homepage for the website.")
-        config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
-        config['search'] = (True, "Enable/disable the search bar.")
         return config
 
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
-        self.__navigation = None # cache for navigation pages
         self.__index = False     # page index created
 
         self.addCSS('materialize', "contrib/materialize/materialize.min.css",

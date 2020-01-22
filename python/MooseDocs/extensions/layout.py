@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring, no-self-use
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,10 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.common import exceptions
-from MooseDocs.base import components
-from MooseDocs.extensions import core, command, materialicon
-from MooseDocs.tree import tokens, html, latex
+from ..common import exceptions
+from ..base import components
+from ..tree import tokens, html, latex
+from . import core, command, materialicon
 
 def make_extension(**kwargs):
     return LayoutExtension(**kwargs)

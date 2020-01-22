@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Heat Conduction Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/heat_conduction
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Functional Expansion Tools Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/functional_expansion_tools
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/heat_conduction
         hide:

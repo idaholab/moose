@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,8 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import collections
-from MooseDocs import common
-from MooseDocs.extensions import command
+from .. import common
+from . import command
 
 def make_extension(**kwargs):
     return ConfigExtension(**kwargs)
@@ -26,13 +25,8 @@ class ConfigExtension(command.CommandExtension):
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
-        self.__configurations = collections.defaultdict(dict)
 
-    def initMetaData(self, page, meta):
-        """Initialize the page as active."""
-        meta.initData('active', True)
-
-    def postRead(self, content, page, meta):
+    def postRead(self, page, content):
         """Updates configuration items."""
         if content:
             for match in command.BlockInlineCommand.RE.finditer(content):
@@ -40,37 +34,22 @@ class ConfigExtension(command.CommandExtension):
                     subcommand = match.group('subcommand')
                     _, settings = common.match_settings(dict(), match.group('settings'))
                     if subcommand == 'disable':
-                        self.__configPageDisable(page, meta, settings)
+                        self.__configPageDisable(page, settings)
                     else:
-                        self.__configurations[page.uid][subcommand] = settings
-
-    @staticmethod
-    def __configPageDisable(page, meta, settings):
-        """Activate/deactivate based on extension."""
-
-        _, ext = os.path.splitext(page.destination)
-        extensions = eval(settings.get('extensions'))
-        if extensions and ext in extensions:
-            meta.setData('active', False)
-
-    def preTokenize(self, ast, page, meta, reader):
-        for key, value in self.__configurations[page.uid].items():
-            self.translator.updateConfiguration(key, **value)
-
-    def postTokenize(self, ast, page, meta, reader):
-        self.translator.resetConfigurations()
-
-    def preRender(self, result, page, meta, renderer):
-        for key, value in self.__configurations[page.uid].items():
-            self.translator.updateConfiguration(key, **value)
-
-    def postWrite(self, *args):
-        self.translator.resetConfigurations()
+                           page['__{}__'.format(subcommand)].update(settings)
 
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, ConfigCommand())
         self.addCommand(reader, ConfigPageActiveCommand())
+
+    @staticmethod
+    def __configPageDisable(page, settings):
+        """Activate/deactivate based on extension."""
+        _, ext = os.path.splitext(page.destination)
+        extensions = eval(settings.get('extensions'))
+        if extensions and ext in extensions:
+            page['active'] = False
 
 class ConfigCommand(command.CommandComponent):
     """This does nothing but serves to hide the command syntax from outputting."""

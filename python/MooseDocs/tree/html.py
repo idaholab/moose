@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
 import html
 import re
 import moosetree
@@ -76,7 +74,7 @@ class Tag(NodeBase):
 
         for child in self.children:
             out += child.write()
-        if self.get('close'): #pylint: disable=no-member
+        if self.get('close'):
             out += '</{}>'.format(self.name)
         return out
 

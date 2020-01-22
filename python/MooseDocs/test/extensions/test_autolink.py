@@ -305,15 +305,15 @@ class TestLocalLinkRender(MooseDocsTestCase):
         link = autolink.LocalLink(None, bookmark='bookmark')
         res = self.render(link, renderer=base.HTMLRenderer())
         self.assertHTMLTag(res, 'body', size=1)
-        self.assertHTMLTag(res(0), 'a', string='#bookmark')
+        self.assertHTMLTag(res(0), 'a', string='_text_#bookmark')
 
         res = self.render(link, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=1)
-        self.assertHTMLTag(res(0), 'a', string='#bookmark')
+        self.assertHTMLTag(res(0), 'a', string='_text_#bookmark')
 
         res = self.render(link, renderer=base.RevealRenderer())
         self.assertHTMLTag(res, 'div', size=1)
-        self.assertHTMLTag(res(0), 'a', string='#bookmark')
+        self.assertHTMLTag(res(0), 'a', string='_text_#bookmark')
 
         # Heading is not founc (see testMinimalLatex)
         res = self.render(link, renderer=base.LatexRenderer())

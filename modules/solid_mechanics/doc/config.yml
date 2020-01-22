@@ -11,10 +11,11 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Solid Mechanics Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/solid_mechanics
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Solid Mechanics Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/solid_mechanics
     MooseDocs.extensions.appsyntax:
         active: False

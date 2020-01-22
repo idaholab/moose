@@ -16,9 +16,9 @@ import mock
 
 from MooseDocs.tree import tokens, pages
 from MooseDocs.common import exceptions
-from MooseDocs.base.components import TokenComponent, Extension
+from MooseDocs.base.components import ReaderComponent
 from MooseDocs.base.lexers import RecursiveLexer, LexerInformation
-from MooseDocs.base import Translator, Reader, Renderer
+from MooseDocs.base import Translator, Reader, Renderer, Extension
 
 class TestExtension(unittest.TestCase):
     """
@@ -43,15 +43,15 @@ class TestExtension(unittest.TestCase):
         t.init()
         self.assertTrue(ext.called)
 
-class TestTokenComponent(unittest.TestCase):
+class TestReaderComponent(unittest.TestCase):
     """
-    Test TokenComponent.
+    Test ReaderComponent.
     """
     def testDefault(self):
         """
         Test basic construction and errors.
         """
-        comp = TokenComponent()
+        comp = ReaderComponent()
         defaults = comp.defaultSettings()
         for key in ['id', 'class', 'style']:
             self.assertIn(key, defaults)
@@ -64,13 +64,13 @@ class TestTokenComponent(unittest.TestCase):
         """
         Test that exceptions are raised.
         """
-        comp = TokenComponent()
+        comp = ReaderComponent()
 
         with self.assertRaises(NotImplementedError):
             comp.createToken(None, None, None)
 
         # Test defaultSettings return type check
-        class TestToken(TokenComponent):
+        class TestToken(ReaderComponent):
             @staticmethod
             def defaultSettings():
                 pass
@@ -83,7 +83,7 @@ class TestTokenComponent(unittest.TestCase):
         """
         Test the createToken method is called.
         """
-        class TestToken(TokenComponent):
+        class TestToken(ReaderComponent):
             PARSE_SETTINGS = False
             def createToken(self, *args):
                 self.count = 1

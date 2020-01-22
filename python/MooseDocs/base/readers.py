@@ -14,9 +14,9 @@ import logging
 import moosetree
 
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import mixins
-from MooseDocs.tree import tokens, pages
+from .. import common
+from ..common import mixins
+from ..tree import tokens, pages
 from .lexers import RecursiveLexer
 
 LOG = logging.getLogger(__name__)
@@ -33,10 +33,18 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         In general, it is not necessary to deal directly with the Reader beyond construction.
         The reader should be passed into the Translator, which handles all the necessary calls.
     """
+    __TRANSLATOR_METHODS__ = ['init',
+                              'initPage',
+                              'read',
+                              'tokenize',
+                              'preExecute', 'postExecute',
+                              'preRead', 'postRead',
+                              'preTokenize', 'postTokenize']
+
+
     def __init__(self, lexer, **kwargs):
-        mixins.ConfigObject.__init__(self, **kwargs)
+        mixins.ConfigObject.__init__(self, 'reader', **kwargs)
         mixins.ComponentObject.__init__(self)
-        common.check_type('lexer', lexer, RecursiveLexer)
         self.__lexer = lexer
 
     def getRoot(self):
@@ -46,6 +54,25 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         This is called by the Translator object.
         """
         return tokens.Token(None)
+
+    def add(self, group, component, location='_end'):
+        """
+        Add a component to extend the Reader by adding a ReaderComponent.
+
+        This method is called when adding ReaderComonents in the ::extend method.
+
+        Inputs:
+            group[str]: Name of the lexer group to append.
+            component[components.ReaderComponent]: The tokenize component to add.
+            location[str|int]: The location to insert this component (see Grammar.py)
+        """
+        component.setReader(self)
+        self.addComponent(component)
+
+        # Update the lexer
+        name = component.__class__.__name__
+        self.__lexer.add(group, name, component.RE, component, location)
+
 
     def read(self, page):
         """
@@ -68,11 +95,6 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
             content[str:tree.page.PageNodeBase]: The content to parse, either as a str
                                                      string or a page node object.
         """
-        # Type checking
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('root', root, tokens.Token)
-            common.check_type('content', content, str)
-
         # Tokenize
         self.__lexer.tokenize(root, content, page, self.__lexer.grammar(group), line)
 
@@ -88,44 +110,66 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
                                               'TOKENIZE ERROR')
                     LOG.error(msg)
 
-    def add(self, group, component, location='_end'):
+    def init(self):
         """
-        Add a component to extend the Reader by adding a TokenComponent.
-
-        This method is called when adding ReaderComonents in the ::extend method.
-
-        Inputs:
-            group[str]: Name of the lexer group to append.
-            component[components.TokenComponent]: The tokenize component to add.
-            location[str|int]: The location to insert this component (see Grammar.py)
+        Called after Translator is set, prior to initializing pages.
         """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type("group", group, str)
-            common.check_type("component", component, MooseDocs.base.components.TokenComponent)
-            common.check_type("location", location, (str, int))
+        pass
 
-        component.setReader(self)
-        self.addComponent(component)
+    def initPage(self, page):
+        """
+        Called for each Page object during initialization.
+        """
+        pass
 
-        # Update the lexer
-        name = component.__class__.__name__
-        self.__lexer.add(group, name, component.RE, component, location)
+    def preExecute(self):
+        """
+        Called by Translator prior to beginning conversion.
+        """
+        pass
 
-    def preTokenize(self, ast, page, meta):
+    def postExecute(self):
+        """
+        Called by Translator after all conversion is complete.
+        """
+        pass
+
+    def preRead(self, page):
+        """
+        Called after to reading the file.
+
+        Input:
+             page[pages.Source]: The source object representing the content
+        """
+        pass
+
+    def postRead(self, page, content):
+        """
+        Called after to reading the file.
+
+        Input:
+             page[pages.Source]: The source object representing the content
+             content[str]: A copy of the content read from the page
+        """
+        pass
+
+    def preTokenize(self, page, ast):
         """
         Called by Translator prior to tokenization.
 
         Inputs:
-            ast[tokens.Token]: The root node of the token tree.
+            page[pages.Source]: The source object representing the content
+            ast[tokens.Token]: The root node of the token tree
         """
         pass
 
-    def postTokenize(self, ast, page, meta):
+    def postTokenize(self, page, ast):
         """
         Called by Translator after tokenization.
 
         Inputs:
-            ast[tokens.Token]: The root node of the token tree.
+            page[pages.Source]: The source object representing the content
+            ast[tokens.Token]: The root node of the token tree
         """
         pass
 
@@ -133,21 +177,23 @@ class MarkdownReader(Reader):
     """
     Reader designed to work with the 'block' and 'inline' structure of markdown to html conversion.
     """
+    BLOCK = 'block'
+    INLINE = 'inline'
     EXTENSIONS = ('.md',)
 
     def __init__(self, **kwargs):
         Reader.__init__(self,
-                        lexer=RecursiveLexer(MooseDocs.BLOCK, MooseDocs.INLINE),
+                        lexer=RecursiveLexer(MarkdownReader.BLOCK, MarkdownReader.INLINE),
                         **kwargs)
 
     def addBlock(self, component, location='_end'):
         """
         Add a component to the 'block' grammar.
         """
-        Reader.add(self, MooseDocs.BLOCK, component, location)
+        Reader.add(self, MarkdownReader.BLOCK, component, location)
 
     def addInline(self, component, location='_end'):
         """
         Add an inline component to the 'inline' grammar.
         """
-        Reader.add(self, MooseDocs.INLINE, component, location)
+        Reader.add(self, MarkdownReader.INLINE, component, location)

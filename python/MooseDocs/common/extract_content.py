@@ -1,4 +1,3 @@
-#:pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -86,7 +85,7 @@ def extractContent(content, settings):
                 continue
     return content, line
 
-def prepareContent(content, settings): #pylint: disable=no-self-use
+def prepareContent(content, settings):
     """
     Apply the various filters and adjustment to the supplied text.
 

@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,21 +7,21 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import re
-from MooseDocs.base import components
-from MooseDocs.tree import tokens
+from ..base import components, Extension
+from ..tree import tokens
 
 def make_extension(**kwargs):
     return CommentExtension(**kwargs)
 
 Comment = tokens.newToken('Comment', content='')
 
-class CommentExtension(components.Extension):
+class CommentExtension(Extension):
     """
     Extracts the heading from AST after tokenization.
     """
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = Extension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
@@ -30,7 +29,7 @@ class CommentExtension(components.Extension):
         reader.addInline(CommentInline(), location='_begin')
         reader.addBlock(CommentBlock(), location='_begin')
 
-class HTMLCommentBlock(components.TokenComponent):
+class HTMLCommentBlock(components.ReaderComponent):
     """
     HTML style comments (deprecated)
     """
@@ -41,7 +40,7 @@ class HTMLCommentBlock(components.TokenComponent):
         Comment(parent, content=info['content'])
         return parent
 
-class CommentInline(components.TokenComponent):
+class CommentInline(components.ReaderComponent):
     """
     Inline comments begin with !! and continue to the end of a line.
     """
@@ -50,7 +49,7 @@ class CommentInline(components.TokenComponent):
         Comment(parent, content=info['content'])
         return parent
 
-class CommentBlock(components.TokenComponent):
+class CommentBlock(components.ReaderComponent):
     """
     Block comments begin and end with !!! that start a line to !!! that end a line.
     """

@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -14,9 +13,9 @@ import re
 from mooseutils.yaml_load import yaml_load
 
 import MooseDocs
-from MooseDocs.common import exceptions
-from MooseDocs.extensions import core, command
-from MooseDocs.tree import tokens
+from ..common import exceptions
+from ..tree import tokens
+from . import core, command
 
 def make_extension(**kwargs):
     return PackageExtension(**kwargs)
