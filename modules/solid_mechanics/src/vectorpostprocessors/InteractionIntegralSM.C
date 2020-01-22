@@ -44,7 +44,11 @@ validParams<InteractionIntegralSM>()
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
-  params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: " + position_type.getRawNames());
+  params.addParam<MooseEnum>(
+      "position_type",
+      position_type,
+      "The method used to calculate position along crack front.  Options are: " +
+          position_type.getRawNames());
   params.addParam<Real>(
       "K_factor", "Conversion factor between interaction integral and stress intensity factor K");
   params.addParam<unsigned int>("symmetry_plane",
@@ -96,7 +100,8 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
     _y(declareVector("y")),
     _z(declareVector("z")),
     _position(declareVector("id")),
-    _interaction_integral(declareVector("II_" + Moose::stringify(getParam<MooseEnum>("sif_mode")) + "_" + Moose::stringify(_ring_index)))
+    _interaction_integral(declareVector("II_" + Moose::stringify(getParam<MooseEnum>("sif_mode")) +
+                                        "_" + Moose::stringify(_ring_index)))
 {
   if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
     mooseError("To include thermal strain term in interaction integral, must both couple "
@@ -144,7 +149,9 @@ InteractionIntegralSM::initialize()
 }
 
 Real
-InteractionIntegralSM::computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q)
+InteractionIntegralSM::computeQpIntegral(const unsigned int crack_front_point_index,
+                                         const Real scalar_q,
+                                         const RealVectorValue & grad_of_scalar_q)
 {
   // In the crack front coordinate system, the crack direction is (1,0,0)
   RealVectorValue crack_direction(1.0, 0.0, 0.0);
@@ -241,8 +248,9 @@ void
 InteractionIntegralSM::execute()
 {
   // calculate phi and dphi for this element
-  FEType fe_type(Utility::string_to_enum<Order>("first"), //BWS TODO does this have to be hardcoded?
-                 Utility::string_to_enum<FEFamily>("lagrange"));
+  FEType fe_type(
+      Utility::string_to_enum<Order>("first"), // BWS TODO does this have to be hardcoded?
+      Utility::string_to_enum<FEFamily>("lagrange"));
   const unsigned int dim = _current_elem->dim();
   std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
@@ -263,10 +271,10 @@ InteractionIntegralSM::execute()
 
       if (_q_function_type == QMethod::Geometry)
         q_this_node = _crack_front_definition->DomainIntegralQFunction(
-                                                                       icfp, _ring_index - ring_base, this_node);
+            icfp, _ring_index - ring_base, this_node);
       else if (_q_function_type == QMethod::Topology)
         q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
-                                                                                  icfp, _ring_index - ring_base, this_node);
+            icfp, _ring_index - ring_base, this_node);
 
       _q_curr_elem.push_back(q_this_node);
     }
@@ -284,7 +292,8 @@ InteractionIntegralSM::execute()
           grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
       }
 
-      _interaction_integral[icfp] += _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+      _interaction_integral[icfp] +=
+          _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
     }
   }
 }
@@ -311,8 +320,8 @@ InteractionIntegralSM::finalize()
 
     if (_sif_mode == SifMethod::T && !_treat_as_2d)
       _interaction_integral[i] +=
-        _poissons_ratio *
-        _crack_front_definition->getCrackFrontTangentialStrain(i); //BWS TODO: this might not be parallel consistent
+          _poissons_ratio * _crack_front_definition->getCrackFrontTangentialStrain(
+                                i); // BWS TODO: this might not be parallel consistent
 
     _interaction_integral[i] *= _K_factor;
   }

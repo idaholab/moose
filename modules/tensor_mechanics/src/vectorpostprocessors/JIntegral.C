@@ -28,10 +28,11 @@ JIntegral::validParams()
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
-  params.addParam<MooseEnum>("position_type",
-                             position_type,
-                             "The method used to calculate position along crack front.  Options are: " +
-                             position_type.getRawNames());
+  params.addParam<MooseEnum>(
+      "position_type",
+      position_type,
+      "The method used to calculate position along crack front.  Options are: " +
+          position_type.getRawNames());
   params.addParam<bool>(
       "convert_J_to_K", false, "Convert J-integral to stress intensity factor K.");
   params.addParam<unsigned int>("symmetry_plane",
@@ -105,7 +106,9 @@ JIntegral::initialize()
 }
 
 Real
-JIntegral::computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q)
+JIntegral::computeQpIntegral(const unsigned int crack_front_point_index,
+                             const Real scalar_q,
+                             const RealVectorValue & grad_of_scalar_q)
 {
   RankTwoTensor grad_of_vector_q;
   const RealVectorValue & crack_direction =
@@ -168,10 +171,10 @@ JIntegral::execute()
 
       if (_q_function_type == QMethod::Geometry)
         q_this_node = _crack_front_definition->DomainIntegralQFunction(
-                                                                       icfp, _ring_index - ring_base, this_node);
+            icfp, _ring_index - ring_base, this_node);
       else if (_q_function_type == QMethod::Topology)
         q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
-                                                                                  icfp, _ring_index - ring_base, this_node);
+            icfp, _ring_index - ring_base, this_node);
 
       _q_curr_elem.push_back(q_this_node);
     }
@@ -189,7 +192,8 @@ JIntegral::execute()
           grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
       }
 
-      _j_integral[icfp] += _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+      _j_integral[icfp] +=
+          _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
     }
   }
 }

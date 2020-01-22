@@ -379,7 +379,7 @@ protected:
 
   /**
    * Determine which of the end nodes should be the starting point of the
-   * crack front. 
+   * crack front.
    * @param end_nodes Vector containing two end nodes. The order of this is
    *                  rearranged so that the first end node is the start of
    *                  the crack front, and the second is at the end.
@@ -447,12 +447,14 @@ protected:
 
   /**
    * Find nodes that are connected through elements to the nodes in the previous
-   * node ring. 
+   * node ring.
    * @param nodes_new_ring Nodes in the new ring -- populated by this method
    * @param nodes_old_ring Nodes in the previous ring
    * @param nodes_all_rings Nodes in all other rings to be excluded from the new ring
-   * @param nodes_neighbor1 Nodes in the neighboring ring to one side to be excluded from the new ring
-   * @param nodes_neighbor2 Nodes in the neighboring ring to the other side to be excluded from the new ring
+   * @param nodes_neighbor1 Nodes in the neighboring ring to one side to be excluded from the new
+   * ring
+   * @param nodes_neighbor2 Nodes in the neighboring ring to the other side to be excluded from the
+   * new ring
    * @param nodes_to_elem_map Map of nodes to connected elements
    */
   void addNodesToQFunctionRing(std::set<dof_id_type> & nodes_new_ring,
@@ -463,7 +465,7 @@ protected:
                                std::vector<std::vector<const Elem *>> & nodes_to_elem_map);
 
   /**
-   * Project a point to a specified point along the crack front and compute the 
+   * Project a point to a specified point along the crack front and compute the
    * projected normal and tangential distance to the front
    * @param dist_to_front Projected normal distance to the front -- computed by this method
    * @param dist_along_tangent Project tangent distance to the front -- computed by this method

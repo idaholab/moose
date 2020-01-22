@@ -26,7 +26,8 @@ InputParameters
 CrackFrontDefinition::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Used to describe geometric characteristics of the crack front for fracture integral calculations");
+  params.addClassDescription("Used to describe geometric characteristics of the crack front for "
+                             "fracture integral calculations");
   params += BoundaryRestrictable::validParams();
   addCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;

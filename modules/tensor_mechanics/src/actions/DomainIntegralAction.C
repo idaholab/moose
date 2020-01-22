@@ -43,8 +43,8 @@ DomainIntegralAction::validParams()
                                           integral_vec,
                                           "Domain integrals to calculate.  Choices are: " +
                                               integral_vec.getRawNames());
-  params.addParam<std::vector<BoundaryName>>(
-      "boundary", "Boundary containing the crack front points");
+  params.addParam<std::vector<BoundaryName>>("boundary",
+                                             "Boundary containing the crack front points");
   params.addParam<std::vector<Point>>("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>(
       "order", "FIRST", "Specifies the order of the FE shape function to use for q AuxVariables");
@@ -108,11 +108,16 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
     _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
     _have_crack_direction_vector(isParamValid("crack_direction_vector")),
-    _crack_direction_vector(_have_crack_direction_vector ? getParam<RealVectorValue>("crack_direction_vector") : 0.0),
+    _crack_direction_vector(
+        _have_crack_direction_vector ? getParam<RealVectorValue>("crack_direction_vector") : 0.0),
     _have_crack_direction_vector_end_1(isParamValid("crack_direction_vector_end_1")),
-    _crack_direction_vector_end_1(_have_crack_direction_vector_end_1 ? getParam<RealVectorValue>("crack_direction_vector_end_1") : 0.0),
+    _crack_direction_vector_end_1(_have_crack_direction_vector_end_1
+                                      ? getParam<RealVectorValue>("crack_direction_vector_end_1")
+                                      : 0.0),
     _have_crack_direction_vector_end_2(isParamValid("crack_direction_vector_end_2")),
-    _crack_direction_vector_end_2(_have_crack_direction_vector_end_2 ? getParam<RealVectorValue>("crack_direction_vector_end_2") : 0.0),
+    _crack_direction_vector_end_2(_have_crack_direction_vector_end_2
+                                      ? getParam<RealVectorValue>("crack_direction_vector_end_2")
+                                      : 0.0),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _convert_J_to_K(false),
@@ -191,7 +196,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
 
       if (_displacements.size() < 2)
         mooseError(
-                   "DomainIntegral error: The size of the displacements vector should at least be 2.");
+            "DomainIntegral error: The size of the displacements vector should at least be 2.");
     }
     else
     {
@@ -201,7 +206,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
 
       if (!isParamValid("disp_x") || !isParamValid("disp_y"))
         mooseError(
-                   "DomainIntegral error: Specify displacements using the `displacements` parameter.");
+            "DomainIntegral error: Specify displacements using the `displacements` parameter.");
       else
       {
         _displacements.clear();
@@ -470,20 +475,25 @@ DomainIntegralAction::act()
       {
         if (_treat_as_2d)
         {
-          params.set<VectorPostprocessorName>("vectorpostprocessor") = pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
-          std::string pp_name = pp_base_name + + "_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("vectorpostprocessor") =
+              pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          std::string pp_name = pp_base_name + +"_" + Moose::stringify(_ring_vec[ring_index]);
           params.set<unsigned int>("index") = 0;
-          params.set<std::string>("vector_name") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<std::string>("vector_name") =
+              pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
           _problem->addPostprocessor(pp_type_name, pp_name, params);
         }
         else
         {
           for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
           {
-            params.set<VectorPostprocessorName>("vectorpostprocessor") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
-            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" + Moose::stringify(_ring_vec[ring_index]);
+            params.set<VectorPostprocessorName>("vectorpostprocessor") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" +
+                                  Moose::stringify(_ring_vec[ring_index]);
             params.set<unsigned int>("index") = cfp_index;
-            params.set<std::string>("vector_name") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            params.set<std::string>("vector_name") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
             _problem->addPostprocessor(pp_type_name, pp_name, params);
           }
         }
@@ -499,20 +509,25 @@ DomainIntegralAction::act()
       {
         if (_treat_as_2d)
         {
-          params.set<VectorPostprocessorName>("vectorpostprocessor") = pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
-          std::string pp_name = pp_base_name + + "_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("vectorpostprocessor") =
+              pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          std::string pp_name = pp_base_name + +"_" + Moose::stringify(_ring_vec[ring_index]);
           params.set<unsigned int>("index") = 0;
-          params.set<std::string>("vector_name") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<std::string>("vector_name") =
+              pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
           _problem->addPostprocessor(pp_type_name, pp_name, params);
         }
         else
         {
           for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
           {
-            params.set<VectorPostprocessorName>("vectorpostprocessor") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
-            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" + Moose::stringify(_ring_vec[ring_index]);
+            params.set<VectorPostprocessorName>("vectorpostprocessor") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" +
+                                  Moose::stringify(_ring_vec[ring_index]);
             params.set<unsigned int>("index") = cfp_index;
-            params.set<std::string>("vector_name") = pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            params.set<std::string>("vector_name") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
             _problem->addPostprocessor(pp_type_name, pp_name, params);
           }
         }
@@ -545,7 +560,6 @@ DomainIntegralAction::act()
         }
       }
     }
-
   }
 
   else if (_current_task == "add_vector_postprocessor")
@@ -674,19 +688,28 @@ DomainIntegralAction::act()
         params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
         if (_treat_as_2d)
         {
-          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") = ki_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
-          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") = kii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
-          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") = kiii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") =
+              ki_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") =
+              kii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") =
+              kiii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
         }
         else
         {
-          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") = ki_name + Moose::stringify(_ring_vec[ring_index]);
-          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") = kii_name + Moose::stringify(_ring_vec[ring_index]);
-          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") = kiii_name + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") =
+              ki_name + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") =
+              kii_name + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") =
+              kiii_name + Moose::stringify(_ring_vec[ring_index]);
         }
-        params.set<std::string>("KI_vector_name") = ki_name + Moose::stringify(_ring_vec[ring_index]);
-        params.set<std::string>("KII_vector_name") = kii_name + Moose::stringify(_ring_vec[ring_index]);
-        params.set<std::string>("KIII_vector_name") = kiii_name + Moose::stringify(_ring_vec[ring_index]);
+        params.set<std::string>("KI_vector_name") =
+            ki_name + Moose::stringify(_ring_vec[ring_index]);
+        params.set<std::string>("KII_vector_name") =
+            kii_name + Moose::stringify(_ring_vec[ring_index]);
+        params.set<std::string>("KIII_vector_name") =
+            kiii_name + Moose::stringify(_ring_vec[ring_index]);
         std::string vpp_name = vpp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
         _problem->addVectorPostprocessor(vpp_type_name, vpp_name, params);
       }

@@ -20,12 +20,17 @@ validParams<MixedModeEquivalentK>()
                              "given the $K_I$, $K_{II}$, and $K_{III}$ stress "
                              "intensity factors");
   params.addParam<unsigned int>("ring_index", "Ring ID");
-  params.addRequiredParam<VectorPostprocessorName>("KI_vectorpostprocessor", "The name of the VectorPostprocessor that computes KI");
-  params.addRequiredParam<VectorPostprocessorName>("KII_vectorpostprocessor", "The name of the VectorPostprocessor that computes KII");
-  params.addRequiredParam<VectorPostprocessorName>("KIII_vectorpostprocessor", "The name of the VectorPostprocessor that computes KIII");
+  params.addRequiredParam<VectorPostprocessorName>(
+      "KI_vectorpostprocessor", "The name of the VectorPostprocessor that computes KI");
+  params.addRequiredParam<VectorPostprocessorName>(
+      "KII_vectorpostprocessor", "The name of the VectorPostprocessor that computes KII");
+  params.addRequiredParam<VectorPostprocessorName>(
+      "KIII_vectorpostprocessor", "The name of the VectorPostprocessor that computes KIII");
   params.addRequiredParam<std::string>("KI_vector_name", "The name of the vector that contains KI");
-  params.addRequiredParam<std::string>("KII_vector_name", "The name of the vector that contains KII");
-  params.addRequiredParam<std::string>("KIII_vector_name", "The name of the vector that contains KIII");
+  params.addRequiredParam<std::string>("KII_vector_name",
+                                       "The name of the vector that contains KII");
+  params.addRequiredParam<std::string>("KIII_vector_name",
+                                       "The name of the vector that contains KIII");
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   return params;
 }
@@ -77,6 +82,6 @@ MixedModeEquivalentK::execute()
     _z[i] = _z_value[i];
     _position[i] = _position_value[i];
     _k_eq[i] = std::sqrt(_ki_value[i] * _ki_value[i] + _kii_value[i] * _kii_value[i] +
-                   1.0 / (1.0 - _poissons_ratio) * _kiii_value[i] * _kiii_value[i]);
+                         1.0 / (1.0 - _poissons_ratio) * _kiii_value[i] * _kiii_value[i]);
   }
 }

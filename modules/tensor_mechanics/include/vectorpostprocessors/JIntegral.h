@@ -36,7 +36,9 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  Real computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q);
+  Real computeQpIntegral(const unsigned int crack_front_point_index,
+                         const Real scalar_q,
+                         const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
   const MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
   const MaterialProperty<RealVectorValue> * _J_thermal_term_vec;

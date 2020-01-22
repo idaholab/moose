@@ -48,4 +48,3 @@ protected:
   VectorPostprocessorValue & _position;
   VectorPostprocessorValue & _k_eq;
 };
-

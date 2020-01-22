@@ -38,7 +38,9 @@ public:
   static MooseEnum sifModeType();
 
 protected:
-  Real computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q);
+  Real computeQpIntegral(const unsigned int crack_front_point_index,
+                         const Real scalar_q,
+                         const RealVectorValue & grad_of_scalar_q);
   void computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
   void computeTFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
   unsigned int _ndisp;
@@ -97,5 +99,4 @@ protected:
   VectorPostprocessorValue & _z;
   VectorPostprocessorValue & _position;
   VectorPostprocessorValue & _interaction_integral;
-
 };
