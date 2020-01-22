@@ -12,15 +12,15 @@
 []
 
 [VectorPostprocessors]
-  [const]
-    type = ConstantVectorPostprocessor
-    value = '1 2 3 4 5'
+  [test]
+    type = TestDistributedVectorPostprocessor
+    parallel_type = distributed
     outputs = none
   []
   [stats]
     type = StatisticsVectorPostprocessor
-    vectorpostprocessors = 'const'
-    compute = 'min max sum mean stddev norm2'
+    vectorpostprocessors = 'test'
+    compute = 'min max sum mean stddev norm2 ratio'
   []
 []
 

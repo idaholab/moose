@@ -26,81 +26,79 @@ InputParameters
 StatisticsVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params.addClassDescription("Compute statistical values of a given VectorPostprocessor.  The "
-                             "statistics are computed for each column.");
+  params.addClassDescription(
+      "Compute statistical values of a given VectorPostprocessor objects and vectors.");
 
-  params.addRequiredParam<VectorPostprocessorName>(
-      "vpp", "The VectorPostprocessor to compute statistics for.");
+  params.addRequiredParam<std::vector<VectorPostprocessorName>>(
+    "vectorpostprocessors", "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
-  // These are directly numbered to ensure that any changes to this list will not cause a bug
-  // Do not change the numbers here without changing the corresponding code in computeStatVector()
-  MultiMooseEnum stats("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6");
-  params.addRequiredParam<MultiMooseEnum>(
-      "stats",
-      stats,
-      "The statistics you would like to compute for each column of the VectorPostprocessor");
-
+  MultiMooseEnum stats = Statistics::makeCalculatorEnum();
+  params.addRequiredParam<MultiMooseEnum>("compute", stats, "The statistics to compute for each of the supplied vector postprocessors.");
   return params;
 }
 
 StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters),
-    _vpp_name(getParam<VectorPostprocessorName>("vpp")),
-    _stats(getParam<MultiMooseEnum>("stats")),
-    _stat_type_vector(declareVector("stat_type"))
+    : GeneralVectorPostprocessor(parameters),
+      _compute_stats(getParam<MultiMooseEnum>("compute")),
+      _stat_type_vector(declareVector("stat_type"))
 {
+  for (const auto & item : _compute_stats)
+    _stat_type_vector.push_back(item.id());
+}
+
+void
+StatisticsVectorPostprocessor::initialSetup()
+{
+  const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
+  for (const auto & vpp_name : vpp_names)
+  {
+    const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
+    for (const auto & the_pair : vpp_vectors)
+    {
+      // Create the Statistics::Calculator objects for each statistic to be computed on each vector
+      _stat_calculators.emplace_back(std::vector<std::unique_ptr<Statistics::Calculator>>());
+      for (const auto & item : _compute_stats)
+        _stat_calculators.back().emplace_back(Statistics::makeCalculator(item.name(), *this));
+
+      // Store the VectorPostprocessor name and vector name for the vectors from which stats will be computed
+      _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
+
+      // Create the vector where the statistics will be stored
+      std::string name = vpp_name + "_" + the_pair.first;
+      _stat_vectors.push_back(&declareVector(name));
+    }
+  }
 }
 
 void
 StatisticsVectorPostprocessor::initialize()
 {
-  const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
-
-  // Add vectors for each column, the reason for the extra logic here is that the columns a VPP
-  // produces can change
-  for (const auto & the_pair : vpp_vectors)
+  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {
-    const auto & name = the_pair.first;
-
-    if (_stat_vectors.find(name) == _stat_vectors.end())
-      _stat_vectors[name] = &declareVector(name);
+    const bool is_distributed = std::get<2>(_compute_from_names[i]);
+    if (is_distributed || processor_id() == 0)
+    {
+      for (auto & calc_ptr : _stat_calculators[i])
+        calc_ptr->initialize(is_distributed);
+    }
   }
 }
 
 void
 StatisticsVectorPostprocessor::execute()
 {
-  if (processor_id() == 0) // Only compute on processor 0
+  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {
-    const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
+    const std::string & vpp_name = std::get<0>(_compute_from_names[i]);
+    const std::string & vec_name = std::get<1>(_compute_from_names[i]);
+    const bool is_distributed = std::get<2>(_compute_from_names[i]);
+    const VectorPostprocessorValue & data =
+        _fe_problem.getVectorPostprocessorValue(vpp_name, vec_name, true);
 
-    _stat_type_vector.clear();
-
-    // Add the stat IDs into the first colum
-    for (const auto & stat : _stats)
+    if (is_distributed || processor_id() == 0)
     {
-      auto stat_id = stat.id();
-
-      _stat_type_vector.push_back(stat_id);
-    }
-
-    // For each value vector compute the stats
-    for (auto & the_pair : vpp_vectors)
-    {
-      const auto & name = the_pair.first;
-      const auto & values = *the_pair.second.current;
-
-      mooseAssert(_stat_vectors.count(name), "Error retrieving VPP vector");
-      auto & stat_vector = *_stat_vectors.at(name);
-
-      stat_vector.clear();
-
-      for (const auto & stat : _stats)
-      {
-        auto stat_id = stat.id();
-
-        stat_vector.push_back(computeStatValue(stat_id, values));
-      }
+      for (auto & calc_ptr : _stat_calculators[i])
+        calc_ptr->execute(data, is_distributed);
     }
   }
 }
@@ -108,48 +106,14 @@ StatisticsVectorPostprocessor::execute()
 void
 StatisticsVectorPostprocessor::finalize()
 {
-}
-
-Real
-StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<Real> & stat_vector)
-{
-  switch (stat_id)
+  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {
-    case 0: // min
-      return *std::min_element(stat_vector.begin(), stat_vector.end());
-    case 1: // max
-      return *std::max_element(stat_vector.begin(), stat_vector.end());
-    case 2: // sum
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.);
-    case 3: // average
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
-             static_cast<Real>(stat_vector.size());
-    case 4: // stddev
+    const bool is_distributed = std::get<2>(_compute_from_names[i]);
+    for (auto & calc_ptr : _stat_calculators[i])
     {
-      auto mean = std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
-                  static_cast<Real>(stat_vector.size());
-
-      auto the_sum = std::accumulate(stat_vector.begin(),
-                                     stat_vector.end(),
-                                     0.,
-                                     [&mean](Real running_value, Real current_value) {
-                                       return running_value + std::pow(current_value - mean, 2);
-                                     });
-
-      return std::sqrt(the_sum / (stat_vector.size() - 1.));
+      if (is_distributed || processor_id() == 0)
+        calc_ptr->finalize(is_distributed);
+      _stat_vectors[i]->emplace_back(calc_ptr->value());
     }
-    case 5: // norm2
-      return std::sqrt(std::accumulate(
-          stat_vector.begin(), stat_vector.end(), 0., [](Real running_value, Real current_value) {
-            return running_value + std::pow(current_value, 2);
-
-          }));
-    case 6: // ratio
-    {
-      auto min = *std::min_element(stat_vector.begin(), stat_vector.end()) * 1.;
-      return (min != 0. ? *std::max_element(stat_vector.begin(), stat_vector.end()) / min : 0.);
-    }
-    default:
-      mooseError("Unknown statistics type: ", stat_id);
   }
 }

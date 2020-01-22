@@ -50,6 +50,9 @@ public:
 
     /// Whether or not this vector needs to be scatterd
     bool needs_scatter = false;
+
+    /// Whether or not this vector is distributed
+    bool is_distributed = false;
   };
 
   /**
