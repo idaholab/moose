@@ -201,6 +201,9 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   // Does the VPP need to be scattered after computing
   vec_struct.needs_scatter |= needs_scatter;
 
+  // Set distributed flag
+  vec_struct.is_distributed = is_distributed;
+
   return vec_struct;
 }
 

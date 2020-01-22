@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
+#include "Statistics.h"
 
 class StatisticsVectorPostprocessor;
 
@@ -17,9 +18,10 @@ template <>
 InputParameters validParams<StatisticsVectorPostprocessor>();
 
 /**
- * Compute several metrics for each MPI process.
+ * Compute several metrics for supplied VPP vectors.
  *
- * Note: this is somewhat expensive.  It does loops over elements, sides and nodes
+ * This class uses calculator objects defined in Statistics.h and is setup such that if a new
+ * calculation is needed it can be added in Statistics.h without modification of this object.
  */
 class StatisticsVectorPostprocessor : public GeneralVectorPostprocessor
 {
@@ -28,26 +30,27 @@ public:
 
   StatisticsVectorPostprocessor(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
 
 protected:
-  /**
-   * Compute the passed in statistic for the vector
-   */
-  Real computeStatValue(int stat_id, const std::vector<Real> & stat_vector);
-
-  /// The name of the VPP to work on
-  const VectorPostprocessorName & _vpp_name;
-
-  /// The chosen statistics to compute
-  MultiMooseEnum _stats;
+  /// The selected statistics to compute
+  const MultiMooseEnum & _compute_stats;
 
   /// The VPP vector that will hold the statistics identifiers
   VectorPostprocessorValue & _stat_type_vector;
 
-  /// The VPP vectors that will hold the statistics for each column
-  std::map<std::string, VectorPostprocessorValue *> _stat_vectors;
-};
+  // The following vectors are sized to the number of statistics to be computed
 
+  /// The VPP vectors being computed
+  std::vector<VectorPostprocessorValue *> _stat_vectors;
+
+  /// Calculators, 1 for each vector and each statistic to compute for that vector
+  std::vector<std::vector<std::unique_ptr<Statistics::Calculator>>> _stat_calculators;
+
+  /// VPPs names to be computed from
+  /// (Vectorpostprocessor name, vector name, is_distribute)
+  std::vector<std::tuple<std::string, std::string, bool>> _compute_from_names;
+};
