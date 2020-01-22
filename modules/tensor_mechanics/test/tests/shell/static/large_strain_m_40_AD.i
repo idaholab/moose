@@ -112,9 +112,11 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  automatic_scaling = true
+
   line_search = 'none'
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-14
 
   dt = 0.1
   dtmin = 0.1
