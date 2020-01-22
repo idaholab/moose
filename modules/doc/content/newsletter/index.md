@@ -5,6 +5,10 @@ major changes to the project monthly highlights will be produced. These highligh
 monthly to the [MOOSE users](contact_us.md) and [MOOSE announcement](contact_us.md) lists as well as
 provided below.
 
+## 2020
+
+- [January, 2020](2020_01.md)
+
 ## 2019
 
 - [December, 2019](2019_12.md)
