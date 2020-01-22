@@ -31,7 +31,7 @@ os.environ['MOOSE_DIR'] = MOOSE_DIR
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.path.join(MOOSE_DIR, 'python')
 
-from TestHarness.testers.bench import DB
+from TestHarness.testers.bench import *
 import hit
 
 def find_moose_python():
