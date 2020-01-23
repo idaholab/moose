@@ -601,7 +601,10 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
   for (const auto & object : objects)
   {
     const auto & mv_deps = object->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    if (needed_moose_vars.empty())
+      needed_moose_vars = mv_deps;
+    else
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 }
 
