@@ -9,10 +9,37 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-from FactorySystem.Parser import DupWalker
 import mooseutils
 from peacock.PeacockException import PeacockException
-import hit
+from pyhit import hit
+
+
+class DupWalker(object):
+    def __init__(self, fname):
+        self.have = {}
+        self.dups = {}
+        self.errors = []
+        self._fname = fname
+
+    def _duperr(self, node):
+        if node.type() == hit.NodeType.Section:
+            ntype = 'section'
+        elif node.type() == hit.NodeType.Field:
+            ntype = 'parameter'
+        self.errors.append('{}:{}: duplicate {} "{}"'.format(self._fname, node.line(), ntype, node.fullpath()))
+
+    def walk(self, fullpath, path, node):
+        if node.type() != hit.NodeType.Field and node.type() != hit.NodeType.Section:
+            return
+
+        if fullpath in self.have:
+            if fullpath not in self.dups:
+                self._duperr(self.have[fullpath])
+                self.dups[fullpath] = True
+            self._duperr(node)
+        else:
+            self.have[fullpath] = node
+
 
 class InputFile(object):
     """

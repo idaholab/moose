@@ -35,11 +35,6 @@
     input = test_camel_to_space.py
     requirement = "MOOSE python utilities shall include tools for converting camel case text to underscore separated text."
   []
-  [hit]
-    type = PythonUnitTest
-    input = test_hit_load.py
-    requirement = "MOOSE python utilities shall include a tool for reading hit files."
-  []
   [yaml_load]
     type = PythonUnitTest
     input = test_yaml_load.py

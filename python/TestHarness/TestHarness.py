@@ -18,27 +18,20 @@ from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 from . import util
-import hit
-from mooseutils import HitNode, hit_parse
+import pyhit
 
 import argparse
 from timeit import default_timer as clock
 
 def readTestRoot(fname):
-    with open(fname, 'r') as f:
-        data = f.read()
-    root = hit.parse(fname, data)
-    args = []
-    if root.find('run_tests_args'):
-        args = shlex.split(root.param('run_tests_args'))
 
-    hit_node = HitNode(None, root)
-    hit_parse(hit_node, root, '')
+    root = pyhit.load(fname)
+    args = root.get('run_tests_args', '').split()
 
     # TODO: add check to see if the binary exists before returning. This can be used to
     # allow users to control fallthrough for e.g. individual module binaries vs. the
     # combined binary.
-    return root.param('app_name'), args, hit_node
+    return root['app_name'], args, root
 
 def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
     rootdir = os.path.abspath(start)
@@ -63,7 +56,7 @@ class TestHarness:
         os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
 
         if app_name:
-            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(None, hit.parse('',''))
+            rootdir, app_name, args, root_params = '.', app_name, [], pyhit.Node()
         else:
             rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
 
@@ -131,7 +124,7 @@ class TestHarness:
         if self.options.skip_config_checks:
             checks['compiler'] = set(['ALL'])
             checks['petsc_version'] = 'N/A'
-            checks['petsc_version_release'] = set(['ALL'])
+            checks['petsc_version_release'] = 'N/A'
             checks['slepc_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
@@ -321,7 +314,6 @@ class TestHarness:
 
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
-
             self.augmentParameters(file, tester, testroot_params)
             if testroot_params.get("caveats"):
                 # Show what executable we are using if using a different testroot file
@@ -364,7 +356,7 @@ class TestHarness:
                 relative_path = relative_path.replace('/' + infile + '/', ':')
                 break
         relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
-        relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[1:])  # Trim root node "[Tests]"
+        relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[2:])  # Trim root node "[Tests]"
         formatted_name = relative_path + '.' + relative_hitpath
 
         params['test_name'] = formatted_name

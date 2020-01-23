@@ -164,6 +164,11 @@ public:
   /// addChild adds a node to the ordered set of this node's children.  This node assumes/takes
   /// ownership of the memory of the passed child.
   void addChild(Node * child);
+
+  /// insertChild inserts a node prior to the supplied index to the ordered set of this node's
+  /// children.  This node assumes/takes ownership of the memory of the passed child.
+  void insertChild(std::size_t index, Node * child);
+
   /// children returns a list of this node's children of the given type t.
   std::vector<Node *> children(NodeType t = NodeType::All);
   /// parent returns a pointer to this node's parent node or nullptr if this node has no parent.
@@ -324,6 +329,7 @@ public:
   static const bool Inline = true;
   static const bool Block = false;
   Comment(const std::string & text, bool is_inline);
+  void setText(const std::string & text);
 
   virtual std::string
   render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;

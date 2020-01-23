@@ -36,7 +36,7 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit python bindings
 #
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
-pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
+pyhit_LIB       := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
 
 # some systems have python2/3 but no python2/3-config command - fall back to python-config for them
 pyconfig := python3-config

@@ -4,7 +4,7 @@ A class for computing the element-wise $H1$ (Sobolev space) error (actually $W^{
 
 ## Example syntax
 
-!listing test/tests/auxkernels/error_function_aux/error_function_aux.i block=h1_error_aux
+!listing test/tests/auxkernels/error_function_aux/error_function_aux.i block=AuxKernels/h1_error_aux
 
 !syntax description /AuxKernels/ElementH1ErrorFunctionAux
 

@@ -20,5 +20,5 @@
     exodiff = good_exodiff_out.e
     prereq = should_execute_false_ok
     # should_execute is true by default
-  [../]  
+  [../]
 []

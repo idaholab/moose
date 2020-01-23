@@ -30,13 +30,13 @@ The "cycles" parameter can be set to perform multiple adaptivity cycles for a si
 useful for cases where one would like to resolve a sharp feature in a single step, such as in the case
 of an introduced nucleus.
 
-!listing test/tests/mesh/adapt/adapt_test_cycles.i block=Adaptivity
+!listing test/tests/mesh/adapt/adapt_test_cycles.i block=Executioner/Adaptivity
 
 The "interval" parameter can be set to decrease the amount of adaptivity is performed so that
 it is performed on every _nth_ step. This can sometimes help to speed up your simulation as adaptivity
 can be somewhat expensive to perform.
 
-!listing test/tests/mesh/adapt/interval.i block=Adaptivity
+!listing test/tests/mesh/adapt/interval.i block=Executioner/Adaptivity
 
 !syntax parameters /Adaptivity
 

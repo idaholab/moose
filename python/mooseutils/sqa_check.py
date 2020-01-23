@@ -7,7 +7,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import os
 import collections
 import subprocess
@@ -15,10 +14,10 @@ from .mooseutils import git_root_dir, colorText
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
-    from .hit_load import hit_load
+    import pyhit
 
     messages = []
-    root = hit_load(filename)
+    root = pyhit.load(filename)
     design = root.children[0].get('design', '')
     issues = root.children[0].get('issues', '')
     deprecated = root.children[0].get('deprecated', False)
@@ -57,7 +56,6 @@ def check_requirement(filename):
 
 def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['tests'], skip=[]):
     """Check that test specifications that were modified include requirements."""
-    from .hit_load import hit_load
 
     # Fetch
     cmd = ['git', 'fetch', remote]
@@ -81,13 +79,14 @@ def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['
 
 def sqa_check_requirement_duplicates(working_dir=os.getcwd(), specs=['tests'], skip=[]):
     """Check that no duplicate requirements exist."""
+    import pyhit
 
     requirements = collections.defaultdict(list)
     for root, dirs, files in os.walk(working_dir):
         for fname in files:
             filename = os.path.join(root, fname)
             if fname in specs and not any(s in filename for s in skip):
-                node = hit_load(filename)
+                node = pyhit.load(filename)
                 for child in node.children[0]:
                     req = child.get('requirement', None)
                     if req is not None:

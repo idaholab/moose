@@ -12,8 +12,8 @@ import os, sys
 import subprocess
 import json
 import unittest
-from FactorySystem.Parser import DupWalker
-import hit
+from FactorySystem import Parser
+import pyhit
 
 def find_app():
     """
@@ -61,10 +61,10 @@ def run_app(args=[]):
 
 class TestHITBase(unittest.TestCase):
     def getBlockSections(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Section)}
+        return {c.name: c for c in node}
 
     def getBlockParams(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Field)}
+        return {k:v for k, v in node.params()}
 
     def getInputFileFormat(self, extra=[]):
         """
@@ -79,13 +79,9 @@ class TestHITBase(unittest.TestCase):
         output = output.split('### END DUMP DATA ###')[0]
 
         self.assertNotEqual(len(output), 0)
-        root = hit.parse("dump.i", output)
-        hit.explode(root)
-        w = DupWalker("dump.i")
-        root.walk(w, hit.NodeType.All)
-        if w.errors:
-            print("\n".join(w.errors))
-        self.assertEqual(len(w.errors), 0)
+        root = pyhit.parse(output)
+        errors = list(Parser.checkDuplicates(root))
+        self.assertEqual(errors, [])
         return root
 
 
@@ -141,13 +137,13 @@ class TestInputFileFormatSearch(TestHITBase):
         Make sure parameter search works
         """
         root = self.getInputFileFormat(["initial_steps"])
-        section_map = {c.path(): c for c in root.children(node_type=hit.NodeType.Section)}
+        section_map = self.getBlockSections(root)
         self.assertNotIn("Executioner", section_map)
         self.assertNotIn("BCs", section_map)
         self.assertIn("Adaptivity", section_map)
         self.assertEqual(len(section_map.keys()), 1)
         adaptivity = section_map["Adaptivity"]
-        params = {c.path(): c for c in adaptivity.children(node_type=hit.NodeType.Field)}
+        params = self.getBlockParams(adaptivity)
         self.assertIn("initial_steps", params)
         self.assertEqual(len(params.keys()), 1)
 
