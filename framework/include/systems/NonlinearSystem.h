@@ -78,7 +78,7 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
-  void computeScalingJacobian() override;
+  void computeScaling() override;
 
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
