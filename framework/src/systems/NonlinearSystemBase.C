@@ -1476,7 +1476,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   PARALLEL_CATCH;
 
   if (_computing_scaling_residual)
-    // We computed the volumetric objects. We can return now (after assembling) before we get into
+    // We computed the volumetric objects. We can return now before we get into
     // any strongly enforced constraint conditions or penalty-type objects
     // (DGKernels, IntegratedBCs, InterfaceKernels, Constraints)
     return;
