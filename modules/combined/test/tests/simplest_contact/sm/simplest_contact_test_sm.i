@@ -75,7 +75,7 @@
   [../]
 
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.0001

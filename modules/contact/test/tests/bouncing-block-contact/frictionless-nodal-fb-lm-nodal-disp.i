@@ -82,24 +82,28 @@ offset = 1e-2
   [./botx]
     type = DirichletBC
     variable = disp_x
+    preset = false
     boundary = 40
     value = 0.0
   [../]
   [./boty]
     type = DirichletBC
     variable = disp_y
+    preset = false
     boundary = 40
     value = 0.0
   [../]
   [./topy]
     type = FunctionDirichletBC
     variable = disp_y
+    preset = false
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
   [../]
   [./leftx]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 50
     function = '1e-2 * t'
   [../]

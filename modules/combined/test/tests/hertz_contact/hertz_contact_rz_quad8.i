@@ -161,20 +161,20 @@
 [BCs]
 
   [./base_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1000
     value = 0.0
   [../]
 
   [./symm_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
   [./disp_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     component = 1
     boundary = 2

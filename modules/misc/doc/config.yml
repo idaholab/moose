@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Misc Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/misc
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Misc Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/misc
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/misc
         hide:

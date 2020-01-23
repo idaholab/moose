@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 #include "Function.h"
 
 /**
@@ -19,7 +19,7 @@
  * displacement is then applied to the boundary.
  **/
 
-class PresetDisplacement : public PresetNodalBC
+class PresetDisplacement : public DirichletBCBase
 {
 public:
   static InputParameters validParams();

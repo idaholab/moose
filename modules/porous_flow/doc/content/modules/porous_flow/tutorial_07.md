@@ -46,7 +46,7 @@ In PorousFlow, the permeability may depend on the porosity via the [KozenyCarman
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[./permeability_aquifer] end=[./precipitation_dissolution_qp]
 
-Instead of using a set of `PresetBC` to control the physics at the injection area, tracer is simply injected using a [`PorousFlowSink`](PorousFlowSink.md) (see also [boundary conditions](porous_flow/boundaries.md) for a detailed discussion).  A fixed rate of $5\times 10^{-3}\,$kg.s$^{-1}$.m$^{-2}$ is used:
+Instead of using a set of preset `DirichletBC` to control the physics at the injection area, tracer is simply injected using a [`PorousFlowSink`](PorousFlowSink.md) (see also [boundary conditions](porous_flow/boundaries.md) for a detailed discussion).  A fixed rate of $5\times 10^{-3}\,$kg.s$^{-1}$.m$^{-2}$ is used:
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[BCs] end=[Modules]
 

@@ -1,0 +1,17 @@
+[Tests]
+  [major]
+    type = RunApp
+    input = good.i
+    python = 2
+  []
+  [major_minor]
+    type = RunApp
+    input = good.i
+    python = 3.5
+  []
+  [major_minor_patch]
+    type = RunApp
+    input = good.i
+    python = 3.4.1
+  []
+[]

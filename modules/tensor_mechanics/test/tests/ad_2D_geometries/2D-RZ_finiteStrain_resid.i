@@ -117,25 +117,25 @@
 
 [BCs]
   [./no_disp_r_left]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
   [./no_disp_r_right]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_r
     boundary = right
     value = 0.0
   [../]
   [./no_disp_z_bottom]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
   [./top]
-    type = ADFunctionPresetBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = top
     function = 't'

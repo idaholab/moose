@@ -30,16 +30,16 @@
 [BCs]
   active = 'left right'
 
-  # We will use PresetBCs
+  # We will use preset BCs
   [./left]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
   [./right]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = u
     boundary = 1
     value = 1

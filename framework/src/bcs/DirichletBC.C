@@ -16,7 +16,7 @@ defineLegacyParams(DirichletBC);
 InputParameters
 DirichletBC::validParams()
 {
-  InputParameters params = NodalBC::validParams();
+  InputParameters params = DirichletBCBase::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -25,12 +25,12 @@ DirichletBC::validParams()
 }
 
 DirichletBC::DirichletBC(const InputParameters & parameters)
-  : NodalBC(parameters), _value(getParam<Real>("value"))
+  : DirichletBCBase(parameters), _value(getParam<Real>("value"))
 {
 }
 
 Real
-DirichletBC::computeQpResidual()
+DirichletBC::computeQpValue()
 {
-  return _u[_qp] - _value;
+  return _value;
 }

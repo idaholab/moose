@@ -28,13 +28,13 @@
 
 [BCs]
   [./bot]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     boundary = top
     function = 't'

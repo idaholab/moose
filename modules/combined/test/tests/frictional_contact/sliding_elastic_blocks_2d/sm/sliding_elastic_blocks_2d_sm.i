@@ -166,13 +166,13 @@
     value = 0.0
   [../]
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.005
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement

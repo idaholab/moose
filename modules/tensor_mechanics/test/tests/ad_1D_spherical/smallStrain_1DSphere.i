@@ -75,7 +75,7 @@
 
 [BCs]
   [./innerDisp]
-    type = ADPresetBC
+    type = ADDirichletBC
     boundary = left
     variable = disp_r
     value = 0.0

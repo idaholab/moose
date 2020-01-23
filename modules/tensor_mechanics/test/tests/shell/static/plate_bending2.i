@@ -62,19 +62,19 @@
 
 [BCs]
   [./simply_support_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'right top bottom left'
     value = 0.0
   [../]
   [./simply_support_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'right top bottom left'
     value = 0.0
   [../]
   [./simply_support_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'bottom left'
     value = 0.0

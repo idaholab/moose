@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Tensor_Mechanics Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/tensor_mechanics
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Tensor_Mechanics Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/tensor_mechanics
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/tensor_mechanics
         hide:

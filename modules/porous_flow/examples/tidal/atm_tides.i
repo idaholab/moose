@@ -68,25 +68,25 @@
   # xmin is called 'left'
   # xmax is called 'right'
   [./no_x_disp]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'bottom top' # because of 1-element meshing, this fixes u_x=0 everywhere
   [../]
   [./no_y_disp]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top' # because of 1-element meshing, this fixes u_y=0 everywhere
   [../]
   [./no_z_disp_at_bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = back
   [../]
   [./pp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = porepressure
     function = cyclic_porepressure
     boundary = front

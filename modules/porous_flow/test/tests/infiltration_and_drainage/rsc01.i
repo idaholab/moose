@@ -190,13 +190,13 @@
     flux_function = -1.0
   [../]
   [./fixedwater]
-    type = PresetBC
+    type = DirichletBC
     variable = pwater
     boundary = 'right'
     value = 0
   [../]
   [./fixedoil]
-    type = PresetBC
+    type = DirichletBC
     variable = poil
     boundary = 'right'
     value = 15

@@ -9,11 +9,9 @@
 
 #pragma once
 
-#include "ADNodalBC.h"
+#include "ADDirichletBCBase.h"
 
-#define usingPresetNodalBCMembers                                                                  \
-  usingNodalBCMembers;                                                                             \
-  using ADPresetNodalBC<compute_stage>::computeQpValue
+#define usingPresetNodalBCMembers usingDirichletBCBaseMembers
 
 template <ComputeStage>
 class ADPresetNodalBC;
@@ -23,20 +21,18 @@ declareADValidParams(ADPresetNodalBC);
 /**
  * Base class for automatic differentiation nodal BCs that (pre)set the solution
  * vector entries.
+ *
+ * Depcreated: inherit from ADDirichletBCBase instead and set the parameter
+ * preset = true for the same behavior.
  */
 template <ComputeStage compute_stage>
-class ADPresetNodalBC : public ADNodalBC<compute_stage>
+class ADPresetNodalBC : public ADDirichletBCBase<compute_stage>
 {
 public:
   ADPresetNodalBC(const InputParameters & parameters);
 
-  void computeValue(NumericVector<Number> & current_solution);
-
   static InputParameters validParams();
 
 protected:
-  virtual ADReal computeQpResidual() override;
-  virtual ADReal computeQpValue() = 0;
-
-  usingNodalBCMembers;
+  usingDirichletBCBaseMembers;
 };

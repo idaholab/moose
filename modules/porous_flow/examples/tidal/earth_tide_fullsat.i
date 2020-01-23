@@ -40,19 +40,19 @@
 
 [BCs]
   [./strain_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     function = earth_tide_x
     boundary = 'left right'
   [../]
   [./strain_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     function = earth_tide_y
     boundary = 'bottom top'
   [../]
   [./strain_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     function = earth_tide_z
     boundary = 'back front'

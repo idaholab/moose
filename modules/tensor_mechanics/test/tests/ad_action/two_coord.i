@@ -83,25 +83,25 @@
 
 [BCs]
   [./topx]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'top'
     variable = disp_x
     value = 0.0
   [../]
   [./topy]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
   [../]
   [./bottomx]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'bottom'
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
-    type = PresetBC
+    type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
     value = 0.05

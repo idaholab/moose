@@ -10,10 +10,11 @@ Content:
             - media/**
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: ExternalPetscSolver
-    repo: https://github.com/idaholab/moose
-    home: /modules/external_petsc_solver
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: ExternalPetscSolver
+        repo: https://github.com/idaholab/moose
+        home: /modules/external_petsc_solver
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/external_petsc_solver
         hide:

@@ -77,13 +77,13 @@
 
 [BCs]
   [./no_x]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = 'centerline'
     value = 0.0
   [../]
   [./no_y]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = 'centerline outer_exterior'
     value = 0.0

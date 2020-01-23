@@ -36,7 +36,7 @@
 
 [BCs]
   [top]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 20e6
     boundary = top

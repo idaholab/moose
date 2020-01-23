@@ -3,9 +3,6 @@ Content:
     - test/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MooseTestApp
-    repo: https://github.com/idaholab/moose
-    home: /
 
 Extensions:
     MooseDocs.extensions.navigation:

@@ -50,7 +50,7 @@ def match_settings(known, raw):
         elif value.lower() == 'none':
             value = None
         elif all([v.isdigit() for v in value]):
-            value = float(value) #pylint: disable=redefined-variable-type
+            value = float(value)
 
         if key in known:
             known[key] = value

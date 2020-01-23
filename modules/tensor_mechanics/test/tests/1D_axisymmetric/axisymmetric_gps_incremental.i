@@ -39,33 +39,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
 [Functions]
   [./temp100]
     type = PiecewiseLinear
@@ -80,8 +53,6 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
   [./heat]
     type = Diffusion
     variable = temp
@@ -90,67 +61,22 @@
 
 [Modules]
   [./TensorMechanics]
-    [./GeneralizedPlaneStrain]
+    [./Master]
       [./gps]
+        planar_formulation = GENERALIZED_PLANE_STRAIN
+        scalar_out_of_plane_strain = scalar_strain_yy
+        strain = SMALL
+        incremental = true
+        generate_output = 'strain_xx strain_yy strain_zz stress_xx stress_yy stress_zz'
+        eigenstrain_names = eigenstrain
       [../]
     [../]
   [../]
 []
 
-[AuxKernels]
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  [../]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  [../]
-[]
-
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1000
     value = 0
     variable = disp_x
@@ -176,17 +102,12 @@
     poissons_ratio = 0.2
   [../]
 
-  [./strain]
-    type = ComputeAxisymmetric1DIncrementalStrain
-    eigenstrain_names = thermal_eigenstrain
-  [../]
-
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
-    eigenstrain_name = thermal_eigenstrain
     thermal_expansion_coeff = 1e-8
     temperature = temp
     stress_free_temperature = 580
+    eigenstrain_name = eigenstrain
   [../]
 
   [./stress]

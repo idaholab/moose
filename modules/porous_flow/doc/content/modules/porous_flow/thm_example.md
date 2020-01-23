@@ -163,10 +163,10 @@ Therefore, the fluid-flow `Kernels` are
 With all the assumptions so far, the mass conservation equations read
 \begin{equation}
 \begin{aligned}
-  0 = & \phi \dot{S}_{\mathrm{water}} 
+  0 = & \phi \dot{S}_{\mathrm{water}}
   - \nabla \left( k \frac{k_{\mathrm{r\,water}}}{\mu_{\mathrm{water}}}\nabla P \right)\ , \\
-  0 = & -\phi\dot{S}_{\mathrm{water}} 
-  - 
+  0 = & -\phi\dot{S}_{\mathrm{water}}
+  -
   \nabla \left( k \frac{k_{\mathrm{r\,co2}}}{\mu_{\mathrm{co2}}}\nabla P \right) \ .
 \end{aligned}
 \end{equation}
@@ -185,7 +185,7 @@ For later use, define the fractional flows
   Q_{\mathrm{water}} & =
   \frac{\frac{k_{\mathrm{r\,water}}}{\mu_{\mathrm{water}}}}{\frac{k_{\mathrm{r\,water}}}{\mu_{\mathrm{water}}}
     + \frac{k_{\mathrm{r\,co2}}}{\mu_{\mathrm{co2}}}} \\
-    Q_{\mathrm{co2}} & = 
+    Q_{\mathrm{co2}} & =
     \frac{\frac{k_{\mathrm{r\,co2}}}{\mu_{\mathrm{co2}}}}{\frac{k_{\mathrm{r\,water}}}{\mu_{\mathrm{water}}}
     + \frac{k_{\mathrm{r\,co2}}}{\mu_{\mathrm{co2}}}} \ .
 \end{aligned}
@@ -479,7 +479,7 @@ LaForce et al. assume the following boundary conditions.
 
 !listing modules/porous_flow/examples/thm_example/2D.i start=[./fixed_outer_r] end=[./co2_injection]
 
-- The injection is at a constant rate of $5\times 10^5\,$T.year$^{-1}$ at a constant temperature of 294$\,$K.  In the PorousFlow input file, the fluid injection is implemented as a [PorousFlowSink](boundaries.md), which slowly ramps up to its full value during the initial 100$\,$s in order to help convergence, and a `PresetBC`:
+- The injection is at a constant rate of $5\times 10^5\,$T.year$^{-1}$ at a constant temperature of 294$\,$K.  In the PorousFlow input file, the fluid injection is implemented as a [PorousFlowSink](boundaries.md), which slowly ramps up to its full value during the initial 100$\,$s in order to help convergence, and a preset `DirichletBC`:
 
 !listing modules/porous_flow/examples/thm_example/2D.i start=[./co2_injection] end=[./cavity_pressure_x]
 

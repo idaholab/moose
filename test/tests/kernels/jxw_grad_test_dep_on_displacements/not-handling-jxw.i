@@ -45,50 +45,59 @@
 []
 
 [BCs]
+  # BCs cannot be preset due to Jacobian test
   [./u_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'left'
     variable = u
   [../]
   [./u_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'right'
     variable = u
   [../]
   [./v_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'left'
     variable = v
   [../]
   [./v_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'right'
     variable = v
   [../]
   [./disp_x_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'left'
     variable = disp_x
   [../]
   [./disp_x_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'right'
     variable = disp_x
   [../]
   [./disp_y_left]
     type = DirichletBC
+    preset = false
     value = 0
     boundary = 'bottom'
     variable = disp_y
   [../]
   [./disp_y_right]
     type = DirichletBC
+    preset = false
     value = 1
     boundary = 'top'
     variable = disp_y

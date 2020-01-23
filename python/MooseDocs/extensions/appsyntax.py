@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,attribute-defined-outside-init
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -19,12 +18,11 @@ import moosetree
 import mooseutils
 
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.tree import html, tokens, syntax, latex, app_syntax
-from MooseDocs.extensions import core, floats, table, autolink, materialicon
-
-from MooseDocs.extensions import command
+from .. import common
+from ..common import exceptions
+from ..base import components, LatexRenderer, MarkdownReader
+from ..tree import html, tokens, syntax, latex, app_syntax
+from . import command, core, floats, table, autolink, materialicon
 
 LOG = logging.getLogger(__name__)
 
@@ -108,7 +106,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._object_cache = dict()
         self._syntax_cache = dict()
 
-    def preExecute(self, content):
+    def preExecute(self):
         """Populate the application syntax tree."""
 
         # Don't re-populate
@@ -151,7 +149,7 @@ class AppSyntaxExtension(command.CommandExtension):
                     msg += "    {} --type".format(exe)
                     LOG.error(msg)
 
-            except Exception as e: #pylint: disable=broad-except
+            except Exception as e:
                 msg = "Failed to load application executable from '%s', " \
                       "application syntax is being disabled:\n%s"
                 self.setActive(False)
@@ -218,7 +216,7 @@ class AppSyntaxExtension(command.CommandExtension):
 
         if node is None:
             msg = "'{}' syntax was not recognized."
-            raise common.MooseDocsException(msg, name)
+            raise exceptions.MooseDocsException(msg, name)
 
         return node
 
@@ -287,7 +285,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
         heading = settings['heading']
         if heading is not None:
             h = core.Heading(parent, level=int(settings['heading-level']), id_=settings['id'])
-            self.reader.tokenize(h, heading, page, MooseDocs.INLINE)
+            self.reader.tokenize(h, heading, page, MarkdownReader.INLINE)
 
 class SyntaxDescriptionCommand(SyntaxCommandBase):
     SUBCOMMAND = 'description'
@@ -305,7 +303,7 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
 
         else:
             p = core.Paragraph(parent)
-            self.reader.tokenize(p, str(obj.description), page, MooseDocs.INLINE)
+            self.reader.tokenize(p, str(obj.description), page, MarkdownReader.INLINE)
             return parent
 
 
@@ -364,7 +362,7 @@ class SyntaxParameterCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
 
-        obj_syntax, param_name = info[MooseDocs.INLINE].rsplit('/', 1)
+        obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit('/', 1)
 
         obj = self.extension.find(obj_syntax)
         parameters = dict()
@@ -379,7 +377,7 @@ class SyntaxParameterCommand(command.CommandComponent):
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n"
             for res in results:
                 msg += '    {}/{}\n'.format(obj_syntax, res)
-            raise common.MooseDocsException(msg, param_name, obj_syntax)
+            raise exceptions.MooseDocsException(msg, param_name, obj_syntax)
 
         ParameterToken(parent, parameter=parameters[param_name],
                        string='"{}"'.format(param_name))
@@ -513,7 +511,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
                                url=str(nodes[0].relativeDestination(page)))
 
                 if obj.description:
-                    self.reader.tokenize(item, str(obj.description), page, MooseDocs.INLINE, info.line)
+                    self.reader.tokenize(item, str(obj.description), page, MarkdownReader.INLINE, info.line)
 
         return count
 

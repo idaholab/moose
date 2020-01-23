@@ -30,19 +30,19 @@
 
 [BCs]
   [./x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '-1.5E-6*x+2E-6*x*sin(t)'
   [../]
   [./y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '2E-6*y*sin(2*t)'
   [../]
   [./z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '-2E-6*z*(sin(t)+sin(2*t))'

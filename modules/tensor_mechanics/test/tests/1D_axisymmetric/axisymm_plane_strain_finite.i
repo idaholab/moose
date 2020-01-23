@@ -25,26 +25,6 @@
 []
 
 [AuxVariables]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./temp]
     initial_condition = 580.0
   [../]
@@ -63,52 +43,20 @@
   [../]
 []
 
-[Kernels]
+[Modules]
   [./TensorMechanics]
+    [./Master]
+      [./ps]
+        planar_formulation = PLANE_STRAIN
+        strain = FINITE
+        generate_output = 'strain_xx strain_zz stress_xx stress_yy stress_zz'
+        eigenstrain_names = eigenstrain
+      [../]
+    [../]
   [../]
 []
 
 [AuxKernels]
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  [../]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  [../]
   [./temp]
     type = FunctionAux
     variable = temp
@@ -119,13 +67,13 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     value = 0
     variable = disp_x
   [../]
   [./disp_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 2
     function = disp_x
     variable = disp_x
@@ -137,12 +85,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3600
     poissons_ratio = 0.2
-  [../]
-
-  [./strain]
-    type = ComputeAxisymmetric1DFiniteStrain
-    out_of_plane_strain = 0
-    eigenstrain_names = eigenstrain
   [../]
 
   [./thermal_strain]

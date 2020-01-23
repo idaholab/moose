@@ -82,32 +82,32 @@
 
 [BCs]
   [./constant_injection_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 1E6
     boundary = injection_area
   [../]
   [./constant_injection_temperature]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 313
     boundary = injection_area
   [../]
 
   [./roller_tmax]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = dmax
   [../]
   [./roller_tmin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = dmin
   [../]
   [./roller_top_bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'

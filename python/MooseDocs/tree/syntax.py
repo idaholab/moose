@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring, no-member
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -99,7 +98,6 @@ class SyntaxNodeBase(NodeBase, mooseutils.AutoPropertyMixin):
         """
         Print the node information.
         """
-        #pylint: disable=invalid-name
         if self.removed:
             self.COLOR = 'GREY'
         elif self.hidden:
@@ -147,7 +145,7 @@ class SyntaxNode(SyntaxNodeBase):
         """
         return SyntaxNodeBase.console(self) + ' markdown={}'.format(self.markdown())
 
-class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
+class ObjectNode(SyntaxNodeBase):
     """
     Base class for nodes associated with C++ objects (Action, MooseObjectAction, or MooseObject).
     """

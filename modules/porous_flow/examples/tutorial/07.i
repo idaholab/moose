@@ -126,7 +126,7 @@
     boundary = injection_area
   [../]
   [./constant_outer_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 0
     boundary = rmax

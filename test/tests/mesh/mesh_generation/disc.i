@@ -24,13 +24,13 @@
 
 [BCs]
   [./inner]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     value = -5.0
     boundary = rmin
   [../]
   [./outer]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     value = 0.0
     boundary = rmax

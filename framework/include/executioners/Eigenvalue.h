@@ -36,6 +36,13 @@ public:
 
   virtual void execute() override;
 
+  /**
+   * Here we scale the solution by the specified scalar and postprocessor value
+   */
+  virtual void postSolve() override;
+
 protected:
   EigenProblem & _eigen_problem;
+  /// Postprocessor value that scales solution when eigensolve is finished
+  const PostprocessorValue * _normalization;
 };

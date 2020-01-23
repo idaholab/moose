@@ -34,13 +34,13 @@
 
 [BCs]
   [./ptop]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = right
     value = 0
   [../]
   [./pbase]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = left
     value = 1

@@ -113,7 +113,7 @@
 
 [BCs]
   [./no_tracer_on_left_top]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer
     value = 0
     boundary = 'left_to_1'
@@ -135,7 +135,7 @@
     variable = tracer
   [../]
   [./remove_tracer_bot]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer
     value = 0
     boundary = 'right_to_3'

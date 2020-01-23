@@ -32,9 +32,9 @@ class GeneralDamper;
 class GeometricSearchData;
 class IntegratedBCBase;
 class NodalBCBase;
-class PresetNodalBC;
+class DirichletBCBase;
 template <ComputeStage>
-class ADPresetNodalBC;
+class ADDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernel;
@@ -797,8 +797,8 @@ protected:
   /// BoundaryCondition Warhouses
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
-  MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADPresetNodalBC<RESIDUAL>> _ad_preset_nodal_bcs;
+  MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
+  MooseObjectWarehouse<ADDirichletBCBase<RESIDUAL>> _ad_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread

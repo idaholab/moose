@@ -33,13 +33,13 @@
 
 [BCs]
   [./ptop]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary =  top
     value = 1e6
   [../]
   [./pbottom]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = bottom
     value = 1.002e6

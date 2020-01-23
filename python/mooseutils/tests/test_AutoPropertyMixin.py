@@ -12,11 +12,18 @@ import os
 import unittest
 import mooseutils
 import pickle
+import multiprocessing
 
 @mooseutils.addProperty('prop')
 class MyNode(mooseutils.AutoPropertyMixin):
     """Global for pickle test."""
     pass
+
+@mooseutils.addProperty('prop', required=True)
+class MyNode2(mooseutils.AutoPropertyMixin):
+    """Global for pickle test, with required property."""
+    pass
+
 
 class Test(unittest.TestCase):
     """Test mooseutils.AutoPropertyMixin class."""
@@ -135,6 +142,117 @@ class Test(unittest.TestCase):
         os.remove(filename)
 
         self.assertEqual(node1.prop, 12345)
+
+    def testPickleRequired(self):
+        node = MyNode2(prop=12345)
+        self.assertEqual(node.prop, 12345)
+
+        filename = 'tmpNodeData.pk1'
+        with open(filename, 'wb') as fid:
+            pickle.dump(node, fid, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(filename, 'rb') as fid:
+            node1 = pickle.load(fid)
+        os.remove(filename)
+
+        self.assertEqual(node1.prop, 12345)
+
+    def testMutable(self):
+        node = MyNode(False, year=1949, prop=12345)
+        with self.assertRaises(mooseutils.MooseException) as e:
+            node['year'] = 1980
+        self.assertIn("The MyNode object is immutable", e.exception.message)
+
+        with self.assertRaises(mooseutils.MooseException) as e:
+            node.prop = 42
+        self.assertIn("The MyNode object is immutable", e.exception.message)
+
+        with self.assertRaises(mooseutils.MooseException) as e:
+            node.attributes
+        self.assertIn("The MyNode object is immutable", e.exception.message)
+
+        node._AutoPropertyMixin__mutable = True
+        node['year'] = 1980
+        self.assertEqual(node['year'], 1980)
+        node.prop = 42
+        self.assertEqual(node.prop, 42)
+        self.assertIsInstance(node.attributes, dict)
+
+    def testParallel(self):
+
+        @mooseutils.addProperty('uid')
+        class MyNode(mooseutils.AutoPropertyMixin):
+            pass
+
+        manager = multiprocessing.Manager()
+        page_attributes = manager.dict()
+
+        page = MyNode(uid=0)
+        p = multiprocessing.Process(target=self._addAttribute, args=(page, 1949, page_attributes))
+        p.start()
+        p.join()
+
+        self.assertNotIn('year', page.attributes)
+        self.assertIn(page.uid, page_attributes)
+        self.assertEqual(page_attributes[page.uid], dict(year=1949))
+        page.update(page_attributes[page.uid])
+        self.assertIn('year', page.attributes)
+        self.assertEqual(page['year'], 1949)
+
+        p = multiprocessing.Process(target=self._addAttribute, args=(page, 1980, page_attributes))
+        p.start()
+        p.join()
+
+        self.assertIn(page.uid, page_attributes)
+        self.assertEqual(page_attributes[page.uid], dict(year=1980))
+        self.assertEqual(page['year'], 1949)
+        page.update(page_attributes[page.uid])
+        self.assertEqual(page['year'], 1980)
+
+    @staticmethod
+    def _addAttribute(node, year, page_attributes):
+        node['year'] = year
+        page_attributes[node.uid] = node.attributes
+
+    def testParallelBarrier(self):
+
+        @mooseutils.addProperty('uid', 42)
+        class MyNode(mooseutils.AutoPropertyMixin):
+            pass
+
+        n0 = MyNode(uid=0)
+        n1 = MyNode(uid=1)
+        self._pages = [n0, n1]
+
+
+        barrier = multiprocessing.Barrier(2)
+        manager = multiprocessing.Manager()
+        page_attributes = manager.dict()
+
+        p0 = multiprocessing.Process(target=self._addAttributeBarrier, args=(n0, barrier, page_attributes))
+        p0.start()
+
+        p1 = multiprocessing.Process(target=self._addAttributeBarrier, args=(n1, barrier, page_attributes))
+        p1.start()
+
+        p0.join()
+        p1.join()
+
+        self.assertEqual(page_attributes[0]['year'], 1949)
+        self.assertEqual(page_attributes[1]['year'], 1980)
+
+
+    def _addAttributeBarrier(self, node, barrier, page_attributes):
+
+        node['year'] = 1949 if node.uid == 0 else 1980
+        page_attributes[node.uid] = node.attributes
+
+        barrier.wait()
+        self._pages[0].update(page_attributes[0])
+        self._pages[1].update(page_attributes[1])
+
+        self.assertEqual(self._pages[0]['year'], 1949)
+        self.assertEqual(self._pages[1]['year'], 1980)
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

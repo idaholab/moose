@@ -56,7 +56,7 @@
 [BCs]
 # Define boundary conditions
   [./left_u]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     boundary = left
     function = u_left

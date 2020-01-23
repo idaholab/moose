@@ -6243,7 +6243,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
   // This is the first residual before any iterations have been done,
-  // but after PresetBCs (if any) have been imposed on the solution
+  // but after preset BCs (if any) have been imposed on the solution
   // vector.  We save it, and use it to detect convergence if
   // compute_initial_residual_before_preset_bcs=false.
   if (it == 0)

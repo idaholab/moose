@@ -15,14 +15,18 @@ template <>
 InputParameters
 validParams<RBMPresetOldValuePD>()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = validParams<DirichletBCBase>();
   params.addClassDescription("Class to apply a preset BC to nodes with rigid body motion (RBM).");
+
+  // Forcefully preset the BC
+  params.set<bool>("preset") = true;
+  params.suppressParameter<bool>("preset");
 
   return params;
 }
 
 RBMPresetOldValuePD::RBMPresetOldValuePD(const InputParameters & parameters)
-  : PresetNodalBC(parameters),
+  : DirichletBCBase(parameters),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _u_old(_var.dofValuesOld()),
     _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status"))

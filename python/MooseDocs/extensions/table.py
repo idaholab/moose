@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,11 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
-
-import MooseDocs
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.extensions import command, floats
-from MooseDocs.tree import html, tokens, latex
+from ..base import components, LatexRenderer, MarkdownReader
+from ..tree import html, tokens, latex
+from . import command, floats
 
 def make_extension(**kwargs):
     return TableExtension(**kwargs)
@@ -98,14 +95,14 @@ class TableCommandComponent(command.CommandComponent):
         content = info['block'] if 'block' in info else info['inline']
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   token_type=TableFloat)
-        self.reader.tokenize(flt, content, page, MooseDocs.BLOCK)
+        self.reader.tokenize(flt, content, page, MarkdownReader.BLOCK)
 
         if flt is parent:
             parent(0).attributes.update(**self.attributes)
 
         return parent
 
-class TableComponent(components.TokenComponent):
+class TableComponent(components.ReaderComponent):
     RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\Z|\n{2,})',
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
     FORMAT_RE = re.compile(r'^(?P<format>\|[ \|:\-]+\|)$', flags=re.MULTILINE|re.UNICODE)
@@ -142,21 +139,21 @@ class TableComponent(components.TokenComponent):
             row = TableRow(TableHead(table))
             for i, h in enumerate(head):
                 hitem = TableHeadItem(row, align=form[i])
-                self.reader.tokenize(hitem, h, page, MooseDocs.INLINE)
+                self.reader.tokenize(hitem, h, page, MarkdownReader.INLINE)
 
         for line in body.splitlines():
             if line:
                 row = TableRow(TableBody(table))
                 items = [item.strip() for item in self.SPLIT_RE.split(line) if item]
                 for i, content in enumerate(items):
-                    item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
-                    self.reader.tokenize(item, content, page, MooseDocs.INLINE)
+                    item = TableItem(row, align=form[i])
+                    self.reader.tokenize(item, content, page, MarkdownReader.INLINE)
 
         table['form'] = form
         return table
 
 class RenderTable(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
         div = html.Tag(parent, 'div', **token.attributes)
         div.addClass('moose-table-div')
         tbl = html.Tag(div, 'table')
@@ -179,7 +176,7 @@ class RenderTag(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
         return self.createHTML(parent, token, page)
 
-    def createHTML(self, parent, token, page): #pylint: disable=unused-argument
+    def createHTML(self, parent, token, page):
         return html.Tag(parent, self.__tag)
 
     def createLatex(self, parent, token, page):

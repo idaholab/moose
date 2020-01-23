@@ -36,19 +36,19 @@
     max_value = 0.49
   [../]
   [./bottom]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
     function = t
   [../]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./front]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0

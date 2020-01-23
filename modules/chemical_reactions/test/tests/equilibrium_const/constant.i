@@ -36,13 +36,13 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 150
     boundary = left
   [../]
   [./right]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 400
     boundary = right

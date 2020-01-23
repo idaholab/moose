@@ -44,7 +44,7 @@
 
 [BCs]
   [./no_tracer_on_left]
-    type = PresetBC
+    type = DirichletBC
     variable = tracer
     value = 0
     boundary = left

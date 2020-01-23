@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring, no-member
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -11,7 +10,7 @@ import logging
 import copy
 import moosetree
 import MooseDocs
-from MooseDocs.tree.base import NodeBase
+from .base import NodeBase
 
 LOG = logging.getLogger(__name__)
 
@@ -62,18 +61,18 @@ class Token(NodeBase):
         # Create string on demand
         string = self.attributes.pop('string', None)
         if string is not None:
-            String(self, content=string) #pylint: disable=no-member
+            String(self, content=string)
 
     @property
     def info(self):
         """Retrieve the Information object from a parent node."""
         node = self
         # use _info to prevent infinite loop
-        while node._info is None: #pylint: disable=protected-access
+        while node._info is None:
             if node.parent is None:
                 break
             node = node.parent
-        return node._info #pylint: disable=protected-access
+        return node._info
 
     @info.setter
     def info(self, value):

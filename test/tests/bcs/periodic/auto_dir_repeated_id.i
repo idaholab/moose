@@ -25,6 +25,7 @@
   [./z_all]
     type = FunctionDirichletBC
     variable = u
+    preset = false
     boundary = 'z_all'
     function = 'z'
   [../]

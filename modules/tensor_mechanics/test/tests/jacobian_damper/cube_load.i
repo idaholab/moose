@@ -75,28 +75,28 @@
 
 [BCs]
   [./y_pull_function]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 3
     function = top_pull
   [../]
 
   [./x_bot]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
 
   [./y_bot]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
 
   [./z_bot]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0

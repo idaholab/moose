@@ -40,19 +40,19 @@
 
 [BCs]
   [./plane_strain]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'
   [../]
   [./ymin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = dmin
   [../]
   [./xmin]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = dmax
@@ -88,25 +88,25 @@
   [../]
 
   [./outer_temperature]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 0
     boundary = rmax
   [../]
   [./outer_pressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 0
     boundary = rmax
   [../]
   [./fixed_outer_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = rmax
   [../]
   [./fixed_outer_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = rmax

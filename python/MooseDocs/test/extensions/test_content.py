@@ -99,6 +99,7 @@ class TestContentAtoZ(MooseDocsTestCase):
 
     def testHTML(self):
         _, res = self.execute('!content a-to-z location=extensions')
+        print(res)
         self.assertHTMLTag(res, 'body', size=6)
         self._assertHTML(res)
 

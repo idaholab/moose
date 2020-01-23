@@ -74,25 +74,25 @@
 
 [BCs]
   [./symmy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./disp]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = right
     value    = 0.001

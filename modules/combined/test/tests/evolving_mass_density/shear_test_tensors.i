@@ -87,12 +87,15 @@
 
   [./top_x]
     variable = disp_x
+    preset = false
   [../]
   [./top_y]
     variable = disp_y
+    preset = false
   [../]
   [./top_z]
     variable = disp_z
+    preset = false
   [../]
 []
 

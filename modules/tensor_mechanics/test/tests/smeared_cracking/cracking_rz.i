@@ -30,19 +30,19 @@
 
 [BCs]
   [./pull]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 2
     function = displ
   [../]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0

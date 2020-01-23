@@ -20,13 +20,6 @@
     type = PythonUnitTest
     input = test_box.py
     requirement = "MooseDocs shall include a utility for creating text boxes suitable for terminal output."
-    python = 3
-  []
-  [check_types]
-    type = PythonUnitTest
-    input = test_check_type.py
-    requirement = "MooseDocs shall include a utility for perform variable type checking."
-    python = 3
   []
   [mixins]
     type = PythonUnitTest
@@ -47,7 +40,6 @@
     type = PythonUnitTest
     input = test_database.py
     requirement = "MooseDocs shall include a database object for storing information regarding source files."
-    python = 3
   []
   [get_requirement]
     type = PythonUnitTest

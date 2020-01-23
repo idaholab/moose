@@ -20,7 +20,7 @@ from MooseDocs.tree import tokens, pages
 from MooseDocs.base import readers, lexers, components
 
 Word = tokens.newToken('Word')
-class WordComponent(components.TokenComponent):
+class WordComponent(components.ReaderComponent):
     RE = re.compile('(?P<inline>\w+)\s*')
     def createToken(self, parent, info, page):
         if info['inline'] == 'throw':
@@ -28,7 +28,7 @@ class WordComponent(components.TokenComponent):
         return Word(parent)
 
 Letter = tokens.newToken('Letter', content='')
-class LetterComponent(components.TokenComponent):
+class LetterComponent(components.ReaderComponent):
     RE = re.compile('(?P<content>\w)')
     def createToken(self, parent, info, page):
         return Letter(parent, content=info['content'])
@@ -56,35 +56,6 @@ class TestReader(unittest.TestCase):
         self.assertEqual(root(1)(0)['content'], 'b')
         self.assertEqual(root(1)(1)['content'], 'a')
         self.assertEqual(root(1)(2)['content'], 'r')
-
-    def testParseExceptions(self):
-        MooseDocs.LOG_LEVEL = logging.DEBUG
-        reader = readers.Reader(lexers.RecursiveLexer('foo'))
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.tokenize([], '', None)
-        self.assertIn("The argument 'root'", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.tokenize(tokens.Token(), [], None)
-        self.assertIn("The argument 'content'", str(e.exception))
-        MooseDocs.LOG_LEVEL = logging.INFO
-
-    def testAddExceptions(self):
-        MooseDocs.LOG_LEVEL = logging.DEBUG
-        reader = readers.Reader(lexers.RecursiveLexer('foo'))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.add([], '', '')
-        self.assertIn("The argument 'group'", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.add('foo', '', '')
-        self.assertIn("The argument 'component'", str(e.exception))
-
-        with self.assertRaises(exceptions.MooseDocsException) as e:
-            reader.add('foo', components.TokenComponent(), [])
-        self.assertIn("The argument 'location'", str(e.exception))
-        MooseDocs.LOG_LEVEL = logging.INFO
 
     def testTokenizeException(self):
         root = tokens.Token(None)

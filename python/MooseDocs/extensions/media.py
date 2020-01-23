@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,10 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.extensions import command, floats
-from MooseDocs.tree import tokens, html, latex
+from ..common import exceptions
+from ..base import components, Extension, LatexRenderer
+from ..tree import tokens, html, latex
+from . import command, floats
 
 LOG = logging.getLogger(__name__)
 
@@ -52,9 +51,15 @@ class MediaExtension(MediaExtensionBase):
 
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = MediaExtensionBase.defaultConfig()
         config['prefix'] = ('Figure', "The caption prefix (e.g., Fig.).")
         return config
+
+    def initPage(self, page):
+        page[self.name] = dict(prefix=self.get('prefix'))
+
+    def preRead(self, page):
+        page['prefix'] = page[self.name]['prefix']
 
     def extend(self, reader, renderer):
         self.requires(command, floats)

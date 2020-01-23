@@ -108,31 +108,31 @@
   # xmin is called left
   # xmax is called right
   [./clamp_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'left right top bottom front back'
     function = '-1.11E-2*x*x/2-0.3*(z*z-y*y)/2.0*1.11E-2'
   [../]
   [./clamp_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'left right top bottom front back'
     function = '-0.3*z*y*1.11E-2'
   [../]
   [./clamp_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'left right top bottom front back'
     function = '1.11E-2*x*z'
   [../]
   [./clamp_wc_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_x
     boundary = 'left right top bottom front back'
     function = '0.3*y*1.11E-2'
   [../]
   [./clamp_wc_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = wc_y
     boundary = 'left right top bottom front back'
     function = '1.11E-2*x'

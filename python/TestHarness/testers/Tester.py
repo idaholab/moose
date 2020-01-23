@@ -86,7 +86,7 @@ class Tester(MooseObject):
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('python',        None, "Restrict the test to s specific version of python (2 or 3).")
+        params.addParam('python',        None, "Restrict the test to s specific version of python (e.g., 3.6 or 3.7.1).")
         params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
         params.addParam('requires', None, "A list of programs required for the test to operate, as tested with shutil.which.")
 
@@ -573,8 +573,15 @@ class Tester(MooseObject):
 
         # Check python version
         py_version = self.specs['python']
-        if (py_version is not None) and (sys.version_info[0] != py_version):
-            reasons['python'] = 'PYTHON != {}'.format(py_version)
+        if (py_version is not None):
+            if isinstance(py_version, int) and (py_version != sys.version_info[0]):
+                reasons['python'] = 'PYTHON != {}'.format(py_version)
+            elif isinstance(py_version, float) and (py_version != float('{}.{}'.format(*sys.version_info[0:2]))):
+                reasons['python'] = 'PYTHON != {}'.format(py_version)
+            elif isinstance(py_version, str):
+                ver = py_version.split('.')
+                if any(sys.version_info[i] != int(v) for i, v in enumerate(ver)):
+                    reasons['python'] = 'PYTHON != {}'.format(py_version)
 
         # Check python packages
         py_packages = self.specs['required_python_packages']
@@ -585,7 +592,7 @@ class Tester(MooseObject):
 
         # Check for programs
         programs = self.specs['requires']
-        if (programs is not None) and (sys.version_info[0] == 3):
+        if (programs is not None):
             missing = []
             for prog in programs.split():
                 if shutil.which(prog) is None:

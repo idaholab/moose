@@ -31,25 +31,25 @@
 
 [BCs]
   [./pp0]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = left
     value = 1
   [../]
   [./pp1]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = right
     value = 0
   [../]
   [./spit_heat]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = left
     value = 300
   [../]
   [./suck_heat]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = right
     value = 200

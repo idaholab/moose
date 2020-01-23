@@ -27,12 +27,6 @@ if os.environ.get("MOOSE_DIR"):
 if os.environ.get("FRAMEWORK_DIR"):
     FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
-# Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(os.path.join(MOOSE_DIR, 'python'))
-import path_tool
-path_tool.activate_module('TestHarness')
-path_tool.activate_module('FactorySystem')
-
 class Job(object):
     def validParams():
         params = InputParameters()

@@ -27,8 +27,5 @@ def json_load(filename):
     return json_parse(raw)
 
 def json_parse(raw):
-    if sys.version_info[0] == 2:
-        tree = json.loads(raw, object_pairs_hook=deunicodify_hook)
-    else:
-        tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
+    tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
     return tree

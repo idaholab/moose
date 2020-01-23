@@ -20,7 +20,7 @@ template <ComputeStage compute_stage>
 InputParameters
 ADFunctionDirichletBC<compute_stage>::validParams()
 {
-  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  InputParameters params = ADDirichletBCBase<compute_stage>::validParams();
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
                              "is calculated by a function.");
   params.addParam<FunctionName>("function", 0, "The function describing the Dirichlet condition");
@@ -29,13 +29,13 @@ ADFunctionDirichletBC<compute_stage>::validParams()
 
 template <ComputeStage compute_stage>
 ADFunctionDirichletBC<compute_stage>::ADFunctionDirichletBC(const InputParameters & parameters)
-  : ADNodalBC<compute_stage>(parameters), _function(getFunction("function"))
+  : ADDirichletBCBase<compute_stage>(parameters), _function(getFunction("function"))
 {
 }
 
 template <ComputeStage compute_stage>
 ADReal
-ADFunctionDirichletBC<compute_stage>::computeQpResidual()
+ADFunctionDirichletBC<compute_stage>::computeQpValue()
 {
-  return _u - _function.value(_t, *_current_node);
+  return _function.value(_t, *_current_node);
 }

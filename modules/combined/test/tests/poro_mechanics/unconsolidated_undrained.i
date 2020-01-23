@@ -80,19 +80,19 @@
     boundary = 'front'
   [../]
   [./confinex]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left'
   [../]
   [./confiney]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom'
   [../]
   [./confinez]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'back'

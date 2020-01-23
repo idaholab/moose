@@ -69,20 +69,20 @@
 
 [BCs]
   [./ur]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = ur
   [../]
   [./uz]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = uz
   [../]
 
   [./temp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = 10
     function = temp

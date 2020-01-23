@@ -182,10 +182,7 @@ def runExe(app_path, args):
 
     proc = subprocess.Popen(popen_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     data = proc.communicate()
-    if sys.version_info[0] == 2:
-        stdout_data = data[0]
-    else:
-        stdout_data = data[0].decode("utf-8")
+    stdout_data = data[0].decode("utf-8")
     return stdout_data
 
 def check_configuration(packages, message=True):
@@ -428,10 +425,8 @@ def shellCommand(command, cwd=None):
         return p.communicate()[0].decode()
 
 def check_output(cmd, **kwargs):
-    if sys.version_info[0] == 2:
-        return subprocess.check_output(cmd, **kwargs)
-    else:
-        return subprocess.check_output(cmd, encoding='utf-8', **kwargs)
+    """Get output from a process"""
+    return subprocess.check_output(cmd, encoding='utf-8', **kwargs)
 
 def generate_filebase(string, replace='_', lowercase=True):
     """
@@ -441,3 +436,9 @@ def generate_filebase(string, replace='_', lowercase=True):
         string = string.lower()
     string = re.sub(r'([\/\\\?%\*:\|\"<>\. ]+)', replace, string)
     return string
+
+def recursive_update(d, u):
+    """Recursive update nested dict(), see https://stackoverflow.com/a/3233356/1088076"""
+    for k, v in u.items():
+        d[k] = recursive_update(d.get(k, dict()), v) if isinstance(v, dict) else v
+    return d

@@ -104,25 +104,25 @@
 
 [BCs]
   [top_xdisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'top'
     function = 0
   []
   [top_ydisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top'
     function = t
   []
   [bottom_xdisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'bottom'
     function = 0
   []
   [bottom_ydisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'bottom'
     function = 0

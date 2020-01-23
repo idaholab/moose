@@ -66,13 +66,13 @@
 
 [BCs]
   [./outer_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0
   [../]
   [./outer_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '2 10'
     value = 0

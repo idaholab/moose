@@ -74,19 +74,20 @@
   [./left_x]
     type = FunctionDirichletBC
     variable = disp_x
+    preset = false
     boundary = 1
     function = left_x
   [../]
 
   [./y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = '1 2 3 4'
     value = 0.0
   [../]
 
   [./right]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '3 4'
     value = 0

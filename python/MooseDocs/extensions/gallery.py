@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,9 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.extensions import command, core, media
-from MooseDocs.tree import tokens, html, latex
+from ..base import components, LatexRenderer
+from ..tree import tokens, html, latex
+from . import command, core, media
+
 LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):

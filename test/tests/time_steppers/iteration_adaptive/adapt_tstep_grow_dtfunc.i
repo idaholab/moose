@@ -28,6 +28,7 @@
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = left
     value = 10
   [../]

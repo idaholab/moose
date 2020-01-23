@@ -63,13 +63,13 @@
 
 [BCs]
   [./constant_injection_porepressure]
-    type = PresetBC
+    type = DirichletBC
     variable = porepressure
     value = 1.5e6
     boundary = injection_area
   [../]
   [./constant_injection_temperature]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 313
     boundary = injection_area
@@ -84,7 +84,7 @@
     PT_shift = 1e6
   [../]
   [./constant_outflow_temperature]
-    type = PresetBC
+    type = DirichletBC
     variable = temperature
     value = 293
     boundary = outflow_area

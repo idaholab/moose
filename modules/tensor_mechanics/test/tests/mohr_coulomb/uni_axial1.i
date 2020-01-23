@@ -36,25 +36,25 @@
   # left = xmin
   # right = xmax
   [./xmin_xzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = '0'
   [../]
   [./ymin_yzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = '0'
   [../]
   [./zmin_zzero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = '0'
   [../]
   [./zmax_disp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front'
     function = '-1E-3*t'

@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -7,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
 import sys
 import collections
 import logging
@@ -17,8 +15,7 @@ import moosetree
 
 import mooseutils
 
-from MooseDocs import common
-from MooseDocs.tree.syntax import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
+from ..tree.syntax import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
 
 LOG = logging.getLogger(__name__)
 
@@ -31,18 +28,13 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
     """
-    common.check_type('exe', exe, str)
-    common.check_type('remove', remove, (type(None), dict, list, set))
-    common.check_type('hide', hide, (type(None), dict, list, set))
-    common.check_type('allow_test_objects', allow_test_objects, bool)
-
     try:
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
         tree = mooseutils.json_parse(raw)
 
-    except Exception as e: #pylint: disable=broad-except
+    except Exception as e:
         LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e)
         sys.exit(1)
 

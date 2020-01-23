@@ -33,6 +33,7 @@
   [./bottom]
     type = DirichletBC
     variable = convected
+    preset = false
     boundary = 'left'
     value = 0
   [../]
@@ -40,6 +41,7 @@
   [./top]
     type = DirichletBC
     variable = convected
+    preset = false
     boundary = 'right'
     value = 1
   [../]

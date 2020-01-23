@@ -20,7 +20,7 @@
 
 [BCs]
   [./inj]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = u
     value = 1

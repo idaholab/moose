@@ -121,7 +121,7 @@
 
 [BCs]
   [./u_top_pull]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.01

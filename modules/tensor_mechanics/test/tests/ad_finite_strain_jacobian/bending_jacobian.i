@@ -57,25 +57,25 @@
 
 [BCs]
  [./fix_corner_x]
-   type = ADPresetBC
+   type = ADDirichletBC
    variable = disp_x
    boundary = 101
    value = 0
  [../]
  [./fix_corner_y]
-   type = ADPresetBC
+   type = ADDirichletBC
    variable = disp_y
    boundary = 101
    value = 0
  [../]
  [./fix_y]
-   type = ADPresetBC
+   type = ADDirichletBC
    variable = disp_y
    boundary = 102
    value = 0
  [../]
  [./move_y]
-   type = ADFunctionPresetBC
+   type = ADFunctionDirichletBC
    variable = disp_y
    boundary = 103
    function = '-t'

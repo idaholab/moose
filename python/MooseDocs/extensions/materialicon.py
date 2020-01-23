@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring,attribute-defined-outside-init
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -8,9 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.tree import html, tokens, latex
-from MooseDocs.extensions import command, core
+from ..base import components, LatexRenderer
+from ..tree import html, tokens, latex
+from . import command, core
 
 def make_extension(**kwargs):
     return MaterialIconExtension(**kwargs)
@@ -22,7 +21,7 @@ class MaterialIconExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
@@ -54,7 +53,7 @@ class RenderIcon(components.RenderComponent):
     def createHTML(self, parent, token, page):
         pass
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         i = html.Tag(parent, 'i', token, string=token['icon'])
         i.addClass('material-icons')
         i.addClass('moose-inline-icon')

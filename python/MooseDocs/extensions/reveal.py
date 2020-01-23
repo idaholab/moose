@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -10,9 +9,9 @@
 import re
 import logging
 import moosetree
-from MooseDocs.base import renderers, components
-from MooseDocs.tree import html, tokens
-from MooseDocs.extensions import core, command
+from ..base import renderers, components
+from ..tree import html, tokens
+from . import core, command
 
 LOG = logging.getLogger(__name__)
 
@@ -35,9 +34,6 @@ class RevealExtension(command.CommandExtension):
                                "files that are included to only be translated once.")
         return config
 
-    def initMetaData(self, page, meta):
-        meta.initData('pdf-active', True)
-
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -55,11 +51,16 @@ class RevealExtension(command.CommandExtension):
         self.addCommand(reader, RevealNotes())
         renderer.add('Notes', RenderNotes())
 
-    def postRead(self, content, page, meta):
-        if page.local not in self.get('translate'):
-            meta.setData('active', False)
+    def postRead(self, page, content):
+        """Deactivate all pages not listed for translation.
 
-    def postTokenize(self, ast, page, meta, reader):
+        This allows for include pages to only be translated when included which improves performance
+        when building a single file such as the case for presentations.
+        """
+        if page.local not in self.get('translate'):
+            page['active'] = False
+
+    def postTokenize(self, page, ast):
         ast.insert(0, Section(None))
 
         section = None
@@ -80,7 +81,7 @@ class RevealExtension(command.CommandExtension):
                     else:
                         subchild.parent = section
 
-    def postRender(self, result, page, meta, renderer):
+    def postRender(self, page, result):
         """Update internal links to use slide numbers."""
 
         # The Reveal.js platform does not honor traditional anchors in links, so the following
@@ -130,13 +131,13 @@ class RevealNotes(command.CommandComponent):
     def createToken(self, parent, info, page):
         return Notes(parent)
 
-class SectionBlock(components.TokenComponent):
+class SectionBlock(components.ReaderComponent):
     RE = re.compile(r'\s*(?P<SlideBreak>^!-{2,3}$)',
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
     @staticmethod
     def defaultSettings():
-        settings = components.TokenComponent.defaultSettings()
+        settings = components.ReaderComponent.defaultSettings()
         return settings
 
     def createToken(self, parent, info, page):

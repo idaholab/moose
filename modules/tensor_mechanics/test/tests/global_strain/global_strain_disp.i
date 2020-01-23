@@ -138,25 +138,25 @@
 
   # fix center point location
   [./centerfix_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
   [../]
   [./fix_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = bottom
     variable = u_y
     value = 0
   [../]
   [./centerfix_z]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = u_z
     value = 0
   [../]
   [./appl_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = top
     variable = u_y
     value = 0.033

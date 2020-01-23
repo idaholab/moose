@@ -18,14 +18,17 @@
 []
 
 [BCs]
+  # BCs cannot be preset due to Jacobian test
   [./left]
     type = DirichletBC
+    preset = false
     variable = u
     boundary = left
     value = 0
   [../]
   [./right]
     type = DirichletBC
+    preset = false
     variable = u
     boundary = right
     value = 1

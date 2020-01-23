@@ -46,7 +46,7 @@
     value = 0.0
   [../]
   [./bottom_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 1000
     function = '-0.001*t'

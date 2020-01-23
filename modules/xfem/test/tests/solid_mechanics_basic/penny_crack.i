@@ -85,31 +85,31 @@
     function = top_trac_z
   [../]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
   [../]
   [./bottom_z]
-    type = PresetBC
+    type = DirichletBC
     boundary = 1
     variable = disp_z
     value = 0.0
   [../]
   [./sym_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 3
     variable = disp_y
     value = 0.0
   [../]
   [./sym_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 4
     variable = disp_x
     value = 0.0

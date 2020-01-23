@@ -120,28 +120,28 @@
 
 [BCs]
   [./temp_far_left]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 1
     variable = temp
     function = ramp
   [../]
 
   [./temp_far_right]
-    type = PresetBC
+    type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
   [../]
 
   [./temp_far_left2]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     boundary = 1
     variable = temp2
     function = ramp
   [../]
 
   [./temp_far_right2]
-    type = PresetBC
+    type = DirichletBC
     boundary = 4
     variable = temp2
     value = 100

@@ -9,7 +9,7 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     boundary = 2
     variable = T
     value = 1

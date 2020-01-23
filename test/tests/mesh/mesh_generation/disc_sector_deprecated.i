@@ -28,25 +28,25 @@
 
 [BCs]
   [./inner]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     value = -5.0
     boundary = rmin
   [../]
   [./outer]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     function = 0
     boundary = rmax
   [../]
   [./tmin]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     function = '-5.0+sqrt(x*x + y*y)'
     boundary = tmin
   [../]
   [./tmax]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     function = '-5.0+pow(x*x + y*y, 2)/125'
     boundary = tmax

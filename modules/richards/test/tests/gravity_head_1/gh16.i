@@ -15,6 +15,7 @@
   [./left]
     type = DirichletBC
     boundary = left
+    preset = false
     value = -1
     variable = pressure
   [../]

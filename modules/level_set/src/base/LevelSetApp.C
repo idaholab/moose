@@ -18,9 +18,15 @@ InputParameters
 validParams<LevelSetApp>()
 {
   InputParameters params = validParams<MooseApp>();
+
   params.addClassDescription(
       "Application containing object necessary to solve the level set equation.");
+
   params.set<bool>("automatic_automatic_scaling") = false;
+
+  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
+  params.set<bool>("use_legacy_dirichlet_bc") = false;
+
   return params;
 }
 

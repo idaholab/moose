@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -11,9 +10,9 @@ import sys
 import re
 import uuid
 import moosetree
-from MooseDocs.base import components, renderers
-from MooseDocs.tree import tokens, html, latex
-from MooseDocs.extensions import command, core, floats
+from ..base import components, renderers
+from ..tree import tokens, html, latex
+from . import command, core, floats
 
 def make_extension(**kwargs):
     """Create an instance of the Extension object."""
@@ -42,9 +41,6 @@ class KatexExtension(command.CommandExtension):
         super(KatexExtension, self).__init__(*args, **kwargs)
         self.macros = None
 
-    def initMetaData(self, page, meta):
-        meta.initData('labels', set())
-
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -63,16 +59,16 @@ class KatexExtension(command.CommandExtension):
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
 
             if self.get('macros', None):
-                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items()) #pylint: disable=no-member
+                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
                 self.macros = '{' + mc + '}'
 
         elif isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
             if self.get('macros', None):
-                for k, v in self.get('macros').items(): #pylint: disable=no-member
+                for k, v in self.get('macros').items():
                     renderer.addNewCommand(k, v)
 
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
         labels = set()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
@@ -88,7 +84,7 @@ class KatexExtension(command.CommandExtension):
                                   string='{} ({})'.format(self.get('prefix'), count),
                                   link='#{}'.format(node['bookmark']))
 
-        meta.setData('labels', labels)
+        page['labels'] = labels
 
 class KatexBlockEquationCommand(command.CommandComponent):
     COMMAND = 'equation'
@@ -114,7 +110,7 @@ class KatexBlockEquationCommand(command.CommandComponent):
         LatexBlockEquation(parent, tex=tex, bookmark=eq_id, label=self.settings['id'])
         return parent
 
-class KatexBlockEquationComponent(components.TokenComponent):
+class KatexBlockEquationComponent(components.ReaderComponent):
     """
     Component for reading LaTeX block equations.
     """
@@ -144,7 +140,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
             token['tex'] = token['tex'].replace(label.group(), '')
         return parent
 
-class KatexInlineEquationComponent(components.TokenComponent):
+class KatexInlineEquationComponent(components.ReaderComponent):
     RE = re.compile(r'(?P<token>\$)(?=\S)(?P<equation>.*?)(?<=\S)(?:\1)',
                     flags=re.MULTILINE|re.DOTALL|re.DOTALL)
 
@@ -163,7 +159,7 @@ class KatexInlineEquationComponent(components.TokenComponent):
 
 class RenderLatexEquation(components.RenderComponent):
     """Render LatexBlockEquation and LatexInlineEquation tokens"""
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
 
         if token.name == 'LatexInlineEquation':
             div = html.Tag(parent, 'span', class_='moose-katex-inline-equation',
@@ -193,12 +189,8 @@ class RenderLatexEquation(components.RenderComponent):
 
         config_str = ','.join('{}:{}'.format(key, value) for key, value in config.items())
 
-        if sys.version_info[0] == 2:
-            config_str = config_str.encode('unicode_escape')
-            tex = token['tex'].encode('unicode_escape')
-        else:
-            config_str = config_str.encode('unicode_escape').decode('utf-8')
-            tex = token['tex'].encode('unicode_escape').decode('utf-8')
+        config_str = config_str.encode('unicode_escape').decode('utf-8')
+        tex = token['tex'].encode('unicode_escape').decode('utf-8')
 
         content = 'var element = document.getElementById("%s");' % token['bookmark']
         content += 'katex.render("%s", element, {%s});' % \
@@ -207,7 +199,7 @@ class RenderLatexEquation(components.RenderComponent):
 
         return parent
 
-    def createLatex(self, parent, token, page): #pylint: disable=no-self-use
+    def createLatex(self, parent, token, page):
         if token.name == 'LatexInlineEquation':
             latex.String(parent, content='${}$'.format(token['tex']), escape=False)
         else:
@@ -222,9 +214,8 @@ class RenderLatexEquation(components.RenderComponent):
 class RenderEquationLink(core.RenderShortcutLink):
 
     def createLatex(self, parent, token, page):
-        labels = self.translator.getMetaData(page, 'labels')
         key = token['key']
-        if key in labels:
+        if key in page.get('labels'):
             latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
             latex.Command(parent, 'eqref', string=key)
             return parent

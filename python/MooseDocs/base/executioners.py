@@ -8,38 +8,20 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 """Module for defining Executioner objects, which are helpers for tokenization and rendering."""
 import sys
+import os
+import copy
 import time
 import logging
 import traceback
 import multiprocessing
 import mooseutils
+import random
+
 import MooseDocs
 from ..tree import pages
-from ..common import exceptions, mixins, check_type
+from ..common import exceptions, mixins
 
 LOG = logging.getLogger('MooseDocs.Executioner')
-
-class Meta(object):
-    """
-    Config data object for data on the pages.Page objects.
-
-    The primary purpose for this object is to enable the ability to modify configurations of the
-    reader, renderer, and extension objects from within an extension (i.e., the config extension).
-    """
-    def __init__(self):
-        self.__data = dict()
-
-    def initData(self, key, default=None):
-        """Initialize dict key with the supplied type."""
-        self.__data[key] = default
-
-    def getData(self, key, default=None):
-        """Retrieve data for the supplied key."""
-        return self.__data.get(key, default)
-
-    def setData(self, key, value):
-        """Set the data for the supplied key."""
-        self.__data[key] = value
 
 class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     """
@@ -47,7 +29,12 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     The Translator object is responsible for managing the conversion from the source files
     to the final result via tokenization and rendering. However, how this process executes
-    can vary, especially when the multiprocessing is considered.
+    can vary, especially when the multiprocessing is considered so to allow for different methods
+    this class was created.
+
+    This is an internal object that should not be used directly, the Translator object should
+    provide the necessary interface for all Extension operations. If access to this object is needed
+    then the Translator is not designed correctly.
 
     Significant effort has been made to correctly handle the data involved with translation
     using the multiprocessing package. Throughout the development of MooseDocs the
@@ -60,26 +47,38 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     Executioner
 
         1. Execute preExecute methods
-        2. Convert pages.Source pages (following called for each Page object)
-           2.1. Read content from page.Source files
-           2.2. Execute postRead methods
-           2.3. Create the root AST object via Reader::getRoot()
-           2.4. Execute preTokenize methods
-           2.5. Perform tokenization
-           2.6. Execute postTokenize methods
-        3. Convert AST into rendered results  (following called for each Page object)
-           3.1. Create the root result object via Renderer::getRoot()
-           3.2. Execute preRender methods
-           3.3. Render the AST
-           3.4. Execute postRender methods
-           3.5. Write the results
-           3.6. Call postWrite methods
-        4. Finalize the content, i.e., copy pages.File objects to the destination
-        5. Execute postExecute methods
+        2. Reading raw content (following called for each Page object)
+           2.1. Execute preRead methods
+           2.2. Read content from page.Source files, using Translator.read method
+           2.3. Execute postRead methods
+        3. Tokenize pages.Source pages (following called for each Page object)
+           3.1. Execute preTokenize methods
+           3.2. Perform tokenization, using Translator.tokenize method
+           3.3. Execute postTokenize methods
+        3. Render pages.Source pages (following called for each Page object)
+           3.1. Execute preRender methods
+           3.2. Perform rendering, using Translator.tokenize method
+           3.3. Execute postRender methods
+        4. Write pages.Source pages (following called for each Page object)
+           3.1. Execute preWrite methods
+           3.2. Perform write, using Translator.write method
+           3.3. Execute postWrite methods
+        5. Finalize the content, i.e., copy pages.File objects to the destination
+        6. Execute postExecute methods
 
-    Inputs:
-        translator[base.Translator]: The translator object to be used for conversion.
+    The following are the total and translation times for the various Executioners for the
+    complete MOOSE website in modules/doc using 12 cores on a Mac trash can ("Mac Pro (Late 2013)"):
+
+                     Total / Translate (sec.)
+             Serial:   819 / 792
+    ParallelBarrier:   233 / 210
+      ParallelQueue:   187 / 163
+       ParallelPipe:   296 / 269
     """
+    #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
+    #  as well as during directory creation.
+    LOCK = multiprocessing.Lock()
+
     @staticmethod
     def defaultConfig():
         config = mixins.ConfigObject.defaultConfig()
@@ -89,69 +88,44 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
         mixins.TranslatorObject.__init__(self)
-        self._meta_data = dict()
-        self._tree_data = dict()
-        self._result_data = dict()
-        self._ast_available = False
-        self._result_available = False
+        self._page_objects = list()
 
-    def isSyntaxTreeAvailable(self):
-        """Returns True if the AST creation is complete."""
-        return self._ast_available
+    def init(self, destination):
+        """Initialize the Page objects."""
 
-    def isResultTreeAvailable(self):
-        """Returns True if the AST creation is complete."""
-        return self._result_available
+        # Call Extension init() method
+        LOG.info('Executing extension init() methods...')
+        t = time.time()
+        self.translator.executeMethod('init')
+        LOG.info('Executing extension init() methods complete [%s sec.]', time.time() - t)
 
-    def getSyntaxTree(self, page):
-        """Return a copy of the syntax tree for the supplied page."""
+        # Initialize Page objects
+        LOG.info('Executing extension initPage() methods...')
+        t = time.time()
+        for node in self._page_objects:
 
-        if not self.isSyntaxTreeAvailable():
-            msg = "The AST data for {} page is not available until tokenization is complete, " \
-                  "therefore this method should not be used within the pre/postTokenize or " \
-                  "createToken methods."
-            raise exceptions.MooseDocsException(msg, page.local)
+            # Setup destination and output extension
+            node.base = destination
+            if isinstance(node, pages.Source):
+                node.output_extension = self.translator.renderer.EXTENSION
 
-        elif not isinstance(page, pages.Source):
-            msg = "AST data is only available for pages.Source objects; however, a {} object " \
-                  "was provided."
-            raise exceptions.MooseDocsException(msg, page.__class__.__name__)
+            # Setup Page Config
+            config = dict()
+            for ext in self.translator.extensions:
+                node['__{}__'.format(ext.name)] = dict()
+            self.translator.executePageMethod('initPage', node)
+            Executioner.setMutable(node, False)
 
-        data = self._tree_data.get(page.uid, None)
-        if data is not None:
-            data = data.copy()
+        LOG.info('Executing extension initPage() methods complete [%s sec.]', time.time() - t)
 
-        return data
+    def addPage(self, page):
+        """Add a Page object to be Translated."""
+        page._Page__unique_id = len(self._page_objects)
+        self._page_objects.append(page)
 
-    def getMetaData(self, page, key):
-        """Return the desired meta data for the supplied page and key."""
-        meta = self.getMetaDataObject(page)
-        if meta is not None:
-            return meta.getData(key)
-
-    def getMetaDataObject(self, page):
-        """Return the desired meta data object for the supplied page."""
-
-        if not self.isSyntaxTreeAvailable():
-            msg = "The meta data for {} page is not available until tokenization is complete, " \
-                  "therefore this method should not be used within the pre/postTokenize or " \
-                  "createToken methods."
-            raise exceptions.MooseDocsException(msg, page.local)
-
-        return self._meta_data.get(page.uid, None)
-
-    def getResultTree(self, page):
-        """Return a copy of the rendered result for the supplied page."""
-        if not self.isResultTreeAvailable():
-            msg = "The result tree data for {} page is not available until rendering is complete, "\
-                  "therefore this method cannot not be used until the postExecute methods."
-            raise exceptions.MooseDocsException(msg, page.local)
-
-        data = self._result_data.get(page.uid, None)
-        if data is not None:
-            data = data.copy()
-
-        return data
+    def getPages(self):
+        """Return a list of Page objects."""
+        return self._page_objects
 
     def execute(self, nodes, num_threads=1):
         """
@@ -163,89 +137,95 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         raise NotImplementedError("The execute method must be defined.")
 
+    @staticmethod
+    def setMutable(node, value):
+        """Helper for controlling the mutable state of Page objects.
+
+        When MooseDocs runs in parallel the Page objects are copied to sub processes using the
+        multiprocessing module, thus during operation calculations are preformed using the copies.
+        If the attributes are altered, only the copies are altered not the original from the
+        root process.
+
+        However, on the process responsible for performing the calculation the copy of the Page
+        object attributes is returned and used to update the page on the root process. The MooseDocs
+        system allows for a Page object to be retrieved from anywhere. This flag prevents
+        modification of attributes from processes that do not own the object to avoid misleading
+        results.
+        """
+        node._AutoPropertyMixin__mutable = value
+
     def __call__(self, nodes, num_threads=1):
         """
         Called by Translator object, this executes the steps listed in the class description.
         """
         total = time.time()
         self.assertInitialized()
+        self.translator.executeMethod('preExecute', log=True)
 
-        LOG.info('Executing preExecute methods...')
-        t = time.time()
-        self.translator.executeExtensionFunction('preExecute', None, args=(self.translator.content,))
-        LOG.info('Finished preExecute methods [%s sec.]', time.time() - t)
-
-        nodes = nodes or self.translator.content
+        nodes = nodes or self.getPages()
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
 
         if source_nodes:
             t = time.time()
             LOG.info('Translating using %s threads...', num_threads)
-            if self.get('profile', False):
-                mooseutils.run_profile(self.execute, source_nodes, num_threads)
-            else:
-                self.execute(source_nodes, num_threads)
+            n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
+            self.execute(source_nodes, n)
             LOG.info('Translating complete [%s sec.]', time.time() - t)
 
         # Indexing/copying
         if other_nodes:
             LOG.info('Copying content...')
-            t = self.finalize(other_nodes, num_threads)
+            n = len(other_nodes) if num_threads > len(other_nodes) else num_threads
+            t = self.finalize(other_nodes, n)
             LOG.info('Copying Finished [%s sec.]', t)
 
-        LOG.info('Executing postExecute methods...')
-        t = time.time()
-        self.translator.executeExtensionFunction('postExecute', None, args=(self.translator.content,))
-        LOG.info('Finished postExecute methods [%s sec.]', time.time() - t)
+        self.translator.executeMethod('postExecute', log=True)
 
         LOG.info('Total Time [%s sec.]', time.time() - total)
 
-    def tokenize(self, node):
+    def read(self, node):
+        """Perform reading of page content."""
+        content = None
+        if node.get('active', True):
+            self.translator.executePageMethod('preRead', node)
+            content = self.translator.reader.read(node) if node.get('read', True) else ''
+            self.translator.executePageMethod('postRead', node, args=(copy.copy(content),))
+
+        return content
+
+    def tokenize(self, node, content):
         """Perform tokenization and call all associated callbacks for the supplied page."""
 
-        meta = Meta()
-        self.translator.executeExtensionFunction('initMetaData', node, args=(node, meta))
-        content = self.translator.reader.read(node) if node.get('read', True) else ''
-        self.translator.executeExtensionFunction('postRead', node, args=(content, node, meta))
-
         ast = self.translator.reader.getRoot()
-        if meta.getData('active', True):
-            self.translator.callFunction(self.translator.reader, 'preTokenize', node, args=(ast, node, meta))
-            self.translator.executeExtensionFunction('preTokenize', node,
-                                                     args=(ast, node, meta, self.translator.reader))
-
+        if node.get('active', True):
+            self.translator.executePageMethod('preTokenize', node, args=(ast,))
             if node.get('tokenize', True):
                 self.translator.reader.tokenize(ast, content, node)
+            self.translator.executePageMethod('postTokenize', node, args=(ast,))
 
-            self.translator.callFunction(self.translator.reader, 'postTokenize', node, args=(ast, node, meta))
-            self.translator.executeExtensionFunction('postTokenize', node,
-                                           args=(ast, node, meta, self.translator.reader))
+        return ast
 
-        return ast, meta
-
-    def render(self, node, ast, meta):
+    def render(self, node, ast):
         """Perform rendering and call all associated callbacks for the supplied page."""
 
         result = self.translator.renderer.getRoot()
-        if meta.getData('active', True):
-            self.translator.callFunction(self.translator.renderer, 'preRender', node,
-                                    args=(result, node, meta))
-            self.translator.executeExtensionFunction('preRender', node,
-                                           args=(result, node, meta, self.translator.renderer))
+        if node.get('active', True):
+            self.translator.executePageMethod('preRender', node, args=(result,))
+            if node.get('render', True):
+                self.translator.renderer.render(result, ast, node)
+            self.translator.executePageMethod('postRender', node, args=(result,))
 
-            #if node.get('render', True):
-            self.translator.renderer.render(result, ast, node)
+        return result
 
-            self.translator.callFunction(self.translator.renderer, 'postRender', node,
-                                         args=(result, node, ast))
-            self.translator.executeExtensionFunction('postRender', node,
-                                                     args=(result, node, meta, self.translator.renderer))
+    def write(self, node, result):
+        """Perform writing and call all associated callbacks for the supplied page."""
 
-        if meta.getData('output', True):
-            self.translator.renderer.write(node, result.root)
-            self.translator.executeExtensionFunction('postWrite', node)
-
+        if node.get('active', True):
+            self.translator.executePageMethod('preWrite', node, args=(result,))
+            if node.get('write', True):
+                self.translator.renderer.write(node, result.root)
+            self.translator.executePageMethod('postWrite', node)
         return result
 
     def finalize(self, other_nodes, num_threads):
@@ -255,223 +235,371 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             self.translator.renderer.write(node)
         return time.time() - start
 
+
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging."""
+
     def __init__(self, *args, **kwargs):
-        super(Serial, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self._page_content = dict()
+        self._page_ast = dict()
+        self._page_result = dict()
 
     def execute(self, nodes, num_threads=1):
         """Perform the translation, in serial."""
-        self.__tokenize_helper(nodes)
-        self._ast_available = True
-        self.__render_helper(nodes)
-        self._result_available = True
+        self._run(nodes, self._readHelper, 'Read')
+        self._run(nodes, self._tokenizeHelper, 'Tokenize')
+        self._run(nodes, self._renderHelper, 'Render')
+        self._run(nodes, self._writeHelper, 'Write')
 
-    def __tokenize_helper(self, nodes):
-        """Helper for tokenization."""
-        for node in nodes:
-            ast, meta = self.tokenize(node)
-            self._tree_data[node.uid] = ast
-            self._meta_data[node.uid] = meta
+    def _run(self, nodes, target, prefix):
+        """Run and optionally profile a function"""
 
-    def __render_helper(self, nodes):
-        """Helper for rendereing."""
+        t = time.time()
+        LOG.info('%s...', prefix)
+
+        if self.get('profile', False):
+            mooseutils.run_profile(target, nodes)
+        else:
+            target(nodes)
+
+        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
+
+    def _readHelper(self, nodes):
         for node in nodes:
-            ast = self._tree_data[node.uid]
-            meta = self._meta_data[node.uid]
-            result = self.render(node, ast, meta)
-            self._result_data[node.uid] = result
+            Executioner.setMutable(node, True)
+            content = self.read(node)
+            self._page_content[node.uid] = content
+
+    def _tokenizeHelper(self, nodes):
+        for node in nodes:
+            ast = self.tokenize(node, self._page_content[node.uid])
+            self._page_ast[node.uid] = ast
+
+    def _renderHelper(self, nodes):
+        for node in nodes:
+            result = self.render(node, self._page_ast[node.uid])
+            self._page_result[node.uid] = result
+
+    def _writeHelper(self, nodes):
+        for node in nodes:
+            self.write(node, self._page_result[node.uid])
+            Executioner.setMutable(node, False)
+
+class ParallelQueue(Executioner):
+    """
+    Implements a Queue based execution for each step of the translation.
+
+    Follows Queue example:
+    https://docs.python.org/3/library/multiprocessing.html#multiprocessing-examples
+    """
+    STOP = float('inf')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._page_content = None
+        self._page_ast = None
+        self._page_result = None
+
+    def execute(self, nodes, num_threads=1):
+
+        n = len(self.getPages())
+        self._page_content = [None]*n
+        self._page_ast = [None]*n
+        self._page_result = [None]*n
+
+        # READ
+        self._run(nodes, self._page_content, self._read_target, num_threads,
+                  lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
+                  "Reading")
+
+        # TOKENIZE
+        self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
+                  lambda n: -len(self._page_content[n.uid]),
+                  "Tokenizing")
+
+        # RENDER
+        self._run(nodes, self._page_result, self._render_target, num_threads,
+                  lambda n: -self._page_ast[n.uid].count,
+                  "Rendering")
+
+        # WRITE
+        self._run(nodes, None, self._write_target, num_threads,
+                  lambda n: -self._page_result[n.uid].count,
+                  "Writing")
+
+    def _run(self, nodes, container, target, num_threads=1, key=None, prefix='Running'):
+        """Helper function for running in parallel using Queues"""
+
+        # Time the process
+        t = time.time()
+        LOG.info('%s using %s threads...', prefix, num_threads)
+
+        # Input/Output Queue object
+        page_queue = multiprocessing.Queue()
+        output_queue = multiprocessing.Queue()
+
+        # Populate the input Queue with the ids for the nodes to be read
+        random.shuffle(nodes)
+        for node in nodes:
+            page_queue.put(node.uid)
+
+        # Create Processes for each thread that reads the data and updates the Queue objects
+        for i in range(num_threads):
+            multiprocessing.Process(target=target, args=(page_queue, output_queue)).start()
+
+        # Extract the data from the output Queue object and update Page object attributes
+        for i in range(len(nodes)):
+            uid, attributes, out = output_queue.get()
+            if container is not None:
+                container[uid] = out
+            node = self._page_objects[uid]
+            Executioner.setMutable(node, True)
+            node.attributes.update(attributes)
+            Executioner.setMutable(node, False)
+
+        for i in range(num_threads):
+            page_queue.put(ParallelQueue.STOP)
+
+        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
+
+    def _read_target(self, qin, qout):
+        """Function for calling self.read with Queue objects."""
+
+        for uid in iter(qin.get, ParallelQueue.STOP):
+            node = self._page_objects[uid]
+            Executioner.setMutable(node, True)
+            content = self.read(node)
+            qout.put((uid, node.attributes, content))
+            Executioner.setMutable(node, False)
+
+    def _tokenize_target(self, qin, qout):
+        """Function for calling self.tokenize with Queue objects."""
+
+        for uid in iter(qin.get, ParallelQueue.STOP):
+            node = self._page_objects[uid]
+            content = self._page_content[uid]
+            Executioner.setMutable(node, True)
+            ast = self.tokenize(node, content)
+            qout.put((uid, node.attributes, ast))
+            Executioner.setMutable(node, False)
+
+    def _render_target(self, qin, qout):
+        """Function for calling self.tokenize with Queue objects."""
+
+        for uid in iter(qin.get, ParallelQueue.STOP):
+            node = self._page_objects[uid]
+            ast = self._page_ast[uid]
+            Executioner.setMutable(node, True)
+            result = self.render(node, ast)
+            qout.put((uid, node.attributes, result))
+            Executioner.setMutable(node, False)
+
+    def _write_target(self, qin, qout):
+        """Function for calling self.write with Queue objects."""
+
+        for uid in iter(qin.get, ParallelQueue.STOP):
+            node = self._page_objects[uid]
+            result = self._page_result[uid]
+            Executioner.setMutable(node, True)
+            ast = self.write(node, result)
+            qout.put((uid, node.attributes, None))
+            Executioner.setMutable(node, False)
 
 class ParallelBarrier(Executioner):
     """
     Parallel Executioner that uses shared multiprocessing.Manager dictionaries
-    for storing the data across processors and a parallel barrier between the
-    tokenization and rendering steps to be sure that the AST data is completed
-    for all pages prior to beginning rendering.
-
-    The Manager dict() are "shared" across processes, so in essence this class
-    performs tokenization and broadcasts the AST and meta data to all other processes,
-    so when tokenization is completed all processors have the data.
+    for storing the Page data across processors and a parallel barrier between the
+    tokenization and rendering steps to be sure that the data is completed
+    for all pages prior to beginning the various steps.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(ParallelBarrier, self).__init__(*args, **kwargs)
-        self._manager = multiprocessing.Manager()
-        self._meta_data = self._manager.dict()
-        self._tree_data = self._manager.dict()
-        self._result_data = self._manager.dict()
-
-        self._ast_available = self._manager.Value('i', 0)
-        self._result_available = self._manager.Value('i', 0)
-
-    def isSyntaxTreeAvailable(self):
-        """Override to allow this check to work across processes."""
-        return self._ast_available.value == 1
-
     def execute(self, nodes, num_threads=1):
         """Perform the translation with multiprocessing."""
-        if num_threads > len(nodes):
-            num_threads = len(nodes)
 
-        if sys.version_info[0] == 2:
-            barrier = mooseutils.parallel.Barrier(num_threads)
-        else:
-            barrier = multiprocessing.Barrier(num_threads)
+        barrier = multiprocessing.Barrier(num_threads)
+        manager = multiprocessing.Manager()
+        page_attributes = manager.list([None]*len(self._page_objects))
 
         jobs = []
+        random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=self.__target, args=(chunk, barrier))
+            p = multiprocessing.Process(target=self._target, args=(chunk, barrier, page_attributes))
             jobs.append(p)
             p.start()
 
         for job in jobs:
             job.join()
 
-    def __target(self, nodes, barrier):
+    def _target(self, nodes, barrier, page_attributes):
         """Target function for multiprocessing.Process calls."""
 
+        local_content = dict()
         local_ast = dict()
-        local_meta = dict()
         local_result = dict()
-        for node in nodes:
-            ast, meta = self.tokenize(node)
-            local_ast[node.uid] = ast
-            local_meta[node.uid] = meta
 
-        with self.translator.LOCK:
-            self._tree_data.update(local_ast)
-            self._meta_data.update(local_meta)
+        # READ
+        for node in nodes:
+            Executioner.setMutable(node, True)
+            content = self.read(node)
+            page_attributes[node.uid] = node.attributes
+            Executioner.setMutable(node, False)
+            local_content[node.uid] = content
 
         barrier.wait()
-        self._ast_available.value = True
+        self._updateAttributes(page_attributes)
 
+        # TOKENIZE
         for node in nodes:
-            ast = local_ast[node.uid]
-            meta = local_meta[node.uid]
-            result = self.render(node, ast, meta)
+            content = local_content.pop(node.uid)
+            Executioner.setMutable(node, True)
+            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
+            ast = self.tokenize(node, content)
+            page_attributes[node.uid] = node.attributes
+            Executioner.setMutable(node, False)
+            local_ast[node.uid] = ast
+
+        barrier.wait()
+        self._updateAttributes(page_attributes)
+
+        # RENDER
+        for node in nodes:
+            ast = local_ast.pop(node.uid)
+            Executioner.setMutable(node, True)
+            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
+            result = self.render(node, ast)
+            page_attributes[node.uid] = node.attributes
+            Executioner.setMutable(node, False)
             local_result[node.uid] = result
 
-        with self.translator.LOCK:
-            self._result_data.update(local_result)
+        barrier.wait()
+        self._updateAttributes(page_attributes)
 
-        self._result_available.value = True
+        # WRITE
+        for node in nodes:
+            result = local_result.pop(node.uid)
+            Executioner.setMutable(node, True)
+            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
+            result = self.write(node, result)
+            Executioner.setMutable(node, False)
+
+    def _updateAttributes(self, page_attributes):
+        """Update the local page objects with attributes gathered from the other processes"""
+        for i, page in enumerate(self._page_objects):
+            if page_attributes[i] is not None:
+                page.update(page_attributes[i])
 
 class ParallelPipe(Executioner):
     """
-    Parallel execution that performs tokenization and uses a multiprocessing.Pipe to
-    send the data to the main process. I then starts a new parallel process for
-    rendering, using the data populated from the first step.
-
-    TODO: This isn't working correct, but the ParallelBarrier seams to be the
-          fastest, so I will need to come back to this at some time.
+    Parallel execution that performs operations and transfers data using multiprocessing.Pipe
     """
-    PROCESS_FINISHED = -1
+    STOP = float('inf')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._page_content = None
+        self._page_ast = None
+        self._page_result = None
 
     def execute(self, nodes, num_threads=1):
-        """Perform parallel conversion using multiprocessing Pipe."""
 
-        if num_threads > len(nodes):
-            num_threads = len(nodes)
+        n = len(self.getPages())
+        self._page_content = [None]*n
+        self._page_ast = [None]*n
+        self._page_result = [None]*n
+
+        # READ
+        self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
+
+        # TOKENIZE
+        self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
+
+        # RENDER
+        self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
+
+        # WRITE
+        self._run(nodes, None, self._write_target, num_threads, "Writing")
+
+    def _run(self, nodes, container, target, num_threads=1, prefix='Running'):
+        """Helper function for running in parallel using Pipe"""
+
+        # Time the process
+        t = time.time()
+        LOG.info('%s using %s threads...', prefix, num_threads)
 
         # Tokenization
         jobs = []
+        conn1, conn2 = multiprocessing.Pipe(False)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            conn1, conn2 = multiprocessing.Pipe(False)
-            p = multiprocessing.Process(target=self.__tokenize_target, args=(chunk, conn2))
-            p.start()
-            jobs.append((p, conn1, conn2))
-
-        # Finish the jobs and collect data from the Pipe
-        while any(job[0].is_alive() for job in jobs):
-            for job, conn1, conn2 in jobs:
-                if conn1.poll():
-                    uid = conn1.recv()
-                    if uid == ParallelPipe.PROCESS_FINISHED:
-                        conn1.close()
-                        job.join()
-                        continue
-
-                    self._tree_data[uid] = conn1.recv()
-                    self._meta_data[uid] = conn1.recv()
-
-        self._ast_available = True
-
-        # Rendering
-        jobs = []
-        for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=self.__render_target, args=(chunk,))
+            p = multiprocessing.Process(target=target, args=(chunk, conn2))
             p.start()
             jobs.append(p)
 
-        for job in jobs:
-            job.join()
+        while any(job.is_alive() for job in jobs):
+            if conn1.poll():
+                data = conn1.recv()
+                for uid, attributes, out in data:
+                    node = self._page_objects[uid]
+                    Executioner.setMutable(node, True)
+                    node.attributes.update(attributes)
+                    Executioner.setMutable(node, False)
 
+                    if container is not None:
+                        container[uid] = out
 
-    def __tokenize_target(self, nodes, conn):
-        """Target for tokenization multiprocessing.Process calls."""
+        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
+
+    def _read_target(self, nodes, conn):
+        """Function for calling self.read with Connection object"""
+
+        data = list()
         for node in nodes:
-            ast, meta = self.tokenize(node)
-            conn.send(node.uid)
-            conn.send(ast)
-            conn.send(meta)
+            Executioner.setMutable(node, True)
+            content = self.read(node)
+            data.append((node.uid, node.attributes, content))
+            Executioner.setMutable(node, False)
 
-        conn.send(self.PROCESS_FINISHED)
+        with self.LOCK:
+            conn.send(data)
 
-    def __render_target(self, nodes):
-        """Target for rendering multiprocessing.Process calls."""
+    def _tokenize_target(self, nodes, conn):
+        """Function for calling self.tokenize with Connection object"""
+
+        data = list()
         for node in nodes:
-            ast = self._tree_data[node.uid]
-            meta = self._meta_data[node.uid]
-            self.render(node, ast, meta)
+            content = self._page_content[node.uid]
+            Executioner.setMutable(node, True)
+            ast = self.tokenize(node, content)
+            data.append((node.uid, node.attributes, ast))
+            Executioner.setMutable(node, False)
 
-class ParallelDemand(Executioner):
-    """
-    Parallel execution that does not perform any communication and re-builds syntax trees
-    within the getSyntaxTree method.
+        with self.LOCK:
+            conn.send(data)
 
+    def _render_target(self, nodes, conn):
+        """Function for calling self.tokenize with Connection object"""
 
-    NOTE: This doesn't work yet. The configuration changes get screwed up when the
-          getSyntaxTree method is called from another page. I need to re-think the configuration
-          handling to make this work.
-
-          Fixing this is not a high priority, because the ParallelBarrier seems to be the fastest.
-    """
-    def __init__(self, *args, **kwargs):
-        super(ParallelDemand, self).__init__(*args, **kwargs)
-        self._ast_available = True
-
-    def execute(self, nodes, num_threads=1):
-        """Perform the translation with multiprocessing."""
-
-        if num_threads > len(nodes):
-            num_threads = len(nodes)
-
-        jobs = []
-        for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=self.__target, args=(chunk,))
-            p.start()
-            jobs.append(p)
-
-        for job in jobs:
-            job.join()
-
-    def __target(self, nodes):
-        """Target function for multiprocessing.Process calls."""
-
+        data = list()
         for node in nodes:
-            ast, meta = self.tokenize(node)
-            self._tree_data[node.uid] = ast
-            self._meta_data[node.uid] = meta
-            self.render(node, ast, meta)
+            ast = self._page_ast[node.uid]
+            Executioner.setMutable(node, True)
+            result = self.render(node, ast)
+            data.append((node.uid, node.attributes, result))
+            Executioner.setMutable(node, False)
 
-    def getSyntaxTree(self, page):
-        """Return the syntax tree, if it doesn't exist build it first."""
-        if isinstance(page, pages.Source) and (page.uid not in self._tree_data):
-            self.__target([page])
-        return super(ParallelDemand, self).getSyntaxTree(page)
+        with self.LOCK:
+            conn.send(data)
 
-    def getMetaData(self, page, key):
-        """Return the meta data, if it doesn't exist build it first."""
-        if isinstance(page, pages.Source) and (page.uid not in self._meta_data):
-            self.__target([page])
-        return super(ParallelDemand, self).getMetaData(page, key)
+    def _write_target(self, nodes, conn):
+        """Function for calling self.write with Connection object"""
+
+        data = list()
+        for node in nodes:
+            result = self._page_result[node.uid]
+            Executioner.setMutable(node, True)
+            self.write(node, result)
+            data.append((node.uid, node.attributes, None))
+            Executioner.setMutable(node, False)
+
+        with self.LOCK:
+            conn.send(data)

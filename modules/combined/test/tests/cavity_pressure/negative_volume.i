@@ -54,13 +54,13 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0

@@ -81,25 +81,25 @@
   # xmin is called left
   # xmax is called right
   [./no_dispy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.0
   [../]
   [./no_wc_y]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_y
     boundary = 'left'
     value = 0.0
   [../]
   [./clamp_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
   [../]
   [./clamp_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0

@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -21,10 +20,11 @@ import json
 import time
 
 import mooseutils
+
 import MooseDocs
 from .. import common
 from ..common import exceptions
-from ..base import components, LatexRenderer, HTMLRenderer
+from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from . import core, command, floats, autolink, civet
 
@@ -87,7 +87,7 @@ class SQAExtension(command.CommandExtension):
         self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
-        for index, (category, info) in enumerate(self.get('categories').items(), 1): #pylint: disable=no-member
+        for index, (category, info) in enumerate(self.get('categories').items(), 1):
             specs = info.get('specs', ['tests'])
             directories = []
             for d in info.get('directories'):
@@ -141,7 +141,7 @@ class SQAExtension(command.CommandExtension):
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return dep
 
-    def preExecute(self, content):
+    def preExecute(self):
         """Reset counts and create test pages."""
         self.__counts.clear()
 
@@ -229,7 +229,7 @@ class SQARequirementsCommand(command.CommandComponent):
                                         satisfied=req.satisfied)
         text = SQARequirementText(item)
 
-        self.reader.tokenize(text, req.text, page, MooseDocs.INLINE, info.line, report=False)
+        self.reader.tokenize(text, req.text, page, MarkdownReader.INLINE, info.line, report=False)
         for token in moosetree.iterate(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
@@ -245,7 +245,7 @@ class SQARequirementsCommand(command.CommandComponent):
             for detail in req.details:
                 ditem = SQARequirementDetailItem(details)
                 text = SQARequirementText(ditem)
-                self.reader.tokenize(text, detail.text, page, MooseDocs.INLINE, info.line, \
+                self.reader.tokenize(text, detail.text, page, MarkdownReader.INLINE, info.line, \
                                      report=False)
 
         if self.settings['link']:
@@ -355,7 +355,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
             raise exceptions.MooseDocsException(msg)
 
         # Extract the unordered list
-        self.reader.tokenize(parent, content, page, MooseDocs.BLOCK, info.line)
+        self.reader.tokenize(parent, content, page, MarkdownReader.BLOCK, info.line)
         ul = parent.children[-1]
         ul.parent = None
 
@@ -372,7 +372,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
         heading = self.settings['heading']
         if heading is not None:
             head = SQARequirementMatrixHeading(matrix)
-            self.reader.tokenize(head, heading, page, MooseDocs.INLINE, info.line)
+            self.reader.tokenize(head, heading, page, MarkdownReader.INLINE, info.line)
 
         for i, item in enumerate(ul.children):
             matrix_item = SQARequirementMatrixListItem(matrix, label='{}.{:d}'.format(label, i))
@@ -407,7 +407,7 @@ class SQAVerificationCommand(command.CommandComponent):
     def _addRequirement(self, parent, info, page, req):
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname)
-        self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
+        self.reader.tokenize(item, req.text, page, MarkdownReader.INLINE, info.line, report=False)
         for token in moosetree.iterate(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
@@ -503,7 +503,7 @@ class RenderSQARequirementMatrixItem(core.RenderListItem):
 
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         attributes = copy.copy(token.attributes)
         id_ = token['reqname']
 
@@ -537,7 +537,7 @@ class RenderSQARequirementMatrixListItem(RenderSQARequirementMatrixItem):
         html.Tag(li, 'span', string=token['label'], class_='moose-sqa-requirement-number')
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+    def createMaterialize(self, parent, token, page):
         li = html.Tag(parent, 'li', token, class_="collection-item")
         html.Tag(li, 'span', string=token['label'], class_='moose-sqa-requirement-number')
         return html.Tag(li, 'span', class_='moose-sqa-requirement-content')

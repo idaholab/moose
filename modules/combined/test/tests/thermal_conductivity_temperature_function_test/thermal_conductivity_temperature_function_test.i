@@ -82,7 +82,7 @@
 [BCs]
 
   [./temps_function]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = 1000
     function = t_func

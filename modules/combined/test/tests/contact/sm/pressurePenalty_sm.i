@@ -84,7 +84,7 @@
   [../]
 
   [./down]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 8
     value = -2e-3

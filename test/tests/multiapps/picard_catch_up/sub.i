@@ -36,12 +36,14 @@
   [./left_v]
     type = DirichletBC
     variable = v
+    preset = false
     boundary = left
     value = 1
   [../]
   [./right_v]
     type = FunctionDirichletBC
     variable = v
+    preset = false
     boundary = right
     function = 't + 1'
   [../]

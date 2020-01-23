@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -13,11 +12,11 @@ import os
 import mooseutils
 
 import MooseDocs
-from MooseDocs.base import LatexRenderer
-from MooseDocs import common
-from MooseDocs.common import exceptions
-from MooseDocs.extensions import core, command, floats
-from MooseDocs.tree import tokens, latex
+from .. import common
+from ..common import exceptions
+from ..base import LatexRenderer
+from ..tree import tokens, latex
+from . import core, command, floats
 
 Listing = tokens.newToken('Listing', floats.Float)
 ListingCode = tokens.newToken('ListingCode', core.Code)

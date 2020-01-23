@@ -127,21 +127,21 @@
 [BCs]
 
   [./crack_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   [../]
 
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 400
     value = 0.0
   [../]
 
   [./no_x1]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 900
     value = 0.0

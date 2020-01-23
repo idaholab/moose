@@ -209,13 +209,13 @@
     value = 0.0
   [../]
   [./top_y_disp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = disp_ramp_vert
   [../]
   [./top_x_disp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = disp_ramp_horz

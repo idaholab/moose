@@ -80,13 +80,13 @@
 
   # fix center point location
   [./centerfix_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
   [../]
   [./centerfix_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = u_y
     value = 0

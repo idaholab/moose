@@ -55,13 +55,13 @@
 
 [BCs]
   [./temp]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 'front back'
     value = 1
   [../]
   [./pp]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = 'front back'
     value = 0

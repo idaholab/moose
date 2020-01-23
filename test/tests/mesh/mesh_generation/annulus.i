@@ -28,13 +28,13 @@
 
 [BCs]
   [./inner]
-    type = PresetBC
+    type = DirichletBC
     variable = u
     value = 0.0
     boundary = rmin
   [../]
   [./outer]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = u
     function = log(5)
     boundary = rmax

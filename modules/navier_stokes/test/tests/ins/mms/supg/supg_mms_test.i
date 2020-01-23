@@ -80,18 +80,21 @@ rho=2.5
 [BCs]
   [./vel_x]
     type = FunctionDirichletBC
+    preset = false
     boundary = 'left right top bottom'
     function = vel_x_func
     variable = vel_x
   [../]
   [./vel_y]
     type = FunctionDirichletBC
+    preset = false
     boundary = 'left right top bottom'
     function = vel_y_func
     variable = vel_y
   [../]
   [./p]
     type = FunctionDirichletBC
+    preset = false
     boundary = 'left right top bottom'
     function = p_func
     variable = p

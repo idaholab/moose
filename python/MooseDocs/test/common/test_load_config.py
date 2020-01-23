@@ -57,14 +57,14 @@ class TestLoadRenderer(unittest.TestCase):
 
 class TestLoadTranslator(unittest.TestCase):
     def testEmpty(self):
-        content = pages.Page('foo', source='foo')
+        content = [pages.Page('foo', source='foo')]
         reader = MooseDocs.base.MarkdownReader()
         renderer = MooseDocs.base.HTMLRenderer()
         obj = _yaml_load_object('Translator', dict(), 'MooseDocs.base.Translator', content, reader, renderer, [])
         self.assertIsInstance(obj, MooseDocs.base.Translator)
 
     def testNode(self):
-        content = pages.Page('foo', source='foo')
+        content = [pages.Page('foo', source='foo')]
         reader = MooseDocs.base.MarkdownReader()
         renderer = MooseDocs.base.HTMLRenderer()
         config = dict(Translator=dict(type='MooseDocs.base.Translator'))

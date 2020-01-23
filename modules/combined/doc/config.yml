@@ -10,9 +10,6 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Combined Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/combined
 
 Extensions:
     disable_defaults: True

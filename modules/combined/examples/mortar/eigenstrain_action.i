@@ -234,13 +234,13 @@
 
   # fix center point location
   [./centerfix_x]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = disp_x
     value = 0
   [../]
   [./centerfix_y]
-    type = PresetBC
+    type = DirichletBC
     boundary = 100
     variable = disp_y
     value = 0
@@ -248,7 +248,7 @@
 
   # fix side point x coordinate to inhibit rotation
   [./angularfix]
-    type = PresetBC
+    type = DirichletBC
     boundary = 101
     variable = disp_x
     value = 0

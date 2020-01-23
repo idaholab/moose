@@ -159,13 +159,13 @@
 
 [BCs]
   [./all_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'top bottom left right'
     value = 0
   [../]
   [./all_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'top bottom left right'
     value = 0

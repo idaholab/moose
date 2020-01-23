@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -14,10 +13,10 @@ import logging
 import collections
 import moosetree
 import mooseutils
-from MooseDocs.base import renderers
-from MooseDocs.common import exceptions, box
-from MooseDocs.tree import base, latex, pages
-from MooseDocs.extensions import core, command, bibtex
+from ..base import renderers
+from ..common import exceptions, box
+from ..tree import base, latex, pages
+from . import core, command, bibtex
 
 LOG = logging.getLogger(__name__)
 
@@ -34,9 +33,6 @@ class PDFExtension(command.CommandExtension):
         config = command.CommandExtension.defaultConfig()
         return config
 
-    def initMetaData(self, page, meta):
-        meta.initData('pdf-active', True)
-
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -49,7 +45,7 @@ class PDFExtension(command.CommandExtension):
             renderer.addPackage('geometry', margin='1in')
             renderer.addPackage('parskip')
 
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
         """
         Performs modification of heading level base on the local folder depth.
         """
@@ -71,12 +67,14 @@ class PDFExtension(command.CommandExtension):
                     LOG.warning(msg, node.text())
                     node['level'] = 4
 
-    def postExecute(self, content):
+    def postExecute(self):
         """
         Combines all the LaTeX files into a single file.
         """
+        return
+
         files = []
-        for page in content:
+        for page in self.translator.getPages():
             if isinstance(page, pages.Source):
                 files.append(page)
         root = self.buildTreeFromPageList(files)
@@ -132,12 +130,12 @@ class PDFExtension(command.CommandExtension):
         doc = latex.Environment(main, 'document', end='\n')
         for node in moosetree.iterate(root, lambda n: 'page' in n):
             page = node['page']
-            if self.translator.getMetaData(page, 'active'):
+            if page.get('active', True):
                 cmd = latex.Command(doc, 'input', start='\n')
                 latex.String(cmd, content=str(page.destination), escape=False)
 
         # BibTeX
-        bib_files = [n.source for n in self.translator.content if n.source.endswith('.bib')]
+        bib_files = [n.source for n in self.translator.getPages() if n.source.endswith('.bib')]
         if bib_files:
             latex.Command(doc, 'bibliographystyle', start='\n', string='unsrtnat')
             latex.Command(doc, 'bibliography', string=','.join(bib_files), start='\n',
@@ -158,9 +156,12 @@ class PDFExtension(command.CommandExtension):
         # Get the rendered result tree and locate the start/end lines for each node
         result = None
         if pnode is not None:
-            result = self.translator.getResultTree(pnode)
-            result['_start_line'] = 1
-            self._lineCounter(result)
+            pass
+            # TODO: The ability to get the ResultTree has been removed, this was the only function
+            #       calling it and the potential slow downs and abuse out pace the use case here
+            #result = self.translator.getResultTree(pnode)
+            #result['_start_line'] = 1
+            #self._lineCounter(result)
 
         # Report warning(s)
         for w in lnode['warnings']:

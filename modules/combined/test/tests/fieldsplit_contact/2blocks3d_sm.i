@@ -49,7 +49,7 @@
 
 [BCs]
   [./push_x]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = horizontal_movement

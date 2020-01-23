@@ -56,7 +56,7 @@
     variable = temp
   [../]
   [./edge]
-    type = PresetBC
+    type = DirichletBC
     value = 700
     boundary = 10
     variable = temp

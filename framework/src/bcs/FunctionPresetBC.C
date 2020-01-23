@@ -8,29 +8,29 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FunctionPresetBC.h"
-#include "Function.h"
 
-registerMooseObject("MooseApp", FunctionPresetBC);
+registerMooseObjectDeprecated("MooseApp", FunctionPresetBC, "06/30/2020 24:00");
 
 defineLegacyParams(FunctionPresetBC);
 
 InputParameters
 FunctionPresetBC::validParams()
 {
-  InputParameters params = PresetNodalBC::validParams();
-  params.addRequiredParam<FunctionName>("function", "The forcing function.");
+  InputParameters params = FunctionDirichletBC::validParams();
   params.addClassDescription(
-      "The same as FunctionDirichletBC except the value is applied before the solve begins");
+      "The same as FunctionDirichletBC except the value is applied before the solve begins. "
+      "Deprecated: use FunctionDirichletBC with preset = true instead.");
+
+  // Utilize the new FunctionDirichletBC with preset, set true and don't let the user change it
+  params.set<bool>("preset") = true;
+  params.suppressParameter<bool>("preset");
+
   return params;
 }
 
 FunctionPresetBC::FunctionPresetBC(const InputParameters & parameters)
-  : PresetNodalBC(parameters), _func(getFunction("function"))
+  : FunctionDirichletBC(parameters)
 {
-}
-
-Real
-FunctionPresetBC::computeQpValue()
-{
-  return _func.value(_t, *_current_node);
+  mooseDeprecated(
+      name(), ": use FunctionDirichletBC with preset = true (default) instead of FunctionPresetBC");
 }

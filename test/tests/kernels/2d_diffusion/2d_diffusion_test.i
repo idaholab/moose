@@ -30,11 +30,13 @@
 []
 
 [BCs]
+  # BCs cannot be preset due to Jacobian test
   active = 'left right'
 
   [./left]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 1
     value = 0
   [../]
@@ -42,6 +44,7 @@
   [./right]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 2
     value = 1
   [../]

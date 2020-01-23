@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -10,10 +9,10 @@
 
 import collections
 
-from MooseDocs.base import components, renderers
-from MooseDocs.common import exceptions
-from MooseDocs.extensions import command, table, floats
-from MooseDocs.tree import tokens, html, latex
+from ..base import components, renderers
+from ..common import exceptions
+from ..tree import tokens, html, latex
+from . import command, table, floats
 
 def make_extension(**kwargs):
     return AcronymExtension(**kwargs)
@@ -39,13 +38,13 @@ class AcronymExtension(command.CommandExtension):
         self.__used = set()
 
         # Initialize the available acronyms
-        for key, value in self.get('acronyms').items(): #pylint: disable=no-member
+        for key, value in self.get('acronyms').items():
             if isinstance(value, dict):
                 self.__acronyms.update(value)
             else:
                 self.__acronyms[key] = value
 
-    def preExecute(self, root):
+    def preExecute(self):
         """
         Reinitialize the list of acronyms being used.
         """

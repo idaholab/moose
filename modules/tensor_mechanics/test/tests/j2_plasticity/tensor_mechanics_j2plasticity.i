@@ -78,43 +78,43 @@
 
 [BCs]
   [./bottom3]
-    type = PresetBC
+    type = DirichletBC
     variable = z_disp
     boundary = 0
     value = 0.0
   [../]
   [./top]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = z_disp
     boundary = 5
     function = topfunc
   [../]
   [./corner1]
-    type = PresetBC
+    type = DirichletBC
     variable = x_disp
     boundary = 6
     value = 0.0
   [../]
   [./corner2]
-    type = PresetBC
+    type = DirichletBC
     variable = y_disp
     boundary = 6
     value = 0.0
   [../]
   [./corner3]
-    type = PresetBC
+    type = DirichletBC
     variable = z_disp
     boundary = 6
     value = 0.0
   [../]
   [./side1]
-    type = PresetBC
+    type = DirichletBC
     variable = y_disp
     boundary = 7
     value = 0.0
   [../]
   [./side2]
-    type = PresetBC
+    type = DirichletBC
     variable = z_disp
     boundary = 7
     value = 0.0

@@ -5,6 +5,5 @@
     separate = True
     display_required = True
     platform = linux
-    python = 3
   [../]
 []

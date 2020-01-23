@@ -93,7 +93,10 @@ public:
                                  NumericVector<Number> & residualB,
                                  TagID tagA,
                                  TagID tagB);
+
+  void scaleEigenvector(const Real scaling_factor);
 #endif
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;

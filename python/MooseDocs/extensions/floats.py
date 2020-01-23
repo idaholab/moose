@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -12,10 +11,10 @@ import uuid
 import collections
 import moosetree
 import MooseDocs
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.extensions import core
-from MooseDocs.tree import tokens, html, latex
+from ..common import exceptions
+from ..base import components, MarkdownReader, LatexRenderer, Extension
+from ..tree import tokens, html, latex
+from . import core
 
 def make_extension(**kwargs):
     return FloatExtension(**kwargs)
@@ -72,10 +71,10 @@ def _add_caption(parent, extension, reader, page, settings):
     if key:
         caption = FloatCaption(parent, key=key, prefix=prefix)
         if cap:
-            reader.tokenize(caption, cap, page, MooseDocs.INLINE)
+            reader.tokenize(caption, cap, page, MarkdownReader.INLINE)
     elif cap:
         caption = FloatCaption(parent)
-        reader.tokenize(caption, cap, page, MooseDocs.INLINE)
+        reader.tokenize(caption, cap, page, MarkdownReader.INLINE)
     return caption, prefix
 
 def create_modal(parent, title=None, content=None, **kwargs):
@@ -107,7 +106,7 @@ def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
     create_modal(parent, title, content, **kwargs)
     return link
 
-class FloatExtension(components.Extension):
+class FloatExtension(Extension):
     """
     Provides ability to add caption float elements (e.g., figures, table, etc.). This is only a
     base extension. It does not provide tables for example, just the tools to make floats
@@ -123,16 +122,14 @@ class FloatExtension(components.Extension):
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('caption', labelsep='period')
 
-    def initMetaData(self, page, meta):
-        meta.initData('counts', collections.defaultdict(int))
-
-    def postTokenize(self, ast, page, meta, reader):
+    def postTokenize(self, page, ast):
         """Set float number for each counter."""
+        counts = page.get('counts', collections.defaultdict(int))
         for node in moosetree.iterate(ast, lambda n: n.name == 'FloatCaption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
-                meta.getData('counts')[prefix] += 1
-                node['number'] = meta.getData('counts')[prefix]
+                counts[prefix] += 1
+                node['number'] = counts[prefix]
             key = node.get('key')
             if key:
                 shortcut = core.Shortcut(ast.root, key=key, link='#{}'.format(key))
@@ -143,9 +140,10 @@ class FloatExtension(components.Extension):
                 else:
                     tokens.String(shortcut, content='{} {}'.format(prefix.title(), node['number']))
 
+        page['counts'] = counts
 
 class RenderFloat(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
         div = html.Tag(parent, 'div', token)
         div.addClass('moose-float-div')
 
@@ -156,7 +154,7 @@ class RenderFloat(components.RenderComponent):
 
         return div
 
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use
+    def createMaterialize(self, parent, token, page):
         div = html.Tag(parent, 'div', token)
         div.addClass('card moose-float')
         content = html.Tag(div, 'div')
@@ -188,7 +186,7 @@ class RenderFloat(components.RenderComponent):
         return env
 
 class RenderFloatCaption(components.RenderComponent):
-    def createHTML(self, parent, token, page): #pylint: disable=no-self-use
+    def createHTML(self, parent, token, page):
 
         caption = html.Tag(parent, 'p', class_="moose-caption")
         prefix = token.get('prefix', None)

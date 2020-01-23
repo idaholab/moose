@@ -83,25 +83,25 @@
 
 [BCs]
   [./top]
-    type = PresetBC
+    type = DirichletBC
     value = 0
     variable = tracer
     boundary = rf2
   [../]
   [./bottom]
-    type = PresetBC
+    type = DirichletBC
     value = 1
     variable = tracer
     boundary = lf1
   [../]
   [./ptop]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary =  rf2
     value = 1e6
   [../]
   [./pbottom]
-    type = PresetBC
+    type = DirichletBC
     variable = pp
     boundary = lf1
     value = 1.02e6

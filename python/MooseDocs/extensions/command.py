@@ -8,29 +8,22 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Extension for adding commands to Markdown syntax."""
-#pylint: disable=missing-docstring
 import re
 
-from MooseDocs import common
-from MooseDocs.base import components, Reader
-from MooseDocs.tree import tokens
-from MooseDocs.extensions import core
+from .. import common
+from ..base import components, Reader, Extension
+from ..tree import tokens
+from . import core
 
 def make_extension(**kwargs):
     """Create the CommandExtension object."""
     return CommandExtension(**kwargs)
 
-class CommandExtension(components.Extension):
+class CommandExtension(Extension):
     """Extension for creating tools necessary generic commands."""
     EXTENSION_COMMANDS = dict()
 
     def addCommand(self, reader, command):
-
-        # Type checking
-        common.check_type('reader', reader, Reader)
-        common.check_type('command', command, CommandComponent)
-        common.check_type('COMMAND', command.COMMAND, (str, tuple))
-        common.check_type('SUBCOMMAND', command.SUBCOMMAND, (type(None), str, tuple))
 
         # Initialize the component
         command.setReader(reader)
@@ -65,11 +58,11 @@ class CommandExtension(components.Extension):
         reader.addBlock(BlockInlineCommand(), location='<BlockBlockCommand')
         reader.addInline(InlineCommand(), location='_begin')
 
-class CommandComponent(components.TokenComponent): #pylint: disable=abstract-method
+class CommandComponent(components.ReaderComponent):
     COMMAND = None
     SUBCOMMAND = None
 
-class CommandBase(components.TokenComponent):
+class CommandBase(components.ReaderComponent):
     """
     Provides a component for creating commands.
 
@@ -85,7 +78,7 @@ class CommandBase(components.TokenComponent):
     FILENAME_RE = re.compile(r'(?P<filename>\S*\.(?P<ext>\w+))(?= |$)', flags=re.UNICODE)
 
     def __init__(self, *args, **kwargs):
-        components.TokenComponent.__init__(self, *args, **kwargs)
+        components.ReaderComponent.__init__(self, *args, **kwargs)
 
     def createToken(self, parent, info, page):
 

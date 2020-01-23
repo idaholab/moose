@@ -35,21 +35,21 @@
 
 [BCs]
   [./lateral]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0
   [../]
 
   [./bottom_up]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
   [../]
 
   [./top]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0

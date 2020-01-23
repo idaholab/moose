@@ -5,11 +5,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE XFEM Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/xfem
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE XFEM Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/xfem
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/xfem
         hide:

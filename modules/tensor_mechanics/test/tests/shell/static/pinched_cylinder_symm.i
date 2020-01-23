@@ -92,31 +92,31 @@
 
 [BCs]
   [./simply_support_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'CD AD'
     value = 0.0
   [../]
   [./simply_support_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'CD BC'
     value = 0.0
   [../]
   [./simply_support_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'CD AB'
     value = 0.0
   [../]
   [./simply_support_rot_x]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_x
     boundary = 'CD BC'
     value = 0.0
   [../]
   [./simply_support_rot_y]
-    type = PresetBC
+    type = DirichletBC
     variable = rot_y
     boundary = 'CD AD'
     value = 0.0

@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: MOOSE Level Set Module
-    repo: https://github.com/idaholab/moose
-    home: /modules/level_set
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Level Set Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/level_set
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/level_set
         hide: !include framework/doc/hidden.yml

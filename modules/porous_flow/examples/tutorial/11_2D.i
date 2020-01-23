@@ -239,7 +239,7 @@
 
 [BCs]
   [./pinned_top_bottom_r]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_r
     value = 0
     boundary = 'top bottom'
@@ -254,7 +254,7 @@
   [../]
 
   [./cold_co2]
-    type = PresetBC
+    type = DirichletBC
     boundary = injection_area
     variable = T
     value = 290  # injection temperature

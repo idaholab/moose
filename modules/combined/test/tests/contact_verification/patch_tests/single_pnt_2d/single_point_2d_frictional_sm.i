@@ -102,13 +102,13 @@
     value = 0.0
   [../]
   [./topx]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = appl_disp
   [../]
   [./topy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 4
     value = -0.002001

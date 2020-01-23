@@ -108,13 +108,13 @@
 
 [BCs]
   [./left]
-    type = PresetBC
+    type = DirichletBC
     boundary = left
     value = 1
     variable = u
   [../]
   [./right]
-    type = PresetBC
+    type = DirichletBC
     boundary = right
     value = 0
     variable = u

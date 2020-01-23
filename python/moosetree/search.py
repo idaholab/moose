@@ -1,19 +1,14 @@
 """Tools for iterating and locating nodes."""
 import sys
-if sys.version_info[0] == 3:
-    from enum import Enum
+from enum import Enum
 
-    class IterMethod(Enum):
-        """
-        An 'Enum' for defining iteration process.
-        https://en.wikipedia.org/wiki/Tree_traversal
-        """
-        PRE_ORDER = 1
-        BREADTH_FIRST = 2
-else:
-    class IterMethod(object):
-        PRE_ORDER = 1
-        BREADTH_FIRST = 2
+class IterMethod(Enum):
+    """
+    An 'Enum' for defining iteration process.
+    https://en.wikipedia.org/wiki/Tree_traversal
+    """
+    PRE_ORDER = 1
+    BREADTH_FIRST = 2
 
 def findall(node, func=None, method=None, **kwargs):
     """

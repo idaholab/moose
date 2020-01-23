@@ -658,37 +658,37 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'xmin xmax'
     value = 0.0
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'ymin ymax'
     value = 0.0
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = zmin
     value = 0.0
   [../]
   [./no_wc_x]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_x
     boundary = 'ymin ymax'
     value = 0.0
   [../]
   [./no_wc_y]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_y
     boundary = 'xmin xmax'
     value = 0.0
   [../]
   [./fix_porepressure]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = porepressure
     boundary = 'ymin ymax xmax'
     function = ini_pp

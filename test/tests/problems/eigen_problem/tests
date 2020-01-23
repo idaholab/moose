@@ -127,4 +127,13 @@
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app"
   []
 
+  [./scaled_eigenvector]
+    type = 'Exodiff'
+    input = 'ne_coupled_scaled.i'
+    exodiff = 'ne_coupled_scaled_out.e'
+    slepc_version = '>=3.8.0'
+    issues = '#14500'
+    requirement = "Eigenvalue system should be able scale eigenvector such that postprocessor is a certain value"
+  []
+
 []

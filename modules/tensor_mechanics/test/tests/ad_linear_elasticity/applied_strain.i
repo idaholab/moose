@@ -38,13 +38,13 @@
 
 [BCs]
   [./bottom_y]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
   [./left_x]
-    type = ADPresetBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0

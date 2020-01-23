@@ -217,5 +217,16 @@ class TestNode(unittest.TestCase):
         self.assertIs(n0(1)(0), n5)
         self.assertIs(n0(1)(1), n6)
 
+    def testCount(self):
+        n0 = moosetree.Node(None, '0')
+        n1 = moosetree.Node(n0, '1')
+        n2 = moosetree.Node(n1, '2')
+        n3 = moosetree.Node(n1, '3')
+        n4 = moosetree.Node(n0, '4')
+        n5 = moosetree.Node(n4, '5')
+        n6 = moosetree.Node(n4, '6')
+
+        self.assertEqual(n0.count, 6)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

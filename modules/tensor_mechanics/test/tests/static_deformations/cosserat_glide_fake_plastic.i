@@ -114,49 +114,49 @@
   # xmin is called left
   # xmax is called right
   [./disp_x_zero_at_y_zero]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0
   [../]
   [./disp_x_fixed_at_y_max]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = top
     value = -1.65731741465
   [../]
   [./no_dispy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'back front bottom top left right'
     value = 0
   [../]
   [./no_dispz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back front bottom top left right'
     value = 0
   [../]
   [./no_wc_x]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_x
     boundary = 'back front bottom top left right'
     value = 0
   [../]
   [./no_wc_y]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_y
     boundary = 'back front bottom top left right'
     value = 0
   [../]
   [./wc_z_zero_at_y_zero]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_z
     boundary = bottom
     value = 0
   [../]
   [./wc_z_fixed_at_y_max]
-    type = PresetBC
+    type = DirichletBC
     variable = wc_z
     boundary = top
     value = 3.626860407847

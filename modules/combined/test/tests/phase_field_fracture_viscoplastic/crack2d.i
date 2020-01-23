@@ -81,19 +81,19 @@
 
 [BCs]
   [./ydisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = '0.0001*t'
   [../]
   [./yfix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
   [../]
   [./xfix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '1 2'
     value = 0

@@ -55,6 +55,7 @@
   [./homogeneous]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = '0 1 2 3'
     value = 0
   [../]

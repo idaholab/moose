@@ -1,4 +1,3 @@
-#pylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -9,10 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-import MooseDocs
-from MooseDocs.base import components, LatexRenderer, HTMLRenderer
-from MooseDocs.extensions import command
-from MooseDocs.tree import tokens, html, latex
+from ..base import components, LatexRenderer, HTMLRenderer, MarkdownReader
+from ..tree import tokens, html, latex
+from . import command
 
 def make_extension(**kwargs):
     return AlertExtension(**kwargs)
@@ -96,7 +94,7 @@ class AlertCommand(command.CommandComponent):
         title_token = AlertTitle(alert_token, brand=brand, prefix=prefix)
 
         if title:
-            self.reader.tokenize(title_token, title, page, MooseDocs.INLINE)
+            self.reader.tokenize(title_token, title, page, MarkdownReader.INLINE)
 
         return AlertContent(alert_token, brand=brand, icon=self.settings['icon'])
 

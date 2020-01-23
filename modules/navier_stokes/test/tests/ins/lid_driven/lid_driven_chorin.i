@@ -130,6 +130,7 @@
   [./u_no_slip]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 'bottom right left'
     value = 0.0
   [../]
@@ -137,6 +138,7 @@
   [./u_lid]
     type = DirichletBC
     variable = u
+    preset = false
     boundary = 'top'
     value = 100.0
   [../]
@@ -144,6 +146,7 @@
   [./v_no_slip]
     type = DirichletBC
     variable = v
+    preset = false
     boundary = 'bottom right top left'
     value = 0.0
   [../]
@@ -152,6 +155,7 @@
   [./u_star_no_slip]
     type = DirichletBC
     variable = u_star
+    preset = false
     boundary = 'bottom right left'
     value = 0.0
   [../]
@@ -159,6 +163,7 @@
   [./u_star_lid]
     type = DirichletBC
     variable = u_star
+    preset = false
     boundary = 'top'
     value = 100.0
   [../]
@@ -166,6 +171,7 @@
   [./v_star_no_slip]
     type = DirichletBC
     variable = v_star
+    preset = false
     boundary = 'bottom right top left'
     value = 0.0
   [../]
@@ -178,6 +184,7 @@
   [./pressure_pin]
     type = DirichletBC
     variable = p
+    preset = false
     boundary = '99'
     value = 0
   [../]

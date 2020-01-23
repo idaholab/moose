@@ -80,10 +80,11 @@ FEProblemSolve::validParams()
       "Specifies whether or not to reuse the base vector for matrix-free calculation");
   params.addParam<bool>(
       "skip_exception_check", false, "Specifies whether or not to skip exception check");
-  params.addParam<bool>("compute_initial_residual_before_preset_bcs",
-                        false,
-                        "Use the residual norm computed *before* PresetBCs are imposed in relative "
-                        "convergence check");
+  params.addParam<bool>(
+      "compute_initial_residual_before_preset_bcs",
+      false,
+      "Use the residual norm computed *before* preset BCs are imposed in relative "
+      "convergence check");
   params.addParam<bool>("automatic_scaling", "Whether to use automatic scaling for the variables.");
   params.addParam<bool>(
       "compute_scaling_once",
