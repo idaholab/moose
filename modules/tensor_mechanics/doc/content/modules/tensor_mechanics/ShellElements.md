@@ -32,7 +32,7 @@ Therefore, the incremental displacements of any point within the shell element w
 u_i = \sum_{k=1}^4 h_k u_i^k + \frac{r_3}{2} \sum_{k=1}^4 a_k h_k (-^tV_{2i}^k \alpha_k + ^tV_{1i}^k \beta_k)
 \end{equation}
 
-If $^t \mathbf{g_i} = \frac{\partial ^t \mathbf{x}/ \partial r_i}$ are the covariant base vectors, then the Green-Lagrange strain components can be written as:
+If $^t \mathbf{g_i} = \partial ^t \mathbf{x}/\partial r_i$ are the covariant base vectors, then the Green-Lagrange strain components can be written as:
 
 \begin{equation}
 \tilde{\epsilon}_{ij} = \frac{1}{2}(^t \mathbf{g_i} \cdot ^t \mathbf{g_j} - ^0 \mathbf{g_i} \cdot ^0 \mathbf{g_j})
