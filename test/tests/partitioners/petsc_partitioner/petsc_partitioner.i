@@ -89,8 +89,8 @@
 
   [./bl_element]
     type = StatisticsVectorPostprocessor
-    vpp = nl_wb_element
-    stats = 'min max sum average ratio'
+    vectorpostprocessors = nl_wb_element
+    compute = 'min max sum mean ratio'
   [../]
 
   [./nl_wb_edgecuts]
