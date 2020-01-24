@@ -24,7 +24,6 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  solution_variables = 'u v'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
 []

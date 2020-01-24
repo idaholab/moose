@@ -443,6 +443,8 @@ NonlinearSystem::computeScaling()
                 "initialization of the NonlinearSystem");
 
     scaling_matrix = &_transient_sys.get_matrix("scaling_matrix");
+    scaling_matrix->init(
+        system().n_dofs(), system().n_dofs(), system().n_local_dofs(), system().n_local_dofs());
 
     _computing_scaling_jacobian = true;
     _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *scaling_matrix);
