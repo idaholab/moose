@@ -95,7 +95,8 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
-    _use_coloring_finite_difference(false)
+    _use_coloring_finite_difference(false),
+    _auto_scaling_initd(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -443,8 +444,17 @@ NonlinearSystem::computeScaling()
                 "initialization of the NonlinearSystem");
 
     scaling_matrix = &_transient_sys.get_matrix("scaling_matrix");
-    scaling_matrix->init(
-        system().n_dofs(), system().n_dofs(), system().n_local_dofs(), system().n_local_dofs());
+
+    if (!_auto_scaling_initd)
+    {
+      auto init_vector = NumericVector<Number>::build(this->comm());
+      init_vector->init(system().n_dofs(), system().n_local_dofs(), /*fast=*/false, PARALLEL);
+
+      auto diagonal_matrix = static_cast<DiagonalMatrix<Number> *>(scaling_matrix);
+      diagonal_matrix->init(*init_vector);
+
+      _auto_scaling_initd = true;
+    }
 
     _computing_scaling_jacobian = true;
     _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *scaling_matrix);
