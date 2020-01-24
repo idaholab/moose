@@ -1,0 +1,50 @@
+Release Notes MOOSE Version 1.0
+
+Initial Release of MOOSE
+
+Release Metadata
+1. Software
+  GCC 4.8.5 - 9.2.0
+  Clang 3.5.1 - 8.0
+  MPICH 3.3
+  PETSc 3.6.3 - 3.10.5
+  libMesh 81589c1acb
+
+  Optional Dependencies
+  VTK 7.1
+  Boost 1.72
+
+2. Hardware
+  Mac OS 10.13 - 10.15
+  Ubuntu 16.04 - 19.04
+
+3. Date
+  01/09/2020
+
+4. Test Configurations
+5. Testing System Data
+6. Test Cases
+  https://civet.inl.gov/sha_events/idaholab/moose/81e3b80ba8/
+  https://civet.inl.gov/sha_events/idaholab/moose/df210db941/
+
+7. Results and Applicability
+  Successful:
+    All test results in green boxes meet expected results per the STP.
+  Failed but allowed:
+    Conda App tests: Failures in BISON, BISON Parallel, Pronghorn, and Mastodon.
+    Conda External App tests: Failures in SaintBernard, BlackBear, and Okami.
+    Test deprecated: Failure in moose test.
+    Update app submodules: Failure in Update Mastodon.
+
+8. Action taken in connection with any deviations noted:
+  Conda App tests: Future target in development - failures are expected.
+  Conda External App tests: Future target in development - failures are expected.
+  Test deprecated: Deprecated objects are currently present in the framework - failures are expected.
+  Update app submodules: Failure in Mastodon update due to permission change in repository.
+  Failure has been reported in an issue on Mastondon issue #270.
+
+9. Person evaluating test results:
+  Cody Permann
+
+10. Acceptability
+  Results are acceptable for deployement
