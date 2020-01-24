@@ -37,7 +37,7 @@ makeCalculator(const MooseEnumItem & item, const MooseObject & other)
   else if (item == "sum")
     return libmesh_make_unique<Sum>(other);
 
-  else if (item == "mean")
+  else if (item == "mean" || item == "average") // average is deprecated
     return libmesh_make_unique<Mean>(other);
 
   else if (item == "stddev")
