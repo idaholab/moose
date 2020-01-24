@@ -273,6 +273,7 @@
 - /Materials/WallBoilingFractionSimpleMaterial
 - /Materials/WallFriction7EqnBaseMaterial
 - /Materials/WallFrictionFunctionMaterial
+- /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial
 - /Materials/WallHeatTransferCoefficient3EqnHeliumMaterial
 - /Materials/WallMassTransferMaterial
 
