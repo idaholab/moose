@@ -29,18 +29,35 @@ StatisticsVectorPostprocessor::validParams()
   params.addClassDescription(
       "Compute statistical values of a given VectorPostprocessor objects and vectors.");
 
-  params.addRequiredParam<std::vector<VectorPostprocessorName>>(
-    "vectorpostprocessors", "List of VectorPostprocessor(s) to utilized for statistic computations.");
+  // TODO: Make these Required when deprecated are removed
+  params.addParam<std::vector<VectorPostprocessorName>>(
+      "vectorpostprocessors",
+      "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
   MultiMooseEnum stats = Statistics::makeCalculatorEnum();
-  params.addRequiredParam<MultiMooseEnum>("compute", stats, "The statistics to compute for each of the supplied vector postprocessors.");
+  params.addParam<MultiMooseEnum>(
+      "compute",
+      stats,
+      "The statistics to compute for each of the supplied vector postprocessors.");
+
+  // DEPRECATED
+  params.addDeprecatedParam<VectorPostprocessorName>(
+      "vpp",
+      "The VectorPostprocessor to compute statistics for.",
+      "Replaced by 'vectorpostprocessors'");
+  params.addDeprecatedParam<MultiMooseEnum>(
+      "stats",
+      MultiMooseEnum("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6"),
+      "The statistics you would like to compute for each column of the VectorPostprocessor",
+      "Replaced with 'compute'");
   return params;
 }
 
 StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
-    : GeneralVectorPostprocessor(parameters),
-      _compute_stats(getParam<MultiMooseEnum>("compute")),
-      _stat_type_vector(declareVector("stat_type"))
+  : GeneralVectorPostprocessor(parameters),
+    _compute_stats(isParamValid("stats") ? getParam<MultiMooseEnum>("stats")
+                                         : getParam<MultiMooseEnum>("compute")),
+    _stat_type_vector(declareVector("stat_type"))
 {
   for (const auto & item : _compute_stats)
     _stat_type_vector.push_back(item.id());
@@ -49,23 +66,43 @@ StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParamete
 void
 StatisticsVectorPostprocessor::initialSetup()
 {
-  const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
-  for (const auto & vpp_name : vpp_names)
+
+  // DEPRECATED
+  if (isParamValid("vpp"))
   {
-    const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
+    const auto & vpp_name = getParam<VectorPostprocessorName>("vpp");
+    const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
+        vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
     for (const auto & the_pair : vpp_vectors)
     {
-      // Create the Statistics::Calculator objects for each statistic to be computed on each vector
       _stat_calculators.emplace_back(std::vector<std::unique_ptr<Statistics::Calculator>>());
       for (const auto & item : _compute_stats)
         _stat_calculators.back().emplace_back(Statistics::makeCalculator(item.name(), *this));
-
-      // Store the VectorPostprocessor name and vector name for the vectors from which stats will be computed
       _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
+      _stat_vectors.push_back(&declareVector(the_pair.first));
+    }
+  }
+  else
+  {
+    const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
+    for (const auto & vpp_name : vpp_names)
+    {
+      const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
+          vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
+      for (const auto & the_pair : vpp_vectors)
+      {
+        // Create Statistics::Calculator objects for each statistic to be computed on each vector
+        _stat_calculators.emplace_back(std::vector<std::unique_ptr<Statistics::Calculator>>());
+        for (const auto & item : _compute_stats)
+          _stat_calculators.back().emplace_back(Statistics::makeCalculator(item.name(), *this));
 
-      // Create the vector where the statistics will be stored
-      std::string name = vpp_name + "_" + the_pair.first;
-      _stat_vectors.push_back(&declareVector(name));
+        // Store VectorPostprocessor name and vector name from which stats will be computed
+        _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
+
+        // Create the vector where the statistics will be stored
+        std::string name = vpp_name + "_" + the_pair.first;
+        _stat_vectors.push_back(&declareVector(name));
+      }
     }
   }
 }
