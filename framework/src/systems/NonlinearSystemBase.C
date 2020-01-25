@@ -168,10 +168,11 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
-    _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
+    _compute_scaling_timer(registerTimedSection("computeScaling", 2)),
     _computed_scaling(false),
     _automatic_scaling(false),
-    _compute_scaling_once(true)
+    _compute_scaling_once(true),
+    _resid_vs_jac_scaling_param(0)
 #ifndef MOOSE_SPARSE_AD
     ,
     _required_derivative_size(0)
@@ -353,12 +354,12 @@ NonlinearSystemBase::timestepSetup()
     {
       if (!_computed_scaling)
       {
-        computeScalingJacobian();
+        computeScaling();
         _computed_scaling = true;
       }
     }
     else
-      computeScalingJacobian();
+      computeScaling();
   }
 }
 
@@ -706,6 +707,10 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
         residual += *_Re_non_time;
       residual.close();
     }
+    if (_computing_scaling_residual)
+      // We don't want to do nodal bcs or anything else
+      return;
+
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
@@ -1469,6 +1474,12 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     }
   }
   PARALLEL_CATCH;
+
+  if (_computing_scaling_residual)
+    // We computed the volumetric objects. We can return now before we get into
+    // any strongly enforced constraint conditions or penalty-type objects
+    // (DGKernels, IntegratedBCs, InterfaceKernels, Constraints)
+    return;
 
   // residual contributions from boundary NodalKernels
   PARALLEL_TRY
@@ -3214,7 +3225,7 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeScalingJacobian()
+NonlinearSystemBase::computeScaling()
 {
   mooseWarning("The NonlinearSystemBase derived class that is being used does not currently "
                "support automatic scaling.");

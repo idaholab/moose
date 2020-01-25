@@ -78,7 +78,7 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
-  void computeScalingJacobian() override;
+  void computeScaling() override;
 
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
@@ -106,4 +106,7 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
+
+  /// Whether we've initialized the automatic scaling data structures
+  bool _auto_scaling_initd;
 };

@@ -9,9 +9,6 @@
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/libmesh_config.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-#include <petscsnes.h>
 
 #include "Moose.h"
 #include "MooseApp.h"
@@ -46,36 +43,6 @@ const ExecFlagType EXEC_PRE_DISPLACE("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP("PRE_MULTIAPP_SETUP");
 const ExecFlagType EXEC_TRANSFER("TRANSFER");
-
-void
-MooseVecView(NumericVector<Number> & vector)
-{
-  PetscVector<Number> & petsc_vec = static_cast<PetscVector<Number> &>(vector);
-  VecView(petsc_vec.vec(), 0);
-}
-
-void
-MooseVecView(const NumericVector<Number> & vector)
-{
-  PetscVector<Number> & petsc_vec =
-      static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
-  VecView(petsc_vec.vec(), 0);
-}
-
-void
-MooseMatView(SparseMatrix<Number> & mat)
-{
-  PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
-  MatView(petsc_mat.mat(), 0);
-}
-
-void
-MooseMatView(const SparseMatrix<Number> & mat)
-{
-  PetscMatrix<Number> & petsc_mat =
-      static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
-  MatView(petsc_mat.mat(), 0);
-}
 
 namespace Moose
 {

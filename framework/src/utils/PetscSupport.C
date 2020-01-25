@@ -65,6 +65,36 @@
 #include <fstream>
 #include <string>
 
+void
+MooseVecView(NumericVector<Number> & vector)
+{
+  PetscVector<Number> & petsc_vec = static_cast<PetscVector<Number> &>(vector);
+  VecView(petsc_vec.vec(), 0);
+}
+
+void
+MooseMatView(SparseMatrix<Number> & mat)
+{
+  PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  MatView(petsc_mat.mat(), 0);
+}
+
+void
+MooseVecView(const NumericVector<Number> & vector)
+{
+  PetscVector<Number> & petsc_vec =
+      static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
+  VecView(petsc_vec.vec(), 0);
+}
+
+void
+MooseMatView(const SparseMatrix<Number> & mat)
+{
+  PetscMatrix<Number> & petsc_mat =
+      static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
+  MatView(petsc_mat.mat(), 0);
+}
+
 namespace Moose
 {
 namespace PetscSupport
