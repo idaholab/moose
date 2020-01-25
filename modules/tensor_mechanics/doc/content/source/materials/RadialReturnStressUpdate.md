@@ -35,8 +35,8 @@ as is required to achieve convergence.
 
 !include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
-In the case of isotropic linear hardening plasticity, with the hardening function $ r = hp$, the
-effective plastic strain increment has the form:
+In the case of isotropic linear hardening plasticity, with the hardening
+function $r = hp$ , the effective plastic strain increment has the form:
 \begin{equation}
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}
 \end{equation}
@@ -48,33 +48,37 @@ tensor is calculated.
 \Delta \epsilon^{inelastic}_{ij} = \frac{3}{2} \Delta p^{(t+1)} \frac{dev(\sigma^{trial}_{ij})}{\sigma^{trial}_{effective}}
 \end{equation}
 
-The elastic strain is calculated by subtracting the return mapping inelastic strain increment tensor
-from the mechanical strain tensor.  Mechanical strain is considered as the sum of the elastic and
-inelastic (plastic, creep, ect) strains.
+The elastic strain is calculated by subtracting the return mapping inelastic
+strain increment tensor from the mechanical strain tensor.  Mechanical strain is
+considered as the sum of the elastic and inelastic (plastic, creep, etc)
+strains.
 \begin{equation}
 \epsilon_{total} = \epsilon_{mechanical} + \epsilon_{eigenstrain}
 = \left( \epsilon_{elastic} + \epsilon_{inelastic} \right) + \epsilon_{eigenstrain}
 = \epsilon_{elastic} + \left( \epsilon_{plastic} + \epsilon_{creep} + \epsilon_{damage}  \right) + \epsilon_{eigenstrain}
 \end{equation}
 
-The final inelastic strain is returned from the radial return stress update material, and
-`ComputeMultipleInelasticStress` computes the stress, with a return mapping stress increment
-following elasticity theory for finite strains. The final stress is calculated from the elastic
-strain increment.
+The final inelastic strain is returned from the radial return stress update
+material, and `ComputeMultipleInelasticStress` computes the stress, with a
+return mapping stress increment following elasticity theory for finite strains.
+The final stress is calculated from the elastic strain increment.
 \begin{equation}
 \sigma^{new}_{ij} = C_{ijkl} \left( \Delta \epsilon^{elastic}_{kl} + \epsilon^{old-elastic}_{kl} \right)
 \end{equation}
 
-When more than one radial recompute material is included in the simulation, as in Combined Power Law
-Creep and Linear Strain Hardening, `ComputeMultipleInelasticStress` will iterate over the change in
-the calculated stress until the return stress has reached a stable value.
+When more than one radial recompute material is included in the simulation, as
+in Combined Power Law Creep and Linear Strain Hardening,
+`ComputeMultipleInelasticStress` will iterate over the change in the calculated
+stress until the return stress has reached a stable value.
 
-Users can print out any of these strains and stresses using the `RankTwoAux` as described on the
-[Visualizing Tensors](/tensor_mechanics/VisualizingTensors.md) page.
+Users can print out any of these strains and stresses using the `RankTwoAux` as
+described on the [Visualizing Tensors](/tensor_mechanics/VisualizingTensors.md)
+page.
 
 ## Writing a New Stress Update Material
-New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six
-virtual methods.
+
+New radial return models must inherit from `RadialReturnStressUpdate` and must
+overwrite the six virtual methods.
 
 - +initQpStatefulProperties+: Set the initial values for all new material properties that are not
   initialized by an input parameter; generally the material properties initialized in this method are
@@ -90,14 +94,14 @@ virtual methods.
 - +computeStressFinalize+: Update the stress after convergence on the inelastic strain increment has
   been reached.
 
-Additionally, new radial return methods must also overwrite a single method from the MOOSE `Material`
-class.
+Additionally, new radial return methods must also overwrite a single method from
+the MOOSE `Material` class.
 
 - +resetQpProperties+: Set the material property used in the iteration, usually $\Delta p$, to zero
   at the start the iteration.  This method is necessary to avoid incorrect material property values.
 
-More details on how to write the equivalent yield surface equation for a creep model are given in
-Dunne and Petrinic.
+More details on how to write the equivalent yield surface equation for a creep
+model are given in Dunne and Petrinic.
 
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 

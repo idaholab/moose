@@ -284,18 +284,27 @@ non-yielding materials (e.g. volumetric swelling) and Full consistent tangent
 operators should be implemented for yielding material models (e.g. plasticity).
 
 ### Include Damage Model
-Optionally, the effect of damage on the stress calculation can be included in the model. Another material that defines the evolution of damage should be coupled using parameter `damage_model`. Here, first the inelastic strains and corresponding effective stresses are calculated based on the undamaged properties. Afterwards, the damage index is applied on the effective stress to calculate the damaged stress. This captures the effect of damage in a material undergoing creep or plastic deformation.
+
+Optionally, the effect of damage on the stress calculation can be included in
+the model. Another material that defines the evolution of damage should be
+coupled using parameter `damage_model`. Here, first the inelastic strains and
+corresponding effective stresses are calculated based on the undamaged
+properties. Afterwards, the damage index is applied on the effective stress to
+calculate the damaged stress. This captures the effect of damage in a material
+undergoing creep or plastic deformation.
 
 ### Material Time Step Limiter
 
-In some cases, particularly in creep, limits on the time step are required by the
-material model formulation. Each inelastic material model is responsible for
-calculating the maximum time step allowable for that material model.
-The [MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md)
-finds the minimum time step size limits from the entire simulation domain. The
-postprocessor then interfaces with the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
-to restrict the time step size based on the limit calculated in the previous
-time step. When the damage model is included, the timestep is limited by the minimum timestep between the inelastic models and the damage model.
+In some cases, particularly in creep, limits on the time step are required by
+the material model formulation. Each inelastic material model is responsible for
+calculating the maximum time step allowable for that material model. The
+[MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md) finds the
+minimum time step size limits from the entire simulation domain. The
+postprocessor then interfaces with the
+[IterationAdaptiveDT](/IterationAdaptiveDT.md) to restrict the time step size
+based on the limit calculated in the previous time step. When the damage model
+is included, the timestep is limited by the minimum timestep between the
+inelastic models and the damage model.
 
 
 ## Example Input Files
