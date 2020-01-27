@@ -16,4 +16,7 @@ public:
   HSBoundaryRadiation(const InputParameters & params);
 
   virtual void addMooseObjects() override;
+
+protected:
+  virtual void check() const override;
 };

@@ -10,6 +10,8 @@ validParams<RadiativeHeatFluxBC>()
   InputParameters params = validParams<RadiativeHeatFluxBCBase>();
 
   params.addParam<FunctionName>("view_factor", "1", "View factor function");
+  params.addParam<PostprocessorName>(
+      "scale_pp", 1.0, "Post-processor by which to scale boundary condition");
 
   params.addClassDescription(
       "Radiative heat transfer boundary condition for a plate heat structure");
@@ -20,12 +22,13 @@ validParams<RadiativeHeatFluxBC>()
 RadiativeHeatFluxBC::RadiativeHeatFluxBC(const InputParameters & parameters)
   : RadiativeHeatFluxBCBase(parameters),
 
-    _view_factor_fn(getFunction("view_factor"))
+    _view_factor_fn(getFunction("view_factor")),
+    _scale_pp(getPostprocessorValue("scale_pp"))
 {
 }
 
 Real
 RadiativeHeatFluxBC::coefficient() const
 {
-  return _eps_boundary * _view_factor_fn.value(_t, _q_point[_qp]);
+  return _scale_pp * _eps_boundary * _view_factor_fn.value(_t, _q_point[_qp]);
 }
