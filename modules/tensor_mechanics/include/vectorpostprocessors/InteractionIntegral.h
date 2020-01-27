@@ -130,37 +130,14 @@ protected:
 
   /// Enum used to select the method used to compute the q function used
   /// in the fracture integrals
-  enum class QMethod
-  {
-    Geometry,
-    Topology
-  };
-
-  /// Method used to compute the q function in the fracture integrals
-  const QMethod _q_function_type;
+  const enum class QMethod { Geometry, Topology } _q_function_type;
 
   /// Enum used to define how the distance along the crack front is
   /// measured (angle or distance)
-  enum class PositionType
-  {
-    Angle,
-    Distance
-  };
-
-  /// How the distance along the crack front is measured
-  const PositionType _position_type;
+  const enum class PositionType { Angle, Distance } _position_type;
 
   /// Enum used to select the type of integral to be performed
-  enum class SifMethod
-  {
-    KI,
-    KII,
-    KIII,
-    T
-  };
-
-  /// Type of integral to be performed
-  const SifMethod _sif_mode;
+  const enum class SifMethod { KI, KII, KIII, T } _sif_mode;
 
   /// Vectors computed by this VectorPostprocessor:
   /// x,y,z coordinates, position of nodes along crack front, and

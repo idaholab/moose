@@ -275,7 +275,7 @@ InteractionIntegral::execute()
       if (_q_function_type == QMethod::Geometry)
         q_this_node = _crack_front_definition->DomainIntegralQFunction(
             icfp, _ring_index - ring_base, this_node);
-      else if (_q_function_type == QMethod::Topology)
+      else // QMethod::Topology
         q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
             icfp, _ring_index - ring_base, this_node);
 

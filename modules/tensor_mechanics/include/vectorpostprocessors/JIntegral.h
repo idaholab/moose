@@ -75,10 +75,7 @@ protected:
   {
     Geometry,
     Topology
-  };
-
-  /// Method used to compute the q function in the fracture integrals
-  const QMethod _q_function_type;
+  } _q_function_type;
 
   /// Enum used to define how the distance along the crack front is
   /// measured (angle or distance)
@@ -86,10 +83,7 @@ protected:
   {
     Angle,
     Distance
-  };
-
-  /// How the distance along the crack front is measured
-  const PositionType _position_type;
+  } _position_type;
 
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;
