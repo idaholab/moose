@@ -38,7 +38,8 @@ XMLOutput::filename()
   {
     std::ostringstream file_name;
     int digits = MooseUtils::numDigits(n_processors());
-    file_name << _file_base << ".xml" << "." << std::setw(digits) << std::setfill('0') << processor_id();
+    file_name << _file_base << ".xml"
+              << "." << std::setw(digits) << std::setfill('0') << processor_id();
     return file_name.str();
   }
   return _file_base + ".xml";
@@ -50,8 +51,15 @@ XMLOutput::outputVectorPostprocessors()
   // Create pugi node for storing vector data
   auto vpp_node = _xml_doc.child("VectorPostprocessors");
   auto vec_node = vpp_node.append_child("Vectors");
-  vec_node.append_attribute("time") = Output::time();
-  vec_node.append_attribute("timestep") = Output::timeStep();
+
+  // Populate output information from FEProblem, do not use AdvancedOutput because the psuedo time
+  // is not required.
+  vec_node.append_attribute("time") = _problem_ptr->time();
+  vec_node.append_attribute("timestep") = _problem_ptr->timeStep();
+  if (_execute_enum.contains(EXEC_LINEAR))
+    vec_node.append_attribute("linear_iteration") = _linear_iter;
+  if (_execute_enum.contains(EXEC_NONLINEAR))
+    vec_node.append_attribute("nonlinear_iteration") = _nonlinear_iter;
 
   // VPP data object for determining if vectors are distributed
   const auto & vpp_data = _problem_ptr->getVectorPostprocessorData();
