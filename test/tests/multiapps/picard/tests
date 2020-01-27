@@ -96,4 +96,25 @@
     issues = '#9038'
     requirement = "The system shall allow steady-state Picard iteration with pseudo-transient multiapps"
   [../]
+
+  [./steady_with_postprocessor_convergence]
+    type = 'Exodiff'
+    input = 'picard_custom_postprocessor.i'
+    exodiff = 'picard_custom_postprocessor_out.e picard_custom_postprocessor_out_sub0.e'
+    cli_args = 'Executioner/direct_pp_value=true Executioner/custom_abs_tol=1e-4'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#14642'
+    requirement = "The system shall allow convergence check with user defined postprocessor directly."
+  [../]
+  [./steady_with_postprocessor_diff_convergence]
+    type = 'Exodiff'
+    input = 'picard_custom_postprocessor.i'
+    exodiff = 'picard_custom_diff_out.e picard_custom_diff_out_sub0.e'
+    cli_args = 'Executioner/picard_custom_pp=unorm Executioner/custom_rel_tol=1e-4 Outputs/file_base=picard_custom_diff_out'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#14642'
+    requirement = "The system shall allow convergence check with the convergence of a user defined postprocessor."
+  [../]
 []
