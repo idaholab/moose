@@ -82,3 +82,74 @@ If you use smoothed multi-surface plasticity, such plasticity models derived fro
   year = {2020}
 }
 ```
+
+### Peridynamics
+
+The following papers document the formulations used in the MOOSE Peridynamics module.
+
+The first paper documents the approach used for irregular discretizations and thermo-mechanical coupling:
+
+```
+@article{hu_thermomechanical_2018,
+	Author = {Hu, Yile and Chen, Hailong and Spencer, Benjamin W. and Madenci, Erdogan},
+	Journal = {Engineering Fracture Mechanics},
+	Month = jun,
+	Pages = {92--113},
+	Title = {Thermomechanical peridynamic analysis with irregular non-uniform domain discretization},
+	Volume = {197},
+	Year = {2018}}
+```
+
+The following papers document the stabilization method used for non-ordinary state-based peridynamics in MOOSE:
+
+```
+@article{chen_bond-associated_2018,
+	Author = {Chen, Hailong},
+	Journal = {Mechanics Research Communications},
+	Month = jun,
+	Pages = {34--41},
+	Title = {Bond-associated deformation gradients for peridynamic correspondence model},
+	Volume = {90},
+	Year = {2018}}
+
+@article{chen_peridynamic_2019,
+	Author = {Chen, Hailong and Spencer, Benjamin W.},
+	Journal = {International Journal for Numerical Methods in Engineering},
+	Month = feb,
+	Number = {6},
+	Pages = {713--727},
+	Title = {Peridynamic bond-associated correspondence model: {Stability} and convergence properties},
+	Volume = {117},
+	Year = {2019}}
+```
+
+### XFEM
+
+The following papers document various aspects of the MOOSE XFEM module.
+
+This paper documents the algorithms used for mesh cutting and partial element integration, and shows applications on several coupled thermal-mechanical problems:
+
+```
+@article{jiang_ceramic_2020,
+	Author = {Jiang, Wen and Spencer, Benjamin W. and Dolbow, John E.},
+	Journal = {Engineering Fracture Mechanics},
+	Month = jan,
+	Pages = {106713},
+	Title = {Ceramic nuclear fuel fracture modeling with the extended finite element method},
+	Volume = {223},
+	Year = {2020}}
+```
+
+This paper documents the moment fitting algorithm that can optionally be used for improved accuracy with MOOSE's XFEM implementation:
+
+```
+@article{zhang_modified_2018,
+	Author = {Zhang, Ziyu and Jiang, Wen and Dolbow, John E. and Spencer, Benjamin W.},
+	Journal = {Computational Mechanics},
+	Month = aug,
+	Number = {2},
+	Pages = {233--252},
+	Title = {A modified moment-fitted integration scheme for {X}-{FEM} applications with history-dependent material data},
+	Volume = {62},
+	Year = {2018}}
+```
