@@ -36,8 +36,7 @@ validParams<VolumeJunction1PhaseUserObject>()
 }
 
 VolumeJunction1PhaseUserObject::VolumeJunction1PhaseUserObject(const InputParameters & params)
-  : VolumeJunctionBaseUserObject(
-        params, getCoupledFlowVariableNames(), getCoupledScalarVariableNames()),
+  : VolumeJunctionBaseUserObject(params),
 
     _A(coupledValue("A")),
     _rhoA(coupledValue("rhoA")),
@@ -65,6 +64,18 @@ VolumeJunction1PhaseUserObject::VolumeJunction1PhaseUserObject(const InputParame
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
+  _flow_variable_names.resize(THM3Eqn::N_EQ);
+  _flow_variable_names[THM3Eqn::CONS_VAR_RHOA] = "rhoA";
+  _flow_variable_names[THM3Eqn::CONS_VAR_RHOUA] = "rhouA";
+  _flow_variable_names[THM3Eqn::CONS_VAR_RHOEA] = "rhoEA";
+
+  _scalar_variable_names.resize(VolumeJunction1Phase::N_EQ);
+  _scalar_variable_names[VolumeJunction1Phase::RHOV_INDEX] = "rhoV";
+  _scalar_variable_names[VolumeJunction1Phase::RHOUV_INDEX] = "rhouV";
+  _scalar_variable_names[VolumeJunction1Phase::RHOVV_INDEX] = "rhovV";
+  _scalar_variable_names[VolumeJunction1Phase::RHOWV_INDEX] = "rhowV";
+  _scalar_variable_names[VolumeJunction1Phase::RHOEV_INDEX] = "rhoEV";
+
   _numerical_flux_uo.resize(_n_connections);
   for (std::size_t i = 0; i < _n_connections; i++)
     _numerical_flux_uo[i] = &getUserObjectByName<NumericalFlux3EqnBase>(_numerical_flux_names[i]);
@@ -263,28 +274,4 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
         -din * _flux_jacobian_flow_channel_vars[c](THM3Eqn::CONS_VAR_RHOEA, j);
   }
   computeScalarJacobianWRTFlowDofs(jac, c);
-}
-
-std::vector<std::string>
-VolumeJunction1PhaseUserObject::getCoupledFlowVariableNames()
-{
-  std::vector<std::string> flow_variable_names(THM3Eqn::N_EQ);
-  flow_variable_names[THM3Eqn::CONS_VAR_RHOA] = "rhoA";
-  flow_variable_names[THM3Eqn::CONS_VAR_RHOUA] = "rhouA";
-  flow_variable_names[THM3Eqn::CONS_VAR_RHOEA] = "rhoEA";
-
-  return flow_variable_names;
-}
-
-std::vector<std::string>
-VolumeJunction1PhaseUserObject::getCoupledScalarVariableNames()
-{
-  std::vector<std::string> scalar_variable_names(VolumeJunction1Phase::N_EQ);
-  scalar_variable_names[VolumeJunction1Phase::RHOV_INDEX] = "rhoV";
-  scalar_variable_names[VolumeJunction1Phase::RHOUV_INDEX] = "rhouV";
-  scalar_variable_names[VolumeJunction1Phase::RHOVV_INDEX] = "rhovV";
-  scalar_variable_names[VolumeJunction1Phase::RHOWV_INDEX] = "rhowV";
-  scalar_variable_names[VolumeJunction1Phase::RHOEV_INDEX] = "rhoEV";
-
-  return scalar_variable_names;
 }

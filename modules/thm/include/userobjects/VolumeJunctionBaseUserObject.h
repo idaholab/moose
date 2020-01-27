@@ -26,10 +26,9 @@ public:
    * @param[in] scalar_variable_names   Vector of coupled scalar variable names,
    *                                    indexed by equation index
    */
-  VolumeJunctionBaseUserObject(const InputParameters & params,
-                               const std::vector<std::string> & flow_variable_names,
-                               const std::vector<std::string> & scalar_variable_names);
+  VolumeJunctionBaseUserObject(const InputParameters & params);
 
+  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
@@ -103,14 +102,14 @@ protected:
   const Real & _volume;
 
   /// Vector of coupled variable names for each flow variable
-  const std::vector<std::string> _flow_variable_names;
+  std::vector<std::string> _flow_variable_names;
   /// Vector of coupled variable names for each scalar variable
-  const std::vector<std::string> _scalar_variable_names;
+  std::vector<std::string> _scalar_variable_names;
 
   /// Number of flow channel flux components
-  const unsigned int _n_flux_eq;
+  unsigned int _n_flux_eq;
   /// Number of scalar residual components
-  const unsigned int _n_scalar_eq;
+  unsigned int _n_scalar_eq;
 
   /// Names of numerical flux user objects for each connected flow channel
   const std::vector<UserObjectName> & _numerical_flux_names;

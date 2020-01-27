@@ -15,30 +15,10 @@ validParams<VolumeJunctionBaseUserObject>()
   return params;
 }
 
-VolumeJunctionBaseUserObject::VolumeJunctionBaseUserObject(
-    const InputParameters & params,
-    const std::vector<std::string> & flow_variable_names,
-    const std::vector<std::string> & scalar_variable_names)
+VolumeJunctionBaseUserObject::VolumeJunctionBaseUserObject(const InputParameters & params)
   : FlowJunctionUserObject(params),
-
     _volume(getParam<Real>("volume")),
-
-    _flow_variable_names(flow_variable_names),
-    _scalar_variable_names(scalar_variable_names),
-
-    _n_flux_eq(_flow_variable_names.size()),
-    _n_scalar_eq(_scalar_variable_names.size()),
-
-    _numerical_flux_names(getParam<std::vector<UserObjectName>>("numerical_flux_names")),
-
-    _scalar_dofs(_n_scalar_eq),
-    _flow_channel_dofs(_n_connections),
-    _phi_face_values(_n_connections, std::vector<std::vector<Real>>(_n_flux_eq)),
-
-    _residual(_n_scalar_eq),
-    _residual_jacobian_scalar_vars(_n_scalar_eq, DenseMatrix<Real>(1, _n_scalar_eq)),
-    _residual_jacobian_flow_channel_vars(_n_connections,
-                                         std::vector<DenseMatrix<Real>>(_n_scalar_eq))
+    _numerical_flux_names(getParam<std::vector<UserObjectName>>("numerical_flux_names"))
 {
   if (_numerical_flux_names.size() != _n_connections)
     mooseError(name(),
@@ -47,6 +27,27 @@ VolumeJunctionBaseUserObject::VolumeJunctionBaseUserObject(
                "' does not match the number of connections '",
                _n_connections,
                "'.");
+}
+
+void
+VolumeJunctionBaseUserObject::initialSetup()
+{
+  _n_flux_eq = _flow_variable_names.size();
+  _n_scalar_eq = _scalar_variable_names.size();
+
+  _scalar_dofs.resize(_n_scalar_eq);
+  _flow_channel_dofs.resize(_n_connections);
+  _phi_face_values.resize(_n_connections);
+  for (auto && v : _phi_face_values)
+    v.resize(_n_flux_eq);
+
+  _residual.resize(_n_scalar_eq);
+  _residual_jacobian_scalar_vars.resize(_n_scalar_eq);
+  for (auto && v : _residual_jacobian_scalar_vars)
+    v.resize(1, _n_scalar_eq);
+  _residual_jacobian_flow_channel_vars.resize(_n_connections);
+  for (auto && v : _residual_jacobian_flow_channel_vars)
+    v.resize(_n_scalar_eq);
 }
 
 void

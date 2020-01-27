@@ -24,16 +24,6 @@ public:
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 
-  /**
-   * Returns a vector of coupled flow variable names, indexed by equation index
-   */
-  static std::vector<std::string> getCoupledFlowVariableNames();
-
-  /**
-   * Returns a vector of coupled scalar variable names, indexed by equation index
-   */
-  static std::vector<std::string> getCoupledScalarVariableNames();
-
   /// Cross-sectional area of connected flow channels
   const VariableValue & _A;
   /// rho*A of the connected flow channels
