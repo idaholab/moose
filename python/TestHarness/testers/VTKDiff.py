@@ -47,7 +47,7 @@ class VTKDiff(RunApp):
             return output
 
         # Loop over every file
-        for file in specs['vtkdiff']:
+        for file in specs['xmldiff']:
 
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
@@ -72,8 +72,7 @@ class VTKDiff(RunApp):
                     output += differ.message() + '\n'
 
                     if differ.fail():
-                        self.addCaveats('VTKDIFF')
-                        self.setStatus(self.skip)
+                        self.setStatus(self.diff, 'VTKDIFF')
                         break
 
         return output

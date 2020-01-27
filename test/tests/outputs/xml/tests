@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#14634'
+  design = 'XMLOutput.md'
+  [xml]
+    requirement = "The system shall support XML output for vector data that is"
+
+    [replicated]
+      type = VTKDiff
+      input = xml.i
+      vtkdiff = xml_out.xml
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "replicated or "
+    []
+    [distributed]
+      type = VTKDiff
+      input = xml.i
+      cli_args = 'VectorPostprocessors/distributed/parallel_type=DISTRIBUTED Outputs/file_base=xml_distributed_out'
+      vtkdiff = 'xml_distributed_out.xml xml_distributed_out.xml.1 xml_distributed_out.xml.2'
+      prereq = xml/replicated
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "distributed in parallel."
+    []
+  []
+[]
