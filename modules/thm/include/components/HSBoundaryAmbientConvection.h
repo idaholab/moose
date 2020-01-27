@@ -18,6 +18,8 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void check() const override;
+
   /// The value of ambient temperature
   const Real & _T_ambient;
   /// The value of convective heat transfer coefficient

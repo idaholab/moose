@@ -14,7 +14,8 @@ conductivity = 16.26
 R_i = ${fparse 0.5 * D_i}
 D_o = ${fparse D_i + 2 * thickness}
 A = ${fparse pi * D_o * L}
-E_change = ${fparse heat_flux * A * t}
+scale = 0.8
+E_change = ${fparse scale * heat_flux * A * t}
 
 [Functions]
   [./q_fn]
@@ -54,10 +55,16 @@ E_change = ${fparse heat_flux * A * t}
     boundary = 'hs:outer'
     hs = hs
     q = q_fn
+    scale_pp = bc_scale_pp
   [../]
 []
 
 [Postprocessors]
+  [./bc_scale_pp]
+    type = FunctionValuePostprocessor
+    function = ${scale}
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
   [./E_hs]
     type = HeatStructureEnergyRZ
     block = 'hs:region'

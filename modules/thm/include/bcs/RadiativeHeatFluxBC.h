@@ -20,4 +20,7 @@ protected:
 
   /// View factor function
   const Function & _view_factor_fn;
+
+  /// Post-processor by which to scale boundary condition
+  const PostprocessorValue & _scale_pp;
 };

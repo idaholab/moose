@@ -13,6 +13,8 @@ validParams<HSBoundaryAmbientConvection>()
   params.addRequiredParam<Real>("htc_ambient",
                                 "Convective heat transfer coefficient with ambient [W/(m^2-K)]");
   params.addRequiredParam<Real>("T_ambient", "Ambient temperature [K]");
+  params.addParam<PostprocessorName>("scale_pp",
+                                     "Post-processor by which to scale boundary condition");
 
   return params;
 }
@@ -23,6 +25,20 @@ HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters &
     _T_ambient(getParam<Real>("T_ambient")),
     _htc_ambient(getParam<Real>("htc_ambient"))
 {
+}
+
+void
+HSBoundaryAmbientConvection::check() const
+{
+  HSBoundary::check();
+
+  if (isParamValid("scale_pp"))
+  {
+    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
+    if (!_sim.hasPostprocessor(pp_name))
+      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
+               "', but no post-processor of this name exists.");
+  }
 }
 
 void
@@ -46,7 +62,25 @@ HSBoundaryAmbientConvection::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
+    if (isParamValid("scale_pp"))
+      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+  }
+
+  // Create integral PP for cylindrical heat structures
+  if (is_cylindrical)
+  {
+    const std::string class_name = "HeatRateConvectionRZ";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
+    pars.set<Real>("T_ambient") = _T_ambient;
+    pars.set<Real>("htc") = _htc_ambient;
+    pars.set<Point>("axis_point") = hs.getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+    pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    _sim.addPostprocessor(class_name, genName(name(), "integral"), pars);
   }
 }

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'function_side_integral_rz.i'
+    csvdiff = 'function_side_integral_rz.csv'
+    recover = false
+  [../]
+[]

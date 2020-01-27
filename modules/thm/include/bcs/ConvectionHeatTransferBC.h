@@ -21,4 +21,6 @@ protected:
   const Real & _T_ambient;
   /// Heat transfer coefficient with ambient
   const Real & _htc_ambient;
+  /// Post-processor by which to scale boundary condition
+  const PostprocessorValue & _scale_pp;
 };
