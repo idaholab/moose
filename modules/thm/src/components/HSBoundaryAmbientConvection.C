@@ -67,4 +67,20 @@ HSBoundaryAmbientConvection::addMooseObjects()
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
+
+  // Create integral PP for cylindrical heat structures
+  if (is_cylindrical)
+  {
+    const std::string class_name = "HeatRateConvectionRZ";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
+    pars.set<Real>("T_ambient") = _T_ambient;
+    pars.set<Real>("htc") = _htc_ambient;
+    pars.set<Point>("axis_point") = hs.getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+    pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    _sim.addPostprocessor(class_name, genName(name(), "integral"), pars);
+  }
 }
