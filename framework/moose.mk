@@ -9,6 +9,7 @@ APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
 
 #
 # pcre
