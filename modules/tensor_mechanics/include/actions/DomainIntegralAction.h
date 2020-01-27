@@ -126,7 +126,7 @@ protected:
   std::vector<VariableName> _displacements;
   /// Temperature variable
   VariableName _temp;
-  /// Whether to compute the J-integral to a stress intensity factor (K)
+  /// Whether to convert the J-integral to a stress intensity factor (K)
   bool _convert_J_to_K;
   /// Whether the model has a symmetry plane passing through the plane of the crack
   bool _has_symmetry_plane;

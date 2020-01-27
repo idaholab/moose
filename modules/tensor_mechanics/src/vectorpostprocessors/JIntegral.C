@@ -48,6 +48,9 @@ JIntegral::validParams()
                              q_function_type,
                              "The method used to define the integration domain. Options are: " +
                                  q_function_type.getRawNames());
+  params.addClassDescription(
+      "Computes the J-Integral, a measure of the strain energy release rate "
+      "at a crack tip, which can be used as a criterion for fracture growth.");
   return params;
 }
 

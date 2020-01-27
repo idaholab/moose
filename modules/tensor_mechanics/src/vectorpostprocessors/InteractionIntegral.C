@@ -68,7 +68,10 @@ InteractionIntegral::validParams()
                                      InteractionIntegral::sifModeType(),
                                      "Stress intensity factor to calculate. Choices are: " +
                                          InteractionIntegral::sifModeType().getRawNames());
-
+  params.addClassDescription(
+      "Computes the interaction integral, which is used to compute various "
+      "fracture mechanics parameters at a crack tip, including KI, KII, KIII, "
+      "and the T stress.");
   return params;
 }
 
@@ -76,9 +79,6 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(
-        _has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
     _stress(hasMaterialProperty<RankTwoTensor>("stress")
                 ? &getMaterialPropertyByName<RankTwoTensor>("stress")
