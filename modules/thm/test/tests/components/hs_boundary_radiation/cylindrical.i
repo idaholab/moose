@@ -18,7 +18,8 @@ R_i = ${fparse 0.5 * D_i}
 D_o = ${fparse D_i + 2 * thickness}
 A = ${fparse pi * D_o * L}
 heat_flux = ${fparse stefan_boltzmann * emissivity * view_factor * (T_ambient^4 - T_hs^4)}
-E_change = ${fparse heat_flux * A * t}
+scale = 0.8
+E_change = ${fparse scale * heat_flux * A * t}
 
 [HeatStructureMaterials]
   [./hs_mat]
@@ -53,10 +54,16 @@ E_change = ${fparse heat_flux * A * t}
     T_ambient = ${T_ambient}
     emissivity = ${emissivity}
     view_factor = ${view_factor}
+    scale_pp = bc_scale_pp
   [../]
 []
 
 [Postprocessors]
+  [./bc_scale_pp]
+    type = FunctionValuePostprocessor
+    function = ${scale}
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
   [./E_hs]
     type = HeatStructureEnergyRZ
     block = 'hs:region'

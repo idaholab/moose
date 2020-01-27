@@ -14,4 +14,9 @@ class HSHeatFluxBC : public FunctionNeumannBC
 {
 public:
   HSHeatFluxBC(const InputParameters & parameters);
+
+  virtual Real computeQpResidual() override;
+
+  /// Post-processor by which to scale boundary condition
+  const PostprocessorValue & _scale_pp;
 };

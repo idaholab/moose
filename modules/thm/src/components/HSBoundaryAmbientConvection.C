@@ -13,6 +13,8 @@ validParams<HSBoundaryAmbientConvection>()
   params.addRequiredParam<Real>("htc_ambient",
                                 "Convective heat transfer coefficient with ambient [W/(m^2-K)]");
   params.addRequiredParam<Real>("T_ambient", "Ambient temperature [K]");
+  params.addParam<PostprocessorName>("scale_pp",
+                                     "Post-processor by which to scale boundary condition");
 
   return params;
 }
@@ -23,6 +25,20 @@ HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters &
     _T_ambient(getParam<Real>("T_ambient")),
     _htc_ambient(getParam<Real>("htc_ambient"))
 {
+}
+
+void
+HSBoundaryAmbientConvection::check() const
+{
+  HSBoundary::check();
+
+  if (isParamValid("scale_pp"))
+  {
+    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
+    if (!_sim.hasPostprocessor(pp_name))
+      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
+               "', but no post-processor of this name exists.");
+  }
 }
 
 void
@@ -46,6 +62,8 @@ HSBoundaryAmbientConvection::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
+    if (isParamValid("scale_pp"))
+      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }

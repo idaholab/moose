@@ -11,6 +11,8 @@ validParams<HSBoundaryHeatFlux>()
   InputParameters params = validParams<HSBoundary>();
 
   params.addRequiredParam<FunctionName>("q", "Heat flux [W/m^2]");
+  params.addParam<PostprocessorName>("scale_pp",
+                                     "Post-processor by which to scale boundary condition");
 
   params.addClassDescription("Applies a specified heat flux to a heat structure boundary");
 
@@ -22,6 +24,20 @@ HSBoundaryHeatFlux::HSBoundaryHeatFlux(const InputParameters & params)
 
     _q_fn_name(getParam<FunctionName>("q"))
 {
+}
+
+void
+HSBoundaryHeatFlux::check() const
+{
+  HSBoundary::check();
+
+  if (isParamValid("scale_pp"))
+  {
+    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
+    if (!_sim.hasPostprocessor(pp_name))
+      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
+               "', but no post-processor of this name exists.");
+  }
 }
 
 void
@@ -43,6 +59,8 @@ HSBoundaryHeatFlux::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
+    if (isParamValid("scale_pp"))
+      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }

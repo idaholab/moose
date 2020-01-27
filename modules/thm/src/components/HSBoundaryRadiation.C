@@ -13,6 +13,8 @@ validParams<HSBoundaryRadiation>()
   params.addRequiredParam<Real>("emissivity", "Emissivity of flow channel [-]");
   params.addParam<FunctionName>("view_factor", "1", "View factor function [-]");
   params.addRequiredParam<FunctionName>("T_ambient", "Temperature of environment [K]");
+  params.addParam<PostprocessorName>("scale_pp",
+                                     "Post-processor by which to scale boundary condition");
 
   params.addClassDescription("Radiative heat transfer boundary condition for heat structure");
 
@@ -20,6 +22,20 @@ validParams<HSBoundaryRadiation>()
 }
 
 HSBoundaryRadiation::HSBoundaryRadiation(const InputParameters & params) : HSBoundary(params) {}
+
+void
+HSBoundaryRadiation::check() const
+{
+  HSBoundary::check();
+
+  if (isParamValid("scale_pp"))
+  {
+    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
+    if (!_sim.hasPostprocessor(pp_name))
+      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
+               "', but no post-processor of this name exists.");
+  }
+}
 
 void
 HSBoundaryRadiation::addMooseObjects()
@@ -42,6 +58,8 @@ HSBoundaryRadiation::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
+    if (isParamValid("scale_pp"))
+      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
