@@ -1,0 +1,12 @@
+[Tests]
+  design = "CentralDifference.md"
+  issues = "#12185"
+  [./central_difference]
+    type = 'CSVDiff'
+    input = 'central_difference.i'
+    csvdiff = 'central_difference_out.csv'
+
+    requirement = "The CentralDifference time integrator shall correctly compute the first"
+                  " and second time derivatives."
+  [../]
+[]
