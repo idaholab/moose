@@ -138,7 +138,10 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
   file_name << ".csv";
 
   if (is_distributed)
-    file_name << "." << processor_id();
+  {
+    int digits = MooseUtils::numDigits(n_processors());
+    file_name << "." << std::setw(digits) << std::setfill('0') << processor_id();
+  }
 
   return file_name.str();
 }
@@ -195,7 +198,10 @@ CSV::output(const ExecFlagType & type)
           std::ostringstream out_latest;
           out_latest << fprefix << "_LATEST.csv";
           if (is_distributed)
-            out_latest << "." << processor_id();
+          {
+            int digits = MooseUtils::numDigits(n_processors());
+            out_latest << "." << std::setw(digits) << std::setfill('0') << processor_id();
+          }
           MooseUtils::createSymlink(fname, out_latest.str());
         }
 
@@ -213,7 +219,8 @@ CSV::output(const ExecFlagType & type)
       out_final << std::get<1>(name_tuple) << "_FINAL.csv";
       if (std::get<2>(name_tuple))
       {
-        out_final << "." << processor_id();
+        int digits = MooseUtils::numDigits(n_processors());
+        out_final << "." << std::setw(digits) << std::setfill('0') << processor_id();
         MooseUtils::createSymlink(std::get<0>(name_tuple), out_final.str());
       }
       else if (processor_id() == 0)
