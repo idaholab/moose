@@ -51,12 +51,6 @@ NewmarkBeta::~NewmarkBeta() {}
 void
 NewmarkBeta::computeTimeDerivatives()
 {
-  // compute second derivative
-  // according to Newmark-Beta method
-  // u_dotdot = first_term - second_term - third_term
-  //       first_term = (u - u_old) / beta / dt ^ 2
-  //      second_term = u_dot_old / beta / dt
-  //       third_term = u_dotdot_old * (1 / 2 / beta - 1)
   if (!_sys.solutionUDot())
     mooseError("NewmarkBeta: Time derivative of solution (`u_dot`) is not stored. Please set "
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");

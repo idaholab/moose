@@ -60,6 +60,12 @@ void
 NewmarkBeta::computeTimeDerivativeHelper(
     T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old) const
 {
+  // compute second derivative
+  // according to Newmark-Beta method
+  // u_dotdot = first_term - second_term - third_term
+  //       first_term = (u - u_old) / beta / dt ^ 2
+  //      second_term = u_dot_old / beta / dt
+  //       third_term = u_dotdot_old * (1 / 2 / beta - 1)
   u_dotdot -= u_old;
   u_dotdot *= 1.0 / _beta / _dt / _dt;
   MathUtils::addScaled(-1.0 / _beta / _dt, u_dot_old, u_dotdot);
@@ -75,4 +81,3 @@ NewmarkBeta::computeTimeDerivativeHelper(
   MathUtils::addScaled((1.0 - _gamma) * _dt, u_dotdot_old, u_dot);
   MathUtils::addScaled(_gamma * _dt, u_dotdot, u_dot);
 }
-
