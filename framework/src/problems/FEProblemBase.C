@@ -6091,7 +6091,13 @@ FEProblemBase::checkDependMaterialsHelper(
     if (!difference.empty())
     {
       std::ostringstream oss;
-      oss << "One or more Material Properties were not supplied on block " << it.first << ":\n";
+      oss << "One or more Material Properties were not supplied on block ";
+      const std::string & subdomain_name = _mesh.getSubdomainName(it.first);
+      if (subdomain_name.length() > 0)
+        oss << subdomain_name << " (" << it.first << ")";
+      else
+        oss << it.first;
+      oss << ":\n";
       for (const auto & name : difference)
         oss << name << "\n";
       mooseError(oss.str());
