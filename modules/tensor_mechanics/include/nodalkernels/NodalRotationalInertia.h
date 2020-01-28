@@ -13,6 +13,7 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
+class TimeIntegrator;
 
 /**
  * Calculates the inertial torque and inertia proportional damping
@@ -88,18 +89,21 @@ protected:
   /// Moment of inertia tensor in global coordinate system
   RankTwoTensor _inertia;
 
-  /// Velocity value
-  std::vector<const VariableValue *> _rot_vel_value;
+  /// Rotational udot residual
+  std::vector<const VariableValue *> _rot_dot_residual;
 
   /// Old velocity value
   std::vector<const VariableValue *> _rot_vel_old_value;
 
-  /// Acceleration value
-  std::vector<const VariableValue *> _rot_accel_value;
+  /// Rotational udotdot residual
+  std::vector<const VariableValue *> _rot_dotdot_residual;
 
   /// du_dot_du value
   const VariableValue * _du_dot_du;
 
   /// du_dotdot_du value
   const VariableValue * _du_dotdot_du;
+
+  /// A pointer to TimeIntegrator.
+  TimeIntegrator * _time_integrator;
 };

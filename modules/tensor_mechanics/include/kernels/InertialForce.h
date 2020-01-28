@@ -13,6 +13,7 @@
 #include "Material.h"
 
 // Forward Declarations
+class TimeIntegrator;
 
 class InertialForce : public TimeKernel
 {
@@ -21,12 +22,15 @@ public:
 
   InertialForce(const InputParameters & parameters);
 
-protected:
-  virtual Real computeQpResidual();
+  virtual void computeResidual() override;
 
-  virtual Real computeQpJacobian();
+protected:
+  virtual Real computeQpResidual() override;
+
+  virtual Real computeQpJacobian() override;
 
 private:
+  unsigned int _var_num;
   const MaterialProperty<Real> & _density;
   const VariableValue * _u_old;
   const VariableValue * _vel_old;
@@ -41,9 +45,12 @@ private:
   const Real _alpha;
 
   // Velocity and acceleration calculated by time integrator
-  const VariableValue * _u_dot;
-  const VariableValue * _u_dotdot;
+  const VariableValue * _u_dot_residual;
+  const VariableValue * _u_dotdot_residual;
   const VariableValue * _u_dot_old;
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;
+
+  /// A pointer to TimeIntegrator
+  TimeIntegrator * _time_integrator;
 };
