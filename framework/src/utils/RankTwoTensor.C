@@ -12,3 +12,20 @@
 
 template class RankTwoTensorTempl<Real>;
 template class RankTwoTensorTempl<DualReal>;
+
+namespace MathUtils
+{
+template <>
+void
+mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
+{
+  v.zero();
+}
+
+template <>
+void
+mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v)
+{
+  v.zero();
+}
+}

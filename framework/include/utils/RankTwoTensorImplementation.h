@@ -38,18 +38,9 @@ constexpr Real RankTwoTensorTempl<T>::identityCoords[];
 namespace MathUtils
 {
 template <>
-void
-mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
-{
-  v.zero();
-}
-
+void mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v);
 template <>
-void
-mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v)
-{
-  v.zero();
-}
+void mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v);
 }
 
 template <typename T>

@@ -28,17 +28,9 @@
 namespace MathUtils
 {
 template <>
-void
-mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
-{
-  v.zero();
-}
+void mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v);
 template <>
-void
-mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
-{
-  v.zero();
-}
+void mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v);
 }
 
 template <typename T>

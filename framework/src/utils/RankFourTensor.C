@@ -13,6 +13,22 @@
 template class RankFourTensorTempl<Real>;
 template class RankFourTensorTempl<DualReal>;
 
+namespace MathUtils
+{
+template <>
+void
+mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
+{
+  v.zero();
+}
+template <>
+void
+mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
+{
+  v.zero();
+}
+}
+
 #define RankTwoTensorMultInstantiate(TemplateClass)                                                \
   template RankTwoTensorTempl<Real> RankFourTensorTempl<Real>::operator*(                          \
       const TemplateClass<Real> & a) const;                                                        \
