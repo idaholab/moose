@@ -1,21 +1,16 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//Magpie includes
+// Magpie includes
 #include "MultiIndex.h"
 
-//libMesh include
+// libMesh include
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
@@ -35,7 +30,7 @@ TEST(MultiIndexTest, setUp)
 
   // check size operator
   for (unsigned int j = 0; j < 3; ++j)
-  EXPECT_EQ(mindex1.size()[j], shape[j]);
+    EXPECT_EQ(mindex1.size()[j], shape[j]);
 
   // parenthesis operator
   MultiIndex<Real>::size_type index(3);
@@ -96,31 +91,82 @@ TEST(MultiIndexTest, setUp)
         index[1] = j1;
         index[2] = j2;
         if (j0 < shape[0] && j1 < shape[1] && j2 < shape[2])
-        EXPECT_TRUE(mindex2(index) == j0 - 3.0 * j1 + 100.0 * j2);
+          EXPECT_TRUE(mindex2(index) == j0 - 3.0 * j1 + 100.0 * j2);
         else
-        EXPECT_EQ(mindex2(index), 0.0);
+          EXPECT_EQ(mindex2(index), 0.0);
       }
 
-      // test assign increasing and descreasing in different dimension simultaneously
-      index.resize(4);
-      new_shape.resize(4);
-      new_shape[0] = 4;
-      new_shape[1] = 2;
-      new_shape[2] = 1;
-      new_shape[3] = 8;
-      mindex2.assign(new_shape, 1.0);
-      for (unsigned int j0 = 0; j0 < new_shape[0]; ++j0)
-        for (unsigned int j1 = 0; j1 < new_shape[1]; ++j1)
-          for (unsigned int j2 = 0; j2 < new_shape[2]; ++j2)
-            for (unsigned int j3 = 0; j3 < new_shape[3]; ++j3)
-            {
-              index[0] = j0;
-              index[1] = j1;
-              index[2] = j2;
-              index[3] = j3;
-              EXPECT_EQ(mindex2(index), 1.0);
-            }
+  // test assign increasing and descreasing in different dimension simultaneously
+  index.resize(4);
+  new_shape.resize(4);
+  new_shape[0] = 4;
+  new_shape[1] = 2;
+  new_shape[2] = 1;
+  new_shape[3] = 8;
+  mindex2.assign(new_shape, 1.0);
+  for (unsigned int j0 = 0; j0 < new_shape[0]; ++j0)
+    for (unsigned int j1 = 0; j1 < new_shape[1]; ++j1)
+      for (unsigned int j2 = 0; j2 < new_shape[2]; ++j2)
+        for (unsigned int j3 = 0; j3 < new_shape[3]; ++j3)
+        {
+          index[0] = j0;
+          index[1] = j1;
+          index[2] = j2;
+          index[3] = j3;
+          EXPECT_EQ(mindex2(index), 1.0);
+        }
+}
 
+TEST(MultiIndexTest, directDataAccess)
+{
+  // Construct a 3 indexed objects of Reals
+  MultiIndex<Real>::size_type shape(3);
+  shape[0] = 3;
+  shape[1] = 2;
+  shape[2] = 4;
+  MultiIndex<Real> mindex1 = MultiIndex<Real>(shape);
+
+  // parenthesis operator
+  MultiIndex<Real>::size_type index(3);
+  for (unsigned int j0 = 0; j0 < shape[0]; ++j0)
+    for (unsigned int j1 = 0; j1 < shape[1]; ++j1)
+      for (unsigned int j2 = 0; j2 < shape[2]; ++j2)
+      {
+        index[0] = j0;
+        index[1] = j1;
+        index[2] = j2;
+        mindex1(index) = j0 + 10.0 * j1 + 100.0 * j2;
+      }
+
+  // get the stride and check it
+  MultiIndex<Real>::size_type stride = mindex1.stride();
+  MultiIndex<Real>::size_type expected_stride = {8, 4, 1};
+  for (unsigned d = 0; d < shape.size(); ++d)
+  {
+    EXPECT_EQ(mindex1.stride(d), stride[d]);
+    EXPECT_EQ(stride[d], expected_stride[d]);
+  }
+
+  // check direct access vs. parenthesis operator
+  Real pt111 = mindex1({1, 0, 1});
+  Real pt211 = mindex1({2, 0, 1});
+  Real pt121 = mindex1({1, 1, 1});
+  Real pt221 = mindex1({2, 1, 1});
+  Real pt112 = mindex1({1, 0, 2});
+  Real pt212 = mindex1({2, 0, 2});
+  Real pt122 = mindex1({1, 1, 2});
+  Real pt222 = mindex1({2, 1, 2});
+
+  unsigned int base = mindex1.flatIndex({1, 0, 1});
+  EXPECT_EQ(pt111, mindex1[base]);
+  EXPECT_EQ(pt211, mindex1[base + stride[0]]);
+  EXPECT_EQ(pt121, mindex1[base + stride[1]]);
+  EXPECT_EQ(pt221, mindex1[base + stride[0] + stride[1]]);
+  EXPECT_EQ(pt112, mindex1[base + stride[2]]);
+  EXPECT_EQ(pt212, mindex1[base + stride[0] + stride[2]]);
+  EXPECT_EQ(pt122, mindex1[base + stride[1] + stride[2]]);
+  EXPECT_EQ(pt222, mindex1[base + stride[0] + stride[1] + stride[2]]);
+  EXPECT_EQ(pt222, mindex1.at(base + stride[0] + stride[1] + stride[2]));
 }
 
 TEST(MultiIndexTest, testIterators)
@@ -135,7 +181,7 @@ TEST(MultiIndexTest, testIterators)
   // set the data by using an iterator
   auto it = mindex.begin();
   auto it_end = mindex.end();
-  for (; it != it_end ; ++it)
+  for (; it != it_end; ++it)
     (*it).second = (*it).first[0] - 3.0 * (*it).first[1] + 100.0 * (*it).first[2];
 
   // check the values
@@ -173,7 +219,9 @@ TEST(MultiIndexTest, testIterators)
   {
     auto indices = (*it).first;
     (*it).second = indices[0] - 7.0 * indices[1] + 100.0 * indices[2];
-    ++it;++it;--it;
+    ++it;
+    ++it;
+    --it;
   }
 
   // check the values
@@ -187,6 +235,10 @@ TEST(MultiIndexTest, testIterators)
         index[2] = j2;
         EXPECT_TRUE(mindex(index) == j0 - 7.0 * j1 + 100.0 * j2);
       }
+
+  // range based loops
+  for (const auto & p : mindex)
+    EXPECT_EQ(mindex(p.first), p.second);
 }
 
 TEST(MultiIndexTest, dataStoreLoad)
@@ -201,7 +253,7 @@ TEST(MultiIndexTest, dataStoreLoad)
   // set the data by using an iterator
   auto it = mindex.begin();
   auto it_end = mindex.end();
-  for (; it != it_end ; ++it)
+  for (; it != it_end; ++it)
     (*it).second = (*it).first[0] - 3.0 * (*it).first[1] + 100.0 * (*it).first[2];
 
   // Serialize
@@ -214,7 +266,7 @@ TEST(MultiIndexTest, dataStoreLoad)
 
   // Clear data structure to avoid false positives and then
   // read data
-  for (it = mindex.begin(); it != it_end ; ++it)
+  for (it = mindex.begin(); it != it_end; ++it)
     (*it).second = 0.0;
 
   dataLoad(iss, mindex, this);
@@ -245,7 +297,7 @@ TEST(MultiIndexTest, slice)
   // set the data by using an iterator
   MultiIndex<unsigned int>::iterator it = mindex.begin();
   MultiIndex<unsigned int>::iterator it_end = mindex.end();
-  for (; it != it_end ; ++it)
+  for (; it != it_end; ++it)
   {
     MultiIndex<unsigned int>::size_type indices = (*it).first;
     (*it).second = indices[0] + 10 * indices[1] + 100 * indices[2] + 1000 * indices[3];

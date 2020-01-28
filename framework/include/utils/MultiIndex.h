@@ -1,10 +1,11 @@
-/**********************************************************************/
-/*                     DO NOT MODIFY THIS HEADER                      */
-/* MAGPIE - Mesoscale Atomistic Glue Program for Integrated Execution */
-/*                                                                    */
-/*            Copyright 2017 Battelle Energy Alliance, LLC            */
-/*                        ALL RIGHTS RESERVED                         */
-/**********************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -43,6 +44,12 @@ public:
   const T & operator()(const size_type & indices) const;
   ///@}
 
+  ///@{ direct data access via bracket operator
+  T & operator[](unsigned int j) { return _data[j]; }
+  const T & operator[](unsigned int j) const { return _data[j]; }
+  T & at(unsigned int j) { return _data.at(j); }
+  ///@}
+
   ///@{ accesses a slice of the multi index object
   MultiIndex<T> slice(unsigned int dimension, unsigned int index) const;
   MultiIndex<T> slice(size_type dimension, size_type index) const;
@@ -66,6 +73,11 @@ public:
   /// Reshape container arbitrarily and initialize with value
   void assign(const size_type & shape, T value);
 
+  ///@{ access the stride
+  unsigned int stride(unsigned int j) const;
+  const size_type & stride() const { return _stride; }
+  ///@}
+
   ///@{ Implement loadHelper and storeHelper for easier data (de)serialization
   void dataStore(std::ostream & stream, void * context);
   void dataLoad(std::istream & stream, void * context);
@@ -77,6 +89,9 @@ public:
   const_iterator begin() const { return const_noconst_iterator<true>(*this, 0); }
   const_iterator end() const { return const_noconst_iterator<true>(*this, _nentries); }
   ///@}
+
+  /// compute the flat index for a size_type index
+  unsigned int flatIndex(const size_type & indices) const;
 
 protected:
   /// given a flat index computes the vector of indices i0, i1, i2, ...
@@ -91,8 +106,8 @@ protected:
   /// the number of entries TODO: get rid of this -> _data.size()
   unsigned int _nentries;
 
-  /// accumulate index for easier computation of unrolled index
-  size_type _accumulated_shape;
+  /// stride for each index, e.g. if you know {i, j, k} -> flat_index,  {i, j + 1, k} = flat_index + stride[1]
+  size_type _stride;
 
   /// the data unrolled into a vector
   std::vector<T> _data;
@@ -103,9 +118,6 @@ private:
 
   /// change the container shape and reset meta data
   void reshape(const size_type & shape);
-
-  /// compute the flat index for a size_type index
-  unsigned int flatIndex(const size_type & indices) const;
 };
 
 /**
@@ -334,7 +346,7 @@ MultiIndex<T>::resize(const size_type & shape)
 
   // first copy the old shape and data
   size_type old_shape = _shape;
-  size_type old_accumulated_shape = _accumulated_shape;
+  size_type old_stride = _stride;
   std::vector<T> old_data = _data;
 
   // reset _shape & recompute meta data
@@ -361,12 +373,20 @@ MultiIndex<T>::resize(const size_type & shape)
     {
       unsigned int old_j = 0;
       for (unsigned int d = 0; d < _dim; ++d)
-        old_j += indices[d] * old_accumulated_shape[d];
+        old_j += indices[d] * old_stride[d];
 
       // finally set the data entry
       _data[j] = old_data[old_j];
     }
   }
+}
+
+template <class T>
+unsigned int
+MultiIndex<T>::stride(unsigned int j) const
+{
+  mooseAssert(j < _dim, "Dimension is" << _dim << ", stride(j) called with j = " << j);
+  return _stride[j];
 }
 
 template <class T>
@@ -403,9 +423,9 @@ MultiIndex<T>::findIndexVector(unsigned int flat_index, MultiIndex<T>::size_type
   indices.resize(_dim);
   for (unsigned int d = 0; d < _dim; ++d)
   {
-    unsigned int i = flat_index / _accumulated_shape[d];
+    unsigned int i = flat_index / _stride[d];
     indices[d] = i;
-    flat_index -= i * _accumulated_shape[d];
+    flat_index -= i * _stride[d];
   }
 }
 
@@ -416,13 +436,13 @@ void
 MultiIndex<T>::buildAccumulatedShape()
 {
   // TODO: simplify - this is needlessly complicated - can be done in a single loop
-  _accumulated_shape.resize(_dim);
+  _stride.resize(_dim);
   for (unsigned int d = 0; d < _dim; ++d)
   {
     unsigned int k = 1;
     for (unsigned int j = d + 1; j < _dim; ++j)
       k *= _shape[j];
-    _accumulated_shape[d] = k;
+    _stride[d] = k;
   }
 }
 
@@ -457,7 +477,7 @@ MultiIndex<T>::flatIndex(const size_type & indices) const
   // index = i_M + i_{M-1} * I_M + i_{M-1} * I_M * I_{M-1} ...
   unsigned int index = 0;
   for (unsigned int d = 0; d < _dim; ++d)
-    index += indices[d] * _accumulated_shape[d];
+    index += indices[d] * _stride[d];
 
   return index;
 }
