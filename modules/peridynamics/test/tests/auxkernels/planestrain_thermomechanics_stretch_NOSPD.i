@@ -10,8 +10,8 @@
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 8
-    ny = 8
+    nx = 6
+    ny = 6
   [../]
   [./gpd]
     type = MeshGeneratorPD
