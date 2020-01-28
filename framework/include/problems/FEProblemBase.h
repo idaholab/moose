@@ -1729,6 +1729,12 @@ public:
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
 
+  /// If solution older than 2 time steps is required, set solution_state to the number of old timesteps required.
+  virtual void setSolutionState(unsigned int solution_state) { _solution_state = solution_state; }
+
+  /// Get the number of old solution states to be stored
+  virtual unsigned int getSolutionState() const { return _solution_state; }
+
   // Whether or not we should solve this system
   bool shouldSolve() const { return _solve; }
 
@@ -2138,6 +2144,9 @@ private:
 
   /// Whether old solution second time derivative needs to be stored
   bool _u_dotdot_old_requested;
+
+  /// Number of old solution states to be stored;
+  unsigned int _solution_state;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

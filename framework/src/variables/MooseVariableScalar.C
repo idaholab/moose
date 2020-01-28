@@ -12,6 +12,7 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "SystemBase.h"
+#include "TimeIntegrator.h"
 
 // libMesh
 #include "libmesh/numeric_vector.h"
@@ -35,13 +36,16 @@ MooseVariableScalar::validParams()
 MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
   : MooseVariableBase(parameters),
     _need_u_dot(false),
+    _need_u_dot_residual(false),
     _need_u_dotdot(false),
+    _need_u_dotdot_residual(false),
     _need_u_dot_old(false),
     _need_u_dotdot_old(false),
     _need_du_dot_du(false),
     _need_du_dotdot_du(false),
     _need_dual(false),
-    _need_dual_u(false)
+    _need_dual_u(false),
+    _time_integrator(nullptr)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -52,6 +56,8 @@ MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
 
   _matrix_tag_u.resize(num_matrix_tags);
   _need_matrix_tag_u.resize(num_matrix_tags);
+
+  _time_integrator = _sys.getTimeIntegrator();
 }
 
 MooseVariableScalar::~MooseVariableScalar()
@@ -61,7 +67,9 @@ MooseVariableScalar::~MooseVariableScalar()
   _u_older.release();
 
   _u_dot.release();
+  _u_dot_residual.release();
   _u_dotdot.release();
+  _u_dotdot_residual.release();
   _u_dot_old.release();
   _u_dotdot_old.release();
   _du_dot_du.release();
@@ -125,8 +133,14 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
   if (_need_u_dot)
     _u_dot.resize(n);
 
+  if (_need_u_dot_residual)
+    _u_dot_residual.resize(n);
+
   if (_need_u_dotdot)
     _u_dotdot.resize(n);
+
+  if (_need_u_dotdot_residual)
+    _u_dotdot_residual.resize(n);
 
   if (_need_u_dot_old)
     _u_dot_old.resize(n);
@@ -177,8 +191,14 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
     if (_need_u_dot)
       (*u_dot).get(_dof_indices, &_u_dot[0]);
 
+    if (_need_u_dot_residual)
+      (_time_integrator->uDotResidual()).get(_dof_indices, &_u_dot_residual[0]);
+
     if (_need_u_dotdot)
       (*u_dotdot).get(_dof_indices, &_u_dotdot[0]);
+
+    if (_need_u_dotdot_residual)
+      (_time_integrator->uDotDotResidual()).get(_dof_indices, &_u_dotdot_residual[0]);
 
     if (_need_u_dot_old)
       (*u_dot_old).get(_dof_indices, &_u_dot_old[0]);
@@ -220,8 +240,14 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         if (_need_u_dot)
           (*u_dot).get(one_dof_index, &_u_dot[i]);
 
+        if (_need_u_dot_residual)
+          (_time_integrator->uDotResidual()).get(one_dof_index, &_u_dot_residual[i]);
+
         if (_need_u_dotdot)
           (*u_dotdot).get(one_dof_index, &_u_dotdot[i]);
+
+        if (_need_u_dotdot_residual)
+          (_time_integrator->uDotDotResidual()).get(one_dof_index, &_u_dotdot_residual[i]);
 
         if (_need_u_dot_old)
           (*u_dot_old).get(one_dof_index, &_u_dot_old[i]);
@@ -250,8 +276,14 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         if (_need_u_dot)
           _u_dot.resize(i);
 
+        if (_need_u_dot_residual)
+          _u_dot_residual.resize(i);
+
         if (_need_u_dotdot)
           _u_dotdot.resize(i);
+
+        if (_need_u_dotdot_residual)
+          _u_dotdot_residual.resize(i);
 
         if (_need_u_dot_old)
           _u_dot_old.resize(i);
@@ -277,8 +309,14 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         if (_need_u_dot)
           _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
 
+        if (_need_u_dot_residual)
+          _u_dot_residual[i] = std::numeric_limits<Real>::quiet_NaN();
+
         if (_need_u_dotdot)
           _u_dotdot[i] = std::numeric_limits<Real>::quiet_NaN();
+
+        if (_need_u_dotdot_residual)
+          _u_dotdot_residual[i] = std::numeric_limits<Real>::quiet_NaN();
 
         if (_need_u_dot_old)
           _u_dot_old[i] = std::numeric_limits<Real>::quiet_NaN();

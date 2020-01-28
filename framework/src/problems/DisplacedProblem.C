@@ -67,6 +67,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     _assembly.emplace_back(libmesh_make_unique<Assembly>(_displaced_nl, i));
 
   _displaced_nl.addTimeIntegrator(_mproblem.getNonlinearSystemBase().getSharedTimeIntegrator());
+  _displaced_aux.addTimeIntegrator(_mproblem.getAuxiliarySystem().getSharedTimeIntegrator());
 
   if (!_default_ghosting)
     _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());

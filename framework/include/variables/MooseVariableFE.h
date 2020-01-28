@@ -336,6 +336,8 @@ public:
   /// element dots
   const FieldVariableValue & uDot() const { return _element_data->uDot(); }
   const FieldVariableValue & uDotDot() const { return _element_data->uDotDot(); }
+  const FieldVariableValue & uDotResidual() const { return _element_data->uDotResidual(); }
+  const FieldVariableValue & uDotDotResidual() const { return _element_data->uDotDotResidual(); }
   const FieldVariableValue & uDotOld() const { return _element_data->uDotOld(); }
   const FieldVariableValue & uDotDotOld() const { return _element_data->uDotDotOld(); }
   const VariableValue & duDotDu() const { return _element_data->duDotDu(); }
@@ -398,10 +400,12 @@ public:
   {
     return _neighbor_data->curlSln(Moose::Current);
   }
+
   const FieldVariableCurl & curlSlnOldNeighbor() const
   {
     return _neighbor_data->curlSln(Moose::Old);
   }
+
   const FieldVariableCurl & curlSlnOlderNeighbor() const
   {
     return _neighbor_data->curlSln(Moose::Older);
@@ -410,6 +414,11 @@ public:
   /// neighbor dots
   const FieldVariableValue & uDotNeighbor() const { return _neighbor_data->uDot(); }
   const FieldVariableValue & uDotDotNeighbor() const { return _neighbor_data->uDotDot(); }
+  const FieldVariableValue & uDotNeighborResidual() const { return _neighbor_data->uDotResidual(); }
+  const FieldVariableValue & uDotDotNeighborResidual() const
+  {
+    return _neighbor_data->uDotDotResidual();
+  }
   const FieldVariableValue & uDotOldNeighbor() const { return _neighbor_data->uDotOld(); }
   const FieldVariableValue & uDotDotOldNeighbor() const { return _neighbor_data->uDotDotOld(); }
   const VariableValue & duDotDuNeighbor() const { return _neighbor_data->duDotDu(); }
@@ -500,11 +509,15 @@ public:
   const DoFValue & dofValuesOlderNeighbor();
   const DoFValue & dofValuesPreviousNLNeighbor();
   const DoFValue & dofValuesDot();
+  const DoFValue & dofValuesDotResidual();
   const DoFValue & dofValuesDotNeighbor();
+  const DoFValue & dofValuesDotNeighborResidual();
   const DoFValue & dofValuesDotOld();
   const DoFValue & dofValuesDotOldNeighbor();
   const DoFValue & dofValuesDotDot();
+  const DoFValue & dofValuesDotDotResidual();
   const DoFValue & dofValuesDotDotNeighbor();
+  const DoFValue & dofValuesDotDotNeighborResidual();
   const DoFValue & dofValuesDotDotOld();
   const DoFValue & dofValuesDotDotOldNeighbor();
   const MooseArray<Number> & dofValuesDuDotDu();
@@ -573,7 +586,9 @@ public:
   const OutputType & nodalValueOlder();
   const OutputType & nodalValuePreviousNL();
   const OutputType & nodalValueDot();
+  const OutputType & nodalValueDotResidual();
   const OutputType & nodalValueDotDot();
+  const OutputType & nodalValueDotDotResidual();
   const OutputType & nodalValueDotOld();
   const OutputType & nodalValueDotDotOld();
   const OutputType & nodalValueDuDotDu();
@@ -583,7 +598,9 @@ public:
   const OutputType & nodalValueOlderNeighbor();
   const OutputType & nodalValuePreviousNLNeighbor();
   const OutputType & nodalValueDotNeighbor();
+  const OutputType & nodalValueDotNeighborResidual();
   const OutputType & nodalValueDotDotNeighbor();
+  const OutputType & nodalValueDotDotNeighborResidual();
   const OutputType & nodalValueDotOldNeighbor();
   const OutputType & nodalValueDotDotOldNeighbor();
   const OutputType & nodalValueDuDotDuNeighbor();

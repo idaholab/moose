@@ -298,9 +298,23 @@ MooseVariableFE<OutputType>::dofValuesDot()
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
+MooseVariableFE<OutputType>::dofValuesDotResidual()
+{
+  return _element_data->dofValuesDotResidual();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::DoFValue &
 MooseVariableFE<OutputType>::dofValuesDotDot()
 {
   return _element_data->dofValuesDotDot();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::DoFValue &
+MooseVariableFE<OutputType>::dofValuesDotDotResidual()
+{
+  return _element_data->dofValuesDotDotResidual();
 }
 
 template <typename OutputType>
@@ -326,9 +340,23 @@ MooseVariableFE<OutputType>::dofValuesDotNeighbor()
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
+MooseVariableFE<OutputType>::dofValuesDotNeighborResidual()
+{
+  return _neighbor_data->dofValuesDotResidual();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::DoFValue &
 MooseVariableFE<OutputType>::dofValuesDotDotNeighbor()
 {
   return _neighbor_data->dofValuesDotDot();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::DoFValue &
+MooseVariableFE<OutputType>::dofValuesDotDotNeighborResidual()
+{
+  return _neighbor_data->dofValuesDotDotResidual();
 }
 
 template <typename OutputType>
@@ -632,6 +660,20 @@ const OutputType &
 MooseVariableFE<OutputType>::nodalValueDotDot()
 {
   return _element_data->nodalValueDotDot();
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueDotResidual()
+{
+  return _element_data->nodalValueDotResidual();
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueDotDotResidual()
+{
+  return _element_data->nodalValueDotDotResidual();
 }
 
 template <typename OutputType>

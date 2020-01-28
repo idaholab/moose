@@ -179,6 +179,8 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
+  virtual NumericVector<Number> * solutionState(unsigned int i) override;
+
   virtual void setPreviousNewtonSolution();
 
   void setScalarVariableCoupleableTags(ExecFlagType type);
@@ -212,8 +214,6 @@ public:
   NumericVector<Number> & _serialized_solution;
   /// Solution vector of the previous nonlinear iterate
   NumericVector<Number> * _solution_previous_nl;
-  /// Time integrator
-  std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// solution vector for u^dotdot
@@ -223,6 +223,8 @@ public:
   NumericVector<Number> * _u_dot_old;
   /// Old solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot_old;
+
+  std::vector<NumericVector<Number> *> _solution_state;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;

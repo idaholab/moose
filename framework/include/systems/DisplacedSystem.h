@@ -209,6 +209,11 @@ public:
     return _undisplaced_system.getMatrix(tag);
   }
 
+  virtual NumericVector<Number> * solutionState(unsigned int i) override
+  {
+    return _undisplaced_system.solutionState(i);
+  }
+
   virtual TransientExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override;

@@ -173,8 +173,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _resid_vs_jac_scaling_param(0)
 #ifndef MOOSE_SPARSE_AD
     ,
-    _required_derivative_size(0)
+    _required_derivative_size(0),
 #endif
+    _solution_state(0)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -226,6 +227,14 @@ NonlinearSystemBase::addDotVectors()
     _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
   if (_fe_problem.uDotDotOldRequested())
     _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
+
+  if (_fe_problem.getSolutionState() > 3)
+  {
+    _solution_state_size = _fe_problem.getSolutionState();
+    _solution_state.resize(_fe_problem.getSolutionState());
+    for (unsigned int i = 0; i < _fe_problem.getSolutionState(); ++i)
+      _solution_state[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
+  }
 }
 
 void
@@ -3005,6 +3014,17 @@ NonlinearSystemBase::setSolutionUDotDotOld(const NumericVector<Number> & u_dotdo
   *_u_dotdot_old = u_dotdot_old;
 }
 
+void
+NonlinearSystemBase::setSolutionState(const std::vector<NumericVector<Number>> & solution_state)
+{
+  if (solution_state.size() != _fe_problem.getSolutionState())
+    mooseError("NonlinearSystemBase: Size of solution state should match the SolutionState "
+               "provided by FeProblem.");
+
+  for (unsigned int i = 0; i < _fe_problem.getSolutionState(); ++i)
+    *_solution_state[i] = solution_state[i];
+}
+
 NumericVector<Number> &
 NonlinearSystemBase::serializedSolution()
 {
@@ -3215,4 +3235,18 @@ NonlinearSystemBase::computeScaling()
 {
   mooseWarning("The NonlinearSystemBase derived class that is being used does not currently "
                "support automatic scaling.");
+}
+
+NumericVector<Number> *
+NonlinearSystemBase::solutionState(unsigned int i)
+{
+  if (_fe_problem.getSolutionState() > 3 && i < _fe_problem.getSolutionState())
+    return _solution_state[i];
+  else if (_fe_problem.getSolutionState() <= 3)
+    mooseError("NonlinearSystemBase: If only current, old or older solution is required, please "
+               "use solution(), solutionOld() or solutionOlder(), respectively.");
+  else
+    mooseError("NonlinearSystemBase: Requested solutionState is not saved, please make sure "
+               "solution state is less than" +
+               std::to_string(_fe_problem.getSolutionState()));
 }
