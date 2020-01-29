@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "MooseEnum.h"
-#include "MooseUtils.h"
 #include "ColumnMajorMatrix.h"
 #include "MooseRandom.h"
 #include "RankFourTensor.h"
@@ -465,57 +464,6 @@ RankTwoTensorTempl<T>::mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
 }
 
 template <typename T>
-RankFourTensorTempl<T>
-RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eigval,
-                                                            RankTwoTensorTempl<T> & eigvec) const
-{
-  // The calculate of projection tensor follows
-  // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
-
-  // Compute eigenvectors and eigenvalues of this tensor
-  this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
-
-  // Separate out positive and negative eigen values
-  std::array<T, N> epos;
-  std::array<T, N> d;
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
-    d[i] = eigval[i] > 0 ? 1.0 : 0.0;
-  }
-
-  // projection tensor
-  RankFourTensorTempl<T> proj_pos;
-  RankFourTensorTempl<T> Gab, Gba;
-  RankTwoTensorTempl<T> Ma, Mb;
-
-  for (unsigned int a = 0; a < N; ++a)
-  {
-    Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
-    proj_pos += d[a] * Ma.outerProduct(Ma);
-  }
-
-  for (unsigned int a = 0; a < N; ++a)
-    for (unsigned int b = 0; b < a; ++b)
-    {
-      Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
-      Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));
-
-      Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
-      Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
-
-      T theta_ab;
-      if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
-        theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
-      else
-        theta_ab = 0.25 * (d[a] + d[b]);
-
-      proj_pos += theta_ab * (Gab + Gba);
-    }
-  return proj_pos;
-}
-
-template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::deviatoric() const
 {
@@ -736,59 +684,6 @@ RankTwoTensorTempl<T>::d2thirdInvariant() const
 }
 
 template <typename T>
-T
-RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
-{
-  T bar = secondInvariant();
-  if (bar <= r0)
-    // in this case the Lode angle is not defined
-    return r0_value;
-  else
-    // the min and max here gaurd against precision-loss when bar is tiny but nonzero.
-    return std::max(std::min(-1.5 * std::sqrt(3.0) * thirdInvariant() / std::pow(bar, 1.5), 1.0),
-                    -1.0);
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
-{
-  T bar = secondInvariant();
-  if (bar <= r0)
-    return RankTwoTensorTempl<T>();
-  else
-    return -1.5 * std::sqrt(3.0) *
-           (dthirdInvariant() / std::pow(bar, 1.5) -
-            1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
-}
-
-template <typename T>
-RankFourTensorTempl<T>
-RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
-{
-  T bar = secondInvariant();
-  if (bar <= r0)
-    return RankFourTensorTempl<T>();
-
-  T J3 = thirdInvariant();
-  RankTwoTensorTempl<T> dII = dsecondInvariant();
-  RankTwoTensorTempl<T> dIII = dthirdInvariant();
-  RankFourTensorTempl<T> deriv =
-      d2thirdInvariant() / std::pow(bar, 1.5) - 1.5 * d2secondInvariant() * J3 / std::pow(bar, 2.5);
-
-  for (unsigned i = 0; i < N; ++i)
-    for (unsigned j = 0; j < N; ++j)
-      for (unsigned k = 0; k < N; ++k)
-        for (unsigned l = 0; l < N; ++l)
-          deriv(i, j, k, l) +=
-              (-1.5 * dII(i, j) * dIII(k, l) - 1.5 * dIII(i, j) * dII(k, l)) / std::pow(bar, 2.5) +
-              1.5 * 2.5 * dII(i, j) * dII(k, l) * J3 / std::pow(bar, 3.5);
-
-  deriv *= -1.5 * std::sqrt(3.0);
-  return deriv;
-}
-
-template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::ddet() const
 {
@@ -958,10 +853,32 @@ void
 RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals,
                                                         RankTwoTensorTempl<T> & eigvecs) const
 {
+  mooseError(
+      "symmetricEigenvaluesEigenvectors is only available for ordered tensor component types");
+}
+
+template <>
+void
+RankTwoTensorTempl<Real>::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
+                                                           RankTwoTensorTempl<Real> & eigvecs) const
+{
+  std::vector<Real> a;
+  syev("V", eigvals, a);
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      eigvecs(j, i) = a[i * N + j];
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
+    std::vector<DualReal> & eigvals, RankTwoTensorTempl<DualReal> & eigvecs) const
+{
   const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
 
   eigvals.resize(N);
-  RankTwoTensorTempl<T> D, Q, R;
+  RankTwoTensorTempl<DualReal> D, Q, R;
   this->hessenberg(D, eigvecs);
 
   unsigned int iter = 0;
@@ -969,7 +886,7 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
     do
     {
       iter++;
-      T shift = D(m, m);
+      auto shift = D(m, m);
       D.addIa(-shift);
       D.QR(Q, R, m + 1);
       D = R * Q;
@@ -984,7 +901,7 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
   for (unsigned int i = 0; i < N - 1; i++)
   {
     unsigned int k = i;
-    T p = eigvals[i];
+    auto p = eigvals[i];
     for (unsigned int j = i + 1; j < N; j++)
       if (eigvals[j] < p)
       {
@@ -1005,19 +922,6 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
   }
 }
 
-template <>
-void
-RankTwoTensorTempl<Real>::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
-                                                           RankTwoTensorTempl<Real> & eigvecs) const
-{
-  std::vector<Real> a;
-  syev("V", eigvals, a);
-
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      eigvecs(j, i) = a[i * N + j];
-}
-
 template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::permutationTensor(
@@ -1033,54 +937,15 @@ RankTwoTensorTempl<T>::permutationTensor(
 }
 
 template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
-{
-  T c, s;
-  T a = (*this)(row1, col);
-  T b = (*this)(row2, col);
-
-  if (MooseUtils::absoluteFuzzyEqual(b, 0.0) && MooseUtils::absoluteFuzzyEqual(a, 0.0))
-  {
-    c = a >= 0.0 ? 1.0 : -1.0;
-    s = 0.0;
-  }
-  else if (std::abs(a) > std::abs(b))
-  {
-    T t = b / a;
-    Real sgn = a >= 0.0 ? 1.0 : -1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
-    c = 1.0 / u;
-    s = c * t;
-  }
-  else
-  {
-    T t = a / b;
-    Real sgn = b >= 0.0 ? 1.0 : -1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
-    s = 1.0 / u;
-    c = s * t;
-  }
-
-  RankTwoTensorTempl<T> R(initIdentity);
-  R(row1, row1) = c;
-  R(row1, row2) = s;
-  R(row2, row1) = -s;
-  R(row2, row2) = c;
-
-  return R;
-}
-
-template <typename T>
 void
 RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const
 {
+  if (N < 3)
+    return;
+
   H = *this;
   U.zero();
   U.addIa(1.0);
-
-  if (N < 3)
-    return;
 
   RankTwoTensorTempl<T> R = this->givensRotation(N - 2, N - 1, 0);
   H = R * H * R.transpose();
