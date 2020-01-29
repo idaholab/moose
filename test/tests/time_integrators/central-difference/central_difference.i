@@ -50,12 +50,14 @@
     variable = u
     boundary = 'left'
     function = forcing_fn
+    preset = false
   [../]
   [./right]
     type = FunctionDirichletBC
     variable = u
     boundary = 'right'
     function = forcing_fn
+    preset = false
   [../]
 []
 

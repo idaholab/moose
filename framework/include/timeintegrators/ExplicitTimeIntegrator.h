@@ -19,7 +19,6 @@
 #include "LumpedPreconditioner.h"
 
 class ExplicitTimeIntegrator;
-// class LumpedPreconditioner;
 
 template <>
 InputParameters validParams<ExplicitTimeIntegrator>();

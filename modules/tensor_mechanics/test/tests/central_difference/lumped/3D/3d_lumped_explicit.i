@@ -100,18 +100,21 @@
     variable = disp_x
     boundary = 'back'
     function = dispx
+    preset = false
   [../]
   [./y_bot]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'back'
     function = dispy
+    preset = false
   [../]
   [./z_bot]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'back'
     function = dispz
+    preset = false
   [../]
 []
 

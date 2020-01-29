@@ -82,6 +82,7 @@
     boundary = bottom
     variable = disp_x
     function = disp
+    preset = false
   [../]
 []
 

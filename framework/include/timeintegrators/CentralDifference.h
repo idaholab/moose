@@ -31,8 +31,6 @@ public:
   void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const override;
   virtual NumericVector<Number> & uDotDotResidual() const override;
   virtual NumericVector<Number> & uDotResidual() const override;
-  // virtual void solve() override;
-  // virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
