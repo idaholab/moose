@@ -48,12 +48,20 @@ protected:
    * Helper function that actually does the math for computing the time derivative
    */
   template <typename T, typename T2, typename T3, typename T4, typename T5>
-  void computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_old_old, const T5 & u_old_old_old) const;
+  void computeTimeDerivativeHelper(T & u_dot,
+                                   T2 & u_dotdot,
+                                   const T3 & u_old,
+                                   const T4 & u_old_old,
+                                   const T5 & u_old_old_old) const;
 };
 
 template <typename T, typename T2, typename T3, typename T4, typename T5>
 void
-CentralDifference::computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_old_old, const T5 & u_old_old_old) const
+CentralDifference::computeTimeDerivativeHelper(T & u_dot,
+                                               T2 & u_dotdot,
+                                               const T3 & u_old,
+                                               const T4 & u_old_old,
+                                               const T5 & u_old_old_old) const
 {
   // computing first derivative
   // using the Central Difference method
