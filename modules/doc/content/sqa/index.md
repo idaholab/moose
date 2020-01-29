@@ -31,4 +31,8 @@ quality.
 MOOSE employs a continuous integration strategy using [!ac](CIVET); the testing results for
 this version of the documentation is available at the following links:
 
++Test Results+:
+
 !civet mergeresults
+
++Releases+: [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
