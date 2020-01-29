@@ -7,7 +7,7 @@
 
 [Variables]
   [./u]
-    scaling = 1e-4
+    scaling = 1e-5
   [../]
 []
 
@@ -48,10 +48,10 @@
 
   l_max_its = 20
   nl_max_its = 20
-  nl_div_tol = 1.0e+4
+  nl_div_tol = 10
 
-  dt = 5
-  num_steps = 4
+  dt = 1
+  num_steps = 3
 
   petsc_options = '-snes_converged_reason -ksp_converged_reason '
   petsc_options_iname = '-pc_type -pc_hypre_type '
