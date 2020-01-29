@@ -13,11 +13,9 @@
 #include "UserObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
-#include "UserObjectInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 #include "RandomInterface.h"
 
 // Forward Declarations
@@ -33,11 +31,9 @@ InputParameters validParams<NodalUserObject>();
 class NodalUserObject : public UserObject,
                         public BlockRestrictable,
                         public BoundaryRestrictable,
-                        public UserObjectInterface,
                         public Coupleable,
                         public MooseVariableDependencyInterface,
                         public TransientInterface,
-                        protected PostprocessorInterface,
                         public RandomInterface
 {
 public:

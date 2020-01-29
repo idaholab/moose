@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "DistributionInterface.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "MeshChangedInterface.h"
 #include "MooseObject.h"
 #include "MooseTypes.h"
@@ -38,6 +41,9 @@ InputParameters validParams<UserObject>();
 class UserObject : public MooseObject,
                    public SetupInterface,
                    protected FunctionInterface,
+                   public UserObjectInterface,
+                   protected PostprocessorInterface,
+                   protected VectorPostprocessorInterface,
                    protected DistributionInterface,
                    protected Restartable,
                    protected MeshMetaDataInterface,

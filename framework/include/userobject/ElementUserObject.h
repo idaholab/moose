@@ -13,11 +13,9 @@
 #include "UserObject.h"
 #include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
-#include "UserObjectInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 #include "RandomInterface.h"
 #include "ElementIDInterface.h"
 
@@ -36,11 +34,9 @@ InputParameters validParams<ElementUserObject>();
 class ElementUserObject : public UserObject,
                           public BlockRestrictable,
                           public MaterialPropertyInterface,
-                          public UserObjectInterface,
                           public Coupleable,
                           public MooseVariableDependencyInterface,
                           public TransientInterface,
-                          protected PostprocessorInterface,
                           public RandomInterface,
                           public ElementIDInterface
 {

@@ -14,9 +14,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
-#include "UserObjectInterface.h"
 #include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 
 class InterfaceUserObject;
 
@@ -31,9 +29,7 @@ class InterfaceUserObject : public UserObject,
                             public TwoMaterialPropertyInterface,
                             public NeighborCoupleable,
                             public MooseVariableDependencyInterface,
-                            public UserObjectInterface,
-                            public TransientInterface,
-                            public PostprocessorInterface
+                            public TransientInterface
 {
 public:
   static InputParameters validParams();

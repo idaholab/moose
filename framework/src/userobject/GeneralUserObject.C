@@ -26,10 +26,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     TransientInterface(this),
-    DependencyResolverInterface(),
-    UserObjectInterface(this),
-    PostprocessorInterface(this),
-    VectorPostprocessorInterface(this)
+    DependencyResolverInterface()
 {
   _supplied_vars.insert(name());
 }

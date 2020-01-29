@@ -34,11 +34,9 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), true), // true for applying to nodesets
-    UserObjectInterface(this),
     Coupleable(this, true),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
-    PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, true),
     _mesh(_subproblem.mesh()),
     _qp(0),
