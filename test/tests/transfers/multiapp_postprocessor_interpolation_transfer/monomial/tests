@@ -1,0 +1,12 @@
+[Tests]
+  design = MultiAppPostprocessorInterpolationTransfer.md
+  issues = '#14631'
+  [monomial]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out.e
+
+    requirement = "The system shall support interpolating scalar quantities computed spatially as "
+                  "a sub-application in to a cell centered field variable in the main application."
+   []
+[]
