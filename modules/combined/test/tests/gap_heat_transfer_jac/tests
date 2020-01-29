@@ -1,0 +1,10 @@
+[Tests]
+  [gap-heat-transfer-jac]
+    type = Exodiff
+    input = two_blocks.i
+    exodiff = two_blocks_out.e
+    issues = '#14626'
+    requirement = 'The system shall provide a Jacobian for the master-side temperature in thermal contact such that problems with significant gap heat transfer may have a non-linear solve that converges'
+    design = 'GapHeatTransfer.md'
+  []
+[]
