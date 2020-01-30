@@ -1,0 +1,12 @@
+[Tests]
+  design = 'ElementAverageMaterialProperty.md'
+  issues = '#14648'
+
+  [./test_average]
+    type = 'CSVDiff'
+    input = 'element_average_material_property.i'
+    csvdiff = 'element_average_material_property_out.csv'
+
+    requirement = 'The system shall compute the the average value of a material property over the domain.'
+  [../]
+[]
