@@ -184,4 +184,9 @@
       allow_test_objects = True
     []
   []
+  [bouncing-block-ranfs-action]
+    type = 'RunApp'
+    input = 'bouncing-block-ranfs-action.i'
+    requirement = 'The system shall run with RANFS formulation in the contact action'
+  []
 []

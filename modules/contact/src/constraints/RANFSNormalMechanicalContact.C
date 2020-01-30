@@ -14,6 +14,7 @@
 #include "Assembly.h"
 #include "NearestNodeLocator.h"
 #include "MooseVariableFE.h"
+#include "ContactAction.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/enum_fe_family.h"
@@ -25,6 +26,8 @@ InputParameters
 validParams<RANFSNormalMechanicalContact>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
+  params += ContactAction::commonParameters();
+
   params.set<bool>("use_displaced_mesh") = true;
 
   MooseEnum component("x=0 y=1 z=2");

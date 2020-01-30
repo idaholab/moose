@@ -352,21 +352,44 @@ ContactAction::addNodeFaceContact()
   std::vector<VariableName> displacements = getDisplacementVarNames();
   const unsigned int ndisp = displacements.size();
 
-  InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
-  params.applyParameters(parameters(), {"displacements"});
-  params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
-  params.set<std::vector<VariableName>>("displacements") = displacements;
-  params.set<BoundaryName>("boundary") = _master;
-  params.set<bool>("use_displaced_mesh") = true;
-
-  for (unsigned int i = 0; i < ndisp; ++i)
+  // Add option for RANFS contact formulation
+  if (_formulation != "ranfs")
   {
-    std::string name = action_name + "_constraint_" + Moose::stringify(i);
+    InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
 
-    params.set<unsigned int>("component") = i;
-    params.set<NonlinearVariableName>("variable") = displacements[i];
-    params.set<std::vector<VariableName>>("master_variable") = {displacements[i]};
-    _problem->addConstraint("MechanicalContactConstraint", name, params);
+    params.applyParameters(parameters(), {"displacements"});
+    params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
+    params.set<std::vector<VariableName>>("displacements") = displacements;
+    params.set<BoundaryName>("boundary") = _master;
+    params.set<bool>("use_displaced_mesh") = true;
+
+    for (unsigned int i = 0; i < ndisp; ++i)
+    {
+      std::string name = action_name + "_constraint_" + Moose::stringify(i);
+
+      params.set<unsigned int>("component") = i;
+      params.set<NonlinearVariableName>("variable") = displacements[i];
+      params.set<std::vector<VariableName>>("master_variable") = {displacements[i]};
+      _problem->addConstraint("MechanicalContactConstraint", name, params);
+    }
+  }
+  else
+  {
+    InputParameters params = _factory.getValidParams("RANFSNormalMechanicalContact");
+
+    params.applyParameters(parameters(), {"displacements"});
+    params.set<std::vector<VariableName>>("displacements") = displacements;
+    params.set<bool>("use_displaced_mesh") = true;
+
+    for (unsigned int i = 0; i < ndisp; ++i)
+    {
+      std::string name = action_name + "_constraint_" + Moose::stringify(i);
+
+      params.set<MooseEnum>("component") = i;
+      params.set<NonlinearVariableName>("variable") = displacements[i];
+      params.set<std::vector<VariableName>>("master_variable") = {displacements[i]};
+      _problem->addConstraint("RANFSNormalMechanicalContact", name, params);
+    }
   }
 }
 
@@ -422,7 +445,8 @@ ContactAction::getModelEnum()
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  return MooseEnum("kinematic penalty augmented_lagrange tangential_penalty mortar", "kinematic");
+  return MooseEnum("ranfs kinematic penalty augmented_lagrange tangential_penalty mortar",
+                   "kinematic");
 }
 
 MooseEnum

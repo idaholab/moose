@@ -22,6 +22,7 @@ enum class ContactModel
 
 enum class ContactFormulation
 {
+  RANFS,
   KINEMATIC,
   PENALTY,
   AUGMENTED_LAGRANGE,
