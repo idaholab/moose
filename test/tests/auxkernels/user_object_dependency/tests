@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#14664'
+  design = '/auxkernels/AuxKernel.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'aux_uo_deps.i'
+    exodiff = 'aux_uo_deps_out.e'
+    requirement = 'MOOSE shall resolve the dependency of auxiliary kernels on user objects including the objects that the aux kernels indirectly depend on.'
+  [../]
+[]
