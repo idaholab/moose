@@ -29,6 +29,7 @@
 #include "MooseVariableInterface.h"
 #include "MemberTemplateMacros.h"
 #include "ElementIDInterface.h"
+#include "UserObject.h"
 
 // forward declarations
 template <typename ComputeValueType>
@@ -113,13 +114,15 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
 
   template <typename T>
-  const T & getUserObjectTempl(const std::string & name);
+  const T & getUserObjectTempl(const UserObjectName & name);
   template <typename T>
   const T & getUserObjectByNameTempl(const UserObjectName & name);
 
-  const UserObject & getUserObjectBase(const std::string & name);
+  const UserObject & getUserObjectBase(const UserObjectName & name);
+  const UserObject & getUserObjectBaseByName(const UserObjectName & name);
 
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                           unsigned int index = 0);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   virtual const VectorPostprocessorValue &
@@ -300,10 +303,14 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlderTempl(const std::strin
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectTempl(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectTempl(const UserObjectName & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
-  return UserObjectInterface::getUserObjectTempl<T>(name);
+  auto & uo = UserObjectInterface::getUserObjectTempl<T>(name);
+  auto indirect_dependents = uo.getDependObjects();
+  for (auto & indirect_dependent : indirect_dependents)
+    _depend_uo.insert(indirect_dependent);
+  return uo;
 }
 
 template <typename ComputeValueType>
@@ -312,5 +319,9 @@ const T &
 AuxKernelTempl<ComputeValueType>::getUserObjectByNameTempl(const UserObjectName & name)
 {
   _depend_uo.insert(name);
-  return UserObjectInterface::getUserObjectByNameTempl<T>(name);
+  auto & uo = UserObjectInterface::getUserObjectByNameTempl<T>(name);
+  auto indirect_dependents = uo.getDependObjects();
+  for (auto & indirect_dependent : indirect_dependents)
+    _depend_uo.insert(indirect_dependent);
+  return uo;
 }
