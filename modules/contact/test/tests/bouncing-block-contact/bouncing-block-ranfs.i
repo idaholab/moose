@@ -38,23 +38,15 @@ offset = 1e-2
   [../]
 []
 
+[Contact]
+  [./top_bottom]
+    mesh = file
+    slave = 10
+    master = 20
 
-[Constraints]
-  [./disp_x]
-    type = RANFSNormalMechanicalContact
-    slave = 10
-    master = 20
-    variable = disp_x
-    master_variable = disp_x
-    component = x
-  [../]
-  [./disp_y]
-    type = RANFSNormalMechanicalContact
-    slave = 10
-    master = 20
-    variable = disp_y
-    master_variable = disp_y
-    component = y
+    model = frictionless
+    formulation = ranfs
+    system = Constraint
   [../]
 []
 

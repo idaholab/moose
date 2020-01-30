@@ -2,7 +2,7 @@
 
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080'
+  issues = '#13080 #14454'
   [frictionless-nodal-min-lm-mortar-disp-coarse]
     type = 'Exodiff'
     input = 'frictionless-nodal-min-lm-mortar-disp.i'
