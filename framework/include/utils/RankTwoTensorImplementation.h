@@ -850,8 +850,8 @@ RankTwoTensorTempl<Real>::symmetricEigenvalues(std::vector<Real> & eigvals) cons
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals,
-                                                        RankTwoTensorTempl<T> & eigvecs) const
+RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> &,
+                                                        RankTwoTensorTempl<T> &) const
 {
   mooseError(
       "symmetricEigenvaluesEigenvectors is only available for ordered tensor component types");

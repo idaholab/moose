@@ -15,6 +15,7 @@
 #include "MooseEnumItem.h"
 #include "MooseError.h"
 #include "Moose.h"
+#include "DualReal.h"
 
 #include "libmesh/compare_types.h"
 #include "metaphysicl/raw_type.h"
@@ -738,6 +739,27 @@ void linearPartitionItems(dof_id_type num_items,
  */
 processor_id_type
 linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type item_id);
+
+/**
+ * Custom type trait that has a ::value of true for types that cam be use interchangably
+ * with Real. Most notably it is false for complex numbers, which do not have a
+ * strict ordering (and therefore no <,>,<=,>= operators).
+ */
+template <typename T>
+struct IsLikeReal
+{
+  static constexpr bool value = false;
+};
+template <>
+struct IsLikeReal<Real>
+{
+  static constexpr bool value = true;
+};
+template <>
+struct IsLikeReal<DualReal>
+{
+  static constexpr bool value = true;
+};
 
 } // MooseUtils namespace
 

@@ -20,9 +20,6 @@
 #include <petscsys.h>
 #include <vector>
 
-// boost
-#include <boost/type_traits.hpp>
-
 // Forward declarations
 template <typename>
 class RankTwoTensorTempl;
@@ -284,10 +281,10 @@ public:
 
   /// return positive projection tensor of eigen-decomposition
   template <typename T2 = T>
-  typename std::enable_if<boost::has_less<T2>::value, RankFourTensorTempl<T>>::type
+  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
   positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
   template <typename T2 = T>
-  typename std::enable_if<!boost::has_less<T2>::value, RankFourTensorTempl<T>>::type
+  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
   positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _coords
@@ -337,10 +334,10 @@ public:
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
   template <typename T2 = T>
-  typename std::enable_if<boost::has_less_equal<T2>::value, T>::type
+  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, T>::type
   sin3Lode(const T & r0, const T & r0_value) const;
   template <typename T2 = T>
-  typename std::enable_if<!boost::has_less_equal<T2>::value, T>::type
+  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, T>::type
   sin3Lode(const T & r0, const T & r0_value) const;
 
   /**
@@ -350,10 +347,10 @@ public:
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
   template <typename T2 = T>
-  typename std::enable_if<boost::has_less_equal<T2>::value, RankTwoTensorTempl<T>>::type
+  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
   dsin3Lode(const T & r0) const;
   template <typename T2 = T>
-  typename std::enable_if<!boost::has_less_equal<T2>::value, RankTwoTensorTempl<T>>::type
+  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
   dsin3Lode(const T & r0) const;
 
   /**
@@ -363,10 +360,10 @@ public:
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
   template <typename T2 = T>
-  typename std::enable_if<boost::has_less_equal<T2>::value, RankFourTensorTempl<T>>::type
+  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
   d2sin3Lode(const T & r0) const;
   template <typename T2 = T>
-  typename std::enable_if<!boost::has_less_equal<T2>::value, RankFourTensorTempl<T>>::type
+  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
   d2sin3Lode(const T & r0) const;
 
   /**
@@ -449,11 +446,11 @@ public:
    * A DualReal instantiation is available to rotate dual numbers as well.
    */
   template <typename T2 = T>
-  typename std::enable_if<boost::has_less<T2>::value, RankTwoTensorTempl<T>>::type
+  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
   givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
   template <typename T2 = T>
-  typename std::enable_if<!boost::has_less<T2>::value, RankTwoTensorTempl<T>>::type
-  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
+  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
+  givensRotation(unsigned int, unsigned int, unsigned int) const;
 
   /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
   void hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const;
@@ -614,7 +611,7 @@ RankTwoTensorTempl<T>::operator/(const T2 & b) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<boost::has_less<T2>::value, RankFourTensorTempl<T>>::type
+typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
 RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eigval,
                                                             RankTwoTensorTempl<T> & eigvec) const
 {
@@ -666,7 +663,7 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!boost::has_less<T2>::value, RankFourTensorTempl<T>>::type
+typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
 RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> &,
                                                             RankTwoTensorTempl<T> &) const
 {
@@ -676,7 +673,7 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> &,
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<boost::has_less<T2>::value, RankTwoTensorTempl<T>>::type
+typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
 RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
 {
   T c, s;
@@ -716,15 +713,15 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsi
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!boost::has_less<T2>::value, RankTwoTensorTempl<T>>::type
-RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
+typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
+RankTwoTensorTempl<T>::givensRotation(unsigned int, unsigned int, unsigned int) const
 {
   mooseError("givensRotation is only available for ordered tensor component types");
 }
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<boost::has_less_equal<T2>::value, T>::type
+typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, T>::type
 RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 {
   T bar = secondInvariant();
@@ -739,7 +736,7 @@ RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!boost::has_less_equal<T2>::value, T>::type
+typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, T>::type
 RankTwoTensorTempl<T>::sin3Lode(const T &, const T &) const
 {
   mooseError("sin3Lode is only available for ordered tensor component types");
@@ -747,7 +744,7 @@ RankTwoTensorTempl<T>::sin3Lode(const T &, const T &) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<boost::has_less_equal<T2>::value, RankTwoTensorTempl<T>>::type
+typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
 RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 {
   T bar = secondInvariant();
@@ -761,7 +758,7 @@ RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!boost::has_less_equal<T2>::value, RankTwoTensorTempl<T>>::type
+typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
 RankTwoTensorTempl<T>::dsin3Lode(const T &) const
 {
   mooseError("dsin3Lode is only available for ordered tensor component types");
@@ -769,7 +766,7 @@ RankTwoTensorTempl<T>::dsin3Lode(const T &) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<boost::has_less_equal<T2>::value, RankFourTensorTempl<T>>::type
+typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
 RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
 {
   T bar = secondInvariant();
@@ -796,7 +793,7 @@ RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!boost::has_less_equal<T2>::value, RankFourTensorTempl<T>>::type
+typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
 RankTwoTensorTempl<T>::d2sin3Lode(const T &) const
 {
   mooseError("d2sin3Lode is only available for ordered tensor component types");
