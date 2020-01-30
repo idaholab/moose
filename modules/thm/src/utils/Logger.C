@@ -32,12 +32,6 @@ Logger::print() const
   }
 }
 
-bool
-Logger::isEmpty() const
-{
-  return (_n_errors == 0) && (_n_warnings == 0);
-}
-
 unsigned int
 Logger::getNumberOfErrors() const
 {

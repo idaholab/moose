@@ -195,7 +195,7 @@ public:
   template <typename... Args>
   void logWarning(Args &&... args) const
   {
-    logComponentError(cname(), std::forward<Args>(args)...);
+    logComponentWarning(cname(), std::forward<Args>(args)...);
   }
 
 protected:

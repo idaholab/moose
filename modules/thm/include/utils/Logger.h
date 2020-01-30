@@ -53,13 +53,6 @@ public:
   void print() const;
 
   /**
-   * Is the log empty?
-   *
-   * @return true if there is nothing in the log, othwerwise false
-   */
-  bool isEmpty() const;
-
-  /**
    * Return the number of errors
    *
    * @return The number of errors in this log
