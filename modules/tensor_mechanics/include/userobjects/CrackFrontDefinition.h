@@ -51,42 +51,42 @@ public:
    * @param node_index Index of the node
    * @return Pointer to node
    */
-  const Node * getCrackFrontNodePtr(const unsigned int node_index) const;
+  const Node * getCrackFrontNodePtr(const std::size_t node_index) const;
 
   /**
    * Get a Point object for a specified point on the crack front
    * @param point_index Index of the point
    * @return Point object
    */
-  const Point * getCrackFrontPoint(const unsigned int point_index) const;
+  const Point * getCrackFrontPoint(const std::size_t point_index) const;
 
   /**
    * Get the vector tangent to the crack front at a specified position
    * @param point_index Index of the point
    * @return tangent vector
    */
-  const RealVectorValue & getCrackFrontTangent(const unsigned int point_index) const;
+  const RealVectorValue & getCrackFrontTangent(const std::size_t point_index) const;
 
   /**
    * Get the length of the line segment on the crack front ahead of the specified position
    * @param point_index Index of the point
    * @return Line segment length
    */
-  Real getCrackFrontForwardSegmentLength(const unsigned int point_index) const;
+  Real getCrackFrontForwardSegmentLength(const std::size_t point_index) const;
 
   /**
    * Get the length of the line segment on the crack front behind the specified position
    * @param point_index Index of the point
    * @return Line segment length
    */
-  Real getCrackFrontBackwardSegmentLength(const unsigned int point_index) const;
+  Real getCrackFrontBackwardSegmentLength(const std::size_t point_index) const;
 
   /**
    * Get the unit vector of the crack extension direction at the specified position
    * @param point_index Index of the point
    * @return Crack extension direction vector
    */
-  const RealVectorValue & getCrackDirection(const unsigned int point_index) const;
+  const RealVectorValue & getCrackDirection(const std::size_t point_index) const;
 
   /**
    * Get the distance along the crack front from the beginning of the crack to the
@@ -94,7 +94,7 @@ public:
    * @param point_index Index of the point
    * @return Distance along crack
    */
-  Real getDistanceAlongFront(const unsigned int point_index) const;
+  Real getDistanceAlongFront(const std::size_t point_index) const;
 
   /**
    * Whether the distance along the crack front is available as an angle
@@ -108,13 +108,13 @@ public:
    * @param point_index Index of the point
    * @return Angle along crack
    */
-  Real getAngleAlongFront(const unsigned int point_index) const;
+  Real getAngleAlongFront(const std::size_t point_index) const;
 
   /**
    * Get the number of points defining the crack front as a set of line segments
    * @return Number of points
    */
-  unsigned int getNumCrackFrontPoints() const;
+  std::size_t getNumCrackFrontPoints() const;
 
   /**
    * Whether the fracture computations are treated as 2D for a 3D model
@@ -130,7 +130,7 @@ public:
    * @return Vector in crack local coordinates
    */
   RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector,
-                                           const unsigned int point_index) const;
+                                           const std::size_t point_index) const;
   /**
    * Rotate a RankTwoTensor in the global coordinate coordinate system to the crack
    * front local coordinate system at a specified point on the crack.
@@ -139,7 +139,7 @@ public:
    * @return Tensor in crack local coordinates
    */
   RankTwoTensor rotateToCrackFrontCoords(const RankTwoTensor tensor,
-                                         const unsigned int point_index) const;
+                                         const std::size_t point_index) const;
 
   /**
    * Rotate a vector from crack front cartesian coordinate to global cartesian coordinate
@@ -148,7 +148,7 @@ public:
    * @return Vector in global coordinates
    */
   RealVectorValue rotateFromCrackFrontCoordsToGlobal(const RealVectorValue vector,
-                                                     const unsigned int point_index) const;
+                                                     const std::size_t point_index) const;
 
   /**
    * Calculate r and theta of a point in the crack front polar coordinates for a given
@@ -159,7 +159,7 @@ public:
    * @param theta Value of the theta coordinate computed in this function
    */
   void calculateRThetaToCrackFront(const Point qp,
-                                   const unsigned int point_index,
+                                   const std::size_t point_index,
                                    Real & r,
                                    Real & theta) const;
 
@@ -172,7 +172,7 @@ public:
    * @param theta Value of the theta coordinate computed in this function
    * @return Index of the closest crack front point
    */
-  unsigned int calculateRThetaToCrackFront(const Point qp, Real & r, Real & theta) const;
+  std::size_t calculateRThetaToCrackFront(const Point qp, Real & r, Real & theta) const;
 
   /**
    * Determine whether a given node is on one of the boundaries that intersects an end
@@ -188,20 +188,23 @@ public:
    * @param point_index the crack front point index
    * @return true if the point is on an intersecting boundary
    */
-  bool isPointWithIndexOnIntersectingBoundary(const unsigned int point_index) const;
+  bool isPointWithIndexOnIntersectingBoundary(const std::size_t point_index) const;
 
   /**
    * Get the strain in the direction tangent to the crack front at a given point
    * @param node_index the crack front node index
    * @return Tangential strain
    */
-  Real getCrackFrontTangentialStrain(const unsigned int node_index) const;
+  Real getCrackFrontTangentialStrain(const std::size_t node_index) const;
 
   /**
    * Determine whether the crack front was defined using nodes
    * @return true if it was defined using nodes
    */
-  bool hasCrackFrontNodes() const { return _geom_definition_method == CRACK_FRONT_NODES; }
+  bool hasCrackFrontNodes() const
+  {
+    return _geom_definition_method == CRACK_GEOM_DEFINITION::CRACK_FRONT_NODES;
+  }
 
   /**
    * Determine whether a node is contained within a specified volume integral element ring
@@ -211,9 +214,9 @@ public:
    * @param node_index Index of the crack front node
    * @return true if the node is in the ring
    */
-  bool isNodeInRing(const unsigned int ring_index,
+  bool isNodeInRing(const std::size_t ring_index,
                     const dof_id_type connected_node_id,
-                    const unsigned int node_index) const;
+                    const std::size_t node_index) const;
 
   /**
    * Compute the q function for the case where it is defined geometrically
@@ -222,8 +225,8 @@ public:
    * @param current_node Node at which q is evaluated
    * @return q
    */
-  Real DomainIntegralQFunction(unsigned int crack_front_point_index,
-                               unsigned int ring_index,
+  Real DomainIntegralQFunction(std::size_t crack_front_point_index,
+                               std::size_t ring_index,
                                const Node * const current_node) const;
 
   /**
@@ -233,26 +236,24 @@ public:
    * @param current_node Node at which q is evaluated
    * @return q
    */
-  Real DomainIntegralTopologicalQFunction(unsigned int crack_front_point_index,
-                                          unsigned int ring_index,
+  Real DomainIntegralTopologicalQFunction(std::size_t crack_front_point_index,
+                                          std::size_t ring_index,
                                           const Node * const current_node) const;
 
 protected:
   /// Enum used to define the method for computing the crack extension direction
-  enum DIRECTION_METHOD
-  {
+  const enum class DIRECTION_METHOD {
     CRACK_DIRECTION_VECTOR,
     CRACK_MOUTH,
     CURVED_CRACK_FRONT
-  };
+  } _direction_method;
 
   /// Enum used to define the method for computing the crack extension direction
   /// at the ends of the crack
-  enum END_DIRECTION_METHOD
-  {
+  const enum class END_DIRECTION_METHOD {
     NO_SPECIAL_TREATMENT,
     END_CRACK_DIRECTION_VECTOR
-  };
+  } _end_direction_method;
 
   /// Enum used to define the type of the nodes on the crack front (end or middle)
   enum CRACK_NODE_TYPE
@@ -263,11 +264,11 @@ protected:
   };
 
   /// Enum used to define whether the crack front is defined using nodes or points
-  enum CRACK_GEOM_DEFINITION
+  enum class CRACK_GEOM_DEFINITION
   {
     CRACK_FRONT_NODES,
     CRACK_FRONT_POINTS
-  };
+  } _geom_definition_method;
 
   /// Reference to the auxiliary system
   AuxiliarySystem & _aux;
@@ -277,9 +278,7 @@ protected:
   static const Real _tol;
 
   /// Crack front nodes ordered from the start to end of the crack front
-  std::vector<unsigned int> _ordered_crack_front_nodes;
-  /// Defines whether the crack front is defined using nodes or points
-  CRACK_GEOM_DEFINITION _geom_definition_method;
+  std::vector<dof_id_type> _ordered_crack_front_nodes;
   /// Vector of points along the crack front
   std::vector<Point> _crack_front_points;
   /// Vector of tangent directions along the crack front
@@ -298,10 +297,6 @@ protected:
   std::vector<RankTwoTensor> _rot_matrix;
   /// Overall length of the crack
   Real _overall_length;
-  /// Method used to determine crack extension direction
-  DIRECTION_METHOD _direction_method;
-  /// Method used to determine crack extension direction at ends of crack front
-  END_DIRECTION_METHOD _end_direction_method;
   /// Fixed vector optionally used to define crack extension direction
   RealVectorValue _crack_direction_vector;
   /// Fixed vector optionally used to define crack extension direction at end 1 of crack front
@@ -341,13 +336,13 @@ protected:
   /// Whether topological rings are used to define the q functions
   bool _q_function_rings;
   /// Numer of elements from crack tip to last topological ring
-  unsigned int _last_ring;
+  std::size_t _last_ring;
   /// Numer of elements from crack tip to first topological ring
-  unsigned int _first_ring;
+  std::size_t _first_ring;
   /// Data structure used to store information about topological rings
   /// Key is a pair of the crack front node index and ring id
   /// Data is a set of the IDs of the nodes in the ring for that crack front node
-  std::map<std::pair<dof_id_type, unsigned int>, std::set<dof_id_type>>
+  std::map<std::pair<dof_id_type, std::size_t>, std::set<dof_id_type>>
       _crack_front_node_to_node_map;
   /// Method used to define the q function
   MooseEnum _q_function_type;
@@ -362,7 +357,7 @@ protected:
   /// the crack front points
   const CrackFrontPointsProvider * _crack_front_points_provider;
   /// Number of points coming from the CrackFrontPointsProvider
-  unsigned int _num_points_from_provider;
+  std::size_t _num_points_from_provider;
 
   /**
    * Get the set of all crack front nodes
@@ -410,7 +405,7 @@ protected:
    * @param nodes Set of all nodes on the crack front
    * @param dir0 First coordinate direction in which to order the coordinates
    */
-  unsigned int maxNodeCoor(std::vector<Node *> & nodes, unsigned int dir0 = 0);
+  dof_id_type maxNodeCoor(std::vector<Node *> & nodes, unsigned int dir0 = 0);
 
   /**
    * Update the data structures defining the crack front geometry such as
@@ -474,6 +469,6 @@ protected:
    */
   void projectToFrontAtPoint(Real & dist_to_front,
                              Real & dist_along_tangent,
-                             unsigned int crack_front_point_index,
+                             std::size_t crack_front_point_index,
                              const Node * const current_node) const;
 };

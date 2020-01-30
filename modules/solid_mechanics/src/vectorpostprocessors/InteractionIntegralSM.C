@@ -92,7 +92,7 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
     _current_instantaneous_thermal_expansion_coef(
         hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
             ? &getMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
-            : NULL),
+            : nullptr),
     _q_function_type(getParam<MooseEnum>("q_function_type").getEnum<QMethod>()),
     _position_type(getParam<MooseEnum>("position_type").getEnum<PositionType>()),
     _sif_mode(getParam<MooseEnum>("sif_mode").getEnum<SifMethod>()),
@@ -114,11 +114,11 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("InteractionIntegralSM Error: number of variables supplied in 'displacements' must "
+    paramError("InteractionIntegralSM Error: number of variables supplied in 'displacements' must "
                "match the mesh dimension.");
 
   // fetch gradients of coupled variables
-  for (unsigned int i = 0; i < _ndisp; ++i)
+  for (std::size_t i = 0; i < _ndisp; ++i)
     _grad_disp[i] = &coupledGradient("displacements", i);
 
   // set unused dimensions to zero
@@ -135,7 +135,7 @@ InteractionIntegralSM::initialSetup()
 void
 InteractionIntegralSM::initialize()
 {
-  unsigned int num_pts;
+  std::size_t num_pts;
   if (_treat_as_2d)
     num_pts = 1;
   else
@@ -149,7 +149,7 @@ InteractionIntegralSM::initialize()
 }
 
 Real
-InteractionIntegralSM::computeQpIntegral(const unsigned int crack_front_point_index,
+InteractionIntegralSM::computeQpIntegral(const std::size_t crack_front_point_index,
                                          const Real scalar_q,
                                          const RealVectorValue & grad_of_scalar_q)
 {
@@ -157,8 +157,8 @@ InteractionIntegralSM::computeQpIntegral(const unsigned int crack_front_point_in
   RealVectorValue crack_direction(1.0, 0.0, 0.0);
 
   // Calculate (r,theta) position of qp relative to crack front
-  Point p(_q_point[_qp]);
-  _crack_front_definition->calculateRThetaToCrackFront(p, crack_front_point_index, _r, _theta);
+  _crack_front_definition->calculateRThetaToCrackFront(
+      _q_point[_qp], crack_front_point_index, _r, _theta);
 
   RankTwoTensor aux_stress;
   RankTwoTensor aux_du;
@@ -251,7 +251,7 @@ InteractionIntegralSM::execute()
   FEType fe_type(
       Utility::string_to_enum<Order>("first"), // BWS TODO does this have to be hardcoded?
       Utility::string_to_enum<FEFamily>("lagrange"));
-  const unsigned int dim = _current_elem->dim();
+  const std::size_t dim = _current_elem->dim();
   std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
@@ -259,12 +259,12 @@ InteractionIntegralSM::execute()
   fe->reinit(_current_elem);
 
   // calculate q for all nodes in this element
-  unsigned int ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
+  std::size_t ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 
-  for (unsigned int icfp = 0; icfp < _interaction_integral.size(); icfp++)
+  for (auto icfp = beginIndex(_interaction_integral); icfp < _interaction_integral.size(); icfp++)
   {
     _q_curr_elem.clear();
-    for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+    for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
     {
       const Node * this_node = _current_elem->node_ptr(i);
       Real q_this_node;
@@ -284,11 +284,11 @@ InteractionIntegralSM::execute()
       Real scalar_q = 0.0;
       RealVectorValue grad_of_scalar_q(0.0, 0.0, 0.0);
 
-      for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+      for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
       {
         scalar_q += (*_phi_curr_elem)[i][_qp] * _q_curr_elem[i];
 
-        for (unsigned int j = 0; j < _current_elem->dim(); ++j)
+        for (std::size_t j = 0; j < _current_elem->dim(); ++j)
           grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
       }
 
@@ -303,7 +303,7 @@ InteractionIntegralSM::finalize()
 {
   gatherSum(_interaction_integral);
 
-  for (unsigned int i = 0; i < _interaction_integral.size(); ++i)
+  for (auto i = beginIndex(_interaction_integral); i < _interaction_integral.size(); ++i)
   {
     if (_has_symmetry_plane)
       _interaction_integral[i] *= 2.0;

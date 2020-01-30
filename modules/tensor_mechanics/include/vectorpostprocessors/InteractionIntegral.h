@@ -58,7 +58,7 @@ protected:
    *                         quadrature point
    * @return Contribution of this quadrature point to the integral
    */
-  Real computeQpIntegral(const unsigned int crack_front_point_index,
+  Real computeQpIntegral(const std::size_t crack_front_point_index,
                          const Real scalar_q,
                          const RealVectorValue & grad_of_scalar_q);
 
@@ -80,7 +80,7 @@ protected:
   void computeTFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
 
   /// Number of displacement components
-  unsigned int _ndisp;
+  std::size_t _ndisp;
   /// Pointer to the crack front definition object
   const CrackFrontDefinition * const _crack_front_definition;
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
@@ -108,7 +108,7 @@ protected:
   /// Young's modulus of the material
   Real _youngs_modulus;
   /// Index of the ring for the integral computed by this object
-  unsigned int _ring_index;
+  std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature
   const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
   /// Vector of q function values for the nodes in the current element

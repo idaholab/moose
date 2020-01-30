@@ -60,7 +60,7 @@ JIntegral::JIntegral(const InputParameters & parameters)
     _Eshelby_tensor(getMaterialProperty<RankTwoTensor>("Eshelby_tensor")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             ? &getMaterialProperty<RealVectorValue>("J_thermal_term_vec")
-                            : NULL),
+                            : nullptr),
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
@@ -89,7 +89,7 @@ JIntegral::initialSetup()
 void
 JIntegral::initialize()
 {
-  unsigned int num_pts;
+  std::size_t num_pts;
   if (_treat_as_2d)
     num_pts = 1;
   else
@@ -109,7 +109,7 @@ JIntegral::initialize()
 }
 
 Real
-JIntegral::computeQpIntegral(const unsigned int crack_front_point_index,
+JIntegral::computeQpIntegral(const std::size_t crack_front_point_index,
                              const Real scalar_q,
                              const RealVectorValue & grad_of_scalar_q)
 {
@@ -132,7 +132,7 @@ JIntegral::computeQpIntegral(const unsigned int crack_front_point_index,
   Real eq_thermal = 0.0;
   if (_J_thermal_term_vec)
   {
-    for (unsigned int i = 0; i < 3; i++)
+    for (std::size_t i = 0; i < 3; i++)
       eq_thermal += crack_direction(i) * scalar_q * (*_J_thermal_term_vec)[_qp](i);
   }
 
@@ -154,7 +154,7 @@ void
 JIntegral::execute()
 {
   // calculate phi and dphi for this element
-  const unsigned int dim = _current_elem->dim();
+  const std::size_t dim = _current_elem->dim();
   std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
@@ -162,12 +162,12 @@ JIntegral::execute()
   fe->reinit(_current_elem);
 
   // calculate q for all nodes in this element
-  unsigned int ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
+  std::size_t ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 
-  for (unsigned int icfp = 0; icfp < _j_integral.size(); icfp++)
+  for (std::size_t icfp = 0; icfp < _j_integral.size(); icfp++)
   {
     _q_curr_elem.clear();
-    for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+    for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
     {
       const Node * this_node = _current_elem->node_ptr(i);
       Real q_this_node;
@@ -187,11 +187,11 @@ JIntegral::execute()
       Real scalar_q = 0.0;
       RealVectorValue grad_of_scalar_q(0.0, 0.0, 0.0);
 
-      for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+      for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
       {
         scalar_q += (*_phi_curr_elem)[i][_qp] * _q_curr_elem[i];
 
-        for (unsigned int j = 0; j < _current_elem->dim(); ++j)
+        for (std::size_t j = 0; j < _current_elem->dim(); ++j)
           grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
       }
 
@@ -206,7 +206,7 @@ JIntegral::finalize()
 {
   gatherSum(_j_integral);
 
-  for (unsigned int i = 0; i < _j_integral.size(); ++i)
+  for (std::size_t i = 0; i < _j_integral.size(); ++i)
   {
     if (_has_symmetry_plane)
       _j_integral[i] *= 2.0;

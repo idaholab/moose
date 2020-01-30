@@ -46,7 +46,7 @@ protected:
    *                         quadrature point
    * @return Contribution of this quadrature point to the J integral
    */
-  Real computeQpIntegral(const unsigned int crack_front_point_index,
+  Real computeQpIntegral(const std::size_t crack_front_point_index,
                          const Real scalar_q,
                          const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
@@ -67,23 +67,15 @@ protected:
   /// Young's modulus of the material
   Real _youngs_modulus;
   /// Index of the ring for the integral computed by this object
-  unsigned int _ring_index;
+  std::size_t _ring_index;
 
   /// Enum used to select the method used to compute the q function used
   /// in the fracture integrals
-  enum class QMethod
-  {
-    Geometry,
-    Topology
-  } _q_function_type;
+  const enum class QMethod { Geometry, Topology } _q_function_type;
 
   /// Enum used to define how the distance along the crack front is
   /// measured (angle or distance)
-  enum class PositionType
-  {
-    Angle,
-    Distance
-  } _position_type;
+  const enum class PositionType { Angle, Distance } _position_type;
 
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;

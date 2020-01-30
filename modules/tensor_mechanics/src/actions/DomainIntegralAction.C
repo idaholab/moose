@@ -166,9 +166,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   if (isParamValid("crack_front_points_provider"))
   {
     if (!isParamValid("number_points_from_provider"))
-      mooseError("DomainIntegral error: when crack_front_points_provider is used, the "
-                 "number_points_from_provider must be "
-                 "provided.");
+      mooseError("DomainIntegral error: when crack_front_points_provider is used, "
+                 "number_points_from_provider must be provided.");
     _use_crack_front_points_provider = true;
     _crack_front_points_provider = getParam<UserObjectName>("crack_front_points_provider");
   }
