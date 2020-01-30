@@ -30,6 +30,9 @@ MOOSE works on Mac OS, Linux, and Windows, and it is easy to [get started](getti
 !col-end!
 !row-end!
 
+## Upcoming Training Events
+
+!include upcoming_training.md
 
 !gallery! large=6
 
