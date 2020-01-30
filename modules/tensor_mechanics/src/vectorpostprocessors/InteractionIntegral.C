@@ -134,7 +134,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("InteractionIntegral Error: number of variables supplied in 'displacements' must "
+    paramError("displacements",
+               "InteractionIntegral Error: number of variables supplied in 'displacements' must "
                "match the mesh dimension.");
 
   // fetch gradients of coupled variables

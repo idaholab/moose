@@ -121,42 +121,46 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
   if (isParamValid("crack_front_points"))
   {
     if (isParamValid("boundary"))
-      mooseError("CrackFrontDefinition error: since boundary is defined, crack_front_points should "
+      paramError("crack_front_points",
+                 "CrackFrontDefinition error: since boundary is defined, crack_front_points should "
                  "not be added.");
     if (isParamValid("crack_front_points_provider"))
-      mooseError("As crack_front_points have been provided, the crack_front_points_provider will "
+      paramError("crack_front_points_provider",
+                 "As crack_front_points have been provided, the crack_front_points_provider will "
                  "not be used and needs to be removed.");
     _crack_front_points = getParam<std::vector<Point>>("crack_front_points");
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
     if (_t_stress)
-      mooseError("t_stress not yet supported with crack_front_points");
+      paramError("t_stress", "t_stress not yet supported with crack_front_points");
     if (_q_function_rings)
-      mooseError("q_function_rings not supported with crack_front_points");
+      paramError("q_function_rings", "q_function_rings not supported with crack_front_points");
   }
   else if (isParamValid("crack_front_points_provider"))
   {
     if (isParamValid("boundary"))
-      mooseError("CrackFrontDefinition error: since boundary is defined, "
+      paramError("crack_front_points_provider",
+                 "CrackFrontDefinition error: since boundary is defined, "
                  "crack_front_points_provider should not be added.");
     if (!isParamValid("number_points_from_provider"))
-      mooseError("CrackFrontDefinition error: When crack_front_points_provider is used, the "
-                 "number_points_from_provider must be "
-                 "provided.");
+      paramError("number_points_from_provider",
+                 "CrackFrontDefinition error: When crack_front_points_provider is used, the "
+                 "number_points_from_provider must be provided.");
     _crack_front_points_provider = &getUserObjectByName<CrackFrontPointsProvider>(
         getParam<UserObjectName>("crack_front_points_provider"));
     _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
   }
   else if (isParamValid("number_points_from_provider"))
-    mooseError("CrackFrontDefinition error: number_points_from_provider is provided but "
-               "crack_front_points_provider cannot "
-               "be found.");
+    paramError("number_points_from_provider",
+               "CrackFrontDefinition error: number_points_from_provider is provided but "
+               "crack_front_points_provider cannot be found.");
   else if (isParamValid("boundary"))
   {
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_NODES;
     if (parameters.isParamSetByUser("closed_loop"))
-      mooseError("In CrackFrontDefinition, if 'boundary' is defined, 'closed_loop' should not be "
-                 "set by user!");
+      paramError("closed_loop",
+                 "In CrackFrontDefinition, if 'boundary' is defined, 'closed_loop' should not be "
+                 "set by user because closed loops are detected automatically");
   }
   else
     mooseError("In CrackFrontDefinition, must define one of 'boundary', 'crack_front_points' "
@@ -167,31 +171,38 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
 
   if (_has_symmetry_plane)
     if (_symmetry_plane > 2)
-      mooseError("symmetry_plane out of bounds: ", _symmetry_plane, " Must be >=0 and <=2.");
+      paramError("symmetry_plane",
+                 "symmetry_plane out of bounds: ",
+                 _symmetry_plane,
+                 " Must be >=0 and <=2.");
 
   switch (_direction_method)
   {
     case DIRECTION_METHOD::CRACK_DIRECTION_VECTOR:
       if (!isParamValid("crack_direction_vector"))
-        mooseError("crack_direction_vector must be specified if crack_direction_method = "
+        paramError("crack_direction_vector",
+                   "crack_direction_vector must be specified if crack_direction_method = "
                    "CrackDirectionVector");
       _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
       break;
     case DIRECTION_METHOD::CRACK_MOUTH:
       if (isParamValid("crack_direction_vector"))
-        mooseError("crack_direction_vector must not be specified if crack_direction_method = "
+        paramError("crack_direction_vector",
+                   "crack_direction_vector must not be specified if crack_direction_method = "
                    "CrackMouthNodes");
       if (_crack_mouth_boundary_names.size() == 0)
-        mooseError(
+        paramError(
+            "crack_mouth_boundary",
             "crack_mouth_boundary must be specified if crack_direction_method = CrackMouthNodes");
       break;
     case DIRECTION_METHOD::CURVED_CRACK_FRONT:
       if (isParamValid("crack_direction_vector"))
-        mooseError("crack_direction_vector must not be specified if crack_direction_method = "
+        paramError("crack_direction_vector",
+                   "crack_direction_vector must not be specified if crack_direction_method = "
                    "CurvedCrackFront");
       break;
     default:
-      mooseError("Invalid direction_method");
+      paramError("crack_direction_method", "Invalid direction_method");
   }
 
   if (isParamValid("intersecting_boundary"))
@@ -200,10 +211,12 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
   if (_end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR)
   {
     if (!isParamValid("crack_direction_vector_end_1"))
-      mooseError("crack_direction_vector_end_1 must be specified if crack_end_direction_method = "
+      paramError("crack_direction_vector_end_1",
+                 "crack_direction_vector_end_1 must be specified if crack_end_direction_method = "
                  "CrackDirectionVector");
     if (!isParamValid("crack_direction_vector_end_2"))
-      mooseError("crack_direction_vector_end_2 must be specified if crack_end_direction_method = "
+      paramError("crack_direction_vector_end_2",
+                 "crack_direction_vector_end_2 must be specified if crack_end_direction_method = "
                  "CrackDirectionVector");
     _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
     _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
@@ -216,12 +229,13 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _disp_z_var_name = getParam<VariableName>("disp_z");
   }
   else if (_t_stress == true && _treat_as_2d == false)
-    mooseError("Displacement variables must be provided for T-stress calculation");
+    paramError("displacements", "Displacement variables must be provided for T-stress calculation");
 
   if (_q_function_rings)
   {
     if (!isParamValid("last_ring"))
-      mooseError("The max number of rings of nodes to generate must be provided if "
+      paramError("last_ring",
+                 "The max number of rings of nodes to generate must be provided if "
                  "q_function_rings = true");
     _last_ring = getParam<unsigned int>("last_ring");
     _first_ring = getParam<unsigned int>("first_ring");
@@ -262,7 +276,7 @@ CrackFrontDefinition::initialSetup()
   }
 
   if (_closed_loop && _intersecting_boundary_names.size() > 0)
-    mooseError("Cannot use intersecting_boundary with closed-loop cracks");
+    paramError("intersecting_boundary", "Cannot use intersecting_boundary with closed-loop cracks");
 
   updateCrackFrontGeometry();
 
@@ -457,10 +471,12 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
       pickLoopCrackEndNodes(end_nodes, nodes, node_to_line_elem_map, line_elems);
       _closed_loop = true;
       if (_end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR)
-        mooseError("In CrackFrontDefinition, end_direction_method cannot be CrackDirectionVector "
+        paramError("end_direction_method",
+                   "In CrackFrontDefinition, end_direction_method cannot be CrackDirectionVector "
                    "for a closed-loop crack");
       if (_intersecting_boundary_names.size() > 0)
-        mooseError("In CrackFrontDefinition, intersecting_boundary cannot be specified for a "
+        paramError("intersecting_boundary",
+                   "In CrackFrontDefinition, intersecting_boundary cannot be specified for a "
                    "closed-loop crack");
     }
     else if (end_nodes.size() == 2) // Rearrange the order of the end nodes if needed
@@ -1100,8 +1116,10 @@ Real
 CrackFrontDefinition::getAngleAlongFront(const std::size_t point_index) const
 {
   if (!hasAngleAlongFront())
-    mooseError("In CrackFrontDefinition, Requested angle along crack front, but not available.  "
-               "Must specify crack_mouth_boundary.");
+    paramError(
+        "crack_mouth_boundary",
+        "In CrackFrontDefinition, Requested angle along crack front, but definition of crack mouth "
+        "boundary using 'crack_mouth_boundary' parameter is necessary to do that.");
   return _angles_along_front[point_index];
 }
 

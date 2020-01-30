@@ -158,7 +158,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
       _ring_vec.push_back(i);
   }
   else
-    mooseError("DomainIntegral error: invalid q_function_type.");
+    paramError("q_function_type", "DomainIntegral error: invalid q_function_type.");
 
   if (isParamValid("crack_front_points"))
     _crack_front_points = getParam<std::vector<Point>>("crack_front_points");
@@ -166,15 +166,16 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   if (isParamValid("crack_front_points_provider"))
   {
     if (!isParamValid("number_points_from_provider"))
-      mooseError("DomainIntegral error: when crack_front_points_provider is used, "
+      paramError("number_points_from_provider",
+                 "DomainIntegral error: when crack_front_points_provider is used, "
                  "number_points_from_provider must be provided.");
     _use_crack_front_points_provider = true;
     _crack_front_points_provider = getParam<UserObjectName>("crack_front_points_provider");
   }
   else if (isParamValid("number_points_from_provider"))
-    mooseError("DomainIntegral error: number_points_from_provider is provided but "
-               "crack_front_points_provider cannot "
-               "be found.");
+    paramError("crack_front_points_provider",
+               "DomainIntegral error: number_points_from_provider is provided but "
+               "crack_front_points_provider cannot be found.");
   if (isParamValid("crack_mouth_boundary"))
     _crack_mouth_boundary_names = getParam<std::vector<BoundaryName>>("crack_mouth_boundary");
   if (isParamValid("intersecting_boundary"))
@@ -185,8 +186,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   bool youngs_modulus_set(false);
   bool poissons_ratio_set(false);
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
-  if (integral_moose_enums.size() == 0)
-    mooseError("Must specify at least one domain integral to perform.");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
     if (isParamValid("displacements"))
@@ -194,7 +193,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
       _displacements = getParam<std::vector<VariableName>>("displacements");
 
       if (_displacements.size() < 2)
-        mooseError(
+        paramError(
+            "displacements",
             "DomainIntegral error: The size of the displacements vector should at least be 2.");
     }
     else
@@ -204,7 +204,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
                         "Please specify displacements using the `dispalcements` parameter.");
 
       if (!isParamValid("disp_x") || !isParamValid("disp_y"))
-        mooseError(
+        paramError(
+            "displacements",
             "DomainIntegral error: Specify displacements using the `displacements` parameter.");
       else
       {
@@ -225,7 +226,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
             integral_moose_enums[i]);
 
       if (!(isParamValid("block")))
-        mooseError("DomainIntegral error: must set block ID or name for integral: ",
+        paramError("block",
+                   "DomainIntegral error: must set block ID or name for integral: ",
                    integral_moose_enums[i]);
 
       _poissons_ratio = getParam<Real>("poissons_ratio");
@@ -242,19 +244,22 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _temp = getParam<VariableName>("temperature");
 
   if (_temp != "" && !isParamValid("eigenstrain_names") && !_solid_mechanics)
-    mooseError(
+    paramError(
+        "eigenstrain_names",
         "DomainIntegral error: must provide `eigenstrain_names` when temperature is coupled.");
 
   if (_get_equivalent_k && (_integrals.count(INTERACTION_INTEGRAL_KI) == 0 ||
                             _integrals.count(INTERACTION_INTEGRAL_KII) == 0 ||
                             _integrals.count(INTERACTION_INTEGRAL_KIII) == 0))
-    mooseError("DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
+    paramError("integrals",
+               "DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
 
   if (isParamValid("output_variable"))
   {
     _output_variables = getParam<std::vector<VariableName>>("output_variable");
     if (_crack_front_points.size() > 0)
-      mooseError("'output_variables' not yet supported with 'crack_front_points'");
+      paramError("output_variables",
+                 "'output_variables' not yet supported with 'crack_front_points'");
   }
 
   if (isParamValid("convert_J_to_K"))
@@ -604,7 +609,8 @@ DomainIntegralAction::act()
     {
       if (_has_symmetry_plane && (_integrals.count(INTERACTION_INTEGRAL_KII) != 0 ||
                                   _integrals.count(INTERACTION_INTEGRAL_KIII) != 0))
-        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-II or "
+        paramError("symmetry_plane",
+                   "In DomainIntegral, symmetry_plane option cannot be used with mode-II or "
                    "mode-III interaction integral");
 
       std::string vpp_base_name;

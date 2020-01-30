@@ -104,7 +104,7 @@ JIntegral::initialize()
   for (const auto * fe_var : _fe_vars)
   {
     if (fe_var->feType() != _fe_type)
-      mooseError("All coupled displacements must have the same type");
+      mooseError("displacements", "All coupled displacements must have the same type");
   }
 }
 
