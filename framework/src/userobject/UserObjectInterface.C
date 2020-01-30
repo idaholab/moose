@@ -21,13 +21,13 @@ UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
 }
 
 const UserObject &
-UserObjectInterface::getUserObjectBase(const std::string & name)
+UserObjectInterface::getUserObjectBase(const std::string & name) const
 {
   return _uoi_feproblem.getUserObjectBase(_uoi_params.get<UserObjectName>(name));
 }
 
 const UserObject &
-UserObjectInterface::getUserObjectBaseByName(const std::string & name)
+UserObjectInterface::getUserObjectBaseByName(const std::string & name) const
 {
   return _uoi_feproblem.getUserObjectBase(name);
 }

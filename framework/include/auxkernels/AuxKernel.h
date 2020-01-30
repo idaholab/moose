@@ -94,7 +94,7 @@ public:
    */
   MooseVariableFE<ComputeValueType> & variable() { return _var; }
 
-  const std::set<std::string> & getDependObjects() const { return _depend_uo; }
+  const std::set<UserObjectName> & getDependObjects() const { return _depend_uo; }
 
   void coupledCallback(const std::string & var_name, bool is_old) override;
 
@@ -231,7 +231,7 @@ protected:
   std::set<std::string> _supplied_vars;
 
   /// Depend UserObjects
-  std::set<std::string> _depend_uo;
+  std::set<UserObjectName> _depend_uo;
 
   /// number of local dofs for elemental variables
   unsigned int _n_local_dofs;
