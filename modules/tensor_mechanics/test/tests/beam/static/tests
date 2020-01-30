@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'timoshenko_small_strain_y.i'
     exodiff = 'timoshenko_small_strain_y_out.e'
-
+    verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Timoshenko beam modeled using"
                   " beam elements under small deformations in the y direction."
@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'euler_small_strain_y.i'
     exodiff = 'euler_small_strain_y_out.e'
-
+    verification = 'beam_vandv.md' 
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under small deformations in the y direction."
@@ -41,7 +41,7 @@
     type = 'Exodiff'
     input = 'euler_finite_rot_y.i'
     exodiff = 'euler_finite_rot_y_out.e'
-
+    verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under finite deformations in the y direction."
@@ -87,7 +87,7 @@
     type = 'CSVDiff'
     input = 'euler_pipe_axial_force.i'
     csvdiff = 'euler_pipe_axial_force_out.csv'
-
+    verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the axial forces"
                   " on an Euler-Bernoulli pipe modeled using beam elements."
   [../]
@@ -140,7 +140,7 @@
     type = 'Exodiff'
     input = 'torsion_1.i'
     exodiff = 'torsion_1_out.e'
-
+    verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the torsional response"
                   " of a beam modeled using beam elements with auto-calculated polar moment of inertia."
   [../]
