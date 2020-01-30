@@ -3,8 +3,8 @@ In conjunction with the upcoming TMS 2020 Annual Meeting in San Diego, we will b
 
 
 
-- Course title: “Modeling the Coevolution of Microstructure and Properties using the MOOSE Framework”
-- Date: Sunday, February 23, 2020, 8:15 – 5:00
+- Course title: "Modeling the Coevolution of Microstructure and Properties using the MOOSE Framework"
+- Date: Sunday, February 23, 2020, 8:15 - 5:00
 - Location: San Diego, CA
 - Instructors:
 
