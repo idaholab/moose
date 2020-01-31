@@ -14,6 +14,7 @@
 #include "Parser.h"
 #include "CrackFrontDefinition.h"
 #include "MooseMesh.h"
+#include "Conversion.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -42,8 +43,8 @@ DomainIntegralAction::validParams()
                                           integral_vec,
                                           "Domain integrals to calculate.  Choices are: " +
                                               integral_vec.getRawNames());
-  params.addParam<std::vector<BoundaryName>>(
-      "boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addParam<std::vector<BoundaryName>>("boundary",
+                                             "Boundary containing the crack front points");
   params.addParam<std::vector<Point>>("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>(
       "order", "FIRST", "Specifies the order of the FE shape function to use for q AuxVariables");
@@ -106,9 +107,17 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _family(getParam<std::string>("family")),
     _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
     _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
-    _have_crack_direction_vector(false),
-    _have_crack_direction_vector_end_1(false),
-    _have_crack_direction_vector_end_2(false),
+    _have_crack_direction_vector(isParamValid("crack_direction_vector")),
+    _crack_direction_vector(
+        _have_crack_direction_vector ? getParam<RealVectorValue>("crack_direction_vector") : 0.0),
+    _have_crack_direction_vector_end_1(isParamValid("crack_direction_vector_end_1")),
+    _crack_direction_vector_end_1(_have_crack_direction_vector_end_1
+                                      ? getParam<RealVectorValue>("crack_direction_vector_end_1")
+                                      : 0.0),
+    _have_crack_direction_vector_end_2(isParamValid("crack_direction_vector_end_2")),
+    _crack_direction_vector_end_2(_have_crack_direction_vector_end_2
+                                      ? getParam<RealVectorValue>("crack_direction_vector_end_2")
+                                      : 0.0),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _convert_J_to_K(false),
@@ -149,7 +158,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
       _ring_vec.push_back(i);
   }
   else
-    mooseError("DomainIntegral error: invalid q_function_type.");
+    paramError("q_function_type", "DomainIntegral error: invalid q_function_type.");
 
   if (isParamValid("crack_front_points"))
     _crack_front_points = getParam<std::vector<Point>>("crack_front_points");
@@ -157,31 +166,16 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   if (isParamValid("crack_front_points_provider"))
   {
     if (!isParamValid("number_points_from_provider"))
-      mooseError("DomainIntegral error: when crack_front_points_provider is used, the "
-                 "number_points_from_provider must be "
-                 "provided.");
+      paramError("number_points_from_provider",
+                 "DomainIntegral error: when crack_front_points_provider is used, "
+                 "number_points_from_provider must be provided.");
     _use_crack_front_points_provider = true;
     _crack_front_points_provider = getParam<UserObjectName>("crack_front_points_provider");
   }
   else if (isParamValid("number_points_from_provider"))
-    mooseError("DomainIntegral error: number_points_from_provider is provided but "
-               "crack_front_points_provider cannot "
-               "be found.");
-  if (isParamValid("crack_direction_vector"))
-  {
-    _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
-    _have_crack_direction_vector = true;
-  }
-  if (isParamValid("crack_direction_vector_end_1"))
-  {
-    _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
-    _have_crack_direction_vector_end_1 = true;
-  }
-  if (isParamValid("crack_direction_vector_end_2"))
-  {
-    _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
-    _have_crack_direction_vector_end_2 = true;
-  }
+    paramError("crack_front_points_provider",
+               "DomainIntegral error: number_points_from_provider is provided but "
+               "crack_front_points_provider cannot be found.");
   if (isParamValid("crack_mouth_boundary"))
     _crack_mouth_boundary_names = getParam<std::vector<BoundaryName>>("crack_mouth_boundary");
   if (isParamValid("intersecting_boundary"))
@@ -192,47 +186,48 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   bool youngs_modulus_set(false);
   bool poissons_ratio_set(false);
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
-  if (integral_moose_enums.size() == 0)
-    mooseError("Must specify at least one domain integral to perform.");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
+    if (isParamValid("displacements"))
+    {
+      _displacements = getParam<std::vector<VariableName>>("displacements");
+
+      if (_displacements.size() < 2)
+        paramError(
+            "displacements",
+            "DomainIntegral error: The size of the displacements vector should at least be 2.");
+    }
+    else
+    {
+      if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
+        mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
+                        "Please specify displacements using the `dispalcements` parameter.");
+
+      if (!isParamValid("disp_x") || !isParamValid("disp_y"))
+        paramError(
+            "displacements",
+            "DomainIntegral error: Specify displacements using the `displacements` parameter.");
+      else
+      {
+        _displacements.clear();
+        _displacements.push_back(getParam<VariableName>("disp_x"));
+        _displacements.push_back(getParam<VariableName>("disp_y"));
+        if (isParamValid("disp_z"))
+          _displacements.push_back(getParam<VariableName>("disp_z"));
+      }
+    }
+
     if (integral_moose_enums[i] != "JIntegral")
     {
       // Check that parameters required for interaction integrals are defined
-      if (isParamValid("displacements"))
-      {
-        _displacements = getParam<std::vector<VariableName>>("displacements");
-
-        if (_displacements.size() < 2)
-          mooseError(
-              "DomainIntegral error: The size of the displacements vector should atleast be 2.");
-      }
-      else
-      {
-        if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
-          mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
-                          "Please specify displacements using the `dispalcements` parameter.");
-
-        if (!isParamValid("disp_x") || !isParamValid("disp_y"))
-          mooseError(
-              "DomainIntegral error: Specify displacements using the `displacements` parameter.");
-        else
-        {
-          _displacements.clear();
-          _displacements.push_back(getParam<VariableName>("disp_x"));
-          _displacements.push_back(getParam<VariableName>("disp_y"));
-          if (isParamValid("disp_z"))
-            _displacements.push_back(getParam<VariableName>("disp_z"));
-        }
-      }
-
       if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
         mooseError(
             "DomainIntegral error: must set Poisson's ratio and Young's modulus for integral: ",
             integral_moose_enums[i]);
 
       if (!(isParamValid("block")))
-        mooseError("DomainIntegral error: must set block ID or name for integral: ",
+        paramError("block",
+                   "DomainIntegral error: must set block ID or name for integral: ",
                    integral_moose_enums[i]);
 
       _poissons_ratio = getParam<Real>("poissons_ratio");
@@ -249,19 +244,22 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _temp = getParam<VariableName>("temperature");
 
   if (_temp != "" && !isParamValid("eigenstrain_names") && !_solid_mechanics)
-    mooseError(
+    paramError(
+        "eigenstrain_names",
         "DomainIntegral error: must provide `eigenstrain_names` when temperature is coupled.");
 
   if (_get_equivalent_k && (_integrals.count(INTERACTION_INTEGRAL_KI) == 0 ||
                             _integrals.count(INTERACTION_INTEGRAL_KII) == 0 ||
                             _integrals.count(INTERACTION_INTEGRAL_KIII) == 0))
-    mooseError("DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
+    paramError("integrals",
+               "DomainIntegral error: must calculate KI, KII and KIII to get equivalent K.");
 
   if (isParamValid("output_variable"))
   {
     _output_variables = getParam<std::vector<VariableName>>("output_variable");
     if (_crack_front_points.size() > 0)
-      mooseError("'output_variables' not yet supported with 'crack_front_points'");
+      paramError("output_variables",
+                 "'output_variables' not yet supported with 'crack_front_points'");
   }
 
   if (isParamValid("convert_J_to_K"))
@@ -447,161 +445,99 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_postprocessor")
   {
-    if (_integrals.count(J_INTEGRAL) != 0)
+    for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
     {
       std::string pp_base_name;
-      if (_convert_J_to_K)
-        pp_base_name = "K";
-      else
-        pp_base_name = "J";
-      const std::string pp_type_name("JIntegral");
-      InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<bool>("convert_J_to_K") = _convert_J_to_K;
-      if (_convert_J_to_K)
+      switch (*sit)
       {
-        params.set<Real>("youngs_modulus") = _youngs_modulus;
-        params.set<Real>("poissons_ratio") = _poissons_ratio;
+        case J_INTEGRAL:
+          if (_convert_J_to_K)
+            pp_base_name = "K";
+          else
+            pp_base_name = "J";
+          break;
+
+        case INTERACTION_INTEGRAL_KI:
+          pp_base_name = "II_KI";
+          break;
+
+        case INTERACTION_INTEGRAL_KII:
+          pp_base_name = "II_KII";
+          break;
+
+        case INTERACTION_INTEGRAL_KIII:
+          pp_base_name = "II_KIII";
+          break;
+
+        case INTERACTION_INTEGRAL_T:
+          pp_base_name = "II_T";
+          break;
       }
-      if (_has_symmetry_plane)
-        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
-      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      const std::string pp_type_name("VectorPostprocessorComponent");
+      InputParameters params = _factory.getValidParams(pp_type_name);
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
-        params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
-        if (_q_function_type == TOPOLOGY)
-          params.set<unsigned int>("ring_first") = _ring_first;
-        params.set<MooseEnum>("q_function_type") = _q_function_type;
-
         if (_treat_as_2d)
         {
-          std::ostringstream av_name_stream;
-          av_name_stream << av_base_name << "_" << _ring_vec[ring_index];
-          std::ostringstream pp_name_stream;
-          pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-          _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
+          params.set<VectorPostprocessorName>("vectorpostprocessor") =
+              pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          std::string pp_name = pp_base_name + +"_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<unsigned int>("index") = 0;
+          params.set<std::string>("vector_name") =
+              pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+          _problem->addPostprocessor(pp_type_name, pp_name, params);
         }
         else
         {
           for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
           {
-            std::ostringstream av_name_stream;
-            av_name_stream << av_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            std::ostringstream pp_name_stream;
-            pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            params.set<unsigned int>("crack_front_point_index") = cfp_index;
-            _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
+            params.set<VectorPostprocessorName>("vectorpostprocessor") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" +
+                                  Moose::stringify(_ring_vec[ring_index]);
+            params.set<unsigned int>("index") = cfp_index;
+            params.set<std::string>("vector_name") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            _problem->addPostprocessor(pp_type_name, pp_name, params);
           }
         }
       }
     }
-    if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0 ||
-        _integrals.count(INTERACTION_INTEGRAL_KII) != 0 ||
-        _integrals.count(INTERACTION_INTEGRAL_KIII) != 0 ||
-        _integrals.count(INTERACTION_INTEGRAL_T) != 0)
+
+    if (_get_equivalent_k)
     {
-
-      if (_has_symmetry_plane && (_integrals.count(INTERACTION_INTEGRAL_KII) != 0 ||
-                                  _integrals.count(INTERACTION_INTEGRAL_KIII) != 0))
-        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-II or "
-                   "mode-III interaction integral");
-
-      const std::string pp_base_name("II");
-      std::string pp_type_name("InteractionIntegral");
-
-      if (_solid_mechanics)
-        pp_type_name = "InteractionIntegralSM";
-
+      std::string pp_base_name("Keq");
+      const std::string pp_type_name("VectorPostprocessorComponent");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-      if (_has_symmetry_plane)
-        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
-      params.set<Real>("poissons_ratio") = _poissons_ratio;
-      params.set<Real>("youngs_modulus") = _youngs_modulus;
-      params.set<std::vector<VariableName>>("displacements") = _displacements;
-      if (_temp != "")
-        params.set<std::vector<VariableName>>("temperature") = {_temp};
-      if (_has_symmetry_plane)
-        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
-
-      for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
+      for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
-        std::string pp_base_name;
-        std::string aux_mode_name;
-        switch (*sit)
+        if (_treat_as_2d)
         {
-          case J_INTEGRAL:
-            continue;
-
-          case INTERACTION_INTEGRAL_KI:
-            pp_base_name = "II_KI";
-            aux_mode_name = "_I_";
-            params.set<Real>("K_factor") =
-                0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
-            params.set<MooseEnum>("sif_mode") = "KI";
-            break;
-
-          case INTERACTION_INTEGRAL_KII:
-            pp_base_name = "II_KII";
-            aux_mode_name = "_II_";
-            params.set<Real>("K_factor") =
-                0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
-            params.set<MooseEnum>("sif_mode") = "KII";
-            break;
-
-          case INTERACTION_INTEGRAL_KIII:
-            pp_base_name = "II_KIII";
-            aux_mode_name = "_III_";
-            params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 + _poissons_ratio);
-            params.set<MooseEnum>("sif_mode") = "KIII";
-            break;
-
-          case INTERACTION_INTEGRAL_T:
-            pp_base_name = "II_T";
-            aux_mode_name = "_T_";
-            params.set<Real>("K_factor") = _youngs_modulus / (1 - std::pow(_poissons_ratio, 2));
-            params.set<MooseEnum>("sif_mode") = "T";
-            break;
+          params.set<VectorPostprocessorName>("vectorpostprocessor") =
+              pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          std::string pp_name = pp_base_name + +"_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<unsigned int>("index") = 0;
+          params.set<std::string>("vector_name") =
+              pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+          _problem->addPostprocessor(pp_type_name, pp_name, params);
         }
-
-        for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
+        else
         {
-          params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
-          params.set<unsigned int>("ring_first") = _ring_first;
-          params.set<MooseEnum>("q_function_type") = _q_function_type;
-
-          if (_treat_as_2d)
+          for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
           {
-            std::ostringstream av_name_stream;
-            av_name_stream << av_base_name << "_" << _ring_vec[ring_index];
-            std::ostringstream pp_name_stream;
-            pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-
-            _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
-          }
-          else
-          {
-            for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
-            {
-              std::ostringstream av_name_stream;
-              av_name_stream << av_base_name << "_" << cfp_index + 1 << "_"
-                             << _ring_vec[ring_index];
-              std::ostringstream pp_name_stream;
-              pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_"
-                             << _ring_vec[ring_index];
-              std::ostringstream cfn_index_stream;
-              cfn_index_stream << cfp_index + 1;
-
-              params.set<unsigned int>("crack_front_point_index") = cfp_index;
-              _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
-            }
+            params.set<VectorPostprocessorName>("vectorpostprocessor") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            std::string pp_name = pp_base_name + "_" + Moose::stringify(cfp_index + 1) + "_" +
+                                  Moose::stringify(_ring_vec[ring_index]);
+            params.set<unsigned int>("index") = cfp_index;
+            params.set<std::string>("vector_name") =
+                pp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+            _problem->addPostprocessor(pp_type_name, pp_name, params);
           }
         }
       }
     }
+
     for (unsigned int i = 0; i < _output_variables.size(); ++i)
     {
       const std::string ov_base_name(_output_variables[i]);
@@ -628,103 +564,164 @@ DomainIntegralAction::act()
         }
       }
     }
-    if (_get_equivalent_k)
-    {
-      std::string pp_base_name("Keq");
-      const std::string pp_type_name("MixedModeEquivalentK");
-      InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<Real>("poissons_ratio") = _poissons_ratio;
-      for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
-      {
-        if (_treat_as_2d)
-        {
-          std::ostringstream ki_name_stream;
-          ki_name_stream << "II_KI_" << _ring_vec[ring_index];
-          std::ostringstream kii_name_stream;
-          kii_name_stream << "II_KII_" << _ring_vec[ring_index];
-          std::ostringstream kiii_name_stream;
-          kiii_name_stream << "II_KIII_" << _ring_vec[ring_index];
-          params.set<PostprocessorName>("KI_name") = ki_name_stream.str();
-          params.set<PostprocessorName>("KII_name") = kii_name_stream.str();
-          params.set<PostprocessorName>("KIII_name") = kiii_name_stream.str();
-          std::ostringstream pp_name_stream;
-          pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-          _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
-        }
-        else
-        {
-          for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
-          {
-            std::ostringstream ki_name_stream;
-            ki_name_stream << "II_KI_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            std::ostringstream kii_name_stream;
-            kii_name_stream << "II_KII_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            std::ostringstream kiii_name_stream;
-            kiii_name_stream << "II_KIII_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            params.set<PostprocessorName>("KI_name") = ki_name_stream.str();
-            params.set<PostprocessorName>("KII_name") = kii_name_stream.str();
-            params.set<PostprocessorName>("KIII_name") = kiii_name_stream.str();
-            std::ostringstream pp_name_stream;
-            pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            params.set<unsigned int>("crack_front_point_index") = cfp_index;
-            _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
-          }
-        }
-      }
-    }
   }
 
   else if (_current_task == "add_vector_postprocessor")
   {
-    if (!_treat_as_2d)
+    if (_integrals.count(J_INTEGRAL) != 0)
     {
+      std::string vpp_base_name;
+      if (_convert_J_to_K)
+        vpp_base_name = "K";
+      else
+        vpp_base_name = "J";
+      if (_treat_as_2d)
+        vpp_base_name += "_2DVPP";
+      const std::string vpp_type_name("JIntegral");
+      InputParameters params = _factory.getValidParams(vpp_type_name);
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.set<UserObjectName>("crack_front_definition") = uo_name;
+      params.set<bool>("convert_J_to_K") = _convert_J_to_K;
+      params.set<MooseEnum>("position_type") = _position_type;
+      if (_convert_J_to_K)
+      {
+        params.set<Real>("youngs_modulus") = _youngs_modulus;
+        params.set<Real>("poissons_ratio") = _poissons_ratio;
+      }
+      if (_has_symmetry_plane)
+        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+      params.set<std::vector<VariableName>>("displacements") = _displacements;
+      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
+      {
+        params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
+        params.set<MooseEnum>("q_function_type") = _q_function_type;
+
+        std::string vpp_name = vpp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+        _problem->addVectorPostprocessor(vpp_type_name, vpp_name, params);
+      }
+    }
+
+    if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0 ||
+        _integrals.count(INTERACTION_INTEGRAL_KII) != 0 ||
+        _integrals.count(INTERACTION_INTEGRAL_KIII) != 0 ||
+        _integrals.count(INTERACTION_INTEGRAL_T) != 0)
+    {
+      if (_has_symmetry_plane && (_integrals.count(INTERACTION_INTEGRAL_KII) != 0 ||
+                                  _integrals.count(INTERACTION_INTEGRAL_KIII) != 0))
+        paramError("symmetry_plane",
+                   "In DomainIntegral, symmetry_plane option cannot be used with mode-II or "
+                   "mode-III interaction integral");
+
+      std::string vpp_base_name;
+      std::string vpp_type_name("InteractionIntegral");
+
+      if (_solid_mechanics)
+        vpp_type_name = "InteractionIntegralSM";
+
+      InputParameters params = _factory.getValidParams(vpp_type_name);
+      params.set<UserObjectName>("crack_front_definition") = uo_name;
+      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      if (_has_symmetry_plane)
+        params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+      params.set<Real>("poissons_ratio") = _poissons_ratio;
+      params.set<Real>("youngs_modulus") = _youngs_modulus;
+      params.set<std::vector<VariableName>>("displacements") = _displacements;
+      if (_temp != "")
+        params.set<std::vector<VariableName>>("temperature") = {_temp};
+
       for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
       {
-        std::string pp_base_name;
         switch (*sit)
         {
           case J_INTEGRAL:
-            if (_convert_J_to_K)
-              pp_base_name = "K";
-            else
-              pp_base_name = "J";
-            break;
+            continue;
+
           case INTERACTION_INTEGRAL_KI:
-            pp_base_name = "II_KI";
+            vpp_base_name = "II_KI";
+            params.set<Real>("K_factor") =
+                0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
+            params.set<MooseEnum>("sif_mode") = "KI";
             break;
+
           case INTERACTION_INTEGRAL_KII:
-            pp_base_name = "II_KII";
+            vpp_base_name = "II_KII";
+            params.set<Real>("K_factor") =
+                0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
+            params.set<MooseEnum>("sif_mode") = "KII";
             break;
+
           case INTERACTION_INTEGRAL_KIII:
-            pp_base_name = "II_KIII";
+            vpp_base_name = "II_KIII";
+            params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 + _poissons_ratio);
+            params.set<MooseEnum>("sif_mode") = "KIII";
             break;
+
           case INTERACTION_INTEGRAL_T:
-            pp_base_name = "II_T";
+            vpp_base_name = "II_T";
+            params.set<Real>("K_factor") = _youngs_modulus / (1 - std::pow(_poissons_ratio, 2));
+            params.set<MooseEnum>("sif_mode") = "T";
             break;
         }
-        const std::string vpp_type_name("CrackDataSampler");
-        InputParameters params = _factory.getValidParams(vpp_type_name);
-        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-        params.set<UserObjectName>("crack_front_definition") = uo_name;
-        params.set<MooseEnum>("sort_by") = "id";
-        params.set<MooseEnum>("position_type") = _position_type;
+        if (_treat_as_2d)
+          vpp_base_name += "_2DVPP";
         for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
         {
-          std::vector<PostprocessorName> postprocessor_names;
-          std::ostringstream vpp_name_stream;
-          vpp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-          for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
-          {
-            std::ostringstream pp_name_stream;
-            pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-            postprocessor_names.push_back(pp_name_stream.str());
-          }
-          params.set<std::vector<PostprocessorName>>("postprocessors") = postprocessor_names;
-          _problem->addVectorPostprocessor(vpp_type_name, vpp_name_stream.str(), params);
+          params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
+          params.set<MooseEnum>("q_function_type") = _q_function_type;
+
+          std::string vpp_name = vpp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+          _problem->addVectorPostprocessor(vpp_type_name, vpp_name, params);
         }
       }
+    }
 
+    if (_get_equivalent_k)
+    {
+      std::string vpp_base_name("Keq");
+      if (_treat_as_2d)
+        vpp_base_name += "_2DVPP";
+      const std::string vpp_type_name("MixedModeEquivalentK");
+      InputParameters params = _factory.getValidParams(vpp_type_name);
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.set<Real>("poissons_ratio") = _poissons_ratio;
+      for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
+      {
+        std::string ki_name = "II_KI_";
+        std::string kii_name = "II_KII_";
+        std::string kiii_name = "II_KIII_";
+        params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
+        if (_treat_as_2d)
+        {
+          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") =
+              ki_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") =
+              kii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") =
+              kiii_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
+        }
+        else
+        {
+          params.set<VectorPostprocessorName>("KI_vectorpostprocessor") =
+              ki_name + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KII_vectorpostprocessor") =
+              kii_name + Moose::stringify(_ring_vec[ring_index]);
+          params.set<VectorPostprocessorName>("KIII_vectorpostprocessor") =
+              kiii_name + Moose::stringify(_ring_vec[ring_index]);
+        }
+        params.set<std::string>("KI_vector_name") =
+            ki_name + Moose::stringify(_ring_vec[ring_index]);
+        params.set<std::string>("KII_vector_name") =
+            kii_name + Moose::stringify(_ring_vec[ring_index]);
+        params.set<std::string>("KIII_vector_name") =
+            kiii_name + Moose::stringify(_ring_vec[ring_index]);
+        std::string vpp_name = vpp_base_name + "_" + Moose::stringify(_ring_vec[ring_index]);
+        _problem->addVectorPostprocessor(vpp_type_name, vpp_name, params);
+      }
+    }
+
+    if (!_treat_as_2d)
+    {
       for (unsigned int i = 0; i < _output_variables.size(); ++i)
       {
         const std::string vpp_type_name("VectorOfPostprocessors");
@@ -737,30 +734,6 @@ DomainIntegralAction::act()
         {
           std::ostringstream pp_name_stream;
           pp_name_stream << vpp_name_stream.str() << "_" << cfp_index + 1;
-          postprocessor_names.push_back(pp_name_stream.str());
-        }
-        params.set<std::vector<PostprocessorName>>("postprocessors") = postprocessor_names;
-        _problem->addVectorPostprocessor(vpp_type_name, vpp_name_stream.str(), params);
-      }
-    }
-    if (_get_equivalent_k && !_treat_as_2d)
-    {
-      std::string pp_base_name("Keq");
-      const std::string vpp_type_name("CrackDataSampler");
-      InputParameters params = _factory.getValidParams(vpp_type_name);
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<MooseEnum>("sort_by") = "id";
-      params.set<MooseEnum>("position_type") = _position_type;
-      for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
-      {
-        std::vector<PostprocessorName> postprocessor_names;
-        std::ostringstream vpp_name_stream;
-        vpp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-        for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
-        {
-          std::ostringstream pp_name_stream;
-          pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
           postprocessor_names.push_back(pp_name_stream.str());
         }
         params.set<std::vector<PostprocessorName>>("postprocessors") = postprocessor_names;

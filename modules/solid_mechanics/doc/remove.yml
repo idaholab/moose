@@ -30,6 +30,6 @@
 - /Kernels/StressDivergenceRZ
 - /Kernels/StressDivergenceRSpherical
 - /Postprocessors/HomogenizedElasticConstants
-- /Postprocessors/InteractionIntegralSM
 - /Postprocessors/MaterialTensorIntegralSM
 - /VectorPostprocessors/LineMaterialSymmTensorSampler
+- /VectorPostprocessors/InteractionIntegralSM

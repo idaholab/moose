@@ -7,15 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//  This post processor returns the Interaction Integral
-//
 #include "InteractionIntegral.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
+#include "Conversion.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 #include "DerivativeMaterialInterface.h"
 #include "libmesh/utility.h"
+
+registerMooseObject("TensorMechanicsApp", InteractionIntegral);
+
+defineLegacyParams(InteractionIntegral);
 
 MooseEnum
 InteractionIntegral::qFunctionType()
@@ -29,15 +32,10 @@ InteractionIntegral::sifModeType()
   return MooseEnum("KI KII KIII T", "KI");
 }
 
-registerMooseObject("TensorMechanicsApp", InteractionIntegral);
-
-defineLegacyParams(InteractionIntegral);
-
 InputParameters
 InteractionIntegral::validParams()
 {
-  InputParameters params = ElementIntegralPostprocessor::validParams();
-  params.addClassDescription("Computes the interaction integral for fracture");
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -46,21 +44,22 @@ InteractionIntegral::validParams()
                        "stress intensity factors in models with thermal strain gradients.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>(
-      "crack_front_point_index",
-      "The index of the point on the crack front corresponding to this q function");
-  params.addParam<Real>(
+  MooseEnum position_type("Angle Distance", "Distance");
+  params.addParam<MooseEnum>(
+      "position_type",
+      position_type,
+      "The method used to calculate position along crack front.  Options are: " +
+          position_type.getRawNames());
+  params.addRequiredParam<Real>(
       "K_factor", "Conversion factor between interaction integral and stress intensity factor K");
   params.addParam<unsigned int>("symmetry_plane",
                                 "Account for a symmetry plane passing through "
                                 "the plane of the crack, normal to the specified "
                                 "axis (0=x, 1=y, 2=z)");
-  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.addRequiredParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
+  params.addRequiredParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam<unsigned int>("ring_first",
-                                "The first ring of elements for volume integral domain");
-  params.addParam<unsigned int>("ring_index", "Ring ID");
+  params.addRequiredParam<unsigned int>("ring_index", "Ring ID");
   params.addParam<MooseEnum>("q_function_type",
                              InteractionIntegral::qFunctionType(),
                              "The method used to define the integration domain. Options are: " +
@@ -69,17 +68,17 @@ InteractionIntegral::validParams()
                                      InteractionIntegral::sifModeType(),
                                      "Stress intensity factor to calculate. Choices are: " +
                                          InteractionIntegral::sifModeType().getRawNames());
-
+  params.addClassDescription(
+      "Computes the interaction integral, which is used to compute various "
+      "fracture mechanics parameters at a crack tip, including KI, KII, KIII, "
+      "and the T stress.");
   return params;
 }
 
 InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
-  : ElementIntegralPostprocessor(parameters),
+  : ElementVectorPostprocessor(parameters),
     _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(
-        _has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
     _stress(hasMaterialProperty<RankTwoTensor>("stress")
                 ? &getMaterialPropertyByName<RankTwoTensor>("stress")
@@ -87,6 +86,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _strain(hasMaterialProperty<RankTwoTensor>("elastic_strain")
                 ? &getMaterialPropertyByName<RankTwoTensor>("elastic_strain")
                 : nullptr),
+    _fe_vars(getCoupledMooseVars()),
+    _fe_type(_fe_vars[0]->feType()),
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
@@ -99,7 +100,14 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
                                ? &getMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
                                : nullptr),
     _q_function_type(getParam<MooseEnum>("q_function_type").getEnum<QMethod>()),
-    _sif_mode(getParam<MooseEnum>("sif_mode").getEnum<SifMethod>())
+    _position_type(getParam<MooseEnum>("position_type").getEnum<PositionType>()),
+    _sif_mode(getParam<MooseEnum>("sif_mode").getEnum<SifMethod>()),
+    _x(declareVector("x")),
+    _y(declareVector("y")),
+    _z(declareVector("z")),
+    _position(declareVector("id")),
+    _interaction_integral(declareVector("II_" + Moose::stringify(getParam<MooseEnum>("sif_mode")) +
+                                        "_" + Moose::stringify(_ring_index)))
 {
   if (!hasMaterialProperty<RankTwoTensor>("stress"))
     mooseError("InteractionIntegral Error: RankTwoTensor material property 'stress' not found. "
@@ -126,15 +134,16 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("InteractionIntegral Error: number of variables supplied in 'displacements' must "
+    paramError("displacements",
+               "InteractionIntegral Error: number of variables supplied in 'displacements' must "
                "match the mesh dimension.");
 
   // fetch gradients of coupled variables
-  for (unsigned int i = 0; i < _ndisp; ++i)
+  for (std::size_t i = 0; i < _ndisp; ++i)
     _grad_disp[i] = &coupledGradient("displacements", i);
 
   // set unused dimensions to zero
-  for (unsigned i = _ndisp; i < 3; ++i)
+  for (std::size_t i = _ndisp; i < 3; ++i)
     _grad_disp[i] = &_grad_zero;
 }
 
@@ -144,42 +153,39 @@ InteractionIntegral::initialSetup()
   _treat_as_2d = _crack_front_definition->treatAs2D();
 }
 
-Real
-InteractionIntegral::getValue()
+void
+InteractionIntegral::initialize()
 {
-  gatherSum(_integral_value);
+  std::size_t num_pts;
+  if (_treat_as_2d)
+    num_pts = 1;
+  else
+    num_pts = _crack_front_definition->getNumCrackFrontPoints();
 
-  if (_sif_mode == SifMethod::T && !_treat_as_2d)
-    _integral_value += _poissons_ratio * _crack_front_definition->getCrackFrontTangentialStrain(
-                                             _crack_front_point_index);
+  _x.assign(num_pts, 0.0);
+  _y.assign(num_pts, 0.0);
+  _z.assign(num_pts, 0.0);
+  _position.assign(num_pts, 0.0);
+  _interaction_integral.assign(num_pts, 0.0);
 
-  return _K_factor * _integral_value;
+  for (const auto * fe_var : _fe_vars)
+  {
+    if (fe_var->feType() != _fe_type)
+      mooseError("All coupled displacements must have the same type");
+  }
 }
 
 Real
-InteractionIntegral::computeQpIntegral()
+InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index,
+                                       const Real scalar_q,
+                                       const RealVectorValue & grad_of_scalar_q)
 {
-  Real scalar_q = 0.0;
-  RealVectorValue grad_q(0.0, 0.0, 0.0);
-
-  const std::vector<std::vector<Real>> & phi_curr_elem = *_phi_curr_elem;
-  const std::vector<std::vector<RealGradient>> & dphi_curr_elem = *_dphi_curr_elem;
-
-  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
-  {
-    scalar_q += phi_curr_elem[i][_qp] * _q_curr_elem[i];
-
-    for (unsigned int j = 0; j < _current_elem->dim(); ++j)
-      grad_q(j) += dphi_curr_elem[i][_qp](j) * _q_curr_elem[i];
-  }
-
   // In the crack front coordinate system, the crack direction is (1,0,0)
-  RealVectorValue crack_direction(0.0);
-  crack_direction(0) = 1.0;
+  RealVectorValue crack_direction(1.0, 0.0, 0.0);
 
   // Calculate (r,theta) position of qp relative to crack front
-  Point p(_q_point[_qp]);
-  _crack_front_definition->calculateRThetaToCrackFront(p, _crack_front_point_index, _r, _theta);
+  _crack_front_definition->calculateRThetaToCrackFront(
+      _q_point[_qp], crack_front_point_index, _r, _theta);
 
   RankTwoTensor aux_stress;
   RankTwoTensor aux_du;
@@ -193,15 +199,15 @@ InteractionIntegral::computeQpIntegral()
 
   // Rotate stress, strain, displacement and temperature to crack front coordinate system
   RealVectorValue grad_q_cf =
-      _crack_front_definition->rotateToCrackFrontCoords(grad_q, _crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords(grad_of_scalar_q, crack_front_point_index);
   RankTwoTensor grad_disp_cf =
-      _crack_front_definition->rotateToCrackFrontCoords(grad_disp, _crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords(grad_disp, crack_front_point_index);
   RankTwoTensor stress_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((*_stress)[_qp], _crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords((*_stress)[_qp], crack_front_point_index);
   RankTwoTensor strain_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((*_strain)[_qp], _crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords((*_strain)[_qp], crack_front_point_index);
   RealVectorValue grad_temp_cf =
-      _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], _crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], crack_front_point_index);
 
   RankTwoTensor dq;
   dq(0, 0) = crack_direction(0) * grad_q_cf(0);
@@ -235,56 +241,102 @@ InteractionIntegral::computeQpIntegral()
   if (!_crack_front_definition->treatAs2D())
   {
     q_avg_seg =
-        (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_point_index) +
-         _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_point_index)) /
+        (_crack_front_definition->getCrackFrontForwardSegmentLength(crack_front_point_index) +
+         _crack_front_definition->getCrackFrontBackwardSegmentLength(crack_front_point_index)) /
         2.0;
   }
 
   Real eq = term1 + term2 - term3 + term4;
 
-  if (_has_symmetry_plane)
-    eq *= 2.0;
-
   return eq / q_avg_seg;
 }
 
-Real
-InteractionIntegral::computeIntegral()
+void
+InteractionIntegral::execute()
 {
-  Real sum = 0.0;
-
   // calculate phi and dphi for this element
-  FEType fe_type(Utility::string_to_enum<Order>("first"),
-                 Utility::string_to_enum<FEFamily>("lagrange"));
-  const unsigned int dim = _current_elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+  const std::size_t dim = _current_elem->dim();
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();
   fe->reinit(_current_elem);
 
   // calculate q for all nodes in this element
-  _q_curr_elem.clear();
-  unsigned int ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
+  std::size_t ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 
-  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+  for (auto icfp = beginIndex(_interaction_integral); icfp < _interaction_integral.size(); icfp++)
   {
-    const Node * this_node = _current_elem->node_ptr(i);
-    Real q_this_node;
+    _q_curr_elem.clear();
+    for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
+    {
+      const Node * this_node = _current_elem->node_ptr(i);
+      Real q_this_node;
 
-    if (_q_function_type == QMethod::Geometry)
-      q_this_node = _crack_front_definition->DomainIntegralQFunction(
-          _crack_front_point_index, _ring_index - ring_base, this_node);
-    else if (_q_function_type == QMethod::Topology)
-      q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
-          _crack_front_point_index, _ring_index - ring_base, this_node);
+      if (_q_function_type == QMethod::Geometry)
+        q_this_node = _crack_front_definition->DomainIntegralQFunction(
+            icfp, _ring_index - ring_base, this_node);
+      else // QMethod::Topology
+        q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
+            icfp, _ring_index - ring_base, this_node);
 
-    _q_curr_elem.push_back(q_this_node);
+      _q_curr_elem.push_back(q_this_node);
+    }
+
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      Real scalar_q = 0.0;
+      RealVectorValue grad_of_scalar_q(0.0, 0.0, 0.0);
+
+      for (std::size_t i = 0; i < _current_elem->n_nodes(); ++i)
+      {
+        scalar_q += (*_phi_curr_elem)[i][_qp] * _q_curr_elem[i];
+
+        for (std::size_t j = 0; j < _current_elem->dim(); ++j)
+          grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
+      }
+
+      _interaction_integral[icfp] +=
+          _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+    }
   }
+}
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
-  return sum;
+void
+InteractionIntegral::finalize()
+{
+  gatherSum(_interaction_integral);
+
+  for (auto i = beginIndex(_interaction_integral); i < _interaction_integral.size(); ++i)
+  {
+    if (_has_symmetry_plane)
+      _interaction_integral[i] *= 2.0;
+
+    const auto cfp = _crack_front_definition->getCrackFrontPoint(i);
+    _x[i] = (*cfp)(0);
+    _y[i] = (*cfp)(1);
+    _z[i] = (*cfp)(2);
+
+    if (_position_type == PositionType::Angle)
+      _position[i] = _crack_front_definition->getAngleAlongFront(i);
+    else
+      _position[i] = _crack_front_definition->getDistanceAlongFront(i);
+
+    if (_sif_mode == SifMethod::T && !_treat_as_2d)
+      _interaction_integral[i] +=
+          _poissons_ratio * _crack_front_definition->getCrackFrontTangentialStrain(i);
+
+    _interaction_integral[i] *= _K_factor;
+  }
+}
+
+void
+InteractionIntegral::threadJoin(const UserObject & y)
+{
+  const InteractionIntegral & uo = static_cast<const InteractionIntegral &>(y);
+
+  for (auto i = beginIndex(_interaction_integral); i < _interaction_integral.size(); ++i)
+    _interaction_integral[i] += uo._interaction_integral[i];
 }
 
 void
