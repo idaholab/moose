@@ -33,15 +33,8 @@ public:
 
   virtual ~MultiDimensionalInterpolationTempl() = default;
 
-  /**
-   * Set the x and y values.
-   */
-  void setData(const std::vector<std::vector<Real>> & base_points, const MultiIndex<Real> & data)
-  {
-    _base_points = base_points;
-    _data = data;
-    errorCheck();
-  }
+  /// sets data but also fixes degenerate dimensions in data
+  void setData(const std::vector<std::vector<Real>> & base_points, const MultiIndex<Real> & data);
 
   /**
    * linearSearch finds the indices i_k of the base point such that
@@ -68,9 +61,16 @@ protected:
    */
   unsigned int linearSearchHelper(T & x, const std::vector<Real> & vector) const;
 
+  /// original dimension is to allow checks on user inputs for cases where arrays are sliced
+  unsigned int _original_dim;
+
+  /// this variable keeps track on which dimension is degenerate and was removed
+  std::vector<bool> _degenerate_index;
+
 private:
   std::vector<std::vector<Real>> _base_points;
   MultiIndex<Real> _data;
+  bool _setup_complete = false;
 };
 
 #define ADMultiDimensionalInterpolation                                                            \

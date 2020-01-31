@@ -18,15 +18,62 @@
 template <typename T>
 MultiDimensionalInterpolationTempl<T>::MultiDimensionalInterpolationTempl(
     const std::vector<std::vector<Real>> & base_points, const MultiIndex<Real> & data)
-  : _base_points(base_points), _data(data)
+  : _base_points(std::vector<std::vector<Real>>()), _data(MultiIndex<Real>({}))
 {
-  errorCheck();
+  setData(base_points, data);
 }
 
 template <typename T>
 MultiDimensionalInterpolationTempl<T>::MultiDimensionalInterpolationTempl()
   : _base_points(std::vector<std::vector<Real>>()), _data(MultiIndex<Real>({}))
 {
+}
+
+template <typename T>
+void
+MultiDimensionalInterpolationTempl<T>::setData(const std::vector<std::vector<Real>> & base_points,
+                                               const MultiIndex<Real> & data)
+{
+  // stash away original dimension of data because we might modify it
+  _original_dim = data.dim();
+  _degenerate_index.resize(_original_dim, false);
+
+  // need to check this here to make sure the next loop is safe
+  if (data.dim() != base_points.size())
+  {
+    std::ostringstream oss;
+    oss << "Leading dimension of base_points " << base_points.size() << " and data dimensionality "
+        << data.dim() << " are inconsistent.";
+    throw std::domain_error(oss.str());
+  }
+
+  // first a corner case is addressed; if the size of the MultiIndex in one
+  // dimension is 1, then finding the interpolation "stencil" becomes much
+  // harder. It is easier to slice the data array and keep track of which values
+  // to discard in the interpolation routines
+  MultiIndex<Real>::size_type slice_dimensions;
+  MultiIndex<Real>::size_type slice_indices;
+  MultiIndex<Real>::size_type size = data.size();
+  std::vector<std::vector<Real>> modified_base_points;
+  for (unsigned int j = 0; j < data.dim(); ++j)
+    if (size[j] == 1)
+    {
+      slice_dimensions.push_back(j);
+      slice_indices.push_back(0);
+      _degenerate_index[j] = true;
+    }
+    else
+      modified_base_points.push_back(base_points[j]);
+
+  // make sure that at least one dimension remains
+  if (modified_base_points.size() == 0)
+    throw std::domain_error("Degenerate interpolation data: data object has no dimension with more "
+                            "than a single entry.");
+
+  // set the data
+  _base_points = modified_base_points;
+  _data = data.slice(slice_dimensions, slice_indices);
+  errorCheck();
 }
 
 template <typename T>
@@ -60,6 +107,9 @@ MultiDimensionalInterpolationTempl<T>::errorCheck()
       }
     }
   }
+
+  // now the setup is complete
+  _setup_complete = true;
 }
 
 template <typename T>
@@ -101,8 +151,14 @@ MultiDimensionalInterpolationTempl<T>::linearSearchHelper(T & x,
   }
   else if (x >= vector.back())
   {
+    // this requires explanation because it looks like a bug (I swear it isn't, it's a feature)
+    // if x >= largest base point value and the index i = vector.size() - 1 is returned, then during
+    // the interpolation, i + 1 will be accessed, causing a segementation fault. Logic in the
+    // interpolation is also bad because it may slow it down. By returning i = vector.size() - 2,
+    // the last two values in the base point array are used, but x is reset to be equal to the last
+    // value. This will give the right interpolation behavior.
     x = vector.back();
-    return vector.size() - 1;
+    return vector.size() - 2;
   }
 
   for (unsigned int j = 0; j < vector.size() - 2; ++j)
@@ -115,9 +171,15 @@ template <typename T>
 T
 MultiDimensionalInterpolationTempl<T>::multiLinearInterpolation(const std::vector<T> & x) const
 {
+  // ensure that object has been set up properly
+  if (!_setup_complete)
+    throw std::domain_error(
+        "Object has been constructed properly. This happens when the empty constructor is called "
+        "and setData is not called before interpolation.");
+
   // assert does not seem to be enough to check data consistency here
   // because this function is exposed to user and will be frequently used
-  if (x.size() != _data.dim())
+  if (x.size() != _original_dim)
   {
     std::ostringstream oss;
     oss << "In sample the parameter x has size " << x.size() << " but data has dimension "
@@ -126,7 +188,15 @@ MultiDimensionalInterpolationTempl<T>::multiLinearInterpolation(const std::vecto
   }
 
   // make a copy of x because linearSearch needs to be able to modify it
-  std::vector<T> y = x;
+  // also adjust for degenerate indices that were removed
+  std::vector<T> y(_data.dim());
+  unsigned int l = 0;
+  for (unsigned int j = 0; j < _original_dim; ++j)
+    if (!_degenerate_index[j])
+    {
+      y[l] = x[j];
+      ++l;
+    }
 
   // obtain the indices using linearSearch & get flat index in _data array
   MultiIndex<Real>::size_type indices;
@@ -140,13 +210,13 @@ MultiDimensionalInterpolationTempl<T>::multiLinearInterpolation(const std::vecto
     volume *= _base_points[j][indices[j] + 1] - _base_points[j][indices[j]];
 
     // now compute weight for each dimension, note that
-    // weight[j][0] = bp[j][high] - x[j]
-    // weight[j][0] = x[j] - bp[j][low]
+    // weight[j][0] = bp[j][high] - y[j]
+    // weight[j][0] = y[j] - bp[j][low]
     // because in the interpolation the value on the "left" is weighted with the
-    // distance of x to the "right"
+    // distance of y to the "right"
     weights[j].resize(2);
-    weights[j][0] = _base_points[j][indices[j] + 1] - x[j];
-    weights[j][1] = x[j] - _base_points[j][indices[j]];
+    weights[j][0] = _base_points[j][indices[j] + 1] - y[j];
+    weights[j][1] = y[j] - _base_points[j][indices[j]];
   }
 
   // get flat index and stride

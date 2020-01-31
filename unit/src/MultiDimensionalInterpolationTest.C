@@ -51,21 +51,21 @@ TEST(MultiDimensionalInterpolationTest, linearSearch)
     interp.linearSearch(values, indices);
     EXPECT_EQ(indices[0], 1);
     EXPECT_EQ(indices[1], 0);
-    EXPECT_EQ(indices[2], 3);
+    EXPECT_EQ(indices[2], 2);
     EXPECT_EQ(values[2], 2000);
 
     values = {-1000, -2.1, 4000};
     interp.linearSearch(values, indices);
     EXPECT_EQ(indices[0], 0);
     EXPECT_EQ(indices[1], 0);
-    EXPECT_EQ(indices[2], 3);
+    EXPECT_EQ(indices[2], 2);
     EXPECT_EQ(values[0], 0);
 
     values = {0, -1.5, 2000};
     interp.linearSearch(values, indices);
     EXPECT_EQ(indices[0], 0);
     EXPECT_EQ(indices[1], 1);
-    EXPECT_EQ(indices[2], 3);
+    EXPECT_EQ(indices[2], 2);
   }
 
   // construct interpolation object using constructor 2
@@ -76,7 +76,7 @@ TEST(MultiDimensionalInterpolationTest, linearSearch)
     interp.linearSearch(values, indices);
     EXPECT_EQ(indices[0], 1);
     EXPECT_EQ(indices[1], 0);
-    EXPECT_EQ(indices[2], 3);
+    EXPECT_EQ(indices[2], 2);
     EXPECT_EQ(values[2], 2000);
   }
 }
@@ -155,4 +155,67 @@ TEST(MultiDimensionalInterpolationTest, interpolate)
         Real err = std::abs(1 - ival / val) * 100;
         EXPECT_TRUE(err < 10);
       }
+}
+
+TEST(MultiDimensionalInterpolationTest, interpolateCornerCases)
+{
+  // Construct a 3 indexed objects of Reals
+  MultiIndex<Real>::size_type shape(5);
+  shape[0] = 3;
+  shape[1] = 1;
+  shape[2] = 5;
+  shape[3] = 4;
+  shape[4] = 1;
+  MultiIndex<Real> mindex = MultiIndex<Real>(shape);
+
+  // linear function should be interpolated exactly
+  std::vector<Real> ua = {0, 1, 3};
+  std::vector<Real> wa = {12};
+  std::vector<Real> xa = {-2, 5, 6, 7, 12};
+  std::vector<Real> ya = {10, 11, 12.5, 13};
+  std::vector<Real> za = {-50};
+  MultiIndex<Real>::size_type index(5);
+  for (unsigned int j0 = 0; j0 < shape[0]; ++j0)
+    for (unsigned int j1 = 0; j1 < shape[1]; ++j1)
+      for (unsigned int j2 = 0; j2 < shape[2]; ++j2)
+        for (unsigned int j3 = 0; j3 < shape[3]; ++j3)
+          for (unsigned int j4 = 0; j4 < shape[4]; ++j4)
+          {
+            index = {j0, j1, j2, j3, j4};
+            Real u = ua[j0];
+            Real w = wa[j1];
+            Real x = xa[j2];
+            Real y = ya[j3];
+            Real z = za[j4];
+            mindex(index) = 4 + 10 * u - 12 * w + x + 2 * y - 5 * z + x * y + 2 * y * z +
+                            0.5 * x * y * z * u * w;
+          }
+
+  std::vector<std::vector<Real>> bp = {ua, wa, xa, ya, za};
+  MultiDimensionalInterpolation interp(bp, mindex);
+
+  // first point
+  std::vector<Real> pt = {3.5, 100, -4, 10.5, 1e12};
+  Real u = 3;
+  Real w = 12;
+  Real x = -2;
+  Real y = 10.5;
+  Real z = -50;
+  Real val = 4 + 10 * u - 12 * w + x + 2 * y - 5 * z + x * y + 2 * y * z + 0.5 * x * y * z * u * w;
+  Real ival = interp.multiLinearInterpolation(pt);
+  EXPECT_EQ(ival, val);
+  /*
+      unsigned int np = 10;
+      for (unsigned int jx = 0; jx < np + 1; ++jx)
+        for (unsigned int jy = 0; jy < np + 1; ++jy)
+          for (unsigned int jz = 0; jz < np + 1; ++jz)
+          {
+            Real x = 3.0 / np * jx;
+            Real y = 14.0 / np * jy - 2;
+            Real z = 3.0 / np * jz + 10;
+            Real ival = interp.multiLinearInterpolation({x, y, z});
+            Real val = 4 + x + 2 * y - 5 * z + x * y + 2 * y * z + 0.5 * x * y * z;
+            EXPECT_NEAR(ival, val, 1e-12);
+          }
+    */
 }
