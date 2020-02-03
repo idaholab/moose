@@ -65,11 +65,11 @@ is used in the linear system, but the linear solve is preconditioned using the
 lumped mass matrix. This compromise retains the accuracy of the `consistent`
 option while benefiting from some of the speedup offered by the `lumped` option.
 
-The lumped mass matrix preconditioner is applied with a helper class, `LumpedPreconditioner`:
+The lumped mass matrix preconditioner is applied with the class, `LumpedPreconditioner`:
 
-!listing framework/include/timeintegrators/ExplicitTimeIntegrator.h line=class LumpedPreconditioner
+!listing framework/include/timeintegrators/LumpedPreconditioner.h
 
-This helper object simply applies the inverse of the diagonal, lumped
+This object simply applies the inverse of the diagonal, lumped
 mass-matrix as the preconditioner for the linear solve, which is very
 efficient. Note that when this option is applied you shouldn't specify any other
 preconditioners using command-line syntax or they will override this option.

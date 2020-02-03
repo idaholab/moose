@@ -1,6 +1,7 @@
 [Tests]
   design = "CentralDifference.md"
-  issues = "#12185"
+  issues = '#13964 #9726'
+  
   [./central_difference]
     type = 'CSVDiff'
     input = 'central_difference.i'
