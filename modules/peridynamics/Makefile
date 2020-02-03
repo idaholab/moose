@@ -18,18 +18,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics
-TENSOR_MECHANICS := yes
-SKIP_LOADER      := yes
+# Module
+MODULE_NAME := peridynamics
 include $(MODULE_DIR)/modules.mk
-
-# dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/peridynamics
-APPLICATION_NAME   := peridynamics
-BUILD_EXEC         := yes
-DEPEND_MODULES     := tensor_mechanics
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here
