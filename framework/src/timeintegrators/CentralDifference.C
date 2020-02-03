@@ -53,7 +53,8 @@ CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_ty
   auto u_dotdot = ad_u_dot; // TODO: Ask Alex if this has to be ad_u_dotdot. Currently, it will
                             // change u_dotdot when called.
 
-  computeTimeDerivativeHelper(ad_u_dot, u_dotdot, _solution_old(dof), _solution_older(dof), u_old_old_old);
+  computeTimeDerivativeHelper(
+      ad_u_dot, u_dotdot, _solution_old(dof), _solution_older(dof), u_old_old_old);
 }
 
 void
