@@ -6,75 +6,128 @@
     xmax = 2
     ny = 2
     ymax = 2
-    elem_type = QUAD4
   []
-  [./subdomain_id]
+  [./subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 1 0'
     block_id = 1
   [../]
-
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
-    input = subdomain_id
+    input = subdomain1
     master_block = '0'
     paired_block = '1'
-    new_boundary = 'interface'
+    new_boundary = 'master0_interface'
   [../]
-
-[]
-
-[Functions]
-  [./fn_exact]
-    type = ParsedFunction
-    value = 'x*x+y*y'
-  [../]
-
-  [./ffn]
-    type = ParsedFunction
-    value = -4
-  [../]
-[]
-
-[UserObjects]
-  [./interface_value_uo]
-    type = InterfaceUserObjectGetMaterialValue
-    property = diffusivity
-    boundary = 'interface'
-    execute_on = 'initial timestep_end'
-    interface_value_type = average
+  [./break_boundary]
+    input = interface
+    type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
 
 [Variables]
   [./u]
-    family = LAGRANGE
     order = FIRST
+    family = LAGRANGE
+    block = 0
+  [../]
+
+  [./v]
+    order = FIRST
+    family = LAGRANGE
+    block = 1
   [../]
 []
 
-
 [Kernels]
-  [./diff]
-    type = Diffusion
+  [./diff_u]
+    type = CoeffParamDiffusion
     variable = u
+    D = 2
+    block = 0
   [../]
-
-  [./ffn]
+  [./diff_v]
+    type = CoeffParamDiffusion
+    variable = v
+    D = 4
+    block = 1
+  [../]
+  [./source_u]
     type = BodyForce
     variable = u
-    function = ffn
+    function = 0.1*t
+  [../]
+[]
+
+[InterfaceKernels]
+  [./interface]
+    type = PenaltyInterfaceDiffusionDot
+    variable = u
+    neighbor_var = v
+    boundary = master0_interface
+    penalty = 1e6
   [../]
 []
 
 [BCs]
-  [./all]
-    type = FunctionDirichletBC
+  [./u]
+    type = VacuumBC
     variable = u
-    boundary = '0 1 2 3'
-    function = fn_exact
+    boundary = 'left_to_0 bottom_to_0 right top'
+  [../]
+  [./v]
+    type = VacuumBC
+    variable = v
+    boundary = 'left_to_1 bottom_to_1'
+  [../]
+[]
+
+[Postprocessors]
+  [./u_int]
+    type = ElementIntegralVariablePostprocessor
+    variable = u
+    block = 0
+  [../]
+  [./v_int]
+    type = ElementIntegralVariablePostprocessor
+    variable = v
+    block = 1
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = TRUE
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = 'NEWTON'
+
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = ' lu       superlu_dist                '
+  dt = 0.1
+  num_steps = 1
+  dtmin = 0.1
+  line_search = none
+[]
+
+[Outputs]
+  exodus = true
+  print_linear_residuals = true
+[]
+
+[UserObjects]
+  [./interface_material_uo]
+    type = InterfaceUserObjectGetMaterialValue
+    property = diffusivity
+    boundary = 'master0_interface'
+    execute_on = 'initial timestep_end'
+    interface_value_type = average
   [../]
 []
 
@@ -91,40 +144,4 @@
     initial_diffusivity = 2
     # outputs = all
   [../]
-[]
-
-[AuxKernels]
-  [./diffusivity_1]
-    type = MaterialRealAux
-    property = diffusivity
-    variable = diffusivity_1
-    block = 0
-  []
-  [./diffusivity_2]
-    type = MaterialRealAux
-    property = diffusivity
-    variable = diffusivity_2
-    block = 1
-  []
-[]
-
-[AuxVariables]
-  [./diffusivity_1]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_2]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-
-[Executioner]
-  type = Steady
-  solve_type = NEWTON
-[]
-
-[Outputs]
-  exodus = true
 []

@@ -29,7 +29,8 @@ public:
   InterfaceUserObjectGetMaterialValue(const InputParameters & parameters);
   virtual ~InterfaceUserObjectGetMaterialValue();
 
-  virtual void initialize();
+  virtual void initialSetup() override;
+  virtual void initialize(){};
   virtual void execute();
   virtual void finalize() { return; };
   virtual void threadJoin(const UserObject & /*uo*/) { return; };

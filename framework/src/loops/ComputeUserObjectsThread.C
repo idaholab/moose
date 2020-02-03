@@ -192,6 +192,10 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
 void
 ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
+
+  Moose::out << std::endl
+             << std::endl
+             << "ComputeUserObjectsThread::onInterface LOOP BEGIN" << std::endl;
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor_ptr(side);
 
@@ -202,19 +206,31 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   if (!(neighbor->active()))
     return;
 
+  Moose::out << "LOOPS BEGIN prepare face and reinint neighbor " << std::endl;
   _fe_problem.prepareFace(elem, _tid);
   _fe_problem.reinitNeighbor(elem, side, _tid);
+  Moose::out << "LOOPS END prepare face and reinint neighbor " << std::endl;
 
   // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
   // still remember to swap back during stack unwinding.
+
+  Moose::out << "LOOPS BEGIN swapback and reinit materials " << std::endl;
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
   _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
 
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
   _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
+  Moose::out << "LOOPS END swapback and reinit materials " << std::endl;
   for (const auto & uo : userobjs)
+  {
+    Moose::out << "LOOPS start UO execution " << std::endl;
     uo->execute();
+    Moose::out << "LOOPS end UO execution " << std::endl;
+  }
+
+  Moose::out << "ComputeUserObjectsThread::onInterface LOOP END" << std::endl
+             << std::endl
+             << std::endl;
 }
 
 void

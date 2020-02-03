@@ -18,7 +18,7 @@ InterfaceUserObjectGetMaterialValue::validParams()
 {
   InputParameters params = InterfaceValueUserObject::validParams();
   params.addRequiredParam<MaterialPropertyName>("property", "The property name");
-  params.addCoupledVar("property_neighbor", "The neighbor property name");
+  params.addParam<MaterialPropertyName>("property_neighbor", "The neighbor property name");
   params.addClassDescription("Test Interfae User Object computing and storing average values at "
                              "each QP across an interface");
   return params;
@@ -28,9 +28,9 @@ InterfaceUserObjectGetMaterialValue::InterfaceUserObjectGetMaterialValue(
     const InputParameters & parameters)
   : InterfaceValueUserObject(parameters),
     _mp(getMaterialProperty<Real>("property")),
-    _mp_neighbor(parameters.isParamSetByUser("property")
-                     ? getNeighborMaterialProperty<Real>("property")
-                     : getNeighborMaterialProperty<Real>("property_neighbor"))
+    _mp_neighbor(parameters.isParamSetByUser("property_neighbor")
+                     ? getNeighborMaterialProperty<Real>("property_neighbor")
+                     : getNeighborMaterialProperty<Real>("property"))
 
 {
 }
@@ -38,7 +38,7 @@ InterfaceUserObjectGetMaterialValue::InterfaceUserObjectGetMaterialValue(
 InterfaceUserObjectGetMaterialValue::~InterfaceUserObjectGetMaterialValue() {}
 
 void
-InterfaceUserObjectGetMaterialValue::initialize()
+InterfaceUserObjectGetMaterialValue::initialSetup()
 {
   // define the boundary map and retrieve element side and boundary_ID
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> elem_side_bid =
@@ -57,12 +57,13 @@ InterfaceUserObjectGetMaterialValue::initialize()
     // map
     if (boundaryList.find(std::get<2>(elem_side_bid[i])) != boundaryList.end())
     {
+      Moose::out << "elem " << std::get<0>(elem_side_bid[i]) << " side "
+                 << std::get<1>(elem_side_bid[i]) << std::endl;
       // make pair
       std::pair<dof_id_type, unsigned int> elem_side_pair =
           std::make_pair(std::get<0>(elem_side_bid[i]), std::get<1>(elem_side_bid[i]));
       // initialize map elemenet
       std::vector<Real> var_values(0, 0);
-
       // add entry to the value map
       _map_values[elem_side_pair] = var_values;
     }
@@ -74,6 +75,8 @@ InterfaceUserObjectGetMaterialValue::execute()
 {
   // find the entry on the map
   auto it = _map_values.find(std::make_pair(_current_elem->id(), _current_side));
+  Moose::out << " _current_elem->id() " << _current_elem->id() << " _current_side " << _current_side
+             << std::endl;
   if (it != _map_values.end())
   {
     // insert two vector value for each qp
@@ -84,7 +87,9 @@ InterfaceUserObjectGetMaterialValue::execute()
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       // compute average value at qp
-      Moose::out << "_mp[qp] " << _mp[qp] << " _mp_neighbor[qp] " << _mp_neighbor[qp] << std::endl;
+      Moose::out << " _current_elem->id() " << _current_elem->id() << " _current_side "
+                 << _current_side << " QP " << qp << " _mp[qp] " << _mp[qp] << " _mp_neighbor[qp] "
+                 << _mp_neighbor[qp] << std::endl;
       vec[qp] = computeInterfaceValueType(_mp[qp], _mp_neighbor[qp]);
     }
   }
