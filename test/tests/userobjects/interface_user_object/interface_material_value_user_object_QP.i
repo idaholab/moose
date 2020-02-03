@@ -98,11 +98,13 @@
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_1
+    block = 0
   []
   [./diffusivity_2]
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_2
+    block = 1
   []
 []
 
@@ -115,66 +117,8 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./avg_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./master_minus_slave_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./slave_minus_master_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./abs_jump_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./master_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./slave_qp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 []
 
-
-
-[Postprocessors]
-  [./interface_average_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  avg_qp
-  [../]
-  [./master_minus_slave_qp_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  master_minus_slave_qp
-  [../]
-  [./slave_minus_master_qp_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  slave_minus_master_qp
-  [../]
-  [./abs_jump_qp_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  abs_jump_qp
-  [../]
-  [./master_qp_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  master_qp
-  [../]
-  [./slave_qp_PP]
-    type = SideAverageValue
-    boundary = interface
-    variable =  slave_qp
-  [../]
-[]
 
 [Executioner]
   type = Steady
