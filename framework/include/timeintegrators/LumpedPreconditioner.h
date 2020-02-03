@@ -23,7 +23,8 @@
 class LumpedPreconditioner;
 
 /**
- * Class to apply preconditioner
+ * Class to that applies the lumped mass matrix preconditioner
+ * in the ExplicitTimeIntegrator
  */
 class LumpedPreconditioner : public Preconditioner<Real>
 {
