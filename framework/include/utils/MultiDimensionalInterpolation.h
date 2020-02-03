@@ -33,6 +33,9 @@ public:
 
   virtual ~MultiDimensionalInterpolationTempl() = default;
 
+  /// returns the dimensionality of this interpolation object
+  unsigned int dim() const { return _original_dim; }
+
   /// sets data but also fixes degenerate dimensions in data
   void setData(const std::vector<std::vector<Real>> & base_points, const MultiIndex<Real> & data);
 
