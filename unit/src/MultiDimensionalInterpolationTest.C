@@ -204,18 +204,16 @@ TEST(MultiDimensionalInterpolationTest, interpolateCornerCases)
   Real val = 4 + 10 * u - 12 * w + x + 2 * y - 5 * z + x * y + 2 * y * z + 0.5 * x * y * z * u * w;
   Real ival = interp.multiLinearInterpolation(pt);
   EXPECT_EQ(ival, val);
-  /*
-      unsigned int np = 10;
-      for (unsigned int jx = 0; jx < np + 1; ++jx)
-        for (unsigned int jy = 0; jy < np + 1; ++jy)
-          for (unsigned int jz = 0; jz < np + 1; ++jz)
-          {
-            Real x = 3.0 / np * jx;
-            Real y = 14.0 / np * jy - 2;
-            Real z = 3.0 / np * jz + 10;
-            Real ival = interp.multiLinearInterpolation({x, y, z});
-            Real val = 4 + x + 2 * y - 5 * z + x * y + 2 * y * z + 0.5 * x * y * z;
-            EXPECT_NEAR(ival, val, 1e-12);
-          }
-    */
+}
+
+TEST(MultiDimensionalInterpolationTest, interpolateDegenerateCase)
+{
+  // Construct a 3 indexed objects of Reals
+  MultiIndex<Real>::size_type shape = {1, 1, 1, 1, 1};
+  MultiIndex<Real> mindex = MultiIndex<Real>(shape, {15});
+  std::vector<std::vector<Real>> bp = {{10}, {12}, {-140}, {5e6}, {-1e-11}};
+  MultiDimensionalInterpolation interp(bp, mindex);
+  std::vector<Real> pt = {20, 15, 36, 12, -1};
+  Real ival = interp.multiLinearInterpolation(pt);
+  EXPECT_EQ(ival, 15);
 }

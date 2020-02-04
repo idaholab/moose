@@ -70,6 +70,13 @@ protected:
   /// this variable keeps track on which dimension is degenerate and was removed
   std::vector<bool> _degenerate_index;
 
+  /**
+   * if all dimensions have size one then there is only one value to return
+   * this corner case should be supported so the calling routine does not need
+   * to check for it
+   */
+  bool _degenerate_interpolation = false;
+
 private:
   std::vector<std::vector<Real>> _base_points;
   MultiIndex<Real> _data;

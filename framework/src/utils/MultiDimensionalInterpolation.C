@@ -34,6 +34,9 @@ void
 MultiDimensionalInterpolationTempl<T>::setData(const std::vector<std::vector<Real>> & base_points,
                                                const MultiIndex<Real> & data)
 {
+  _degenerate_interpolation = false;
+  _setup_complete = false;
+
   // stash away original dimension of data because we might modify it
   _original_dim = data.dim();
   _degenerate_index.resize(_original_dim, false);
@@ -65,14 +68,23 @@ MultiDimensionalInterpolationTempl<T>::setData(const std::vector<std::vector<Rea
     else
       modified_base_points.push_back(base_points[j]);
 
-  // make sure that at least one dimension remains
+  // if all dimensions have size 1, then there is only one value to return
+  // this is a weird corner case that we should support to make life easier
+  // for whoever uses this object
+  // In this case, we can just use the passed base_points and data objects
+  // and short-cut the computation in the interpolation function
   if (modified_base_points.size() == 0)
-    throw std::domain_error("Degenerate interpolation data: data object has no dimension with more "
-                            "than a single entry.");
-
-  // set the data
-  _base_points = modified_base_points;
-  _data = data.slice(slice_dimensions, slice_indices);
+  {
+    _degenerate_interpolation = true;
+    _base_points = base_points;
+    _data = data;
+  }
+  else
+  {
+    // set the data
+    _base_points = modified_base_points;
+    _data = data.slice(slice_dimensions, slice_indices);
+  }
   errorCheck();
 }
 
@@ -186,6 +198,10 @@ MultiDimensionalInterpolationTempl<T>::multiLinearInterpolation(const std::vecto
         << _data.dim();
     throw std::domain_error(oss.str());
   }
+
+  // in this case there is only one entry that resides at flat index 0
+  if (_degenerate_interpolation)
+    return _data[0];
 
   // make a copy of x because linearSearch needs to be able to modify it
   // also adjust for degenerate indices that were removed
