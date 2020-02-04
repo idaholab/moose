@@ -24,7 +24,7 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
 - Install the moose and moose-tools package from mooseframework.org, and name your environment 'moose':
 
   ```bash
-  conda create --name moose moose moose-tools
+  conda create --name moose moose-libmesh moose-tools
   ```
 
 - Activate the moose environment +(do this for any new terminal opened)+:
