@@ -2,7 +2,6 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-
 # Update package lists
 apt-get update -y
 
@@ -22,8 +21,8 @@ apt-get install -y \
   libcurl4-gnutls-dev \
   zlib1g-dev \
   libhwloc-dev \
-  python \
-  python-dev \
+  python3 \
+  python3-dev \
   cmake \
   curl \
   bison \
@@ -32,3 +31,6 @@ apt-get install -y \
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*
+
+# Set Python 3 as the default interpreter
+update-alternatives --install /usr/bin/python python /usr/bin/python3 10
