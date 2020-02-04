@@ -187,6 +187,12 @@ class TestUnitConversion(unittest.TestCase):
         self.assertAlmostEqual(lbpersecond.to(1.), 0.45359237, places = 6)
         self.assertAlmostEqual(lbpersecond.frm(0.45359237), 1., places = 6)
 
+        lbperhour = PoundPerHourUnit()
+        self.assertTrue(lbperhour.name() == 'Pound per hour')
+        self.assertTrue(lbperhour.unit() == [ "lb/hr", "lbm/hr", "lbm/h", "lb/h" ])
+        self.assertAlmostEqual(lbperhour.to(1.), 1.259978805556e-4, places = 6)
+        self.assertAlmostEqual(lbperhour.frm(1.259978805556e-4), 1., places = 6)
+
         megalbperhour = MegapoundPerHourlUnit()
         self.assertTrue(megalbperhour.name() == 'Megapound per hour')
         self.assertTrue(megalbperhour.unit() == [ "Mlb/hr", "Mlbm/hr", "Mlbm/h", "Mlb/h" ])

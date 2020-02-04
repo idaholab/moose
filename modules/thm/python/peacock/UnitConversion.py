@@ -380,6 +380,21 @@ class PoundPerMinutelUnit(Unit):
         return value * 60 /  0.45359237
 
 
+class PoundPerHourUnit(Unit):
+
+    def name(self):
+        return "Pound per hour"
+
+    def unit(self):
+        return [ "lb/hr", "lbm/hr", "lbm/h", "lb/h" ]
+
+    def to(self, value):
+        return value * 0.45359237 / 3600
+
+    def frm(self, value):
+        return value * 3600 / 0.45359237
+
+
 class MassFlowRateGroup(UnitGroup):
     """
     Group of mass flow rate units
@@ -388,6 +403,7 @@ class MassFlowRateGroup(UnitGroup):
         super(MassFlowRateGroup, self).__init__([
         PoundPerSecondUnit(),
         PoundPerMinutelUnit(),
+        PoundPerHourUnit(),
         MegapoundPerHourlUnit(),
         KilogramPerSecondUnit()
     ])
