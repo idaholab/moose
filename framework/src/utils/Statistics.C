@@ -10,9 +10,9 @@
 #include <numeric>
 
 #include "Statistics.h"
-#include "MooseTypes.h"
 #include "MooseEnumItem.h"
 #include "MooseError.h"
+#include "MooseRandom.h"
 #include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 
@@ -22,32 +22,35 @@ namespace Statistics
 MultiMooseEnum
 makeCalculatorEnum()
 {
-  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6");
+  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7");
 }
 
-std::unique_ptr<Calculator>
+std::unique_ptr<const Calculator>
 makeCalculator(const MooseEnumItem & item, const MooseObject & other)
 {
   if (item == "min")
-    return libmesh_make_unique<Min>(other);
+    return libmesh_make_unique<const Min>(other);
 
   else if (item == "max")
-    return libmesh_make_unique<Max>(other);
+    return libmesh_make_unique<const Max>(other);
 
   else if (item == "sum")
-    return libmesh_make_unique<Sum>(other);
+    return libmesh_make_unique<const Sum>(other);
 
   else if (item == "mean" || item == "average") // average is deprecated
-    return libmesh_make_unique<Mean>(other);
+    return libmesh_make_unique<const Mean>(other);
 
   else if (item == "stddev")
-    return libmesh_make_unique<StdDev>(other);
+    return libmesh_make_unique<const StdDev>(other);
+
+  else if (item == "stderr")
+    return libmesh_make_unique<const StdErr>(other);
 
   else if (item == "norm2")
-    return libmesh_make_unique<L2Norm>(other);
+    return libmesh_make_unique<const L2Norm>(other);
 
   else if (item == "ratio")
-    return libmesh_make_unique<Ratio>(other);
+    return libmesh_make_unique<const Ratio>(other);
 
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;
@@ -56,137 +59,69 @@ makeCalculator(const MooseEnumItem & item, const MooseObject & other)
 // CALCULATOR //////////////////////////////////////////////////////////////////////////////////////
 Calculator::Calculator(const MooseObject & other) : libMesh::ParallelObject(other) {}
 
-Real
-Calculator::compute(const std::vector<Real> & data)
-{
-  initialize(false);
-  execute(data, false);
-  finalize(false);
-  return value();
-}
-
+// MEAN ////////////////////////////////////////////////////////////////////////////////////////////
 Mean::Mean(const MooseObject & other) : Calculator(other) {}
 
-// MEAN ////////////////////////////////////////////////////////////////////////////////////////////
-void
-Mean::initialize(bool /*is_distributed*/)
+Real
+Mean::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  _local_count = 0;
-  _local_sum = 0;
-}
+  Real local_count, local_sum;
+  local_count = data.size();
+  local_sum = std::accumulate(data.begin(), data.end(), 0.);
 
-void
-Mean::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_count = data.size();
-  _local_sum = std::accumulate(data.begin(), data.end(), 0.);
-}
-
-void
-Mean::finalize(bool is_distributed)
-{
   if (is_distributed)
   {
-    _communicator.sum(_local_count);
-    _communicator.sum(_local_sum);
+    _communicator.sum(local_count);
+    _communicator.sum(local_sum);
   }
-}
 
-Real
-Mean::value()
-{
-  return _local_sum / _local_count;
+  return local_sum / local_count;
 }
 
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
 Min::Min(const MooseObject & other) : Calculator(other) {}
 
-void
-Min::initialize(bool /*is_distributed*/)
-{
-  _local_min = std::numeric_limits<Real>::max();
-}
-
-void
-Min::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_min = *std::min_element(data.begin(), data.end());
-}
-
-void
-Min::finalize(bool is_distributed)
-{
-  if (is_distributed)
-    _communicator.min(_local_min);
-}
-
 Real
-Min::value()
+Min::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  return _local_min;
+  Real local_min;
+  local_min = *std::min_element(data.begin(), data.end());
+  if (is_distributed)
+    _communicator.min(local_min);
+  return local_min;
 }
 
 // MAX /////////////////////////////////////////////////////////////////////////////////////////////
 Max::Max(const MooseObject & other) : Calculator(other) {}
 
-void
-Max::initialize(bool /*is_distributed*/)
-{
-  _local_max = std::numeric_limits<Real>::min();
-}
-
-void
-Max::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_max = *std::max_element(data.begin(), data.end());
-}
-
-void
-Max::finalize(bool is_distributed)
-{
-  if (is_distributed)
-    _communicator.max(_local_max);
-}
-
 Real
-Max::value()
+Max::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  return _local_max;
+  Real local_max;
+  local_max = *std::max_element(data.begin(), data.end());
+  if (is_distributed)
+    _communicator.max(local_max);
+  return local_max;
 }
 
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
 Sum::Sum(const MooseObject & other) : Calculator(other) {}
 
-void
-Sum::initialize(bool /*is_distributed*/)
-{
-  _local_sum = 0.;
-}
-
-void
-Sum::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_sum = std::accumulate(data.begin(), data.end(), 0.);
-}
-
-void
-Sum::finalize(bool is_distributed)
-{
-  if (is_distributed)
-    _communicator.sum(_local_sum);
-}
-
 Real
-Sum::value()
+Sum::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  return _local_sum;
+  Real local_sum = 0.;
+  local_sum = std::accumulate(data.begin(), data.end(), 0.);
+  if (is_distributed)
+    _communicator.sum(local_sum);
+  return local_sum;
 }
 
 // STDDEV //////////////////////////////////////////////////////////////////////////////////////////
 StdDev::StdDev(const MooseObject & other) : Calculator(other) {}
 
-void
-StdDev::execute(const std::vector<Real> & data, bool is_distributed)
+Real
+StdDev::compute(const std::vector<Real> & data, bool is_distributed) const
 {
   Real count = data.size();
   Real sum = std::accumulate(data.begin(), data.end(), 0.);
@@ -205,77 +140,56 @@ StdDev::execute(const std::vector<Real> & data, bool is_distributed)
   if (is_distributed)
     _communicator.sum(sum_of_squares);
 
-  _value = std::sqrt(sum_of_squares / (count - 1.));
+  return std::sqrt(sum_of_squares / (count - 1.));
 }
 
+// STDERR //////////////////////////////////////////////////////////////////////////////////////////
+StdErr::StdErr(const MooseObject & other) : StdDev(other) {}
+
 Real
-StdDev::value()
+StdErr::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  return _value;
+  Real count = data.size();
+  if (is_distributed)
+    _communicator.sum(count);
+  return StdDev::compute(data, is_distributed) / std::sqrt(count);
 }
 
 // RATIO ///////////////////////////////////////////////////////////////////////////////////////////
 Ratio::Ratio(const MooseObject & other) : Calculator(other) {}
 
-void
-Ratio::initialize(bool /*is_distributed*/)
+Real
+Ratio::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  _local_max = std::numeric_limits<Real>::min();
-  _local_min = std::numeric_limits<Real>::max();
-}
+  Real local_max = std::numeric_limits<Real>::min();
+  Real local_min = std::numeric_limits<Real>::max();
+  local_min = *std::min_element(data.begin(), data.end());
+  local_max = *std::max_element(data.begin(), data.end());
 
-void
-Ratio::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_min = *std::min_element(data.begin(), data.end());
-  _local_max = *std::max_element(data.begin(), data.end());
-}
-
-void
-Ratio::finalize(bool is_distributed)
-{
   if (is_distributed)
   {
-    _communicator.min(_local_min);
-    _communicator.max(_local_max);
+    _communicator.min(local_min);
+    _communicator.max(local_max);
   }
-}
 
-Real
-Ratio::value()
-{
-  return _local_min != 0. ? _local_max / _local_min : 0.;
+  return local_min != 0. ? local_max / local_min : 0.;
 }
 
 // L2NORM //////////////////////////////////////////////////////////////////////////////////////////
 L2Norm::L2Norm(const MooseObject & other) : Calculator(other) {}
 
-void
-L2Norm::initialize(bool /*is_distributed*/)
+Real
+L2Norm::compute(const std::vector<Real> & data, bool is_distributed) const
 {
-  _local_sum = 0;
-}
-
-void
-L2Norm::execute(const std::vector<Real> & data, bool /*is_distributed*/)
-{
-  _local_sum =
+  Real local_sum =
       std::accumulate(data.begin(), data.end(), 0., [](Real running_value, Real current_value) {
         return running_value + std::pow(current_value, 2);
       });
-}
 
-void
-L2Norm::finalize(bool is_distributed)
-{
   if (is_distributed)
-    _communicator.sum(_local_sum);
-}
+    _communicator.sum(local_sum);
 
-Real
-L2Norm::value()
-{
-  return std::sqrt(_local_sum);
+  return std::sqrt(local_sum);
 }
 
 } // Statistics namespace

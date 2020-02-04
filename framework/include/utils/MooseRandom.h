@@ -119,6 +119,21 @@ public:
   }
 
   /**
+   * This method returns the next random number (long format) from the specified generator
+   * within the supplied range.
+   *
+   * @param lower lower bounds of value
+   * @param upper upper bounds of value
+   * @param i     the index of the generator
+   * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
+   */
+  inline uint32_t randl(std::size_t i, uint32_t lower, uint32_t upper)
+  {
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
+    return rds_iuniform(&(_states[i].first), lower, upper);
+  }
+
+  /**
    * This method saves the current state of all generators which can be restored at a later time
    * (i.e. re-generate the same sequence of random numbers of this generator
    */
@@ -178,4 +193,3 @@ dataLoad(std::istream & stream, MooseRandom & v, void * context)
 {
   loadHelper(stream, v._states, context);
 }
-

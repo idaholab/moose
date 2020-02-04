@@ -11,6 +11,7 @@
 
 #include "GeneralVectorPostprocessor.h"
 #include "Statistics.h"
+#include "BootstrapStatistics.h"
 
 class StatisticsVectorPostprocessor;
 
@@ -27,30 +28,45 @@ class StatisticsVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
-
   StatisticsVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void initialize() override;
   virtual void execute() override;
-  virtual void finalize() override;
+
+  /// Not used; all parallel computation is wrapped in the Statistics objects
+  virtual void initialize() final{};
+  virtual void finalize() final{};
 
 protected:
   /// The selected statistics to compute
   const MultiMooseEnum & _compute_stats;
 
+  /// Bootstrap Confidence Level method
+  const MooseEnum & _ci_method;
+
+  /// Confidence levels to compute (see computeLevels)
+  const std::vector<Real> _ci_levels;
+
   /// The VPP vector that will hold the statistics identifiers
   VectorPostprocessorValue & _stat_type_vector;
+
+  /// Confidence level calculator
+  std::unique_ptr<const Statistics::BootstrapCalculator> _ci_calculator = nullptr;
 
   // The following vectors are sized to the number of statistics to be computed
 
   /// The VPP vectors being computed
   std::vector<VectorPostprocessorValue *> _stat_vectors;
 
-  /// Calculators, 1 for each vector and each statistic to compute for that vector
-  std::vector<std::vector<std::unique_ptr<Statistics::Calculator>>> _stat_calculators;
-
-  /// VPPs names to be computed from
-  /// (Vectorpostprocessor name, vector name, is_distribute)
+  /// VPPs names to be computed from (Vectorpostprocessor name, vector name, is_distribute)
   std::vector<std::tuple<std::string, std::string, bool>> _compute_from_names;
+
+private:
+  /**
+   * Helper function for converting confidence levels given in (0, 0.5] into levels in (0, 1).
+   * For example, levels_in = {0.05, 0.1, 0.5} converts to {0.05 0.1, 0.5, 0.9, 0.95}.
+   *
+   * This also performs error checking on the supplied "ci_levels".
+   */
+  std::vector<Real> computeLevels(const std::vector<Real> & levels_in) const;
 };

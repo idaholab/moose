@@ -15,113 +15,95 @@ class MooseEnumItem;
 
 namespace Statistics
 {
+class Calculator;
 
+/*
+ * Free function for building a const Calculator object for use by StatisticsVectorPostprocessor.
+ */
+std::unique_ptr<const Calculator> makeCalculator(const MooseEnumItem & item,
+                                                 const MooseObject & other);
+
+/*
+ * Free function that returns the available statistics available to the
+ * StatisticsVectorPostprocessor.
+ */
+MultiMooseEnum makeCalculatorEnum();
+
+/* Base class for computing statistics (e.g., mean, min) for use with StatisticsVectorPostprocessor.
+ *
+ * The purpose of these objects are to provide an API for computing statistics in serial or parallel
+ * without any state. This allows future statistics to be quickly added and for each statistic
+ * to be used with the BoostrapCalculator for computing bootstrap statistics such as confidence
+ * level intervals.
+ *
+ * The Calculator objects are created as const objects by the StatisticsVectorPostprocessor via
+ * the makeCalculator function.
+ *
+ * To create new Calculator objects first create the Calculator class and then update the
+ * above free functions above.
+ */
 class Calculator : public libMesh::ParallelObject
 {
 public:
   Calculator(const MooseObject &);
   virtual ~Calculator() = default;
-  virtual Real compute(const std::vector<Real> &);
-  virtual void initialize(bool) = 0;
-  virtual void execute(const std::vector<Real> &, bool) = 0;
-  virtual void finalize(bool) = 0;
-  virtual Real value() = 0;
+  virtual Real compute(const std::vector<Real> &, bool) const = 0;
 };
-
-std::unique_ptr<Calculator> makeCalculator(const MooseEnumItem & name, const MooseObject &);
-MultiMooseEnum makeCalculatorEnum();
 
 class Mean : public Calculator
 {
 public:
   Mean(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  std::size_t _local_count = 0;
-  Real _local_sum = 0.0;
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Min : public Calculator
 {
 public:
   Min(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  Real _local_min = std::numeric_limits<Real>::max();
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Max : public Calculator
 {
 public:
   Max(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  Real _local_max = std::numeric_limits<Real>::min();
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Sum : public Calculator
 {
 public:
   Sum(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  Real _local_sum = 0;
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class StdDev : public Calculator
 {
 public:
   StdDev(const MooseObject &);
-  virtual void initialize(bool) override {}
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override {}
-  virtual Real value() override;
+  virtual Real compute(const std::vector<Real> &, bool) const override;
+};
 
-protected:
-  Real _value = 0;
+class StdErr : public StdDev
+{
+public:
+  StdErr(const MooseObject &);
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Ratio : public Calculator
 {
 public:
   Ratio(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  Real _local_min = std::numeric_limits<Real>::max();
-  Real _local_max = std::numeric_limits<Real>::min();
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class L2Norm : public Calculator
 {
 public:
   L2Norm(const MooseObject &);
-  virtual void initialize(bool) override;
-  virtual void execute(const std::vector<Real> &, bool) override;
-  virtual void finalize(bool) override;
-  virtual Real value() override;
-
-protected:
-  Real _local_sum = 0;
+  virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 } // namespace Statistics

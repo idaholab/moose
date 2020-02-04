@@ -38,7 +38,23 @@ StatisticsVectorPostprocessor::validParams()
   params.addParam<MultiMooseEnum>(
       "compute",
       stats,
-      "The statistics to compute for each of the supplied vector postprocessors.");
+      "The statistic(s) to compute for each of the supplied vector postprocessors.");
+
+  // Confidence Levels
+  MooseEnum ci = Statistics::makeBootstrapCalculatorEnum();
+  params.addParam<MooseEnum>(
+      "ci_method", ci, "The method to use for computing confidence level intervals.");
+
+  params.addParam<std::vector<Real>>(
+      "ci_levels", "A vector of confidence levels to consider, values must be in (0, 0.5].");
+  params.addParam<unsigned int>(
+      "ci_replicates",
+      10000,
+      "The number of replicates to use when computing confidence level intervals.");
+  params.addParam<unsigned int>("ci_seed",
+                                1,
+                                "The random number generator seed used for creating replicates "
+                                "while computing confidence level intervals.");
 
   // DEPRECATED
   params.addDeprecatedParam<VectorPostprocessorName>(
@@ -57,16 +73,30 @@ StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParamete
   : GeneralVectorPostprocessor(parameters),
     _compute_stats(isParamValid("stats") ? getParam<MultiMooseEnum>("stats")
                                          : getParam<MultiMooseEnum>("compute")),
+    _ci_method(getParam<MooseEnum>("ci_method")),
+    _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
+                                    : std::vector<Real>()),
     _stat_type_vector(declareVector("stat_type"))
 {
   for (const auto & item : _compute_stats)
+  {
     _stat_type_vector.push_back(item.id());
+    for (const auto & level : _ci_levels)
+      _stat_type_vector.push_back(item.id() + level);
+  }
+
+  if (_ci_method.isValid())
+  {
+    unsigned int replicates = getParam<unsigned int>("ci_replicates");
+    unsigned int seed = getParam<unsigned int>("ci_seed");
+    _ci_calculator =
+        Statistics::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
+  }
 }
 
 void
 StatisticsVectorPostprocessor::initialSetup()
 {
-
   // DEPRECATED
   if (isParamValid("vpp"))
   {
@@ -75,9 +105,6 @@ StatisticsVectorPostprocessor::initialSetup()
         vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
     for (const auto & the_pair : vpp_vectors)
     {
-      _stat_calculators.emplace_back(std::vector<std::unique_ptr<Statistics::Calculator>>());
-      for (const auto & item : _compute_stats)
-        _stat_calculators.back().emplace_back(Statistics::makeCalculator(item.name(), *this));
       _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
       _stat_vectors.push_back(&declareVector(the_pair.first));
     }
@@ -91,11 +118,6 @@ StatisticsVectorPostprocessor::initialSetup()
           vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
       for (const auto & the_pair : vpp_vectors)
       {
-        // Create Statistics::Calculator objects for each statistic to be computed on each vector
-        _stat_calculators.emplace_back(std::vector<std::unique_ptr<Statistics::Calculator>>());
-        for (const auto & item : _compute_stats)
-          _stat_calculators.back().emplace_back(Statistics::makeCalculator(item.name(), *this));
-
         // Store VectorPostprocessor name and vector name from which stats will be computed
         _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
 
@@ -103,20 +125,6 @@ StatisticsVectorPostprocessor::initialSetup()
         std::string name = vpp_name + "_" + the_pair.first;
         _stat_vectors.push_back(&declareVector(name));
       }
-    }
-  }
-}
-
-void
-StatisticsVectorPostprocessor::initialize()
-{
-  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
-  {
-    const bool is_distributed = std::get<2>(_compute_from_names[i]);
-    if (is_distributed || processor_id() == 0)
-    {
-      for (auto & calc_ptr : _stat_calculators[i])
-        calc_ptr->initialize(is_distributed);
     }
   }
 }
@@ -134,23 +142,47 @@ StatisticsVectorPostprocessor::execute()
 
     if (is_distributed || processor_id() == 0)
     {
-      for (auto & calc_ptr : _stat_calculators[i])
-        calc_ptr->execute(data, is_distributed);
+      for (const auto & item : _compute_stats)
+      {
+        std::unique_ptr<const Statistics::Calculator> calc_ptr =
+            Statistics::makeCalculator(item, *this);
+        _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
+
+        if (_ci_calculator)
+        {
+          std::vector<Real> ci = _ci_calculator->compute(data, *calc_ptr, is_distributed);
+          _stat_vectors[i]->insert(_stat_vectors[i]->end(), ci.begin(), ci.end());
+        }
+      }
     }
   }
 }
 
-void
-StatisticsVectorPostprocessor::finalize()
+std::vector<Real>
+StatisticsVectorPostprocessor::computeLevels(const std::vector<Real> & levels_in) const
 {
-  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
+  if (levels_in.empty())
+    paramError("ci_levels",
+               "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be "
+               "supplied with values in (0, 0.5].");
+
+  else if (*std::min_element(levels_in.begin(), levels_in.end()) <= 0)
+    paramError("ci_levels", "The supplied levels must be greater than zero.");
+
+  else if (*std::max_element(levels_in.begin(), levels_in.end()) > 0.5)
+    paramError("ci_levels", "The supplied levels must be less than or equal to 0.5");
+
+  std::list<Real> levels_out;
+  for (auto it = levels_in.rbegin(); it != levels_in.rend(); ++it)
   {
-    const bool is_distributed = std::get<2>(_compute_from_names[i]);
-    for (auto & calc_ptr : _stat_calculators[i])
+    if (*it == 0.5)
+      levels_out.push_back(*it);
+
+    else
     {
-      if (is_distributed || processor_id() == 0)
-        calc_ptr->finalize(is_distributed);
-      _stat_vectors[i]->emplace_back(calc_ptr->value());
+      levels_out.push_front(*it);
+      levels_out.push_back(1 - *it);
     }
   }
+  return std::vector<Real>(levels_out.begin(), levels_out.end());
 }

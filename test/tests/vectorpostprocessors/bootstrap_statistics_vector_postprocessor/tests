@@ -1,0 +1,16 @@
+[Tests]
+  design = StatisticsVectorPostprocessor.md
+  issues = '#14409'
+
+  [precentile]
+    requirement = "The system shall support computing percentile bootstrap statics of a vector of data"
+
+    [replicated]
+      type = CSVDiff
+      input = bootstrap.i
+      csvdiff = bootstrap_out_stats_0001.csv
+
+      detail = "for data that is replicated"
+    []
+  []
+[]
