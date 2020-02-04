@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#11439'
+  design = 'VectorPostprocessorComponent.md'
+
+  [vpp_component]
+    type = CSVDiff
+    input = vpp_component.i
+    csvdiff = 'vpp_component_out.csv'
+    requirement = 'The system shall provide a Postprocessor that returns a single specified component of a VectorPostprocessor'
+  [../]
+  [vpp_component_range_err]
+    type = RunException
+    input = vpp_component.i
+    cli_args = 'Postprocessors/component/index=4'
+    expect_err = 'In VectorPostprocessorComponent index greater than size of vector'
+    requirement = 'The Postprocessor that returns a single specified component of a VectorPostprocessor shall generate an error if the requested component is out of the range of the vector'
+    prereq = vpp_component
+  [../]
+[]

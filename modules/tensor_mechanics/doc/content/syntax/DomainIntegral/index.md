@@ -1,6 +1,6 @@
 # DomainIntegral System
 
-The `DomainIntegral` Action sets up the required objects to perform fracture integrals.
+The `DomainIntegral` Action sets up the required objects to perform fracture integrals. See the documentation for [DomainIntegralAction](DomainIntegralAction.md) for details.
 
 !syntax list /DomainIntegral objects=True actions=False subsystems=False
 
