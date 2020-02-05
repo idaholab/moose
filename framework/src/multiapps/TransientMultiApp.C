@@ -79,12 +79,6 @@ TransientMultiApp::validParams()
       false,
       "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
-  params.addParam<bool>("keep_solution_during_restore",
-                        false,
-                        "This is useful when doing Picard with catch_up steps.  It takes the "
-                        "solution from the final catch_up step and re-uses it as the initial guess "
-                        "for the next picard iteration");
-
   params.addParam<Real>("max_catch_up_steps",
                         2,
                         "Maximum number of steps to allow an app to take "
@@ -106,7 +100,6 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _first(declareRecoverableData<bool>("first", true)),
     _auto_advance(false),
     _print_sub_cycles(getParam<bool>("print_sub_cycles"))
@@ -176,35 +169,6 @@ TransientMultiApp::initialSetup()
     // Grab Transient Executioners from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
       setupApp(i);
-  }
-}
-
-void
-TransientMultiApp::restore()
-{
-  // Must be restarting / recovering so hold off on restoring
-  // Instead - the restore will happen in createApp()
-  // Note that _backups was already populated by dataLoad()
-  if (_apps.empty())
-    return;
-
-  if (_keep_solution_during_restore)
-  {
-    _end_solutions.resize(_my_num_apps);
-
-    for (unsigned int i = 0; i < _my_num_apps; i++)
-      _end_solutions[i] =
-          _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution().clone();
-  }
-
-  MultiApp::restore();
-
-  if (_keep_solution_during_restore)
-  {
-    for (unsigned int i = 0; i < _my_num_apps; i++)
-      _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution() = *_end_solutions[i];
-
-    _end_solutions.clear();
   }
 }
 

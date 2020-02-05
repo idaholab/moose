@@ -323,6 +323,12 @@ protected:
    */
   void init(unsigned int num);
 
+  /**
+   * Reserve the solution from the previous simulation,
+   *  and it is used as an initial guess for the next run
+   */
+  void keepSolutionDuringRestore(bool keep_solution_during_restore);
+
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
 
@@ -424,6 +430,12 @@ protected:
 
   /// Storage for command line arguments
   const std::vector<std::string> & _cli_args;
+
+  /// Flag indicates if or not restart from the latest solution
+  bool _keep_solution_during_restore;
+
+  /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
+  std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
 };
 
 template <>
