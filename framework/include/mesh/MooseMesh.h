@@ -26,6 +26,7 @@
 #include "libmesh/node_range.h"
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/vector_value.h"
+#include "libmesh/point.h"
 
 // forward declaration
 class MooseMesh;
@@ -65,6 +66,84 @@ public:
 
   /// The distance between them
   Real _distance;
+};
+
+class FaceInfo
+{
+public:
+  FaceInfo(const Elem * elem, const Elem * neighbor);
+
+  ///@{ returns the face area of face id
+  Real faceArea() const { return _face_area; }
+  ///@}
+
+  ///@{ returns the face area of face id
+  const Point & normal() const { return _normal; }
+  ///@}
+
+  bool isBoundary() const { return (_right == nullptr); }
+
+  ///@{ returns the face centroid
+  const Point & faceCentroid() const { return _face_centroid; }
+  ///@}
+
+  ///@{ returns the left and right adjacent elements
+  const Elem & leftElem() const { return *_left; }
+  const Elem & rightElem() const { return *_right; }
+  ///@}
+
+  ///@{ returns the left and right centroids
+  const Point & leftCentroid() const { return _left_centroid; }
+  const Point & rightCentroid() const { return _right_centroid; }
+  ///@}
+
+  ///@{ returns the left and right centroids
+  unsigned int leftSideID() const { return _left_side_id; }
+  unsigned int rightSideID() const { return _right_side_id; }
+  ///@}
+
+  const std::vector<dof_id_type> & leftDofIndices(unsigned int var_number) const
+  {
+    return _left_dof_indices[var_number];
+  }
+  std::vector<dof_id_type> & leftDofIndices(unsigned int var_number)
+  {
+    if (_left_dof_indices.size() <= var_number)
+      _left_dof_indices.resize(var_number + 1);
+    return _left_dof_indices[var_number];
+  }
+  const std::vector<dof_id_type> & rightDofIndices(unsigned int var_number) const
+  {
+    return _right_dof_indices[var_number];
+  }
+  std::vector<dof_id_type> & rightDofIndices(unsigned int var_number)
+  {
+    if (_right_dof_indices.size() <= var_number)
+      _right_dof_indices.resize(var_number + 1);
+    return _right_dof_indices[var_number];
+  }
+
+private:
+  Real _face_area;
+  Real _left_volume;
+  Real _right_volume;
+  Point _normal;
+
+  /// the left and right elems
+  const Elem * _left;
+  const Elem * _right;
+
+  /// the left and right local side ids
+  unsigned int _left_side_id;
+  unsigned int _right_side_id;
+
+  Point _left_centroid;
+  Point _right_centroid;
+  Point _face_centroid;
+
+  /// cached locations of variables in solution vectors
+  std::vector<std::vector<dof_id_type>> _left_dof_indices;
+  std::vector<std::vector<dof_id_type>> _right_dof_indices;
 };
 
 /**
@@ -915,6 +994,16 @@ public:
    */
   bool hasMeshBase() const { return _mesh.get() != nullptr; }
 
+  /// builds the face info vector
+  void buildFaceInfo();
+
+  ///@{ accessors for the FaceInfo objects
+  unsigned int nFace() const { return _face_info.size(); }
+  const std::vector<FaceInfo> & faceInfo() const { return _face_info; }
+  std::vector<FaceInfo> & faceInfo() { return _face_info; }
+  // const
+  ///@}
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1081,6 +1170,12 @@ protected:
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
+
+  /// Boolean indicating if the FaceInfo object needs to be built
+  bool _needs_face_info = true;
+
+  /// FaceInfo object storing information for face based loops
+  std::vector<FaceInfo> _face_info;
 
   void cacheInfo();
   void freeBndNodes();

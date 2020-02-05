@@ -55,9 +55,54 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/ghost_point_neighbors.h"
+#include "libmesh/fe_type.h"
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
+
+FaceInfo::FaceInfo(const Elem * elem, const Elem * neighbor)
+{
+  _left = elem;
+  _right = neighbor;
+
+  _left_side_id = elem->which_neighbor_am_i(neighbor);
+  _right_side_id = neighbor->which_neighbor_am_i(elem);
+  _left_centroid = elem->centroid();
+  _right_centroid = neighbor->centroid();
+
+  _left_volume = elem->volume();
+  _right_volume = neighbor->volume();
+
+  std::unique_ptr<const Elem> face = elem->build_side_ptr(_left_side_id);
+  _face_area = face->volume();
+
+  // 1. compute face centroid
+  // 2. compute an averaged normal (av. normal is identical to all qp normals for 1st order
+  //    meshes)
+  Order order = elem->default_order();
+  unsigned int dim = elem->dim();
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(order)));
+  QGauss qface(dim - 1, FEType(order).default_quadrature_order());
+  fe->attach_quadrature_rule(&qface);
+
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<Point> & normals = fe->get_normals();
+  const std::vector<Point> & xyz = fe->get_xyz();
+
+  fe->reinit(elem, _left_side_id);
+  Point average_normal;
+  Point face_centroid;
+  for (unsigned int j = 0; j < JxW.size(); ++j)
+  {
+    average_normal += JxW[j] * normals[j];
+    face_centroid += JxW[j] * xyz[j];
+  }
+  average_normal /= _face_area;
+  face_centroid /= _face_area;
+
+  _normal = average_normal;
+  _face_centroid = face_centroid;
+}
 
 defineLegacyParams(MooseMesh);
 
@@ -433,6 +478,9 @@ MooseMesh::update()
   buildNodeList();
   buildBndElemList();
   cacheInfo();
+
+  if (_needs_face_info)
+    buildFaceInfo();
 }
 
 const Node &
@@ -2871,3 +2919,34 @@ MooseMesh::getPointLocator() const
 {
   return getMesh().sub_point_locator();
 }
+
+void
+MooseMesh::buildFaceInfo()
+{
+  // clear data structures
+  _face_info.clear();
+
+  // loop over all active, local elements
+  auto begin = getMesh().active_local_elements_begin();
+  auto end = getMesh().active_local_elements_end();
+  for (auto it = begin; it != end; ++it)
+  {
+    const Elem * elem = *it;
+    const dof_id_type elem_id = elem->id();
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    {
+      // get the neighbor element
+      const Elem * neighbor = elem->neighbor_ptr(side);
+
+      // this is a boundary side
+      if (!neighbor)
+        continue;
+
+      if ((neighbor->active() && (neighbor->level() == elem->level()) &&
+           (elem_id < neighbor->id())) ||
+          (neighbor->level() < elem->level()))
+        _face_info.emplace_back(elem, neighbor);
+    }
+  }
+}
+

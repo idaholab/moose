@@ -758,6 +758,8 @@ public:
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
+  void getStandardFieldVariableNames(std::vector<VariableName> & std_field_variables) const;
+
   /**
    * Returns the maximum number of all variables on the system
    */
@@ -784,6 +786,9 @@ public:
   const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
 
   std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
+
+  /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
+  void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
 protected:
   SubProblem & _subproblem;

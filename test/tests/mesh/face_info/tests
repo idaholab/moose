@@ -1,0 +1,12 @@
+[Tests]
+  [./face_info_quad]
+    type = 'CSVDiff'
+    input = 'face_info_quads.i'
+    csvdiff = 'face_info_quads_out_face_info_0001.csv'
+    recover = false
+
+    requirement = 'The system shall compute and store internal face data on request.'
+    issues = '#'
+    design = 'MooseMesh.md'
+  [../]
+[]
