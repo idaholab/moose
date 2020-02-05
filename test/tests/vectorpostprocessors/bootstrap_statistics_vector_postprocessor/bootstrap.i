@@ -28,7 +28,7 @@
   [stats]
     type = StatisticsVectorPostprocessor
     vectorpostprocessors = 'treatment control'
-    compute = 'mean'
+    compute = 'mean stderr'
     ci_method = 'percentile'
     ci_levels = '0.025 0.05 0.1 0.16 0.5'
     ci_replicates = 1000

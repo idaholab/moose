@@ -1,71 +1,126 @@
 # StatisticsVectorPostprocessor
 
-## Short Description
-
 !syntax description /VectorPostprocessors/StatisticsVectorPostprocessor
 
 ## Description
 
-The `StatisticsVectorPostprocessor` computes statistical information for each column of another `VectorPostprocessor` (VPP).  The results are output in columns corresponding to the column-names of the original VPP.  The rows of each column are the statistical measures the `StatisticsVectorPostprocessor` was asked to compute.  In addition, the first column is named `stat_type` and contains the unique identifier for the type of statistical measure computed in that row.
+The `StatisticsVectorPostprocessor` computes statistical values for each vector of other
+`VectorPostprocessor` (VPP) objects.  The results are output in vectors that are assigned names
+based on the VPP and vector name (object-vector) and each entry in the vector correspoinding
+the the desired statistics and optionally confidence level intervals.
 
-The statistical measures are chosen using the `stats` input parameter.  Note that multiple statistical measures can be computed simultaneously by passing in more than one to the `stats` input parameter.  The current statistical measures (and their `stat_type` identifier) the `StatisticsPostprocessor` can compute are:
+The first column, named `stat_type` and contains an unique integer identifier for the type of
+statistical measure computed and the confidence levels, if computed.
 
-### Min: 0
+## Statistics
 
-`stats = min`
+The statistics to compute are indicated by the
+[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/compute) parameter, which can contain
+multiple values as listed below. This list also includes the associated numeric identifier
+that is included in the `stat_type` vector output the VPP object.
 
-The minimum value within the column.
+measures are chosen using the `stats` input parameter.  Note that multiple
+statistical measures can be computed simultaneously by passing in more than one to the `stats` input
+parameter.  The current statistical measures (and their `stat_type` identifier) the
+`StatisticsPostprocessor` can compute are:
 
-### Max: 1
+- +minimum (0)+
 
-`stats = max`
+  `compute = min`\\
+  Computes the minimum value for the supplied vectors.
 
-The maximum value within the column
+- +maximum (1)+
 
-### Sum: 2
+  `compute = max`\\
+  Computes the maximum value for the supplied vectors.
 
-`stats = sum`
+- +sum (2)+
 
-The sum of the column
+  `compute = sum`\\
+  Computes the sum ($\Sigma$) of the supplied vectors $\vec{v}$, where $N$ is the length of the vector:
 
-\begin{equation}
-\Sigma = \sum_{i=1}^N{Vi}
-\end{equation}
+  !equation
+  \Sigma = \sum_{i=1}^N{v_i}
 
-### Average: 3
+- +mean (3)+
 
-`stats = average`
+  `compute = average`\\
+  Computes the average ($\bar{v}$) of the supplied vectors $\vec{v}$:
 
-The average (mean) of the column
+  !equation
+  \bar{v} = \frac{\sum_{i=1}^{N}{v_i}}{N}
 
-\begin{equation}
-\bar{V} = \frac{\sum_{i=1}^{N}{V_i}}{N}
-\end{equation}
+- +standard deviation (4)+
 
-### Standard Deviation: 4
+  `compute = stddev`\\
+  Computes the standard deviation ($\sigma$) of the supplied vectors $\vec{v}$:
 
-`stats = stddev`
+  !equation
+  \sigma = \sqrt{\frac{\sum_{i=1}^{N}{(v_i - \bar{v})^2}}{N-1}}
 
-The standard deviation of the values
+- +2-Norm (5)+
 
-\begin{equation}
-\sigma = \sqrt{\frac{\sum_{i=1}^{N}{(V_i - \bar{V})^2}}{N-1}}
-\end{equation}
+  `compute = norm2`\\
+  Computes the 2-norm, $|v|_2$ of the supplied vectors $\vec{v}$, this is also known as the
+  Euclidean Norm or the "distance":
 
-### The 2-Norm (Eucliden Norm): 5
+  !equation
+  |v|_2 = \sqrt{\sum_{i=1}^{N}{{v_i}^2}}
 
-`stats = norm2`
+- +standard error (6)+
 
-The 2-norm (also known as the Euclidean Norm or the "distance")
+  `compute = stderr`\\
+  Computes the standard error ($\sigma_{\bar{v}}$) of the supplied vectors $\vec{v}$:
 
-\begin{equation}
-|V|_2 = \sqrt{\sum_{i=1}^{N}{{V_i}^2}}
-\end{equation}
+  !equation
+  \sigma_{\bar{v}} = \frac{\sigma}{\sqrt{N}}
 
 
-## Important Notes
+## Confidence Levels
 
-Note that this VPP only computes on processor 0.  This is because that's all that is necessary for output - and the VPP it uses for its values may be doing the same.
+Bootstrap confidence level intervals, as defined by [!cite](tibshirani1993introduction), are enabled
+by specifying the desired levels using the
+[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/ci_levels) parameter and setting
+the method of calculation using the
+[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/ci_method).
+The levels listed should be in the range (0, 0.5]. For example, the levels 0.05, 0.1, and 0.5 provided
+result in the computation of the 0.05, 0.1, 0.5, 0.9, and 0.95 confidence level intervals.
+
+Enabling the confidence level intervals will compute the intervals for each level and each statistic
+and the result will appear in the same output vector as the associated statistic calculation. The
+`stat_type` vector will include decimal values where the ones place indicates the statistic
+computed and the decimal corresponds with the confidence level.
+
+The available methods include the following:
+
+- +precentile+: Percentile bootstrap method as defined in Ch. 13 of [!cite](tibshirani1993introduction).
+
+## Example 1: Statistics
+
+The following input file snippet demonstrates how to compute various statistics using the
+`StatisticsVectorPostprocessor` object.
+
+!listing statistics_vector_postprocessor.i block=VectorPostprocessors
+
+This block results in the following CSV file for the "stats" block of the input file. Notice
+the first column corresponds with the numeric identifier for the statistics being computed.
+
+!listing statistics_vector_postprocessor/gold/statistics_vector_postprocessor_out_stats_0001.csv
+
+
+## Example 2: Confidence Levels
+
+The following input file snippet demonstrates how to compute various statistics and
+confidence levels using the `StatisticsVectorPostprocessor` object
+
+!listing bootstrap_statistics_vector_postprocessor/bootstrap.i block=VectorPostprocessors
+
+This block results in the following CSV file for the "stats" block of the input file. Notice
+the first column corresponds with the numeric identifier for the statistics being computed.
+
+!listing bootstrap_statistics_vector_postprocessor/gold/bootstrap_out_stats_0001.csv
+
+
 
 !syntax parameters /VectorPostprocessors/StatisticsVectorPostprocessor
 
