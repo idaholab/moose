@@ -644,9 +644,6 @@ public:
    */
   void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
 
-  bool automaticScaling() const { return _automatic_scaling; }
-  void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
-
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
   {
@@ -922,9 +919,6 @@ protected:
 
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;
-
-  /// Whether to automatically scale the variables
-  bool _automatic_scaling;
 
   /// Whether the scaling factors should only be computed once at the beginning of the simulation
   /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will

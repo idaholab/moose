@@ -6526,3 +6526,12 @@ FEProblemBase::uniformRefine()
 
   meshChangedHelper(/*intermediate_change=*/false);
 }
+
+void
+FEProblemBase::automaticScaling(bool automatic_scaling)
+{
+  if (_displaced_problem)
+    _displaced_problem->automaticScaling(automatic_scaling);
+
+  SubProblem::automaticScaling(automatic_scaling);
+}

@@ -69,15 +69,15 @@ Executioner::Executioner(const InputParameters & parameters)
     paramWarning("automatic_scaling",
                  "Automatic scaling isn't implemented for the case where you do not have a "
                  "preconditioning matrix. No scaling will be applied");
-    nl.automaticScaling(false);
+    _fe_problem.automaticScaling(false);
   }
   else
     // Check to see whether automatic_scaling has been specified anywhere, including at the
     // application level. No matter what: if we don't have a matrix, we don't do scaling
-    nl.automaticScaling((isParamValid("automatic_scaling")
-                             ? getParam<bool>("automatic_scaling")
-                             : getMooseApp().defaultAutomaticScaling()) &&
-                        (_fe_problem.solverParams()._type != Moose::ST_JFNK));
+    _fe_problem.automaticScaling((isParamValid("automatic_scaling")
+                                      ? getParam<bool>("automatic_scaling")
+                                      : getMooseApp().defaultAutomaticScaling()) &&
+                                 (_fe_problem.solverParams()._type != Moose::ST_JFNK));
 
   nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
   nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));

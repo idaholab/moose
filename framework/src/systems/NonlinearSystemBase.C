@@ -170,7 +170,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
     _compute_scaling_timer(registerTimedSection("computeScaling", 2)),
     _computed_scaling(false),
-    _automatic_scaling(false),
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0)
 #ifndef MOOSE_SPARSE_AD
