@@ -37,8 +37,6 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void restore() override;
-
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
   virtual void incrementTStep(Real target_time) override;
@@ -79,8 +77,6 @@ private:
   bool _catch_up;
   Real _max_catch_up_steps;
 
-  bool _keep_solution_during_restore;
-
   /// Is it our first time through the execution loop?
   bool & _first;
 
@@ -98,9 +94,6 @@ private:
 
   /// Flag for toggling console output on sub cycles
   bool _print_sub_cycles;
-
-  /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
-  std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
 };
 
 /**

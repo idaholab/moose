@@ -163,6 +163,13 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
 
+  params.addParam<bool>("keep_solution_during_restore",
+                        false,
+                        "This is useful when doing Picard.  It takes the "
+                        "final solution from the previous Picard iteration"
+                        "and re-uses it as the initial guess "
+                        "for the next picard iteration");
+
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
@@ -202,7 +209,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _move_happened(false),
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
-    _cli_args(getParam<std::vector<std::string>>("cli_args"))
+    _cli_args(getParam<std::vector<std::string>>("cli_args")),
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
 {
 }
 
@@ -421,10 +429,54 @@ MultiApp::restore()
   if (_apps.empty())
     return;
 
+  // We temporatily copy and store solutions for all subapps
+  if (_keep_solution_during_restore)
+  {
+    _end_solutions.resize(_my_num_apps);
+
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+    {
+      _end_solutions[i] =
+          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution().clone();
+      auto & sub_multiapps =
+          _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
+
+      // multiapps of each subapp should do the same things
+      // It is implemented recursively
+      for (auto & multi_app : sub_multiapps)
+        multi_app->keepSolutionDuringRestore(_keep_solution_during_restore);
+    }
+  }
+
   _console << "Begining restoring MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
   _console << "Finished restoring MultiApp " << name() << std::endl;
+
+  // Now copy the latest solutions back for each subapp
+  if (_keep_solution_during_restore)
+  {
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+    {
+      _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution() =
+          *_end_solutions[i];
+
+      // We need to synchronize solution so that local_solution has the right values
+      _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().update();
+    }
+
+    _end_solutions.clear();
+  }
+}
+
+void
+MultiApp::keepSolutionDuringRestore(bool keep_solution_during_restore)
+{
+  if (_pars.isParamSetByUser("keep_solution_during_restore"))
+    paramError("keep_solution_during_restore",
+               "This parameter should be provided in only master app");
+
+  _keep_solution_during_restore = keep_solution_during_restore;
 }
 
 BoundingBox
