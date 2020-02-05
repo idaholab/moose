@@ -1,0 +1,22 @@
+COORDINATES absolute 1.e-6    # min separation = 0.02723
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:            0.01 @ t11
+
+GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
+	bot_react_x  # min:               0 @ t1	max:               0 @ t1
+	bot_react_y  # min:               0 @ t1	max:               0 @ t1
+	top_react_x  relative 1.e-3 # min:               0 @ t1	max:       779.33026 @ t5
+	top_react_y  # min:               0 @ t1	max:       3119.4974 @ t2
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-8
+	disp_x        relative 1.e-3 # min:               0 @ t1,n1	max:     0.010189572 @ t11,n12
+	disp_y        relative 1.e-5 # min:               0 @ t1,n1	max:    0.0054977392 @ t5,n13
+	penetration   relative 1.e-5 # min:               0 @ t1,n1	max:           0.095 @ t2,n7
+	saved_x       absolute 1.e-1 # min:               0 @ t1,n1	max:       779.33026 @ t5,n10
+	saved_y       absolute 1.e-1 # min:               0 @ t1,n1	max:       3119.4974 @ t2,n10
+	diag_saved_x  relative 1.e-5 # min:               0 @ t1,n1	max:   1.3269231e+09 @ t2,n2
+	diag_saved_y  relative 1.e-5 # min:               0 @ t1,n1	max:         4.5e+09 @ t2,n1
+	inc_slip_x    relative 5.e-4 # min:               0 @ t1,n1	max:    0.0010000001 @ t6,n10
+	inc_slip_y    # min:               0 @ t1,n1	max:               0 @ t1,n1
+	accum_slip_x  relative 1.e-3 # min:               0 @ t1,n1	max:     0.006657154 @ t11,n10
+	accum_slip_y  # min:               0 @ t1,n1	max:               0 @ t1,n1

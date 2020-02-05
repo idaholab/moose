@@ -1,1 +1,0 @@
-../ring_contact.e

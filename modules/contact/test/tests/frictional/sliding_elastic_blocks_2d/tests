@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#6524'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./sliding_elastic_blocks_2d]
+    type = 'Exodiff'
+    input = 'sliding_elastic_blocks_2d.i'
+    exodiff = 'sliding_elastic_blocks_2d_out.e'
+    custom_cmp = 'sliding_elastic_blocks_2d.cmp'
+    superlu = true
+    requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip.'
+  [../]
+  [./sliding_elastic_blocks_2d_tp]
+    type = 'Exodiff'
+    input = 'sliding_elastic_blocks_2d_tp.i'
+    exodiff = 'sliding_elastic_blocks_2d_tp_out.e'
+    custom_cmp = 'sliding_elastic_blocks_2d.cmp'
+    superlu = true
+    requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip, when formulation selected is tangential_penalty.'
+  [../]
+[]
