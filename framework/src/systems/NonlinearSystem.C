@@ -185,6 +185,22 @@ NonlinearSystem::solve()
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 
+  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
+  // to determine variable scaling factors
+  if (_automatic_scaling)
+  {
+    if (_compute_scaling_once)
+    {
+      if (!_computed_scaling)
+      {
+        computeScaling();
+        _computed_scaling = true;
+      }
+    }
+    else
+      computeScaling();
+  }
+
   if (_use_finite_differenced_preconditioner)
   {
     _transient_sys.nonlinear_solver->fd_residual_object = &_fd_residual_functor;
