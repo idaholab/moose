@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ContactApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -59,6 +60,8 @@ ContactApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"ContactApp"});
   Registry::registerActionsTo(af, {"ContactApp"});
   associateSyntaxInner(s, af);
+
+  TensorMechanicsApp::registerAll(f, af, s);
 }
 
 void
@@ -85,6 +88,20 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 ContactApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+void
+ContactApp::registerObjectDepends(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
+  TensorMechanicsApp::registerObjects(factory);
+}
+
+void
+ContactApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 extern "C" void

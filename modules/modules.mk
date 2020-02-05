@@ -63,6 +63,10 @@ ifeq ($(PHASE_FIELD),yes)
         TENSOR_MECHANICS            := yes
 endif
 
+ifeq ($(CONTACT),yes)
+        TENSOR_MECHANICS            := yes
+endif
+
 # The master list of all moose modules
 MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
 
@@ -75,13 +79,6 @@ ifeq ($(CHEMICAL_REACTIONS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
   APPLICATION_NAME   := chemical_reactions
   SUFFIX             := cr
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(CONTACT),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
-  APPLICATION_NAME   := contact
-  SUFFIX             := con
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -214,6 +211,16 @@ ifeq ($(EXTERNAL_PETSC_SOLVER),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/${APPLICATION_NAME}
 
   SUFFIX             := eps
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(CONTACT),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
+  APPLICATION_NAME   := contact
+
+	# Dependency on tensor mechanics
+  DEPEND_MODULES     := tensor_mechanics
+  SUFFIX             := con
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

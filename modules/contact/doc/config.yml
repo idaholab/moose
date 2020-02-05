@@ -1,6 +1,7 @@
 Content:
     - framework/doc/content
     - modules/contact/doc/content
+    - modules/tensor_mechanics/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -15,10 +16,13 @@ Extensions:
         hide:
             framework: !include framework/doc/hidden.yml
             contact: !include modules/contact/doc/hidden.yml
-        remove: !include framework/doc/remove.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
+        remove:
+            framework: !include framework/doc/remove.yml
         includes:
             - framework/include
             - modules/contact/include
+            - modules/tensor_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -30,3 +34,4 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             contact: !include modules/contact/doc/sqa_contact.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
