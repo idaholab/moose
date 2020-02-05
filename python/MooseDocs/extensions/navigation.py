@@ -14,7 +14,7 @@ import json
 import moosetree
 from . import common
 from ..base import components, renderers, Extension
-from ..common import exceptions
+from ..common import exceptions, write
 from ..tree import html, pages, tokens
 from . import core, heading
 
@@ -34,6 +34,7 @@ class NavigationExtension(Extension):
         config['menu'] = (dict(), "Navigation items, this can either be a *.menu.md file or dict. "\
                           "The former creates a 'mega men' and the later uses dropdowns.")
         config['google-cse'] = (None, "Enable Google search by supplying the Google 'search engine ID'.")
+        config['search'] = (True, "Enable/disable the search bar.")
         config['home'] = ('', "The homepage for the website.")
         config['repo'] = (None, "The source code repository.")
         config['name'] = (None, "The name of the website (e.g., MOOSE)")
@@ -72,11 +73,16 @@ class NavigationExtension(Extension):
             if cx is not None:
                 renderer.addJavaScript("google_cse", "https://cse.google.com/cse.js?cx={}".format(cx))
 
+            elif self.get('search', False):
+                renderer.addJavaScript('fuse', "contrib/fuse/fuse.min.js")
+                renderer.addJavaScript('fuse_index', "js/search_index.js")
+
     def initPage(self, page):
         """Initialize page with Extension settings."""
-        self.initConfig(page, 'breadcrumbs', 'name', 'sections', 'scrollspy', 'google-cse')
+        self.initConfig(page, 'breadcrumbs', 'name', 'sections', 'scrollspy', 'google-cse', 'search')
         if page.local.endswith('.menu.md'):
             self.setConfig(page, 'breadcrumbs', False)
+        page['search'] = list()
 
     def postRender(self, page, result):
         """Called after rendering is complete."""
@@ -109,7 +115,7 @@ class NavigationExtension(Extension):
         else:
             col.addClass('col', 's12', 'm12', 'l12')
 
-        if self.getConfig(page, 'google-cse') is not None:
+        if (self.getConfig(page, 'google-cse') is not None) or self.getConfig(page, 'search'):
             self._addSearch(nav, page)
 
         repo = self.get('repo', None)
@@ -119,6 +125,41 @@ class NavigationExtension(Extension):
         head = moosetree.find(root, lambda n: n.name == 'head')
         self._addTitle(head, root, page)
         self._addName(nav, page)
+
+    def postTokenize(self, page, ast):
+
+        index = []
+        title = None
+        for head in moosetree.findall(ast, lambda n: n.name == 'Heading'):
+            if (head['level'] == 1) and (title is None):
+                title = head.text()
+
+            id_ = head.get('id')
+            if id_ == '':
+                id_ = head.text('-').lower()
+            index.append(dict(title=title, text=head.text(), bookmark=id_))
+        page['search'].extend(index)
+
+
+    def postExecute(self):
+        """Build the JSON file containing the index data for 'search' option.
+
+        The 'search' option is used by internal apps that require a search.
+        """
+        dest = self.translator.get('destination')
+        home = self.get('home')
+        iname = os.path.join(dest, 'js', 'search_index.js')
+        items = []
+
+        for page in self.translator.getPages():
+            location = page.destination.replace(dest, home)
+            for data in page['search']:
+                url = '{}#{}'.format(location, data['bookmark'])
+                items.append(dict(title=data['title'], text=data['text'], location=url))
+
+        if not os.path.isdir(os.path.dirname(iname)):
+            os.makedirs(os.path.dirname(iname))
+        write(iname, 'var index_data = {};'.format(json.dumps(items)))
 
     def _addName(self, nav, page):
         """
@@ -194,7 +235,21 @@ class NavigationExtension(Extension):
         container = html.Tag(div, 'div',
                              class_="modal-content container moose-search-modal-content")
 
-        html.Tag(container, 'div', class_='gcse-search')
+        cx = self.get('google-cse', None)
+        if cx is not None:
+            html.Tag(container, 'div', class_='gcse-search')
+
+        elif self.get('search', False):
+            row = html.Tag(container, 'div', class_="row")
+            col = html.Tag(row, 'div', class_="col l12")
+            box_div = html.Tag(col, 'div', class_="input-field")
+            html.Tag(box_div, 'input',
+                     type_='text',
+                     id_="moose-search-box",
+                     onkeyup="mooseSearch()",
+                     placeholder=self.get('home'))
+            result_wrapper = html.Tag(row, 'div')
+            html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
 
         footer = html.Tag(div, 'div', class_="modal-footer")
         html.Tag(footer, 'a', href='#!', class_="modal-close btn-flat", string=u'Close')
