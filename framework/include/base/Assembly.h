@@ -9,10 +9,10 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "MooseArray.h"
 #include "MooseTypes.h"
 
-#include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/fe_type.h"

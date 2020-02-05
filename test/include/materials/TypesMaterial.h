@@ -9,9 +9,8 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "Material.h"
-// libMesh
-#include "libmesh/dense_matrix.h"
 
 /**
  * Material for testing different types of material properties

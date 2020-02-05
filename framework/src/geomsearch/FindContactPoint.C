@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Moose
+#include "DenseMatrix.h"
 #include "FindContactPoint.h"
 #include "LineSegment.h"
 #include "PenetrationInfo.h"
@@ -18,7 +19,6 @@
 #include "libmesh/elem.h"
 #include "libmesh/plane.h"
 #include "libmesh/fe_interface.h"
-#include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/vector_value.h"

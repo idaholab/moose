@@ -9,10 +9,10 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "ElasticityTensor.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
-#include "libmesh/dense_matrix.h"
 #include "libmesh/mesh.h"
 
 /**
@@ -88,4 +88,3 @@ protected:
 
   virtual void calculateEntries(unsigned int qp);
 };
-

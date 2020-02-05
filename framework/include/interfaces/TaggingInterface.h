@@ -9,11 +9,11 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
 
 #include "libmesh/dense_vector.h"
-#include "libmesh/dense_matrix.h"
 
 // Forward declarations
 class InputParameters;
