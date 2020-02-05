@@ -142,7 +142,10 @@ class NavigationExtension(Extension):
 
 
     def postExecute(self):
-        """Build the JSON file containing the index data."""
+        """Build the JSON file containing the index data for 'search' option.
+
+        The 'search' option is used by internal apps that require a search.
+        """
         dest = self.translator.get('destination')
         home = self.get('home')
         iname = os.path.join(dest, 'js', 'search_index.js')

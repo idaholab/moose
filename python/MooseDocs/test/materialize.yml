@@ -74,6 +74,7 @@ Extensions:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
         home: https://www.mooseframework.org
+        search: False
         menu:
             Direct: core.md
             Mega: mega.menu.md
