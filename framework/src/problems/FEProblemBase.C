@@ -6386,7 +6386,23 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 bool
 FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 {
-  return _residual_interface_materials.hasActiveBoundaryObjects(bnd_id, tid);
+  if (_interface_mat_side_cache[tid].find(bnd_id) == _interface_mat_side_cache[tid].end())
+  {
+    _interface_mat_side_cache[tid][bnd_id] = false;
+
+    if (_nl->needInterfaceMaterialOnSide(bnd_id, tid))
+      _interface_mat_side_cache[tid][bnd_id] = true;
+    else if (theWarehouse()
+                 .query()
+                 .condition<AttribThread>(tid)
+                 .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+                 .condition<AttribBoundaries>(bnd_id)
+                 .count() > 0)
+      _interface_mat_side_cache[tid][bnd_id] = true;
+    else if (_residual_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
+      _interface_mat_side_cache[tid][bnd_id] = true;
+  }
+  return _interface_mat_side_cache[tid][bnd_id];
 }
 
 bool
