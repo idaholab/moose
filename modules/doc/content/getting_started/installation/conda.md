@@ -10,7 +10,7 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
 
 ## Install Conda id=installconda
 
-- [Install Miniconda or Anaconda for Python 3.x](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (we recommend Miniconda)
+- [Install Miniconda3 or Anaconda for Python 3.x](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (we recommend Miniconda)
 
   - +Catalina Users:+ It is recommended you +do not+ choose the pkg installation technique. Please download the 'bash' or 'command line' variant, as there appears to be issues installing the pkg version on Zsh enabled machines.
 
@@ -21,7 +21,7 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
   conda config --add channels https://mooseframework.org/conda/moose
   ```
 
-- Install the moose and moose-tools package from mooseframework.org, and name your environment 'moose':
+- Install the moose-libmesh and moose-tools package from mooseframework.org, and name your environment 'moose':
 
   ```bash
   conda create --name moose moose-libmesh moose-tools
