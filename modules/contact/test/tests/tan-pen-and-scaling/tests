@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#12601'
+  design = 'Constraints/index.md'
+  [auto-scaling]
+    type = Exodiff
+    input = bouncing-block-tan-pen.i
+    exodiff = bouncing-block-tan-pen_exo.e
+    requirement = 'The system shall be able to apply automatic scaling in conjunection with tangential penalty contact constraint enforcement and show no penetration and exhibit good nonlinear convergence'
+    cli_args = "Postprocessors/active=''"
+    abs_zero = 1e-8
+  []
+  [no-scaling]
+    type = Exodiff
+    input = bouncing-block-tan-pen.i
+    exodiff = no-scaling.e
+    requirement = 'The system shall yield the same physical results when solving a tangential penalty contact problem with and without automatic scaling'
+    cli_args = "Postprocessors/active='' Executioner/automatic_scaling=false Outputs/exo/file_base=no-scaling"
+    abs_zero = 1e-8
+  []
+[]
