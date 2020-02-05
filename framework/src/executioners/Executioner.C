@@ -81,6 +81,9 @@ Executioner::Executioner(const InputParameters & parameters)
 
   nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
   nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
+  if (isParamValid("scaling_group_variables"))
+    nl.scalingGroupVariables(
+        getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
 
   _fe_problem.numGridSteps(_num_grid_steps);
 }

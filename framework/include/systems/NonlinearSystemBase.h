@@ -660,6 +660,11 @@ public:
     _resid_vs_jac_scaling_param = resid_vs_jac_scaling_param;
   }
 
+  void scalingGroupVariables(const std::vector<std::vector<std::string>> & scaling_group_variables)
+  {
+    _scaling_group_variables = scaling_group_variables;
+  }
+
 #ifndef MOOSE_SPARSE_AD
   /**
    * Set the required size of the derivative vector
@@ -929,6 +934,11 @@ protected:
   /// variable scaling parameters. A value of 1 indicates pure residual-based scaling. A value of 0
   /// indicates pure Jacobian-based scaling
   Real _resid_vs_jac_scaling_param;
+
+  /// A container of variable groupings that can be used in scaling calculations. This can be useful
+  /// for simulations in which vector-like variables are split into invidual scalar-field components
+  /// like for solid/fluid mechanics
+  std::vector<std::vector<std::string>> _scaling_group_variables;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints

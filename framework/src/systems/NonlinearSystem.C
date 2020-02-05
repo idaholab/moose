@@ -411,6 +411,56 @@ NonlinearSystem::converged()
 }
 
 void
+NonlinearSystem::setupScalingGrouping()
+{
+  if (_auto_scaling_initd)
+    return;
+
+  const auto & field_variables = _vars[0].fieldVariables();
+
+  if (_scaling_group_variables.empty())
+  {
+    _var_to_group_var.reserve(field_variables.size());
+    _num_scaling_groups = field_variables.size();
+
+    for (auto & field_var : field_variables)
+      _var_to_group_var.insert(std::make_pair(field_var->number(), field_var->number()));
+  }
+  else
+  {
+    std::set<unsigned int> var_numbers, var_numbers_covered, var_numbers_not_covered;
+    for (const auto & field_var : field_variables)
+      var_numbers.insert(field_var->number());
+
+    _num_scaling_groups = _scaling_group_variables.size();
+
+    for (MooseIndex(_scaling_group_variables) group_index = 0;
+         group_index < _scaling_group_variables.size();
+         ++group_index)
+      for (const auto & var_name : _scaling_group_variables[group_index])
+      {
+        auto & fe_var = getVariable(/*tid=*/0, var_name);
+        auto map_pair = _var_to_group_var.insert(std::make_pair(fe_var.number(), group_index));
+        if (!map_pair.second)
+          mooseError("Variable ", var_name, " is contained in multiple scaling grouplings");
+        var_numbers_covered.insert(fe_var.number());
+      }
+
+    std::set_difference(var_numbers.begin(),
+                        var_numbers.end(),
+                        var_numbers_covered.begin(),
+                        var_numbers_covered.end(),
+                        std::inserter(var_numbers_not_covered, var_numbers_not_covered.begin()));
+
+    _num_scaling_groups = _scaling_group_variables.size() + var_numbers_not_covered.size();
+
+    auto index = static_cast<unsigned int>(_scaling_group_variables.size());
+    for (auto var_number : var_numbers_not_covered)
+      _var_to_group_var.insert(std::make_pair(var_number, index++));
+  }
+}
+
+void
 NonlinearSystem::computeScaling()
 {
   _console << "\nPerforming automatic scaling calculation\n\n";
@@ -420,14 +470,15 @@ NonlinearSystem::computeScaling()
   // container for repeated access of element global dof indices
   std::vector<dof_id_type> dof_indices;
 
+  if (!_auto_scaling_initd)
+    setupScalingGrouping();
+
   auto & field_variables = _vars[0].fieldVariables();
   auto & scalar_variables = _vars[0].scalars();
 
-  std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
-  std::vector<Real> resid_inverse_scaling_factors(field_variables.size() + scalar_variables.size(),
-                                                  0);
-  std::vector<Real> jac_inverse_scaling_factors(field_variables.size() + scalar_variables.size(),
-                                                0);
+  std::vector<Real> inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
+  std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
+  std::vector<Real> jac_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
   auto & dof_map = dofMap();
 
   // what types of scaling do we want?
@@ -452,8 +503,6 @@ NonlinearSystem::computeScaling()
 
       auto diagonal_matrix = static_cast<DiagonalMatrix<Number> *>(scaling_matrix);
       diagonal_matrix->init(*init_vector);
-
-      _auto_scaling_initd = true;
     }
 
     _computing_scaling_jacobian = true;
@@ -477,7 +526,8 @@ NonlinearSystem::computeScaling()
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
     {
       auto & field_variable = *field_variables[i];
-      dof_map.dof_indices(elem, dof_indices, field_variable.number());
+      auto var_number = field_variable.number();
+      dof_map.dof_indices(elem, dof_indices, var_number);
       for (auto dof_index : dof_indices)
         if (dof_map.local_index(dof_index))
         {
@@ -485,19 +535,19 @@ NonlinearSystem::computeScaling()
           {
             // For now we will use the diagonal for determining scaling
             auto mat_value = (*scaling_matrix)(dof_index, dof_index);
-            jac_inverse_scaling_factors[i] =
-                std::max(jac_inverse_scaling_factors[i], std::abs(mat_value));
+            auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
+            factor = std::max(factor, std::abs(mat_value));
           }
           if (resid_scaling)
           {
             auto vec_value = (*scaling_residual)(dof_index);
-            resid_inverse_scaling_factors[i] =
-                std::max(resid_inverse_scaling_factors[i], std::abs(vec_value));
+            auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
+            factor = std::max(factor, std::abs(vec_value));
           }
         }
     }
 
-  auto offset = field_variables.size();
+  auto offset = _num_scaling_groups;
 
   // Compute scalar factors for scalar variables
   for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
@@ -559,6 +609,14 @@ NonlinearSystem::computeScaling()
     if (scaling_factor < std::numeric_limits<Real>::epsilon())
       scaling_factor = 1;
 
+  // Now flatten the group scaling factors to the individual variable scaling factors
+  std::vector<Real> flattened_inverse_scaling_factors(field_variables.size() +
+                                                      scalar_variables.size());
+  for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+    flattened_inverse_scaling_factors[i] = inverse_scaling_factors[_var_to_group_var[i]];
+  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+    flattened_inverse_scaling_factors[i + offset] = inverse_scaling_factors[i + offset];
+
   if (_verbose)
   {
     _console << "Automatic scaling factors:\n";
@@ -570,13 +628,14 @@ NonlinearSystem::computeScaling()
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
     {
       auto & field_variable = *field_variables[i];
-      _console << "  " << field_variable.name() << ": " << 1.0 / inverse_scaling_factors[i] << "\n";
+      _console << "  " << field_variable.name() << ": "
+               << 1.0 / flattened_inverse_scaling_factors[i] << "\n";
     }
     for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
     {
       auto & scalar_variable = *scalar_variables[i];
       _console << "  " << scalar_variable.name() << ": "
-               << 1.0 / inverse_scaling_factors[offset + i] << "\n";
+               << 1.0 / flattened_inverse_scaling_factors[offset + i] << "\n";
     }
     _console << "\n\n";
 
@@ -586,7 +645,9 @@ NonlinearSystem::computeScaling()
   }
 
   // Now set the scaling factors for the variables
-  applyScalingFactors(inverse_scaling_factors);
+  applyScalingFactors(flattened_inverse_scaling_factors);
   if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
-    displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
+    displaced_problem->systemBaseNonlinear().applyScalingFactors(flattened_inverse_scaling_factors);
+
+  _auto_scaling_initd = true;
 }
