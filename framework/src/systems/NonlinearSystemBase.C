@@ -1158,7 +1158,12 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                               "We are on a node so there should only be one dof per variable (for "
                               "an ArrayVariable we should have a number of dofs equal to the "
                               "number of components");
-                  std::vector<Number> values = {nfc->slaveResidual() * slave_var.scalingFactor()};
+
+                  // Assume that if the user is overwriting the slave residual, then they are
+                  // supplying residuals that do not correspond to their other physics
+                  // (e.g. Kernels), hence we should not apply a scalingFactor that is normally
+                  // based on the order of their other physics (e.g. Kernels)
+                  std::vector<Number> values = {nfc->slaveResidual()};
                   residual.insert(values, slave_dofs);
                   residual_has_inserted_values = true;
                 }
@@ -1873,23 +1878,38 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                 std::vector<dof_id_type> slave_dofs(1, nfc->variable().nodalDofIndex());
 
-                // Cache the jacobian block for the slave side
-                _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee,
-                                                           slave_dofs,
-                                                           nfc->_connected_dof_indices,
-                                                           nfc->variable().scalingFactor());
+                // Assume that if the user is overwriting the slave Jacobian, then they are
+                // supplying Jacobians that do not correspond to their other physics
+                // (e.g. Kernels), hence we should not apply a scalingFactor that is normally
+                // based on the order of their other physics (e.g. Kernels)
+                Real scaling_factor =
+                    nfc->overwriteSlaveJacobian() ? 1. : nfc->variable().scalingFactor();
 
-                // Cache the jacobian block for the master side
+                // Cache the jacobian block for the slave side
+                _fe_problem.assembly(0).cacheJacobianBlock(
+                    nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, scaling_factor);
+
+                // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
+                {
+                  // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
+                  // factor when we're overwriting slave stuff)
+                  _fe_problem.assembly(0).cacheJacobianBlock(
+                      nfc->_Ken,
+                      slave_dofs,
+                      nfc->masterVariable().dofIndicesNeighbor(),
+                      scaling_factor);
+
+                  // Use _connected_dof_indices to get all the correct columns
                   _fe_problem.assembly(0).cacheJacobianBlock(
                       nfc->_Kne,
                       nfc->masterVariable().dofIndicesNeighbor(),
                       nfc->_connected_dof_indices,
                       nfc->variable().scalingFactor());
 
-                _fe_problem.cacheJacobian(0);
-                if (nfc->addCouplingEntriesToJacobian())
+                  // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
+                }
 
                 // Do the off-diagonals next
                 const std::vector<MooseVariableFEBase *> coupled_vars = nfc->getCoupledMooseVars();
@@ -1914,21 +1934,26 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the slave side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee,
-                                                             slave_dofs,
-                                                             nfc->_connected_dof_indices,
-                                                             nfc->variable().scalingFactor());
+                  _fe_problem.assembly(0).cacheJacobianBlock(
+                      nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, scaling_factor);
 
-                  // Cache the jacobian block for the master side
+                  // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
+                  {
+                    // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
+                    // factor when we're overwriting slave stuff)
+                    _fe_problem.assembly(0).cacheJacobianBlock(
+                        nfc->_Ken, slave_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
+
+                    // Use _connected_dof_indices to get all the correct columns
                     _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne,
                                                                nfc->variable().dofIndicesNeighbor(),
                                                                nfc->_connected_dof_indices,
                                                                nfc->variable().scalingFactor());
 
-                  _fe_problem.cacheJacobian(0);
-                  if (nfc->addCouplingEntriesToJacobian())
+                    // We've handled Ken and Kne, finally handle Knn
                     _fe_problem.cacheJacobianNeighbor(0);
+                  }
                 }
               }
             }
