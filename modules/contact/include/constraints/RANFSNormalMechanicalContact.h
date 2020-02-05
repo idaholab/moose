@@ -69,4 +69,5 @@ protected:
   const Node * _nearest_node;
   std::vector<std::unordered_map<dof_id_type, Number>> _dof_number_to_value;
   CouplingMatrix _disp_coupling;
+  const bool _ping_pong_protection;
 };
