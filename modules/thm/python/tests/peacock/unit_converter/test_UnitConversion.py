@@ -187,6 +187,12 @@ class TestUnitConversion(unittest.TestCase):
         self.assertAlmostEqual(lbpersecond.to(1.), 0.45359237, places = 6)
         self.assertAlmostEqual(lbpersecond.frm(0.45359237), 1., places = 6)
 
+        lbperhour = PoundPerHourUnit()
+        self.assertTrue(lbperhour.name() == 'Pound per hour')
+        self.assertTrue(lbperhour.unit() == [ "lb/hr", "lbm/hr", "lbm/h", "lb/h" ])
+        self.assertAlmostEqual(lbperhour.to(1.), 1.259978805556e-4, places = 6)
+        self.assertAlmostEqual(lbperhour.frm(1.259978805556e-4), 1., places = 6)
+
         megalbperhour = MegapoundPerHourlUnit()
         self.assertTrue(megalbperhour.name() == 'Megapound per hour')
         self.assertTrue(megalbperhour.unit() == [ "Mlb/hr", "Mlbm/hr", "Mlbm/h", "Mlb/h" ])
@@ -204,19 +210,19 @@ class TestUnitConversion(unittest.TestCase):
 
 
     def testEnergy(self):
-        Jperkg = JoulePerKilogramlUnit()
+        Jperkg = JoulePerKilogramUnit()
         self.assertTrue(Jperkg.name() == 'Joule per kilogram')
         self.assertTrue(Jperkg.unit() == [ "J/kg", "Joule/kg" ])
         self.assertAlmostEqual(Jperkg.to(123.456), 123.456, places = 6)
         self.assertAlmostEqual(Jperkg.frm(123.456), 123.456, places = 6)
 
-        kJperkg = KilojoulePerKilogramlUnit()
+        kJperkg = KilojoulePerKilogramUnit()
         self.assertTrue(kJperkg.name() == 'Kilojoule per kilogram')
         self.assertTrue(kJperkg.unit() == [ "kJ/kg" ])
         self.assertAlmostEqual(kJperkg.to(1.), 1000., places = 6)
         self.assertAlmostEqual(kJperkg.frm(1000), 1., places = 6)
 
-        btuperlb = BtuPerPoundlUnit()
+        btuperlb = BtuPerPoundUnit()
         self.assertTrue(btuperlb.name() == 'British thermal unit per pound')
         self.assertTrue(btuperlb.unit() == [ "BTU/lb", "Btu/lb", "BTU/lbm", "Btu/lbm" ])
         self.assertAlmostEqual(btuperlb.to(1.), 2326.0091434078, places = 6)
@@ -225,6 +231,40 @@ class TestUnitConversion(unittest.TestCase):
         energy = EnergyGroup()
         self.assertTrue(energy.name() == 'Energy')
 
+
+    def testTime(self):
+        sec = SecondUnit()
+        self.assertTrue(sec.name() == 'Second')
+        self.assertTrue(sec.unit() == [ "s", "sec", "secs", "second", "seconds" ])
+        self.assertAlmostEqual(sec.to(123.456), 123.456, places = 6)
+        self.assertAlmostEqual(sec.frm(123.456), 123.456, places = 6)
+
+        min = MinuteUnit()
+        self.assertTrue(min.name() == 'Minute')
+        self.assertTrue(min.unit() == [ "min", "mins", "minute", "minutes" ])
+        self.assertAlmostEqual(min.to(1.), 60., places = 6)
+        self.assertAlmostEqual(min.frm(60), 1., places = 6)
+
+        hour = HourUnit()
+        self.assertTrue(hour.name() == 'Hour')
+        self.assertTrue(hour.unit() == [ "h", "hr", "hrs", "hour", "hours" ])
+        self.assertAlmostEqual(hour.to(1.), 3600, places = 6)
+        self.assertAlmostEqual(hour.frm(3600.), 1., places = 6)
+
+        day = DayUnit()
+        self.assertTrue(day.name() == 'Day')
+        self.assertTrue(day.unit() == [ "day", "days" ])
+        self.assertAlmostEqual(day.to(1.), 86400., places = 6)
+        self.assertAlmostEqual(day.frm(86400.), 1., places = 6)
+
+        year = YearUnit()
+        self.assertTrue(year.name() == 'Year')
+        self.assertTrue(year.unit() == [ "year", "years" ])
+        self.assertAlmostEqual(year.to(1.), 31536000., places = 6)
+        self.assertAlmostEqual(year.frm(31536000.), 1., places = 6)
+
+        t = TimeGroup()
+        self.assertTrue(t.name() == 'Time')
 
 if __name__ == '__main__':
     unittest.main(module = __name__, verbosity = 2)

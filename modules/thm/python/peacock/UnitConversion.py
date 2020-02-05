@@ -380,6 +380,21 @@ class PoundPerMinutelUnit(Unit):
         return value * 60 /  0.45359237
 
 
+class PoundPerHourUnit(Unit):
+
+    def name(self):
+        return "Pound per hour"
+
+    def unit(self):
+        return [ "lb/hr", "lbm/hr", "lbm/h", "lb/h" ]
+
+    def to(self, value):
+        return value * 0.45359237 / 3600
+
+    def frm(self, value):
+        return value * 3600 / 0.45359237
+
+
 class MassFlowRateGroup(UnitGroup):
     """
     Group of mass flow rate units
@@ -388,6 +403,7 @@ class MassFlowRateGroup(UnitGroup):
         super(MassFlowRateGroup, self).__init__([
         PoundPerSecondUnit(),
         PoundPerMinutelUnit(),
+        PoundPerHourUnit(),
         MegapoundPerHourlUnit(),
         KilogramPerSecondUnit()
     ])
@@ -568,7 +584,7 @@ class MassGroup(UnitGroup):
 
 # Energy/enthalpy units
 
-class JoulePerKilogramlUnit(Unit):
+class JoulePerKilogramUnit(Unit):
 
     def name(self):
         return "Joule per kilogram"
@@ -583,7 +599,7 @@ class JoulePerKilogramlUnit(Unit):
         return value
 
 
-class KilojoulePerKilogramlUnit(Unit):
+class KilojoulePerKilogramUnit(Unit):
 
     def name(self):
         return "Kilojoule per kilogram"
@@ -598,7 +614,7 @@ class KilojoulePerKilogramlUnit(Unit):
         return value / 1000
 
 
-class BtuPerPoundlUnit(Unit):
+class BtuPerPoundUnit(Unit):
 
     def name(self):
         return "British thermal unit per pound"
@@ -619,14 +635,108 @@ class EnergyGroup(UnitGroup):
     """
     def __init__(self):
         super(EnergyGroup, self).__init__([
-        BtuPerPoundlUnit(),
-        JoulePerKilogramlUnit(),
-        KilojoulePerKilogramlUnit()
+        BtuPerPoundUnit(),
+        JoulePerKilogramUnit(),
+        KilojoulePerKilogramUnit()
     ])
 
     def name(self):
         return "Energy"
 
+
+# Time units
+
+class SecondUnit(Unit):
+
+    def name(self):
+        return "Second"
+
+    def unit(self):
+        return [ "s", "sec", "secs", "second", "seconds" ]
+
+    def to(self, value):
+        return value
+
+    def frm(self, value):
+        return value
+
+
+class MinuteUnit(Unit):
+
+    def name(self):
+        return "Minute"
+
+    def unit(self):
+        return [ "min", "mins", "minute", "minutes" ]
+
+    def to(self, value):
+        return value * 60.
+
+    def frm(self, value):
+        return value / 60.
+
+
+class HourUnit(Unit):
+
+    def name(self):
+        return "Hour"
+
+    def unit(self):
+        return [ "h", "hr", "hrs", "hour", "hours" ]
+
+    def to(self, value):
+        return value * 3600.
+
+    def frm(self, value):
+        return value / 3600.
+
+
+class DayUnit(Unit):
+
+    def name(self):
+        return "Day"
+
+    def unit(self):
+        return [ "day", "days" ]
+
+    def to(self, value):
+        return value * 86400.
+
+    def frm(self, value):
+        return value / 86400.
+
+
+class YearUnit(Unit):
+
+    def name(self):
+        return "Year"
+
+    def unit(self):
+        return [ "year", "years" ]
+
+    def to(self, value):
+        # assuming 365 days in a year
+        return value * 31536000.
+
+    def frm(self, value):
+        return value / 31536000.
+
+
+class TimeGroup(UnitGroup):
+    """
+    Group of time units
+    """
+    def __init__(self):
+        super(TimeGroup, self).__init__([
+        SecondUnit(),
+        MinuteUnit(),
+        HourUnit(),
+        DayUnit(),
+        YearUnit()
+    ])
+
+    def name(self):
+        return "Time"
 
 # Unit groups
 
@@ -638,5 +748,6 @@ GROUPS = [
     VolumeGroup(),
     MassGroup(),
     MassFlowRateGroup(),
-    EnergyGroup()
+    EnergyGroup(),
+    TimeGroup()
 ]
