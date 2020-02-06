@@ -22,6 +22,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
         num_geometris = len(FlowChannelGeometries.GEOMETRIES)
         self.ctlInputs = []
         self.ctlParams = []
+        self.btnCalculate = []
         self.lblErrorMessage = []
 
         self.MainLayout = QtWidgets.QVBoxLayout(self)
@@ -54,7 +55,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 validator = QDoubleValidator(self)
                 validator.setBottom(0.)
                 self.ctlInputs[i][name].setValidator(validator)
-                self.ctlInputs[i][name].returnPressed.connect(self.computeParameters)
+                self.ctlInputs[i][name].textChanged.connect(self.onModified)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
@@ -64,6 +65,17 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 hbox.addWidget(lblUnit)
 
                 paramsLayout.addRow(lblInput, hbox)
+
+            icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'icons', 'calculator.svg'))
+            icon = QtGui.QIcon(icon_path)
+            btnCalc = QtWidgets.QPushButton(self)
+            btnCalc.clicked.connect(self.onCalculate)
+            btnCalc.setIcon(icon)
+            btnCalc.setToolTip("Calculate flow channel parameters")
+            btnCalc.setAutoDefault(True)
+            btnCalc.setMaximumWidth(62)
+            paramsLayout.addRow("", btnCalc)
+            self.btnCalculate.append(btnCalc)
 
             # horz line
             ctlLine = QtWidgets.QFrame(self)
@@ -112,6 +124,11 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
         self.MainLayout.addLayout(self.GeometryLayout)
 
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self.onCtrlReturn)
+
+        self.updateWidgets()
+
         self.setMainLayoutName('MainLayout')
 
         self.ctlFChType.model().sort(0)
@@ -129,6 +146,26 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def setup(self):
         super(peacock.base.Plugin, self).setup()
         pass
+
+    def updateWidgets(self):
+        idx = self.ctlFChType.currentData()
+        enable = True
+        for k, input in self.ctlInputs[idx].items():
+            if len(input.text()) == 0:
+                enable = False
+                break
+        self.btnCalculate[idx].setEnabled(enable)
+
+    def onModified(self):
+        self.updateWidgets()
+
+    def onCtrlReturn(self):
+        idx = self.ctlFChType.currentData()
+        if self.btnCalculate[idx].isEnabled():
+            self.btnCalculate[idx].animateClick()
+
+    def onCalculate(self):
+        self.computeParameters()
 
     def computeParameters(self):
         """
@@ -160,6 +197,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def onGeometryTypeChanged(self, index):
         page = self.ctlFChType.itemData(index)
         self.GeometryLayout.setCurrentIndex(page)
+        self.updateWidgets()
 
 def main(size=None):
     """
