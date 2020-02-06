@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QPalette, QIcon
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess, QSize
 from PyQt5.QtWidgets import QWidget, QFormLayout, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QFrame, QPushButton
@@ -23,10 +23,6 @@ class FluidPropertyWidget(QWidget):
         self.layoutForm.setFormAlignment(Qt.AlignLeft)
         self.layoutForm.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         self.layoutForm.setVerticalSpacing(5)
-
-        palette = QPalette()
-        palette.setColor(QPalette.Base, Qt.gray);
-        palette.setColor(QPalette.Text, Qt.darkGray);
 
         self.lblInputs = {}
         self.ctlInputs = {}
@@ -65,6 +61,9 @@ class FluidPropertyWidget(QWidget):
         self.btnCalculate.setMaximumWidth(62)
         self.layoutForm.addRow("", self.btnCalculate)
 
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self.onCtrlReturn)
+
         lbl = QFrame()
         lbl.setMinimumHeight(2)
         self.layoutForm.addRow("", lbl)
@@ -76,22 +75,15 @@ class FluidPropertyWidget(QWidget):
 
             self.lblProp[name] = QLabel(name, self)
             self.lblProp[name].setToolTip(hint)
-
-            palette = self.lblProp[name].palette()
-            palette.setCurrentColorGroup(QPalette.Disabled)
-            palette.setColorGroup(QPalette.Normal, palette.windowText(),
-                palette.button(), palette.light(), palette.dark(), palette.mid(),
-                palette.text(), palette.brightText(), palette.base(), palette.window())
-            self.lblProp[name].setPalette(palette)
+            self.lblProp[name].setEnabled(False)
 
             self.ctlProp[name] = QLineEdit(self)
             self.ctlProp[name].setReadOnly(True)
             self.ctlProp[name].setToolTip(hint)
-            self.ctlProp[name].setPalette(palette)
 
             self.lblUnit[name] = QLabel(unit, self)
             self.lblUnit[name].setFixedWidth(self.UNITS_WIDTH)
-            self.lblUnit[name].setPalette(palette)
+            self.lblUnit[name].setEnabled(False)
 
             hbox = QHBoxLayout()
             hbox.addWidget(self.ctlProp[name])
@@ -139,13 +131,12 @@ class FluidPropertyWidget(QWidget):
         self.setModified(True)
         self.updateWidgets()
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Return:
-            if self.btnCalculate.isEnabled():
-                self.computeProperties()
-
     def setExecutablePath(self, exe_path):
         self.exe_path = exe_path
+
+    def onCtrlReturn(self):
+        if self.btnCalculate.isEnabled():
+            self.btnCalculate.animateClick()
 
     def computeProperties(self):
         """
@@ -208,7 +199,7 @@ class FluidPropertyWidget(QWidget):
 
     @pyqtSlot()
     def _onReadStdErr(self):
-        self.process.setReadChannel(QProcess.Exception)
+        self.process.setReadChannel(QProcess.StandardError)
         while self.process.canReadLine():
             line = self.process.readLine().data().decode("utf-8").rstrip()
             if line == '*** ERROR ***':
@@ -226,8 +217,12 @@ class FluidPropertyWidget(QWidget):
                 # enter the data into the controls
                 for p in self.outputs():
                     name = p['name']
-                    val = str(j[self.jsonSectionName()][name])
-                    self.ctlProp[name].setText(val)
+                    val = float(j[self.jsonSectionName()][name])
+                    if abs(val) < 0.1:
+                        s = "{:.5e}".format(val)
+                    else:
+                        s = "{:.5f}".format(val)
+                    self.ctlProp[name].setText(s)
             except:
                 # this would happen if people used MOOSE that does not support
                 # printing fluid properties in JSON format
