@@ -217,8 +217,12 @@ class FluidPropertyWidget(QWidget):
                 # enter the data into the controls
                 for p in self.outputs():
                     name = p['name']
-                    val = str(j[self.jsonSectionName()][name])
-                    self.ctlProp[name].setText(val)
+                    val = float(j[self.jsonSectionName()][name])
+                    if abs(val) < 0.1:
+                        s = "{:.5e}".format(val)
+                    else:
+                        s = "{:.5f}".format(val)
+                    self.ctlProp[name].setText(s)
             except:
                 # this would happen if people used MOOSE that does not support
                 # printing fluid properties in JSON format
