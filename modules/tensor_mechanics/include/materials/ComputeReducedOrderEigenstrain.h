@@ -8,11 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+#include "DenseMatrix.h"
 #include "ComputeEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
 // libmesh includes
-#include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 
 class Assembly;

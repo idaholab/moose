@@ -9,8 +9,8 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "ADMaterial.h"
-#include "libmesh/dense_matrix.h"
 
 #define usingComputeIncrementalShellStrainMembers                                                  \
   usingMaterialMembers;                                                                            \
