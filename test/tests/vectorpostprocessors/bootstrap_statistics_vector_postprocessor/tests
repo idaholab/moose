@@ -3,17 +3,44 @@
   issues = '#14409'
 
   [precentile]
-    requirement = "The system shall support computing percentile bootstrap statics of a vector of data"
+    requirement = "The system shall support computing bootstrap statics of a vector of data including"
 
     [replicated]
       type = CSVDiff
       input = bootstrap.i
       csvdiff = bootstrap_out_stats_0001.csv
 
-      detail = "for data that is replicated"
+      detail = "percentile bootstrap confidence level intervals"
     []
   []
 
+  [parallel]
+    requirement = "The system shall support computing bootstrap statics of a vector of data in parallel"
+
+    # These two tests are restricted to 3 processors because the Test VPP creates unique data
+    # depending on the number of cores used
+    [replicated]
+      type = CSVDiff
+      input = bootstrap_distributed.i
+      csvdiff = bootstrap_distributed_out_stats_0001.csv
+      cli_args = "VectorPostprocessors/data/parallel_type=replicated"
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "if the vector is replicated across processors and"
+    []
+
+    [distributed]
+      type = CSVDiff
+      input = bootstrap_distributed.i
+      csvdiff = bootstrap_distributed_out_stats_0001.csv
+      prereq = parallel/replicated
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "when the vector is distributed across processors."
+    []
+  []
 
   [errors]
     requirement = "The system shall error when computing confidence level intervals when"
