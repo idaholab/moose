@@ -18,11 +18,22 @@ class TestFlowChannelParametersCalculator(unittest.TestCase):
         self._widget = main(size=[600,600])
         self._plugin = self._widget.FlowChannelParametersCalculator
 
-    def testCircular(self):
-        idx = self._plugin.ctlFChType.itemData(self._plugin.ctlFChType.findText("Circular"))
+    def testCircularR(self):
+        idx = self._plugin.ctlFChType.itemData(self._plugin.ctlFChType.findText("Circular (radius)"))
         self._plugin.GeometryLayout.setCurrentIndex(idx)
 
         self._plugin.ctlInputs[idx]['r'].setText('1')
+        self._plugin.computeParameters()
+
+        self.assertTrue(self._plugin.ctlParams[idx]['A'].displayText() == '3.141593e+00')
+        self.assertTrue(self._plugin.ctlParams[idx]['D_h'].displayText() == '2.000000e+00')
+        self.assertTrue(self._plugin.ctlParams[idx]['P_hf'].displayText() == '6.283185e+00')
+
+    def testCircularD(self):
+        idx = self._plugin.ctlFChType.itemData(self._plugin.ctlFChType.findText("Circular (diameter)"))
+        self._plugin.GeometryLayout.setCurrentIndex(idx)
+
+        self._plugin.ctlInputs[idx]['d'].setText('2')
         self._plugin.computeParameters()
 
         self.assertTrue(self._plugin.ctlParams[idx]['A'].displayText() == '3.141593e+00')
