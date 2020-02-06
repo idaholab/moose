@@ -1,6 +1,6 @@
 [Tests]
   issues = '#716'
-  design = 'syntax/Contact/index.md source/MechanicalContactConstraint.md'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
   [./test]
     type = 'Exodiff'
     input = 'overclosure.i'
