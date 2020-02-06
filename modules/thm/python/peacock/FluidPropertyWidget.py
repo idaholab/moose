@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QPalette, QIcon
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess, QSize
 from PyQt5.QtWidgets import QWidget, QFormLayout, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QFrame, QPushButton
@@ -60,6 +60,9 @@ class FluidPropertyWidget(QWidget):
         self.btnCalculate.setAutoDefault(True)
         self.btnCalculate.setMaximumWidth(62)
         self.layoutForm.addRow("", self.btnCalculate)
+
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self.onCtrlReturn)
 
         lbl = QFrame()
         lbl.setMinimumHeight(2)
@@ -128,13 +131,12 @@ class FluidPropertyWidget(QWidget):
         self.setModified(True)
         self.updateWidgets()
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Return:
-            if self.btnCalculate.isEnabled():
-                self.computeProperties()
-
     def setExecutablePath(self, exe_path):
         self.exe_path = exe_path
+
+    def onCtrlReturn(self):
+        if self.btnCalculate.isEnabled():
+            self.btnCalculate.animateClick()
 
     def computeProperties(self):
         """
