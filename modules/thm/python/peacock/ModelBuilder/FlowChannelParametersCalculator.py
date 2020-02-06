@@ -1,8 +1,5 @@
 import os, sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
-from PyQt5.QtWidgets import QSizePolicy, QLabel
-from PyQt5.QtGui import QDoubleValidator
 import peacock
 import FlowChannelGeometries
 
@@ -17,7 +14,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def __init__(self, **kwargs):
         super(FlowChannelParametersCalculator, self).__init__(**kwargs)
 
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
         num_geometris = len(FlowChannelGeometries.GEOMETRIES)
         self.ctlInputs = []
@@ -52,7 +49,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 self.ctlInputs[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlInputs[i][name].setToolTip(hint)
-                validator = QDoubleValidator(self)
+                validator = QtGui.QDoubleValidator(self)
                 validator.setBottom(0.)
                 self.ctlInputs[i][name].setValidator(validator)
                 self.ctlInputs[i][name].textChanged.connect(self.onModified)
@@ -117,7 +114,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             widget.setLayout(paramsLayout)
             self.GeometryLayout.addWidget(widget)
 
-            lblErrorMsg = QLabel(self)
+            lblErrorMsg = QtWidgets.QLabel(self)
             lblErrorMsg.setStyleSheet("QLabel { color: red; }");
             paramsLayout.addRow(lblErrorMsg)
             self.lblErrorMessage.append(lblErrorMsg)
