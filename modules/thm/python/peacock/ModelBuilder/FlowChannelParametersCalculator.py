@@ -88,13 +88,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 lblParams = QtWidgets.QLabel(name, self)
                 lblParams.setToolTip(hint)
-
-                palette = lblParams.palette()
-                palette.setCurrentColorGroup(QtGui.QPalette.Disabled)
-                palette.setColorGroup(QtGui.QPalette.Normal, palette.windowText(),
-                    palette.button(), palette.light(), palette.dark(), palette.mid(),
-                    palette.text(), palette.brightText(), palette.base(), palette.window())
-                lblParams.setPalette(palette)
+                lblParams.setEnabled(False)
 
                 self.ctlParams[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlParams[i][name].setReadOnly(True)
@@ -102,7 +96,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
-                lblUnit.setPalette(palette)
+                lblUnit.setEnabled(False)
 
                 hbox = QtWidgets.QHBoxLayout()
                 hbox.addWidget(self.ctlParams[i][name])
