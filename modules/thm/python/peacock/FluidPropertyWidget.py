@@ -24,10 +24,6 @@ class FluidPropertyWidget(QWidget):
         self.layoutForm.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         self.layoutForm.setVerticalSpacing(5)
 
-        palette = QPalette()
-        palette.setColor(QPalette.Base, Qt.gray);
-        palette.setColor(QPalette.Text, Qt.darkGray);
-
         self.lblInputs = {}
         self.ctlInputs = {}
         self.lblUnit = {}
@@ -76,22 +72,15 @@ class FluidPropertyWidget(QWidget):
 
             self.lblProp[name] = QLabel(name, self)
             self.lblProp[name].setToolTip(hint)
-
-            palette = self.lblProp[name].palette()
-            palette.setCurrentColorGroup(QPalette.Disabled)
-            palette.setColorGroup(QPalette.Normal, palette.windowText(),
-                palette.button(), palette.light(), palette.dark(), palette.mid(),
-                palette.text(), palette.brightText(), palette.base(), palette.window())
-            self.lblProp[name].setPalette(palette)
+            self.lblProp[name].setEnabled(False)
 
             self.ctlProp[name] = QLineEdit(self)
             self.ctlProp[name].setReadOnly(True)
             self.ctlProp[name].setToolTip(hint)
-            self.ctlProp[name].setPalette(palette)
 
             self.lblUnit[name] = QLabel(unit, self)
             self.lblUnit[name].setFixedWidth(self.UNITS_WIDTH)
-            self.lblUnit[name].setPalette(palette)
+            self.lblUnit[name].setEnabled(False)
 
             hbox = QHBoxLayout()
             hbox.addWidget(self.ctlProp[name])
@@ -208,7 +197,7 @@ class FluidPropertyWidget(QWidget):
 
     @pyqtSlot()
     def _onReadStdErr(self):
-        self.process.setReadChannel(QProcess.Exception)
+        self.process.setReadChannel(QProcess.StandardError)
         while self.process.canReadLine():
             line = self.process.readLine().data().decode("utf-8").rstrip()
             if line == '*** ERROR ***':
