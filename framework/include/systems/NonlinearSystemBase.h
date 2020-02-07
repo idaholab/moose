@@ -617,13 +617,9 @@ public:
     return _solution_previous_nl;
   }
 
-  virtual NumericVector<Number> * solutionState(unsigned int i) override;
-
   virtual void setSolutionUDotOld(const NumericVector<Number> & u_dot_old);
 
   virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
-
-  virtual void setSolutionState(const std::vector<NumericVector<Number>> & solution_state);
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 

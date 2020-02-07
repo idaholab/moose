@@ -140,6 +140,20 @@ DisplacedProblem::initAdaptivity()
 }
 
 void
+DisplacedProblem::setupSolutionStates()
+{
+  _displaced_nl.setupSolutionStates();
+  _displaced_aux.setupSolutionStates();
+}
+
+void
+DisplacedProblem::needOldSolutionState(const unsigned int state)
+{
+  _displaced_nl.needOldSolutionState(state);
+  _displaced_aux.needOldSolutionState(state);
+}
+
+void
 DisplacedProblem::saveOldSolutions()
 {
   _displaced_nl.saveOldSolutions();

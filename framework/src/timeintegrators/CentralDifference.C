@@ -42,13 +42,13 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
   _fe_problem.setUDotDotOldRequested(true);
-  _fe_problem.setSolutionState(4);
+  _fe_problem.needOldSolutionState(3);
 }
 
 void
 CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
-  const auto & u_old_old_old = (*_sys.solutionState(3))(dof);
+  const auto & u_old_old_old = (_sys.solutionState(3))(dof);
 
   auto u_dotdot = ad_u_dot; // TODO: Ask Alex if this has to be ad_u_dotdot. Currently, it will
                             // change u_dotdot when called.
@@ -71,7 +71,7 @@ CentralDifference::computeTimeDerivatives()
   // Declaring u_dot and u_dotdot
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   NumericVector<Number> & u_dotdot = *_sys.solutionUDotDot();
-  NumericVector<Number> & u_old_old_old = *_sys.solutionState(3);
+  NumericVector<Number> & u_old_old_old = _sys.solutionState(3);
 
   // Computing derivatives
   computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older, u_old_old_old);

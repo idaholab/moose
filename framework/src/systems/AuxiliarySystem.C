@@ -43,7 +43,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _u_dotdot(NULL),
     _u_dot_old(NULL),
     _u_dotdot_old(NULL),
-    _solution_state(0),
     _need_serialized_solution(false),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
@@ -89,14 +88,6 @@ AuxiliarySystem::addDotVectors()
     _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
   if (_fe_problem.uDotDotOldRequested())
     _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
-
-  if (_fe_problem.getSolutionState() > 3)
-  {
-    _solution_state_size = _fe_problem.getSolutionState();
-    _solution_state.resize(_fe_problem.getSolutionState());
-    for (unsigned int i = 0; i < _fe_problem.getSolutionState(); ++i)
-      _solution_state[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
-  }
 }
 
 void
@@ -645,20 +636,6 @@ AuxiliarySystem::setPreviousNewtonSolution()
 {
   // Evaluate aux variables to get the solution vector
   compute(EXEC_LINEAR);
-}
-
-NumericVector<Number> *
-AuxiliarySystem::solutionState(unsigned int i)
-{
-  if (_fe_problem.getSolutionState() > 3 && i < _fe_problem.getSolutionState())
-    return _solution_state[i];
-  else if (_fe_problem.getSolutionState() <= 3)
-    mooseError("AuxiliarySystem: If only current, old or older solution is required, please use "
-               "solution(), solutionOld() or solutionOlder(), respectively.");
-  else
-    mooseError("AuxiliarySystem: Requested solutionState is not saved, please make sure solution "
-               "state is less than" +
-               std::to_string(_fe_problem.getSolutionState()));
 }
 
 template <typename AuxKernelType>

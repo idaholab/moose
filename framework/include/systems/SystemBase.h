@@ -215,12 +215,17 @@ public:
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
-  virtual NumericVector<Number> * solutionState(unsigned int i) = 0;
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
   virtual const NumericVector<Number> & solution() const = 0;
   virtual const NumericVector<Number> & solutionOld() const = 0;
   virtual const NumericVector<Number> & solutionOlder() const = 0;
   virtual const NumericVector<Number> * solutionPreviousNewton() const = 0;
+
+  /**
+   * Get a state of the solution.
+   * State 0 is the current solution, state 1 is the old solution, etc...
+   */
+  NumericVector<Number> & solutionState(const unsigned int state);
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
@@ -807,6 +812,16 @@ public:
   /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
   void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
+  /*
+   * Sets up the solution states - stores older copies of the solutions in _solution_states)
+   */
+  void setupSolutionStates();
+
+  /**
+   * Register that a certain solution state is needed (1 = old, 2 = older, etc)
+   */
+  void needOldSolutionState(const unsigned int state);
+
 protected:
   SubProblem & _subproblem;
 
@@ -862,8 +877,12 @@ protected:
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
 
-  std::vector<NumericVector<Real> *> _saved_solution_state;
-  unsigned int _solution_state_size;
+  /// How many old solutions states are needed (1 = old, 2 = older, etc)
+  unsigned int _old_solution_states_needed;
+  /// The solution states (0 = current, 1 = old, 2 = older, etc)
+  std::vector<NumericVector<Number> *> _solution_states;
+  /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
+  std::vector<NumericVector<Real> *> _saved_solution_states;
 
   /// Storage for MooseVariable objects
   MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;
