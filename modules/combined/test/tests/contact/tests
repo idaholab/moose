@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#3418'
+  issues = '#3418 #14630'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
   [./pressureAugLag]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
     exodiff = 'pressurePenalty_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
-    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'    
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'
   [../]
 
   [./pressurePenalty_mechanical_constraint]
@@ -79,5 +79,10 @@
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce and release contact conditions. 8 elements.'
 
+  [../]
+
+  [./horizontal_blocks_mortar_TM]
+    type = 'RunApp'
+    input = horizontal_blocks_mortar_TM.i
   [../]
 []

@@ -172,6 +172,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_aux_variable", false);
   registerTask("add_external_aux_variables", true);
   registerTask("add_variable", false);
+  registerTask("add_mortar_variable", false);
 
   registerTask("execute_mesh_modifiers", false);
   registerTask("execute_mesh_generators", true);
@@ -270,6 +271,7 @@ addActionTypes(Syntax & syntax)
                            "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
+                           "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_function)"
