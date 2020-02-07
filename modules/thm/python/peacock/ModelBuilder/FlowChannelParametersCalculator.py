@@ -1,8 +1,5 @@
 import os, sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
-from PyQt5.QtWidgets import QSizePolicy, QLabel
-from PyQt5.QtGui import QDoubleValidator
 import peacock
 import FlowChannelGeometries
 
@@ -17,11 +14,12 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def __init__(self, **kwargs):
         super(FlowChannelParametersCalculator, self).__init__(**kwargs)
 
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
         num_geometris = len(FlowChannelGeometries.GEOMETRIES)
         self.ctlInputs = []
         self.ctlParams = []
+        self.btnCalculate = []
         self.lblErrorMessage = []
 
         self.MainLayout = QtWidgets.QVBoxLayout(self)
@@ -51,10 +49,10 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 self.ctlInputs[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlInputs[i][name].setToolTip(hint)
-                validator = QDoubleValidator(self)
+                validator = QtGui.QDoubleValidator(self)
                 validator.setBottom(0.)
                 self.ctlInputs[i][name].setValidator(validator)
-                self.ctlInputs[i][name].returnPressed.connect(self.computeParameters)
+                self.ctlInputs[i][name].textChanged.connect(self.onModified)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
@@ -64,6 +62,17 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 hbox.addWidget(lblUnit)
 
                 paramsLayout.addRow(lblInput, hbox)
+
+            icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'icons', 'calculator.svg'))
+            icon = QtGui.QIcon(icon_path)
+            btnCalc = QtWidgets.QPushButton(self)
+            btnCalc.clicked.connect(self.onCalculate)
+            btnCalc.setIcon(icon)
+            btnCalc.setToolTip("Calculate flow channel parameters")
+            btnCalc.setAutoDefault(True)
+            btnCalc.setMaximumWidth(62)
+            paramsLayout.addRow("", btnCalc)
+            self.btnCalculate.append(btnCalc)
 
             # horz line
             ctlLine = QtWidgets.QFrame(self)
@@ -79,13 +88,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 lblParams = QtWidgets.QLabel(name, self)
                 lblParams.setToolTip(hint)
-
-                palette = lblParams.palette()
-                palette.setCurrentColorGroup(QtGui.QPalette.Disabled)
-                palette.setColorGroup(QtGui.QPalette.Normal, palette.windowText(),
-                    palette.button(), palette.light(), palette.dark(), palette.mid(),
-                    palette.text(), palette.brightText(), palette.base(), palette.window())
-                lblParams.setPalette(palette)
+                lblParams.setEnabled(False)
 
                 self.ctlParams[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlParams[i][name].setReadOnly(True)
@@ -93,7 +96,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
-                lblUnit.setPalette(palette)
+                lblUnit.setEnabled(False)
 
                 hbox = QtWidgets.QHBoxLayout()
                 hbox.addWidget(self.ctlParams[i][name])
@@ -105,12 +108,17 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             widget.setLayout(paramsLayout)
             self.GeometryLayout.addWidget(widget)
 
-            lblErrorMsg = QLabel(self)
+            lblErrorMsg = QtWidgets.QLabel(self)
             lblErrorMsg.setStyleSheet("QLabel { color: red; }");
             paramsLayout.addRow(lblErrorMsg)
             self.lblErrorMessage.append(lblErrorMsg)
 
         self.MainLayout.addLayout(self.GeometryLayout)
+
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self.onCtrlReturn)
+
+        self.updateWidgets()
 
         self.setMainLayoutName('MainLayout')
 
@@ -129,6 +137,26 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def setup(self):
         super(peacock.base.Plugin, self).setup()
         pass
+
+    def updateWidgets(self):
+        idx = self.ctlFChType.currentData()
+        enable = True
+        for k, input in self.ctlInputs[idx].items():
+            if len(input.text()) == 0:
+                enable = False
+                break
+        self.btnCalculate[idx].setEnabled(enable)
+
+    def onModified(self):
+        self.updateWidgets()
+
+    def onCtrlReturn(self):
+        idx = self.ctlFChType.currentData()
+        if self.btnCalculate[idx].isEnabled():
+            self.btnCalculate[idx].animateClick()
+
+    def onCalculate(self):
+        self.computeParameters()
 
     def computeParameters(self):
         """
@@ -160,6 +188,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
     def onGeometryTypeChanged(self, index):
         page = self.ctlFChType.itemData(index)
         self.GeometryLayout.setCurrentIndex(page)
+        self.updateWidgets()
 
 def main(size=None):
     """

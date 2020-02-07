@@ -33,12 +33,12 @@ class FlowChannelGeometry(object):
         raise NotImplementedError()
 
 
-class CircularFlowChannelGeometry(FlowChannelGeometry):
+class CircularRFlowChannelGeometry(FlowChannelGeometry):
     """
     Circular flow channel defined by radius
     """
 
-    NAME = "Circular"
+    NAME = "Circular (radius)"
 
     def inputs(self):
         return [
@@ -58,6 +58,34 @@ class CircularFlowChannelGeometry(FlowChannelGeometry):
             'A' : math.pi * r * r,
             'D_h' : 2 * r,
             'P_hf' : 2 * math.pi * r
+        }
+
+
+class CircularDFlowChannelGeometry(FlowChannelGeometry):
+    """
+    Circular flow channel defined by diameter
+    """
+
+    NAME = "Circular (diameter)"
+
+    def inputs(self):
+        return [
+            { 'name': "d", 'unit': "m", 'hint': "Diameter" }
+        ]
+
+    def outputs(self):
+        return [
+            { 'name': "A", 'unit': "m^2", 'hint': "Cross-sectional area" },
+            { 'name': "D_h", 'unit': "m", 'hint': "Hydraulic diameter" },
+            { 'name': "P_hf", 'unit': "m", 'hint': "Heated perimeter" }
+        ]
+
+    def compute(self, **kwargs):
+        d = kwargs['d']
+        return {
+            'A' : math.pi * d * d * 0.25,
+            'D_h' : d,
+            'P_hf' : math.pi * d
         }
 
 
@@ -203,7 +231,8 @@ class CoreChannelRoundFuelFlowChannelGeometry(FlowChannelGeometry):
 
 
 GEOMETRIES = (
-    CircularFlowChannelGeometry(),
+    CircularRFlowChannelGeometry(),
+    CircularDFlowChannelGeometry(),
     SquareFlowChannelGeometry(),
     AnnulusFlowChannelGeometry(),
     CoreChannelRoundFuelFlowChannelGeometry(),
