@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "DenseMatrix.h"
 #include "MooseConfig.h"
 #include "MooseADWrapper.h"
 #include "DataIO.h"
@@ -16,7 +17,6 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/numeric_vector.h"
-#include "libmesh/dense_matrix.h"
 #include "libmesh/elem.h"
 
 #include "DualRealOps.h"

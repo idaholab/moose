@@ -9,13 +9,12 @@
 
 #pragma once
 
-// MOOSE includes
+#include "DenseMatrix.h"
 #include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
 #include "DualReal.h"
 
 #include "libmesh/type_tensor.h"
-#include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 
 // C++ includes

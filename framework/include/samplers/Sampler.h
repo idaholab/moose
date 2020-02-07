@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "libmesh/dense_matrix.h"
-
-// MOOSE includes
+#include "DenseMatrix.h"
 #include "MooseObject.h"
 #include "MooseRandom.h"
 #include "SetupInterface.h"

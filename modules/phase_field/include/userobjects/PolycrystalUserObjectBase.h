@@ -9,9 +9,8 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "FeatureFloodCount.h"
-
-#include "libmesh/dense_matrix.h"
 
 // Forward Declarations
 class PolycrystalUserObjectBase;

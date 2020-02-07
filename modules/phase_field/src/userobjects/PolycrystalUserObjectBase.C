@@ -7,13 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "DenseMatrix.h"
 #include "PolycrystalUserObjectBase.h"
 #include "NonlinearSystemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "TimedPrint.h"
-
-#include "libmesh/dense_matrix.h"
 
 #include <vector>
 #include <map>

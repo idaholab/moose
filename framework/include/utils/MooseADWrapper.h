@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "DenseMatrix.h"
 #include "MooseError.h"
 #include "DualReal.h"
 #include "RankTwoTensor.h"
@@ -18,7 +19,6 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
-#include "libmesh/dense_matrix.h"
 
 #include "DualRealOps.h"
 

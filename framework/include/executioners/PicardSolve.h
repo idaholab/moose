@@ -113,6 +113,12 @@ protected:
   Real _picard_rel_tol;
   /// Absolute tolerance on residual norm
   Real _picard_abs_tol;
+  /// Postprocessor value for user-defined picard convergence check
+  const PostprocessorValue * _picard_custom_pp;
+  /// Relative tolerance on postprocessor value
+  Real _custom_rel_tol;
+  /// Absolute tolerance on postprocessor value
+  Real _custom_abs_tol;
   /// Whether or not we force evaluation of residual norms even without multiapps
   bool _picard_force_norms;
   /// Relaxation factor for Picard Iteration
