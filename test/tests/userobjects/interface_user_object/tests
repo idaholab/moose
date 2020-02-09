@@ -20,4 +20,15 @@
       design = 'InterfaceQpValueUserObject.md InterfaceValueUserObjectAux.md'
       max_threads = 1
     [../]
+    [./interface_UO_get_material]
+      type = 'RunApp'
+      input = 'interface_userobject_material_value.i'
+      expect_out = ' Solve Converged!'
+      requirement = "The InterfaceUseroObject system shall be able to "
+                    "get updated bulk, boundary and interface material property values."
+                    "The test use mooseAssert so it needs to run in debug mode"
+      issues = '#14680'
+      design = ' '
+      max_threads = 1
+    [../]
   []

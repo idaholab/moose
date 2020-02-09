@@ -10,7 +10,7 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "InterfaceQpValueUserObject.h"
+#include "InterfaceQpUserObjectBase.h"
 
 // Forward Declarations
 class InterfaceValueUserObjectAux;
@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<InterfaceValueUserObjectAux>();
 
 /**
- * AuxKernel creating an AuxVariable from values stored in an InterfaceQpValueUserObject
+ * AuxKernel creating an AuxVariable from values stored in an InterfaceQpUserObjectBase
  */
 class InterfaceValueUserObjectAux : public AuxKernel
 {
@@ -34,6 +34,6 @@ public:
 
 protected:
   virtual Real computeValue() override;
-  const InterfaceQpValueUserObject & _interface_uo;
+  const InterfaceQpUserObjectBase & _interface_uo;
+  const bool _return_side_average;
 };
-

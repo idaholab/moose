@@ -25,13 +25,6 @@
     input = interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
-  [./interface_2]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = break_boundary
-    master_block = '1'
-    paired_block = '0'
-    new_boundary = 'master1_interface'
-  [../]
 []
 
 [Variables]
@@ -125,56 +118,43 @@
 
 [Outputs]
   exodus = true
-  print_linear_residuals = true
 []
 
 [UserObjects]
   [./interface_material_uo]
-    type = InterfaceUserObjectGetMaterialValue
-    property = diffusivity
+    type = InterfaceUserObjectTestGetMaterialProperty
+    property = 'master_prop'
+    property_neighbor = 'slave_prop'
+    property_boundary = 'boundary_prop'
+    property_interface = 'interface_prop'
     boundary = 'master0_interface'
-    execute_on = 'initial timestep_end'
-    interface_value_type = average
+    execute_on = 'initial linear nonlinear timestep_end final'
   [../]
 []
 
 [Materials]
-  [./stateful1]
-    type = StatefulMaterial
+  [./mat_master]
+    type = LinearNonLinearIterationMaterial
     block = 0
-    initial_diffusivity = 5
-    # outputs = all
+    prefactor = 1
+    prop_name = 'master_prop'
   [../]
-  [./stateful2]
-    type = StatefulMaterial
+  [./mat_slave]
+    type = LinearNonLinearIterationMaterial
     block = 1
-    initial_diffusivity = 2
-    # outputs = all
+    prefactor = 2
+    prop_name = 'slave_prop'
   [../]
-[]
-
-[AuxVariables]
-  [./aux_master]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./aux_slave]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [aux_master]
-    type = MaterialRealAux
-    variable = aux_master
-    property = diffusivity
+  [./mat_boundary]
+    type = LinearNonLinearIterationMaterial
+    prefactor = 3
     boundary = 'master0_interface'
-  []
-  [aux_slave]
-    type = MaterialRealAux
-    variable = aux_slave
-    property = diffusivity
-    boundary = 'master1_interface'
-  []
+    prop_name = 'boundary_prop'
+  [../]
+  [./mat_interface]
+    type = LinearNonLinearIterationInterfaceMaterial
+    prefactor = 4
+    boundary = 'master0_interface'
+    prop_name = 'interface_prop'
+  [../]
 []

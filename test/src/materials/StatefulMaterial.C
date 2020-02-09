@@ -45,6 +45,4 @@ void
 StatefulMaterial::computeQpProperties()
 {
   _diffusivity[_qp] = _diffusivity_old[_qp] * 2.0;
-  Moose::out << "_diffusivity[_qp] " << _diffusivity[_qp] << " block "
-             << _current_elem->subdomain_id() << std::endl;
 }

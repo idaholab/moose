@@ -9,25 +9,24 @@
 
 #pragma once
 
-#include "InterfaceValueUserObject.h"
+#include "InterfaceUserObject.h"
 
-class InterfaceUserObjectGetMaterialValue;
+class InterfaceUserObjectTestGetMaterialProperty;
 
 template <>
-InputParameters validParams<InterfaceUserObjectGetMaterialValue>();
+InputParameters validParams<InterfaceUserObjectTestGetMaterialProperty>();
 
 /**
- * This userobject collect values of a variable across an interface for each QP and compute a
- * scalar. The computed scalar value depends on the given parameter _interface_value_type\
- * _interface_value_type (see IntervafeValueTools).
+ * This userobject tests teh capabilities of the interface user object to get in-sync values of
+ * bulk, boundary and interface material property.
  */
-class InterfaceUserObjectGetMaterialValue : public InterfaceValueUserObject
+class InterfaceUserObjectTestGetMaterialProperty : public InterfaceUserObject
 {
 public:
   static InputParameters validParams();
 
-  InterfaceUserObjectGetMaterialValue(const InputParameters & parameters);
-  virtual ~InterfaceUserObjectGetMaterialValue();
+  InterfaceUserObjectTestGetMaterialProperty(const InputParameters & parameters);
+  virtual ~InterfaceUserObjectTestGetMaterialProperty();
 
   virtual void initialSetup() override;
   virtual void initialize(){};
@@ -35,11 +34,11 @@ public:
   virtual void finalize() { return; };
   virtual void threadJoin(const UserObject & /*uo*/) { return; };
 
-  Real getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const;
-
 protected:
   /// this map is used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
   const MaterialProperty<Real> & _mp;
   const MaterialProperty<Real> & _mp_neighbor;
+  const MaterialProperty<Real> & _mp_boundary;
+  const MaterialProperty<Real> & _mp_interface;
 };
