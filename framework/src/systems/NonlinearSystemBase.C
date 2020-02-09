@@ -290,20 +290,12 @@ NonlinearSystemBase::initialSetup()
       auto & mortar_constraints =
           _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
 
-      _undisplaced_mortar_residual_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::RESIDUAL>(mortar_constraints,
-                                                       mortar_generation_object,
-                                                       _fe_problem,
-                                                       _fe_problem,
-                                                       /*displaced=*/false));
-      _undisplaced_mortar_jacobian_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::JACOBIAN>(mortar_constraints,
-                                                       mortar_generation_object,
-                                                       _fe_problem,
-                                                       _fe_problem,
-                                                       /*displaced=*/false));
+      _undisplaced_mortar_functors.emplace(master_slave_boundary_pair,
+                                           ComputeMortarFunctor(mortar_constraints,
+                                                                mortar_generation_object,
+                                                                _fe_problem,
+                                                                _fe_problem,
+                                                                /*displaced=*/false));
     }
 
     const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
@@ -317,20 +309,12 @@ NonlinearSystemBase::initialSetup()
       auto & mortar_constraints =
           _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
 
-      _displaced_mortar_residual_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::RESIDUAL>(mortar_constraints,
-                                                       mortar_generation_object,
-                                                       *_fe_problem.getDisplacedProblem(),
-                                                       _fe_problem,
-                                                       /*displaced=*/true));
-      _displaced_mortar_jacobian_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::JACOBIAN>(mortar_constraints,
-                                                       mortar_generation_object,
-                                                       *_fe_problem.getDisplacedProblem(),
-                                                       _fe_problem,
-                                                       /*displaced=*/true));
+      _displaced_mortar_functors.emplace(master_slave_boundary_pair,
+                                         ComputeMortarFunctor(mortar_constraints,
+                                                              mortar_generation_object,
+                                                              *_fe_problem.getDisplacedProblem(),
+                                                              _fe_problem,
+                                                              /*displaced=*/true));
     }
   }
 }

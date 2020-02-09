@@ -16,13 +16,10 @@
 
 registerADMooseObject("MooseApp", ADDGDiffusion);
 
-defineADLegacyParams(ADDGDiffusion);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADDGDiffusion<compute_stage>::validParams()
+ADDGDiffusion::validParams()
 {
-  InputParameters params = ADDGKernel<compute_stage>::validParams();
+  InputParameters params = ADDGKernel::validParams();
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");
@@ -31,9 +28,8 @@ ADDGDiffusion<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
-  : ADDGKernel<compute_stage>(parameters),
+ADDGDiffusion::ADDGDiffusion(const InputParameters & parameters)
+  : ADDGKernel(parameters),
     _epsilon(getParam<Real>("epsilon")),
     _sigma(getParam<Real>("sigma")),
     _diff(getADMaterialProperty<Real>("diff")),
@@ -41,9 +37,8 @@ ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADDGDiffusion<compute_stage>::computeQpResidual(Moose::DGResidualType type)
+ADDGDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = 0;
 
@@ -76,6 +71,3 @@ ADDGDiffusion<compute_stage>::computeQpResidual(Moose::DGResidualType type)
 
   return r;
 }
-
-template class ADDGDiffusion<RESIDUAL>;
-template class ADDGDiffusion<JACOBIAN>;

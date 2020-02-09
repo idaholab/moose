@@ -12,13 +12,10 @@
 
 registerADMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 
-defineADLegacyParams(ADVectorFunctionDirichletBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADVectorFunctionDirichletBC<compute_stage>::validParams()
+ADVectorFunctionDirichletBC::validParams()
 {
-  InputParameters params = ADVectorNodalBC<compute_stage>::validParams();
+  InputParameters params = ADVectorNodalBC::validParams();
   params.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "components are calculated with functions.");
@@ -31,10 +28,8 @@ ADVectorFunctionDirichletBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADVectorFunctionDirichletBC<compute_stage>::ADVectorFunctionDirichletBC(
-    const InputParameters & parameters)
-  : ADVectorNodalBC<compute_stage>(parameters),
+ADVectorFunctionDirichletBC::ADVectorFunctionDirichletBC(const InputParameters & parameters)
+  : ADVectorNodalBC(parameters),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _function_x(getFunction("function_x")),
     _function_y(getFunction("function_y")),
@@ -48,9 +43,8 @@ ADVectorFunctionDirichletBC<compute_stage>::ADVectorFunctionDirichletBC(
     paramError("function_z", "The 'function' and 'function_z' parameters cannot both be set.");
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-ADVectorFunctionDirichletBC<compute_stage>::computeQpResidual()
+ADVectorFunctionDirichletBC::computeQpResidual()
 {
   if (_function)
     _values = _function->vectorValue(_t, *_current_node);

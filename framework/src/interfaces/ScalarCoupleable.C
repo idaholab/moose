@@ -133,46 +133,29 @@ ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int 
   return (_sc_is_implicit) ? var->sln() : var->slnOld();
 }
 
-template <ComputeStage compute_stage>
 const ADVariableValue &
-ScalarCoupleable::adCoupledScalarValueTempl(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::adCoupledScalarValue(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
-    return *getADDefaultValue<compute_stage>(var_name);
+    return *getADDefaultValue(var_name);
 
   MooseVariableScalar * var = getScalarVar(var_name, comp);
 
   if (_sc_is_implicit)
-    return var->adSln<compute_stage>();
+    return var->adSln();
   else
     mooseError("adCoupledValue for non-implicit calculations is not currently supported. Use "
                "coupledValue instead for non-implicit");
 }
 
-template <>
-VariableValue *
-ScalarCoupleable::getADDefaultValue<ComputeStage::RESIDUAL>(const std::string & var_name)
-{
-  auto default_value_it = _default_value.find(var_name);
-  if (default_value_it == _default_value.end())
-  {
-    auto value = libmesh_make_unique<VariableValue>(
-        _sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
-    default_value_it = _default_value.insert(std::make_pair(var_name, std::move(value))).first;
-  }
-
-  return default_value_it->second.get();
-}
-
-template <>
-DualVariableValue *
-ScalarCoupleable::getADDefaultValue<ComputeStage::JACOBIAN>(const std::string & var_name)
+ADVariableValue *
+ScalarCoupleable::getADDefaultValue(const std::string & var_name)
 {
   auto default_value_it = _dual_default_value.find(var_name);
   if (default_value_it == _dual_default_value.end())
   {
-    auto value = libmesh_make_unique<DualVariableValue>(
+    auto value = libmesh_make_unique<ADVariableValue>(
         _sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
     default_value_it = _dual_default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
@@ -342,12 +325,3 @@ ScalarCoupleable::coupledScalarComponents(const std::string & var_name)
 {
   return _coupled_scalar_vars[var_name].size();
 }
-
-// Explicit instantiations
-template const VariableValue &
-ScalarCoupleable::adCoupledScalarValueTempl<ComputeStage::RESIDUAL>(const std::string & var_name,
-                                                                    unsigned int comp);
-
-template const DualVariableValue &
-ScalarCoupleable::adCoupledScalarValueTempl<ComputeStage::JACOBIAN>(const std::string & var_name,
-                                                                    unsigned int comp);

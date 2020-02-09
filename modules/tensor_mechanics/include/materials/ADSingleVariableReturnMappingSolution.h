@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "DualRealOps.h"
 #include "InputParameters.h"
 
 #define usingSingleVariableReturnMappingSolutionMembers                                            \

@@ -18,16 +18,16 @@
 
 #include "libmesh/quadrature.h"
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 InputParameters
-ADNodalBCTempl<T, compute_stage>::validParams()
+ADNodalBCTempl<T>::validParams()
 {
   InputParameters params = NodalBCBase::validParams();
   return params;
 }
 
-template <typename T, ComputeStage compute_stage>
-ADNodalBCTempl<T, compute_stage>::ADNodalBCTempl(const InputParameters & parameters)
+template <typename T>
+ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
   : NodalBCBase(parameters),
     MooseVariableInterface<T>(this,
                               true,
@@ -37,7 +37,7 @@ ADNodalBCTempl<T, compute_stage>::ADNodalBCTempl(const InputParameters & paramet
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(*this->mooseVariable()),
     _current_node(_var.node()),
-    _u(_var.template adNodalValue<compute_stage>())
+    _u(_var.adNodalValue())
 {
   addMooseVariableDependency(this->mooseVariable());
 }
@@ -56,9 +56,9 @@ conversionHelper(libMesh::VectorValue<T> & value, const unsigned int & i)
   return value(i);
 }
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 void
-ADNodalBCTempl<T, compute_stage>::computeResidual()
+ADNodalBCTempl<T>::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
 
@@ -67,24 +67,12 @@ ADNodalBCTempl<T, compute_stage>::computeResidual()
   for (auto tag_id : _vector_tags)
     if (_sys.hasVector(tag_id))
       for (size_t i = 0; i < dof_indices.size(); ++i)
-        _sys.getVector(tag_id).set(dof_indices[i], conversionHelper(residual, i));
+        _sys.getVector(tag_id).set(dof_indices[i], raw_value(conversionHelper(residual, i)));
 }
 
-template <>
+template <typename T>
 void
-ADNodalBCTempl<Real, JACOBIAN>::computeResidual()
-{
-}
-
-template <>
-void
-ADNodalBCTempl<RealVectorValue, JACOBIAN>::computeResidual()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
-ADNodalBCTempl<T, compute_stage>::computeJacobian()
+ADNodalBCTempl<T>::computeJacobian()
 {
   auto ad_offset = _var.number() * _sys.getMaxVarNDofsPerNode();
   auto residual = computeQpResidual();
@@ -101,20 +89,9 @@ ADNodalBCTempl<T, compute_stage>::computeJacobian()
             tag);
 }
 
-template <>
+template <typename T>
 void
-ADNodalBCTempl<Real, RESIDUAL>::computeJacobian()
-{
-}
-template <>
-void
-ADNodalBCTempl<RealVectorValue, RESIDUAL>::computeJacobian()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
-ADNodalBCTempl<T, compute_stage>::computeOffDiagJacobian(unsigned int jvar)
+ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var.number())
     computeJacobian();
@@ -139,20 +116,9 @@ ADNodalBCTempl<T, compute_stage>::computeOffDiagJacobian(unsigned int jvar)
   }
 }
 
-template <>
+template <typename T>
 void
-ADNodalBCTempl<Real, RESIDUAL>::computeOffDiagJacobian(unsigned int)
-{
-}
-template <>
-void
-ADNodalBCTempl<RealVectorValue, RESIDUAL>::computeOffDiagJacobian(unsigned int)
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
-ADNodalBCTempl<T, compute_stage>::computeOffDiagJacobianScalar(unsigned int jvar)
+ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
 {
   auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
   auto residual = computeQpResidual();
@@ -179,19 +145,5 @@ ADNodalBCTempl<T, compute_stage>::computeOffDiagJacobianScalar(unsigned int jvar
             tag);
 }
 
-template <>
-void
-ADNodalBCTempl<Real, RESIDUAL>::computeOffDiagJacobianScalar(unsigned int)
-{
-}
-
-template <>
-void
-ADNodalBCTempl<RealVectorValue, RESIDUAL>::computeOffDiagJacobianScalar(unsigned int)
-{
-}
-
-template class ADNodalBCTempl<Real, RESIDUAL>;
-template class ADNodalBCTempl<Real, JACOBIAN>;
-template class ADNodalBCTempl<RealVectorValue, RESIDUAL>;
-template class ADNodalBCTempl<RealVectorValue, JACOBIAN>;
+template class ADNodalBCTempl<Real>;
+template class ADNodalBCTempl<RealVectorValue>;

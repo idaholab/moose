@@ -14,36 +14,31 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADLegacyParams(ADKernelSUPG);
-defineADLegacyParams(ADVectorKernelSUPG);
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 InputParameters
-ADKernelSUPGTempl<T, compute_stage>::validParams()
+ADKernelSUPGTempl<T>::validParams()
 {
-  InputParameters params = ADKernelStabilizedTempl<T, compute_stage>::validParams();
+  InputParameters params = ADKernelStabilizedTempl<T>::validParams();
   params.addParam<MaterialPropertyName>(
       "tau_name", "tau", "The name of the stabilization parameter tau.");
   params.addRequiredCoupledVar("velocity", "The velocity variable.");
   return params;
 }
 
-template <typename T, ComputeStage compute_stage>
-ADKernelSUPGTempl<T, compute_stage>::ADKernelSUPGTempl(const InputParameters & parameters)
-  : ADKernelStabilizedTempl<T, compute_stage>(parameters),
-    _tau(getADMaterialProperty<Real>("tau_name")),
-    _velocity(adCoupledVectorValue("velocity"))
+template <typename T>
+ADKernelSUPGTempl<T>::ADKernelSUPGTempl(const InputParameters & parameters)
+  : ADKernelStabilizedTempl<T>(parameters),
+    _tau(this->template getADMaterialProperty<Real>("tau_name")),
+    _velocity(this->adCoupledVectorValue("velocity"))
 {
 }
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 ADRealVectorValue
-ADKernelSUPGTempl<T, compute_stage>::computeQpStabilization()
+ADKernelSUPGTempl<T>::computeQpStabilization()
 {
   return _velocity[_qp] * _tau[_qp];
 }
 
-template class ADKernelSUPGTempl<Real, RESIDUAL>;
-template class ADKernelSUPGTempl<Real, JACOBIAN>;
-template class ADKernelSUPGTempl<RealVectorValue, RESIDUAL>;
-template class ADKernelSUPGTempl<RealVectorValue, JACOBIAN>;
+template class ADKernelSUPGTempl<Real>;
+template class ADKernelSUPGTempl<RealVectorValue>;

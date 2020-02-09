@@ -11,13 +11,10 @@
 
 registerADMooseObject("MooseApp", ADVectorDiffusion);
 
-defineADLegacyParams(ADVectorDiffusion);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADVectorDiffusion<compute_stage>::validParams()
+ADVectorDiffusion::validParams()
 {
-  InputParameters params = ADVectorKernel<compute_stage>::validParams();
+  InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription(
       "The Laplacian operator ($-\\nabla \\cdot \\nabla \\vec{u}$), with the weak "
       "form of $(\\nabla \\vec{\\phi_i}, \\nabla \\vec{u_h})$. The Jacobian is computed using "
@@ -25,18 +22,13 @@ ADVectorDiffusion<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADVectorDiffusion<compute_stage>::ADVectorDiffusion(const InputParameters & parameters)
-  : ADVectorKernel<compute_stage>(parameters)
+ADVectorDiffusion::ADVectorDiffusion(const InputParameters & parameters)
+  : ADVectorKernel(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADVectorDiffusion<compute_stage>::computeQpResidual()
+ADVectorDiffusion::computeQpResidual()
 {
   return _grad_u[_qp].contract(_grad_test[_i][_qp]);
 }
-
-template class ADVectorDiffusion<RESIDUAL>;
-template class ADVectorDiffusion<JACOBIAN>;

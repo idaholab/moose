@@ -13,27 +13,22 @@
 
 registerADMooseObject("MooseApp", EqualValueConstraint);
 
-defineADLegacyParams(EqualValueConstraint);
-
-template <ComputeStage compute_stage>
 InputParameters
-EqualValueConstraint<compute_stage>::validParams()
+EqualValueConstraint::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
   params.addClassDescription("EqualValueConstraint enforces solution continuity between slave and "
                              "master sides of a mortar interface using lagrange multipliers");
   return params;
 }
 
-template <ComputeStage compute_stage>
-EqualValueConstraint<compute_stage>::EqualValueConstraint(const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters)
+EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
+  : ADMortarConstraint(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-EqualValueConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

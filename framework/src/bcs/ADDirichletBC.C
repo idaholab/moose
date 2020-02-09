@@ -11,13 +11,10 @@
 
 registerADMooseObject("MooseApp", ADDirichletBC);
 
-defineADLegacyParams(ADDirichletBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADDirichletBC<compute_stage>::validParams()
+ADDirichletBC::validParams()
 {
-  InputParameters params = ADDirichletBCBase<compute_stage>::validParams();
+  InputParameters params = ADDirichletBCBase::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -25,18 +22,13 @@ ADDirichletBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDirichletBC<compute_stage>::ADDirichletBC(const InputParameters & parameters)
-  : ADDirichletBCBase<compute_stage>(parameters), _value(getParam<Real>("value"))
+ADDirichletBC::ADDirichletBC(const InputParameters & parameters)
+  : ADDirichletBCBase(parameters), _value(getParam<Real>("value"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADDirichletBC<compute_stage>::computeQpValue()
+ADDirichletBC::computeQpValue()
 {
   return _value;
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADDirichletBC);

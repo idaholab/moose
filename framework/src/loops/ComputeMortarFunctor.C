@@ -23,8 +23,7 @@
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
 
-template <ComputeStage compute_stage>
-ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
+ComputeMortarFunctor::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,
     SubProblem & subproblem,
@@ -38,28 +37,15 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     _qrule_msm(_assembly.qRuleMortar())
 {
   // Construct the mortar constraints we will later loop over
-  if (compute_stage == ComputeStage::RESIDUAL)
-    for (auto && mc : mortar_constraints)
-    {
-      auto && cmc = std::dynamic_pointer_cast<ADMortarConstraint<ComputeStage::JACOBIAN>>(mc);
-      if (!cmc)
-        _mortar_constraints.push_back(mc.get());
-    }
-  else if (compute_stage == ComputeStage::JACOBIAN)
-    for (auto && mc : mortar_constraints)
-    {
-      auto && cmc = std::dynamic_pointer_cast<ADMortarConstraint<ComputeStage::RESIDUAL>>(mc);
-      if (!cmc)
-        _mortar_constraints.push_back(mc.get());
-    }
+  for (auto mc : mortar_constraints)
+    _mortar_constraints.push_back(mc.get());
 
   _master_boundary_id = _amg.master_slave_boundary_id_pairs[0].first;
   _slave_boundary_id = _amg.master_slave_boundary_id_pairs[0].second;
 }
 
-template <ComputeStage compute_stage>
 void
-ComputeMortarFunctor<compute_stage>::operator()()
+ComputeMortarFunctor::operator()()
 {
   // Set required material properties
   std::set<unsigned int> needed_mat_props;
@@ -197,7 +183,6 @@ ComputeMortarFunctor<compute_stage>::operator()()
     // slave (element) and master (neighbor)
     _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
 
-    if (compute_stage == ComputeStage::RESIDUAL)
     {
       for (auto && mc : _mortar_constraints)
         mc->computeResidual(_has_master);
@@ -237,11 +222,6 @@ ComputeMortarFunctor<compute_stage>::operator()()
   } // end for loop over elements
 
   // Make sure any remaining cached residuals/Jacobians get added
-  if (compute_stage == ComputeStage::RESIDUAL)
-    _assembly.addCachedResiduals();
-  else
-    _assembly.addCachedJacobian();
+  _assembly.addCachedResiduals();
+  else _assembly.addCachedJacobian();
 }
-
-template class ComputeMortarFunctor<ComputeStage::RESIDUAL>;
-template class ComputeMortarFunctor<ComputeStage::JACOBIAN>;

@@ -15,7 +15,7 @@
 /**
  * Base class for deriving any boundary condition of a integrated type
  */
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 class ADIntegratedBCTempl : public IntegratedBCBase, public MooseVariableInterface<T>
 {
 public:
@@ -40,64 +40,32 @@ protected:
   MooseVariableFE<T> & _var;
 
   /// normals at quadrature points
-  const typename PointType<compute_stage>::type & _normals;
+  const MooseArray<ADPoint> & _normals;
 
   /// (physical) quadrature points
-  const typename PointType<compute_stage>::type & _ad_q_points;
+  const MooseArray<ADPoint> & _ad_q_points;
 
   // test functions
 
   /// test function values (in QPs)
-  const ADTemplateVariableTestValue & _test;
+  const ADTemplateVariableTestValue<T> & _test;
   /// gradients of test functions  (in QPs)
-  const typename VariableTestGradientType<T, compute_stage>::type & _grad_test;
+  const ADTemplateVariableTestGradient<T> & _grad_test;
 
   /// the values of the unknown variable this BC is acting on
-  const ADTemplateVariableValue & _u;
+  const ADTemplateVariableValue<T> & _u;
   /// the gradient of the unknown variable this BC is acting on
-  const ADTemplateVariableGradient & _grad_u;
+  const ADTemplateVariableGradient<T> & _grad_u;
 
   /// The ad version of JxW
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW;
+  const MooseArray<ADReal> & _ad_JxW;
 
   /// The AD version of coord
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_coord;
+  const MooseArray<ADReal> & _ad_coord;
 
   /// Whether this object is acting on the displaced mesh
   const bool _use_displaced_mesh;
 };
 
-template <ComputeStage compute_stage>
-using ADIntegratedBC = ADIntegratedBCTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorIntegratedBC = ADIntegratedBCTempl<RealVectorValue, compute_stage>;
-
-declareADValidParams(ADIntegratedBC);
-declareADValidParams(ADVectorIntegratedBC);
-
-#define usingTemplIntegratedBCMembers(type)                                                        \
-  usingMooseObjectMembers;                                                                         \
-  usingCoupleableMembers;                                                                          \
-  usingUserObjectInterfaceMembers;                                                                 \
-  using ADIntegratedBCTempl<type, compute_stage>::_test;                                           \
-  using ADIntegratedBCTempl<type, compute_stage>::_qp;                                             \
-  using ADIntegratedBCTempl<type, compute_stage>::_i;                                              \
-  using ADIntegratedBCTempl<type, compute_stage>::_u;                                              \
-  using ADIntegratedBCTempl<type, compute_stage>::_var;                                            \
-  using ADIntegratedBCTempl<type, compute_stage>::_grad_test;                                      \
-  using ADIntegratedBCTempl<type, compute_stage>::_grad_u;                                         \
-  using ADIntegratedBCTempl<type, compute_stage>::_dt;                                             \
-  using ADIntegratedBCTempl<type, compute_stage>::_current_elem;                                   \
-  using ADIntegratedBCTempl<type, compute_stage>::_t;                                              \
-  using ADIntegratedBCTempl<type, compute_stage>::_q_point;                                        \
-  using ADIntegratedBCTempl<type, compute_stage>::_assembly;                                       \
-  using ADIntegratedBCTempl<type, compute_stage>::_local_ke;                                       \
-  using ADIntegratedBCTempl<type, compute_stage>::_j;                                              \
-  using ADIntegratedBCTempl<type, compute_stage>::_coord;                                          \
-  using ADIntegratedBCTempl<type, compute_stage>::_qrule;                                          \
-  using ADIntegratedBCTempl<type, compute_stage>::_normals;                                        \
-  using ADIntegratedBCTempl<type, compute_stage>::getFunction;                                     \
-  using ADIntegratedBCTempl<type, compute_stage>::_ad_q_points
-
-#define usingIntegratedBCMembers usingTemplIntegratedBCMembers(Real)
-#define usingVectorIntegratedBCMembers usingTemplIntegratedBCMembers(RealVectorValue)
+using ADIntegratedBC = ADIntegratedBCTempl<Real>;
+using ADVectorIntegratedBC = ADIntegratedBCTempl<RealVectorValue>;

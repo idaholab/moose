@@ -11,13 +11,10 @@
 
 registerADMooseObject("MooseApp", ADNeumannBC);
 
-defineADLegacyParams(ADNeumannBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADNeumannBC<compute_stage>::validParams()
+ADNeumannBC::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
   params.declareControllable("value");
@@ -27,15 +24,13 @@ ADNeumannBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADNeumannBC<compute_stage>::ADNeumannBC(const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters), _value(getParam<Real>("value"))
+ADNeumannBC::ADNeumannBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters), _value(getParam<Real>("value"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADNeumannBC<compute_stage>::computeQpResidual()
+ADNeumannBC::computeQpResidual()
 {
   return -_test[_i][_qp] * _value;
 }

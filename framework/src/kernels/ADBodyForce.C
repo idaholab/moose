@@ -13,13 +13,10 @@
 
 registerADMooseObject("MooseApp", ADBodyForce);
 
-defineADLegacyParams(ADBodyForce);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADBodyForce<compute_stage>::validParams()
+ADBodyForce::validParams()
 {
-  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Demonstrates the multiple ways that scalar values can be introduced "
                              "into kernels, e.g. (controllable) constants, functions, and "
                              "postprocessors. Implements the weak form $(\\psi_i, -f)$.");
@@ -31,18 +28,16 @@ ADBodyForce<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADBodyForce<compute_stage>::ADBodyForce(const InputParameters & parameters)
-  : ADKernelValue<compute_stage>(parameters),
+ADBodyForce::ADBodyForce(const InputParameters & parameters)
+  : ADKernelValue(parameters),
     _scale(getParam<Real>("value")),
     _function(getFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADBodyForce<compute_stage>::precomputeQpResidual()
+ADBodyForce::precomputeQpResidual()
 {
   return -_scale * _postprocessor * _function.value(_t, _q_point[_qp]);
 }

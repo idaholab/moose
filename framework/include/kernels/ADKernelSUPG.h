@@ -11,26 +11,14 @@
 
 #include "ADKernelStabilized.h"
 
-#define usingTemplKernelSUPGMembers(type)                                                          \
-  usingTemplKernelStabilizedMembers(type);                                                         \
-  using ADKernelSUPGTempl<type, compute_stage>::_velocity;                                         \
-  using ADKernelSUPGTempl<type, compute_stage>::_tau
-#define usingKernelSUPGMembers usingTemplKernelSUPGMembers(Real)
-#define usingVectorKernelSUPGMembers usingTemplKernelSUPGMembers(RealVectorValue)
-
-template <typename, ComputeStage>
+template <typename>
 class ADKernelSUPGTempl;
 
-template <ComputeStage compute_stage>
-using ADKernelSUPG = ADKernelSUPGTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorKernelSUPG = ADKernelSUPGTempl<RealVectorValue, compute_stage>;
+using ADKernelSUPG = ADKernelSUPGTempl<Real>;
+using ADVectorKernelSUPG = ADKernelSUPGTempl<RealVectorValue>;
 
-declareADValidParams(ADKernelSUPG);
-declareADValidParams(ADVectorKernelSUPG);
-
-template <typename T, ComputeStage compute_stage>
-class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T, compute_stage>
+template <typename T>
+class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T>
 {
 public:
   static InputParameters validParams();
@@ -38,11 +26,10 @@ public:
   ADKernelSUPGTempl(const InputParameters & parameters);
 
 protected:
-  ADRealVectorValue virtual computeQpStabilization() override;
+  ADRealVectorValue computeQpStabilization() override;
 
-  const ADMaterialProperty(Real) & _tau;
+  const ADMaterialProperty<Real> & _tau;
   const ADVectorVariableValue & _velocity;
 
-  usingTemplKernelStabilizedMembers(T);
+  using ADKernelStabilizedTempl<T>::_qp;
 };
-

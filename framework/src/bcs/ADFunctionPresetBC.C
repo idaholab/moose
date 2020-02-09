@@ -12,13 +12,10 @@
 
 registerADMooseObjectDeprecated("MooseApp", ADFunctionPresetBC, "06/30/2020 24:00");
 
-defineADLegacyParams(ADFunctionPresetBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADFunctionPresetBC<compute_stage>::validParams()
+ADFunctionPresetBC::validParams()
 {
-  InputParameters params = ADDirichletBCBase<compute_stage>::validParams();
+  InputParameters params = ADDirichletBCBase::validParams();
 
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addClassDescription(
@@ -31,16 +28,14 @@ ADFunctionPresetBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADFunctionPresetBC<compute_stage>::ADFunctionPresetBC(const InputParameters & parameters)
-  : ADDirichletBCBase<compute_stage>(parameters), _func(getFunction("function"))
+ADFunctionPresetBC::ADFunctionPresetBC(const InputParameters & parameters)
+  : ADDirichletBCBase(parameters), _func(getFunction("function"))
 {
   mooseDeprecated("Use ADFunctionDirichletBC with preset = true instead of ADFunctionPresetBC");
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADFunctionPresetBC<compute_stage>::computeQpValue()
+ADFunctionPresetBC::computeQpValue()
 {
   return _func.value(_t, *_current_node);
 }

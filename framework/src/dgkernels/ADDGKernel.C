@@ -17,18 +17,14 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADLegacyParams(ADDGKernel);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADDGKernel<compute_stage>::validParams()
+ADDGKernel::validParams()
 {
   InputParameters params = DGKernelBase::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
+ADDGKernel::ADDGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
     NeighborMooseVariableInterface(
         this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
@@ -45,10 +41,10 @@ ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
     _test_neighbor(_var.phiFaceNeighbor()),
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
 
-    _u(_var.adSln<compute_stage>()),
-    _grad_u(_var.adGradSln<compute_stage>()),
-    _u_neighbor(_var.adSlnNeighbor<compute_stage>()),
-    _grad_u_neighbor(_var.adGradSlnNeighbor<compute_stage>())
+    _u(_var.adSln()),
+    _grad_u(_var.adGradSln()),
+    _u_neighbor(_var.adSlnNeighbor()),
+    _grad_u_neighbor(_var.adGradSlnNeighbor())
 {
   addMooseVariableDependency(mooseVariable());
 
@@ -104,27 +100,10 @@ ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
   _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
-template <ComputeStage compute_stage>
-ADDGKernel<compute_stage>::~ADDGKernel()
-{
-}
+ADDGKernel::~ADDGKernel() {}
 
-template <ComputeStage compute_stage>
 void
-ADDGKernel<compute_stage>::computeResidual()
-{
-  DGKernelBase::computeResidual();
-}
-
-template <>
-void
-ADDGKernel<JACOBIAN>::computeResidual()
-{
-}
-
-template <ComputeStage compute_stage>
-void
-ADDGKernel<compute_stage>::computeElemNeighResidual(Moose::DGResidualType type)
+ADDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
 {
   bool is_elem;
   if (type == Moose::Element)
@@ -141,7 +120,7 @@ ADDGKernel<compute_stage>::computeElemNeighResidual(Moose::DGResidualType type)
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
+      _local_re(_i) += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual(type));
 
   accumulateTaggedLocalResidual();
 
@@ -157,27 +136,8 @@ ADDGKernel<compute_stage>::computeElemNeighResidual(Moose::DGResidualType type)
   }
 }
 
-template <>
-void ADDGKernel<JACOBIAN>::computeElemNeighResidual(Moose::DGResidualType /*type*/)
-{
-}
-
-template <ComputeStage compute_stage>
 void
-ADDGKernel<compute_stage>::computeJacobian()
-{
-  DGKernelBase::computeJacobian();
-}
-
-template <>
-void
-ADDGKernel<RESIDUAL>::computeJacobian()
-{
-}
-
-template <ComputeStage compute_stage>
-void
-ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
+ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 {
   const VariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
@@ -226,23 +186,8 @@ ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADDGKernel<compute_stage>::computeOffDiagJacobian(unsigned int jvar)
-{
-  DGKernelBase::computeOffDiagJacobian(jvar);
-}
-
-template <>
-void
-ADDGKernel<RESIDUAL>::computeOffDiagJacobian(unsigned int)
-{
-}
-
-template <ComputeStage compute_stage>
-void
-ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                                           unsigned int jvar)
+ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
   const VariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
@@ -273,5 +218,3 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
 
   accumulateTaggedLocalMatrix();
 }
-
-adBaseClass(ADDGKernel);

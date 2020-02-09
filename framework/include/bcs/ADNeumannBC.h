@@ -11,17 +11,11 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADNeumannBC;
-
-declareADValidParams(ADNeumannBC);
-
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-template <ComputeStage compute_stage>
-class ADNeumannBC : public ADIntegratedBC<compute_stage>
+class ADNeumannBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -33,6 +27,4 @@ protected:
 
   /// Value of grad(u) on the boundary.
   const Real & _value;
-
-  usingIntegratedBCMembers;
 };

@@ -11,18 +11,12 @@
 
 #include "ADNodalBC.h"
 
-template <ComputeStage>
-class ADVectorFunctionDirichletBC;
-
-declareADValidParams(ADVectorFunctionDirichletBC);
-
 /**
  * Boundary condition of a Dirichlet type
  *
  * Sets the values of a LAGRANGE_VEC variable at nodes to values specified by functions
  */
-template <ComputeStage compute_stage>
-class ADVectorFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
+class ADVectorFunctionDirichletBC : public ADVectorNodalBC
 {
 public:
   static InputParameters validParams();
@@ -44,6 +38,4 @@ protected:
 
   /// The value for this BC
   RealVectorValue _values;
-
-  usingVectorNodalBCMembers;
 };

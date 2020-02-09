@@ -77,7 +77,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _block_diagonal_matrix(false),
     _calculate_xyz(false),
     _calculate_face_xyz(false),
-    _calculate_curvatures(false)
+    _calculate_curvatures(false),
+    _calculate_ad_coord(false)
 {
   Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   // Build fe's for the helpers
@@ -599,7 +600,7 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
 
-  if (_computing_jacobian && _subproblem.haveADObjects())
+  if (_subproblem.haveADObjects())
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
@@ -673,11 +674,10 @@ Assembly::reinitFE(const Elem * elem)
 
 template <typename OutputType>
 void
-Assembly::computeGradPhiAD(
-    const Elem * elem,
-    unsigned int n_qp,
-    typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
-    FEGenericBase<OutputType> * fe)
+Assembly::computeGradPhiAD(const Elem * elem,
+                           unsigned int n_qp,
+                           ADTemplateVariableTestGradient<OutputType> & grad_phi,
+                           FEGenericBase<OutputType> * fe)
 {
   // This function relies on the fact that FE::reinit has already been called. FE::reinit will
   // importantly have already called FEMap::init_shape_functions which will have computed
@@ -806,10 +806,11 @@ Assembly::computeAffineMapAD(const Elem * elem,
         mooseAssert(elem_nodes[i], "The node is null!");
         VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(elem_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(elem_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                               1.);
 
         _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
@@ -916,10 +917,11 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(elem_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(elem_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                               1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
@@ -965,10 +967,11 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(elem_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(elem_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                               1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1041,10 +1044,11 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(elem_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + i,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(elem_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+                               1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1213,10 +1217,11 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         auto element_node_number = elem->which_node_am_i(side_number, 0);
 
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(side_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(side_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                               1.);
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
@@ -1258,10 +1263,11 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         auto element_node_number = elem->which_node_am_i(side_number, i);
 
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(side_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(side_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                               1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1325,10 +1331,11 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         auto element_node_number = elem->which_node_am_i(side_number, i);
 
         unsigned dimension = 0;
-        for (const auto & disp_num : _displacements)
-          Moose::derivInsert(side_point(dimension++).derivatives(),
-                             disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
-                             1.);
+        if (_computing_jacobian)
+          for (const auto & disp_num : _displacements)
+            Moose::derivInsert(side_point(dimension++).derivatives(),
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+                               1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1511,8 +1518,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     MooseArray<Point> q_points;
     q_points.shallowCopy(const_cast<std::vector<Point> &>(fe->get_xyz()));
 
-    setCoordinateTransformation<RESIDUAL>(
-        qrule, q_points, _coord_neighbor, _current_neighbor_subdomain_id);
+    setCoordinateTransformation(qrule, q_points, _coord_neighbor, _current_neighbor_subdomain_id);
 
     _current_neighbor_volume = 0.;
     for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
@@ -1520,11 +1526,11 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   }
 }
 
-template <ComputeStage compute_stage>
+template <typename Points, typename Coords>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
-                                      const ADPoint & q_points,
-                                      MooseArray<ADReal> & coord,
+                                      const Points & q_points,
+                                      Coords & coord,
                                       SubdomainID sub_id)
 {
   mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
@@ -1560,21 +1566,16 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
   }
 }
 
-template void Assembly::setCoordinateTransformation<ComputeStage::RESIDUAL>(
-    const QBase *, const MooseArray<Point> &, MooseArray<Real> &, SubdomainID);
-template void Assembly::setCoordinateTransformation<ComputeStage::JACOBIAN>(
-    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &, SubdomainID);
-
 void
 Assembly::computeCurrentElemVolume()
 {
   if (_current_elem_volume_computed)
     return;
 
-  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+  setCoordinateTransformation(
       _current_qrule, _current_q_points, _coord, _current_elem->subdomain_id());
-  if (_computing_jacobian && _calculate_xyz)
-    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+  if (_calculate_ad_coord)
+    setCoordinateTransformation(
         _current_qrule, _ad_q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_elem_volume = 0.;
@@ -1590,10 +1591,10 @@ Assembly::computeCurrentFaceVolume()
   if (_current_side_volume_computed)
     return;
 
-  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+  setCoordinateTransformation(
       _current_qrule_face, _current_q_points_face, _coord, _current_elem->subdomain_id());
-  if (_computing_jacobian && _calculate_face_xyz)
-    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+  if (_calculate_ad_coord)
+    setCoordinateTransformation(
         _current_qrule_face, _ad_q_points_face, _ad_coord, _current_elem->subdomain_id());
 
   _current_side_volume = 0.;
@@ -1866,7 +1867,7 @@ Assembly::computeADFace(const Elem * elem, unsigned int side)
 {
   auto dim = elem->dim();
 
-  if (_computing_jacobian && _subproblem.haveADObjects())
+  if (_subproblem.haveADObjects())
   {
     const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
 
@@ -2056,7 +2057,7 @@ Assembly::reinitMortarElem(const Elem * elem)
 
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
-  setCoordinateTransformation<RESIDUAL>(
+  setCoordinateTransformation(
       _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
 }
 
@@ -4153,44 +4154,3 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
-
-template <>
-const typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type &
-Assembly::adGradPhi<Real, ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const
-{
-  return _ad_grad_phi_data.at(v.feType());
-}
-
-template <>
-const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
-Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
-    const MooseVariableFE<RealVectorValue> & v) const
-{
-  return _ad_vector_grad_phi_data.at(v.feType());
-}
-
-template <>
-const MooseArray<typename Moose::RealType<RESIDUAL>::type> &
-Assembly::adJxW<RESIDUAL>() const
-{
-  return _current_JxW;
-}
-
-template <ComputeStage compute_stage>
-const MooseArray<ADReal> &
-Assembly::adCurvatures() const
-{
-  _calculate_curvatures = true;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    (*_holder_fe_face_helper.at(dim))->get_curvatures();
-  return _curvatures;
-}
-
-template const MooseArray<typename Moose::RealType<RESIDUAL>::type> &
-Assembly::adCurvatures<RESIDUAL>() const;
-
-template void Assembly::computeGradPhiAD<Real>(
-    const Elem * elem,
-    unsigned int n_qp,
-    typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type & grad_phi,
-    FEGenericBase<Real> * fe);

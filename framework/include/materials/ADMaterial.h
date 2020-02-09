@@ -15,40 +15,9 @@
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
 
-#define usingMaterialMembers                                                                       \
-  usingMooseObjectMembers;                                                                         \
-  usingCoupleableMembers;                                                                          \
-  usingScalarCoupleableMembers;                                                                    \
-  usingTransientInterfaceMembers;                                                                  \
-  usingBlockRestrictableMembers;                                                                   \
-  usingFunctionInterfaceMembers;                                                                   \
-  using ConsoleStreamInterface::_console;                                                          \
-  using ADMaterial<compute_stage>::_tid;                                                           \
-  using ADMaterial<compute_stage>::_qp;                                                            \
-  using ADMaterial<compute_stage>::_name;                                                          \
-  using ADMaterial<compute_stage>::_qrule;                                                         \
-  using ADMaterial<compute_stage>::_JxW;                                                           \
-  using ADMaterial<compute_stage>::_coord;                                                         \
-  using ADMaterial<compute_stage>::_q_point;                                                       \
-  using ADMaterial<compute_stage>::_current_elem;                                                  \
-  using ADMaterial<compute_stage>::_fe_problem;                                                    \
-  using ADMaterial<compute_stage>::_assembly;                                                      \
-  using ADMaterial<compute_stage>::_mesh;                                                          \
-  using ADMaterial<compute_stage>::isBoundaryMaterial;                                             \
-  using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
-  using ADMaterial<compute_stage>::_displacements;                                                 \
-  using ADMaterial<compute_stage>::getPostprocessorValueOld
-
-// forward declarations
-template <ComputeStage>
-class ADMaterial;
-
-declareADValidParams(ADMaterial);
-
 /**
  * ADMaterials compute ADMaterialProperties.
  */
-template <ComputeStage compute_stage>
 class ADMaterial : public Material
 {
 public:
@@ -60,15 +29,14 @@ public:
    * declare the ad property named "prop_name"
    */
   template <typename T>
-  ADMaterialPropertyObject<T> & declareADPropertyTempl(const std::string & prop_name);
+  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
 };
 
-template <ComputeStage compute_stage>
 template <typename T>
-ADMaterialPropertyObject<T> &
-ADMaterial<compute_stage>::declareADPropertyTempl(const std::string & prop_name)
+ADMaterialProperty<T> &
+ADMaterial::declareADProperty(const std::string & prop_name)
 {
   _fe_problem.usingADMatProps(true);
-  registerPropName(prop_name, false, Material::CURRENT, compute_stage == JACOBIAN);
-  return _material_data->declareADPropertyTempl<T>(prop_name);
+  registerPropName(prop_name, false, Material::CURRENT, /*declared_ad=*/true);
+  return _material_data->declareADProperty<T>(prop_name);
 }

@@ -83,19 +83,6 @@ private:
   bool _setup_complete = false;
 };
 
-#define ADMultiDimensionalInterpolation                                                            \
-  typename MultiDimensionalInterpolationType<compute_stage>::type
-
 typedef MultiDimensionalInterpolationTempl<Real> MultiDimensionalInterpolation;
 typedef MultiDimensionalInterpolationTempl<DualReal> DualMultiDimensionalInterpolation;
-
-template <ComputeStage compute_stage>
-struct MultiDimensionalInterpolationType
-{
-  typedef MultiDimensionalInterpolation type;
-};
-template <>
-struct MultiDimensionalInterpolationType<JACOBIAN>
-{
-  typedef DualMultiDimensionalInterpolation type;
-};
+typedef DualMultiDimensionalInterpolation ADMultiDimensionalInterpolation;

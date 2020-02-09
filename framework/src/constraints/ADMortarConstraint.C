@@ -14,44 +14,26 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 
-defineADLegacyParams(ADMortarConstraint);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADMortarConstraint<compute_stage>::validParams()
+ADMortarConstraint::validParams()
 {
   InputParameters params = MortarConstraintBase::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMortarConstraint<compute_stage>::ADMortarConstraint(const InputParameters & parameters)
+ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
   : MortarConstraintBase(parameters),
     _lambda_dummy(),
-    _lambda(_var ? _var->adSlnLower<compute_stage>() : _lambda_dummy),
-    _u_slave(_slave_var.adSln<compute_stage>()),
-    _u_master(_master_var.adSlnNeighbor<compute_stage>()),
-    _grad_u_slave(_slave_var.adGradSln<compute_stage>()),
-    _grad_u_master(_master_var.adGradSlnNeighbor<compute_stage>())
+    _lambda(_var ? _var->adSlnLower() : _lambda_dummy),
+    _u_slave(_slave_var.adSln()),
+    _u_master(_master_var.adSlnNeighbor()),
+    _grad_u_slave(_slave_var.adGradSln()),
+    _grad_u_master(_master_var.adGradSlnNeighbor())
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADMortarConstraint<compute_stage>::computeResidual(bool has_master)
-{
-  MortarConstraintBase::computeResidual(has_master);
-}
-
-template <>
-void
-ADMortarConstraint<JACOBIAN>::computeResidual(bool /*has_master*/)
-{
-}
-
-template <ComputeStage compute_stage>
-void
-ADMortarConstraint<compute_stage>::computeResidual(Moose::MortarType mortar_type)
+ADMortarConstraint::computeResidual(Moose::MortarType mortar_type)
 {
   unsigned int test_space_size = 0;
   switch (mortar_type)
@@ -75,32 +57,13 @@ ADMortarConstraint<compute_stage>::computeResidual(Moose::MortarType mortar_type
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     for (_i = 0; _i < test_space_size; _i++)
-      _local_re(_i) += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+      _local_re(_i) += raw_value(_JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type));
 
   accumulateTaggedLocalResidual();
 }
 
-template <>
-void ADMortarConstraint<JACOBIAN>::computeResidual(Moose::MortarType /*mortar_type*/)
-{
-}
-
-template <ComputeStage compute_stage>
 void
-ADMortarConstraint<compute_stage>::computeJacobian(bool has_master)
-{
-  MortarConstraintBase::computeJacobian(has_master);
-}
-
-template <>
-void
-ADMortarConstraint<RESIDUAL>::computeJacobian(bool /*has_master*/)
-{
-}
-
-template <ComputeStage compute_stage>
-void
-ADMortarConstraint<compute_stage>::computeJacobian(Moose::MortarType mortar_type)
+ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
   size_t test_space_size = 0;
@@ -178,10 +141,3 @@ ADMortarConstraint<compute_stage>::computeJacobian(Moose::MortarType mortar_type
     }
   }
 }
-
-template <>
-void ADMortarConstraint<RESIDUAL>::computeJacobian(Moose::MortarType /*mortar_type*/)
-{
-}
-
-adBaseClass(ADMortarConstraint);

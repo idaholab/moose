@@ -260,32 +260,6 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
   return *discrete;
 }
 
-template <ComputeStage compute_stage>
-MaterialBase &
-MaterialPropertyInterface::getMaterial(const std::string & name)
-{
-  return getMaterialByName<compute_stage>(_mi_params.get<MaterialName>(name));
-}
-
-template <>
-MaterialBase &
-MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
-{
-  const std::string new_name = name + "_residual";
-  return getMaterialByName(new_name, no_warn);
-}
-
-template <>
-MaterialBase &
-MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
-{
-  const std::string new_name = name + "_jacobian";
-  return getMaterialByName(new_name, no_warn);
-}
-
-template MaterialBase & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
-template MaterialBase & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
-
 void
 MaterialPropertyInterface::checkExecutionStage()
 {

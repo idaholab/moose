@@ -10,20 +10,11 @@
 // MOOSE includes
 #include "ADMaterial.h"
 
-defineADLegacyParams(ADMaterial);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADMaterial<compute_stage>::validParams()
+ADMaterial::validParams()
 {
   InputParameters params = Material::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMaterial<compute_stage>::ADMaterial(const InputParameters & parameters) : Material(parameters)
-{
-}
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADMaterial);
+ADMaterial::ADMaterial(const InputParameters & parameters) : Material(parameters) {}

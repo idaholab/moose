@@ -12,13 +12,10 @@
 
 registerADMooseObject("MooseApp", ADFunctionPenaltyDirichletBC);
 
-defineADLegacyParams(ADFunctionPenaltyDirichletBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADFunctionPenaltyDirichletBC<compute_stage>::validParams()
+ADFunctionPenaltyDirichletBC::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription(
       "Enforces a (possibly) time and space-dependent MOOSE Function Dirichlet boundary condition "
       "in a weak sense by penalizing differences between the current "
@@ -29,18 +26,13 @@ ADFunctionPenaltyDirichletBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADFunctionPenaltyDirichletBC<compute_stage>::ADFunctionPenaltyDirichletBC(
-    const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters),
-    _func(getFunction("function")),
-    _p(getParam<Real>("penalty"))
+ADFunctionPenaltyDirichletBC::ADFunctionPenaltyDirichletBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters), _func(getFunction("function")), _p(getParam<Real>("penalty"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADFunctionPenaltyDirichletBC<compute_stage>::computeQpResidual()
+ADFunctionPenaltyDirichletBC::computeQpResidual()
 {
   return _p * _test[_i][_qp] * (-_func.value(_t, _q_point[_qp]) + _u[_qp]);
 }

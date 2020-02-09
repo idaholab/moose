@@ -11,13 +11,6 @@
 
 #include "MortarConstraintBase.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADMortarConstraint;
-
-declareADValidParams(ADMortarConstraint);
-
-template <ComputeStage compute_stage>
 class ADMortarConstraint : public MortarConstraintBase
 {
 public:
@@ -25,21 +18,19 @@ public:
 
   ADMortarConstraint(const InputParameters & parameters);
 
-  void computeResidual(bool has_master) final;
-
-  void computeJacobian(bool has_master) final;
-
 protected:
   /**
    * compute the residual at the quadrature points
    */
   virtual ADReal computeQpResidual(Moose::MortarType mortar_type) = 0;
 
+  using MortarConstraintBase::computeResidual;
   /**
    * compute the residual for the specified element type
    */
   void computeResidual(Moose::MortarType mortar_type) override;
 
+  using MortarConstraintBase::computeJacobian;
   /**
    * compute the residual for the specified element type
    */
@@ -64,14 +55,4 @@ protected:
 
   /// The primal solution gradient on the master side
   const ADVariableGradient & _grad_u_master;
-
-  usingCoupleableMembers;
 };
-
-#define usingMortarConstraintMembers                                                               \
-  usingMortarConstraintBaseMembers;                                                                \
-  using ADMortarConstraint<compute_stage>::_lambda;                                                \
-  using ADMortarConstraint<compute_stage>::_u_slave;                                               \
-  using ADMortarConstraint<compute_stage>::_u_master;                                              \
-  using ADMortarConstraint<compute_stage>::_grad_u_slave;                                          \
-  using ADMortarConstraint<compute_stage>::_grad_u_master

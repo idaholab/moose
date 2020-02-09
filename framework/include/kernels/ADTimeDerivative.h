@@ -11,14 +11,7 @@
 
 #include "ADTimeKernelValue.h"
 
-// Forward Declaration
-template <ComputeStage>
-class ADTimeDerivative;
-
-declareADValidParams(ADTimeDerivative);
-
-template <ComputeStage compute_stage>
-class ADTimeDerivative : public ADTimeKernelValue<compute_stage>
+class ADTimeDerivative : public ADTimeKernelValue
 {
 public:
   static InputParameters validParams();
@@ -27,9 +20,4 @@ public:
 
 protected:
   virtual ADReal precomputeQpResidual() override;
-
-  usingTimeKernelValueMembers;
 };
-
-#define usingTimeDerivativeMembers usingTemplTimeKernelValueMembers(Real)
-#define usingVectorTimeDerivativeMembers usingTemplTimeKernelValueMembers(RealVectorValue)

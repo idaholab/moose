@@ -33,7 +33,6 @@ class GeometricSearchData;
 class IntegratedBCBase;
 class NodalBCBase;
 class DirichletBCBase;
-template <ComputeStage>
 class ADDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
@@ -799,7 +798,7 @@ protected:
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADDirichletBCBase<RESIDUAL>> _ad_preset_nodal_bcs;
+  MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
@@ -930,25 +929,13 @@ protected:
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
 private:
-  /// Functors for computing residuals from undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _undisplaced_mortar_residual_functors;
+  /// Functors for computing undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+      _undisplaced_mortar_functors;
 
-  /// Functors for computing jacobians from undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _undisplaced_mortar_jacobian_functors;
-
-  /// Functors for computing residuals from displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _displaced_mortar_residual_functors;
-
-  /// Functors for computing jacobians from displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _displaced_mortar_jacobian_functors;
+  /// Functors for computing displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+      _displaced_mortar_functors;
 
 #ifndef MOOSE_SPARSE_AD
   /// The required size of the derivative storage array

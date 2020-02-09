@@ -15,8 +15,8 @@
  * All AD time kernels should inherit from this class
  *
  */
-template <typename T, ComputeStage compute_stage>
-class ADTimeKernelTempl : public ADKernelTempl<T, compute_stage>
+template <typename T>
+class ADTimeKernelTempl : public ADKernelTempl<T>
 {
 public:
   static InputParameters validParams();
@@ -25,23 +25,10 @@ public:
 
 protected:
   /// Holds the time derivatives at the quadrature points
-  const ADTemplateVariableValue & _u_dot;
+  const ADTemplateVariableValue<T> & _u_dot;
 
-  usingTemplKernelMembers(T);
+  using ADKernelTempl<T>::_var;
 };
 
-template <ComputeStage compute_stage>
-using ADTimeKernel = ADTimeKernelTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorTimeKernel = ADTimeKernelTempl<RealVectorValue, compute_stage>;
-
-declareADValidParams(ADTimeKernel);
-declareADValidParams(ADVectorTimeKernel);
-
-#define usingTemplTimeKernelMembers(type)                                                          \
-  usingTemplKernelMembers(type);                                                                   \
-  using ADTimeKernelTempl<type, compute_stage>::_u_dot
-
-#define usingTimeKernelMembers usingTemplTimeKernelMembers(Real)
-#define usingVectorTimeKernelMembers usingTemplTimeKernelMembers(RealVectorValue)
-
+using ADTimeKernel = ADTimeKernelTempl<Real>;
+using ADVectorTimeKernel = ADTimeKernelTempl<RealVectorValue>;

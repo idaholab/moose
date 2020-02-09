@@ -239,16 +239,14 @@ public:
   const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
   const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
 
-  template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<OutputType, compute_stage>::type & adGradPhi()
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhi()
   {
-    return _element_data->template adGradPhi<compute_stage>();
+    return _element_data->adGradPhi();
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<OutputType, compute_stage>::type & adGradPhiFace()
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhiFace()
   {
-    return _element_data->template adGradPhiFace<compute_stage>();
+    return _element_data->adGradPhiFace();
   }
 
   // damping
@@ -303,47 +301,33 @@ public:
   const FieldVariableCurl & curlSlnOlder() const { return _element_data->curlSln(Moose::Older); }
 
   /// AD
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSln() const
+  const ADTemplateVariableValue<OutputType> & adSln() const { return _element_data->adSln(); }
+  const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
-    return _element_data->template adSln<compute_stage>();
+    return _element_data->adGradSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
-    return _element_data->template adGradSln<compute_stage>();
+    return _element_data->adSecondSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln() const
-  {
-    return _element_data->template adSecondSln<compute_stage>();
-  }
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDot() const
-  {
-    return _element_data->template adUDot<compute_stage>();
-  }
+  const ADTemplateVariableValue<OutputType> & adUDot() const { return _element_data->adUDot(); }
 
   /// neighbor AD
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const
   {
-    return _neighbor_data->template adSln<compute_stage>();
+    return _neighbor_data->adSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor() const
+  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const
   {
-    return _neighbor_data->template adGradSln<compute_stage>();
+    return _neighbor_data->adGradSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSlnNeighbor() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const
   {
-    return _neighbor_data->template adSecondSln<compute_stage>();
+    return _neighbor_data->adSecondSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const
   {
-    return _neighbor_data->template adUDot<compute_stage>();
+    return _neighbor_data->adUDot();
   }
 
   /// element dots
@@ -429,11 +413,7 @@ public:
   const VariableValue & duDotDotDuNeighbor() const { return _neighbor_data->duDotDotDu(); }
 
   /// lower-d element solution
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSlnLower() const
-  {
-    return _lower_data->template adSln<compute_stage>();
-  }
+  const ADTemplateVariableValue<OutputType> & adSlnLower() const { return _lower_data->adSln(); }
   const FieldVariableValue & slnLower() const { return _lower_data->sln(Moose::Current); }
 
   /// Actually compute variable values from the solution vectors
@@ -534,8 +514,7 @@ public:
   /**
    * Return the AD dof values
    */
-  template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adDofValues();
+  const MooseArray<ADReal> & adDofValues();
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -628,8 +607,7 @@ public:
   const DoFValue & nodalVectorTagValue(TagID tag);
   const DoFValue & nodalMatrixTagValue(TagID tag);
 
-  template <ComputeStage compute_stage>
-  const typename Moose::ValueType<OutputType, compute_stage>::type & adNodalValue();
+  const typename Moose::ADType<OutputType>::type & adNodalValue();
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
@@ -646,17 +624,15 @@ protected:
 };
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-inline const MooseArray<typename Moose::RealType<compute_stage>::type> &
+inline const MooseArray<ADReal> &
 MooseVariableFE<OutputType>::adDofValues()
 {
-  return _element_data->template adDofValues<compute_stage>();
+  return _element_data->adDofValues();
 }
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-inline const typename Moose::ValueType<OutputType, compute_stage>::type &
+inline const typename Moose::ADType<OutputType>::type &
 MooseVariableFE<OutputType>::adNodalValue()
 {
-  return _element_data->template adNodalValue<compute_stage>();
+  return _element_data->adNodalValue();
 }

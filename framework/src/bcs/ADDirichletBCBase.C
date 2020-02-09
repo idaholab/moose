@@ -9,13 +9,10 @@
 
 #include "ADDirichletBCBase.h"
 
-defineADLegacyParams(ADDirichletBCBase);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADDirichletBCBase<compute_stage>::validParams()
+ADDirichletBCBase::validParams()
 {
-  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  InputParameters params = ADNodalBC::validParams();
   params.addParam<bool>("preset",
                         true,
                         "Whether or not to preset the BC (apply the value before the solve "
@@ -24,9 +21,8 @@ ADDirichletBCBase<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDirichletBCBase<compute_stage>::ADDirichletBCBase(const InputParameters & parameters)
-  : ADNodalBC<compute_stage>(parameters),
+ADDirichletBCBase::ADDirichletBCBase(const InputParameters & parameters)
+  : ADNodalBC(parameters),
     // If the user sets preset, abide by it. Otherwise, pick the default depending on the
     // application's preference to using the legacy dirichlet BC (legacy: preset = false,
     // non-legacy: preset = true)
@@ -36,9 +32,8 @@ ADDirichletBCBase<compute_stage>::ADDirichletBCBase(const InputParameters & para
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADDirichletBCBase<compute_stage>::computeValue(NumericVector<Number> & current_solution)
+ADDirichletBCBase::computeValue(NumericVector<Number> & current_solution)
 {
   mooseAssert(_preset, "BC is not preset");
 
@@ -49,12 +44,8 @@ ADDirichletBCBase<compute_stage>::computeValue(NumericVector<Number> & current_s
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADDirichletBCBase<compute_stage>::computeQpResidual()
+ADDirichletBCBase::computeQpResidual()
 {
   return _u - computeQpValue();
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADDirichletBCBase);

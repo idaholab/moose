@@ -16,26 +16,21 @@
 
 #include "libmesh/quadrature.h"
 
-defineADLegacyParams(ADTimeKernel);
-defineADLegacyParams(ADVectorTimeKernel);
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 InputParameters
-ADTimeKernelTempl<T, compute_stage>::validParams()
+ADTimeKernelTempl<T>::validParams()
 {
-  InputParameters params = ADKernelTempl<T, compute_stage>::validParams();
+  InputParameters params = ADKernelTempl<T>::validParams();
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
 }
 
-template <typename T, ComputeStage compute_stage>
-ADTimeKernelTempl<T, compute_stage>::ADTimeKernelTempl(const InputParameters & parameters)
-  : ADKernelTempl<T, compute_stage>(parameters), _u_dot(_var.template adUDot<compute_stage>())
+template <typename T>
+ADTimeKernelTempl<T>::ADTimeKernelTempl(const InputParameters & parameters)
+  : ADKernelTempl<T>(parameters), _u_dot(_var.adUDot())
 {
 }
 
-template class ADTimeKernelTempl<Real, RESIDUAL>;
-template class ADTimeKernelTempl<Real, JACOBIAN>;
-template class ADTimeKernelTempl<RealVectorValue, RESIDUAL>;
-template class ADTimeKernelTempl<RealVectorValue, JACOBIAN>;
+template class ADTimeKernelTempl<Real>;
+template class ADTimeKernelTempl<RealVectorValue>;

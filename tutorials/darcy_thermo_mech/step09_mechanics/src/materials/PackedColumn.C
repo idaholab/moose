@@ -176,17 +176,24 @@ PackedColumn<compute_stage>::computeQpProperties()
   _porosity[_qp] = porosity_value;
 
   // Fluid properties
-  _viscosity[_qp] = _use_fluid_mu_interp ? _fluid_mu_interpolation.sample(temp) : _fluid_mu;
-  ADReal fluid_k = _use_fluid_k_interp ? _fluid_k_interpolation.sample(temp) : _fluid_k;
-  ADReal fluid_rho = _use_fluid_rho_interp ? _fluid_rho_interpolation.sample(temp) : _fluid_rho;
-  ADReal fluid_cp = _use_fluid_cp_interp ? _fluid_cp_interpolation.sample(temp) : _fluid_cp;
-  ADReal fluid_cte = _use_fluid_cte_interp ? _fluid_cte_interpolation.sample(temp) : _fluid_cte;
+  _viscosity[_qp] =
+      _use_fluid_mu_interp ? _fluid_mu_interpolation.sample(raw_value(temp)) : _fluid_mu;
+  ADReal fluid_k = _use_fluid_k_interp ? _fluid_k_interpolation.sample(raw_value(temp)) : _fluid_k;
+  ADReal fluid_rho =
+      _use_fluid_rho_interp ? _fluid_rho_interpolation.sample(raw_value(temp)) : _fluid_rho;
+  ADReal fluid_cp =
+      _use_fluid_cp_interp ? _fluid_cp_interpolation.sample(raw_value(temp)) : _fluid_cp;
+  ADReal fluid_cte =
+      _use_fluid_cte_interp ? _fluid_cte_interpolation.sample(raw_value(temp)) : _fluid_cte;
 
   // Solid properties
-  ADReal solid_k = _use_solid_k_interp ? _solid_k_interpolation.sample(temp) : _solid_k;
-  ADReal solid_rho = _use_solid_rho_interp ? _solid_rho_interpolation.sample(temp) : _solid_rho;
-  ADReal solid_cp = _use_solid_cp_interp ? _solid_cp_interpolation.sample(temp) : _solid_cp;
-  ADReal solid_cte = _use_solid_cte_interp ? _solid_cte_interpolation.sample(temp) : _solid_cte;
+  ADReal solid_k = _use_solid_k_interp ? _solid_k_interpolation.sample(raw_value(temp)) : _solid_k;
+  ADReal solid_rho =
+      _use_solid_rho_interp ? _solid_rho_interpolation.sample(raw_value(temp)) : _solid_rho;
+  ADReal solid_cp =
+      _use_solid_cp_interp ? _solid_cp_interpolation.sample(raw_value(temp)) : _solid_cp;
+  ADReal solid_cte =
+      _use_solid_cte_interp ? _solid_cte_interpolation.sample(raw_value(temp)) : _solid_cte;
 
   // Compute the heat conduction material properties as a linear combination of
   // the material properties for fluid and steel.

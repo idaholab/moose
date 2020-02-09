@@ -11,20 +11,16 @@
 
 registerADMooseObject("MooseApp", ADMatDiffusion);
 
-defineADLegacyParams(ADMatDiffusion);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADMatDiffusion<compute_stage>::validParams()
+ADMatDiffusion::validParams()
 {
-  auto params = ADMatDiffusionBase<compute_stage, Real>::validParams();
+  auto params = ADMatDiffusionBase<Real>::validParams();
   params.addClassDescription(
       "Diffusion equation kernel that takes an isotropic diffusivity from a material property");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)
-  : ADMatDiffusionBase<compute_stage, Real>(parameters)
+ADMatDiffusion::ADMatDiffusion(const InputParameters & parameters)
+  : ADMatDiffusionBase<Real>(parameters)
 {
 }

@@ -13,67 +13,14 @@
 
 #include "DualRealOps.h"
 
-#define usingTemplKernelMembers(type)                                                              \
-  usingMooseObjectMembers;                                                                         \
-  usingCoupleableMembers;                                                                          \
-  usingBlockRestrictableMembers;                                                                   \
-  usingFunctionInterfaceMembers;                                                                   \
-  usingUserObjectInterfaceMembers;                                                                 \
-  using ADKernelTempl<type, compute_stage>::_test;                                                 \
-  using ADKernelTempl<type, compute_stage>::_qp;                                                   \
-  using ADKernelTempl<type, compute_stage>::_ad_q_point;                                           \
-  using ADKernelTempl<type, compute_stage>::_i;                                                    \
-  using ADKernelTempl<type, compute_stage>::_j;                                                    \
-  using ADKernelTempl<type, compute_stage>::_u;                                                    \
-  using ADKernelTempl<type, compute_stage>::_var;                                                  \
-  using ADKernelTempl<type, compute_stage>::_grad_test;                                            \
-  using ADKernelTempl<type, compute_stage>::_regular_grad_test;                                    \
-  using ADKernelTempl<type, compute_stage>::_grad_u;                                               \
-  using ADKernelTempl<type, compute_stage>::_ad_JxW;                                               \
-  using ADKernelTempl<type, compute_stage>::_JxW;                                                  \
-  using ADKernelTempl<type, compute_stage>::_ad_coord;                                             \
-  using ADKernelTempl<type, compute_stage>::_coord;                                                \
-  using ADKernelTempl<type, compute_stage>::_local_re;                                             \
-  using ADKernelTempl<type, compute_stage>::_local_ke;                                             \
-  using ADKernelTempl<type, compute_stage>::_qrule;                                                \
-  using ADKernelTempl<type, compute_stage>::_has_save_in;                                          \
-  using ADKernelTempl<type, compute_stage>::_save_in;                                              \
-  using ADKernelTempl<type, compute_stage>::_has_diag_save_in;                                     \
-  using ADKernelTempl<type, compute_stage>::_diag_save_in;                                         \
-  using ADKernelTempl<type, compute_stage>::_current_elem_volume;                                  \
-  using ADKernelTempl<type, compute_stage>::_sys;                                                  \
-  using ADKernelTempl<type, compute_stage>::_assembly;                                             \
-  using ADKernelTempl<type, compute_stage>::_current_elem;                                         \
-  using ADKernelTempl<type, compute_stage>::_t;                                                    \
-  using ADKernelTempl<type, compute_stage>::_dt;                                                   \
-  using ADKernelTempl<type, compute_stage>::_phi;                                                  \
-  using ADKernelTempl<type, compute_stage>::_grad_phi;                                             \
-  using ADKernelTempl<type, compute_stage>::_regular_grad_phi;                                     \
-  using ADKernelTempl<type, compute_stage>::_use_displaced_mesh;                                   \
-  using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
-  using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
-  using ADKernelTempl<type, compute_stage>::prepareMatrixTag;                                      \
-  using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalResidual;                         \
-  using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalMatrix;                           \
-  using ADKernelTempl<type, compute_stage>::variable;                                              \
-  using ADKernelTempl<type, compute_stage>::getPostprocessorValue
-
-#define usingKernelMembers usingTemplKernelMembers(Real)
-#define usingVectorKernelMembers usingTemplKernelMembers(RealVectorValue)
-
 // forward declarations
-template <typename, ComputeStage>
+template <typename>
 class ADKernelTempl;
 
-template <ComputeStage compute_stage>
-using ADKernel = ADKernelTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorKernel = ADKernelTempl<RealVectorValue, compute_stage>;
+using ADKernel = ADKernelTempl<Real>;
+using ADVectorKernel = ADKernelTempl<RealVectorValue>;
 
-declareADValidParams(ADKernel);
-declareADValidParams(ADVectorKernel);
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
 {
 public:
@@ -109,37 +56,37 @@ protected:
   MooseVariableFE<T> & _var;
 
   /// the current test function
-  const ADTemplateVariableTestValue & _test;
+  const ADTemplateVariableTestValue<T> & _test;
 
   /// gradient of the test function
-  const typename VariableTestGradientType<T, compute_stage>::type & _grad_test;
+  const ADTemplateVariableTestGradient<T> & _grad_test;
 
   // gradient of the test function without possible displacement derivatives
   const typename OutputTools<T>::VariableTestGradient & _regular_grad_test;
 
   /// Holds the solution at current quadrature points
-  const ADTemplateVariableValue & _u;
+  const ADTemplateVariableValue<T> & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  const ADTemplateVariableGradient & _grad_u;
+  const ADTemplateVariableGradient<T> & _grad_u;
 
   /// The ad version of JxW
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW;
+  const MooseArray<ADReal> & _ad_JxW;
 
   /// The ad version of coord
   const MooseArray<ADReal> & _ad_coord;
 
   /// The ad version of q_point
-  const ADPoint & _ad_q_point;
+  const MooseArray<ADPoint> & _ad_q_point;
 
   /// The current shape functions
-  const ADTemplateVariablePhiValue & _phi;
+  const ADTemplateVariablePhiValue<T> & _phi;
 
   ADReal _r;
-  std::vector<DualReal> _residuals;
+  std::vector<ADReal> _residuals;
 
   /// The current gradient of the shape functions
-  const typename VariablePhiGradientType<T, compute_stage>::type & _grad_phi;
+  const ADTemplateVariablePhiGradient<T> & _grad_phi;
 
   /// The current gradient of the shape functions without possible displacement derivatives
   const typename OutputTools<T>::VariablePhiGradient & _regular_grad_phi;

@@ -49,14 +49,6 @@ template <ComputeStage compute_stage>
 void
 ADCoupledMaterial<compute_stage>::computeQpProperties()
 {
-  _regular_mat_prop[_qp] = 4.0 * _coupled_var[_qp].value();
-  _ad_mat_prop[_qp] = 4.0 * _coupled_var[_qp];
-}
-
-template <>
-void
-ADCoupledMaterial<RESIDUAL>::computeQpProperties()
-{
-  _regular_mat_prop[_qp] = 4.0 * _coupled_var[_qp];
+  _regular_mat_prop[_qp] = 4.0 * MetaPhysicL::raw_value(_coupled_var[_qp]);
   _ad_mat_prop[_qp] = 4.0 * _coupled_var[_qp];
 }

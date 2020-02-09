@@ -148,10 +148,6 @@ public:
    */
   MaterialBase & getMaterial(const std::string & name);
   MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
-  template <ComputeStage>
-  MaterialBase & getMaterial(const std::string & name);
-  template <ComputeStage>
-  MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
   ///@{

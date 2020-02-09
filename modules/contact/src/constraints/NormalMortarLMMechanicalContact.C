@@ -59,44 +59,9 @@ NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
   }
 }
 
-template <>
-Real
-NormalMortarLMMechanicalContact<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_type)
-{
-  switch (mortar_type)
-  {
-    case Moose::MortarType::Lower:
-    {
-      if (_has_master)
-      {
-        auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
-        auto gap = gap_vec * _normals[_qp];
-
-        const auto & a = _lambda[_qp];
-        const auto & b = gap;
-
-        Real fb_function;
-        if (_ncp_type == "fb")
-          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
-          // constant > 0 into the root function, then it is
-          fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
-        else
-          fb_function = std::min(a, b);
-
-        return _test[_i][_qp] * fb_function;
-      }
-      else
-        return _test[_i][_qp] * _lambda[_qp];
-    }
-
-    default:
-      return 0;
-  }
-}
-
-template <>
-DualReal
-NormalMortarLMMechanicalContact<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_type)
+template <ComputeStage compute_stage>
+ADReal
+NormalMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

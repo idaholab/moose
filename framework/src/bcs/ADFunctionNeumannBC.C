@@ -13,13 +13,10 @@
 
 registerADMooseObject("MooseApp", ADFunctionNeumannBC);
 
-defineADLegacyParams(ADFunctionNeumannBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADFunctionNeumannBC<compute_stage>::validParams()
+ADFunctionNeumannBC::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<FunctionName>("function", "The function.");
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "
@@ -27,15 +24,13 @@ ADFunctionNeumannBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADFunctionNeumannBC<compute_stage>::ADFunctionNeumannBC(const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters), _func(getFunction("function"))
+ADFunctionNeumannBC::ADFunctionNeumannBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters), _func(getFunction("function"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADFunctionNeumannBC<compute_stage>::computeQpResidual()
+ADFunctionNeumannBC::computeQpResidual()
 {
   return -_test[_i][_qp] * _func.value(_t, _q_point[_qp]);
 }

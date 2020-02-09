@@ -206,17 +206,12 @@ public:
   /**
    * ad_grad_phi getter
    */
-  template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<OutputShape, compute_stage>::type & adGradPhi() const
-  {
-    return *_ad_grad_phi;
-  }
+  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhi() const { return *_ad_grad_phi; }
 
   /**
    * ad_grad_phi_face getter
    */
-  template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<OutputShape, compute_stage>::type & adGradPhiFace() const
+  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhiFace() const
   {
     return *_ad_grad_phi_face;
   }
@@ -302,22 +297,19 @@ public:
    */
   const FieldVariableCurl & curlSln(Moose::SolutionState state) const;
 
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSln() const
+  const ADTemplateVariableValue<OutputType> & adSln() const
   {
     _need_ad = _need_ad_u = true;
     return _ad_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln() const
+  const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
     _need_ad = _need_ad_second_u = true;
     secondPhi();
@@ -325,10 +317,17 @@ public:
     return _ad_second_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDot() const
+  const ADTemplateVariableValue<OutputType> & adUDot() const
   {
     _need_ad = _need_ad_u_dot = true;
+
+    if (!_time_integrator)
+      // If we don't have a time integrator (this will be the case for variables that are a part of
+      // the AuxiliarySystem) then we have no way to calculate _ad_u_dot and we are just going to
+      // copy the values from _u_dot. Of course in order to be able to do that we need to calculate
+      // _u_dot
+      _need_u_dot = true;
+
     return _ad_u_dot;
   }
 
@@ -363,8 +362,7 @@ public:
   const OutputType & nodalValueDuDotDu() const;
   const OutputType & nodalValueDuDotDotDu() const;
 
-  template <ComputeStage compute_stage>
-  const typename Moose::ValueType<OutputType, compute_stage>::type & adNodalValue() const;
+  const typename Moose::ADType<OutputType>::type & adNodalValue() const;
 
   const DoFValue & nodalVectorTagValue(TagID tag) const;
   const DoFValue & nodalMatrixTagValue(TagID tag) const;
@@ -456,8 +454,7 @@ public:
   /**
    * Return the AD dof values
    */
-  template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adDofValues() const;
+  const MooseArray<ADReal> & adDofValues() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -577,10 +574,10 @@ private:
   MooseArray<OutputType> _nodal_value_older_array;
 
   /// AD nodal value
-  typename Moose::ValueType<OutputType, JACOBIAN>::type _ad_nodal_value;
+  typename Moose::ADType<OutputType>::type _ad_nodal_value;
 
   /// A zero AD variable
-  const DualReal _ad_zero;
+  DualReal _ad_zero;
 
   /// u flags
   mutable bool _need_u_old;
@@ -684,12 +681,12 @@ private:
   FieldVariableCurl _curl_u_older;
 
   /// AD u
-  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u;
-  typename VariableGradientType<OutputShape, JACOBIAN>::type _ad_grad_u;
-  typename VariableSecondType<OutputShape, JACOBIAN>::type _ad_second_u;
-  MooseArray<DualReal> _ad_dof_values;
-  MooseArray<DualReal> _ad_dofs_dot;
-  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u_dot;
+  ADTemplateVariableValue<OutputType> _ad_u;
+  ADTemplateVariableGradient<OutputType> _ad_grad_u;
+  ADTemplateVariableSecond<OutputType> _ad_second_u;
+  MooseArray<ADReal> _ad_dof_values;
+  MooseArray<ADReal> _ad_dofs_dot;
+  ADTemplateVariableValue<OutputType> _ad_u_dot;
 
   // time derivatives
 
@@ -735,47 +732,47 @@ private:
   mutable const FieldVariablePhiSecond * _second_phi_face;
   mutable const FieldVariablePhiCurl * _curl_phi_face;
 
-  const typename VariableTestGradientType<OutputShape, JACOBIAN>::type * _ad_grad_phi;
-  const typename VariableTestGradientType<OutputShape, JACOBIAN>::type * _ad_grad_phi_face;
+  const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi;
+  const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi_face;
 
   const QBase * _current_qrule;
   const FieldVariablePhiValue * _current_phi;
   const FieldVariablePhiGradient * _current_grad_phi;
   const FieldVariablePhiSecond * _current_second_phi;
   const FieldVariablePhiCurl * _current_curl_phi;
-  const typename VariableTestGradientType<OutputShape, JACOBIAN>::type * _current_ad_grad_phi;
+  const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
 
-  std::function<const typename OutputTools<OutputType>::VariablePhiValue &(const Assembly &,
-                                                                           FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiValue &(const Assembly &,
+                                                                            FEType)>
       _phi_assembly_method;
-  std::function<const typename OutputTools<OutputType>::VariablePhiValue &(const Assembly &,
-                                                                           FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiValue &(const Assembly &,
+                                                                            FEType)>
       _phi_face_assembly_method;
 
-  std::function<const typename OutputTools<OutputType>::VariablePhiGradient &(const Assembly &,
-                                                                              FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiGradient &(const Assembly &,
+                                                                               FEType)>
       _grad_phi_assembly_method;
-  std::function<const typename OutputTools<OutputType>::VariablePhiGradient &(const Assembly &,
-                                                                              FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiGradient &(const Assembly &,
+                                                                               FEType)>
       _grad_phi_face_assembly_method;
 
-  std::function<const typename OutputTools<OutputType>::VariablePhiSecond &(const Assembly &,
-                                                                            FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiSecond &(const Assembly &,
+                                                                             FEType)>
       _second_phi_assembly_method;
-  std::function<const typename OutputTools<OutputType>::VariablePhiSecond &(const Assembly &,
-                                                                            FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiSecond &(const Assembly &,
+                                                                             FEType)>
       _second_phi_face_assembly_method;
 
-  std::function<const typename OutputTools<OutputType>::VariablePhiCurl &(const Assembly &, FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiCurl &(const Assembly &,
+                                                                           FEType)>
       _curl_phi_assembly_method;
-  std::function<const typename OutputTools<OutputType>::VariablePhiCurl &(const Assembly &, FEType)>
+  std::function<const typename OutputTools<OutputShape>::VariablePhiCurl &(const Assembly &,
+                                                                           FEType)>
       _curl_phi_face_assembly_method;
 
-  std::function<const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &(
-      const Assembly &, FEType)>
+  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>
       _ad_grad_phi_assembly_method;
-  std::function<const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &(
-      const Assembly &, FEType)>
+  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>
       _ad_grad_phi_face_assembly_method;
 
   /// Pointer to time integrator
@@ -801,8 +798,7 @@ private:
 /////////////////////// General template definitions //////////////////////////////////////
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-const MooseArray<typename Moose::RealType<compute_stage>::type> &
+const MooseArray<ADReal> &
 MooseVariableData<OutputType>::adDofValues() const
 {
   _need_ad = true;
@@ -810,8 +806,7 @@ MooseVariableData<OutputType>::adDofValues() const
 }
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-const typename Moose::ValueType<OutputType, compute_stage>::type &
+const typename Moose::ADType<OutputType>::type &
 MooseVariableData<OutputType>::adNodalValue() const
 {
   _need_ad = true;
@@ -823,84 +818,4 @@ MooseVariableData<OutputType>::adNodalValue() const
 template <>
 void MooseVariableData<RealEigenVector>::fetchDoFValues();
 
-template <>
-template <>
-const VariableValue & MooseVariableData<Real>::adSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableGradient & MooseVariableData<Real>::adGradSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableSecond & MooseVariableData<Real>::adSecondSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableValue & MooseVariableData<Real>::adUDot<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableValue & MooseVariableData<RealVectorValue>::adSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableGradient & MooseVariableData<RealVectorValue>::adGradSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableSecond & MooseVariableData<RealVectorValue>::adSecondSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableValue & MooseVariableData<RealVectorValue>::adUDot<RESIDUAL>() const;
-
-template <>
-template <>
-const MooseArray<Real> & MooseVariableData<Real>::adDofValues<RESIDUAL>() const;
-
-template <>
-template <>
-const MooseArray<Real> & MooseVariableData<RealVectorValue>::adDofValues<RESIDUAL>() const;
-
-template <>
-template <>
-const Real & MooseVariableData<Real>::adNodalValue<RESIDUAL>() const;
-
-template <>
-template <>
-const RealVectorValue & MooseVariableData<RealVectorValue>::adNodalValue<RESIDUAL>() const;
-
 ////////////////////// Definitions of fully specialized templates (must be inlined) //////////
-
-template <>
-template <>
-inline const typename VariableTestGradientType<Real, RESIDUAL>::type &
-MooseVariableData<Real>::adGradPhi<RESIDUAL>() const
-{
-  return *_grad_phi;
-}
-
-template <>
-template <>
-inline const typename VariableTestGradientType<RealVectorValue, RESIDUAL>::type &
-MooseVariableData<RealVectorValue>::adGradPhi<RESIDUAL>() const
-{
-  return *_grad_phi;
-}
-
-template <>
-template <>
-inline const typename VariableTestGradientType<Real, RESIDUAL>::type &
-MooseVariableData<Real>::adGradPhiFace<RESIDUAL>() const
-{
-  return *_grad_phi_face;
-}
-
-template <>
-template <>
-inline const typename VariableTestGradientType<RealVectorValue, RESIDUAL>::type &
-MooseVariableData<RealVectorValue>::adGradPhiFace<RESIDUAL>() const
-{
-  return *_grad_phi_face;
-}

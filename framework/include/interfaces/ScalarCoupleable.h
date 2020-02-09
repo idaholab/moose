@@ -19,17 +19,11 @@
 #include <string>
 #include <vector>
 
-#define usingScalarCoupleableMembers                                                               \
-  using ScalarCoupleable::coupledScalarComponents;                                                 \
-  using ScalarCoupleable::coupledScalarValueOld
-
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
 class MooseObject;
 class MooseVariableScalar;
-
-#define adCoupledScalarValue this->template adCoupledScalarValueTempl<compute_stage>
 
 /**
  * Interface for objects that needs scalar coupling capabilities
@@ -108,9 +102,7 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a ADVariableValue for the coupled variable
    */
-  template <ComputeStage compute_stage>
-  const ADVariableValue & adCoupledScalarValueTempl(const std::string & var_name,
-                                                    unsigned int comp = 0);
+  const ADVariableValue & adCoupledScalarValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns value of a scalar coupled variable
@@ -212,7 +204,7 @@ protected:
   std::unordered_map<std::string, std::unique_ptr<VariableValue>> _default_value;
 
   /// Will hold the default AD value for optional coupled scalar variables.
-  std::unordered_map<std::string, std::unique_ptr<DualVariableValue>> _dual_default_value;
+  std::unordered_map<std::string, std::unique_ptr<ADVariableValue>> _dual_default_value;
 
   /// Vector of coupled variables
   std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
@@ -249,7 +241,6 @@ protected:
    * @param var_name the name of the variable for which to retrieve a default value
    * @return ADVariableValue * a pointer to the associated ADVariableValue.
    */
-  template <ComputeStage compute_stage>
   ADVariableValue * getADDefaultValue(const std::string & var_name);
 
   /**
@@ -283,11 +274,3 @@ private:
 
   std::set<TagID> _sc_coupleable_matrix_tags;
 };
-
-template <>
-VariableValue *
-ScalarCoupleable::getADDefaultValue<ComputeStage::RESIDUAL>(const std::string & var_name);
-
-template <>
-DualVariableValue *
-ScalarCoupleable::getADDefaultValue<ComputeStage::JACOBIAN>(const std::string & var_name);

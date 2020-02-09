@@ -13,13 +13,10 @@
 
 registerADMooseObject("MooseApp", EqualGradientConstraint);
 
-defineADLegacyParams(EqualGradientConstraint);
-
-template <ComputeStage compute_stage>
 InputParameters
-EqualGradientConstraint<compute_stage>::validParams()
+EqualGradientConstraint::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
   params.addClassDescription(
       "EqualGradientConstraint enforces continuity of a gradient component between slave and "
       "master sides of a mortar interface using lagrange multipliers");
@@ -27,15 +24,13 @@ EqualGradientConstraint<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-EqualGradientConstraint<compute_stage>::EqualGradientConstraint(const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<unsigned int>("component"))
+EqualGradientConstraint::EqualGradientConstraint(const InputParameters & parameters)
+  : ADMortarConstraint(parameters), _component(getParam<unsigned int>("component"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-EqualGradientConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+EqualGradientConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

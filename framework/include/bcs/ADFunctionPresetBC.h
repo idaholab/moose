@@ -12,11 +12,7 @@
 #include "ADDirichletBCBase.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADFunctionPresetBC;
 class Function;
-
-declareADValidParams(ADFunctionPresetBC);
 
 /**
  * Defines a boundary condition that forces the value to be a user specified
@@ -24,8 +20,7 @@ declareADValidParams(ADFunctionPresetBC);
  *
  * Deprecated: use FunctionDirichletBC with preset = true instead.
  */
-template <ComputeStage compute_stage>
-class ADFunctionPresetBC : public ADDirichletBCBase<compute_stage>
+class ADFunctionPresetBC : public ADDirichletBCBase
 {
 public:
   static InputParameters validParams();
@@ -40,6 +35,4 @@ protected:
 
   /// Function being used for evaluation of this BC
   const Function & _func;
-
-  usingDirichletBCBaseMembers;
 };

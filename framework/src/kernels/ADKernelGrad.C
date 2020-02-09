@@ -15,25 +15,22 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADLegacyParams(ADKernelGrad);
-defineADLegacyParams(ADVectorKernelGrad);
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 InputParameters
-ADKernelGradTempl<T, compute_stage>::validParams()
+ADKernelGradTempl<T>::validParams()
 {
-  return ADKernelTempl<T, compute_stage>::validParams();
+  return ADKernelTempl<T>::validParams();
 }
 
-template <typename T, ComputeStage compute_stage>
-ADKernelGradTempl<T, compute_stage>::ADKernelGradTempl(const InputParameters & parameters)
-  : ADKernelTempl<T, compute_stage>(parameters)
+template <typename T>
+ADKernelGradTempl<T>::ADKernelGradTempl(const InputParameters & parameters)
+  : ADKernelTempl<T>(parameters)
 {
 }
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 void
-ADKernelGradTempl<T, compute_stage>::computeResidual()
+ADKernelGradTempl<T>::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
@@ -45,14 +42,14 @@ ADKernelGradTempl<T, compute_stage>::computeResidual()
     {
       const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
       for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-        _local_re(_i) += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
+        _local_re(_i) += raw_value(MathUtils::dotProduct(value, _grad_test[_i][_qp]));
     }
   else
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
       for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-        _local_re(_i) += MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]);
+        _local_re(_i) += raw_value(MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]));
     }
 
   accumulateTaggedLocalResidual();
@@ -65,21 +62,9 @@ ADKernelGradTempl<T, compute_stage>::computeResidual()
   }
 }
 
-template <>
+template <typename T>
 void
-ADKernelGradTempl<Real, JACOBIAN>::computeResidual()
-{
-}
-
-template <>
-void
-ADKernelGradTempl<RealVectorValue, JACOBIAN>::computeResidual()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
-ADKernelGradTempl<T, compute_stage>::computeJacobian()
+ADKernelGradTempl<T>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
@@ -127,21 +112,9 @@ ADKernelGradTempl<T, compute_stage>::computeJacobian()
   }
 }
 
-template <>
+template <typename T>
 void
-ADKernelGradTempl<Real, RESIDUAL>::computeJacobian()
-{
-}
-
-template <>
-void
-ADKernelGradTempl<RealVectorValue, RESIDUAL>::computeJacobian()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
-ADKernelGradTempl<T, compute_stage>::computeADOffDiagJacobian()
+ADKernelGradTempl<T>::computeADOffDiagJacobian()
 {
   std::vector<DualReal> residuals(_grad_test.size(), 0);
 
@@ -189,26 +162,12 @@ ADKernelGradTempl<T, compute_stage>::computeADOffDiagJacobian()
   }
 }
 
-template <>
-void
-ADKernelGradTempl<Real, RESIDUAL>::computeADOffDiagJacobian()
-{
-}
-
-template <>
-void
-ADKernelGradTempl<RealVectorValue, RESIDUAL>::computeADOffDiagJacobian()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 ADReal
-ADKernelGradTempl<T, compute_stage>::computeQpResidual()
+ADKernelGradTempl<T>::computeQpResidual()
 {
   mooseError("Override precomputeQpResidual() in your ADKernelGrad derived class!");
 }
 
-template class ADKernelGradTempl<Real, RESIDUAL>;
-template class ADKernelGradTempl<Real, JACOBIAN>;
-template class ADKernelGradTempl<RealVectorValue, RESIDUAL>;
-template class ADKernelGradTempl<RealVectorValue, JACOBIAN>;
+template class ADKernelGradTempl<Real>;
+template class ADKernelGradTempl<RealVectorValue>;
