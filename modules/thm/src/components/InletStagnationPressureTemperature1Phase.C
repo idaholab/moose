@@ -172,6 +172,7 @@ InletStagnationPressureTemperature1Phase::setup1PhaseRDG()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("p0") = getParam<Real>("p0");
     params.set<Real>("T0") = getParam<Real>("T0");
+    params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;

@@ -237,6 +237,7 @@ Outlet1Phase::addMooseObjects3EqnRDG()
     const std::string class_name = "BoundaryFlux3EqnGhostPressure";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("p") = getParam<Real>("p");
+    params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
