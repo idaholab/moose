@@ -24,7 +24,9 @@ registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
 registerMooseAction("ContactApp", ContactAction, "add_constraint"); // for mortar constraint
 registerMooseAction("ContactApp", ContactAction, "add_dirac_kernel");
 registerMooseAction("ContactApp", ContactAction, "add_mesh_generator"); // for mortar subdomains
-registerMooseAction("ContactApp", ContactAction, "add_variable"); // for mortar lagrange multiplier
+registerMooseAction("ContactApp",
+                    ContactAction,
+                    "add_mortar_variable"); // for mortar lagrange multiplier
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 
 template <>
@@ -209,7 +211,7 @@ ContactAction::addMortarContact()
     }
   }
 
-  if (_current_task == "add_variable")
+  if (_current_task == "add_mortar_variable")
   {
     // Add the lagrange multiplier on the slave subdomain.
     const auto addLagrangeMultiplier =
