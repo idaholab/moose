@@ -17,9 +17,7 @@ template <>
 InputParameters validParams<InterfaceQpValueUserObject>();
 
 /**
- * This userobject collect values of a variable across an interface for each QP and compute a
- * scalar. The computed scalar value depends on the given parameter _interface_value_type\
- * _interface_value_type (see IntervafeValueTools).
+ * Specialization of InterfaceQpUserObjectBase for scalar variables.
  */
 class InterfaceQpValueUserObject : public InterfaceQpUserObjectBase
 {
@@ -29,8 +27,11 @@ public:
   virtual ~InterfaceQpValueUserObject(){};
 
 protected:
-  virtual Real computeRealValueMaster(const unsigned int qp) override { return _u[qp]; };
-  virtual Real computeRealValueSlave(const unsigned int qp) override { return _u_neighbor[qp]; };
+  virtual Real computeRealValue(const unsigned int qp) override;
+
+  /// the variable and neighbor variable values or rate
+  ///@{
   const VariableValue & _u;
   const VariableValue & _u_neighbor;
+  ///@}
 };

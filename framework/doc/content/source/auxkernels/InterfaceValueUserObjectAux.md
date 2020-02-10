@@ -11,7 +11,7 @@ It requires three inputs:
 * `boundary` = the name of the boundary to which this AuxKernel applies
 * `interface_uo_name` = the name of interface UserObject where data are stored
 
-The optional argument `return_side_average` retrieve element side average values from the specified UserObject. 
+The optional argument `return_side_average` retrieves element side average values from the specified UserObject. 
 
 ## Example Input File Syntax
 

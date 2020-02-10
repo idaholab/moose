@@ -128,7 +128,7 @@
     property_boundary = 'boundary_prop'
     property_interface = 'interface_prop'
     boundary = 'master0_interface'
-    execute_on = 'initial linear nonlinear timestep_end final'
+    execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
   [../]
 []
 

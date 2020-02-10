@@ -18,8 +18,7 @@ template <>
 InputParameters validParams<InterfaceQpMaterialPropertyRealUO>();
 
 /**
- * This userobject works on Real material properties. It returns the interface value (see
- * IntervafeValueTools) or its rate.
+ * Specialization of InterfaceQpMaterialPropertyBaseUserObject for Real material properties.
  */
 class InterfaceQpMaterialPropertyRealUO : public InterfaceQpMaterialPropertyBaseUserObject<Real>
 {
@@ -34,6 +33,10 @@ public:
   virtual ~InterfaceQpMaterialPropertyRealUO(){};
 
 protected:
-  virtual Real computeRealValueMaster(const unsigned int /*qp*/) override;
-  virtual Real computeRealValueSlave(const unsigned int /*qp*/) override;
+  /// return the material property value at the give qp
+  virtual Real computeScalarMaterialProperty(const MaterialProperty<Real> * p,
+                                             const unsigned int qp) override final
+  {
+    return (*p)[qp];
+  }
 };

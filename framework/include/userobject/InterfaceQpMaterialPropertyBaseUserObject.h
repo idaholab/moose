@@ -19,9 +19,8 @@ template <>
 InputParameters validParams<InterfaceQpMaterialPropertyBaseUserObject<>>();
 
 /**
- * This userobject collect values of a variable across an interface for each QP and compute a
- * scalar. The computed scalar value depends on the given parameter _interface_value_type\
- * _interface_value_type (see IntervafeValueTools).
+ * Specialization of InterfaceQpUserObjectBase for material properties. Material property type
+ * specialization is achieved by specializing computeScalarMaterialProperty in derived classes.
  */
 template <typename T>
 class InterfaceQpMaterialPropertyBaseUserObject : public InterfaceQpUserObjectBase
@@ -37,12 +36,47 @@ public:
   virtual ~InterfaceQpMaterialPropertyBaseUserObject(){};
 
 protected:
-  virtual Real computeRealValueMaster(const unsigned int /*qp*/) override = 0;
-  virtual Real computeRealValueSlave(const unsigned int /*qp*/) override = 0;
+  /* method computing the real value*/
+  virtual Real computeRealValue(const unsigned int qp) override final
+  {
+    if (!_compute_rate && !_compute_increment)
+    {
+      return computeInterfaceValueType(computeScalarMaterialProperty(&_prop, qp),
+                                       computeScalarMaterialProperty(&_prop_neighbor, qp));
+    }
+    else
+    {
+
+      Real value_master = 0;
+      Real value_slave = 0;
+      if (_dt != 0)
+      {
+
+        value_master = (computeScalarMaterialProperty(&_prop, qp) -
+                        computeScalarMaterialProperty(_prop_old, qp));
+        value_slave = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
+                       computeScalarMaterialProperty(_prop_neighbor_old, qp));
+        if (_compute_rate)
+        {
+          value_master /= _dt;
+          value_slave /= _dt;
+        }
+      }
+      return computeInterfaceValueType(value_master, value_slave);
+    }
+  };
+
+  /*template for computing a scalar material property value*/
+  virtual Real computeScalarMaterialProperty(const MaterialProperty<T> *,
+                                             const unsigned int qp) = 0;
+
+  /// the material property and neighbor material property current and old value
+  ///@{
   const MaterialProperty<T> & _prop;
   const MaterialProperty<T> & _prop_neighbor;
   const MaterialProperty<T> * _prop_old;
   const MaterialProperty<T> * _prop_neighbor_old;
+  ///@}
 };
 
 template <typename T>
@@ -67,8 +101,9 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::InterfaceQpMaterialPropertyBaseUse
     _prop_neighbor(parameters.isParamSetByUser("property_neighbor")
                        ? getNeighborMaterialProperty<T>("property_neighbor")
                        : getNeighborMaterialProperty<T>("property")),
-    _prop_old(_compute_rate ? &getMaterialPropertyOld<T>("property") : nullptr),
-    _prop_neighbor_old(_compute_rate
+    _prop_old(_compute_rate || _compute_increment ? &getMaterialPropertyOld<T>("property")
+                                                  : nullptr),
+    _prop_neighbor_old(_compute_rate || _compute_increment
                            ? (parameters.isParamSetByUser("property_neighbor")
                                   ? &getNeighborMaterialPropertyOld<T>("property_neighbor")
                                   : &getNeighborMaterialPropertyOld<T>("property"))

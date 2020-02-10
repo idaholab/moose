@@ -18,11 +18,11 @@ InputParameters validParams<InterfaceQpUserObjectBase>();
 
 /**
  * This is a base class for userobjects collecting values of variables or material properites across
- * an interface at each QP. This userobejct class always return a scalar value and compute both the
- * current value or its rate. The computed scalar value depends on the given parameter
- * interface_value_type paramters (see IntervafeValueTools). Also, it provides two output options to
- * all other MOOSE systems, a qp value (getQpValue) or an element side average value
- * (getSideAverageValue).
+ * an interface at each QP. This userobejct class always return a scalar value and can compute the
+ * current value or current rate or the current increment. The computed scalar depends on the
+ * given interface_value_type paramters (see IntervafeValueTools). Also, it provides two
+ * output options to all other MOOSE systems as a qp value (getQpValue) or an element side average
+ * value (getSideAverageValue).
  */
 class InterfaceQpUserObjectBase : public InterfaceValueUserObject
 {
@@ -37,15 +37,17 @@ public:
   virtual void finalize() { return; };
   virtual void threadJoin(const UserObject & /*uo*/) { return; };
 
+  /// function returning the quadrature point value
   Real getQpValue(const dof_id_type elem, const unsigned int side, unsigned int qp) const;
-
+  /// function returning the element side average value
   Real getSideAverageValue(const dof_id_type elem, const unsigned int side) const;
 
 protected:
+  /// boolealn varaibles deciding which type of value to return
   const bool _compute_rate;
+  const bool _compute_increment;
   /// this map is used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_JxW;
-  virtual Real computeRealValueMaster(const unsigned int /*qp*/) = 0;
-  virtual Real computeRealValueSlave(const unsigned int /*qp*/) = 0;
+  virtual Real computeRealValue(const unsigned int /*qp*/) = 0;
 };

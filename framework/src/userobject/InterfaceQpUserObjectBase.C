@@ -18,13 +18,18 @@ InterfaceQpUserObjectBase::validParams()
   InputParameters params = InterfaceValueUserObject::validParams();
   params.addClassDescription("Base class to compute a scalar value or rate across an interface");
   params.addParam<bool>("compute_rate", false, "if true, compute the rate of the value.");
+  params.addParam<bool>("compute_increment", false, "if true, compute the finite increment.");
   return params;
 }
 
 InterfaceQpUserObjectBase::InterfaceQpUserObjectBase(const InputParameters & parameters)
-  : InterfaceValueUserObject(parameters), _compute_rate(getParam<bool>("compute_rate"))
+  : InterfaceValueUserObject(parameters),
+    _compute_rate(getParam<bool>("compute_rate")),
+    _compute_increment(getParam<bool>("compute_increment"))
 
 {
+  if (_compute_rate && _compute_increment)
+    mooseError("InterfaceQpUserObjectBase cannot compute both the rate and the increment");
 }
 
 void
@@ -74,7 +79,7 @@ InterfaceQpUserObjectBase::execute()
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       // compute average value at qp
-      vec[qp] = computeInterfaceValueType(computeRealValueMaster(qp), computeRealValueSlave(qp));
+      vec[qp] = computeRealValue(qp);
       jxw[qp] = _JxW[qp];
     }
   }
