@@ -450,7 +450,15 @@ template <class T>
 void
 MultiIndex<T>::reshape(const size_type & shape)
 {
-  mooseAssert(shape.size() > 0, "Zero dimensional MultiIndex objects are not supported.");
+  if (shape.size() == 0)
+  {
+    _shape = {};
+    _dim = 0;
+    _stride = {};
+    _nentries = 0;
+    return;
+  }
+
   _shape = shape;
   _dim = shape.size();
 
