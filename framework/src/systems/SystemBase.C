@@ -101,7 +101,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _max_var_n_dofs_per_node(0),
     _time_integrator(nullptr),
     _computing_scaling_jacobian(false),
-    _computing_scaling_residual(false)
+    _computing_scaling_residual(false),
+    _automatic_scaling(false)
 {
 }
 

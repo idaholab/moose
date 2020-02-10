@@ -283,6 +283,23 @@ protected:
 public:
   std::vector<dof_id_type> _connected_dof_indices;
 
+  /// The Jacobian corresponding to the derivatives of the neighbor/master residual with respect to
+  /// the elemental/slave degrees of freedom.  We want to manually manipulate Kne because of the
+  /// dependence of the master residuals on dofs from all elements connected to the slave node
+  /// (e.g. those held by _connected_dof_indices)
   DenseMatrix<Number> _Kne;
+
+  /// The Jacobian corresponding to the derivatives of the elemental/slave residual with respect to
+  /// the elemental/slave degrees of freedom.  We want to manually manipulate Kee because of the
+  /// dependence of the slave/master residuals on // dofs from all elements connected to the slave
+  /// node (e.g. those held by _connected_dof_indices) // and because when we're overwriting the
+  /// slave residual we traditionally want to use a different // scaling factor from the one
+  /// associated with interior physics
   DenseMatrix<Number> _Kee;
+
+  /// The Jacobian corresponding to the derivatives of the elemental/slave residual with respect to
+  /// the neighbor/master degrees of freedom.  We want to manually manipulate Ken because when we're
+  /// overwriting the slave residual we traditionally want to use a different scaling factor from the
+  /// one associated with interior physics
+  DenseMatrix<Number> _Ken;
 };

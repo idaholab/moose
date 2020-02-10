@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#12601'
+  design = 'Constraints/index.md'
+  [auto-scaling]
+    type = Exodiff
+    input = bouncing-block-ranfs.i
+    exodiff = bouncing-block-ranfs_exo.e
+    requirement = 'The system shall be able to apply automatic scaling in conjunction with ranfs contact'
+    cli_args = "Postprocessors/active=''"
+    abs_zero = 1e-8
+  []
+  [no-scaling]
+    type = Exodiff
+    input = bouncing-block-ranfs.i
+    exodiff = no-scaling.e
+    requirement = 'The system shall be able to solve ranfs contact with no scaling'
+    cli_args = "Executioner/automatic_scaling=false Outputs/file_base=no-scaling Postprocessors/active=''"
+    abs_zero = 1e-8
+  []
+[]

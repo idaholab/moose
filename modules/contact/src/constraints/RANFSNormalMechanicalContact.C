@@ -36,6 +36,15 @@ validParams<RANFSNormalMechanicalContact>()
   params.addClassDescription("Applies the Reduced Active Nonlinear Function Set scheme in which "
                              "the slave node's non-linear residual function is replaced by the "
                              "zero penetration constraint equation when the constraint is active");
+  params.addParam<bool>(
+      "ping_pong_protection",
+      false,
+      "Whether to protect against ping-ponging, e.g. the oscillation of the slave node between two "
+      "different master faces, by tying the slave node to the "
+      "edge between the involved master faces");
+  params.addParam<Real>(
+      "normal_smoothing_distance",
+      "Distance from edge in parametric coordinates over which to smooth contact normal");
   return params;
 }
 
@@ -45,7 +54,8 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
     _mesh_dimension(_mesh.dimension()),
     _residual_copy(_sys.residualGhosted()),
     _dof_number_to_value(coupledComponents("displacements")),
-    _disp_coupling(coupledComponents("displacements"))
+    _disp_coupling(coupledComponents("displacements")),
+    _ping_pong_protection(getParam<bool>("ping_pong_protection"))
 {
   // modern parameter scheme for displacements
   for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
@@ -60,6 +70,9 @@ RANFSNormalMechanicalContact::RANFSNormalMechanicalContact(const InputParameters
 
   if (_vars.size() != _mesh_dimension)
     mooseError("The number of displacement variables does not match the mesh dimension!");
+
+  if (parameters.isParamValid("normal_smoothing_distance"))
+    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
 }
 
 void
@@ -179,7 +192,7 @@ RANFSNormalMechanicalContact::shouldApply()
             // times for example, it is not guaranteed to ping-pong indefinitely and the Newton
             // iteration may naturally resolve the correct face dofs that need to be involved in the
             // constraint.
-            if (master_elem_sequence.size() >= 5 &&
+            if (_ping_pong_protection && master_elem_sequence.size() >= 5 &&
                 _pinfo->_elem == *(master_elem_sequence.rbegin() + 2) &&
                 _pinfo->_elem == *(master_elem_sequence.rbegin() + 4) &&
                 _pinfo->_elem != *(master_elem_sequence.rbegin() + 1) &&

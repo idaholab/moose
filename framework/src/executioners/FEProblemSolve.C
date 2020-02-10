@@ -100,6 +100,10 @@ FEProblemSolve::validParams()
       "A parameter that indicates the weighting of the residual vs the Jacobian in determining "
       "variable scaling parameters. A value of 1 indicates pure residual-based scaling. A value of "
       "0 indicates pure Jacobian-based scaling");
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "scaling_group_variables",
+      "Name of variables that are grouped together to for determing scale factors. (Multiple "
+      "groups can be provided, separated by semicolon)");
   params.addRangeCheckedParam<unsigned int>(
       "num_grids",
       1,
