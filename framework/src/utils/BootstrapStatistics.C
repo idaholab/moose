@@ -46,7 +46,15 @@ makeBootstrapCalculator(const MooseEnum & item,
   ptr->setSeed(seed);
   if (!ptr)
     ::mooseError("Failed to create Statistics::BootstrapCalculator object for ", item);
+
+    // The minimum compiler GCC 4.8.4 needs the std::move explicitly; the newer compilers do this
+    // automatically.
+#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
+    !defined(__clang__)
+  return std::move(ptr);
+#else
   return ptr;
+#endif
 }
 
 BootstrapCalculator::BootstrapCalculator(const MooseObject & other) : libMesh::ParallelObject(other)
