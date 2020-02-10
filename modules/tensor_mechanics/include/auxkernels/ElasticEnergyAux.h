@@ -29,8 +29,10 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// Base name of the material system used to calculate the elastic energy
   const std::string _base_name;
 
+  /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };

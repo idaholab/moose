@@ -42,5 +42,6 @@ private:
 
   unsigned int _porepressure_var_num;
 
+  /// An integer corresponding to the direction this kernel acts in
   unsigned int _component;
 };

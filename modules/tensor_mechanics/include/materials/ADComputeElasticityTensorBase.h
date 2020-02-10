@@ -45,7 +45,9 @@ protected:
   virtual void computeQpProperties();
   virtual void computeQpElasticityTensor() = 0;
 
+  /// Base name of the material system
   const std::string _base_name;
+
   std::string _elasticity_tensor_name;
 
   ADMaterialProperty(RankFourTensor) & _elasticity_tensor;

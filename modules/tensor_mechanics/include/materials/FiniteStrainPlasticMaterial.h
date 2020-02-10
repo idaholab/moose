@@ -10,7 +10,6 @@
 #pragma once
 // Original class author: A.M. Jokisaari,  O. Heinonen
 
-
 #include "ComputeStressBase.h"
 
 class FiniteStrainPlasticMaterial;
@@ -41,6 +40,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   const MaterialProperty<Real> & _eqv_plastic_strain_old;
+  /// The old stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;

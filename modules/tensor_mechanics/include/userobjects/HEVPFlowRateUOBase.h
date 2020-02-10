@@ -37,6 +37,8 @@ public:
 
 protected:
   std::string _strength_prop_name;
+
+  /// Base name of the material system
   const std::string _base_name;
   const MaterialProperty<Real> & _strength;
   std::string _pk2_prop_name;

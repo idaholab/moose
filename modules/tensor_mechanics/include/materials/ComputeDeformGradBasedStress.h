@@ -38,6 +38,8 @@ protected:
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
+  /// The stress tensor to be calculated
   MaterialProperty<RankTwoTensor> & _stress;
+
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };

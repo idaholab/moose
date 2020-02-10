@@ -35,12 +35,18 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
+  /// Base name of the material system
   const std::string _base_name;
 
   const MaterialProperty<Real> & _sed;
   MaterialProperty<RankTwoTensor> & _eshelby_tensor;
+
+  /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
+
+  /// The odl stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
+
   std::vector<const VariableGradient *> _grad_disp;
 
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;

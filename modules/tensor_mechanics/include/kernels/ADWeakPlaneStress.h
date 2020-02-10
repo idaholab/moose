@@ -37,10 +37,13 @@ public:
 protected:
   ADReal precomputeQpResidual() override;
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
 
+  /// The stress tensor that provides the out-of-plane stress
   const ADMaterialProperty(RankTwoTensor) & _stress;
 
+  /// The direction of the out-of-plane strain variable
   const unsigned int _direction;
 
   usingKernelValueMembers;

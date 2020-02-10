@@ -27,10 +27,13 @@ public:
 protected:
   virtual Real computeQpResidual();
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
+
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
 private:
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
   const unsigned int _column;
   const std::array<unsigned int, 6> _k_index;

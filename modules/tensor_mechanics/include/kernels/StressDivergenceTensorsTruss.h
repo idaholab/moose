@@ -33,17 +33,25 @@ protected:
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
 
   const MaterialProperty<Real> & _axial_stress;
   const MaterialProperty<Real> & _e_over_l;
 
 private:
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
+
+  /// Number of displacement variables
   const unsigned int _ndisp;
+
+  /// Whether temperature is coupeld
   const bool _temp_coupled;
 
   const unsigned int _temp_var;
+
+  /// Variable numbers of coupled displacement variables
   std::vector<unsigned int> _disp_var;
 
   const VariableValue & _area;

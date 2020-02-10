@@ -50,9 +50,12 @@ protected:
   virtual void computeQpProperties() override;
   virtual void computeQpStress() = 0;
 
+  /// Base name of the material system
   const std::string _base_name;
 
   const ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
+
+  /// The stress tensor to be calculated
   ADMaterialProperty(RankTwoTensor) & _stress;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
 
