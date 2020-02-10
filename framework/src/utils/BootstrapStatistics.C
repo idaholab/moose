@@ -132,7 +132,7 @@ BootstrapCalculator::shuffle(const std::vector<Real> & data,
     }
 
     // Advance the random number generator to the end of the global vector
-    for (std::size_t i = offsets[processor_id() + 1]; i < n_global; ++i)
+    for (std::size_t i = offsets[processor_id()] + n_local; i < n_global; ++i)
       generator.randl(0, 0, n_global);
 
     // Collect the values to be returned to the various processors
@@ -140,7 +140,6 @@ BootstrapCalculator::shuffle(const std::vector<Real> & data,
     auto return_functor = [&data, &returns](processor_id_type pid,
                                             const std::vector<std::size_t> & indices) {
       auto & returns_pid = returns[pid];
-      returns_pid.reserve(indices.size());
       for (auto idx : indices)
         returns_pid.push_back(data[idx]);
     };
