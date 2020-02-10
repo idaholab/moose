@@ -14,7 +14,7 @@ problems, or in
 
 In the classical plane strain problem, it is assumed that the front and back
 surfaces of the body are constrained in the out-of-plane direction, and that
-the displacements in that direction on those surfaces are zero. As a 
+the displacements in that direction on those surfaces are zero. As a
 result, the strain and deformation gradient components in the out-of-plane
 direction are held constant at zero:
 \begin{equation}
