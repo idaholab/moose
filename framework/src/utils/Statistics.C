@@ -13,49 +13,12 @@
 #include "MooseEnumItem.h"
 #include "MooseError.h"
 #include "MooseRandom.h"
+
 #include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 
 namespace Statistics
 {
-
-MultiMooseEnum
-makeCalculatorEnum()
-{
-  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7");
-}
-
-std::unique_ptr<const Calculator>
-makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other)
-{
-  if (item == "min")
-    return libmesh_make_unique<const Min>(other);
-
-  else if (item == "max")
-    return libmesh_make_unique<const Max>(other);
-
-  else if (item == "sum")
-    return libmesh_make_unique<const Sum>(other);
-
-  else if (item == "mean" || item == "average") // average is deprecated
-    return libmesh_make_unique<const Mean>(other);
-
-  else if (item == "stddev")
-    return libmesh_make_unique<const StdDev>(other);
-
-  else if (item == "stderr")
-    return libmesh_make_unique<const StdErr>(other);
-
-  else if (item == "norm2")
-    return libmesh_make_unique<const L2Norm>(other);
-
-  else if (item == "ratio")
-    return libmesh_make_unique<const Ratio>(other);
-
-  ::mooseError("Failed to create Statistics::Calculator object for ", item);
-  return nullptr;
-}
-
 // CALCULATOR //////////////////////////////////////////////////////////////////////////////////////
 Calculator::Calculator(const libMesh::ParallelObject & other) : libMesh::ParallelObject(other) {}
 

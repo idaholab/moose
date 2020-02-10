@@ -20,6 +20,16 @@
 
 registerMooseObject("MooseApp", StatisticsVectorPostprocessor);
 
+registerMooseCalculator(0, "min", Statistics::Min);
+registerMooseCalculator(1, "max", Statistics::Max);
+registerMooseCalculator(2, "sum", Statistics::Sum);
+registerMooseCalculator(3, "mean", Statistics::Mean);
+// registerMooseCalculator(3, "average", Statistics::Mean); // deprecated
+registerMooseCalculator(4, "stddev", Statistics::StdDev);
+registerMooseCalculator(5, "norm2", Statistics::L2Norm);
+registerMooseCalculator(6, "ratio", Statistics::Ratio);
+registerMooseCalculator(7, "stderr", Statistics::StdErr);
+
 defineLegacyParams(StatisticsVectorPostprocessor);
 
 InputParameters
@@ -34,7 +44,7 @@ StatisticsVectorPostprocessor::validParams()
       "vectorpostprocessors",
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
-  MultiMooseEnum stats = Statistics::makeCalculatorEnum();
+  MultiMooseEnum stats = StatisticsVectorPostprocessor::makeCalculatorEnum();
   params.addParam<MultiMooseEnum>(
       "compute",
       stats,
@@ -67,6 +77,29 @@ StatisticsVectorPostprocessor::validParams()
       "The statistics you would like to compute for each column of the VectorPostprocessor",
       "Replaced with 'compute'");
   return params;
+}
+
+MultiMooseEnum
+StatisticsVectorPostprocessor::makeCalculatorEnum()
+{
+  std::vector<std::string> stat_names;
+  for (auto & calc_pair : Registry::allCalculators())
+    stat_names.push_back(calc_pair.second._name + "=" + calc_pair.second._alias);
+  MultiMooseEnum stats(MooseUtils::join(stat_names, " "));
+  return stats;
+}
+
+std::unique_ptr<const Statistics::Calculator>
+StatisticsVectorPostprocessor::makeCalculator(const MooseEnumItem & item,
+                                              const libMesh::ParallelObject & other)
+{
+  const auto & calc_entries = Registry::allCalculators();
+  auto entry_ptr = calc_entries.find(item.rawName());
+  if (entry_ptr != calc_entries.end())
+    return entry_ptr->second._build_calculator_ptr(other);
+
+  ::mooseError("Failed to create Statistics::Calculator object for ", item);
+  return nullptr;
 }
 
 StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
@@ -145,7 +178,7 @@ StatisticsVectorPostprocessor::execute()
       for (const auto & item : _compute_stats)
       {
         std::unique_ptr<const Statistics::Calculator> calc_ptr =
-            Statistics::makeCalculator(item, *this);
+            StatisticsVectorPostprocessor::makeCalculator(item, *this);
         _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
 
         if (_ci_calculator)

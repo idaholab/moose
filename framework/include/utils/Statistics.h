@@ -19,18 +19,6 @@ namespace Statistics
 {
 class Calculator;
 
-/*
- * Free function for building a const Calculator object for use by StatisticsVectorPostprocessor.
- */
-std::unique_ptr<const Calculator> makeCalculator(const MooseEnumItem & item,
-                                                 const libMesh::ParallelObject & other);
-
-/*
- * Free function that returns the available statistics available to the
- * StatisticsVectorPostprocessor.
- */
-MultiMooseEnum makeCalculatorEnum();
-
 /* Base class for computing statistics (e.g., mean, min) for use with StatisticsVectorPostprocessor.
  *
  * The purpose of these objects are to provide an API for computing statistics in serial or parallel

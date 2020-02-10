@@ -34,6 +34,11 @@ Registry::allActions()
 {
   return getRegistry()._per_label_actions;
 }
+const std::unordered_map<std::string, RegistryEntry> &
+Registry::allCalculators()
+{
+  return getRegistry()._name_to_calculator;
+}
 
 void
 Registry::addInner(const RegistryEntry & info)
@@ -47,6 +52,13 @@ Registry::addActionInner(const RegistryEntry & info)
 {
   auto & r = getRegistry();
   r._per_label_actions[info._label].push_back(info);
+}
+
+void
+Registry::addCalculatorInner(const RegistryEntry & info)
+{
+  auto & r = getRegistry();
+  r._name_to_calculator[info._name] = info;
 }
 
 void

@@ -37,6 +37,13 @@ public:
   virtual void initialize() final{};
   virtual void finalize() final{};
 
+  // Function for building a const Calculator object
+  static std::unique_ptr<const Statistics::Calculator>
+  makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
+
+  // Function that returns the available statistics available to the
+  static MultiMooseEnum makeCalculatorEnum();
+
 protected:
   /// The selected statistics to compute
   const MultiMooseEnum & _compute_stats;
