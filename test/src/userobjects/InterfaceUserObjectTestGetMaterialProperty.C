@@ -85,25 +85,35 @@ InterfaceUserObjectTestGetMaterialProperty::execute()
     // loop over qps and do stuff
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
-      // compute average value at qp
+      // check material property values
 
-      Real v = (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations());
-
-      mooseAssert(_mp[qp] == 1 * v,
-                  "InterfaceUserObjectTestGetMaterialProperty bad material property value"
-                      << _mp[qp] << " instead of " << v);
       mooseAssert(
-          _mp_neighbor[qp] == 2 * v,
+          _mp[qp] ==
+              1 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
+          "InterfaceUserObjectTestGetMaterialProperty bad material property value"
+              << _mp[qp] << " instead of "
+              << (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
+      mooseAssert(
+          _mp_neighbor[qp] ==
+              2 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
           "InterfaceUserObjectTestGetMaterialProperty bad neighbor material property value: "
-              << _mp_neighbor[qp] << " instead of " << 2 * v);
+              << _mp_neighbor[qp] << " instead of "
+              << 2 * (_t_step +
+                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
       mooseAssert(
-          _mp_interface[qp] == 4 * v,
+          _mp_interface[qp] ==
+              4 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
           "InterfaceUserObjectTestGetMaterialProperty bad interface material property value: "
-              << _mp_interface[qp] << " instead of " << 4 * v);
+              << _mp_interface[qp] << " instead of "
+              << 4 * (_t_step +
+                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
       mooseAssert(
-          _mp_boundary[qp] == 3 * v,
+          _mp_boundary[qp] ==
+              3 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
           "InterfaceUserObjectTestGetMaterialProperty bad boundary material property value: "
-              << _mp_boundary[qp] << " instead of " << 3 * v);
+              << _mp_boundary[qp] << " instead of "
+              << 3 * (_t_step +
+                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
     }
   }
   else

@@ -32,10 +32,10 @@ public:
   InterfaceQpUserObjectBase(const InputParameters & parameters);
   virtual ~InterfaceQpUserObjectBase(){};
   virtual void initialSetup() override;
-  virtual void initialize(){};
-  virtual void execute();
-  virtual void finalize() { return; };
-  virtual void threadJoin(const UserObject & /*uo*/) { return; };
+  virtual void initialize() override{};
+  virtual void execute() override;
+  virtual void finalize() override{};
+  virtual void threadJoin(const UserObject & /*uo*/) override{};
 
   /// function returning the quadrature point value
   Real getQpValue(const dof_id_type elem, const unsigned int side, unsigned int qp) const;

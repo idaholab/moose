@@ -29,10 +29,10 @@ public:
   virtual ~InterfaceUserObjectTestGetMaterialProperty();
 
   virtual void initialSetup() override;
-  virtual void initialize(){};
-  virtual void execute();
-  virtual void finalize() { return; };
-  virtual void threadJoin(const UserObject & /*uo*/) { return; };
+  virtual void initialize() override{};
+  virtual void execute() override;
+  virtual void finalize() override{};
+  virtual void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
   /// this map is used to store QP data.
