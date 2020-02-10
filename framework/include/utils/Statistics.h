@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "MooseTypes.h"
 #include "MooseObject.h"
 #include <vector>
@@ -21,7 +23,7 @@ class Calculator;
  * Free function for building a const Calculator object for use by StatisticsVectorPostprocessor.
  */
 std::unique_ptr<const Calculator> makeCalculator(const MooseEnumItem & item,
-                                                 const MooseObject & other);
+                                                 const libMesh::ParallelObject & other);
 
 /*
  * Free function that returns the available statistics available to the
@@ -45,7 +47,7 @@ MultiMooseEnum makeCalculatorEnum();
 class Calculator : public libMesh::ParallelObject
 {
 public:
-  Calculator(const MooseObject &);
+  Calculator(const libMesh::ParallelObject &);
   virtual ~Calculator() = default;
   virtual Real compute(const std::vector<Real> &, bool) const = 0;
 };
@@ -53,56 +55,56 @@ public:
 class Mean : public Calculator
 {
 public:
-  Mean(const MooseObject &);
+  Mean(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Min : public Calculator
 {
 public:
-  Min(const MooseObject &);
+  Min(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Max : public Calculator
 {
 public:
-  Max(const MooseObject &);
+  Max(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Sum : public Calculator
 {
 public:
-  Sum(const MooseObject &);
+  Sum(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class StdDev : public Calculator
 {
 public:
-  StdDev(const MooseObject &);
+  StdDev(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class StdErr : public StdDev
 {
 public:
-  StdErr(const MooseObject &);
+  StdErr(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class Ratio : public Calculator
 {
 public:
-  Ratio(const MooseObject &);
+  Ratio(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 
 class L2Norm : public Calculator
 {
 public:
-  L2Norm(const MooseObject &);
+  L2Norm(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 

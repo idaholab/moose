@@ -26,7 +26,7 @@ makeCalculatorEnum()
 }
 
 std::unique_ptr<const Calculator>
-makeCalculator(const MooseEnumItem & item, const MooseObject & other)
+makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other)
 {
   if (item == "min")
     return libmesh_make_unique<const Min>(other);
@@ -57,10 +57,10 @@ makeCalculator(const MooseEnumItem & item, const MooseObject & other)
 }
 
 // CALCULATOR //////////////////////////////////////////////////////////////////////////////////////
-Calculator::Calculator(const MooseObject & other) : libMesh::ParallelObject(other) {}
+Calculator::Calculator(const libMesh::ParallelObject & other) : libMesh::ParallelObject(other) {}
 
 // MEAN ////////////////////////////////////////////////////////////////////////////////////////////
-Mean::Mean(const MooseObject & other) : Calculator(other) {}
+Mean::Mean(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 Mean::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -79,7 +79,7 @@ Mean::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
-Min::Min(const MooseObject & other) : Calculator(other) {}
+Min::Min(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 Min::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -92,7 +92,7 @@ Min::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // MAX /////////////////////////////////////////////////////////////////////////////////////////////
-Max::Max(const MooseObject & other) : Calculator(other) {}
+Max::Max(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 Max::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -105,7 +105,7 @@ Max::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
-Sum::Sum(const MooseObject & other) : Calculator(other) {}
+Sum::Sum(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 Sum::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -118,7 +118,7 @@ Sum::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // STDDEV //////////////////////////////////////////////////////////////////////////////////////////
-StdDev::StdDev(const MooseObject & other) : Calculator(other) {}
+StdDev::StdDev(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 StdDev::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -144,7 +144,7 @@ StdDev::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // STDERR //////////////////////////////////////////////////////////////////////////////////////////
-StdErr::StdErr(const MooseObject & other) : StdDev(other) {}
+StdErr::StdErr(const libMesh::ParallelObject & other) : StdDev(other) {}
 
 Real
 StdErr::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -156,7 +156,7 @@ StdErr::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // RATIO ///////////////////////////////////////////////////////////////////////////////////////////
-Ratio::Ratio(const MooseObject & other) : Calculator(other) {}
+Ratio::Ratio(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 Ratio::compute(const std::vector<Real> & data, bool is_distributed) const
@@ -176,7 +176,7 @@ Ratio::compute(const std::vector<Real> & data, bool is_distributed) const
 }
 
 // L2NORM //////////////////////////////////////////////////////////////////////////////////////////
-L2Norm::L2Norm(const MooseObject & other) : Calculator(other) {}
+L2Norm::L2Norm(const libMesh::ParallelObject & other) : Calculator(other) {}
 
 Real
 L2Norm::compute(const std::vector<Real> & data, bool is_distributed) const

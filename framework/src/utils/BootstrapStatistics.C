@@ -31,7 +31,7 @@ makeBootstrapCalculatorEnum()
 
 std::unique_ptr<const BootstrapCalculator>
 makeBootstrapCalculator(const MooseEnum & item,
-                        const MooseObject & other,
+                        const libMesh::ParallelObject & other,
                         const std::vector<Real> & levels,
                         unsigned int replicates,
                         unsigned int seed)
@@ -51,7 +51,8 @@ makeBootstrapCalculator(const MooseEnum & item,
   return std::unique_ptr<const BootstrapCalculator>(ptr);
 }
 
-BootstrapCalculator::BootstrapCalculator(const MooseObject & other) : libMesh::ParallelObject(other)
+BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other)
+  : libMesh::ParallelObject(other)
 {
 }
 
@@ -158,7 +159,7 @@ BootstrapCalculator::shuffle(const std::vector<Real> & data,
 }
 
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////
-Percentile::Percentile(const MooseObject & other) : BootstrapCalculator(other) {}
+Percentile::Percentile(const libMesh::ParallelObject & other) : BootstrapCalculator(other) {}
 
 std::vector<Real>
 Percentile::compute(const std::vector<Real> & data,
