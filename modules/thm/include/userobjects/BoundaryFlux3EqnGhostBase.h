@@ -50,4 +50,6 @@ protected:
 
   /// Numerical flux user object
   const NumericalFlux3EqnBase & _numerical_flux;
+  /// Outward normal
+  const Real & _normal;
 };

@@ -27,6 +27,7 @@ SolidWall::addMooseObjects1Phase()
     const std::string class_name = "BoundaryFlux3EqnGhostWall";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<Real>("normal") = _normal;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
   }
@@ -77,6 +78,7 @@ SolidWall::addMooseObjects2Phase()
       const std::string class_name = "BoundaryFlux7EqnGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+      params.set<Real>("normal") = _normal;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
@@ -117,6 +119,7 @@ SolidWall::addMooseObjects2PhaseNCG()
       const std::string class_name = "BoundaryFlux7EqnNCGGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+      params.set<Real>("normal") = _normal;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
       const std::vector<VariableName> & vars = fm.getNCGSolutionVars();

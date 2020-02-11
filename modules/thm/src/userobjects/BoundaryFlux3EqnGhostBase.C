@@ -11,13 +11,15 @@ validParams<BoundaryFlux3EqnGhostBase>()
                              "using a numerical flux user object and a ghost cell solution");
 
   params.addRequiredParam<UserObjectName>("numerical_flux", "Name of numerical flux user object");
+  params.addRequiredParam<Real>("normal", "Outward normal");
 
   return params;
 }
 
 BoundaryFlux3EqnGhostBase::BoundaryFlux3EqnGhostBase(const InputParameters & parameters)
   : BoundaryFluxBase(parameters),
-    _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux"))
+    _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux")),
+    _normal(getParam<Real>("normal"))
 {
 }
 

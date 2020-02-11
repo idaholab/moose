@@ -17,6 +17,7 @@
     vel = 0.12
     fluid_properties = fluid_properties
     numerical_flux = numerical_flux
+    normal = 1
     execute_on = 'linear nonlinear'
   [../]
 []
