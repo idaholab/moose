@@ -4,3 +4,4 @@ specs:
     - tests
 dependencies:
     - framework
+repo: moose
