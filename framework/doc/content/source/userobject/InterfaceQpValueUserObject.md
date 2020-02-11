@@ -12,19 +12,15 @@ The user object only stores one type of value. For example to get both the varia
 
 The InterfaceQpValueUserObject can provide two types of values to other MOOSE systems:
 
-* a qp value by calling `getQpValue`
-* an element side average value by calling `getSideAverageValue`
+-  a qp value by calling `getQpValue`
+-  an element side average value by calling `getSideAverageValue`
 
 The stored value can be converted into an AuxVariable by using [InterfaceValueUserObjectAux](/InterfaceValueUserObjectAux.md) AuxKernel.
 
 
 ## Example Input File Syntax
 
-listing test/tests/userobjects/interface_user_object/interface_value_user_object_QP.i block=UserObjects/interface_value_uo
-
-listing test/tests/userobjects/interface_user_object/interface_value_rate_increment_user_object_QP.i block=UserObjects/interface_avg_value_rate_uo
-
-listing test/tests/userobjects/interface_user_object/interface_value_rate_increment_user_object_QP.i block=UserObjects/interface_avg_value_increment_uo
+!listing test/tests/userobjects/interface_user_object/interface_value_user_object_QP.i block=UserObjects
 
 !syntax description /UserObjects/InterfaceQpValueUserObject
 

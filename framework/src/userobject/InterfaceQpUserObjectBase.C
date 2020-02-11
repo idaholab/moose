@@ -19,6 +19,7 @@ InterfaceQpUserObjectBase::validParams()
   params.addClassDescription("Base class to compute a scalar value or rate across an interface");
   params.addParam<bool>("compute_rate", false, "if true, compute the rate of the value.");
   params.addParam<bool>("compute_increment", false, "if true, compute the finite increment.");
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   return params;
 }
 
