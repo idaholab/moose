@@ -1,2 +1,2 @@
-stat_type,pid,num_partition_sides
-2,6,86
+stat_type,nl_wb_edgecuts_pid,nl_wb_edgecuts_num_partition_sides
+2,6,84

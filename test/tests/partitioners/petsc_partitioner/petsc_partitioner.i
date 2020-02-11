@@ -103,7 +103,7 @@
 
   [./bl_edgecuts]
     type = StatisticsVectorPostprocessor
-    vpp = nl_wb_edgecuts
-    stats = 'sum'
+    vectorpostprocessors = nl_wb_edgecuts
+    compute = 'sum'
   [../]
 []
