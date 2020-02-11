@@ -58,9 +58,7 @@ class SparseMatrix;
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearSystemBase : public SystemBase,
-                            public ConsoleStreamInterface,
-                            public PerfGraphInterface
+class NonlinearSystemBase : public SystemBase, public PerfGraphInterface
 {
 public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
@@ -638,12 +636,6 @@ public:
 
   virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
 
-  /**
-   * Sets the verbose flag
-   * @param[in] verbose   Verbose flag
-   */
-  void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
-
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
   {
@@ -737,9 +729,6 @@ protected:
   void mortarJacobianConstraints(bool displaced);
 
 protected:
-  /// True if printing out additional information
-  bool _verbose;
-
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
