@@ -1,8 +1,8 @@
-# Compute Quasi-birttle Linear Elastic Phase Field Fracture Stress
+# Compute Linear Elastic Phase Field Fracture Stress
 
 ## Description
 
-This material implements the unified phase-field model for mechanics of damage and quasi-brittle failure from Jian-Ying Wu [!cite](JYWu2017).
+This material implements the unified phase-field model for mechanics of damage and quasi-brittle failure from Jian-Ying Wu [!cite](JYWu2017). The pressure on the fracture surface can be optionally applied as described in [!cite](CHUKWUDOZIE2019957) and [!cite](Mikelic2019).
 
 ## Crack Surface Energy
 
@@ -197,7 +197,7 @@ Its derivatives are
 
 To further avoid crack phase-field going to negative, $H$ should overcome a barrier energy. The barrier energy $f_{barrier}$ is determined by
 \begin{equation}
-f_{barrier} = -\frac{f_'{fracture}}{\omega'(d)}~/text{at}~d=0
+f_{barrier} = -\frac{f_{fracture}}{\omega(d)}~/text{at}~d=0
 \end{equation}
 and the $H$ is modified as
 \begin{equation}
@@ -214,16 +214,33 @@ This equation follows the standard Allen-Cahn and thus can be implemented in MOO
 Allen-Cahn kernels, TimeDerivative, AllenCahn, and ACInterface. There is now an action that automatically generates these kernels:
 NonconservedAction. See the +PhaseField module documentation+ for more information.
 
+## Pressure on the fracture surface
 
-## Example Input File Syntax
+As suggested by [!cite](CHUKWUDOZIE2019957), the work of pressure forces acting along each side of the cracks that is added to the total free energy can be approximated by
+\begin{equation}
+\int_{\Gamma}p(\mathbf{u}\cdot \mathbf{n})ds \approx \int_{\Omega}p(\mathbf{u}\cdot\nabla d)
+\end{equation}
+
+Integration by parts yields
+\begin{equation}
+-\int_{\Omega}p(\mathbf{u}\cdot\nabla d) = \int_{\Omega}pd\nabla\cdot\mathbf{u}-\int_{\partial{\Omega}}pd(\mathbf{u}\cdot\mathbf{n})
+\end{equation}
+
+The boundary integral term can be neglected as in most applications $d=0$ on $\partial\Omega$. Some authors [!cite](Mikelic2019) have proposed to replace the indicator function $d$ with $d^2$ in the first term in order to make the functional convex. The indicator function is implemented as a generic material object that can be easily provided and modified in an input file.
+The stress equilibrium and damage evolution equations are also modified to account for the pressure contribution.
+
+## Example Input File
 
 !listing modules/combined/test/tests/phase_field_fracture/crack2d_iso.i
          block=Materials/damage_stress
 
-!syntax parameters /Materials/ComputeLinearElasticPFFractureStress
+## Example Input File with pressure
 
-!syntax inputs /Materials/ComputeLinearElasticPFFractureStress
+!listing modules/combined/test/tests/phase_field_fracture/crack2d_iso_with_pressure.i
+         block=Materials/damage_stress
 
-!syntax children /Materials/ComputeLinearElasticPFFractureStress
+!listing modules/combined/test/tests/phase_field_fracture/crack2d_iso_with_pressure.i
+				 block=Materials/pfbulkmat
+
 
 !bibtex bibliography

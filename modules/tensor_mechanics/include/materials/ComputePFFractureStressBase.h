@@ -43,6 +43,9 @@ protected:
   /// Material property defining gc parameter, declared elsewhere
   const MaterialProperty<Real> & _gc;
 
+  /// Material property defining pressure, declared elsewhere
+  const MaterialProperty<Real> & _pressure;
+
   /// Use current value of history variable
   bool _use_current_hist;
 
@@ -78,4 +81,13 @@ protected:
 
   /// Second-order derivative of degradation w.r.t damage variable
   const MaterialProperty<Real> & _d2Dd2c;
+
+  /// Material property for damage indicator function
+  const MaterialProperty<Real> & _I;
+
+  /// Derivative of damage indicator function w.r.t damage variable
+  const MaterialProperty<Real> & _dIdc;
+
+  /// Second-order derivative of damage indicator function w.r.t damage variable
+  const MaterialProperty<Real> & _d2Id2c;
 };
