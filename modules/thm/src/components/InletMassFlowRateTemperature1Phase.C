@@ -9,8 +9,8 @@ validParams<InletMassFlowRateTemperature1Phase>()
 {
   InputParameters params = validParams<FlowBoundary>();
   params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
-  params.addRequiredParam<Real>("T", "Prescribed temperature (used only in 3eqn model) [K]");
-  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
+  params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
   params.addClassDescription("Boundary condition with prescribed mass flow rate and temperature "
                              "for 1-phase flow channels.");
   return params;
@@ -96,6 +96,7 @@ InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("mass_flow_rate") = getParam<Real>("m_dot");
     params.set<Real>("T") = getParam<Real>("T");
+    params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;

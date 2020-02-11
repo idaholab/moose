@@ -14,6 +14,7 @@
   [./boundary_flux]
     type = BoundaryFlux3EqnGhostFreeOutflow
     numerical_flux = numerical_flux
+    normal = 1
     execute_on = 'linear nonlinear'
   [../]
 []

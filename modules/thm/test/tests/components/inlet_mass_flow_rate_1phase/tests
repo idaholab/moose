@@ -17,6 +17,11 @@
     group = 'inlet_mass_flow_rate outlet pipe 1phase rdg'
     max_time = 600
   [../]
+  [./phy:reversed_flow]
+    type = 'Exodiff'
+    input = 'phy.reversed_flow.i'
+    exodiff = 'phy.reversed_flow.e'
+  [../]
 
   [./clg:massflowrate_3eqn]
     type = 'CSVDiff'
