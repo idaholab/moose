@@ -115,8 +115,8 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
         self.MainLayout.addLayout(self.GeometryLayout)
 
-        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
-        shortcut.activated.connect(self.onCtrlReturn)
+        self.CalculateShortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        self.CalculateShortcut.activated.connect(self.onCtrlReturn)
 
         self.updateWidgets()
 
@@ -146,14 +146,14 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 enable = False
                 break
         self.btnCalculate[idx].setEnabled(enable)
+        self.CalculateShortcut.setEnabled(enable)
 
     def onModified(self):
         self.updateWidgets()
 
     def onCtrlReturn(self):
         idx = self.ctlFChType.currentData()
-        if self.btnCalculate[idx].isEnabled():
-            self.btnCalculate[idx].animateClick()
+        self.btnCalculate[idx].animateClick()
 
     def onCalculate(self):
         self.computeParameters()

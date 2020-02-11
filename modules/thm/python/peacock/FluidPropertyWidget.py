@@ -61,8 +61,8 @@ class FluidPropertyWidget(QWidget):
         self.btnCalculate.setMaximumWidth(62)
         self.layoutForm.addRow("", self.btnCalculate)
 
-        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
-        shortcut.activated.connect(self.onCtrlReturn)
+        self.CalculateShortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self)
+        self.CalculateShortcut.activated.connect(self.onCtrlReturn)
 
         lbl = QFrame()
         lbl.setMinimumHeight(2)
@@ -121,6 +121,7 @@ class FluidPropertyWidget(QWidget):
                 enable = False
                 break
         self.btnCalculate.setEnabled(enable)
+        self.CalculateShortcut.setEnabled(enable)
 
         title = "Fluid Property Interrogator"
         if self.modified:
@@ -135,8 +136,7 @@ class FluidPropertyWidget(QWidget):
         self.exe_path = exe_path
 
     def onCtrlReturn(self):
-        if self.btnCalculate.isEnabled():
-            self.btnCalculate.animateClick()
+        self.btnCalculate.animateClick()
 
     def computeProperties(self):
         """
