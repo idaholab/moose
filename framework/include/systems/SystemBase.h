@@ -142,6 +142,18 @@ public:
   }
 
   /**
+   * Getter for whether we are performing automatic scaling
+   * @return whether we are performing automatic scaling
+   */
+  bool automaticScaling() const { return _automatic_scaling; }
+
+  /**
+   * Setter for whether we are performing automatic scaling
+   * @param automatic_scaling A boolean representing whether we are performing automatic scaling
+   */
+  void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
+
+  /**
    * Gets writeable reference to the dof map
    */
   virtual DofMap & dofMap();
@@ -828,6 +840,9 @@ protected:
 
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual;
+
+  /// Whether to automatically scale the variables
+  bool _automatic_scaling;
 };
 
 #define PARALLEL_TRY

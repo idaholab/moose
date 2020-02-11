@@ -270,3 +270,32 @@ The recommended PETSc options for use with `NodeFaceConstraint` based contact ar
 ## Objects, Actions, and Syntax
 
 !syntax complete groups=ContactApp level=3
+
+## Scaling effects
+
+The effects of scaling on non-linear solve convergence are shown below for
+different kinds of contact formulations. The results are based on the input files for
+[RANFS](/ranfs-and-scaling/bouncing-block-ranfs.i),
+[kinematic](/bouncing-block-kinematic.i), and
+[tangential penalty](/bouncing-block-tan-pen.i),
+running with two processes.
+
+| Scheme | Cumulative nonlinear iterations | Cumulative linear iterations | Initial condition number | Variable Scaling Factor |
+| - | - | - | - | - |
+| SMP PJFNK RANFS no scaling AMG | 68 | 510 | 9e3 | 1 |
+| SMP PJFNK RANFS residual auto-scaling AMG | 65 | 391 | 1e2 | 1.1e-2 |
+| SMP PJFNK RANFS Jacobian auto-scaling AMG | 66 | 372 | 4e1 | 4.1e-4 |
+| SMP PJFNK Kinematic no scaling AMG | 58 | 305 | 9e3 | 1 |
+| SMP PJFNK Kinematic residual auto-scaling AMG | 58 | 305 | 1e2 | 1.1e-2 |
+| SMP PJFNK Kinematic Jacobian auto-scaling AMG | 58 | 305 | 4e1 | 4.1e-4 |
+| SMP PJFNK Tangential Penalty no scaling AMG | 65 | 400 | 9e3 | 1 |
+| SMP PJFNK Tangential Penalty residual auto-scaling AMG | 65 | 400 | 1e2 | 1.1e-2 |
+| SMP PJFNK Tangential Penalty Jacobian auto-scaling AMG | 65 | 400 | 4e1 | 4.1e-4 |
+| FD PJFNK RANFS jacobian auto-scaling LU | 54 | 70 | 4e1 | 4.1e-4 |
+| FD PJFNK Kinematic jacobian auto-scaling LU | 62 | 95 | 4e1 | 4.1e-4 |
+
+Important takeaways:
+
+- The solve efficiency of kinematic and tangential penalty formulations is independent of scaling (within the window of this problem)
+- Because RANFS constraint residuals/Jacobians are of gap magnitude, the RANFS solve really does perform better when the internal physics is scaled to be on the same order of magnitude
+- There are some bugs with the RANFS Jacobian functions because RANFS takes more nonlinear and linear iterations than kinematic, but with a FD Jacobian RANFS takes significantly less nonlinear and linear iterations than kinematic

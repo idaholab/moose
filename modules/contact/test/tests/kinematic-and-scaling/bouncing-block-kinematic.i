@@ -3,12 +3,10 @@ offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  diffusivity = 1e0
-  ping_pong_protection = true
 []
 
 [Mesh]
-  file = long-bottom-block-no-lower-d.e
+  file = long-bottom-block-no-lower-d-coarse.e
 []
 
 [Variables]
@@ -27,35 +25,35 @@ offset = 1e-2
   [../]
 []
 
-[Kernels]
-  [./disp_x]
-    type = MatDiffusion
-    variable = disp_x
-  [../]
-  [./disp_y]
-    type = MatDiffusion
-    variable = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = false
+    use_automatic_differentiation = true
+    strain = SMALL
+  []
 []
 
+[Materials]
+  [elasticity]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e3
+    poissons_ratio = 0.3
+  []
+  [stress]
+    type = ADComputeLinearElasticStress
+  []
+[]
 
-[Constraints]
-  [./disp_x]
-    type = RANFSNormalMechanicalContact
+[Contact]
+  [leftright]
     slave = 10
     master = 20
-    variable = disp_x
-    master_variable = disp_x
-    component = x
-  [../]
-  [./disp_y]
-    type = RANFSNormalMechanicalContact
-    slave = 10
-    master = 20
-    variable = disp_y
-    master_variable = disp_y
-    component = y
-  [../]
+    model = frictionless
+    formulation = kinematic
+    penalty = 1e3
+    system = constraint
+    normal_smoothing_distance = 0.1
+  []
 []
 
 [BCs]
@@ -87,16 +85,20 @@ offset = 1e-2
 
 [Executioner]
   type = Transient
-  end_time = 200
+  end_time = 100
   dt = 5
-  dtmin = 2.5
+  dtmin = 5
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -pc_hypre_type -mat_mffd_err'
-  petsc_options_value = 'hypre    boomeramg      1e-5'
-  l_max_its = 30
+  petsc_options_iname = '-pc_type -pc_hypre_type  -ksp_gmres_restart'
+  petsc_options_value = 'hypre    boomeramg       200'
+  l_max_its = 200
   nl_max_its = 20
   line_search = 'none'
+  automatic_scaling = true
+  verbose = true
+  scaling_group_variables = 'disp_x disp_y'
+  resid_vs_jac_scaling_param = 1
 []
 
 [Debug]
@@ -107,7 +109,6 @@ offset = 1e-2
   [exo]
     type = Exodus
   []
-  checkpoint = true
 []
 
 [Preconditioning]
@@ -118,11 +119,18 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  [./num_nl]
+  [nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [lin]
+    type = NumLinearIterations
+  []
+  [tot_nl]
     type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  [../]
+    postprocessor = nl
+  []
+  [tot_lin]
+    type = CumulativeValuePostprocessor
+    postprocessor = lin
+  []
 []

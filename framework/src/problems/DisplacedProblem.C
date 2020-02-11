@@ -70,6 +70,8 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
 
   if (!_default_ghosting)
     _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
+
+  automaticScaling(_mproblem.automaticScaling());
 }
 
 bool

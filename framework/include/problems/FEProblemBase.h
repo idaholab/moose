@@ -1750,6 +1750,9 @@ public:
    */
   void uniformRefine();
 
+  using SubProblem::automaticScaling;
+  void automaticScaling(bool automatic_scaling) override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

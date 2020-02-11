@@ -856,7 +856,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) +
                      (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -884,7 +885,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                               _var_objects[i]->scalingFactor();
                 }
                 return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) +
                        (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -892,9 +894,11 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               }
               else
               {
-                const Real curr_jac = (*_jacobian)(
-                    _current_node->dof_number(0, _vars[_component], 0), _connected_dof_indices[_j]);
-                return -curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
+                const Real curr_jac =
+                    (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
+                                 _connected_dof_indices[_j]) /
+                    _var.scalingFactor();
+                return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]);
               }
             }
 
@@ -925,7 +929,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               Real normal_comp = -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) +
                                  (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -949,8 +954,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case ContactFormulation::KINEMATIC:
             {
               const Real curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
-                                                 _connected_dof_indices[_j]);
-              return -curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
+                                                 _connected_dof_indices[_j]) /
+                                    _var.scalingFactor();
+              return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]);
             }
 
             case ContactFormulation::PENALTY:
@@ -978,8 +984,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) =
-                    (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0));
+                jac_vec(i) = (*_jacobian)(dof_number,
+                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                             _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                      (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -1010,7 +1017,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
                   jac_vec(i) = (*_jacobian)(dof_number,
-                                            curr_master_node->dof_number(0, _vars[_component], 0));
+                                            curr_master_node->dof_number(0, _vars[_component], 0)) /
+                               _var_objects[i]->scalingFactor();
                 }
                 return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                        (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -1021,8 +1029,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                 const Node * curr_master_node = _current_master->node_ptr(_j);
                 const Real curr_jac =
                     (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
-                                 curr_master_node->dof_number(0, _vars[_component], 0));
-                return -curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
+                                 curr_master_node->dof_number(0, _vars[_component], 0)) /
+                    _var.scalingFactor();
+                return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]);
               }
             }
 
@@ -1055,8 +1064,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) =
-                    (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0));
+                jac_vec(i) = (*_jacobian)(dof_number,
+                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                             _var_objects[i]->scalingFactor();
               }
               Real normal_comp = -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                                  (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -1081,8 +1091,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               const Node * curr_master_node = _current_master->node_ptr(_j);
               const Real curr_jac =
                   (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
-                               curr_master_node->dof_number(0, _vars[_component], 0));
-              return -curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
+                               curr_master_node->dof_number(0, _vars[_component], 0)) /
+                  _var.scalingFactor();
+              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]);
             }
 
             case ContactFormulation::PENALTY:
@@ -1109,7 +1120,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
                      _test_master[_i][_qp];
@@ -1135,15 +1147,18 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                               _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
                        _test_master[_i][_qp];
               }
               else
               {
-                const Real slave_jac = (*_jacobian)(
-                    _current_node->dof_number(0, _vars[_component], 0), _connected_dof_indices[_j]);
+                const Real slave_jac =
+                    (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
+                                 _connected_dof_indices[_j]) /
+                    _var.scalingFactor();
                 return slave_jac * _test_master[_i][_qp];
               }
             }
@@ -1175,7 +1190,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               Real normal_comp =
                   pinfo->_normal(_component) * (pinfo->_normal * jac_vec) * _test_master[_i][_qp];
@@ -1197,8 +1213,10 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case ContactFormulation::KINEMATIC:
             {
-              const Real slave_jac = (*_jacobian)(
-                  _current_node->dof_number(0, _vars[_component], 0), _connected_dof_indices[_j]);
+              const Real slave_jac =
+                  (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
+                               _connected_dof_indices[_j]) /
+                  _var.scalingFactor();
               return slave_jac * _test_master[_i][_qp];
             }
 
@@ -1313,7 +1331,8 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) +
                      (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -1340,8 +1359,10 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             for (unsigned int i = 0; i < _mesh_dimension; ++i)
             {
               dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-              jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+              jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                           _var_objects[i]->scalingFactor();
             }
+
             return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) +
                    (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) *
                        pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
@@ -1395,8 +1416,9 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) =
-                    (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0));
+                jac_vec(i) = (*_jacobian)(dof_number,
+                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                             _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                      (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) *
@@ -1425,8 +1447,10 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             {
               dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
               jac_vec(i) =
-                  (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0));
+                  (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0)) /
+                  _var_objects[i]->scalingFactor();
             }
+
             return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                    (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) *
                        pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
@@ -1470,7 +1494,8 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                             _var_objects[i]->scalingFactor();
               }
               return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
                      _test_master[_i][_qp];
@@ -1496,15 +1521,18 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                               _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
                        _test_master[_i][_qp];
               }
               else
               {
-                const Real slave_jac = (*_jacobian)(
-                    _current_node->dof_number(0, _vars[_component], 0), _connected_dof_indices[_j]);
+                const Real slave_jac =
+                    (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
+                                 _connected_dof_indices[_j]) /
+                    _var.scalingFactor();
                 return slave_jac * _test_master[_i][_qp];
               }
             }
@@ -1538,7 +1566,8 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+                  jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]) /
+                               _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
                        _test_master[_i][_qp];
@@ -1556,8 +1585,10 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           {
             case ContactFormulation::KINEMATIC:
             {
-              const Real slave_jac = (*_jacobian)(
-                  _current_node->dof_number(0, _vars[_component], 0), _connected_dof_indices[_j]);
+              const Real slave_jac =
+                  (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
+                               _connected_dof_indices[_j]) /
+                  _var.scalingFactor();
               return slave_jac * _test_master[_i][_qp];
             }
 

@@ -3,8 +3,6 @@ offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  diffusivity = 1e0
-  ping_pong_protection = true
 []
 
 [Mesh]
@@ -27,17 +25,24 @@ offset = 1e-2
   [../]
 []
 
-[Kernels]
-  [./disp_x]
-    type = MatDiffusion
-    variable = disp_x
-  [../]
-  [./disp_y]
-    type = MatDiffusion
-    variable = disp_y
-  [../]
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = false
+    use_automatic_differentiation = true
+    strain = SMALL
+  []
 []
 
+[Materials]
+  [elasticity]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e0
+    poissons_ratio = 0.3
+  []
+  [stress]
+    type = ADComputeLinearElasticStress
+  []
+[]
 
 [Constraints]
   [./disp_x]
@@ -87,9 +92,10 @@ offset = 1e-2
 
 [Executioner]
   type = Transient
+  num_steps = 19
   end_time = 200
   dt = 5
-  dtmin = 2.5
+  dtmin = 5
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_hypre_type -mat_mffd_err'
@@ -107,22 +113,11 @@ offset = 1e-2
   [exo]
     type = Exodus
   []
-  checkpoint = true
 []
 
 [Preconditioning]
   [./smp]
     type = SMP
     full = true
-  [../]
-[]
-
-[Postprocessors]
-  [./num_nl]
-    type = NumNonlinearIterations
-  [../]
-  [./cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
   [../]
 []

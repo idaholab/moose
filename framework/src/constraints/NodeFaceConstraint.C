@@ -156,9 +156,9 @@ NodeFaceConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  // Just do a direct assignment here because the Jacobian coming from assembly has already been
+  // properly sized according to the neighbor _var dof indices. It has also been zeroed
+  _Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement,
   //  _var.number(), _var.number());
@@ -189,10 +189,10 @@ NodeFaceConstraint::computeJacobian()
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
 
-  if (Ken.m() && Ken.n())
+  if (_Ken.m() && _Ken.n())
     for (_i = 0; _i < _test_slave.size(); _i++)
       for (_j = 0; _j < _phi_master.size(); _j++)
-        Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
+        _Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
 
   for (_i = 0; _i < _test_master.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -213,8 +213,10 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());
 
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+  // Just do a direct assignment here because the Jacobian coming from assembly has already been
+  // properly sized according to the jvar neighbor dof indices. It has also been zeroed
+  _Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+
   DenseMatrix<Number> & Knn =
       _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
 
@@ -243,7 +245,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 
   for (_i = 0; _i < _test_slave.size(); _i++)
     for (_j = 0; _j < master_jsize; _j++)
-      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+      _Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
   if (_Kne.m() && _Kne.n())
     for (_i = 0; _i < _test_master.size(); _i++)
