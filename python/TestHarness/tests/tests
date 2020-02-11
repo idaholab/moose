@@ -200,4 +200,10 @@
     requirement = "TestHarness shall support restrictions based on the python version available."
     issues = '#13903'
   [../]
+  [./csvvalidationtester]
+    type = PythonUnitTest
+    input = test_CSVValidationTester.py
+    requirement = "TestHarness shall be able to compare computed values against measured data using mean value and std. deviation"
+    issues = '#14511'
+  [../]
 []
