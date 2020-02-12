@@ -1,0 +1,1 @@
+../../../../../../contact/test/tests/simple_contact/gold/simple_contact_rz_dirac_test_out.e

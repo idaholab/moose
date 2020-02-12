@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#14630'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+
+  [./horizontal_blocks_mortar_TM]
+    type = 'RunApp'
+    input = horizontal_blocks_mortar_TM.i
+  [../]
+[]
