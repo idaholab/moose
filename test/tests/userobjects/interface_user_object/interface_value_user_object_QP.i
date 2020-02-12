@@ -124,13 +124,11 @@
     type = StatefulMaterial
     block = 0
     initial_diffusivity = 5
-    # outputs = all
   [../]
   [./stateful2]
     type = StatefulMaterial
     block = 1
     initial_diffusivity = 2
-    # outputs = all
   [../]
 []
 

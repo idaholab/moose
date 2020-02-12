@@ -94,9 +94,6 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = ' lu       superlu_dist                '
   dt = 0.1
   num_steps = 3
   dtmin = 0.1

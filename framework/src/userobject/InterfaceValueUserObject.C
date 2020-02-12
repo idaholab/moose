@@ -14,7 +14,7 @@ template <>
 InputParameters
 validParams<InterfaceValueUserObject>()
 {
-  InputParameters params = InterfaceUserObject::validParams();
+  InputParameters params = validParams<InterfaceUserObject>();
   params.addParam<MooseEnum>("interface_value_type",
                              InterfaceValueTools::InterfaceAverageOptions(),
                              "Type of scalar output");

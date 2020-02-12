@@ -13,9 +13,6 @@
 
 class InterfaceQpValueUserObject;
 
-template <>
-InputParameters validParams<InterfaceQpValueUserObject>();
-
 /**
  * Specialization of InterfaceQpUserObjectBase for scalar variables.
  */

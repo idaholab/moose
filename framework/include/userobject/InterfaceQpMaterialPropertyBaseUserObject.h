@@ -15,9 +15,6 @@
 template <typename T = Real>
 class InterfaceQpMaterialPropertyBaseUserObject;
 
-template <>
-InputParameters validParams<InterfaceQpMaterialPropertyBaseUserObject<>>();
-
 /**
  * Specialization of InterfaceQpUserObjectBase for material properties. Material property type
  * specialization is achieved by specializing computeScalarMaterialProperty in derived classes.

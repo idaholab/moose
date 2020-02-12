@@ -14,9 +14,6 @@
 // Forward declarations
 class InterfaceQpMaterialPropertyRealUO;
 
-template <>
-InputParameters validParams<InterfaceQpMaterialPropertyRealUO>();
-
 /**
  * Specialization of InterfaceQpMaterialPropertyBaseUserObject for Real material properties.
  */
