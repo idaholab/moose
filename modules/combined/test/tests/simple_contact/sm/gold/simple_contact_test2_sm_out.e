@@ -1,1 +1,0 @@
-../../gold/simple_contact_test2_out.e

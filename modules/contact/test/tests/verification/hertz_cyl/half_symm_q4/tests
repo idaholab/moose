@@ -1,0 +1,165 @@
+[Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./glued_kin]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_glued_kin_check2.csv hertz_cyl_half_1deg_glued_kin_check_cont_press_0010.csv hertz_cyl_half_1deg_glued_kin_check_x_disp_0010.csv hertz_cyl_half_1deg_glued_kin_check_y_disp_0010.csv'
+    cli_args = 'Executioner/end_time=1.0 Contact/interface/model=glued Contact/interface/formulation=kinematic
+    Outputs/file_base=hertz_cyl_half_1deg_glued_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_glued_kin_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_glued_kin_check2'
+    rel_err = 2e-4
+    abs_zero = 2e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+  [./glued_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_glued_pen_check2.csv hertz_cyl_half_1deg_glued_pen_check_cont_press_0010.csv hertz_cyl_half_1deg_glued_pen_check_x_disp_0010.csv hertz_cyl_half_1deg_glued_pen_check_y_disp_0010.csv'
+    cli_args = 'Executioner/end_time=1.0 Contact/interface/model=glued Contact/interface/formulation=penalty
+    Outputs/file_base=hertz_cyl_half_1deg_glued_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_glued_pen_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_glued_pen_check2'
+    rel_err = 2e-4
+    abs_zero = 1e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+  [./frictionless_kin]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_frictionless_kin_check2.csv
+    hertz_cyl_half_1deg_frictionless_kin_check_cont_press_0035.csv
+    hertz_cyl_half_1deg_frictionless_kin_check_x_disp_0035.csv
+    hertz_cyl_half_1deg_frictionless_kin_check_y_disp_0035.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=kinematic
+    Outputs/file_base=hertz_cyl_half_1deg_frictionless_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_kin_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_kin_check2
+    Outputs/chkfile/start_time=3.49'
+    rel_err = 1e-5
+    abs_zero = 3e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+  [./frictionless_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_frictionless_pen_check2.csv
+    hertz_cyl_half_1deg_frictionless_pen_check_cont_press_0035.csv
+    hertz_cyl_half_1deg_frictionless_pen_check_x_disp_0035.csv
+    hertz_cyl_half_1deg_frictionless_pen_check_y_disp_0035.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=penalty
+    Outputs/file_base=hertz_cyl_half_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_pen_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_pen_check2
+    Outputs/chkfile/start_time=3.49'
+    rel_err = 1e-5
+    abs_zero = 3e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+  [./frictionless_aug]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_frictionless_aug_check2.csv
+    hertz_cyl_half_1deg_frictionless_aug_check_cont_press_0035.csv
+    hertz_cyl_half_1deg_frictionless_aug_check_x_disp_0035.csv
+    hertz_cyl_half_1deg_frictionless_aug_check_y_disp_0035.csv'
+    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200
+    Contact/interface/model=frictionless
+    Contact/interface/formulation=augmented_lagrange
+    Contact/interface/al_penetration_tolerance=1e-12
+    Outputs/file_base=hertz_cyl_half_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_aug_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_aug_check2
+    Outputs/chkfile/start_time=3.49'
+    rel_err = 1e-5
+    abs_zero = 3e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+  [./mu_0_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template3.i'
+    csvdiff = 'hertz_cyl_half_1deg_mu_0_pen_check2.csv hertz_cyl_half_1deg_mu_0_pen_check_cont_press_0020.csv hertz_cyl_half_1deg_mu_0_pen_check_x_disp_0020.csv hertz_cyl_half_1deg_mu_0_pen_check_y_disp_0020.csv'
+    cli_args = 'Contact/interface/friction_coefficient=0.0
+    Outputs/file_base=hertz_cyl_half_1deg_mu_0_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_pen_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_pen_check2
+    Outputs/chkfile/start_time=1.99'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 0."
+  [../]
+  [./mu_0_2_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template3.i'
+    csvdiff = 'hertz_cyl_half_1deg_mu_0_2_pen_check2.csv hertz_cyl_half_1deg_mu_0_2_pen_check_cont_press_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_x_disp_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_y_disp_0060.csv'
+    cli_args = 'Executioner/end_time=6.0 Contact/interface/friction_coefficient=0.2
+    Outputs/file_base=hertz_cyl_half_1deg_mu_0_2_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check2
+    Outputs/chkfile/start_time=5.99'
+    max_time = 1500
+    rel_err = 1e-5
+    abs_zero = 3e-5
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 0.2."
+  [../]
+  [./mu_1_0_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template3.i'
+    csvdiff = 'hertz_cyl_half_1deg_mu_1_0_pen_check2.csv hertz_cyl_half_1deg_mu_1_0_pen_check_cont_press_0010.csv hertz_cyl_half_1deg_mu_1_0_pen_check_x_disp_0010.csv hertz_cyl_half_1deg_mu_1_0_pen_check_y_disp_0010.csv'
+    cli_args = 'Executioner/end_time=1.0 Contact/interface/friction_coefficient=1.0 Contact/interface/penalty=5e+8
+    Outputs/file_base=hertz_cyl_half_1deg_mu_1_0_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_1_0_pen_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_1_0_pen_check2
+    Outputs/chkfile/start_time=0.99'
+    rel_err = 1e-5
+    abs_zero = 1e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 1.0."
+  [../]
+  [./mu_0_2_aug]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_half_1deg_template1.i'
+    csvdiff = 'hertz_cyl_half_1deg_mu_0_2_aug_check2.csv hertz_cyl_half_1deg_mu_0_2_aug_check_cont_press_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_x_disp_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_y_disp_0030.csv'
+    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200
+    Contact/interface/formulation=augmented_lagrange Contact/interface/al_penetration_tolerance=1e-12
+    Executioner/end_time=3.0 Contact/interface/friction_coefficient=0.2
+    Outputs/file_base=hertz_cyl_half_1deg_mu_0_2_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_2_aug_check
+    Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_2_aug_check2
+    Outputs/chkfile/start_time=2.99'
+    max_time = 1500
+    rel_err = 1e-5
+    abs_zero = 3e-5
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictional, Augmented
+    Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
+  [../]
+[]

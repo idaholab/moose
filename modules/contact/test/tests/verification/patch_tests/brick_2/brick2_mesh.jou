@@ -1,0 +1,40 @@
+title 'Contact Patch Test - Simplified, constrained'
+
+# Setup dimensions of problem
+#{width=1.0}
+#{height=0.5}
+#{depth=1.0}
+#{nelem_w=1}
+#{nelem_h=1}
+
+# Lower block
+create brick X {width} Y {height} Z {depth}
+create brick X {width} Y {height} Z {depth}
+move volume 2 y {height}
+
+move volume 1 2 x {width/2.}
+move volume 1 2 y {height/2.}
+move volume 1 2 z {depth/2.}
+
+block 1 volume 1
+block 2 volume 2
+
+block 1 elem hex8
+block 2 elem hex8
+
+# Specify meshing
+curve 2 4 6 8 9 10 11 12 interval {2*nelem_w}
+curve 1 3 5 7 interval {nelem_w}
+curve 13 to 24 interval {nelem_h}
+
+mesh volume all
+
+sideset 1 surface 3
+sideset 2 surface 4 10
+sideset 3 surface 5
+sideset 4 surface 9
+sideset 5 surface 11
+sideset 6 surface 2 8
+sideset 7 surface 1 7
+
+export mesh 'brick2_mesh.e' overwrite

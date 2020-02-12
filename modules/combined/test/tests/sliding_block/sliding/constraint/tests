@@ -2,83 +2,76 @@
   issues = '#12527'
   design = '/ContactAction.md'
 
-  [./frictional_mu02_penalty]
+  [./frictional_mu02_penalty_sm]
     type = 'Exodiff'
-    input = 'frictional_02_penalty.i'
-    exodiff = 'frictional_02_penalty_out.e'
+    input = 'frictional_02_penalty_sm.i'
+    exodiff = 'frictional_02_penalty_sm_out.e'
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     max_time = 800
     allow_warnings = true
-    rel_err = 1e-4
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
 
-  [./frictional_mu04_penalty]
+  [./frictional_mu04_penalty_sm]
     type = 'Exodiff'
-    input = 'frictional_04_penalty.i'
-    exodiff = 'frictional_04_penalty_out.e'
+    input = 'frictional_04_penalty_sm.i'
+    exodiff = 'frictional_04_penalty_sm_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
-    rel_err = 1e-4
+    abs_zero = 1e-6
     max_time = 800
-#    deleted = '#6139'
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
 
-  [./frictionless_kinematic]
+  [./frictionless_kinematic_sm]
     type = 'Exodiff'
-    input = 'frictionless_kinematic.i'
-    exodiff = 'frictionless_kinematic_out.e'
+    input = 'frictionless_kinematic_sm.i'
+    exodiff = 'frictionless_kinematic_sm_out.e'
     heavy = true
     min_parallel = 4
-    abs_zero = 1e-7
-    rel_err = 1e-4
+    abs_zero = 1e-6
     max_time = 800
-#    deleted = '#6139'
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'MOOSE shall support mechanics frictionless contact problems. Legacy Solid Mechanics.'
   [../]
 
-  [./frictionless_penalty]
+  [./frictionless_penalty_sm]
     type = 'Exodiff'
-    input = 'frictionless_penalty.i'
-    exodiff = 'frictionless_penalty_out.e'
+    input = 'frictionless_penalty_sm.i'
+    exodiff = 'frictionless_penalty_sm_out.e'
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-7
-    rel_err = 1e-4
+    abs_zero = 1e-6
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'MOOSE shall support mechanics frictionless contact problems. Legacy Solid Mechanics.'
   [../]
 
-  [./frictionless_aug]
+  [./frictionless_aug_sm]
     type = 'Exodiff'
-    input = 'frictionless_aug.i'
-    exodiff = 'frictionless_aug_out.e'
+    input = 'frictionless_aug_sm.i'
+    exodiff = 'frictionless_aug_sm_out.e'
     heavy = true
     superlu = true
     min_parallel = 4
     abs_zero = 1e-4
-    rel_err = 1e-4
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'MOOSE shall support mechanics frictionless contact problems. Legacy Solid Mechanics.'
   [../]
 
-  [./frictional_mu02_aug]
+  [./frictional_mu02_aug_sm]
     type = 'Exodiff'
-    input = 'frictional_02_aug.i'
-    exodiff = 'frictional_02_aug_out.e'
+    input = 'frictional_02_aug_sm.i'
+    exodiff = 'frictional_02_aug_sm_out.e'
     heavy = true
     superlu = true
     min_parallel = 4
-    rel_err = 1e-4
-    abs_zero = 1e-4
+    abs_zero = 1e-5
+    rel_err = 1e-5
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
 
 []

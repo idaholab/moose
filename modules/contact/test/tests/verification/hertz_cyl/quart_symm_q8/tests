@@ -1,0 +1,75 @@
+[Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./glued_kin]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_glued_kin_check.csv hertz_cyl_qsym_1deg_glued_kin_check_cont_press_0010.csv hertz_cyl_qsym_1deg_glued_kin_check_x_disp_0010.csv hertz_cyl_qsym_1deg_glued_kin_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=glued Contact/interface/formulation=kinematic Outputs/file_base=hertz_cyl_qsym_1deg_glued_kin_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_glued_kin_check'
+    max_time = 1000
+    rel_err = 3e-5
+    abs_zero = 1e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+  [../]
+  [./glued_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_glued_pen_check.csv hertz_cyl_qsym_1deg_glued_pen_check_cont_press_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_x_disp_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=glued Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_glued_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_glued_pen_check'
+    max_time = 1000
+    rel_err = 3e-5
+    abs_zero = 1e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+  [../]
+  [./frictionless_kin]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_kin_check.csv hertz_cyl_qsym_1deg_frictionless_kin_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_kin_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_kin_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=kinematic Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_kin_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_kin_check'
+    max_time = 1000
+    rel_err = 4e-4
+    abs_zero = 1e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+  [../]
+  [./frictionless_pen]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_pen_check.csv hertz_cyl_qsym_1deg_frictionless_pen_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_pen_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_pen_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_pen_check'
+    max_time = 1000
+    rel_err = 4e-4
+    abs_zero = 5e-6
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+  [../]
+  [./frictionless_aug]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_aug_check.csv hertz_cyl_qsym_1deg_frictionless_aug_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_aug_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_aug_check_y_disp_0010.csv'
+    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200
+    Contact/interface/model=frictionless Contact/interface/formulation=augmented_lagrange Contact/interface/al_penetration_tolerance=1e-12
+    Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_aug_check'
+    rel_err = 4e-4
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
+  [../]
+[]

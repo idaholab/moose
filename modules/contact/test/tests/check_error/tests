@@ -1,0 +1,10 @@
+[Tests]
+  design = "/Contact.md"
+  issues = "#2816"
+  requirement = "The system shall generate an error if contact is used without updated coordinates"
+  [./contact_displacements]
+    type = 'RunException'
+    input = 'contact_displacements.i'
+    expect_err = "Contact requires updated coordinates.  Use the"
+  [../]
+[]

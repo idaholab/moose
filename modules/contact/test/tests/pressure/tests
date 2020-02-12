@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#3418'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [./pressureAugLag]
+    type = 'Exodiff'
+    input = 'pressureAugLag.i'
+    exodiff = 'pressureAugLag_out.e'
+    custom_cmp = 'pressure.exodiff'
+    petsc_version = '>=3.1'
+    max_parallel = 1
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
+  [../]
+
+  [./pressurePenalty]
+    type = 'Exodiff'
+    input = 'pressurePenalty.i'
+    exodiff = 'pressurePenalty_out.e'
+    custom_cmp = 'pressure.exodiff'
+    max_parallel = 1
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'
+  [../]
+
+  [./pressurePenalty_mechanical_constraint]
+    type = 'Exodiff'
+    input = 'pressurePenalty_mechanical_constraint.i'
+    exodiff = 'pressurePenalty_mechanical_constraint_out.e'
+    custom_cmp = 'pressure.exodiff'
+    max_parallel = 1
+   requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
+  [../]
+[]
