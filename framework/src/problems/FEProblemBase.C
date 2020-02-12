@@ -2169,12 +2169,12 @@ FEProblemBase::addADKernel(const std::string & kernel_name,
 
   // alias parameters of the two instances to the name without the suffix
   const std::string & base = parameters.get<std::string>("_moose_base");
-  MooseObjectParameterName the_name(MooseObjectName(base, name), "*");
-  MooseObjectParameterName res_name(MooseObjectName(base, name + "_residual"), "*");
-  MooseObjectParameterName jac_name(MooseObjectName(base, name + "_jacobian"), "*");
+  MooseObjectName the_name(base, name);
+  MooseObjectName res_name(base, name + "_residual");
+  MooseObjectName jac_name(base, name + "_jacobian");
 
-  _app.getInputParameterWarehouse().addControllableParameterAlias(the_name, res_name);
-  _app.getInputParameterWarehouse().addControllableParameterAlias(the_name, jac_name);
+  _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, res_name);
+  _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, jac_name);
 }
 
 void
