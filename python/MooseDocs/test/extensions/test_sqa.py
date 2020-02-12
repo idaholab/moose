@@ -575,7 +575,7 @@ class TestSQARequirementsRender(MooseDocsTestCase):
 
     def testSQARequirementIssues(self):
 
-        tok = sqa.SQARequirementIssues(None, issues=['#1', '#2'])
+        tok = sqa.SQARequirementIssues(None, issues=['#1', '#2'], url='https://github.com/idaholab/moose')
         res = self.render(tok, renderer=base.HTMLRenderer())
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'p', size=3, class_='moose-sqa-items')
