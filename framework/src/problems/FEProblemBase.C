@@ -2269,6 +2269,28 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addADBoundaryCondition(const std::string & bc_name,
+                                      const std::string & name,
+                                      InputParameters & parameters)
+{
+  addBoundaryCondition(bc_name + "<RESIDUAL>", name + "_residual", parameters);
+  addBoundaryCondition(bc_name + "<JACOBIAN>", name + "_jacobian", parameters);
+  haveADObjects(true);
+
+  // alias parameters of the two instances to the name without the suffix
+  std::vector<std::string> prefix = {parameters.get<std::string>("_moose_base"), "BCs"};
+  for (const auto & base : prefix)
+  {
+    MooseObjectParameterName the_name(MooseObjectName(base, name), "*");
+    MooseObjectParameterName res_name(MooseObjectName(base, name + "_residual"), "*");
+    MooseObjectParameterName jac_name(MooseObjectName(base, name + "_jacobian"), "*");
+
+    _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, res_name);
+    _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, jac_name);
+  }
+}
+
+void
 FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
