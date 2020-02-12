@@ -8,29 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceQpUserObjectBase.h"
-#include "MooseMesh.h"
 
-defineLegacyParams(InterfaceQpUserObjectBase);
-
+template <>
 InputParameters
-InterfaceQpUserObjectBase::validParams()
+validParams<InterfaceQpUserObjectBase>()
 {
-  InputParameters params = InterfaceValueUserObject::validParams();
+  InputParameters params = validParams<InterfaceValueUserObject>();
   params.addClassDescription("Base class to compute a scalar value or rate across an interface");
-  params.addParam<bool>("compute_rate", false, "if true, compute the rate of the value.");
-  params.addParam<bool>("compute_increment", false, "if true, compute the finite increment.");
+  params.addParam<MooseEnum>("value_type",
+                             InterfaceQpUserObjectBase::valueOptions(),
+                             "Type of value to compute and store");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   return params;
 }
 
 InterfaceQpUserObjectBase::InterfaceQpUserObjectBase(const InputParameters & parameters)
-  : InterfaceValueUserObject(parameters),
-    _compute_rate(getParam<bool>("compute_rate")),
-    _compute_increment(getParam<bool>("compute_increment"))
+  : InterfaceValueUserObject(parameters), _value_type(getParam<MooseEnum>("value_type"))
 
 {
-  if (_compute_rate && _compute_increment)
-    mooseError("InterfaceQpUserObjectBase cannot compute both the rate and the increment");
 }
 
 void

@@ -26,7 +26,10 @@
       expect_out = ' Solve Converged!'
       requirement = "The InterfaceUseroObject system shall be able to "
                     "get updated bulk, boundary and interface material property values."
-                    "The test use mooseAssert so it needs to run in debug mode"
+                    "This test uses two specific test materials "
+                    "(e.g. LinearNonLinearIterationMaterial and LinearNonLinearIterationInterfaceMaterial)"
+                    " and one test userobject (e.g. InterfaceUserObjectTestGetMaterialProperty)."
+                    "This test will produce an error if the computed an retrived material property are not the same."
       issues = '#14680'
       design = ' '
       max_threads = 1

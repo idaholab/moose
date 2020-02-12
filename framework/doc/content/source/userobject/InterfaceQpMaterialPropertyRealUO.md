@@ -8,7 +8,7 @@
 !syntax description /UserObjects/InterfaceQpMaterialPropertyRealUO
 
 InterfaceQpMaterialPropertyRealUO is a user object computing and storing average `real` material property values, rates, or increments across an interface for each quadrature point. The kind of average value are the one available in [InterfaceValueTools](/InterfaceValueTools.md).
-The user object only stores one type of value. For example to get both the material property value and material property rate the user must add two separate user objects in the input file.
+The value type stored by this userobject is selected via the `value_type` input parameter. For example to get both the material property value and material property rate the user must add two separate user objects in the input file.
 
 The InterfaceQpMaterialPropertyRealUO can provide two types of values to other MOOSE systems:
 

@@ -23,8 +23,6 @@ InputParameters validParams<InterfaceValueUserObject>();
 class InterfaceValueUserObject : public InterfaceUserObject
 {
 public:
-  static InputParameters validParams();
-
   InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:
@@ -32,4 +30,3 @@ protected:
   const MooseEnum _interface_value_type;
   virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
 };
-

@@ -25,9 +25,7 @@ InputParameters validParams<InterfaceQpMaterialPropertyBaseUserObject<>>();
 template <typename T>
 class InterfaceQpMaterialPropertyBaseUserObject : public InterfaceQpUserObjectBase
 {
-
 public:
-  static InputParameters validParams();
   /**
    * Class constructor
    * @param parameters The input parameters for this object
@@ -36,37 +34,10 @@ public:
   virtual ~InterfaceQpMaterialPropertyBaseUserObject(){};
 
 protected:
-  /* method computing the real value*/
-  virtual Real computeRealValue(const unsigned int qp) override final
-  {
-    if (!_compute_rate && !_compute_increment)
-    {
-      return computeInterfaceValueType(computeScalarMaterialProperty(&_prop, qp),
-                                       computeScalarMaterialProperty(&_prop_neighbor, qp));
-    }
-    else
-    {
+  /// method defining the scalar value computation given a scalar material property value
+  virtual Real computeRealValue(const unsigned int qp) override final;
 
-      Real value_master = 0;
-      Real value_slave = 0;
-      if (_dt != 0)
-      {
-
-        value_master = (computeScalarMaterialProperty(&_prop, qp) -
-                        computeScalarMaterialProperty(_prop_old, qp));
-        value_slave = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
-                       computeScalarMaterialProperty(_prop_neighbor_old, qp));
-        if (_compute_rate)
-        {
-          value_master /= _dt;
-          value_slave /= _dt;
-        }
-      }
-      return computeInterfaceValueType(value_master, value_slave);
-    }
-  };
-
-  /*template for computing a scalar material property value*/
+  /// method returning a scalar material property value given a generic T type
   virtual Real computeScalarMaterialProperty(const MaterialProperty<T> *,
                                              const unsigned int qp) = 0;
 
@@ -79,17 +50,16 @@ protected:
   ///@}
 };
 
-template <typename T>
+template <>
 InputParameters
-InterfaceQpMaterialPropertyBaseUserObject<T>::validParams()
+validParams<InterfaceQpMaterialPropertyBaseUserObject<>>()
 {
-  InputParameters params = InterfaceQpUserObjectBase::validParams();
+  InputParameters params = validParams<InterfaceQpUserObjectBase>();
   params.addRequiredParam<MaterialPropertyName>("property", "The material property name");
-  params.addParam<MaterialPropertyName>("property_neighbor",
-                                        "The neighbor neighbor material property name");
+  params.addParam<MaterialPropertyName>("property_neighbor", "The neighbor material property name");
   params.addClassDescription(
       "Computes the interface material property value or rate across an interface. The value or "
-      "rate is computed according to the provided interface_value_type paramter.");
+      "rate is computed according to the provided interface_value_type parameter.");
   return params;
 }
 
@@ -101,13 +71,49 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::InterfaceQpMaterialPropertyBaseUse
     _prop_neighbor(parameters.isParamSetByUser("property_neighbor")
                        ? getNeighborMaterialProperty<T>("property_neighbor")
                        : getNeighborMaterialProperty<T>("property")),
-    _prop_old(_compute_rate || _compute_increment ? &getMaterialPropertyOld<T>("property")
-                                                  : nullptr),
-    _prop_neighbor_old(_compute_rate || _compute_increment
-                           ? (parameters.isParamSetByUser("property_neighbor")
-                                  ? &getNeighborMaterialPropertyOld<T>("property_neighbor")
-                                  : &getNeighborMaterialPropertyOld<T>("property"))
+    _prop_old(_value_type > 0 ? &getMaterialPropertyOld<T>("property") : nullptr),
+    _prop_neighbor_old(_value_type > 0
+                           ? ((parameters.isParamSetByUser("property_neighbor")
+                                   ? &getNeighborMaterialPropertyOld<T>("property_neighbor")
+                                   : &getNeighborMaterialPropertyOld<T>("property")))
                            : nullptr)
-
 {
+}
+
+template <typename T>
+Real
+InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned int qp)
+{
+  Real value_master = 0;
+  Real value_slave = 0;
+  /*using an if else here because a switch produce an unkown error in the docuemantion test */
+  if (_value_type == 0) /*value*/
+  {
+    value_master = computeScalarMaterialProperty(&_prop, qp);
+    value_slave = computeScalarMaterialProperty(&_prop_neighbor, qp);
+  }
+  else if (_value_type == 1) /*rate*/
+  {
+    if (_dt != 0)
+    {
+      value_master = (computeScalarMaterialProperty(&_prop, qp) -
+                      computeScalarMaterialProperty(_prop_old, qp)) /
+                     _dt;
+      value_slave = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
+                     computeScalarMaterialProperty(_prop_neighbor_old, qp)) /
+                    _dt;
+    }
+  }
+  else if (_value_type == 2) /*increment*/
+  {
+    value_master =
+        (computeScalarMaterialProperty(&_prop, qp) - computeScalarMaterialProperty(_prop_old, qp));
+    value_slave = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
+                   computeScalarMaterialProperty(_prop_neighbor_old, qp));
+  }
+  else
+    mooseError("InterfaceQpMaterialPropertyBaseUserObject::computeRealValue the supplied "
+               "value type has not been implemented");
+
+  return computeInterfaceValueType(value_master, value_slave);
 }

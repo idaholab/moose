@@ -124,7 +124,7 @@
     boundary = 'master0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
-    compute_rate = true
+    value_type = rate
   [../]
   [./interface_avg_value_increment_uo]
     type = InterfaceQpValueUserObject
@@ -133,7 +133,7 @@
     boundary = 'master0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
-    compute_increment = true
+    value_type = increment
   [../]
 []
 

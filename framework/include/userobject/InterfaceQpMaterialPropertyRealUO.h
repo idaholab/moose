@@ -22,9 +22,7 @@ InputParameters validParams<InterfaceQpMaterialPropertyRealUO>();
  */
 class InterfaceQpMaterialPropertyRealUO : public InterfaceQpMaterialPropertyBaseUserObject<Real>
 {
-
 public:
-  static InputParameters validParams();
   /**
    * Class constructor
    * @param parameters The input parameters for this object

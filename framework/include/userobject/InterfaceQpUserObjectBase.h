@@ -27,7 +27,8 @@ InputParameters validParams<InterfaceQpUserObjectBase>();
 class InterfaceQpUserObjectBase : public InterfaceValueUserObject
 {
 public:
-  static InputParameters validParams();
+  /// the method defining the returning value type: value, rate or increment
+  static MooseEnum valueOptions() { return MooseEnum("value rate increment", "value"); }
 
   InterfaceQpUserObjectBase(const InputParameters & parameters);
   virtual ~InterfaceQpUserObjectBase(){};
@@ -43,10 +44,10 @@ public:
   Real getSideAverageValue(const dof_id_type elem, const unsigned int side) const;
 
 protected:
-  /// boolealn varaibles deciding which type of value to return
-  const bool _compute_rate;
-  const bool _compute_increment;
-  /// this map is used to store QP data.
+  /// moose enum deciding this userobject reture value type
+  const MooseEnum _value_type;
+
+  /// these maps are used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_JxW;
   virtual Real computeRealValue(const unsigned int /*qp*/) = 0;

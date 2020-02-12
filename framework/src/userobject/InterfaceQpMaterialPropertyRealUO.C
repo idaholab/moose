@@ -8,18 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceQpMaterialPropertyRealUO.h"
-#include "MooseMesh.h"
+
 registerMooseObject("MooseApp", InterfaceQpMaterialPropertyRealUO);
 
-defineLegacyParams(InterfaceQpMaterialPropertyRealUO);
-
+template <>
 InputParameters
-InterfaceQpMaterialPropertyRealUO::validParams()
+validParams<InterfaceQpMaterialPropertyRealUO>()
 {
-  InputParameters params = InterfaceQpMaterialPropertyBaseUserObject<Real>::validParams();
+  InputParameters params = validParams<InterfaceQpMaterialPropertyBaseUserObject<Real>>();
   params.addClassDescription(
       "Computes the value, rate or increment of a Real Material property across an "
-      "interface. The value or rate is computed according to the provided "
+      "interface. The value, rate or increment is computed according to the provided "
       "interface_value_type parameter");
   return params;
 }

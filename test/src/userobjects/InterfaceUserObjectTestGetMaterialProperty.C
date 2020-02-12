@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceUserObjectTestGetMaterialProperty.h"
-#include "MooseMesh.h"
+
 registerMooseObject("MooseTestApp", InterfaceUserObjectTestGetMaterialProperty);
 
 defineLegacyParams(InterfaceUserObjectTestGetMaterialProperty);
@@ -22,9 +22,12 @@ InterfaceUserObjectTestGetMaterialProperty::validParams()
   params.addRequiredParam<MaterialPropertyName>("property_boundary", "The neighbor property name");
   params.addRequiredParam<MaterialPropertyName>("property_interface",
                                                 "The interface property name");
+  params.set<ExecFlagEnum>("execute_on") = {
+      EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_FINAL};
   params.addClassDescription(
-      "This userobject tests the capabilities of the interface user object to"
-      "get synchornised values of bulk, boundary and interface material properties ");
+      "This userobject tests the capabilities of the interface user object system to"
+      "get synchronised values of bulk, boundary and interface material properties. This UO should "
+      "only be for testing purposes.");
   return params;
 }
 
@@ -86,34 +89,22 @@ InterfaceUserObjectTestGetMaterialProperty::execute()
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       // check material property values
-
-      mooseAssert(
-          _mp[qp] ==
-              1 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
-          "InterfaceUserObjectTestGetMaterialProperty bad material property value"
-              << _mp[qp] << " instead of "
-              << (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
-      mooseAssert(
-          _mp_neighbor[qp] ==
-              2 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
-          "InterfaceUserObjectTestGetMaterialProperty bad neighbor material property value: "
-              << _mp_neighbor[qp] << " instead of "
-              << 2 * (_t_step +
-                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
-      mooseAssert(
-          _mp_interface[qp] ==
-              4 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
-          "InterfaceUserObjectTestGetMaterialProperty bad interface material property value: "
-              << _mp_interface[qp] << " instead of "
-              << 4 * (_t_step +
-                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
-      mooseAssert(
-          _mp_boundary[qp] ==
-              3 * (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()),
-          "InterfaceUserObjectTestGetMaterialProperty bad boundary material property value: "
-              << _mp_boundary[qp] << " instead of "
-              << 3 * (_t_step +
-                      _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()));
+      Real V = _t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations();
+      if (_mp[qp] != (1 * V))
+        mooseError("InterfaceUserObjectTestGetMaterialProperty bad material property value" +
+                   std::to_string(_mp[qp]) + " instead of " + std::to_string(1 * V));
+      if (_mp_neighbor[qp] != (2 * V))
+        mooseError("InterfaceUserObjectTestGetMaterialProperty bad neighbor material property "
+                   "value: " +
+                   std::to_string(_mp_neighbor[qp]) + " instead of " + std::to_string(2 * V));
+      if (_mp_boundary[qp] != (3 * V))
+        mooseError("InterfaceUserObjectTestGetMaterialProperty bad boundary material property "
+                   "value: " +
+                   std::to_string(_mp_boundary[qp]) + " instead of " + std::to_string(3 * V));
+      if (_mp_interface[qp] != (4 * V))
+        mooseError("InterfaceUserObjectTestGetMaterialProperty bad interface material property "
+                   "value: " +
+                   std::to_string(_mp_interface[qp]) + " instead of " + std::to_string(4 * V));
     }
   }
   else

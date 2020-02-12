@@ -10,10 +10,9 @@
 #include "InterfaceValueUserObject.h"
 #include "InterfaceValueTools.h"
 
-defineLegacyParams(InterfaceValueUserObject);
-
+template <>
 InputParameters
-InterfaceValueUserObject::validParams()
+validParams<InterfaceValueUserObject>()
 {
   InputParameters params = InterfaceUserObject::validParams();
   params.addParam<MooseEnum>("interface_value_type",

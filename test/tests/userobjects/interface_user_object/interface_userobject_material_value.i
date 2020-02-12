@@ -14,7 +14,7 @@
     top_right = '1 1 0'
     block_id = 1
   [../]
-  [./interface]
+  [./master0_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     master_block = '0'
@@ -22,7 +22,7 @@
     new_boundary = 'master0_interface'
   [../]
   [./break_boundary]
-    input = interface
+    input = master0_interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
@@ -40,6 +40,7 @@
     block = 1
   [../]
 []
+
 
 [Kernels]
   [./diff_u]
@@ -62,7 +63,7 @@
 []
 
 [InterfaceKernels]
-  [./interface]
+  [./master0_interface]
     type = PenaltyInterfaceDiffusionDot
     variable = u
     neighbor_var = v
@@ -84,19 +85,6 @@
   [../]
 []
 
-[Postprocessors]
-  [./u_int]
-    type = ElementIntegralVariablePostprocessor
-    variable = u
-    block = 0
-  [../]
-  [./v_int]
-    type = ElementIntegralVariablePostprocessor
-    variable = v
-    block = 1
-  [../]
-[]
-
 [Preconditioning]
   [./SMP]
     type = SMP
@@ -111,7 +99,7 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = ' lu       superlu_dist                '
   dt = 0.1
-  num_steps = 1
+  num_steps = 3
   dtmin = 0.1
   line_search = none
 []
@@ -119,6 +107,7 @@
 [Outputs]
   exodus = true
 []
+
 
 [UserObjects]
   [./interface_material_uo]

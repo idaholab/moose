@@ -20,7 +20,9 @@ LinearNonLinearIterationInterfaceMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the property");
   params.addParam<Real>("prefactor", 1, "the prefactor to apply to the new material value");
   params.addClassDescription(
-      "Interface material whose property is equal to (t_step+n_linear*n_nonlinear)*prefactor");
+      "Interface material whose property is equal to (t_step+n_linear*n_nonlinear)*prefactor. Use "
+      "this material only to test that other MOOSE systems can get in sync values. Only use RunApp "
+      "type tests.");
   return params;
 }
 
