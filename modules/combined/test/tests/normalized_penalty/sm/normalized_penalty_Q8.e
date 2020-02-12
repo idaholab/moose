@@ -1,1 +1,0 @@
-../normalized_penalty_Q8.e

@@ -1,61 +1,61 @@
 [Tests]
   issues = '#3418 #14630'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./pressureAugLag]
+  [./pressureAugLag_sm]
     type = 'Exodiff'
-    input = 'pressureAugLag.i'
-    exodiff = 'pressureAugLag_out.e'
+    input = 'pressureAugLag_sm.i'
+    exodiff = 'pressureAugLag_sm_out.e'
     custom_cmp = 'pressure.exodiff'
     petsc_version = '>=3.1'
     max_parallel = 1
-    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
-
-  [./pressurePenalty]
+  [./pressurePenalty_sm]
     type = 'Exodiff'
-    input = 'pressurePenalty.i'
-    exodiff = 'pressurePenalty_out.e'
+    input = 'pressurePenalty_sm.i'
+    exodiff = 'pressurePenalty_sm_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'
   [../]
-
-  [./pressurePenalty_mechanical_constraint]
+  [./pressurePenalty_mechanical_constraint_sm]
     type = 'Exodiff'
-    input = 'pressurePenalty_mechanical_constraint.i'
-    exodiff = 'pressurePenalty_mechanical_constraint_out.e'
+    input = 'pressurePenalty_mechanical_constraint_sm.i'
+    exodiff = 'pressurePenalty_mechanical_constraint_sm_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
-   requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
+    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
-
-  [./4ElemTensionRelease]
+  [./4ElemTensionRelease_sm]
     type = 'Exodiff'
-    input = 4ElemTensionRelease.i
-    exodiff = 4ElemTensionRelease_out.e
+    input = 4ElemTensionRelease_sm.i
+    exodiff = 4ElemTensionRelease_sm_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
-    requirement = 'The contact system shall enforce and release contact conditions. 4 elements.'
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
-
-  [./4ElemTensionRelease_mechanical_constraint]
+  [./4ElemTensionRelease_mechanical_constraint_sm]
     type = 'Exodiff'
-    input = 4ElemTensionRelease_mechanical_constraint.i
+    input = 4ElemTensionRelease_mechanical_constraint_sm.i
     exodiff = 4ElemTensionRelease_mechanical_constraint_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
-    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and mechanical constraints.'
+    cli_args = 'Outputs/file_base=4ElemTensionRelease_mechanical_constraint_out'
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and mechanical constraints. Legacy Solid Mechanics. '
+    no_error_deprecated = true
   [../]
-
-  [./4ElemTensionRelease_no_new_nonzeros]
+  [./4ElemTensionRelease_mechanical_constraint_sm_no_nonzeros]
     type = 'Exodiff'
-    input = 4ElemTensionRelease_mechanical_constraint.i
+    input = 4ElemTensionRelease_mechanical_constraint_sm.i
     exodiff = 4ElemTensionRelease_no_new_nonzeros_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true Outputs/file_base=4ElemTensionRelease_no_new_nonzeros_out'
@@ -63,22 +63,21 @@
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
-    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and ensure no new Jacobian allocations.'
-
+    requirement = 'The contact system shall enforce and release contact conditions. 4 elements and ensure no new Jacobian allocations. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
-
-  [./8ElemTensionRelease]
+  [./8ElemTensionRelease_sm]
     type = 'Exodiff'
-    input = 8ElemTensionRelease.i
-    exodiff = 8ElemTensionRelease_out.e
+    input = 8ElemTensionRelease_sm.i
+    exodiff = 8ElemTensionRelease_sm_out.e
     custom_cmp = '8ElemTensionRelease.exodiff'
     min_parallel = 4
     max_parallel = 4
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
-    requirement = 'The contact system shall enforce and release contact conditions. 8 elements.'
-
+    requirement = 'The contact system shall enforce and release contact conditions. 8 elements. Legacy Solid Mechanics.'
+    no_error_deprecated = true
   [../]
 
   [./horizontal_blocks_mortar_TM]
