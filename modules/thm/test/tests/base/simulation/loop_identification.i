@@ -39,10 +39,10 @@
   initial_T = 300
   initial_vel = 0
 
-  velocity_relaxation = false
-  pressure_relaxation = false
-  interface_transfer = false
-  wall_mass_transfer = false
+  velocity_relaxation_rate = 0
+  pressure_relaxation_rate = 0
+  heat_exchange_coef_liquid = 0
+  heat_exchange_coef_vapor = 0
 
   initial_p_liquid = 1e6
   initial_T_liquid = 453

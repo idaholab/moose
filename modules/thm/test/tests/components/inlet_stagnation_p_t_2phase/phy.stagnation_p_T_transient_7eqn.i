@@ -13,10 +13,6 @@
                            1e0 1e-3 1e-6
                            1e0 1e-3 1e-6'
 
-  pressure_relaxation = true
-  velocity_relaxation = true
-  interface_transfer = true
-
   specific_interfacial_area_max_value = 10
 
   closures = simple

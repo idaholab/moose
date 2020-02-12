@@ -12,10 +12,10 @@
   scaling_factor_2phase = '1e0 1e0 1e-2 1e-4 1e0 1e-3 1e-5'
 
   gravity_vector = '0 0 0'
-  pressure_relaxation = false
-  velocity_relaxation = false
-  interface_transfer = false
-  wall_mass_transfer = false
+  pressure_relaxation_rate = 0
+  velocity_relaxation_rate = 0
+  heat_exchange_coef_liquid = 0
+  heat_exchange_coef_vapor = 0
 
   specific_interfacial_area_max_value = 10
   explicit_acoustic_impedance = true
