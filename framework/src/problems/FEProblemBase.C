@@ -2166,6 +2166,15 @@ FEProblemBase::addADKernel(const std::string & kernel_name,
   addKernel(kernel_name + "<RESIDUAL>", name + "_residual", parameters);
   addKernel(kernel_name + "<JACOBIAN>", name + "_jacobian", parameters);
   haveADObjects(true);
+
+  // alias parameters of the two instances to the name without the suffix
+  const std::string & base = parameters.get<std::string>("_moose_base");
+  MooseObjectParameterName the_name(MooseObjectName(base, name), "*");
+  MooseObjectParameterName res_name(MooseObjectName(base, name + "_residual"), "*");
+  MooseObjectParameterName jac_name(MooseObjectName(base, name + "_jacobian"), "*");
+
+  _app.getInputParameterWarehouse().addControllableParameterAlias(the_name, res_name);
+  _app.getInputParameterWarehouse().addControllableParameterAlias(the_name, jac_name);
 }
 
 void
@@ -2876,10 +2885,10 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
           warehouse->addObjects(material, neighbor_material, face_material, tid);
 
       // link parameters of face and neighbor materials
-      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
-      MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "*");
-      MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()),
-                                             "*");
+      const std::string & base = parameters.get<std::string>("_moose_base");
+      MooseObjectParameterName name(MooseObjectName(base, material->name()), "*");
+      MooseObjectParameterName face_name(MooseObjectName(base, face_material->name()), "*");
+      MooseObjectParameterName neighbor_name(MooseObjectName(base, neighbor_material->name()), "*");
 
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
       _app.getInputParameterWarehouse().addControllableParameterConnection(

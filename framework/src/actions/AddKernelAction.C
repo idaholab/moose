@@ -30,11 +30,7 @@ AddKernelAction::act()
   if (_current_task == "add_kernel")
   {
     if (Registry::isADObj(_type + "<RESIDUAL>"))
-    {
-      _problem->addKernel(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
-      _problem->addKernel(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
-      _problem->haveADObjects(true);
-    }
+      _problem->addADKernel(_type, _name, _moose_object_pars);
     else
       _problem->addKernel(_type, _name, _moose_object_pars);
   }
