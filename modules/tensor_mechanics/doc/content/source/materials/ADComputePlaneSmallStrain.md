@@ -43,7 +43,7 @@ problems use scalar variables. Multiple scalar variables can be provided such
 that one strain calculator is needed for multiple generalized plane strain
 models on different subdomains.
 
-For the case of plane stress, the [WeakPlaneStress](WeakPlaneStress.md) kernel
+For the case of plane stress, the [ADWeakPlaneStress](ADWeakPlaneStress.md) kernel
 is used to integrate the out-of-plane component of the stress over the area of
 each element, and assemble that integral to the residual of the out-of-plane
 strain field variable. This results in a weak enforcement of the condition that

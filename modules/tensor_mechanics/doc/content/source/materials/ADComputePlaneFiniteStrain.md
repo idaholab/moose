@@ -46,7 +46,7 @@ direction of the out-of-plane strain and $\epsilon|^{op}$ is a prescribed
 out-of-plane strain value: this strain value can be given either as a scalar
 variable or a nonlinear field variable.
 
-For the case of plane stress, the [WeakPlaneStress](WeakPlaneStress.md) kernel
+For the case of plane stress, the [ADWeakPlaneStress](ADWeakPlaneStress.md) kernel
 is used to integrate the out-of-plane component of the stress over the area of
 each element, and assemble that integral to the residual of the out-of-plane
 strain field variable. This results in a weak enforcement of the condition that
@@ -158,7 +158,7 @@ documentation.
 
 Once the incremental deformation gradient is calculated for the specific 2D geometry,
 the deformation gradient is passed to the strain and rotation methods used by the
-3D Cartesian simulations, as described in the [Finite Strain Class](ComputeFiniteStrain.md)
+3D Cartesian simulations, as described in the [Finite Strain Class](ADComputeFiniteStrain.md)
 documentation.
 
 ## Example Input Files
