@@ -37,6 +37,7 @@ protected:
   MaterialProperty<Real> & _chemical_potential;
   MaterialProperty<Real> * _dchemical_potential;
 
+  /// The old stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RealTensorValue> & _direction_tensor;
   const MaterialProperty<Real> & _prefactor;

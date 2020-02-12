@@ -54,14 +54,25 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 
+  /// A Userobject that carries the subblock ID for all elements
   const SubblockIndexProvider * _subblock_id_provider;
 
+  /// Whether an out-of-plane strain variable is coupled
   bool _has_out_of_plane_strain;
+
+  ///{@ Current and old values of the out-of-plane strain variable
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
+  ///@}
 
+  /// Whether an out-of-plane strain scalar variable is coupled
   bool _has_scalar_out_of_plane_strain;
+
+  /// Number of out-of-plane strain scalar variables
   unsigned int _nscalar_strains;
+
+  ///{@ Current and old values of the out-of-plane strain scalar variable
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
+  ///@}
 };

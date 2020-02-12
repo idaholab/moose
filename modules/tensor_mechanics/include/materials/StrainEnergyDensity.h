@@ -36,6 +36,7 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
+  /// Base name of the material system
   const std::string _base_name;
 
   /// Whether the material model is a total or incremental model
@@ -45,9 +46,10 @@ protected:
   MaterialProperty<Real> & _strain_energy_density;
   const MaterialProperty<Real> & _strain_energy_density_old;
 
-  /// Current and old values of stress
+  ///{@ Current and old values of stress
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _stress_old;
+  ///@}
 
   /// Current value of mechanical strain which includes elastic and
   /// inelastic components of the strain

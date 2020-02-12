@@ -47,9 +47,12 @@ protected:
   virtual void computeAverageGradientTest();
   virtual void computeAverageGradientPhi();
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
+
   bool _use_finite_deform_jacobian;
 
+  /// The stress tensor that the divergence operator operates on
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
@@ -59,10 +62,13 @@ protected:
   const MaterialProperty<RankTwoTensor> * _rotation_increment;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
 
   /// Coupled displacement variables
   unsigned int _ndisp;
+
+  /// Displacement variables IDs
   std::vector<unsigned int> _disp_var;
 
   const bool _temp_coupled;

@@ -36,6 +36,7 @@ protected:
   virtual Real computeQpIntegral();
 
 private:
+  /// Base name of the material system
   const std::string _base_name;
 
   const std::array<std::array<const VariableGradient *, 3>, 6> _grad;

@@ -45,5 +45,7 @@ protected:
   const VectorValue<bool> & _periodic_dir;
 
   const unsigned int _dim;
+
+  /// Number of displacement variables
   const unsigned int _ndisp;
 };

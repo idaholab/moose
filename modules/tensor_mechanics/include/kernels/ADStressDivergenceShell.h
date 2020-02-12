@@ -46,6 +46,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
   const bool _large_strain;
 

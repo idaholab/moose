@@ -44,12 +44,21 @@ protected:
     return _subblock_id_provider ? _subblock_id_provider->getSubblockIndex(*_current_elem) : 0;
   };
 
+  /// A Userobject that carries the subblock ID for all elements
   const SubblockIndexProvider * _subblock_id_provider;
 
+  /// Whether an out-of-plane strain variable is coupled
   const bool _has_out_of_plane_strain;
+
+  /// The out-of-plane strain variable
   const VariableValue & _out_of_plane_strain;
 
+  /// Whether out-of-plane strain scalar variables are coupled
   const bool _has_scalar_out_of_plane_strain;
+
+  /// Number of out-of-plane strain scalar variables
   unsigned int _nscalar_strains;
+
+  /// The out-of-plane strain scalar variables
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };

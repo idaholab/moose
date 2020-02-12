@@ -38,7 +38,10 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
+
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
 
   const bool _c_coupled;
