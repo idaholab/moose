@@ -1,0 +1,18 @@
+[Tests]
+  [./csv_validation_tester_01]
+    type = CSVValidationTester
+    input = csv_validation_tester_01.i
+    csvdiff = csv_validation_tester_01.csv
+    mean_limit = 1e-2
+    std_limit = 0.011
+  [../]
+
+  [./csv_validation_tester_02]
+    type = CSVValidationTester
+    input = csv_validation_tester_01.i
+    csvdiff = csv_validation_tester_01.csv
+    mean_limit = 1e-2
+    std_limit = 0.0
+    prereq = csv_validation_tester_01
+  [../]
+[]

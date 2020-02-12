@@ -299,7 +299,7 @@ class TestHarness:
             self.keyboard_talk = False
             print('\nExiting due to keyboard interrupt...')
 
-   # Create and return list of tester objects. A tester is created by providing
+    # Create and return list of tester objects. A tester is created by providing
     # abspath to basename (dirpath), and the test file in queustion (file)
     def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects

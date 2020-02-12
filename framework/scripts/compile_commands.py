@@ -1,4 +1,4 @@
-#!/usr/bin/env/python3
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -26,4 +26,4 @@ for file in lines[3].split() :
     'file' : file
   })
 
-print json.dumps(commands, indent=2)
+print(json.dumps(commands, indent=2))
