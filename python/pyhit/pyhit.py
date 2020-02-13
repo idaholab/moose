@@ -9,9 +9,15 @@
 
 """Wrapper for hit parser."""
 import os
+import subprocess
 import moosetree
 from mooseutils import message
-from . import hit
+try:
+    from . import hit
+except:
+    testdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'test'))
+    subprocess.run(['make', 'hit'], cwd=testdir)
+    from . import hit
 
 class Node(moosetree.Node):
     """

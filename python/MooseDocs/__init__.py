@@ -11,6 +11,13 @@ import sys
 import subprocess
 import logging
 
+
+if sys.version_info < (3, 6):
+    print('"MOOSEDocs" requires python version 3.6 or greater, version {}.{} is being used.' \
+          .format(sys.version_info[0], sys.version_info[1]))
+    sys.exit(1)
+
+
 import mooseutils
 
 # Current logging level, used to allow for debug only type checking, etc.
