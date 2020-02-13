@@ -5,3 +5,4 @@ dependencies:
     - tensor_mechanics
 specs:
     - tests
+repo: moose

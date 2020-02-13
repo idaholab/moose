@@ -84,6 +84,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
                        const std::string & name,
                        Moose::VarKindType var_kind)
   : libMesh::ParallelObject(subproblem),
+    ConsoleStreamInterface(subproblem.getMooseApp()),
     _subproblem(subproblem),
     _app(subproblem.getMooseApp()),
     _factory(_app.getFactory()),
@@ -102,7 +103,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _time_integrator(nullptr),
     _computing_scaling_jacobian(false),
     _computing_scaling_residual(false),
-    _automatic_scaling(false)
+    _automatic_scaling(false),
+    _verbose(false)
 {
 }
 
@@ -1154,6 +1156,27 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
     for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
       scalar_variables[i]->scalingFactor(1. / inverse_scaling_factors[offset + i] *
                                          scalar_variables[i]->scalingFactor());
+
+    if (thread == 0 && _verbose)
+    {
+      _console << "Automatic scaling factors:\n";
+      auto original_flags = _console.flags();
+      auto original_precision = _console.precision();
+      _console.unsetf(std::ios_base::floatfield);
+      _console.precision(6);
+
+      for (const auto & field_variable : field_variables)
+        _console << "  " << field_variable->name() << ": " << field_variable->scalingFactor()
+                 << "\n";
+      for (const auto & scalar_variable : scalar_variables)
+        _console << "  " << scalar_variable->name() << ": " << scalar_variable->scalingFactor()
+                 << "\n";
+      _console << "\n\n";
+
+      // restore state
+      _console.flags(original_flags);
+      _console.precision(original_precision);
+    }
   }
 }
 

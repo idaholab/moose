@@ -17,6 +17,7 @@
 #include "InputParameters.h"
 #include "MooseObjectWarehouseBase.h"
 #include "MooseVariableBase.h"
+#include "ConsoleStreamInterface.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
@@ -92,7 +93,8 @@ struct VarCopyInfo
  * Base class for a system (of equations)
  *
  */
-class SystemBase : public libMesh::ParallelObject
+class SystemBase : public libMesh::ParallelObject, public ConsoleStreamInterface
+
 {
 public:
   SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind);
@@ -152,6 +154,12 @@ public:
    * @param automatic_scaling A boolean representing whether we are performing automatic scaling
    */
   void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
+
+  /**
+   * Sets the verbose flag
+   * @param[in] verbose   Verbose flag
+   */
+  void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
 
   /**
    * Gets writeable reference to the dof map
@@ -843,6 +851,9 @@ protected:
 
   /// Whether to automatically scale the variables
   bool _automatic_scaling;
+
+  /// True if printing out additional information
+  bool _verbose;
 };
 
 #define PARALLEL_TRY

@@ -633,33 +633,6 @@ NonlinearSystem::computeScaling()
   for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
     flattened_inverse_scaling_factors[i + offset] = inverse_scaling_factors[i + offset];
 
-  if (_verbose)
-  {
-    _console << "Automatic scaling factors:\n";
-    auto original_flags = _console.flags();
-    auto original_precision = _console.precision();
-    _console.unsetf(std::ios_base::floatfield);
-    _console.precision(6);
-
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-    {
-      auto & field_variable = *field_variables[i];
-      _console << "  " << field_variable.name() << ": "
-               << 1.0 / flattened_inverse_scaling_factors[i] << "\n";
-    }
-    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    {
-      auto & scalar_variable = *scalar_variables[i];
-      _console << "  " << scalar_variable.name() << ": "
-               << 1.0 / flattened_inverse_scaling_factors[offset + i] << "\n";
-    }
-    _console << "\n\n";
-
-    // restore state
-    _console.flags(original_flags);
-    _console.precision(original_precision);
-  }
-
   // Now set the scaling factors for the variables
   applyScalingFactors(flattened_inverse_scaling_factors);
   if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
