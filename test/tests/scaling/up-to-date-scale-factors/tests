@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NonlinearSystem.md'
+  issues = '#12601'
+  [up-to-date-scale-factors]
+    type = Exodiff
+    input = up-to-date-scale-factors.i
+    exodiff = up-to-date-scale-factors_out.e
+    expect_out = 'Automatic scaling factors:\s+u:\s+0\.125'
+    requirement = 'The system shall print current variable automatic scaling factors'
+  []
+[]
