@@ -99,6 +99,7 @@ build
 !**/gold/*.vtk
 !**/gold/*.vtu
 !**/gold/*.pvtu
+!**/gold/*.xml*
 
 peacock_run_tmp.i
 yaml_dump*
