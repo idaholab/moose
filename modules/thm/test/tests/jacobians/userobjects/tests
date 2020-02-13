@@ -154,6 +154,16 @@
   [./boundary_flux_3eqn_ghost_stagnation_pressure_temperature]
     type = 'PetscJacobianTester'
     input = 'boundary_flux_3eqn_ghost_stagnation_pressure_temperature.i'
+    cli_args = 'UserObjects/boundary_flux/normal=-1'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./boundary_flux_3eqn_ghost_stagnation_pressure_temperature_reversed]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_stagnation_pressure_temperature.i'
+    cli_args = 'UserObjects/boundary_flux/normal=1'
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1

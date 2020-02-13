@@ -27,6 +27,8 @@ protected:
 
   /// Specified stagnation temperature
   const Real & _T0;
+  /// Reversibility
+  const bool & _reversible;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;

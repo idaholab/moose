@@ -74,6 +74,7 @@ A = 0.1
     input = 'pipe1:in'
     p0 = 1.0001e5
     T0 = 300
+    reversible = false
   [../]
 
   [./pipe2_out]
