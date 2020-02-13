@@ -1,0 +1,1 @@
+../../../../../contact/test/tests/fieldsplit/2blocks3d.e

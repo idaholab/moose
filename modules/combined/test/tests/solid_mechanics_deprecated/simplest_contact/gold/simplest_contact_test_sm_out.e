@@ -1,0 +1,1 @@
+../../../../../../contact/test/tests/simplest_contact/gold/simplest_contact_test_out.e

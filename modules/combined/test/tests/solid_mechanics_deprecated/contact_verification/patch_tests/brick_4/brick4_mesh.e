@@ -1,0 +1,1 @@
+../../../../../../../contact/test/tests/verification/patch_tests/brick_4/brick4_mesh.e

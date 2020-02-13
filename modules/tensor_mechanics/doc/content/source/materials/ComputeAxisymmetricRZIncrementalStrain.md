@@ -15,7 +15,7 @@ the [Incremental Finite Strain Class](ComputeIncrementalSmallStrain.md) page.
 
 ## Example Input File
 
-!listing modules/combined/test/tests/contact_verification/patch_tests/cyl_1/cyl1_mu_0_2_pen.i
+!listing modules/contact/test/tests/verification/patch_tests/cyl_1/cyl1_mu_0_2_pen.i
          block=Materials/bot_strain
 
 !syntax parameters /Materials/ComputeAxisymmetricRZIncrementalStrain
