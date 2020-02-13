@@ -33,11 +33,14 @@ protected:
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
-  ///@{ displacement variables
+  /// Displacement variables
   std::vector<VariableName> _displacements;
+
+  /// Number of displacement variables
   unsigned int _ndisp;
+
+  /// Coupled displacement variables
   std::vector<VariableName> _coupled_displacements;
-  ///@}
 
   ///@{ residual debugging
   std::vector<AuxVariableName> _save_in;

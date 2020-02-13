@@ -48,8 +48,11 @@ protected:
   const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
   const ADMaterialProperty(RankFourTensor) & _elasticity_tensor;
+
   const ADMaterialProperty(RankTwoTensor) & _strain_increment;
   const ADMaterialProperty(RankTwoTensor) & _rotation_increment;
+
+  /// The old stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
 
   /**

@@ -18,6 +18,7 @@
 #define usingMaterialMembers                                                                       \
   usingMooseObjectMembers;                                                                         \
   usingCoupleableMembers;                                                                          \
+  usingScalarCoupleableMembers;                                                                    \
   usingTransientInterfaceMembers;                                                                  \
   usingBlockRestrictableMembers;                                                                   \
   usingFunctionInterfaceMembers;                                                                   \

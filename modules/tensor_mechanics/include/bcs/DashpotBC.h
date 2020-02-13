@@ -38,6 +38,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
+  /// Component of the velocity vector
   unsigned int _component;
   Real _coefficient;
 

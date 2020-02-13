@@ -33,8 +33,10 @@ protected:
 
   std::vector<MooseVariable *> _disp_var;
 
+  /// Base name of the material system
   const std::string _base_name;
 
+  /// Number of displacement variables
   unsigned int _ndisp;
   const VariableValue & _youngs_modulus;
 

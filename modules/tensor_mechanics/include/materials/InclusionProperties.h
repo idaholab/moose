@@ -62,6 +62,7 @@ private:
   RankTwoTensor _elastic_strain_int;
   Real _elastic_energy_int;
 
+  /// The stress tensor
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _strain;
   MaterialProperty<Real> & _elastic_energy;

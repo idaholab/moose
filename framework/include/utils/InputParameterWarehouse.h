@@ -81,6 +81,11 @@ public:
   void addControllableParameterAlias(const MooseObjectParameterName & alias,
                                      const MooseObjectParameterName & slave);
 
+  /**
+   * Method for creating alias for all shared controllable parameters between the two objects.
+   */
+  void addControllableObjectAlias(const MooseObjectName & alias, const MooseObjectName & slave);
+
   /***
    * Helper method for printing controllable items.
    */

@@ -92,4 +92,10 @@
     difference_tol = 1E10
     requirement = 'The system shall compute thermal strain in conjunction with weak plane stress'
   [../]
+
+  [./ad_elastic_thermal_weak_plane_stress_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_elastic_thermal_weak_plane_stress_jacobian.i'
+    requirement = 'The system shall compute thermal strain in conjunction with AD weak plane stress'
+  [../]
 []

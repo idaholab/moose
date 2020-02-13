@@ -41,9 +41,12 @@ public:
   virtual void computeAdditionalStress(){};
 
 protected:
+  /// Base name of the material system
   const std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _dstress_dstrain;
+
+  /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
 
   RankTwoTensor _applied_stress_tensor;
@@ -51,7 +54,11 @@ protected:
   RankFourTensor _jacobian;
 
   const unsigned int _dim;
+
+  /// Number of displacement variables
   const unsigned int _ndisp;
+
+  /// Variable numbers of the displacement variables
   std::vector<unsigned int> _disp_var;
   VectorValue<bool> _periodic_dir;
 };

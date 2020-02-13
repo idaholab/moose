@@ -594,6 +594,9 @@ public:
   virtual void addADKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
+  virtual void addADBoundaryCondition(const std::string & bc_name,
+                                      const std::string & name,
+                                      InputParameters & parameters);
 
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,

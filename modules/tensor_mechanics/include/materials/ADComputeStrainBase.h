@@ -54,9 +54,14 @@ protected:
 
   /// Coupled displacement variables
   const unsigned int _ndisp;
+
+  /// Displacement variables
   std::vector<const ADVariableValue *> _disp;
+
+  /// Gradient of displacements
   std::vector<const ADVariableGradient *> _grad_disp;
 
+  /// Base name of the material system
   const std::string _base_name;
 
   ADMaterialProperty(RankTwoTensor) & _mechanical_strain;

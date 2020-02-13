@@ -35,16 +35,23 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
 
+  /// The stress tensor that provides the out-of-plane stress
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
+  /// The direction of the out-of-plane strain variable
   const unsigned int _direction;
 
   /// Coupled displacement variables
   const bool _disp_coupled;
+
+  /// Number of displacement variables
   unsigned int _ndisp;
+
+  /// Variable numbers of the displacement variables
   std::vector<unsigned int> _disp_var;
 
   const bool _temp_coupled;

@@ -29,11 +29,7 @@ void
 AddBCAction::act()
 {
   if (Registry::isADObj(_type + "<RESIDUAL>"))
-  {
-    _problem->addBoundaryCondition(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
-    _problem->addBoundaryCondition(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
-    _problem->haveADObjects(true);
-  }
+    _problem->addADBoundaryCondition(_type, _name, _moose_object_pars);
   else
     _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
 }

@@ -52,7 +52,11 @@ protected:
   std::vector<const MaterialProperty<RankFourTensor> *> _dphase_stress_dstrain;
 
   // global material properties
+
+  /// Base name of the material system
   const std::string _base_name;
+
+  /// The stress tensor
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };

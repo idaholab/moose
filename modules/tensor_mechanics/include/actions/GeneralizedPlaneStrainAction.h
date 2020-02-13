@@ -27,6 +27,8 @@ public:
 
 protected:
   std::vector<VariableName> _displacements;
+
+  /// Number of displacement variables
   unsigned int _ndisp;
   const unsigned int _out_of_plane_direction;
 };

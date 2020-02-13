@@ -19,6 +19,8 @@
   using ADStressDivergenceTensors<compute_stage>::_ndisp;                                          \
   using ADStressDivergenceTensors<compute_stage>::_disp_var;                                       \
   using ADStressDivergenceTensors<compute_stage>::_avg_grad_test;                                  \
+  using ADStressDivergenceTensors<compute_stage>::_out_of_plane_strain_coupled;                    \
+  using ADStressDivergenceTensors<compute_stage>::_out_of_plane_strain;                            \
   using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction
 
 // Forward Declarations
@@ -48,17 +50,29 @@ protected:
   ADReal computeQpResidual() override;
   void precalculateResidual() override;
 
+  /// Base name of the material system that this kernel applies to
   const std::string _base_name;
 
+  /// The stress tensor that the divergence operator operates on
   const ADMaterialProperty(RankTwoTensor) & _stress;
+
+  /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
 
-  /// Coupled displacement variables
+  /// Number of coupled displacement variables
   const unsigned int _ndisp;
+
+  /// Coupled displacement variable IDs
   std::vector<unsigned int> _disp_var;
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
   std::vector<ADReal> _avg_grad_test;
+
+  /// Whether out-of-plane strain is coupeld
+  const bool _out_of_plane_strain_coupled;
+
+  /// Pointer to the out-of-plane strain variable
+  const ADVariableValue * _out_of_plane_strain;
 
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;
