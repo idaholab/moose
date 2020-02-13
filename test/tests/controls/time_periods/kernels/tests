@@ -1,10 +1,25 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./test]
-    type = Exodiff
-    input = kernels.i
-    exodiff = kernels_out.e
-    requirement = "The Control system shall be capable of activating or deactivating Kernel objects with time."
-  [../]
+
+  [test]
+    requirement = "The system shall be capable of activating or deactivating volume residual contributions with time:"
+
+    [non_ad]
+      type = Exodiff
+      input = kernels.i
+      exodiff = kernels_out.e
+
+      detail = "for non-automatic differentiation and "
+    []
+    [ad]
+      type = Exodiff
+      input = adkernels.i
+      cli_args = Outputs/file_base=kernels_out
+      prereq = test/non_ad
+      exodiff = kernels_out.e
+
+      detail = "automatic differentiation terms."
+    []
+  []
 []

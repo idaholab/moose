@@ -187,6 +187,23 @@ InputParameterWarehouse::addControllableParameterConnection(const MooseObjectPar
 }
 
 void
+InputParameterWarehouse::addControllableObjectAlias(const MooseObjectName & alias,
+                                                    const MooseObjectName & slave)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    std::vector<ControllableItem *> slaves =
+        getControllableItems(MooseObjectParameterName(slave, "*"), tid);
+    for (auto slave_ptr : slaves)
+    {
+      MooseObjectParameterName alias_param(alias, slave_ptr->name().parameter());
+      MooseObjectParameterName slave_param(slave, slave_ptr->name().parameter());
+      addControllableParameterAlias(alias_param, slave_param);
+    }
+  }
+}
+
+void
 InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParameterName & alias,
                                                        const MooseObjectParameterName & slave)
 {

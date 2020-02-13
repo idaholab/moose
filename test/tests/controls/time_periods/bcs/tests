@@ -1,22 +1,40 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./dirichlet]
-    type = Exodiff
-    input = bcs.i
-    exodiff = bcs_out.e
-    requirement = "The Control system shall be capable of activating or deactivating NodalBC objects with time."
-  [../]
-  [./integrated]
-    type = Exodiff
-    input = bcs_integrated.i
-    exodiff = bcs_integrated_out.e
-    requirement = "The Control system shall be capable of activating or deactivating IntegratedBC objects with time."
-  [../]
-  [./enable_disable]
-    type = Exodiff
-    input = bcs_enable_disable.i
-    exodiff = bcs_enable_disable_out.e
-    requirement = "The Control system shall be capable of activating and deactivating NodalBC objects with time within a single TimePeriod block."
-  [../]
+
+  [tests]
+    requirement = "The system shall be capable of activating and/or deactivating boundary "
+                  "contributions to the residual with time"
+
+    [dirichlet]
+      type = Exodiff
+      input = bcs.i
+      exodiff = bcs_out.e
+
+      detail = "for contributions from finite element nodes,"
+    []
+    [integrated]
+      type = Exodiff
+      input = bcs_integrated.i
+      exodiff = bcs_integrated_out.e
+
+      detail = "for contributions integrated over a finite element side,"
+    []
+    [ad]
+      type = Exodiff
+      input = adbcs.i
+      cli_args = 'Outputs/file_base=bcs_out'
+      prereq = tests/dirichlet
+      exodiff = bcs_out.e
+
+      detail = "for contributions from automatic differentiation, and"
+    []
+    [enable_disable]
+      type = Exodiff
+      input = bcs_enable_disable.i
+      exodiff = bcs_enable_disable_out.e
+
+      detail = "perform the activation/deactivation with a single control."
+    []
+  []
 []
