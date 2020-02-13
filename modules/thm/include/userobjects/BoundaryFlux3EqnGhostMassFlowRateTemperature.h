@@ -27,6 +27,8 @@ protected:
 
   /// Specified temperature
   const Real & _T;
+  /// Reversible flag
+  const bool & _reversible;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
