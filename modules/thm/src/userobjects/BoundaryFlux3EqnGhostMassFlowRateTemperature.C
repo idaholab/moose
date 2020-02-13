@@ -17,6 +17,7 @@ validParams<BoundaryFlux3EqnGhostMassFlowRateTemperature>()
 
   params.addRequiredParam<Real>("mass_flow_rate", "Specified mass flow rate");
   params.addRequiredParam<Real>("T", "Specified temperature");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "Name of single-phase fluid properties user object");
@@ -31,6 +32,7 @@ BoundaryFlux3EqnGhostMassFlowRateTemperature::BoundaryFlux3EqnGhostMassFlowRateT
 
     _rhouA(getParam<Real>("mass_flow_rate")),
     _T(getParam<Real>("T")),
+    _reversible(getParam<bool>("reversible")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
@@ -45,7 +47,7 @@ BoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(
   const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   std::vector<Real> U_ghost(THM3Eqn::N_CONS_VAR);
-  if (THM::isInlet(_rhouA, _normal))
+  if (!_reversible || THM::isInlet(_rhouA, _normal))
   {
     // Pressure is the only quantity coming from the interior
     const Real rho = rhoA / A;
@@ -85,7 +87,7 @@ BoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolutionJacobian(
   const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
-  if (THM::isInlet(_rhouA, _normal))
+  if (!_reversible || THM::isInlet(_rhouA, _normal))
   {
     // Compute pressure from the interior solution
     const Real rho = rhoA / A;

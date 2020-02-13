@@ -97,6 +97,7 @@ InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
     params.set<Real>("mass_flow_rate") = getParam<Real>("m_dot");
     params.set<Real>("T") = getParam<Real>("T");
     params.set<Real>("normal") = _normal;
+    params.set<bool>("reversible") = _reversible;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
