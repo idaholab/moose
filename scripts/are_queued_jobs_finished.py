@@ -20,7 +20,7 @@ class Jobs:
             raise Exception('File does not exist: %s' % (json_file))
 
     def yieldJobsResultPath(self):
-        for k, v in self.__job_data.iteritems():
+        for k, v in self.__job_data.items():
             yield k, v
 
 def hasExited(meta):
