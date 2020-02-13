@@ -2,3 +2,4 @@ directories:
     - ${MOOSE_DIR}/test/tests
 specs:
     - tests
+repo: moose

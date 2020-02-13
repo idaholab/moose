@@ -5,3 +5,4 @@ specs:
 dependencies:
     - framework
     - tensor_mechanics
+repo: moose

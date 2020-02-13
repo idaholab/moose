@@ -39,7 +39,7 @@ SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', label=Non
 SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', label=None)
 SQARequirementText = tokens.newToken('SQARequirementText')
 SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[], line=None, filename=None)
-SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None)
+SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None, url=None)
 SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
                                               spec_name=None, spec_path=None)
 SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
@@ -73,7 +73,7 @@ class SQAExtension(command.CommandExtension):
                            "'#1234' or add additional keys to allow for foo#1234.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
-                                        "and 'dependencies'.")
+                                        ", 'dependencies', and 'repo'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
 
         # Disable by default to allow for updates to applications
@@ -83,13 +83,21 @@ class SQAExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
+        # Always include MOOSE and libMesh
+        self['repos'].update(dict(moose="https://github.com/idaholab/moose",
+                                  libmesh="https://github.com/libMesh/libmesh"))
+
         # Build requirements sets
+        repos = self.get('repos')
         self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
+        self.__remotes = dict()
         for index, (category, info) in enumerate(self.get('categories').items(), 1):
             specs = info.get('specs', ['tests'])
+            repo = info.get('repo', 'default')
             directories = []
+
             for d in info.get('directories'):
                 path = mooseutils.eval_path(d)
                 if not os.path.isdir(path):
@@ -106,6 +114,9 @@ class SQAExtension(command.CommandExtension):
             # Create dependency database
             self.__dependencies[category] = info.get('dependencies', [])
 
+            # Create remote repository database
+            self.__remotes[category] = repos.get(repo, None)
+
         # Storage for requirement matrix counting (see SQARequirementMatricCommand)
         self.__counts = collections.defaultdict(int)
 
@@ -117,11 +128,6 @@ class SQAExtension(command.CommandExtension):
                  " add the 'repos' option with a 'default' entry instead."
             LOG.warning(msg)
             self['repos'].update(dict(default="{}/{}".format(url, repo)))
-
-        # Always include MOOSE and libMesh
-        self['repos'].update(dict(moose="https://github.com/idaholab/moose",
-                                  libmesh="https://github.com/libMesh/libmesh"))
-
 
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
@@ -140,6 +146,13 @@ class SQAExtension(command.CommandExtension):
         if dep is None:
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return dep
+
+    def remote(self, category):
+        """Return the remote URL for the given category."""
+        rem = self.__remotes.get(category, None)
+        if rem is None:
+            raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
+        return rem
 
     def preExecute(self):
         """Reset counts and create test pages."""
@@ -219,11 +232,11 @@ class SQARequirementsCommand(command.CommandComponent):
             matrix = SQARequirementMatrix(parent)
             SQARequirementMatrixHeading(matrix, category=category, string=str(group))
             for req in requirements:
-                self._addRequirement(matrix, info, page, req, requirements)
+                self._addRequirement(matrix, info, page, req, requirements, category)
 
         return parent
 
-    def _addRequirement(self, parent, info, page, req, requirements):
+    def _addRequirement(self, parent, info, page, req, requirements, category):
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname,
                                         satisfied=req.satisfied)
@@ -266,7 +279,7 @@ class SQARequirementsCommand(command.CommandComponent):
 
             if self.settings['link-issues'] and req.issues:
                 p = SQARequirementIssues(item, filename=req.filename, issues=req.issues,
-                                         line=req.issues_line)
+                                         line=req.issues_line, url=self.extension.remote(category))
 
             if self.settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
@@ -329,7 +342,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
             heading = SQARequirementMatrixHeading(matrix, category=category)
             autolink.AutoLink(heading, page=str(node.local))
             for req in requirements:
-                self._addRequirement(matrix, info, page, req, requirements)
+                self._addRequirement(matrix, info, page, req, requirements, category)
 
         return parent
 
@@ -619,7 +632,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
     def __urlHelper(self, regex, name, issue, token):
         """Function for creating issue/commit links."""
         repos = self.extension['repos']
-        default = repos.get('default', None)
+        default = token['url']
         match = regex.search(issue)
         if match:
             key = match.group('key')
