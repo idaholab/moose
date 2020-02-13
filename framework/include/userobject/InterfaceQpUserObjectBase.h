@@ -13,9 +13,6 @@
 
 class InterfaceQpUserObjectBase;
 
-template <>
-InputParameters validParams<InterfaceQpUserObjectBase>();
-
 /**
  * This is a base class for userobjects collecting values of variables or material properites across
  * an interface at each QP. This userobejct class always return a scalar value and can compute the
@@ -27,6 +24,7 @@ InputParameters validParams<InterfaceQpUserObjectBase>();
 class InterfaceQpUserObjectBase : public InterfaceValueUserObject
 {
 public:
+  static InputParameters validParams();
   /// the method defining the returning value type: value, rate or increment
   static MooseEnum valueOptions() { return MooseEnum("value rate increment", "value"); }
 

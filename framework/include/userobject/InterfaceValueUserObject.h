@@ -13,9 +13,6 @@
 
 class InterfaceValueUserObject;
 
-template <>
-InputParameters validParams<InterfaceValueUserObject>();
-
 /**
  *  A special InterfaceUserObject computing average values across an interface given
  *  the average type (see InterfaceValueTools for details)
@@ -23,6 +20,7 @@ InputParameters validParams<InterfaceValueUserObject>();
 class InterfaceValueUserObject : public InterfaceUserObject
 {
 public:
+  static InputParameters validParams();
   InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:

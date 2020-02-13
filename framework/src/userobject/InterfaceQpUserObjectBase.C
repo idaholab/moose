@@ -9,11 +9,10 @@
 
 #include "InterfaceQpUserObjectBase.h"
 
-template <>
 InputParameters
-validParams<InterfaceQpUserObjectBase>()
+InterfaceQpUserObjectBase::validParams()
 {
-  InputParameters params = validParams<InterfaceValueUserObject>();
+  InputParameters params = InterfaceValueUserObject::validParams();
   params.addClassDescription("Base class to compute a scalar value or rate across an interface");
   params.addParam<MooseEnum>("value_type",
                              InterfaceQpUserObjectBase::valueOptions(),

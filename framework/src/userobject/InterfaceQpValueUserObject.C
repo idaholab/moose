@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseApp", InterfaceQpValueUserObject);
 
-template <>
 InputParameters
-validParams<InterfaceQpValueUserObject>()
+InterfaceQpValueUserObject::validParams()
 {
-  InputParameters params = validParams<InterfaceQpUserObjectBase>();
+  InputParameters params = InterfaceQpUserObjectBase::validParams();
   params.addRequiredCoupledVar("var", "The variable name");
   params.addCoupledVar("var_neighbor", "The neighbor variable name");
   params.addClassDescription(
