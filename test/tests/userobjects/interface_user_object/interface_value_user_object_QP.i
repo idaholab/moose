@@ -179,47 +179,55 @@
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_1
+    execute_on = 'INITIAL  NONLINEAR'
   []
   [./diffusivity_2]
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_2
+    execute_on = 'INITIAL NONLINEAR'
   []
   [./interface_avg_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_value_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [./interface_master_minus_slave_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = master_minus_slave_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_master_minus_slave_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_slave_minus_master_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = slave_minus_master_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_slave_minus_master_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_absolute_jump_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = abs_jump_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_absolute_jump_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_master_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = master_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_master_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_slave_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = slave_qp
     boundary = 'master0_interface'
     interface_uo_name = interface_slave_uo
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
 
 
@@ -267,30 +275,36 @@
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  avg_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./master_minus_slave_qp_PP]
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  master_minus_slave_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./slave_minus_master_qp_PP]
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  slave_minus_master_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./abs_jump_qp_PP]
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  abs_jump_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./master_qp_PP]
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  master_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./slave_qp_PP]
     type = SideAverageValue
     boundary = 'master0_interface'
     variable =  slave_qp
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
 []
