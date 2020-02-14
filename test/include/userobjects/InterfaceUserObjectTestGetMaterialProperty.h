@@ -17,8 +17,8 @@ template <>
 InputParameters validParams<InterfaceUserObjectTestGetMaterialProperty>();
 
 /**
- * This userobject tests teh capabilities of the interface user object to get in-sync values of
- * bulk, boundary and interface material property.
+ * This userobject tests the capabilities of the interface user object to get in-sync values of
+ * bulk, boundary and interface material property. Don't use for other purposes.
  */
 class InterfaceUserObjectTestGetMaterialProperty : public InterfaceUserObject
 {
@@ -37,8 +37,13 @@ public:
 protected:
   /// this map is used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
+
+  /// the master side, coupled bulk material property
   const MaterialProperty<Real> & _mp;
+  /// the master side, coupled bulk material property
   const MaterialProperty<Real> & _mp_neighbor;
+  /// the coupled boundary material property
   const MaterialProperty<Real> & _mp_boundary;
+  /// the coupled interface material property
   const MaterialProperty<Real> & _mp_interface;
 };

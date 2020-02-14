@@ -6,36 +6,107 @@
     xmax = 2
     ny = 2
     ymax = 2
-    elem_type = QUAD4
   []
-  [./subdomain_id]
+  [./subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 1 0'
     block_id = 1
   [../]
-
-  [./interface]
+  [./master0_interface]
     type = SideSetsBetweenSubdomainsGenerator
-    input = subdomain_id
+    input = subdomain1
     master_block = '0'
     paired_block = '1'
-    new_boundary = 'interface'
+    new_boundary = 'master0_interface'
   [../]
-
+  [./break_boundary]
+    input = master0_interface
+    type = BreakBoundaryOnSubdomainGenerator
+  [../]
 []
 
-[Functions]
-  [./fn_exact]
-    type = ParsedFunction
-    value = 'x*x+y*y'
+[Variables]
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+    block = 0
   [../]
 
-  [./ffn]
-    type = ParsedFunction
-    value = -4
+  [./v]
+    order = FIRST
+    family = LAGRANGE
+    block = 1
   [../]
+[]
+
+[Kernels]
+  [./diff_u]
+    type = CoeffParamDiffusion
+    variable = u
+    D = 2
+    block = 0
+  [../]
+  [./diff_v]
+    type = CoeffParamDiffusion
+    variable = v
+    D = 4
+    block = 1
+  [../]
+  [./source_u]
+    type = BodyForce
+    variable = u
+    function = 0.1*t
+  [../]
+[]
+
+[InterfaceKernels]
+  [./master0_interface]
+    type = PenaltyInterfaceDiffusionDot
+    variable = u
+    neighbor_var = v
+    boundary = master0_interface
+    penalty = 1e6
+  [../]
+[]
+
+[BCs]
+  [./u]
+    type = VacuumBC
+    variable = u
+    boundary = 'left_to_0 bottom_to_0 right top'
+  [../]
+  [./v]
+    type = VacuumBC
+    variable = v
+    boundary = 'left_to_1 bottom_to_1'
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = TRUE
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = 'NEWTON'
+  dt = 0.1
+  num_steps = 3
+  dtmin = 0.1
+  line_search = none
+[]
+
+[Outputs]
+  [./out]
+    type = Exodus
+    sync_only = true
+    sync_times = '0.1 0.2 0.3'
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [UserObjects]
@@ -43,7 +114,7 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = average
   [../]
@@ -51,7 +122,7 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = jump_master_minus_slave
   [../]
@@ -59,7 +130,7 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = jump_slave_minus_master
   [../]
@@ -67,7 +138,7 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = jump_abs
   [../]
@@ -75,7 +146,7 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = master
   [../]
@@ -83,41 +154,12 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'interface'
+    boundary = 'master0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = slave
   [../]
 []
 
-[Variables]
-  [./u]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-[]
-
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-
-  [./ffn]
-    type = BodyForce
-    variable = u
-    function = ffn
-  [../]
-[]
-
-[BCs]
-  [./all]
-    type = FunctionDirichletBC
-    variable = u
-    boundary = '0 1 2 3'
-    function = fn_exact
-  [../]
-[]
 
 [Materials]
   [./stateful1]
@@ -146,37 +188,37 @@
   [./interface_avg_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_value_uo
   []
   [./interface_master_minus_slave_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = master_minus_slave_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_master_minus_slave_uo
   [../]
   [./interface_slave_minus_master_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = slave_minus_master_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_slave_minus_master_uo
   [../]
   [./interface_absolute_jump_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = abs_jump_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_absolute_jump_uo
   [../]
   [./interface_master_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = master_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_master_uo
   [../]
   [./interface_slave_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = slave_qp
-    boundary = 'interface'
+    boundary = 'master0_interface'
     interface_uo_name = interface_slave_uo
   [../]
 
@@ -223,41 +265,32 @@
 [Postprocessors]
   [./interface_average_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  avg_qp
   [../]
   [./master_minus_slave_qp_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  master_minus_slave_qp
   [../]
   [./slave_minus_master_qp_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  slave_minus_master_qp
   [../]
   [./abs_jump_qp_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  abs_jump_qp
   [../]
   [./master_qp_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  master_qp
   [../]
   [./slave_qp_PP]
     type = SideAverageValue
-    boundary = interface
+    boundary = 'master0_interface'
     variable =  slave_qp
   [../]
-[]
-
-[Executioner]
-  type = Steady
-  solve_type = NEWTON
-[]
-
-[Outputs]
-  exodus = true
 []

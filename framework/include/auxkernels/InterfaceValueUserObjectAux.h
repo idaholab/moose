@@ -34,6 +34,10 @@ public:
 
 protected:
   virtual Real computeValue() override;
+
+  /// the coupled interface user object
   const InterfaceQpUserObjectBase & _interface_uo;
+
+  /// switch asking the user object the return an elment side average value
   const bool _return_side_average;
 };

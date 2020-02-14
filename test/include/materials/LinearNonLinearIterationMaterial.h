@@ -17,7 +17,10 @@ class LinearNonLinearIterationMaterial;
 template <>
 InputParameters validParams<LinearNonLinearIterationMaterial>();
 /**
- * A material that tracks the number of times computeQpProperties has been called.
+ * A special material used to check the ability of other MOOSE systems to get the correct
+ * material property value ar each linear and non linear iteration. When using this material for
+ * testing don't use Exodiff type tests. For an example use see
+ * InterfaceUserObjectTestGetMaterialProperty and realted tests.
  */
 class LinearNonLinearIterationMaterial : public Material
 {

@@ -25,7 +25,9 @@ class InterfaceQpUserObjectBase : public InterfaceValueUserObject
 {
 public:
   static InputParameters validParams();
-  /// the method defining the returning value type: value, rate or increment
+  /**
+   * the method defining the returning value type: value, rate or increment
+   **/
   static MooseEnum valueOptions() { return MooseEnum("value rate increment", "value"); }
 
   InterfaceQpUserObjectBase(const InputParameters & parameters);
@@ -36,17 +38,29 @@ public:
   virtual void finalize() override{};
   virtual void threadJoin(const UserObject & /*uo*/) override{};
 
-  /// function returning the quadrature point value
+  /**
+   * method returning the quadrature point value
+   **/
   Real getQpValue(const dof_id_type elem, const unsigned int side, unsigned int qp) const;
-  /// function returning the element side average value
+  /**
+   * function returning the element side average value
+   **/
   Real getSideAverageValue(const dof_id_type elem, const unsigned int side) const;
 
 protected:
-  /// moose enum deciding this userobject reture value type
+  /**
+   * moose enum deciding this userobject reture value type
+   **/
   const MooseEnum _value_type;
 
+  /**
+   * method to overrid in child classes returnig a real value
+   **/
+  virtual Real computeRealValue(const unsigned int /*qp*/) = 0;
+
   /// these maps are used to store QP data.
+  ///@{
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_JxW;
-  virtual Real computeRealValue(const unsigned int /*qp*/) = 0;
+  ///@}
 };

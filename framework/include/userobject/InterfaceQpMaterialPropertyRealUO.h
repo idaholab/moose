@@ -29,7 +29,9 @@ public:
   virtual ~InterfaceQpMaterialPropertyRealUO(){};
 
 protected:
-  /// return the material property value at the give qp
+  /**
+   * return the material property value at the give qp
+   **/
   virtual Real computeScalarMaterialProperty(const MaterialProperty<Real> * p,
                                              const unsigned int qp) override final
   {

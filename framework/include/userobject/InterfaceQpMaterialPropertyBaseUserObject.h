@@ -15,9 +15,6 @@
 template <typename T = Real>
 class InterfaceQpMaterialPropertyBaseUserObject;
 
-// template <>
-// InputParameters validParams<InterfaceQpMaterialPropertyBaseUserObject<>>();
-
 /**
  * Specialization of InterfaceQpUserObjectBase for material properties. Material property type
  * specialization is achieved by specializing computeScalarMaterialProperty in derived classes.
@@ -35,10 +32,13 @@ public:
   virtual ~InterfaceQpMaterialPropertyBaseUserObject(){};
 
 protected:
-  /// method defining the scalar value computation given a scalar material property value
+  /**
+   * method defining the scalar value computation given a scalar material property value
+   **/
   virtual Real computeRealValue(const unsigned int qp) override final;
-
-  /// method returning a scalar material property value given a generic T type
+  /**
+   * method returning a scalar material property value given a generic T type
+   **/
   virtual Real computeScalarMaterialProperty(const MaterialProperty<T> *,
                                              const unsigned int qp) = 0;
 
@@ -87,7 +87,7 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned in
 {
   Real value_master = 0;
   Real value_slave = 0;
-  /*using an if else here because a switch produce an unkown error in the docuemantion test */
+  // using an if else here because a switch produce an unkown error in the docuemantion test
   if (_value_type == 0) /*value*/
   {
     value_master = computeScalarMaterialProperty(&_prop, qp);

@@ -24,7 +24,11 @@ public:
   InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:
+  /**
+   * method computing an interface value give two Real quantities
+   **/
+  virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
+
   /// the average type to be computed across the interface
   const MooseEnum _interface_value_type;
-  virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
 };

@@ -21,7 +21,7 @@ InterfaceValueUserObjectAux::validParams()
                                           "The name of the interface user object to use");
   params.addParam<bool>("return_side_average",
                         false,
-                        "if true returns the elment side average rather than a single qp value");
+                        "If true returns the elment side average rather than a single qp value");
   params.addClassDescription("Get stored value from the specified InterfaceQpUserObjectBase.");
 
   return params;
