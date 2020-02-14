@@ -27,6 +27,8 @@ protected:
   const Real & _rho;
   /// Specified velocity
   const Real & _vel;
+  /// Reversibility
+  const bool & _reversible;
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
 };

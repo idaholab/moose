@@ -10,7 +10,7 @@ validParams<InletDensityVelocity1Phase>()
   InputParameters params = validParams<FlowBoundary>();
   params.addRequiredParam<Real>("rho", "Prescribed density [kg/m^3]");
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
-  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
   params.addClassDescription(
       "Boundary condition with prescribed density and velocity for 1-phase flow channels.");
   return params;
@@ -100,6 +100,7 @@ InletDensityVelocity1Phase::setupRDG()
     params.set<Real>("rho") = getParam<Real>("rho");
     params.set<Real>("vel") = getParam<Real>("vel");
     params.set<Real>("normal") = _normal;
+    params.set<bool>("reversible") = _reversible;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
