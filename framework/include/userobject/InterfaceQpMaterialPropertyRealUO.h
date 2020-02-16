@@ -11,9 +11,6 @@
 
 #include "InterfaceQpMaterialPropertyBaseUserObject.h"
 
-// Forward declarations
-class InterfaceQpMaterialPropertyRealUO;
-
 /**
  * Specialization of InterfaceQpMaterialPropertyBaseUserObject for Real material properties.
  */

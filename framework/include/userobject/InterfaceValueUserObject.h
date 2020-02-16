@@ -11,8 +11,6 @@
 
 #include "InterfaceUserObject.h"
 
-class InterfaceValueUserObject;
-
 /**
  *  A special InterfaceUserObject computing average values across an interface given
  *  the average type (see InterfaceValueTools for details)

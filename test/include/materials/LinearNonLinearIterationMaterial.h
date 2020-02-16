@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class LinearNonLinearIterationMaterial;
-
-template <>
-InputParameters validParams<LinearNonLinearIterationMaterial>();
 /**
  * A special material used to check the ability of other MOOSE systems to get the correct
  * material property value ar each linear and non linear iteration. When using this material for

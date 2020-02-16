@@ -26,6 +26,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  int _coupled;                           ///< The number of the coupled variable
-  const VariableValue & _coupled_val_old; ///< Coupled variable
+  /// The coupled variable id
+  unsigned int _coupled;
+  /// The old coupled variable value
+  const VariableValue & _coupled_val_old;
 };

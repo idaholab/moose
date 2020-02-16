@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseTestApp", InterfaceUserObjectTestGetMaterialProperty);
 
-defineLegacyParams(InterfaceUserObjectTestGetMaterialProperty);
-
 InputParameters
 InterfaceUserObjectTestGetMaterialProperty::validParams()
 {

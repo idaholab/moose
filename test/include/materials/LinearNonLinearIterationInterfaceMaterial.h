@@ -11,11 +11,6 @@
 
 #include "InterfaceMaterial.h"
 
-// Forward Declarations
-class LinearNonLinearIterationInterfaceMaterial;
-
-template <>
-InputParameters validParams<LinearNonLinearIterationInterfaceMaterial>();
 /**
  * A special interface material used to check the ability of other MOOSE systems to get the correct
  * material property value ar each linear and non linear iteration. When using this material for

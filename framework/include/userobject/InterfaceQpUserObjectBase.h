@@ -11,8 +11,6 @@
 
 #include "InterfaceValueUserObject.h"
 
-class InterfaceQpUserObjectBase;
-
 /**
  * This is a base class for userobjects collecting values of variables or material properites across
  * an interface at each QP. This userobejct class always return a scalar value and can compute the

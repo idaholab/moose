@@ -11,8 +11,6 @@
 
 #include "InterfaceQpUserObjectBase.h"
 
-class InterfaceQpValueUserObject;
-
 /**
  * Specialization of InterfaceQpUserObjectBase for scalar variables.
  */

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseTestApp", LinearNonLinearIterationMaterial);
 
-defineLegacyParams(LinearNonLinearIterationMaterial);
-
 InputParameters
 LinearNonLinearIterationMaterial::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "InterfaceUserObject.h"
 
-class InterfaceUserObjectTestGetMaterialProperty;
-
-template <>
-InputParameters validParams<InterfaceUserObjectTestGetMaterialProperty>();
-
 /**
  * This userobject tests the capabilities of the interface user object to get in-sync values of
  * bulk, boundary and interface material property. Don't use for other purposes.

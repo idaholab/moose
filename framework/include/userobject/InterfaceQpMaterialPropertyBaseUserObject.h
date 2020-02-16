@@ -11,10 +11,6 @@
 
 #include "InterfaceQpUserObjectBase.h"
 
-// Forward declarations
-template <typename T = Real>
-class InterfaceQpMaterialPropertyBaseUserObject;
-
 /**
  * Specialization of InterfaceQpUserObjectBase for material properties. Material property type
  * specialization is achieved by specializing computeScalarMaterialProperty in derived classes.
