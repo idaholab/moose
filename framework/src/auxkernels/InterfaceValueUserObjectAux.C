@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", InterfaceValueUserObjectAux);
 
-defineLegacyParams(InterfaceValueUserObjectAux);
-
 InputParameters
 InterfaceValueUserObjectAux::validParams()
 {

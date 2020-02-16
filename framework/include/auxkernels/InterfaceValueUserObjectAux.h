@@ -12,12 +12,6 @@
 #include "AuxKernel.h"
 #include "InterfaceQpUserObjectBase.h"
 
-// Forward Declarations
-class InterfaceValueUserObjectAux;
-
-template <>
-InputParameters validParams<InterfaceValueUserObjectAux>();
-
 /**
  * AuxKernel creating an AuxVariable from values stored in an InterfaceQpUserObjectBase
  */

@@ -12,8 +12,6 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-defineLegacyParams(InterfaceUserObject);
-
 InputParameters
 InterfaceUserObject::validParams()
 {
