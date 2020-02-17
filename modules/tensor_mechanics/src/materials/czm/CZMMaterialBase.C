@@ -11,11 +11,10 @@
 #include "CZMMaterialBase.h"
 #include "RotationMatrix.h"
 
-template <>
 InputParameters
-validParams<CZMMaterialBase>()
+CZMMaterialBase::validParams()
 {
-  InputParameters params = validParams<InterfaceMaterial>();
+  InputParameters params = InterfaceMaterial::validParams();
 
   params.addClassDescription("Base class for cohesive zone mateirla models");
   params.addRequiredCoupledVar("displacements",
