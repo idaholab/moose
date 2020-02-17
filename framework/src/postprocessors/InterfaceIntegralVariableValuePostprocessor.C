@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", InterfaceIntegralVariableValuePostprocessor);
 
-defineLegacyParams(InterfaceIntegralVariableValuePostprocessor);
-
 InputParameters
 InterfaceIntegralVariableValuePostprocessor::validParams()
 {

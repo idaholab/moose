@@ -9,37 +9,24 @@
 
 #pragma once
 
-#include "InterfaceValueUserObject.h"
-
-class InterfaceQpValueUserObject;
-
-template <>
-InputParameters validParams<InterfaceQpValueUserObject>();
+#include "InterfaceQpUserObjectBase.h"
 
 /**
- * This userobject collect values of a variable across an interface for each QP and compute a
- * scalar. The computed scalar value depends on the given parameter _interface_value_type\
- * _interface_value_type (see IntervafeValueTools).
+ * Specialization of InterfaceQpUserObjectBase for scalar variables.
  */
-class InterfaceQpValueUserObject : public InterfaceValueUserObject
+class InterfaceQpValueUserObject : public InterfaceQpUserObjectBase
 {
 public:
   static InputParameters validParams();
-
   InterfaceQpValueUserObject(const InputParameters & parameters);
-  virtual ~InterfaceQpValueUserObject();
-
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize() { return; };
-  virtual void threadJoin(const UserObject & /*uo*/) { return; };
-
-  Real getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const;
+  virtual ~InterfaceQpValueUserObject(){};
 
 protected:
-  /// this map is used to store QP data.
-  std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
+  virtual Real computeRealValue(const unsigned int qp) override;
+
+  /// the variable and neighbor variable values or rate
+  ///@{
   const VariableValue & _u;
   const VariableValue & _u_neighbor;
+  ///@}
 };
-

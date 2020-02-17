@@ -11,11 +11,6 @@
 
 #include "InterfaceUserObject.h"
 
-class InterfaceValueUserObject;
-
-template <>
-InputParameters validParams<InterfaceValueUserObject>();
-
 /**
  *  A special InterfaceUserObject computing average values across an interface given
  *  the average type (see InterfaceValueTools for details)
@@ -24,12 +19,14 @@ class InterfaceValueUserObject : public InterfaceUserObject
 {
 public:
   static InputParameters validParams();
-
   InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:
+  /**
+   * method computing an interface value give two Real quantities
+   **/
+  virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
+
   /// the average type to be computed across the interface
   const MooseEnum _interface_value_type;
-  virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
 };
-

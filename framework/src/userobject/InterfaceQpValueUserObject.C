@@ -8,91 +8,49 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceQpValueUserObject.h"
-#include "MooseMesh.h"
-registerMooseObject("MooseApp", InterfaceQpValueUserObject);
 
-defineLegacyParams(InterfaceQpValueUserObject);
+registerMooseObject("MooseApp", InterfaceQpValueUserObject);
 
 InputParameters
 InterfaceQpValueUserObject::validParams()
 {
-  InputParameters params = InterfaceValueUserObject::validParams();
+  InputParameters params = InterfaceQpUserObjectBase::validParams();
   params.addRequiredCoupledVar("var", "The variable name");
-  params.addCoupledVar("var_neighbor", "The variable name");
-  params.addClassDescription("Test Interfae User Object computing and storing average values at "
-                             "each QP across an interface");
+  params.addCoupledVar("var_neighbor", "The neighbor variable name");
+  params.addClassDescription(
+      "Computes the variable value, rate or increment across an "
+      "interface. The value, rate or increment is computed according to the provided "
+      "interface_value_type parameter");
   return params;
 }
 
 InterfaceQpValueUserObject::InterfaceQpValueUserObject(const InputParameters & parameters)
-  : InterfaceValueUserObject(parameters),
-    _u(coupledValue("var")),
-    _u_neighbor(parameters.isParamSetByUser("var_neighbor") ? coupledNeighborValue("var_neighbor")
-                                                            : coupledNeighborValue("var"))
+  : InterfaceQpUserObjectBase(parameters),
+    _u(_value_type > 0 ? coupledDot("var") : coupledValue("var")),
+    _u_neighbor(
+        parameters.isParamSetByUser("var_neighbor")
+            ? (_value_type > 0 ? coupledNeighborValueDot("var_neighbor")
+                               : coupledNeighborValue("var_neighbor"))
+            : (_value_type > 0 ? coupledNeighborValueDot("var") : coupledNeighborValue("var")))
 
 {
-}
-
-InterfaceQpValueUserObject::~InterfaceQpValueUserObject() {}
-
-void
-InterfaceQpValueUserObject::initialize()
-{
-  // define the boundary map and retrieve element side and boundary_ID
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> elem_side_bid =
-      _mesh.buildSideList();
-
-  // retrieve on which boundary this UO operates
-  std::set<BoundaryID> boundaryList = boundaryIDs();
-
-  // clear map values
-  _map_values.clear();
-
-  // initialize the map_values looping over all the element and sides
-  for (unsigned int i = 0; i < elem_side_bid.size(); i++)
-  {
-    // check if this element side is part of the boundary, if so add element side to the interface
-    // map
-    if (boundaryList.find(std::get<2>(elem_side_bid[i])) != boundaryList.end())
-    {
-      // make pair
-      std::pair<dof_id_type, unsigned int> elem_side_pair =
-          std::make_pair(std::get<0>(elem_side_bid[i]), std::get<1>(elem_side_bid[i]));
-      // initialize map elemenet
-      std::vector<Real> var_values(0, 0);
-
-      // add entry to the value map
-      _map_values[elem_side_pair] = var_values;
-    }
-  }
-}
-
-void
-InterfaceQpValueUserObject::execute()
-{
-  // find the entry on the map
-  auto it = _map_values.find(std::make_pair(_current_elem->id(), _current_side));
-  if (it != _map_values.end())
-  {
-    // insert two vector value for each qp
-    auto & vec = _map_values[std::make_pair(_current_elem->id(), _current_side)];
-    vec.resize(_qrule->n_points());
-
-    // loop over qps and do stuff
-    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-      // compute average value at qp
-      vec[qp] = computeInterfaceValueType(_u[qp], _u_neighbor[qp]);
-  }
-  else
-    mooseError("InterfaceQpValueUserObject:: cannot find the required element and side");
 }
 
 Real
-InterfaceQpValueUserObject::getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const
+InterfaceQpValueUserObject::computeRealValue(const unsigned int qp)
 {
-  auto data = _map_values.find(std::make_pair(elem, side));
-  if (data != _map_values.end())
-    return data->second[qp];
-  else
-    mooseError("getMeanMatProp: can't find the given qp");
+  /* civet complains about fall through, let's fix this using some extra code */
+  switch (_value_type)
+  {
+    case 0: /*value*/
+      return computeInterfaceValueType(_u[qp], _u_neighbor[qp]);
+    case 1: /*rate*/
+      return computeInterfaceValueType(_u[qp], _u_neighbor[qp]);
+    case 2: /*increment*/
+      return computeInterfaceValueType(_u[qp] * _dt, _u_neighbor[qp] * _dt);
+    default:
+      mooseError("InterfaceQpValueUserObject::computeRealValue the supplied "
+                 "value type has not been implemented");
+  }
+  mooseError("InterfaceQpValueUserObject::computeRealValue if we are here something is wrong");
 }

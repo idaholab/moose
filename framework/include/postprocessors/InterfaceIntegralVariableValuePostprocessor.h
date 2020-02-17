@@ -12,12 +12,6 @@
 #include "InterfaceIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-// Forward Declarations
-class InterfaceIntegralVariableValuePostprocessor;
-
-template <>
-InputParameters validParams<InterfaceIntegralVariableValuePostprocessor>();
-
 /**
  * This postprocessor computes a weighted (by area) integral of the specified variable.
  * The type of integral is determined by the _interface_value_type input parameter
@@ -48,4 +42,3 @@ protected:
   /// the contribution of a qp to the integral
   virtual Real computeQpIntegral() override;
 };
-

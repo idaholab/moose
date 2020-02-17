@@ -11,12 +11,6 @@
 
 #include "InterfaceIntegralVariableValuePostprocessor.h"
 
-// Forward Declarations
-class InterfaceAverageVariableValuePostprocessor;
-
-template <>
-InputParameters validParams<InterfaceAverageVariableValuePostprocessor>();
-
 /**
  * This postprocessor computes a spatial average value of the specified variable value on the
  * interface. Different kind of averages may be obtaine either by specializing the computeQpIntegral
@@ -31,4 +25,3 @@ public:
   InterfaceAverageVariableValuePostprocessor(const InputParameters & parameters);
   virtual Real getValue() override;
 };
-
