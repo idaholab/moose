@@ -12,17 +12,11 @@
 #include "InterfaceUserObject.h"
 #include "Postprocessor.h"
 
-// Forward Declarations
-class InterfacePostprocessor;
-
 /**
  * BASE CLASS FOR IMPLEMENTING INTERFACE POSTRPOCESSOR
  * ALL INTERFACE POSTPROCESOR SHOULD DERIVE FROM THIS CLASS
  * THIS CALSS ALASO COMPUTE THE INTERFACE AREA
  */
-
-template <>
-InputParameters validParams<InterfacePostprocessor>();
 
 class InterfacePostprocessor : public InterfaceUserObject, public Postprocessor
 {
@@ -55,4 +49,3 @@ protected:
   /// the area of the master side of the interface
   Real _interface_master_area;
 };
-

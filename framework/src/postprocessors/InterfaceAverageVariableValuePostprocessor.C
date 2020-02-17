@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", InterfaceAverageVariableValuePostprocessor);
 
-defineLegacyParams(InterfaceAverageVariableValuePostprocessor);
-
 InputParameters
 InterfaceAverageVariableValuePostprocessor::validParams()
 {

@@ -10,8 +10,6 @@
 #include "InterfaceValueUserObject.h"
 #include "InterfaceValueTools.h"
 
-defineLegacyParams(InterfaceValueUserObject);
-
 InputParameters
 InterfaceValueUserObject::validParams()
 {

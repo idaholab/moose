@@ -207,11 +207,19 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 
   // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
   // still remember to swap back during stack unwinding.
+
   SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
   _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
   _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+  // Has to happen after face and neighbor properties have been computed. Note that we don't use
+  // a sentinel here because FEProblem::swapBackMaterialsFace is going to handle face materials,
+  // boundary materials, and interface materials (e.g. it queries the boundary material data
+  // with the current element and side
+  _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
   for (const auto & uo : userobjs)
     uo->execute();

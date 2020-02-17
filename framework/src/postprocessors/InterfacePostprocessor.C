@@ -9,8 +9,6 @@
 
 #include "InterfacePostprocessor.h"
 
-defineLegacyParams(InterfacePostprocessor);
-
 InputParameters
 InterfacePostprocessor::validParams()
 {

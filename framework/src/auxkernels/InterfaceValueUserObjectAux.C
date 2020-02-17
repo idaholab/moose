@@ -11,27 +11,32 @@
 
 registerMooseObject("MooseApp", InterfaceValueUserObjectAux);
 
-defineLegacyParams(InterfaceValueUserObjectAux);
-
 InputParameters
 InterfaceValueUserObjectAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
                                           "The name of the interface user object to use");
-  params.addClassDescription("Get stored value from the specified InterfaceQpValueUserObject.");
+  params.addParam<bool>("return_side_average",
+                        false,
+                        "If true returns the elment side average rather than a single qp value");
+  params.addClassDescription("Get stored value from the specified InterfaceQpUserObjectBase.");
 
   return params;
 }
 
 InterfaceValueUserObjectAux::InterfaceValueUserObjectAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _interface_uo(getUserObject<InterfaceQpValueUserObject>("interface_uo_name"))
+    _interface_uo(getUserObject<InterfaceQpUserObjectBase>("interface_uo_name")),
+    _return_side_average(getParam<bool>("return_side_average"))
 {
 }
 
 Real
 InterfaceValueUserObjectAux::computeValue()
 {
-  return _interface_uo.getQpValue(_current_elem->id(), _current_side, _qp);
+  if (_return_side_average)
+    return _interface_uo.getSideAverageValue(_current_elem->id(), _current_side);
+  else
+    return _interface_uo.getQpValue(_current_elem->id(), _current_side, _qp);
 }

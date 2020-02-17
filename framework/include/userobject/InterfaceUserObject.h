@@ -18,11 +18,6 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 
-class InterfaceUserObject;
-
-template <>
-InputParameters validParams<InterfaceUserObject>();
-
 /**
  *  Base class for implementing interface user objects
  */
@@ -66,4 +61,3 @@ protected:
   /// The volume (or length) of the current neighbor
   const Real & getNeighborElemVolume();
 };
-
