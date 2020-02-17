@@ -14,21 +14,17 @@
 
 registerMooseAction("TensorMechanicsApp", CohesiveZoneMasterAction, "add_interface_kernel");
 
-template <>
 InputParameters
-validParams<CohesiveZoneMasterAction>()
+CohesiveZoneMasterAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Action to create an instance of the cohesive zone model kernel for "
                              "each displacement component");
-
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the cohesive zone will be applied");
-
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-
   return params;
 }
 
@@ -40,7 +36,6 @@ void
 CohesiveZoneMasterAction::act()
 {
   std::string kernel_name = "CZMInterfaceKernel";
-
   std::vector<VariableName> displacements;
   if (isParamValid("displacements"))
     displacements = getParam<std::vector<VariableName>>("displacements");

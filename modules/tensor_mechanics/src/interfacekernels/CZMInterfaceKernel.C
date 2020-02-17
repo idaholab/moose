@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", CZMInterfaceKernel);
 
-template <>
 InputParameters
-validParams<CZMInterfaceKernel>()
+CZMInterfaceKernel::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<unsigned int>("component",
                                         "the component of the "
                                         "displacement vector this kernel is working on:"

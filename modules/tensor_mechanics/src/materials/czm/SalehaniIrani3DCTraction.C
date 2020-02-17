@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", SalehaniIrani3DCTraction);
 
-template <>
 InputParameters
-validParams<SalehaniIrani3DCTraction>()
+SalehaniIrani3DCTraction::validParams()
 {
-  InputParameters params = validParams<CZMMaterialBase>();
+  InputParameters params = CZMMaterialBase::validParams();
   params.addClassDescription("3D Coupled (3DC) cohesive law of Salehani and Irani with no damage");
   params.addRequiredParam<Real>(
       "normal_gap_at_maximum_normal_traction",
