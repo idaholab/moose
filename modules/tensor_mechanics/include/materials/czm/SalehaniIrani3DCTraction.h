@@ -11,8 +11,7 @@
 
 #include "CZMMaterialBase.h"
 class SalehaniIrani3DCTraction;
-template <>
-InputParameters validParams<SalehaniIrani3DCTraction>();
+
 /**
  * Implementation of the non-stateful exponential traction separation law
  * proposed by Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
@@ -20,6 +19,7 @@ InputParameters validParams<SalehaniIrani3DCTraction>();
 class SalehaniIrani3DCTraction : public CZMMaterialBase
 {
 public:
+  static InputParameters validParams();
   SalehaniIrani3DCTraction(const InputParameters & parameters);
 
 protected:

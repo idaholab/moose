@@ -11,12 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-/// Forward Declarations
-class CZMInterfaceKernel;
-
-template <>
-InputParameters validParams<CZMInterfaceKernel>();
-
 /// DG kernel implementing cohesive zone models (CZM) for a 1D/2D/3D traction
 /// separation laws based on the displacement jump. This kernel operates only on
 /// a single displacement compenent.
@@ -24,6 +18,7 @@ InputParameters validParams<CZMInterfaceKernel>();
 class CZMInterfaceKernel : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
   CZMInterfaceKernel(const InputParameters & parameters);
 
 protected:

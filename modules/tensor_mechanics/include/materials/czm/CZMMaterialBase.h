@@ -11,8 +11,6 @@
 
 #include "InterfaceMaterial.h"
 class CZMMaterialBase;
-template <>
-InputParameters validParams<CZMMaterialBase>();
 /**
  * This is the base Material class for implementing a traction separation material model.
  * The responsibility of this class is to rotate the displacement jump from global to local
@@ -29,6 +27,7 @@ InputParameters validParams<CZMMaterialBase>();
 class CZMMaterialBase : public InterfaceMaterial
 {
 public:
+  static InputParameters validParams();
   CZMMaterialBase(const InputParameters & parameters);
 
 protected:

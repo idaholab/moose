@@ -13,12 +13,10 @@
 
 class CohesiveZoneMasterAction;
 
-template <>
-InputParameters validParams<CohesiveZoneMasterAction>();
-
 class CohesiveZoneMasterAction : public Action
 {
 public:
+  static InputParameters validParams();
   CohesiveZoneMasterAction(const InputParameters & params);
 
   void act() override;
