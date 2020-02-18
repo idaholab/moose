@@ -183,7 +183,6 @@
       cli_args = "Outputs/active=''"
       detail = 'have a perfect Jacobian'
       allow_test_objects = True
-      prereq = 'tied_node/physics'
     []
   []
 []
