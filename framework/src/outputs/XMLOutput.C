@@ -79,6 +79,7 @@ XMLOutput::outputVectorPostprocessors()
         {
           // Create a Vector node and associated operators
           auto data_node = vec_node.append_child("Vector");
+          data_node.append_attribute("object") = vpp_name.c_str();
           data_node.append_attribute("name") = vec_it.first.c_str();
           data_node.append_attribute("distributed") = distributed;
           if (distributed)
