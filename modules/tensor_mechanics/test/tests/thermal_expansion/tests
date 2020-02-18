@@ -58,7 +58,7 @@
     type = 'PetscJacobianTester'
     input = 'ad_constant_expansion_coeff.i'
     run_sim = 'True'
-    cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
+    cli_args = 'Outputs/exodus=false Outputs/csv=false Executioner/num_steps=2'
     difference_tol = 1e-5
     issues = '#13091'
     design = 'ADComputeThermalExpansionEigenstrain.md'
