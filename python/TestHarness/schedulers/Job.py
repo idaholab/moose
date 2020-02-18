@@ -62,7 +62,7 @@ class Job(object):
         self.__meta_data = {}
 
         # Create a fileChecker object to be able to call filecheck methods
-        self.fileChecker = FileChecker()
+        self.fileChecker = FileChecker(self.options.input_file_name)
 
         # List of files modified by this job.
         self.modifiedFiles = []

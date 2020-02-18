@@ -12,11 +12,11 @@ import os
 class FileChecker(object):
     """ Class that checks files and stores last-modified times. """
 
-    def __init__(self):
+    def __init__(self, input_file_name):
         """ Establish new dictionaries for files and their corresponding modified times. """
         self.__original_times = dict()
         self.__new_times = dict()
-
+        self.__input_file_name = input_file_name
 
     def getOriginalTimes(self):
         return self.__original_times
@@ -27,6 +27,12 @@ class FileChecker(object):
     def get_all_files(self, job, times):
         """ Method to get the names and last_modified_times of all files within current test location """
         for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
+
+            # When perfoming a snapshot, don't traverse into directories that have test
+            # specifications of their own
+            if os.path.exists(os.path.join(dirpath, self.__input_file_name)):
+                dirnames[:] = []
+
             for file in filenames:
                 fullyQualifiedFile = os.path.join(dirpath, file)
                 try:
