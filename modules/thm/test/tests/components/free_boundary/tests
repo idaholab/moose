@@ -15,6 +15,7 @@
     cli_args = 'Outputs/out_momentum/type=CSV Outputs/out_momentum/execute_postprocessors_on=final Outputs/out_momentum/show=momentum_conservation'
     abs_zero = 1e-6
     rel_err = 1e-15
+    prereq = 'phy:mass_1phase'
   [../]
   [./phy:energy_1phase]
     type = 'CSVDiff'
@@ -23,6 +24,7 @@
     cli_args = 'Outputs/out_energy/type=CSV Outputs/out_energy/execute_postprocessors_on=final Outputs/out_energy/show=energy_conservation'
     abs_zero = 1e-2
     rel_err = 1e-15
+    prereq = 'phy:momentum_1phase'
   [../]
 
   # 2-phase
@@ -41,6 +43,7 @@
     cli_args = 'Outputs/out_momentum/type=CSV Outputs/out_momentum/execute_postprocessors_on=final Outputs/out_momentum/show=momentum_conservation'
     abs_zero = 1e-10
     rel_err = 1e-15
+    prereq = 'phy:mass_2phase'
   [../]
   [./phy:energy_2phase]
     type = 'CSVDiff'
@@ -49,5 +52,6 @@
     cli_args = 'Outputs/out_energy/type=CSV Outputs/out_energy/execute_postprocessors_on=final Outputs/out_energy/show=energy_conservation'
     abs_zero = 2e-8
     rel_err = 1e-15
+    prereq = 'phy:momentum_2phase'
   [../]
 []
