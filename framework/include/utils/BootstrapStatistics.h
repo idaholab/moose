@@ -44,26 +44,39 @@ std::unique_ptr<const BootstrapCalculator> makeBootstrapCalculator(const MooseEn
 class BootstrapCalculator : public libMesh::ParallelObject
 {
 public:
-  BootstrapCalculator(const libMesh::ParallelObject &);
+  BootstrapCalculator(const libMesh::ParallelObject &,
+                      const std::vector<Real> &,
+                      unsigned int,
+                      unsigned int);
   virtual ~BootstrapCalculator() = default;
-  void setSeed(unsigned int);
-  void setReplicates(unsigned int);
-  void setLevels(std::vector<Real>);
 
   virtual std::vector<Real>
   compute(const std::vector<Real> &, const Calculator &, const bool) const = 0;
 
 protected:
   std::vector<Real> shuffle(const std::vector<Real> &, MooseRandom &, const bool) const;
-  std::vector<Real> _levels;
-  unsigned int _seed = 1;
-  unsigned int _replicates = 1000;
+
+  // Confidence levels to compute in range (0, 1)
+  const std::vector<Real> _levels;
+
+  // Number of bootstrap replicates
+  const unsigned int _replicates;
+
+  // Random seed for creating boostrap replicates
+  const unsigned int _seed;
 };
 
+/*
+ * Implement percentile method of Efron and Tibshirani (2003), Chapter 13.
+ */
 class Percentile : public BootstrapCalculator
 {
 public:
-  Percentile(const libMesh::ParallelObject &);
+  Percentile(const libMesh::ParallelObject &,
+             const std::vector<Real> &,
+             unsigned int,
+             unsigned int);
+
   virtual std::vector<Real>
   compute(const std::vector<Real> &, const Calculator &, const bool) const override;
 };

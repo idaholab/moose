@@ -36,46 +36,26 @@ makeBootstrapCalculator(const MooseEnum & item,
                         unsigned int replicates,
                         unsigned int seed)
 {
-
-  BootstrapCalculator * ptr = nullptr;
+  std::unique_ptr<const BootstrapCalculator> ptr = nullptr;
   if (item == "percentile")
-    ptr = new Percentile(other); // ownership transfer to a unique_ptr in the return statement
+    ptr = libmesh_make_unique<const Percentile>(other, levels, replicates, seed);
 
   if (!ptr)
     ::mooseError("Failed to create Statistics::BootstrapCalculator object for ", item);
 
-  ptr->setLevels(levels);
-  ptr->setReplicates(replicates);
-  ptr->setSeed(seed);
-
-  return std::unique_ptr<const BootstrapCalculator>(ptr);
+  return ptr;
 }
 
-BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other)
-  : libMesh::ParallelObject(other)
-{
-}
-
-void
-BootstrapCalculator::setLevels(std::vector<Real> levels)
+BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other,
+                                         const std::vector<Real> & levels,
+                                         unsigned int replicates,
+                                         unsigned int seed)
+  : libMesh::ParallelObject(other), _levels(levels), _replicates(replicates), _seed(seed)
 {
   mooseAssert(*std::min_element(levels.begin(), levels.end()) > 0,
               "The supplied levels must be greater than zero.");
   mooseAssert(*std::max_element(levels.begin(), levels.end()) < 1,
               "The supplied levels must be less than one");
-  _levels = levels;
-}
-
-void
-BootstrapCalculator::setReplicates(const unsigned int replicates)
-{
-  _replicates = replicates;
-}
-
-void
-BootstrapCalculator::setSeed(const unsigned int seed)
-{
-  _seed = seed;
 }
 
 std::vector<Real>
@@ -159,7 +139,13 @@ BootstrapCalculator::shuffle(const std::vector<Real> & data,
 }
 
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////
-Percentile::Percentile(const libMesh::ParallelObject & other) : BootstrapCalculator(other) {}
+Percentile::Percentile(const libMesh::ParallelObject & other,
+                       const std::vector<Real> & levels,
+                       unsigned int replicates,
+                       unsigned int seed)
+  : BootstrapCalculator(other, levels, replicates, seed)
+{
+}
 
 std::vector<Real>
 Percentile::compute(const std::vector<Real> & data,
