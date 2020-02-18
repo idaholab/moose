@@ -266,7 +266,7 @@ class TestHarness:
 
                             # Get the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
-                            if self.options.auto_prereq:
+                            if True:#self.options.auto_prereq:
                                 for i in range(1, len(testers)):
                                     testers[i].specs["prereq"] = [testers[i-1].getTestName()]
 
