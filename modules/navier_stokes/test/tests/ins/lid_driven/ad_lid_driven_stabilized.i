@@ -161,10 +161,6 @@
 [Outputs]
   exodus = true
   file_base = lid_driven_stabilized_out
-  [dofmap]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []
 
 [Postprocessors]

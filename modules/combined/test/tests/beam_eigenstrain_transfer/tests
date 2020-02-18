@@ -25,6 +25,7 @@
       detail = 'and LineValueSampler shall report an error if multiple variables'
                     ' are provided as input to the sampler when it is used with'
                     ' MultiAppUserObjectTransfer.'
+      prereq = 'test' # Can't control subapp output from cli args I believe
     [../]
     [./error_3]
       type = RunException
@@ -33,6 +34,7 @@
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, `sort_by` should be set to `id`.'
       detail = 'and LineValueSampler shall report an error if sorting method'
                     ' is not set to `id` when it is used with MultiAppUserObjectTransfer.'
+      prereq = 'error_2' # Can't control subapp output from cli args I believe
     [../]
     [./error_4]
       type = RunException
@@ -42,6 +44,7 @@
       detail = 'and LineValueSampler shall report an return value of infinity'
                     ' when the projection of the queried point onto the line'
                     ' segment lies outside the limits of the line segment.'
+      prereq = 'error_3' # Can't control subapp output from cli args I believe
     [../]
   [../]
 []

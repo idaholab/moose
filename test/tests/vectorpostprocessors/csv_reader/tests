@@ -17,6 +17,7 @@
     input = read.i
     cli_args = 'UserObjects/tester/rank=1 Outputs/csv=false'
     min_parallel = 2
+    prereq = 'read' # Possible race condition for writing out checkpoint files
 
     requirement = 'The system shall support the ability to read CSV data on only one processor and broadcast it to other ranks.'
   [../]

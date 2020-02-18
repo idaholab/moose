@@ -95,7 +95,6 @@
   [exo]
     type = Exodus
   []
-  checkpoint = true
 []
 
 [Preconditioning]
