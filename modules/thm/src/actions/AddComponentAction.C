@@ -8,18 +8,36 @@ InputParameters
 validParams<AddComponentAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
+  params.makeParamNotRequired<std::string>("type");
+  params.set<std::string>("type") = "ComponentGroup";
   return params;
 }
 
-AddComponentAction::AddComponentAction(InputParameters params) : MooseObjectAction(params) {}
+AddComponentAction::AddComponentAction(InputParameters params)
+  : MooseObjectAction(params), _group(_type == "ComponentGroup")
+{
+}
 
 void
 AddComponentAction::act()
 {
-  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
-  if (thm_problem)
+  if (!_group)
   {
-    _moose_object_pars.set<THMProblem *>("_thm_problem") = thm_problem;
-    thm_problem->addComponent(_type, _name, _moose_object_pars);
+    THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+    if (thm_problem)
+    {
+      _moose_object_pars.set<THMProblem *>("_thm_problem") = thm_problem;
+
+      std::vector<std::string> parts;
+      MooseUtils::tokenize<std::string>(_moose_object_pars.blockFullpath(), parts);
+
+      std::stringstream res;
+      std::copy(++parts.begin(), parts.end(), std::ostream_iterator<std::string>(res, "/"));
+
+      std::string comp_name = res.str();
+      comp_name.pop_back();
+
+      thm_problem->addComponent(_type, comp_name, _moose_object_pars);
+    }
   }
 }
