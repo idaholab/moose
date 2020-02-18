@@ -22,10 +22,10 @@ public:
 
 public:
   ///@{ table data for output generation
-  static const std::map<std::string, std::string> _ranktwoaux_table;
+  static const std::map<std::string, std::string> _ranktwo_quantity_table;
   static const std::vector<char> _component_table;
   static const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-      _ranktwoscalaraux_table;
+      _ranktwo_scalar_quantity_table;
   ///@}
 
 protected:

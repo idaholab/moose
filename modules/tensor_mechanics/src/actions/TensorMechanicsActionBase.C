@@ -13,7 +13,7 @@
 #include "ComputeFiniteStrain.h"
 
 // map tensor name shortcuts to tensor material property names
-const std::map<std::string, std::string> TensorMechanicsActionBase::_ranktwoaux_table = {
+const std::map<std::string, std::string> TensorMechanicsActionBase::_ranktwo_quantity_table = {
     {"strain", "total_strain"},
     {"stress", "stress"},
     {"elastic_strain", "elastic_strain"},
@@ -23,12 +23,17 @@ const std::vector<char> TensorMechanicsActionBase::_component_table = {'x', 'y',
 // map aux variable name prefixes to RanTwoScalarAux option and list of permitted tensor name
 // shortcuts
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    TensorMechanicsActionBase::_ranktwoscalaraux_table = {
+    TensorMechanicsActionBase::_ranktwo_scalar_quantity_table = {
         {"vonmises", {"VonMisesStress", {"stress"}}},
+        {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic", {"Hydrostatic", {"stress"}}},
         {"max_principal", {"MaxPrincipal", {"stress"}}},
         {"mid_principal", {"MidPrincipal", {"stress"}}},
         {"min_principal", {"MinPrincipal", {"stress"}}},
+        {"volumetric", {"VolumetricStrain", {"strain"}}},
+        {"axial", {"AxialStress", {"stress", "strain"}}},
+        {"hoop", {"HoopStress", {"stress", "strain"}}},
+        {"radial", {"RadialStress", {"stress", "strain"}}},
         {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
         {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
@@ -132,13 +137,13 @@ MultiMooseEnum
 TensorMechanicsActionBase::outputPropertiesType()
 {
   std::string options = "";
-  for (auto & r2a : _ranktwoaux_table)
+  for (auto & r2a : _ranktwo_quantity_table)
     for (unsigned int a = 0; a < 3; ++a)
       for (unsigned int b = 0; b < 3; ++b)
         options += (options == "" ? "" : " ") + r2a.first + '_' + _component_table[a] +
                    _component_table[b];
 
-  for (auto & r2sa : _ranktwoscalaraux_table)
+  for (auto & r2sa : _ranktwo_scalar_quantity_table)
     for (auto & t : r2sa.second.second)
       options += " " + r2sa.first + "_" + t;
 

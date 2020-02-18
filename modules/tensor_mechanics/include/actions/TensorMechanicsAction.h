@@ -23,19 +23,17 @@ public:
 protected:
   void actSubdomainChecks();
   void actOutputGeneration();
+  void actOutputMatProp();
   void actGatherActionParameters();
 
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
-  /// Displacement variables
+  ///@{ displacement variables
   std::vector<VariableName> _displacements;
-
-  /// Number of displacement variables
   unsigned int _ndisp;
-
-  /// Coupled displacement variables
   std::vector<VariableName> _coupled_displacements;
+  ///@}
 
   ///@{ residual debugging
   std::vector<AuxVariableName> _save_in;
@@ -93,6 +91,6 @@ protected:
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
 
-  /// output aux variables to generate for sclar stress/strain tensor quantities
+  /// output materials to generate scalar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
 };

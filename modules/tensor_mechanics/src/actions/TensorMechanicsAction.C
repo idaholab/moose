@@ -186,7 +186,7 @@ TensorMechanicsAction::act()
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
       if (_use_ad)
-        paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
+        paramError("use_ad", "AD not setup for use with PlaneStrain");
       // Set the action parameters
       const std::string type = "GeneralizedPlaneStrainAction";
       auto action_params = _action_factory.getValidParams(type);
@@ -229,11 +229,13 @@ TensorMechanicsAction::act()
   }
 
   //
-  // Add Strain Materials
+  // Add Materials
   //
   else if (_current_task == "add_material")
   {
     std::string type;
+
+    actOutputMatProp();
 
     //
     // no plane strain
@@ -267,10 +269,10 @@ TensorMechanicsAction::act()
              _planar_formulation == PlanarFormulation::PlaneStrain ||
              _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
-      if (_use_ad && (_planar_formulation == PlanarFormulation::PlaneStrain ||
-                      _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain))
-        paramError("use_automatic_differentiation",
-                   "AD not setup for use with PlaneStrain or GeneralizedPlaneStrain");
+      if (_use_ad)
+        paramError(
+            "use_ad",
+            "AD not setup for use with WeakPlaneStress, PlaneStrain, or GeneralizedPlaneStrain");
 
       std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
           {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputePlaneSmallStrain"},
@@ -413,14 +415,13 @@ TensorMechanicsAction::actOutputGeneration()
 {
   std::string ad_prepend = _use_ad ? "AD" : "";
   //
-  // Add variables (optional)
-  //
+  // Create aux variables for postprocessors and material classes which use
+  // variables instead of material properties
   if (_current_task == "add_aux_variable")
   {
     auto params = _factory.getValidParams("MooseVariableConstMonomial");
     params.set<MooseEnum>("order") = "CONSTANT";
     params.set<MooseEnum>("family") = "MONOMIAL";
-    // Loop through output aux variables
     for (auto out : _generate_output)
     {
       // Create output helper aux variables
@@ -428,57 +429,87 @@ TensorMechanicsAction::actOutputGeneration()
     }
   }
 
-  //
-  // Add output AuxKernels
-  //
-  else if (_current_task == "add_aux_kernel")
+  if (_current_task == "add_aux_kernel")
   {
     // Loop through output aux variables
     for (auto out : _generate_output)
     {
       std::string type = "";
       InputParameters params = emptyInputParameters();
+      params = _factory.getValidParams("MaterialRealAux");
+      params.applyParameters(parameters());
+      params.set<MaterialPropertyName>("property") = _base_name + out;
+      params.set<AuxVariableName>("variable") = _base_name + out;
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      _problem->addAuxKernel("MaterialRealAux", _base_name + out + '_' + name(), params);
+    }
+  }
+}
 
-      // RankTwoAux
-      for (const auto & r2a : _ranktwoaux_table)
+void
+TensorMechanicsAction::actOutputMatProp()
+{
+  //
+  // Create materials which allow the use of material properties for quatities
+  if (_current_task == "add_material")
+  {
+    //
+    // Add output Materials
+    for (auto out : _generate_output)
+    {
+      std::string type = "";
+      InputParameters params = emptyInputParameters();
+      //
+      // MaterialRankTwoTensorQuantity
+      for (const auto & r2a : _ranktwo_quantity_table)
         for (unsigned int a = 0; a < 3; ++a)
           for (unsigned int b = 0; b < 3; ++b)
             if (r2a.first + '_' + _component_table[a] + _component_table[b] == out)
             {
-              type = ad_prepend + "RankTwoAux";
+              type = "MaterialRankTwoTensorQuantity";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a.second;
               params.set<unsigned int>("index_i") = a;
               params.set<unsigned int>("index_j") = b;
             }
 
-      // RankTwoScalarAux
-      for (const auto & r2sa : _ranktwoscalaraux_table)
+      //
+      // MaterialRankTwoScalar
+      for (const auto & r2sa : _ranktwo_scalar_quantity_table)
         for (const auto & t : r2sa.second.second)
           if (r2sa.first + '_' + t == out)
           {
-            const auto r2a = _ranktwoaux_table.find(t);
-            if (r2a != _ranktwoaux_table.end())
+            const auto r2a = _ranktwo_quantity_table.find(t);
+            if (r2a != _ranktwo_quantity_table.end())
             {
-              type = ad_prepend + "RankTwoScalarAux";
+              if (_coord_system == Moose::COORD_XYZ)
+                type = "MaterialRankTwoCartesianScalar";
+              if (_coord_system == Moose::COORD_RZ)
+                type = "MaterialRankTwoCylindricalScalar";
+              if (_coord_system == Moose::COORD_RSPHERICAL)
+                type = "MaterialRankTwoSphericalScalar";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a->second;
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;
             }
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
-                         "'_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
+                         "'_ranktwo_scalar_quantity_table' must be keys in the "
+                         "'_ranktwo_quantity_table'.");
           }
 
-      if (type != "")
+      //
+      // This material property is already created by other materials such as
+      // ZryCreepLimbackHoppeUpdate.
+      if (type != "" && (out != "effective_creep_strain" && out != "effective_plastic_strain"))
       {
         params.applyParameters(parameters());
-        params.set<AuxVariableName>("variable") = _base_name + out;
-        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-        _problem->addAuxKernel(type, _base_name + out + '_' + name(), params);
+        params.set<std::string>("calculation_name") = _base_name + out;
+        _problem->addMaterial(type, _base_name + out + '_' + name(), params);
       }
-      else
-        mooseError("Unable to add output AuxKernel");
+
+      if (type == "")
+        mooseError("Unable to add output Material");
     }
   }
 }
