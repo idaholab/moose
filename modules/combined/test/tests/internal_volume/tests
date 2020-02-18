@@ -1,6 +1,14 @@
 [Tests]
   design = 'InternalVolume.md'
   issues = '#7061'
+
+  [./rspherical]
+    type = 'CSVDiff'
+    input = 'rspherical.i'
+    csvdiff = 'rspherical_out.csv'
+    requirement = 'The system shall compute internal volume given an enclosing sideset for spherical coordinates'
+  [../]
+
   [./rspherical_sm]
     type = 'CSVDiff'
     input = 'rspherical_sm.i'
@@ -18,6 +26,23 @@
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
     requirement = 'The system shall report an error if component is not 0 in InternalVolume for spherical coordinates for solid_mechanics'
     no_error_deprecated = true
+  [../]
+
+  [./rz]
+    type = 'CSVDiff'
+    input = 'rz.i'
+    csvdiff = 'rz_out.csv'
+    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates'
+  [../]
+
+  [./rz2]
+    type = 'CSVDiff'
+    input = 'rz.i'
+    csvdiff = 'rz2_out.csv'
+    cli_args = 'Postprocessors/internalVolume/component=1
+                Outputs/file_base=rz2_out'
+    prereq = rz
+    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and with the y coordinate used in the integration over the sideset'
   [../]
 
   [./rz_sm]
@@ -109,36 +134,12 @@
     no_error_deprecated = true
   [../]
 
-  [./rspherical]
-    type = 'CSVDiff'
-    input = 'rspherical.i'
-    csvdiff = 'rspherical_out.csv'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for spherical coordinates'
-  [../]
-
   [./rspherical_error]
     type = RunException
     input = 'rspherical.i'
     cli_args = 'Postprocessors/intVolTotal/component=1'
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
     requirement = 'The system shall report an error if component is not 0 in InternalVolume for spherical coordinates'
-  [../]
-
-  [./rz]
-    type = 'CSVDiff'
-    input = 'rz.i'
-    csvdiff = 'rz_out.csv'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates'
-  [../]
-
-  [./rz2]
-    type = 'CSVDiff'
-    input = 'rz.i'
-    csvdiff = 'rz2_out.csv'
-    cli_args = 'Postprocessors/internalVolume/component=1
-                Outputs/file_base=rz2_out'
-    prereq = rz
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and with the y coordinate used in the integration over the sideset'
   [../]
 
   [./rz_error]

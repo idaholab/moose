@@ -1,4 +1,12 @@
 [Tests]
+  [./combined2_sm]
+    type = 'Exodiff'
+    input = 'combined_creep_plasticity_sm2.i'
+    exodiff = 'combined_creep_plasticity_sm_out.e'
+    abs_zero = 1e-09
+    method = 'OPT OPROF' # Test is too big for debug
+    no_error_deprecated = true
+  [../]
   [./combined_sm]
     type = 'Exodiff'
     input = 'combined_creep_plasticity_sm1.i'
@@ -6,14 +14,6 @@
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug
     prereq = combined2_sm
-    no_error_deprecated = true
-  [../]
-  [./combined2_sm]
-    type = 'Exodiff'
-    input = 'combined_creep_plasticity_sm2.i'
-    exodiff = 'combined_creep_plasticity_sm_out.e'
-    abs_zero = 1e-09
-    method = 'OPT OPROF' # Test is too big for debug
     no_error_deprecated = true
   [../]
 
