@@ -19,7 +19,7 @@
     [./error_2]
       type = RunException
       input = 'master_uo_transfer.i'
-      cli_args = "MultiApps/sub/input_files='subapp_err_2.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false"
+      cli_args = "MultiApps/sub/input_files='subapp_err_2.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, only one variable can be provided as input to LineValueSampler.'
       method='OPT OPROF' # Test triggers an assert before reaching the expected runtime error
       detail = 'and LineValueSampler shall report an error if multiple variables'
@@ -29,7 +29,7 @@
     [./error_3]
       type = RunException
       input = 'master_uo_transfer.i'
-      cli_args = "MultiApps/sub/input_files='subapp_err_3.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false"
+      cli_args = "MultiApps/sub/input_files='subapp_err_3.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, `sort_by` should be set to `id`.'
       detail = 'and LineValueSampler shall report an error if sorting method'
                     ' is not set to `id` when it is used with MultiAppUserObjectTransfer.'
@@ -37,7 +37,7 @@
     [./error_4]
       type = RunException
       input = 'master_uo_transfer.i'
-      cli_args = "MultiApps/sub/input_files='subapp_err_4.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false"
+      cli_args = "MultiApps/sub/input_files='subapp_err_4.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
       expect_err = 'MultiAppUserObjectTransfer: Point corresponding to master node at'
       detail = 'and LineValueSampler shall report an return value of infinity'
                     ' when the projection of the queried point onto the line'

@@ -17,7 +17,7 @@
       input = 'relative_difference.i'
       csvdiff = 'relative_difference_zero_out.csv'
       cli_args = 'Postprocessors/relative_difference/value2=zero '
-                 'Outputs/out/file_base=relative_difference_zero_out'
+                 'Outputs/out/file_base=relative_difference_zero_out Outputs/file_base=close_to_zero'
 
       detail = 'when values are approximately zero.'
     []
