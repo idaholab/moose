@@ -266,6 +266,9 @@ class TestHarness:
 
                             # Get the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
+                            if self.options.auto_prereq:
+                                for i in range(1, len(testers)):
+                                    testers[i].specs["prereq"] = [testers[i-1].getTestName()]
 
                             # Schedule the testers for immediate execution
                             self.scheduler.schedule(testers)
@@ -777,6 +780,7 @@ class TestHarness:
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
         parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
         parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
+        parser.add_argument('--auto-prereq', action='store_true', help="Automatically add 'prereq' to tests within the same specification so that those tests run in order in serial.")
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -790,6 +794,7 @@ class TestHarness:
 
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
         parser.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
+
 
         outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
         outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
@@ -912,6 +917,9 @@ class TestHarness:
         # User wants only failed files, so unify the options involved
         elif opts.fail_files:
             opts.quiet = True
+
+        # Enable/disable auto prereq mode
+        self.options.auto_prereq = opts.auto_prereq
 
     def postRun(self, specs, timing):
         return
