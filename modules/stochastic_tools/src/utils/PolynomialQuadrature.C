@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PolynomialQuadrature.h"
-#include "QuadratureLibrary.h"
 
 #include "MooseError.h"
 #include "libmesh/auto_ptr.h"
@@ -221,6 +220,22 @@ gauss_hermite(const unsigned int order,
     points[i] = mu + lambda(i) * sig;
     weights[i] = vec(0, i) * vec(0, i);
   }
+}
+
+TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
+                       std::vector<std::unique_ptr<const Polynomial>> & poly)
+{
+  if (npoints.size() != poly.size())
+    ::mooseError("List of number of 1D quadrature points must be same size as number of Polynomial "
+                 "objects.");
+
+  std::vector<std::vector<Real>> qpoints_1D(poly.size());
+  std::vector<std::vector<Real>> qweights_1D(poly.size());
+  for (unsigned int d = 0; d < poly.size(); ++d)
+    poly[d]->quadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
+
+  _quad = libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
+      qpoints_1D, qweights_1D);
 }
 
 } // namespace PolynomialQuadrature

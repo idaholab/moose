@@ -14,6 +14,8 @@
 #include "BoostNormalDistribution.h"
 #include "libmesh/utility.h"
 
+#include "CartesianProduct.h"
+
 /**
  * Polynomials and quadratures based on defined distributions for Polynomial Chaos
  */
@@ -89,6 +91,61 @@ public:
 private:
   Real _mu;
   Real _sig;
+};
+
+/**
+ * General multidimensional quadrature class
+ */
+class Quadrature
+{
+public:
+  Quadrature() {}
+  virtual ~Quadrature() = default;
+
+  /// Resulting number of quadrature points in grid
+  virtual unsigned int nPoints() const = 0;
+  /// Inputted number of dimensions
+  virtual unsigned int nDim() const = 0;
+
+  /// Quadrature point n
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const = 0;
+  /// Quadrature point n for dimension dim
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const = 0;
+  /// Weight for quadrature point n
+  virtual Real quadratureWeight(const unsigned int n) const = 0;
+};
+
+/**
+ * Full tensor product of 1D quadratures
+ */
+class TensorGrid : public Quadrature
+{
+public:
+  TensorGrid(const std::vector<unsigned int> & npoints,
+             std::vector<std::unique_ptr<const Polynomial>> & poly);
+  TensorGrid(const unsigned int npoints, std::vector<std::unique_ptr<const Polynomial>> & poly)
+    : TensorGrid(std::vector<unsigned int>(poly.size(), npoints), poly)
+  {
+  }
+
+  virtual unsigned int nPoints() const override { return _quad->numRows(); };
+  virtual unsigned int nDim() const override { return _quad->numCols(); };
+
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const override
+  {
+    return _quad->computeRow(n);
+  };
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const override
+  {
+    return _quad->computeValue(n, dim);
+  };
+  virtual Real quadratureWeight(const unsigned int n) const override
+  {
+    return _quad->computeWeight(n);
+  };
+
+private:
+  std::unique_ptr<const StochasticTools::WeightedCartesianProduct<Real, Real>> _quad = nullptr;
 };
 
 /**
