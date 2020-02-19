@@ -85,13 +85,13 @@ GapConductance::actionParameters()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
-  params.addRangeCheckedParam<Real>("emissivity_1",
+  params.addRangeCheckedParam<Real>("emissivity_master",
                                     0.0,
-                                    "emissivity_1>=0 & emissivity_1<=1",
+                                    "emissivity_master>=0 & emissivity_master<=1",
                                     "The emissivity of the fuel surface");
-  params.addRangeCheckedParam<Real>("emissivity_2",
+  params.addRangeCheckedParam<Real>("emissivity_slave",
                                     0.0,
-                                    "emissivity_2>=0 & emissivity_2<=1",
+                                    "emissivity_slave>=0 & emissivity_slave<=1",
                                     "The emissivity of the cladding surface");
 
   // Common
@@ -131,9 +131,10 @@ GapConductance::GapConductance(const InputParameters & parameters)
                                             ? &coupledValue("gap_conductivity_function_variable")
                                             : NULL),
     _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
-    _emissivity(getParam<Real>("emissivity_1") != 0.0 && getParam<Real>("emissivity_2") != 0.0
-                    ? 1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") -
-                          1
+    _emissivity(getParam<Real>("emissivity_master") != 0.0 &&
+                        getParam<Real>("emissivity_slave") != 0.0
+                    ? 1.0 / getParam<Real>("emissivity_master") +
+                          1.0 / getParam<Real>("emissivity_slave") - 1
                     : 0.0),
     _min_gap(getParam<Real>("min_gap")),
     _min_gap_order(getParam<unsigned int>("min_gap_order")),
