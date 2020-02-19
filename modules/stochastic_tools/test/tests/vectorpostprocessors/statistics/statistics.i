@@ -18,7 +18,7 @@
     outputs = none
   []
   [stats]
-    type = StatisticsVectorPostprocessor
+    type = Statistics
     vectorpostprocessors = 'const'
     compute = 'min max sum mean stddev norm2'
   []

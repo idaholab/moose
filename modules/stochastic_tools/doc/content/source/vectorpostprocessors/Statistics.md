@@ -1,12 +1,12 @@
-# StatisticsVectorPostprocessor
+# Statistics
 
-!syntax description /VectorPostprocessors/StatisticsVectorPostprocessor
+!syntax description /VectorPostprocessors/Statistics
 
 ## Description
 
-The `StatisticsVectorPostprocessor` computes statistical values for each vector of other
+The `Statistics` computes statistical values for each vector of other
 `VectorPostprocessor` (VPP) objects.  The results are output in vectors that are assigned names
-based on the VPP and vector name (object-vector) and each entry in the vector correspoinding
+based on the VPP and vector name (object-vector) and each entry in the vector corresponding
 the the desired statistics and optionally confidence level intervals.
 
 The first column, named `stat_type` and contains an unique integer identifier for the type of
@@ -15,7 +15,7 @@ statistical measure computed and the confidence levels, if computed.
 ## Statistics
 
 The statistics to compute are indicated by the
-[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/compute) parameter, which can contain
+[!param](/VectorPostprocessors/Statistics/compute) parameter, which can contain
 multiple values as listed below. This list also includes the associated numeric identifier
 that is included in the `stat_type` vector output the VPP object.
 
@@ -80,9 +80,9 @@ parameter.  The current statistical measures (and their `stat_type` identifier) 
 
 Bootstrap confidence level intervals, as defined by [!cite](tibshirani1993introduction), are enabled
 by specifying the desired levels using the
-[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/ci_levels) parameter and setting
+[!param](/VectorPostprocessors/Statistics/ci_levels) parameter and setting
 the method of calculation using the
-[!param](/VectorPostprocessors/StatisticsVectorPostprocessor/ci_method).
+[!param](/VectorPostprocessors/Statistics/ci_method).
 The levels listed should be in the range (0, 0.5]. For example, the levels 0.05, 0.1, and 0.5 provided
 result in the computation of the 0.05, 0.1, 0.5, 0.9, and 0.95 confidence level intervals.
 
@@ -98,34 +98,34 @@ The available methods include the following:
 ## Example 1: Statistics
 
 The following input file snippet demonstrates how to compute various statistics using the
-`StatisticsVectorPostprocessor` object.
+`Statistics` object.
 
-!listing statistics_vector_postprocessor.i block=VectorPostprocessors
+!listing statistics.i block=VectorPostprocessors
 
 This block results in the following CSV file for the "stats" block of the input file. Notice
 the first column corresponds with the numeric identifier for the statistics being computed.
 
-!listing statistics_vector_postprocessor/gold/statistics_vector_postprocessor_out_stats_0001.csv
+!listing statistics/gold/statistics_out_stats_0001.csv
 
 
 ## Example 2: Confidence Levels
 
 The following input file snippet demonstrates how to compute various statistics and
-confidence levels using the `StatisticsVectorPostprocessor` object
+confidence levels using the `Statistics` object
 
-!listing bootstrap_statistics_vector_postprocessor/bootstrap.i block=VectorPostprocessors
+!listing bootstrap_statistics/bootstrap.i block=VectorPostprocessors
 
 This block results in the following CSV file for the "stats" block of the input file. Notice
 the first column corresponds with the numeric identifier for the statistics being computed.
 
-!listing bootstrap_statistics_vector_postprocessor/gold/bootstrap_out_stats_0001.csv
+!listing bootstrap_statistics/gold/bootstrap_out_stats_0001.csv
 
 
 
-!syntax parameters /VectorPostprocessors/StatisticsVectorPostprocessor
+!syntax parameters /VectorPostprocessors/Statistics
 
-!syntax inputs /VectorPostprocessors/StatisticsVectorPostprocessor
+!syntax inputs /VectorPostprocessors/Statistics
 
-!syntax children /VectorPostprocessors/StatisticsVectorPostprocessor
+!syntax children /VectorPostprocessors/Statistics
 
 !bibtex bibliography

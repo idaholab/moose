@@ -12,19 +12,15 @@
 []
 
 [VectorPostprocessors]
-  [data]
+  [test]
     type = TestDistributedVectorPostprocessor
     parallel_type = distributed
     outputs = none
   []
-
   [stats]
-    type = StatisticsVectorPostprocessor
-    vectorpostprocessors = 'data'
-    compute = 'mean'
-    ci_method = 'percentile'
-    ci_levels = '0.025 0.05 0.1 0.16 0.5'
-    ci_replicates = 10
+    type = Statistics
+    vectorpostprocessors = 'test'
+    compute = 'min max sum mean stddev norm2 ratio'
   []
 []
 

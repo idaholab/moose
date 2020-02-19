@@ -10,13 +10,13 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
-#include "Statistics.h"
-#include "BootstrapStatistics.h"
+#include "Calculators.h"
+#include "BootstrapCalculators.h"
 
-class StatisticsVectorPostprocessor;
+class Statistics;
 
 template <>
-InputParameters validParams<StatisticsVectorPostprocessor>();
+InputParameters validParams<Statistics>();
 
 /**
  * Compute several metrics for supplied VPP vectors.
@@ -24,11 +24,11 @@ InputParameters validParams<StatisticsVectorPostprocessor>();
  * This class uses calculator objects defined in Statistics.h and is setup such that if a new
  * calculation is needed it can be added in Statistics.h without modification of this object.
  */
-class StatisticsVectorPostprocessor : public GeneralVectorPostprocessor
+class Statistics : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
-  StatisticsVectorPostprocessor(const InputParameters & parameters);
+  Statistics(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void execute() override;
@@ -51,7 +51,7 @@ protected:
   VectorPostprocessorValue & _stat_type_vector;
 
   /// Confidence level calculator
-  std::unique_ptr<const Statistics::BootstrapCalculator> _ci_calculator = nullptr;
+  std::unique_ptr<const StochasticTools::BootstrapCalculator> _ci_calculator = nullptr;
 
   // The following vectors are sized to the number of statistics to be computed
 

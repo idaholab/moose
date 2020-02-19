@@ -16,7 +16,7 @@
 #include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 
-namespace Statistics
+namespace StochasticTools
 {
 
 MultiMooseEnum

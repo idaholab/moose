@@ -17,7 +17,7 @@ class MooseEnum;
 class MooseEnumItem;
 class MooseRandom;
 
-namespace Statistics
+namespace StochasticTools
 {
 class Calculator;
 class BootstrapCalculator;
@@ -62,7 +62,7 @@ protected:
   // Number of bootstrap replicates
   const unsigned int _replicates;
 
-  // Random seed for creating boostrap replicates
+  // Random seed for creating bootstrap replicates
   const unsigned int _seed;
 };
 

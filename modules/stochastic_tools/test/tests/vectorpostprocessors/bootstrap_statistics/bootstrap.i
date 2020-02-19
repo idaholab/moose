@@ -26,7 +26,7 @@
 
   # Reproduce Table 13.1 in Efron and Tibshirani, 1993
   [stats]
-    type = StatisticsVectorPostprocessor
+    type = Statistics
     vectorpostprocessors = 'treatment control'
     compute = 'mean stderr'
     ci_method = 'percentile'

@@ -15,30 +15,29 @@
 
 class MooseEnumItem;
 
-namespace Statistics
+namespace StochasticTools
 {
 class Calculator;
 
 /*
- * Free function for building a const Calculator object for use by StatisticsVectorPostprocessor.
+ * Free function for building a const Calculator object for use by Statistics object
  */
 std::unique_ptr<const Calculator> makeCalculator(const MooseEnumItem & item,
                                                  const libMesh::ParallelObject & other);
 
 /*
- * Free function that returns the available statistics available to the
- * StatisticsVectorPostprocessor.
+ * Free function that returns the available statistics available to the Statistics object(s)
  */
 MultiMooseEnum makeCalculatorEnum();
 
-/* Base class for computing statistics (e.g., mean, min) for use with StatisticsVectorPostprocessor.
+/* Base class for computing statistics (e.g., mean, min) for use with Statistics object
  *
  * The purpose of these objects are to provide an API for computing statistics in serial or parallel
  * without any state. This allows future statistics to be quickly added and for each statistic
  * to be used with the BoostrapCalculator for computing bootstrap statistics such as confidence
  * level intervals.
  *
- * The Calculator objects are created as const objects by the StatisticsVectorPostprocessor via
+ * The Calculator objects are created as const objects by the Statistics object via
  * the makeCalculator function.
  *
  * To create new Calculator objects first create the Calculator class and then update the

@@ -1,5 +1,5 @@
 [Tests]
-  design = StatisticsVectorPostprocessor.md
+  design = Statistics.md
   issues = '#14409'
 
   [precentile]
@@ -26,6 +26,7 @@
       cli_args = "VectorPostprocessors/data/parallel_type=replicated"
       min_parallel = 3
       max_parallel = 3
+      allow_test_objects = true
 
       detail = "if the vector is replicated across processors and"
     []
@@ -37,6 +38,7 @@
       prereq = parallel/replicated
       min_parallel = 3
       max_parallel = 3
+      allow_test_objects = true
 
       detail = "when the vector is distributed across processors."
     []

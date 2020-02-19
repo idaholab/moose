@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 // Bootstrap CI
 
-#include "Statistics.h"
-#include "BootstrapStatistics.h"
+#include "Calculators.h"
+#include "BootstrapCalculators.h"
 #include "MooseEnumItem.h"
 #include "MooseEnum.h"
 #include "MooseError.h"
@@ -18,9 +18,7 @@
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_sync.h"
 
-#include "SerializerGuard.h"
-
-namespace Statistics
+namespace StochasticTools
 {
 
 MooseEnum

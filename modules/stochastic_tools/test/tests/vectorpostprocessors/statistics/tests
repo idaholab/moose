@@ -1,24 +1,26 @@
 [Tests]
   issues = '#11217'
-  design = 'StatisticsVectorPostprocessor.md'
+  design = 'Statistics.md'
 
   [tests]
     requirement = 'The system shall be capable of computing the statics of a data vector of that'
 
     [replicated]
       type = 'CSVDiff'
-      input = 'statistics_vector_postprocessor.i'
-      csvdiff = 'statistics_vector_postprocessor_out_stats_0001.csv'
+      input = 'statistics.i'
+      csvdiff = 'statistics_out_stats_0001.csv'
+      allow_test_objects = true
 
       detail = 'is replicated and'
     []
 
     [distributed]
       type = 'CSVDiff'
-      input = 'statistics_vector_postprocessor_distributed.i'
-      csvdiff = 'statistics_vector_postprocessor_distributed_out_stats_0001.csv'
+      input = 'statistics_distributed.i'
+      csvdiff = 'statistics_distributed_out_stats_0001.csv'
       min_parallel = 3
       max_parallel = 3
+      allow_test_objects = true
 
       detail = 'distributed.'
     []

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StatisticsVectorPostprocessor.h"
+#include "Statistics.h"
 
 // MOOSE includes
 #include "MooseVariable.h"
@@ -18,30 +18,29 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", StatisticsVectorPostprocessor);
+registerMooseObject("MooseApp", Statistics);
 
-defineLegacyParams(StatisticsVectorPostprocessor);
+defineLegacyParams(Statistics);
 
 InputParameters
-StatisticsVectorPostprocessor::validParams()
+Statistics::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Compute statistical values of a given VectorPostprocessor objects and vectors.");
 
-  // TODO: Make these Required when deprecated are removed
-  params.addParam<std::vector<VectorPostprocessorName>>(
+  params.addRequiredParam<std::vector<VectorPostprocessorName>>(
       "vectorpostprocessors",
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
-  MultiMooseEnum stats = Statistics::makeCalculatorEnum();
-  params.addParam<MultiMooseEnum>(
+  MultiMooseEnum stats = StochasticTools::makeCalculatorEnum();
+  params.addRequiredParam<MultiMooseEnum>(
       "compute",
       stats,
       "The statistic(s) to compute for each of the supplied vector postprocessors.");
 
   // Confidence Levels
-  MooseEnum ci = Statistics::makeBootstrapCalculatorEnum();
+  MooseEnum ci = StochasticTools::makeBootstrapCalculatorEnum();
   params.addParam<MooseEnum>(
       "ci_method", ci, "The method to use for computing confidence level intervals.");
 
@@ -56,23 +55,12 @@ StatisticsVectorPostprocessor::validParams()
                                 "The random number generator seed used for creating replicates "
                                 "while computing confidence level intervals.");
 
-  // DEPRECATED
-  params.addDeprecatedParam<VectorPostprocessorName>(
-      "vpp",
-      "The VectorPostprocessor to compute statistics for.",
-      "Replaced by 'vectorpostprocessors'");
-  params.addDeprecatedParam<MultiMooseEnum>(
-      "stats",
-      MultiMooseEnum("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6"),
-      "The statistics you would like to compute for each column of the VectorPostprocessor",
-      "Replaced with 'compute'");
   return params;
 }
 
-StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
+Statistics::Statistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _compute_stats(isParamValid("stats") ? getParam<MultiMooseEnum>("stats")
-                                         : getParam<MultiMooseEnum>("compute")),
+    _compute_stats(getParam<MultiMooseEnum>("compute")),
     _ci_method(getParam<MooseEnum>("ci_method")),
     _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
                                     : std::vector<Real>()),
@@ -90,47 +78,32 @@ StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParamete
     unsigned int replicates = getParam<unsigned int>("ci_replicates");
     unsigned int seed = getParam<unsigned int>("ci_seed");
     _ci_calculator =
-        Statistics::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
+        StochasticTools::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
   }
 }
 
 void
-StatisticsVectorPostprocessor::initialSetup()
+Statistics::initialSetup()
 {
-  // DEPRECATED
-  if (isParamValid("vpp"))
+  const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
+  for (const auto & vpp_name : vpp_names)
   {
-    const auto & vpp_name = getParam<VectorPostprocessorName>("vpp");
     const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
         vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
     for (const auto & the_pair : vpp_vectors)
     {
+      // Store VectorPostprocessor name and vector name from which stats will be computed
       _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
-      _stat_vectors.push_back(&declareVector(the_pair.first));
-    }
-  }
-  else
-  {
-    const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
-    for (const auto & vpp_name : vpp_names)
-    {
-      const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
-          vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
-      for (const auto & the_pair : vpp_vectors)
-      {
-        // Store VectorPostprocessor name and vector name from which stats will be computed
-        _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
 
-        // Create the vector where the statistics will be stored
-        std::string name = vpp_name + "_" + the_pair.first;
-        _stat_vectors.push_back(&declareVector(name));
-      }
+      // Create the vector where the statistics will be stored
+      std::string name = vpp_name + "_" + the_pair.first;
+      _stat_vectors.push_back(&declareVector(name));
     }
   }
 }
 
 void
-StatisticsVectorPostprocessor::execute()
+Statistics::execute()
 {
   for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {
@@ -144,8 +117,8 @@ StatisticsVectorPostprocessor::execute()
     {
       for (const auto & item : _compute_stats)
       {
-        std::unique_ptr<const Statistics::Calculator> calc_ptr =
-            Statistics::makeCalculator(item, *this);
+        std::unique_ptr<const StochasticTools::Calculator> calc_ptr =
+            StochasticTools::makeCalculator(item, *this);
         _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
 
         if (_ci_calculator)
@@ -159,7 +132,7 @@ StatisticsVectorPostprocessor::execute()
 }
 
 std::vector<Real>
-StatisticsVectorPostprocessor::computeLevels(const std::vector<Real> & levels_in) const
+Statistics::computeLevels(const std::vector<Real> & levels_in) const
 {
   if (levels_in.empty())
     paramError("ci_levels",
