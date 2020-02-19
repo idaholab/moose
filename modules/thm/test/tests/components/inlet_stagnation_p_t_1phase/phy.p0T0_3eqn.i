@@ -46,6 +46,7 @@
     input = 'pipe:in'
     p0 = 1e6
     T0 = 453.1
+    reversible = false
   [../]
 
   [./outlet]
