@@ -4,7 +4,7 @@
 
 ## Description
 
-The `Statistics` computes statistical values for each vector of other
+The `Statistics` object computes statistical values for each vector of other
 `VectorPostprocessor` (VPP) objects.  The results are output in vectors that are assigned names
 based on the VPP and vector name (object-vector) and each entry in the vector corresponding
 the the desired statistics and optionally confidence level intervals.
@@ -93,7 +93,7 @@ computed and the decimal corresponds with the confidence level.
 
 The available methods include the following:
 
-- +precentile+: Percentile bootstrap method as defined in Ch. 13 of [!cite](tibshirani1993introduction).
+- +percentile+: Percentile bootstrap method as defined in Ch. 13 of [!cite](tibshirani1993introduction).
 
 ## Example 1: Statistics
 

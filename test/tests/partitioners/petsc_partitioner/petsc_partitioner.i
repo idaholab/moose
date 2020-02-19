@@ -46,14 +46,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  exodus = true
-  [out]
-    type = CSV
-    execute_on = FINAL
-  []
-[]
-
 [AuxVariables]
   [pid]
     family = MONOMIAL
@@ -78,32 +70,41 @@
   []
 []
 
+[Postprocessors]
+  [sum_sides]
+    type = StatVector
+    stat = sum
+    object = nl_wb_element
+    vector = num_partition_sides
+  []
+  [min_elems]
+    type = StatVector
+    stat = min
+    object = nl_wb_element
+    vector = num_elems
+  []
+  [max_elems]
+    type = StatVector
+    stat = max
+    object = nl_wb_element
+    vector = num_elems
+  []
+[]
+
 [VectorPostprocessors]
-  [./nl_wb_element]
+  [nl_wb_element]
     type = WorkBalance
     execute_on = initial
     system = nl
-    outputs  = none
-    balances = 'num_elems num_nodes'
+    balances = 'num_elems num_partition_sides'
+    outputs = none
   []
+[]
 
-  [./bl_element]
-    type = StatisticsVectorPostprocessor
-    vectorpostprocessors = nl_wb_element
-    compute = 'min max sum mean ratio'
-  [../]
-
-  [./nl_wb_edgecuts]
-    type = WorkBalance
-    execute_on = initial
-    system = nl
-    outputs  = none
-    balances = 'num_partition_sides'
+[Outputs]
+  exodus = true
+  [out]
+    type = CSV
+    execute_on = FINAL
   []
-
-  [./bl_edgecuts]
-    type = StatisticsVectorPostprocessor
-    vpp = nl_wb_edgecuts
-    stats = 'sum'
-  [../]
 []

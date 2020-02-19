@@ -12,12 +12,12 @@
     group = 'requirements nemesis'
 
     requirement = 'The system shall support writing solution data in the Nemesis parallel file format.'
-[../]
+  [../]
 
   [./nemesis_repartitioning_test]
     type = 'CSVDiff'
     input = 'nemesis_repartitioning_test.i'
-    csvdiff = 'repartitioned_bl_edgecuts_0003.csv 	repartitioned_bl_element_0003.csv'
+    csvdiff = 'nemesis_repartitioning_test_out.csv'
     max_parallel = 4
     min_parallel = 4
     recover = false

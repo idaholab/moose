@@ -7,10 +7,10 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -21,10 +21,10 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,41 +36,62 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
-[]
-
-[Postprocessors]
-  [./elem_avg]
-    type = ElementAverageValue
-    variable = u
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-
   solve_type = 'NEWTON'
-
-  [./Adaptivity]
+  nl_rel_tol = 1e-6
+  [Adaptivity]
     steps = 1
     refine_fraction = 0.1
     coarsen_fraction = 0.1
     max_h_level = 2
-  [../]
+  []
+[]
 
-  nl_rel_tol = 1e-6
+[Postprocessors]
+  [sum_sides]
+    type = StatVector
+    stat = sum
+    object = nl_wb_element
+    vector = num_partition_sides
+  []
+  [min_elems]
+    type = StatVector
+    stat = min
+    object = nl_wb_element
+    vector = num_elems
+  []
+  [max_elems]
+    type = StatVector
+    stat = max
+    object = nl_wb_element
+    vector = num_elems
+  []
+[]
+
+[VectorPostprocessors]
+  [nl_wb_element]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    balances = 'num_elems num_partition_sides'
+    outputs = none
+  []
 []
 
 [Outputs]
@@ -78,36 +99,4 @@
     type = CSV
     execute_on = FINAL
   []
-  file_base = repartitioned
-  nemesis = true
-[]
-
-[VectorPostprocessors]
-  [./nl_wb_element]
-    type = WorkBalance
-    execute_on = initial
-    system = nl
-    outputs  = none
-    balances = 'num_elems num_nodes'
-  []
-
-  [./bl_element]
-    type = StatisticsVectorPostprocessor
-    vpp = nl_wb_element
-    stats = 'min max sum average ratio'
-  [../]
-
-  [./nl_wb_edgecuts]
-    type = WorkBalance
-    execute_on = initial
-    system = nl
-    outputs  = none
-    balances = 'num_partition_sides'
-  []
-
-  [./bl_edgecuts]
-    type = StatisticsVectorPostprocessor
-    vpp = nl_wb_edgecuts
-    stats = 'sum'
-  [../]
 []

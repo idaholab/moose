@@ -9,7 +9,7 @@
     requirement = 'Make MOOSE support ptscotch via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_ptscotch_out_bl_element_0002.csv petsc_partitioner_ptscotch_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_ptscotch_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Outputs/file_base=petsc_partitioner_ptscotch_out Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
@@ -27,7 +27,7 @@
     requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_ptscotch_weight_element_out_bl_element_0002.csv petsc_partitioner_ptscotch_weight_element_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_ptscotch_weight_element_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch  Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_element_out Outputs/exodus=false'
     ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
@@ -45,7 +45,7 @@
     requirement = 'ptscotch shall support side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_ptscotch_weight_side_out_bl_element_0002.csv petsc_partitioner_ptscotch_weight_side_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_ptscotch_weight_side_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_side_out Outputs/exodus=false'
     ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
@@ -63,7 +63,7 @@
     requirement = 'ptscotch shall take both side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_ptscotch_weight_both_out_bl_element_0002.csv petsc_partitioner_ptscotch_weight_both_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_ptscotch_weight_both_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_both_out Outputs/exodus=false'
     ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
@@ -81,7 +81,7 @@
     requirement = 'Make MOOSE support parmetis via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_parmetis_out_bl_element_0002.csv petsc_partitioner_parmetis_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_parmetis_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
@@ -96,7 +96,7 @@
     requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_parmetis_weight_element_out_bl_element_0002.csv petsc_partitioner_parmetis_weight_element_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_parmetis_weight_element_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
@@ -112,7 +112,7 @@
     requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_parmetis_weight_side_out_bl_element_0002.csv petsc_partitioner_parmetis_weight_side_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_parmetis_weight_side_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true Outputs/exodus=false'
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
@@ -128,7 +128,7 @@
     requirement = 'Parmetis shall take side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
-    csvdiff = 'petsc_partitioner_parmetis_weight_both_out_bl_element_0002.csv petsc_partitioner_parmetis_weight_both_out_bl_edgecuts_0002.csv'
+    csvdiff = 'petsc_partitioner_parmetis_weight_both_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
