@@ -20,16 +20,6 @@
 
 registerMooseObject("MooseApp", StatisticsVectorPostprocessor);
 
-registerMooseCalculator(0, "min", Statistics::Min);
-registerMooseCalculator(1, "max", Statistics::Max);
-registerMooseCalculator(2, "sum", Statistics::Sum);
-registerMooseCalculator(3, "mean", Statistics::Mean);
-// registerMooseCalculator(3, "average", Statistics::Mean); // deprecated
-registerMooseCalculator(4, "stddev", Statistics::StdDev);
-registerMooseCalculator(5, "norm2", Statistics::L2Norm);
-registerMooseCalculator(6, "ratio", Statistics::Ratio);
-registerMooseCalculator(7, "stderr", Statistics::StdErr);
-
 defineLegacyParams(StatisticsVectorPostprocessor);
 
 InputParameters
