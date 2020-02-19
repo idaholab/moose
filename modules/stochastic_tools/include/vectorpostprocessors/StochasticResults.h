@@ -74,10 +74,4 @@ public:
 protected:
   /// Storage for declared vectors
   std::vector<StochasticResultsData> _sample_vectors;
-
-  /// Parallel operation mode
-  const MooseEnum _parallel_type;
-
-  /// The rank data to output if parallel type is distributed
-  const processor_id_type _output_distributed_rank;
 };

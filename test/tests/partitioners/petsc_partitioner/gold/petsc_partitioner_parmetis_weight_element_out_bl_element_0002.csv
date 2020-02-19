@@ -1,4 +1,4 @@
-stat_type,pid,num_elems,num_nodes
+stat_type,nl_wb_element_pid,nl_wb_element_num_elems,nl_wb_element_num_nodes
 0,0,148,87
 1,3,154,136
 2,6,600,441

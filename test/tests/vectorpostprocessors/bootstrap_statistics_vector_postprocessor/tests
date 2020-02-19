@@ -1,0 +1,75 @@
+[Tests]
+  design = StatisticsVectorPostprocessor.md
+  issues = '#14409'
+
+  [precentile]
+    requirement = "The system shall support computing bootstrap statics of a vector of data including"
+
+    [replicated]
+      type = CSVDiff
+      input = bootstrap.i
+      csvdiff = bootstrap_out_stats_0001.csv
+
+      detail = "percentile bootstrap confidence level intervals"
+    []
+  []
+
+  [parallel]
+    requirement = "The system shall support computing bootstrap statics of a vector of data in parallel"
+
+    # These two tests are restricted to 3 processors because the Test VPP creates unique data
+    # depending on the number of cores used
+    [replicated]
+      type = CSVDiff
+      input = bootstrap_distributed.i
+      csvdiff = bootstrap_distributed_out_stats_0001.csv
+      cli_args = "VectorPostprocessors/data/parallel_type=replicated"
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "if the vector is replicated across processors and"
+    []
+
+    [distributed]
+      type = CSVDiff
+      input = bootstrap_distributed.i
+      csvdiff = bootstrap_distributed_out_stats_0001.csv
+      prereq = parallel/replicated
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "when the vector is distributed across processors."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error when computing confidence level intervals when"
+
+    [no_ci_levels]
+      type = RunException
+      input = bootstrap.i
+      cli_args = "VectorPostprocessors/stats/ci_levels=''"
+      expect_err = "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be supplied with values in \(0, 0.5\]"
+
+      detail = "the confidence level intervals are omitted;"
+    []
+
+    [ci_levels_zero]
+      type = RunException
+      input = bootstrap.i
+      cli_args = "VectorPostprocessors/stats/ci_levels='0'"
+      expect_err = "The supplied levels must be greater than zero"
+
+      detail = "the confidence level intervals are omitted;"
+    []
+
+    [ci_levels_one]
+      type = RunException
+      input = bootstrap.i
+      cli_args = "VectorPostprocessors/stats/ci_levels='1'"
+      expect_err = "The supplied levels must be less than or equal to 0\.5"
+
+      detail = "the confidence level intervals are omitted;"
+    []
+  []
+[]
