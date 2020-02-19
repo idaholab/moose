@@ -19,7 +19,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     block = 0
     coef = 0.1

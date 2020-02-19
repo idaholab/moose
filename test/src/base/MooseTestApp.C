@@ -18,6 +18,8 @@
 
 #include "MooseTestApp.h"
 
+registerKnownLabel("MooseTestApp");
+
 InputParameters
 MooseTestApp::validParams()
 {
@@ -40,6 +42,7 @@ MooseTestApp::validParams()
 
 MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
+  std::cout << "MooseTestApp" << std::endl;
   MooseTestApp::registerAll(
       _factory, _action_factory, _syntax, !getParam<bool>("disallow_test_objects"));
 }

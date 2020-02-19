@@ -36,7 +36,7 @@ ApplyCoupledVariablesTestAction::act()
 {
   // Set the 'type =' parameters for the desired object
   InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
-  action_params.set<std::string>("type") = "CoefDiffusion";
+  action_params.set<std::string>("type") = "CoefDiffusionTest";
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // Create the action

@@ -93,7 +93,7 @@ ConvDiffMetaAction::act()
   }
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
-  action_params.set<std::string>("type") = "Convection";
+  action_params.set<std::string>("type") = "ConvectionTest";
   action = _action_factory.create("AddKernelAction", "conv_u", action_params);
   moose_object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
   mooseAssert(moose_object_action.get(), "Dynamic Cast failed");

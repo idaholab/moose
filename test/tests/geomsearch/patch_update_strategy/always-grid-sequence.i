@@ -36,7 +36,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = 1
     extra_vector_tags = 'ref'

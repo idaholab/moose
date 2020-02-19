@@ -30,7 +30,7 @@
   [../]
 
   [./rea]
-    type = CoefReaction
+    type = CoefReactionTest
     variable = u
     coefficient = 2.0
   [../]
@@ -42,7 +42,7 @@
   [../]
 
   [./rea1]
-    type = CoefReaction
+    type = CoefReactionTest
     variable = u
     coefficient = 1.0
   [../]

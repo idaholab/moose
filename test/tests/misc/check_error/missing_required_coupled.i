@@ -36,7 +36,7 @@
     variable = v
   [../]
   [./diff_v]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = v
     coef = 0.5
   [../]

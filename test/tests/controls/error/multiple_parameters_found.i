@@ -12,12 +12,12 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = 0.1
   [../]
   [./diff2]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = 0.2
   [../]

@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "MooseTestApp.h"
 
 defineLegacyParams(StochasticToolsTestApp);
 
@@ -26,6 +27,7 @@ registerKnownLabel("StochasticToolsTestApp");
 
 StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  std::cout << "StochasticToolsTestApp" << std::endl;
   StochasticToolsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
@@ -38,6 +40,7 @@ StochasticToolsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
   StochasticToolsApp::registerAll(f, af, s);
   if (use_test_objs)
   {
+    MooseTestApp::registerAll(f, af, s, use_test_objs);
     Registry::registerObjectsTo(f, {"StochasticToolsTestApp"});
     Registry::registerActionsTo(af, {"StochasticToolsTestApp"});
   }

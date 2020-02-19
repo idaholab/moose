@@ -61,14 +61,14 @@
   [../]
 
   [./rea]
-    type = CoefReaction
+    type = CoefReactionTest
     variable = u
     coefficient = 2.0
     use_displaced_mesh = true
   [../]
 
   [./rhs]
-    type = CoefReaction
+    type = CoefReactionTest
     variable = u
     coefficient = -1.0
     use_displaced_mesh = true

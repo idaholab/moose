@@ -21,19 +21,19 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = 1e-5
   [../]
 
   [./conv]
-    type = Convection
+    type = ConvectionTest
     variable = u
     velocity = '-0.4 0 0'
   [../]
 
   [./forcing]
-    type = GaussContForcing
+    type = GaussContForcingTest
     variable = u
     x_center = 6.0
     y_center = 8.0

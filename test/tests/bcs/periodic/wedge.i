@@ -35,7 +35,7 @@
   [../]
 
   [./forcing]
-    type = GaussContForcing
+    type = GaussContForcingTest
     variable = u
     x_center = -0.5
     y_center = 3.0

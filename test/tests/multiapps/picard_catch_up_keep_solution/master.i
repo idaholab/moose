@@ -18,7 +18,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = 0.1
   [../]

@@ -31,6 +31,7 @@
 #include "RdgTestApp.h"
 #include "LevelSetTestApp.h"
 #include "ExternalPetscSolverApp.h"
+#include "MooseTestApp.h"
 
 template <>
 InputParameters
@@ -75,6 +76,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     RdgTestApp::registerAll(f, af, s, use_test_objs);
     LevelSetTestApp::registerAll(f, af, s, use_test_objs);
     ExternalPetscSolverApp::registerAll(f, af, s);
+    MooseTestApp::registerAll(f, af, s, use_test_objs);
   }
 }
 

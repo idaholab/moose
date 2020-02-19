@@ -11,7 +11,7 @@
 []
 
 [ApplyInputParametersTest]
-  # Builds CoefDiffusion
+  # Builds CoefDiffusionTest
   coef = 0.1
   variable = u
 []

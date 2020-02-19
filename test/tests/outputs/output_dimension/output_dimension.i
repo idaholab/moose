@@ -28,17 +28,17 @@
     variable = disp_z
   [../]
   [./conv_x]
-    type = Convection
+    type = ConvectionTest
     variable = disp_x
     velocity = '2 0 0'
   [../]
   [./conv_y]
-    type = Convection
+    type = ConvectionTest
     variable = disp_y
     velocity = '2 0 0'
   [../]
   [./conv_z]
-    type = Convection
+    type = ConvectionTest
     variable = disp_z
     velocity = '2 0 0'
   [../]

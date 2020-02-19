@@ -28,7 +28,7 @@
     variable = u
   [../]
   [./conv]
-    type = Convection
+    type = ConvectionTest
     variable = u
     velocity = '1 0 0'
   [../]

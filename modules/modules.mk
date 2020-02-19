@@ -218,7 +218,7 @@ ifeq ($(CONTACT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
   APPLICATION_NAME   := contact
 
-	# Dependency on tensor mechanics
+  # Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := con
   include $(FRAMEWORK_DIR)/app.mk

@@ -24,7 +24,7 @@
   []
 
   [forcing]
-    type = GaussContForcing
+    type = GaussContForcingTest
     variable = u
     x_center = 2
     y_center = -1

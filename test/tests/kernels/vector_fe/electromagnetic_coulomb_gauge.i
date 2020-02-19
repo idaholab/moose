@@ -30,7 +30,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = V
     coef = 5
   [../]

@@ -20,8 +20,17 @@ include $(FRAMEWORK_DIR)/moose.mk
 ALL_MODULES       := yes
 INCLUDE_COMBINED  := no
 USE_TEST_LIBS     := yes
+MOOSE_TEST        := yes
 include modules.mk
+
 ###############################################################################
+MOOSE_TEST := yes
+ifeq ($(MOOSE_TEST),yes)
+  APPLICATION_NAME   := moose_test
+  APPLICATION_DIR    := $(MOOSE_DIR)/test
+  SUFFIX             := mt
+  include $(FRAMEWORK_DIR)/app.mk
+endif
 
 # Build the Module executable
 APPLICATION_DIR    := $(MOOSE_DIR)/modules/combined

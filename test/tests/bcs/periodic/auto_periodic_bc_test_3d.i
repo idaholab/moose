@@ -28,7 +28,7 @@
   [../]
 
   [./forcing]
-    type = GaussContForcing
+    type = GaussContForcingTest
     variable = u
   [../]
 

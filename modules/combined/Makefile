@@ -18,6 +18,14 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+MOOSE_TEST := yes
+ifeq ($(MOOSE_TEST),yes)
+  APPLICATION_NAME   := moose_test
+  APPLICATION_DIR    := $(MOOSE_DIR)/test
+  SUFFIX             := mt
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ################################## MODULES ################################
 ALL_MODULES       := yes
 INCLUDE_COMBINED  := no

@@ -43,7 +43,7 @@
     variable = u
   [../]
   [./forcing]
-    type = GaussContForcing
+    type = GaussContForcingTest
     variable = u
     y_center = 1
     x_spread = 0.25

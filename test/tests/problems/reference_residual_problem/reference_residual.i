@@ -19,7 +19,7 @@ coef=1
 
 [Kernels]
   [u_diff]
-    type = CoefDiffusion
+    type = CoefDiffusionTest
     variable = u
     coef = ${coef}
   []

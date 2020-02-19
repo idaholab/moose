@@ -38,7 +38,7 @@
   [../]
 
   [./rhs]
-    type = CoefReaction
+    type = CoefReactionTest
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
