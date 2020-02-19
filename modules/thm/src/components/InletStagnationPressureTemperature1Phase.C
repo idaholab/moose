@@ -10,7 +10,7 @@ validParams<InletStagnationPressureTemperature1Phase>()
   InputParameters params = validParams<FlowBoundary>();
   params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure [Pa]");
   params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature [K]");
-  params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
   params.addClassDescription("Boundary condition with prescribed stagnation pressure and "
                              "temperature for 1-phase flow channels.");
   return params;
@@ -173,6 +173,7 @@ InletStagnationPressureTemperature1Phase::setup1PhaseRDG()
     params.set<Real>("p0") = getParam<Real>("p0");
     params.set<Real>("T0") = getParam<Real>("T0");
     params.set<Real>("normal") = _normal;
+    params.set<bool>("reversible") = _reversible;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
