@@ -19,24 +19,6 @@ class MooseRandom;
 
 namespace Statistics
 {
-class Calculator;
-class BootstrapCalculator;
-
-/*
- * Return available bootstrap statistics calculators.
- */
-MooseEnum makeBootstrapCalculatorEnum();
-
-/*
- * Create const Bootstrap confidence level interface calculator for use by VectorPostprocessor
- * objects.
- */
-std::unique_ptr<const BootstrapCalculator> makeBootstrapCalculator(const MooseEnum &,
-                                                                   const libMesh::ParallelObject &,
-                                                                   const std::vector<Real> &,
-                                                                   unsigned int,
-                                                                   unsigned int);
-
 /*
  * Base class for computing bootstrap confidence level intervals. These classes follow the same
  * design pattern as those Statistics.h.

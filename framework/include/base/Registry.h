@@ -38,6 +38,7 @@
                                       nullptr,                                                     \
                                       nullptr,                                                     \
                                       nullptr,                                                     \
+                                      nullptr,                                                     \
                                       __FILE__,                                                    \
                                       __LINE__,                                                    \
                                       "",                                                          \
@@ -52,6 +53,7 @@
                                 #classname,                                                        \
                                 "",                                                                \
                                 "",                                                                \
+                                nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
@@ -72,11 +74,29 @@
                                           nullptr,                                                 \
                                           nullptr,                                                 \
                                           nullptr,                                                 \
+                                          nullptr,                                                 \
                                           __FILE__,                                                \
                                           __LINE__,                                                \
                                           "",                                                      \
                                           "",                                                      \
                                           false})
+
+#define registerMooseBootstrapCalculator(id, name, classname)                                      \
+  static char combineNames(dummyvar_for_registering_bootstrap_calc_##id, __LINE__) =               \
+      Registry::addBootstrapCalculator<classname>({"",                                             \
+                                                   #classname,                                     \
+                                                   #id,                                            \
+                                                   name,                                           \
+                                                   nullptr,                                        \
+                                                   nullptr,                                        \
+                                                   nullptr,                                        \
+                                                   nullptr,                                        \
+                                                   nullptr,                                        \
+                                                   __FILE__,                                       \
+                                                   __LINE__,                                       \
+                                                   "",                                             \
+                                                   "",                                             \
+                                                   false})
 
 /// Add AD MooseObjects (e.g. both residual and jacobian objects) to the registry with the given app
 /// name/label.  classname is the (unquoted) c++ class template.  Each class template should only be
@@ -91,6 +111,7 @@
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
+                                             nullptr,                                              \
                                              __FILE__,                                             \
                                              __LINE__,                                             \
                                              "",                                                   \
@@ -101,6 +122,7 @@
                                              #templatename "<JACOBIAN>",                           \
                                              "",                                                   \
                                              "",                                                   \
+                                             nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
@@ -123,6 +145,7 @@
                                 nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
+                                nullptr,                                                           \
                                 __FILE__,                                                          \
                                 __LINE__,                                                          \
                                 "",                                                                \
@@ -137,6 +160,7 @@
                                 #classname,                                                        \
                                 "",                                                                \
                                 "",                                                                \
+                                nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
@@ -160,6 +184,7 @@
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
+                                             nullptr,                                              \
                                              __FILE__,                                             \
                                              __LINE__,                                             \
                                              time,                                                 \
@@ -170,6 +195,7 @@
                                              #templatename "<JACOBIAN>",                           \
                                              "",                                                   \
                                              "",                                                   \
+                                             nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
@@ -188,6 +214,7 @@
                                 #classname,                                                        \
                                 "",                                                                \
                                 "",                                                                \
+                                nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
@@ -212,6 +239,7 @@
                                 nullptr,                                                           \
                                 nullptr,                                                           \
                                 nullptr,                                                           \
+                                nullptr,                                                           \
                                 __FILE__,                                                          \
                                 __LINE__,                                                          \
                                 time,                                                              \
@@ -231,6 +259,7 @@
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
+                                             nullptr,                                              \
                                              __FILE__,                                             \
                                              __LINE__,                                             \
                                              time,                                                 \
@@ -241,6 +270,7 @@
                                              #templatename "<JACOBIAN>",                           \
                                              #origtemplatename "<JACOBIAN>",                       \
                                              #origtemplatename "<JACOBIAN>",                       \
+                                             nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
                                              nullptr,                                              \
@@ -261,6 +291,7 @@ class Action;
 namespace Statistics
 {
 class Calculator;
+class BootstrapCalculator;
 }
 
 using paramsPtr = InputParameters (*)();
@@ -268,6 +299,11 @@ using buildPtr = std::shared_ptr<MooseObject> (*)(const InputParameters & parame
 using buildActionPtr = std::shared_ptr<Action> (*)(const InputParameters & parameters);
 using buildCalculatorPtr =
     std::unique_ptr<const Statistics::Calculator> (*)(const libMesh::ParallelObject & other);
+using buildBootstrapCalculatorPtr = std::unique_ptr<const Statistics::BootstrapCalculator> (*)(
+    const libMesh::ParallelObject & other,
+    const std::vector<Real> & levels,
+    unsigned int replicates,
+    unsigned int seed);
 
 namespace moose
 {
@@ -324,6 +360,16 @@ buildCalculator(const libMesh::ParallelObject & other)
   return libmesh_make_unique<const T>(other);
 }
 
+template <typename T>
+std::unique_ptr<const Statistics::BootstrapCalculator>
+buildBootstrapCalculator(const libMesh::ParallelObject & other,
+                         const std::vector<Real> & levels,
+                         unsigned int replicates,
+                         unsigned int seed)
+{
+  return libmesh_make_unique<const T>(other, levels, replicates, seed);
+}
+
 } // namespace internal
 } // namespace moose
 
@@ -346,6 +392,8 @@ struct RegistryEntry
   buildActionPtr _build_action_ptr;
   /// function pointer for building instances of the Calculator
   buildCalculatorPtr _build_calculator_ptr;
+  /// function pointer for building instances of the BootstrapCalculator
+  buildBootstrapCalculatorPtr _build_bootstrap_calculator_ptr;
   /// function pointer for building InputParameters objects for the object or action.
   paramsPtr _params_ptr;
   /// file path for the c++ file the object or action was added to the registry in.
@@ -407,6 +455,15 @@ public:
     return 0;
   }
 
+  template <typename T>
+  static char addBootstrapCalculator(const RegistryEntry & info)
+  {
+    RegistryEntry copy = info;
+    copy._build_bootstrap_calculator_ptr = &moose::internal::buildBootstrapCalculator<T>;
+    addBootstrapCalculatorInner(copy);
+    return 0;
+  }
+
   /// This registers all MooseObjects known to the registry that have the given label(s) with the
   /// factory f.
   static void registerObjectsTo(Factory & f, const std::set<std::string> & labels);
@@ -430,6 +487,8 @@ public:
   static const std::map<std::string, std::vector<RegistryEntry>> & allActions();
   /// Returns a per-label keyed map of all Calculator in the registry.
   static const std::unordered_map<std::string, RegistryEntry> & allCalculators();
+  /// Returns a per-label keyed map of all Calculator in the registry.
+  static const std::unordered_map<std::string, RegistryEntry> & allBootstrapCalculators();
 
   static RegistryEntry & objData(const std::string & name);
   static bool isADObj(const std::string & name);
@@ -439,10 +498,12 @@ private:
   static void addInner(const RegistryEntry & info);
   static void addActionInner(const RegistryEntry & info);
   static void addCalculatorInner(const RegistryEntry & info);
+  static void addBootstrapCalculatorInner(const RegistryEntry & info);
 
   std::map<std::string, RegistryEntry> _name_to_entry;
   std::map<std::string, std::vector<RegistryEntry>> _per_label_objects;
   std::map<std::string, std::vector<RegistryEntry>> _per_label_actions;
   std::unordered_map<std::string, RegistryEntry> _name_to_calculator;
+  std::unordered_map<std::string, RegistryEntry> _name_to_bootstrap_calculator;
   std::set<std::string> _known_labels;
 };

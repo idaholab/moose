@@ -17,8 +17,6 @@ class MooseEnumItem;
 
 namespace Statistics
 {
-class Calculator;
-
 /* Base class for computing statistics (e.g., mean, min) for use with StatisticsVectorPostprocessor.
  *
  * The purpose of these objects are to provide an API for computing statistics in serial or parallel

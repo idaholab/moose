@@ -41,7 +41,7 @@ StatisticsVectorPostprocessor::validParams()
       "The statistic(s) to compute for each of the supplied vector postprocessors.");
 
   // Confidence Levels
-  MooseEnum ci = Statistics::makeBootstrapCalculatorEnum();
+  MooseEnum ci = StatisticsVectorPostprocessor::makeBootstrapCalculatorEnum();
   params.addParam<MooseEnum>(
       "ci_method", ci, "The method to use for computing confidence level intervals.");
 
@@ -92,6 +92,32 @@ StatisticsVectorPostprocessor::makeCalculator(const MooseEnumItem & item,
   return nullptr;
 }
 
+MooseEnum
+StatisticsVectorPostprocessor::makeBootstrapCalculatorEnum()
+{
+  std::vector<std::string> stat_names;
+  for (auto & calc_pair : Registry::allBootstrapCalculators())
+    stat_names.push_back(calc_pair.second._name + "=" + calc_pair.second._alias);
+  MooseEnum stats(MooseUtils::join(stat_names, " "));
+  return stats;
+}
+
+std::unique_ptr<const Statistics::BootstrapCalculator>
+StatisticsVectorPostprocessor::makeBootstrapCalculator(const MooseEnum & item,
+                                                       const libMesh::ParallelObject & other,
+                                                       const std::vector<Real> & levels,
+                                                       unsigned int replicates,
+                                                       unsigned int seed)
+{
+  const auto & calc_entries = Registry::allBootstrapCalculators();
+  auto entry_ptr = calc_entries.find(item);
+  if (entry_ptr != calc_entries.end())
+    return entry_ptr->second._build_bootstrap_calculator_ptr(other, levels, replicates, seed);
+
+  ::mooseError("Failed to create Statistics::Calculator object for ", item);
+  return nullptr;
+}
+
 StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _compute_stats(isParamValid("stats") ? getParam<MultiMooseEnum>("stats")
@@ -112,8 +138,8 @@ StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParamete
   {
     unsigned int replicates = getParam<unsigned int>("ci_replicates");
     unsigned int seed = getParam<unsigned int>("ci_seed");
-    _ci_calculator =
-        Statistics::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
+    _ci_calculator = StatisticsVectorPostprocessor::makeBootstrapCalculator(
+        _ci_method, *this, _ci_levels, replicates, seed);
   }
 }
 

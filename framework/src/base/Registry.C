@@ -40,6 +40,12 @@ Registry::allCalculators()
   return getRegistry()._name_to_calculator;
 }
 
+const std::unordered_map<std::string, RegistryEntry> &
+Registry::allBootstrapCalculators()
+{
+  return getRegistry()._name_to_bootstrap_calculator;
+}
+
 void
 Registry::addInner(const RegistryEntry & info)
 {
@@ -59,6 +65,13 @@ Registry::addCalculatorInner(const RegistryEntry & info)
 {
   auto & r = getRegistry();
   r._name_to_calculator[info._name] = info;
+}
+
+void
+Registry::addBootstrapCalculatorInner(const RegistryEntry & info)
+{
+  auto & r = getRegistry();
+  r._name_to_bootstrap_calculator[info._name] = info;
 }
 
 void

@@ -18,33 +18,10 @@
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_sync.h"
 
-#include "SerializerGuard.h"
+registerMooseBootstrapCalculator(0, "percentile", Statistics::Percentile);
 
 namespace Statistics
 {
-
-MooseEnum
-makeBootstrapCalculatorEnum()
-{
-  return MooseEnum("percentile=0");
-}
-
-std::unique_ptr<const BootstrapCalculator>
-makeBootstrapCalculator(const MooseEnum & item,
-                        const libMesh::ParallelObject & other,
-                        const std::vector<Real> & levels,
-                        unsigned int replicates,
-                        unsigned int seed)
-{
-  std::unique_ptr<const BootstrapCalculator> ptr = nullptr;
-  if (item == "percentile")
-    ptr = libmesh_make_unique<const Percentile>(other, levels, replicates, seed);
-
-  if (!ptr)
-    ::mooseError("Failed to create Statistics::BootstrapCalculator object for ", item);
-
-  return ptr;
-}
 
 BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other,
                                          const std::vector<Real> & levels,

@@ -37,13 +37,6 @@ public:
   virtual void initialize() final{};
   virtual void finalize() final{};
 
-  // Function for building a const Calculator object
-  static std::unique_ptr<const Statistics::Calculator>
-  makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
-
-  // Function that returns the available statistics available to the
-  static MultiMooseEnum makeCalculatorEnum();
-
 protected:
   /// The selected statistics to compute
   const MultiMooseEnum & _compute_stats;
@@ -76,4 +69,23 @@ private:
    * This also performs error checking on the supplied "ci_levels".
    */
   std::vector<Real> computeLevels(const std::vector<Real> & levels_in) const;
+
+public:
+  // Function for building a const Calculator object
+  static std::unique_ptr<const Statistics::Calculator>
+  makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
+
+  // Function that returns the available statistics available to the
+  static MultiMooseEnum makeCalculatorEnum();
+
+  // Function for building a const Calculator object
+  static std::unique_ptr<const Statistics::BootstrapCalculator>
+  makeBootstrapCalculator(const MooseEnum & item,
+                          const libMesh::ParallelObject & other,
+                          const std::vector<Real> & levels,
+                          unsigned int replicates,
+                          unsigned int seed);
+
+  // Function that returns the available statistics available to the
+  static MooseEnum makeBootstrapCalculatorEnum();
 };
