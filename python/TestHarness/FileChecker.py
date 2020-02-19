@@ -28,12 +28,14 @@ class FileChecker(object):
         """ Method to get the names and last_modified_times of all files within current test location """
         for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
             for file in filenames:
-                fullyQualifiedFile = os.path.join(dirpath, file)
-                try:
-                    lastModifiedTime = os.path.getmtime(fullyQualifiedFile)
-                    times[fullyQualifiedFile] = lastModifiedTime
-                except:
-                    pass
+                # Test Exceptions may produce traceout files. We don't want to pay attention to those
+                if file.find("traceout") == -1:
+                    fullyQualifiedFile = os.path.join(dirpath, file)
+                    try:
+                        lastModifiedTime = os.path.getmtime(fullyQualifiedFile)
+                        times[fullyQualifiedFile] = lastModifiedTime
+                    except:
+                        pass
         return times
 
     def check_changes(self, originalTimes, newTimes):
