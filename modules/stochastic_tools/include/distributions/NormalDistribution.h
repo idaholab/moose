@@ -34,6 +34,9 @@ public:
   static Real cdf(const Real & x, const Real & mean, const Real & std_dev);
   static Real quantile(const Real & p, const Real & mean, const Real & std_dev);
 
+  Real getMean() const { return _mean; }
+  Real getStdDev() const { return _standard_deviation; }
+
 protected:
   ///@{
   /// Coefficients for the rational function used to approximate the quantile

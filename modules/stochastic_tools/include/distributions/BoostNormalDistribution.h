@@ -25,5 +25,7 @@ public:
   static InputParameters validParams();
 
   BoostNormalDistribution(const InputParameters & parameters);
-};
 
+  Real getMean() const { return _distribution_unique_ptr->mean(); }
+  Real getStdDev() const { return _distribution_unique_ptr->standard_deviation(); }
+};
