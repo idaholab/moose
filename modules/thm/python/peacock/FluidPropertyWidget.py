@@ -326,7 +326,7 @@ class FluidPropertyWidget2PhaseP(FluidPropertyWidget):
     def outputs(self):
         return [
             { 'name': "p_critical", 'unit': "Pa", 'hint': "Critical pressure" },
-            { 'name': "T_sat", 'unit': "Pa", 'hint': "Saturation temperature" },
+            { 'name': "T_sat", 'unit': "K", 'hint': "Saturation temperature" },
             { 'name': "h_lat", 'unit': "J/kg", 'hint': "Latent heat of vaporization" },
         ]
 
