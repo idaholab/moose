@@ -55,6 +55,11 @@ Statistics::validParams()
                                 "The random number generator seed used for creating replicates "
                                 "while computing confidence level intervals.");
 
+  // Compute values are computed on rank 0 and broadcast
+  params.set<MooseEnum>("parallel_type") = "REPLICATED";
+  params.suppressParameter<MooseEnum>("parallel_type");
+  params.set<bool>("_auto_boradcast") = true;
+
   return params;
 }
 

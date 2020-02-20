@@ -191,5 +191,4 @@ L2Norm::compute(const std::vector<Real> & data, bool is_distributed) const
 
   return std::sqrt(local_sum);
 }
-
 } // Statistics namespace

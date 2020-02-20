@@ -106,5 +106,4 @@ public:
   L2Norm(const libMesh::ParallelObject &);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
-
-} // namespace Statistics
+} // namespace

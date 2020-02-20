@@ -14,6 +14,7 @@
 #include "MooseEnum.h"
 #include "MooseError.h"
 #include "MooseRandom.h"
+#include "NormalDistribution.h"
 #include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_sync.h"
@@ -24,7 +25,7 @@ namespace StochasticTools
 MooseEnum
 makeBootstrapCalculatorEnum()
 {
-  return MooseEnum("percentile=0");
+  return MooseEnum("percentile=0 bca=1");
 }
 
 std::unique_ptr<const BootstrapCalculator>
@@ -37,6 +38,8 @@ makeBootstrapCalculator(const MooseEnum & item,
   std::unique_ptr<const BootstrapCalculator> ptr = nullptr;
   if (item == "percentile")
     ptr = libmesh_make_unique<const Percentile>(other, levels, replicates, seed);
+  else if (item == "bca")
+    ptr = libmesh_make_unique<const BiasCorrectedAccelerated>(other, levels, replicates, seed);
 
   if (!ptr)
     ::mooseError("Failed to create Statistics::BootstrapCalculator object for ", item);
@@ -54,6 +57,25 @@ BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other,
               "The supplied levels must be greater than zero.");
   mooseAssert(*std::max_element(levels.begin(), levels.end()) < 1,
               "The supplied levels must be less than one");
+}
+
+std::vector<Real>
+BootstrapCalculator::computeBootstrapEstimates(const std::vector<Real> & data,
+                                               const Calculator & calc,
+                                               const bool is_distributed) const
+{
+  MooseRandom generator;
+  generator.seed(0, _seed);
+
+  // Compute replicate statistics
+  std::vector<Real> values(_replicates);
+  for (std::size_t i = 0; i < _replicates; ++i)
+  {
+    std::vector<Real> replicate = shuffle(data, generator, is_distributed);
+    values[i] = calc.compute(replicate, is_distributed);
+  }
+  std::sort(values.begin(), values.end());
+  return values;
 }
 
 std::vector<Real>
@@ -150,27 +172,97 @@ Percentile::compute(const std::vector<Real> & data,
                     const Calculator & calc,
                     const bool is_distributed) const
 {
-  MooseRandom generator;
-  generator.seed(0, _seed);
-
-  // Compute replicate statistics
-  std::vector<Real> values(_replicates);
-  for (std::size_t i = 0; i < _replicates; ++i)
-  {
-    std::vector<Real> replicate = shuffle(data, generator, is_distributed);
-    values[i] = calc.compute(replicate, is_distributed);
-  }
-  std::sort(values.begin(), values.end());
+  // Bootstrap estimates
+  const std::vector<Real> values = computeBootstrapEstimates(data, calc, is_distributed);
 
   // Extract percentiles
   std::vector<Real> output;
-  for (const Real & level : _levels)
+  if (processor_id() == 0)
   {
-    long unsigned int index = std::lrint(level * (_replicates - 1));
-    output.push_back(values[index]);
+    for (const Real & level : _levels)
+    {
+      long unsigned int index = std::lrint(level * (_replicates - 1));
+      output.push_back(values[index]);
+    }
   }
-
   return output;
 }
 
+// BIASCORRECTEDACCELERATED ////////////////////////////////////////////////////////////////////////
+BiasCorrectedAccelerated::BiasCorrectedAccelerated(const libMesh::ParallelObject & other,
+                                                   const std::vector<Real> & levels,
+                                                   unsigned int replicates,
+                                                   unsigned int seed)
+  : BootstrapCalculator(other, levels, replicates, seed)
+{
+}
+
+std::vector<Real>
+BiasCorrectedAccelerated::compute(const std::vector<Real> & data,
+                                  const Calculator & calc,
+                                  const bool is_distributed) const
+{
+  if (is_distributed)
+    mooseError("BiasCorrectedAccelerated does not work with distributed data at this time.");
+
+  // Bootstrap estimates
+  const std::vector<Real> values = computeBootstrapEstimates(data, calc, is_distributed);
+
+  // Compute bias-correction, Efron and Tibshirani (2003), Eq. 14.14, p. 186
+  const Real value = calc.compute(data, is_distributed);
+  const Real count = std::count_if(values.begin(), values.end(), [&value](Real v) {
+    return v < value;
+  }); // use Real for non-integer divison below
+  const Real bias = NormalDistribution::quantile(count / _replicates, 0, 1);
+
+  // Compute Acceleration, Efron and Tibshirani (2003), Eq. 14.15, p. 186
+  const Real acc = acceleration(data, calc, is_distributed);
+
+  // Compute intervals, Efron and Tibshirani (2003), Eq. 14.10, p. 185
+  std::vector<Real> output;
+  for (const Real & level : _levels)
+  {
+    const Real z = NormalDistribution::quantile(level, 0, 1);
+    const Real x = bias + (bias + (bias + z) / (1 - acc * (bias + z)));
+    const Real alpha = NormalDistribution::cdf(x, 0, 1);
+
+    long unsigned int index = std::lrint(alpha * (_replicates - 1));
+    output.push_back(values[index]);
+  }
+  return output;
+}
+
+Real
+BiasCorrectedAccelerated::acceleration(const std::vector<Real> & data,
+                                       const Calculator & calc,
+                                       const bool is_distributed) const
+{
+  // Jackknife statistics
+  std::vector<Real> theta_i(data.size());
+
+  // Total number of data entries
+  Real count = data.size();
+
+  // Compute jackknife estimates, Ch. 11, Eq. 11.2, p. 141
+  for (std::size_t i = 0; i < count; ++i)
+  {
+    std::vector<Real> data_not_i = data;
+    data_not_i.erase(data_not_i.begin() + i);
+    theta_i[i] = calc.compute(data_not_i, is_distributed);
+  }
+
+  // Compute jackknife sum, Ch. 11, Eq. 11.4, p. 141
+  Real theta_dot = std::accumulate(theta_i.begin(), theta_i.end(), 0.);
+  theta_dot /= count;
+
+  // Acceleration, Ch. 14, Eq. 14.15, p. 185
+  Real numerator = 0.;
+  Real denomenator = 0;
+  for (const auto & jk : theta_i)
+  {
+    numerator += std::pow(theta_dot - jk, 3);
+    denomenator += std::pow(theta_dot - jk, 2);
+  }
+  return numerator / (6 * std::pow(denomenator, 3. / 2.));
+}
 } // namespace

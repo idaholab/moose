@@ -54,6 +54,11 @@ public:
   compute(const std::vector<Real> &, const Calculator &, const bool) const = 0;
 
 protected:
+  // Compute Bootstrap estimates of a statistic
+  std::vector<Real>
+  computeBootstrapEstimates(const std::vector<Real> &, const Calculator &, const bool) const;
+
+  // Randomly shuffle a vector of data
   std::vector<Real> shuffle(const std::vector<Real> &, MooseRandom &, const bool) const;
 
   // Confidence levels to compute in range (0, 1)
@@ -81,4 +86,23 @@ public:
   compute(const std::vector<Real> &, const Calculator &, const bool) const override;
 };
 
-} // namespace Statistics
+/*
+ * Implement BCa method of Efron and Tibshirani (2003), Chapter 14.
+ */
+class BiasCorrectedAccelerated : public BootstrapCalculator
+{
+public:
+  BiasCorrectedAccelerated(const libMesh::ParallelObject &,
+                           const std::vector<Real> &,
+                           unsigned int,
+                           unsigned int);
+
+  virtual std::vector<Real>
+  compute(const std::vector<Real> &, const Calculator &, const bool) const override;
+
+private:
+  // Compute the acceleration, see Efron and Tibshirani (2003), Ch. 14, Eq. 14.15, p 186.
+  Real acceleration(const std::vector<Real> &, const Calculator &, const bool) const;
+};
+
+} // namespace
