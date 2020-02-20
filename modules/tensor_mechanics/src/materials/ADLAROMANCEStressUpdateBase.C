@@ -73,6 +73,13 @@ ADLAROMANCEStressUpdateBase<compute_stage>::validParams()
       "the old creep strain will be reset to the function value at the beginning of the "
       "timestep. Used for testing purposes only.");
 
+  params.addParam<Real>(
+      "yield_surface_distance_threshold",
+      0.01,
+      "Threshold for the ratio of the effective trial stress to the approximate yield surface "
+      "(estimated with the max_inelastic_increment); used to determine if the sub-stepping "
+      "capabilities should be used and number of sub-steps to be used");
+
   params.addParam<bool>("verbose", false, "Flag to add verbose output");
 
   params.addParamNamesToGroup(
@@ -93,6 +100,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
         parameters.get<MooseEnum>("input_window_failure_action").getEnum<WindowFailure>()),
     _extrapolate_stress(getParam<bool>("extrapolate_to_zero_stress")),
     _verbose(getParam<bool>("verbose")),
+    _yield_surface_distance_threshold(getParam<Real>("yield_surface_distance_threshold")),
     _mobile_dislocations(declareADProperty<Real>(_base_name + "mobile_dislocations")),
     _mobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "mobile_dislocations")),
     _initial_mobile_dislocations(getParam<Real>("initial_mobile_dislocation_density")),
@@ -192,6 +200,24 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effec
 
   const ADReal trial_stress_mpa = (effective_trial_stress - _three_shear_modulus * scalar) * 1.0e-6;
 
+  // std::cout << "Comparing the values of the trial stress passed to the ROM: " << trial_stress_mpa
+  // << "\n"; std::cout << "  and the value of the effective trial stress provided by the radial
+  // return algorithm: " << effective_trial_stress * 1.0e-6 << "\n"; std::cout << "  estimated
+  // maximum yield surface reach " << _three_shear_modulus * _max_inelastic_increment * 1.0e-6 <<
+  // "\n \n";
+
+  const Real distance_from_yield_surface_measure = MetaPhysicL::raw_value(
+      trial_stress_mpa / (_three_shear_modulus * _max_inelastic_increment * 1.0e-6));
+  unsigned int number_substeps = 1;
+  if (distance_from_yield_surface_measure > _yield_surface_distance_threshold)
+    number_substeps =
+        std::ceil(distance_from_yield_surface_measure / _yield_surface_distance_threshold);
+
+  // std::cout << "  Introducing my new measure of distance from the yield surface, the effective
+  // trial stress divided by 3Ge_{max}: " << distance_from_yield_surface_measure << "\n"; std::cout
+  // << "  and the number of substeps I'll need with my threshold value is: " << number_substeps <<
+  // "\n \n";
+
   if (trial_stress_mpa < 0.0)
     mooseException("In ",
                    _name,
@@ -211,17 +237,99 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effec
   ADReal rom_effective_strain = 0.0;
   ADReal derivative_rom_effective_strain = 0.0;
 
-  computeROMStrainRate(_dt,
-                       _mobile_old,
-                       _immobile_old,
-                       trial_stress_mpa,
-                       effective_strain_old,
-                       _temperature[_qp],
-                       _environmental[_qp],
-                       _mobile_dislocation_increment,
-                       _immobile_dislocation_increment,
-                       rom_effective_strain,
-                       derivative_rom_effective_strain);
+  if (number_substeps > 1)
+  {
+    // Enter the substepping and save the incremental values
+    const Real substep_dt = _dt / number_substeps;
+    ADReal substep_mobile_disl_increment = 0.0;
+    ADReal substep_immobile_disl_increment = 0.0;
+    ADReal substep_rom_effective_strain = 0.0;
+    ADReal substep_derivative_rom_effective_strain = 0.0;
+    ADReal total_steps_mobile_disl = 0.0;
+    ADReal total_steps_immobile_disl = 0.0;
+    ADReal previous_step_derivative_rom_effective_strain = derivative_rom_effective_strain;
+
+    for (unsigned int step = 0; step < number_substeps; ++step)
+    {
+      // Need to instead subtract the summed up dislocation increments from the old values
+      // std::cout << "what's this counter value? " << step << "\n";
+      // std::cout << "Check on the updating of the previous values at the start of the for loop:
+      // \n"; std::cout.precision(9); std::cout << std::scientific; std::cout << "  previous mobile
+      // dislocation increment: " << total_steps_mobile_disl << "\n"; std::cout << "  previous
+      // immobile dislocation increment: " << total_steps_immobile_disl << "\n"; std::cout << "
+      // previous inelastic strain: " << rom_effective_strain << "\n";
+
+      const Real increment_fraction =
+          (static_cast<Real>(step) + 1.0) / (static_cast<Real>(number_substeps));
+      ADReal substep_stress = trial_stress_mpa * increment_fraction;
+      const Real previous_step_mobile_disl =
+          MetaPhysicL::raw_value(_mobile_old) + MetaPhysicL::raw_value(total_steps_mobile_disl);
+      const Real previous_step_immobile_disl =
+          MetaPhysicL::raw_value(_immobile_old) + MetaPhysicL::raw_value(total_steps_immobile_disl);
+      const Real previous_step_rom_effective_strain =
+          effective_strain_old + MetaPhysicL::raw_value(rom_effective_strain);
+
+      // std::cout << "\n Going into the computeROMStrainRate call: \n";
+      // std::cout << "  the substep_dt is " << substep_dt << "\n";
+      // std::cout << "  the substep stress is " << substep_stress << "\n";
+      // std::cout << "  the old substep mobile dislocations value is " << previous_step_mobile_disl
+      // << "\n"; std::cout << "  the old substep immobile dislocation density is " <<
+      // previous_step_immobile_disl << "\n"; std::cout << "  and the old substep effective strain
+      // is " << previous_step_rom_effective_strain << "\n";
+
+      computeROMStrainRate(substep_dt,
+                           previous_step_mobile_disl,
+                           previous_step_immobile_disl,
+                           substep_stress,
+                           previous_step_rom_effective_strain,
+                           _temperature[_qp],
+                           _environmental[_qp],
+                           substep_mobile_disl_increment,
+                           substep_immobile_disl_increment,
+                           substep_rom_effective_strain,
+                           substep_derivative_rom_effective_strain);
+
+      // std::cout << "Check on the increment values calculated with the substepping \n";
+      // std::cout << "  substep mobile dislocation increment: " << substep_mobile_disl_increment <<
+      // "\n"; std::cout << "  substep immobile dislocation increment: " <<
+      // substep_immobile_disl_increment << "\n";
+      // std::cout << "  substep the inelastic strain: " << substep_rom_effective_strain <<
+      // "\n";
+      
+      // update the stateful properties which are incremented in the substepping
+      total_steps_mobile_disl += substep_mobile_disl_increment;
+      total_steps_immobile_disl += substep_immobile_disl_increment;
+      rom_effective_strain += substep_rom_effective_strain;
+      previous_step_derivative_rom_effective_strain += substep_derivative_rom_effective_strain;
+
+      // std::cout << "Check on the updating of the previous values after the ROM call \n";
+      // std::cout << "  total mobile dislocation increment: " << total_steps_mobile_disl << "\n";
+      // std::cout << "  total immobile dislocation increment: " << total_steps_immobile_disl <<
+      // "\n"; std::cout << "  total inelastic strain: " << rom_effective_strain << "\n"; std::cout
+      // << "  total derivative inelastic strain: " << previous_step_derivative_rom_effective_strain
+      // << "\n \n";
+    }
+
+    // Store off the substep increment values into the actual state variables
+    _mobile_dislocation_increment = total_steps_mobile_disl;
+    _immobile_dislocation_increment = total_steps_immobile_disl;
+    // rom_effective_strain = total_steps_rom_effective_strain;
+    derivative_rom_effective_strain = previous_step_derivative_rom_effective_strain;
+  }
+  else // call the compute ROMStrainRate method just once and be happy
+  {
+    computeROMStrainRate(_dt,
+                         _mobile_old,
+                         _immobile_old,
+                         trial_stress_mpa,
+                         effective_strain_old,
+                         _temperature[_qp],
+                         _environmental[_qp],
+                         _mobile_dislocation_increment,
+                         _immobile_dislocation_increment,
+                         rom_effective_strain,
+                         derivative_rom_effective_strain);
+  }
 
   if (_verbose && compute_stage == RESIDUAL)
   {

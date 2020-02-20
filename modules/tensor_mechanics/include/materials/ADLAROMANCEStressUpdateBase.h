@@ -222,8 +222,14 @@ protected:
   /// Flag to optinoally allow model extrapolation to zero stress
   const bool _extrapolate_stress;
 
-  /// Flag to output verbose infromation
+  /// Flag to output verbose information
   const bool _verbose;
+
+  /**
+   * Threshold measure for allowable distance from an estimated yield surface
+   * Used to estimate the number of substeps to apply
+   */
+  const Real _yield_surface_distance_threshold;
 
   ///@{Material properties for mobile (glissile) dislocation densities (1/m^2)
   ADMaterialProperty(Real) & _mobile_dislocations;
