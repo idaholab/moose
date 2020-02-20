@@ -12,6 +12,8 @@
 namespace RankTwoScalarTools
 {
 
+///
+/// This enum is left for legacy calls
 MooseEnum
 scalarOptions()
 {
@@ -19,6 +21,32 @@ scalarOptions()
                    "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
                    "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
                    "Direction MaxShear StressIntensity");
+}
+
+MooseEnum
+cylindricalOptions()
+{
+  return MooseEnum("AxialStress HoopStress RadialStress");
+}
+
+MooseEnum
+cartesianOptions()
+{
+  return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain "
+                   "FirstInvariant SecondInvariant "
+                   "ThirdInvariant TriaxialityStress MaxShear StressIntensity");
+}
+
+MooseEnum
+principalComponentOptions()
+{
+  return MooseEnum("MaxPrincipal MidPrincipal MinPrincipal");
+}
+
+MooseEnum
+directionOption()
+{
+  return MooseEnum("Direction");
 }
 
 void

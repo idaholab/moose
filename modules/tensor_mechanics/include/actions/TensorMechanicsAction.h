@@ -10,6 +10,7 @@
 #pragma once
 
 #include "TensorMechanicsActionBase.h"
+#include "libmesh/point.h"
 
 class TensorMechanicsAction : public TensorMechanicsActionBase
 {
@@ -31,7 +32,11 @@ protected:
 
   ///@{ displacement variables
   std::vector<VariableName> _displacements;
+
+  /// Number of displacement variables
   unsigned int _ndisp;
+
+  /// Coupled displacement variables
   std::vector<VariableName> _coupled_displacements;
   ///@}
 
@@ -93,4 +98,9 @@ protected:
 
   /// output materials to generate scalar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
+
+  /// points used to determine axis of rotation for cyclindrical stress/strain quantities
+  Point _cylindrical_axis_point1;
+  Point _cylindrical_axis_point2;
+  Point _direction;
 };

@@ -22,6 +22,10 @@ namespace RankTwoScalarTools
  * Return the scalar_type MooseEnum
  */
 MooseEnum scalarOptions();
+MooseEnum cylindricalOptions();
+MooseEnum cartesianOptions();
+MooseEnum principalComponentOptions();
+MooseEnum directionOption();
 
 /*
  * Extracts the value of the tensor component at the specified indices
@@ -363,7 +367,7 @@ radialStress(const RankTwoTensorTempl<T> & stress,
  */
 template <typename T>
 T
-directionValueTensor(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+directionValueTensor(const RankTwoTensorTempl<T> & r2tensor, const Point & direction)
 {
   T tensor_value_in_direction = 0.0;
   for (unsigned int i = 0; i < 3; ++i)
@@ -466,5 +470,87 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
       mooseError("RankTwoScalarAux Error: Pass valid scalar type - " +
                  scalarOptions().getRawNames());
   }
+}
+
+template <typename T>
+T
+getCylindricalComponent(const RankTwoTensorTempl<T> & tensor,
+                        const MooseEnum & scalar_type,
+                        const Point & point1,
+                        const Point & point2,
+                        const Point & curr_point,
+                        Point & direction)
+{
+
+  if (scalar_type == "AxialStress")
+    return axialStress(tensor, point1, point2, direction);
+  else if (scalar_type == "HoopStress")
+    return hoopStress(tensor, point1, point2, curr_point, direction);
+  else if (scalar_type == "RadialStress")
+    return radialStress(tensor, point1, point2, curr_point, direction);
+  else
+    mooseError("RankTwoCylindricalComponent Error: Pass valid scalar type - " +
+               cylindricalOptions().getRawNames());
+}
+
+template <typename T>
+T
+getPrincipalComponent(const RankTwoTensorTempl<T> & tensor,
+                      const MooseEnum & scalar_type,
+                      Point & direction)
+{
+  if (scalar_type == "MaxPrincipal")
+    return maxPrincipal(tensor, direction);
+  else if (scalar_type == "MidPrincipal")
+    return midPrincipal(tensor, direction);
+  else if (scalar_type == "MinPrincipal")
+    return minPrincipal(tensor, direction);
+  else
+    mooseError("RankTwoInvariant Error: Pass valid invariant - " +
+               principalComponentOptions().getRawNames());
+}
+
+template <typename T>
+T
+getDirectionalComponent(const RankTwoTensorTempl<T> & tensor,
+                        const MooseEnum & scalar_type,
+                        const Point & direction)
+{
+  if (scalar_type == "Direction")
+    return directionValueTensor(tensor, direction);
+  else
+    mooseError("RankTwoDirectionalComponent Error: Pass valid invariant - " +
+               directionOption().getRawNames());
+}
+
+template <typename T>
+T
+getCartesianComponent(const RankTwoTensorTempl<T> & tensor, const MooseEnum & scalar_type)
+{
+  if (scalar_type == "VonMisesStress")
+    return vonMisesStress(tensor);
+  else if (scalar_type == "EffectiveStrain")
+    return effectiveStrain(tensor);
+  else if (scalar_type == "Hydrostatic")
+    return hydrostatic(tensor);
+  else if (scalar_type == "L2norm")
+    return L2norm(tensor);
+  else if (scalar_type == "VolumetricStrain")
+    return volumetricStrain(tensor);
+  else if (scalar_type == "FirstInvariant")
+    return firstInvariant(tensor);
+  else if (scalar_type == "SecondInvariant")
+    return secondInvariant(tensor);
+  else if (scalar_type == "ThirdInvariant")
+    return thirdInvariant(tensor);
+  else if (scalar_type == "TriaxialityStress")
+    return triaxialityStress(tensor);
+  else if (scalar_type == "MaxShear")
+    return maxShear(tensor);
+  else if (scalar_type == "StressIntensity")
+    return stressIntensity(tensor);
+  else
+    mooseError("RankTwoCartesianComponent Error: Pass valid invariant - " +
+               cartesianOptions().getRawNames());
 }
 }

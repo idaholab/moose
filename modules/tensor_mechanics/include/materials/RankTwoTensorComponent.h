@@ -12,34 +12,36 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-class MaterialRankTwoTensorQuantity;
-
 /**
- * MaterialRankTwoTensorQuantity is designed to take the data in the RankTwoTensor material
+ * RankTwoTensorComponent is designed to take the data in the RankTwoTensor material
  * property, for example stress or strain, and output the value for the
  * supplied indices.
  */
-
-template <>
-InputParameters validParams<MaterialRankTwoTensorQuantity>();
-
-class MaterialRankTwoTensorQuantity : public Material
+template <bool is_ad>
+class RankTwoTensorComponentTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  MaterialRankTwoTensorQuantity(const InputParameters & parameters);
+  RankTwoTensorComponentTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
 private:
-  const MaterialProperty<RankTwoTensor> & _tensor;
-  const std::string _calculation_name;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
-  MaterialProperty<Real> & _calculation;
+  /// Name of the stress/strain to be calculated
+  const std::string _property_name;
 
+  /// Stress/strain value returned from calculation
+  GenericMaterialProperty<Real, is_ad> & _property;
+
+  /// Tensor components
   const unsigned int _i;
   const unsigned int _j;
 };
+
+typedef RankTwoTensorComponentTempl<false> RankTwoTensorComponent;
+typedef RankTwoTensorComponentTempl<true> ADRankTwoTensorComponent;
