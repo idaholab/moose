@@ -30,8 +30,21 @@ VectorPostprocessor::validParams()
                         "only a single file is output and updated with each invocation");
 
   // VPPs can set this to true if their resulting vectors are naturally replicated in parallel
-  // setting this to true will keep MOOSE from unnecesarily broadcasting those vectors
-  params.addPrivateParam<bool>("_is_broadcast", false);
+  // setting this to false will keep MOOSE from unnecessarily broadcasting those vectors
+  params.addPrivateParam<bool>("_auto_broadcast", true);
+
+  // VPPs can operate in "distributed" mode, which disables automatic the automatic broadcasting
+  // and results in an individual file per processor if CSV output is enabled
+  MooseEnum parallel_type("DISTRIBUTED REPLICATED", "REPLICATED");
+  params.addParam<MooseEnum>(
+      "parallel_type",
+      parallel_type,
+      "Set how the data is represented within the VectorPostprocessor (VPP); 'distributed' "
+      "indicates that data within the VPP is distributed and no auto communication is preformed, "
+      "this setting will result in parallel output within the CSV output; 'replicated' indicates "
+      "that the data within the VPP is correct on processor 0, the data will automatically be "
+      "broadcast to all processors unless the '_auto_broadcast' param is set to false within the "
+      "validParams function.");
 
   params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("VectorPostprocessor");
@@ -44,7 +57,9 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _contains_complete_history(parameters.get<bool>("contains_complete_history")),
-    _is_broadcast(parameters.get<bool>("_is_broadcast"))
+    _parallel_type(parameters.get<MooseEnum>("parallel_type")),
+    _is_distributed(_parallel_type == "DISTRIBUTED"),
+    _is_broadcast(_is_distributed || !parameters.get<bool>("_auto_broadcast"))
 {
 }
 
@@ -61,5 +76,5 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
     return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
   else
     return _vpp_fe_problem->declareVectorPostprocessorVector(
-        _vpp_name, vector_name, _contains_complete_history, _is_broadcast);
+        _vpp_name, vector_name, _contains_complete_history, _is_broadcast, _is_distributed);
 }

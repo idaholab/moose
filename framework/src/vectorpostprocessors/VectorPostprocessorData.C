@@ -31,6 +31,15 @@ VectorPostprocessorData::containsCompleteHistory(const std::string & name) const
 }
 
 bool
+VectorPostprocessorData::isDistributed(const std::string & name) const
+{
+  auto it = _vpp_data.find(name);
+  mooseAssert(it != _vpp_data.end(), std::string("VectorPostprocessor ") + name + " not found!");
+
+  return it->second._is_distributed;
+}
+
+bool
 VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 {
   return (_vpp_data.find(name) != _vpp_data.end());
@@ -50,6 +59,7 @@ VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorNa
                                                    /* get_current */ true,
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
+                                                   /* is_distributed */ false,
                                                    /* needs_broadcast */ needs_broadcast,
                                                    /* needs_scatter */ false);
   return *vec_struct.current;
@@ -69,6 +79,7 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
                                                    /* get_current */ false,
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
+                                                   /* is_distributed */ false,
                                                    /* needs_broadcast */ needs_broadcast,
                                                    /* needs_scatter */ false);
   return *vec_struct.old;
@@ -88,6 +99,7 @@ VectorPostprocessorData::getScatterVectorPostprocessorValue(
                                                    /* get_current */ true,
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
+                                                   /* is_distributed */ false,
                                                    /* needs_broadcast */ false,
                                                    /* needs_scatter */ true);
 
@@ -108,6 +120,7 @@ VectorPostprocessorData::getScatterVectorPostprocessorValueOld(
                                                    /* get_current */ false,
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
+                                                   /* is_distributed */ false,
                                                    /* needs_broadcast */ false,
                                                    /* needs_scatter */ true);
 
@@ -118,12 +131,13 @@ VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name,
                                        const std::string & vector_name,
                                        bool contains_complete_history,
-                                       bool is_broadcast)
+                                       bool is_broadcast,
+                                       bool is_distributed)
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
   auto & vec_struct = getVectorPostprocessorHelper(
-      vpp_name, vector_name, true, contains_complete_history, is_broadcast);
+      vpp_name, vector_name, true, contains_complete_history, is_broadcast, is_distributed);
 
   return *vec_struct.current;
 }
@@ -134,6 +148,7 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
                                                       bool get_current,
                                                       bool contains_complete_history,
                                                       bool is_broadcast,
+                                                      bool is_distributed,
                                                       bool needs_broadcast,
                                                       bool needs_scatter)
 {
@@ -149,6 +164,9 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   // If the VPP is declaring a vector, see if it will already be replicated in parallel.
   // Note: This parameter is constant and applies to _all_ declared vectors.
   vec_storage._is_broadcast |= is_broadcast;
+
+  // If the VPP is declaring a vector, see if it will be output in parallel.
+  vec_storage._is_distributed = is_distributed;
 
   // Keep track of whether an old vector is needed for copying back later.
   if (!get_current)
@@ -182,6 +200,9 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
 
   // Does the VPP need to be scattered after computing
   vec_struct.needs_scatter |= needs_scatter;
+
+  // Set distributed flag
+  vec_struct.is_distributed = is_distributed;
 
   return vec_struct;
 }

@@ -10,6 +10,8 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
+#include "Statistics.h"
+#include "BootstrapStatistics.h"
 
 class StatisticsVectorPostprocessor;
 
@@ -17,37 +19,54 @@ template <>
 InputParameters validParams<StatisticsVectorPostprocessor>();
 
 /**
- * Compute several metrics for each MPI process.
+ * Compute several metrics for supplied VPP vectors.
  *
- * Note: this is somewhat expensive.  It does loops over elements, sides and nodes
+ * This class uses calculator objects defined in Statistics.h and is setup such that if a new
+ * calculation is needed it can be added in Statistics.h without modification of this object.
  */
 class StatisticsVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
-
   StatisticsVectorPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override;
+  virtual void initialSetup() override;
   virtual void execute() override;
-  virtual void finalize() override;
+
+  /// Not used; all parallel computation is wrapped in the Statistics objects
+  virtual void initialize() final{};
+  virtual void finalize() final{};
 
 protected:
-  /**
-   * Compute the passed in statistic for the vector
-   */
-  Real computeStatValue(int stat_id, const std::vector<Real> & stat_vector);
+  /// The selected statistics to compute
+  const MultiMooseEnum & _compute_stats;
 
-  /// The name of the VPP to work on
-  const VectorPostprocessorName & _vpp_name;
+  /// Bootstrap Confidence Level method
+  const MooseEnum & _ci_method;
 
-  /// The chosen statistics to compute
-  MultiMooseEnum _stats;
+  /// Confidence levels to compute (see computeLevels)
+  const std::vector<Real> _ci_levels;
 
   /// The VPP vector that will hold the statistics identifiers
   VectorPostprocessorValue & _stat_type_vector;
 
-  /// The VPP vectors that will hold the statistics for each column
-  std::map<std::string, VectorPostprocessorValue *> _stat_vectors;
-};
+  /// Confidence level calculator
+  std::unique_ptr<const Statistics::BootstrapCalculator> _ci_calculator = nullptr;
 
+  // The following vectors are sized to the number of statistics to be computed
+
+  /// The VPP vectors being computed
+  std::vector<VectorPostprocessorValue *> _stat_vectors;
+
+  /// VPPs names to be computed from (Vectorpostprocessor name, vector name, is_distribute)
+  std::vector<std::tuple<std::string, std::string, bool>> _compute_from_names;
+
+private:
+  /**
+   * Helper function for converting confidence levels given in (0, 0.5] into levels in (0, 1).
+   * For example, levels_in = {0.05, 0.1, 0.5} converts to {0.05 0.1, 0.5, 0.9, 0.95}.
+   *
+   * This also performs error checking on the supplied "ci_levels".
+   */
+  std::vector<Real> computeLevels(const std::vector<Real> & levels_in) const;
+};

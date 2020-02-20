@@ -120,7 +120,9 @@ CSV::outputVectorPostprocessors()
 }
 
 std::string
-CSV::getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step)
+CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
+                                    bool include_time_step,
+                                    bool is_distributed)
 {
   std::ostringstream file_name;
   file_name << _file_base;
@@ -132,7 +134,14 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name, bool include_t
   if (include_time_step)
     file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
               << std::right << timeStep();
+
   file_name << ".csv";
+
+  if (is_distributed)
+  {
+    int digits = MooseUtils::numDigits(n_processors());
+    file_name << "." << std::setw(digits) << std::setfill('0') << processor_id();
+  }
 
   return file_name.str();
 }
@@ -154,7 +163,7 @@ CSV::output(const ExecFlagType & type)
   const auto & vpp_data = _problem_ptr->getVectorPostprocessorData();
 
   // Output each VectorPostprocessor's data to a file
-  if (_write_vector_table && processor_id() == 0)
+  if (_write_vector_table)
   {
 
     // The VPP table will not write the same data twice, so to get the symlinks correct
@@ -172,28 +181,50 @@ CSV::output(const ExecFlagType & type)
         it.second.sortColumns();
 
       auto include_time_suffix = !vpp_data.containsCompleteHistory(vpp_name);
-      std::string fname = getVectorPostprocessorFileName(vpp_name, include_time_suffix);
-      std::string fprefix = getVectorPostprocessorFilePrefix(vpp_name);
-      _latest_vpp_filenames.emplace_back(fname, fprefix);
-      it.second.printCSV(fname, 1, _align);
+      auto is_distributed = vpp_data.isDistributed(vpp_name);
 
-      if (_create_latest_symlink)
+      if (is_distributed || processor_id() == 0)
       {
-        std::string out_latest = fprefix + "_LATEST.csv";
-        MooseUtils::createSymlink(fname, out_latest);
-      }
+        std::string fname =
+            getVectorPostprocessorFileName(vpp_name, include_time_suffix, is_distributed);
+        std::string fprefix = getVectorPostprocessorFilePrefix(vpp_name);
 
-      if (_time_data)
-        _vector_postprocessor_time_tables[vpp_name].printCSV(fprefix + "_time.csv");
+        _latest_vpp_filenames.emplace_back(fname, fprefix, is_distributed);
+
+        it.second.printCSV(fname, 1, _align);
+
+        if (_create_latest_symlink)
+        {
+          std::ostringstream out_latest;
+          out_latest << fprefix << "_LATEST.csv";
+          if (is_distributed)
+          {
+            int digits = MooseUtils::numDigits(n_processors());
+            out_latest << "." << std::setw(digits) << std::setfill('0') << processor_id();
+          }
+          MooseUtils::createSymlink(fname, out_latest.str());
+        }
+
+        if (_time_data)
+          _vector_postprocessor_time_tables[vpp_name].printCSV(fprefix + "_time.csv");
+      }
     }
   }
 
-  if (type == EXEC_FINAL && _create_final_symlink && processor_id() == 0)
+  if (type == EXEC_FINAL && _create_final_symlink)
   {
-    for (const auto & name_pair : _latest_vpp_filenames)
+    for (const auto & name_tuple : _latest_vpp_filenames)
     {
-      std::string out_final = name_pair.second + "_FINAL.csv";
-      MooseUtils::createSymlink(name_pair.first, out_final);
+      std::ostringstream out_final;
+      out_final << std::get<1>(name_tuple) << "_FINAL.csv";
+      if (std::get<2>(name_tuple))
+      {
+        int digits = MooseUtils::numDigits(n_processors());
+        out_final << "." << std::setw(digits) << std::setfill('0') << processor_id();
+        MooseUtils::createSymlink(std::get<0>(name_tuple), out_final.str());
+      }
+      else if (processor_id() == 0)
+        MooseUtils::createSymlink(std::get<0>(name_tuple), out_final.str());
     }
   }
 

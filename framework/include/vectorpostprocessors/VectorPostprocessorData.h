@@ -50,6 +50,9 @@ public:
 
     /// Whether or not this vector needs to be scatterd
     bool needs_scatter = false;
+
+    /// Whether or not this vector is distributed
+    bool is_distributed = false;
   };
 
   /**
@@ -66,7 +69,8 @@ public:
   VectorPostprocessorValue & declareVector(const std::string & vpp_name,
                                            const std::string & vector_name,
                                            bool contains_complete_history,
-                                           bool is_broadcast);
+                                           bool is_broadcast,
+                                           bool is_distributed);
 
   /**
    * Returns a true value if the VectorPostprocessor exists
@@ -127,6 +131,11 @@ public:
   bool containsCompleteHistory(const std::string & name) const;
 
   /**
+   * Returns a Boolean indicating whether the specified VPP vectors are distributed
+   */
+  bool isDistributed(const std::string & name) const;
+
+  /**
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
@@ -151,6 +160,7 @@ private:
                                                           bool get_current = true,
                                                           bool contains_complete_history = false,
                                                           bool is_broadcast = false,
+                                                          bool is_distributed = false,
                                                           bool needs_broadcast = false,
                                                           bool needs_scatter = false);
   /**
@@ -177,6 +187,9 @@ private:
 
     /// Boolean indicating whether any old vectors have been requested.
     bool _needs_old;
+
+    /// Flag if data is distributed
+    bool _is_distributed;
   };
 
   /// The VPP data store in a map: VPP Name to vector storage
@@ -185,4 +198,3 @@ private:
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
 };
-

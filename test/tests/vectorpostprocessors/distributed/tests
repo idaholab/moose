@@ -1,0 +1,45 @@
+[Tests]
+  design = 'VectorPostprocessors/index.md'
+  issues = '#14480'
+
+  [parallel_type]
+    requirement = "The system shall support writing a vector of data"
+
+    [replicated]
+      type = CSVDiff
+      input = input.i
+      csvdiff = input_out_test_0001.csv
+      cli_args = 'VectorPostprocessors/test/parallel_type=replicated'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "that is completely stored on a single processor or"
+    []
+
+    [distributed]
+      type = CSVDiff
+      input = input.i
+      csvdiff = 'input_out_test_0001.csv.0 input_out_test_0001.csv.1 input_out_test_0001.csv.2'
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = 'VectorPostprocessors/test/parallel_type=distributed'
+      prereq = parallel_type/replicated
+
+      detail = "distributed across many and"
+    []
+
+    [distributed_symlinks]
+      type = CheckFiles
+      input = input.i
+      check_files = 'input_out_test_0002.csv.0 input_out_test_0002.csv.1 input_out_test_0002.csv.2 '
+                    'input_out_test_LATEST.csv.0 input_out_test_LATEST.csv.1 input_out_test_LATEST.csv.2 '
+                    'input_out_test_FINAL.csv.0 input_out_test_FINAL.csv.1 input_out_test_FINAL.csv.2'
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = 'VectorPostprocessors/test/parallel_type=distributed Outputs/out/execute_on=FINAL Outputs/out/create_latest_symlink=true Outputs/out/create_final_symlink=true'
+      prereq = parallel_type/distributed
+
+      detail = "allows for the creation of symbolic links to the the most recent and final files on each processor."
+    []
+  []
+[]

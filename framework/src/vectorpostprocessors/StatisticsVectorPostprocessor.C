@@ -26,130 +26,163 @@ InputParameters
 StatisticsVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params.addClassDescription("Compute statistical values of a given VectorPostprocessor.  The "
-                             "statistics are computed for each column.");
+  params.addClassDescription(
+      "Compute statistical values of a given VectorPostprocessor objects and vectors.");
 
-  params.addRequiredParam<VectorPostprocessorName>(
-      "vpp", "The VectorPostprocessor to compute statistics for.");
+  // TODO: Make these Required when deprecated are removed
+  params.addParam<std::vector<VectorPostprocessorName>>(
+      "vectorpostprocessors",
+      "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
-  // These are directly numbered to ensure that any changes to this list will not cause a bug
-  // Do not change the numbers here without changing the corresponding code in computeStatVector()
-  MultiMooseEnum stats("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6");
-  params.addRequiredParam<MultiMooseEnum>(
-      "stats",
+  MultiMooseEnum stats = Statistics::makeCalculatorEnum();
+  params.addParam<MultiMooseEnum>(
+      "compute",
       stats,
-      "The statistics you would like to compute for each column of the VectorPostprocessor");
+      "The statistic(s) to compute for each of the supplied vector postprocessors.");
 
+  // Confidence Levels
+  MooseEnum ci = Statistics::makeBootstrapCalculatorEnum();
+  params.addParam<MooseEnum>(
+      "ci_method", ci, "The method to use for computing confidence level intervals.");
+
+  params.addParam<std::vector<Real>>(
+      "ci_levels", "A vector of confidence levels to consider, values must be in (0, 0.5].");
+  params.addParam<unsigned int>(
+      "ci_replicates",
+      10000,
+      "The number of replicates to use when computing confidence level intervals.");
+  params.addParam<unsigned int>("ci_seed",
+                                1,
+                                "The random number generator seed used for creating replicates "
+                                "while computing confidence level intervals.");
+
+  // DEPRECATED
+  params.addDeprecatedParam<VectorPostprocessorName>(
+      "vpp",
+      "The VectorPostprocessor to compute statistics for.",
+      "Replaced by 'vectorpostprocessors'");
+  params.addDeprecatedParam<MultiMooseEnum>(
+      "stats",
+      MultiMooseEnum("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6"),
+      "The statistics you would like to compute for each column of the VectorPostprocessor",
+      "Replaced with 'compute'");
   return params;
 }
 
 StatisticsVectorPostprocessor::StatisticsVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _vpp_name(getParam<VectorPostprocessorName>("vpp")),
-    _stats(getParam<MultiMooseEnum>("stats")),
+    _compute_stats(isParamValid("stats") ? getParam<MultiMooseEnum>("stats")
+                                         : getParam<MultiMooseEnum>("compute")),
+    _ci_method(getParam<MooseEnum>("ci_method")),
+    _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
+                                    : std::vector<Real>()),
     _stat_type_vector(declareVector("stat_type"))
 {
-}
-
-void
-StatisticsVectorPostprocessor::initialize()
-{
-  const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
-
-  // Add vectors for each column, the reason for the extra logic here is that the columns a VPP
-  // produces can change
-  for (const auto & the_pair : vpp_vectors)
+  for (const auto & item : _compute_stats)
   {
-    const auto & name = the_pair.first;
+    _stat_type_vector.push_back(item.id());
+    for (const auto & level : _ci_levels)
+      _stat_type_vector.push_back(item.id() + level);
+  }
 
-    if (_stat_vectors.find(name) == _stat_vectors.end())
-      _stat_vectors[name] = &declareVector(name);
+  if (_ci_method.isValid())
+  {
+    unsigned int replicates = getParam<unsigned int>("ci_replicates");
+    unsigned int seed = getParam<unsigned int>("ci_seed");
+    _ci_calculator =
+        Statistics::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
   }
 }
 
 void
-StatisticsVectorPostprocessor::execute()
+StatisticsVectorPostprocessor::initialSetup()
 {
-  if (processor_id() == 0) // Only compute on processor 0
+  // DEPRECATED
+  if (isParamValid("vpp"))
   {
-    const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
-
-    _stat_type_vector.clear();
-
-    // Add the stat IDs into the first colum
-    for (const auto & stat : _stats)
+    const auto & vpp_name = getParam<VectorPostprocessorName>("vpp");
+    const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
+        vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
+    for (const auto & the_pair : vpp_vectors)
     {
-      auto stat_id = stat.id();
-
-      _stat_type_vector.push_back(stat_id);
+      _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
+      _stat_vectors.push_back(&declareVector(the_pair.first));
     }
-
-    // For each value vector compute the stats
-    for (auto & the_pair : vpp_vectors)
+  }
+  else
+  {
+    const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
+    for (const auto & vpp_name : vpp_names)
     {
-      const auto & name = the_pair.first;
-      const auto & values = *the_pair.second.current;
-
-      mooseAssert(_stat_vectors.count(name), "Error retrieving VPP vector");
-      auto & stat_vector = *_stat_vectors.at(name);
-
-      stat_vector.clear();
-
-      for (const auto & stat : _stats)
+      const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
+          vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
+      for (const auto & the_pair : vpp_vectors)
       {
-        auto stat_id = stat.id();
+        // Store VectorPostprocessor name and vector name from which stats will be computed
+        _compute_from_names.emplace_back(vpp_name, the_pair.first, the_pair.second.is_distributed);
 
-        stat_vector.push_back(computeStatValue(stat_id, values));
+        // Create the vector where the statistics will be stored
+        std::string name = vpp_name + "_" + the_pair.first;
+        _stat_vectors.push_back(&declareVector(name));
       }
     }
   }
 }
 
 void
-StatisticsVectorPostprocessor::finalize()
+StatisticsVectorPostprocessor::execute()
 {
+  for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
+  {
+    const std::string & vpp_name = std::get<0>(_compute_from_names[i]);
+    const std::string & vec_name = std::get<1>(_compute_from_names[i]);
+    const bool is_distributed = std::get<2>(_compute_from_names[i]);
+    const VectorPostprocessorValue & data =
+        _fe_problem.getVectorPostprocessorValue(vpp_name, vec_name, true);
+
+    if (is_distributed || processor_id() == 0)
+    {
+      for (const auto & item : _compute_stats)
+      {
+        std::unique_ptr<const Statistics::Calculator> calc_ptr =
+            Statistics::makeCalculator(item, *this);
+        _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
+
+        if (_ci_calculator)
+        {
+          std::vector<Real> ci = _ci_calculator->compute(data, *calc_ptr, is_distributed);
+          _stat_vectors[i]->insert(_stat_vectors[i]->end(), ci.begin(), ci.end());
+        }
+      }
+    }
+  }
 }
 
-Real
-StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<Real> & stat_vector)
+std::vector<Real>
+StatisticsVectorPostprocessor::computeLevels(const std::vector<Real> & levels_in) const
 {
-  switch (stat_id)
+  if (levels_in.empty())
+    paramError("ci_levels",
+               "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be "
+               "supplied with values in (0, 0.5].");
+
+  else if (*std::min_element(levels_in.begin(), levels_in.end()) <= 0)
+    paramError("ci_levels", "The supplied levels must be greater than zero.");
+
+  else if (*std::max_element(levels_in.begin(), levels_in.end()) > 0.5)
+    paramError("ci_levels", "The supplied levels must be less than or equal to 0.5");
+
+  std::list<Real> levels_out;
+  for (auto it = levels_in.rbegin(); it != levels_in.rend(); ++it)
   {
-    case 0: // min
-      return *std::min_element(stat_vector.begin(), stat_vector.end());
-    case 1: // max
-      return *std::max_element(stat_vector.begin(), stat_vector.end());
-    case 2: // sum
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.);
-    case 3: // average
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
-             static_cast<Real>(stat_vector.size());
-    case 4: // stddev
+    if (*it == 0.5)
+      levels_out.push_back(*it);
+
+    else
     {
-      auto mean = std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
-                  static_cast<Real>(stat_vector.size());
-
-      auto the_sum = std::accumulate(stat_vector.begin(),
-                                     stat_vector.end(),
-                                     0.,
-                                     [&mean](Real running_value, Real current_value) {
-                                       return running_value + std::pow(current_value - mean, 2);
-                                     });
-
-      return std::sqrt(the_sum / (stat_vector.size() - 1.));
+      levels_out.push_front(*it);
+      levels_out.push_back(1 - *it);
     }
-    case 5: // norm2
-      return std::sqrt(std::accumulate(
-          stat_vector.begin(), stat_vector.end(), 0., [](Real running_value, Real current_value) {
-            return running_value + std::pow(current_value, 2);
-
-          }));
-    case 6: // ratio
-    {
-      auto min = *std::min_element(stat_vector.begin(), stat_vector.end()) * 1.;
-      return (min != 0. ? *std::max_element(stat_vector.begin(), stat_vector.end()) / min : 0.);
-    }
-    default:
-      mooseError("Unknown statistics type: ", stat_id);
   }
+  return std::vector<Real>(levels_out.begin(), levels_out.end());
 }
