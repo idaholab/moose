@@ -1,0 +1,10 @@
+[Tests]
+  [./from_file]
+    type = 'Exodiff'
+    input = 'nearest_point_layered_integral.i'
+    exodiff = 'nearest_point_layered_integral_out.e'
+    requirement = 'The system shall compute layered integrals that computed from the closest values for a list of points that are specified in an external file'
+    design = 'NearestPointLayeredIntegral.md'
+    issues = '#14717'
+  [../]
+[]
