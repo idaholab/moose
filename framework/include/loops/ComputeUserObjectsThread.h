@@ -103,7 +103,8 @@ groupUserObjects(TheWarehouse & w,
   //
   for (const auto obj : objs)
   {
-    if (ic_deps.count(obj->name()) > 0)
+    if (ic_deps.count(obj->name()) > 0 ||
+        (obj->isParamValid("force_preic") && obj->template getParamTempl<bool>("force_preic")))
       w.update(obj, AttribPreIC(w, true));
 
     if ((obj->isParamValid("force_preaux") && obj->template getParamTempl<bool>("force_preaux")) ||
