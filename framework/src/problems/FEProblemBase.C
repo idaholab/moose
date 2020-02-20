@@ -98,6 +98,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
+#include "metaphysicl/dualnumber.h"
+
 // Anonymous namespace for helper function
 namespace
 {
@@ -5018,6 +5020,8 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
 {
   TIME_SECTION(_compute_residual_sys_timer);
 
+  MetaPhysicL::DualNumber<Real, DNDerivativeType>::do_derivatives = false;
+
   computeResidual(soln, residual);
 }
 
@@ -5258,6 +5262,8 @@ FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & /*sys*/,
                                   const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian)
 {
+  MetaPhysicL::DualNumber<Real, DNDerivativeType>::do_derivatives = true;
+
   computeJacobian(soln, jacobian);
 }
 
