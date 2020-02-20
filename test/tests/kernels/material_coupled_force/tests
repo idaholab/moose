@@ -1,0 +1,11 @@
+[Tests]
+  design = 'MatCoupledForce.md'
+  issues = '#14665'
+  [./material_coupled_force]
+    type = 'Exodiff'
+    input = 'material_coupled_force.i'
+    exodiff = 'material_coupled_force_out.e'
+    abs_zero = 1e-6
+    requirement = 'The system shall support a kernel for coupling the sum of several products of material properties with variables and constant coefficients'
+  [../]
+[]
