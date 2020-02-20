@@ -28,6 +28,7 @@
       input = test_InputTree.py
       display_required = True
       test_case = Tests.testLCF
+      prereq = 'input/testTransient'
 
       detail = "support for input files with a linear combination function;"
     []
@@ -37,6 +38,7 @@
       input = test_InputTree.py
       display_required = True
       test_case = Tests.testFSP
+      prereq = 'input/testLCF'
 
       detail = "support for input files with a field split preconditioner;"
     []
@@ -46,6 +48,7 @@
       input = test_InputTree.py
       display_required = True
       test_case = Tests.testSimpleDiffusion
+      prereq = 'input/testFSP'
 
       detail = "the ability to read and write a complete input file;"
     []

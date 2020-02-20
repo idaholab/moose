@@ -8,5 +8,6 @@
         type = SpeedTest
         input = simple_transient_diffusion.i
         cli_args = 'Mesh/nx=100 Mesh/ny=100 Executioner/num_steps=10'
+        prereq = 'trans_diffusion_100x100_t5'
     [../]
 []

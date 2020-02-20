@@ -13,7 +13,7 @@ from mooseutils.csvdiff import CSVTools
 from mooseutils import colorText
 import os
 import math
-import numpy as np
+import statistics
 
 def diff_files(gold_file, out_file, err_type='relative'):
     """
@@ -82,8 +82,8 @@ def diff_files(gold_file, out_file, err_type='relative'):
                 diff = val2 - val1
             a.append(diff)
 
-    mean = np.mean(a)
-    std = np.std(a)
+    mean = statistics.mean(a)
+    std = statistics.stdev(a)
     return (mean, std)
 
 

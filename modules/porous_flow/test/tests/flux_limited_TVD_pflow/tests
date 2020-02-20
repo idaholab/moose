@@ -305,6 +305,8 @@
     input = 'pffltvd_1D_adaptivity.i'
     csvdiff = 'pffltvd_1D_adaptivity_out_tracer_0101.csv'
     abs_zero = 1.0E-5
+
+    max_threads = 1 # See issue #14558
     threading = '!pthreads'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
