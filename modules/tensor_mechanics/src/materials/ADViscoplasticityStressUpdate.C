@@ -20,6 +20,7 @@ InputParameters
 ADViscoplasticityStressUpdate<compute_stage>::validParams()
 {
   InputParameters params = ADViscoplasticityStressUpdateBase<compute_stage>::validParams();
+  params += ADSingleVariableReturnMappingSolution<RESIDUAL>::validParams();
   params.addClassDescription(
       "This material computes the non-linear homogenized gauge stress in order to compute the "
       "viscoplastic responce due to creep in porous materials. This material must be used in "
@@ -56,6 +57,7 @@ template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     const InputParameters & parameters)
   : ADViscoplasticityStressUpdateBase<compute_stage>(parameters),
+    ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
     _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
     _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
     _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
@@ -68,7 +70,8 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     _maximum_equivalent_stress(getParam<Real>("maximum_equivalent_stress")),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
-    _dhydro_stress_dsigma(_identity_two / 3.0)
+    _dhydro_stress_dsigma(_identity_two / 3.0),
+    _derivative(0.0)
 {
   _check_range = true;
 }
@@ -328,4 +331,28 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
   // to the stress stress. The current form is explicit, and should eventually be changed
   inelastic_strain_increment =
       _dt * dpsi_dgauge * computeDGaugeDSigma(gauge_stress, equiv_stress, dev_stress, stress);
+}
+
+template <ComputeStage compute_stage>
+void
+ADViscoplasticityStressUpdate<compute_stage>::outputIterationSummary(
+    std::stringstream * iter_output, const unsigned int total_it)
+{
+  if (iter_output)
+  {
+    *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
+                 << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
+  }
+  ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(iter_output,
+                                                                               total_it);
+}
+
+template <ComputeStage compute_stage>
+Real
+ADViscoplasticityStressUpdate<compute_stage>::computeReferenceResidual(
+    const ADReal & /*effective_trial_stress*/, const ADReal & gauge_stress)
+{
+  // Use gauge stress for relative tolerance criteria, defined as:
+  // std::abs(residual / gauge_stress) <= _relative_tolerance
+  return MetaPhysicL::raw_value(gauge_stress);
 }

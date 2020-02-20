@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADViscoplasticityStressUpdateBase.h"
+#include "ADSingleVariableReturnMappingSolution.h"
 
 template <ComputeStage>
 class ADViscoplasticityStressUpdate;
@@ -17,7 +18,8 @@ class ADViscoplasticityStressUpdate;
 declareADValidParams(ADViscoplasticityStressUpdate);
 
 template <ComputeStage compute_stage>
-class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<compute_stage>
+class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<compute_stage>,
+                                      public ADSingleVariableReturnMappingSolution<compute_stage>
 {
 public:
   static InputParameters validParams();
@@ -36,6 +38,9 @@ public:
 
   virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
 
+  virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
+                                        const ADReal & scalar_effective_inelastic_strain) override;
+
 protected:
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -52,6 +57,15 @@ protected:
    */
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
+
+  virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
+                                   const ADReal & /*scalar*/) override
+  {
+    return _derivative;
+  }
+
+  void outputIterationSummary(std::stringstream * iter_output,
+                              const unsigned int total_it) override;
 
   ADReal computeH(const Real n, const ADReal & gauge_stress, const bool derivative = false);
 
@@ -106,5 +120,9 @@ protected:
   /// Derivative of hydrostatic stress with respect to the stress tensor
   const RankTwoTensor _dhydro_stress_dsigma;
 
+  /// Container for _derivative
+  ADReal _derivative;
+
   usingViscoplasticityStressUpdateBaseMembers;
+  usingSingleVariableReturnMappingSolutionMembers;
 };
