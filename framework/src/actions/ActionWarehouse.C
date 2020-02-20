@@ -19,6 +19,7 @@
 #include "XTermConstants.h"
 #include "InfixIterator.h"
 #include "FEProblem.h"
+#include "MemoryUtils.h"
 
 #include "libmesh/simple_range.h"
 
@@ -341,7 +342,14 @@ ActionWarehouse::executeAllActions()
   }
 
   if (_show_actions)
-    _console << "[DBG][ACT] Finished executing all actions" << std::endl;
+  {
+    MemoryUtils::Stats stats;
+    MemoryUtils::getMemoryStats(stats);
+    auto usage =
+        MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+    _console << "[DBG][ACT] Finished executing all actions with memory usage " << usage << "MB"
+             << std::endl;
+  }
 }
 
 void
@@ -354,12 +362,18 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
        ++_act_iter)
   {
     if (_show_actions)
+    {
+      MemoryUtils::Stats stats;
+      MemoryUtils::getMemoryStats(stats);
+      auto usage =
+          MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
                << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
                << ") "
                << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
-               << ")" << std::endl;
+               << ") Memory usage " << usage << "MB" << std::endl;
+    }
 
     (*_act_iter)->timedAct();
   }

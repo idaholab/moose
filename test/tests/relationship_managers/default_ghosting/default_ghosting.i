@@ -41,6 +41,10 @@
 
 [Outputs]
   exodus = true
+  [console]
+    type = Console
+    system_info = 'framework mesh aux nonlinear relationship execution'
+  []
 []
 
 # Show that we can enable and see that libmesh Ghosting Functors are active
