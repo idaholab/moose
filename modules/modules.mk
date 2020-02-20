@@ -20,6 +20,7 @@ ifeq ($(ALL_MODULES),yes)
         EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
+        GEOCHEMISTRY                := yes
         HEAT_CONDUCTION             := yes
         LEVEL_SET                   := yes
         MISC                        := yes
@@ -68,7 +69,7 @@ ifeq ($(CONTACT),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -93,6 +94,13 @@ ifeq ($(FUNCTIONAL_EXPANSION_TOOLS),yes)
   APPLICATION_NAME   := functional_expansion_tools
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/$(APPLICATION_NAME)
   SUFFIX             := fet
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(GEOCHEMISTRY),yes)
+  APPLICATION_NAME   := geochemistry
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/$(APPLICATION_NAME)
+  SUFFIX             := gc
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
