@@ -88,6 +88,21 @@ ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
   return s.str();
 }
 
+bool
+ExpressionBuilder::EBBinaryFuncTermNode::commutative() const
+{
+  switch (_type) {
+    case MIN:
+    case MAX:
+    case HYPOT:
+      return true;
+    case ATAN2:
+    case PLOG:
+      return false;
+  }
+  mooseError("Unknown type.");
+}
+
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 {
@@ -137,6 +152,28 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
       return 9;
   }
 
+  mooseError("Unknown type.");
+}
+
+bool
+ExpressionBuilder::EBBinaryOpTermNode::commutative() const
+{
+  switch (_type) {
+    case ADD:
+    case MUL:
+    case EQ:
+    case NOTEQ:
+      return true;
+    case SUB:
+    case DIV:
+    case MOD:
+    case POW:
+    case LESS:
+    case GREATER:
+    case LESSEQ:
+    case GREATEREQ:
+      return false;
+  }
   mooseError("Unknown type.");
 }
 
@@ -473,4 +510,63 @@ ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode &
         node.getSubnode()->clone(), _epsilon->clone(), EBBinaryFuncTermNode::PLOG);
   else
     return NULL;
+}
+
+bool
+ExpressionBuilder::Comparer::compare()
+{
+
+  std::vector<EBTermNode *> left_children = _compare_left->getChildren();
+  std::vector<EBTermNode *> right_children = _compare_right->getChildren();
+  bool atStart = true;
+
+  // I assume that there is at least one operation in our right hand side equation (the one we're comparing to)
+  // Thus, I have left off any check for it and it automatically will return true.
+  // Actually having zero operations would be pointless, so I am assuming that someone will never enter one.
+  while(_right_stack_compare.size() > 0 || atStart)
+  {
+    if(!atStart)
+    {
+      _compare_left = _left_stack_compare.top();
+      _compare_right = _right_stack_compare.top();
+      _left_stack_compare.pop();
+      _right_stack_compare.pop();
+    }
+
+    atStart = false;
+
+    std::vector<EBTermNode *> left_children = _compare_left->getChildren();
+    std::vector<EBTermNode *> right_children = _compare_right->getChildren();
+
+    if(!_compare_right->compare(_compare_left, _star_compares) || left_children.size() != right_children.size())
+    {
+      if(_permutations.size() > 0)
+      {
+        Comparer * replacement = _permutations.top();
+        _permutations.pop();
+        _compare_left =  replacement->getCompareLeft();
+        _compare_right = replacement->getCompareRight();
+        _left_stack_compare = replacement->getLeftStack();
+        _right_stack_compare = replacement->getRightStack();
+        _star_compares = replacement->getStarCompares();
+        _permutations = replacement->getPermutations();
+      }
+      else
+        return false;
+    }
+
+    for(unsigned int i = 0; i < left_children.size(); ++i)
+    {
+      _left_stack_compare.emplace(left_children[i]);
+      _right_stack_compare.emplace(right_children[i]);
+    }
+
+    std::vector<EBTermNode *> node_permutes = _compare_right->getPermutations();
+    for(unsigned int i = 0; i < node_permutes.size(); ++i)
+    {
+      Comparer * new_comparer = new Comparer(_compare_left, _left_stack_compare, node_permutes[i], _right_stack_compare, _star_compares, _permutations);
+      _permutations.emplace(new_comparer);
+    }
+  }
+  return true;
 }
