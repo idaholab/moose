@@ -1,0 +1,6 @@
+COORDINATES
+TIME STEPS
+ELEMENT VARIABLES relative 1e-6
+	vel
+	T
+	p
