@@ -144,7 +144,7 @@ The axial and shear strain increments, and the rotational strain increments (aft
 \Delta M_2(x) = E \; \kappa_2(x)
 \end{equation}
 \begin{equation}
-\Delta M_3(x) = G \; \kappa_3(x)
+\Delta M_3(x) = E \; \kappa_3(x)
 \end{equation}
 where $E$ and $G$ are the Young's and shear modulus, respectively. $k$ is the shear correction factor that depends on the shape of the cross-section.
 
