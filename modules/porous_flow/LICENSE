@@ -1,0 +1,2 @@
+PorousFlow is a physics module of the MOOSE framework designed to simulate problems involving flow through porous media.
+PorousFlow is conveniently packaged with the MOOSE framework and is hence released under the same license as MOOSE (Lesser GPL 2.1).  For details see ../../LICENSE
