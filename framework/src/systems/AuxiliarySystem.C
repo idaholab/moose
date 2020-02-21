@@ -395,7 +395,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
         _elemental_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -406,7 +406,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
         _elemental_vec_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -417,7 +417,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
         _nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -428,7 +428,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
         _nodal_vec_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -447,7 +447,7 @@ AuxiliarySystem::getDependObjects()
         _elemental_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -458,7 +458,7 @@ AuxiliarySystem::getDependObjects()
         _elemental_vec_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -468,7 +468,7 @@ AuxiliarySystem::getDependObjects()
     const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -479,7 +479,7 @@ AuxiliarySystem::getDependObjects()
         _nodal_vec_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = aux->getDependObjects();
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }

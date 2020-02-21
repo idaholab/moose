@@ -42,7 +42,7 @@ public:
    * @return The user object with name associated with the parameter 'name'
    */
   template <class T>
-  const T & getUserObjectTempl(const std::string & name);
+  const T & getUserObjectTempl(const std::string & name) const;
 
   /**
    * Get an user object with a given name
@@ -50,21 +50,21 @@ public:
    * @return The user object with the name
    */
   template <class T>
-  const T & getUserObjectByNameTempl(const std::string & name);
+  const T & getUserObjectByNameTempl(const std::string & name) const;
 
   /**
    * Get an user object with a given parameter name
    * @param name The name of the parameter key of the user object to retrieve
    * @return The user object with name associated with the parameter 'name'
    */
-  const UserObject & getUserObjectBase(const std::string & name);
+  const UserObject & getUserObjectBase(const std::string & name) const;
 
   /**
    * Get an user object with a given name
    * @param name The name of the user object to retrieve
    * @return The user object with the name
    */
-  const UserObject & getUserObjectBaseByName(const std::string & name);
+  const UserObject & getUserObjectBaseByName(const std::string & name) const;
 
 private:
   /// Parameters of the object with this interface
@@ -82,7 +82,7 @@ private:
 
 template <class T>
 const T &
-UserObjectInterface::getUserObjectTempl(const std::string & name)
+UserObjectInterface::getUserObjectTempl(const std::string & name) const
 {
   unsigned int tid = needThreadedCopy(getUserObjectBase(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObjectTempl<T>(_uoi_params.get<UserObjectName>(name), tid);
@@ -90,7 +90,7 @@ UserObjectInterface::getUserObjectTempl(const std::string & name)
 
 template <class T>
 const T &
-UserObjectInterface::getUserObjectByNameTempl(const std::string & name)
+UserObjectInterface::getUserObjectByNameTempl(const std::string & name) const
 {
   unsigned int tid = needThreadedCopy(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObjectTempl<T>(name, tid);
