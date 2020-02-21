@@ -107,6 +107,8 @@
 - /Components/InletStagnationPressureTemperature
 - /Components/InletStagnationPressureTemperature1Phase
 - /Components/InletStagnationPressureTemperature2Phase
+- /Components/InletVelocityTemperature1Phase
+- /Components/InletVelocityTemperature2Phase
 - /Components/JunctionBase
 - /Components/JunctionWithLossesBase
 - /Components/Outlet1Phase
@@ -298,9 +300,12 @@
 - /ScalarKernels/ODECoefTimeDerivative
 - /ScalarKernels/VolumeJunction2PhaseVolumeFractionTimeDerivative
 
+- /UserObjects/BoundaryFlux3EqnGhostVelocityTemperature
+- /UserObjects/BoundaryFlux7EqnGhostVelocityTemperature
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/BoundaryFlux7EqnNCGGhostDensityVelocity
 - /UserObjects/BoundaryFlux7EqnNCGGhostMassFlowRateTemperature
+- /UserObjects/BoundaryFlux7EqnNCGGhostVelocityTemperature
 - /UserObjects/BoundaryFlux7EqnNCGGhostPressure
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning

@@ -1,0 +1,68 @@
+#include "InletVelocityTemperature1Phase.h"
+#include "FlowModelSinglePhase.h"
+
+registerMooseObject("THMApp", InletVelocityTemperature1Phase);
+
+template <>
+InputParameters
+validParams<InletVelocityTemperature1Phase>()
+{
+  InputParameters params = validParams<FlowBoundary>();
+  params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
+  params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
+  params.addClassDescription("Boundary condition with prescribed velocity and temperature "
+                             "for 1-phase flow channels.");
+  return params;
+}
+
+InletVelocityTemperature1Phase::InletVelocityTemperature1Phase(const InputParameters & params)
+  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+{
+}
+
+void
+InletVelocityTemperature1Phase::check() const
+{
+  FlowBoundary::check();
+
+  auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+  if (fm == nullptr)
+    logError("Incompatible flow model. Make sure you use this component with single phase flow "
+             "channel.");
+  if (_spatial_discretization == FlowModel::CG)
+    logError("Incompatible spatial discretization. Make sure you use this component with rDG.");
+}
+
+void
+InletVelocityTemperature1Phase::setup1PhaseRDG()
+{
+  ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+  userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+  // boundary flux user object
+  const std::string boundary_flux_name = genName(name(), "boundary_flux");
+  {
+    const std::string class_name = "BoundaryFlux3EqnGhostVelocityTemperature";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<Real>("vel") = getParam<Real>("vel");
+    params.set<Real>("T") = getParam<Real>("T");
+    params.set<Real>("normal") = _normal;
+    params.set<bool>("reversible") = _reversible;
+    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
+    params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+    _sim.addUserObject(class_name, boundary_flux_name, params);
+    connectObject(params, boundary_flux_name, "vel");
+    connectObject(params, boundary_flux_name, "T");
+  }
+
+  // BCs
+  addWeakBC3Eqn(boundary_flux_name);
+}
+
+void
+InletVelocityTemperature1Phase::addMooseObjects()
+{
+  setup1PhaseRDG();
+}
