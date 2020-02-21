@@ -167,8 +167,16 @@ object which can be used to query eligible fluid properties objects.
 
 ## Additional objects
 
-Several additional objects such as AuxKernels and Materials are provided:
+Several additional objects are provided:
+
+### AuxKernels
 
 !syntax list /AuxKernels groups=FluidPropertiesApp heading-level=3 actions=False
+
+### Functions
+
+!syntax list /Functions groups=FluidPropertiesApp heading-level=3 actions=False
+
+### Materials
 
 !syntax list /Materials groups=FluidPropertiesApp heading-level=3 actions=False
