@@ -23,6 +23,7 @@ class CSVDiff(FileTester):
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
         params.addParam('rel_err', "A customized relative error tolerances.")
         params.addParam('abs_zero', "A customized relative error tolerances.")
+
         return params
 
     def __init__(self, name, params):
