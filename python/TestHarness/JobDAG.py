@@ -9,18 +9,35 @@
 
 from .schedulers.Job import Job
 from contrib import dag
+import pyhit
+import os
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
     def __init__(self, options):
         self.__job_dag = dag.DAG()
+        self.__parallel_scheduling = False
         self.options = options
+
+    def _setParallel(self, tester):
+        if self.__parallel_scheduling:
+            return
+
+        # Read test spec file for a group parallel_scheduling attribute
+        root = pyhit.load(os.path.join(tester.specs['test_dir'], self.options.input_file_name))
+        if root.children[0].get('parallel_scheduling', None):
+            self.__parallel_scheduling = True
+
+    def canParallel(self):
+        """ Return bool whether or not this group runs in parallel """
+        return self.__parallel_scheduling
 
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
         # for each tester, instance a job and create a DAG node for that job
         self.__name_to_job = {}
         for tester in testers:
+            self._setParallel(tester)
             job = Job(tester, self.__job_dag, self.options)
             name = job.getUniqueIdentifier()
             if name not in self.__name_to_job:
@@ -36,10 +53,11 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
-
     def getJobs(self):
-        """ Return concurrent available jobs """
-        return self.__job_dag.ind_nodes()
+        """ Return a list of available jobs """
+        if self.canParallel() and not self.options.pedantic_checks:
+            return self.__job_dag.ind_nodes()
+        return self.getJob()
 
     def getJob(self):
         """ Return a single available job """
@@ -61,10 +79,7 @@ class JobDAG(object):
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
 
-        if self.options.pedantic_checks:
-            next_jobs.update(self.getJob())
-        else:
-            next_jobs.update(self.getJobs())
+        next_jobs.update(self.getJobs())
         return next_jobs
 
     def removeAllDependencies(self):
