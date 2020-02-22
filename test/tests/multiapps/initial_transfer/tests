@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#14676'
+  design = '/userobject/UserObject.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'master.i'
+    csvdiff = 'master_out_sub0.csv'
+    requirement = 'MOOSE shall allow forcely evaluating general user objects on initial before applying initial conditions.'
+  [../]
+[]

@@ -7,6 +7,7 @@ provided below.
 
 ## 2020
 
+- [February, 2020](2020_02.md)
 - [January, 2020](2020_01.md)
 
 ## 2019
