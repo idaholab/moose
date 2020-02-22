@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'saturation_pressure_function.i'
+    csvdiff = 'saturation_pressure_function_out.csv'
+    allow_test_objects = True
+
+    requirement = 'The system shall provide a function that computes saturation pressure from a temperature function'
+    design = '/SaturationPressureFunction.md'
+    issues = '#14755'
+  [../]
+[]
