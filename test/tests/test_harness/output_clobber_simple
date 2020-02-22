@@ -1,4 +1,7 @@
 [Tests]
+  # Enable the parallel scheduler so this unitteset fails
+  parallel_scheduling = True
+
 [./testA]
   type = RunApp
   input = output_csv_and_exodus.i

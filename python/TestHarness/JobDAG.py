@@ -16,29 +16,35 @@ class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
     def __init__(self, options):
         self.__job_dag = dag.DAG()
-        self.__parallel_scheduling = False
+        self.__parallel_scheduling = None
         self.options = options
 
-    def _setParallel(self, tester):
-        if self.__parallel_scheduling:
-            return
+    def _setParallel(self):
+        """ Read the test spec file and determine if parallel_scheduling is set. """
+        if self.__parallel_scheduling is not None:
+            return self.__parallel_scheduling
+        self.__parallel_scheduling = False
 
-        # Read test spec file for a group parallel_scheduling attribute
-        root = pyhit.load(os.path.join(tester.specs['test_dir'], self.options.input_file_name))
-        if root.children[0].get('parallel_scheduling', None):
-            self.__parallel_scheduling = True
+        job = self.getJob()
+        if job:
+            # We only need a single tester so we know what spec file to load.
+            # TODO: would be nice to have access to this without needing tester.specs
+            tester = job[0].getTester()
+            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['spec_file']))
+            self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
+
+        return self.__parallel_scheduling
 
     def canParallel(self):
         """ Return bool whether or not this group runs in parallel """
-        return self.__parallel_scheduling
+        return self._setParallel()
 
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
         # for each tester, instance a job and create a DAG node for that job
         self.__name_to_job = {}
         for tester in testers:
-            self._setParallel(tester)
-            job = Job(tester, self.__job_dag, self.options)
+            job = Job(tester, self, self.options)
             name = job.getUniqueIdentifier()
             if name not in self.__name_to_job:
                 self.__name_to_job[name] = job
