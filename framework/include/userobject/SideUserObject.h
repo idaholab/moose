@@ -15,9 +15,7 @@
 #include "MaterialPropertyInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
-#include "UserObjectInterface.h"
 #include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 
 // Forward Declarations
 class SideUserObject;
@@ -30,9 +28,7 @@ class SideUserObject : public UserObject,
                        public MaterialPropertyInterface,
                        public Coupleable,
                        public MooseVariableDependencyInterface,
-                       public UserObjectInterface,
-                       public TransientInterface,
-                       protected PostprocessorInterface
+                       public TransientInterface
 {
 public:
   static InputParameters validParams();

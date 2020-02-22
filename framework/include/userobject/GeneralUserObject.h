@@ -14,9 +14,6 @@
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "DependencyResolverInterface.h"
-#include "UserObjectInterface.h"
-#include "PostprocessorInterface.h"
-#include "VectorPostprocessorInterface.h"
 
 // Forward Declarations
 class GeneralUserObject;
@@ -29,10 +26,7 @@ InputParameters validParams<GeneralUserObject>();
 class GeneralUserObject : public UserObject,
                           public MaterialPropertyInterface,
                           public TransientInterface,
-                          public DependencyResolverInterface,
-                          public UserObjectInterface,
-                          protected PostprocessorInterface,
-                          protected VectorPostprocessorInterface
+                          public DependencyResolverInterface
 {
 public:
   static InputParameters validParams();

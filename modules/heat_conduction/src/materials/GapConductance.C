@@ -85,15 +85,20 @@ GapConductance::actionParameters()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
-  params.addRangeCheckedParam<Real>("emissivity_1",
+  params.addRangeCheckedParam<Real>("emissivity_master",
                                     0.0,
-                                    "emissivity_1>=0 & emissivity_1<=1",
-                                    "The emissivity of the fuel surface");
-  params.addRangeCheckedParam<Real>("emissivity_2",
+                                    "emissivity_master>=0 & emissivity_master<=1",
+                                    "The emissivity of the master surface");
+  params.addRangeCheckedParam<Real>("emissivity_slave",
                                     0.0,
-                                    "emissivity_2>=0 & emissivity_2<=1",
-                                    "The emissivity of the cladding surface");
-
+                                    "emissivity_slave>=0 & emissivity_slave<=1",
+                                    "The emissivity of the slave surface");
+  params.addDeprecatedParam<Real>("emissivity_1",
+                                  "The emissivity of the fuel surface",
+                                  "Please use \"emissivity_master\" instead");
+  params.addDeprecatedParam<Real>("emissivity_2",
+                                  "The emissivity of the cladding surface",
+                                  "Please use \"emissivity_slave\" instead");
   // Common
   params.addRangeCheckedParam<Real>(
       "min_gap", 1e-6, "min_gap>0", "A minimum gap (denominator) size");
@@ -131,10 +136,6 @@ GapConductance::GapConductance(const InputParameters & parameters)
                                             ? &coupledValue("gap_conductivity_function_variable")
                                             : NULL),
     _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
-    _emissivity(getParam<Real>("emissivity_1") != 0.0 && getParam<Real>("emissivity_2") != 0.0
-                    ? 1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") -
-                          1
-                    : 0.0),
     _min_gap(getParam<Real>("min_gap")),
     _min_gap_order(getParam<unsigned int>("min_gap_order")),
     _max_gap(getParam<Real>("max_gap")),
@@ -146,6 +147,35 @@ GapConductance::GapConductance(const InputParameters & parameters)
     _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
     _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0)))
 {
+  // set emissivity but allow legacy naming; legacy names are used if they
+  // are present
+  Real emissivity_master = getParam<Real>("emissivity_master");
+  if (isParamValid("emissivity_1"))
+  {
+    emissivity_master = getParam<Real>("emissivity_1");
+
+    // make sure emissivity is physical
+    if (emissivity_master < 0 || emissivity_master > 1)
+      paramError("emissivity_1",
+                 "Emissivities must have values between 0 and 1. You provided: ",
+                 emissivity_master);
+  }
+
+  Real emissivity_slave = getParam<Real>("emissivity_slave");
+  if (isParamValid("emissivity_2"))
+  {
+    emissivity_slave = getParam<Real>("emissivity_2");
+
+    // make sure emissivity is physical
+    if (emissivity_slave < 0 || emissivity_slave > 1)
+      paramError("emissivity_2",
+                 "Emissivities must have values between 0 and 1. You provided: ",
+                 emissivity_slave);
+  }
+  _emissivity = emissivity_master != 0.0 && emissivity_slave != 0.0
+                    ? 1.0 / emissivity_master + 1.0 / emissivity_slave - 1
+                    : 0.0;
+
   if (_quadrature)
   {
     if (!parameters.isParamValid("paired_boundary"))

@@ -50,7 +50,8 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
     _scalar_global_strain(coupledScalarValue("scalar_global_strain")),
     _component(getParam<unsigned int>("component")),
     _output_global_disp(getParam<bool>("output_global_displacement")),
-    _pst(getUserObject<GlobalStrainUserObjectInterface>("global_strain_uo")),
+    _pst(dynamic_cast<const GlobalStrainUserObjectInterface &>(
+        getUserObjectBase("global_strain_uo"))),
     _periodic_dir(_pst.getPeriodicDirections()),
     _ref_point(parameters.get<Point>("reference_point")),
     _dim(_mesh.dimension()),

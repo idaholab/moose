@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "DistributionInterface.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "MeshChangedInterface.h"
 #include "MooseObject.h"
 #include "MooseTypes.h"
@@ -38,6 +41,9 @@ InputParameters validParams<UserObject>();
 class UserObject : public MooseObject,
                    public SetupInterface,
                    protected FunctionInterface,
+                   public UserObjectInterface,
+                   protected PostprocessorInterface,
+                   protected VectorPostprocessorInterface,
                    protected DistributionInterface,
                    protected Restartable,
                    protected MeshMetaDataInterface,
@@ -137,6 +143,118 @@ public:
 
   UserObject * primaryThreadCopy() { return _primary_thread_copy; }
 
+  /**
+   * Recursively return a set of user objects this user object depends on
+   * Note: this can be called only after all user objects are constructed.
+   */
+  std::set<UserObjectName> getDependObjects() const
+  {
+    std::set<UserObjectName> all;
+    for (auto & v : _depend_uo)
+    {
+      all.insert(v);
+      auto & uo = UserObjectInterface::getUserObjectBaseByName(v);
+      auto uos = uo.getDependObjects();
+      for (auto & t : uos)
+        all.insert(t);
+    }
+    return all;
+  }
+
+  template <typename T>
+  const T & getUserObjectTempl(const std::string & name)
+  {
+    _depend_uo.insert(_pars.get<UserObjectName>(name));
+    return UserObjectInterface::getUserObjectTempl<T>(name);
+  }
+
+  template <typename T>
+  const T & getUserObjectByNameTempl(const UserObjectName & name)
+  {
+    _depend_uo.insert(name);
+    return UserObjectInterface::getUserObjectByNameTempl<T>(name);
+  }
+
+  const UserObject & getUserObjectBase(const UserObjectName & name)
+  {
+    return getUserObjectBaseByName(_pars.get<UserObjectName>(name));
+  }
+
+  const UserObject & getUserObjectBaseByName(const UserObjectName & name)
+  {
+    _depend_uo.insert(name);
+    return UserObjectInterface::getUserObjectBaseByName(name);
+  }
+
+  const PostprocessorValue & getPostprocessorValue(const std::string & name, unsigned int index = 0)
+  {
+    if (hasPostprocessor(name, index))
+    {
+      UserObjectName nm;
+      if (_pars.isSinglePostprocessor(name))
+        nm = _pars.get<PostprocessorName>(name);
+      else
+        nm = _pars.get<std::vector<PostprocessorName>>(name)[index];
+
+      _depend_uo.insert(nm);
+    }
+    return PostprocessorInterface::getPostprocessorValue(name, index);
+  }
+
+  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name)
+  {
+    _depend_uo.insert(name);
+    return PostprocessorInterface::getPostprocessorValueByName(name);
+  }
+
+  const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name,
+                                                               const std::string & vector_name)
+  {
+    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+    return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+  }
+
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name)
+  {
+    _depend_uo.insert(name);
+    return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+  }
+
+  const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name,
+                                                               const std::string & vector_name,
+                                                               bool needs_broadcast)
+  {
+    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+    return VectorPostprocessorInterface::getVectorPostprocessorValue(
+        name, vector_name, needs_broadcast);
+  }
+
+  const VectorPostprocessorValue & getVectorPostprocessorValueByName(
+      const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
+  {
+    _depend_uo.insert(name);
+    return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+        name, vector_name, needs_broadcast);
+  }
+
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
+  {
+    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+    return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
+  }
+
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValueByName(const std::string & name,
+                                           const std::string & vector_name)
+  {
+    _depend_uo.insert(name);
+    return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name,
+                                                                                  vector_name);
+  }
+
 protected:
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
@@ -155,4 +273,7 @@ protected:
 
 private:
   UserObject * _primary_thread_copy = nullptr;
+
+  /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
+  std::set<UserObjectName> _depend_uo;
 };
