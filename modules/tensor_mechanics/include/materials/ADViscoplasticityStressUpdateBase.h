@@ -10,16 +10,13 @@
 #pragma once
 
 #include "ADStressUpdateBase.h"
-#include "ADSingleVariableReturnMappingSolution.h"
 
 #define usingViscoplasticityStressUpdateBaseMembers                                                \
   usingStressUpdateBaseMembers;                                                                    \
-  usingSingleVariableReturnMappingSolutionMembers;                                                 \
   using ADViscoplasticityStressUpdateBase<compute_stage>::updateIntermediatePorosity;              \
   using ADViscoplasticityStressUpdateBase<compute_stage>::computeStressInitialize;                 \
   using ADViscoplasticityStressUpdateBase<compute_stage>::computeStressFinalize;                   \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_intermediate_porosity;                  \
-  using ADViscoplasticityStressUpdateBase<compute_stage>::_derivative;                             \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_effective_inelastic_strain;             \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_effective_inelastic_strain_old;         \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_inelastic_strain;                       \
@@ -34,17 +31,12 @@ class ADViscoplasticityStressUpdateBase;
 declareADValidParams(ADViscoplasticityStressUpdateBase);
 
 template <ComputeStage compute_stage>
-class ADViscoplasticityStressUpdateBase
-  : public ADStressUpdateBase<compute_stage>,
-    public ADSingleVariableReturnMappingSolution<compute_stage>
+class ADViscoplasticityStressUpdateBase : public ADStressUpdateBase<compute_stage>
 {
 public:
   static InputParameters validParams();
 
   ADViscoplasticityStressUpdateBase(const InputParameters & parameters);
-
-  virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
-                                        const ADReal & scalar_effective_inelastic_strain) override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -78,16 +70,7 @@ protected:
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & /*plastic_strain_increment*/) {}
 
-  virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
-                                   const ADReal & /*scalar*/) override
-  {
-    return _derivative;
-  }
-
   void updateIntermediatePorosity(const ADRankTwoTensor & elastic_strain_increment);
-
-  void outputIterationSummary(std::stringstream * iter_output,
-                              const unsigned int total_it) override;
 
   /// String designating the base name of the total strain
   const std::string _total_strain_base_name;
@@ -117,9 +100,5 @@ protected:
   /// Flag to enable verbose output
   const bool _verbose;
 
-  /// Container for _derivative
-  ADReal _derivative;
-
   usingStressUpdateBaseMembers;
-  usingSingleVariableReturnMappingSolutionMembers;
 };

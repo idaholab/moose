@@ -16,7 +16,6 @@ InputParameters
 ADViscoplasticityStressUpdateBase<compute_stage>::validParams()
 {
   InputParameters params = ADStressUpdateBase<compute_stage>::validParams();
-  params += ADSingleVariableReturnMappingSolution<RESIDUAL>::validParams();
   params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
                              "ADComputeMultiplePorousInelasticStress");
   params.addParam<Real>("max_inelastic_increment",
@@ -39,7 +38,6 @@ template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdateBase<compute_stage>::ADViscoplasticityStressUpdateBase(
     const InputParameters & parameters)
   : ADStressUpdateBase<compute_stage>(parameters),
-    ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
     _total_strain_base_name(isParamValid("total_strain_base_name")
                                 ? getParam<std::string>("total_strain_base_name") + "_"
                                 : ""),
@@ -56,8 +54,7 @@ ADViscoplasticityStressUpdateBase<compute_stage>::ADViscoplasticityStressUpdateB
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _intermediate_porosity(0.0),
     _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
-    _verbose(getParam<bool>("verbose")),
-    _derivative(0.0)
+    _verbose(getParam<bool>("verbose"))
 {
 }
 
@@ -79,16 +76,6 @@ ADViscoplasticityStressUpdateBase<compute_stage>::propagateQpStatefulProperties(
 
 template <ComputeStage compute_stage>
 Real
-ADViscoplasticityStressUpdateBase<compute_stage>::computeReferenceResidual(
-    const ADReal & /*effective_trial_stress*/, const ADReal & gauge_stress)
-{
-  // Use gauge stress for relative tolerance criteria, defined as:
-  // std::abs(residual / gauge_stress) <= _relative_tolerance
-  return MetaPhysicL::raw_value(gauge_stress);
-}
-
-template <ComputeStage compute_stage>
-Real
 ADViscoplasticityStressUpdateBase<compute_stage>::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
@@ -99,20 +86,6 @@ ADViscoplasticityStressUpdateBase<compute_stage>::computeTimeStepLimit()
     return std::numeric_limits<Real>::max();
 
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
-}
-
-template <ComputeStage compute_stage>
-void
-ADViscoplasticityStressUpdateBase<compute_stage>::outputIterationSummary(
-    std::stringstream * iter_output, const unsigned int total_it)
-{
-  if (iter_output)
-  {
-    *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
-                 << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
-  }
-  ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(iter_output,
-                                                                               total_it);
 }
 
 template <ComputeStage compute_stage>
