@@ -1,3 +1,13 @@
+# This problem consists of two beams with different prescribed temperatures on
+# the top of the top beam and the bottom of the bottom beam.  The top beam is
+# fixed against vertical displacement on the top surface, and the bottom beam
+# bends downward due to thermal expansion.
+
+# This is a test of the effectiveness of the Jacobian terms coupling temperature
+# and displacement for thermal contact. The Jacobian is not exactly correct,
+# but is close enough that this challenging problem converges in a small number
+# of nonlinear iterations using NEWTON.
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -16,27 +26,39 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temp
   [../]
 []
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = SMALL
+    strain = FINITE
     add_variables = true
+    eigenstrain_names = thermal_expansion
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
+    use_automatic_differentiation = true
   [../]
 []
 
+[Contact]
+  [./mechanical]
+    master = 4
+    slave = 5
+    formulation = kinematic
+    tangential_tolerance = 1e-1
+    penalty = 1e10
+    system = Constraint
+  [../]
+[]
 
 [ThermalContact]
-  [./gap_conductivity]
+  [./thermal]
     type = GapHeatTransfer
     variable = temp
-    slave = 4
-    master = 5
-    gap_conductance = 1e8
+    master = 4
+    slave = 5
+    gap_conductivity = 1e4
     quadrature = true
   [../]
 []
@@ -54,26 +76,19 @@
     boundary = 1
     value = 0.0
   [../]
-  [./right_y1]
-    type = FunctionDirichletBC
+  [./top_y]
+    type = DirichletBC
     variable = disp_y
-    boundary = 3
-    function = 0
+    boundary = 7
+    value = 0
   [../]
-  [./right_y2]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = 2
-    function = 0.01*t
-  [../]
-  [./temp1]
+  [./top_temp]
     type = DirichletBC
     variable = temp
     boundary = 7
     value = 1000.0
   [../]
-
-  [./temp2]
+  [./bot_temp]
     type = DirichletBC
     variable = temp
     boundary = 6
@@ -96,8 +111,15 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
   [../]
+  [./thermal_eigenstrain]
+    type = ADComputeThermalExpansionEigenstrain
+    thermal_expansion_coeff = 1e-5
+    stress_free_temperature = 500
+    temperature = temp
+    eigenstrain_name = thermal_expansion
+  [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ADComputeFiniteStrainElasticStress
   [../]
 []
 
@@ -118,7 +140,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   solve_type = NEWTON
-  nl_max_its = 10
+  nl_max_its = 15
   l_tol = 1e-10
   l_max_its = 50
   start_time = 0.0
