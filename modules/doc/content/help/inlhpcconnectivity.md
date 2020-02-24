@@ -24,6 +24,7 @@ Host moosebuild.inl.gov
 ```
 
 For Linux Systems use the following instead:
+
 ```bash
 Host hpcgitlab.hpc.inl.gov
  User <your hpc user id>
