@@ -34,7 +34,7 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
                "The number of numeric items must be divisible by 3; min, max, divisions for each "
                "item are required.");
 
-  dof_id_type n_rows = 1;
+  std::vector<std::vector<Real>> grid_items;
   for (std::size_t i = 0; i < items.size(); i += 3)
   {
     if (items[i + 2] != std::floor(items[i + 2]))
@@ -44,34 +44,18 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
       paramError("items", "The third entry for each item must be positive.");
 
     unsigned int div = static_cast<unsigned int>(items[i + 2]);
-    n_rows *= div;
-
-    _grid_items.emplace_back(std::vector<Real>(div));
-    for (std::size_t j = 0; j < _grid_items.back().size(); ++j)
-      _grid_items.back()[j] = items[i] + j * items[i + 1];
+    grid_items.emplace_back(std::vector<Real>(div));
+    for (std::size_t j = 0; j < grid_items.back().size(); ++j)
+      grid_items.back()[j] = items[i] + j * items[i + 1];
   }
 
-  setNumberOfRows(n_rows);
-  setNumberOfCols(_grid_items.size());
-}
-
-void
-CartesianProductSampler::sampleSetUp()
-{
-  dof_id_type d = 1;
-  for (std::vector<std::vector<Real>>::const_reverse_iterator iter = _grid_items.rbegin();
-       iter != _grid_items.rend();
-       ++iter)
-  {
-    std::size_t n = iter->size();
-    _denomenators.push_front(d);
-    _moduli.push_front(n);
-    d *= n;
-  }
+  _cp_ptr = libmesh_make_unique<const StochasticTools::CartesianProduct>(grid_items);
+  setNumberOfRows(_cp_ptr->numRows());
+  setNumberOfCols(_cp_ptr->numCols());
 }
 
 Real
 CartesianProductSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  return _grid_items[col_index][(row_index / _denomenators[col_index]) % _moduli[col_index]];
+  return _cp_ptr->computeValue(row_index, col_index);
 }

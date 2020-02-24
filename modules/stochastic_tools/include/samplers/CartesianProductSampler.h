@@ -10,15 +10,14 @@
 #pragma once
 
 #include "Sampler.h"
+#include "CartesianProduct.h"
 
 class CartesianProductSampler;
 template <>
 InputParameters validParams<CartesianProductSampler>();
 
 /**
- * Creates samples based on the Cartesian product
- * http://phrogz.net/lazy-cartesian-product
- * https://github.com/iamtheburd/lazy-cartesian-product-python/blob/master/LazyCartesianProduct.py
+ * Creates samples based on the Cartesian product, see CartesianProduct in utils.
  */
 class CartesianProductSampler : public Sampler
 {
@@ -31,13 +30,7 @@ protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
-  /// Setup the necessary data for computing the lazy Cartesian product
-  virtual void sampleSetUp() override;
-
-  /// Data used to create Cartesian product
-  std::vector<std::vector<Real>> _grid_items;
-
-  // Containers for lazy Cartesian product calculation
-  std::deque<unsigned int> _denomenators;
-  std::deque<unsigned int> _moduli;
+  // Helper object for computing the CartesianProcduct values; this is a pointer because it cannot
+  // be created until the grid vectors are assembled from the input parameters.
+  std::unique_ptr<const StochasticTools::CartesianProduct> _cp_ptr = nullptr;
 };

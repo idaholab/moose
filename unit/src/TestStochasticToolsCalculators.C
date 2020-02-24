@@ -14,7 +14,7 @@
 
 using namespace StochasticTools;
 
-TEST(Calculators, stats)
+TEST(StochasticTools, Calculators)
 {
   const std::vector<Real> x = {6, 1, 7, 3, 4, 5, 2};
   Parallel::Communicator comm;
