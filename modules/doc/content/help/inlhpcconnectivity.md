@@ -7,7 +7,7 @@ INL's internal network.
 
 ### SSH Config
 
-Edit your `~/.ssh/config` file and add the commands to proxy calls to internal INL sites. 
+Edit your `~/.ssh/config` file and add the commands to proxy calls to internal INL sites.
 
 For MacOS add the following content:
 
@@ -89,6 +89,7 @@ able to create a Fork of that repository (using the
 [https://hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov) web site)
 
 To clone the repository you just forked:
+
 ```bash
 git clone git@hpcgitlab.hpc.inl.gov:<your user id>/<project>.git
 ```
