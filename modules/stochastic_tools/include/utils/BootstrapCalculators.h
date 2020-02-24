@@ -40,18 +40,29 @@ std::unique_ptr<const BootstrapCalculator> makeBootstrapCalculator(const MooseEn
 /*
  * Base class for computing bootstrap confidence level intervals. These classes follow the same
  * design pattern as those Statistics.h.
+ * @param other ParallelObject that is providing the Communicator
+ * @param levels The bootstrap confidence level intervals to compute in range (0, 1)
+ * @param replicates Number of bootstrap replicates to perform
+ * @param seed Seed for random number generator
  */
 class BootstrapCalculator : public libMesh::ParallelObject
 {
 public:
-  BootstrapCalculator(const libMesh::ParallelObject &,
-                      const std::vector<Real> &,
-                      unsigned int,
-                      unsigned int);
+  BootstrapCalculator(const libMesh::ParallelObject & other,
+                      const std::vector<Real> & levels,
+                      unsigned int replicates,
+                      unsigned int seed);
   virtual ~BootstrapCalculator() = default;
 
-  virtual std::vector<Real>
-  compute(const std::vector<Real> &, const Calculator &, const bool) const = 0;
+  /*
+   * Compute the bootstrap confidence level intervals.
+   * @param data Vector of data from which statistics are to be computed
+   * @param calc Calculator object defining the statistic to be computed
+   * @param is_distributed Flag indicating if the data is distributed in parallel
+   */
+  virtual std::vector<Real> compute(const std::vector<Real> & data,
+                                    const Calculator & calc,
+                                    const bool is_distributed) const = 0;
 
 protected:
   // Compute Bootstrap estimates of a statistic
@@ -77,10 +88,10 @@ protected:
 class Percentile : public BootstrapCalculator
 {
 public:
-  Percentile(const libMesh::ParallelObject &,
-             const std::vector<Real> &,
-             unsigned int,
-             unsigned int);
+  Percentile(const libMesh::ParallelObject & other,
+             const std::vector<Real> & levels,
+             unsigned int replicates,
+             unsigned int seed);
 
   virtual std::vector<Real>
   compute(const std::vector<Real> &, const Calculator &, const bool) const override;
@@ -92,10 +103,10 @@ public:
 class BiasCorrectedAccelerated : public BootstrapCalculator
 {
 public:
-  BiasCorrectedAccelerated(const libMesh::ParallelObject &,
-                           const std::vector<Real> &,
-                           unsigned int,
-                           unsigned int);
+  BiasCorrectedAccelerated(const libMesh::ParallelObject & other,
+                           const std::vector<Real> & levels,
+                           unsigned int replicates,
+                           unsigned int seed);
 
   virtual std::vector<Real>
   compute(const std::vector<Real> &, const Calculator &, const bool) const override;
