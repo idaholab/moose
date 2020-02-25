@@ -34,6 +34,8 @@
     slave = leftright
     quadrature = true
     master = rightleft
+    emissivity_master = 0
+    emissivity_slave = 0
     variable = temp
     type = GapHeatTransfer
   [../]

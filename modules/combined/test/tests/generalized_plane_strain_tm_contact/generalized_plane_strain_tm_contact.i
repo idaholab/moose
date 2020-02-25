@@ -209,6 +209,8 @@
     type = GapHeatTransfer
     master = 8
     slave = 2
+    emissivity_master = 0
+    emissivity_slave = 0
     variable = temp
     tangential_tolerance = .1
     normal_smoothing_distance = .1

@@ -65,6 +65,8 @@
     variable = temp
     master = rightleft
     slave = leftright
+    emissivity_master = 0
+    emissivity_slave = 0
     quadrature = true
   [../]
 []

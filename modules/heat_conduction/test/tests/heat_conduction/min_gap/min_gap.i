@@ -139,6 +139,8 @@
     variable = temp
     min_gap = 1
     min_gap_order = 1
+    emissivity_master = 0
+    emissivity_slave = 0
     type = GapHeatTransfer
   [../]
 []

@@ -58,6 +58,8 @@
     variable = temp
     master = 4
     slave = 5
+    emissivity_master = 0
+    emissivity_slave = 0
     gap_conductivity = 1e4
     quadrature = true
   [../]
