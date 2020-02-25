@@ -1,5 +1,5 @@
 [Tests]
-  issues = '12903'
+  issues = '#12903'
   design = 'source/bcs/ADPenaltyDirichletBC.md source/bcs/ADFunctionPenaltyDirichletBC.md'
   [./ad]
     requirement = 'The system shall support the application of Dirichlet type boundary conditions using the penalty method using the AD system'
@@ -12,6 +12,7 @@
     [./penalty_dirichlet_bc_test-jac]
       type = 'PetscJacobianTester'
       input = 'penalty_dirichlet_bc_test.i'
+      prereq = 'ad/penalty_dirichlet_bc_test'
       run_sim = False
       difference_tol = 5e-8
       method = 'opt'
@@ -30,6 +31,7 @@
     [./function_penalty_dirichlet_bc_test-jac]
       type = 'PetscJacobianTester'
       input = 'function_penalty_dirichlet_bc_test.i'
+      prereq = 'ad/function_penalty_dirichlet_bc_test'
       run_sim = False
       ratio_tol = 5e-8
       difference_tol = 0.1
