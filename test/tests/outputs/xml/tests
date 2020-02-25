@@ -28,8 +28,9 @@
   [iterations]
     requirement = "The system shall support XML output for vector data during nonlinear solve."
 
-    type = XMLDiff
+    type = CheckFiles
     input = xml_iterations.i
-    xmldiff = xml_iterations_out.xml
+    check_files = xml_iterations_out.xml
+    file_expect_out = 'linear_iteration="1" nonlinear_iteration="1"'
   []
 []
