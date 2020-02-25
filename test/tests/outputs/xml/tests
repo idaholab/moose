@@ -31,6 +31,6 @@
     type = CheckFiles
     input = xml_iterations.i
     check_files = xml_iterations_out.xml
-    file_expect_out = 'linear_iteration="1" nonlinear_iteration="1"'
+    file_expect_out = 'linear_iteration="1" nonlinear_iteration="0"'
   []
 []
