@@ -244,10 +244,11 @@ BiasCorrectedAccelerated::acceleration(const std::vector<Real> & data,
   Real count = data.size();
 
   // Compute jackknife estimates, Ch. 11, Eq. 11.2, p. 141
+  std::vector<Real> data_not_i(data.size() - 1);
   for (std::size_t i = 0; i < count; ++i)
   {
-    std::vector<Real> data_not_i = data;
-    data_not_i.erase(data_not_i.begin() + i);
+    std::copy(data.begin(), data.begin() + i, data_not_i.begin());
+    std::copy(data.begin() + i + 1, data.end(), data_not_i.begin() + i);
     theta_i[i] = calc.compute(data_not_i, is_distributed);
   }
 
@@ -263,6 +264,8 @@ BiasCorrectedAccelerated::acceleration(const std::vector<Real> & data,
     numerator += std::pow(theta_dot - jk, 3);
     denomenator += std::pow(theta_dot - jk, 2);
   }
+
+  mooseAssert(denomenator != 0, "The acceleration denomenator must not be zero.");
   return numerator / (6 * std::pow(denomenator, 3. / 2.));
 }
 } // namespace
