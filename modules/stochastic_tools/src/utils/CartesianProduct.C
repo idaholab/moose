@@ -74,4 +74,31 @@ CartesianProduct::computeRowCount(const std::vector<std::vector<Real>> & items)
   return n_rows;
 }
 
+WeightedCartesianProduct::WeightedCartesianProduct(const std::vector<std::vector<Real>> & items,
+                                                   const std::vector<std::vector<Real>> & weights)
+  : CartesianProduct(items), _weight(weights)
+{
+  mooseAssert(items.size() == weights.size(),
+              "The supplied items and weights must be the same size.");
+  for (std::size_t i = 0; i < items.size(); ++i)
+    mooseAssert(items[i].size() == weights[i].size(),
+                "Internal vector of the supplied items and weights must be the same size.");
+}
+
+std::vector<Real>
+WeightedCartesianProduct::computeWeightVector() const
+{
+  std::vector<Real> output(_n_rows);
+  for (std::size_t i = 0; i < output.size(); ++i)
+    output[i] = computeWeight(i);
+  return output;
+}
+
+Real
+WeightedCartesianProduct::computeWeight(std::size_t row) const
+{
+  std::vector<Real> vec = _weight.computeRow(row);
+  return std::accumulate(vec.begin(), vec.end(), 1, std::multiplies<Real>());
+}
+
 } // namespace

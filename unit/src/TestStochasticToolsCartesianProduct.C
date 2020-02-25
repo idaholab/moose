@@ -65,3 +65,30 @@ TEST(StochasticTools, CartesianProduct)
         EXPECT_EQ(cp.computeValue(row, col), gold[row][col]);
   }
 }
+
+TEST(StochasticTools, WeightedCartesianProduct)
+{
+  const std::vector<Real> gold = {
+      1 * 10 * 100, 1 * 10 * 110, 1 * 11 * 100, 1 * 11 * 110, 1 * 12 * 100, 1 * 12 * 110,
+      2 * 10 * 100, 2 * 10 * 110, 2 * 11 * 100, 2 * 11 * 110, 2 * 12 * 100, 2 * 12 * 110,
+      3 * 10 * 100, 3 * 10 * 110, 3 * 11 * 100, 3 * 11 * 110, 3 * 12 * 100, 3 * 12 * 110,
+      4 * 10 * 100, 4 * 10 * 110, 4 * 11 * 100, 4 * 11 * 110, 4 * 12 * 100, 4 * 12 * 110};
+
+  const std::vector<std::vector<Real>> x = {{2, 4, 8, 16}, {3, 9, 27}, {4, 16}};
+  const std::vector<std::vector<Real>> w = {{1, 2, 3, 4}, {10, 11, 12}, {100, 110}};
+
+  const WeightedCartesianProduct wcp(x, w);
+
+  EXPECT_EQ(wcp.numRows(), 24);
+  EXPECT_EQ(wcp.numCols(), 3);
+
+  {
+    auto out = wcp.computeWeightVector();
+    EXPECT_EQ(out, gold);
+  }
+
+  {
+    for (std::size_t row = 0; row < wcp.numRows(); ++row)
+      EXPECT_EQ(wcp.computeWeight(row), gold[row]);
+  }
+}

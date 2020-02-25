@@ -57,4 +57,25 @@ private:
   // Helper to compute the rows in initialization list to allow _n_rows to be const
   static std::size_t computeRowCount(const std::vector<std::vector<Real>> & items);
 };
+
+/*
+ * Add ability to compute weighting values with the Cartesian Product
+ */
+class WeightedCartesianProduct : public CartesianProduct
+{
+public:
+  WeightedCartesianProduct(const std::vector<std::vector<Real>> & items,
+                           const std::vector<std::vector<Real>> & weights);
+
+  // Compute complete vector of weights
+  std::vector<Real> computeWeightVector() const;
+
+  // Compute specific weight value, given row
+  Real computeWeight(std::size_t row) const;
+
+private:
+  // Data used to create Cartesian product; use a copy because a temporary can be supplied
+  const CartesianProduct _weight;
+};
+
 } // namespace
