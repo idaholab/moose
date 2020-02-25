@@ -89,7 +89,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   nl_rel_tol = 1e-14
 []
 
