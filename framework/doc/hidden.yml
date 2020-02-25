@@ -35,7 +35,6 @@
 - /BCs
 - /BCs/AddBCAction
 - /BCs/DGFunctionDiffusionDirichletBC
-- /BCs/FunctionPenaltyDirichletBC
 - /BCs/OneDEqualValueConstraintBC
 - /BCs/PostprocessorDirichletBC
 - /BCs/PostprocessorNeumannBC

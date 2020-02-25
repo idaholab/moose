@@ -18,6 +18,10 @@ InputParameters
 FunctionPenaltyDirichletBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params.addClassDescription(
+      "Enforces a (possibly) time and space-dependent MOOSE Function Dirichlet boundary condition "
+      "in a weak sense by penalizing differences between the current "
+      "solution and the Dirichlet data.");
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addRequiredParam<FunctionName>("function", "Forcing function");
 
