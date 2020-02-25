@@ -129,7 +129,7 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
         return std::min(a, b);
     }
   }
-  return 0;
+  return _u_slave[_qp];
 }
 
 // Note that the Jacobians below are inexact. To really make them exact, the most algorithmically
@@ -156,7 +156,7 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
         return std::min(a, b).derivatives();
     }
   }
-  return 0;
+  return 1;
 }
 
 Real
