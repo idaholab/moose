@@ -7,32 +7,15 @@ the `run_tests` script and how to create your own tests.
 The ideas behind testing are described over the in the [MOOSE Test System](test_system.md)
 documentation.
 
-# Testers
-
-Testers represent individual tests in MOOSE. Testers encompass a set of instructions for performing
-a task and then verifying the result. There are several built-in testers in the framework but the
-Tester system is completely pluggable and extendable. The list of default testers is listed here:
-
-[RunApp](RunApp.md)
-Exodiff
-CSVDiff
-[CSVValidationTester](CSVValidationTester.md)
-FileTester
-AnalyzeJacobian
-CheckFiles
-ImageDiff
-PetscJacobianTester
-RunCommand
-RunException
-VTKDiff
-
 ## run_tests
 
 `run_tests` is a small Python script that can be found in every MOOSE-based application and in the
 framework itself (under `moose/test`).  The `run_tests` script will find tests and run them with your
-compiled binary for your app.
+compiled binary for your app. There is also a `run_tests` script in the `moose/scripts` which you may
+consider adding to your system PATH to conveniently run tests in any directory containing test specification
+files.
 
-### Basic Usage
+## Basic Usage
 
 To run the tests for any application, make sure the executable is built (generally by running `make`
 see the [Build System](build_system.md)) and then do:
@@ -44,17 +27,18 @@ see the [Build System](build_system.md)) and then do:
 There are many options for `run_tests`, but the `-j` option shown above is by far the most widely
 used.  It tells the `run_tests` script how many processors to utilize on your local machine for
 running tests concurrently.  Put the correct number there (instead of 8). The script will then go
-find and run your tests and display the results.
+find and run your tests and display the results. More detail on concurrency can be found
+[below](TestHarness.md#parallel).
 
-### More Options id=moreoptions
+## More Options id=moreoptions
 
 To see more options for `run_tests` you can invoke it with `-h`.  There are many options to look
 through, but some of the important ones are:
 
-- `--failed-tests`: Runs the tests that just failed.  Note: as long as you keep using the
-  `--failed-tests` option the set of failed tests will not change.
-- `--n-threads #`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
-- `-p #`: Causes the tests to run with `#` MPI processes.  Useful for guaranteeing that you get the
+- `--failed-tests`: Runs the tests that just failed.  Note: as long as you keep using this
+  option the set of failed tests will not change.
+- `--n-threads <n>`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
+- `-p <n>`: Causes the tests to run with `#` MPI processes.  Useful for guaranteeing that you get the
   same result in parallel!
 - `--valgrind`: Run all of the tests with the [Valgrind](http://valgrind.org) utility.  Does
   extensive memory checking to catch segfaults and uninitialized memory errors.
@@ -85,7 +69,71 @@ development.  Instead, developers should periodically run their tests with `--er
 see if any of their tests are using deprecated code / parameters and then fix them up at that point.
 The MOOSE team is not responsible for fixing deprecated code.
 
-## Influential Environment Variables id=environment
+# Testers
+
+Testers represent individual tests in MOOSE. Testers encompass a set of instructions for performing
+a task and then verifying the result. There are several built-in testers in the framework but the
+Tester system is completely pluggable and extendable. The list of default testers is listed here:
+
+- [RunApp](RunApp.md)
+- Exodiff
+- CSVDiff
+- [CSVValidationTester](CSVValidationTester.md)
+- FileTester
+- AnalyzeJacobian
+- CheckFiles
+- ImageDiff
+- PetscJacobianTester
+- RunCommand
+- RunException
+- VTKDiff
+
+## Test Specifications
+
+Tests are controlled by creating "test specification" files. By default, the TestHarness searches
+a directory tree for files named "tests" (no extension). These files use the standard HIT syntax
+that MOOSE [uses](/application_usage/input_syntax.html optional=True). An example is given below:
+
+!listing moose/test/tests/kernels/simple_diffusion/tests
+
+## Parallel Test Execution id=parallel
+
+The TestHarness is designed to schedule several tests (jobs) concurrently. The `-j <n>` option to the
+run_tests script determines the numbers of available "slots" that may be used for testing. For maximum
+utilization of a given machine, this number should be set to the number of cores available on the system.
+The TestHarness will not oversubscribe a machine. When running with different combinations of parallel or
+threaded testing, each job will consume multiple slots (e.g. A test running with 2 MPI processes and 2 threads
+would consume 4 jobs slots).
+
+To reduce the chance of tests in the same directory from writing to one or more of the same output or checkpoint
+files concurrently, the TestHarness normally only schedules a single job from a single directory (test specification)
+at a time. Concurrency is achieved by scheduling several tests from different directories at the same time.
+It is possible however to tell the TestHarness that tests from the same directory should be scheduled at the same
+time by using the parallel_scheduling syntax (shown below). Care should be taken when using this parameter to
+avoid race conditions with file output. Extensive use of this parameter is discouraged. It should be used in
+places where splitting up tests into separate folders is cumbersome, or splits of several related tests.
+
+```
+[Tests]
+  parallel_scheduling = True
+
+  [test1]
+     ...
+  []
+  [test2]
+     ...
+  []
+  [test3]
+     ...
+  []
+[]
+```
+
+!alert note
+The "prereq" parameter is still honored when using "parallel_scheduling = True".
+
+
+# Influential Environment Variables id=environment
 
 #### PYTHONPATH
 
