@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DistributedGeneratedMesh.h"
+#include "DistributedRectilinearMeshGenerator.h"
 
 #include "SerializerGuard.h"
 
@@ -16,8 +16,6 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/unstructured_mesh.h"
-#include "libmesh/partitioner.h"
-#include "libmesh/metis_csr_graph.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
@@ -25,41 +23,32 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
-#include "libmesh/parmetis_helper.h"
+#include "libmesh/partitioner.h"
+
+// TIMPI includes
+#include "timpi/communicator.h"
+#include "timpi/parallel_sync.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
-#ifdef LIBMESH_HAVE_METIS
-// MIPSPro 7.4.2 gets confused about these nested namespaces
-#ifdef __sgi
-#include <cstdarg>
-#endif
-namespace Metis
-{
-extern "C" {
-#include "libmesh/ignore_warnings.h"
-#include "metis.h"
-#include "libmesh/restore_warnings.h"
-}
-}
-#else
-#include "libmesh/sfc_partitioner.h"
-#endif
+registerMooseObject("MooseApp", DistributedRectilinearMeshGenerator);
 
-registerMooseObject("MooseApp", DistributedGeneratedMesh);
 
-template <>
 InputParameters
-validParams<DistributedGeneratedMesh>()
+DistributedRectilinearMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MeshGenerator::validParams();
 
   params.addParam<bool>("verbose", false, "Turn on verbose printing for the mesh generation");
 
-  MooseEnum elem_types(
-      "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
-      "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
+  MooseEnum partPackage("parmetis ptscotch hierarch", "parmetis", false);
+
+  params.addParam<MooseEnum>("part_package",
+                              partPackage,
+                             "The external package is used for partitioning the mesh via PETSc");
+
+  params.addParam<dof_id_type>("num_cores_per_compute_node", 1, "Number of cores per compute node for hierarchical partitioning");
 
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>(
@@ -74,11 +63,16 @@ validParams<DistributedGeneratedMesh>()
   params.addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh");
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
+
+  MooseEnum elem_types(
+      "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
+      "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
   params.addParam<MooseEnum>("elem_type",
                              elem_types,
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
+
   params.addRangeCheckedParam<Real>(
       "bias_x",
       1.,
@@ -100,303 +94,32 @@ validParams<DistributedGeneratedMesh>()
   params.addClassDescription(
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
 
-  // This mesh is always distributed
-  params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
-
   return params;
 }
 
-DistributedGeneratedMesh::DistributedGeneratedMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
+DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(const InputParameters & parameters)
+  : MeshGenerator(parameters),
     _verbose(getParam<bool>("verbose")),
     _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<dof_id_type>("nx")),
-    _ny(getParam<dof_id_type>("ny")),
-    _nz(getParam<dof_id_type>("nz")),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
+    _nx(declareMeshProperty("num_elements_x", getParam<unsigned int>("nx"))),
+    _ny(declareMeshProperty("num_elements_y", getParam<unsigned int>("ny"))),
+    _nz(declareMeshProperty("num_elements_z", getParam<unsigned int>("nz"))),
+    _xmin(declareMeshProperty("xmin", getParam<Real>("xmin"))),
+    _xmax(declareMeshProperty("xmax", getParam<Real>("xmax"))),
+    _ymin(declareMeshProperty("ymin", getParam<Real>("ymin"))),
+    _ymax(declareMeshProperty("ymax", getParam<Real>("ymax"))),
+    _zmin(declareMeshProperty("zmin", getParam<Real>("zmin"))),
+    _zmax(declareMeshProperty("zmax", getParam<Real>("zmax"))),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
+    _bias_z(getParam<Real>("bias_z")),
+    _part_package(getParam<MooseEnum>("part_package"))
 {
-  // All generated meshes are regular orthogonal meshes
-  _regular_orthogonal_mesh = true;
-}
-
-Real
-DistributedGeneratedMesh::getMinInDimension(dof_id_type component) const
-{
-  switch (component)
-  {
-    case 0:
-      return _xmin;
-    case 1:
-      return _dim > 1 ? _ymin : 0;
-    case 2:
-      return _dim > 2 ? _zmin : 0;
-    default:
-      mooseError("Invalid component");
-  }
-}
-
-Real
-DistributedGeneratedMesh::getMaxInDimension(dof_id_type component) const
-{
-  switch (component)
-  {
-    case 0:
-      return _xmax;
-    case 1:
-      return _dim > 1 ? _ymax : 0;
-    case 2:
-      return _dim > 2 ? _zmax : 0;
-    default:
-      mooseError("Invalid component");
-  }
-}
-
-MooseMesh &
-DistributedGeneratedMesh::clone() const
-{
-  return *(new DistributedGeneratedMesh(*this));
-}
-
-namespace
-{
-
-/**
- * Get the element ID for a given hex
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param i The x index of this element
- * @param j The y index of this element
- * @param k The z index of this element
- * @return The ID of the i,j element
- */
-template <typename T>
-inline dof_id_type
-elem_id(const dof_id_type /*nx*/,
-        const dof_id_type /*ny*/,
-        const dof_id_type /*i*/,
-        const dof_id_type /*j*/,
-        const dof_id_type /*k*/)
-{
-  mooseError("elem_id not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Get the number of neighbors this element will have
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param nz The number of elements in the z direction
- * @param i The x index of this element
- * @param j The y index of this element
- * @param k The z index of this element
- * @return The number of neighboring elements
- */
-template <typename T>
-inline dof_id_type
-num_neighbors(const dof_id_type /*nx*/,
-              const dof_id_type /*ny*/,
-              const dof_id_type /*nz*/,
-              const dof_id_type /*i*/,
-              const dof_id_type /*j*/,
-              const dof_id_type /*k*/)
-{
-  mooseError("num_neighbors not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Get the IDs of the neighbors of a given element
- *
- * @param nx The number of elements in the x direction
- * @param nx The number of elements in the y direction
- * @param nz The number of elements in the z direction
- * @param i The x index of this element
- * @param j The y index of this element
- * @param k The z index of this element
- * @param neighbors This will be filled with the IDs of the two neighbors or invalid_dof_id if there
- * is no neighbor.  THIS MUST be of size 6 BEFORE calling this function
- */
-template <typename T>
-inline void
-get_neighbors(const dof_id_type /*nx*/,
-              const dof_id_type /*ny*/,
-              const dof_id_type /*nz*/,
-              const dof_id_type /*i*/,
-              const dof_id_type /*j*/,
-              const dof_id_type /*k*/,
-              std::vector<dof_id_type> & /*neighbors*/)
-{
-  mooseError("get_neighbors not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * The ID of the i,j,k node
- *
- * @param type The element type
- * @param nx The number of elements in the x direction
- * @param nx The number of elements in the y direction
- * @param nz The number of elements in the z direction
- * @param i The x index of this node
- * @param j The y index of this node
- * @param k The z index of this node
- */
-template <typename T>
-inline dof_id_type
-node_id(const ElemType /*type*/,
-        const dof_id_type /*nx*/,
-        const dof_id_type /*ny*/,
-        const dof_id_type /*i*/,
-        const dof_id_type /*j*/,
-        const dof_id_type /*k*/)
-{
-  mooseError("node_id not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Add a node to the mesh
- *
- * @param nx The number of elements in the x direction
- * @param nx The number of elements in the y direction
- * @param nz The number of elements in the z direction
- * @param i The x index of this node
- * @param j The y index of this node
- * @param k The z index of this node
- * @param type The element type
- * @param mesh The mesh to add it to
- */
-template <typename T>
-Node *
-add_point(const dof_id_type /*nx*/,
-          const dof_id_type /*ny*/,
-          const dof_id_type /*nz*/,
-          const dof_id_type /*i*/,
-          const dof_id_type /*j*/,
-          const dof_id_type /*k*/,
-          const ElemType /*type*/,
-          MeshBase & /*mesh*/)
-{
-  mooseError("add_point not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Adds an element to the mesh
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param nz The number of elements in the z direction
- * @param i The x index of this element
- * @param j The y index of this element
- * @param k The z index of this element
- * @param elem_id The element ID of the element to add
- * @param pid The processor ID to assign it to
- * @param type The type of element to add
- * @param mesh The mesh to add it to
- * @param verbose Whether or not to print out verbose statements
- */
-template <typename T>
-void
-add_element(const dof_id_type /*nx*/,
-            const dof_id_type /*ny*/,
-            const dof_id_type /*nz*/,
-            const dof_id_type /*i*/,
-            const dof_id_type /*j*/,
-            const dof_id_type /*k*/,
-            const dof_id_type /*elem_id*/,
-            const processor_id_type /*pid*/,
-            const ElemType /*type*/,
-            MeshBase & /*mesh*/,
-            bool /*verbose*/)
-{
-  mooseError("add_element not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Compute the i,j,k indices of a given element ID
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param elem_id The ID of the element
- * @param i Output: The index in the x direction
- * @param j Output: The index in the y direction
- * @param k Output: The index in the z direction
- */
-template <typename T>
-inline void
-get_indices(const dof_id_type /*nx*/,
-            const dof_id_type /*ny*/,
-            const dof_id_type /*elem_id*/,
-            dof_id_type & /*i*/,
-            dof_id_type & /*j*/,
-            dof_id_type & /*k*/)
-{
-  mooseError("get_indices not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Find the elements and sides that need ghost elements
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param mesh The mesh - without any ghost elements
- * @param ghost_elems The ghost elems that need to be added
- */
-template <typename T>
-inline void
-get_ghost_neighbors(const dof_id_type /*nx*/,
-                    const dof_id_type /*ny*/,
-                    const dof_id_type /*nz*/,
-                    const MeshBase & /*mesh*/,
-                    std::set<dof_id_type> & /*ghost_elems*/)
-{
-  mooseError(
-      "get_ghost_neighbors not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * Set the boundary names for any added boundary ideas
- *
- * @boundary_info The BoundaryInfo object to set the boundary names on
- */
-template <typename T>
-void
-set_boundary_names(BoundaryInfo & /*boundary_info*/)
-{
-  mooseError(
-      "set_boundary_names not implemented for this element type in DistributedGeneratedMesh");
-}
-
-/**
- * All meshes are generated on the unit square.  This function stretches the mesh
- * out to fill the correct area.
- */
-template <typename T>
-void
-scale_nodal_positions(dof_id_type /*nx*/,
-                      dof_id_type /*ny*/,
-                      dof_id_type /*nz*/,
-                      Real /*xmin*/,
-                      Real /*xmax*/,
-                      Real /*ymin*/,
-                      Real /*ymax*/,
-                      Real /*zmin*/,
-                      Real /*zmax*/,
-                      MeshBase & /*mesh*/)
-{
-  mooseError(
-      "scale_nodal_positions not implemented for this element type in DistributedGeneratedMesh");
 }
 
 template <>
 inline dof_id_type
-num_neighbors<Edge2>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::num_neighbors<Edge2>(const dof_id_type nx,
                      const dof_id_type /*ny*/,
                      const dof_id_type /*nz*/,
                      const dof_id_type i,
@@ -412,7 +135,7 @@ num_neighbors<Edge2>(const dof_id_type nx,
 
 template <>
 inline void
-get_neighbors<Edge2>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_neighbors<Edge2>(const dof_id_type nx,
                      const dof_id_type /*ny*/,
                      const dof_id_type /*nz*/,
                      const dof_id_type i,
@@ -435,7 +158,7 @@ get_neighbors<Edge2>(const dof_id_type nx,
 
 template <>
 inline void
-get_indices<Edge2>(const dof_id_type /*nx*/,
+DistributedRectilinearMeshGenerator::get_indices<Edge2>(const dof_id_type /*nx*/,
                    const dof_id_type /*ny*/,
                    const dof_id_type elem_id,
                    dof_id_type & i,
@@ -447,7 +170,7 @@ get_indices<Edge2>(const dof_id_type /*nx*/,
 
 template <>
 inline void
-get_ghost_neighbors<Edge2>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_ghost_neighbors<Edge2>(const dof_id_type nx,
                            const dof_id_type /*ny*/,
                            const dof_id_type /*nz*/,
                            const MeshBase & mesh,
@@ -478,7 +201,7 @@ get_ghost_neighbors<Edge2>(const dof_id_type nx,
 
 template <>
 inline dof_id_type
-elem_id<Edge2>(const dof_id_type /*nx*/,
+DistributedRectilinearMeshGenerator::elem_id<Edge2>(const dof_id_type /*nx*/,
                const dof_id_type /*ny*/,
                const dof_id_type i,
                const dof_id_type /*j*/,
@@ -489,7 +212,7 @@ elem_id<Edge2>(const dof_id_type /*nx*/,
 
 template <>
 void
-add_element<Edge2>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::add_element<Edge2>(const dof_id_type nx,
                    const dof_id_type /*ny*/,
                    const dof_id_type /*nz*/,
                    const dof_id_type /*i*/,
@@ -535,7 +258,7 @@ add_element<Edge2>(const dof_id_type nx,
 
 template <>
 void
-set_boundary_names<Edge2>(BoundaryInfo & boundary_info)
+DistributedRectilinearMeshGenerator::set_boundary_names<Edge2>(BoundaryInfo & boundary_info)
 {
   boundary_info.sideset_name(0) = "left";
   boundary_info.sideset_name(1) = "right";
@@ -543,7 +266,7 @@ set_boundary_names<Edge2>(BoundaryInfo & boundary_info)
 
 template <>
 void
-scale_nodal_positions<Edge2>(dof_id_type /*nx*/,
+DistributedRectilinearMeshGenerator::scale_nodal_positions<Edge2>(dof_id_type /*nx*/,
                              dof_id_type /*ny*/,
                              dof_id_type /*nz*/,
                              Real xmin,
@@ -560,7 +283,7 @@ scale_nodal_positions<Edge2>(dof_id_type /*nx*/,
 
 template <>
 inline dof_id_type
-num_neighbors<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::num_neighbors<Quad4>(const dof_id_type nx,
                      const dof_id_type ny,
                      const dof_id_type /*nz*/,
                      const dof_id_type i,
@@ -586,7 +309,7 @@ num_neighbors<Quad4>(const dof_id_type nx,
 
 template <>
 inline dof_id_type
-elem_id<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::elem_id<Quad4>(const dof_id_type nx,
                const dof_id_type /*nx*/,
                const dof_id_type i,
                const dof_id_type j,
@@ -597,7 +320,7 @@ elem_id<Quad4>(const dof_id_type nx,
 
 template <>
 inline void
-get_neighbors<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_neighbors<Quad4>(const dof_id_type nx,
                      const dof_id_type ny,
                      const dof_id_type /*nz*/,
                      const dof_id_type i,
@@ -626,7 +349,7 @@ get_neighbors<Quad4>(const dof_id_type nx,
 
 template <>
 inline void
-get_indices<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_indices<Quad4>(const dof_id_type nx,
                    const dof_id_type /*ny*/,
                    const dof_id_type elem_id,
                    dof_id_type & i,
@@ -639,7 +362,7 @@ get_indices<Quad4>(const dof_id_type nx,
 
 template <>
 inline void
-get_ghost_neighbors<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_ghost_neighbors<Quad4>(const dof_id_type nx,
                            const dof_id_type ny,
                            const dof_id_type /*nz*/,
                            const MeshBase & mesh,
@@ -676,7 +399,7 @@ get_ghost_neighbors<Quad4>(const dof_id_type nx,
 
 template <>
 inline dof_id_type
-node_id<Quad4>(const ElemType /*type*/,
+DistributedRectilinearMeshGenerator::node_id<Quad4>(const ElemType /*type*/,
                const dof_id_type nx,
                const dof_id_type /*ny*/,
                const dof_id_type i,
@@ -689,7 +412,7 @@ node_id<Quad4>(const ElemType /*type*/,
 
 template <>
 void
-add_element<Quad4>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::add_element<Quad4>(const dof_id_type nx,
                    const dof_id_type ny,
                    const dof_id_type /*nz*/,
                    const dof_id_type i,
@@ -758,7 +481,7 @@ add_element<Quad4>(const dof_id_type nx,
 
 template <>
 void
-set_boundary_names<Quad4>(BoundaryInfo & boundary_info)
+DistributedRectilinearMeshGenerator::set_boundary_names<Quad4>(BoundaryInfo & boundary_info)
 {
   boundary_info.sideset_name(0) = "bottom";
   boundary_info.sideset_name(1) = "right";
@@ -768,7 +491,7 @@ set_boundary_names<Quad4>(BoundaryInfo & boundary_info)
 
 template <>
 void
-scale_nodal_positions<Quad4>(dof_id_type /*nx*/,
+DistributedRectilinearMeshGenerator::scale_nodal_positions<Quad4>(dof_id_type /*nx*/,
                              dof_id_type /*ny*/,
                              dof_id_type /*nz*/,
                              Real xmin,
@@ -788,7 +511,7 @@ scale_nodal_positions<Quad4>(dof_id_type /*nx*/,
 
 template <>
 inline dof_id_type
-elem_id<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::elem_id<Hex8>(const dof_id_type nx,
               const dof_id_type ny,
               const dof_id_type i,
               const dof_id_type j,
@@ -799,7 +522,7 @@ elem_id<Hex8>(const dof_id_type nx,
 
 template <>
 inline dof_id_type
-num_neighbors<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::num_neighbors<Hex8>(const dof_id_type nx,
                     const dof_id_type ny,
                     const dof_id_type nz,
                     const dof_id_type i,
@@ -831,7 +554,7 @@ num_neighbors<Hex8>(const dof_id_type nx,
 
 template <>
 inline void
-get_neighbors<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_neighbors<Hex8>(const dof_id_type nx,
                     const dof_id_type ny,
                     const dof_id_type nz,
                     const dof_id_type i,
@@ -868,7 +591,7 @@ get_neighbors<Hex8>(const dof_id_type nx,
 
 template <>
 inline dof_id_type
-node_id<Hex8>(const ElemType /*type*/,
+DistributedRectilinearMeshGenerator::node_id<Hex8>(const ElemType /*type*/,
               const dof_id_type nx,
               const dof_id_type ny,
               const dof_id_type i,
@@ -880,7 +603,7 @@ node_id<Hex8>(const ElemType /*type*/,
 
 template <>
 Node *
-add_point<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::add_point<Hex8>(const dof_id_type nx,
                 const dof_id_type ny,
                 const dof_id_type nz,
                 const dof_id_type i,
@@ -899,7 +622,7 @@ add_point<Hex8>(const dof_id_type nx,
 
 template <>
 void
-add_element<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::add_element<Hex8>(const dof_id_type nx,
                   const dof_id_type ny,
                   const dof_id_type nz,
                   const dof_id_type i,
@@ -964,7 +687,7 @@ add_element<Hex8>(const dof_id_type nx,
 
 template <>
 inline void
-get_indices<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_indices<Hex8>(const dof_id_type nx,
                   const dof_id_type ny,
                   const dof_id_type elem_id,
                   dof_id_type & i,
@@ -978,7 +701,7 @@ get_indices<Hex8>(const dof_id_type nx,
 
 template <>
 inline void
-get_ghost_neighbors<Hex8>(const dof_id_type nx,
+DistributedRectilinearMeshGenerator::get_ghost_neighbors<Hex8>(const dof_id_type nx,
                           const dof_id_type ny,
                           const dof_id_type nz,
                           const MeshBase & mesh,
@@ -1015,7 +738,7 @@ get_ghost_neighbors<Hex8>(const dof_id_type nx,
 
 template <>
 void
-set_boundary_names<Hex8>(BoundaryInfo & boundary_info)
+DistributedRectilinearMeshGenerator::set_boundary_names<Hex8>(BoundaryInfo & boundary_info)
 {
   boundary_info.sideset_name(0) = "back";
   boundary_info.sideset_name(1) = "bottom";
@@ -1027,7 +750,7 @@ set_boundary_names<Hex8>(BoundaryInfo & boundary_info)
 
 template <>
 void
-scale_nodal_positions<Hex8>(dof_id_type /*nx*/,
+DistributedRectilinearMeshGenerator::scale_nodal_positions<Hex8>(dof_id_type /*nx*/,
                             dof_id_type /*ny*/,
                             dof_id_type /*nz*/,
                             Real xmin,
@@ -1045,11 +768,10 @@ scale_nodal_positions<Hex8>(dof_id_type /*nx*/,
     (*node_ptr)(2) = (*node_ptr)(2) * (zmax - zmin) + zmin;
   }
 }
-}
 
 template <typename T>
 void
-build_cube(UnstructuredMesh & mesh,
+DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
            const unsigned int nx,
            unsigned int ny,
            unsigned int nz,
@@ -1062,6 +784,7 @@ build_cube(UnstructuredMesh & mesh,
            const ElemType type,
            bool verbose)
 {
+#ifdef LIBMESH_HAVE_PETSC
   if (verbose)
     Moose::out << "nx: " << nx << "\n ny: " << ny << "\n nz: " << nz << std::endl;
 
@@ -1080,87 +803,57 @@ build_cube(UnstructuredMesh & mesh,
   auto & comm = mesh.comm();
 
   dof_id_type num_elems = nx * ny * nz;
+
+  if (verbose)
+    Moose::out << "num elems: " << num_elems << std::endl;
+
   const auto num_procs = comm.size();
+  // Current processor ID
   const auto pid = comm.rank();
 
   auto & boundary_info = mesh.get_boundary_info();
-
-  auto elem_tag = comm.get_unique_tag(934);
-  auto ghost_request_tag = comm.get_unique_tag(832);
-  auto ghost_response_tag = comm.get_unique_tag(821);
 
   std::unique_ptr<Elem> canonical_elem = libmesh_make_unique<T>();
 
   // Will get used to find the neighbors of an element
   std::vector<dof_id_type> neighbors(canonical_elem->n_neighbors());
+  // Number of neighbors
+  dof_id_type n_neighbors = canonical_elem->n_neighbors();
+
+  if (verbose)
+    Moose::out << "num neighbors: " << n_neighbors << std::endl;
 
   // "Partition" the elements linearly across the processors
   dof_id_type num_local_elems;
   dof_id_type local_elems_begin;
   dof_id_type local_elems_end;
-  MooseUtils::linearPartitionItems(
-      num_elems, num_procs, pid, num_local_elems, local_elems_begin, local_elems_end);
+  MooseUtils::linearPartitionItems(num_elems, num_procs, pid, num_local_elems, local_elems_begin, local_elems_end);
 
-  std::unique_ptr<ParmetisHelper> pmetis = libmesh_make_unique<ParmetisHelper>();
+  PetscInt *xadj, *adjncy;
+  const PetscInt * parts;
+  PetscErrorCode ierr;
+  Mat dual;
+  MatPartitioning part;
+  IS partition, my_new_elems;
 
-  // Set parameters.
-  pmetis->wgtflag = 2;                                      // weights on vertices only
-  pmetis->ncon = 1;                                         // one weight per vertex
-  pmetis->numflag = 0;                                      // C-style 0-based numbering
-  pmetis->nparts = static_cast<Parmetis::idx_t>(num_procs); // number of subdomains to create
-  pmetis->edgecut = 0;                                      // the numbers of edges cut by the
-                                                            // partition
-  // Initialize data structures for ParMETIS
-  pmetis->xadj.assign(num_local_elems + 1, 0);
-  // Size this to the max it can be
-  pmetis->adjncy.assign((num_local_elems * canonical_elem->n_neighbors()), 0);
-  pmetis->vtxdist.assign(num_procs + 1, 0);
-  pmetis->tpwgts.assign(pmetis->nparts, 1. / pmetis->nparts);
-  pmetis->ubvec.assign(pmetis->ncon, 1.05);
-  pmetis->part.assign(num_local_elems, 0);
-  pmetis->options.resize(5);
-  pmetis->vwgt.assign(num_local_elems, canonical_elem->n_nodes());
+  if (verbose)
+    Moose::out << "num local elements: " << num_local_elems << std::endl;
 
-  // Set the options
-  pmetis->options[0] = 1;  // don't use default options
-  pmetis->options[1] = 0;  // default (level of timing)
-  pmetis->options[2] = 15; // random seed (defaul)t
-  pmetis->options[3] = 2;  // processor distribution and subdomain distribution are decoupled
+  // We are going to build a dual graph
+  ierr = PetscCalloc1(num_local_elems + 1, &xadj);
+  CHKERRABORT(comm.get(), ierr);
 
-  // Fill vtxdist.  These are the bin edges of the ranges current on each proc
-  // Note that this was resized to "num_procs + 1" up above
-  auto & vtxdist = pmetis->vtxdist;
-  for (processor_id_type p = 0; p < num_procs; p++)
-  {
-    dof_id_type t_num_local_elems;
-    dof_id_type t_local_elems_begin;
-    dof_id_type t_local_elems_end;
-    MooseUtils::linearPartitionItems(
-        num_elems, num_procs, p, t_num_local_elems, t_local_elems_begin, t_local_elems_end);
-
-    vtxdist[p] = t_local_elems_begin;
-
-    if (verbose)
-      Moose::out << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
-
-    // The last one needs to fill in the final entry too
-    if (p == num_procs - 1)
-      vtxdist[p + 1] = t_local_elems_end;
-  }
+  ierr = PetscCalloc1(num_local_elems*n_neighbors, &adjncy);
+  CHKERRABORT(comm.get(), ierr);
 
   // Fill in xadj and adjncy
   // xadj is the offset into adjncy
   // adjncy are the face neighbors of each element on this processor
-  auto & xadj = pmetis->xadj;
-  auto & adjncy = pmetis->adjncy;
-
-  dof_id_type local_elem = 0;
   dof_id_type offset = 0;
-
-  for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
+  xadj[0] = 0;
+  // Build a distributed graph
+  for (dof_id_type e_id = local_elems_begin, num_local_elems = 0; e_id < local_elems_end; e_id++)
   {
-    xadj[local_elem] = offset;
-
     dof_id_type i, j, k;
 
     get_indices<T>(nx, ny, e_id, i, j, k);
@@ -1178,195 +871,62 @@ build_cube(UnstructuredMesh & mesh,
       if (neighbor != Elem::invalid_id)
         adjncy[offset++] = neighbor;
     }
-
-    local_elem++;
+    // Increase offset, and go to next element
+    xadj[++num_local_elems] = offset;
   }
+  // Create a graph matrix and partitioning context
+  ierr = MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, nullptr, &dual);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningCreate(mesh.comm().get(), &part);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningSetAdjacency(part, dual);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatDestroy(&dual);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningSetNParts(part, num_procs);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningSetType(part, _part_package.c_str());
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningSetFromOptions(part);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningApply(part, &partition);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = MatPartitioningDestroy(&part);
+  CHKERRABORT(comm.get(), ierr);
+  // Grab my new elements based on partition
+  ierr = ISBuildTwoSided(partition,nullptr,&my_new_elems);
+  CHKERRABORT(comm.get(), ierr);
 
-  // Fill in the last entry
-  xadj[local_elem] = offset;
+  ierr = ISGetIndices(partition, &parts);
+  CHKERRABORT(comm.get(), ierr);
 
-  if (verbose)
-  {
-    Moose::out << "xadj: ";
-    for (auto val : xadj)
-      Moose::out << val << " ";
-    Moose::out << std::endl;
+  std::vector<dof_id_type> partition_vec;
+  std::copy(parts, parts + num_local_elems, std::back_inserter(partition_vec));
 
-    Moose::out << "adjncy: ";
-    for (auto val : adjncy)
-      Moose::out << val << " ";
-    Moose::out << std::endl;
+  ierr = ISRestoreIndices(partition, &parts);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = ISDestroy(&partition);
+  CHKERRABORT(comm.get(), ierr);
 
-    Moose::out << "vtxdist: ";
-    for (auto val : vtxdist)
-      Moose::out << val << " ";
-    Moose::out << std::endl;
-  }
-
-  // Fill in the last entry
-  xadj[num_local_elems + 1] = adjncy.size() + 1;
-
-  if (num_procs == 1)
-  {
-    // Just assign them all to proc 0
-    for (auto & elem_pid : pmetis->part)
-      elem_pid = 0;
-  }
-  else
-  {
-    std::vector<Parmetis::idx_t> vsize(pmetis->vwgt.size(), 1);
-    Parmetis::real_t itr = 1000000.0;
-    MPI_Comm mpi_comm = comm.get();
-
-    Parmetis::ParMETIS_V3_AdaptiveRepart(
-        pmetis->vtxdist.empty() ? libmesh_nullptr : &pmetis->vtxdist[0],
-        pmetis->xadj.empty() ? libmesh_nullptr : &pmetis->xadj[0],
-        pmetis->adjncy.empty() ? libmesh_nullptr : &pmetis->adjncy[0],
-        pmetis->vwgt.empty() ? libmesh_nullptr : &pmetis->vwgt[0],
-        vsize.empty() ? libmesh_nullptr : &vsize[0],
-        libmesh_nullptr,
-        &pmetis->wgtflag,
-        &pmetis->numflag,
-        &pmetis->ncon,
-        &pmetis->nparts,
-        pmetis->tpwgts.empty() ? libmesh_nullptr : &pmetis->tpwgts[0],
-        pmetis->ubvec.empty() ? libmesh_nullptr : &pmetis->ubvec[0],
-        &itr,
-        &pmetis->options[0],
-        &pmetis->edgecut,
-        pmetis->part.empty() ? libmesh_nullptr : &pmetis->part[0],
-        &mpi_comm);
-  }
-
-  if (verbose)
-  {
-    Moose::out << "Part " << comm.rank() << ": ";
-    for (auto apid : pmetis->part)
-      Moose::out << apid << " ";
-    Moose::out << std::endl;
-  }
-
-  // Partitioning is complete.
-  // Now we need to tell each processor which elements
-  // it will be handling.  It'll go like this:
-  // 1.  AlltoAll to figure out who's sending/receiving and how many elements
-  //     Note: This AlltoAll could be removed in the future using
-  //     a super nonblocking scheme
-  // 2.  Post non-blocking sends
-  // 3.  Receive
-  // 4.  Closeup all Sends
-
-  // The complete list of elements assigned to this proc:
-  std::vector<dof_id_type> my_elems;
-
-  // Will hold the number of elements we're going to send to each processor
-  std::vector<dof_id_type> will_send_to(num_procs, 0);
-
-  // Keep track of the total number of local elements
-  // This will be the number we know about in our local "part" vector
-  // plus the number other people will send to us
-  dof_id_type total_num_local_elems = 0;
-
-  // The actual vectors to be sent
-  std::map<processor_id_type, std::vector<dof_id_type>> elems_to_be_sent;
-
-  // Total number of messages we'll send
-  processor_id_type num_sends = 0;
-
-  dof_id_type current_elem_id = local_elems_begin;
-
-  for (auto proc_id : pmetis->part)
-  {
-    if (static_cast<processor_id_type>(proc_id) != pid)
-    {
-      // Keep track of the unique procs we're sending to
-      if (!will_send_to[proc_id])
-        num_sends++;
-
-      will_send_to[proc_id]++;
-
-      // Side-effect insertion used on purpose
-      //
-      // Note: I thought about the speed here, I could
-      // find the number of elems going to each processor
-      // first so I could reserve the correct space in the
-      // vectors.  But when I went to implement that it
-      // simply wasn't worth the increase in code complexity
-      elems_to_be_sent[proc_id].push_back(current_elem_id);
-    }
-    else
-    {
-      total_num_local_elems++;
-      my_elems.push_back(current_elem_id);
-    }
-
-    current_elem_id++;
-  }
-
-  // Trade data
-  comm.alltoall(will_send_to);
-
-  // will_send_to now represents who we'll receive from
-  // give it a good name
-  auto & will_receive_from = will_send_to;
-
-  // Post the sends
-  std::vector<Parallel::Request> elem_sends(num_sends);
-
-  processor_id_type current_send = 0;
-  for (auto & pid_elems_to_be_sent : elems_to_be_sent)
-  {
-    auto proc_id = pid_elems_to_be_sent.first;
-    auto & elems_to_send = pid_elems_to_be_sent.second;
-
-    comm.send(proc_id, elems_to_send, elem_sends[current_send], elem_tag);
-
-    current_send++;
-  }
-
-  // Now start receiving
-
-  // Count the number of receives and the total number of elements
-  processor_id_type num_receives = 0;
-  for (processor_id_type proc_id = 0; proc_id < num_procs; proc_id++)
-  {
-    if (will_receive_from[proc_id])
-    {
-      num_receives++;
-      total_num_local_elems += will_receive_from[proc_id];
-    }
-  }
-
-  // Note that my_elems might already have some stuff in it
-  // But let's go ahead and make sure it has enough to hold
-  // that stuff and everything that is received.
-  my_elems.reserve(total_num_local_elems);
-
-  // Will hold incoming elem_ids
-  std::vector<dof_id_type> in_elems;
-
-  // Post the receives
-  for (processor_id_type current_receive = 0; current_receive < num_receives; current_receive++)
-  {
-    // It doesn't matter what order we process the receives in
-    comm.receive(Parallel::any_source, in_elems, elem_tag);
-
-    for (auto & e_id : in_elems)
-      my_elems.push_back(e_id);
-  }
-
-  // Finish the sends
-  Parallel::wait(elem_sends);
+  ierr = ISGetIndices(my_new_elems, &parts);
+  CHKERRABORT(comm.get(), ierr);
+  PetscInt num_local_new_elems;
+  ierr = ISGetLocalSize(my_new_elems, &num_local_new_elems);CHKERRABORT(comm.get(), ierr);
 
   // Add the elements this processor owns
-  for (auto & e_id : my_elems)
+  for (PetscInt e_id = 0 ; e_id < num_local_new_elems;  e_id++)
   {
     dof_id_type i, j, k;
 
-    get_indices<T>(nx, ny, e_id, i, j, k);
+    get_indices<T>(nx, ny, parts[e_id], i, j, k);
 
-    add_element<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh, verbose);
+    add_element<T>(nx, ny, nz, i, j, k, parts[e_id], pid, type, mesh, verbose);
   }
+
+  ierr = ISRestoreIndices(my_new_elems, &parts);
+  CHKERRABORT(comm.get(), ierr);
+  ierr = ISDestroy(&my_new_elems);
+  CHKERRABORT(comm.get(), ierr);
 
   if (verbose)
     for (auto & elem_ptr : mesh.element_ptr_range())
@@ -1390,17 +950,6 @@ build_cube(UnstructuredMesh & mesh,
   std::set<dof_id_type> ghost_elems;
   get_ghost_neighbors<T>(nx, ny, nz, mesh, ghost_elems);
 
-  // Now at this point we know the ghosts we need to add but we don't know
-  // the processor ID they ended up on.  Here's what we're going to
-  // do about it:
-  // 1. Figure out which processor originally had the ghost elements
-  // 2. Send a request to each of those processors
-  // 3. Receive back the place the ghosts ended up
-  // 4. Add the ghosts with the correct PID
-
-  // Who we're going to make requests of
-  std::vector<char> request_ghosts_from(num_procs, 0);
-
   // Elements we're going to request from others
   std::map<processor_id_type, std::vector<dof_id_type>> ghost_elems_to_request;
 
@@ -1409,134 +958,55 @@ build_cube(UnstructuredMesh & mesh,
     // This is the processor ID the ghost_elem was originally assigned to
     auto proc_id = MooseUtils::linearPartitionChunk(num_elems, num_procs, ghost_id);
 
-    request_ghosts_from[proc_id] = true;
-
     // Using side-effect insertion on purpose
     ghost_elems_to_request[proc_id].push_back(ghost_id);
   }
 
-  // Tell everyone who we're going to request from
-  comm.alltoall(request_ghosts_from);
-
-  // Now request_ghosts_from tells us who is requesting ghosts from _us_
-  auto & send_ghosts_to = request_ghosts_from;
-
-  // Five Phases:
-  // 1. Send off _my_ requests
-  // 2. Receive requests from others
-  // 3. Fill requests from others
-  // 4. Send results back
-  // 5. Receive and process _my_ requests
-
-  // 1. Send off _my_ requests
-
-  std::vector<Parallel::Request> ghost_request_sends(ghost_elems_to_request.size());
-
-  processor_id_type current_ghost_request_send = 0;
-  for (auto & proc_id_ghost_elem : ghost_elems_to_request)
-  {
-    auto proc_id = proc_id_ghost_elem.first;
-    auto & ghosts_to_send = proc_id_ghost_elem.second;
-
-    comm.send(proc_id,
-              ghosts_to_send,
-              ghost_request_sends[current_ghost_request_send],
-              ghost_request_tag);
-
-    current_ghost_request_send++;
-  }
-
-  // 2. Start receiving requests
-
-  // 2a: Figure out how many requests we'll be receiving
-  processor_id_type number_of_incoming_requests = 0;
-  for (auto val : send_ghosts_to)
-    if (val)
-      number_of_incoming_requests++;
-
-  // Will hold the PID for each requests ghost element so we can send them back
-  std::map<processor_id_type, std::vector<dof_id_type>> filled_requests_to_send_back;
-
-  // Will hold incoming ghost_ids
-  std::vector<dof_id_type> in_ghosts;
-
-  // 2b. and 3. Receive requests and process them
-  for (processor_id_type current_incoming_request = 0;
-       current_incoming_request < number_of_incoming_requests;
-       current_incoming_request++)
-  {
-    // The stat will tell where this message came from - so we'll know where to send the response to
-    auto stat = comm.receive(Parallel::any_source, in_ghosts, ghost_request_tag);
-
-    auto proc_id = stat.source();
-
-    // Side effect insertion on purpose
-    auto & proc_ids_of_ghosts = filled_requests_to_send_back[proc_id];
-
-    proc_ids_of_ghosts.reserve(in_ghosts.size());
-
-    // Fill up the vector we will send back with the PID the ghost was assigned to
-    for (auto & ghost_id : in_ghosts)
+  // Next set ghost object ids from other processors
+  auto gather_functor = [ local_elems_begin, partition_vec ]
+    (processor_id_type /*pid*/, const std::vector<dof_id_type> & coming_ghost_elems,
+     std::vector<dof_id_type> & pid_for_ghost_elems)
     {
-      auto local_id = ghost_id - local_elems_begin;
+      auto num_ghost_elems = coming_ghost_elems.size();
+      pid_for_ghost_elems.resize(num_ghost_elems);
 
-      mooseAssert(local_id < pmetis->part.size(),
-                  "Invalid request! Received a request for an element that "
-                  "doesn't exist on this processor in "
-                  "DistributedGeneratedMesh");
+      dof_id_type num_local_elems = 0;
 
-      proc_ids_of_ghosts.push_back(pmetis->part[local_id]);
-    }
-  }
+      for (auto elem: coming_ghost_elems)
+        {
+          pid_for_ghost_elems[num_local_elems++] = partition_vec [elem-local_elems_begin];
+        }
+    };
 
-  // 4. Send responses back
-  std::vector<Parallel::Request> ghost_response_sends(filled_requests_to_send_back.size());
+  std::unordered_map<dof_id_type, processor_id_type> ghost_elem_to_pid;
 
-  processor_id_type current_response_send = 0;
-  for (auto & proc_id_response : filled_requests_to_send_back)
-  {
-    auto proc_id = proc_id_response.first;
-    auto & response_to_send = proc_id_response.second;
-
-    comm.send(proc_id, response_to_send, ghost_response_sends[current_send], ghost_response_tag);
-
-    current_response_send++;
-  }
-
-  // 5. Receive and process _my_ responses
-
-  // This will hold the PID for each ghost element that was requested from a processor
-  std::vector<dof_id_type> in_response;
-
-  for (processor_id_type current_incoming_response = 0;
-       current_incoming_response < ghost_elems_to_request.size();
-       current_incoming_response++)
-  {
-    auto stat = comm.receive(Parallel::any_source, in_response, ghost_response_tag);
-
-    auto proc_id = stat.source();
-
-    // Grab the ghost_elems we requested from this processor
-    auto & ghost_elems = ghost_elems_to_request[proc_id];
-
-    // Add the ghost elements to the mesh
-    for (dof_id_type current_ghost_elem = 0; current_ghost_elem < ghost_elems.size();
-         current_ghost_elem++)
+  auto action_functor = [ &ghost_elem_to_pid ]
+    (processor_id_type /*pid*/,
+     const std::vector<dof_id_type> & my_ghost_elems,
+     const std::vector<dof_id_type> & pid_for_my_ghost_elems)
     {
-      auto ghost_id = ghost_elems[current_ghost_elem];
-      auto proc_id = in_response[current_ghost_elem];
+      dof_id_type num_local_elems = 0;
+
+      for (auto elem: my_ghost_elems)
+        ghost_elem_to_pid[elem] = pid_for_my_ghost_elems[num_local_elems++];
+
+    };
+
+  const dof_id_type * ex = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(comm, ghost_elems_to_request, gather_functor, action_functor, ex);
+
+  // Add the ghost elements to the mesh
+  for (auto gtop : ghost_elem_to_pid)
+  {
+      auto ghost_id = gtop.first;
+      auto proc_id =  gtop.second;
 
       dof_id_type i, j, k;
 
       get_indices<T>(nx, ny, ghost_id, i, j, k);
 
       add_element<T>(nx, ny, nz, i, j, k, ghost_id, proc_id, type, mesh, verbose);
-    }
   }
-
-  // Tie up loose ends
-  Parallel::wait(ghost_request_sends);
-  Parallel::wait(ghost_response_sends);
 
   if (verbose)
     Moose::out << "After adding ghosts" << std::endl;
@@ -1561,7 +1031,7 @@ build_cube(UnstructuredMesh & mesh,
   // Set RemoteElem neighbors
   for (auto & elem_ptr : mesh.element_ptr_range())
     for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
+      if (!elem_ptr->neighbor_ptr(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
         elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
 
   if (verbose)
@@ -1613,13 +1083,18 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     mesh.print_info();
+
+#else
+   mooseError("Petsc is required for DistributedRectilinearMeshGenerator");
+#endif
 }
 
-void
-DistributedGeneratedMesh::buildMesh()
+std::unique_ptr<MeshBase>
+DistributedRectilinearMeshGenerator::generate()
 {
-  // Reference to the libmesh mesh
-  MeshBase & mesh = getMesh();
+  // DistributedRectilinearMeshGenerator always generates a distributed mesh
+  _mesh->setParallelType(MooseMesh::ParallelType::DISTRIBUTED);
+  auto mesh = _mesh->buildMeshBaseObject(MooseMesh::ParallelType::DISTRIBUTED);
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
@@ -1642,8 +1117,8 @@ DistributedGeneratedMesh::buildMesh()
 
   _elem_type = Utility::string_to_enum<ElemType>(elem_type_enum);
 
-  mesh.set_mesh_dimension(_dim);
-  mesh.set_spatial_dimension(_dim);
+  mesh->set_mesh_dimension(_dim);
+  mesh->set_spatial_dimension(_dim);
 
   // Switching on MooseEnum
   switch (_dim)
@@ -1651,7 +1126,7 @@ DistributedGeneratedMesh::buildMesh()
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the dynamic_cast.
     case 1:
-      build_cube<Edge2>(dynamic_cast<UnstructuredMesh &>(getMesh()),
+      build_cube<Edge2>(dynamic_cast<UnstructuredMesh &>(*mesh),
                         _nx,
                         1,
                         1,
@@ -1665,7 +1140,7 @@ DistributedGeneratedMesh::buildMesh()
                         _verbose);
       break;
     case 2:
-      build_cube<Quad4>(dynamic_cast<UnstructuredMesh &>(getMesh()),
+      build_cube<Quad4>(dynamic_cast<UnstructuredMesh &>(*mesh),
                         _nx,
                         _ny,
                         1,
@@ -1679,7 +1154,7 @@ DistributedGeneratedMesh::buildMesh()
                         _verbose);
       break;
     case 3:
-      build_cube<Hex8>(dynamic_cast<UnstructuredMesh &>(getMesh()),
+      build_cube<Hex8>(dynamic_cast<UnstructuredMesh &>(*mesh),
                        _nx,
                        _ny,
                        _nz,
@@ -1723,7 +1198,7 @@ DistributedGeneratedMesh::buildMesh()
     }
 
     // Loop over the nodes and move them to the desired location
-    for (auto & node_ptr : mesh.node_ptr_range())
+    for (auto & node_ptr : mesh->node_ptr_range())
     {
       Node & node = *node_ptr;
 
@@ -1780,4 +1255,6 @@ DistributedGeneratedMesh::buildMesh()
       }
     }
   }
+
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
