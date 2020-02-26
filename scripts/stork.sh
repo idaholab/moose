@@ -89,6 +89,7 @@ recursiveRename "$srcnameup" "$dstnameup"
 
 # rename files
 mv "$dir/Makefile.${kind}" "$dir/Makefile"
+mv "$dir/unit/Makefile.${kind}" "$dir/unit/Makefile"
 mv "$dir/run_tests.${kind}" "$dir/run_tests"
 mv "$dir/src/base/${srcname}App.C.${kind}" "$dir/src/base/${dstname}App.C"
 mv "$dir/test/src/base/${srcname}TestApp.C.${kind}" "$dir/test/src/base/${dstname}TestApp.C"
@@ -98,6 +99,7 @@ chmod a+x "$dir/run_tests"
 
 # remove unnecessary files
 rm -f $dir/Makefile.*
+rm -f $dir/unit/Makefile.*
 rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
 
