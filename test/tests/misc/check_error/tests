@@ -1,5 +1,7 @@
 [Tests]
   design = 'Problem/index.md'
+  parallel_scheduling = True
+
   [./steady_no_converge]
     type = 'RunApp'
     input = 'steady_no_converge.i'

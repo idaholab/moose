@@ -1,6 +1,8 @@
 [Tests]
     design = 'TestHarness.md'
     issues = '#427'
+    parallel_scheduling = True
+
   [./long_running]
     type = PythonUnitTest
     input = test_LongRunning.py

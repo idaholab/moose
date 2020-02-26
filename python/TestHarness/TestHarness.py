@@ -359,6 +359,7 @@ class TestHarness:
         relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[2:])  # Trim root node "[Tests]"
         formatted_name = relative_path + '.' + relative_hitpath
 
+        params['spec_file'] = filename
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir
         params['relative_path'] = relative_path
