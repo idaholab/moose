@@ -245,6 +245,15 @@ template <typename RangeType>
 OnScopeExit
 ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 {
+  // TODO: (VITAL) we need to figure out how to reinit/prepare assembly
+  // appropriately for residual/jacobian calcs without doing all the other
+  // heavy stuff FEProblemBase::prepare does.  Maybe we just need direct
+  // assembly.prepare() and assembly.prepareNonlocal() calls? Also there might
+  // be some stuff that happens in assembly::reinit/reinitFE that we need, but
+  // most of that is (obviously) FE specific.  Also - we need to fall back to
+  // reiniting everything like normal if there is any FV-FE variable coupling.
+  _fe_problem.prepare(fi.leftElem(), _tid);
+
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
   // reinit is called on fe problem which forwards its calls to the system
