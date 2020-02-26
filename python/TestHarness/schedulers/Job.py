@@ -13,7 +13,6 @@ from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 
-
 class Timer(object):
     """
     A helper class for testers to track the time it takes to run.
@@ -95,17 +94,19 @@ class Job(object):
 
     def getUpstreams(self):
         """ Return a list of all the jobs that needed to be completed before this job """
-        original_dag = self.__job_dag.getOriginalDAG()
-        return self.__job_dag.predecessors(self, original_dag)
+        dag = self.getDAG()
+        original_dag = dag.getOriginalDAG()
+        return dag.predecessors(self, original_dag)
 
     def getDownstreams(self):
         """ Return a list of all the jobs that need this job completed """
-        original_dag = self.__job_dag.getOriginalDAG()
-        return self.__job_dag.all_downstreams(self, original_dag)
+        dag = self.getDAG()
+        original_dag = dag.getOriginalDAG()
+        return dag.all_downstreams(self, original_dag)
 
     def getDAG(self):
         """ Return the DAG associated with this tester """
-        return self.__job_dag
+        return self.__job_dag.getDAG()
 
     def getTester(self):
         """ Return the tester object """
@@ -187,6 +188,10 @@ class Job(object):
         self.__slots = int(slots)
         return self.__slots
 
+    def canParallel(self):
+        """ Call DAG and determine if this group can run in parallel """
+        return self.__job_dag.canParallel()
+
     def run(self):
         """
         A blocking method to handle the exit status of the process object while keeping track of the
@@ -197,9 +202,10 @@ class Job(object):
         if not self.__tester.shouldExecute():
             return
 
-        if self.options.pedantic_checks:
+        if self.options.pedantic_checks and self.canParallel():
             # Before the job does anything, get the times files below it were last modified
             self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
+            self.addCaveats('pedantic check')
             time.sleep(1)
 
         self.__tester.prepare(self.options)
@@ -211,7 +217,7 @@ class Job(object):
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.joined_out
 
-        if self.options.pedantic_checks:
+        if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.
             self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
             self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())

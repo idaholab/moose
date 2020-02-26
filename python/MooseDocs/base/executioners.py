@@ -324,7 +324,7 @@ class ParallelQueue(Executioner):
                   "Rendering")
 
         # WRITE
-        self._run(nodes, None, self._write_target, num_threads,
+        self._run(nodes, None, self._write_target, 1,
                   lambda n: -self._page_result[n.uid].count,
                   "Writing")
 

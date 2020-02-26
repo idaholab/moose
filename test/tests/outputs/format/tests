@@ -1,4 +1,6 @@
 [Tests]
+  parallel_scheduling = True
+
   [./nemesis_out_test]
     type = 'CheckFiles'
     input = 'output_test_nemesis.i'

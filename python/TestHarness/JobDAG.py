@@ -9,19 +9,42 @@
 
 from .schedulers.Job import Job
 from contrib import dag
+import pyhit
+import os
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
     def __init__(self, options):
         self.__job_dag = dag.DAG()
+        self.__parallel_scheduling = None
         self.options = options
+
+    def _setParallel(self):
+        """ Read the test spec file and determine if parallel_scheduling is set. """
+        if self.__parallel_scheduling is not None:
+            return self.__parallel_scheduling
+        self.__parallel_scheduling = False
+
+        job = self.getJob()
+        if job:
+            # We only need a single tester so we know what spec file to load.
+            # TODO: would be nice to have access to this without needing tester.specs
+            tester = job[0].getTester()
+            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['spec_file']))
+            self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
+
+        return self.__parallel_scheduling
+
+    def canParallel(self):
+        """ Return bool whether or not this group runs in parallel """
+        return self._setParallel()
 
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
         # for each tester, instance a job and create a DAG node for that job
         self.__name_to_job = {}
         for tester in testers:
-            job = Job(tester, self.__job_dag, self.options)
+            job = Job(tester, self, self.options)
             name = job.getUniqueIdentifier()
             if name not in self.__name_to_job:
                 self.__name_to_job[name] = job
@@ -36,10 +59,11 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
-
     def getJobs(self):
-        """ Return concurrent available jobs """
-        return self.__job_dag.ind_nodes()
+        """ Return a list of available jobs """
+        if self.canParallel() and not self.options.pedantic_checks:
+            return self.__job_dag.ind_nodes()
+        return self.getJob()
 
     def getJob(self):
         """ Return a single available job """
@@ -61,10 +85,7 @@ class JobDAG(object):
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
 
-        if self.options.pedantic_checks:
-            next_jobs.update(self.getJob())
-        else:
-            next_jobs.update(self.getJobs())
+        next_jobs.update(self.getJobs())
         return next_jobs
 
     def removeAllDependencies(self):

@@ -5,7 +5,7 @@ and constructing the necessary [Actions](Action.md) that ultimately execute to b
 up the objects which compose a complete MOOSE based simulation. It is important to note
 that +this+ object is not responsible for the raw file-base I/O. The underlying
 structure of the MOOSE input file is dictated by HIT and information on the format
-can be found [here](input_syntax optional=True). The parser abstraction expects
+can be found [here](/application_usage/input_syntax.md optional=True). The parser abstraction expects
 information to be organized into a hierarchy of blocks with zero or more children
 at each level. All of the name/value pairs at each level are used to construct
 one or more complete objects.
