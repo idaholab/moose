@@ -244,6 +244,7 @@
 - /Materials/AverageWallTemperature3EqnMaterial
 - /Materials/ConstantMaterial
 - /Materials/CoupledVariableValueMaterial
+- /Materials/ConvectiveHeatTransferCoefficientMaterial
 - /Materials/DerivativeMaterialInterfaceTHM
 - /Materials/DirectionMaterial
 - /Materials/FluidProperties3EqnMaterial
