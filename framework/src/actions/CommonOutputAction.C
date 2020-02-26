@@ -47,7 +47,7 @@ CommonOutputAction::validParams()
                         "file using the default CSV output.");
   params.addParam<bool>("xml",
                         false,
-                        "Output the scalar variable and postprocessors to a *.xml "
+                        "Output the vector postprocessors to a *.xml "
                         "file using the default XML output.");
   params.addParam<bool>(
       "vtk", false, "Output the results using the default settings for VTKOutput output");

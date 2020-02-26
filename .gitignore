@@ -54,6 +54,7 @@ temp_print_trace.*
 *.mpx
 *.btr
 *.xml
+*.xml.*
 *.gmv
 *.plt
 *.slh

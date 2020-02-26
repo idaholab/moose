@@ -17,7 +17,7 @@ class XMLDiff(RunApp):
     @staticmethod
     def validParams():
         params = RunApp.validParams()
-        params.addRequiredParam('xmldiff',   [], "A list of XML files to compage.")
+        params.addRequiredParam('xmldiff',   [], "A list of XML files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
         params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
