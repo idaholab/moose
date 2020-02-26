@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DistributedRectilinearMeshGenerator.h"
+#include "PetscExternalPartitioner.h"
 
 #include "SerializerGuard.h"
 
@@ -38,17 +39,10 @@ registerMooseObject("MooseApp", DistributedRectilinearMeshGenerator);
 InputParameters
 DistributedRectilinearMeshGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = PetscExternalPartitioner::validParams();
+  params += MeshGenerator::validParams();
 
   params.addParam<bool>("verbose", false, "Turn on verbose printing for the mesh generation");
-
-  MooseEnum partPackage("parmetis ptscotch hierarch", "parmetis", false);
-
-  params.addParam<MooseEnum>("part_package",
-                              partPackage,
-                             "The external package is used for partitioning the mesh via PETSc");
-
-  params.addParam<dof_id_type>("num_cores_per_compute_node", 1, "Number of cores per compute node for hierarchical partitioning");
 
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>(
@@ -113,7 +107,8 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(const I
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z")),
-    _part_package(getParam<MooseEnum>("part_package"))
+    _part_package(getParam<MooseEnum>("part_package")),
+    _num_parts_per_compute_node(getParam<dof_id_type>("num_cores_per_compute_node"))
 {
 }
 
@@ -233,10 +228,12 @@ DistributedRectilinearMeshGenerator::add_element<Edge2>(const dof_id_type nx,
 
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
   node0_ptr->set_unique_id() = node_offset;
+  node0_ptr->processor_id()  = pid;
 
   auto node1_ptr =
       mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
   node1_ptr->set_unique_id() = node_offset + 1;
+  node1_ptr->processor_id()  = pid;
 
   if (verbose)
     Moose::out << "Adding elem: " << elem_id << std::endl;
@@ -433,24 +430,28 @@ DistributedRectilinearMeshGenerator::add_element<Quad4>(const dof_id_type nx,
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
                                   node_id<Quad4>(type, nx, 0, i, j, 0));
   node0_ptr->set_unique_id() = node_id<Quad4>(type, nx, 0, i, j, 0);
+  node0_ptr->processor_id() = pid;
 
   // Bottom Right
   auto node1_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0),
                      node_id<Quad4>(type, nx, 0, i + 1, j, 0));
   node1_ptr->set_unique_id() = node_id<Quad4>(type, nx, 0, i + 1, j, 0);
+  node1_ptr->processor_id() = pid;
 
   // Top Right
   auto node2_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0),
                      node_id<Quad4>(type, nx, 0, i + 1, j + 1, 0));
   node2_ptr->set_unique_id() = node_id<Quad4>(type, nx, 0, i + 1, j + 1, 0);
+  node2_ptr->processor_id() = pid;
 
   // Top Left
   auto node3_ptr =
       mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0),
                      node_id<Quad4>(type, nx, 0, i, j + 1, 0));
   node3_ptr->set_unique_id() = node_id<Quad4>(type, nx, 0, i, j + 1, 0);
+  node3_ptr->processor_id() = pid;
 
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
@@ -644,13 +645,21 @@ DistributedRectilinearMeshGenerator::add_element<Hex8>(const dof_id_type nx,
 
   // This ordering was picked to match the ordering in mesh_generation.C
   auto node0_ptr = add_point<Hex8>(nx, ny, nz, i, j, k, type, mesh);
+  node0_ptr->processor_id() = pid;
   auto node1_ptr = add_point<Hex8>(nx, ny, nz, i + 1, j, k, type, mesh);
+  node1_ptr->processor_id() = pid;
   auto node2_ptr = add_point<Hex8>(nx, ny, nz, i + 1, j + 1, k, type, mesh);
+  node2_ptr->processor_id() = pid;
   auto node3_ptr = add_point<Hex8>(nx, ny, nz, i, j + 1, k, type, mesh);
+  node3_ptr->processor_id() = pid;
   auto node4_ptr = add_point<Hex8>(nx, ny, nz, i, j, k + 1, type, mesh);
+  node4_ptr->processor_id() = pid;
   auto node5_ptr = add_point<Hex8>(nx, ny, nz, i + 1, j, k + 1, type, mesh);
+  node5_ptr->processor_id() = pid;
   auto node6_ptr = add_point<Hex8>(nx, ny, nz, i + 1, j + 1, k + 1, type, mesh);
+  node6_ptr->processor_id() = pid;
   auto node7_ptr = add_point<Hex8>(nx, ny, nz, i, j + 1, k + 1, type, mesh);
+  node7_ptr->processor_id() = pid;
 
   Elem * elem = new Hex8;
   elem->set_id(elem_id);
@@ -784,7 +793,6 @@ DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
            const ElemType type,
            bool verbose)
 {
-#ifdef LIBMESH_HAVE_PETSC
   if (verbose)
     Moose::out << "nx: " << nx << "\n ny: " << ny << "\n nz: " << nz << std::endl;
 
@@ -829,30 +837,18 @@ DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
   dof_id_type local_elems_end;
   MooseUtils::linearPartitionItems(num_elems, num_procs, pid, num_local_elems, local_elems_begin, local_elems_end);
 
-  PetscInt *xadj, *adjncy;
-  const PetscInt * parts;
-  PetscErrorCode ierr;
-  Mat dual;
-  MatPartitioning part;
-  IS partition, my_new_elems;
+  std::vector<std::vector<dof_id_type>> graph;
 
   if (verbose)
     Moose::out << "num local elements: " << num_local_elems << std::endl;
 
-  // We are going to build a dual graph
-  ierr = PetscCalloc1(num_local_elems + 1, &xadj);
-  CHKERRABORT(comm.get(), ierr);
-
-  ierr = PetscCalloc1(num_local_elems*n_neighbors, &adjncy);
-  CHKERRABORT(comm.get(), ierr);
-
   // Fill in xadj and adjncy
   // xadj is the offset into adjncy
   // adjncy are the face neighbors of each element on this processor
-  dof_id_type offset = 0;
-  xadj[0] = 0;
+  graph.resize(num_local_elems);
   // Build a distributed graph
-  for (dof_id_type e_id = local_elems_begin, num_local_elems = 0; e_id < local_elems_end; e_id++)
+  num_local_elems = 0;
+  for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
   {
     dof_id_type i, j, k;
 
@@ -863,70 +859,50 @@ DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
     if (verbose)
       Moose::out << "e_id: " << e_id << std::endl;
 
+    std::vector<dof_id_type> & row  = graph[num_local_elems++];
+    row.reserve(n_neighbors);
+
     for (auto neighbor : neighbors)
     {
       if (verbose)
         Moose::out << " neighbor: " << neighbor << std::endl;
 
       if (neighbor != Elem::invalid_id)
-        adjncy[offset++] = neighbor;
+        row.push_back(neighbor);
     }
-    // Increase offset, and go to next element
-    xadj[++num_local_elems] = offset;
   }
-  // Create a graph matrix and partitioning context
-  ierr = MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, nullptr, &dual);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningCreate(mesh.comm().get(), &part);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningSetAdjacency(part, dual);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatDestroy(&dual);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningSetNParts(part, num_procs);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningSetType(part, _part_package.c_str());
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningSetFromOptions(part);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningApply(part, &partition);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningDestroy(&part);
-  CHKERRABORT(comm.get(), ierr);
-  // Grab my new elements based on partition
-  ierr = ISBuildTwoSided(partition,nullptr,&my_new_elems);
-  CHKERRABORT(comm.get(), ierr);
 
-  ierr = ISGetIndices(partition, &parts);
-  CHKERRABORT(comm.get(), ierr);
-
+  // Partition the distributed graph
   std::vector<dof_id_type> partition_vec;
-  std::copy(parts, parts + num_local_elems, std::back_inserter(partition_vec));
+  PetscExternalPartitioner::partitionGraph(comm, graph, {}, {}, num_procs, _num_parts_per_compute_node, _part_package, partition_vec);
 
-  ierr = ISRestoreIndices(partition, &parts);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = ISDestroy(&partition);
-  CHKERRABORT(comm.get(), ierr);
+  mooseAssert(partition_vec.size() == num_local_elems, " Invalid partition was generateed ");
 
-  ierr = ISGetIndices(my_new_elems, &parts);
-  CHKERRABORT(comm.get(), ierr);
-  PetscInt num_local_new_elems;
-  ierr = ISGetLocalSize(my_new_elems, &num_local_new_elems);CHKERRABORT(comm.get(), ierr);
+  // Use current elements to remote processors according to partition
+  std::map<processor_id_type, std::vector<dof_id_type>> pushed_elements_vecs;
+
+  for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
+    pushed_elements_vecs[partition_vec[e_id-local_elems_begin]].push_back(e_id);
+
+  // Collect new elements I should own
+  std::vector<dof_id_type> my_new_elems;
+
+  auto elements_action_functor = [ &my_new_elems] (processor_id_type /*pid*/, const std::vector<dof_id_type> & data)
+  {
+    std::copy(data.begin(), data.end(), std::back_inserter(my_new_elems));
+  };
+
+  Parallel::push_parallel_vector_data(comm, pushed_elements_vecs, elements_action_functor);
 
   // Add the elements this processor owns
-  for (PetscInt e_id = 0 ; e_id < num_local_new_elems;  e_id++)
+  for (auto e_id :  my_new_elems)
   {
     dof_id_type i, j, k;
 
-    get_indices<T>(nx, ny, parts[e_id], i, j, k);
+    get_indices<T>(nx, ny, e_id, i, j, k);
 
-    add_element<T>(nx, ny, nz, i, j, k, parts[e_id], pid, type, mesh, verbose);
+    add_element<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh, verbose);
   }
-
-  ierr = ISRestoreIndices(my_new_elems, &parts);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = ISDestroy(&my_new_elems);
-  CHKERRABORT(comm.get(), ierr);
 
   if (verbose)
     for (auto & elem_ptr : mesh.element_ptr_range())
@@ -963,20 +939,19 @@ DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
   }
 
   // Next set ghost object ids from other processors
-  auto gather_functor = [ local_elems_begin, partition_vec ]
-    (processor_id_type /*pid*/, const std::vector<dof_id_type> & coming_ghost_elems,
-     std::vector<dof_id_type> & pid_for_ghost_elems)
-    {
+  auto gather_functor = [ local_elems_begin, partition_vec ](processor_id_type /*pid*/, const std::vector<dof_id_type> & coming_ghost_elems,
+       std::vector<dof_id_type> & pid_for_ghost_elems)
+  {
       auto num_ghost_elems = coming_ghost_elems.size();
       pid_for_ghost_elems.resize(num_ghost_elems);
 
       dof_id_type num_local_elems = 0;
 
       for (auto elem: coming_ghost_elems)
-        {
-          pid_for_ghost_elems[num_local_elems++] = partition_vec [elem-local_elems_begin];
-        }
-    };
+      {
+        pid_for_ghost_elems[num_local_elems++] = partition_vec [elem-local_elems_begin];
+      }
+  };
 
   std::unordered_map<dof_id_type, processor_id_type> ghost_elem_to_pid;
 
@@ -1083,10 +1058,6 @@ DistributedRectilinearMeshGenerator::build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     mesh.print_info();
-
-#else
-   mooseError("Petsc is required for DistributedRectilinearMeshGenerator");
-#endif
 }
 
 std::unique_ptr<MeshBase>
