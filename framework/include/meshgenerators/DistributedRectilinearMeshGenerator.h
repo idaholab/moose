@@ -280,4 +280,7 @@ protected:
 
   /// External partitioner
   std::string _part_package;
+
+  /// Number of cores per compute node if hierarch partitioning is used
+  dof_id_type _num_parts_per_compute_node;
 };
