@@ -113,14 +113,12 @@ the first column corresponds with the numeric identifier for the statistics bein
 The following input file snippet demonstrates how to compute various statistics and
 confidence levels using the `Statistics` object
 
-!listing bootstrap_statistics/bootstrap.i block=VectorPostprocessors
+!listing bootstrap_statistics/percentile/percentile.i block=VectorPostprocessors
 
 This block results in the following CSV file for the "stats" block of the input file. Notice
 the first column corresponds with the numeric identifier for the statistics being computed.
 
-!listing bootstrap_statistics/gold/bootstrap_out_stats_0001.csv
-
-
+!listing bootstrap_statistics/percentile/gold/percentile_out_stats_0001.csv
 
 !syntax parameters /VectorPostprocessors/Statistics
 
