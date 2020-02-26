@@ -33,7 +33,7 @@ VectorPostprocessor::validParams()
   // setting this to false will keep MOOSE from unnecessarily broadcasting those vectors
   params.addPrivateParam<bool>("_auto_broadcast", true);
 
-  // VPPs can operate in "distributed" mode, which disables automatic the automatic broadcasting
+  // VPPs can operate in "distributed" mode, which disables the automatic broadcasting
   // and results in an individual file per processor if CSV output is enabled
   MooseEnum parallel_type("DISTRIBUTED REPLICATED", "REPLICATED");
   params.addParam<MooseEnum>(

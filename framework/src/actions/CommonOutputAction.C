@@ -45,6 +45,10 @@ CommonOutputAction::validParams()
                         false,
                         "Output the scalar variable and postprocessors to a *.csv "
                         "file using the default CSV output.");
+  params.addParam<bool>("xml",
+                        false,
+                        "Output the vector postprocessors to a *.xml "
+                        "file using the default XML output.");
   params.addParam<bool>(
       "vtk", false, "Output the results using the default settings for VTKOutput output");
   params.addParam<bool>(
@@ -156,6 +160,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("csv"))
     create("CSV");
+
+  if (getParam<bool>("xml"))
+    create("XMLOutput");
 
 #ifdef LIBMESH_HAVE_VTK
   if (getParam<bool>("vtk"))
