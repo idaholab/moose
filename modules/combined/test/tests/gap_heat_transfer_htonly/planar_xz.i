@@ -52,6 +52,8 @@
     variable = temp
     master = 3
     slave = 2
+    emissivity_master = 0
+    emissivity_slave = 0
   [../]
 []
 

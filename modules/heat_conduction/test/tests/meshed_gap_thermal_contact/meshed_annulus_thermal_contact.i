@@ -47,6 +47,8 @@
     variable = temp
     master = 2
     slave = 3
+    emissivity_master = 0
+    emissivity_slave = 0
     gap_conductivity = 0.5
   [../]
 []

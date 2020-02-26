@@ -86,11 +86,11 @@ GapConductance::actionParameters()
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
   params.addRangeCheckedParam<Real>("emissivity_master",
-                                    0.0,
+                                    1,
                                     "emissivity_master>=0 & emissivity_master<=1",
                                     "The emissivity of the master surface");
   params.addRangeCheckedParam<Real>("emissivity_slave",
-                                    0.0,
+                                    1,
                                     "emissivity_slave>=0 & emissivity_slave<=1",
                                     "The emissivity of the slave surface");
   params.addDeprecatedParam<Real>("emissivity_1",

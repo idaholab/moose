@@ -33,6 +33,8 @@
 
 [ThermalContact]
   [./left_to_right]
+    emissivity_master = 0
+    emissivity_slave = 0
     slave = leftright
     quadrature = true
     master = rightleft
@@ -79,4 +81,3 @@
 [Outputs]
   exodus = true
 []
-

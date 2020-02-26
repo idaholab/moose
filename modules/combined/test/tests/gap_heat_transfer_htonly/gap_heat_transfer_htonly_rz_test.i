@@ -71,12 +71,16 @@
     variable = temp
     master = 3
     slave = 2
+    emissivity_master = 0
+    emissivity_slave = 0
   [../]
   [./thermal_contact2]
     type = GapHeatTransfer
     variable = temp2
     master = 3
     slave = 2
+    emissivity_master = 0
+    emissivity_slave = 0
     gap_geometry_type = PLATE
     appended_property_name = 2
   [../]

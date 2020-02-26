@@ -44,6 +44,8 @@
     variable = temp
     master = 5
     slave = 10
+    emissivity_master = 0
+    emissivity_slave = 0
     quadrature = true
   [../]
 []
