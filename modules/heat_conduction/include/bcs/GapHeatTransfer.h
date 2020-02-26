@@ -31,6 +31,9 @@ public:
   virtual void initialSetup() override;
   void computeJacobian() override;
 
+  using IntegratedBC::computeJacobianBlock;
+  void computeJacobianBlock(unsigned int jvar) override;
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -39,6 +42,11 @@ protected:
    * compute the Jacobian contributions from the slave side degrees of freedom
    */
   Real computeSlaveQpJacobian();
+
+  /**
+   * compute the displacement Jacobian contributions from the slave side degrees of freedom
+   */
+  Real computeSlaveQpOffDiagJacobian(unsigned int jvar);
 
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 

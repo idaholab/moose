@@ -7,10 +7,12 @@ INL's internal network.
 
 ### SSH Config
 
-Edit your ~/.ssh/config file and add the following content:
+Edit your `~/.ssh/config` file and add the commands to proxy calls to internal INL sites.
+
+For MacOS add the following content:
 
 ```bash
-Host hpcgitlab.inl.gov
+Host hpcgitlab.hpc.inl.gov
  User <your hpc user id>
  ProxyCommand nc -x localhost:5555 %h %p
 Host hpcsc.inl.gov
@@ -20,6 +22,21 @@ Host moosebuild.inl.gov
  User <your hpc user id>
  ProxyCommand nc -x localhost:5555 %h %p
 ```
+
+For Linux Systems use the following instead:
+
+```bash
+Host hpcgitlab.hpc.inl.gov
+ User <your hpc user id>
+ ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
+Host hpcsc.inl.gov
+ User <your hpc user id>
+ ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
+Host moosebuild.inl.gov
+ User <your hpc user id>
+ ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
+```
+
 
 ### SSH Tunnel
 
@@ -53,28 +70,29 @@ using a search engine.
 
 ### Log in to HPC Gitlab
 
-Go to the following link: [https://hpcgitlab.inl.gov](https://hpcgitlab.inl.gov)
+Go to the following link: [https://hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov)
 Log in using your HPC id and password, +not+ your RSA token or PIN.+
 
 ### SSH Keys
 
 Create your SSH public/private key and install it on GitLab. Instructions for doing so can be found
 on GitLab itself at:
-[https://hpcgitlab.inl.gov/help/ssh/README](https://hpcgitlab.inl.gov/help/ssh/README)
+[https://hpcgitlab.hpc.inl.gov/help/ssh/README](https://hpcgitlab.hpc.inl.gov/help/ssh/README)
 
 ### Request Access
 
-With now being able to connect to [https://hpcgitlab.inl.gov](https://hpcgitlab.inl.gov), and having
+With now being able to connect to [https://hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov), and having
 generated an SSH public/private key pair, please inform a project owner that you require access to
 their project.
 
 Once you receive an email stating you have been added as a member of said project, you should then be
 able to create a Fork of that repository (using the
-[https://hpcgitlab.inl.gov](https://hpcgitlab.inl.gov) web site)
+[https://hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov) web site)
 
 To clone the repository you just forked:
+
 ```bash
-git clone git@hpcgitlab.inl.gov:<your user id>/<project>.git
+git clone git@hpcgitlab.hpc.inl.gov:<your user id>/<project>.git
 ```
 
 ### View build status on MOOSEBuild

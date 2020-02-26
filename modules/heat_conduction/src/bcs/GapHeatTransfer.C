@@ -246,6 +246,56 @@ GapHeatTransfer::computeJacobian()
   }
 }
 
+void
+GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
+{
+  if (jvar == _var.number())
+  {
+    computeJacobian();
+    return;
+  }
+
+  prepareMatrixTag(_assembly, _var.number(), jvar);
+
+  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+  // on the displaced mesh
+  auto phi_size = _sys.getVariable(_tid, jvar).dofIndices().size();
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    // compute this up front because it only depends on the quadrature point
+    computeGapValues();
+
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < phi_size; _j++)
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+
+    // Ok now do the contribution from the slave side
+    if (_quadrature && _has_info)
+    {
+      std::vector<dof_id_type> slave_side_dof_indices;
+
+      _sys.dofMap().dof_indices(_slave_side, slave_side_dof_indices, jvar);
+
+      DenseMatrix<Number> K_slave(_var.dofIndices().size(), slave_side_dof_indices.size());
+
+      mooseAssert(
+          _slave_side_phi->size() == slave_side_dof_indices.size(),
+          "The number of shapes does not match the number of dof indices on the slave elem");
+
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_slave_j = 0; _slave_j < static_cast<unsigned int>(slave_side_dof_indices.size());
+             ++_slave_j)
+          K_slave(_i, _slave_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
+
+      _subproblem.assembly(_tid).cacheJacobianBlock(
+          K_slave, _var.dofIndices(), slave_side_dof_indices, _var.scalingFactor());
+    }
+  }
+
+  accumulateTaggedLocalMatrix();
+}
+
 Real
 GapHeatTransfer::computeQpJacobian()
 {
@@ -270,8 +320,6 @@ GapHeatTransfer::computeSlaveQpJacobian()
 Real
 GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
 {
-  computeGapValues();
-
   if (!_has_info)
     return 0.0;
 
@@ -325,6 +373,37 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
            GapConductance::gapAttenuation(gapL, _min_gap, _min_gap_order) * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
+}
+
+Real
+GapHeatTransfer::computeSlaveQpOffDiagJacobian(unsigned jvar)
+{
+  if (!_has_info)
+    return 0.0;
+
+  unsigned int coupled_component;
+  bool active = false;
+  for (coupled_component = 0; coupled_component < _disp_vars.size(); ++coupled_component)
+    if (jvar == _disp_vars[coupled_component])
+    {
+      active = true;
+      break;
+    }
+
+  Real dRdx = 0.0;
+  if (active)
+  {
+    const Real gapL = gapLength();
+
+    const Point & normal(_normals[_qp]);
+
+    const Real dgap = dgapLength(-normal(coupled_component));
+
+    // The sign of the slave side should presumably be opposite that of the master side
+    dRdx = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] *
+           GapConductance::gapAttenuation(gapL, _min_gap, _min_gap_order) * dgap;
+  }
+  return _test[_i][_qp] * dRdx * (*_slave_side_phi)[_slave_j][0];
 }
 
 Real
