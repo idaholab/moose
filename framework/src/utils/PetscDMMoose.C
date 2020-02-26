@@ -743,6 +743,21 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
                 indices.insert(edof);
           }
+          // loop over lower dimensional slave elements
+          for (const auto & bit : *(dmm->_block_names))
+            if (bit.second.find("_slave_subdomain") != std::string::npos)
+              for (const auto & elem :
+                   as_range(dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(
+                                bit.first),
+                            dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(
+                                bit.first)))
+              {
+                evindices.clear();
+                dofmap.dof_indices(elem, evindices, v);
+                for (const auto & edof : evindices)
+                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                    indices.insert(edof);
+              }
         }
 
         // Iterate over the contacts included in this split.
