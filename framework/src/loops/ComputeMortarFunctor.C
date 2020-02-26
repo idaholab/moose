@@ -75,6 +75,9 @@ ComputeMortarFunctor<compute_stage>::operator()()
     // contribute to the mortar segment integrals, but we don't
     // want to do reinit() on them or there will be a negative
     // Jacobian error.
+    // I cannot call _assembly.elementVolume here. It bombs with
+    // messages like "Requested subdomain 0 does not exist."
+    // elem_volume is _only_ used for the following if check.
     Real elem_volume = msm_elem->volume();
 
     if (elem_volume < TOLERANCE)

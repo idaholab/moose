@@ -42,10 +42,12 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     _coord(_assembly.coordTransformation()),
     _normals(_assembly.normals()),
     _current_elem(_assembly.elem()),
+    _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
-    _neighbor_elem(_assembly.neighbor())
+    _neighbor_elem(_assembly.neighbor()),
+    _current_neighbor_volume(_assembly.neighborVolume())
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();

@@ -218,7 +218,7 @@ SpiralAnnularMeshGenerator::generate()
   }
 
   // Sanity check: make sure all elements have positive area. Note: we
-  // can't use elem->volume() for this, as that always returns a
+  // can't use elem -> volume() for this, as that always returns a
   // positive area regardless of the node ordering.
   // We compute (p1-p0) \cross (p2-p0) and check that the z-component is positive.
   for (const auto & elem : mesh->element_ptr_range())

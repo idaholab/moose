@@ -45,7 +45,12 @@ protected:
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _normals;
 
+  /// pointer to the current element object
   const Elem * const & _current_elem;
+
+  /// the volume of the current element
+  const Real & _current_elem_volume;
+
   /// current side of the current element
   const unsigned int & _current_side;
 
@@ -55,7 +60,9 @@ protected:
   /// The neighboring element
   const Elem * const & _neighbor_elem;
 
+  /// the neighboring element's volume
+  const Real & _current_neighbor_volume;
+
   /// The volume (or length) of the current neighbor
   const Real & getNeighborElemVolume();
 };
-

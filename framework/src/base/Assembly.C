@@ -3331,6 +3331,32 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
   addCachedJacobian();
 }
 
+Real
+Assembly::elementVolume(const Elem * elem)
+{
+  FEType fe_type(elem->default_order(), LAGRANGE);
+  std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+
+  const std::vector<Real> & JxW = fe->get_JxW();
+  // The default quadrature rule should integrate the mass matrix,
+  // thus it should be plenty to compute the volume
+  QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
+  MooseArray<Point> q_points;
+  MooseArray<Real> coord;
+
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(elem);
+
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+      &qrule, q_points, coord, elem->subdomain_id());
+  coord.resize(qrule.n_points());
+  Real vol = 0;
+  for (unsigned int qp = 0; qp < qrule.n_points(); ++qp)
+    vol += JxW[qp] * coord[qp];
+
+  return vol;
+}
+
 void
 Assembly::addCachedJacobian()
 {

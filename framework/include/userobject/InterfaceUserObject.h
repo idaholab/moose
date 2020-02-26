@@ -42,6 +42,8 @@ protected:
 
   /// current element
   const Elem * const & _current_elem;
+  /// the volume of the current element
+  const Real & _current_elem_volume;
   /// current side of the current element
   const unsigned int & _current_side;
   /// the side element
