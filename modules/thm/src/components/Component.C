@@ -135,7 +135,8 @@ Component::checkComponentExistsByName(const std::string & comp_name) const
 }
 
 void
-Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & params) const
+Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
+                                            bool need_one_specified) const
 {
   unsigned int n_provided_params = 0;
   for (const auto & param : params)
@@ -149,9 +150,10 @@ Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & par
       params_list_string += ", '" + params[i] + "'";
     params_list_string += "}";
 
-    if (n_provided_params == 0)
+    if (n_provided_params == 0 && need_one_specified)
       logError("One of the parameters ", params_list_string, " must be provided");
-    else
+
+    if (n_provided_params != 0)
       logError("Only one of the parameters ", params_list_string, " can be provided");
   }
 }

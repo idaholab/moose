@@ -346,8 +346,10 @@ protected:
    * Checks that exactly one parameter out of a list is provided
    *
    * @param[in] params   vector of parameter names
+   * @param[in] need_one_specified   Need one of the parameters specified?
    */
-  void checkMutuallyExclusiveParameters(const std::vector<std::string> & params) const;
+  void checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
+                                        bool need_one_specified = true) const;
 
   /**
    * Checks that an rDG parameter was provided
