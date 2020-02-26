@@ -263,6 +263,7 @@
 - /Materials/InterphaseMassTransferMaterial
 - /Materials/LinearTestMaterial
 - /Materials/MultiComponentFluidPropertiesMaterialPT
+- /Materials/PrandtlNumberMaterial
 - /Materials/PressureRelaxationRateMaterial
 - /Materials/RDG7EqnNCGMaterial
 - /Materials/ReynoldsNumberMaterial
