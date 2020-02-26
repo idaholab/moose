@@ -4,7 +4,7 @@
 
 ## Description
 
-`ADPenaltyDirichletBC` is a `ADNodalBC` used for enforcing Dirichlet boundary conditions
+`ADPenaltyDirichletBC` is a `ADIntegratedBC` used for enforcing Dirichlet boundary conditions
 which differs from the [`ADDirichletBC`](/ADDirichletBC.md) class in the way in which it handles the enforcement.
 It is appropriate for partial differential equations (PDEs) in the form
 

@@ -4,7 +4,7 @@
 
 ## Description
 
-`PenaltyDirichletBC` is a `NodalBC` used for enforcing Dirichlet boundary conditions
+`PenaltyDirichletBC` is a `IntegratedBC` used for enforcing Dirichlet boundary conditions
 which differs from the [`DirichletBC`](/DirichletBC.md) class in the way in which it handles the enforcement.
 It is appropriate for partial differential equations (PDEs) in the form
 
