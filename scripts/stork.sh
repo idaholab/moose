@@ -95,6 +95,8 @@ mv "$dir/src/base/${srcname}App.C.${kind}" "$dir/src/base/${dstname}App.C"
 mv "$dir/test/src/base/${srcname}TestApp.C.${kind}" "$dir/test/src/base/${dstname}TestApp.C"
 mv "$dir/include/base/${srcname}App.h" "$dir/include/base/${dstname}App.h"
 mv "$dir/test/include/base/${srcname}TestApp.h" "$dir/test/include/base/${dstname}TestApp.h"
+mv "$dir/doc/config.yml.${kind}" "$dir/doc/config.yml"
+mv "$dir/doc/moosedocs.py.${kind}" "$dir/doc/moosedocs.py"
 chmod a+x "$dir/run_tests"
 
 # remove unnecessary files
@@ -102,6 +104,8 @@ rm -f $dir/Makefile.*
 rm -f $dir/unit/Makefile.*
 rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
+rm -f $dir/doc/config.yml.*
+rm -f $dir/doc/moosedocs.py.*
 
 if [[ "$kind" == "app" ]]; then
     # copy clang-format related files
