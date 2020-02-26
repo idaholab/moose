@@ -44,6 +44,14 @@ public:
 
   bool applyElementEeight() { return _apply_element_weight; }
 
+  static void partitionGraph(const Parallel::Communicator & comm,
+                             const std::vector<std::vector<dof_id_type>> & graph,
+                             const std::vector<dof_id_type> & elem_weights,
+                             const std::vector<dof_id_type> & side_weights,
+                             const dof_id_type num_parts, const dof_id_type num_parts_per_compute_node,
+                             const std::string & part_package,
+                             std::vector<dof_id_type> & partition);
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
@@ -58,4 +66,5 @@ private:
   std::string _part_package;
   bool _apply_element_weight;
   bool _apply_side_weight;
+  dof_id_type _num_parts_per_compute_node;
 };
