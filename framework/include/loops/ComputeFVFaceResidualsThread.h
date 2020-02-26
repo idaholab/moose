@@ -42,48 +42,23 @@ struct OnScopeExit
   }
 };
 
-/**
- * Base class for assembly-like calculations.
- */
 template <typename RangeType>
-class ComputeFVFaceResidualsThread
+class ThreadedFaceLoop
 {
 public:
-  ComputeFVFaceResidualsThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ThreadedFaceLoop(FEProblemBase & fe_problem, const std::set<TagID> & tags);
 
-  ComputeFVFaceResidualsThread(ComputeFVFaceResidualsThread & x, Threads::split split);
+  ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split split);
 
-  virtual ~ComputeFVFaceResidualsThread();
+  virtual ~ThreadedFaceLoop();
 
   virtual void operator()(const RangeType & range, bool bypass_threading = false);
 
-  void join(const ComputeFVFaceResidualsThread & /*y*/){};
+  void join(const ThreadedFaceLoop & /*y*/){};
 
-  /**
-   * Called before the element range loop
-   */
-  virtual void pre();
+  virtual void onFace(const FaceInfo & fi) = 0;
 
-  /**
-   * Called after the element range loop
-   */
-  virtual void post();
-
-  /**
-   * Called before the boundary assembly
-   *
-   * @param elem - The element we are checking is on the boundary.
-   * @param side - The side of the element in question.
-   * @param bnd_id - ID of the boundary we are at
-   */
-  virtual void onFace(const FaceInfo & fi);
-
-  /**
-   * Called before the boundary assembly
-   *
-   * @param bnd_id - ID of the boundary we are at
-   */
-  virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary);
+  virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) = 0;
 
   /**
    * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
@@ -91,7 +66,7 @@ public:
    * You might think that you can do some expensive stuff in here and get away with it...
    * but there are applications that have TONS of subdomains....
    */
-  virtual void subdomainChanged();
+  virtual void subdomainChanged(){};
 
   /**
    * Called every time the neighbor subdomain changes (i.e. the subdomain of _this_ neighbor
@@ -107,7 +82,7 @@ public:
    */
   virtual void caughtMooseException(MooseException &){};
 
-private:
+protected:
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
   const std::set<TagID> & _tags;
@@ -124,45 +99,44 @@ private:
 
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
-
-  OnScopeExit reinitVariables(const FaceInfo & fi);
-
-  std::set<MooseVariableFVBase *> _needed_fv_vars;
 };
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(FEProblemBase & fe_problem,
-                                                                      const std::set<TagID> & tags)
+ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
+                                              const std::set<TagID> & tags)
   : _fe_problem(fe_problem), _mesh(fe_problem.mesh()), _tags(tags)
 {
 }
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(
-    ComputeFVFaceResidualsThread & x, Threads::split /*split*/)
+ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem), _mesh(x._mesh), _tags(x._tags)
 {
 }
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::~ComputeFVFaceResidualsThread()
+ThreadedFaceLoop<RangeType>::~ThreadedFaceLoop()
 {
 }
 
-// the vector<faceinfo> data structure needs to be built such that for all
-// sides on an interface between two subdomains, the elements of the same
-// subdomain are used consistently for all the "elem" (i.e. not "neighbor")
-// parameters in order to avoid jumping back and forth along the boundary
-// between using one or the other subdomains' FV kernels unpredictably.
+// TODO: ensure the vector<faceinfo> data structure needs to be built such
+// that for all sides on an interface between two subdomains, the elements of
+// the same subdomain are used consistently for all the "elem" (i.e. not
+// "neighbor") parameters in order to avoid jumping back and forth along the
+// boundary between using one or the other subdomains' FV kernels
+// unpredictably.
 template <typename RangeType>
 void
-ComputeFVFaceResidualsThread<RangeType>::operator()(const RangeType & range, bool bypass_threading)
+ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_threading)
 {
-  // skip everything if we don't have any FV kernels.
+  // TODO: make this query fv flux kernel specific or somehow integrate the
+  // fv source kernels into this loop. Also this check will need to increase
+  // in generality if/when other systems and objects besides FV stuff get
+  // added to this loop.
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVFluxKernels")
+      .template condition<AttribSystem>("FVKernels")
       .queryInto(kernels);
   if (kernels.size() == 0)
     return;
@@ -173,8 +147,6 @@ ComputeFVFaceResidualsThread<RangeType>::operator()(const RangeType & range, boo
     {
       ParallelUniqueId puid;
       _tid = bypass_threading ? 0 : puid.id;
-
-      pre();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
@@ -190,6 +162,11 @@ ComputeFVFaceResidualsThread<RangeType>::operator()(const RangeType & range, boo
         if (_subdomain != _old_subdomain)
           subdomainChanged();
 
+        _old_neighbor_subdomain = _neighbor_subdomain;
+        _neighbor_subdomain = faceinfo->rightElem().subdomain_id();
+        if (_neighbor_subdomain != _old_neighbor_subdomain)
+          neighborSubdomainChanged();
+
         // get elem's face residual contribution to it's neighbor
         onFace(*faceinfo);
 
@@ -199,8 +176,6 @@ ComputeFVFaceResidualsThread<RangeType>::operator()(const RangeType & range, boo
         for (auto it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(*faceinfo, *it);
       } // range
-
-      post();
     }
     catch (libMesh::LogicError & e)
     {
@@ -213,15 +188,53 @@ ComputeFVFaceResidualsThread<RangeType>::operator()(const RangeType & range, boo
   }
 }
 
+/**
+ * Base class for assembly-like calculations.
+ */
 template <typename RangeType>
-void
-ComputeFVFaceResidualsThread<RangeType>::pre()
+class ComputeFVFaceResidualsThread : public ThreadedFaceLoop<RangeType>
+{
+public:
+  ComputeFVFaceResidualsThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+
+  ComputeFVFaceResidualsThread(ComputeFVFaceResidualsThread & x, Threads::split split);
+
+  virtual ~ComputeFVFaceResidualsThread();
+
+  virtual void onFace(const FaceInfo & fi) override;
+
+  virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) override;
+
+  virtual void subdomainChanged() override;
+
+private:
+  OnScopeExit reinitVariables(const FaceInfo & fi);
+
+  std::set<MooseVariableFVBase *> _needed_fv_vars;
+
+  using ThreadedFaceLoop<RangeType>::_fe_problem;
+  using ThreadedFaceLoop<RangeType>::_mesh;
+  using ThreadedFaceLoop<RangeType>::_tid;
+  using ThreadedFaceLoop<RangeType>::_tags;
+  using ThreadedFaceLoop<RangeType>::_subdomain;
+};
+
+template <typename RangeType>
+ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(FEProblemBase & fe_problem,
+                                                                      const std::set<TagID> & tags)
+  : ThreadedFaceLoop<RangeType>(fe_problem, tags)
 {
 }
 
 template <typename RangeType>
-void
-ComputeFVFaceResidualsThread<RangeType>::post()
+ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(
+    ComputeFVFaceResidualsThread & x, Threads::split split)
+  : ThreadedFaceLoop<RangeType>(x, split), _needed_fv_vars(x._needed_fv_vars)
+{
+}
+
+template <typename RangeType>
+ComputeFVFaceResidualsThread<RangeType>::~ComputeFVFaceResidualsThread()
 {
 }
 
@@ -312,8 +325,6 @@ ComputeFVFaceResidualsThread<RangeType>::onBoundary(const FaceInfo & fi, Boundar
 
   auto swap_back_sentinel = reinitVariables(fi);
 
-  // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
-  // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
   _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
@@ -332,7 +343,8 @@ ComputeFVFaceResidualsThread<RangeType>::subdomainChanged()
 
   // TODO: do this for other relevant objects - like FV BCs, FV source term
   // kernels, etc. - but we don't need to add them for other types of objects
-  // like FE or DG kernels because those kernels don't run in this loop.
+  // like FE or DG kernels because those kernels don't run in this loop. Do we
+  // really want to integrate fv source kernels into this loop?
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
