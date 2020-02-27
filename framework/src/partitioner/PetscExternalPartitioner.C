@@ -34,7 +34,9 @@ PetscExternalPartitioner::validParams()
                              partPackage,
                              "The external package is used for partitioning the mesh via PETSc");
 
-  params.addParam<dof_id_type>("num_cores_per_compute_node", 1, "Number of cores per compute node for hierarchical partitioning");
+  params.addParam<dof_id_type>("num_cores_per_compute_node",
+                               1,
+                               "Number of cores per compute node for hierarchical partitioning");
 
   params.addParam<bool>("apply_element_weight",
                         false,
@@ -126,7 +128,7 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     }
   }
 
-   side_weights.clear();
+  side_weights.clear();
   // Edge weights represent the communication
   if (_apply_side_weight)
     side_weights.resize(num_edges);
@@ -153,7 +155,6 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
 
         nj++;
         n_neighbors++;
-
       }
 
       side++;
@@ -167,28 +168,35 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
 
   std::vector<dof_id_type> partition;
   // Partition graph
-  partitionGraph(comm(), _dual_graph, elem_weights, side_weights, n_parts, _num_parts_per_compute_node, _part_package, partition);
+  partitionGraph(comm(),
+                 _dual_graph,
+                 elem_weights,
+                 side_weights,
+                 n_parts,
+                 _num_parts_per_compute_node,
+                 _part_package,
+                 partition);
   // Assign partition to mesh
   assign_partitioning(mesh, partition);
 }
 
 void
 PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
-                           const std::vector<std::vector<dof_id_type>> & graph,
-                           const std::vector<dof_id_type> & elem_weights,
-                           const std::vector<dof_id_type> & side_weights,
-                           const dof_id_type num_parts, const dof_id_type num_parts_per_compute_node,
-                           const std::string & part_package,
-                           std::vector<dof_id_type> & partition)
+                                         const std::vector<std::vector<dof_id_type>> & graph,
+                                         const std::vector<dof_id_type> & elem_weights,
+                                         const std::vector<dof_id_type> & side_weights,
+                                         const dof_id_type num_parts,
+                                         const dof_id_type num_parts_per_compute_node,
+                                         const std::string & part_package,
+                                         std::vector<dof_id_type> & partition)
 {
 #ifdef LIBMESH_HAVE_PETSC
 
   PetscErrorCode ierr;
   Mat dual;
-  PetscInt num_local_elems, num_elems,
-           *xadj=nullptr, *adjncy=nullptr,i,
-          *values=nullptr, *petsc_elem_weights=nullptr;
-  const PetscInt *parts;
+  PetscInt num_local_elems, num_elems, *xadj = nullptr, *adjncy = nullptr, i, *values = nullptr,
+                                       *petsc_elem_weights = nullptr;
+  const PetscInt * parts;
   MatPartitioning part;
   IS is;
 
@@ -197,38 +205,41 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   // Figure out the total of elements
   comm.sum(num_elems);
 
-  ierr = PetscCalloc1(num_local_elems+1,&xadj);
+  ierr = PetscCalloc1(num_local_elems + 1, &xadj);
   CHKERRABORT(comm.get(), ierr);
 
   num_local_elems = 0;
   xadj[0] = 0;
-  for (auto & row: graph)
+  for (auto & row : graph)
   {
     num_local_elems++;
-    xadj[num_local_elems] = xadj[num_local_elems-1] + row.size();
+    xadj[num_local_elems] = xadj[num_local_elems - 1] + row.size();
   }
 
-  ierr = PetscCalloc1(xadj[num_local_elems],&adjncy);
+  ierr = PetscCalloc1(xadj[num_local_elems], &adjncy);
   CHKERRABORT(comm.get(), ierr);
 
   // Fill up adjacency
   i = 0;
-  for (auto & row: graph)
-     for (auto elem: row)
-       adjncy[i++] = elem;
+  for (auto & row : graph)
+    for (auto elem : row)
+      adjncy[i++] = elem;
 
   // If there are no neighbors at all, no side weights should be proivded
   if (!i)
-    mooseAssert(!side_weights.size(), "No side weights should be provided since there are no neighbors at all");
+    mooseAssert(!side_weights.size(),
+                "No side weights should be provided since there are no neighbors at all");
 
   // Copy over weights
   if (side_weights.size())
   {
-    mooseAssert(side_weights.size()==i, "Side weight size "<<side_weights.size()<<" does not match with adjacency matrix size "<<i);
-    ierr = PetscCalloc1(side_weights.size(),&values);
+    mooseAssert(side_weights.size() == i,
+                "Side weight size " << side_weights.size()
+                                    << " does not match with adjacency matrix size " << i);
+    ierr = PetscCalloc1(side_weights.size(), &values);
     CHKERRABORT(comm.get(), ierr);
     i = 0;
-    for (auto weight: side_weights)
+    for (auto weight : side_weights)
       values[i++] = weight;
   }
 
@@ -241,17 +252,21 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   CHKERRABORT(comm.get(), ierr);
 
   if (!num_local_elems)
-    mooseAssert(!elem_weights.size(), "No element weights should be provided since there are no elements at all");
+    mooseAssert(!elem_weights.size(),
+                "No element weights should be provided since there are no elements at all");
 
   // Handle element weights
   if (elem_weights.size())
   {
-    mooseAssert(elem_weights.size()==num_local_elems, "Element weight size "<<elem_weights.size()<< " does not match with the number of local elements" <<num_local_elems);
+    mooseAssert(elem_weights.size() == num_local_elems,
+                "Element weight size " << elem_weights.size()
+                                       << " does not match with the number of local elements"
+                                       << num_local_elems);
 
-    ierr = PetscCalloc1(elem_weights.size(),&petsc_elem_weights);
+    ierr = PetscCalloc1(elem_weights.size(), &petsc_elem_weights);
     CHKERRABORT(comm.get(), ierr);
     i = 0;
-    for (auto weight: elem_weights)
+    for (auto weight : elem_weights)
       petsc_elem_weights[i++] = weight;
 
     ierr = MatPartitioningSetVertexWeights(part, petsc_elem_weights);
@@ -260,14 +275,14 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
 
   ierr = MatPartitioningSetNParts(part, num_parts);
   CHKERRABORT(comm.get(), ierr);
-  #if PETSC_VERSION_LESS_THAN(3, 9, 2)
+#if PETSC_VERSION_LESS_THAN(3, 9, 2)
   if (part_package == "party")
     mooseError("PETSc-3.9.3 or higher is required for using party");
-  #endif
-  #if PETSC_VERSION_LESS_THAN(3, 9, 0)
+#endif
+#if PETSC_VERSION_LESS_THAN(3, 9, 0)
   if (part_package == "chaco")
     mooseError("PETSc-3.9.0 or higher is required for using chaco");
-  #endif
+#endif
   ierr = MatPartitioningSetType(part, part_package.c_str());
   CHKERRABORT(comm.get(), ierr);
   if (part_package == "hierarch")
@@ -284,7 +299,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   CHKERRABORT(comm.get(), ierr);
 
   partition.resize(num_local_elems);
-  for (i=0; i<num_local_elems; i++)
+  for (i = 0; i < num_local_elems; i++)
     partition[i] = parts[i];
 
   ierr = ISRestoreIndices(is, &parts);

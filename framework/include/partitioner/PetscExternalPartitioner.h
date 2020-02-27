@@ -48,7 +48,8 @@ public:
                              const std::vector<std::vector<dof_id_type>> & graph,
                              const std::vector<dof_id_type> & elem_weights,
                              const std::vector<dof_id_type> & side_weights,
-                             const dof_id_type num_parts, const dof_id_type num_parts_per_compute_node,
+                             const dof_id_type num_parts,
+                             const dof_id_type num_parts_per_compute_node,
                              const std::string & part_package,
                              std::vector<dof_id_type> & partition);
 
