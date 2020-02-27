@@ -349,7 +349,6 @@
   [./interface]
     master = 3
     slave = 4
-    system = constraint
     model = glued
     formulation = kinematic
     normalize_penalty = true

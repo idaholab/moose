@@ -1,18 +1,21 @@
-# This is a dirac (contact formulation) version of glued_kinematic.i
+#  This is a benchmark test that checks constraint based frictional
+#  contact using the penalty method.  In this test a constant
+#  displacement is applied in the horizontal direction to simulate
+#  a small block come sliding down a larger block.
+#
+#  A friction coefficient of 0.4 is used.  The gold file is run on one processor
+#  and the benchmark case is run on a minimum of 4 processors to ensure no
+#  parallel variability in the contact pressure and penetration results.
+#
+
 [Mesh]
-  file = blocks_2d_nogap.e
+  file = sliding_elastic_blocks_2d.e
+  patch_size = 80
 []
 
 [GlobalParams]
   volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -35,12 +38,13 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
   [../]
 []
+
 
 [AuxKernels]
   [./zeroslip_x]
@@ -77,6 +81,23 @@
   [../]
 []
 
+[Postprocessors]
+  [./nonlinear_its]
+    type = NumNonlinearIterations
+    execute_on = timestep_end
+  [../]
+  [./penetration]
+    type = NodalVariableValue
+    variable = penetration
+    nodeid = 222
+  [../]
+  [./contact_pressure]
+    type = NodalVariableValue
+    variable = contact_pressure
+    nodeid = 222
+  [../]
+[]
+
 [BCs]
   [./left_x]
     type = DirichletBC
@@ -94,8 +115,7 @@
     type = DirichletBC
     variable = disp_x
     boundary = 4
-    #Initial gap is 0.01
-    value = -0.01
+    value = -0.02
   [../]
   [./right_y]
     type = FunctionDirichletBC
@@ -107,43 +127,35 @@
 
 [Materials]
   [./left]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
-    youngs_modulus = 1e7
-  [../]
-  [./right]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
   l_max_its = 100
   nl_max_its = 1000
-  dt = 0.01
-  end_time = 0.10
+  dt = 0.1
+  end_time = 14.99999
   num_steps = 1000
   l_tol = 1e-6
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-6
   dtmin = 0.01
 
   [./Predictor]
@@ -153,6 +165,7 @@
 []
 
 [Outputs]
+  interval = 10
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -165,10 +178,12 @@
 
 [Contact]
   [./leftright]
-    master = 2
     slave = 3
-    model = glued
-    penalty = 1e+6
-    system = dirackernel
+    master = 2
+    model = coulomb
+    penalty = 1e+7
+    friction_coefficient = 0.4
+    formulation = penalty
+    normal_smoothing_distance = 0.1
   [../]
 []

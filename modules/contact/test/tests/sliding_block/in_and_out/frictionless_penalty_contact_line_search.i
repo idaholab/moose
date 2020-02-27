@@ -1,11 +1,13 @@
-#  This is a benchmark test that checks constraint based frictional
-#  contact using the penalty method.  In this test a constant
+#  This is a benchmark test that checks constraint based frictionless
+#  contact using the penalty method.  In this test a sinusoidal
 #  displacement is applied in the horizontal direction to simulate
-#  a small block come sliding down a larger block.
+#  a small block come in and out of contact as it slides down a larger block.
 #
-#  A friction coefficient of 0.2 is used.  The gold file is run on one processor
-#  and the benchmark case is run on a minimum of 4 processors to ensure no
-#  parallel variability in the contact pressure and penetration results.
+#  The sinusoid is of the form 0.4sin(4t)+0.2. The gold file is run
+#  on one processor and the benchmark
+#  case is run on a minimum of 4 processors to ensure no parallel variability
+#  in the contact pressure and penetration results.  Further documentation can
+#  found in moose/modules/contact/doc/sliding_block/
 #
 
 [Mesh]
@@ -35,6 +37,10 @@
   [./vertical_movement]
     type = ParsedFunction
     value = -t
+  [../]
+  [./horizontal_movement]
+    type = ParsedFunction
+    value = -0.04*sin(4*t)+0.02
   [../]
 []
 
@@ -95,6 +101,10 @@
     variable = contact_pressure
     nodeid = 222
   [../]
+  [./tot_nonlin_it]
+    type = CumulativeValuePostprocessor
+    postprocessor = nonlinear_its
+  [../]
 []
 
 [BCs]
@@ -111,10 +121,10 @@
     value = 0.0
   [../]
   [./right_x]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
-    value = -0.02
+    function = horizontal_movement
   [../]
   [./right_y]
     type = FunctionDirichletBC
@@ -137,35 +147,39 @@
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+     type = SMP
+     full = true
+  [../]
+[]
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_ksp_ew'
+  petsc_options = '-ksp_monitor_true_residual'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
 
-  line_search = 'none'
+  line_search = 'contact'
+  contact_line_search_ltol = .5
+  contact_line_search_allowed_lambda_cuts = 0
 
   l_max_its = 100
-  nl_max_its = 1000
+  nl_max_its = 20
   dt = 0.1
-  end_time = 15
-  num_steps = 1000
+  end_time = 3
+  # num_steps = 30
   l_tol = 1e-6
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-6
   dtmin = 0.01
-
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
 []
 
 [Outputs]
-  interval = 10
+  perf_graph = true
+  print_linear_residuals = false
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -180,11 +194,9 @@
   [./leftright]
     slave = 3
     master = 2
-    model = coulomb
+    model = frictionless
     penalty = 1e+7
-    friction_coefficient = 0.2
     formulation = penalty
-    system = constraint
     normal_smoothing_distance = 0.1
   [../]
 []

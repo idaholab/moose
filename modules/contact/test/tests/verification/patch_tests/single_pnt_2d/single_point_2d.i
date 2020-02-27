@@ -233,7 +233,6 @@
     master = 2
     slave = 3
     model = glued
-    system = constraint
     formulation = kinematic
     penalty = 1e12
     normalize_penalty = true

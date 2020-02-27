@@ -93,7 +93,6 @@
     slave = 2
     penalty = 1e7
     tangential_tolerance = 1e-5
-    system = Constraint
   [../]
 []
 

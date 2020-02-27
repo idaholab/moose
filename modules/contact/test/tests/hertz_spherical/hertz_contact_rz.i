@@ -191,7 +191,6 @@
     master = 1000
     slave = 100
     model = coulomb
-    system = constraint
     formulation = penalty
     normalize_penalty = true
     friction_coefficient = 0.4

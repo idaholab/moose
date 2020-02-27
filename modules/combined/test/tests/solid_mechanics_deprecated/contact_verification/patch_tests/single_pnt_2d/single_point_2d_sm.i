@@ -228,7 +228,6 @@
     disp_y = disp_y
     disp_x = disp_x
     model = glued
-    system = constraint
     formulation = kinematic
     penalty = 1e12
     normalize_penalty = true

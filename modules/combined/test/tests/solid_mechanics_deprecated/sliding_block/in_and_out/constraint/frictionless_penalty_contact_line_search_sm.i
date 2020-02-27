@@ -212,7 +212,6 @@
     model = frictionless
     penalty = 1e+7
     formulation = penalty
-    system = constraint
     normal_smoothing_distance = 0.1
   [../]
 []

@@ -1,6 +1,16 @@
-# This is a dirac (contact formulation) version of frictionless_penalty.i
+#  This is a benchmark test that checks constraint based frictionless
+#  contact using the penalty method.  In this test a constant
+#  displacement is applied in the horizontal direction to simulate
+#  a small block come sliding down a larger block.
+#
+#  The gold file is run on one processor
+#  and the benchmark case is run on a minimum of 4 processors to ensure no
+#  parallel variability in the contact pressure and penetration results.
+#
+
 [Mesh]
-  file = blocks_2d.e
+  file = sliding_elastic_blocks_2d.e
+  patch_size = 80
 []
 
 [GlobalParams]
@@ -70,6 +80,23 @@
   [../]
 []
 
+[Postprocessors]
+  [./nonlinear_its]
+    type = NumNonlinearIterations
+    execute_on = timestep_end
+  [../]
+  [./penetration]
+    type = NodalVariableValue
+    variable = penetration
+    nodeid = 222
+  [../]
+  [./contact_pressure]
+    type = NodalVariableValue
+    variable = contact_pressure
+    nodeid = 222
+  [../]
+[]
+
 [BCs]
   [./left_x]
     type = DirichletBC
@@ -87,7 +114,6 @@
     type = DirichletBC
     variable = disp_x
     boundary = 4
-    #Initial gap is 0.01
     value = -0.02
   [../]
   [./right_y]
@@ -101,17 +127,11 @@
 [Materials]
   [./left]
     type = ComputeIsotropicElasticityTensor
-    block = '1'
-    youngs_modulus = 1e7
-    poissons_ratio = 0.3
-  [../]
-  [./right]
-    type = ComputeIsotropicElasticityTensor
-    block = '2'
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [./left_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
@@ -119,22 +139,22 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
   l_max_its = 100
   nl_max_its = 1000
-  dt = 0.01
-  end_time = 0.10
+  dt = 0.1
+  end_time = 15
   num_steps = 1000
   l_tol = 1e-6
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-6
   dtmin = 0.01
 
   [./Predictor]
@@ -144,6 +164,7 @@
 []
 
 [Outputs]
+  interval = 10
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -156,11 +177,11 @@
 
 [Contact]
   [./leftright]
-    master = 2
     slave = 3
+    master = 2
     model = frictionless
-    formulation = penalty
     penalty = 1e+7
-    system = diracKernel
+    formulation = penalty
+    normal_smoothing_distance = 0.1
   [../]
 []

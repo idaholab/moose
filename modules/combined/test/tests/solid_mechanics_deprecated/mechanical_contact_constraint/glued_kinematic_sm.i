@@ -164,7 +164,6 @@
 
 [Contact]
   [./leftright]
-    system = Constraint
     master = 2
     slave = 3
     model = glued

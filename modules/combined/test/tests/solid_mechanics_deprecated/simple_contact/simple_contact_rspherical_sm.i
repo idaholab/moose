@@ -96,7 +96,6 @@
   [./fred]
     master = 2
     slave = 3
-    system = constraint
   [../]
 []
 

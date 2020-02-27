@@ -340,7 +340,6 @@
   [./interface]
     master = 3
     slave = 4
-    system = constraint
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+11

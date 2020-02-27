@@ -52,7 +52,6 @@ offset = 1e-2
     model = frictionless
     formulation = kinematic
     penalty = 1e0
-    system = constraint
   []
 []
 

@@ -1,10 +1,10 @@
-#  This is a benchmark test that checks Dirac based frictional
+#  This is a benchmark test that checks constraint based frictionless
 #  contact using the penalty method.  In this test a sinusoidal
 #  displacement is applied in the horizontal direction to simulate
 #  a small block come in and out of contact as it slides down a larger block.
 #
-#  The sinusoid is of the form 0.4sin(4t)+0.2 and a friction coefficient
-#  of 0.2 is used.  The gold file is run on one processor and the benchmark
+#  The sinusoid is of the form 0.4sin(4t)+0.2. The gold file is run
+#  on one processor and the benchmark
 #  case is run on a minimum of 4 processors to ensure no parallel variability
 #  in the contact pressure and penetration results.  Further documentation can
 #  found in moose/modules/contact/doc/sliding_block/
@@ -16,8 +16,8 @@
 []
 
 [GlobalParams]
-  displacements = 'disp_x disp_y'
   volumetric_locking_correction = false
+  displacements = 'disp_x disp_y'
 []
 
 [AuxVariables]
@@ -131,7 +131,7 @@
 []
 
 [Materials]
-  [./constitutive]
+  [./left]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
@@ -140,6 +140,13 @@
   [./stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+     type = SMP
+     full = true
   [../]
 []
 
@@ -153,15 +160,15 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
   l_max_its = 100
   nl_max_its = 1000
   dt = 0.1
   end_time = 15
   num_steps = 1000
-  nl_rel_tol = 1e-6
-  dtmin = 0.01
   l_tol = 1e-6
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-6
+  dtmin = 0.01
 
   [./Predictor]
     type = SimplePredictor
@@ -170,9 +177,8 @@
 []
 
 [Outputs]
-  file_base = frictional_02_penalty_out
   interval = 10
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -186,11 +192,9 @@
   [./leftright]
     slave = 3
     master = 2
-    model = coulomb
+    model = frictionless
     penalty = 1e+7
     formulation = penalty
-    friction_coefficient = 0.2
     normal_smoothing_distance = 0.1
-    system = DiracKernel
   [../]
 []

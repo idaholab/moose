@@ -1,13 +1,11 @@
-#  This is a benchmark test that checks Dirac based frictionless
-#  contact using the kinematic method.  In this test a sinusoidal
+#  This is a benchmark test that checks constraint based frictionless
+#  contact using the augmented lagrangian method.  In this test a constant
 #  displacement is applied in the horizontal direction to simulate
-#  a small block come in and out of contact as it slides down a larger block.
+#  a small block come sliding down a larger block.
 #
-#  The sinusoid is of the form 0.4sin(4t)+0.2. The gold file is run
-#  on one processor and the benchmark
-#  case is run on a minimum of 4 processors to ensure no parallel variability
-#  in the contact pressure and penetration results.  Further documentation can
-#  found in moose/modules/contact/doc/sliding_block/
+#  The gold file is run on one processor
+#  and the benchmark case is run on a minimum of 4 processors to ensure no
+#  parallel variability in the contact pressure and penetration results.
 #
 
 [Mesh]
@@ -16,18 +14,17 @@
 []
 
 [GlobalParams]
-  displacements = 'disp_x disp_y'
   volumetric_locking_correction = false
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  displacements = 'disp_x disp_y'
 []
 
 [AuxVariables]
+  [./saved_x]
+  [../]
+  [./saved_y]
+  [../]
+  [./contact_traction]
+  [../]
   [./penetration]
   [../]
   [./inc_slip_x]
@@ -45,18 +42,17 @@
     type = ParsedFunction
     value = -t
   [../]
-  [./horizontal_movement]
-    type = ParsedFunction
-    value = -0.04*sin(4*t)+0.02
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = FINITE
+    save_in = 'saved_x saved_y'
+    extra_vector_tags = 'ref'
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
-[]
 
 [AuxKernels]
   [./zeroslip_x]
@@ -124,10 +120,10 @@
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
-    function = horizontal_movement
+    value = -0.02
   [../]
   [./right_y]
     type = FunctionDirichletBC
@@ -139,22 +135,14 @@
 
 [Materials]
   [./left]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./right]
-    type = Elastic
-    formulation = NonlinearPlaneStrain
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
-    youngs_modulus = 1e6
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
@@ -168,15 +156,15 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
   l_max_its = 100
-  nl_max_its = 1000
+  nl_max_its = 100
   dt = 0.1
   end_time = 15
-  num_steps = 1000
-  nl_rel_tol = 1e-6
-  dtmin = 0.01
+  num_steps = 200
   l_tol = 1e-6
+  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-6
+  dtmin = 0.01
 
   [./Predictor]
     type = SimplePredictor
@@ -186,7 +174,7 @@
 
 [Outputs]
   interval = 10
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -196,14 +184,31 @@
   [../]
 []
 
+[Problem]
+  type = AugmentedLagrangianContactProblem
+  solution_variables = 'disp_x disp_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
+  maximum_lagrangian_update_iterations = 25
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Contact]
   [./leftright]
     slave = 3
     master = 2
     model = frictionless
-    penalty = 1e+6
-    formulation = kinematic
+    penalty = 1e+7
+    normalize_penalty = true
+    formulation = augmented_lagrange
+    tangential_tolerance = 1e-3
     normal_smoothing_distance = 0.1
-    system = DiracKernel
+    al_penetration_tolerance = 1e-9
   [../]
 []

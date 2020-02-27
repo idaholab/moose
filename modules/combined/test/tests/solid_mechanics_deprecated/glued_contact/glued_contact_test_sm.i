@@ -45,7 +45,6 @@
     penalty = 1e6
     model = glued
     formulation = kinematic
-    system = Constraint
   [../]
 []
 

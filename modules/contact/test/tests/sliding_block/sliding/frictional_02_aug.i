@@ -1,14 +1,26 @@
-# This is a dirac (contact formulation) version of glued_penalty.i
+#  This is a benchmark test that checks constraint based frictional
+#  contact using the augmented lagrangian method.  In this test a constant
+#  displacement is applied in the horizontal direction to simulate
+#  a small block come sliding down a larger block.
+#
+#  A friction coefficient of 0.2 is used.  The gold file is run on one processor
+#  and the benchmark case is run on a minimum of 4 processors to ensure no
+#  parallel variability in the contact pressure and penetration results.
+#
+
 [Mesh]
-  file = blocks_2d_nogap.e
+  file = sliding_elastic_blocks_2d.e
+  patch_size = 80
 []
 
 [GlobalParams]
-  volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
 []
 
 [AuxVariables]
+  [./contact_traction]
+  [../]
   [./penetration]
   [../]
   [./inc_slip_x]
@@ -18,6 +30,18 @@
   [./accum_slip_x]
   [../]
   [./accum_slip_y]
+  [../]
+  [./saved_x]
+  [../]
+  [./saved_y]
+  [../]
+  [./diag_saved_x]
+  [../]
+  [./diag_saved_y]
+  [../]
+  [./tang_force_x]
+  [../]
+  [./tang_force_y]
   [../]
 []
 
@@ -32,8 +56,11 @@
   [./all]
     add_variables = true
     strain = FINITE
+    save_in = 'saved_x saved_y'
+    extra_vector_tags = 'ref'
   [../]
 []
+
 
 [AuxKernels]
   [./zeroslip_x]
@@ -70,6 +97,23 @@
   [../]
 []
 
+[Postprocessors]
+  [./nonlinear_its]
+    type = NumNonlinearIterations
+    execute_on = timestep_end
+  [../]
+  [./penetration]
+    type = NodalVariableValue
+    variable = penetration
+    nodeid = 222
+  [../]
+  [./contact_pressure]
+    type = NodalVariableValue
+    variable = contact_pressure
+    nodeid = 222
+  [../]
+[]
+
 [BCs]
   [./left_x]
     type = DirichletBC
@@ -87,8 +131,7 @@
     type = DirichletBC
     variable = disp_x
     boundary = 4
-    #Initial gap is 0.01
-    value = -0.01
+    value = -0.02
   [../]
   [./right_y]
     type = FunctionDirichletBC
@@ -101,13 +144,7 @@
 [Materials]
   [./left]
     type = ComputeIsotropicElasticityTensor
-    block = '1'
-    youngs_modulus = 1e7
-    poissons_ratio = 0.3
-  [../]
-  [./right]
-    type = ComputeIsotropicElasticityTensor
-    block = '2'
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
@@ -119,21 +156,21 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
-  l_max_its = 100
-  nl_max_its = 1000
-  dt = 0.01
-  end_time = 0.10
-  num_steps = 1000
+  l_max_its = 20
+  nl_max_its = 200
+  dt = 0.1
+  end_time = 15
+  num_steps = 200
   l_tol = 1e-6
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   dtmin = 0.01
 
@@ -144,6 +181,7 @@
 []
 
 [Outputs]
+  interval = 10
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -154,13 +192,32 @@
   [../]
 []
 
+[Problem]
+  type = AugmentedLagrangianContactProblem
+  solution_variables = 'disp_x disp_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
+  maximum_lagrangian_update_iterations = 100
+[]
+
 [Contact]
   [./leftright]
-    master = 2
     slave = 3
-    model = glued
-    formulation = penalty
+    master = 2
+    model = coulomb
     penalty = 1e+7
-    system = diracKernel
+    friction_coefficient = 0.2
+    formulation = augmented_lagrange
+    normalize_penalty = true
+    al_penetration_tolerance = 1e-6
+    al_incremental_slip_tolerance = 1.0e-2
+    al_frictional_force_tolerance =  1e-3
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []

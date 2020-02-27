@@ -37,7 +37,6 @@
     slave = 2
     penalty = 5e6
     formulation = penalty
-    system = constraint
     master_slave_jacobian = false
     normalize_penalty = true
   [../]

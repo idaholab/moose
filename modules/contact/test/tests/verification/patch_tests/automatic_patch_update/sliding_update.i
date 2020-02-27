@@ -39,7 +39,6 @@
   [./leftright]
     slave = 3
     master = 2
-    system = constraint
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+4

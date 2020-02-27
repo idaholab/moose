@@ -412,7 +412,6 @@
     disp_y = disp_y
     model = coulomb
     friction_coefficient = 0.0
-    system = constraint
     formulation = penalty
     normalize_penalty = true
     tangential_tolerance = 1e-3
