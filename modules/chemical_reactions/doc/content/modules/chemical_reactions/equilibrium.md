@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 This page follows [!cite](bethke_2007).
 
@@ -46,7 +46,7 @@ Here:
 - $f_{m}$ is the known gas [fugacity](fugacity.md)
 - $m_{j}$ is the molality of the secondary species
 - $\gamma_{j}$ is the [activity coefficient](activity_coefficients.md) of the secondary species.
-- $m$ denotes [molality](nomenclature.md)
+- $m$ denotes [molality](geochemistry_nomenclature.md)
 
 As discussed on the [activity](activity_coefficients.md) and [fugacity](fugacity.md) pages, geochemists typically ignore the dimensional inconsistencies in this equation.  Instead, it is conventional to omit dimension-full factors of "1", and simply use consistent units of moles, kg, bars and Kelvin throughout all calculations.
 

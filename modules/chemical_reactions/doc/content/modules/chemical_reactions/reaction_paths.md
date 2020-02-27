@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 This page follows Chapters 13 and 14 of [!cite](bethke_2007).
 

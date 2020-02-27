@@ -17,7 +17,7 @@ I have tried to write thorough documentation that is understandable to someone w
 - [Activity coefficients](activity_coefficients.md) and [gas fugacity](fugacity.md)
 - [The chemical component basis](basis.md) and [basis swaps](swap.md)
 - [Reaction paths available in the `geochemistry` module](reaction_paths.md)
-- [Definitions of chemistry terminology and notation used](nomenclature.md)
+- [Definitions of chemistry terminology and notation used](geochemistry_nomenclature.md)
 
 ## Transport
 

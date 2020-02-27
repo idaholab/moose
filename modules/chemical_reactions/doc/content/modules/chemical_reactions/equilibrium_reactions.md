@@ -2,13 +2,13 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 Consider the hypothetical reactions
 \begin{equation}
 b\mathrm{B} \rightleftharpoons c\mathrm{C} + d\mathrm{D}
 \end{equation}
-among species B, C and D, where $b$, $c$ and $d$ are the reaction coefficients.  This means that $b$ [moles](nomenclature.md) of B can be created by removing $c$ moles of C and $d$ moles of D, and vice versa.
+among species B, C and D, where $b$, $c$ and $d$ are the reaction coefficients.  This means that $b$ [moles](geochemistry_nomenclature.md) of B can be created by removing $c$ moles of C and $d$ moles of D, and vice versa.
 
 ## The free energy
 
@@ -48,7 +48,7 @@ where
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature
 - $\log$ is the natural logarithm
-- $X$ is the [mole fraction](nomenclature.md) of the constituent
+- $X$ is the [mole fraction](geochemistry_nomenclature.md) of the constituent
 
 ## Mass action for ideal solutions
 

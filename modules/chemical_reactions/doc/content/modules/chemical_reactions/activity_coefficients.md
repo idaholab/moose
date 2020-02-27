@@ -5,7 +5,7 @@ Author: Andy Wilkins
 !alert note
 Only the Debye-Huckel B-dot model along with the formulae below for neutral species and water are coded into the `geochemistry` module
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 The material below is taken largely from Chapter 8 of [!cite](bethke_2007).
 

@@ -11,7 +11,7 @@ Only rudimentary transport is available as part of the `geochemistry` module.  C
 - coupling with geomechanics
 - sophisticated numerical stabilization
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 ## Volumes, concentrations and mass conservation.
 

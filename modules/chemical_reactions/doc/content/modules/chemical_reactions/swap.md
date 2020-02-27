@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 It is useful to swap constituents in and out of the [basis](basis.md).  For instance:
 

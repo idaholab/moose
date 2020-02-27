@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 The core material below follows Chapter 2 of [!cite](prausnitz).  Fugacity coefficients follow [!cite](spycher1988) as well as Appendix B of [!cite](toughreact).  Section 3.1.3.3 of [!cite](bethke_2007) offers some further equations, but I find them difficult to undrestand.
 

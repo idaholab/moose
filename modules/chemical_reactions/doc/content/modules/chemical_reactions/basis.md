@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 Choosing the "basis" of primary species is the first stage in a geochemical simulation.  Throughout this page we use the standard geochemical notation in which *the subscript gives meaning to the quantity*.  For instance, $A_{i}$ is a primary species, while $A_{l}$ is a mineral.  The "$i$" and "$l$" have given meaning to the $A$.
 

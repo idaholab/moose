@@ -2,7 +2,7 @@
 
 Author: Andy Wilkins
 
-Notation and definitions are described in [nomenclature.md].
+Notation and definitions are described in [geochemistry_nomenclature.md].
 
 The `geochemistry` module works with chemical databases in the EQ3/6 format.  This page describes the EQ3/6 format, using a database file downloaded from the geochemist workbench site.  See the "Thermo Datasets" chapter of [!cite](gwb_reference) and [https://academy.gwb.com](https://academy.gwb.com)
 
