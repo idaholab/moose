@@ -181,7 +181,7 @@ FauxGrainTracker::execute()
         {
           _entity_id_to_var_num[current_elem->id()] = var_num;
           _variables_used.insert(var_num);
-          _volume[var_num] += current_elem->volume();
+          _volume[var_num] += _assembly.elementVolume(current_elem);
           _vol_count[var_num]++;
           // Sum the centroid values for now, we'll average them later
           _centroid[var_num] += current_elem->centroid();

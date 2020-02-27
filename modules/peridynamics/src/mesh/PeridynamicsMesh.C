@@ -201,6 +201,8 @@ PeridynamicsMesh::createPeridynamicsMeshData(
     _pdnode_coord[id] = fe_elem->centroid();
     _pdnode_avg_spacing[id] = dist_sum / n_fe_neighbors;
     _pdnode_horiz_rad[id] = (_has_horiz_num ? _horiz_num * dist_sum / n_fe_neighbors : _horiz_rad);
+    // this needs to be fixed as well. MooseMesh does not have Assembly so
+    // that makes this harder here
     _pdnode_vol[id] = fe_elem->volume();
     _pdnode_horiz_vol[id] = 0.0;
     _pdnode_blockID[id] = fe_elem->subdomain_id() + 1000; // set new subdomain id for PD mesh in

@@ -146,7 +146,7 @@ UnobstructedPlanarViewFactor::reinitFace(dof_id_type elem_id, unsigned int side)
 {
   const Elem * current_remote_elem = _mesh.getMesh().elem_ptr(elem_id);
   _current_remote_side = current_remote_elem->build_side_ptr(side);
-  _current_remote_side_volume = _current_remote_side->volume();
+  _current_remote_side_volume = _assembly.elementVolume(_current_remote_side.get());
 
   Order order = current_remote_elem->default_order();
   unsigned int dim = _mesh.getMesh().mesh_dimension();
