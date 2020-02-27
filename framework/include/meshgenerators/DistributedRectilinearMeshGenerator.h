@@ -55,7 +55,8 @@ public:
                              const dof_id_type /*j*/,
                              const dof_id_type /*k*/)
   {
-    mooseError("elem_id not implemented for this element type in DistributedGeneratedMesh");
+    mooseError(
+        "elem_id not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -77,7 +78,8 @@ public:
                                    const dof_id_type /*j*/,
                                    const dof_id_type /*k*/)
   {
-    mooseError("num_neighbors not implemented for this element type in DistributedGeneratedMesh");
+    mooseError("num_neighbors not implemented for this element type in "
+               "DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -121,7 +123,8 @@ public:
                              const dof_id_type /*j*/,
                              const dof_id_type /*k*/)
   {
-    mooseError("node_id not implemented for this element type in DistributedGeneratedMesh");
+    mooseError(
+        "node_id not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -146,7 +149,8 @@ public:
                    const ElemType /*type*/,
                    MeshBase & /*mesh*/)
   {
-    mooseError("add_point not implemented for this element type in DistributedGeneratedMesh");
+    mooseError(
+        "add_point not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -177,7 +181,8 @@ public:
                    MeshBase & /*mesh*/,
                    bool /*verbose*/)
   {
-    mooseError("add_element not implemented for this element type in DistributedGeneratedMesh");
+    mooseError(
+        "add_element not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -198,7 +203,8 @@ public:
                           dof_id_type & /*j*/,
                           dof_id_type & /*k*/)
   {
-    mooseError("get_indices not implemented for this element type in DistributedGeneratedMesh");
+    mooseError(
+        "get_indices not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -216,8 +222,8 @@ public:
                                   const MeshBase & /*mesh*/,
                                   std::set<dof_id_type> & /*ghost_elems*/)
   {
-    mooseError(
-        "get_ghost_neighbors not implemented for this element type in DistributedGeneratedMesh");
+    mooseError("get_ghost_neighbors not implemented for this element type in "
+               "DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -228,8 +234,8 @@ public:
   template <typename T>
   void set_boundary_names(BoundaryInfo & /*boundary_info*/)
   {
-    mooseError(
-        "set_boundary_names not implemented for this element type in DistributedGeneratedMesh");
+    mooseError("set_boundary_names not implemented for this element type in "
+               "DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -248,8 +254,8 @@ public:
                              Real /*zmax*/,
                              MeshBase & /*mesh*/)
   {
-    mooseError(
-        "scale_nodal_positions not implemented for this element type in DistributedGeneratedMesh");
+    mooseError("scale_nodal_positions not implemented for this element type in "
+               "DistributedRectilinearMeshGenerator");
   }
 
 protected:

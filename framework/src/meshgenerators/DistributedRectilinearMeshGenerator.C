@@ -139,7 +139,8 @@ get_neighbors(const dof_id_type /*nx*/,
               std::vector<dof_id_type> & /*neighbors*/,
               const bool /*corner*/)
 {
-  mooseError("get_neighbors not implemented for this element type in DistributedGeneratedMesh");
+  mooseError(
+      "get_neighbors not implemented for this element type in DistributedRectilinearMeshGenerator");
 }
 
 template <>
@@ -391,8 +392,6 @@ DistributedRectilinearMeshGenerator::get_ghost_neighbors<Quad4>(const dof_id_typ
                                                                 const MeshBase & mesh,
                                                                 std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.get_boundary_info();
-
   dof_id_type i, j, k;
 
   std::vector<dof_id_type> neighbors(9);
@@ -747,8 +746,6 @@ DistributedRectilinearMeshGenerator::get_ghost_neighbors<Hex8>(const dof_id_type
                                                                const MeshBase & mesh,
                                                                std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.get_boundary_info();
-
   dof_id_type i, j, k;
 
   std::vector<dof_id_type> neighbors(27);
@@ -1184,8 +1181,9 @@ DistributedRectilinearMeshGenerator::generate()
                        _verbose);
       break;
     default:
-      mooseError(getParam<MooseEnum>("elem_type"),
-                 " is not a currently supported element type for DistributedGeneratedMesh");
+      mooseError(
+          getParam<MooseEnum>("elem_type"),
+          " is not a currently supported element type for DistributedRectilinearMeshGenerator");
   }
 
   // Apply the bias if any exists

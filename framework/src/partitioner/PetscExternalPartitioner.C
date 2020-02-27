@@ -137,7 +137,7 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   nj = 0;
   for (auto & row : _dual_graph)
   {
-    mooseAssert(local_elem_id < static_cast<PetscInt>(_local_id_to_elem.size()),
+    mooseAssert(local_elem_id < static_cast<dof_id_type>(_local_id_to_elem.size()),
                 "Local element id " << local_elem_id << " is not smaller than "
                                     << _local_id_to_elem.size());
     auto elem = _local_id_to_elem[local_elem_id];
