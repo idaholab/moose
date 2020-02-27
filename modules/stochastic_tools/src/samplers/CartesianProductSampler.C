@@ -18,9 +18,10 @@ InputParameters
 CartesianProductSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
-  params.addClassDescription("Provides complete cartesian product for the supplied variables.");
+  params.addClassDescription("Provides complete Cartesian product for the supplied variables.");
   params.addRequiredParam<std::vector<Real>>(
-      "items", "A list of items, each item should include a min, step size, and number of steps.");
+      "items",
+      "A list of item triplets, each item should include the min, step size, and number of steps.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
@@ -38,10 +39,14 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
   for (std::size_t i = 0; i < items.size(); i += 3)
   {
     if (items[i + 2] != std::floor(items[i + 2]))
-      paramError("items", "The third entry for each item must be an integer.");
+      paramError("items",
+                 "The third entry for each item must be an integer; it provides the number of "
+                 "entries in the resulting item vector.");
 
     if (items[i + 2] < 0)
-      paramError("items", "The third entry for each item must be positive.");
+      paramError("items",
+                 "The third entry for each item must be positive; it provides the number of "
+                 "entries in the resulting item vector.");
 
     unsigned int div = static_cast<unsigned int>(items[i + 2]);
     grid_items.emplace_back(std::vector<Real>(div));

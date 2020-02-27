@@ -30,7 +30,8 @@ protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
-  // Helper object for computing the CartesianProcduct values; this is a pointer because it cannot
-  // be created until the grid vectors are assembled from the input parameters.
+  /// Helper object for computing the CartesianProcduct values
+  // This is a pointer because it cannot be created until the grid vectors are assembled from
+  // the input parameters.
   std::unique_ptr<const StochasticTools::CartesianProduct> _cp_ptr = nullptr;
 };
