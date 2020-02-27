@@ -120,7 +120,7 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     if (_apply_element_weight)
     {
       // Get the original element
-      mooseAssert(k < static_cast<PetscInt>(_local_id_to_elem.size()),
+      mooseAssert(k < static_cast<dof_id_type>(_local_id_to_elem.size()),
                   "Local element id " << k << " is not smaller than " << _local_id_to_elem.size());
       auto elem = _local_id_to_elem[k];
 
@@ -227,13 +227,15 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
 
   // If there are no neighbors at all, no side weights should be proivded
   if (!i)
+  {
     mooseAssert(!side_weights.size(),
                 "No side weights should be provided since there are no neighbors at all");
+  }
 
   // Copy over weights
   if (side_weights.size())
   {
-    mooseAssert(side_weights.size() == i,
+    mooseAssert((PetscInt)side_weights.size() == i,
                 "Side weight size " << side_weights.size()
                                     << " does not match with adjacency matrix size " << i);
     ierr = PetscCalloc1(side_weights.size(), &values);
@@ -252,13 +254,15 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   CHKERRABORT(comm.get(), ierr);
 
   if (!num_local_elems)
+  {
     mooseAssert(!elem_weights.size(),
                 "No element weights should be provided since there are no elements at all");
+  }
 
   // Handle element weights
   if (elem_weights.size())
   {
-    mooseAssert(elem_weights.size() == num_local_elems,
+    mooseAssert((PetscInt)elem_weights.size() == num_local_elems,
                 "Element weight size " << elem_weights.size()
                                        << " does not match with the number of local elements"
                                        << num_local_elems);
@@ -276,12 +280,10 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   ierr = MatPartitioningSetNParts(part, num_parts);
   CHKERRABORT(comm.get(), ierr);
 #if PETSC_VERSION_LESS_THAN(3, 9, 2)
-  if (part_package == "party")
-    mooseError("PETSc-3.9.3 or higher is required for using party");
+  mooseAssert(part_package != "party", "PETSc-3.9.3 or higher is required for using party");
 #endif
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
-  if (part_package == "chaco")
-    mooseError("PETSc-3.9.0 or higher is required for using chaco");
+  mooseAssert(part_package != "chaco", "PETSc-3.9.0 or higher is required for using chaco");
 #endif
   ierr = MatPartitioningSetType(part, part_package.c_str());
   CHKERRABORT(comm.get(), ierr);

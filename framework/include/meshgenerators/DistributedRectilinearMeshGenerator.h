@@ -24,7 +24,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
   template <typename T>
-  void build_cube(UnstructuredMesh & mesh,
+  void buildCube(UnstructuredMesh & mesh,
                   const unsigned int nx,
                   unsigned int ny,
                   unsigned int nz,
@@ -49,14 +49,14 @@ public:
    */
 
   template <typename T>
-  inline dof_id_type elem_id(const dof_id_type /*nx*/,
+  inline dof_id_type elemId(const dof_id_type /*nx*/,
                              const dof_id_type /*ny*/,
                              const dof_id_type /*i*/,
                              const dof_id_type /*j*/,
                              const dof_id_type /*k*/)
   {
     mooseError(
-        "elem_id not implemented for this element type in DistributedRectilinearMeshGenerator");
+        "elemId not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -71,14 +71,14 @@ public:
    * @return The number of neighboring elements
    */
   template <typename T>
-  inline dof_id_type num_neighbors(const dof_id_type /*nx*/,
+  inline dof_id_type numNeighbors(const dof_id_type /*nx*/,
                                    const dof_id_type /*ny*/,
                                    const dof_id_type /*nz*/,
                                    const dof_id_type /*i*/,
                                    const dof_id_type /*j*/,
                                    const dof_id_type /*k*/)
   {
-    mooseError("num_neighbors not implemented for this element type in "
+    mooseError("numNeighbors not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
 
@@ -95,14 +95,18 @@ public:
    * there is no neighbor.  THIS MUST be of size 6 BEFORE calling this function
    */
   template <typename T>
-  inline void get_neighbors(const dof_id_type /*nx*/,
+  inline void getNeighbors(const dof_id_type /*nx*/,
                             const dof_id_type /*ny*/,
                             const dof_id_type /*nz*/,
                             const dof_id_type /*i*/,
                             const dof_id_type /*j*/,
                             const dof_id_type /*k*/,
                             std::vector<dof_id_type> & /*neighbors*/,
-                            const bool corner = false);
+                            const bool corner = false)
+{
+  mooseError(
+      "getNeighbors not implemented for this element type in DistributedRectilinearMeshGenerator");
+}
 
   /**
    * The ID of the i,j,k node
@@ -116,7 +120,7 @@ public:
    * @param k The z index of this node
    */
   template <typename T>
-  inline dof_id_type node_id(const ElemType /*type*/,
+  inline dof_id_type nodeId(const ElemType /*type*/,
                              const dof_id_type /*nx*/,
                              const dof_id_type /*ny*/,
                              const dof_id_type /*i*/,
@@ -124,7 +128,7 @@ public:
                              const dof_id_type /*k*/)
   {
     mooseError(
-        "node_id not implemented for this element type in DistributedRectilinearMeshGenerator");
+        "nodeId not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -140,7 +144,7 @@ public:
    * @param mesh The mesh to add it to
    */
   template <typename T>
-  Node * add_point(const dof_id_type /*nx*/,
+  Node * addPoint(const dof_id_type /*nx*/,
                    const dof_id_type /*ny*/,
                    const dof_id_type /*nz*/,
                    const dof_id_type /*i*/,
@@ -150,7 +154,7 @@ public:
                    MeshBase & /*mesh*/)
   {
     mooseError(
-        "add_point not implemented for this element type in DistributedRectilinearMeshGenerator");
+        "addPoint not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -169,7 +173,7 @@ public:
    * @param verbose Whether or not to print out verbose statements
    */
   template <typename T>
-  void add_element(const dof_id_type /*nx*/,
+  void addElement(const dof_id_type /*nx*/,
                    const dof_id_type /*ny*/,
                    const dof_id_type /*nz*/,
                    const dof_id_type /*i*/,
@@ -182,7 +186,7 @@ public:
                    bool /*verbose*/)
   {
     mooseError(
-        "add_element not implemented for this element type in DistributedRectilinearMeshGenerator");
+        "addElement not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -196,7 +200,7 @@ public:
    * @param k Output: The index in the z direction
    */
   template <typename T>
-  inline void get_indices(const dof_id_type /*nx*/,
+  inline void getIndices(const dof_id_type /*nx*/,
                           const dof_id_type /*ny*/,
                           const dof_id_type /*elem_id*/,
                           dof_id_type & /*i*/,
@@ -204,7 +208,7 @@ public:
                           dof_id_type & /*k*/)
   {
     mooseError(
-        "get_indices not implemented for this element type in DistributedRectilinearMeshGenerator");
+        "getIndices not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
 
   /**
@@ -216,13 +220,13 @@ public:
    * @param ghost_elems The ghost elems that need to be added
    */
   template <typename T>
-  inline void get_ghost_neighbors(const dof_id_type /*nx*/,
+  inline void getGhostNeighbors(const dof_id_type /*nx*/,
                                   const dof_id_type /*ny*/,
                                   const dof_id_type /*nz*/,
                                   const MeshBase & /*mesh*/,
                                   std::set<dof_id_type> & /*ghost_elems*/)
   {
-    mooseError("get_ghost_neighbors not implemented for this element type in "
+    mooseError("getGhostNeighbors not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
 
@@ -232,9 +236,9 @@ public:
    * @boundary_info The BoundaryInfo object to set the boundary names on
    */
   template <typename T>
-  void set_boundary_names(BoundaryInfo & /*boundary_info*/)
+  void setBoundaryNames(BoundaryInfo & /*boundary_info*/)
   {
-    mooseError("set_boundary_names not implemented for this element type in "
+    mooseError("setBoundaryNames not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
 
@@ -243,7 +247,7 @@ public:
    * out to fill the correct area.
    */
   template <typename T>
-  void scale_nodal_positions(dof_id_type /*nx*/,
+  void scaleNodalPositions(dof_id_type /*nx*/,
                              dof_id_type /*ny*/,
                              dof_id_type /*nz*/,
                              Real /*xmin*/,
@@ -254,7 +258,7 @@ public:
                              Real /*zmax*/,
                              MeshBase & /*mesh*/)
   {
-    mooseError("scale_nodal_positions not implemented for this element type in "
+    mooseError("scaleNodalPositions not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
 
