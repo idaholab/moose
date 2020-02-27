@@ -12,12 +12,12 @@ from TestHarness import util
 import os
 from TestHarness.XMLDiffer import XMLDiffer
 
-class VTKDiff(RunApp):
+class XMLDiff(RunApp):
 
     @staticmethod
     def validParams():
         params = RunApp.validParams()
-        params.addRequiredParam('vtkdiff',   [], "A list of files to exodiff.")
+        params.addRequiredParam('xmldiff',   [], "A list of XML files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
         params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
@@ -30,7 +30,7 @@ class VTKDiff(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['xmldiff'])
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
@@ -42,12 +42,12 @@ class VTKDiff(RunApp):
         if self.isFail() or specs['skip_checks']:
             return output
 
-        # Don't Run VTKDiff on Scaled Tests
+        # Don't Run XMLDiff on Scaled Tests
         if options.scaling and specs['scale_refine']:
             return output
 
         # Loop over every file
-        for file in specs['vtkdiff']:
+        for file in specs['xmldiff']:
 
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
@@ -57,7 +57,7 @@ class VTKDiff(RunApp):
 
             # Perform diff
             else:
-                for file in self.specs['vtkdiff']:
+                for file in self.specs['xmldiff']:
                     gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
                     test = os.path.join(specs['test_dir'], file)
 
@@ -68,12 +68,11 @@ class VTKDiff(RunApp):
 
                     differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'], ignored_attributes=specs['ignored_attributes'])
 
-                    # Print the results of the VTKDiff whether it passed or failed.
+                    # Print the results of the XMLDiff whether it passed or failed.
                     output += differ.message() + '\n'
 
                     if differ.fail():
-                        self.addCaveats('VTKDIFF')
-                        self.setStatus(self.skip)
+                        self.setStatus(self.diff, 'XMLDIFF')
                         break
 
         return output

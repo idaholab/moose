@@ -70,6 +70,8 @@
     variable = temp
     master = outer_interior
     slave = inner_surface
+    emissivity_master = 0
+    emissivity_slave = 0
     quadrature = true
   [../]
 []

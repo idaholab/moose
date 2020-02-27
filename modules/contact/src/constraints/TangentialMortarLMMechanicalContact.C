@@ -88,7 +88,12 @@ TangentialMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::Mor
           if (tangential_velocity * _lambda[_qp] < 0)
             a = -std::abs(tangential_velocity);
           else
+          {
+            if (tangential_velocity == 0)
+              // Avoid a singular Jacobian entry
+              tangential_velocity += _epsilon;
             a = std::abs(tangential_velocity);
+          }
           a *= _c;
 
           // NCP part 2: require that the frictional force can never exceed the frictional

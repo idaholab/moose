@@ -52,6 +52,12 @@ protected:
   /// Current linear iteration returned from PETSc
   PetscInt _linear_iter;
 
+  /// True if current output calls is on the linear residual (used by time())
+  bool _on_linear_residual;
+
+  /// True if current output call is on the non-linear residual (used by time())
+  bool _on_nonlinear_residual;
+
 private:
   /**
    * Internal setup function that executes at the beginning of the time step
@@ -85,12 +91,6 @@ private:
 
   /// Psuedo linear time step
   Real _linear_dt;
-
-  /// True if current output calls is on the linear residual (used by time())
-  bool _on_linear_residual;
-
-  /// True if current output call is on the non-linear residual (used by time())
-  bool _on_nonlinear_residual;
 
   /// Pseudo non-linear timestep divisor
   Real _nonlinear_dt_divisor;

@@ -37,6 +37,8 @@
     quadrature = true
     master = rightleft
     variable = temp
+    emissivity_master = 0
+    emissivity_slave = 0
     type = GapHeatTransfer
     order = SECOND
   [../]
@@ -79,4 +81,3 @@
 [Outputs]
   exodus = true
 []
-

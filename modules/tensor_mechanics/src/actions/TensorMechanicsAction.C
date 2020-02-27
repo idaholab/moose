@@ -60,6 +60,7 @@ TensorMechanicsAction::validParams()
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");
+  params.addParam<Real>("scaling", "The scaling to apply to the displacement variables");
 
   return params;
 }
@@ -150,6 +151,11 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   // Error if volumetric locking correction is true for 1D problems
   if (_ndisp == 1 && getParam<bool>("volumetric_locking_correction"))
     mooseError("Volumetric locking correction should be set to false for 1D problems.");
+
+  if (!getParam<bool>("add_variables") && params.isParamSetByUser("scaling"))
+    paramError("scaling",
+               "The scaling parameter has no effect unless add_variables is set to true. Did you "
+               "mean to set 'add_variables = true'?");
 }
 
 void
@@ -217,6 +223,8 @@ TensorMechanicsAction::act()
 
     params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
     params.set<MooseEnum>("family") = "LAGRANGE";
+    if (isParamValid("scaling"))
+      params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
     // Loop through the displacement variables
     for (const auto & disp : _displacements)

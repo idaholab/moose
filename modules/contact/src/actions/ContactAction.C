@@ -93,6 +93,10 @@ validParams<ContactAction>()
       "Whether to protect against ping-ponging, e.g. the oscillation of the slave node between two "
       "different master faces, by tying the slave node to the "
       "edge between the involved master faces");
+  params.addParam<Real>(
+      "normal_lm_scaling", 1., "Scaling factor to apply to the normal LM variable");
+  params.addParam<Real>(
+      "tangential_lm_scaling", 1., "Scaling factor to apply to the tangential LM variable");
 
   return params;
 }
@@ -228,7 +232,8 @@ ContactAction::addMortarContact()
     // Add the lagrange multiplier on the slave subdomain.
     const auto addLagrangeMultiplier =
         [this, &slave_subdomain_name, &displacements](const std::string & variable_name,
-                                                      const int codimension) //
+                                                      const int codimension,
+                                                      const Real scaling_factor) //
     {
       InputParameters params = _factory.getValidParams("MooseVariableBase");
 
@@ -252,15 +257,17 @@ ContactAction::addMortarContact()
         mooseError("Primal variable type must be either MONOMIAL or LAGRANGE for mortar contact.");
 
       params.set<std::vector<SubdomainName>>("block") = {slave_subdomain_name};
+      params.set<std::vector<Real>>("scaling") = {scaling_factor};
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::determineType(fe_type, 1);
       _problem->addVariable(var_type, variable_name, params);
     };
 
     // Set the family/order same as primal for normal contact and one order lower for tangential.
-    addLagrangeMultiplier(normal_lagrange_multiplier_name, 0);
+    addLagrangeMultiplier(normal_lagrange_multiplier_name, 0, getParam<Real>("normal_lm_scaling"));
     if (_model == "coulomb")
-      addLagrangeMultiplier(tangential_lagrange_multiplier_name, 1);
+      addLagrangeMultiplier(
+          tangential_lagrange_multiplier_name, 1, getParam<Real>("tangential_lm_scaling"));
   }
 
   if (_current_task == "add_constraint")

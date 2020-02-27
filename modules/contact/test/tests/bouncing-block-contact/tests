@@ -66,6 +66,7 @@
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
     max_parallel = 1
     allow_test_objects = true
+    abs_zero = 1e-9
   []
   [frictional-mortar-fb-lm-mortar-disp-coarse]
     type = 'Exodiff'
