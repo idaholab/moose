@@ -11,14 +11,14 @@
 
 #include "MooseApp.h"
 
-class geochemistryTestApp : public MooseApp
+class GeochemistryApp : public MooseApp
 {
 public:
   static InputParameters validParams();
 
-  geochemistryTestApp(InputParameters parameters);
-  virtual ~geochemistryTestApp();
+  GeochemistryApp(InputParameters parameters);
+  virtual ~GeochemistryApp();
 
   static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };

@@ -1,10 +1,10 @@
-#include "geochemistryApp.h"
+#include "GeochemistryApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
 InputParameters
-geochemistryApp::validParams()
+GeochemistryApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
@@ -14,39 +14,39 @@ geochemistryApp::validParams()
   return params;
 }
 
-geochemistryApp::geochemistryApp(InputParameters parameters) : MooseApp(parameters)
+GeochemistryApp::GeochemistryApp(InputParameters parameters) : MooseApp(parameters)
 {
-  geochemistryApp::registerAll(_factory, _action_factory, _syntax);
+  GeochemistryApp::registerAll(_factory, _action_factory, _syntax);
 }
 
-geochemistryApp::~geochemistryApp() {}
+GeochemistryApp::~GeochemistryApp() {}
 
 void
-geochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+GeochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
   /* ModulesApp::registerAll(f, af, s); */
-  Registry::registerObjectsTo(f, {"geochemistryApp"});
-  Registry::registerActionsTo(af, {"geochemistryApp"});
+  Registry::registerObjectsTo(f, {"GeochemistryApp"});
+  Registry::registerActionsTo(af, {"GeochemistryApp"});
 
   /* register custom execute flags, action syntax, etc. here */
 }
 
 void
-geochemistryApp::registerApps()
+GeochemistryApp::registerApps()
 {
-  registerApp(geochemistryApp);
+  registerApp(GeochemistryApp);
 }
 
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/
 extern "C" void
-geochemistryApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+GeochemistryApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  geochemistryApp::registerAll(f, af, s);
+  GeochemistryApp::registerAll(f, af, s);
 }
 extern "C" void
-geochemistryApp__registerApps()
+GeochemistryApp__registerApps()
 {
-  geochemistryApp::registerApps();
+  GeochemistryApp::registerApps();
 }

@@ -6,43 +6,43 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#include "geochemistryTestApp.h"
-#include "geochemistryApp.h"
+#include "GeochemistryTestApp.h"
+#include "GeochemistryApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
 InputParameters
-geochemistryTestApp::validParams()
+GeochemistryTestApp::validParams()
 {
-  InputParameters params = geochemistryApp::validParams();
+  InputParameters params = GeochemistryApp::validParams();
   return params;
 }
 
-geochemistryTestApp::geochemistryTestApp(InputParameters parameters) : MooseApp(parameters)
+GeochemistryTestApp::GeochemistryTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  geochemistryTestApp::registerAll(
+  GeochemistryTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
-geochemistryTestApp::~geochemistryTestApp() {}
+GeochemistryTestApp::~GeochemistryTestApp() {}
 
 void
-geochemistryTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+GeochemistryTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  geochemistryApp::registerAll(f, af, s);
+  GeochemistryApp::registerAll(f, af, s);
   if (use_test_objs)
   {
-    Registry::registerObjectsTo(f, {"geochemistryTestApp"});
-    Registry::registerActionsTo(af, {"geochemistryTestApp"});
+    Registry::registerObjectsTo(f, {"GeochemistryTestApp"});
+    Registry::registerActionsTo(af, {"GeochemistryTestApp"});
   }
 }
 
 void
-geochemistryTestApp::registerApps()
+GeochemistryTestApp::registerApps()
 {
-  registerApp(geochemistryApp);
-  registerApp(geochemistryTestApp);
+  registerApp(GeochemistryApp);
+  registerApp(GeochemistryTestApp);
 }
 
 /***************************************************************************************************
@@ -50,12 +50,12 @@ geochemistryTestApp::registerApps()
  **************************************************************************************************/
 // External entry point for dynamic application loading
 extern "C" void
-geochemistryTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+GeochemistryTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  geochemistryTestApp::registerAll(f, af, s);
+  GeochemistryTestApp::registerAll(f, af, s);
 }
 extern "C" void
-geochemistryTestApp__registerApps()
+GeochemistryTestApp__registerApps()
 {
-  geochemistryTestApp::registerApps();
+  GeochemistryTestApp::registerApps();
 }
