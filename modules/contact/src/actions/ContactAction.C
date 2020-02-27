@@ -77,8 +77,9 @@ ContactAction::validParams()
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
 
-  params.addParam<MooseEnum>(
-      "system", ContactAction::getSystemEnum(), "System to use for constraint enforcement");
+  params.addDeprecatedParam<MooseEnum>(
+      "system", ContactAction::getSystemEnum(), "System to use for constraint enforcement",
+      "The only available system in the contact action is constraint");
   params.addParam<bool>("normalize_penalty",
                         false,
                         "Whether to normalize the penalty parameter with the nodal area.");
@@ -144,16 +145,6 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
   }
 
-  // Make the Dirac kernel deprecated as an initial step for its final removal.
-  MooseEnum makeDiracDeprecated = params.get<MooseEnum>("system");
-  makeDiracDeprecated.deprecate("DiracKernel", "Constraint");
-
-  if (_system == "DiracKernel")
-    mooseDeprecated(
-        "The DiracKernel-based system for mechanical contact enforcement is deprecated, "
-        "and will be removed on April 1, 2020. It is being replaced by the Constraint-based "
-        "system, which is selected by setting 'system=Constraint'.\n");
-
   if (_formulation != "ranfs")
     if (getParam<bool>("ping_pong_protection"))
       paramError("ping_pong_protection",
@@ -185,8 +176,6 @@ ContactAction::act()
         // MechanicalContactConstraint has to be added after the init_problem task, so it cannot
         // be added for the add_constraint task.
         addNodeFaceContact();
-      else if (_system == "DiracKernel")
-        addDiracContact();
     }
   }
 
@@ -505,49 +494,6 @@ ContactAction::addNodeFaceContact()
   }
 }
 
-void
-ContactAction::addDiracContact()
-{
-  std::string action_name = MooseUtils::shortName(name());
-
-  std::vector<VariableName> displacements = getDisplacementVarNames();
-  const unsigned int ndisp = displacements.size();
-
-  {
-    InputParameters params = _factory.getValidParams("ContactMaster");
-    params.applyParameters(parameters(), {"displacements"});
-    params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
-    params.set<std::vector<VariableName>>("displacements") = displacements;
-    params.set<BoundaryName>("boundary") = _master;
-    params.set<bool>("use_displaced_mesh") = true;
-
-    for (unsigned int i = 0; i < ndisp; ++i)
-    {
-      std::string name = action_name + "_master_" + Moose::stringify(i);
-      params.set<unsigned int>("component") = i;
-      params.set<NonlinearVariableName>("variable") = displacements[i];
-      _problem->addDiracKernel("ContactMaster", name, params);
-    }
-  }
-
-  {
-    InputParameters params = _factory.getValidParams("SlaveConstraint");
-    params.applyParameters(parameters(), {"displacements"});
-    params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
-    params.set<std::vector<VariableName>>("displacements") = displacements;
-    params.set<BoundaryName>("boundary") = _slave;
-    params.set<bool>("use_displaced_mesh") = true;
-
-    for (unsigned int i = 0; i < ndisp; ++i)
-    {
-      std::string name = action_name + "_slave_" + Moose::stringify(i);
-      params.set<unsigned int>("component") = i;
-      params.set<NonlinearVariableName>("variable") = displacements[i];
-      _problem->addDiracKernel("SlaveConstraint", name, params);
-    }
-  }
-}
-
 MooseEnum
 ContactAction::getModelEnum()
 {
@@ -564,7 +510,7 @@ ContactAction::getFormulationEnum()
 MooseEnum
 ContactAction::getSystemEnum()
 {
-  return MooseEnum("DiracKernel Constraint", "DiracKernel");
+  return MooseEnum("Constraint", "Constraint");
 }
 
 MooseEnum

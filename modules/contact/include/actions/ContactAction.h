@@ -103,10 +103,6 @@ private:
    */
   void addNodeFaceContact();
   /**
-   * Generate Dirac kernels for mechanical contact
-   */
-  void addDiracContact();
-  /**
    * Get displacement variable names
    */
   std::vector<VariableName> getDisplacementVarNames();
