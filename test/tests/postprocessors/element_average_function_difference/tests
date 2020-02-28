@@ -1,0 +1,10 @@
+[Tests]
+  design = 'source/postprocessors/ElementAverageFunctionDifference.md'
+  issues = '#14800'
+  requirement = 'The system shall contain a "Postprocessor" that computes the difference between average value of a variable and a function'
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+  [../]
+[]
