@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SodiumProperties.h"
-#include "MooseError.h"
 
 registerMooseObject("FluidPropertiesApp", SodiumProperties);
 
@@ -47,6 +46,7 @@ Real
 SodiumProperties::heatCapacity(Real T) const
 {
   const Real T2 = T * T;
+
   // Converted from kJ/kg-K to J/kg-K.
   return 1.6582e3 - 8.4790e-1 * T + 4.4541e-4 * T2 - 2992.6e3 / T2;
 }
@@ -61,7 +61,7 @@ SodiumProperties::temperature(Real H) const
   // dResidual/dT is just dH/dT, which is heat capacity.
   for (unsigned iteration = 0; iteration < 10; ++iteration)
   {
-    Real residual = h(T) - H;
+    const Real residual = h(T) - H;
     T -= residual / heatCapacity(T);
     if (std::abs(residual / H) < 1e-6)
       break;
@@ -81,7 +81,7 @@ SodiumProperties::rho(Real T) const
   const Real Tc = 2503.7; // critical temperature, K
   mooseAssert(T < Tc, "Temperature is greater than critical temperature 2503.7 K ");
 
-  return rhoc + f * (1 - T / Tc) + g * std::sqrt(1 - T / Tc);
+  return rhoc + f * (1.0 - T / Tc) + g * std::sqrt(1 - T / Tc);
 }
 
 Real
@@ -92,13 +92,12 @@ SodiumProperties::drho_dT(Real T) const
   const Real Tc = 2503.7; // critical temperature, K
   mooseAssert(T < Tc, "Temperature is greater than critical temperature 2503.7 K ");
 
-  return -(f + g * (0.5) / std::sqrt(1 - T / Tc)) / Tc;
+  return -(f + g * 0.5 / std::sqrt(1.0 - T / Tc)) / Tc;
 }
 
 Real
 SodiumProperties::drho_dh(Real h) const
 {
-  Real T = 0.0;
-  T = temperature(h);
+  const Real T = temperature(h);
   return drho_dT(T) / heatCapacity(T);
 }

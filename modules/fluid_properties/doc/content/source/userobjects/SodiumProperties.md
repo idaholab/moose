@@ -15,11 +15,12 @@ The following methods are provided in this class:
 - Derivative of Density w.r.t temperature: `drho_dT(temperature)`
 - Derivative of Density w.r.t enthalpy: `drho_dh(h)`
 
-Properties of liquid sodium are obtained from ANL/RE-95/2 report "Thermodynamic and Transport Properties of
-Sodium Liquid and Vapor" from ANL Reactor Engineering Division.
+Properties of liquid sodium are obtained from [!cite](Fink:1995bf).
 
 !syntax parameters /Modules/FluidProperties/SodiumProperties
 
 !syntax inputs /Modules/FluidProperties/SodiumProperties
 
 !syntax children /Modules/FluidProperties/SodiumProperties
+
+!bibtex bibliography
