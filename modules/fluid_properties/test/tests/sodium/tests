@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#14798'
+  design = 'SodiumProperties.md SodiumPropertiesMaterial.md'
+  requirement = 'The system shall be able to compute liquid sodium properties and compare exactly to analytical expressions.'
+  [./sodium]
+    type = CSVDiff
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    abs_zero = 1e-9
+  [../]
+[]

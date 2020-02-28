@@ -2,7 +2,7 @@
 
 !syntax description /Modules/FluidProperties/SodiumProperties
 
-SodiumProperties inherits from the base class FluidProperties and provides the needed functionality for determining sodium
+`SodiumProperties` inherits from the base class `FluidProperties` and provides the needed functionality for determining sodium
 fluid properties that may be used for coolant channel simulations.
 
 The following methods are provided in this class:
@@ -16,6 +16,8 @@ The following methods are provided in this class:
 - Derivative of Density w.r.t enthalpy: `drho_dh(h)`
 
 Properties of liquid sodium are obtained from [!cite](Fink:1995bf).
+
+!listing modules/fluid_properties/test/tests/sodium/exact.i block=Modules/FluidProperties/sodium
 
 !syntax parameters /Modules/FluidProperties/SodiumProperties
 
