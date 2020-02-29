@@ -12,7 +12,9 @@
 #include "SymmTensor.h"
 #include "Factory.h"
 
+#ifdef LIBMESH_HAVE_DLOPEN
 #include <dlfcn.h>
+#endif
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("SolidMechanicsApp", AbaqusCreepMaterial);
@@ -92,6 +94,7 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters)
   _elasticity_tensor[2] = _eg;
 
   // Open the library
+#ifdef LIBMESH_HAVE_DLOPEN
   _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
 
   if (!_handle)
@@ -119,13 +122,18 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters)
     error << "Cannot load symbol 'creep_': " << dlsym_error << '\n';
     mooseError(error.str());
   }
+#else
+  mooseError("AbaqusCreepMaterial is not supported on Windows.");
+#endif
 }
 
 AbaqusCreepMaterial::~AbaqusCreepMaterial()
 {
   delete _STATEV;
 
+#ifdef LIBMESH_HAVE_DLOPEN
   dlclose(_handle);
+#endif
 }
 
 void
