@@ -21,8 +21,10 @@ ElementAverageFunctionDifference::validParams()
   InputParameters params = ElementAverageValue::validParams();
   params.addClassDescription("Calculates the difference between a variable and a function.");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
+  params.addParam<Point>(
+      "point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
   params.addParam<bool>("absolute_value",
-                        false,
+                        true,
                         "Flag to take the absolute value of the diffference between the variable "
                         "and the function.");
   return params;
@@ -32,6 +34,7 @@ ElementAverageFunctionDifference::ElementAverageFunctionDifference(
     const InputParameters & parameters)
   : ElementAverageValue(parameters),
     _func(getFunction("function")),
+    _point(getParam<Point>("point")),
     _abs(getParam<bool>("absolute_value"))
 {
 }
@@ -39,12 +42,7 @@ ElementAverageFunctionDifference::ElementAverageFunctionDifference(
 Real
 ElementAverageFunctionDifference::getValue()
 {
-  const Real integral = ElementAverageValue::getValue();
-
-  gatherSum(_volume);
-  const Real val = integral / _volume - _func.value(_t, _q_point[_qp]);
-
   if (_abs)
-    return std::abs(val);
-  return val;
+    return std::abs(std::abs(ElementAverageValue::getValue()) - std::abs(_func.value(_t, _point)));
+  return ElementAverageValue::getValue() - _func.value(_t, _point);
 }

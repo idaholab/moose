@@ -20,13 +20,13 @@
     type = DirichletBC
     variable = u
     boundary = 0
-    value = 0
+    value = -1
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = 1
-    value = 2
+    value = 0
   [../]
 []
 
@@ -42,12 +42,14 @@
   [./diff]
     type = ElementAverageFunctionDifference
     variable = u
-    function = 1.5
+    function = x
+    point = '0.3 0 0'
   [../]
   [./abs_diff]
     type = ElementAverageFunctionDifference
     variable = u
-    function = 1.5
+    function = x
+    point = '0.3 0 0'
     absolute_value = true
   [../]
 []

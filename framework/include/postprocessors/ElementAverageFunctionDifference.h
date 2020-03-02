@@ -35,6 +35,9 @@ protected:
   /// Function to be compared against
   const Function & _func;
 
+  /// Point at which the function is evaluated
+  const Point & _point;
+
   /// Flag to return the absolute value
   const bool _abs;
 };
