@@ -27,6 +27,7 @@ def command_line_options():
     desc = "MooseDocs: A utility to build MOOSE documentation from a single source."
     parser = argparse.ArgumentParser(description=desc)
     subparser = parser.add_subparsers(dest='command', help='Available commands.')
+    subparser.required = True
 
     # Common arguments
     parent = argparse.ArgumentParser(add_help=False)
