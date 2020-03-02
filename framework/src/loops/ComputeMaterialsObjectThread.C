@@ -262,24 +262,21 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
                                               face_n_points,
                                               *elem,
                                               side);
-
-      // Interface Materials
-      if (_interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
-        _bnd_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _interface_materials.getActiveBoundaryObjects(bnd_id, _tid),
-            face_n_points,
-            *elem,
-            side);
     }
 
     const Elem * neighbor = elem->neighbor_ptr(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
 
-    if (_has_neighbor_stateful_props && neighbor->active())
-    {
+    // Do we have neighbor stateful properties or do we have stateful interface material properties?
+    // If either then we need to reinit the neighbor, so at least at a minimum _neighbor_elem isn't
+    // NULL!
+    if (neighbor->active() &&
+        (_has_neighbor_stateful_props ||
+         (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))))
       _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
 
+    if (_has_neighbor_stateful_props && neighbor->active())
+    {
       // Neighbor Materials
       if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
               neighbor->subdomain_id(), _tid))
@@ -301,6 +298,15 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
             *neighbor,
             neighbor_side);
     }
+
+    // Interface Materials. Make sure we do these after neighbors
+    if (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+      _bnd_material_props.initStatefulProps(
+          *_bnd_material_data[_tid],
+          _interface_materials.getActiveBoundaryObjects(bnd_id, _tid),
+          face_n_points,
+          *elem,
+          side);
   }
 }
 

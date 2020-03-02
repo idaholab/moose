@@ -93,6 +93,7 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
 void
 InterfaceValueMaterial::computeQpProperties()
 {
+  mooseAssert(_neighbor_elem, "Neighbor elem is NULL!");
   mooseAssert(_mp_master[_qp] == _var_master[_qp],
               "the material property and variable values on the master side do not coincide.");
   mooseAssert(_mp_slave[_qp] == _var_slave[_qp],
@@ -118,6 +119,7 @@ InterfaceValueMaterial::computeQpProperties()
 void
 InterfaceValueMaterial::initQpStatefulProperties()
 {
+  mooseAssert(_neighbor_elem, "Neighbor elem is NULL!");
   _interface_value[_qp] = 0;
   _interface_value_2[_qp] = 0;
 }
