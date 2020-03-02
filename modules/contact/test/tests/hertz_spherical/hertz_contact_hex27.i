@@ -258,7 +258,7 @@
   l_max_its = 10
   start_time = 0.0
   dt = 0.5
-  end_time = 2.0
+  end_time = 1.0 # was 2.0
 
   [./Quadrature]
     order = FIFTH
