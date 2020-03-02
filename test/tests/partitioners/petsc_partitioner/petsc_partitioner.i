@@ -12,6 +12,7 @@
   uniform_refine = 1
 []
 
+
 [Variables]
   [u]
   []
