@@ -78,7 +78,9 @@ ContactAction::validParams()
       "Distance from edge in parametric coordinates over which to smooth contact normal");
 
   params.addDeprecatedParam<MooseEnum>(
-      "system", ContactAction::getSystemEnum(), "System to use for constraint enforcement",
+      "system",
+      ContactAction::getSystemEnum(),
+      "System to use for constraint enforcement",
       "The only available system in the contact action is constraint");
   params.addParam<bool>("normalize_penalty",
                         false,
