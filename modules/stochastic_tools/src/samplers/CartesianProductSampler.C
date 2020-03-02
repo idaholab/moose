@@ -20,8 +20,8 @@ CartesianProductSampler::validParams()
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Provides complete Cartesian product for the supplied variables.");
   params.addRequiredParam<std::vector<Real>>(
-      "items",
-      "A list of item triplets, each item should include the min, step size, and number of steps.");
+      "linear_space_items",
+      "A list of triplets, each item should include the min, step size, and number of steps.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
@@ -29,9 +29,9 @@ CartesianProductSampler::validParams()
 CartesianProductSampler::CartesianProductSampler(const InputParameters & parameters)
   : Sampler(parameters)
 {
-  const std::vector<Real> & items = getParam<std::vector<Real>>("items");
+  const std::vector<Real> & items = getParam<std::vector<Real>>("linear_space_items");
   if (items.size() % 3 != 0)
-    paramError("items",
+    paramError("linear_space_items",
                "The number of numeric items must be divisible by 3; min, max, divisions for each "
                "item are required.");
 
@@ -39,12 +39,12 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
   for (std::size_t i = 0; i < items.size(); i += 3)
   {
     if (items[i + 2] != std::floor(items[i + 2]))
-      paramError("items",
+      paramError("linear_space_items",
                  "The third entry for each item must be an integer; it provides the number of "
                  "entries in the resulting item vector.");
 
     if (items[i + 2] < 0)
-      paramError("items",
+      paramError("linear_space_items",
                  "The third entry for each item must be positive; it provides the number of "
                  "entries in the resulting item vector.");
 
