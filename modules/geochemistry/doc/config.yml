@@ -1,0 +1,23 @@
+Content:
+    - framework/doc/content
+    - modules/geochemistry/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Geochemistry Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/geochemistry
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/geochemistry
+        hide: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/geochemistry/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa: disable
