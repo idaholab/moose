@@ -15,5 +15,3 @@ non-linear convergence than the mortar method.
 !syntax inputs /Constraints/TangentialNodalLMMechanicalContact
 
 !syntax children /Constraints/TangentialNodalLMMechanicalContact
-
-!bibtex bibliography

@@ -15,5 +15,3 @@ is comparable or only slightly worse than the mortar application.
 !syntax inputs /Constraints/NormalNodalMechanicalContact
 
 !syntax children /Constraints/NormalNodalMechanicalContact
-
-!bibtex bibliography

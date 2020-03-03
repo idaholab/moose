@@ -32,5 +32,3 @@ protection the solve does not converge and the time-step gets cut.
 !syntax inputs /Constraints/RANFSNormalMechanicalContact
 
 !syntax children /Constraints/RANFSNormalMechanicalContact
-
-!bibtex bibliography
