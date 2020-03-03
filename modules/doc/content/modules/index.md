@@ -7,6 +7,7 @@ application.
 - [Contact](modules/contact/index.md)
 - [Fluid Properties](modules/fluid_properties/index.md)
 - [Functional Expansion Tools](modules/functional_expansion_tools/index.md)
+- [Geochemistry](modules/geochemistry/index.md)
 - [Heat Conduction](modules/heat_conduction/index.md)
 - [Level Set](modules/level_set/index.md)
 - [Misc](modules/misc/index.md)
