@@ -27,13 +27,13 @@
     expect_out = "Solve Converged"
   [../]
 
-  [./missing_axial_regions_parameter]
+  [./err:missing_axial_regions_parameter]
     type = RunException
     input = 'axial_regions.i'
     expect_err = "If there is more than 1 axial region, then the parameter 'axial_region_names' must be specified."
   [../]
 
-  [./incorrect_size_axial_regions_parameter]
+  [./err:incorrect_size_axial_regions_parameter]
     type = RunException
     input = 'axial_regions.i'
     cli_args = "Components/hs/axial_region_names='region1 region2'"
