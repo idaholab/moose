@@ -9,13 +9,13 @@
 
 #include "gtest/gtest.h"
 
-#include "ExpressionBuilder.h"
+#include "ExpressionBuilderToo.h"
 
-class ExpressionBuilderTest : public ::testing::Test, public ExpressionBuilder
+class ExpressionBuilderTooTest : public ::testing::Test, public ExpressionBuilderToo
 {
 };
 
-TEST_F(ExpressionBuilderTest, test)
+TEST_F(ExpressionBuilderTooTest, test)
 {
   EBTerm x;
   x = "x";
@@ -27,7 +27,7 @@ TEST_F(ExpressionBuilderTest, test)
 
   EBTerm f = pow(x, 2) + pow(y, a) + 3 * y * (-a);
 
-  EBFunction G, H;
+  EBTerm G, H;
 
   // Test using functions in terms
   {
@@ -102,30 +102,30 @@ TEST_F(ExpressionBuilderTest, test)
     EBTerm temp2;
     EXPECT_NE(std::string(temp1), std::string(temp2));
   }
+  /*
+    // test substitution
+    {
+      // plog substitution
+      EBTerm u = log(x / a);
+      u.substitute(EBLogPlogSubstitution(b));
+      EXPECT_EQ(std::string(u), "plog(x/1,4)");
 
-  // test substitution
-  {
-    // plog substitution
-    EBTerm u = log(x / a);
-    u.substitute(EBLogPlogSubstitution(b));
-    EXPECT_EQ(std::string(u), "plog(x/1,4)");
+      // single substitution in a ternary
+      EBTerm v = conditional(x < y, x * y, x / y);
+      v.substitute(EBTermSubstitution(x, a));
+      EXPECT_EQ(std::string(v),
+                "if"
+                "(1<y,1*y,1/y)");
 
-    // single substitution in a ternary
-    EBTerm v = conditional(x < y, x * y, x / y);
-    v.substitute(EBTermSubstitution(x, a));
-    EXPECT_EQ(std::string(v),
-              "if"
-              "(1<y,1*y,1/y)");
-
-    // substitution list
-    EBTerm w = conditional(x < y, x * y, x / y);
-    EBSubstitutionRuleList s(2);
-    EBTermSubstitution s0(x, y), s1(y, a);
-    s[0] = &s0;
-    s[1] = &s1;
-    w.substitute(s);
-    EXPECT_EQ(std::string(w),
-              "if"
-              "(y<1,y*1,y/1)");
-  }
+      // substitution list
+      EBTerm w = conditional(x < y, x * y, x / y);
+      EBSubstitutionRuleList s(2);
+      EBTermSubstitution s0(x, y), s1(y, a);
+      s[0] = &s0;
+      s[1] = &s1;
+      w.substitute(s);
+      EXPECT_EQ(std::string(w),
+                "if"
+                "(y<1,y*1,y/1)");
+    }*/
 }

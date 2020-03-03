@@ -54,7 +54,6 @@ public:
   class EBTermNode;
   class EBFunction;
   class EBSubstitutionRule;
-  struct Comparer;
   typedef std::vector<EBTerm> EBTermList;
   typedef std::vector<EBTermNode *> EBTermNodeList;
   typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
@@ -73,29 +72,6 @@ public:
     {
       return os << node.stringify();
     }
-    virtual std::vector<EBTermNode *> getChildren() { return std::vector<EBTermNode *>(0); }
-    virtual bool compare(EBTermNode *, std::vector<EBTermNode *> &, bool) = 0;
-    virtual std::vector<EBTermNode *> getPermutations(bool, bool)
-    {
-      return std::vector<EBTermNode *>(0);
-    }
-
-    virtual bool compareRule(EBTermNode * rule,
-                             std::vector<EBTermNode *> & stars,
-                             std::vector<int> & current_index,
-                             bool = false);
-
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed);
-
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *>) { return this; }
-
-    virtual bool isCommutative() const { return false; }
-    std::vector<std::vector<EBTermNode *>> permuteChildren(std::vector<EBTermNode *> children);
-    std::vector<std::vector<EBTermNode *>>
-    permuteChildren(std::vector<EBTermNode *> children,
-                    std::vector<std::vector<int>> & nnary_index);
-
-    virtual EBTermNode * toNNary() { return this; }
   };
 
   /// Template class for leaf nodes holding numbers in the expression tree
@@ -110,17 +86,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
-
-    T getValue() { return _value; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBNumberNode<T> * c_to = dynamic_cast<EBNumberNode<T> *>(compare_to);
-
-      if (c_to != NULL && c_to->getValue() - _value < 0.000001)
-        return true;
-      return false;
-    }
   };
 
   /// Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
@@ -134,18 +99,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
-
-    std::string getSymbol() { return _symbol; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBSymbolNode * c_to = dynamic_cast<EBSymbolNode *>(compare_to);
-
-      // We will do a hash compare first in the future
-      if (c_to != NULL && c_to->getSymbol() == _symbol)
-        return true;
-      return false;
-    }
   };
 
   /**
@@ -162,11 +115,6 @@ public:
 
     virtual std::string stringify() const; // returns "[idnumber]"
     virtual int precedence() const { return 0; }
-
-    virtual bool compare(EBTermNode *, std::vector<EBTermNode *> &, bool)
-    {
-      mooseError("Cannot compare with temp id node");
-    }
   };
 
   /// Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
@@ -178,29 +126,6 @@ public:
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
     const EBTermNode * getSubnode() const { return _subnode; }
-
-    virtual std::vector<EBTermNode *> getChildren()
-    {
-      return std::vector<EBTermNode *>(1, _subnode);
-    }
-
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
-    {
-      _subnode = _subnode->simplify(rule, changed);
-      return EBTermNode::simplify(rule, changed);
-    }
-
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
-    {
-      _subnode = _subnode->replaceRule(stars);
-      return this;
-    }
-
-    virtual EBTermNode * toNNary()
-    {
-      _subnode = _subnode->toNNary();
-      return this;
-    }
 
   protected:
     EBTermNode * _subnode;
@@ -233,15 +158,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 2; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBUnaryFuncTermNode * c_to = dynamic_cast<EBUnaryFuncTermNode *>(compare_to);
-
-      if (c_to != NULL && c_to->_type == _type)
-        return true;
-      return false;
-    }
   };
 
   /// Node representing a unary operator
@@ -263,15 +179,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 3; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBUnaryOpTermNode * c_to = dynamic_cast<EBUnaryOpTermNode *>(compare_to);
-
-      if (c_to != NULL && c_to->_type == _type)
-        return true;
-      return false;
-    }
   };
 
   /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -287,41 +194,43 @@ public:
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
 
-    virtual std::vector<EBTermNode *> getChildren()
-    {
-      std::vector<EBTermNode *> children(2);
-      children[0] = _right;
-      children[1] = _left;
-      return children;
-    }
-
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
-    {
-      _left = _left->simplify(rule, changed);
-      _right = _right->simplify(rule, changed);
-      return EBTermNode::simplify(rule, changed);
-    }
-
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
-    {
-      _left = _left->replaceRule(stars);
-      _right = _right->replaceRule(stars);
-      return this;
-    }
-
-    virtual EBTermNode * toNNary()
-    {
-      _right = _right->toNNary();
-      _left = _left->toNNary();
-      return this;
-    }
-
-    EBTermNode * getLeft() { return _left; }
-    EBTermNode * getRight() { return _right; }
-
   protected:
     EBTermNode * _left;
     EBTermNode * _right;
+  };
+
+  /// Node representing a binary operator
+  class EBBinaryOpTermNode : public EBBinaryTermNode
+  {
+  public:
+    enum NodeType
+    {
+      ADD,
+      SUB,
+      MUL,
+      DIV,
+      MOD,
+      POW,
+      LESS,
+      GREATER,
+      LESSEQ,
+      GREATEREQ,
+      EQ,
+      NOTEQ
+    };
+
+    EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
+      : EBBinaryTermNode(left, right), _type(type){};
+    virtual EBBinaryOpTermNode * clone() const
+    {
+      return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
+    };
+
+    virtual std::string stringify() const;
+    virtual int precedence() const;
+
+  protected:
+    NodeType _type;
   };
 
   /// Node representing a function with two arguments
@@ -346,52 +255,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 2; }
-    virtual bool isCommutative() const;
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBBinaryFuncTermNode * c_to_bin = dynamic_cast<EBBinaryFuncTermNode *>(compare_to);
-
-      if (c_to_bin != NULL && c_to_bin->_type == _type)
-        return true;
-      return false;
-    }
-  };
-
-  /// Node representing a binary operator
-  class EBBinaryOpTermNode : public EBBinaryTermNode
-  {
-  public:
-    enum NodeType
-    {
-      ADD,
-      SUB,
-      MUL,
-      DIV,
-      MOD,
-      POW,
-      LESS,
-      GREATER,
-      LESSEQ,
-      GREATEREQ,
-      EQ,
-      NOTEQ
-    } _type;
-
-    EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
-      : EBBinaryTermNode(left, right), _type(type){};
-    virtual EBBinaryOpTermNode * clone() const
-    {
-      return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
-    };
-
-    virtual std::string stringify() const;
-    virtual int precedence() const;
-    virtual bool isCommutative() const;
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool isHead);
-
-    virtual EBTermNode * toNNary();
   };
 
   /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -403,35 +266,6 @@ public:
     virtual ~EBTernaryTermNode() { delete _middle; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
-
-    virtual std::vector<EBTermNode *> getChildren()
-    {
-      std::vector<EBTermNode *> children(3);
-      children[0] = _right;
-      children[1] = _middle;
-      children[2] = _left;
-      return children;
-    }
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
-    {
-      _middle = _middle->simplify(rule, changed);
-      return EBBinaryTermNode::simplify(rule, changed);
-    }
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
-    {
-      _middle = _middle->replaceRule(stars);
-      _left = _left->replaceRule(stars);
-      _right = _right->replaceRule(stars);
-      return this;
-    }
-
-    virtual EBTermNode * toNNary()
-    {
-      _right = _right->toNNary();
-      _middle = _middle->toNNary();
-      _left = _left->toNNary();
-      return this;
-    }
 
   protected:
     EBTermNode * _middle;
@@ -455,113 +289,6 @@ public:
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 2; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBTernaryFuncTermNode * c_to = dynamic_cast<EBTernaryFuncTermNode *>(compare_to);
-
-      if (c_to != NULL && c_to->_type == _type)
-        return true;
-      return false;
-    }
-  };
-
-  class EBNNaryTermNode : public EBTermNode
-  {
-  public:
-    EBNNaryTermNode(std::vector<EBTermNode *> children) : _children(children){};
-
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
-    {
-      for (unsigned int i = 0; i < _children.size(); ++i)
-        _children[i] = _children[i]->replaceRule(stars);
-      return this;
-    }
-
-    std::vector<EBTermNode *> getChildren() { return _children; }
-    unsigned int childrenSize() { return _children.size(); }
-
-  protected:
-    std::vector<EBTermNode *> _children;
-  };
-
-  class EBNNaryOpTermNode : public EBNNaryTermNode
-  {
-  public:
-    enum NodeType
-    {
-      MUL,
-      ADD
-    } _type;
-
-    EBNNaryOpTermNode(std::vector<EBTermNode *> children, NodeType type)
-      : EBNNaryTermNode(children), _type(type)
-    {
-    }
-    virtual EBNNaryOpTermNode * clone() const
-    {
-      std::vector<EBTermNode *> children(_children.size());
-      for (unsigned int i = 0; i < children.size(); ++i)
-        children[i] = _children[i]->clone();
-      return new EBNNaryOpTermNode(children, _type);
-    }
-
-    virtual std::string stringify() const;
-    virtual int precedence() const;
-    virtual bool isCommutative() const { return true; }
-
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool)
-    {
-      EBNNaryOpTermNode * c_to = dynamic_cast<EBNNaryOpTermNode *>(compare_to);
-
-      if (c_to != NULL && c_to->_type == _type)
-        return true;
-      return false;
-    }
-
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed);
-  };
-
-  class EBStarNode : public EBTermNode
-  {
-  public:
-    EBStarNode(unsigned int index) : _index(index) {}
-
-    virtual EBStarNode * clone() const { return new EBStarNode(_index); }
-
-    virtual std::string stringify() const
-    {
-      mooseError("Star Node should not be present to stringify.");
-    }
-    virtual int precedence() const
-    {
-      mooseError("Star Node should not be present to be able to find a precedence.");
-    }
-    virtual EBTermNode * derivative(const std::string &)
-    {
-      mooseError("Star Node should not be present while a derivative is being taken.");
-    }
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> & stars, bool)
-    {
-      if (stars[_index] == NULL)
-      {
-        stars[_index] = compare_to->clone();
-        return true;
-      }
-      std::vector<EBTermNode *> empty_vec(0);
-      std::vector<int> empty_int_vec(0);
-      if (compare_to->compareRule(stars[_index], empty_vec, empty_int_vec, true))
-        return true;
-      return false;
-    }
-
-    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
-    {
-      return stars[_index]->clone();
-    }
-
-  private:
-    unsigned int _index;
   };
 
   /**
@@ -598,7 +325,6 @@ public:
   public:
     EBTermSubstitution(const EBTerm & find, const EBTerm & replace);
     virtual ~EBTermSubstitution() { delete _replace; }
-
   protected:
     virtual EBTermNode * substitute(const EBSymbolNode &) const;
     std::string _find;
@@ -617,7 +343,6 @@ public:
       mooseAssert(_epsilon != NULL, "Epsilon must not be an empty term in EBLogPlogSubstitution");
     }
     virtual ~EBLogPlogSubstitution() { delete _epsilon; }
-
   protected:
     virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) const;
     EBTermNode * _epsilon;
@@ -650,12 +375,6 @@ public:
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
     EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
 
-    // These two should only be used by EBSimpleTrees!
-    // They are for making EBSymbolNodes
-    // The dummy variable is just so people check before using them.
-    EBTerm(unsigned int index, bool) : _root(new EBStarNode(index)) {}
-    EBTerm(EBNNaryOpTermNode root, bool) : _root(root.clone()){};
-
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
                                 const ExpressionBuilder::EBTerm & rarg);
@@ -684,13 +403,8 @@ public:
     const EBTermNode * getRoot() const { return _root; }
     EBTermNode * cloneRoot() const { return _root == NULL ? NULL : _root->clone(); }
 
-    void simplify();
-
   protected:
     EBTermNode * _root;
-
-    static std::vector<std::pair<EBTermNode *, EBTermNode *>> _prep_simplification_rules;
-    static std::vector<std::pair<EBTermNode *, EBTermNode *>> _simplification_rules;
 
   public:
 /**
@@ -783,7 +497,7 @@ public:
     BINARYCOMP_OP_IMPLEMENT(%=, MOD)
 
     /**
-     * @{
+    * @{
      * Binary functions
      */
     friend EBTerm min(const EBTerm &, const EBTerm &);
@@ -951,25 +665,6 @@ public:
   BINARYFUNC_OP_IMPLEMENT(>=, GREATEREQ)
   BINARYFUNC_OP_IMPLEMENT(==, EQ)
   BINARYFUNC_OP_IMPLEMENT(!=, NOTEQ)
-
-  struct Comparer
-  {
-    Comparer(std::stack<EBTermNode *> self_stack,
-             std::stack<EBTermNode *> rule_stack,
-             std::vector<EBTermNode *> stars,
-             std::vector<int> current_index)
-      : _self_stack(self_stack),
-        _rule_stack(rule_stack),
-        _stars(stars),
-        _current_index(current_index)
-    {
-    }
-
-    std::stack<EBTermNode *> _self_stack;
-    std::stack<EBTermNode *> _rule_stack;
-    std::vector<EBTermNode *> _stars;
-    std::vector<int> _current_index;
-  };
 };
 
 // convenience function for numeric exponent
@@ -1004,3 +699,4 @@ ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(
   else
     return substitute(*match_node);
 }
+

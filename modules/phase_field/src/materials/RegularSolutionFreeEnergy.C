@@ -33,14 +33,13 @@ RegularSolutionFreeEnergy::RegularSolutionFreeEnergy(const InputParameters & par
     _omega(getParam<Real>("omega")),
     _kB(getParam<Real>("kB"))
 {
-  EBFunction free_energy;
+  EBTerm free_energy;
   // Definition of the free energy for the expression builder
-  free_energy(_c) =
-      _omega * _c * (1.0 - _c) + _kB * _T * (_c * log(_c) + (1.0 - _c) * log(1.0 - _c));
+  free_energy = _omega * _c * (1.0 - _c) + _kB * _T * (_c * log(_c) + (1.0 - _c) * log(1.0 - _c));
 
   // Use Taylor expanded logarithm?
-  if (isParamValid("log_tol"))
-    free_energy.substitute(EBLogPlogSubstitution(getParam<Real>("log_tol")));
+  // if (isParamValid("log_tol"))
+  //  free_energy.substitute(EBLogPlogSubstitution(getParam<Real>("log_tol")));
 
   // Parse function for automatic differentiation
   functionParse(free_energy);

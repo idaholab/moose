@@ -24,8 +24,8 @@ IdealGasFreeEnergy::IdealGasFreeEnergy(const InputParameters & parameters)
   : GasFreeEnergyBase(parameters)
 {
   // Definition of the free energy for the expression builder
-  EBFunction free_energy;
-  free_energy(_c, _T) = -_n * _kB * _T * (log(_nq / _n) + 1.0);
+  EBTerm free_energy;
+  free_energy = -_n * _kB * _T * (log(_nq / _n) + 1.0);
 
   // Parse function for automatic differentiation
   functionParse(free_energy);

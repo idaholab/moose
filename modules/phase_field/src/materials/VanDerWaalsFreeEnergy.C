@@ -38,9 +38,8 @@ VanDerWaalsFreeEnergy::VanDerWaalsFreeEnergy(const InputParameters & parameters)
     _log_tol(getParam<Real>("log_tol"))
 {
   // Definition of the free energy for the expression builder
-  EBFunction free_energy;
-  free_energy(_c, _T) =
-      -_n * _kB * _T * (plog(_nq * (1.0 / _n - _b), _log_tol) + 1.0) - _n * _n * _a;
+  EBTerm free_energy;
+  free_energy = -_n * _kB * _T * (plog(_nq * (1.0 / _n - _b), _log_tol) + 1.0) - _n * _n * _a;
 
   // Parse function for automatic differentiation
   functionParse(free_energy);
