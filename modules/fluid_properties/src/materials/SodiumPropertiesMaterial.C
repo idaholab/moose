@@ -30,9 +30,9 @@ SodiumPropertiesMaterial::SodiumPropertiesMaterial(const InputParameters & param
     _k(declareProperty<Real>("k")),
     _h(declareProperty<Real>("h")),
     _cp(declareProperty<Real>("cp")),
-    _t_from_h(declareProperty<Real>("t_from_h")),
+    _T_from_h(declareProperty<Real>("T_from_h")),
     _rho(declareProperty<Real>("rho")),
-    _drho_dt(declareProperty<Real>("drho_dT")),
+    _drho_dT(declareProperty<Real>("drho_dT")),
     _drho_dh(declareProperty<Real>("drho_dh")),
 
     _sodium(getUserObject<SodiumProperties>("fp"))
@@ -45,8 +45,8 @@ SodiumPropertiesMaterial::computeQpProperties()
   _k[_qp] = _sodium.k(_temperature[_qp]);
   _h[_qp] = _sodium.h(_temperature[_qp]);
   _cp[_qp] = _sodium.heatCapacity(_temperature[_qp]);
-  _t_from_h[_qp] = _sodium.temperature(_h[_qp]);
+  _T_from_h[_qp] = _sodium.temperature(_h[_qp]);
   _rho[_qp] = _sodium.rho(_temperature[_qp]);
-  _drho_dt[_qp] = _sodium.drho_dT(_temperature[_qp]);
+  _drho_dT[_qp] = _sodium.drho_dT(_temperature[_qp]);
   _drho_dh[_qp] = _sodium.drho_dh(_h[_qp]);
 }

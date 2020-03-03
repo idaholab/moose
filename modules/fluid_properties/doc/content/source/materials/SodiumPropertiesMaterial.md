@@ -2,15 +2,15 @@
 
 !syntax description /Materials/SodiumPropertiesMaterial
 
-`SodiumPropertiesMaterial` samples the functions availble in [SodiumProperties](SodiumProperties.md)
+`SodiumPropertiesMaterial` samples the functions available in [SodiumProperties](SodiumProperties.md)
 and provides them as material properties.
 
-The following materials created for liquid sodium are:
+The following material properties created for liquid sodium are:
 
 - Thermal Conductivity: `k(temperature)`
 - Enthalpy: `h(temperature)`
-- Heat capacity: `heatCapacity(temperature)`
-- Temperature: `temperature(h)`
+- Heat capacity: `cp(temperature)`
+- Temperature from enthalpy: `T_from_h(h)`
 - Density: `rho(temperature)`
 - Derivative of Density w.r.t temperature: `drho_dT(temperature)`
 - Derivative of Density w.r.t enthalpy: `drho_dh(h)`

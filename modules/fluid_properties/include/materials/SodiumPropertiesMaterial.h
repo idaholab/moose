@@ -39,17 +39,17 @@ protected:
   MaterialProperty<Real> & _cp;
 
   /// Temperature from enthalpy
-  MaterialProperty<Real> & _t_from_h;
+  MaterialProperty<Real> & _T_from_h;
 
   /// Density
   MaterialProperty<Real> & _rho;
 
   /// Derivative of density with respect to temperature
-  MaterialProperty<Real> & _drho_dt;
+  MaterialProperty<Real> & _drho_dT;
 
   /// Derivative of density with respect to enthalpy
   MaterialProperty<Real> & _drho_dh;
 
-  // Multicomponent fluid properties UserObject
+  // Sodium fluid properties UserObject
   const SodiumProperties & _sodium;
 };
