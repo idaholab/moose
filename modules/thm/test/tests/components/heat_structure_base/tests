@@ -51,4 +51,25 @@
     input = 'err.no_T_ic.i'
     expect_err = "hs: Missing initial condition for temperature."
   [../]
+
+  [./err:incorrect_size_of_n_part_elems]
+    type = 'RunException'
+    input = 'err.no_T_ic.i'
+    cli_args = 'Components/hs/n_part_elems=1'
+    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'n_part_elems' \(1\)"
+  [../]
+
+  [./err:incorrect_size_of_widths]
+    type = 'RunException'
+    input = 'err.no_T_ic.i'
+    cli_args = 'Components/hs/widths=1'
+    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'widths' \(1\)"
+  [../]
+
+  [./err:incorrect_size_of_materials]
+    type = 'RunException'
+    input = 'err.no_T_ic.i'
+    cli_args = 'Components/hs/materials=a'
+    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'materials' \(1\)"
+  [../]
 []

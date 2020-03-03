@@ -91,6 +91,10 @@ HeatStructureBase::check() const
   else if (_n_sections > 1)
     logError("If there is more than 1 axial region, then the parameter 'axial_region_names' must "
              "be specified.");
+
+  checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
+  checkEqualSize<std::string, Real>("names", "widths");
+  checkEqualSize<std::string, std::string>("names", "materials");
 }
 
 bool
