@@ -51,7 +51,7 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_TRANSLATOR = 'MooseDocs.base.Translator'
-DEFAULT_EXECUTIONER = 'MooseDocs.base.ParallelQueue'
+DEFAULT_EXECUTIONER = 'MooseDocs.base.ParallelBarrier'
 
 def load_config(filename, **kwargs):
     """
