@@ -24,14 +24,18 @@ SobolSampler::validParams()
       "distributions",
       "The distribution names to be sampled, the number of distributions provided defines the "
       "number of columns per matrix.");
+  params.addParam<bool>("resample", true, "Create the re-sample matrix for second-order indices.");
   return params;
 }
 
 SobolSampler::SobolSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    _a_matrix(0, 0),
-    _b_matrix(0, 0),
+    _m1_matrix(0, 0),
+    _m2_matrix(0, 0),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
+    _resample(getParam<bool>("resample")),
+    _num_inputs(_distribution_names.size()),
+    _num_matrices(_resample ? 2 * _distribution_names.size() + 2 : _distribution_names.size() + 2),
     _num_rows_per_matrix(getParam<dof_id_type>("num_rows"))
 {
   setNumberOfRandomSeeds(2);
@@ -40,19 +44,19 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
     _distributions.push_back(&getDistributionByName(name));
 
   setNumberOfCols(_distribution_names.size());
-  setNumberOfRows(_num_rows_per_matrix * (_distribution_names.size() + 2));
+  setNumberOfRows(_num_rows_per_matrix * _num_matrices);
 }
 
 void
 SobolSampler::sampleSetUp()
 {
-  _a_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
-  _b_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
+  _m1_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
+  _m2_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
   for (dof_id_type i = 0; i < _num_rows_per_matrix; ++i)
     for (dof_id_type j = 0; j < getNumberOfCols(); ++j)
     {
-      _a_matrix(i, j) = _distributions[j]->quantile(this->getRand(0));
-      _b_matrix(i, j) = _distributions[j]->quantile(this->getRand(1));
+      _m1_matrix(i, j) = _distributions[j]->quantile(this->getRand(0));
+      _m2_matrix(i, j) = _distributions[j]->quantile(this->getRand(1));
     }
 }
 
@@ -62,19 +66,39 @@ SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
   dof_id_type matrix_index = row_index / _num_rows_per_matrix;
   dof_id_type r = row_index - matrix_index * _num_rows_per_matrix;
 
+  // M2 Matrix
   if (matrix_index == 0)
-    return _a_matrix(r, col_index);
-  else if (matrix_index == 1)
-    return _b_matrix(r, col_index);
-  else if (col_index == matrix_index - 2)
-    return _b_matrix(r, col_index);
-  else
-    return _a_matrix(r, col_index);
+    return _m2_matrix(r, col_index);
+
+  // M1 Matrix
+  else if (matrix_index == _num_matrices - 1)
+    return _m1_matrix(r, col_index);
+
+  // N_-i Matrices
+  else if (matrix_index > _num_inputs)
+  {
+    if (col_index == (matrix_index - _num_inputs - 1))
+      return _m2_matrix(r, col_index);
+    else
+      return _m1_matrix(r, col_index);
+  }
+
+  // N_i Matrices
+  else // if (matrix_index < _num_inputs + 1)
+  {
+    if (col_index == matrix_index - 1)
+      return _m1_matrix(r, col_index);
+    else
+      return _m2_matrix(r, col_index);
+  }
+
+  mooseError("Invalid row and column index, if you are seeing this Andrew messed up becsue this "
+             "should be impossible to reach.");
 }
 
 void
 SobolSampler::sampleTearDown()
 {
-  _a_matrix.resize(0, 0);
-  _b_matrix.resize(0, 0);
+  _m1_matrix.resize(0, 0);
+  _m2_matrix.resize(0, 0);
 }
