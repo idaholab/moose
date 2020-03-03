@@ -136,10 +136,23 @@ if [[ "$kind" == "app" ]]; then
 fi
 
 if [[ "$kind" == "module" ]]; then
-  rm -f $dir/LICENSE
-  rm -f $dir/README.md
-  rm -f $dir/scripts/*
-  rmdir $dir/scripts
-  rm -f $dir/run_tests
-  ln -s ../../scripts/run_tests $dir/run_tests
+    echo "new Module created in moose/modules"
+    echo ""
+    echo "There are several more steps that need to be completed"
+    echo "    1. Modify the moose/modules/modules.mk file"
+    echo "      a. Add the new module to the ALL_MODULES list (alphabetical)"
+    echo "      b. Add the new module to the MODULE_NAMES variable (alphabetical)"
+    echo "      c. Create a new registration section for the new module"
+    echo "    2. Modify the moose/scripts/sqa_stats.py file"
+    echo "      a. Add a new compute requirements stats section"
+    echo "    3. Ensure that no stork files hang around before committing"
+    echo "    4. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
+    echo ""
+
+    rm -f $dir/LICENSE
+    rm -f $dir/README.md
+    rm -f $dir/scripts/*
+    rmdir $dir/scripts
+    rm -f $dir/run_tests
+    ln -s ../../scripts/run_tests $dir/run_tests
 fi
