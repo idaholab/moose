@@ -15,7 +15,7 @@
 class StiffenedGasFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  StiffenedGasFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  StiffenedGasFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()

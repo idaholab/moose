@@ -19,7 +19,7 @@ class TabulatedFluidProperties;
 class TabulatedFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  TabulatedFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  TabulatedFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()

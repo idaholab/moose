@@ -15,7 +15,7 @@
 class SodiumPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  SodiumPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  SodiumPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()
