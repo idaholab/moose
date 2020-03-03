@@ -27,12 +27,15 @@ SamplerData::validParams()
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
 
-  // Control for
+  // Do not broadcast, this tools is mainly for testing of sampler data so the data is only needed
+  // on the root process, which is handled in finalize
+  params.set<bool>("_auto_broadcast") = false;
+
   MooseEnum method("get_global_samples get_local_samples get_next_local_row", "get_next_local_row");
   params.addParam<MooseEnum>(
       "sampler_method",
       method,
-      "Control the method of data retrival from the Sampler object; this is mainly for testing.");
+      "Control the method of data retrieval from the Sampler object; this is mainly for testing.");
 
   return params;
 }
