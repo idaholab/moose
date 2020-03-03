@@ -102,13 +102,6 @@ protected:
   /// The number of rods represented by this heat structure
   const Real & _num_rods;
 
-  /// Thermal conductivity of each heat structure part
-  const bool _has_k;
-  /// Heat capacity of each heat structure part
-  const bool _has_Cp;
-  /// Density of each heat structure part
-  const bool _has_rho;
-
   // mesh related
   /// BC ID of the heat structure (outer)
   std::vector<unsigned int> _outer_bc_id;

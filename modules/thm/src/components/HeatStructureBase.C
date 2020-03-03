@@ -49,10 +49,7 @@ HeatStructureBase::HeatStructureBase(const InputParameters & params)
     _total_width(std::accumulate(_width.begin(), _width.end(), 0.0)),
     _n_part_elems(getParam<std::vector<unsigned int>>("n_part_elems")),
     _total_elem_number(0),
-    _num_rods(getParam<Real>("num_rods")),
-    _has_k(params.isParamValid("k")),
-    _has_Cp(params.isParamValid("Cp")),
-    _has_rho(params.isParamValid("rho"))
+    _num_rods(getParam<Real>("num_rods"))
 {
   _number_of_hs = _names.size();
   if (_n_part_elems.size() == _number_of_hs)
