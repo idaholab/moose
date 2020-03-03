@@ -13,6 +13,18 @@
     csvdiff = 'master_2d_quad_out_pc_samp_0002.csv'
     requirement = 'The system shall compute polynomial chaos coefficients using Gauss-Legendre quadrature.'
   []
+  [legendre_moment_calculation]
+    type = CSVDiff
+    input = master_2d_quad.i
+    csvdiff = 'master_2d_quad_out.csv'
+    cli_args = 'Samplers/quadrature/order=5
+                UserObjects/poly_chaos/order=5
+                UserObjects/poly_chaos/output_mean=true
+                UserObjects/poly_chaos/output_stdv=true
+                UserObjects/poly_chaos/output_skew=true
+                UserObjects/poly_chaos/output_kurt=true'
+    requirement = 'The system shall compute statistical moments after computing Legendre polynomial chaos coefficients.'
+  []
   [gauss_hermite]
     type = CSVDiff
     input = master_2dnorm_quad.i
@@ -28,5 +40,17 @@
     csvdiff = 'boost_2dnorm_quad_pc_samp_0002.csv'
     boost = true
     requirement = 'The system shall compute polynomial chaos coefficients using Gauss-Hermite quadrature.'
+  []
+  [hermite_moment_calculation]
+    type = CSVDiff
+    input = master_2dnorm_quad.i
+    csvdiff = 'master_2dnorm_quad_out.csv'
+    cli_args = 'Samplers/quadrature/order=5
+                UserObjects/poly_chaos/order=5
+                UserObjects/poly_chaos/output_mean=true
+                UserObjects/poly_chaos/output_stdv=true
+                UserObjects/poly_chaos/output_skew=true
+                UserObjects/poly_chaos/output_kurt=true'
+    requirement = 'The system shall compute statistical moments after computing Hermite polynomial chaos coefficients.'
   []
 []

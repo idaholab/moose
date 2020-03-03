@@ -11,7 +11,6 @@
 
 #include "MooseError.h"
 #include "libmesh/auto_ptr.h"
-#include "libmesh/utility.h"
 
 // For computing legendre quadrature
 #include "libmesh/dense_matrix_impl.h"
@@ -51,6 +50,35 @@ Polynomial::compute(const unsigned int /*order*/, const Real /*x*/, const bool /
 {
   ::mooseError("Polynomial type has not been implemented.");
   return 0;
+}
+
+Real
+Polynomial::productIntegral(const std::vector<unsigned int> order) const
+{
+  const unsigned int nprod = order.size();
+
+  if (nprod == 1)
+    return (order[0] == 0 ? 1.0 : 0.0);
+  else if (nprod == 2)
+    return (order[0] == order[1] ? innerProduct(order[0]) : 0.0);
+
+  unsigned int poly_order = std::accumulate(order.begin(), order.end(), 0);
+  unsigned int quad_order = (poly_order % 2 == 0 ? poly_order : poly_order - 1) / 2;
+
+  std::vector<Real> xq;
+  std::vector<Real> wq;
+  quadrature(quad_order, xq, wq);
+
+  Real val = 0.0;
+  for (unsigned int q = 0; q < xq.size(); ++q)
+  {
+    Real prod = wq[q];
+    for (unsigned int i = 0; i < nprod; ++i)
+      prod *= compute(order[i], xq[q], false);
+    val += prod;
+  }
+
+  return val / std::accumulate(wq.begin(), wq.end(), 0.0);
 }
 
 Legendre::Legendre(const UniformDistribution * dist)

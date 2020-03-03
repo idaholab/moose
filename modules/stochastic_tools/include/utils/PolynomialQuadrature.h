@@ -40,6 +40,7 @@ public:
   virtual void quadrature(const unsigned int order,
                           std::vector<Real> & points,
                           std::vector<Real> & weights) const = 0;
+  Real productIntegral(const std::vector<unsigned int> order) const;
 };
 
 /**
