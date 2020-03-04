@@ -22,7 +22,7 @@ TEST(StochasticTools, CartesianProduct)
 
   const std::vector<std::vector<Real>> x = {{2, 4, 8, 16}, {3, 9, 27}, {4, 16}};
 
-  const CartesianProduct cp(x);
+  const CartesianProduct<Real> cp(x);
 
   EXPECT_EQ(cp.numRows(), 24);
   EXPECT_EQ(cp.numCols(), 3);
@@ -77,7 +77,7 @@ TEST(StochasticTools, WeightedCartesianProduct)
   const std::vector<std::vector<Real>> x = {{2, 4, 8, 16}, {3, 9, 27}, {4, 16}};
   const std::vector<std::vector<Real>> w = {{1, 2, 3, 4}, {10, 11, 12}, {100, 110}};
 
-  const WeightedCartesianProduct wcp(x, w);
+  const WeightedCartesianProduct<Real, Real> wcp(x, w);
 
   EXPECT_EQ(wcp.numRows(), 24);
   EXPECT_EQ(wcp.numCols(), 3);
