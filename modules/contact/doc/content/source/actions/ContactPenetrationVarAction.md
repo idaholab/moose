@@ -1,1 +1,0 @@
-!template load file=stubs/moose_action.md.template name=ContactPenetrationVarAction syntax=/Contact/ContactPenetrationVarAction
