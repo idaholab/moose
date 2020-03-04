@@ -12,23 +12,20 @@
 #include "MooseObjectUnitTest.h"
 #include "IdealGasFluidProperties.h"
 
-class ADFluidPropsTest : public MooseObjectUnitTest
+class IdealGasFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  ADFluidPropsTest() : MooseObjectUnitTest("MooseUnitApp") { buildObj(); }
+  IdealGasFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
-  const SinglePhaseFluidProperties & buildObj(const std::string name = "fp",
-                                              bool allow_imperfect_jac = false)
+  void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("IdealGasFluidProperties");
     uo_pars.set<Real>("molar_mass") = 0.028966206103678928;
     uo_pars.set<Real>("gamma") = 1.41;
-    uo_pars.set<bool>("allow_imperfect_jacobians") = allow_imperfect_jac;
-    _fe_problem->addUserObject("IdealGasFluidProperties", name, uo_pars);
-    _fp = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>(name);
-    return *_fp;
+    _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>("fp");
   }
 
-  const SinglePhaseFluidProperties * _fp;
+  const IdealGasFluidProperties * _fp;
 };

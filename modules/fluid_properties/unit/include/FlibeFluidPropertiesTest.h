@@ -15,7 +15,7 @@
 class FlibeFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  FlibeFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  FlibeFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()

@@ -16,7 +16,7 @@
 class Water97FluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  Water97FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  Water97FluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()

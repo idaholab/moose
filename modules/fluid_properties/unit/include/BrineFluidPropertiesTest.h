@@ -19,7 +19,7 @@ class SinglePhaseFluidProperties;
 class BrineFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  BrineFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  BrineFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()
