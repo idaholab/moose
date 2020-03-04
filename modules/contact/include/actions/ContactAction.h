@@ -64,7 +64,6 @@ protected:
   const MeshGeneratorName _mesh_gen_name;
   const bool _ping_pong_protection;
 
-
 private:
   void addMortarContact();
   void addNodeFaceContact();
