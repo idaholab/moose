@@ -44,14 +44,16 @@ public:
    * @param name The name of the parameter key of the sampler to retrieve
    * @return The sampler with name associated with the parameter 'name'
    */
-  Sampler & getSampler(const std::string & name);
+  template <typename T = Sampler>
+  T & getSampler(const std::string & name);
 
   /**
    * Get a sampler with a given name
    * @param name The name of the sampler to retrieve
    * @return The sampler with name 'name'
    */
-  Sampler & getSamplerByName(const SamplerName & name);
+  template <typename T = Sampler>
+  T & getSamplerByName(const SamplerName & name);
 
 private:
   /// Parameters of the object with this interface
@@ -63,3 +65,21 @@ private:
   /// Thread ID
   THREAD_ID _smi_tid;
 };
+
+template <typename T>
+T &
+SamplerInterface::getSampler(const std::string & name)
+{
+  return getSamplerByName<T>(_smi_params.get<SamplerName>(name));
+}
+
+template <typename T>
+T &
+SamplerInterface::getSamplerByName(const SamplerName & name)
+{
+  Sampler * base_ptr = &_smi_feproblem.getSampler(name, _smi_tid);
+  T * obj_ptr = dynamic_cast<T *>(base_ptr);
+  if (!obj_ptr)
+    mooseError("Failed to find a Sampler object with the name '", name, "' for the desired type.");
+  return *obj_ptr;
+}
