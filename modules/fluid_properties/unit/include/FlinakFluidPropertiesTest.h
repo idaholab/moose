@@ -15,7 +15,7 @@
 class FlinakFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  FlinakFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  FlinakFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()

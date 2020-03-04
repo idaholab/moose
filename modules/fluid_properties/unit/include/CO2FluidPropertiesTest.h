@@ -15,7 +15,7 @@
 class CO2FluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  CO2FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  CO2FluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()
