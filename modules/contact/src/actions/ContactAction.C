@@ -24,7 +24,6 @@ static unsigned int counter = 0;
 static unsigned int cp_counter = 0;
 static unsigned int na_counter = 0;
 
-
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
 registerMooseAction("ContactApp", ContactAction, "add_constraint"); // for mortar constraint
@@ -266,11 +265,11 @@ ContactAction::act()
     }
     // Add nodal area contact variable
     {
-    auto var_params = _factory.getValidParams("MooseVariable");
-    var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    var_params.set<MooseEnum>("family") = "LAGRANGE";
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-    _problem->addAuxVariable("MooseVariable", "nodal_area_" + _name, var_params);
+      _problem->addAuxVariable("MooseVariable", "nodal_area_" + _name, var_params);
     }
   }
 
