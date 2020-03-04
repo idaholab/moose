@@ -15,9 +15,15 @@
 #include "AddVariableAction.h"
 #include "MortarConstraintBase.h"
 #include "NonlinearSystemBase.h"
+#include "Parser.h"
 
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
+
+static unsigned int counter = 0;
+static unsigned int cp_counter = 0;
+static unsigned int na_counter = 0;
+
 
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
@@ -28,6 +34,7 @@ registerMooseAction("ContactApp",
                     ContactAction,
                     "add_mortar_variable"); // for mortar lagrange multiplier
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
+registerMooseAction("ContactApp", ContactAction, "add_user_object");
 
 defineLegacyParams(ContactAction);
 
@@ -109,6 +116,7 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
+    _order(getParam<MooseEnum>("order")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
     _ping_pong_protection(getParam<bool>("ping_pong_protection"))
 {
@@ -179,6 +187,105 @@ ContactAction::act()
       else if (_system == "DiracKernel")
         addDiracContact();
     }
+  }
+
+  if (_current_task == "add_aux_kernel")
+  { // Add ContactPenetrationAuxAction.
+    if (!_problem->getDisplacedProblem())
+    {
+      mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+                 "Mesh block.");
+    }
+
+    {
+      InputParameters params = _factory.getValidParams("PenetrationAux");
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+
+      // Extract global params
+      if (isParamValid("parser_syntax"))
+        _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+
+      params.set<std::vector<BoundaryName>>("boundary") = {_slave};
+      params.set<BoundaryName>("paired_boundary") = _master;
+      params.set<AuxVariableName>("variable") = "penetration";
+      params.set<MooseEnum>("order") = _order;
+
+      params.set<bool>("use_displaced_mesh") = true;
+      std::stringstream name;
+      name << _name;
+      name << "_contact_";
+      name << counter++;
+
+      _problem->addAuxKernel("PenetrationAux", name.str(), params);
+    }
+    // Add ContactPressureAuxAction
+    {
+      InputParameters params = _factory.getValidParams("ContactPressureAux");
+
+      // Extract global params
+      if (isParamValid("parser_syntax"))
+        _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+
+      params.set<std::vector<BoundaryName>>("boundary") = {_slave};
+      params.set<BoundaryName>("paired_boundary") = _master;
+      params.set<AuxVariableName>("variable") = "contact_pressure";
+      params.addRequiredCoupledVar("nodal_area", "The nodal area");
+      params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
+      params.set<MooseEnum>("order") = _order;
+
+      params.set<bool>("use_displaced_mesh") = true;
+
+      std::stringstream name;
+      name << _name;
+      name << "_contact_pressure_";
+      name << cp_counter++;
+
+      params.set<ExecFlagEnum>("execute_on",
+                               true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
+      _problem->addAuxKernel("ContactPressureAux", name.str(), params);
+    }
+  }
+
+  if (_current_task == "add_aux_variable")
+  {
+    // Add ContactPenetrationVarAction
+    {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+      _problem->addAuxVariable("MooseVariable", "penetration", var_params);
+    }
+    // Add ContactPressureVarAction
+    {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+      _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
+    }
+    // Add nodal area contact variable
+    {
+    auto var_params = _factory.getValidParams("MooseVariable");
+    var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+    var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+    _problem->addAuxVariable("MooseVariable", "nodal_area_" + _name, var_params);
+    }
+  }
+
+  if (_current_task == "add_user_object")
+  {
+    auto var_params = _factory.getValidParams("NodalArea");
+    var_params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    var_params.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
+
+    mooseAssert(_problem, "Problem pointer is NULL");
+    var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
+    var_params.set<bool>("use_displaced_mesh") = true;
+
+    _problem->addUserObject(
+        "NodalArea", "nodal_area_object_" + Moose::stringify(na_counter++), var_params);
   }
 }
 
