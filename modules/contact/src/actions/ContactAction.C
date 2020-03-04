@@ -210,12 +210,9 @@ ContactAction::act()
       params.set<MooseEnum>("order") = _order;
 
       params.set<bool>("use_displaced_mesh") = true;
-      std::stringstream name;
-      name << _name;
-      name << "_contact_";
-      name << counter++;
+      std::string name = _name + "_contact_" + Moose::stringify(counter++);
 
-      _problem->addAuxKernel("PenetrationAux", name.str(), params);
+      _problem->addAuxKernel("PenetrationAux", name, params);
     }
     // Add ContactPressureAuxAction
     {
@@ -234,14 +231,11 @@ ContactAction::act()
 
       params.set<bool>("use_displaced_mesh") = true;
 
-      std::stringstream name;
-      name << _name;
-      name << "_contact_pressure_";
-      name << cp_counter++;
+      std::string name = _name + "_contact_pressure_" + Moose::stringify(cp_counter++);
 
       params.set<ExecFlagEnum>("execute_on",
                                true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
-      _problem->addAuxKernel("ContactPressureAux", name.str(), params);
+      _problem->addAuxKernel("ContactPressureAux", name, params);
     }
   }
 
