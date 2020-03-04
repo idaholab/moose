@@ -32,6 +32,12 @@ public:
 
   SobolSampler(const InputParameters & parameters);
 
+  /// Number of inputs, see SobolStatistics
+  std::size_t numInputs() const { return _num_inputs; }
+
+  /// Resampling flag, see SobolStatistics
+  bool resample() const { return _resample; }
+
 protected:
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
   virtual void sampleSetUp() override;
