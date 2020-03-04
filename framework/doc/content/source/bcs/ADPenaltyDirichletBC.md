@@ -1,11 +1,11 @@
-# PenaltyDirichletBC
+# ADPenaltyDirichletBC
 
-!syntax description /BCs/PenaltyDirichletBC
+!syntax description /BCs/ADPenaltyDirichletBC
 
 ## Description
 
-`PenaltyDirichletBC` is a `IntegratedBC` used for enforcing Dirichlet boundary conditions
-which differs from the [`DirichletBC`](/DirichletBC.md) class in the way in which it handles the enforcement.
+`ADPenaltyDirichletBC` is a `ADIntegratedBC` used for enforcing Dirichlet boundary conditions
+which differs from the [`ADDirichletBC`](/ADDirichletBC.md) class in the way in which it handles the enforcement.
 It is appropriate for partial differential equations (PDEs) in the form
 
 \begin{equation}
@@ -18,7 +18,7 @@ It is appropriate for partial differential equations (PDEs) in the form
 
 Instead of imposing the Dirichlet condition directly on the basis by replacing the
 equations associated with those degrees of freedom (DOFs) by the auxiliary equation
-$u-g=0$, the `PenaltyDirichletBC` is based on the variational statement:
+$u-g=0$, the `ADPenaltyDirichletBC` is based on the variational statement:
 find $u \in H^1(\Omega)$ such that
 \begin{equation}
   \label{weakform}
@@ -74,10 +74,10 @@ in MOOSE some time in the future.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/penalty_dirichlet_bc/penalty_dirichlet_bc_test.i block=BCs
+!listing test/tests/bcs/ad_penalty_dirichlet_bc/penalty_dirichlet_bc_test.i block=BCs
 
-!syntax parameters /BCs/PenaltyDirichletBC
+!syntax parameters /BCs/ADPenaltyDirichletBC
 
-!syntax inputs /BCs/PenaltyDirichletBC
+!syntax inputs /BCs/ADPenaltyDirichletBC
 
-!syntax children /BCs/PenaltyDirichletBC
+!syntax children /BCs/ADPenaltyDirichletBC
