@@ -220,12 +220,6 @@ private:
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
 
-  /// Seed generator
-  MooseRandom _seed_generator;
-
-  /// Initial random number seed
-  const unsigned int & _seed;
-
   /// Number of rows for this processor
   dof_id_type _n_local_rows;
 
@@ -241,6 +235,9 @@ private:
   /// Total number of columns in the sample matrix
   dof_id_type _n_cols;
 
+  /// Number of seeds
+  std::size_t _n_seeds;
+
   /// Iterator index for getNextLocalRow method
   dof_id_type _next_local_row;
 
@@ -249,6 +246,9 @@ private:
 
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
+
+  /// Flag for initial execute to allow the first set of random numbers to be always be the same
+  bool _has_executed;
 
   /// Max number of entries for matrix returned by getGlobalSamples
   const dof_id_type _limit_get_global_samples;

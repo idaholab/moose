@@ -56,11 +56,12 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     PerfGraphInterface(this),
-    _seed(getParam<unsigned int>("seed")),
     _n_rows(0),
     _n_cols(0),
+    _n_seeds(1),
     _next_local_row_requires_state_restore(true),
     _initialized(false),
+    _has_executed(false),
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
@@ -70,7 +71,6 @@ Sampler::Sampler(const InputParameters & parameters)
     _perf_advance_generator(registerTimedSection("advanceGenerators", 2)),
     _perf_get_rand(registerTimedSection("getRand", 5))
 {
-  setNumberOfRandomSeeds(1);
 }
 
 void
@@ -81,24 +81,24 @@ Sampler::init()
   if (_initialized)
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
-  if (!getParam<bool>("legacy_support"))
-  {
-    if (_n_rows == 0)
-      mooseError("The number of rows cannot be zero.");
-
-    if (_n_cols == 0)
-      mooseError("The number of columns cannot be zero.");
-  }
-
   // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
   MooseUtils::linearPartitionItems(
       _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
 
-  // See FEProblemBase::execute
-  execute();
-
   // Set the next row iterator index
   _next_local_row = _local_row_begin;
+
+  // Seed the "master" seed generator
+  const unsigned int seed = getParam<unsigned int>("seed");
+  MooseRandom seed_generator;
+  seed_generator.seed(0, seed);
+
+  // See the "slave" generator that will be used for the random number generation
+  for (std::size_t i = 0; i < _n_seeds; ++i)
+    _generator.seed(i, seed_generator.randl(0));
+
+  // Save the initial state
+  _generator.saveState();
 
   // Mark class as initialized, which locks out certain methods
   _initialized = true;
@@ -112,6 +112,9 @@ Sampler::setNumberOfRows(dof_id_type n_rows)
         "The 'setNumberOfRows()' method can not be called after the Sampler has been initialized; "
         "this method should be called in the constructor of the Sampler object.");
 
+  if (n_rows == 0)
+    mooseError("The number of rows cannot be zero.");
+
   _n_rows = n_rows;
 }
 
@@ -123,13 +126,36 @@ Sampler::setNumberOfCols(dof_id_type n_cols)
         "The 'setNumberOfCols()' method can not be called after the Sampler has been initialized; "
         "this method should be called in the constructor of the Sampler object.");
 
+  if (n_cols == 0)
+    mooseError("The number of columns cannot be zero.");
+
   _n_cols = n_cols;
+}
+
+void
+Sampler::setNumberOfRandomSeeds(std::size_t n_seeds)
+{
+  if (_initialized)
+    mooseError("The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been "
+               "initialized; "
+               "this method should be called in the constructor of the Sampler object.");
+
+  if (n_seeds == 0)
+    mooseError("The number of seeds must be larger than zero.");
+
+  _n_seeds = n_seeds;
 }
 
 void
 Sampler::execute()
 {
+  if (_has_executed)
+  {
+    _generator.restoreState();
+    advanceGenerators(_n_rows * _n_cols);
+  }
   _generator.saveState();
+  _has_executed = true;
 }
 
 DenseMatrix<Real>
@@ -266,24 +292,6 @@ Sampler::getRand(const unsigned int index)
   return _generator.rand(index);
 }
 
-void
-Sampler::setNumberOfRandomSeeds(std::size_t number)
-{
-  if (number == 0)
-    mooseError("The number of seeds must be larger than zero.");
-
-  if (_initialized)
-    mooseError("The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been "
-               "initialized; "
-               "this method should be called in the constructor of the Sampler object.");
-
-  // Seed the "master" seed generator
-  _seed_generator.seed(0, _seed);
-
-  // See the "slave" generator that will be used for the random number generation
-  for (std::size_t i = 0; i < number; ++i)
-    _generator.seed(i, _seed_generator.randl(0));
-}
 
 dof_id_type
 Sampler::getNumberOfRows() const
