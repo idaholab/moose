@@ -18,7 +18,9 @@
       input = sobol.i
       csvdiff = 'sobol_out_sub00.csv sobol_out_sub01.csv sobol_out_sub02.csv sobol_out_sub03.csv '
                 'sobol_out_sub04.csv sobol_out_sub05.csv sobol_out_sub06.csv sobol_out_sub07.csv '
-                'sobol_out_sub08.csv sobol_out_sub09.csv sobol_out_sub10.csv sobol_out_sub11.csv'
+                'sobol_out_sub08.csv sobol_out_sub09.csv sobol_out_sub10.csv sobol_out_sub11.csv '
+                'sobol_out_sub12.csv sobol_out_sub13.csv sobol_out_sub14.csv sobol_out_sub15.csv '
+                'sobol_out_sub16.csv sobol_out_sub17.csv'
 
       detail = 'Sobol sampling scheme.'
     []
