@@ -10,8 +10,7 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
-#include "Calculators.h"
-#include "BootstrapCalculators.h"
+#include "SamplerInterface.h"
 
 class SobolStatistics;
 class SobolSampler;
