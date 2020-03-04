@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#14457'
+  design = 'CartesianProductSampler.md'
+  [test]
+    type = CSVDiff
+    input = grid.i
+    csvdiff = grid_out_data_0000.csv
+
+    requirement = "The system shall include the ability to create a Cartesian product sampling scheme."
+  []
+[]

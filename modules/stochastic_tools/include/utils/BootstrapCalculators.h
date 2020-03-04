@@ -37,7 +37,7 @@ std::unique_ptr<const BootstrapCalculator> makeBootstrapCalculator(const MooseEn
                                                                    unsigned int,
                                                                    unsigned int);
 
-/*
+/**
  * Base class for computing bootstrap confidence level intervals. These classes follow the same
  * design pattern as those Statistics.h.
  * @param other ParallelObject that is providing the Communicator
@@ -54,7 +54,7 @@ public:
                       unsigned int seed);
   virtual ~BootstrapCalculator() = default;
 
-  /*
+  /**
    * Compute the bootstrap confidence level intervals.
    * @param data Vector of data from which statistics are to be computed
    * @param calc Calculator object defining the statistic to be computed
