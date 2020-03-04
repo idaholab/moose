@@ -42,15 +42,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntax("ContactAction", "Contact/*");
 
-  registerSyntax("ContactPenetrationAuxAction", "Contact/*");
-  registerSyntax("ContactPenetrationVarAction", "Contact/*");
-
-  registerSyntax("ContactPressureAuxAction", "Contact/*");
-  registerSyntax("ContactPressureVarAction", "Contact/*");
-
-  registerSyntax("NodalAreaAction", "Contact/*");
-  registerSyntax("NodalAreaVarAction", "Contact/*");
-
   registerTask("output_penetration_info_vars", false);
   syntax.addDependency("output_penetration_info_vars", "add_output");
 }
