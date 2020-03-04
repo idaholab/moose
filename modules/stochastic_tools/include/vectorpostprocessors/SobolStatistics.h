@@ -19,6 +19,9 @@ class SobolSampler;
 template <>
 InputParameters validParams<SobolStatistics>();
 
+/**
+ * Computes Sobol sensitivity indices, see SobolCalculators
+ */
 class SobolStatistics : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
@@ -31,15 +34,15 @@ public:
   virtual void finalize() final{};
 
 protected:
+  /// The sampler that generated the samples that produced results for the _results_vectors
   const SobolSampler & _sobol_sampler;
 
-  dof_id_type _num_rows_per_matrix;
-  dof_id_type _num_cols_per_matrix;
-
-  const bool _is_result_distributed = false;
-
-  VectorPostprocessorValue & _stat_ids;
-
+  /// Result vectors from StocasticResults object
   std::vector<std::pair<const VectorPostprocessorValue *, bool>> _result_vectors;
+
+  /// Vectors computed by this object
   std::vector<VectorPostprocessorValue *> _sobol_stat_vectors;
+
+  /// PrefGraph timer
+  const PerfID _perf_execute;
 };

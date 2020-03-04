@@ -69,4 +69,8 @@
 [Outputs]
   execute_on = 'FINAL'
   csv = true
+  [perf]
+    type = PerfGraphOutput
+    level = 4
+  []
 []

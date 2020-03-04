@@ -55,4 +55,11 @@ private:
    */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
   getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
+
+  ///@{
+  /// PrefGraph timers
+  const PerfID _perf_solve_step;
+  const PerfID _perf_solve_batch_step;
+  const PerfID _perf_command_line_args;
+  ///@}
 };

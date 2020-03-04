@@ -66,4 +66,10 @@ protected:
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
+
+private:
+  /// PerfGraph timer
+  const PerfID _perf_sample_setup;
+  const PerfID _perf_sample_teardown;
+  const PerfID _perf_compute_sample;
 };

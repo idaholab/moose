@@ -36,7 +36,10 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
     _resample(getParam<bool>("resample")),
     _num_inputs(_distribution_names.size()),
     _num_matrices(_resample ? 2 * _distribution_names.size() + 2 : _distribution_names.size() + 2),
-    _num_rows_per_matrix(getParam<dof_id_type>("num_rows"))
+    _num_rows_per_matrix(getParam<dof_id_type>("num_rows")),
+    _perf_sample_setup(registerTimedSection("sampleSetup", 3)),
+    _perf_sample_teardown(registerTimedSection("computeTearDown", 3)),
+    _perf_compute_sample(registerTimedSection("computeSample", 4))
 {
   setNumberOfRandomSeeds(2);
 
@@ -50,6 +53,8 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
 void
 SobolSampler::sampleSetUp()
 {
+  TIME_SECTION(_perf_sample_setup);
+
   _m1_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
   _m2_matrix.resize(_num_rows_per_matrix, getNumberOfCols());
   for (dof_id_type i = 0; i < _num_rows_per_matrix; ++i)
@@ -63,6 +68,8 @@ SobolSampler::sampleSetUp()
 Real
 SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  TIME_SECTION(_perf_compute_sample);
+
   dof_id_type matrix_index = row_index / _num_rows_per_matrix;
   dof_id_type r = row_index - matrix_index * _num_rows_per_matrix;
 
@@ -99,6 +106,8 @@ SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 void
 SobolSampler::sampleTearDown()
 {
+  TIME_SECTION(_perf_sample_teardown);
+
   _m1_matrix.resize(0, 0);
   _m2_matrix.resize(0, 0);
 }

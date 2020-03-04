@@ -47,7 +47,10 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
-    _local_batch_app_index(0)
+    _local_batch_app_index(0),
+    _perf_solve_step(registerTimedSection("solveStep", 1)),
+    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
+    _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
@@ -60,6 +63,8 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
 bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  TIME_SECTION(_perf_solve_step);
+
   mooseAssert(_my_num_apps, _sampler.getNumberOfLocalRows());
 
   bool last_solve_converged = true;
@@ -74,6 +79,8 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
+  TIME_SECTION(_perf_solve_batch_step);
+
   // Value to return
   bool last_solve_converged = true;
 
@@ -152,6 +159,8 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
+  TIME_SECTION(_perf_command_line_args);
+
   // Since we only store param_names in cli_args, we need to find the values for each param from
   // sampler data and combine them to get full command line option strings.
   std::vector<Real> row = _sampler.getNextLocalRow();

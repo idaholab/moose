@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Restartable.h"
+#include "PerfGraphInterface.h"
 
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
@@ -54,7 +55,10 @@ class SubAppBackups : public std::vector<std::shared_ptr<Backup>>
  * path using "MOOSE_LIBRARY_PATH" or by specifying a single input file library path
  * in Multiapps InputParameters object.
  */
-class MultiApp : public MooseObject, public SetupInterface, public Restartable
+class MultiApp : public MooseObject,
+                 public SetupInterface,
+                 public Restartable,
+                 public PerfGraphInterface
 {
 public:
   static InputParameters validParams();
@@ -436,6 +440,12 @@ protected:
 
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
   std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
+
+private:
+  PerfID _perf_backup;
+  PerfID _perf_restore;
+  PerfID _perf_init;
+  PerfID _perf_reset_app;
 };
 
 template <>

@@ -42,7 +42,7 @@ InputParameters validParams<Sampler>();
 class Sampler : public MooseObject,
                 public SetupInterface,
                 public DistributionInterface,
-                PerfGraphInterface
+                public PerfGraphInterface
 {
 public:
   static InputParameters validParams();
@@ -266,5 +266,8 @@ private:
   const PerfID _perf_get_next_local_row;
   const PerfID _perf_advance_generator;
   const PerfID _perf_get_rand;
+  const PerfID _perf_sample_row;
+  const PerfID _perf_local_sample_matrix;
+  const PerfID _perf_sample_matrix;
   ///@}
 };

@@ -69,7 +69,10 @@ Sampler::Sampler(const InputParameters & parameters)
     _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
     _perf_get_next_local_row(registerTimedSection("getNextLocalRow", 1)),
     _perf_advance_generator(registerTimedSection("advanceGenerators", 2)),
-    _perf_get_rand(registerTimedSection("getRand", 5))
+    _perf_get_rand(registerTimedSection("getRand", 5)),
+    _perf_sample_row(registerTimedSection("computeSampleRow", 2)),
+    _perf_local_sample_matrix(registerTimedSection("computeLocalSampleMatrix", 2)),
+    _perf_sample_matrix(registerTimedSection("computeSampleMatrix", 2))
 {
 }
 
@@ -242,6 +245,8 @@ Sampler::getNextLocalRow()
 void
 Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
 {
+  TIME_SECTION(_perf_sample_matrix);
+
   for (dof_id_type i = 0; i < _n_rows; ++i)
   {
     std::vector<Real> row(_n_cols, 0);
@@ -254,6 +259,8 @@ Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
 void
 Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 {
+  TIME_SECTION(_perf_local_sample_matrix);
+
   advanceGenerators(_local_row_begin * _n_cols);
   for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
   {
@@ -269,6 +276,8 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 void
 Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
 {
+  TIME_SECTION(_perf_sample_row);
+
   for (dof_id_type j = 0; j < _n_cols; ++j)
     data[j] = computeSample(i, j);
 }

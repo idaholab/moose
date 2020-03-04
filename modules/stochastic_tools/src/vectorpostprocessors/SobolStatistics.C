@@ -40,7 +40,7 @@ SobolStatistics::SobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
     _sobol_sampler(getSampler<SobolSampler>("sampler")),
-    _stat_ids(declareVector("stat_ids"))
+    _perf_execute(registerTimedSection("execute", 1))
 {
   const VectorPostprocessorName & vpp_name = getParam<VectorPostprocessorName>("results");
   const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
@@ -56,6 +56,8 @@ SobolStatistics::SobolStatistics(const InputParameters & parameters)
 void
 SobolStatistics::execute()
 {
+  TIME_SECTION(_perf_execute);
+
   StochasticTools::SobolCalculator calc(
       *this, _sobol_sampler.numInputs(), _sobol_sampler.resample());
   for (std::size_t i = 0; i < _result_vectors.size(); ++i)
