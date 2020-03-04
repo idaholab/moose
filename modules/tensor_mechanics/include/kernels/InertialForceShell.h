@@ -79,45 +79,6 @@ private:
   /// Variable numbers corresponding to rotational acceleration aux variables
   std::vector<unsigned int> _rot_accel_num;
 
-  /// Coupled variable for beam cross-sectional area
-  const VariableValue & _area;
-
-  /**
-   * Coupled variable for first moment of area of beam in y direction,
-   * i.e., integral of y*dA over the cross-section
-   **/
-  const VariableValue & _Ay;
-
-  /**
-   * Coupled variable for first moment of area of beam in z direction,
-   * i.e., integral of z*dA over the cross-section
-   **/
-  const VariableValue & _Az;
-
-  /**
-   * Coupled variable for second moment of area of beam in x direction,
-   * i.e., integral of (y^2+z^2)*dA over the cross-section.
-   **/
-  const VariableValue & _Ix;
-
-  /**
-   * Coupled variable for second moment of area of beam in y direction,
-   * i.e., integral of y^2*dA over the cross-section
-   **/
-  const VariableValue & _Iy;
-
-  /**
-   * Coupled variable for second momemnt of area of beam in z direction,
-   * i.e., integral of z^2*dA over the cross-section
-   **/
-  const VariableValue & _Iz;
-
-  /// Newmark time integration parameter
-  const Real _beta;
-
-  /// Newmark time integraion parameter
-  const Real _gamma;
-
   /// Mass proportional Rayleigh damping parameter
   const MaterialProperty<Real> & _eta;
 
@@ -211,7 +172,7 @@ private:
   std::vector<Point> _t_points;
 
   /// Quadrature weights in the out of plane direction in isoparametric coordinate system
-  std::vector<Point> _t_weights;
+  std::vector<Real> _t_weights;
 
   /// Vector storing pointers to the nodes of the shell element
   std::vector<const Node *> _nodes;

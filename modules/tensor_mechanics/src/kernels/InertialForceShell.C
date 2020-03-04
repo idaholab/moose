@@ -98,14 +98,6 @@ InertialForceShell::InertialForceShell(const InputParameters & parameters)
     _accel_num(_ndisp),
     _rot_vel_num(_nrot),
     _rot_accel_num(_nrot),
-    _area(coupledValue("area")),
-    _Ay(coupledValue("Ay")),
-    _Az(coupledValue("Az")),
-    _Ix(_has_Ix ? coupledValue("Ix") : _zero),
-    _Iy(coupledValue("Iy")),
-    _Iz(coupledValue("Iz")),
-    _beta(_has_beta ? getParam<Real>("beta") : 0.1),
-    _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
     _eta(getMaterialProperty<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
     _original_local_config(getMaterialPropertyByName<RankTwoTensor>("initial_rotation")),
@@ -329,12 +321,12 @@ InertialForceShell::computeResidual()
       _0g1_vector.push_back(0.5 * _thickness[qp_xy] * _v2[0]);
 
       DenseMatrix<Real> G1(3, 2);
-      G1(0, 0) = _0g1_vector[0][0];
-      G1(1, 0) = _0g1_vector[0][1];
-      G1(2, 0) = _0g1_vector[0][2];
-      G1(0, 1) = _0g1_vector[1][0];
-      G1(1, 1) = _0g1_vector[1][1];
-      G1(2, 1) = _0g1_vector[1][2];
+      G1(0, 0) = _0g1_vector[0](0);
+      G1(1, 0) = _0g1_vector[0](1);
+      G1(2, 0) = _0g1_vector[0](2);
+      G1(0, 1) = _0g1_vector[1](0);
+      G1(1, 1) = _0g1_vector[1](1);
+      G1(2, 1) = _0g1_vector[1](2);
       DenseMatrix<Real> G1T(2, 3);
       G1.get_transpose(G1T);
 
@@ -343,12 +335,12 @@ InertialForceShell::computeResidual()
       _0g2_vector.push_back(0.5 * _thickness[qp_xy] * _v2[1]);
 
       DenseMatrix<Real> G2(3, 2);
-      G2(0, 0) = _0g2_vector[0][0];
-      G2(1, 0) = _0g2_vector[0][1];
-      G2(2, 0) = _0g2_vector[0][2];
-      G2(0, 1) = _0g2_vector[1][0];
-      G2(1, 1) = _0g2_vector[1][1];
-      G2(2, 1) = _0g2_vector[1][2];
+      G2(0, 0) = _0g2_vector[0](0);
+      G2(1, 0) = _0g2_vector[0](1);
+      G2(2, 0) = _0g2_vector[0](2);
+      G2(0, 1) = _0g2_vector[1](0);
+      G2(1, 1) = _0g2_vector[1](1);
+      G2(2, 1) = _0g2_vector[1](2);
 
       DenseMatrix<Real> G2T(2, 3);
       G2.get_transpose(G2T);
@@ -358,12 +350,12 @@ InertialForceShell::computeResidual()
       _0g3_vector.push_back(0.5 * _thickness[qp_xy] * _v2[2]);
 
       DenseMatrix<Real> G3(3, 2);
-      G3(0, 0) = _0g3_vector[0][0];
-      G3(1, 0) = _0g3_vector[0][1];
-      G3(2, 0) = _0g3_vector[0][2];
-      G3(0, 1) = _0g3_vector[1][0];
-      G3(1, 1) = _0g3_vector[1][1];
-      G3(2, 1) = _0g3_vector[1][2];
+      G3(0, 0) = _0g3_vector[0](0);
+      G3(1, 0) = _0g3_vector[0](1);
+      G3(2, 0) = _0g3_vector[0](2);
+      G3(0, 1) = _0g3_vector[1](0);
+      G3(1, 1) = _0g3_vector[1](1);
+      G3(2, 1) = _0g3_vector[1](2);
 
       DenseMatrix<Real> G3T(2, 3);
       G3.get_transpose(G3T);
@@ -373,12 +365,12 @@ InertialForceShell::computeResidual()
       _0g4_vector.push_back(0.5 * _thickness[qp_xy] * _v2[3]);
 
       DenseMatrix<Real> G4(3, 2);
-      G4(0, 0) = _0g4_vector[0][0];
-      G4(1, 0) = _0g4_vector[0][1];
-      G4(2, 0) = _0g4_vector[0][2];
-      G4(0, 1) = _0g4_vector[1][0];
-      G4(1, 1) = _0g4_vector[1][1];
-      G4(2, 1) = _0g4_vector[1][2];
+      G4(0, 0) = _0g4_vector[0](0);
+      G4(1, 0) = _0g4_vector[0](1);
+      G4(2, 0) = _0g4_vector[0](2);
+      G4(0, 1) = _0g4_vector[1](0);
+      G4(1, 1) = _0g4_vector[1](1);
+      G4(2, 1) = _0g4_vector[1](2);
 
       DenseMatrix<Real> G4T(2, 3);
       G4.get_transpose(G4T);
@@ -425,7 +417,25 @@ InertialForceShell::computeResidual()
                            _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_acc[3] +
                            _phi_map[3][qp_xy] * G4 * local_rot_acc[3];
 
-        _local_moment[0] += G1T * _phi_map[0][qp_xy] * local_acc[0] +
+        _local_moment[0] += G1T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
+                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
+                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
+                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+
+        _local_moment[1] += G2T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
+                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
+                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
+                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+
+        _local_moment[2] += G3T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
+                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
+                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
+                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+
+        _local_moment[3] += G4T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
+                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
+                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
+                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
       }
     }
 
@@ -494,160 +504,16 @@ InertialForceShell::computeResidual()
   }
 }
 
+// All code below to be revised.
+
 void
 InertialForceShell::computeJacobian()
 {
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
-  mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
-
-  Real factor = 0.0;
-  if (_has_beta)
-    factor = 1.0 / (_beta * _dt * _dt) + _eta[0] * (1.0 + _alpha) * _gamma / _beta / _dt;
-  else
-    factor = (*_du_dotdot_du)[0] + _eta[0] * (1.0 + _alpha) * (*_du_dot_du)[0];
-
-  for (unsigned int i = 0; i < _test.size(); ++i)
-  {
-    for (unsigned int j = 0; j < _phi.size(); ++j)
-    {
-      if (_component < 3)
-        _local_ke(i, j) = (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] * _area[0] *
-                          _original_length[0] * factor;
-      else if (_component > 2)
-      {
-        RankTwoTensor I;
-        if (_has_Ix)
-          I(0, 0) = _Ix[0];
-        else
-          I(0, 0) = _Iy[0] + _Iz[0];
-        I(1, 1) = _Iz[0];
-        I(2, 2) = _Iy[0];
-
-        // conversion from local config to global coordinate system
-        RankTwoTensor Ig = _original_local_config[0].transpose() * I * _original_local_config[0];
-
-        _local_ke(i, j) = (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
-                          Ig(_component - 3, _component - 3) * _original_length[0] * factor;
-      }
-    }
-  }
-
-  accumulateTaggedLocalMatrix();
-
-  if (_has_diag_save_in)
-  {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; ++i)
-      diag(i) = _local_ke(i, i);
-
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
-  }
 }
 
 void
 InertialForceShell::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
 
-  Real factor = 0.0;
-  if (_has_beta)
-    factor = 1.0 / (_beta * _dt * _dt) + _eta[0] * (1.0 + _alpha) * _gamma / _beta / _dt;
-  else
-    factor = (*_du_dotdot_du)[0] + _eta[0] * (1.0 + _alpha) * (*_du_dot_du)[0];
-
-  size_t jvar_num = jvar.number();
-  if (jvar_num == _var.number())
-    computeJacobian();
-  else
-  {
-    unsigned int coupled_component = 0;
-    bool disp_coupled = false;
-    bool rot_coupled = false;
-
-    for (unsigned int i = 0; i < _ndisp; ++i)
-    {
-      if (jvar_num == _disp_num[i] && _component > 2)
-      {
-        coupled_component = i;
-        disp_coupled = true;
-        break;
-      }
-    }
-
-    for (unsigned int i = 0; i < _nrot; ++i)
-    {
-      if (jvar_num == _rot_num[i])
-      {
-        coupled_component = i + 3;
-        rot_coupled = true;
-        break;
-      }
-    }
-
-    prepareMatrixTag(_assembly, _var.number(), jvar_num);
-
-    if (disp_coupled || rot_coupled)
-    {
-      for (unsigned int i = 0; i < _test.size(); ++i)
-      {
-        for (unsigned int j = 0; j < _phi.size(); ++j)
-        {
-          if (_component < 3 && coupled_component > 2)
-          {
-            RankTwoTensor A;
-            A(0, 1) = _Az[0];
-            A(0, 2) = -_Ay[0];
-            A(1, 0) = -_Az[0];
-            A(2, 0) = _Ay[0];
-
-            // conversion from local config to global coordinate system
-            const RankTwoTensor Ag =
-                _original_local_config[0].transpose() * A * _original_local_config[0];
-
-            _local_ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
-                               Ag(_component, coupled_component - 3) * _original_length[0] * factor;
-          }
-          else if (_component > 2 && coupled_component < 3)
-          {
-            RankTwoTensor A;
-            A(0, 1) = -_Az[0];
-            A(0, 2) = _Ay[0];
-            A(1, 0) = _Az[0];
-            A(2, 0) = -_Ay[0];
-
-            // conversion from local config to global coordinate system
-            const RankTwoTensor Ag =
-                _original_local_config[0].transpose() * A * _original_local_config[0];
-
-            _local_ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
-                               Ag(_component - 3, coupled_component) * _original_length[0] * factor;
-          }
-          else if (_component > 2 && coupled_component > 2)
-          {
-            RankTwoTensor I;
-            if (_has_Ix)
-              I(0, 0) = _Ix[0];
-            else
-              I(0, 0) = _Iy[0] + _Iz[0];
-            I(1, 1) = _Iz[0];
-            I(2, 2) = _Iy[0];
-
-            // conversion from local config to global coordinate system
-            const RankTwoTensor Ig =
-                _original_local_config[0].transpose() * I * _original_local_config[0];
-
-            _local_ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
-                               Ig(_component - 3, coupled_component - 3) * _original_length[0] *
-                               factor;
-          }
-        }
-      }
-    }
-
-    accumulateTaggedLocalMatrix();
-  }
 }
