@@ -31,7 +31,10 @@ validParams<PorousFlowApp>()
 
 registerKnownLabel("PorousFlowApp");
 
-PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters) {}
+PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
+{
+  PorousFlowApp::registerAll(_factory, _action_factory, _syntax);
+}
 
 PorousFlowApp::~PorousFlowApp() {}
 

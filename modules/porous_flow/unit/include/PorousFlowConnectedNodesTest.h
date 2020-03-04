@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "gtest_include.h"
+#include "gtest/gtest.h"
 #include "PorousFlowConnectedNodes.h"
 
 class PorousFlowConnectedNodesTest : public ::testing::Test
@@ -41,4 +41,3 @@ protected:
   PorousFlowConnectedNodes _n1;
   PorousFlowConnectedNodes _n2;
 };
-
