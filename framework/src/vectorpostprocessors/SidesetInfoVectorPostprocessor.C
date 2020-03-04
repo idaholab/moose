@@ -81,8 +81,8 @@ SidesetInfoVectorPostprocessor::execute()
               "_current_boundary_id not found in _boundary_data.");
 
   auto & bd = _boundary_data.find(_current_boundary_id)->second;
-  bd.area += _current_side_elem->volume();
-  bd.centroid += _current_side_elem->centroid() * _current_side_elem->volume();
+  bd.area += _current_side_volume;
+  bd.centroid += _current_side_elem->centroid() * _current_side_volume;
 
   BoundingBox box = _current_side_elem->loose_bounding_box();
   Point lmin = box.min();

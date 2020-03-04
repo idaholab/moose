@@ -45,8 +45,8 @@ ArrayDGDiffusion::computeQpResidual(Moose::DGResidualType type)
   RealEigenVector r = RealEigenVector::Zero(_count);
 
   const unsigned int elem_b_order = _var.order();
-  const double h_elem =
-      _current_elem->volume() / _current_side_elem->volume() * 1. / Utility::pow<2>(elem_b_order);
+  const Real h_elem =
+      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
   switch (type)
   {
@@ -79,7 +79,7 @@ ArrayDGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 
   const unsigned int elem_b_order = _var.order();
   const double h_elem =
-      _current_elem->volume() / _current_side_elem->volume() * 1. / Utility::pow<2>(elem_b_order);
+      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
   switch (type)
   {

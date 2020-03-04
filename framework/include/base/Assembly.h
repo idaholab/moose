@@ -1259,6 +1259,9 @@ public:
    */
   void addCachedJacobianContributions();
 
+  /// On-demand computation of volume element accounting for RZ/RSpherical
+  Real elementVolume(const Elem * elem) const;
+
   /**
    * Set the pointer to the XFEM controller object
    */

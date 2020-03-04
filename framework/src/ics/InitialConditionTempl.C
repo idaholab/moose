@@ -55,6 +55,7 @@ InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & paramete
     _var(_sys.getFieldVariable<T>(parameters.get<THREAD_ID>("_tid"),
                                   parameters.get<VariableName>("variable"))),
     _current_elem(_var.currentElem()),
+    _current_elem_volume(_assembly.elemVolume()),
     _current_node(nullptr),
     _qp(0),
     _fe_type(_var.feType())

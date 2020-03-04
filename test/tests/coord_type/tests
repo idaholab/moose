@@ -28,6 +28,7 @@
     type = Exodiff
     input = coord_type_rz_integrated.i
     exodiff = coord_type_rz_integrated_x_rotation_out.e
+    rel_err = 1e-4
     cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
     requirement = "MOOSE shall support cylindrical coordinates with the radial direction in the 'y' direction with discontinous Galkerin and integrated boundary conditions."
   [../]

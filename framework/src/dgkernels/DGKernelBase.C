@@ -97,6 +97,7 @@ DGKernelBase::DGKernelBase(const InputParameters & parameters)
     _current_elem_volume(_assembly.elemVolume()),
 
     _neighbor_elem(_assembly.neighbor()),
+    _neighbor_elem_volume(_assembly.neighborVolume()),
 
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
