@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "Assembly.h"
 
 registerMooseObject("PhaseFieldApp", FauxGrainTracker);
 

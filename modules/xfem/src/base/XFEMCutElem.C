@@ -37,13 +37,11 @@ XFEMCutElem::XFEMCutElem(Elem * elem, unsigned int n_qpoints, unsigned int n_sid
   {
     _have_face_weights[i] = false;
     _physical_areafrac[i] = 1.0;
-    // changes are necessary here as well, but I have no access to
-    // Assembly
+    // TODO: this line does not support RZ/RSpherical geoms
     _elem_side_area[i] = elem->side_ptr(i)->volume();
   }
 
-  // changes are necessary here as well, but I have no access to
-  // Assembly
+  // TODO: this line does not support RZ/RSpherical geoms
   _elem_volume = elem->volume();
 }
 
