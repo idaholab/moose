@@ -244,6 +244,7 @@
 - /Materials/AverageWallTemperature3EqnMaterial
 - /Materials/ConstantMaterial
 - /Materials/CoupledVariableValueMaterial
+- /Materials/ConvectiveHeatTransferCoefficientMaterial
 - /Materials/DerivativeMaterialInterfaceTHM
 - /Materials/DirectionMaterial
 - /Materials/FluidProperties3EqnMaterial
@@ -262,8 +263,10 @@
 - /Materials/InterphaseMassTransferMaterial
 - /Materials/LinearTestMaterial
 - /Materials/MultiComponentFluidPropertiesMaterialPT
+- /Materials/PrandtlNumberMaterial
 - /Materials/PressureRelaxationRateMaterial
 - /Materials/RDG7EqnNCGMaterial
+- /Materials/ReynoldsNumberMaterial
 - /Materials/SaturationTemperatureMaterial
 - /Materials/SpecificInterfacialArea7EqnMaterial
 - /Materials/SpecificInterfacialAreaSimpleMaterial
