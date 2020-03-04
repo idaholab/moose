@@ -170,9 +170,15 @@ HeatStructureBase::build2DMesh()
           elem_ids[i].push_back(elem->id());
 
           if (j == 0)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
+            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+          }
           if (j == _total_elem_number - 1)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
+            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+          }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
@@ -248,9 +254,15 @@ HeatStructureBase::build2DMesh2ndOrder()
           elem_ids[i].push_back(elem->id());
 
           if (j == 0)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
+            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+          }
           if (j == _total_elem_number - 1)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
+            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+          }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
@@ -385,4 +397,18 @@ HeatStructureBase::getInnerBoundaryNames() const
   checkSetupStatus(MESH_PREPARED);
 
   return _boundary_names_inner;
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+HeatStructureBase::getBoundaryInfo(const HeatStructureBase::SideType & side) const
+{
+  switch (side)
+  {
+    case INNER:
+      return _inner_bnd_info;
+    case OUTER:
+      return _outer_bnd_info;
+    default:
+      mooseError(name(), "Unknown heat structure side requested.");
+  }
 }
