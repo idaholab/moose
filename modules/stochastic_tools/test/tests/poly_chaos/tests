@@ -1,5 +1,6 @@
 [Tests]
   issues = '#14710'
+  design = 'PolynomialChaos.md QuadratureSampler.md'
 
   [monte_carlo_integration]
     type = CSVDiff
