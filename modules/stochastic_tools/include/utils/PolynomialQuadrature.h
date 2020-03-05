@@ -64,8 +64,8 @@ public:
                           std::vector<Real> & weights) const override;
 
 private:
-  Real _lower_bound;
-  Real _upper_bound;
+  const Real & _lower_bound;
+  const Real & _upper_bound;
 };
 
 /**
@@ -90,8 +90,8 @@ public:
                           std::vector<Real> & weights) const override;
 
 private:
-  Real _mu;
-  Real _sig;
+  const Real & _mu;
+  const Real & _sig;
 };
 
 /**

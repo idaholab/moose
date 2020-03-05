@@ -33,9 +33,6 @@ public:
   virtual Real cdf(const Real & x) const override;
   virtual Real quantile(const Real & y) const override;
 
-  Real getLowerBound() const { return _lower_bound; }
-  Real getUpperBound() const { return _upper_bound; }
-
 protected:
   /// The lower bound for the uniform distribution
   const Real & _lower_bound;

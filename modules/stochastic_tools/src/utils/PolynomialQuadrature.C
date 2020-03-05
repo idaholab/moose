@@ -82,7 +82,9 @@ Polynomial::productIntegral(const std::vector<unsigned int> order) const
 }
 
 Legendre::Legendre(const UniformDistribution * dist)
-  : Polynomial(), _lower_bound(dist->getLowerBound()), _upper_bound(dist->getUpperBound())
+  : Polynomial(),
+    _lower_bound(dist->getParamTempl<Real>("lower_bound")),
+    _upper_bound(dist->getParamTempl<Real>("upper_bound"))
 {
 }
 
@@ -133,12 +135,16 @@ legendre(const unsigned int order, const Real x, const Real lower_bound, const R
 }
 
 Hermite::Hermite(const NormalDistribution * dist)
-  : Polynomial(), _mu(dist->getMean()), _sig(dist->getStdDev())
+  : Polynomial(),
+    _mu(dist->getParamTempl<Real>("mean")),
+    _sig(dist->getParamTempl<Real>("standard_deviation"))
 {
 }
 
 Hermite::Hermite(const BoostNormalDistribution * dist)
-  : Polynomial(), _mu(dist->getMean()), _sig(dist->getStdDev())
+  : Polynomial(),
+    _mu(dist->getParamTempl<Real>("mean")),
+    _sig(dist->getParamTempl<Real>("standard_deviation"))
 {
 }
 
