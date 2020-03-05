@@ -78,7 +78,7 @@
   []
 []
 
-[UserObjects]
+[Surrogates]
   [poly_chaos]
     type = PolynomialChaos
     execute_on = timestep_end

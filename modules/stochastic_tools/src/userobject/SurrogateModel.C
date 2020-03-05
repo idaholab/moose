@@ -22,6 +22,7 @@ SurrogateModel::validParams()
   params.addRequiredParam<VectorPostprocessorName>(
       "stochastic_results", "Vectorpostprocessor with results of samples created by trainer");
 
+  params.registerBase("SurrogateModel");
   return params;
 }
 
