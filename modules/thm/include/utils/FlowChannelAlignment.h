@@ -4,8 +4,6 @@
 #include "libmesh/point.h"
 #include "THMMesh.h"
 
-class FlowChannelBase;
-
 /**
  * Checks alignment of 1D component with 2D one
  *
@@ -16,27 +14,54 @@ class FlowChannelAlignment
 {
 public:
   /**
-   * @param flow_channel[in] The flow channel component used for the check
-   * @param master_bnd_name[in] The name of the side of 2D component (usually a side set name)
-   * @param slave_bnd_name[in] The name of the nodeset of the flow channel
+   * @param mesh[in] The mesh
    */
-  FlowChannelAlignment(const FlowChannelBase & flow_channel,
-                       const BoundaryName & master_bnd_name,
-                       const BoundaryName & slave_bnd_name);
+  FlowChannelAlignment(THMMesh & mesh);
 
-  void build();
-  bool check() const;
+  /**
+   * Build the neighborhood information between master and slave side
+   *
+   * @param master_boundary_info[in] List of tuples (elem_id, side_id) of the master side (i.e. heat
+   * structure side)
+   * @param slave_elem_ids[in] List of slave element IDs (i.e. flow channel elements)
+   */
+  void build(const std::vector<std::tuple<dof_id_type, unsigned short int>> & master_boundary_info,
+             const std::vector<unsigned int> & slave_elem_ids);
+
+  /**
+   * Check the alignment of the flow channel elements with the heat structure elements
+   *
+   * @param slave_elem_ids[in] The vector of flow channel element IDs
+   */
+  bool check(const std::vector<unsigned int> & slave_elem_ids) const;
+
+  /**
+   * Return the boundary info associated with the master side
+   */
+  const std::vector<std::tuple<dof_id_type, unsigned short int>> & getMasterBoundaryInfo() const
+  {
+    return _master_boundary_info;
+  }
+
+  /**
+   * Return list of slave side element IDs
+   */
+  const std::vector<unsigned int> & getSlaveElementIDs() const { return _slave_elem_ids; }
+
+  /**
+   * Get the nearest element ID given another element ID
+   *
+   * @param[in] elem_id Element ID for which we want to obtain the neasert element ID
+   */
+  const dof_id_type & getNearestElemID(const dof_id_type & elem_id) const;
 
 protected:
-  /// Flow channel component
-  const FlowChannelBase & _flow_channel;
-  /// The mesh
+  /// Mesh
   THMMesh & _mesh;
-  /// Boundary ID of the master side (2D component)
-  BoundaryID _master_bnd_id;
-  /// Boundary ID of the slave side (flow channel)
-  BoundaryID _slave_bnd_id;
-
+  /// List of master element boundary infos
+  std::vector<std::tuple<dof_id_type, unsigned short int>> _master_boundary_info;
+  /// List of slave element IDs
+  std::vector<unsigned int> _slave_elem_ids;
   // master element centroids
   std::vector<Point> _master_points;
   // slave element centroids

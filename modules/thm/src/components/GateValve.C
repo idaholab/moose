@@ -2,6 +2,7 @@
 #include "GeometricalFlowComponent.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
+#include "THMMesh.h"
 
 registerMooseObject("THMApp", GateValve);
 
@@ -19,6 +20,28 @@ validParams<GateValve>()
 }
 
 GateValve::GateValve(const InputParameters & params) : FlowJunction(params) {}
+
+void
+GateValve::setupMesh()
+{
+  FlowJunction::setupMesh();
+
+  std::vector<dof_id_type> connected_elems;
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
+  for (auto & nid : _nodes)
+  {
+    const auto & it = node_to_elem.find(nid);
+    if (it == node_to_elem.end())
+      mooseError(name(), ": failed to find node ", nid, "in the mesh!");
+
+    const std::vector<dof_id_type> & elems = it->second;
+    for (const auto & e : elems)
+      connected_elems.push_back(e);
+  }
+
+  if (connected_elems.size() == 2)
+    _sim.augmentSparsity(connected_elems[0], connected_elems[1]);
+}
 
 void
 GateValve::check() const

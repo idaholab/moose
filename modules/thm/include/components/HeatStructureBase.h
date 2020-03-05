@@ -64,6 +64,12 @@ public:
    */
   Real getNumberOfUnits() const { return _num_rods; }
 
+  /**
+   * Get boundary info associated with the heat structure side
+   */
+  const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+  getBoundaryInfo(const HeatStructureBase::SideType & side) const;
+
 protected:
   virtual std::shared_ptr<HeatConductionModel> buildModel();
   virtual void init() override;
@@ -102,13 +108,6 @@ protected:
   /// The number of rods represented by this heat structure
   const Real & _num_rods;
 
-  /// Thermal conductivity of each heat structure part
-  const bool _has_k;
-  /// Heat capacity of each heat structure part
-  const bool _has_Cp;
-  /// Density of each heat structure part
-  const bool _has_rho;
-
   // mesh related
   /// BC ID of the heat structure (outer)
   std::vector<unsigned int> _outer_bc_id;
@@ -132,6 +131,10 @@ protected:
   std::vector<unsigned int> _outer_heat_node_ids;
   /// Nodes at the inner side of the generated heat structure
   std::vector<unsigned int> _inner_heat_node_ids;
+  /// Boundary info for the outer side of the heat strucutre
+  std::vector<std::tuple<dof_id_type, unsigned short int>> _outer_bnd_info;
+  /// Boundary info for the inner side of the heat strucutre
+  std::vector<std::tuple<dof_id_type, unsigned short int>> _inner_bnd_info;
 
 public:
   /// map of heat structure side string to enum

@@ -1,52 +1,40 @@
 #include "FlowChannelAlignment.h"
-#include "FlowChannelBase.h"
 #include "KDTree.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_type.h"
 #include "libmesh/fe_interface.h"
 
-FlowChannelAlignment::FlowChannelAlignment(const FlowChannelBase & flow_channel,
-                                           const BoundaryName & master_bnd_name,
-                                           const BoundaryName & slave_bnd_name)
-  : _flow_channel(flow_channel),
-    _mesh(_flow_channel.mesh()),
-    _master_bnd_id(_mesh.getBoundaryID(master_bnd_name)),
-    _slave_bnd_id(_mesh.getBoundaryID(slave_bnd_name))
-{
-}
+FlowChannelAlignment::FlowChannelAlignment(THMMesh & mesh) : _mesh(mesh) {}
 
 void
-FlowChannelAlignment::build()
+FlowChannelAlignment::build(
+    const std::vector<std::tuple<dof_id_type, unsigned short int>> & master_boundary_info,
+    const std::vector<dof_id_type> & slave_elem_ids)
 {
-  // element ids corresponding to the centroids in `master_points`
+  _master_boundary_info = master_boundary_info;
+  _slave_elem_ids = slave_elem_ids;
+
+  // element IDs corresponding to the centroids in `_master_points`
   std::vector<dof_id_type> master_elem_ids;
-  // local side number corresponding to the element id in `master_elem_ids`
+  // local side number corresponding to the element ID in `master_elem_ids`
   std::vector<dof_id_type> master_elem_sides;
-  // element ids corresponding to the centroids in `slave_points`
-  std::vector<dof_id_type> slave_elem_ids;
 
-  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-  for (const auto & belem : range)
+  for (const auto & t : _master_boundary_info)
   {
-    const Elem * elem = belem->_elem;
-    BoundaryID boundary_id = belem->_bnd_id;
+    auto elem_id = std::get<0>(t);
+    auto side_id = std::get<1>(t);
+    const Elem * elem = _mesh.elemPtr(elem_id);
 
-    if (boundary_id == _master_bnd_id)
-    {
-      // 2D elements
-      master_elem_ids.push_back(elem->id());
-      master_elem_sides.push_back(belem->_side);
-      _master_points.push_back(elem->centroid());
-      _nearest_elem_side.insert(std::pair<dof_id_type, unsigned int>(elem->id(), belem->_side));
-    }
-    else if (boundary_id == _slave_bnd_id)
-    {
-      if (std::find(slave_elem_ids.begin(), slave_elem_ids.end(), elem->id()) ==
-          slave_elem_ids.end())
-      {
-        // 1D elements
-        slave_elem_ids.push_back(elem->id());
-        _slave_points.push_back(elem->centroid());
-      }
-    }
+    master_elem_ids.push_back(elem_id);
+    master_elem_sides.push_back(side_id);
+    _master_points.push_back(elem->centroid());
+    _nearest_elem_side.insert(std::pair<dof_id_type, unsigned int>(elem_id, side_id));
+  }
+
+  for (auto & elem_id : _slave_elem_ids)
+  {
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    _slave_points.push_back(elem->centroid());
   }
 
   if (_master_points.size() > 0 && _slave_points.size() > 0)
@@ -68,14 +56,13 @@ FlowChannelAlignment::build()
 }
 
 bool
-FlowChannelAlignment::check() const
+FlowChannelAlignment::check(const std::vector<unsigned int> & fch_elem_ids) const
 {
   if (_master_points.size() > 0 && _slave_points.size() > 0)
   {
     // Go over all elements in the flow channel. Take the center of each element and project it onto
     // the side of the 2D component. Then check that the projected location matches the location of
     // the original center of the flow channel element
-    const std::vector<unsigned int> & fch_elem_ids = _flow_channel.getElementIDs();
     for (const auto & elem_id : fch_elem_ids)
     {
       const Elem * elem = _mesh.elemPtr(elem_id);
@@ -97,4 +84,14 @@ FlowChannelAlignment::check() const
   }
 
   return true;
+}
+
+const dof_id_type &
+FlowChannelAlignment::getNearestElemID(const dof_id_type & elem_id) const
+{
+  auto it = _nearest_elem_ids.find(elem_id);
+  if (it != _nearest_elem_ids.end())
+    return it->second;
+  else
+    return DofObject::invalid_id;
 }

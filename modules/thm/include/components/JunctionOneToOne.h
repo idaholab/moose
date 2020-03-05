@@ -23,6 +23,7 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void setupMesh() override;
   virtual void addMooseObjects1Phase() const;
   virtual void addMooseObjects2Phase() const;
 };

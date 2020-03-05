@@ -4,7 +4,6 @@
 #include "HeatStructureCylindrical.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
-#include "FlowChannelAlignment.h"
 
 registerMooseObject("THMApp", HeatTransferFromHeatStructure1Phase);
 
@@ -22,8 +21,29 @@ validParams<HeatTransferFromHeatStructure1Phase>()
 
 HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
-  : HeatTransferFromTemperature1Phase(parameters), HSBoundaryInterface(this)
+  : HeatTransferFromTemperature1Phase(parameters), HSBoundaryInterface(this), _fch_alignment(_mesh)
 {
+}
+
+void
+HeatTransferFromHeatStructure1Phase::setupMesh()
+{
+  if (hasComponentByName<HeatStructureBase>(_hs_name) && _hs_side_valid &&
+      hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
+  {
+    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
+    const FlowChannel1Phase & flow_channel =
+        getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+
+    _fch_alignment.build(hs.getBoundaryInfo(_hs_side), flow_channel.getElementIDs());
+
+    for (auto & elem_id : flow_channel.getElementIDs())
+    {
+      dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
+      if (nearest_elem_id != DofObject::invalid_id)
+        _sim.augmentSparsity(elem_id, nearest_elem_id);
+    }
+  }
 }
 
 void
@@ -63,9 +83,7 @@ HeatTransferFromHeatStructure1Phase::check() const
 
     if (_hs_side_valid)
     {
-      FlowChannelAlignment fcha(flow_channel, getMasterSideName(), getSlaveSideName());
-      fcha.build();
-      if (!fcha.check())
+      if (!_fch_alignment.check(flow_channel.getElementIDs()))
         logError("The centers of the elements of flow channel '",
                  _flow_channel_name,
                  "' do not equal the centers of the specified heat structure side.");
@@ -104,8 +122,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     const std::string class_name = "HeatFluxFromHeatStructure3EqnUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-    params.set<std::vector<BoundaryName>>("slave_boundary") = {getSlaveSideName()};
-    params.set<BoundaryName>("master_boundary") = getMasterSideName();
+    params.set<FlowChannelAlignment *>("_fch_alignment") = &_fch_alignment;
     params.set<std::vector<VariableName>>("T_wall") = {_T_wall_name};
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
