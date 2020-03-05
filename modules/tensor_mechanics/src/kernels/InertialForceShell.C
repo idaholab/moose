@@ -64,13 +64,7 @@ InertialForceShell::validParams()
       "density",
       "density",
       "Name of Material Property  or a constant real number defining the density of the beam.");
-  params.addRequiredCoupledVar("area", "Variable containing cross-section area");
-  params.addCoupledVar("Ay", 0.0, "Variable containing first moment of area about y axis");
-  params.addCoupledVar("Az", 0.0, "Variable containing first moment of area about z axis");
-  params.addCoupledVar("Ix",
-                       "Variable containing second moment of area about x axis. Defaults to Iy+Iz");
-  params.addRequiredCoupledVar("Iy", "Variable containing second moment of area about y axis");
-  params.addRequiredCoupledVar("Iz", "Variable containing second moment of area about z axis");
+
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component<6",
@@ -277,18 +271,6 @@ InertialForceShell::computeResidual()
 
     // AMR
 
-    std::vector<RealVectorValue> local_acc;
-    local_acc.push_back(_local_accel_0);
-    local_acc.push_back(_local_accel_1);
-    local_acc.push_back(_local_accel_2);
-    local_acc.push_back(_local_accel_3);
-
-    std::vector<RealVectorValue> local_rot_acc;
-    local_rot_acc.push_back(_local_rot_accel_0);
-    local_rot_acc.push_back(_local_rot_accel_1);
-    local_rot_acc.push_back(_local_rot_accel_2);
-    local_rot_acc.push_back(_local_rot_accel_3);
-
     unsigned int dim = _current_elem->dim();
 
     FEType fe_type(Utility::string_to_enum<Order>("First"),
@@ -375,123 +357,182 @@ InertialForceShell::computeResidual()
       DenseMatrix<Real> G4T(2, 3);
       G4.get_transpose(G4T);
 
+      // Conversions to DenseVector from RealVectorValue: Make a method out of this.
+      DenseVector<Real> local_accel_dv_0;
+      DenseVector<Real> local_accel_dv_1;
+      DenseVector<Real> local_accel_dv_2;
+      DenseVector<Real> local_accel_dv_3;
+
+      DenseVector<Real> local_rot_accel_dv_0;
+      DenseVector<Real> local_rot_accel_dv_1;
+      DenseVector<Real> local_rot_accel_dv_2;
+      DenseVector<Real> local_rot_accel_dv_3;
+
+      for (unsigned int i = 0; i < 3; i++)
+      {
+        local_accel_dv_0(i) = _local_accel_0(i);
+        local_accel_dv_1(i) = _local_accel_1(i);
+        local_accel_dv_2(i) = _local_accel_2(i);
+        local_accel_dv_3(i) = _local_accel_3(i);
+
+        local_rot_accel_dv_0(i) = _local_rot_accel_0(i);
+        local_rot_accel_dv_1(i) = _local_rot_accel_1(i);
+        local_rot_accel_dv_2(i) = _local_rot_accel_2(i);
+        local_rot_accel_dv_3(i) = _local_rot_accel_3(i);
+      }
+
+      std::vector<DenseVector<Real>> local_acc;
+      local_acc.push_back(local_accel_dv_0);
+      local_acc.push_back(local_accel_dv_1);
+      local_acc.push_back(local_accel_dv_2);
+      local_acc.push_back(local_accel_dv_3);
+
+      std::vector<DenseVector<Real>> local_rot_acc;
+      local_rot_acc.push_back(local_rot_accel_dv_0);
+      local_rot_acc.push_back(local_rot_accel_dv_1);
+      local_rot_acc.push_back(local_rot_accel_dv_2);
+      local_rot_acc.push_back(local_rot_accel_dv_3);
+
       for (unsigned int qpz = 0; qpz < _t_points.size(); ++qpz)
       {
         // _local_force for each of the nodes. Try vector form first (containing three displacement
         // components)
         _2d_weights[qp_xy] * _t_weights[qpz] * _JxW[qp_xy] * _coord[qp_xy];
 
-        _local_force[0] += _phi_map[0][qp_xy] * _phi_map[0][qp_xy] * local_acc[0] +
-                           _phi_map[0][qp_xy] * G1 * local_rot_acc[0] +
-                           _phi_map[0][qp_xy] * _phi_map[1][qp_xy] * local_acc[1] +
-                           _phi_map[0][qp_xy] * G2 * local_rot_acc[1] +
-                           _phi_map[0][qp_xy] * _phi_map[2][qp_xy] * local_acc[2] +
-                           _phi_map[0][qp_xy] * G3 * local_rot_acc[2] +
-                           _phi_map[0][qp_xy] * _phi_map[3][qp_xy] * local_acc[3] +
-                           _phi_map[0][qp_xy] * G4 * local_rot_acc[3];
+        for (unsigned int dim = 0; dim < 3; dim++)
+        {
+          _local_force[0](dim) +=
+              _phi_map[0][qp_xy] * _phi_map[0][qp_xy] * local_acc[0](dim) +
+              _phi_map[0][qp_xy] *
+                  (G1(dim, 0) * local_rot_acc[0](0) + G1(dim, 1) * local_rot_acc[0](1)) +
+              _phi_map[0][qp_xy] * _phi_map[1][qp_xy] * local_acc[1](dim) +
+              _phi_map[0][qp_xy] *
+                  (G2(dim, 0) * local_rot_acc[1](0) + G2(dim, 1) * local_rot_acc[1](1)) +
+              _phi_map[0][qp_xy] * _phi_map[2][qp_xy] * local_acc[2](dim) +
+              _phi_map[0][qp_xy] *
+                  (G3(dim, 0) * local_rot_acc[2](0) + G3(dim, 1) * local_rot_acc[2](1)) +
+              _phi_map[0][qp_xy] * _phi_map[3][qp_xy] * local_acc[3](dim) +
+              _phi_map[0][qp_xy] *
+                  (G4(dim, 0) * local_rot_acc[3](0) + G4(dim, 1) * local_rot_acc[3](1));
 
-        _local_force[1] += _phi_map[1][qp_xy] * _phi_map[0][qp_xy] * local_acc[0] +
-                           _phi_map[1][qp_xy] * G1 * local_rot_acc[0] +
-                           _phi_map[1][qp_xy] * _phi_map[1][qp_xy] * local_acc[1] +
-                           _phi_map[1][qp_xy] * G2 * local_rot_acc[1] +
-                           _phi_map[1][qp_xy] * _phi_map[2][qp_xy] * local_acc[2] +
-                           _phi_map[1][qp_xy] * G3 * local_rot_acc[2] +
-                           _phi_map[1][qp_xy] * _phi_map[3][qp_xy] * local_acc[3] +
-                           _phi_map[1][qp_xy] * G4 * local_rot_acc[3];
+          _local_force[1](dim) +=
+              _phi_map[1][qp_xy] * _phi_map[0][qp_xy] * local_acc[0](dim) +
+              _phi_map[1][qp_xy] *
+                  (G1(dim, 0) * local_rot_acc[0](0) + G1(dim, 1) * local_rot_acc[0](1)) +
+              _phi_map[1][qp_xy] * _phi_map[1][qp_xy] * local_acc[1](dim) +
+              _phi_map[1][qp_xy] *
+                  (G2(dim, 0) * local_rot_acc[1](0) + G2(dim, 1) * local_rot_acc[1](1)) +
+              _phi_map[1][qp_xy] * _phi_map[2][qp_xy] * local_acc[2](dim) +
+              _phi_map[1][qp_xy] *
+                  (G3(dim, 0) * local_rot_acc[2](0) + G3(dim, 1) * local_rot_acc[2](1)) +
+              _phi_map[1][qp_xy] * _phi_map[3][qp_xy] * local_acc[3](dim) +
+              _phi_map[1][qp_xy] *
+                  (G4(dim, 0) * local_rot_acc[3](0) + G4(dim, 1) * local_rot_acc[3](1));
 
-        _local_force[2] += _phi_map[2][qp_xy] * _phi_map[0][qp_xy] * local_acc[0] +
-                           _phi_map[2][qp_xy] * G1 * local_rot_acc[0] +
-                           _phi_map[2][qp_xy] * _phi_map[1][qp_xy] * local_acc[1] +
-                           _phi_map[2][qp_xy] * G2 * local_rot_acc[1] +
-                           _phi_map[2][qp_xy] * _phi_map[2][qp_xy] * local_acc[2] +
-                           _phi_map[2][qp_xy] * G3 * local_rot_acc[2] +
-                           _phi_map[2][qp_xy] * _phi_map[3][qp_xy] * local_acc[3] +
-                           _phi_map[2][qp_xy] * G4 * local_rot_acc[3];
+          _local_force[2](dim) +=
+              _phi_map[2][qp_xy] * _phi_map[0][qp_xy] * local_acc[0](dim) +
+              _phi_map[2][qp_xy] *
+                  (G1(dim, 0) * local_rot_acc[0](0) + G1(dim, 1) * local_rot_acc[0](1)) +
+              _phi_map[2][qp_xy] * _phi_map[1][qp_xy] * local_acc[1](dim) +
+              _phi_map[2][qp_xy] *
+                  (G2(dim, 0) * local_rot_acc[1](0) + G2(dim, 1) * local_rot_acc[1](1)) +
+              _phi_map[2][qp_xy] * _phi_map[2][qp_xy] * local_acc[2](dim) +
+              _phi_map[2][qp_xy] *
+                  (G3(dim, 0) * local_rot_acc[2](0) + G3(dim, 1) * local_rot_acc[2](1)) +
+              _phi_map[2][qp_xy] * _phi_map[3][qp_xy] * local_acc[3](dim) +
+              _phi_map[2][qp_xy] *
+                  (G4(dim, 0) * local_rot_acc[3](0) + G4(dim, 1) * local_rot_acc[3](1));
 
-        _local_force[3] += _phi_map[3][qp_xy] * _phi_map[0][qp_xy] * local_acc[0] +
-                           _phi_map[3][qp_xy] * G1 * local_rot_acc[0] +
-                           _phi_map[3][qp_xy] * _phi_map[1][qp_xy] * local_acc[1] +
-                           _phi_map[3][qp_xy] * G2 * local_rot_acc[1] +
-                           _phi_map[3][qp_xy] * _phi_map[2][qp_xy] * local_acc[2] +
-                           _phi_map[3][qp_xy] * G3 * local_rot_acc[2] +
-                           _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_acc[3] +
-                           _phi_map[3][qp_xy] * G4 * local_rot_acc[3];
+          _local_force[3](dim) +=
+              _phi_map[3][qp_xy] * _phi_map[0][qp_xy] * local_acc[0](dim) +
+              _phi_map[3][qp_xy] *
+                  (G1(dim, 0) * local_rot_acc[0](0) + G1(dim, 1) * local_rot_acc[0](1)) +
+              _phi_map[3][qp_xy] * _phi_map[1][qp_xy] * local_acc[1](dim) +
+              _phi_map[3][qp_xy] *
+                  (G2(dim, 0) * local_rot_acc[1](0) + G2(dim, 1) * local_rot_acc[1](1)) +
+              _phi_map[3][qp_xy] * _phi_map[2][qp_xy] * local_acc[2](dim) +
+              _phi_map[3][qp_xy] *
+                  (G3(dim, 0) * local_rot_acc[2](0) + G3(dim, 1) * local_rot_acc[2](1)) +
+              _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_acc[3](dim) +
+              _phi_map[3][qp_xy] *
+                  (G4(dim, 0) * local_rot_acc[3](0) + G4(dim, 1) * local_rot_acc[3](1));
+        }
 
-        _local_moment[0] += G1T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
-                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
-                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
-                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+        DenseVector<Real> momentInertia;
+        momentInertia(0) =
+            _phi_map[0][qp_xy] * local_acc[0](0) + _phi_map[1][qp_xy] * local_acc[1](0) +
+            _phi_map[2][qp_xy] * local_acc[2](0) + _phi_map[3][qp_xy] * local_acc[3](0) +
+            G1(0, 0) * local_rot_acc[0](0) + G1(0, 1) * local_rot_acc[0](1) +
+            G2(0, 0) * local_rot_acc[1](0) + G2(0, 1) * local_rot_acc[1](1) +
+            G3(0, 0) * local_rot_acc[2](0) + G3(0, 1) * local_rot_acc[2](1) +
+            G4(0, 0) * local_rot_acc[3](0) + G4(0, 1) * local_rot_acc[3](1);
 
-        _local_moment[1] += G2T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
-                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
-                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
-                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+        momentInertia(1) =
+            _phi_map[0][qp_xy] * local_acc[0](1) + _phi_map[1][qp_xy] * local_acc[1](1) +
+            _phi_map[2][qp_xy] * local_acc[2](1) + _phi_map[3][qp_xy] * local_acc[3](1) +
+            G1(1, 0) * local_rot_acc[0](0) + G1(1, 1) * local_rot_acc[0](1) +
+            G2(1, 0) * local_rot_acc[1](0) + G2(1, 1) * local_rot_acc[1](1) +
+            G3(1, 0) * local_rot_acc[2](0) + G3(1, 1) * local_rot_acc[2](1) +
+            G4(1, 0) * local_rot_acc[3](0) + G4(1, 1) * local_rot_acc[3](1);
 
-        _local_moment[2] += G3T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
-                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
-                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
-                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+        momentInertia(2) =
+            _phi_map[0][qp_xy] * local_acc[0](2) + _phi_map[1][qp_xy] * local_acc[1](2) +
+            _phi_map[2][qp_xy] * local_acc[2](2) + _phi_map[3][qp_xy] * local_acc[3](2) +
+            G1(2, 0) * local_rot_acc[0](0) + G1(2, 1) * local_rot_acc[0](1) +
+            G2(2, 0) * local_rot_acc[1](0) + G2(2, 1) * local_rot_acc[1](1) +
+            G3(2, 0) * local_rot_acc[2](0) + G3(2, 1) * local_rot_acc[2](1) +
+            G4(2, 0) * local_rot_acc[3](0) + G4(2, 1) * local_rot_acc[3](1);
 
-        _local_moment[3] += G4T * (_phi_map[0][qp_xy] * local_acc[0] + G1 * local_rot_acc[0] +
-                                   _phi_map[1][qp_xy] * local_acc[1] + G2 * local_rot_acc[1] +
-                                   _phi_map[2][qp_xy] * local_acc[2] + G3 * local_rot_acc[2] +
-                                   _phi_map[3][qp_xy] * local_acc[3] + G4 * local_rot_acc[3]);
+        _local_moment[0](0) += G1T(0, 0) * momentInertia(0) + G1T(0, 1) * momentInertia(1) +
+                               G1T(0, 2) * momentInertia(2);
+
+        _local_moment[0](1) += G1T(1, 0) * momentInertia(0) + G1T(1, 1) * momentInertia(1) +
+                               G1T(1, 2) * momentInertia(2);
+
+        _local_moment[1](0) += G1T(0, 0) * momentInertia(0) + G1T(0, 1) * momentInertia(1) +
+                               G2T(0, 2) * momentInertia(2);
+
+        _local_moment[1](1) += G1T(1, 0) * momentInertia(0) + G1T(1, 1) * momentInertia(1) +
+                               G2T(1, 2) * momentInertia(2);
+
+        _local_moment[2](0) += G1T(0, 0) * momentInertia(0) + G1T(0, 1) * momentInertia(1) +
+                               G3T(0, 2) * momentInertia(2);
+
+        _local_moment[2](1) += G1T(1, 0) * momentInertia(0) + G1T(1, 1) * momentInertia(1) +
+                               G3T(1, 2) * momentInertia(2);
+
+        _local_moment[3](0) += G1T(0, 0) * momentInertia(0) + G1T(0, 1) * momentInertia(1) +
+                               G4T(0, 2) * momentInertia(2);
+
+        _local_moment[3](1) += G1T(1, 0) * momentInertia(0) + G1T(1, 1) * momentInertia(1) +
+                               G4T(1, 2) * momentInertia(2);
       }
     }
 
-    // AMR
-
-    // local residual
-    //  for (unsigned int i = 0; i < _ndisp; ++i)
-    //  {
-    //    if (_component > 2)
-    //    {
-    //      Real I = _Iy[0] + _Iz[0];
-    //      if (_has_Ix && (i == 0))
-    //        I = _Ix[0];
-    //      if (i == 1)
-    //        I = _Iz[0];
-    //      else if (i == 2)
-    //        I = _Iy[0];
-    //
-    //      _local_moment[0](i) =
-    //          _density[0] * I * _original_length[0] / 3.0 *
-    //          (_local_rot_accel_0(i) + _local_rot_accel_1(i) / 2.0 +
-    //           _eta[0] * (1.0 + _alpha) * (_local_rot_vel_0(i) + _local_rot_vel_1(i) / 2.0) -
-    //           _alpha * _eta[0] * (_local_rot_vel_old_0(i) + _local_rot_vel_old_1(i) / 2.0));
-    //      _local_moment[1](i) =
-    //          _density[0] * I * _original_length[0] / 3.0 *
-    //          (_local_rot_accel_1(i) + _local_rot_accel_0(i) / 2.0 +
-    //           _eta[0] * (1.0 + _alpha) * (_local_rot_vel_1(i) + _local_rot_vel_0(i) / 2.0) -
-    //           _alpha * _eta[0] * (_local_rot_vel_old_1(i) + _local_rot_vel_old_0(i) / 2.0));
-    //    }
-    //  }
-    //
-    //    // If Ay or Az are non-zero, contribution of rotational accelerations to translational forces
-    //    // and vice versa have to be added
-    //    if (_component > 2)
-    //    {
-    //      _local_moment[0](0) += _density[0] * _original_length[0] / 3.0 *
-    //                             (-_Az[0] * (_local_accel_0(1) + _local_accel_1(1) / 2.0) +
-    //                              _Ay[0] * (_local_accel_0(1) + _local_accel_1(1) / 2.0));
-    //      _local_moment[1](0) += _density[0] * _original_length[0] / 3.0 *
-    //                             (-_Az[0] * (_local_accel_1(1) + _local_accel_0(1) / 2.0) +
-    //                              _Ay[0] * (_local_accel_1(1) + _local_accel_0(1) / 2.0));
-    //
-    //      _local_moment[0](1) += _density[0] * _original_length[0] / 3.0 * _Az[0] *
-    //                             (_local_accel_0(0) + _local_accel_1(0) / 2.0);
-    //      _local_moment[1](1) += _density[0] * _original_length[0] / 3.0 * _Az[0] *
-    //                             (_local_accel_1(0) + _local_accel_0(0) / 2.0);
-    //
-    //      _local_moment[0](2) += -_density[0] * _original_length[0] / 3.0 * _Ay[0] *
-    //                             (_local_accel_0(0) + _local_accel_1(0) / 2.0);
-    //      _local_moment[1](2) += -_density[0] * _original_length[0] / 3.0 * _Ay[0] *
-    //                             (_local_accel_1(0) + _local_accel_0(0) / 2.0);
-    //      _global_moment_0 = _original_local_config[0] * _local_moment[0];
-    //      _global_moment_1 = _original_local_config[0] * _local_moment[1];
-    //      _local_re(0) = _global_moment_0(_component - 3);
-    //      _local_re(1) = _global_moment_1(_component - 3);
-    //    }
+    // Global force and moments
+    if (_component < 3)
+    {
+      _global_force_0 = _original_local_config[0] * _local_force[0];
+      _global_force_1 = _original_local_config[0] * _local_force[1];
+      _global_force_2 = _original_local_config[0] * _local_force[2];
+      _global_force_3 = _original_local_config[0] * _local_force[3];
+      _local_re(0) = _global_force_0(_component);
+      _local_re(1) = _global_force_1(_component);
+      _local_re(2) = _global_force_2(_component);
+      _local_re(3) = _global_force_3(_component);
+    }
+    else
+     // Only two rotational components: \alpha and \beta.
+    {
+      _global_moment_0 = _original_local_config[0] * _local_moment[0];
+      _global_moment_1 = _original_local_config[0] * _local_moment[1];
+      _global_moment_2 = _original_local_config[0] * _local_moment[2];
+      _global_moment_3 = _original_local_config[0] * _local_moment[3];
+      _local_re(0) = _global_moment_0(_component - 3);
+      _local_re(1) = _global_moment_1(_component - 3);
+      _local_re(2) = _global_moment_2(_component - 3);
+      _local_re(3) = _global_moment_3(_component - 3);
+    }
 
     accumulateTaggedLocalResidual();
 
@@ -509,11 +550,9 @@ InertialForceShell::computeResidual()
 void
 InertialForceShell::computeJacobian()
 {
-
 }
 
 void
 InertialForceShell::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-
 }
