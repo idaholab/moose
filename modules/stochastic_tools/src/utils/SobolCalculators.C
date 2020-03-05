@@ -9,6 +9,8 @@
 #include "SobolCalculators.h"
 #include "MooseError.h"
 
+#include <numeric>
+
 namespace StochasticTools
 {
 SobolCalculator::SobolCalculator(const ParallelObject & other, std::size_t n, bool resample)

@@ -8,34 +8,49 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GFunction.h"
+#include "Sampler.h"
 
 registerMooseObject("StochasticToolsTestApp", GFunction);
 
 InputParameters
 GFunction::validParams()
 {
-  InputParameters params = Function::validParams();
-  params.addParam<std::vector<Real>>(
-      "q_vector", std::vector<Real>({0, 0.5, 3, 9, 99, 99}), "q values for GFunction");
-  params.addParam<std::vector<Real>>("x_vector", "x values for GFunction");
-  params.declareControllable("x_vector");
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+
+  params.addRequiredParam<std::vector<Real>>("q_vector", "q values for g-function");
+  params.addRequiredParam<SamplerName>(
+      "sampler", "The Sampler object to use to perform g-function evaluations.");
   return params;
 }
 
 GFunction::GFunction(const InputParameters & parameters)
-  : Function(parameters),
+  : GeneralVectorPostprocessor(parameters),
+    SamplerInterface(this),
+    _sampler(getSampler("sampler")),
     _q_vector(getParam<std::vector<Real>>("q_vector")),
-    _x_vector(getParam<std::vector<Real>>("x_vector"))
+    _values(declareVector("g_values"))
 {
-  if (_q_vector.size() != _x_vector.size())
-    paramError("q_vector", "The 'q_vector' and 'x_vector' must be the same size.");
+  if (_q_vector.size() != _sampler.getNumberOfCols())
+    paramError("q_vector", "The 'q_vector' size must match the number of columns in the Sampler.");
 }
 
-Real
-GFunction::value(Real /*t*/, const Point & /*p*/) const
+void
+GFunction::execute()
 {
-  Real y = 1;
-  for (std::size_t i = 0; i < _x_vector.size(); ++i)
-    y *= (std::abs(4 * _x_vector[i] - 2) + _q_vector[i]) / (1 + _q_vector[i]);
-  return y;
+  _values.reserve(_sampler.getNumberOfLocalRows());
+  for (dof_id_type r = _sampler.getLocalRowBegin(); r < _sampler.getLocalRowEnd(); ++r)
+  {
+    std::vector<Real> x = _sampler.getNextLocalRow();
+    Real y = 1;
+    for (std::size_t i = 0; i < _q_vector.size(); ++i)
+      y *= (std::abs(4 * x[i] - 2) + _q_vector[i]) / (1 + _q_vector[i]);
+    _values.push_back(y);
+  }
+}
+
+void
+GFunction::finalize()
+{
+  if (_parallel_type == "REPLICATED")
+    _communicator.gather(0, _values);
 }

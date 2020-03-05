@@ -2,16 +2,6 @@
   design = SobolStatistics.md
   issues = '#14784'
 
-  [g_function]
-    type = CSVDiff
-    input = gfunction.i
-    cli_args = Outputs/csv=true
-    csvdiff = gfunction_out.csv
-    allow_test_objects = true
-
-    requirement = "The system shall support the ability to compute analytic function for sensitivity analysis verification."
-  []
-
   [sobol]
     type = CSVDiff
     input = sobol.i

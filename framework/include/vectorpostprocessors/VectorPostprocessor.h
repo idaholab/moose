@@ -74,14 +74,15 @@ protected:
   /// Pointer to FEProblemBase
   FEProblemBase * _vpp_fe_problem;
 
+  /// DISTRIBUTED or REPLICATED
+  const MooseEnum & _parallel_type;
+
   friend class SamplerBase;
 
 private:
   THREAD_ID _vpp_tid;
 
   const bool _contains_complete_history;
-
-  const MooseEnum & _parallel_type;
 
   const bool _is_distributed;
 

@@ -12,40 +12,16 @@
 
 [Samplers/sample]
   type = SobolSampler
-  num_rows = 1000
+  num_rows = 10000
   distributions = 'uniform uniform uniform uniform uniform uniform'
   execute_on = 'initial'
 []
 
-[MultiApps/sub]
-    type = SamplerFullSolveMultiApp
-    input_files = gfunction.i
-    mode = batch-restore
-    sampler = sample
-    execute_on = INITIAL
-[]
-
-[Transfers]
-  [sub]
-    type = SamplerParameterTransfer
-    multi_app = sub
-    sampler = sample
-    parameters = 'Functions/g/x_vector'
-    to_control = 'stochastic'
-  []
-  [data]
-    type = SamplerPostprocessorTransfer
-    multi_app = sub
-    sampler = sample
-    to_vector_postprocessor = results
-    from_postprocessor = y
-  []
-[]
-
 [VectorPostprocessors]
   [results]
-    type = StochasticResults
-    samplers = sample
+    type = GFunction
+    sampler = sample
+    q_vector = '0 0.5 3 9 99 99'
     execute_on = INITIAL
     outputs = none
   []
@@ -69,8 +45,4 @@
 [Outputs]
   execute_on = 'FINAL'
   csv = true
-  [perf]
-    type = PerfGraphOutput
-    level = 4
-  []
 []
