@@ -206,44 +206,44 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
-    EXPECT_NEAR(sobol[0], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[1], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[2], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[3], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[4], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[5], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[6], 0.037, 1e-1);
-    EXPECT_NEAR(sobol[7], 0.037, 1e-1);
+    EXPECT_EQ(sobol.size(), 44);
+    EXPECT_NEAR(sobol[0], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[1], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[2], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[3], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[4], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[5], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[6], 0.037, 1e-2);
+    EXPECT_NEAR(sobol[7], 0.037, 1e-2);
 
-    EXPECT_NEAR(sobol[16], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[17], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[18], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[19], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[20], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[21], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[22], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[23], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[24], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[25], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[26], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[27], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[28], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[29], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[30], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[31], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[32], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[33], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[34], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[35], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[36], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[37], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[38], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[39], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[40], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[41], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[42], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[43], 0.012, 1e-1);
-    EXPECT_NEAR(sobol[44], 0.012, 1e-1);
+    EXPECT_NEAR(sobol[16], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[17], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[18], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[19], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[20], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[21], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[22], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[23], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[24], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[25], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[26], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[27], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[28], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[29], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[30], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[31], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[32], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[33], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[34], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[35], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[36], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[37], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[38], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[39], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[40], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[41], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[42], 0.012, 1e-2);
+    EXPECT_NEAR(sobol[43], 0.012, 1e-2);
   }
 
   {
@@ -253,6 +253,7 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
+    EXPECT_EQ(sobol.size(), 44);
     EXPECT_NEAR(sobol[8], 0.550, 1e-2);
     EXPECT_NEAR(sobol[9], 0.550, 1e-2);
     EXPECT_NEAR(sobol[10], 0.050, 1e-2);
