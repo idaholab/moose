@@ -9,48 +9,40 @@
 
 #pragma once
 
-#include "TimeKernel.h"
+#include "ADTimeKernel.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
 
+#define ADInertialForceShellMembers usingTimeKernelMembers
+
 // Forward Declarations
-class InertialForceShell;
+template <ComputeStage compute_stage>
+class ADInertialForceShell;
 
 namespace libMesh
 {
 class QGauss;
 }
 
+declareADValidParams(ADInertialForceShell);
 
-template <>
-InputParameters validParams<InertialForceShell>();
-
-class InertialForceShell : public TimeKernel
+template <ComputeStage compute_stage>
+class ADInertialForceShell : public ADTimeKernel<compute_stage>
 {
 public:
   static InputParameters validParams();
 
-  InertialForceShell(const InputParameters & parameters);
-
-  virtual void computeResidual() override;
-
-  virtual void computeJacobian() override;
-
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
+  ADInertialForceShell(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override { return 0.0; };
+  virtual ADReal computeQpResidual() override;
 
 private:
   /// Booleans for validity of params
-  const bool _has_beta;
-  const bool _has_gamma;
   const bool _has_velocities;
   const bool _has_rot_velocities;
   const bool _has_accelerations;
   const bool _has_rot_accelerations;
-  const bool _has_Ix;
 
   /// Density of the beam
   const MaterialProperty<Real> & _density;
@@ -146,15 +138,6 @@ private:
   RealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
   RealVectorValue _global_force_2, _global_force_3, _global_moment_2, _global_moment_3;
 
-  /**
-   * Coupled variable for du_dot_du calculated by time integrator
-   **/
-  const VariableValue * _du_dot_du;
-
-  /**
-   * Coupled variable for du_dotdot_du calculated by time integrator
-   **/
-  const VariableValue * _du_dotdot_du;
   // AMR
   /// Derivatives of shape functions w.r.t isoparametric coordinates xi
   std::vector<std::vector<Real>> _dphidxi_map;
@@ -210,5 +193,7 @@ private:
 
   /// Coupled variable for the shell thickness
   const VariableValue & _thickness;
+
+  usingTimeKernelMembers;
 
 };

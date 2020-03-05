@@ -17,6 +17,8 @@
 #include "MooseMesh.h"
 #include "DenseMatrix.h"
 
+// #include "Coupleable.h"
+
 #include "libmesh/utility.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/enum_quadrature_type.h"
@@ -24,65 +26,60 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 
-registerMooseObject("TensorMechanicsApp", InertialForceShell);
+registerADMooseObject("TensorMechanicsApp", ADInertialForceShell);
 
-defineLegacyParams(InertialForceShell);
+defineADValidParams(
+    ADInertialForceShell,
+    ADTimeKernel,
+    params.addClassDescription("Calculates the residual for the inertial force/moment and the "
+                               "contribution of mass dependent Rayleigh damping and HHT time "
+                               "integration scheme.");
+    params.set<bool>("use_displaced_mesh") = true;
+    params.addRequiredCoupledVar(
+        "rotations",
+        "The rotational variables appropriate for the simulation geometry and coordinate system");
+    params.addRequiredCoupledVar(
+        "displacements",
+        "The displacement variables appropriate for the simulation geometry and coordinate system");
+    params.addCoupledVar("velocities", "Translational velocity variables");
+    params.addCoupledVar("accelerations", "Translational acceleration variables");
+    params.addCoupledVar("rotational_velocities", "Rotational velocity variables");
+    params.addCoupledVar("rotational_accelerations", "Rotational acceleration variables");
+    params.addRangeCheckedParam<Real>("beta",
+                                      "beta>0.0",
+                                      "beta parameter for Newmark Time integration");
+    params.addRangeCheckedParam<Real>("gamma",
+                                      "gamma>0.0",
+                                      "gamma parameter for Newmark Time integration");
+    params.addParam<MaterialPropertyName>("eta",
+                                          0.0,
+                                          "Name of material property or a constant real "
+                                          "number defining the eta parameter for the "
+                                          "Rayleigh damping.");
+    params.addRangeCheckedParam<Real>(
+        "alpha",
+        0.0,
+        "alpha >= -0.3333 & alpha <= 0.0",
+        "Alpha parameter for mass dependent numerical damping induced "
+        "by HHT time integration scheme");
+    params.addParam<MaterialPropertyName>(
+        "density",
+        "density",
+        "Name of Material Property  or a constant real number defining the density of the beam.");
+    params.addRequiredRangeCheckedParam<unsigned int>(
+        "component",
+        "component<6",
+        "An integer corresponding to the direction "
+        "the variable this kernel acts in. (0 for disp_x, "
+        "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y and 5 for rot_z)"););
 
-InputParameters
-InertialForceShell::validParams()
-{
-  InputParameters params = TimeKernel::validParams();
-  params.addClassDescription("Calculates the residual for the inertial force/moment and the "
-                             "contribution of mass dependent Rayleigh damping and HHT time "
-                             "integration scheme.");
-  params.set<bool>("use_displaced_mesh") = true;
-  params.addRequiredCoupledVar(
-      "rotations",
-      "The rotational variables appropriate for the simulation geometry and coordinate system");
-  params.addRequiredCoupledVar(
-      "displacements",
-      "The displacement variables appropriate for the simulation geometry and coordinate system");
-  params.addCoupledVar("velocities", "Translational velocity variables");
-  params.addCoupledVar("accelerations", "Translational acceleration variables");
-  params.addCoupledVar("rotational_velocities", "Rotational velocity variables");
-  params.addCoupledVar("rotational_accelerations", "Rotational acceleration variables");
-  params.addRangeCheckedParam<Real>(
-      "beta", "beta>0.0", "beta parameter for Newmark Time integration");
-  params.addRangeCheckedParam<Real>(
-      "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
-  params.addParam<MaterialPropertyName>("eta",
-                                        0.0,
-                                        "Name of material property or a constant real "
-                                        "number defining the eta parameter for the "
-                                        "Rayleigh damping.");
-  params.addRangeCheckedParam<Real>("alpha",
-                                    0.0,
-                                    "alpha >= -0.3333 & alpha <= 0.0",
-                                    "Alpha parameter for mass dependent numerical damping induced "
-                                    "by HHT time integration scheme");
-  params.addParam<MaterialPropertyName>(
-      "density",
-      "density",
-      "Name of Material Property  or a constant real number defining the density of the beam.");
-
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "component",
-      "component<6",
-      "An integer corresponding to the direction "
-      "the variable this kernel acts in. (0 for disp_x, "
-      "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y and 5 for rot_z)");
-  return params;
-}
-
-InertialForceShell::InertialForceShell(const InputParameters & parameters)
-  : TimeKernel(parameters),
-    _has_beta(isParamValid("beta")),
-    _has_gamma(isParamValid("gamma")),
+template <ComputeStage compute_stage>
+ADInertialForceShell<compute_stage>::ADInertialForceShell(const InputParameters & parameters)
+  : ADTimeKernel<compute_stage>(parameters),
     _has_velocities(isParamValid("velocities")),
     _has_rot_velocities(isParamValid("rotational_velocities")),
     _has_accelerations(isParamValid("accelerations")),
     _has_rot_accelerations(isParamValid("rotational_accelerations")),
-    _has_Ix(isParamValid("Ix")),
     _density(getMaterialProperty<Real>("density")),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
@@ -107,10 +104,6 @@ InertialForceShell::InertialForceShell(const InputParameters & parameters)
   if (_ndisp != 3 || _nrot != 2)
     mooseError("InertialForceShell: The number of variables supplied in 'displacements' "
                "must be 3 and that in 'rotations' must be 2.");
-
-  // Get variables from the integrator
-  _du_dot_du = &coupledDotDu("displacements", 0);
-  _du_dotdot_du = &coupledDotDotDu("displacements", 0);
 
   // fetch coupled displacements and rotations
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -156,8 +149,9 @@ InertialForceShell::InertialForceShell(const InputParameters & parameters)
   }
 }
 
-void
-InertialForceShell::computeResidual()
+template <ComputeStage compute_stage>
+ADReal
+ADInertialForceShell<compute_stage>::computeQpResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
@@ -543,16 +537,6 @@ InertialForceShell::computeResidual()
         _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
     }
   }
-}
-
-// All code below to be revised.
-
-void
-InertialForceShell::computeJacobian()
-{
-}
-
-void
-InertialForceShell::computeOffDiagJacobian(MooseVariableFEBase & jvar)
-{
+  ADReal whatever;
+  return whatever;
 }
