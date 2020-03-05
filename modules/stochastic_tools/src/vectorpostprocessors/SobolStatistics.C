@@ -20,7 +20,7 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", SobolStatistics);
+registerMooseObject("StochasticToolsApp", SobolStatistics);
 
 defineLegacyParams(SobolStatistics);
 
