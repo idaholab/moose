@@ -19,7 +19,7 @@ class PorousFlowDictatorTest : public MooseObjectUnitTest
 {
 public:
   PorousFlowDictatorTest()
-    : MooseObjectUnitTest("MooseUnitApp"),
+    : MooseObjectUnitTest("PorousFlowApp"),
       _linear_lagrange(FEType(Utility::string_to_enum<Order>("FIRST"),
                               Utility::string_to_enum<FEFamily>("LAGRANGE"))),
       _constant_monomial(FEType(Utility::string_to_enum<Order>("CONSTANT"),
