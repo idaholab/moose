@@ -6,13 +6,13 @@ The uniform distribution is a probability distribution that has constant probabi
 This is a continuous uniform distribution with the probability density function:
 
 if $a < x < b$, then
-\begin{equation}
+!equation
 f(x) = 1/(b - a)
-\end{equation}
+
 if $x > b$ or $x < a$, then
-\begin{equation}
+!equation
 f(x) = 0
-\end{equation}
+
 where $a$ and $b$ are the lower bound and upper bound for the uniform distribution, respectively.
 
 ## Example Input Syntax

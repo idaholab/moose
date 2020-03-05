@@ -10,28 +10,28 @@ when compiling libMesh.
 As the name suggests, the BoostWeibullDistribution object defines a Weibull distribution which
 has a probability density function (PDF) defined as
 
-\begin{equation}
+!equation
 f(x;\lambda,k) =
 \begin{cases}
 \frac{k}{\lambda}\left(\frac{x}{\lambda}\right)^{k-1}e^{-(x/\lambda)^{k}} & x\geq0 ,\\
 0 & x<0,
 \end{cases}
-\end{equation}
+
 where $k > 0$ and defines the shape parameter and $\lambda > 0$ and defines the scale parameter.
 
 The cumulative distribution function (CDF) is defined as
-\begin{equation}
+
+!equation
 F(x;k,\lambda) =
 \begin{cases}
 1- e^{-(x/\lambda)^k}\ & x\geq0, \\
 0 & x<0.
 \end{cases}
-\end{equation}
 
 The quantile function is defined as
-\begin{equation}
+
+!equation
 Q(p;k,\lambda) = \lambda {(-\ln(1-p))}^{1/k} \quad 0 \leq p < 1.
-\end{equation}
 
 ## Example Input Syntax
 

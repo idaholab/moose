@@ -10,15 +10,13 @@ asymmetric.
 
 Probability Density Function:
 
-\begin{equation}
+!equation
 f(x) = \tfrac{\delta}{\lambda\sqrt{2\pi} z(1-z)} exp(-\tfrac{1}{2}(\gamma + \delta ln(\tfrac{z}{1-z}))^2),\,\textrm{where}\, z \equiv \tfrac{x-\zeta}{\lambda}
-\end{equation}
 
 Cumulative Density Function:
 
-\begin{equation}
+!equation
 F(x) = \Phi(\gamma + \delta ln \tfrac{z}{1-z}),\,\textrm{where}\, z = \tfrac{x-\epsilon}{\lambda}
-\end{equation}
 
 !syntax description /Distributions/JohnsonSBDistribution
 
