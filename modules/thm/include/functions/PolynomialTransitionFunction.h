@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SmoothTransitionFunction.h"
-#include "PolynomialTransitionInterface.h"
+#include "CubicTransition.h"
 
 class PolynomialTransitionFunction;
 
@@ -15,8 +15,7 @@ InputParameters validParams<PolynomialTransitionFunction>();
  * the x, y, z direction, but this could later be extended to an arbitrary
  * direction.
  */
-class PolynomialTransitionFunction : public SmoothTransitionFunction,
-                                     public PolynomialTransitionInterface
+class PolynomialTransitionFunction : public SmoothTransitionFunction
 {
 public:
   PolynomialTransitionFunction(const InputParameters & parameters);
@@ -29,4 +28,7 @@ protected:
   const Real & _df1dx_end_point;
   /// Derivative of second function at end point
   const Real & _df2dx_end_point;
+
+  /// Transition object
+  CubicTransition _transition;
 };
