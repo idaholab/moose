@@ -69,10 +69,11 @@ Sampler::Sampler(const InputParameters & parameters)
     _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
     _perf_get_next_local_row(registerTimedSection("getNextLocalRow", 1)),
     _perf_advance_generator(registerTimedSection("advanceGenerators", 2)),
-    _perf_get_rand(registerTimedSection("getRand", 5)),
     _perf_sample_row(registerTimedSection("computeSampleRow", 2)),
     _perf_local_sample_matrix(registerTimedSection("computeLocalSampleMatrix", 2)),
-    _perf_sample_matrix(registerTimedSection("computeSampleMatrix", 2))
+    _perf_sample_matrix(registerTimedSection("computeSampleMatrix", 2)),
+    _perf_get_rand(registerTimedSection("getRand", 5)),
+    _perf_get_randl(registerTimedSection("getRandl", 5))
 {
 }
 
@@ -301,6 +302,14 @@ Sampler::getRand(const unsigned int index)
   return _generator.rand(index);
 }
 
+uint32_t
+Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
+{
+  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  TIME_SECTION(_perf_get_randl);
+
+  return _generator.randl(index, lower, upper);
+}
 
 dof_id_type
 Sampler::getNumberOfRows() const
