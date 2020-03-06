@@ -10,7 +10,11 @@
 #include "CartesianProductSampler.h"
 #include "Distribution.h"
 
-registerMooseObject("StochasticToolsApp", CartesianProductSampler);
+registerMooseObjectAliased("StochasticToolsApp", CartesianProductSampler, "CartesianProduct");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            CartesianProductSampler,
+                            "07/01/2020 00:00",
+                            CartesianProduct);
 
 defineLegacyParams(CartesianProductSampler);
 

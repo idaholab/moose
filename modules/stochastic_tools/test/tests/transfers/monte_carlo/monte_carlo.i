@@ -25,7 +25,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 10
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep

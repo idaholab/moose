@@ -25,7 +25,7 @@
 
 [Samplers]
   [sample]
-    type = SobolSampler
+    type = Sobol
     num_rows = 3
     resample = false
     distributions = 'uniform_left uniform_right'

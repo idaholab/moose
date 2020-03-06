@@ -20,7 +20,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform'
     execute_on = 'initial timestep_end'

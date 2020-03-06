@@ -25,13 +25,13 @@
 
 [Samplers]
   [sobol]
-    type = SobolSampler
+    type = Sobol
     num_rows = 3
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep
   []
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep

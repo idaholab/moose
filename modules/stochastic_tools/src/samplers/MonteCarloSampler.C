@@ -10,7 +10,11 @@
 #include "MonteCarloSampler.h"
 #include "Distribution.h"
 
-registerMooseObject("StochasticToolsApp", MonteCarloSampler);
+registerMooseObjectAliased("StochasticToolsApp", MonteCarloSampler, "MonteCarlo");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            MonteCarloSampler,
+                            "07/01/2020 00:00",
+                            MonteCarlo);
 
 defineLegacyParams(MonteCarloSampler);
 

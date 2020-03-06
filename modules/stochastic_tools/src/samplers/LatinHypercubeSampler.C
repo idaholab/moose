@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LatinHypercube.h"
+#include "LatinHypercubeSampler.h"
 #include "Distribution.h"
 
-registerMooseObject("StochasticToolsApp", LatinHypercube);
+registerMooseObjectAliased("StochasticToolsApp", LatinHypercubeSampler, "LatinHypercube");
 
-defineLegacyParams(LatinHypercube);
+defineLegacyParams(LatinHypercubeSampler);
 
 InputParameters
-LatinHypercube::validParams()
+LatinHypercubeSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Latin Hypercube Sampler.");
@@ -35,7 +35,7 @@ LatinHypercube::validParams()
   return params;
 }
 
-LatinHypercube::LatinHypercube(const InputParameters & parameters)
+LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _num_bins_input(getParam<std::vector<unsigned int>>("num_bins")),
@@ -71,7 +71,7 @@ LatinHypercube::LatinHypercube(const InputParameters & parameters)
 }
 
 void
-LatinHypercube::sampleSetUp()
+LatinHypercubeSampler::sampleSetUp()
 {
   // Setup bin information
   const std::size_t num_dists = _distributions.size();
@@ -88,7 +88,7 @@ LatinHypercube::sampleSetUp()
 }
 
 Real
-LatinHypercube::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+LatinHypercubeSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 {
   // Determine the bin
   const uint32_t bin_num = getRandl(0, 0, _num_bins[col_index]);
@@ -102,7 +102,7 @@ LatinHypercube::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 }
 
 void
-LatinHypercube::sampleTearDown()
+LatinHypercubeSampler::sampleTearDown()
 {
   _num_bins.clear();
   _size_bins.clear();

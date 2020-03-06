@@ -18,7 +18,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform_0'
   []

@@ -23,7 +23,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 15
     distributions = 'uniform_0 uniform_1'
     execute_on = INITIAL

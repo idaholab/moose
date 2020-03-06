@@ -11,19 +11,19 @@
 
 #include "Sampler.h"
 
-class LatinHypercube;
+class LatinHypercubeSampler;
 
 template <>
-InputParameters validParams<LatinHypercube>();
+InputParameters validParams<LatinHypercubeSampler>();
 /**
  * A class used to perform Monte Carlo Sampling
  */
-class LatinHypercube : public Sampler
+class LatinHypercubeSampler : public Sampler
 {
 public:
   static InputParameters validParams();
 
-  LatinHypercube(const InputParameters & parameters);
+  LatinHypercubeSampler(const InputParameters & parameters);
 
 protected:
   virtual void sampleSetUp() override;

@@ -25,7 +25,7 @@
 
 [Samplers]
   [sample]
-    type = SobolSampler
+    type = Sobol
     num_rows = 4
     distributions = 'd0 d1 d2'
     execute_on = 'initial'
