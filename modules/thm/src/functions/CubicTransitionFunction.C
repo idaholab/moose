@@ -1,10 +1,10 @@
-#include "PolynomialTransitionFunction.h"
+#include "CubicTransitionFunction.h"
 
-registerMooseObject("THMApp", PolynomialTransitionFunction);
+registerMooseObject("THMApp", CubicTransitionFunction);
 
 template <>
 InputParameters
-validParams<PolynomialTransitionFunction>()
+validParams<CubicTransitionFunction>()
 {
   InputParameters params = validParams<SmoothTransitionFunction>();
 
@@ -16,7 +16,7 @@ validParams<PolynomialTransitionFunction>()
   return params;
 }
 
-PolynomialTransitionFunction::PolynomialTransitionFunction(const InputParameters & parameters)
+CubicTransitionFunction::CubicTransitionFunction(const InputParameters & parameters)
   : SmoothTransitionFunction(parameters),
 
     _df1dx_end_point(getParam<Real>("function1_derivative_end_point")),
@@ -42,7 +42,7 @@ PolynomialTransitionFunction::PolynomialTransitionFunction(const InputParameters
 }
 
 Real
-PolynomialTransitionFunction::value(Real t, const Point & p) const
+CubicTransitionFunction::value(Real t, const Point & p) const
 {
   const Real x = _use_time ? t : p(_component);
 
@@ -50,7 +50,7 @@ PolynomialTransitionFunction::value(Real t, const Point & p) const
 }
 
 RealVectorValue
-PolynomialTransitionFunction::gradient(Real /*t*/, const Point & /*p*/) const
+CubicTransitionFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

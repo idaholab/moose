@@ -3,10 +3,10 @@
 #include "SmoothTransitionFunction.h"
 #include "CubicTransition.h"
 
-class PolynomialTransitionFunction;
+class CubicTransitionFunction;
 
 template <>
-InputParameters validParams<PolynomialTransitionFunction>();
+InputParameters validParams<CubicTransitionFunction>();
 
 /**
  * Computes a cubic polynomial transition between two functions
@@ -15,10 +15,10 @@ InputParameters validParams<PolynomialTransitionFunction>();
  * the x, y, z direction, but this could later be extended to an arbitrary
  * direction.
  */
-class PolynomialTransitionFunction : public SmoothTransitionFunction
+class CubicTransitionFunction : public SmoothTransitionFunction
 {
 public:
-  PolynomialTransitionFunction(const InputParameters & parameters);
+  CubicTransitionFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;
   virtual RealVectorValue gradient(Real t, const Point & p) const;
