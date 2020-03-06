@@ -268,6 +268,13 @@ public:
    */
   void setCheckJacobian(bool state) { _check_jacobian = state; }
 
+  /**
+   * Hint how to augment sparsity pattern between two elements.
+   *
+   * The augmentation will be symmetric
+   */
+  virtual void augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & elem_id2);
+
 protected:
   struct VariableInfo
   {
@@ -334,11 +341,6 @@ protected:
   void setupInitialConditions();
 
   /**
-   * Add proper element ghosting for parallel runs
-   */
-  void ghostElements();
-
-  /**
    * Sets the coordinate system for each subdomain
    */
   void setupCoordinateSystem();
@@ -362,6 +364,9 @@ protected:
 
   /// True if checking jacobian
   bool _check_jacobian;
+
+  /// Additional sparsity pattern that needs to be added into the Jacobian matrix
+  std::map<dof_id_type, std::vector<dof_id_type>> _sparsity_elem_augmentation;
 
 public:
   Real _zero;

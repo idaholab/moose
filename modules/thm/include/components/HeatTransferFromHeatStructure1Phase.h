@@ -2,6 +2,7 @@
 
 #include "HeatTransferFromTemperature1Phase.h"
 #include "HSBoundaryInterface.h"
+#include "FlowChannelAlignment.h"
 
 class HeatTransferFromHeatStructure1Phase;
 
@@ -21,6 +22,7 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void setupMesh() override;
   virtual void check() const override;
 
   /**
@@ -35,4 +37,6 @@ protected:
    * @return The nodeset name for the slave side
    */
   const BoundaryName & getSlaveSideName() const;
+
+  FlowChannelAlignment _fch_alignment;
 };

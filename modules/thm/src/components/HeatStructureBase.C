@@ -49,10 +49,7 @@ HeatStructureBase::HeatStructureBase(const InputParameters & params)
     _total_width(std::accumulate(_width.begin(), _width.end(), 0.0)),
     _n_part_elems(getParam<std::vector<unsigned int>>("n_part_elems")),
     _total_elem_number(0),
-    _num_rods(getParam<Real>("num_rods")),
-    _has_k(params.isParamValid("k")),
-    _has_Cp(params.isParamValid("Cp")),
-    _has_rho(params.isParamValid("rho"))
+    _num_rods(getParam<Real>("num_rods"))
 {
   _number_of_hs = _names.size();
   if (_n_part_elems.size() == _number_of_hs)
@@ -94,6 +91,10 @@ HeatStructureBase::check() const
   else if (_n_sections > 1)
     logError("If there is more than 1 axial region, then the parameter 'axial_region_names' must "
              "be specified.");
+
+  checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
+  checkEqualSize<std::string, Real>("names", "widths");
+  checkEqualSize<std::string, std::string>("names", "materials");
 }
 
 bool
@@ -169,9 +170,15 @@ HeatStructureBase::build2DMesh()
           elem_ids[i].push_back(elem->id());
 
           if (j == 0)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
+            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+          }
           if (j == _total_elem_number - 1)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
+            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+          }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
@@ -247,9 +254,15 @@ HeatStructureBase::build2DMesh2ndOrder()
           elem_ids[i].push_back(elem->id());
 
           if (j == 0)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
+            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+          }
           if (j == _total_elem_number - 1)
+          {
             _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
+            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+          }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
@@ -384,4 +397,18 @@ HeatStructureBase::getInnerBoundaryNames() const
   checkSetupStatus(MESH_PREPARED);
 
   return _boundary_names_inner;
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+HeatStructureBase::getBoundaryInfo(const HeatStructureBase::SideType & side) const
+{
+  switch (side)
+  {
+    case INNER:
+      return _inner_bnd_info;
+    case OUTER:
+      return _outer_bnd_info;
+    default:
+      mooseError(name(), "Unknown heat structure side requested.");
+  }
 }

@@ -8,10 +8,8 @@ InputParameters
 validParams<HeatFluxFromHeatStructureBaseUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
-  params.addRequiredParam<std::vector<BoundaryName>>("slave_boundary",
-                                                     "Boundary name on the flow channel mesh");
-  params.addRequiredParam<BoundaryName>("master_boundary",
-                                        "Boundary name on the heat structure mesh");
+  params.addRequiredParam<FlowChannelAlignment *>("_fch_alignment",
+                                                  "Flow channel alignement object");
   params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
   params.addClassDescription(
       "Base class for caching heat flux between flow channels and heat structures.");
@@ -20,86 +18,52 @@ validParams<HeatFluxFromHeatStructureBaseUserObject>()
 
 HeatFluxFromHeatStructureBaseUserObject::HeatFluxFromHeatStructureBaseUserObject(
     const InputParameters & parameters)
-  : ElementUserObject(parameters), _P_hf(coupledValue("P_hf"))
+  : ElementUserObject(parameters),
+    _fch_alignment(*getParam<FlowChannelAlignment *>("_fch_alignment")),
+    _P_hf(coupledValue("P_hf"))
 {
-  // master element centroids
-  std::vector<Point> master_points;
-  // element ids corresponding to the centroids in `master_points`
-  std::vector<dof_id_type> master_elem_ids;
-  // local side number corresponding to the element id in `master_elem_ids`
-  std::vector<dof_id_type> master_elem_sides;
-  // slave element centroids
-  std::vector<Point> slave_points;
-  // element ids corresponding to the centroids in `slave_points`
-  std::vector<dof_id_type> slave_elem_ids;
+  const auto & master_boundary_info = _fch_alignment.getMasterBoundaryInfo();
+  const auto & slave_elem_ids = _fch_alignment.getSlaveElementIDs();
 
   // list of q-points per master elements
   std::map<dof_id_type, std::vector<Point>> master_elem_qps;
   // list of q-points per slave elements
   std::map<dof_id_type, std::vector<Point>> slave_elem_qps;
 
-  BoundaryID master_bnd_id = _mesh.getBoundaryID(getParam<BoundaryName>("master_boundary"));
-  std::vector<BoundaryID> slave_bnd_id =
-      _mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("slave_boundary"));
-
-  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-  for (const auto & belem : range)
+  for (const auto & t : master_boundary_info)
   {
-    const Elem * elem = belem->_elem;
-    BoundaryID boundary_id = belem->_bnd_id;
-
+    auto elem_id = std::get<0>(t);
+    auto side_id = std::get<1>(t);
+    const Elem * elem = _mesh.elemPtr(elem_id);
     if (elem->processor_id() == _subproblem.processor_id())
     {
+      // 2D elements
       _assembly.setCurrentSubdomainID(elem->subdomain_id());
-      if (boundary_id == master_bnd_id)
-      {
-        // 2D elements
-        _assembly.reinit(elem, belem->_side);
-        const MooseArray<Point> & q_points = _assembly.qPointsFace();
-        for (std::size_t i = 0; i < q_points.size(); i++)
-          master_elem_qps[elem->id()].push_back(q_points[i]);
-
-        master_elem_ids.push_back(elem->id());
-        master_elem_sides.push_back(belem->_side);
-        master_points.push_back(elem->centroid());
-      }
-      else if (std::find(slave_bnd_id.begin(), slave_bnd_id.end(), boundary_id) !=
-               slave_bnd_id.end())
-      {
-        if (std::find(slave_elem_ids.begin(), slave_elem_ids.end(), elem->id()) ==
-            slave_elem_ids.end())
-        {
-          // 1D elements
-          _assembly.reinit(elem);
-          const MooseArray<Point> & q_points = _assembly.qPoints();
-          for (std::size_t i = 0; i < q_points.size(); i++)
-            slave_elem_qps[elem->id()].push_back(q_points[i]);
-
-          slave_elem_ids.push_back(elem->id());
-          slave_points.push_back(elem->centroid());
-        }
-      }
+      _assembly.reinit(elem, side_id);
+      const MooseArray<Point> & q_points = _assembly.qPointsFace();
+      for (std::size_t i = 0; i < q_points.size(); i++)
+        master_elem_qps[elem_id].push_back(q_points[i]);
     }
   }
 
-  // find the master elements that are nearest to the slave elements
-  KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
-  for (std::size_t i = 0; i < slave_points.size(); i++)
+  for (const auto & elem_id : slave_elem_ids)
   {
-    unsigned int patch_size = 1;
-    std::vector<std::size_t> return_index(patch_size);
-    kd_tree.neighborSearch(slave_points[i], patch_size, return_index);
-
-    _nearest_elem_ids.insert(
-        std::pair<dof_id_type, dof_id_type>(slave_elem_ids[i], master_elem_ids[return_index[0]]));
-    _nearest_elem_ids.insert(
-        std::pair<dof_id_type, dof_id_type>(master_elem_ids[return_index[0]], slave_elem_ids[i]));
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    if (elem->processor_id() == _subproblem.processor_id())
+    {
+      // 1D elements
+      _assembly.setCurrentSubdomainID(elem->subdomain_id());
+      _assembly.reinit(elem);
+      const MooseArray<Point> & q_points = _assembly.qPoints();
+      for (std::size_t i = 0; i < q_points.size(); i++)
+        slave_elem_qps[elem_id].push_back(q_points[i]);
+    }
   }
+
   // now find out how q-points correspond to each other on the (master, slave) pair of elements
-  for (std::size_t i = 0; i < slave_elem_ids.size(); i++)
+  for (auto elem_id : slave_elem_ids)
   {
-    dof_id_type elem_id = slave_elem_ids[i];
-    dof_id_type nearest_elem_id = _nearest_elem_ids[elem_id];
+    dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
 
     std::vector<Point> & slave_qps = slave_elem_qps[elem_id];
     std::vector<Point> & master_qps = master_elem_qps[nearest_elem_id];
@@ -126,7 +90,7 @@ void
 HeatFluxFromHeatStructureBaseUserObject::execute()
 {
   unsigned int n_qpts = _qrule->n_points();
-  dof_id_type nearest_elem_id = _nearest_elem_ids[_current_elem->id()];
+  const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(_current_elem->id());
 
   _heated_perimeter[_current_elem->id()].resize(n_qpts);
   _heated_perimeter[nearest_elem_id].resize(n_qpts);

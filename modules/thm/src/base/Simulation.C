@@ -12,6 +12,7 @@
 #include "THMControl.h"
 #include "TerminateControl.h"
 #include "THMMesh.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -46,6 +47,22 @@ Simulation::~Simulation()
 }
 
 void
+Simulation::augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & elem_id2)
+{
+  auto it = _sparsity_elem_augmentation.find(elem_id1);
+  if (it == _sparsity_elem_augmentation.end())
+    it = _sparsity_elem_augmentation.insert(_sparsity_elem_augmentation.begin(),
+                                            {elem_id1, std::vector<dof_id_type>()});
+  it->second.push_back(elem_id2);
+
+  it = _sparsity_elem_augmentation.find(elem_id2);
+  if (it == _sparsity_elem_augmentation.end())
+    it = _sparsity_elem_augmentation.insert(_sparsity_elem_augmentation.begin(),
+                                            {elem_id2, std::vector<dof_id_type>()});
+  it->second.push_back(elem_id1);
+}
+
+void
 Simulation::buildMesh()
 {
   if (_components.size() == 0)
@@ -57,6 +74,21 @@ Simulation::buildMesh()
   // Some components add side sets, some add node sets. Make sure both versions exist
   _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
   _mesh.prep();
+
+  // augment the sparsity pattern
+  {
+    const std::string class_name = "AugmentSparsityBetweenElements";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<std::string>("for_whom") = "thm:simualtion";
+    params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::COUPLING;
+    params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
+        &_sparsity_elem_augmentation;
+    auto obj = _factory.create<RelationshipManager>(
+        class_name, genName(_fe_problem.name(), "rm_elem2elem"), params);
+    _app.addRelationshipManager(obj);
+  }
 }
 
 void
@@ -551,33 +583,6 @@ Simulation::addComponentPhysics()
 }
 
 void
-Simulation::ghostElements()
-{
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
-
-  for (auto && comp : _components)
-  {
-    auto jct = dynamic_cast<FlowJunction *>(comp.get());
-    if (jct != nullptr)
-    {
-      const std::vector<dof_id_type> & node_ids = jct->getNodeIDs();
-
-      // go over nodes the junction is connected to
-      for (const auto & nid : node_ids)
-      {
-        const auto & it = node_to_elem.find(nid);
-        if (it == node_to_elem.end())
-          mooseError("Failed to find Node ", nid, "in the Mesh!");
-        // ghost all elements connected to the nodes
-        const std::vector<dof_id_type> & elems = it->second;
-        for (const auto & elem_it : elems)
-          _fe_problem.addGhostedElem(elem_it);
-      }
-    }
-  }
-}
-
-void
 Simulation::setupCoordinateSystem()
 {
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL");
@@ -617,7 +622,6 @@ Simulation::setupMesh()
     return;
 
   setupCoordinateSystem();
-  ghostElements();
 }
 
 void

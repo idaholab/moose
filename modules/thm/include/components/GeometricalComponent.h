@@ -44,9 +44,9 @@ public:
    */
   virtual const Real & getGravityAngle() const { return _gravity_angle; }
 
-  const std::vector<unsigned int> & getNodeIDs() const;
+  const std::vector<dof_id_type> & getNodeIDs() const;
 
-  const std::vector<unsigned int> & getElementIDs() const;
+  const std::vector<dof_id_type> & getElementIDs() const;
 
 protected:
   Node * addNode(const Point & pt);
@@ -131,9 +131,9 @@ protected:
   /// List of coordinate system for each subdomain
   std::vector<Moose::CoordinateSystemType> _coord_sys;
   /// List of node IDs this components owns
-  std::vector<unsigned int> _node_ids;
+  std::vector<dof_id_type> _node_ids;
   /// Elements ids of this flow channel component
-  std::vector<unsigned int> _elem_ids;
+  std::vector<dof_id_type> _elem_ids;
 
   /// Rotational matrix about x-axis
   RealTensorValue _Rx;

@@ -248,7 +248,7 @@ GeometricalComponent::setSubdomainInfo(SubdomainID subdomain_id,
   _mesh.setSubdomainName(subdomain_id, subdomain_name);
 }
 
-const std::vector<unsigned int> &
+const std::vector<dof_id_type> &
 GeometricalComponent::getNodeIDs() const
 {
   checkSetupStatus(MESH_PREPARED);
@@ -256,7 +256,7 @@ GeometricalComponent::getNodeIDs() const
   return _node_ids;
 }
 
-const std::vector<unsigned int> &
+const std::vector<dof_id_type> &
 GeometricalComponent::getElementIDs() const
 {
   checkSetupStatus(MESH_PREPARED);
