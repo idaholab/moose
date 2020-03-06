@@ -1,6 +1,6 @@
 [Tests]
   issues = '#7485 #14791'
-  design = 'FieldSplitPreconditioner.md NormalMortarLMMechanicalContact.md TangentialMortarLMMechanicalContact.md'
+  design = 'FieldSplitPreconditioner.md NormalNodalLMMechanicalContact.md TangentialMortarLMMechanicalContact.md'
   [./2block-3D]
     type = 'Exodiff'
     input = '2blocks3d.i'
@@ -13,6 +13,6 @@
     input = 'frictional_mortar_FS.i'
     exodiff = 'frictional_mortar_FS_out.e'
     abs_zero = 1e-8
-    requirement = 'The mortar contact problem shall converge reasonably fast with split preconditioning.'
+    requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
   [../]
 []
