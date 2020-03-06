@@ -9,6 +9,8 @@
 
 #include "SurrogateModel.h"
 
+#include "Sampler.h"
+
 defineLegacyParams(SurrogateModel);
 
 InputParameters

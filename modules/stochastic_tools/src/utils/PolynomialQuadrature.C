@@ -121,16 +121,23 @@ legendre(const unsigned int order, const Real x, const Real lower_bound, const R
   // Using explicit expression of polynomial coefficients:
   // P_n(x) = 1/2^n\sum_{k=1}^{floor(n/2)} (-1)^k * nchoosek(n, k) * nchoosek(2n-2k, n) * x^(n-2k)
   // https://en.wikipedia.org/wiki/Legendre_polynomials
-  Real val = 0;
-  for (unsigned int k = 0; k <= (order % 2 == 0 ? order / 2 : (order - 1) / 2); ++k)
+  if (order < 16)
   {
-    Real coeff =
-        Real(Utility::binomial(order, k)) * Real(Utility::binomial(2 * order - 2 * k, order));
-    Real sgn = (k % 2 == 0 ? 1.0 : -1.0);
-    unsigned int ord = order - 2 * k;
-    val += sgn * coeff * pow(xref, ord);
+    Real val = 0;
+    for (unsigned int k = 0; k <= (order % 2 == 0 ? order / 2 : (order - 1) / 2); ++k)
+    {
+      Real coeff =
+          Real(Utility::binomial(order, k)) * Real(Utility::binomial(2 * order - 2 * k, order));
+      Real sgn = (k % 2 == 0 ? 1.0 : -1.0);
+      unsigned int ord = order - 2 * k;
+      val += sgn * coeff * pow(xref, ord);
+    }
+    return val / pow(2.0, order);
   }
-  return val / pow(2.0, order);
+  else
+    return ((2.0 * (Real)order - 1.0) * xref * legendre(order - 1, xref) -
+            ((Real)order - 1.0) * legendre(order - 2, xref)) /
+           (Real)order;
 #endif
 }
 
@@ -182,16 +189,21 @@ hermite(const unsigned int order, const Real x, const Real mu, const Real sig)
   // Using explicit expression of polynomial coefficients:
   // H_n(x) = n!\sum_{m=1}^{floor(n/2)} (-1)^m / (m!(n-2m)!) * x^(n-2m) / 2^m
   // https://en.wikipedia.org/wiki/Hermite_polynomials
-  Real val = 0;
-  for (unsigned int m = 0; m <= (order % 2 == 0 ? order / 2 : (order - 1) / 2); ++m)
+  if (order < 13)
   {
-    Real sgn = (m % 2 == 0 ? 1.0 : -1.0);
-    Real coeff =
-        1.0 / Real(Utility::factorial(m) * Utility::factorial(order - 2 * m)) / pow(2.0, m);
-    unsigned int ord = order - 2 * m;
-    val += sgn * coeff * pow(xref, ord);
+    Real val = 0;
+    for (unsigned int m = 0; m <= (order % 2 == 0 ? order / 2 : (order - 1) / 2); ++m)
+    {
+      Real sgn = (m % 2 == 0 ? 1.0 : -1.0);
+      Real coeff =
+          1.0 / Real(Utility::factorial(m) * Utility::factorial(order - 2 * m)) / pow(2.0, m);
+      unsigned int ord = order - 2 * m;
+      val += sgn * coeff * pow(xref, ord);
+    }
+    return val * Utility::factorial(order);
   }
-  return val * Utility::factorial(order);
+  else
+    return xref * hermite(order - 1, xref) - ((Real)order - 1.0) * hermite(order - 2, xref);
 #endif
 }
 
