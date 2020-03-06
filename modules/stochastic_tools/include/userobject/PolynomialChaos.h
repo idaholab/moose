@@ -53,17 +53,12 @@ public:
 
   /// Evaluate mean: \mu = E[u]
   virtual Real computeMean() const { return _coeff[0]; };
-  /// Evaluate standard deviation: \sigma = sqrt(E[u^2] - \mu^2)
+  /// Evaluate variance: \sigma = sqrt(E[(u-\mu)^2])
   virtual Real computeSTD() const;
-  /// Evaluate skewness: S = (E[u^3] - 3\sigma^2\mu - \mu^3) / \sigma^3
-  virtual Real computeSkewness() const;
-  /// Evaluate kurtosis: K = E[(u-\mu)^4] / \sigma^4
-  virtual Real computeKurtosis() const;
+  /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
+  Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 
 protected:
-  /// Compute expectation of a certain power of the QoI: E[u^n]
-  Real powerExpectation(const unsigned int n) const;
-
   /**
    * Function computing for computing _tuple
    * Example for ndim = 3, order = 4:
@@ -87,13 +82,6 @@ protected:
   const unsigned int _ncoeff;
   /// These are the coefficients we are after in the PC expansion
   std::vector<Real> _coeff;
-  /// Postprocessor values for outputting statistical moments
-  ////@{
-  PostprocessorValue * _mean_pp;
-  PostprocessorValue * _stdv_pp;
-  PostprocessorValue * _skew_pp;
-  PostprocessorValue * _kurt_pp;
-  ///@}
   /// The distributions used for sampling
   std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> _poly;
 };

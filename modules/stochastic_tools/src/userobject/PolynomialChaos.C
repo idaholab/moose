@@ -25,16 +25,6 @@ PolynomialChaos::validParams()
   params.addRequiredParam<unsigned int>("order", "Maximum polynomial order.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
-  params.addParam<bool>(
-      "output_mean", false, "True to output mean from computed coefficients to postprocessor.");
-  params.addParam<bool>(
-      "output_stdv",
-      false,
-      "True to output standard deviation from computed coefficients to postprocessor.");
-  params.addParam<bool>(
-      "output_skew", false, "True to output skewness from computed coefficients to postprocessor.");
-  params.addParam<bool>(
-      "output_kurt", false, "True to output kurtosis from computed coefficients to postprocessor.");
 
   return params;
 }
@@ -45,33 +35,8 @@ PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
     _quad_sampler(nullptr),
     _tuple(generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order)),
     _ncoeff(_tuple.size()),
-    _coeff(_ncoeff),
-    _mean_pp(nullptr),
-    _stdv_pp(nullptr),
-    _skew_pp(nullptr),
-    _kurt_pp(nullptr)
+    _coeff(_ncoeff)
 {
-  InputParameters params = _app.getFactory().getValidParams("Receiver");
-  if (getParam<bool>("output_mean"))
-  {
-    _fe_problem.addPostprocessor("Receiver", name() + "_mean", params);
-    _mean_pp = &_fe_problem.getPostprocessorValue(name() + "_mean");
-  }
-  if (getParam<bool>("output_stdv"))
-  {
-    _fe_problem.addPostprocessor("Receiver", name() + "_stdv", params);
-    _stdv_pp = &_fe_problem.getPostprocessorValue(name() + "_stdv");
-  }
-  if (getParam<bool>("output_skew"))
-  {
-    _fe_problem.addPostprocessor("Receiver", name() + "_skew", params);
-    _skew_pp = &_fe_problem.getPostprocessorValue(name() + "_skew");
-  }
-  if (getParam<bool>("output_kurt"))
-  {
-    _fe_problem.addPostprocessor("Receiver", name() + "_kurt", params);
-    _kurt_pp = &_fe_problem.getPostprocessorValue(name() + "_kurt");
-  }
 }
 
 void
@@ -133,15 +98,6 @@ PolynomialChaos::finalize()
   if (!_quad_sampler)
     for (unsigned int i = 0; i < _ncoeff; ++i)
       _coeff[i] /= _sampler->getNumberOfRows();
-
-  if (_mean_pp)
-    *_mean_pp = computeMean();
-  if (_stdv_pp)
-    *_stdv_pp = computeSTD();
-  if (_skew_pp)
-    *_skew_pp = computeSkewness();
-  if (_kurt_pp)
-    *_kurt_pp = computeKurtosis();
 }
 
 void
@@ -186,49 +142,38 @@ PolynomialChaos::computeSTD() const
     Real norm = 1.0;
     for (std::size_t d = 0; d < _ndim; ++d)
       norm *= _poly[d]->innerProduct(_tuple[i][d]);
-    var += pow(_coeff[i], 2) * norm;
+    var += _coeff[i] * _coeff[i] * norm;
   }
 
   return std::sqrt(var);
 }
 
 Real
-PolynomialChaos::computeSkewness() const
-{
-  Real mu = computeMean();
-  Real sig = computeSTD();
-  return (powerExpectation(3) - 3.0 * Utility::pow<2>(sig) * mu - Utility::pow<3>(mu)) /
-         Utility::pow<3>(sig);
-}
-
-Real
-PolynomialChaos::computeKurtosis() const
-{
-  Real mu = computeMean();
-  Real sig = computeSTD();
-  Real e3 = powerExpectation(3);
-  Real e4 = powerExpectation(4);
-  return (e4 - 4 * e3 * mu + 6.0 * Utility::pow<2>(sig) * Utility::pow<2>(mu) +
-          3.0 * Utility::pow<4>(mu)) /
-         Utility::pow<4>(sig);
-}
-
-Real
-PolynomialChaos::powerExpectation(const unsigned int n) const
+PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) const
 {
   std::vector<StochasticTools::WeightedCartesianProduct<unsigned int, Real>> order;
   for (unsigned int d = 0; d < _ndim; ++d)
   {
     std::vector<std::vector<unsigned int>> order_1d(n);
-    std::vector<std::vector<Real>> c_1d(n, _coeff);
-    for (unsigned int i = 0; i < _ncoeff; ++i)
+    std::vector<std::vector<Real>> c_1d(n);
+    for (unsigned int i = 1; i < _ncoeff; ++i)
       for (unsigned int m = 0; m < n; ++m)
+      {
         order_1d[m].push_back(_tuple[i][d]);
+        c_1d[m].push_back(_coeff[i]);
+      }
     order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
   }
 
+  unsigned int n_local = order[0].numRows();
+  unsigned int st_local = 0;
+  unsigned int end_local = n_local;
+  if (distributed)
+    MooseUtils::linearPartitionItems(
+        order[0].numRows(), n_processors(), processor_id(), n_local, st_local, end_local);
+
   Real val = 0;
-  for (unsigned int i = 0; i < order[0].numRows(); ++i)
+  for (unsigned int i = st_local; i < end_local; ++i)
   {
     Real tmp = order[0].computeWeight(i);
     for (unsigned int d = 0; d < _ndim; ++d)
