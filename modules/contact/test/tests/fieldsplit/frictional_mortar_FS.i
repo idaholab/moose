@@ -146,6 +146,7 @@ refine = 1
       contact_slave    = '10'
       contact_displaced = '30'
       include_all_contact_nodes = 1
+      blocks = '4'
 
 
       petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type  -pc_factor_shift_amount'
