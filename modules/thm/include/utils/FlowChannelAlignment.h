@@ -51,7 +51,7 @@ public:
   /**
    * Get the nearest element ID given another element ID
    *
-   * @param[in] elem_id Element ID for which we want to obtain the neasert element ID
+   * @param[in] elem_id Element ID for which we want to obtain the nearest element ID
    */
   const dof_id_type & getNearestElemID(const dof_id_type & elem_id) const;
 

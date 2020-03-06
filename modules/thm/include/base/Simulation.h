@@ -365,7 +365,7 @@ protected:
   /// True if checking jacobian
   bool _check_jacobian;
 
-  /// Additional sparisity pattern that needs to be added into the Jacobian matrix
+  /// Additional sparsity pattern that needs to be added into the Jacobian matrix
   std::map<dof_id_type, std::vector<dof_id_type>> _sparsity_elem_augmentation;
 
 public:

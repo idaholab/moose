@@ -66,6 +66,8 @@ public:
 
   /**
    * Get boundary info associated with the heat structure side
+   *
+   * @return The list of tuples (element id, local side id) that is associated with side `side`
    */
   const std::vector<std::tuple<dof_id_type, unsigned short int>> &
   getBoundaryInfo(const HeatStructureBase::SideType & side) const;
