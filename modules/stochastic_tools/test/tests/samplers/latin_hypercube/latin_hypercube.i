@@ -7,12 +7,12 @@
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2004
     upper_bound = 2010
   []
   [normal]
-    type = NormalDistribution
+    type = Normal
     mean = 1980
     standard_deviation = 3
   []

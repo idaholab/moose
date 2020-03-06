@@ -9,7 +9,11 @@
 
 #include "TruncatedNormalDistribution.h"
 
-registerMooseObject("StochasticToolsApp", TruncatedNormalDistribution);
+registerMooseObjectAliased("StochasticToolsApp", TruncatedNormalDistribution, "TruncatedNormal");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            TruncatedNormalDistribution,
+                            "07/01/2020 00:00",
+                            TruncatedNormal);
 
 defineLegacyParams(TruncatedNormalDistribution);
 

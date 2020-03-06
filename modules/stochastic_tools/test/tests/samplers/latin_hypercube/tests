@@ -1,5 +1,5 @@
 [Tests]
-  design = LatinHypercube.md
+  design = LatinHypercubeSampler.md
   issues = '#14830'
 
   [sample]

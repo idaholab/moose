@@ -11,7 +11,8 @@
 #include "math.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("StochasticToolsApp", WeibullDistribution);
+registerMooseObjectAliased("StochasticToolsApp", WeibullDistribution, "Weibull");
+registerMooseObjectReplaced("StochasticToolsApp", WeibullDistribution, "07/01/2020 00:00", Weibull);
 
 defineLegacyParams(WeibullDistribution);
 

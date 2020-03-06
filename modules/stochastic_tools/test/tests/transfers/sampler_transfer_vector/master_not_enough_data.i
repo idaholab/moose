@@ -12,7 +12,7 @@
 
 [Distributions]
   [uniform_prop_a]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1980
     upper_bound = 1981
   []

@@ -12,7 +12,7 @@
 
 [Distributions]
   [weibull]
-    type = WeibullDistribution
+    type = Weibull
     shape = 5
     scale = 1
     location = 0

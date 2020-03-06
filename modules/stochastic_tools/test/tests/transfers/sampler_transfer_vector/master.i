@@ -12,22 +12,22 @@
 
 [Distributions]
   [uniform_left]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1
     upper_bound = 2
   []
   [uniform_right]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 10
     upper_bound = 20
   []
   [uniform_prop_a]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1980
     upper_bound = 1981
   []
   [uniform_prop_b]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1949
     upper_bound = 1950
   []

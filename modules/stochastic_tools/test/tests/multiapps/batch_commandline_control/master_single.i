@@ -14,7 +14,7 @@
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 5
     upper_bound = 10
   []

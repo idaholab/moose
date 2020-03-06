@@ -7,17 +7,17 @@
 
 [Distributions]
   [d0]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 0
     upper_bound = 1
   []
   [d1]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 10
     upper_bound = 11
   []
   [d2]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 100
     upper_bound = 101
   []
