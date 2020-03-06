@@ -53,8 +53,8 @@ public:
 
   /// Evaluate mean: \mu = E[u]
   virtual Real computeMean() const { return _coeff[0]; };
-  /// Evaluate variance: \sigma = sqrt(E[(u-\mu)^2])
-  virtual Real computeSTD() const;
+  /// Evaluate standard deviation: \sigma = sqrt(E[(u-\mu)^2])
+  virtual Real computeStandardDeviation() const;
   /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
   Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 

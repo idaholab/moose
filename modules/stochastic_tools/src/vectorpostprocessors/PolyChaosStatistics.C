@@ -37,7 +37,7 @@ PolyChaosStatistics::PolyChaosStatistics(const InputParameters & parameters)
   for (const auto & item : _type)
     _stat_type.push_back(item.id());
 
-  _stats.resize(_stat_type.size());
+  _stats.reserve(_stat_type.size());
 }
 
 void
@@ -46,25 +46,24 @@ PolyChaosStatistics::execute()
   // Compute standard deviation
   Real sig = 0.0;
   if (_type.contains("stddev") || _type.contains("skewness") || _type.contains("kurtosis"))
-    sig = _pc_uo.computeSTD();
+    sig = _pc_uo.computeStandardDeviation();
 
-  for (unsigned int t = 0; t < _type.size(); ++t)
+  for (const auto & item : _type)
   {
+    Real val = 0.0;
     // Mean
-    if (_type.get(t) == 1 && processor_id() == 0)
-      _stats[t] = _pc_uo.computeMean();
-
+    if (item == "mean" && processor_id() == 0)
+      val = _pc_uo.computeMean();
     // Standard Deviation
-    if (_type.get(t) == 2 && processor_id() == 0)
-      _stats[t] = sig;
-
+    else if (item == "stddev" && processor_id() == 0)
+      val = sig;
     // Skewness
-    if (_type.get(t) == 3)
-      _stats[t] = _pc_uo.powerExpectation(3, true) / (sig * sig * sig);
-
+    else if (item == "skewness")
+      val = _pc_uo.powerExpectation(3, true) / (sig * sig * sig);
     // Kurtosis
-    if (_type.get(t) == 4)
-      _stats[t] = _pc_uo.powerExpectation(4, true) / (sig * sig * sig * sig);
+    else if (item == "kurtosis")
+      val = _pc_uo.powerExpectation(4, true) / (sig * sig * sig * sig);
+    _stats.push_back(val);
   }
 }
 

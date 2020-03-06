@@ -134,7 +134,7 @@ PolynomialChaos::evaluate(const std::vector<Real> & x) const
 }
 
 Real
-PolynomialChaos::computeSTD() const
+PolynomialChaos::computeStandardDeviation() const
 {
   Real var = 0;
   for (unsigned int i = 1; i < _ncoeff; ++i)
@@ -152,6 +152,7 @@ Real
 PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) const
 {
   std::vector<StochasticTools::WeightedCartesianProduct<unsigned int, Real>> order;
+  order.reserve(_ndim);
   for (unsigned int d = 0; d < _ndim; ++d)
   {
     std::vector<std::vector<unsigned int>> order_1d(n);
