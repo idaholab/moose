@@ -29,14 +29,6 @@ public:
 
   Real getQuadratureWeight(dof_id_type row_index) const;
 
-  /**
-   * Function that performs tensor produces of all inputted points and weights
-   */
-  static void tensorGrid(const std::vector<std::vector<Real>> & points_1D,
-                         const std::vector<std::vector<Real>> & weights_1D,
-                         DenseMatrix<Real> & points,
-                         DenseVector<Real> & weights);
-
 protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
