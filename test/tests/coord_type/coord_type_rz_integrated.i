@@ -5,6 +5,7 @@
   ny = 10
   ymax = 1
   dim = 2
+  allow_renumbering = false
 []
 
 [Problem]
