@@ -1,0 +1,108 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+
+#include "Units.h"
+#include <cmath>
+#include <sstream>
+
+TEST(Units, parse)
+{
+  std::vector<std::pair<std::string, std::string>> pairs = {
+      {"m^3", "m^3"},
+      {"N*m", "m^2*kg*s^-2"},
+      {"mm", "0.001 m"},
+      {"kg/(m*s^2)", "m^-1*kg*s^-2"},
+      {"kg/(m*s)^2", "m^-2*kg*s^-2"},
+      {"eV/at", "1.60218e-19 m^2*kg*s^-2*at^-1"},
+      {"J/mol", "1.66054e-24 m^2*kg*s^-2*at^-1"},
+      {"m/s*s/m", "1"},
+      {"km/s*s/m", "1000"},
+      {"(km/s)*(s/m)", "1000"},
+      {"GPa", "1e+09 m^-1*kg*s^-2"},
+      {"psi", "6894.76 m^-1*kg*s^-2"},
+      {"kbar", "1e+08 m^-1*kg*s^-2"}};
+
+  for (auto & p : pairs)
+  {
+    auto u = MooseUnits(p.first);
+    std::stringstream s;
+    s << u;
+    EXPECT_EQ(s.str(), p.second);
+  }
+}
+
+TEST(Units, conformsTo)
+{
+  std::vector<std::pair<std::string, std::string>> pairs = {
+      {"erg/in", "J/nm"}, {"erg", "eV"}, {"ft", "in"}, {"N/m^2", "bar"}, {"eV/at", "J/mol"}};
+
+  for (auto & u : pairs)
+    EXPECT_TRUE(MooseUnits(u.first).conformsTo(MooseUnits(u.second)))
+        << "units " << u.first << " and " << u.second << " should conform!";
+}
+
+TEST(Units, isBase)
+{
+  std::vector<std::string> lengths = {"m", "mum", "mm", "cm", "ft", "km", "lbf/psi/m", "N/kg*s^2"};
+  for (auto & l : lengths)
+  {
+    auto u = MooseUnits(l);
+    EXPECT_TRUE(u.isLength()) << l << " = " << u << " should be a length!";
+    EXPECT_FALSE(u.isTime()) << l << " = " << u << " should not be a time!";
+    EXPECT_FALSE(u.isMass()) << l << " = " << u << " should not be a mass!";
+    EXPECT_FALSE(u.isCurrent()) << l << " = " << u << " should not be a current!";
+    EXPECT_FALSE(u.isTemperature()) << l << " = " << u << " should not be a temperature!";
+  }
+
+  std::vector<std::string> times = {"s", "ms", "Gs", "C/A"};
+  for (auto & t : times)
+  {
+    auto u = MooseUnits(t);
+    EXPECT_TRUE(u.isTime()) << t << " = " << u << " should be a time!";
+    EXPECT_FALSE(u.isLength()) << t << " = " << u << " should not be a length!";
+    EXPECT_FALSE(u.isMass()) << t << " = " << u << " should not be a mass!";
+    EXPECT_FALSE(u.isCurrent()) << t << " = " << u << " should not be a current!";
+    EXPECT_FALSE(u.isTemperature()) << t << " = " << u << " should not be a temperature!";
+  }
+
+  std::vector<std::string> masses = {"g", "kg", "N/m*s^2", "atm*in*s^2", "meV/m^2*s^2"};
+  for (auto & m : masses)
+  {
+    auto u = MooseUnits(m);
+    EXPECT_TRUE(u.isMass()) << m << " = " << u << " should be a mass!";
+    EXPECT_FALSE(u.isTime()) << m << " = " << u << " should not be a time!";
+    EXPECT_FALSE(u.isCurrent()) << m << " = " << u << " should not be a current!";
+    EXPECT_FALSE(u.isLength()) << m << " = " << u << " should not be a length!";
+    EXPECT_FALSE(u.isTemperature()) << m << " = " << u << " should not be a temperature!";
+  }
+
+  std::vector<std::string> currents = {"A", "W*S/A", "mA", "nA"};
+  for (auto & c : currents)
+  {
+    auto u = MooseUnits(c);
+    EXPECT_TRUE(u.isCurrent()) << c << " = " << u << " should be a current!";
+    EXPECT_FALSE(u.isTime()) << c << " = " << u << " should not be a time!";
+    EXPECT_FALSE(u.isMass()) << c << " = " << u << " should not be a mass!";
+    EXPECT_FALSE(u.isLength()) << c << " = " << u << " should not be a length!";
+    EXPECT_FALSE(u.isTemperature()) << c << " = " << u << " should not be a temperature!";
+  }
+
+  std::vector<std::string> temperatures = {"K", "mK", "K^3/K^2", "(K*K^4)/(K*K)^2"};
+  for (auto & T : temperatures)
+  {
+    auto u = MooseUnits(T);
+    EXPECT_TRUE(u.isTemperature()) << T << " = " << u << " should be a temperature!";
+    EXPECT_FALSE(u.isTime()) << T << " = " << u << " should not be a time!";
+    EXPECT_FALSE(u.isMass()) << T << " = " << u << " should not be a mass!";
+    EXPECT_FALSE(u.isLength()) << T << " = " << u << " should not be a length!";
+    EXPECT_FALSE(u.isCurrent()) << T << " = " << u << " should not be a current!";
+  }
+}
