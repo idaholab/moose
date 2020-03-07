@@ -4,7 +4,7 @@ These sessions will offer participants the oppurtunity to gain hands-on experien
 
 - Course title: "MOOSE Workshop"
 - Date: Mon-Tues, March 30-31 2020, 8:30 - 5:00
-- Location: Libery University, Lynchburg, VA (Onsite location TBA)
+- Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
   - Dr. Andrew Slaughter
@@ -13,7 +13,7 @@ These sessions will offer participants the oppurtunity to gain hands-on experien
 
 - Course title: "BISON Workshop"
 - Date: Wed, April 1, 2020, 8:30 - 5:00
-- Location: Libery University, Lynchburg, VA (Onsite location TBA)
+- Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
   - Dr. Stephen Novascone
@@ -21,7 +21,7 @@ These sessions will offer participants the oppurtunity to gain hands-on experien
 
 - Course title: "Griffin Workshop"
 - Date: Wed, April 1, 2020, 8:30 - 5:00
-- Location: Libery University, Lynchburg, VA (Onsite location TBA)
+- Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
   - Dr. Javier Ortensi
