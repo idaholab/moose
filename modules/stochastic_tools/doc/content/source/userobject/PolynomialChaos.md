@@ -1,6 +1,6 @@
 # PolynomialChaos
 
-!syntax description /UserObjects/PolynomialChaos
+!syntax description /Surrogates/PolynomialChaos
 
 ## Overview
 
@@ -163,11 +163,10 @@ It is important that the order in the quadrature sampler input matches the order
 
 All this information is ready to be sent to the PolynomialChaos user object:
 
-!listing poly_chaos/master_2d_quad.i block=UserObjects
+!listing poly_chaos/master_2d_quad.i block=Surrogates
 
+!syntax parameters /Surrogates/PolynomialChaos
 
-!syntax parameters /UserObjects/PolynomialChaos
+!syntax inputs /Surrogates/PolynomialChaos
 
-!syntax inputs /UserObjects/PolynomialChaos
-
-!syntax children /UserObjects/PolynomialChaos
+!syntax children /Surrogates/PolynomialChaos
