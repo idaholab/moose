@@ -23,7 +23,6 @@ const std::map<std::string, Real> MooseUnits::_si_prefix = {{"E", 1e18},
                                                             {"c", 1e-2},
                                                             {"m", 1e-3},
                                                             {"mu", 1e-6},
-                                                            {"μ", 1e-6},
                                                             {"n", 1e-9},
                                                             {"p", 1e-12},
                                                             {"f", 1e-15},
@@ -313,7 +312,8 @@ MooseUnits::parse(const std::string & unit_string)
     {
       // consume unit symbol
       std::string unit;
-      while (it != end && ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z'))) // no µ :(
+      while (it != end &&
+             ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z'))) // no unicode :(
         unit += *(it++);
 
       // parse the unit and a potential SI prefix
