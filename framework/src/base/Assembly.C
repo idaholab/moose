@@ -3331,6 +3331,64 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
   addCachedJacobian();
 }
 
+Real
+Assembly::elementVolume(const Elem * elem) const
+{
+  FEType fe_type(elem->default_order(), LAGRANGE);
+  std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+
+  // references to the quadrature points and weights
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<Point> & q_points = fe->get_xyz();
+
+  // The default quadrature rule should integrate the mass matrix,
+  // thus it should be plenty to compute the volume
+  QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(elem);
+
+  // perform a sanity check to ensure that size of quad rule and size of q_points is
+  // identical
+  mooseAssert(qrule.n_points() == q_points.size(),
+              "The number of points in the quadrature rule doesn't match the number of passed-in "
+              "points in Assembly::setCoordinateTransformation");
+
+  // information about the coordinate system on this block & if RZ which axis is
+  // the rotation axis
+  Moose::CoordinateSystemType coord_type = _subproblem.getCoordSystem(elem->subdomain_id());
+  unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
+
+  // compute the coordinate transformation
+  std::vector<Real> coord(qrule.n_points());
+  switch (coord_type)
+  {
+    case Moose::COORD_XYZ:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 1.;
+      break;
+
+    case Moose::COORD_RZ:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+      break;
+
+    case Moose::COORD_RSPHERICAL:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+      break;
+
+    default:
+      mooseError("Unknown coordinate system");
+      break;
+  }
+
+  Real vol = 0;
+  for (unsigned int qp = 0; qp < qrule.n_points(); ++qp)
+    vol += JxW[qp] * coord[qp];
+
+  return vol;
+}
+
 void
 Assembly::addCachedJacobian()
 {

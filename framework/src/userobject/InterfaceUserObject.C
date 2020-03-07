@@ -42,6 +42,7 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
     _coord(_assembly.coordTransformation()),
     _normals(_assembly.normals()),
     _current_elem(_assembly.elem()),
+    _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
@@ -57,5 +58,5 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
 const Real &
 InterfaceUserObject::getNeighborElemVolume()
 {
-  return _assembly.neighborVolume();
+  return _current_neighbor_volume;
 }

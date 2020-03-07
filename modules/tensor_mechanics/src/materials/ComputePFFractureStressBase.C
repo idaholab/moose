@@ -25,6 +25,8 @@ ComputePFFractureStressBase::validParams()
   params.addParam<MaterialPropertyName>(
       "D_name", "degradation", "Name of material property for energetic degradation function.");
   params.addParam<MaterialPropertyName>(
+      "I_name", "indicator", "Name of material property for damage indicator function.");
+  params.addParam<MaterialPropertyName>(
       "F_name",
       "local_fracture_energy",
       "Name of material property for local fracture energy function.");
@@ -38,6 +40,7 @@ ComputePFFractureStressBase::ComputePFFractureStressBase(const InputParameters &
     _c(coupledValue("c")),
     _l(getMaterialProperty<Real>("l")),
     _gc(getMaterialProperty<Real>("gc_prop")),
+    _pressure(getDefaultMaterialProperty<Real>("fracture_pressure")),
     _use_current_hist(getParam<bool>("use_current_history_variable")),
     _H(declareProperty<Real>("hist")),
     _H_old(getMaterialPropertyOld<Real>("hist")),
@@ -53,7 +56,11 @@ ComputePFFractureStressBase::ComputePFFractureStressBase(const InputParameters &
     _D(getMaterialProperty<Real>("D_name")),
     _dDdc(getMaterialPropertyDerivative<Real>("D_name", getVar("c", 0)->name())),
     _d2Dd2c(getMaterialPropertyDerivative<Real>(
-        "D_name", getVar("c", 0)->name(), getVar("c", 0)->name()))
+        "D_name", getVar("c", 0)->name(), getVar("c", 0)->name())),
+    _I(getDefaultMaterialProperty<Real>("I_name")),
+    _dIdc(getMaterialPropertyDerivative<Real>("I_name", getVar("c", 0)->name())),
+    _d2Id2c(getMaterialPropertyDerivative<Real>(
+        "I_name", getVar("c", 0)->name(), getVar("c", 0)->name()))
 {
 }
 

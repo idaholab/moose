@@ -1,16 +1,33 @@
+In conjunction with Liberty University in Lynchburg, VA, we will  we will be offering a training course on the MOOSE framework along with BISON (fuels performance) and Griffin (Neutron Transport and Depletion). The MOOSE workshop will be open to all participants who register. The BISON and Griffin workshops will be open for registered participants who have a license or are in the process of obtaining a license through the INL.
 
-In conjunction with the upcoming TMS 2020 Annual Meeting in San Diego, we will be offering a training course on phase-field modeling using the MOOSE framework. The course will give an overview of the theoretical background of the phase-field method, how it is implemented in the MOOSE framework, and how other physics can be coupled to phase-field models to predict microstructural evolution and properties. There will be two tutorial sessions where participants will gain hands-on experience working through example problems. (For the hands-on portion, participants should bring their own laptops to work on.)
+These sessions will offer participants the oppurtunity to gain hands-on experience working through example problems. Participants are encouraged to bring their own laptops for these sessions.
 
-
-
-- Course title: "Modeling the Coevolution of Microstructure and Properties using the MOOSE Framework"
-- Date: Sunday, February 23, 2020, 8:15 - 5:00
-- Location: San Diego, CA
+- Course title: "MOOSE Workshop"
+- Date: Mon-Tues, March 30-31 2020, 8:30 - 5:00
+- Location: Libery University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
-  - Larry Aagesen (Idaho National Laboratory)
-  - Andrea Jokisaari (Idaho National Laboratory)
-  - Daniel Schwen (Idaho National Laboratory)
-  - Michael Tonks (University of Florida)
+  - Dr. Andrew Slaughter
+  - Dr. Cody Permann
+  - Dr. Richard Martineau
 
-For more information, including how to register and costs, please see: [Modeling the Coevolution of Microstructure and Properties using the MOOSE Framework](https://www.tms.org/TMS2020/Professional_Development/Workshops_and_Courses/Modeling_the_Coevolution_MOOSE_Framework/TMS2020/pd/MOOSE_Framework.aspx?hkey=872ab7c9-81b9-417a-9f0f-de567ebf263d) or click on the Professional Development tab on the TMS 2020 conference home page.
+- Course title: "BISON Workshop"
+- Date: Wed, April 1, 2020, 8:30 - 5:00
+- Location: Libery University, Lynchburg, VA (Onsite location TBA)
+- Instructors:
+
+  - Dr. Stephen Novascone
+  - Dr. Albert Casagranda
+
+- Course title: "Griffin Workshop"
+- Date: Wed, April 1, 2020, 8:30 - 5:00
+- Location: Libery University, Lynchburg, VA (Onsite location TBA)
+- Instructors:
+
+  - Dr. Javier Ortensi
+  - Dr. Jackson Harter
+  - Dr. Mark DeHart
+
+On site technician - Jason Miller
+
+To register for this workshop, please submit your information here: [Registration Form](https://docs.google.com/forms/d/e/1FAIpQLSeI9roXU10Lktt8D-7QWRHjTyzO5JaSU2JaabMhAd1FP9YKGA/viewform?usp=sf_link)

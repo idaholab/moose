@@ -31,6 +31,9 @@ AxisymmetricCenterlineAverageValue::AxisymmetricCenterlineAverageValue(
 {
 }
 
+// NOTE: We do not account for the coordinate system transformation here
+// (using _coord) because we want to average a variable over the centerline
+// of a cylinder. If we weight by _coord, we get 0 / 0.
 Real
 AxisymmetricCenterlineAverageValue::volume()
 {

@@ -38,9 +38,7 @@ VolumeWeightedWeibull::VolumeWeightedWeibull(const InputParameters & parameters)
 Real
 VolumeWeightedWeibull::value(const Point & /*p*/)
 {
-  const Real & element_volume = _current_elem->volume();
-
-  return _median *
-         std::pow(_reference_volume * std::log(generateRandom()) / (element_volume * std::log(0.5)),
-                  1.0 / _weibull_modulus);
+  return _median * std::pow(_reference_volume * std::log(generateRandom()) /
+                                (_current_elem_volume * std::log(0.5)),
+                            1.0 / _weibull_modulus);
 }

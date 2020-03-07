@@ -130,6 +130,9 @@ protected:
   /// The neighboring element
   const Elem * const & _neighbor_elem;
 
+  /// The neighboring element volume
+  const Real & _neighbor_elem_volume;
+
   /// Current side
   const unsigned int & _current_side;
 

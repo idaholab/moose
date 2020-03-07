@@ -20,7 +20,7 @@
 class PorousFlowBrineCO2Test : public MooseObjectUnitTest
 {
 public:
-  PorousFlowBrineCO2Test() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  PorousFlowBrineCO2Test() : MooseObjectUnitTest("PorousFlowApp") { buildObjects(); }
 
 protected:
   void buildObjects()

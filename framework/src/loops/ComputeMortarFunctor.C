@@ -75,6 +75,9 @@ ComputeMortarFunctor<compute_stage>::operator()()
     // contribute to the mortar segment integrals, but we don't
     // want to do reinit() on them or there will be a negative
     // Jacobian error.
+    // NOTE: calling volume is fine here because elem_volume is only
+    // used to check if it is very, very small. Distinction between
+    // coordinates systems do not matter.
     Real elem_volume = msm_elem->volume();
 
     if (elem_volume < TOLERANCE)

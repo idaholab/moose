@@ -193,6 +193,8 @@ public:
 
       // Build the side so we can compute its volume
       auto side_elem = elem->build_side_ptr(side);
+      // NOTE: we do not want to account for different coordinate systems here, so
+      // using volume from libmesh elem is fine here
       auto volume = side_elem->volume();
       _local_partition_surface_area += volume;
 
