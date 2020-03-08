@@ -1,7 +1,5 @@
 # The chemical database
 
-Author: Andy Wilkins
-
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
 The `geochemistry` module works with chemical databases in the EQ3/6 format.  This page describes the EQ3/6 format, using a database file downloaded from the geochemist workbench site.  See the "Thermo Datasets" chapter of [!cite](gwb_reference) and [https://academy.gwb.com](https://academy.gwb.com)
@@ -33,7 +31,7 @@ All equilibrium coefficients, activity coefficients, etc, are evaluated at a set
        150.0000    200.0000    250.0000    300.0000
 ```
 
-If temperature is not one of these values, a fourth-order polynomial fit to the data is used.
+If a numerical simulation is performed at a temperature that is not one of these 8 values, a fourth-order polynomial fit to the data is used.
 
 ## Steam saturation curve
 
@@ -93,7 +91,7 @@ The temperature dependence of the parameters $a$, $b$, $c$ and $d$ that define t
          0.0000      0.0000      0.0000      0.0000
 ```
 
-The formulae for neutral species is given in the [activity coefficients](activity_coefficients.md) page, and the special keyword $\mathring{a}=-0.5$ acts as a flag to the solver to use this instead of the Debye-Hucke formula (for instance, see the basis species B(OH)3).  See Section 3.1.4 of [!cite](gwb_reference).
+The formulae for neutral species is given in the [activity coefficients](activity_coefficients.md) page, and the special keyword $\mathring{a}=-0.5$ acts as a flag to the solver to use this instead of the Debye-Hucke formula (for instance, see the basis species B(OH)3, below).  See Section 3.1.4 of [!cite](gwb_reference).
 
 ## Water activity
 
@@ -147,13 +145,23 @@ Ag+
      1 elements in species
         1.000 Ag      
 ...
+B(OH)3
+     charge=  0      ion size=  -.5 A      mole wt.=   61.8329 g
+     3 elements in species
+        1.000 B               3.000 H               3.000 O       
+...
 -end-
 ```
 
 In these entries:
 
 - The first line defines the name (H2O, Ag+, etc)
-- The second line provides the charge, $z$, and ion size, $\mathring{a}$ (both used in computing the [activity](activity_coefficients.md)) and the molecular weight.
+- The second line provides the charge, $z$, and ion size, $\mathring{a}$ (both used in computing the [activity](activity_coefficients.md)) and the molecular weight.  For neutral species, the [activity](activity_coefficients.md) is calculated (see Section 3.1.4 of [!cite](gwb_reference)):
+
+  - If `ion size=0` and the species is `H2O`, the formula for the activity of water is used
+  - If `ion size=0` and the species is not `H2O`, the activity is set to 1.
+  - If `ion size=-0.5A` the activity is calculated using the CO2 coefficients
+  - If `ion size<=-1A` the formula $a=\log_{10}\dot{B}I$ is used.
 - The remaining data provides the elemental decomposition.
 
 ## Redox pairs
@@ -266,7 +274,7 @@ Acanthite                          type= sulfide
 In these entries:
 
 - The first line defines the name ((BaO)2^(SiO2)3(c), Acanthite, etc)
-- The "type" and "formula" are optional, and I'm not sure what they're used for
+- The "type" and "formula" are optional, and are not used in the `geochemistry` module
 - The mole volume and mole weight are quantified (the activity for each mineral is unity)
 - The remaining data provides the equilibrium reaction (in terms of basis species and redox couples) along with its temperature-dependent equilibrium constant.
 
@@ -294,7 +302,7 @@ In these blocks:
 
 - The first line defines the name (CH4(g), etc)
 - The "chi" line defines the [Spycher-Reed coefficients](fugacity.md)
-- The "Pcrit" line is used to evaluate Twonopoulos and Peng-Robinson pressure modles, and are not used in the `geochemistry` module
+- The "Pcrit" line is used to evaluate Tsonopoulos and Peng-Robinson pressure models, and are not used in the `geochemistry` module
 - The remaining data define the equilibrium reaction and its constant.
 
 !bibtex bibliography

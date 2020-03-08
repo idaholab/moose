@@ -1,7 +1,5 @@
 # Nomenclature
 
-Author: Andy Wilkins
-
 ## Terminology
 
 ### Species
@@ -23,8 +21,9 @@ A linearly-independent complete set of components: every other chemical in the s
 A measure of the amount of a substance.
 
 \begin{equation}
-\mathrm{number\ of\ moles} = \frac{\mathrm{number\ of\ particles\ (molecules,\ atoms,\ ions,\ etc)}}{\mathcal{N}_{A}}
+\mathrm{number\ of\ moles} = \frac{\mathrm{number\ of\ particles\ (molecules,\ atoms,\ ions,\ etc)}}{\mathcal{N}_{A}} \ ,
 \end{equation}
+where $\mathcal{N}_{A}$ is Avogadro's number.
 
 ### Mole fraction
 

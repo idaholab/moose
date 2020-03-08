@@ -1,7 +1,5 @@
 # Equilibrium equations and solution method
 
-Author: Andy Wilkins
-
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
 This page follows [!cite](bethke_2007).

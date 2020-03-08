@@ -1,9 +1,7 @@
 # Activity coefficients
 
-Author: Andy Wilkins
-
 !alert note
-Only the Debye-Huckel B-dot model along with the formulae below for neutral species and water are coded into the `geochemistry` module
+Only the Debye-Huckel B-dot model along with the formulae below for neutral species and water are coded into the `geochemistry` module.  The virial Pitzer/HMW models have not yet been included.
 
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
@@ -11,7 +9,7 @@ The material below is taken largely from Chapter 8 of [!cite](bethke_2007).
 
 Recall that the activity, $a$, of a species is defined in terms of the chemical potential, $\mu$
 \begin{equation}
-\mu = mu^{0} + RT \log a \ .
+\mu = \mu^{0} + RT \log a \ .
 \end{equation}
 For minerals in mineralisation reactions, $a=1$, but for species in equilibrium reactions, the activity is a dimensionless measure of effective concentration of a constituent in a solution
 \begin{equation}
@@ -104,11 +102,11 @@ Here (Eqn(8.4) of [!cite](bethke_2007))
 \begin{equation}
 \log_{10}\gamma = -A z^{2} \left( \frac{\sqrt{I}}{1 + \sqrt{I}} - 0.3 I \right)
 \end{equation}
-This is valid for equilibrium solutions at 25$^{\circ}$C and up to ionic strengths of about 0.5 molal.  This will not be coded into the `geochemistry` module.
+This is valid for equilibrium solutions at 25$^{\circ}$C and up to ionic strengths of about 0.5 molal.  This isn't currently coded into the `geochemistry` module.
 
 ## Virial (Pitzer, HMW) models
 
-Section 8.2 and Appendix 2 of [!cite](bethke_2007) demonstrate how to compute activity coefficients using this technique.  The method is valid up to high concentrations, but unfortunately does not (currently) treat components such as SiO$_{2}$ and Al$^{3+}$ and temperatures other than 25$^{\circ}$C.  It will therefore not be coded into the `geochemistry` module.
+Section 8.2 and Appendix 2 of [!cite](bethke_2007) demonstrate how to compute activity coefficients using this technique.  The method is valid up to high concentrations, but unfortunately does not (currently) treat components such as SiO$_{2}$ and Al$^{3+}$ and temperatures other than 25$^{\circ}$C.  It has not yet been coded into the `geochemistry` module.
 
 
 

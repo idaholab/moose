@@ -1,10 +1,8 @@
 # The chemical basis
 
-Author: Andy Wilkins
-
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
-Choosing the "basis" of primary species is the first stage in a geochemical simulation.  Throughout this page we use the standard geochemical notation in which *the subscript gives meaning to the quantity*.  For instance, $A_{i}$ is a primary species, while $A_{l}$ is a mineral.  The "$i$" and "$l$" have given meaning to the $A$.
+Choosing the "basis" of primary species is the first stage in a geochemical simulation.  Throughout this page we use the standard geochemical notation, following [!cite](bethke_2007), in which *the subscript gives meaning to the quantity*.  For instance, $A_{i}$ is a primary species, while $A_{l}$ is a mineral.  The "$i$" and "$l$" have given meaning to the $A$.
 
 ## Default basis
 
@@ -77,15 +75,5 @@ The above models of sorption do not account for the electrical state of the poro
 (Now there are multiple $A_{p}$: one for each surface complex.)
 
 Reactions to form each surface complex (i.e. species made out of the basis that form on the porous-skeleton's surface) are written, and the mass-action involves a surface potential, which is supplied by the user.
-
-
-
-
-
-
-
-
-
-
 
 !bibtex bibliography

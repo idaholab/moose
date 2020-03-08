@@ -1,7 +1,5 @@
 # Transport
 
-Author: Andy Wilkins
-
 Only rudimentary transport is available as part of the `geochemistry` module.  Coupling with the `PorousFlow` module allows users to access more advanced features such as:
 
 - pressure and temperature that tightly couple with fluid flows, instead of being specified by uncoupled dynamics
@@ -21,11 +19,11 @@ Define the concentration, $C$ of a component (water, basis aqueous species, seco
 \begin{equation}
 C = \frac{M}{V_{\mathrm{solution}}} \ ,
 \end{equation}
-where $V_{\mathrm{solution}}$ \[m$^{3}$\] is the total volume of the aqueous solution.  Hence the units of $C$ are mol.m$^{-3}$.  Now introduce the porous skeleton.  The aqueous solution inhabits its void space.  Introduce the porosity,
+where $V_{\mathrm{solution}}$ \[m$^{3}$\] is the total volume of the aqueous solution.  Hence the units of $C$ are mol.m$^{-3}$.  Now introduce the porous skeleton.  The aqueous solution inhabits its void space.  Introduce the porosity \[dimensionless\],
 \begin{equation}
 \phi = \frac{V_{\mathrm{void}}}{V_{\mathrm{solid}} + V_{\mathrm{void}}} = \frac{V_{\mathrm{void}}}{V} \ .
 \end{equation}
-Here, $V_{\mathrm{solid}}$ is the volume of the rock grains of the porous skeleton: it is the volume of the porous skeleton if it were crushed so that it contained no voids.  $V$ is a spatial volume containing the porous skeleton.  Hence, the quantity
+Here, $V_{\mathrm{solid}}$ \[m$^{3}$\] is the volume of the rock grains of the porous skeleton: it is the volume of the porous skeleton if it were crushed so that it contained no voids.  $V$ is a spatial volume containing the porous skeleton.  Hence, the quantity
 \begin{equation}
 \int_{V} \phi C \ ,
 \end{equation}
@@ -78,7 +76,7 @@ In these expressions:
 
 - $C_{w}$ \[mol.m$^{-3}$\] is concentration of water per volume of aqueous solution; $C_{i}$ is concentration of basis aqueous species $A_{i}$ per volume of aqueous solution, etc.
 - $C_{\bar{k}}$ \[mol.m$^{-3}$\] is concentration of kinetic component $A_{\bar{k}}$ per volume of aqueous solution.
-- $\phi$ is constant, so could be eliminated entirely, but we retain it for comprison with the case with transport.
+- $\phi$ \[dimensionless\] is constant, so could be eliminated entirely, but we retain it for comprison with the case with transport.
 - $R_{\bar{k}}$ \[mol.s$^{-1}$.m$^{-3}$\] is the kinetic rate, per volume of aqueous solution, for kinetic species $A_{\bar{k}}$.
 - $c_{w}$ \[kg.m$^{-3}$\] is mass of solute water per volume of aqueous solution.
 - $c_{k}$ \[mol.m$^{-3}$\] is concentration of mineral component $A_{k}$ per volume of aqueous solution.
@@ -138,7 +136,14 @@ The continuity equation for each component is therefore:
 \end{equation}
 Here:
 
-- $\mathbf{q}$ \[m.s$^{-1}$\] is the Darcy flux vector.  usually $q_{i} = -\frac{k_{ij}}{\mu}(\nabla_{j}P - \rho g_{j})$, where $k_{ij}$ \[m$^{2}$\] is the permeability, $\mu$ is the fluid viscosity, $P$ is its porepressure, $\rho$ is its density, and $g_{j}$ is the acceleration due to gravity.  (In these equations, $i$ and $j$ indicate spatial directions, not primary and secondary species!)  In `geomechanics` $\mathbf{q}$ is assumed to be given by an external agent, which could be a user-defined set of functions, or a field that varies spatially and temporally by solving Darcy's equation in conjunction with the `geomechanics` equations.
+- $\mathbf{q}$ \[m.s$^{-1}$\] is the Darcy flux vector.  In `geomechanics` $\mathbf{q}$ is assumed to be given by an external agent, which could be a user-defined set of functions, or a field that varies spatially and temporally by solving Darcy's equation in conjunction with the `geomechanics` equations.  Usually $q_{i} = -\sum_{j}\frac{k_{ij}}{\mu}(\nabla_{j}P - \rho g_{j})$, where:
+
+  - $k_{ij}$ \[m$^{2}$\] is the permeability;
+  - $\mu$ \[Pa.s\] is the fluid viscosity;
+  - $P$ \[Pa\] is its porepressure;
+  - $\rho$ \[kg.m$^{-3}$\] is its density;
+  - and $g_{j}$ \[m.s$^{-2}$\] is the acceleration due to gravity;
+  - in this equation, $i$ and $j$ indicate spatial directions, not primary and secondary species.
 - $D$ \[m$^{2}$.s$^{-1}$\] is the hydrodynamic dispersion tensor, which is assumed to be given to the `geomechanics` module by an external agent.
 
 !alert note
