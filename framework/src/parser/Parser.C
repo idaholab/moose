@@ -602,7 +602,7 @@ Parser::parse(const std::string & input_filename)
   {
     char abspath[PATH_MAX + 1];
     if (!realpath(input_filename.c_str(), abspath))
-      mooseError("failed to resolve the input file path '", input_filename, "'");
+      mooseError("Failed to resolve input file path '", input_filename, "'.");
     _input_filename = std::string(abspath);
   }
 
