@@ -11,7 +11,7 @@
 
 #include "Material.h"
 
-registerMooseObject("MooseApp", MaterialReaction);
+registerMooseObject("StochasticToolsTestApp", MaterialReaction);
 
 template <>
 InputParameters

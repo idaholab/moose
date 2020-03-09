@@ -82,7 +82,7 @@
   [poly_chaos]
     type = PolynomialChaos
     execute_on = timestep_end
-    order = 20
+    order = 5
     distributions = 'D_dist S_dist'
     training_sampler = sample
     stochastic_results = storage

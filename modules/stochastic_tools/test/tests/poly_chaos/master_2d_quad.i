@@ -26,7 +26,7 @@
 [Samplers]
   [sample]
     type = MonteCarloSampler
-    num_rows = 10000
+    num_rows = 100
     distributions = 'D_dist S_dist'
     execute_on = timestep_end
   []
@@ -34,7 +34,7 @@
     type = QuadratureSampler
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
-    order = 20
+    order = 5
   []
 []
 
@@ -88,7 +88,7 @@
   [poly_chaos]
     type = PolynomialChaos
     execute_on = timestep_end
-    order = 20
+    order = 5
     distributions = 'D_dist S_dist'
     training_sampler = quadrature
     stochastic_results = storage

@@ -153,18 +153,13 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
 {
   std::vector<StochasticTools::WeightedCartesianProduct<unsigned int, Real>> order;
   order.reserve(_ndim);
+  std::vector<std::vector<Real>> c_1d(n, std::vector<Real>(_coeff.begin() + 1, _coeff.end()));
   for (unsigned int d = 0; d < _ndim; ++d)
   {
-    std::vector<std::vector<unsigned int>> order_1d(n);
-    std::vector<std::vector<Real>> c_1d(n);
-    order_1d.reserve(_ncoeff * n);
-    c_1d.reserve(_ncoeff * n);
+    std::vector<std::vector<unsigned int>> order_1d(n, std::vector<unsigned int>(_ncoeff - 1));
     for (unsigned int i = 1; i < _ncoeff; ++i)
       for (unsigned int m = 0; m < n; ++m)
-      {
-        order_1d[m].push_back(_tuple[i][d]);
-        c_1d[m].push_back(_coeff[i]);
-      }
+        order_1d[m][i - 1] = _tuple[i][d];
     order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
   }
 
