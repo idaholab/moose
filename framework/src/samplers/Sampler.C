@@ -56,6 +56,7 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     PerfGraphInterface(this),
+    SamplerInterface(this),
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),

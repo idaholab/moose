@@ -15,6 +15,7 @@
 #include "SetupInterface.h"
 #include "DistributionInterface.h"
 #include "PerfGraphInterface.h"
+#include "SamplerInterface.h"
 
 template <>
 InputParameters validParams<Sampler>();
@@ -42,7 +43,8 @@ InputParameters validParams<Sampler>();
 class Sampler : public MooseObject,
                 public SetupInterface,
                 public DistributionInterface,
-                public PerfGraphInterface
+                public PerfGraphInterface,
+                public SamplerInterface
 {
 public:
   static InputParameters validParams();

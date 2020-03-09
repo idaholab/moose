@@ -59,7 +59,7 @@ SobolStatistics::execute()
   TIME_SECTION(_perf_execute);
 
   StochasticTools::SobolCalculator calc(
-      *this, _sobol_sampler.numInputs(), _sobol_sampler.resample());
+      *this, _sobol_sampler.getNumberOfCols(), _sobol_sampler.resample());
   for (std::size_t i = 0; i < _result_vectors.size(); ++i)
     (*_sobol_stat_vectors[i]) =
         calc.compute(*(_result_vectors[i].first), _result_vectors[i].second);
