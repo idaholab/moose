@@ -10,11 +10,25 @@
   upper_bound = 1
 []
 
-[Samplers/sample]
-  type = SobolSampler
-  num_rows = 10000
-  distributions = 'uniform uniform uniform uniform uniform uniform'
-  execute_on = 'initial'
+[Samplers]
+  [sample]
+    type = MonteCarloSampler
+    distributions = 'uniform uniform uniform uniform uniform uniform'
+    num_rows = 4
+    seed = 2011
+  []
+  [resample]
+    type = MonteCarloSampler
+    distributions = 'uniform uniform uniform uniform uniform uniform'
+    num_rows = 4
+    seed = 2013
+  []
+
+  [sobol]
+    type = SobolSampler
+    sampler_a = sample
+    sampler_b = resample
+  []
 []
 
 [VectorPostprocessors]
@@ -27,7 +41,7 @@
   []
   [sobol]
     type = SobolStatistics
-    sampler = sample
+    sampler = sobol
     results = results
     execute_on = FINAL
   []

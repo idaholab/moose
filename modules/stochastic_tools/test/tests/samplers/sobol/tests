@@ -15,7 +15,7 @@
     [no_resample]
       type = CSVDiff
       input = sobol.i
-      cli_args = 'Samplers/sample/resample=false Outputs/file_base=sobol_no_resample_out'
+      cli_args = 'Samplers/sobol/resample=false Outputs/file_base=sobol_no_resample_out'
       csvdiff = 'sobol_no_resample_out_data_0000.csv'
 
       detail = "without the re-sampling matrix."
