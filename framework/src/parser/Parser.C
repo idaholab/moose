@@ -640,8 +640,8 @@ Parser::parse(const std::string & input_filename)
   exw.registerEvaler("raw", raw);
   exw.registerEvaler("env", env);
   exw.registerEvaler("fparse", fparse_ev);
-  exw.registerEvaler("units", units_ev);
   exw.registerEvaler("replace", repl);
+  exw.registerEvaler("units", units_ev);
   _root->walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);
