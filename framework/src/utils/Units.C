@@ -158,7 +158,7 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND, -2}}}},                          // bar (unit of pressure)
     {"h", {60 * 60, {{MooseUnits::BaseUnit::SECOND, 1}}}},             // day
-    {"d", {60 * 60 * 24, {{MooseUnits::BaseUnit::SECOND, 1}}}},        // day
+    {"day", {60 * 60 * 24, {{MooseUnits::BaseUnit::SECOND, 1}}}},      // day
     {"l", {1e-3, {{MooseUnits::BaseUnit::METER, 3}}}},                 // liter
     {"u", {1.66053906660e-27, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
     {"at", {1, {{MooseUnits::BaseUnit::COUNT, 1}}}}                    // 1 single count (atom)

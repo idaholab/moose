@@ -13,8 +13,23 @@
 #include <cmath>
 #include <sstream>
 
+TEST(Units, si_prefixes)
+{
+  // test every possible combination of units and si prefixes for correct parsing
+  for (const auto & u : MooseUnits::_unit_table)
+  {
+    auto unit = MooseUnits(u.first);
+    for (const auto & p : MooseUnits::_si_prefix)
+    {
+      auto prefixed = MooseUnits(p.first + u.first);
+      EXPECT_DOUBLE_EQ(Real(prefixed / unit), p.second);
+    }
+  }
+}
+
 TEST(Units, parse)
 {
+  // check the parsing and plain text stringification of units
   std::vector<std::pair<std::string, std::string>> pairs = {
       {"m^3", "m^3"},
       {"N*m", "m^2*kg*s^-2"},
@@ -41,6 +56,7 @@ TEST(Units, parse)
 
 TEST(Units, conformsTo)
 {
+  // check the conformsTo function for a few pairs of units
   std::vector<std::pair<std::string, std::string>> pairs = {
       {"erg/in", "J/nm"}, {"erg", "eV"}, {"ft", "in"}, {"N/m^2", "bar"}, {"eV/at", "J/mol"}};
 
@@ -51,6 +67,7 @@ TEST(Units, conformsTo)
 
 TEST(Units, isBase)
 {
+  // check the dimension helpers (and at the same time the parsing of complex units)
   std::vector<std::string> lengths = {"m", "mum", "mm", "cm", "ft", "km", "lbf/psi/m", "N/kg*s^2"};
   for (auto & l : lengths)
   {

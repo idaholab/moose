@@ -24,7 +24,7 @@ The following units are currently supported
 | `Ohm` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}\cdot \text{A}^{-2}$ | Ohm | resistance, impedance, reactance|
 | `atm` | $101325\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Standard atmosphere | pressure |
 | `eV` | $1.60218\cdot10^{-19}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | electron Volt | energy |
-| `erg` | $10^{-7}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | | |
+| `erg` | $10^{-7}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | Erg | energy |
 | `Ang` | $10^{-10}\, \text{m}$ | Angstrom | length |
 | `m` | $\text{m}$ | meter | length |
 | `g` | $0.001\, \text{kg}$ | gram | mass |
@@ -45,7 +45,7 @@ The following units are currently supported
 | `T` | $\text{kg}\cdot \text{s}^{-2}\cdot \text{A}^{-1}$ | Tesla | magnetic flux density |
 | `H` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}\cdot \text{A}^{-2}$ | Henry | inductance |
 | `Ba` | $0.1\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | barye | Pressure |
-| `dyn` | $10^{-5}\, \text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | | |
+| `dyn` | $10^{-5}\, \text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | dyne | force, weight |
 | `ft` | $0.3048\, \text{m}$ | Foot | length |
 | `in` | $0.0254\, \text{m}$ | Inch | length |
 | `lb` | $0.453592\, \text{kg}$ | pound  | mass |
@@ -54,7 +54,7 @@ The following units are currently supported
 | `BTU` | $1055.06\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | ISO 31-4 British thermal unit | heat |
 | `bar` | $10^5\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Bar | pressure, stress |
 | `h` | $3600\, \text{s}$ | hour | time |
-| `d` | $86400\, \text{s}$ | day | time |
+| `day` | $86400\, \text{s}$ | day | time (`d` would create an ambiguity between centi-day and candela)|
 | `l` | $0.001\, \text{m}^{3}$ | liter | volume |
 | `u` | $1.66054\cdot10^{-27}\, \text{kg}^{3}$ | unified atomic mass unit | mass |
 | `at` | $\text{at}$ | atom | single count of substance |
