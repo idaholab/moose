@@ -35,6 +35,7 @@ public:
   ADInertialForceShell(const InputParameters & parameters);
 
 protected:
+
   virtual ADReal computeQpResidual() override;
 
 private:
@@ -129,14 +130,14 @@ private:
    * Forces and moments at the two end nodes of the beam in the initial
    * beam local configuration
    **/
-  std::vector<RealVectorValue> _local_force, _local_moment;
+  std::vector<ADRealVectorValue> _local_force, _local_moment;
 
   /**
    * Forces and moments at the two end nodes of the beam in the global
    * coordinate system
    **/
-  RealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
-  RealVectorValue _global_force_2, _global_force_3, _global_moment_2, _global_moment_3;
+  ADRealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
+  ADRealVectorValue _global_force_2, _global_force_3, _global_moment_2, _global_moment_3;
 
   // AMR
   /// Derivatives of shape functions w.r.t isoparametric coordinates xi
@@ -195,5 +196,4 @@ private:
   const VariableValue & _thickness;
 
   usingTimeKernelMembers;
-
 };
