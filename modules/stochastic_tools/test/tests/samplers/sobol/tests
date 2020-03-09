@@ -3,10 +3,22 @@
   design = 'SobolSampler.md'
 
   [sobol]
-    type = CSVDiff
-    input = sobol.i
-    csvdiff = 'sobol_out_data_0000.csv'
+    requirement = 'The system shall include a SOBOL method for sampling distribution data:'
 
-    requirement = 'The system shall include a SOBOL method for sampling distribution data.'
+    [resample]
+      type = CSVDiff
+      input = sobol.i
+      csvdiff = 'sobol_out_data_0000.csv'
+
+      detail = "with the re-sampling matrix and"
+    []
+    [no_resample]
+      type = CSVDiff
+      input = sobol.i
+      cli_args = 'Samplers/sample/resample=false Outputs/file_base=sobol_no_resample_out'
+      csvdiff = 'sobol_no_resample_out_data_0000.csv'
+
+      detail = "without the re-sampling matrix."
+    []
   []
 []

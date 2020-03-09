@@ -27,12 +27,14 @@ SamplerInterface::SamplerInterface(const MooseObject * moose_object)
 {
 }
 
+template <>
 Sampler &
 SamplerInterface::getSampler(const std::string & name)
 {
-  return _smi_feproblem.getSampler(_smi_params.get<SamplerName>(name), _smi_tid);
+  return _smi_feproblem.getSampler(_smi_params.get<SamplerName>(name));
 }
 
+template <>
 Sampler &
 SamplerInterface::getSamplerByName(const SamplerName & name)
 {

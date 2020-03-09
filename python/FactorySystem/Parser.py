@@ -113,7 +113,7 @@ class Parser:
                             # Otherwise, just do normal assignment
                             params[key] = value
             else:
-                self.error('unused parameter "{}"'.format(child.fullpath), node=child)
+                self.error('{}: unused parameter "{}"'.format(filename, key), node=getpot_node)
 
         # Make sure that all required parameters are supplied
         required_params_missing = params.required_keys() - local_parsed

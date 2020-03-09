@@ -1,0 +1,13 @@
+[Tests]
+  design = SobolStatistics.md
+  issues = '#14784'
+
+  [sobol]
+    type = CSVDiff
+    input = sobol.i
+    csvdiff = sobol_out_sobol_0002.csv
+    allow_test_objects = true
+
+    requirement = "The system shall support the ability to compute first, second, and total-effect Sobol sensitivity indices."
+  []
+[]

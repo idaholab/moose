@@ -47,7 +47,7 @@ public:
   // different modes of parallel operation, without the Transfer objects needing knowledge of the
   // modes.
   //
-  // In practice, the Trasnfer objects are responsible for populating the vector that contains the
+  // In practice, the Transfer objects are responsible for populating the vector that contains the
   // current data from sub-application for this local process. This object then handles the
   // communication and updating of the actual VPP data being mindfull of the
   // "contains_complete_history". An r-value reference is used by this object to take ownership of

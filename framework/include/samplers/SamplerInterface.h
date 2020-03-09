@@ -21,14 +21,20 @@ template <>
 InputParameters validParams<SamplerInterface>();
 
 /**
- * Interface for objects that need to use samplers
+ * Interface for objects that need to use samplers.
  *
- * Inherit from this class at a very low level to make the getSampler method
- * available.
+ * This practically adds two methods for getting Sampler objects:
+ *
+ *  1. Call `getSampler` or `getSamplerByName` without a template parameter and you will get
+ *     a `Sampler` base object (see SamplerInterface.C for the template specialization).
+ *  2. Call `getSampler<MySampler>` or `getSamplerByName<MySampler>` to perform a cast to the
+ *     desired type, as done for UserObjects.
  */
 class SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * @param params The parameters used by the object being instantiated. This
    *        class needs them so it can get the sampler named in the input file,
@@ -37,21 +43,21 @@ public:
    */
   SamplerInterface(const MooseObject * moose_object);
 
-  static InputParameters validParams();
-
   /**
    * Get a sampler with a given name
    * @param name The name of the parameter key of the sampler to retrieve
    * @return The sampler with name associated with the parameter 'name'
    */
-  Sampler & getSampler(const std::string & name);
+  template <typename T = Sampler>
+  T & getSampler(const std::string & name);
 
   /**
    * Get a sampler with a given name
    * @param name The name of the sampler to retrieve
    * @return The sampler with name 'name'
    */
-  Sampler & getSamplerByName(const SamplerName & name);
+  template <typename T = Sampler>
+  T & getSamplerByName(const SamplerName & name);
 
 private:
   /// Parameters of the object with this interface
@@ -63,3 +69,21 @@ private:
   /// Thread ID
   THREAD_ID _smi_tid;
 };
+
+template <typename T>
+T &
+SamplerInterface::getSampler(const std::string & name)
+{
+  return getSamplerByName<T>(_smi_params.get<SamplerName>(name));
+}
+
+template <typename T>
+T &
+SamplerInterface::getSamplerByName(const SamplerName & name)
+{
+  Sampler * base_ptr = &_smi_feproblem.getSampler(name, _smi_tid);
+  T * obj_ptr = dynamic_cast<T *>(base_ptr);
+  if (!obj_ptr)
+    mooseError("Failed to find a Sampler object with the name '", name, "' for the desired type.");
+  return *obj_ptr;
+}
