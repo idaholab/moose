@@ -42,7 +42,7 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
     paramError("sampler_a", "The supplied Sampler objects must have the same number of columns.");
 
   if (_sampler_a.getNumberOfRows() != _sampler_b.getNumberOfRows())
-    paramError("sampler_a", "The supplied Sampler objects must have the same number of columns.");
+    paramError("sampler_a", "The supplied Sampler objects must have the same number of rows.");
 
   // Compute the number of matrices
   const dof_id_type num_cols = _sampler_a.getNumberOfCols();
@@ -59,8 +59,13 @@ SobolSampler::sampleSetUp()
 {
   TIME_SECTION(_perf_sample_setup);
 
+  // These must call getGlobalSamples because the matrix partition between the supplied objects
+  // and this object differ.
   _m1_matrix = _sampler_a.getGlobalSamples();
   _m2_matrix = _sampler_b.getGlobalSamples();
+
+  if (_m1_matrix == _m2_matrix)
+    mooseError("The supplied sampler matrices must not be the same.");
 }
 
 Real
