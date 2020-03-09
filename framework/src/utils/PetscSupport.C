@@ -286,10 +286,6 @@ petscSetOptions(FEProblemBase & problem)
   for (unsigned int i = 0; i < petsc.inames.size(); ++i)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
-  // set up DM which is required if use a field split preconditioner
-  if (problem.getNonlinearSystemBase().haveFieldSplitPreconditioner())
-    petscSetupDM(problem.getNonlinearSystemBase());
-
   addPetscOptionsFromCommandline();
 }
 
