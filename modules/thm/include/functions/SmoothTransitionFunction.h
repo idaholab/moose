@@ -30,4 +30,9 @@ protected:
   const Function & _function1;
   /// Second function
   const Function & _function2;
+
+  /// Center point of transition
+  const Real & _x_center;
+  /// Width of transition
+  const Real & _transition_width;
 };

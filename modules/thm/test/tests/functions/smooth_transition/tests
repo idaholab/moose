@@ -10,24 +10,24 @@
     csvdiff = 'time_weighted.csv'
   [../]
 
-  [./space_polynomial]
+  [./space_cubic]
     type = 'Exodiff'
     input = 'space.i'
     cli_args = '
-      Functions/transition_fn/type=PolynomialTransitionFunction
+      Functions/transition_fn/type=CubicTransitionFunction
       Functions/transition_fn/function1_derivative_end_point=0
       Functions/transition_fn/function2_derivative_end_point=0
-      Outputs/file_base=space_polynomial'
-    exodiff = 'space_polynomial.e'
+      Outputs/file_base=space_cubic'
+    exodiff = 'space_cubic.e'
   [../]
-  [./time_polynomial]
+  [./time_cubic]
     type = 'CSVDiff'
     input = 'time.i'
     cli_args = '
-      Functions/transition_fn/type=PolynomialTransitionFunction
+      Functions/transition_fn/type=CubicTransitionFunction
       Functions/transition_fn/function1_derivative_end_point=0
       Functions/transition_fn/function2_derivative_end_point=0
-      Outputs/file_base=time_polynomial'
-    csvdiff = 'time_polynomial.csv'
+      Outputs/file_base=time_cubic'
+    csvdiff = 'time_cubic.csv'
   [../]
 []

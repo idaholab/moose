@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SmoothTransitionFunction.h"
-#include "WeightedTransitionInterface.h"
+#include "WeightedTransition.h"
 
 class CosineTransitionFunction;
 
@@ -15,11 +15,15 @@ InputParameters validParams<CosineTransitionFunction>();
  * the x, y, z direction, but this could later be extended to an arbitrary
  * direction.
  */
-class CosineTransitionFunction : public SmoothTransitionFunction, public WeightedTransitionInterface
+class CosineTransitionFunction : public SmoothTransitionFunction
 {
 public:
   CosineTransitionFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;
   virtual RealVectorValue gradient(Real t, const Point & p) const;
+
+protected:
+  /// Transition object
+  const WeightedTransition _transition;
 };
