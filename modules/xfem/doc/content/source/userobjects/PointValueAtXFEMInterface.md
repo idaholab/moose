@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/PointValueAtXFEMInterface
 
-## Description
+## Overview
 
 The values of field variables on either side of a moving interface are often needed to define the interface velocity. These variables and their gradients might be discontinuous across the interface. The fact that the interface does not lie on the standard quadrature points makes it difficult to get the quantities on the interface using existing functions in MOOSE.
 
@@ -17,5 +17,3 @@ The values of field variables on either side of a moving interface are often nee
 !syntax inputs /UserObjects/PointValueAtXFEMInterface
 
 !syntax children /UserObjects/PointValueAtXFEMInterface
-
-!bibtex bibliography
