@@ -19,6 +19,8 @@ InputParameters
 AddSurrogateAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription(
+      "Adds SurrogateModel objects contained within the `[Surrogates]` input block.");
   return params;
 }
 

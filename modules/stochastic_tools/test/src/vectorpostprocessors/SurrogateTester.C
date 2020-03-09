@@ -12,7 +12,7 @@
 
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", SurrogateTester);
+registerMooseObject("StochasticToolsTestApp", SurrogateTester);
 
 defineLegacyParams(SurrogateTester);
 
