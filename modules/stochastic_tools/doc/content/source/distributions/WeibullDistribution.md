@@ -5,13 +5,13 @@
 The WeibullDistribution object defines a translated Weibull distribution which
 has a probability density function (PDF) defined as
 
-\begin{equation}
+!equation
 f(x;\lambda,k,\theta) =
 \begin{cases}
 \frac{k}{\lambda}\left(\frac{x-\theta}{\lambda}\right)^{k-1}e^{-(\frac{x-\theta}{\lambda})^{k}} & x\geq0 ,\\
 0 & x<0,
 \end{cases}
-\end{equation}
+
 where $k > 0$ and defines the shape parameter, $\lambda > 0$ and defines the scale parameter and $\theta$ is the location parameter of the distribution.
 
 ## Example Input Syntax

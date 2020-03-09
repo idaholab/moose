@@ -9,20 +9,19 @@
 
 #pragma once
 
-#include "BoostDistribution.h"
+#include "MooseObjectAction.h"
 
-class BoostNormalDistribution;
+class AddSurrogateAction;
 
 template <>
-InputParameters validParams<BoostNormalDistribution>();
+InputParameters validParams<AddSurrogateAction>();
 
-/**
- * A class used to generate Normal distribution via Boost
- */
-class BoostNormalDistribution : public BoostDistribution<boost::math::normal_distribution<Real>>
+class AddSurrogateAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  BoostNormalDistribution(const InputParameters & parameters);
+  AddSurrogateAction(InputParameters params);
+
+  virtual void act() override;
 };

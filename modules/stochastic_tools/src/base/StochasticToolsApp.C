@@ -35,10 +35,14 @@ StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(pa
 StochasticToolsApp::~StochasticToolsApp() {}
 
 void
-StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
   Registry::registerObjectsTo(f, {"StochasticToolsApp"});
   Registry::registerActionsTo(af, {"StochasticToolsApp"});
+
+  registerSyntax("AddSurrogateAction", "Surrogates/*");
+  registerMooseObjectTask("add_surrogate", SurrogateModel, false);
+  addTaskDependency("add_surrogate", "add_user_object");
 }
 
 void

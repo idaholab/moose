@@ -1,0 +1,52 @@
+[Tests]
+  issues = '#14710'
+  design = 'PolynomialChaos.md QuadratureSampler.md PolyChaosStatistics.md'
+
+  [monte_carlo_integration]
+    type = CSVDiff
+    input = master_2d_mc.i
+    allow_test_objects = true
+    csvdiff = 'master_2d_mc_out_pc_samp_0002.csv'
+    requirement = 'The system shall compute polynomial chaos coefficients using Monte Carlo integration.'
+  []
+  [gauss_legendre_integration]
+    type = CSVDiff
+    input = master_2d_quad.i
+    allow_test_objects = true
+    csvdiff = 'master_2d_quad_out_pc_samp_0002.csv'
+    requirement = 'The system shall compute polynomial chaos coefficients using Gauss-Legendre quadrature.'
+  []
+  [legendre_moment_calculation]
+    type = CSVDiff
+    input = master_2d_quad_moment.i
+    allow_test_objects = true
+    csvdiff = 'master_2d_quad_moment_out_pc_moments_0002.csv'
+    requirement = 'The system shall compute statistical moments after computing Legendre polynomial chaos coefficients.'
+  []
+  [gauss_hermite]
+    type = CSVDiff
+    input = master_2dnorm_quad.i
+    allow_test_objects = true
+    csvdiff = 'master_2dnorm_quad_out_pc_samp_0002.csv'
+    requirement = 'The system shall compute polynomial chaos coefficients using Gauss-Hermite quadrature.'
+    boost = true
+  []
+  [gauss_hermite_boost]
+    type = CSVDiff
+    input = master_2dnorm_quad.i
+    allow_test_objects = true
+    cli_args = 'Distributions/D_dist/type=BoostNormalDistribution
+                Distributions/S_dist/type=BoostNormalDistribution
+                Outputs/file_base=boost_2dnorm_quad'
+    csvdiff = 'boost_2dnorm_quad_pc_samp_0002.csv'
+    boost = true
+    requirement = 'The system shall compute polynomial chaos coefficients using Gauss-Hermite quadrature.'
+  []
+  [hermite_moment_calculation]
+    type = CSVDiff
+    input = master_2dnorm_quad_moment.i
+    allow_test_objects = true
+    csvdiff = 'master_2dnorm_quad_moment_out_pc_moments_0002.csv'
+    requirement = 'The system shall compute statistical moments after computing Hermite polynomial chaos coefficients.'
+  []
+[]
