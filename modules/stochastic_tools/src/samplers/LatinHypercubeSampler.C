@@ -65,6 +65,12 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
     if (lim < 0 || lim > 1)
       paramError("lower_limits", "The items in 'lower_limits' must be in the range [0,1]");
 
+  for (std::size_t i = 0; i < _lower_limits.size(); ++i)
+    if (_lower_limits[i] >= _upper_limits[i])
+      paramError(
+          "lower_limits",
+          "The items in 'lower_limits' must be less than the corresponding 'upper_limits' value");
+
   setNumberOfRandomSeeds(2); // 0 = Bin seed; 1 = distribution sample seed
   setNumberOfRows(getParam<dof_id_type>("num_rows"));
   setNumberOfCols(_distributions.size());

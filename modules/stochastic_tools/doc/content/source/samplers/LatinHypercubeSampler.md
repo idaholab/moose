@@ -24,7 +24,7 @@ The graph in [hypercube] show the Latin hypercube sample generated from the inpu
 the grid lines are defined with the associated probability based bins.
 
 !plot scatter filename=gold/latin_hypercube_out_data_0001.csv id=hypercube
-      caption="Latin hypercube sampled data with tick marks defined at the probability intervals."
+      caption=Latin hypercube sampled data with tick marks defined at the probability intervals.
       data=[{'x':'sample_0', 'y':'sample_1', 'mode':'markers'}]
       layout={'xaxis':{'title':'Uniform', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[2004,2005,2006,2007,2008,2009,2010]},
               'yaxis':{'title':'Normal', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[1970.7,1976.8,1978.3,1979.5,1980.5,1981.7,1983.2,1989.3]},
