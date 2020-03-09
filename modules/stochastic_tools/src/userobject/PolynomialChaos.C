@@ -157,6 +157,8 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
   {
     std::vector<std::vector<unsigned int>> order_1d(n);
     std::vector<std::vector<Real>> c_1d(n);
+    order_1d.reserve(_ncoeff * n);
+    c_1d.reserve(_ncoeff * n);
     for (unsigned int i = 1; i < _ncoeff; ++i)
       for (unsigned int m = 0; m < n; ++m)
       {
