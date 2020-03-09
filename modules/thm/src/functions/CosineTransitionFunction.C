@@ -7,7 +7,6 @@ InputParameters
 validParams<CosineTransitionFunction>()
 {
   InputParameters params = validParams<SmoothTransitionFunction>();
-  params += validParams<WeightedTransitionInterface>();
 
   params.addClassDescription(
       "Computes a cosine transtition of a user-specified width between two values");
@@ -16,7 +15,9 @@ validParams<CosineTransitionFunction>()
 }
 
 CosineTransitionFunction::CosineTransitionFunction(const InputParameters & parameters)
-  : SmoothTransitionFunction(parameters), WeightedTransitionInterface(this)
+  : SmoothTransitionFunction(parameters),
+
+    _transition(_x_center, _transition_width)
 {
 }
 
@@ -25,7 +26,7 @@ CosineTransitionFunction::value(Real t, const Point & p) const
 {
   const Real x = _use_time ? t : p(_component);
 
-  return computeTransitionValue(x, _function1.value(t, p), _function2.value(t, p));
+  return _transition.value(x, _function1.value(t, p), _function2.value(t, p));
 }
 
 RealVectorValue
