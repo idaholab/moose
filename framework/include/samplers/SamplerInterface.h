@@ -21,14 +21,20 @@ template <>
 InputParameters validParams<SamplerInterface>();
 
 /**
- * Interface for objects that need to use samplers
+ * Interface for objects that need to use samplers.
  *
- * Inherit from this class at a very low level to make the getSampler method
- * available.
+ * This practically adds two methods for getting Sampler objects:
+ *
+ *  1. Call `getSampler` or `getSamplerByName` without a template parameter and you will get
+ *     a `Sampler` base object (see SamplerInterface.C for the template specialization).
+ *  2. Call `getSampler<MySampler>` or `getSamplerByName<MySampler>` to perform a cast to the
+ *     desired type, as done for UserObjects.
  */
 class SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * @param params The parameters used by the object being instantiated. This
    *        class needs them so it can get the sampler named in the input file,
@@ -36,8 +42,6 @@ public:
    *        left hand side of the statement "sampler = sampler_name"
    */
   SamplerInterface(const MooseObject * moose_object);
-
-  static InputParameters validParams();
 
   /**
    * Get a sampler with a given name

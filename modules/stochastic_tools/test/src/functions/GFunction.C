@@ -32,6 +32,9 @@ GFunction::GFunction(const InputParameters & parameters)
 {
   if (_q_vector.size() != _sampler.getNumberOfCols())
     paramError("q_vector", "The 'q_vector' size must match the number of columns in the Sampler.");
+  for (const auto & q : _q_vector)
+    if (q < 0)
+      paramError("q_vector", "The 'q_vector' entries must be zero or positive.");
 }
 
 void

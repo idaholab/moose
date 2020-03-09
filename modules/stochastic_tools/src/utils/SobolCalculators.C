@@ -133,6 +133,10 @@ SobolCalculator::compute(const std::vector<Real> & data, bool is_distributed) co
 
   // Output the data
   std::vector<Real> output;
+  if (_resample)
+    output.reserve(n * (1 + n));
+  else
+    output.reserve(2 * n);
 
   // First-order
   for (std::size_t i = 0; i < n; ++i)

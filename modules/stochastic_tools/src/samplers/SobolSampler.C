@@ -99,7 +99,7 @@ SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
       return _m2_matrix(r, col_index);
   }
 
-  mooseError("Invalid row and column index, if you are seeing this Andrew messed up becsue this "
+  mooseError("Invalid row and column index, if you are seeing this Andrew messed up because this "
              "should be impossible to reach.");
 }
 
