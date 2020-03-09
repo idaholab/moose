@@ -115,9 +115,7 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
-    _order(getParam<MooseEnum>("order")),
-    _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
-    _ping_pong_protection(getParam<bool>("ping_pong_protection"))
+    _mesh_gen_name(getParam<MeshGeneratorName>("mesh"))
 {
 
   if (_formulation == "tangential_penalty")
@@ -153,7 +151,7 @@ ContactAction::ContactAction(const InputParameters & params)
         "system, which is selected by setting 'system=Constraint'.\n");
 
   if (_formulation != "ranfs")
-    if (_ping_pong_protection)
+    if (getParam<bool>("ping_pong_protection"))
       paramError("ping_pong_protection",
                  "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
 }
@@ -198,16 +196,11 @@ ContactAction::act()
 
     {
       InputParameters params = _factory.getValidParams("PenetrationAux");
+      params.applyParameters(parameters());
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-
-      // Extract global params
-      if (isParamValid("parser_syntax"))
-        _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
-
       params.set<std::vector<BoundaryName>>("boundary") = {_slave};
       params.set<BoundaryName>("paired_boundary") = _master;
       params.set<AuxVariableName>("variable") = "penetration";
-      params.set<MooseEnum>("order") = _order;
 
       params.set<bool>("use_displaced_mesh") = true;
       std::string name = _name + "_contact_" + Moose::stringify(counter++);
@@ -217,17 +210,13 @@ ContactAction::act()
     // Add ContactPressureAuxAction
     {
       InputParameters params = _factory.getValidParams("ContactPressureAux");
-
-      // Extract global params
-      if (isParamValid("parser_syntax"))
-        _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
+      params.applyParameters(parameters());
 
       params.set<std::vector<BoundaryName>>("boundary") = {_slave};
       params.set<BoundaryName>("paired_boundary") = _master;
       params.set<AuxVariableName>("variable") = "contact_pressure";
       params.addRequiredCoupledVar("nodal_area", "The nodal area");
       params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
-      params.set<MooseEnum>("order") = _order;
 
       params.set<bool>("use_displaced_mesh") = true;
 
