@@ -46,7 +46,6 @@ private:
   /// PETSc solver
   TS & _ts;
   /// PETSc solver solution
-  Vec _petsc_sol;
+  Vec & _petsc_sol;
 #endif
 };
-

@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class ExternalPetscSolverApp;
-
-template <>
-InputParameters validParams<ExternalPetscSolverApp>();
-
 /**
  * This is a demo used to demonstrate how to couple an external app
  * through the MOOSE wrapper APP.
@@ -25,22 +20,29 @@ InputParameters validParams<ExternalPetscSolverApp>();
 class ExternalPetscSolverApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   ExternalPetscSolverApp(InputParameters parameters);
   virtual ~ExternalPetscSolverApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
+  virtual std::shared_ptr<Backup> backup() override;
+  virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false) override;
+
 #if LIBMESH_HAVE_PETSC
   /**
    * Return a time-stepping (TS) component that holds all the ingredients of applicaiton
    */
   TS & getExternalPETScTS() { return _ts; }
-#endif
+
+  Vec & getExternalPETScTSSolution() { return _petsc_sol; }
+
 private:
-#if LIBMESH_HAVE_PETSC
   /// Time-stepping (TS) object
   TS _ts;
+  /// PETSc solver solution
+  Vec _petsc_sol;
 #endif
 };
-
