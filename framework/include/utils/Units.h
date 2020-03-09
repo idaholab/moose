@@ -82,6 +82,11 @@ public:
   friend std::ostream & operator<<(std::ostream & os, const MooseUnits & dt);
   friend MooseUnits std::pow(const MooseUnits &, int);
 
+  ///@{ iostream manipulators
+  static std::ostream & latex(std::ostream & os);
+  static std::ostream & text(std::ostream & os);
+  ///@}
+
 protected:
   /// helper function to generate a pretty mooseError
   template <typename... Args>
@@ -95,6 +100,9 @@ protected:
 
   /// base SI units and their exponents
   std::vector<std::pair<BaseUnit, int>> _base;
+
+  /// iosteam manipulator helper to toggle latex / text output
+  static int geti();
 };
 
 template <typename... Args>

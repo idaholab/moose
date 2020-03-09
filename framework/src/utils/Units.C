@@ -11,24 +11,10 @@
 #include <stack>
 #include <algorithm>
 
-const std::map<std::string, Real> MooseUnits::_si_prefix = {{"E", 1e18},
-                                                            {"P", 1e15},
-                                                            {"T", 1e12},
-                                                            {"G", 1e9},
-                                                            {"M", 1e6},
-                                                            {"k", 1e3},
-                                                            {"h", 1e2},
-                                                            {"da", 1e1},
-                                                            {"d", 1e-1},
-                                                            {"c", 1e-2},
-                                                            {"m", 1e-3},
-                                                            {"mu", 1e-6},
-                                                            {"n", 1e-9},
-                                                            {"p", 1e-12},
-                                                            {"f", 1e-15},
-                                                            {"a", 1e-18},
-                                                            {"z", 1e-21},
-                                                            {"y", 1e-24}};
+const std::map<std::string, Real> MooseUnits::_si_prefix = {
+    {"Y", 1e24}, {"Z", 1e21},  {"E", 1e18},  {"P", 1e15},  {"T", 1e12},  {"G", 1e9},  {"M", 1e6},
+    {"k", 1e3},  {"h", 1e2},   {"da", 1e1},  {"d", 1e-1},  {"c", 1e-2},  {"m", 1e-3}, {"mu", 1e-6},
+    {"n", 1e-9}, {"p", 1e-12}, {"f", 1e-15}, {"a", 1e-18}, {"z", 1e-21}, {"y", 1e-24}};
 
 const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = {
     // avoid matching meters
@@ -161,13 +147,21 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // pound-force per square inch
 
     // misc.
+    {"BTU",
+     {1055.06,
+      {{MooseUnits::BaseUnit::KILOGRAM, 1},
+       {MooseUnits::BaseUnit::METER, 2},
+       {MooseUnits::BaseUnit::SECOND, -2}}}}, // ISO 31-4 British thermal unit
     {"bar",
      {1e5,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
-       {MooseUnits::BaseUnit::SECOND, -2}}}},          // bar (unit of pressure)
-    {"l", {1e-3, {{MooseUnits::BaseUnit::METER, 3}}}}, // liter
-    {"at", {1, {{MooseUnits::BaseUnit::COUNT, 1}}}}    // 1 single count (atom)
+       {MooseUnits::BaseUnit::SECOND, -2}}}},                          // bar (unit of pressure)
+    {"h", {60 * 60, {{MooseUnits::BaseUnit::SECOND, 1}}}},             // day
+    {"d", {60 * 60 * 24, {{MooseUnits::BaseUnit::SECOND, 1}}}},        // day
+    {"l", {1e-3, {{MooseUnits::BaseUnit::METER, 3}}}},                 // liter
+    {"u", {1.66053906660e-27, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
+    {"at", {1, {{MooseUnits::BaseUnit::COUNT, 1}}}}                    // 1 single count (atom)
 };
 
 MooseUnits::MooseUnits(const std::string & unit_string) : _factor(1.0), _base()
@@ -492,8 +486,31 @@ pow(const MooseUnits & u, int e)
 }
 
 std::ostream &
+MooseUnits::latex(std::ostream & os)
+{
+  os.iword(geti()) = 1;
+  return os;
+}
+std::ostream &
+MooseUnits::text(std::ostream & os)
+{
+  os.iword(geti()) = 0;
+  return os;
+}
+
+int
+MooseUnits::geti()
+{
+  static int i = std::ios_base::xalloc();
+  return i;
+}
+
+std::ostream &
 operator<<(std::ostream & os, const MooseUnits & u)
 {
+  bool latex = (os.iword(MooseUnits::geti()) == 1);
+  static const std::vector<std::string> base_unit = {"m", "kg", "s", "A", "K", "at", "cd"};
+
   if (u._factor != 1.0 || u._base.empty())
   {
     os << u._factor;
@@ -503,33 +520,21 @@ operator<<(std::ostream & os, const MooseUnits & u)
 
   for (unsigned int i = 0; i < u._base.size(); ++i)
   {
-    os << (i ? "*" : "");
-    switch (u._base[i].first)
-    {
-      case MooseUnits::BaseUnit::METER:
-        os << "m";
-        break;
-      case MooseUnits::BaseUnit::KILOGRAM:
-        os << "kg";
-        break;
-      case MooseUnits::BaseUnit::SECOND:
-        os << "s";
-        break;
-      case MooseUnits::BaseUnit::AMPERE:
-        os << "A";
-        break;
-      case MooseUnits::BaseUnit::KELVIN:
-        os << "K";
-        break;
-      case MooseUnits::BaseUnit::COUNT:
-        os << "at";
-        break;
-      case MooseUnits::BaseUnit::CANDELA:
-        os << "cd";
-        break;
-    }
+    os << (i ? (latex ? "\\cdot " : "*") : "");
+
+    const auto & unit = base_unit[int(u._base[i].first)];
+    if (latex)
+      os << "\\text{" << unit << "}";
+    else
+      os << unit;
+
     if (u._base[i].second != 1)
-      os << '^' << u._base[i].second;
+    {
+      if (latex)
+        os << "^{" << u._base[i].second << '}';
+      else
+        os << '^' << u._base[i].second;
+    }
   }
 
   return os;
