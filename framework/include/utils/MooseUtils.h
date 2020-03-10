@@ -19,6 +19,7 @@
 
 #include "libmesh/compare_types.h"
 #include "metaphysicl/raw_type.h"
+#include "metaphysicl/metaphysicl_version.h"
 
 // C++ includes
 #include <string>
@@ -43,15 +44,26 @@ class Communicator;
 class MultiMooseEnum;
 namespace MetaPhysicL
 {
+#if METAPHYSICL_MAJOR_VERSION < 1
 template <typename, typename>
 class DualNumber;
+#else
+#include "metaphysicl/dualnumber_forward.h"
+#endif
 }
 namespace std
 {
+#if METAPHYSICL_MAJOR_VERSION < 1
 template <typename T, typename D>
 MetaPhysicL::DualNumber<T, D> abs(const MetaPhysicL::DualNumber<T, D> & in);
 template <typename T, typename D>
 MetaPhysicL::DualNumber<T, D> abs(MetaPhysicL::DualNumber<T, D> && in);
+#else
+template <typename T, typename D, bool asd>
+MetaPhysicL::DualNumber<T, D, asd> abs(const MetaPhysicL::DualNumber<T, D, asd> & in);
+template <typename T, typename D, bool asd>
+MetaPhysicL::DualNumber<T, D, asd> abs(MetaPhysicL::DualNumber<T, D, asd> && in);
+#endif
 }
 
 namespace MooseUtils

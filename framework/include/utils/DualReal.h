@@ -14,10 +14,16 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/compare_types.h"
 
+#include "metaphysicl/metaphysicl_version.h"
+
 namespace MetaPhysicL
 {
+#if METAPHYSICL_MAJOR_VERSION < 1
 template <typename, typename>
 class DualNumber;
+#else
+#include "metaphysicl/dualnumber_forward.h"
+#endif
 template <typename, typename, typename>
 class SemiDynamicSparseNumberArray;
 template <std::size_t, typename>
