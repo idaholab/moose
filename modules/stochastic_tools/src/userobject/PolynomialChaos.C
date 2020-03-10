@@ -163,15 +163,15 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
     order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
   }
 
-  unsigned int n_local = order[0].numRows();
-  unsigned int st_local = 0;
-  unsigned int end_local = n_local;
+  dof_id_type n_local = order[0].numRows();
+  dof_id_type st_local = 0;
+  dof_id_type end_local = n_local;
   if (distributed)
     MooseUtils::linearPartitionItems(
         order[0].numRows(), n_processors(), processor_id(), n_local, st_local, end_local);
 
   Real val = 0;
-  for (unsigned int i = st_local; i < end_local; ++i)
+  for (dof_id_type i = st_local; i < end_local; ++i)
   {
     Real tmp = order[0].computeWeight(i);
     for (unsigned int d = 0; d < _ndim; ++d)
