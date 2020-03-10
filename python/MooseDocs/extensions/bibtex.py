@@ -27,6 +27,9 @@ LOG = logging.getLogger('MooseDocs.extensions.bibtex')
 def make_extension(**kwargs):
     return BibtexExtension(**kwargs)
 
+BibtexCite = tokens.newToken('BibtexCite', keys=[])
+BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style='')
+
 class BibtexExtension(command.CommandExtension):
     """
     Extension for BibTeX citations and bibliography.
@@ -43,10 +46,6 @@ class BibtexExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         self.__database = None
-        self.__citations = list()
-
-    def addCitations(self, *args):
-        self.__citations.extend(args)
 
     def preExecute(self):
 
@@ -82,10 +81,7 @@ class BibtexExtension(command.CommandExtension):
         page['citations'] = list()
 
     def postTokenize(self, page, ast):
-        if self.__citations:
-            page['citations'].extend(self.__citations)
-            self.__citations.clear()
-
+        if page['citations']:
             has_bib = False
             for node in moosetree.iterate(ast):
                 if node.name == 'BibtexBibliography':
@@ -93,7 +89,9 @@ class BibtexExtension(command.CommandExtension):
                     break
 
             if not has_bib:
-                BibtexBibliography(ast)
+                core.Heading(ast, level=2, string='References')
+                BibtexBibliography(ast, bib_style='plain')
+                print('Adding Bibliography:', page.local)
 
     @property
     def database(self):
@@ -111,8 +109,6 @@ class BibtexExtension(command.CommandExtension):
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('natbib', 'round')
 
-BibtexCite = tokens.newToken('BibtexCite', keys=[])
-BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style='')
 class BibtexReferenceComponent(command.CommandComponent):
     COMMAND = ('cite', 'citet', 'citep', 'nocite')
     SUBCOMMAND = None
@@ -120,7 +116,7 @@ class BibtexReferenceComponent(command.CommandComponent):
     def createToken(self, parent, info, page):
         keys = [key.strip() for key in info['inline'].split(',')]
         BibtexCite(parent, keys=keys, cite=info['command'])
-        self.extension.addCitations(*keys)
+        page['citations'].extend(keys)
         return parent
 
 class BibtexCommand(command.CommandComponent):
