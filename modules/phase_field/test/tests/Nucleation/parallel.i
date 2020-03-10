@@ -54,10 +54,11 @@
     type = DiscreteNucleationInserter
     hold_time = 1
     probability = 0.01
+    radius = 4
   [../]
   [./map]
     type = DiscreteNucleationMap
-    radius = 4
+#    radius = 4
     periodic = c
     inserter = inserter
   [../]

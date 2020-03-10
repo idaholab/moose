@@ -18,9 +18,9 @@ InputParameters validParams<DiscreteNucleationInserter>();
 
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
- * domain it manages a list of nuclei with their insertion times and their center
- * positions. A DiscreteNucleationMap is needed to enable the DiscreteNucleation
- * material to look up if a nucleus is present at a given element/qp.
+ * domain it manages a list of nuclei with their insertion times, center
+ * positions and raidus. A DiscreteNucleationMap is needed to enable the
+ * DiscreteNucleation material to look up if a nucleus is present at a given element/qp.
  */
 class DiscreteNucleationInserter : public DiscreteNucleationInserterBase
 {
@@ -37,6 +37,8 @@ public:
   const Real & getRate() const { return _nucleation_rate; }
 
 protected:
+  virtual void addNucleus(unsigned int & qp);
+
   /// Nucleation rate density (should be a material property implementing nucleation theory)
   const MaterialProperty<Real> & _probability;
 
@@ -48,5 +50,12 @@ protected:
 
   /// total nucleation rate
   Real _nucleation_rate;
-};
 
+  /// determine if a fixed radius or variable radius are used
+  const bool _fixed_radius;
+  const Real _radius;
+  /// store the local nucleus radius
+  const MaterialProperty<Real> & _local_radius;
+
+  const bool _poisson_stats;
+};

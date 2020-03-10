@@ -55,5 +55,8 @@ protected:
 
   /// total nucleation rate
   const Real _nucleation_rate;
-};
 
+  /// determine if a fixed radius or variable radius are used
+  const bool _fixed_radius;
+  const Real _radius;
+};

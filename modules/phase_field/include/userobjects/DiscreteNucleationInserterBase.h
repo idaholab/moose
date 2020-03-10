@@ -21,6 +21,7 @@ InputParameters validParams<DiscreteNucleationInserterBase>();
  * domain it manages a list of nuclei with their insertion times and their center
  * positions. A DiscreteNucleationMap is needed to enable the DiscreteNucleation
  * material to look up if a nucleus is present at a given element/qp.
+ * This class has been modified to take a variable nucleus radius.
  */
 class DiscreteNucleationInserterBase : public ElementUserObject
 {
@@ -29,8 +30,14 @@ public:
 
   DiscreteNucleationInserterBase(const InputParameters & parameters);
 
-  /// A nucleus has an expiration time and a location
-  using NucleusLocation = std::pair<Real, Point>;
+  /// A nucleus has an expiration time, a location, and a size.
+  //using NucleusLocation = std::tuple<Real, Point, Real>;
+  struct NucleusLocation
+  {
+    Real time;
+    Point center;
+    Real radius;
+  };
 
   /// Every MPI task should keep a full list of nuclei (in case they cross domains with their finite radii)
   using NucleusList = std::vector<NucleusLocation>;
@@ -55,3 +62,8 @@ protected:
   bool _update_required;
 };
 
+// Used for Restart
+template<>
+void dataStore(std::ostream & stream, DiscreteNucleationInserterBase::NucleusLocation & nl, void * context);
+template<>
+void dataLoad(std::istream & stream, DiscreteNucleationInserterBase::NucleusLocation & nl, void * context);

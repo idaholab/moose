@@ -23,6 +23,7 @@
     type = DiscreteNucleationInserter
     hold_time = 0.5
     probability = 0.0076
+    radius = 3.27
   [../]
 []
 

@@ -31,8 +31,8 @@
   [./inserter]
     type = DiscreteNucleationFromFile
     hold_time = 1
-    file = nuclei.csv
-    radius = 2
+    file = nuclei2.csv
+    fixed_radius = false
   [../]
   [./map]
     type = DiscreteNucleationMap
