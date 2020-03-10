@@ -28,6 +28,7 @@ Sampler::validParams()
 
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
+  params.registerSystemAttributeName("Sampler");
 
   params.addParam<bool>("legacy_support", true, "Disables errors for legacy API support.");
 
