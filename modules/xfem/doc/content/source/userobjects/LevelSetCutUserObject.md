@@ -1,7 +1,9 @@
 # LevelSetCutUserObject
+
 !syntax description /UserObjects/LevelSetCutUserObject
 
-## Description
+## Overview
+
 This userobject, `LevelSetCutUserObject` uses a level set field to cut the finite element mesh. The zero level set contour represents the interface.
 
 ## Example Input File Syntax
@@ -13,5 +15,3 @@ This userobject, `LevelSetCutUserObject` uses a level set field to cut the finit
 !syntax inputs /UserObjects/LevelSetCutUserObject
 
 !syntax children /UserObjects/LevelSetCutUserObject
-
-!bibtex bibliography

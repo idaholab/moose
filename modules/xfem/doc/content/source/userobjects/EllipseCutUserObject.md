@@ -2,6 +2,8 @@
 
 !syntax description /UserObjects/EllipseCutUserObject
 
+## Overview
+
 The `EllipseCutUserObject` defines the boundary of an elliptical cut for XFEM
 to make on a 3 dimensional mesh. The user enters three points in the cut_data
 parameter in x, y, z coordinates: the center point of the ellipse (must be
@@ -14,12 +16,8 @@ logic to determine whether a given point is located inside the cut plane.
 
 !listing test/tests/solid_mechanics_basic/elliptical_crack.i block=UserObjects
 
-!syntax description /UserObjects/EllipseCutUserObject
-
 !syntax parameters /UserObjects/EllipseCutUserObject
 
 !syntax inputs /UserObjects/EllipseCutUserObject
 
 !syntax children /UserObjects/EllipseCutUserObject
-
-!bibtex bibliography
