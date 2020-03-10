@@ -44,10 +44,10 @@
     type = DiscreteNucleationFromFile
     hold_time = 1
     file = single.csv
+    radius = 7
   [../]
   [./map]
     type = DiscreteNucleationMap
-    radius = 7
     int_width = 6
     inserter = inserter
   [../]
