@@ -106,6 +106,7 @@ A_{q} \rightleftharpoons \nu_{wq}A_{w} + \sum_{i}\nu_{iq}A_{i} + \sum_{k}\nu_{kq
 \end{equation}
 The mass action for each surface complex $A_{q}$ is
 \begin{equation}
+\label{eq:mq}
 m_{q} = \frac{1}{K_{q}e^{z_{a}F\Psi/RT}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{iq}} \cdot \prod_{k}a_{k}^{\nu_{kq}} \cdot \prod_{m}f_{m}^{\nu_{mq}} \cdot m_{p}^{\nu_{pq}} \right) \ .
 \end{equation}
 which sets the molality of each surface complex.  Here:
@@ -118,9 +119,10 @@ which sets the molality of each surface complex.  Here:
 
 Computing the surface potential, $\Psi$, requires an additional equation, which [!cite](bethke_2007) writes as
 \begin{equation}
+\label{eq:psi}
 \frac{A_{\mathrm{sf}}}{Fn_{w}}\sqrt{RT\epsilon\epsilon_{0}\rho_{w} I}\sinh \left(\frac{z_{\pm}\Psi F}{2RT}\right) = \sum_{q}z_{q}m_{q} \ .
 \end{equation}
-Note that the right-hand side of this equation depends on $\Psi$ through the mass-action equation.  The additional notation introduced here is as follows.
+Note that the right-hand side of this equation depends on $\Psi$ through [eq:mq].  The additional notation introduced here is as follows.
 
 - $A_{\mathrm{sf}}$ \[m$^{2}$\] is the surface area of material upon which the $A_{q}$ live.  Usually a mineral in the system provides this surface area and usually the user specifies a specific surface area in \[m$^{2}$/g(of mineral)\].  Hence $A_{\mathrm{sf}}$ is proportional to the mole number of a mineral, $n_{k}$, with coefficient of proportionality being the mineral's density \[g.mol$^{-1}$\] and the specific surface area.
 - $\epsilon$ \[dimensionless\] is the dielectric constant: $\epsilon = 78.5$ at 25$^{\circ}$C for water.
@@ -177,7 +179,7 @@ m_{j} & = \frac{a_{w}^{\nu_{wj}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{ij}} \cdo
 m_{q} & = \frac{1}{K_{q}\mathcal{C}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{iq}} \cdot \prod_{k}a_{k}^{\nu_{kq}} \cdot \prod_{m}f_{m}^{\nu_{mq}} \cdot m_{p}^{\nu_{pq}} \right) \\
 \end{aligned}
 \end{equation}
-In addition, if surface complexation is present, there is an equation for the surface potential, $\Psi$.  In the above equations:
+In addition, if surface complexation is present, [eq:psi] provides an equation for the surface potential, $\Psi$.  In the above equations:
 
 - $M$ \[mol\] is the total number of moles of a substance
 - $m$ \[mol.kg$^{-1}$\] is the molality
@@ -209,15 +211,18 @@ To solve these equations, the following assumptions are made.
 
 - The [activity coefficients](activity_coefficients.md) are known functions.
 
+- If surface complexation is employed, $A_{sf}$ is fixed (see [eq:psi]).  If $A_{\mathrm{sf}}$ depends on $n_{k}$, as is often the case, this breaks the "splitting into reduced equations" just described.  However, the only examples I have found are when $n_{k}$ is fixed by specifying the amount of free mineral.
+
 This means that the "reduced" equations are
 \begin{equation}
 \begin{aligned}
 M_{w} & = n_{w}\left(55.51 + \sum_{j}\nu_{wj}m_{j} + \sum_{q}\nu_{wq}m_{q}\right) \\
 M_{i} & = n_{w}\left(m_{i} + \sum_{j}\nu_{ij}m_{j} + \sum_{q}\nu_{iq}m_{q}\right) \\
-M_{p} & = n_{w} \left(m_{p} + \sum_{q}\nu_{pq}m_{q} \right)
+M_{p} & = n_{w} \left(m_{p} + \sum_{q}\nu_{pq}m_{q} \right) \ ,
 \end{aligned}
 \end{equation}
-The problem becomes: given $(M_{w}, M_{i}, M_{p})$, find $n_{w}$, $m_{i}$ and $m_{p}$.  The Newton-Raphson (NR) procedure (below) is used.  If $n_{w}$ is known, the first equation is trivial, and needn't appear in the NR.  Similarly, if any $m_{i}$ or $m_{p}$ are known (e.g. pH is fixed by the user) then that equation needn't appear in the NR.
+as well as [eq:psi] if appropriate.
+The problem becomes: given $(M_{w}, M_{i}, M_{p})$, find $n_{w}$, $m_{i}$ and $m_{p}$ (and $\Psi$, if appropriate).  The Newton-Raphson (NR) procedure (below) is used.  If $n_{w}$ is known, the first equation is trivial, and needn't appear in the NR.  Similarly, if any $m_{i}$ or $m_{p}$ are known (e.g. pH is fixed by the user) then that equation needn't appear in the NR.
 
 ## Solution method
 

@@ -2,7 +2,7 @@
 
 This example closely follows Section 6.2 of [!cite](bethke_2007).
 
-A chemical analysis of the major element composition of water in the Amazon river [table:amazon_analysis].  The "free" O$_{2}$(aq) concentration of 5.8$\,$mg.kg$^{-1}$ means its bulk composition will be more than this. In addition, the pH is 6.5.
+A chemical analysis of the major element composition of water in the Amazon river [table:analysis].  The "free" O$_{2}$(aq) concentration of 5.8$\,$mg.kg$^{-1}$ means its bulk composition will be more than this. In addition, the pH is 6.5.
 
 !table id=table:analysis caption=Major element composition of Amazon river water
 | Species | Concentration (mg.kg$^{-1}$) |

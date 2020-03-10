@@ -82,6 +82,13 @@ In these expressions:
 - $c_{k}$ \[mol.m$^{-3}$\] is concentration of mineral component $A_{k}$ per volume of aqueous solution.
 - As mentioned in the [kinetic](kinetics.md) case, I suspect the ODE for $C_{m}$ is ignored, since once the Newton-Raphson procedure (First Step, below) has provided the secondary and sorbed species' molalities, $C_{m}$ is defined uniquely.  Any excess or deficit according to the ODE comes from the infinite gas buffer of fixed fugacity.
 
+In addition, if there is surface complexation, there is an [addition algebraic equation](equilibrium.md)
+\begin{equation}
+\label{eq:psi}
+\frac{A_{\mathrm{sf}}}{Fn_{w}}\sqrt{RT\epsilon\epsilon_{0}\rho_{w} I}\sinh \left(\frac{z_{\pm}\Psi F}{2RT}\right) = \sum_{q}z_{q}m_{q} \ .
+\end{equation}
+that provides the surface potential $\Psi$.
+
 The task is: given all quantities at time $t-\Delta t$, find all quantities at time $t$.  As [discussed elsewhere](equilibrium.md), since the mineral activity $a_{k}=1$ and the time evolution of the gas fugacity is specified, this task splits into two:
 
 ### First step
@@ -102,7 +109,7 @@ m_{j} & = \frac{a_{w}^{\nu_{wj}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{ij}} \cdo
 m_{q} & = \frac{1}{K_{q}\mathcal{C}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{iq}} \cdot \prod_{k}a_{k}^{\nu_{kq}} \cdot \prod_{m}f_{m}^{\nu_{mq}} \cdot m_{p}^{\nu_{pq}} \right) \ ,
 \end{aligned}
 \end{equation}
-and $(\gamma_{i}, a_{w})$ being [known functions](activity_coefficients.md) of the molalities, which must be solved for $(c_{w}, m_{i}, m_{p}, C_{\bar{k}})$.  The right-hand sides of the ODEs are evaluated at $t$ and are [functions](kinetics.md) of the molalities.  Once these are known $(m_{j}, m_{q}, C_{w}, C_{i}, C_{p})$ may be determined at time $t$.
+and $(\gamma_{i}, a_{w})$ being [known functions](activity_coefficients.md) of the molalities, which must be solved for $(c_{w}, m_{i}, m_{p}, C_{\bar{k}})$.  The right-hand sides of the ODEs are evaluated at $t$ and are [functions](kinetics.md) of the molalities.  Once these are known $(m_{j}, m_{q}, C_{w}, C_{i}, C_{p})$ may be determined at time $t$.  The addition of the surface-potential equation, [eq:psi], is makes no conceptual difference (although it is algebraically complicated), as assumed in [equilibrium case](equilibrium.md).
 
 ### Second step
 
@@ -111,7 +118,8 @@ It is now an easy task to obtain $(C_{k}, C_{m}, c_{k})$ at time $t$ using the r
 
 ## Equations with transport
 
-Fluid density is assumed to be constant in the `geochemistry` module.  Therefore, transport acts on the [basis](basis.md) species' total concentrations.
+Fluid density is assumed to be constant in the `geochemistry` module.  Therefore, transport acts on the [basis](basis.md) species' total concentrations, which are now spatially and temporally varying functions.
+
 Only the water, the primary aqueous species, the minerals that are mobile and the dissolved gases, are transported.  Minerals and sorbed species are generally assumed to be immobile.  Equilibrium  provides [equations](equilibrium.md) for the bulk composition of water, primary aqueous species, etc.  It is simple to remove the contributions from the immobile mineral and sorbed species from those formulae to provide the concentrations involved in transport:
 \begin{equation}
 \begin{aligned}
@@ -151,7 +159,7 @@ The above equations are dissimilar to [!cite](bethke_2007), who uses $C_{T}$ in 
 
 ## Solution method
 
-The same two-step approach is obviously possible here, where the first step involves $(A_{w}, A_{i}, A_{p}, A_{\bar{k}})$, and the second involves $(A_{k}, A_{m})$.
+The same two-step approach is obviously possible here, where the first step involves $(A_{w}, A_{i}, A_{p}, A_{\bar{k}})$ (and $\Psi$ if appropriate), and the second involves $(A_{k}, A_{m})$.  All concentrations and $\Psi$ are spatially dependent.
 
 It is most common to use operator splitting.
 
@@ -160,7 +168,7 @@ It is most common to use operator splitting.
 This involves:
 
 - the transport equations $0 = \frac{\partial}{\partial t}\phi C_{r} + \nabla\cdot (\mathbf{q} - \phi D\nabla) C_{T,r}$ for $r=(w,i,p,\bar{k})$ are solved to provide extra source terms for the chemistry equations (the ODEs above).
-- These source terms are introduced into the chemistry equations.  Using the Newton-Raphson method mentioned above, these are solved for $(c_{w}, m_{i}, m_{p}, C_{\bar{k}})$ at time $t$, and finally $(m_{j}, m_{q}, C_{w}, C_{i}, C_{p})$ are determined.
+- These source terms are introduced into the chemistry equations.  Using the Newton-Raphson method mentioned above, these are solved for $(c_{w}, m_{i}, m_{p}, C_{\bar{k}})$ (and potentially $\Psi$) at time $t$, and finally $(m_{j}, m_{q}, C_{w}, C_{i}, C_{p})$ are determined.
 
 ### Second step using operator splitting
 
