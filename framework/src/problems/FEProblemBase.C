@@ -217,7 +217,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _nl(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-    _distributions(/*threaded=*/false),
     _material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(
@@ -1941,16 +1940,21 @@ FEProblemBase::addDistribution(std::string type,
 {
   parameters.set<std::string>("type") = type;
   std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
-  _distributions.addObject(dist);
+  theWarehouse().add(dist);
 }
 
 Distribution &
 FEProblemBase::getDistribution(const std::string & name)
 {
-  if (!_distributions.hasActiveObject(name))
-    mooseError("Unable to find distribution " + name);
-
-  return *(_distributions.getActiveObject(name));
+  std::vector<Distribution *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("Distribution")
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find Distribution with name '" + name + "'");
+  return *(objs[0]);
 }
 
 void

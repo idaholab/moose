@@ -1803,9 +1803,6 @@ protected:
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
-  /// distributions
-  MooseObjectWarehouseBase<Distribution> _distributions;
-
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
 
