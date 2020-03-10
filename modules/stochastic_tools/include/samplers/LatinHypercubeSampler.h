@@ -39,14 +39,14 @@ protected:
   /// Number of intervals for each distribution
   const std::vector<unsigned int> & _num_bins_input;
 
-  /// Upper limit to probability for each distribution (use double b/c MooseRandom uses double)
-  const std::vector<double> & _upper_limits;
+  /// Upper limit to probability for each distribution
+  const std::vector<Real> & _upper_limits;
 
-  /// Lower limit to probability for each distribution (use double b/c MooseRandom uses double)
-  const std::vector<double> & _lower_limits;
+  /// Lower limit to probability for each distribution
+  const std::vector<Real> & _lower_limits;
 
   /// Portion of probability within each bin for each distribution
-  std::vector<double> _size_bins;
+  std::vector<Real> _size_bins;
 
   /// Bin sizes for each distribution; this is populated during sample setup so in the future
   /// it can be controlled

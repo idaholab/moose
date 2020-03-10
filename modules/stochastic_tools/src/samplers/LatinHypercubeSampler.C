@@ -28,9 +28,9 @@ LatinHypercubeSampler::validParams()
       "number of columns per matrix.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_bins", "The number of intervals to consider within the sampling.");
-  params.addRequiredParam<std::vector<double>>(
+  params.addRequiredParam<std::vector<Real>>(
       "upper_limits", "The lower limit of probability for each of the associated distributions.");
-  params.addRequiredParam<std::vector<double>>(
+  params.addRequiredParam<std::vector<Real>>(
       "lower_limits", "The upper limit of probability for each of the associated distributions.");
   return params;
 }
@@ -39,8 +39,8 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _num_bins_input(getParam<std::vector<unsigned int>>("num_bins")),
-    _upper_limits(getParam<std::vector<double>>("upper_limits")),
-    _lower_limits(getParam<std::vector<double>>("lower_limits"))
+    _upper_limits(getParam<std::vector<Real>>("upper_limits")),
+    _lower_limits(getParam<std::vector<Real>>("lower_limits"))
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
@@ -87,8 +87,8 @@ LatinHypercubeSampler::sampleSetUp()
 
   for (std::size_t dist_idx = 0; dist_idx < num_dists; ++dist_idx)
   {
-    const double lower = _lower_limits[dist_idx];
-    const double upper = _upper_limits[dist_idx];
+    const Real lower = _lower_limits[dist_idx];
+    const Real upper = _upper_limits[dist_idx];
     _size_bins[dist_idx] = (upper - lower) / _num_bins[dist_idx];
   }
 }
@@ -100,8 +100,8 @@ LatinHypercubeSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_
   const uint32_t bin_num = getRandl(0, 0, _num_bins[col_index]);
 
   // Compute probability in the range within the bin
-  double lower = bin_num * _size_bins[col_index] + _lower_limits[col_index];
-  double prob = getRand(1) * _size_bins[col_index] + lower;
+  Real lower = bin_num * _size_bins[col_index] + _lower_limits[col_index];
+  Real prob = getRand(1) * _size_bins[col_index] + lower;
   mooseAssert(prob >= _lower_limits[col_index] && prob <= _upper_limits[col_index],
               "Computed probability out of range.");
 

@@ -137,7 +137,7 @@ protected:
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
-  double getRand(unsigned int index = 0);
+  Real getRand(unsigned int index = 0);
 
   /**
    * Get the next random integer from the generator within the specified range [lower, upper)
