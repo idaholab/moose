@@ -11,9 +11,11 @@ import os
 import re
 import logging
 import moosetree
+import mooseutils
 
 import MooseDocs
 from .. import common
+from ..common import exceptions
 from ..base import components, Extension
 from ..tree import tokens, latex
 from . import core, floats, heading
@@ -68,7 +70,14 @@ def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=
 
     else:
         source = common.project_find(info[key])
-        if len(source) == 1:
+        if len(source) > 1:
+            options = mooseutils.levenshteinDistance(info[key], source, number=8)
+            msg = "Multiple files match the supplied filename {}, did you mean:\n".format(info[key])
+            for opt in options:
+                msg += "    {}\n".format(opt)
+            raise exceptions.MooseDocsException(msg)
+
+        elif len(source) == 1:
             src_link = SourceLink(parent)
             src = str(source[0])
             content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR, src)))
