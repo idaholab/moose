@@ -3,7 +3,7 @@ In conjunction with Liberty University in Lynchburg, VA, we will  we will be off
 These sessions will offer participants the oppurtunity to gain hands-on experience working through example problems. Participants are encouraged to bring their own laptops for these sessions.
 
 - Course title: "MOOSE Workshop"
-- Date: Mon-Tues, March 30-31 2020, 8:30 - 5:00
+- Date: Mon-Tues, April 6-7 2020, 8:30 - 5:00
 - Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
@@ -12,7 +12,7 @@ These sessions will offer participants the oppurtunity to gain hands-on experien
   - Dr. Richard Martineau
 
 - Course title: "BISON Workshop"
-- Date: Wed, April 1, 2020, 8:30 - 5:00
+- Date: Wed, April 8, 2020, 8:30 - 5:00
 - Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
@@ -20,7 +20,7 @@ These sessions will offer participants the oppurtunity to gain hands-on experien
   - Dr. Albert Casagranda
 
 - Course title: "Griffin Workshop"
-- Date: Wed, April 1, 2020, 8:30 - 5:00
+- Date: Wed, April 9, 2020, 8:30 - 5:00
 - Location: Liberty University, Lynchburg, VA (Onsite location TBA)
 - Instructors:
 
