@@ -100,8 +100,10 @@ LatinHypercubeSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_
   const uint32_t bin_num = getRandl(0, 0, _num_bins[col_index]);
 
   // Compute probability in the range within the bin
-  double lower = bin_num * _size_bins[col_index];
+  double lower = bin_num * _size_bins[col_index] + _lower_limits[col_index];
   double prob = getRand(1) * _size_bins[col_index] + lower;
+  mooseAssert(prob >= _lower_limits[col_index] && prob <= _upper_limits[col_index],
+              "Computed probability out of range.");
 
   // Sample the distribution
   return _distributions[col_index]->quantile(prob);
