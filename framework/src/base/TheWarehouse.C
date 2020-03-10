@@ -91,7 +91,7 @@ TheWarehouse::~TheWarehouse() {}
 void isValid(MooseObject * obj);
 
 void
-TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
+TheWarehouse::add(std::shared_ptr<MooseObject> obj)
 {
   isValid(obj.get());
 
@@ -109,7 +109,7 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
   }
 
   std::vector<std::unique_ptr<Attribute>> attribs;
-  readAttribs(obj.get(), system, attribs);
+  readAttribs(obj.get(), attribs);
   _store->add(obj_id, std::move(attribs));
 }
 
@@ -129,7 +129,7 @@ void
 TheWarehouse::update(MooseObject * obj)
 {
   std::vector<std::unique_ptr<Attribute>> attribs;
-  readAttribs(obj, "", attribs);
+  readAttribs(obj, attribs);
   _store->set(_obj_ids[obj], std::move(attribs));
   // reset/invalidate the query cache since query results may have been affected by this object
   // attribute modification.
@@ -226,20 +226,10 @@ TheWarehouse::count(const std::vector<std::unique_ptr<Attribute>> & conds)
 
 void
 TheWarehouse::readAttribs(const MooseObject * obj,
-                          const std::string & system,
                           std::vector<std::unique_ptr<Attribute>> & attribs)
 {
-  std::unique_ptr<AttribSystem> sys;
-  if (!system.empty())
-    sys.reset(new AttribSystem(*this, system));
   for (auto & ref : _attrib_list)
   {
-    if (sys && (ref->id() == sys->id()))
-    {
-      attribs.push_back(std::move(sys));
-      continue;
-    }
-
     attribs.emplace_back(ref->clone());
     attribs.back()->initFrom(obj);
   }

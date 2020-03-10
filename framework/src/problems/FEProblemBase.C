@@ -3199,7 +3199,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // TODO: delete this line after apps have been updated to not call getUserObjects
     _all_user_objects.addObject(user_object, tid);
 
-    theWarehouse().add(user_object, "UserObject");
+    theWarehouse().add(user_object);
 
     // Attempt to create all the possible UserObject types
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
@@ -3229,7 +3229,12 @@ const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().query().condition<AttribThread>(0).condition<AttribName>(name).queryInto(objs);
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find user object with name '" + name + "'");
   return *(objs[0]);
@@ -3239,7 +3244,12 @@ bool
 FEProblemBase::hasUserObject(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().query().condition<AttribThread>(0).condition<AttribName>(name).queryInto(objs);
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(objs);
   return !objs.empty();
 }
 
