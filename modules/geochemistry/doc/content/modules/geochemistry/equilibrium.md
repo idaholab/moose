@@ -20,7 +20,7 @@ Introduce the following:
 
 ## Basis
 
-Note that the index $i$, $j$, etc, gives meaning to the symbol that it is indexing.  Although unusual in mathematics literature, this is the common convention in geochemistry.  There are $1+N_{i}+N_{k}+N_{m}$ unknowns and the basis is
+Note that the index $i$, $j$, etc, gives meaning to the symbol that it is indexing.  Although unusual in mathematics literature, this is the common convention in geochemistry.  There are $1+N_{i}+N_{k}+N_{m}+N_{p}$ unknowns and the basis is
 \begin{equation}
 \mathrm{basis} = (A_{w}, A_{i}, A_{k}, A_{m}, A_{p}) \ .
 \end{equation}
@@ -92,9 +92,11 @@ m_{q} = \frac{1}{K_{q}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{
 \end{equation}
 Here $m_{p}$ is the molality of unoccupied sites and $m_{q}$ is the molality of the secondary species.
 
-### Ion exchange --- mathematically similar to Langmuir sorption
+### Ion exchange
 
-Ion exchange does not treat the sorption of a species on the surface of the porous skeleton, but the replacement of one adsorped ion with another.  The development of the theory is similar to the Langmuir approach of sorption however.  A new basis species representing exchange sites, $A_{p}$ is introduced.  The formula for $m_{q}$ is similar to the Langmuir equation above, but involves the electric charge of the ions involved in the exchange.
+Ion exchange does not treat the sorption of a species on the surface of the porous skeleton, but the replacement of one adsorped ion with another.  The development of the theory is similar to the Langmuir approach of sorption however.  A new basis species representing exchange sites, $A_{p}$ is introduced.  The formula for $m_{q}$ is similar to the Langmuir equation above, but involves the electric charge of the ions involved in the exchange as well as multiplicative factors.
+
+The ion-exchange approach is not currently supported in the `geochemistry` module.
 
 ### Surface complexation approach
 
@@ -102,17 +104,31 @@ Here, the basis includes an entry, $A_{p}$ for *each type* of surface site consi
 \begin{equation}
 A_{q} \rightleftharpoons \nu_{wq}A_{w} + \sum_{i}\nu_{iq}A_{i} + \sum_{k}\nu_{kq}A_{k} + \sum_{m}\nu_{mq}A_{m} + \nu_{pq}A_{p} \ .
 \end{equation}
-($N_{q}=N_{p}$.)  The mass action for each surface complex $A_{q}$ is
+The mass action for each surface complex $A_{q}$ is
 \begin{equation}
 m_{q} = \frac{1}{K_{q}e^{z_{a}F\Psi/RT}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{iq}} \cdot \prod_{k}a_{k}^{\nu_{kq}} \cdot \prod_{m}f_{m}^{\nu_{mq}} \cdot m_{p}^{\nu_{pq}} \right) \ .
 \end{equation}
 which sets the molality of each surface complex.  Here:
 
 - $z_{q}$ \[dimensionless\] is the electronic charge of the surface complex $A_{q}$
-- $\Psi$ is the surface potential, which I think must be set by the user
+- $\Psi$ \[J.K$^{-1}$\] is the surface potential, which is set as below
 - $F = 96485\ldots \,$C.mol$^{-1}$ is the Faraday constant
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature
+
+Computing the surface potential, $\Psi$, requires an additional equation, which [!cite](bethke_2007) writes as
+\begin{equation}
+\frac{A_{\mathrm{sf}}}{Fn_{w}}\sqrt{RT\epsilon\epsilon_{0}\rho_{w} I}\sinh \left(\frac{z_{\pm}\Psi F}{2RT}\right) = \sum_{q}z_{q}m_{q} \ .
+\end{equation}
+Note that the right-hand side of this equation depends on $\Psi$ through the mass-action equation.  The additional notation introduced here is as follows.
+
+- $A_{\mathrm{sf}}$ \[m$^{2}$\] is the surface area of material upon which the $A_{q}$ live.  Usually a mineral in the system provides this surface area and usually the user specifies a specific surface area in \[m$^{2}$/g(of mineral)\].  Hence $A_{\mathrm{sf}}$ is proportional to the mole number of a mineral, $n_{k}$, with coefficient of proportionality being the mineral's density \[g.mol$^{-1}$\] and the specific surface area.
+- $\epsilon$ \[dimensionless\] is the dielectric constant: $\epsilon = 78.5$ at 25$^{\circ}$C for water.
+- $\epsilon_{0} = 8.854\times 10^{-12}\,$F.m$^{-1}$ is the permittivity of free space.
+- $\rho_{w}=1000\,$kg.m$^{-3}$ is the density of water.
+- $I$ is the ionic strength.
+- $z_{\pm}=1$ is the charge on the background solute.  [!cite](bethke_2007) assumes $z_{\pm}=1$
+- $z_{q}$ \[dimensionless\] is the charge of the surface complex $A_{q}$.
 
 ## Equations relating molality and mole numbers of the basis
 
@@ -161,7 +177,7 @@ m_{j} & = \frac{a_{w}^{\nu_{wj}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{ij}} \cdo
 m_{q} & = \frac{1}{K_{q}\mathcal{C}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{iq}} \cdot \prod_{k}a_{k}^{\nu_{kq}} \cdot \prod_{m}f_{m}^{\nu_{mq}} \cdot m_{p}^{\nu_{pq}} \right) \\
 \end{aligned}
 \end{equation}
-Here:
+In addition, if surface complexation is present, there is an equation for the surface potential, $\Psi$.  In the above equations:
 
 - $M$ \[mol\] is the total number of moles of a substance
 - $m$ \[mol.kg$^{-1}$\] is the molality
@@ -175,7 +191,7 @@ Here:
 - $\mathcal{C}$ is unity for the Langmuir approach to sorption, involves electonic charge for ion exchange, and involves the surface potential for the surface complexation approach
 - The last two equations are not dimensionally consistent: see the note above.
 
-These equations relate $1 + N_{i} + N_{j} + N_{k} + N_{m} + N_{p} + N_{q}$ quantities.  Once the basis species are known, the molalities of the secondary and any sorbed species may be worked out simply using the final two equations.
+These equations relate $1 + N_{i} + N_{j} + N_{k} + N_{m} + N_{p} + N_{q}$ quantities, as well as the addition equation for $\Psi$ if relevant.  Once the basis species are known, the molalities of the secondary and any sorbed species may be worked out simply using the final two equations.
 
 The known conditions for the reactions can take a varity of forms:
 

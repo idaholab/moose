@@ -128,6 +128,7 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $N_{i}$ | - | Number of basis species $A_{i}$ |
 | $N_{k}$ | - | Number of basis minerals $A_{k}$ |
 | $N_{m}$ | - | Number of basis gases $A_{m}$ |
+| $N_{p}$ | - | Number of basis sorbing sites $A_{p}$ |
 | $\nu$ | - | Stoichiometric coefficient |
 | $Q_{l}$ | - | [Activity product](equilibrium.md) for mineral $l$.  This is used to construct the saturation index for the mineral |
 | $r_{\bar{k}}$ | mol.s$^{-1}$ | [Reaction rate](kinetics.md) for kinetic component $A_{\bar{k}}$ |
