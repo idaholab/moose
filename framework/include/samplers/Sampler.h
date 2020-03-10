@@ -228,7 +228,7 @@ private:
    * FEProblemBase::executeSamplers; it should not be called elsewhere.
    */
   void execute();
-  friend void FEProblemBase::objectExecuteHelper(const std::vector<Sampler *> & objects);
+  friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
