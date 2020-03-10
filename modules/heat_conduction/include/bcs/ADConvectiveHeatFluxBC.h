@@ -31,7 +31,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Far-field temperatue fields for each component
+  /// Far-field temperatue variable
   const ADMaterialProperty(Real) & _T_infinity;
 
   /// Convective heat transfer coefficient

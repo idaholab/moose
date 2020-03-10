@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  /// Far-field temperatue fields for each component
+  /// Far-field temperatue variable
   const MaterialProperty<Real> & _T_infinity;
 
   /// Convective heat transfer coefficient
