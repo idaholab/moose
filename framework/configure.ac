@@ -54,6 +54,7 @@ fi
 
 AC_SUBST([LIBPNG_LIBS])
 AC_SUBST([LIBPNG_INCLUDES])
+AC_SUBST([prefix])
 
 AC_CONFIG_FILES(conf_vars.mk)
 
