@@ -183,6 +183,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     Restartable(this, "MultiApps"),
+    PerfGraphInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
@@ -210,13 +211,19 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _perf_backup(registerTimedSection("backup", 3)),
+    _perf_restore(registerTimedSection("restore", 3)),
+    _perf_init(registerTimedSection("init", 3)),
+    _perf_reset_app(registerTimedSection("resetApp", 3))
 {
 }
 
 void
 MultiApp::init(unsigned int num)
 {
+  TIME_SECTION(_perf_init);
+
   _total_num_apps = num;
   buildComm();
   _backups.reserve(_my_num_apps);
@@ -414,6 +421,8 @@ MultiApp::postExecute()
 void
 MultiApp::backup()
 {
+  TIME_SECTION(_perf_backup);
+
   _console << "Beginning backing up MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
@@ -423,6 +432,8 @@ MultiApp::backup()
 void
 MultiApp::restore()
 {
+  TIME_SECTION(_perf_restore);
+
   // Must be restarting / recovering so hold off on restoring
   // Instead - the restore will happen in createApp()
   // Note that _backups was already populated by dataLoad()
@@ -610,6 +621,8 @@ MultiApp::localApp(unsigned int local_app)
 void
 MultiApp::resetApp(unsigned int global_app, Real time)
 {
+  TIME_SECTION(_perf_reset_app);
+
   Moose::ScopedCommSwapper swapper(_my_comm);
 
   if (hasLocalApp(global_app))

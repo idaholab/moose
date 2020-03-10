@@ -5,11 +5,6 @@
   ny = 1
 []
 
-[Variables]
-  [u]
-  []
-[]
-
 [Distributions]
   [d0]
     type = UniformDistribution

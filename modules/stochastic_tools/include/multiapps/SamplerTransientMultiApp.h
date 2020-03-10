@@ -66,4 +66,11 @@ private:
   /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included
   /// in case that changes in the future or in child classes
   std::vector<std::vector<std::shared_ptr<Backup>>> _batch_backup;
+
+  ///@{
+  /// PrefGraph timers
+  const PerfID _perf_solve_step;
+  const PerfID _perf_solve_batch_step;
+  const PerfID _perf_initial_setup;
+  ///@}
 };

@@ -27,6 +27,7 @@
   [sample]
     type = SobolSampler
     num_rows = 3
+    resample = false
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep
   []

@@ -69,7 +69,9 @@ Statistics::Statistics(const InputParameters & parameters)
     _ci_method(getParam<MooseEnum>("ci_method")),
     _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
                                     : std::vector<Real>()),
-    _stat_type_vector(declareVector("stat_type"))
+    _stat_type_vector(declareVector("stat_type")),
+    _perf_initial_setup(registerTimedSection("initialSetup", 2)),
+    _perf_execute(registerTimedSection("execute", 1))
 {
   for (const auto & item : _compute_stats)
   {
@@ -90,6 +92,8 @@ Statistics::Statistics(const InputParameters & parameters)
 void
 Statistics::initialSetup()
 {
+  TIME_SECTION(_perf_initial_setup);
+
   const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
   for (const auto & vpp_name : vpp_names)
   {
@@ -110,6 +114,8 @@ Statistics::initialSetup()
 void
 Statistics::execute()
 {
+  TIME_SECTION(_perf_execute);
+
   for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {
     const std::string & vpp_name = std::get<0>(_compute_from_names[i]);

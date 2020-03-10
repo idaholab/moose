@@ -55,9 +55,9 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
   : OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _parallel_type(parameters.get<MooseEnum>("parallel_type")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _contains_complete_history(parameters.get<bool>("contains_complete_history")),
-    _parallel_type(parameters.get<MooseEnum>("parallel_type")),
     _is_distributed(_parallel_type == "DISTRIBUTED"),
     _is_broadcast(_is_distributed || !parameters.get<bool>("_auto_broadcast"))
 {

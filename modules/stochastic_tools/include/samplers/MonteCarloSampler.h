@@ -34,4 +34,8 @@ protected:
 
   /// Distribution names
   const std::vector<DistributionName> & _distribution_names;
+
+private:
+  /// PerfGraph timer
+  const PerfID _perf_compute_sample;
 };

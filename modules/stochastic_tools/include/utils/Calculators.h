@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "MooseObject.h"
+#include "MultiMooseEnum.h"
 #include <vector>
 
 class MooseEnumItem;

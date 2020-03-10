@@ -48,7 +48,11 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
   : TransientMultiApp(parameters),
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
-    _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>())
+    _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
+    _perf_solve_step(registerTimedSection("solveStep", 1)),
+    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
+    _perf_initial_setup(registerTimedSection("initialSetup", 2))
+
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
@@ -65,6 +69,8 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
 void
 SamplerTransientMultiApp::initialSetup()
 {
+  TIME_SECTION(_perf_initial_setup);
+
   TransientMultiApp::initialSetup();
 
   // Perform initial backup for the batch sub-applications
@@ -81,6 +87,8 @@ SamplerTransientMultiApp::initialSetup()
 bool
 SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  TIME_SECTION(_perf_solve_step);
+
   bool last_solve_converged = true;
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
@@ -92,6 +100,8 @@ SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
+  TIME_SECTION(_perf_solve_batch_step);
+
   // Value to return
   bool last_solve_converged = true;
 

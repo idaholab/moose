@@ -27,7 +27,7 @@ CartesianProductSampler::validParams()
 }
 
 CartesianProductSampler::CartesianProductSampler(const InputParameters & parameters)
-  : Sampler(parameters)
+  : Sampler(parameters), _perf_compute_sample(registerTimedSection("computeSample", 4))
 {
   const std::vector<Real> & items = getParam<std::vector<Real>>("linear_space_items");
   if (items.size() % 3 != 0)
@@ -62,5 +62,6 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
 Real
 CartesianProductSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  TIME_SECTION(_perf_compute_sample);
   return _cp_ptr->computeValue(row_index, col_index);
 }
