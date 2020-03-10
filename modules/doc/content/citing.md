@@ -6,16 +6,16 @@ If you use MOOSE for your publication, please cite the following:
 
 ```
 @article{permann2020moose,
-title = "MOOSE: Enabling massively parallel multiphysics simulation",
-journal = "SoftwareX",
-volume = "11",
-pages = "100430",
-year = "2020",
-issn = "2352-7110",
-doi = "https://doi.org/10.1016/j.softx.2020.100430",
-url = "http://www.sciencedirect.com/science/article/pii/S2352711019302973",
-author = "Cody J. Permann and Derek R. Gaston and David Andr{\v{s}} and Robert W. Carlsen and Fande Kong and Alexander D. Lindsay and Jason M. Miller and John W. Peterson and Andrew E. Slaughter and Roy H. Stogner and Richard C. Martineau",
-keywords = "Framework, Finite-element, Parallel, Multiphysics, Multiscale"
+title = {{MOOSE}: Enabling massively parallel multiphysics simulation},
+journal = {{SoftwareX}},
+volume = {11},
+pages = {100430},
+year = {2020},
+issn = {2352-7110},
+doi = {https://doi.org/10.1016/j.softx.2020.100430},
+url = {http://www.sciencedirect.com/science/article/pii/S2352711019302973},
+author = {Cody J. Permann and Derek R. Gaston and David Andr{\v{s}} and Robert W. Carlsen and Fande Kong and Alexander D. Lindsay and Jason M. Miller and John W. Peterson and Andrew E. Slaughter and Roy H. Stogner and Richard C. Martineau},
+keywords = {Framework, Finite-element, Parallel, Multiphysics, Multiscale},
 }
 ```
 
