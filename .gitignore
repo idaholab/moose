@@ -97,6 +97,7 @@ build
 !**/gold/*.e
 !**/gold/*.e-s*
 !**/gold/*.csv
+!**/gold/*.csv.*
 !**/gold/*.vtk
 !**/gold/*.vtu
 !**/gold/*.pvtu
