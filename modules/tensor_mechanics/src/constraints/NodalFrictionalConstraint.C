@@ -9,7 +9,10 @@
 
 // MOOSE includes
 #include "NodalFrictionalConstraint.h"
+#include "NodalConstraintUtils.h"
 #include "MooseMesh.h"
+#include "Assembly.h"
+#include "SystemBase.h"
 
 #include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/parallel.h"
@@ -28,16 +31,20 @@ validParams<NodalFrictionalConstraint>()
   InputParameters params = validParams<NodalConstraint>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
-  params.addRequiredParam<Real>("friction_coefficient", "The friction coefficient");
-  params.addRequiredParam<Real>("normal_force", "The force in the normal direction.");
-  params.addRequiredParam<Real>("tangential_penalty", "Stiffness of the spring in the tangential direction.");
+  params.addRequiredParam<Real>("friction_coefficient",
+                                "Friction coefficient for slippage in the normal direction");
+  params.addRequiredParam<Real>("normal_force",
+                                "Normal force used together with friction_coefficient to compute "
+                                "the normal frictional capacity.");
+  params.addRequiredParam<Real>("tangential_penalty",
+                                "Stiffness of the spring in the tangential direction.");
   return params;
 }
 
 NodalFrictionalConstraint::NodalFrictionalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
-    _master_node_set_id(getParam<BoundaryName>("boundary")),
-    _slave_node_set_id(getParam<BoundaryName>("slave")),
+    _master_boundary_id(getParam<BoundaryName>("boundary")),
+    _slave_boundary_id(getParam<BoundaryName>("slave")),
     _normal_force(getParam<Real>("normal_force")),
     _tangential_penalty(getParam<Real>("tangential_penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
@@ -50,7 +57,8 @@ NodalFrictionalConstraint::NodalFrictionalConstraint(const InputParameters & par
   if (temp_formulation == "penalty")
     _formulation = Moose::Penalty;
   else if (temp_formulation == "kinematic")
-    mooseError("NodalFrictionalConstraint: Kinematic formulation is currently not supported for this constraint.");
+    mooseError("NodalFrictionalConstraint: Kinematic formulation is currently not supported for "
+               "this constraint.");
   else
     mooseError("Formulation must be set to Penalty.");
 }
@@ -68,21 +76,21 @@ NodalFrictionalConstraint::updateConstrainedNodes()
   _connected_nodes.clear();
   _master_conn.clear();
 
-  std::vector<dof_id_type> slave_nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
-  std::vector<dof_id_type> master_nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_master_node_set_id));
-
-  std::vector<dof_id_type>::iterator in;
+  std::vector<dof_id_type> slave_nodelist =
+      _mesh.getNodeList(_mesh.getBoundaryID(_slave_boundary_id));
+  std::vector<dof_id_type> master_nodelist =
+      _mesh.getNodeList(_mesh.getBoundaryID(_master_boundary_id));
 
   // Fill in _connected_nodes, which defines slave nodes in the base class
-  for (in = slave_nodelist.begin(); in != slave_nodelist.end(); ++in)
+  for (auto in : slave_nodelist)
   {
-    if (_mesh.nodeRef(*in).processor_id() ==_subproblem.processor_id())
-      _connected_nodes.push_back(*in);
+    if (_mesh.nodeRef(in).processor_id() == _subproblem.processor_id())
+      _connected_nodes.push_back(in);
   }
 
   // Fill in _master_node_vector, which defines slave nodes in the base class
-  for (in = master_nodelist.begin(); in != master_nodelist.end(); ++in)
-    _master_node_vector.push_back(*in);
+  for (auto in : master_nodelist)
+    _master_node_vector.push_back(in);
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   std::vector<std::vector<dof_id_type>> elems(_master_node_vector.size());
@@ -110,7 +118,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
 
       if (found_elems)
       {
-        for (dof_id_type id : node_to_elem_pair->second)
+        for (auto id : node_to_elem_pair->second)
         {
           Elem * elem = _mesh.queryElemPtr(id);
           if (elem)
@@ -177,7 +185,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
   _master_conn.clear();
   for (unsigned int j = 0; j < slave_nodelist.size(); ++j)
   {
-     if (_mesh.nodeRef(slave_nodelist[j]).processor_id() ==_subproblem.processor_id())
+    if (_mesh.nodeRef(slave_nodelist[j]).processor_id() == _subproblem.processor_id())
     {
       Node & slave_node = _mesh.nodeRef(slave_nodelist[j]);
       for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
@@ -192,17 +200,20 @@ NodalFrictionalConstraint::updateConstrainedNodes()
         }
       }
     }
-      /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
-      {
-          printf("in here \n");
-          mooseError("No master node located at the same elevation as the slave node.");
-      }*/
+    /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
+    {
+        printf("in here \n");
+        mooseError("No master node located at the same elevation as the slave node.");
+    }*/
   }
-  printf("total slave nodes, master nodes: %lu, %lu \n", _master_conn.size(), _master_node_vector.size());
+  printf("total slave nodes, master nodes: %lu, %lu \n",
+         _master_conn.size(),
+         _master_node_vector.size());
 }
 
 void
-NodalFrictionalConstraint::computeResidual(NumericVector<Number> & residual)
+NodalFrictionalConstraint::computeResidual(NumericVector<Number> &
+                                           /*residual*/)
 {
   std::vector<dof_id_type> masterdof = _var.dofIndices();
   std::vector<dof_id_type> slavedof = _var.dofIndicesNeighbor();
@@ -215,48 +226,42 @@ NodalFrictionalConstraint::computeResidual(NumericVector<Number> & residual)
   for (_i = 0; _i < slavedof.size(); ++_i)
   {
     _j = _master_conn[_i];
-    switch (_formulation)
-    {
-      case Moose::Penalty:
-        re(_j) += computeQpResidual(Moose::Master);
-        neighbor_re(_i) += computeQpResidual(Moose::Slave);
-        break;
-      case Moose::Kinematic:
-        mooseError("This constraint currently works only with penalty formulation.");
-    }
+    re(_j) += computeQpResidual(Moose::Master);
+    neighbor_re(_i) += computeQpResidual(Moose::Slave);
+    break;
   }
   _assembly.cacheResidualNodes(re, masterdof);
   _assembly.cacheResidualNodes(neighbor_re, slavedof);
 }
-
 
 Real
 NodalFrictionalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   // check whether the tangential spring is already in the yielded state
   Real old_force = (_u_slave_old[_i] - _u_master_old[_j]) * _tangential_penalty;
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(old_force), _friction_coefficient * _normal_force))
-    old_force = _friction_coefficient * _normal_force * old_force/ std::abs(old_force);
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(old_force),
+                                           _friction_coefficient * _normal_force))
+    old_force = _friction_coefficient * _normal_force * old_force / std::abs(old_force);
 
-  Real current_force = ((_u_slave[_i] - _u_slave_old[_i]) - (_u_master[_j] - _u_master_old[_j])) * _tangential_penalty + old_force;
-  printf("current, max: %e, %e\n",std::abs(current_force), _friction_coefficient * _normal_force);
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force), _friction_coefficient * _normal_force))
-  {
-     current_force = _friction_coefficient * _normal_force * current_force/ std::abs(current_force);
-     printf("yielded: %u \n", _i);
-  }
+  Real current_force = ((_u_slave[_i] - _u_slave_old[_i]) - (_u_master[_j] - _u_master_old[_j])) *
+                           _tangential_penalty +
+                       old_force;
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force),
+                                           _friction_coefficient * _normal_force))
+    current_force = _friction_coefficient * _normal_force * current_force / std::abs(current_force);
 
-  switch(type)
+  switch (type)
   {
     case Moose::Slave:
       return current_force;
     case Moose::Master:
       return -current_force;
   }
+  return 0;
 }
 
 void
-NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
+NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
   // Calculate Jacobian enteries and cache those entries along with the row and column indices
   std::vector<dof_id_type> slavedof = _var.dofIndicesNeighbor();
@@ -275,17 +280,10 @@ NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
   for (_i = 0; _i < slavedof.size(); ++_i)
   {
     _j = _master_conn[_i];
-    switch (_formulation)
-    {
-      case Moose::Penalty:
-        Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
-        Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
-        Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
-        Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
-        break;
-      case Moose::Kinematic:
-        mooseError("This constraint currently works only with penalty formulation.");
-    }
+    Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
+    Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
+    Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
+    Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
   }
   _assembly.cacheJacobianBlock(Kee, masterdof, masterdof, _var.scalingFactor());
   _assembly.cacheJacobianBlock(Ken, masterdof, slavedof, _var.scalingFactor());
@@ -300,23 +298,29 @@ NodalFrictionalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
   // set jacobian to zero if spring has yielded
   Real old_force = (_u_slave_old[_i] - _u_master_old[_j]) * _tangential_penalty;
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(old_force), _friction_coefficient * _normal_force))
-    old_force = _friction_coefficient * _normal_force * old_force/ std::abs(old_force);
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(old_force),
+                                           _friction_coefficient * _normal_force))
+    old_force = _friction_coefficient * _normal_force * old_force / std::abs(old_force);
 
-  Real current_force = ((_u_slave[_i] - _u_slave_old[_i]) - (_u_master[_j] - _u_master_old[_j])) * _tangential_penalty + old_force;
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force), _friction_coefficient * _normal_force))
+  Real current_force = ((_u_slave[_i] - _u_slave_old[_i]) - (_u_master[_j] - _u_master_old[_j])) *
+                           _tangential_penalty +
+                       old_force;
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force),
+                                           _friction_coefficient * _normal_force))
     jac = 0.0;
 
   switch (type)
   {
     case Moose::SlaveSlave:
-      return jac ;
+      return jac;
     case Moose::SlaveMaster:
-      return - jac;
+      return -jac;
     case Moose::MasterMaster:
       return jac;
     case Moose::MasterSlave:
-      return - jac;
+      return -jac;
+    default:
+      mooseError("Invalid type");
   }
   return 0.;
 }

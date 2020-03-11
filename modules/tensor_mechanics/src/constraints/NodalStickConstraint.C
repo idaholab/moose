@@ -9,7 +9,10 @@
 
 // MOOSE includes
 #include "NodalStickConstraint.h"
+#include "NodalConstraintUtils.h"
 #include "MooseMesh.h"
+#include "Assembly.h"
+#include "SystemBase.h"
 
 #include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/parallel.h"
@@ -34,8 +37,8 @@ validParams<NodalStickConstraint>()
 
 NodalStickConstraint::NodalStickConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
-    _master_node_set_id(getParam<BoundaryName>("boundary")),
-    _slave_node_set_id(getParam<BoundaryName>("slave")),
+    _master_boundary_id(getParam<BoundaryName>("boundary")),
+    _slave_boundary_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {
   updateConstrainedNodes();
@@ -54,21 +57,21 @@ NodalStickConstraint::updateConstrainedNodes()
   _connected_nodes.clear();
   _master_conn.clear();
 
-  std::vector<dof_id_type> slave_nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
-  std::vector<dof_id_type> master_nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_master_node_set_id));
-
-  std::vector<dof_id_type>::iterator in;
+  std::vector<dof_id_type> slave_nodelist =
+      _mesh.getNodeList(_mesh.getBoundaryID(_slave_boundary_id));
+  std::vector<dof_id_type> master_nodelist =
+      _mesh.getNodeList(_mesh.getBoundaryID(_master_boundary_id));
 
   // Fill in _connected_nodes, which defines slave nodes in the base class
-  for (in = slave_nodelist.begin(); in != slave_nodelist.end(); ++in)
+  for (auto in : slave_nodelist)
   {
-    if (_mesh.nodeRef(*in).processor_id() ==_subproblem.processor_id())
-      _connected_nodes.push_back(*in);
+    if (_mesh.nodeRef(in).processor_id() == _subproblem.processor_id())
+      _connected_nodes.push_back(in);
   }
 
   // Fill in _master_node_vector, which defines slave nodes in the base class
-  for (in = master_nodelist.begin(); in != master_nodelist.end(); ++in)
-    _master_node_vector.push_back(*in);
+  for (auto in : master_nodelist)
+    _master_node_vector.push_back(in);
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   std::vector<std::vector<dof_id_type>> elems(_master_node_vector.size());
@@ -96,7 +99,7 @@ NodalStickConstraint::updateConstrainedNodes()
 
       if (found_elems)
       {
-        for (dof_id_type id : node_to_elem_pair->second)
+        for (auto id : node_to_elem_pair->second)
         {
           Elem * elem = _mesh.queryElemPtr(id);
           if (elem)
@@ -163,7 +166,7 @@ NodalStickConstraint::updateConstrainedNodes()
   _master_conn.clear();
   for (unsigned int j = 0; j < slave_nodelist.size(); ++j)
   {
-     if (_mesh.nodeRef(slave_nodelist[j]).processor_id() ==_subproblem.processor_id())
+    if (_mesh.nodeRef(slave_nodelist[j]).processor_id() == _subproblem.processor_id())
     {
       Node & slave_node = _mesh.nodeRef(slave_nodelist[j]);
       for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
@@ -178,11 +181,11 @@ NodalStickConstraint::updateConstrainedNodes()
         }
       }
     }
-      /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
-      {
-          printf("in here \n");
-          mooseError("No master node located at the same elevation as the slave node.");
-      }*/
+    /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
+    {
+        printf("in here \n");
+        mooseError("No master node located at the same elevation as the slave node.");
+    }*/
   }
 }
 
@@ -205,24 +208,23 @@ NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 
   for (_i = 0; _i < slavedof.size(); ++_i)
   {
-     _j = _master_conn[_i];
-      switch (_formulation)
-      {
-        case Moose::Penalty:
-          Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
-          Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
-          Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
-          Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
-          break;
-        case Moose::Kinematic:
-          Kee(_j, _j) = 0.;
-          Ken(_j, _i) += jacobian(slavedof[_i], masterdof[_j]);
-          Kne(_i, _j) += -jacobian(slavedof[_i], masterdof[_j])+
-                         computeQpJacobian(Moose::SlaveMaster);
-          Knn(_i, _i) += -jacobian(slavedof[_i], slavedof[_i])+
-                         computeQpJacobian(Moose::SlaveSlave);
-          break;
-      }
+    _j = _master_conn[_i];
+    switch (_formulation)
+    {
+      case Moose::Penalty:
+        Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
+        Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
+        Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
+        Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
+        break;
+      case Moose::Kinematic:
+        Kee(_j, _j) = 0.;
+        Ken(_j, _i) += jacobian(slavedof[_i], masterdof[_j]);
+        Kne(_i, _j) +=
+            -jacobian(slavedof[_i], masterdof[_j]) + computeQpJacobian(Moose::SlaveMaster);
+        Knn(_i, _i) += -jacobian(slavedof[_i], slavedof[_i]) + computeQpJacobian(Moose::SlaveSlave);
+        break;
+    }
   }
   _assembly.cacheJacobianBlock(Kee, masterdof, masterdof, _var.scalingFactor());
   _assembly.cacheJacobianBlock(Ken, masterdof, slavedof, _var.scalingFactor());
@@ -261,7 +263,6 @@ NodalStickConstraint::computeResidual(NumericVector<Number> & residual)
   _assembly.cacheResidualNodes(neighbor_re, slavedof);
 }
 
-
 Real
 NodalStickConstraint::computeQpResidual(Moose::ConstraintType type)
 {
@@ -288,6 +289,8 @@ NodalStickConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       return _penalty;
     case Moose::MasterSlave:
       return -_penalty;
+    default:
+      mooseError("Invalid type");
   }
   return 0.;
 }
