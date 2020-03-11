@@ -3063,33 +3063,73 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 }
 
 void
+FEProblemBase::reinitMaterialsFace(const Elem * elem,
+                                   unsigned int side,
+                                   unsigned int n_points,
+                                   SubdomainID blk_id,
+                                   THREAD_ID tid,
+                                   bool swap_stateful)
+{
+  _bnd_material_data[tid]->resize(n_points);
+
+  if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
+    _bnd_material_data[tid]->swap(*elem, side);
+
+  if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    _bnd_material_data[tid]->reset(
+        _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+  if (_jacobian_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+      _currently_computing_jacobian)
+    _bnd_material_data[tid]->reinit(
+        _jacobian_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+  if (_residual_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+      !_currently_computing_jacobian)
+    _bnd_material_data[tid]->reinit(
+        _residual_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+}
+
+void
 FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
-  {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    reinitMaterialsFace(_assembly[tid]->elem(),
+                        _assembly[tid]->side(),
+                        _assembly[tid]->qRuleFace()->n_points(),
+                        blk_id,
+                        tid,
+                        swap_stateful);
+}
 
-    _bnd_material_data[tid]->resize(n_points);
+void
+FEProblemBase::reinitMaterialsNeighbor(const Elem * neighbor,
+                                       unsigned int neighbor_side,
+                                       unsigned int n_points,
+                                       SubdomainID blk_id,
+                                       THREAD_ID tid,
+                                       bool swap_stateful)
+{
+  // NOTE: this will not work with h-adaptivity
+  _neighbor_material_data[tid]->resize(n_points);
 
-    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
-      _bnd_material_data[tid]->swap(*elem, side);
+  // Only swap if requested
+  if (swap_stateful)
+    _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
 
-    if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _bnd_material_data[tid]->reset(
-          _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    _neighbor_material_data[tid]->reset(
+        _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_jacobian_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        _currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _jacobian_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+      _currently_computing_jacobian)
+    _neighbor_material_data[tid]->reinit(
+        _jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_residual_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        !_currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _residual_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-  }
+  if (_residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+      !_currently_computing_jacobian)
+    _neighbor_material_data[tid]->reinit(
+        _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 }
 
 void
@@ -3101,25 +3141,8 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
     auto && neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-    _neighbor_material_data[tid]->resize(n_points);
 
-    // Only swap if requested
-    if (swap_stateful)
-      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
-
-    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reset(
-          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        _currently_computing_jacobian)
-      _neighbor_material_data[tid]->reinit(
-          _jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        !_currently_computing_jacobian)
-      _neighbor_material_data[tid]->reinit(
-          _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+    reinitMaterialsNeighbor(neighbor, neighbor_side, n_points, blk_id, tid, swap_stateful);
   }
 }
 
@@ -3198,6 +3221,20 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
   // NOTE: this will not work with h-adaptivity
   auto && neighbor = _assembly[tid]->neighbor();
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
+}
+
+void
+FEProblemBase::swapBackMaterialsFace(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  _bnd_material_data[tid]->swapBack(*elem, side);
+}
+
+void
+FEProblemBase::swapBackMaterialsNeighbor(const Elem * neighbor,
+                                         unsigned int neighbor_side,
+                                         THREAD_ID tid)
+{
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 

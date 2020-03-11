@@ -668,6 +668,25 @@ public:
    */
   bool automaticScaling() const;
 
+  /*
+   * Swap back underlying data storing stateful material properties
+   */
+  virtual void swapBackMaterials(THREAD_ID tid) = 0;
+  virtual void swapBackMaterialsFace(THREAD_ID tid) = 0;
+  virtual void swapBackMaterialsNeighbor(THREAD_ID tid) = 0;
+
+  /**
+   * Reinitialize element face materials
+   */
+  virtual void
+  reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) = 0;
+
+  /**
+   * Reinitialize neighbor face materials
+   */
+  virtual void
+  reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

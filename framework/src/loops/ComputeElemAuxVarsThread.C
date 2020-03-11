@@ -103,7 +103,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
 
     // Set up the sentinel so that, even if reinitMaterials() throws, we
     // still remember to swap back.
-    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid, _need_materials);
+    SwapBackSentinel sentinel(_fe_problem, &SubProblem::swapBackMaterials, _tid, _need_materials);
 
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);

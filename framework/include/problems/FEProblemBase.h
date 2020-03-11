@@ -704,9 +704,32 @@ public:
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
-  reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) override;
+
+  /**
+   * reinit face material for specified elem and side
+   */
+  void reinitMaterialsFace(const Elem * elem,
+                           unsigned int side,
+                           unsigned int n_points,
+                           SubdomainID blk_id,
+                           THREAD_ID tid,
+                           bool swap_stateful = true);
+
+  virtual void
+  reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) override;
+
+  /**
+   * reinit neighbor face material for specified neighbor and neighbor_side
+   */
+  void reinitMaterialsNeighbor(const Elem * neighbor,
+                               unsigned int neighbor_side,
+                               unsigned int n_points,
+                               SubdomainID blk_id,
+                               THREAD_ID tid,
+                               bool swap_stateful = true);
+
   virtual void
   reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
@@ -714,9 +737,19 @@ public:
   /*
    * Swap back underlying data storing stateful material properties
    */
-  virtual void swapBackMaterials(THREAD_ID tid);
-  virtual void swapBackMaterialsFace(THREAD_ID tid);
-  virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
+  virtual void swapBackMaterials(THREAD_ID tid) override;
+  virtual void swapBackMaterialsFace(THREAD_ID tid) override;
+  virtual void swapBackMaterialsNeighbor(THREAD_ID tid) override;
+
+  /**
+   * swap back material for given \p elem and \p side
+   */
+  void swapBackMaterialsFace(const Elem * elem, unsigned int side, THREAD_ID tid);
+
+  /**
+   * swap back material for given \p neighbor_elem and \p neighbor_side
+   */
+  void swapBackMaterialsNeighbor(const Elem * neighbor, unsigned int neighbor_side, THREAD_ID tid);
 
   // Postprocessors /////
   virtual void
