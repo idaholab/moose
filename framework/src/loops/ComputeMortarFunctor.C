@@ -14,6 +14,7 @@
 #include "AutomaticMortarGeneration.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
+#include "SwapBackSentinel.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature.h"
@@ -132,6 +133,14 @@ ComputeMortarFunctor<compute_stage>::operator()()
     _subproblem.reinitElemFaceRef(
         slave_ip, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
 
+    // reinit higher-dimensional element face materials
+    {
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_subproblem, &SubProblem::swapBackMaterialsFace, /*tid=*/0);
+      _subproblem.reinitMaterialsFace(slave_ip->subdomain_id(), /*tid=*/0);
+    }
+
     if (_has_master)
     {
       //  Compute custom integration points for the master side
@@ -146,6 +155,13 @@ ComputeMortarFunctor<compute_stage>::operator()()
       // reinit the variables/residuals/jacobians on the master interior
       _subproblem.reinitNeighborFaceRef(
           master_ip, master_side_id, _master_boundary_id, TOLERANCE, &custom_xi2_pts);
+
+      // reinit higher-dimensional neighbor face materials
+      {
+        SwapBackSentinel neighbor_sentinel(
+            _subproblem, &SubProblem::swapBackMaterialsNeighbor, /*tid=*/0);
+        _subproblem.reinitMaterialsNeighbor(master_ip->subdomain_id(), /*tid=*/0);
+      }
     }
 
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
