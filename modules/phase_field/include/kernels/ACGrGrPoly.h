@@ -25,6 +25,8 @@ InputParameters validParams<ACGrGrPoly>();
 class ACGrGrPoly : public ACGrGrBase
 {
 public:
+  static InputParameters validParams();
+
   ACGrGrPoly(const InputParameters & parameters);
 
 protected:

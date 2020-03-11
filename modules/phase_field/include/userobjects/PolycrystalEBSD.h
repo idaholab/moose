@@ -21,6 +21,8 @@ InputParameters validParams<PolycrystalEBSD>();
 class PolycrystalEBSD : public PolycrystalUserObjectBase
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalEBSD(const InputParameters & parameters);
 
   virtual void getGrainsBasedOnPoint(const Point & point,

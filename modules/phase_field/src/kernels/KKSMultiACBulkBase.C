@@ -9,9 +9,10 @@
 
 #include "KKSMultiACBulkBase.h"
 
-template <>
+defineLegacyParams(KKSMultiACBulkBase);
+
 InputParameters
-validParams<KKSMultiACBulkBase>()
+KKSMultiACBulkBase::validParams()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Multi-order parameter KKS model kernel for the Bulk Allen-Cahn. This "

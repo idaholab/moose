@@ -27,6 +27,8 @@ InputParameters validParams<BarrierFunctionMaterial>();
 class BarrierFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
+  static InputParameters validParams();
+
   BarrierFunctionMaterial(const InputParameters & parameters);
 
 protected:

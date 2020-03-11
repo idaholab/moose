@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class ADCHSplitConcentration : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCHSplitConcentration(const InputParameters & parameters);
 
 protected:

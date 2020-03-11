@@ -32,6 +32,8 @@ InputParameters validParams<ConservedMaskedNoiseBase>();
 class ConservedMaskedNoiseBase : public ConservedNoiseInterface
 {
 public:
+  static InputParameters validParams();
+
   ConservedMaskedNoiseBase(const InputParameters & parameters);
 
   virtual ~ConservedMaskedNoiseBase() {}

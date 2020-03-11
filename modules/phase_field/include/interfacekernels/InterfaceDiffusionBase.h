@@ -23,6 +23,8 @@ InputParameters validParams<InterfaceDiffusionBase>();
 class InterfaceDiffusionBase : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   InterfaceDiffusionBase(const InputParameters & parameters);
 
 protected:

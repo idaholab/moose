@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", MathEBFreeEnergy);
 
-template <>
+defineLegacyParams(MathEBFreeEnergy);
+
 InputParameters
-validParams<MathEBFreeEnergy>()
+MathEBFreeEnergy::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription("Material that implements the math free energy using the expression "
                              "builder and automatic differentiation");
   params.addRequiredCoupledVar("c", "Concentration variable");

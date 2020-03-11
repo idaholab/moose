@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CHBulkPFCTrad);
 
-template <>
+defineLegacyParams(CHBulkPFCTrad);
+
 InputParameters
-validParams<CHBulkPFCTrad>()
+CHBulkPFCTrad::validParams()
 {
   InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription(

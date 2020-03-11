@@ -19,6 +19,8 @@ template <ComputeStage compute_stage>
 class ADSplitCHWRes : public ADSplitCHWResBase<compute_stage, Real>
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHWRes(const InputParameters & parameters);
 };
 

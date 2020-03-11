@@ -14,6 +14,8 @@
 class RigidBodyMultiKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   RigidBodyMultiKernelAction(const InputParameters & params);
 
   virtual void act();

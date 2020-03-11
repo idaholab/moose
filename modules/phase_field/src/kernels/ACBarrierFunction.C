@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", ACBarrierFunction);
 
-template <>
+defineLegacyParams(ACBarrierFunction);
+
 InputParameters
-validParams<ACBarrierFunction>()
+ACBarrierFunction::validParams()
 {
-  InputParameters params = validParams<ACGrGrBase>();
+  InputParameters params = ACGrGrBase::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "gamma", "The interface profile coefficient to use with the kernel");
   params.addClassDescription("Allen-Cahn kernel used when 'mu' is a function of variables");

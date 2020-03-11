@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CoefCoupledTimeDerivative);
 
-template <>
+defineLegacyParams(CoefCoupledTimeDerivative);
+
 InputParameters
-validParams<CoefCoupledTimeDerivative>()
+CoefCoupledTimeDerivative::validParams()
 {
-  InputParameters params = validParams<CoupledTimeDerivative>();
+  InputParameters params = CoupledTimeDerivative::validParams();
   params.addClassDescription("Scaled time derivative Kernel that acts on a coupled variable");
   params.addRequiredParam<Real>("coef", "Coefficient");
   return params;

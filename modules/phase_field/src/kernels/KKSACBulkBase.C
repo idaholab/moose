@@ -9,9 +9,10 @@
 
 #include "KKSACBulkBase.h"
 
-template <>
+defineLegacyParams(KKSACBulkBase);
+
 InputParameters
-validParams<KKSACBulkBase>()
+KKSACBulkBase::validParams()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order "

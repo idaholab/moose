@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", TotalFreeEnergy);
 
-template <>
+defineLegacyParams(TotalFreeEnergy);
+
 InputParameters
-validParams<TotalFreeEnergy>()
+TotalFreeEnergy::validParams()
 {
-  InputParameters params = validParams<TotalFreeEnergyBase>();
+  InputParameters params = TotalFreeEnergyBase::validParams();
   params.addClassDescription("Total free energy (both the bulk and gradient parts), where the bulk "
                              "free energy has been defined in a material");
   params.addParam<MaterialPropertyName>("f_name", "F", " Base name of the free energy function");

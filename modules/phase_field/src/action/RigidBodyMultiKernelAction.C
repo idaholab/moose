@@ -15,11 +15,12 @@
 
 registerMooseAction("PhaseFieldApp", RigidBodyMultiKernelAction, "add_kernel");
 
-template <>
+defineLegacyParams(RigidBodyMultiKernelAction);
+
 InputParameters
-validParams<RigidBodyMultiKernelAction>()
+RigidBodyMultiKernelAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action for applying Allen-Cahn equations and SingleGrainRigidBodyMotion to grains");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");

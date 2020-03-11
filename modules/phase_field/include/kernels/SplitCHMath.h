@@ -21,6 +21,8 @@ InputParameters validParams<SplitCHMath>();
 class SplitCHMath : public SplitCHCRes
 {
 public:
+  static InputParameters validParams();
+
   SplitCHMath(const InputParameters & parameters);
 
 protected:

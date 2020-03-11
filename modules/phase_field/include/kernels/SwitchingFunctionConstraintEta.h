@@ -28,6 +28,8 @@ class SwitchingFunctionConstraintEta
   : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunctionConstraintEta(const InputParameters & parameters);
 
 protected:

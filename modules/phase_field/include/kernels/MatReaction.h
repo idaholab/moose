@@ -26,6 +26,8 @@ InputParameters validParams<MatReaction>();
 class MatReaction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   MatReaction(const InputParameters & parameters);
   virtual void initialSetup();
 

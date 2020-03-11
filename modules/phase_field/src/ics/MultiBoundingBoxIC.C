@@ -25,11 +25,12 @@ sizeVector(std::vector<Real> v, std::size_t size)
 }
 }
 
-template <>
+defineLegacyParams(MultiBoundingBoxIC);
+
 InputParameters
-validParams<MultiBoundingBoxIC>()
+MultiBoundingBoxIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription("Specify variable values inside and outside a list of box shaped "
                              "axis-aligned regions defined by pairs of opposing corners");
   params.addRequiredParam<std::vector<Point>>("corners", "The corner coordinates boxes");

@@ -26,6 +26,8 @@ InputParameters validParams<SpecifiedSmoothCircleIC>();
 class SpecifiedSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
+  static InputParameters validParams();
+
   SpecifiedSmoothCircleIC(const InputParameters & parameters);
 
 protected:

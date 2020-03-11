@@ -24,6 +24,8 @@ InputParameters validParams<EulerAngleVariables2RGBAux>();
 class EulerAngleVariables2RGBAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   EulerAngleVariables2RGBAux(const InputParameters & parameters);
 
 protected:

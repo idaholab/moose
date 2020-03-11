@@ -11,13 +11,19 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSplitConcentration);
 
-defineADValidParams(
-    ADCHSplitConcentration,
-    ADKernel,
-    params.addClassDescription("Concentration kernel in Split Cahn-Hilliard that solves chemical "
-                               "potential in a weak form");
-    params.addRequiredCoupledVar("chemical_potential_var", "Chemical potential variable");
-    params.addRequiredParam<MaterialPropertyName>("mobility", "Mobility property name"););
+defineADLegacyParams(ADCHSplitConcentration);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCHSplitConcentration<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Concentration kernel in Split Cahn-Hilliard that solves chemical "
+                             "potential in a weak form");
+  params.addRequiredCoupledVar("chemical_potential_var", "Chemical potential variable");
+  params.addRequiredParam<MaterialPropertyName>("mobility", "Mobility property name");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCHSplitConcentration<compute_stage>::ADCHSplitConcentration(const InputParameters & parameters)

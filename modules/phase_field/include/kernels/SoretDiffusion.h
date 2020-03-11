@@ -23,6 +23,8 @@ InputParameters validParams<SoretDiffusion>();
 class SoretDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SoretDiffusion(const InputParameters & parameters);
 
 protected:

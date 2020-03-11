@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ReconPhaseVarIC);
 
-template <>
+defineLegacyParams(ReconPhaseVarIC);
+
 InputParameters
-validParams<ReconPhaseVarIC>()
+ReconPhaseVarIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("ebsd_reader",
                                           "The EBSDReader object holding the EBSD data");
   params.addRequiredParam<unsigned int>("phase", "EBSD phase number this variable is to represent");

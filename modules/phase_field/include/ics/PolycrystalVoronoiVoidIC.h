@@ -28,6 +28,8 @@ InputParameters validParams<PolycrystalVoronoiVoidIC>();
 class PolycrystalVoronoiVoidIC : public MultiSmoothCircleIC
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalVoronoiVoidIC(const InputParameters & parameters);
 
   virtual void initialSetup() override;

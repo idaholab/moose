@@ -28,9 +28,10 @@ InputParameters validParams<ConservedNormalNoise>();
 class ConservedNormalNoise : public ConservedNormalNoiseVeneer<ConservedNoiseBase>
 {
 public:
+  static InputParameters validParams();
+
   ConservedNormalNoise(const InputParameters & parameters)
     : ConservedNormalNoiseVeneer<ConservedNoiseBase>(parameters)
   {
   }
 };
-

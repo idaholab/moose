@@ -27,11 +27,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-template <>
+defineLegacyParams(C1ICBase);
+
 InputParameters
-validParams<C1ICBase>()
+C1ICBase::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
 
   params.addParam<Real>("average", 0, "The average value");
   params.addParam<Real>("amplitude", 1., "The amplitude");

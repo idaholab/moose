@@ -24,6 +24,8 @@ InputParameters validParams<ConstantGrainForceAndTorque>();
 class ConstantGrainForceAndTorque : public GrainForceAndTorqueInterface, public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   ConstantGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();

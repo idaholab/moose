@@ -17,11 +17,12 @@
 
 registerMooseAction("PhaseFieldApp", HHPFCRFFSplitVariablesAction, "add_variable");
 
-template <>
+defineLegacyParams(HHPFCRFFSplitVariablesAction);
+
 InputParameters
-validParams<HHPFCRFFSplitVariablesAction>()
+HHPFCRFFSplitVariablesAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
   params.addParam<MooseEnum>(
       "family",

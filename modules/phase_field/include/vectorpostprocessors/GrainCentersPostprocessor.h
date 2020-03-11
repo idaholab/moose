@@ -26,6 +26,8 @@ InputParameters validParams<GrainCentersPostprocessor>();
 class GrainCentersPostprocessor : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GrainCentersPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainCentersPostprocessor() {}

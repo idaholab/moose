@@ -36,6 +36,8 @@ InputParameters validParams<KKSPhaseChemicalPotential>();
 class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   KKSPhaseChemicalPotential(const InputParameters & parameters);
 
 protected:

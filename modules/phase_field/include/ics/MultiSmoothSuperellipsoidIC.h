@@ -25,6 +25,8 @@ InputParameters validParams<MultiSmoothSuperellipsoidIC>();
 class MultiSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 {
 public:
+  static InputParameters validParams();
+
   MultiSmoothSuperellipsoidIC(const InputParameters & parameters);
 
   virtual void initialSetup();

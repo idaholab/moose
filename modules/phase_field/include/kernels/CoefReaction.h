@@ -20,6 +20,8 @@ InputParameters validParams<CoefReaction>();
 class CoefReaction : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   CoefReaction(const InputParameters & parameters);
 
 protected:

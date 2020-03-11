@@ -27,11 +27,12 @@ const Real Tricrystal2CircleGrainsICAction::_abs_zero_tol = 1e-12;
 
 registerMooseAction("PhaseFieldApp", Tricrystal2CircleGrainsICAction, "add_ic");
 
-template <>
+defineLegacyParams(Tricrystal2CircleGrainsICAction);
+
 InputParameters
-validParams<Tricrystal2CircleGrainsICAction>()
+Tricrystal2CircleGrainsICAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
 

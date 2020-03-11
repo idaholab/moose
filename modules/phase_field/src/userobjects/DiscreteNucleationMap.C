@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationMap);
 
-template <>
+defineLegacyParams(DiscreteNucleationMap);
+
 InputParameters
-validParams<DiscreteNucleationMap>()
+DiscreteNucleationMap::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Generates a spatial smoothed map of all nucleation sites with the "
                              "data of the DiscreteNucleationInserter for use by the "
                              "DiscreteNucleation material.");

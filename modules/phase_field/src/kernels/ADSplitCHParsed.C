@@ -11,14 +11,20 @@
 
 registerADMooseObject("PhaseFieldApp", ADSplitCHParsed);
 
-defineADValidParams(
-    ADSplitCHParsed,
-    ADSplitCHCRes,
-    params.addClassDescription(
-        "Split formulation Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
-    params.addRequiredParam<MaterialPropertyName>(
-        "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
-    params.addCoupledVar("args", "Vector of additional arguments to F"););
+defineADLegacyParams(ADSplitCHParsed);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADSplitCHParsed<compute_stage>::validParams()
+{
+  InputParameters params = ADSplitCHCRes<compute_stage>::validParams();
+  params.addClassDescription(
+      "Split formulation Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
+  params.addRequiredParam<MaterialPropertyName>(
+      "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  params.addCoupledVar("args", "Vector of additional arguments to F");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADSplitCHParsed<compute_stage>::ADSplitCHParsed(const InputParameters & parameters)

@@ -27,6 +27,8 @@ class ADTestDerivativeFunction : public ADMaterial<compute_stage>,
                                  public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADTestDerivativeFunction(const InputParameters & parameters);
 
 protected:

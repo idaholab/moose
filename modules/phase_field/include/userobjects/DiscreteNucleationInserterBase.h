@@ -25,6 +25,8 @@ InputParameters validParams<DiscreteNucleationInserterBase>();
 class DiscreteNucleationInserterBase : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationInserterBase(const InputParameters & parameters);
 
   /// A nucleus has an expiration time and a location

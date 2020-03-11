@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", EqualGradientLagrangeInterface);
 
-template <>
+defineLegacyParams(EqualGradientLagrangeInterface);
+
 InputParameters
-validParams<EqualGradientLagrangeInterface>()
+EqualGradientLagrangeInterface::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription("Enforce componentwise gradient continuity between two different "
                              "variables across a subdomain boundary using a Lagrange multiplier");
   params.addRequiredParam<unsigned int>("component", "Gradient component to constrain");

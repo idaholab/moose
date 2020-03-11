@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", AntitrappingCurrent);
 
-template <>
+defineLegacyParams(AntitrappingCurrent);
+
 InputParameters
-validParams<AntitrappingCurrent>()
+AntitrappingCurrent::validParams()
 {
-  InputParameters params = validParams<CoupledSusceptibilityTimeDerivative>();
+  InputParameters params = CoupledSusceptibilityTimeDerivative::validParams();
   params.addClassDescription(
       "Kernel that provides antitrapping current at the interface for alloy solidification");
   return params;

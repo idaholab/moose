@@ -24,6 +24,8 @@ InputParameters validParams<PFCRFFVariablesAction>();
 class PFCRFFVariablesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PFCRFFVariablesAction(const InputParameters & params);
 
   virtual void act();

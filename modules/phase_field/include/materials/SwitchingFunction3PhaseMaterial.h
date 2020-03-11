@@ -27,6 +27,8 @@ class SwitchingFunction3PhaseMaterial : public DerivativeParsedMaterialHelper,
                                         public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunction3PhaseMaterial(const InputParameters & parameters);
 
 protected:

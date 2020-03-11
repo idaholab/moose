@@ -23,6 +23,8 @@ InputParameters validParams<BndsCalcAux>();
 class BndsCalcAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   BndsCalcAux(const InputParameters & parameters);
 
 protected:

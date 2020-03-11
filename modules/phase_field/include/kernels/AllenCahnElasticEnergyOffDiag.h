@@ -30,6 +30,8 @@ class AllenCahnElasticEnergyOffDiag
   : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   AllenCahnElasticEnergyOffDiag(const InputParameters & parameters);
 
 protected:

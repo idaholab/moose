@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CHInterface);
 
-template <>
+defineLegacyParams(CHInterface);
+
 InputParameters
-validParams<CHInterface>()
+CHInterface::validParams()
 {
   InputParameters params = CHInterfaceBase<Real>::validParams();
   params.addClassDescription(

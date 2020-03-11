@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SplitCHParsed);
 
-template <>
+defineLegacyParams(SplitCHParsed);
+
 InputParameters
-validParams<SplitCHParsed>()
+SplitCHParsed::validParams()
 {
-  InputParameters params = validParams<SplitCHCRes>();
+  InputParameters params = SplitCHCRes::validParams();
   params.addClassDescription(
       "Split formulation Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
   params.addRequiredParam<MaterialPropertyName>(

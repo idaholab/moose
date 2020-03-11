@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", ElasticEnergyMaterial);
 
-template <>
+defineLegacyParams(ElasticEnergyMaterial);
+
 InputParameters
-validParams<ElasticEnergyMaterial>()
+ElasticEnergyMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
+  InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");

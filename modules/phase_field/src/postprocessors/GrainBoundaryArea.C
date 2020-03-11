@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", GrainBoundaryArea);
 
-template <>
+defineLegacyParams(GrainBoundaryArea);
+
 InputParameters
-validParams<GrainBoundaryArea>()
+GrainBoundaryArea::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Calculate total grain boundary length in 2D and area in 3D");
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");

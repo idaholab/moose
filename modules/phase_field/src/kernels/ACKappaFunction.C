@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACKappaFunction);
 
-template <>
+defineLegacyParams(ACKappaFunction);
+
 InputParameters
-validParams<ACKappaFunction>()
+ACKappaFunction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy term for when kappa as a function of the variable");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa function name");

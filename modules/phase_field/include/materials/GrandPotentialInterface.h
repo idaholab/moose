@@ -22,6 +22,8 @@ InputParameters validParams<GrandPotentialInterface>();
 class GrandPotentialInterface : public Material
 {
 public:
+  static InputParameters validParams();
+
   GrandPotentialInterface(const InputParameters & parameters);
 
 protected:

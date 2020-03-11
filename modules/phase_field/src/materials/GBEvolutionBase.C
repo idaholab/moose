@@ -9,11 +9,12 @@
 
 #include "GBEvolutionBase.h"
 
-template <>
+defineLegacyParams(GBEvolutionBase);
+
 InputParameters
-validParams<GBEvolutionBase>()
+GBEvolutionBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Computes necessary material properties for the isotropic grain growth model");
   params.addRequiredCoupledVar("T", "Temperature in Kelvin");

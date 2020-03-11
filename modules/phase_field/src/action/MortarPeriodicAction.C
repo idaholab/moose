@@ -21,11 +21,12 @@ registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_mesh_modifier");
 
 registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_variable");
 
-template <>
+defineLegacyParams(MortarPeriodicAction);
+
 InputParameters
-validParams<MortarPeriodicAction>()
+MortarPeriodicAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Add mortar interfaces, Lagrange multiplier variables, and "
                              "constraints to implement mortar based periodicity of values or "
                              "gradients on a MortarPeriodicMesh");

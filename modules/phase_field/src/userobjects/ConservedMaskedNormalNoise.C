@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ConservedMaskedNormalNoise);
 
-template <>
+defineLegacyParams(ConservedMaskedNormalNoise);
+
 InputParameters
-validParams<ConservedMaskedNormalNoise>()
+ConservedMaskedNormalNoise::validParams()
 {
-  auto params = validParams<ConservedMaskedNoiseBase>();
+  auto params = ConservedMaskedNoiseBase::validParams();
   params.addClassDescription("Gaussian normal distributed random number noise provider with an "
                              "applied spatially dependent material property mask for the "
                              "ConservedLangevinNoise kernel.");

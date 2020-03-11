@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", MultiAuxVariablesAction, "add_aux_variable");
 
-template <>
+defineLegacyParams(MultiAuxVariablesAction);
+
 InputParameters
-validParams<MultiAuxVariablesAction>()
+MultiAuxVariablesAction::validParams()
 {
-  InputParameters params = validParams<AddAuxVariableAction>();
+  InputParameters params = AddAuxVariableAction::validParams();
   params.addClassDescription("Set up auxvariables for components of "
                              "MaterialProperty<std::vector<data_type> > for polycrystal sample.");
   params.addRequiredParam<unsigned int>(

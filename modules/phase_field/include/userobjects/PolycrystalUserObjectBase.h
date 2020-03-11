@@ -26,6 +26,8 @@ InputParameters validParams<PolycrystalUserObjectBase>();
 class PolycrystalUserObjectBase : public FeatureFloodCount
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalUserObjectBase(const InputParameters & parameters);
 
   /**

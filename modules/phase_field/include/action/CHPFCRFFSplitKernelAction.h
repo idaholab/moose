@@ -23,6 +23,8 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>();
 class CHPFCRFFSplitKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   CHPFCRFFSplitKernelAction(const InputParameters & params);
 
   virtual void act();

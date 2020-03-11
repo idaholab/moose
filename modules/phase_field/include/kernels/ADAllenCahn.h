@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class ADAllenCahn : public ADAllenCahnBase<compute_stage, Real>
 {
 public:
+  static InputParameters validParams();
+
   ADAllenCahn(const InputParameters & parameters);
 
 protected:

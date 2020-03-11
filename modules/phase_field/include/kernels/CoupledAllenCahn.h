@@ -26,6 +26,8 @@ InputParameters validParams<CoupledAllenCahn>();
 class CoupledAllenCahn : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   CoupledAllenCahn(const InputParameters & parameters);
 
   virtual void initialSetup();

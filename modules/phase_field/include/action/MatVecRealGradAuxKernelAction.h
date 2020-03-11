@@ -14,6 +14,8 @@
 class MatVecRealGradAuxKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MatVecRealGradAuxKernelAction(const InputParameters & params);
 
   virtual void act();

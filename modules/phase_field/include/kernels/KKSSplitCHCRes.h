@@ -34,6 +34,8 @@ InputParameters validParams<KKSSplitCHCRes>();
 class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase>>
 {
 public:
+  static InputParameters validParams();
+
   KKSSplitCHCRes(const InputParameters & parameters);
 
 protected:

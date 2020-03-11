@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSXeVacSolidMaterial);
 
-template <>
+defineLegacyParams(KKSXeVacSolidMaterial);
+
 InputParameters
-validParams<KKSXeVacSolidMaterial>()
+KKSXeVacSolidMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
+  InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("KKS Solid phase free energy for Xe,Vac in UO2.  Fm(cmg,cmv)");
   params.addRequiredParam<Real>("T", "Temperature in [K]");
   params.addRequiredCoupledVar("cmg", "Gas concentration");

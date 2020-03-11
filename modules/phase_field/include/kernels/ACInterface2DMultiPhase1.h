@@ -27,6 +27,8 @@ InputParameters validParams<ACInterface2DMultiPhase1>();
 class ACInterface2DMultiPhase1 : public ACInterface
 {
 public:
+  static InputParameters validParams();
+
   ACInterface2DMultiPhase1(const InputParameters & parameters);
 
 protected:

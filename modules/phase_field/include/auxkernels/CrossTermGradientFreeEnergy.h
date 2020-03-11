@@ -23,6 +23,8 @@ InputParameters validParams<CrossTermGradientFreeEnergy>();
 class CrossTermGradientFreeEnergy : public TotalFreeEnergyBase
 {
 public:
+  static InputParameters validParams();
+
   CrossTermGradientFreeEnergy(const InputParameters & parameters);
 
 protected:

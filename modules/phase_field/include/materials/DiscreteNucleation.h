@@ -24,6 +24,8 @@ InputParameters validParams<DiscreteNucleation>();
 class DiscreteNucleation : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleation(const InputParameters & params);
 
   virtual void computeProperties();

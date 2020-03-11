@@ -18,11 +18,12 @@
 #include <map>
 #include <algorithm>
 
-template <>
+defineLegacyParams(PolycrystalUserObjectBase);
+
 InputParameters
-validParams<PolycrystalUserObjectBase>()
+PolycrystalUserObjectBase::validParams()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
+  InputParameters params = FeatureFloodCount::validParams();
   params.addClassDescription("This object provides the base capability for creating proper reduced "
                              "order parameter polycrystal initial conditions.");
   params.addRequiredCoupledVarWithAutoBuild(

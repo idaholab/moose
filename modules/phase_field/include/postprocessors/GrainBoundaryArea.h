@@ -22,6 +22,8 @@ InputParameters validParams<GrainBoundaryArea>();
 class GrainBoundaryArea : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   GrainBoundaryArea(const InputParameters & parameters);
 
   virtual Real getValue() override;

@@ -24,6 +24,8 @@ InputParameters validParams<PhaseNormalTensor>();
 class PhaseNormalTensor : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   PhaseNormalTensor(const InputParameters & parameters);
 
 protected:

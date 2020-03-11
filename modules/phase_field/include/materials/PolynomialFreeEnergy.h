@@ -25,6 +25,8 @@ InputParameters validParams<PolynomialFreeEnergy>();
 class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   PolynomialFreeEnergy(const InputParameters & parameters);
 
 protected:

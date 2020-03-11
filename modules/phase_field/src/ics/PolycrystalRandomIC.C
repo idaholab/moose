@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalRandomIC);
 
-template <>
+defineLegacyParams(PolycrystalRandomIC);
+
 InputParameters
-validParams<PolycrystalRandomIC>()
+PolycrystalRandomIC::validParams()
 {
-  InputParameters params = validParams<RandomICBase>();
+  InputParameters params = RandomICBase::validParams();
   params.addClassDescription("Random initial condition for a polycrystalline material");
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");

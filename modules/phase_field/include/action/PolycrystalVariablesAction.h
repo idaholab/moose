@@ -21,6 +21,8 @@ class PolycrystalVariablesAction;
 class PolycrystalVariablesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalVariablesAction(const InputParameters & params);
 
   virtual void act();

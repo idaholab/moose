@@ -9,11 +9,12 @@
 
 #include "TotalFreeEnergyBase.h"
 
-template <>
+defineLegacyParams(TotalFreeEnergyBase);
+
 InputParameters
-validParams<TotalFreeEnergyBase>()
+TotalFreeEnergyBase::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addCoupledVar("interfacial_vars", "Variable names that contribute to interfacial energy");
   params.addCoupledVar(
       "additional_free_energy",

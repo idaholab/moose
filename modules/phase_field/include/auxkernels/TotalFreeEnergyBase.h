@@ -24,6 +24,8 @@ InputParameters validParams<TotalFreeEnergyBase>();
 class TotalFreeEnergyBase : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TotalFreeEnergyBase(const InputParameters & parameters);
 
 protected:

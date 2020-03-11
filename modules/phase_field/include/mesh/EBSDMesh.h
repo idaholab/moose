@@ -24,6 +24,8 @@ InputParameters validParams<EBSDMesh>();
 class EBSDMesh : public GeneratedMesh
 {
 public:
+  static InputParameters validParams();
+
   EBSDMesh(const InputParameters & parameters);
   virtual ~EBSDMesh();
 

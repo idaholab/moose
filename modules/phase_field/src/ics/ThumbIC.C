@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ThumbIC);
 
-template <>
+defineLegacyParams(ThumbIC);
+
 InputParameters
-validParams<ThumbIC>()
+ThumbIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription("Thumb shaped bicrystal for grain boundary mobility tests");
   params.addRequiredParam<Real>("xcoord", "The x coordinate of the circle center");
   params.addRequiredParam<Real>("width", "The y coordinate of the circle center");

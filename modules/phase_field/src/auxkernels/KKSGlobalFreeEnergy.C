@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSGlobalFreeEnergy);
 
-template <>
+defineLegacyParams(KKSGlobalFreeEnergy);
+
 InputParameters
-validParams<KKSGlobalFreeEnergy>()
+KKSGlobalFreeEnergy::validParams()
 {
-  InputParameters params = validParams<TotalFreeEnergyBase>();
+  InputParameters params = TotalFreeEnergyBase::validParams();
   params.addClassDescription(
       "Total free energy in KKS system, including chemical, barrier and gradient terms");
   params.addRequiredParam<MaterialPropertyName>("fa_name",

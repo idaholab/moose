@@ -27,6 +27,8 @@ InputParameters validParams<MixedSwitchingFunctionMaterial>();
 class MixedSwitchingFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
+  static InputParameters validParams();
+
   MixedSwitchingFunctionMaterial(const InputParameters & parameters);
 
 protected:

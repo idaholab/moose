@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", PhaseNormalTensor);
 
-template <>
+defineLegacyParams(PhaseNormalTensor);
+
 InputParameters
-validParams<PhaseNormalTensor>()
+PhaseNormalTensor::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Calculate normal tensor of a phase based on gradient");
   params.addRequiredCoupledVar("phase", "Phase variable");
   params.addRequiredParam<MaterialPropertyName>("normal_tensor_name", "Name of normal tensor");

@@ -23,6 +23,8 @@ class GrainRigidBodyMotionBase : public NonlocalKernel
 
 {
 public:
+  static InputParameters validParams();
+
   GrainRigidBodyMotionBase(const InputParameters & parameters);
 
   virtual void timestepSetup();

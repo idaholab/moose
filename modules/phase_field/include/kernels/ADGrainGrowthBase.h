@@ -33,6 +33,8 @@ template <ComputeStage compute_stage>
 class ADGrainGrowthBase : public ADAllenCahnBase<compute_stage, Real>
 {
 public:
+  static InputParameters validParams();
+
   ADGrainGrowthBase(const InputParameters & parameters);
 
 protected:

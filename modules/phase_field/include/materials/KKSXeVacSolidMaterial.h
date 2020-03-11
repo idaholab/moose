@@ -20,6 +20,8 @@ InputParameters validParams<KKSXeVacSolidMaterial>();
 class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   KKSXeVacSolidMaterial(const InputParameters & parameters);
 
 protected:

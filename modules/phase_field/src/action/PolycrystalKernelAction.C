@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalKernelAction, "add_kernel");
 
-template <>
+defineLegacyParams(PolycrystalKernelAction);
+
 InputParameters
-validParams<PolycrystalKernelAction>()
+PolycrystalKernelAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Set up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly kernels");
   params.addRequiredParam<unsigned int>(

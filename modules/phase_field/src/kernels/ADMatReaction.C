@@ -11,16 +11,20 @@
 
 registerADMooseObject("PhaseFieldApp", ADMatReaction);
 
-defineADValidParams(
-    ADMatReaction,
-    ADKernel,
-    params.addCoupledVar("v",
-                         "Set this to make v a coupled variable, otherwise it will use the "
-                         "kernel's nonlinear variable for v");
-    params.addClassDescription("Kernel to add -L*v, where L=reaction rate, v=variable");
-    params.addParam<MaterialPropertyName>("mob_name",
-                                          "L",
-                                          "The reaction rate used with the kernel"););
+defineADLegacyParams(ADMatReaction);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADMatReaction<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addCoupledVar("v",
+                       "Set this to make v a coupled variable, otherwise it will use the "
+                       "kernel's nonlinear variable for v");
+  params.addClassDescription("Kernel to add -L*v, where L=reaction rate, v=variable");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The reaction rate used with the kernel");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMatReaction<compute_stage>::ADMatReaction(const InputParameters & parameters)

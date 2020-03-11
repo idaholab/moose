@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSACBulkC);
 
-template <>
+defineLegacyParams(KKSACBulkC);
+
 InputParameters
-validParams<KKSACBulkC>()
+KKSACBulkC::validParams()
 {
-  InputParameters params = validParams<KKSACBulkBase>();
+  InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This "
                              "includes all terms dependent on chemical potential.");
   params.addRequiredCoupledVar("ca", "a-phase concentration");

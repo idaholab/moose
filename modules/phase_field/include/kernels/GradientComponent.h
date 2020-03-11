@@ -19,6 +19,8 @@ InputParameters validParams<GradientComponent>();
 class GradientComponent : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   GradientComponent(const InputParameters & parameters);
 
 protected:

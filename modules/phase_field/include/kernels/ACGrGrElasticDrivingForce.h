@@ -31,6 +31,8 @@ InputParameters validParams<ACGrGrElasticDrivingForce>();
 class ACGrGrElasticDrivingForce : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   ACGrGrElasticDrivingForce(const InputParameters & parameters);
 
 protected:

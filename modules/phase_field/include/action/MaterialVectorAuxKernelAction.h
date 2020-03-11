@@ -14,6 +14,8 @@
 class MaterialVectorAuxKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MaterialVectorAuxKernelAction(const InputParameters & params);
 
   virtual void act();

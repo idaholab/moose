@@ -9,9 +9,16 @@
 
 #include "ADSplitCHBase.h"
 
-defineADValidParams(ADSplitCHBase,
-                    ADKernel,
-                    params.addClassDescription("Base class for split Cahn-Hilliard equation."););
+defineADLegacyParams(ADSplitCHBase);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADSplitCHBase<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Base class for split Cahn-Hilliard equation.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADSplitCHBase<compute_stage>::ADSplitCHBase(const InputParameters & parameters)

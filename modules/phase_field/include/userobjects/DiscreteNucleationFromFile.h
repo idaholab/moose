@@ -26,6 +26,8 @@ InputParameters validParams<DiscreteNucleationFromFile>();
 class DiscreteNucleationFromFile : public DiscreteNucleationInserterBase
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationFromFile(const InputParameters & parameters);
 
   void initialize() override;

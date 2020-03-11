@@ -20,6 +20,8 @@ InputParameters validParams<PolycrystalVoronoi>();
 class PolycrystalVoronoi : public PolycrystalUserObjectBase
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalVoronoi(const InputParameters & parameters);
 
   virtual void precomputeGrainStructure() override;

@@ -18,6 +18,8 @@
 class CHInterfaceAniso : public CHInterfaceBase<RealTensorValue>
 {
 public:
+  static InputParameters validParams();
+
   CHInterfaceAniso(const InputParameters & parameters);
 };
 

@@ -23,6 +23,8 @@ InputParameters validParams<PFParamsPolyFreeEnergy>();
 class PFParamsPolyFreeEnergy : public Material
 {
 public:
+  static InputParameters validParams();
+
   PFParamsPolyFreeEnergy(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", TimeStepMaterial);
 
-template <>
+defineLegacyParams(TimeStepMaterial);
+
 InputParameters
-validParams<TimeStepMaterial>()
+TimeStepMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>(
       "prop_dt", "dt", "Material property to store the current dt");
   params.addParam<MaterialPropertyName>(

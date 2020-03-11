@@ -10,11 +10,12 @@
 #include "SmoothMultiBoundingBoxBaseIC.h"
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(SmoothMultiBoundingBoxBaseIC);
+
 InputParameters
-validParams<SmoothMultiBoundingBoxBaseIC>()
+SmoothMultiBoundingBoxBaseIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>("outside", "Outside value");
   params.addRequiredParam<std::vector<Point>>(
       "smaller_coordinate_corners",

@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADMatAnisoDiffusion : public ADMatDiffusionBase<compute_stage, RealTensorValue>
 {
 public:
+  static InputParameters validParams();
+
   ADMatAnisoDiffusion(const InputParameters & parameters);
 };
 

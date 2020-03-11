@@ -20,6 +20,8 @@ InputParameters validParams<FeatureVolumeFraction>();
 class FeatureVolumeFraction : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   FeatureVolumeFraction(const InputParameters & parameters);
 
   virtual void initialize() override;

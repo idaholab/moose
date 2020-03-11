@@ -26,6 +26,8 @@ class CoupledSusceptibilityTimeDerivative
     : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>
 {
 public:
+  static InputParameters validParams();
+
   CoupledSusceptibilityTimeDerivative(const InputParameters & parameters);
   virtual void initialSetup();
 

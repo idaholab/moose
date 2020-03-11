@@ -15,11 +15,12 @@
 
 registerMooseAction("PhaseFieldApp", GrandPotentialKernelAction, "add_kernel");
 
-template <>
+defineLegacyParams(GrandPotentialKernelAction);
+
 InputParameters
-validParams<GrandPotentialKernelAction>()
+GrandPotentialKernelAction::validParams()
 {
-  InputParameters parameters = validParams<Action>();
+  InputParameters parameters = Action::validParams();
   parameters.addClassDescription(
       "Automatically generate most or all of the kernels for the grand potential model");
   parameters.addRequiredParam<std::vector<NonlinearVariableName>>(

@@ -27,6 +27,8 @@ InputParameters validParams<CHSplitChemicalPotential>();
 class CHSplitChemicalPotential : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   CHSplitChemicalPotential(const InputParameters & parameters);
 
 protected:

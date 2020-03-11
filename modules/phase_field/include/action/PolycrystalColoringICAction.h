@@ -18,6 +18,8 @@
 class PolycrystalColoringICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalColoringICAction(const InputParameters & params);
 
   virtual void act() override;

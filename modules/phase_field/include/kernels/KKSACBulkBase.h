@@ -26,6 +26,8 @@ InputParameters validParams<KKSACBulkBase>();
 class KKSACBulkBase : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   KKSACBulkBase(const InputParameters & parameters);
 
   virtual void initialSetup();

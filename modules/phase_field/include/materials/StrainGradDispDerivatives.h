@@ -23,6 +23,8 @@ InputParameters validParams<StrainGradDispDerivatives>();
 class StrainGradDispDerivatives : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   StrainGradDispDerivatives(const InputParameters & parameters);
 
 protected:

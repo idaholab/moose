@@ -24,6 +24,8 @@ InputParameters validParams<HHPFCRFFSplitVariablesAction>();
 class HHPFCRFFSplitVariablesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   HHPFCRFFSplitVariablesAction(const InputParameters & params);
 
   virtual void act();

@@ -36,6 +36,8 @@ InputParameters validParams<EulerAngleUpdater>();
 class EulerAngleUpdater : public EulerAngleProvider
 {
 public:
+  static InputParameters validParams();
+
   EulerAngleUpdater(const InputParameters & parameters);
 
   virtual void initialize() override;

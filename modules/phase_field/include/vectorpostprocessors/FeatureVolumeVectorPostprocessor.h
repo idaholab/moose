@@ -35,6 +35,8 @@ class FeatureVolumeVectorPostprocessor : public GeneralVectorPostprocessor,
                                          public BoundaryRestrictable
 {
 public:
+  static InputParameters validParams();
+
   FeatureVolumeVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

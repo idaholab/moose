@@ -12,11 +12,12 @@
 
 #include <fstream>
 
-template <>
+defineLegacyParams(GBAnisotropyBase);
+
 InputParameters
-validParams<GBAnisotropyBase>()
+GBAnisotropyBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addCoupledVar("T", 300.0, "Temperature in Kelvin");
   params.addParam<Real>("length_scale", 1.0e-9, "Length scale in m, where default is nm");
   params.addParam<Real>("time_scale", 1.0e-9, "Time scale in s, where default is ns");

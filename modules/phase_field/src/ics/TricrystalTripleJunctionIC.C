@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", TricrystalTripleJunctionIC);
 
-template <>
+defineLegacyParams(TricrystalTripleJunctionIC);
+
 InputParameters
-validParams<TricrystalTripleJunctionIC>()
+TricrystalTripleJunctionIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription("Tricrystal with a triple junction");
   params.addRequiredParam<unsigned int>("op_num", "Number of grain order parameters");
   params.addRequiredParam<unsigned int>("op_index", "Index for the current grain order parameter");

@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", BicrystalBoundingBoxICAction, "add_ic");
 
-template <>
+defineLegacyParams(BicrystalBoundingBoxICAction);
+
 InputParameters
-validParams<BicrystalBoundingBoxICAction>()
+BicrystalBoundingBoxICAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Constructs a bicrystal, where one grain is on the inside of "
                              "the box and the other grain is the outside of the box");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");

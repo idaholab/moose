@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CoupledMaterialDerivative);
 
-template <>
+defineLegacyParams(CoupledMaterialDerivative);
+
 InputParameters
-validParams<CoupledMaterialDerivative>()
+CoupledMaterialDerivative::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Kernel that implements the first derivative of a function material "
                              "property with respect to a coupled variable.");
   params.addRequiredCoupledVar("v", "Variable to take the derivative with respect to");

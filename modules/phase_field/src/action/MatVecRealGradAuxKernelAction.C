@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", MatVecRealGradAuxKernelAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(MatVecRealGradAuxKernelAction);
+
 InputParameters
-validParams<MatVecRealGradAuxKernelAction>()
+MatVecRealGradAuxKernelAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<unsigned int>("op_num",
                                         "Value that specifies the number of grains to create");
   params.addRequiredParam<std::vector<std::string>>(

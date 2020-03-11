@@ -24,6 +24,8 @@ InputParameters validParams<DiscreteNucleationMarker>();
 class DiscreteNucleationMarker : public Marker
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationMarker(const InputParameters & parameters);
 
 protected:

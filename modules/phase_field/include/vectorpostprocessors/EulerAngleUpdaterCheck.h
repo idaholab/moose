@@ -30,6 +30,8 @@ InputParameters validParams<EulerAngleUpdaterCheck>();
 class EulerAngleUpdaterCheck : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   EulerAngleUpdaterCheck(const InputParameters & parameters);
 
   virtual void initialize() override;

@@ -23,6 +23,8 @@ InputParameters validParams<FourierNoise>();
 class FourierNoise : public Function
 {
 public:
+  static InputParameters validParams();
+
   FourierNoise(const InputParameters & parameters);
 
   virtual Real value(Real, const Point & p) const override;

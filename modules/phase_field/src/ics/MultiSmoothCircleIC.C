@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", MultiSmoothCircleIC);
 
-template <>
+defineLegacyParams(MultiSmoothCircleIC);
+
 InputParameters
-validParams<MultiSmoothCircleIC>()
+MultiSmoothCircleIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleBaseIC>();
+  InputParameters params = SmoothCircleBaseIC::validParams();
   params.addClassDescription("Random distribution of smooth circles with given minimum spacing");
   params.addRequiredParam<unsigned int>("numbub", "The number of bubbles to place");
   params.addRequiredParam<Real>("bubspac",

@@ -29,6 +29,8 @@ InputParameters validParams<ElasticEnergyMaterial>();
 class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   ElasticEnergyMaterial(const InputParameters & parameters);
 
   virtual void initialSetup() override;

@@ -16,11 +16,12 @@
 
 registerMooseObject("PhaseFieldApp", FauxGrainTracker);
 
-template <>
+defineLegacyParams(FauxGrainTracker);
+
 InputParameters
-validParams<FauxGrainTracker>()
+FauxGrainTracker::validParams()
 {
-  InputParameters params = validParams<GrainTrackerInterface>();
+  InputParameters params = GrainTrackerInterface::validParams();
   params.addClassDescription("Fake grain tracker object for cases where the number of grains is "
                              "equal to the number of order parameters.");
 

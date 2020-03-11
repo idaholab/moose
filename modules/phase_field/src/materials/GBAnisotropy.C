@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GBAnisotropy);
 
-template <>
+defineLegacyParams(GBAnisotropy);
+
 InputParameters
-validParams<GBAnisotropy>()
+GBAnisotropy::validParams()
 {
-  InputParameters params = validParams<GBAnisotropyBase>();
+  InputParameters params = GBAnisotropyBase::validParams();
   params.addRequiredParam<Real>("wGB", "Diffuse GB width in nm");
   return params;
 }

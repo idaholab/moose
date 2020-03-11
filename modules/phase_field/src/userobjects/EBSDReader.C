@@ -18,11 +18,12 @@
 
 registerMooseObject("PhaseFieldApp", EBSDReader);
 
-template <>
+defineLegacyParams(EBSDReader);
+
 InputParameters
-validParams<EBSDReader>()
+EBSDReader::validParams()
 {
-  InputParameters params = validParams<EulerAngleProvider>();
+  InputParameters params = EulerAngleProvider::validParams();
   params.addClassDescription("Load and manage DREAM.3D EBSD data files for running simulations on "
                              "reconstructed microstructures.");
   params.addParam<unsigned int>(

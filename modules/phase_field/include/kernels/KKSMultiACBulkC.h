@@ -27,6 +27,8 @@ InputParameters validParams<KKSMultiACBulkC>();
 class KKSMultiACBulkC : public KKSMultiACBulkBase
 {
 public:
+  static InputParameters validParams();
+
   KKSMultiACBulkC(const InputParameters & parameters);
 
 protected:

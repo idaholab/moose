@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ForceDensityMaterial);
 
-template <>
+defineLegacyParams(ForceDensityMaterial);
+
 InputParameters
-validParams<ForceDensityMaterial>()
+ForceDensityMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Calculating the force density acting on a grain");
   params.addCoupledVar("etas", "Array of coupled order parameters");
   params.addCoupledVar("c", "Concentration field");

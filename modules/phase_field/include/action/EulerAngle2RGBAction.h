@@ -20,6 +20,8 @@
 class EulerAngle2RGBAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   EulerAngle2RGBAction(const InputParameters & params);
 
   virtual void act();

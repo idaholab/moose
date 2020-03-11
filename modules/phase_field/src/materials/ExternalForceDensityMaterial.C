@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", ExternalForceDensityMaterial);
 
-template <>
+defineLegacyParams(ExternalForceDensityMaterial);
+
 InputParameters
-validParams<ExternalForceDensityMaterial>()
+ExternalForceDensityMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Providing external applied force density to grains");
   params.addParam<FunctionName>("force_x", 0.0, "The forcing function in x direction.");
   params.addParam<FunctionName>("force_y", 0.0, "The forcing function in y direction.");

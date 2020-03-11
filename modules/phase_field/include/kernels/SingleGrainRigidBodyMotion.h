@@ -20,6 +20,8 @@ InputParameters validParams<SingleGrainRigidBodyMotion>();
 class SingleGrainRigidBodyMotion : public GrainRigidBodyMotionBase
 {
 public:
+  static InputParameters validParams();
+
   SingleGrainRigidBodyMotion(const InputParameters & parameters);
 
 protected:

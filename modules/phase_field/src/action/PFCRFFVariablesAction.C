@@ -17,11 +17,12 @@
 
 registerMooseAction("PhaseFieldApp", PFCRFFVariablesAction, "add_variable");
 
-template <>
+defineLegacyParams(PFCRFFVariablesAction);
+
 InputParameters
-validParams<PFCRFFVariablesAction>()
+PFCRFFVariablesAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
   params.addParam<MooseEnum>(
       "family",

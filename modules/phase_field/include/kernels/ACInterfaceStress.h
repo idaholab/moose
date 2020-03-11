@@ -31,6 +31,8 @@ InputParameters validParams<ACInterfaceStress>();
 class ACInterfaceStress : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ACInterfaceStress(const InputParameters & parameters);
 
 protected:

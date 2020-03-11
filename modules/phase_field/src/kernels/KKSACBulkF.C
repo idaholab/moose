@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSACBulkF);
 
-template <>
+defineLegacyParams(KKSACBulkF);
+
 InputParameters
-validParams<KKSACBulkF>()
+KKSACBulkF::validParams()
 {
-  InputParameters params = validParams<KKSACBulkBase>();
+  InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
                              "includes all terms NOT dependent on chemical potential.");
   params.addRequiredParam<Real>("w", "Double well height parameter");

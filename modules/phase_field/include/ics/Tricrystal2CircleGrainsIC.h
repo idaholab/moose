@@ -23,6 +23,8 @@ InputParameters validParams<Tricrystal2CircleGrainsIC>();
 class Tricrystal2CircleGrainsIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   Tricrystal2CircleGrainsIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

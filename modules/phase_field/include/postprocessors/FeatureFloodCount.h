@@ -47,6 +47,8 @@ class FeatureFloodCount : public GeneralPostprocessor,
                           public BoundaryRestrictable
 {
 public:
+  static InputParameters validParams();
+
   FeatureFloodCount(const InputParameters & parameters);
 
   virtual void initialSetup() override;

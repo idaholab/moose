@@ -32,6 +32,8 @@ template <ComputeStage compute_stage, typename T>
 class ADSplitCHWResBase : public ADKernelGrad<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHWResBase(const InputParameters & parameters);
 
 protected:

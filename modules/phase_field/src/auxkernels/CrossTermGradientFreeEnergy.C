@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CrossTermGradientFreeEnergy);
 
-template <>
+defineLegacyParams(CrossTermGradientFreeEnergy);
+
 InputParameters
-validParams<CrossTermGradientFreeEnergy>()
+CrossTermGradientFreeEnergy::validParams()
 {
-  InputParameters params = validParams<TotalFreeEnergyBase>();
+  InputParameters params = TotalFreeEnergyBase::validParams();
   params.addClassDescription("Free energy contribution from the cross terms in ACMultiInterface");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "kappa_names",

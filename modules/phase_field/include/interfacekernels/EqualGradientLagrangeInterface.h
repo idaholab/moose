@@ -23,6 +23,8 @@ InputParameters validParams<EqualGradientLagrangeInterface>();
 class EqualGradientLagrangeInterface : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   EqualGradientLagrangeInterface(const InputParameters & parameters);
 
 protected:

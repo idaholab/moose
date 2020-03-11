@@ -27,6 +27,8 @@ InputParameters validParams<PFCFreezingIC>();
 class PFCFreezingIC : public RandomICBase
 {
 public:
+  static InputParameters validParams();
+
   PFCFreezingIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

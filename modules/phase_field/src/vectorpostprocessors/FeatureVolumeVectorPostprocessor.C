@@ -20,12 +20,13 @@
 
 registerMooseObject("PhaseFieldApp", FeatureVolumeVectorPostprocessor);
 
-template <>
+defineLegacyParams(FeatureVolumeVectorPostprocessor);
+
 InputParameters
-validParams<FeatureVolumeVectorPostprocessor>()
+FeatureVolumeVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
-  params += validParams<BoundaryRestrictable>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addRequiredParam<UserObjectName>("flood_counter",
                                           "The FeatureFloodCount UserObject to get values from.");

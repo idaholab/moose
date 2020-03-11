@@ -45,12 +45,13 @@ dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void
 
 registerMooseObject("PhaseFieldApp", GrainTracker);
 
-template <>
+defineLegacyParams(GrainTracker);
+
 InputParameters
-validParams<GrainTracker>()
+GrainTracker::validParams()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
-  params += validParams<GrainTrackerInterface>();
+  InputParameters params = FeatureFloodCount::validParams();
+  params += GrainTrackerInterface::validParams();
 
   // FeatureFloodCount adds a relationship manager, but we need to extend that for GrainTracker
   params.clearRelationshipManagers();

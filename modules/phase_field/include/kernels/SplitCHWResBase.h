@@ -30,6 +30,8 @@ template <typename T>
 class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   SplitCHWResBase(const InputParameters & parameters);
 
 protected:
@@ -107,4 +109,18 @@ SplitCHWResBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   return (*_dmobdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_w[_qp] * _grad_test[_i][_qp];
+}
+
+template <typename T>
+InputParameters
+SplitCHWResBase<T>::validParams()
+{
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription(
+      "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
+  params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
+  params.addCoupledVar("args", "Vector of arguments of the mobility");
+  params.addCoupledVar(
+      "w", "Coupled chemical potential (if not specified kernel variable will be used)");
+  return params;
 }

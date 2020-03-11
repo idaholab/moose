@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintLagrange);
 
-template <>
+defineLegacyParams(SwitchingFunctionConstraintLagrange);
+
 InputParameters
-validParams<SwitchingFunctionConstraintLagrange>()
+SwitchingFunctionConstraintLagrange::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
                              "functions in a multiphase system. This kernel acts on the Lagrange "
                              "multiplier variable.");

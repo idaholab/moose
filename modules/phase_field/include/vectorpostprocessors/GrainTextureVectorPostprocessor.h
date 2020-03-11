@@ -27,6 +27,8 @@ InputParameters validParams<GrainTextureVectorPostprocessor>();
 class GrainTextureVectorPostprocessor : public ElementVectorPostprocessor, protected SamplerBase
 {
 public:
+  static InputParameters validParams();
+
   GrainTextureVectorPostprocessor(const InputParameters & parameters);
   virtual void initialize();
   virtual void execute();

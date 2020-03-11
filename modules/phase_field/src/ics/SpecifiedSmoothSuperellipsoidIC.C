@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", SpecifiedSmoothSuperellipsoidIC);
 
-template <>
+defineLegacyParams(SpecifiedSmoothSuperellipsoidIC);
+
 InputParameters
-validParams<SpecifiedSmoothSuperellipsoidIC>()
+SpecifiedSmoothSuperellipsoidIC::validParams()
 {
-  InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
+  InputParameters params = SmoothSuperellipsoidBaseIC::validParams();
   params.addClassDescription("Multiple smooth superellipsoids with manually specified center "
                              "points; semiaxes a,b,c; and exponents n");
   params.addRequiredParam<std::vector<Real>>("x_positions",

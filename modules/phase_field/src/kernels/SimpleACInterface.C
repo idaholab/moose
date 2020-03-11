@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SimpleACInterface);
 
-template <>
+defineLegacyParams(SimpleACInterface);
+
 InputParameters
-validParams<SimpleACInterface>()
+SimpleACInterface::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Gradient energy for Allen-Cahn Kernel with constant Mobility and Interfacial parameter");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");

@@ -28,6 +28,8 @@ InputParameters validParams<SplitCHParsed>();
 class SplitCHParsed : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHCRes>>
 {
 public:
+  static InputParameters validParams();
+
   SplitCHParsed(const InputParameters & parameters);
 
   virtual void initialSetup();

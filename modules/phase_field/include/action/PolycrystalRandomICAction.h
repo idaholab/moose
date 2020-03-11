@@ -19,6 +19,8 @@
 class PolycrystalRandomICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalRandomICAction(const InputParameters & params);
 
   virtual void act();

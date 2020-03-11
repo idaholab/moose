@@ -27,6 +27,8 @@ class ComputeGrainForceAndTorque : public DerivativeMaterialInterface<ShapeEleme
                                    public GrainForceAndTorqueInterface
 {
 public:
+  static InputParameters validParams();
+
   ComputeGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();

@@ -22,6 +22,8 @@ InputParameters validParams<SimpleCHInterface>();
 class SimpleCHInterface : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SimpleCHInterface(const InputParameters & parameters);
 
 protected:
