@@ -19,11 +19,12 @@ using MetaPhysicL::DualNumber;
 
 registerMooseObject("MooseApp", NormalNodalLMMechanicalContact);
 
-template <>
+defineLegacyParams(NormalNodalLMMechanicalContact);
+
 InputParameters
-validParams<NormalNodalLMMechanicalContact>()
+NormalNodalLMMechanicalContact::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addCoupledVar("disp_y", "The y displacement");

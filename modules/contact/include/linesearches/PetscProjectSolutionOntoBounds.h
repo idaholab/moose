@@ -43,6 +43,8 @@ InputParameters validParams<PetscProjectSolutionOntoBounds>();
 class PetscProjectSolutionOntoBounds : public LineSearch
 {
 public:
+  static InputParameters validParams();
+
   PetscProjectSolutionOntoBounds(const InputParameters & parameters);
 
   void initialSetup() override;

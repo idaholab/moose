@@ -17,13 +17,14 @@
 
 registerMooseAction("ContactApp", ContactPressureVarAction, "add_aux_variable");
 
-template <>
+defineLegacyParams(ContactPressureVarAction);
+
 InputParameters
-validParams<ContactPressureVarAction>()
+ContactPressureVarAction::validParams()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
   return params;
 }

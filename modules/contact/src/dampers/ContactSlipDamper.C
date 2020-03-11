@@ -16,11 +16,12 @@
 
 registerMooseObject("ContactApp", ContactSlipDamper);
 
-template <>
+defineLegacyParams(ContactSlipDamper);
+
 InputParameters
-validParams<ContactSlipDamper>()
+ContactSlipDamper::validParams()
 {
-  InputParameters params = validParams<GeneralDamper>();
+  InputParameters params = GeneralDamper::validParams();
   params.addRequiredParam<std::vector<int>>(
       "master", "IDs of the master surfaces for which slip reversals should be damped");
   params.addRequiredParam<std::vector<int>>(

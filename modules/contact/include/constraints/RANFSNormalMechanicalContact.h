@@ -33,6 +33,8 @@ InputParameters validParams<RANFSNormalMechanicalContact>();
 class RANFSNormalMechanicalContact : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   RANFSNormalMechanicalContact(const InputParameters & parameters);
 
   bool shouldApply() override;

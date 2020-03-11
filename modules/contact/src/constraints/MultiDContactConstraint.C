@@ -19,11 +19,12 @@
 
 registerMooseObject("ContactApp", MultiDContactConstraint);
 
-template <>
+defineLegacyParams(MultiDContactConstraint);
+
 InputParameters
-validParams<MultiDContactConstraint>()
+MultiDContactConstraint::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<bool>("jacobian_update",
                         false,

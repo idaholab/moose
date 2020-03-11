@@ -14,6 +14,8 @@
 class NodalArea : public SideIntegralVariableUserObject
 {
 public:
+  static InputParameters validParams();
+
   NodalArea(const InputParameters & parameters);
   virtual ~NodalArea();
 

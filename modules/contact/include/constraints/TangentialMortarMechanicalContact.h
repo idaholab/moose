@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class TangentialMortarMechanicalContact : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   TangentialMortarMechanicalContact(const InputParameters & parameters);
 
 protected:

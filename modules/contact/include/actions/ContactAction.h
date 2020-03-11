@@ -38,6 +38,8 @@ InputParameters validParams<ContactAction>();
 class ContactAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ContactAction(const InputParameters & params);
 
   virtual void act() override;

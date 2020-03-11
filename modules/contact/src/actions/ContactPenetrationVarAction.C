@@ -17,13 +17,14 @@
 
 registerMooseAction("ContactApp", ContactPenetrationVarAction, "add_aux_variable");
 
-template <>
+defineLegacyParams(ContactPenetrationVarAction);
+
 InputParameters
-validParams<ContactPenetrationVarAction>()
+ContactPenetrationVarAction::validParams()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
   return params;
 }

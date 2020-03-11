@@ -17,6 +17,8 @@ class PenetrationLocator;
 class ContactPressureAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ContactPressureAux(const InputParameters & parameters);
 
   virtual ~ContactPressureAux();

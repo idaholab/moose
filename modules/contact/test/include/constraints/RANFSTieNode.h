@@ -31,6 +31,8 @@ InputParameters validParams<RANFSTieNode>();
 class RANFSTieNode : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   RANFSTieNode(const InputParameters & parameters);
 
   bool shouldApply() override;

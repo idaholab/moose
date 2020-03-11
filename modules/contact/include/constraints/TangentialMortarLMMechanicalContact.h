@@ -14,12 +14,12 @@
 template <ComputeStage>
 class TangentialMortarLMMechanicalContact;
 
-declareADValidParams(TangentialMortarLMMechanicalContact);
-
 template <ComputeStage compute_stage>
 class TangentialMortarLMMechanicalContact : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   TangentialMortarLMMechanicalContact(const InputParameters & parameters);
 
 protected:

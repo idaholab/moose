@@ -21,6 +21,8 @@ InputParameters validParams<NormalNodalMechanicalContact>();
 class NormalNodalMechanicalContact : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   NormalNodalMechanicalContact(const InputParameters & parameters);
 
   void computeJacobian() override;

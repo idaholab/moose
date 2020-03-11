@@ -28,6 +28,8 @@ InputParameters validParams<AugmentedLagrangianContactProblem>();
 class AugmentedLagrangianContactProblem : public ReferenceResidualProblem
 {
 public:
+  static InputParameters validParams();
+
   AugmentedLagrangianContactProblem(const InputParameters & params);
   virtual ~AugmentedLagrangianContactProblem() {}
 

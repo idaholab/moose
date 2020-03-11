@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(ContactTestApp);
+
 InputParameters
-validParams<ContactTestApp>()
+ContactTestApp::validParams()
 {
-  InputParameters params = validParams<ContactApp>();
+  InputParameters params = ContactApp::validParams();
   return params;
 }
 

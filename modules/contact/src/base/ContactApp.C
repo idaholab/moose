@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(ContactApp);
+
 InputParameters
-validParams<ContactApp>()
+ContactApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
 
   params.set<bool>("automatic_automatic_scaling") = false;
 
