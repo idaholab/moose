@@ -19,6 +19,8 @@ InputParameters validParams<SolidMechanicsTestApp>();
 class SolidMechanicsTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   SolidMechanicsTestApp(InputParameters parameters);
   virtual ~SolidMechanicsTestApp();
 

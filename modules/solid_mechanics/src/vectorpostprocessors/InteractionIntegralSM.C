@@ -30,11 +30,12 @@ InteractionIntegralSM::sifModeType()
   return MooseEnum("KI KII KIII T", "KI");
 }
 
-template <>
+defineLegacyParams(InteractionIntegralSM);
+
 InputParameters
-validParams<InteractionIntegralSM>()
+InteractionIntegralSM::validParams()
 {
-  InputParameters params = validParams<ElementVectorPostprocessor>();
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");

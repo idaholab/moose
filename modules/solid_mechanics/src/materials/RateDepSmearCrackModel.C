@@ -11,12 +11,13 @@
 
 registerMooseObject("SolidMechanicsApp", RateDepSmearCrackModel);
 
-template <>
+defineLegacyParams(RateDepSmearCrackModel);
+
 InputParameters
-validParams<RateDepSmearCrackModel>()
+RateDepSmearCrackModel::validParams()
 {
 
-  InputParameters params = validParams<ConstitutiveModel>();
+  InputParameters params = ConstitutiveModel::validParams();
 
   params.addRequiredParam<Real>("ref_damage_rate", "Reference damage rate");
   params.addRequiredParam<unsigned int>("nstate", "Number of state variables");

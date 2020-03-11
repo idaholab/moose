@@ -17,11 +17,12 @@
 
 registerMooseObject("SolidMechanicsApp", AbaqusCreepMaterial);
 
-template <>
+defineLegacyParams(AbaqusCreepMaterial);
+
 InputParameters
-validParams<AbaqusCreepMaterial>()
+AbaqusCreepMaterial::validParams()
 {
-  InputParameters params = validParams<SolidModel>();
+  InputParameters params = SolidModel::validParams();
   params.addRequiredParam<FileName>("plugin",
                                     "The path to the compiled dynamic library for the "
                                     "plugin you want to use (without -opt.plugin or "

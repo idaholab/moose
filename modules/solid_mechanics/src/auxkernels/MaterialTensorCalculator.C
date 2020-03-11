@@ -10,9 +10,10 @@
 #include "MaterialTensorCalculatorTools.h"
 #include "MaterialTensorCalculator.h"
 
-template <>
+defineLegacyParams(MaterialTensorCalculator);
+
 InputParameters
-validParams<MaterialTensorCalculator>()
+MaterialTensorCalculator::validParams()
 {
   InputParameters params = emptyInputParameters();
   MooseEnum quantities("VonMises=1 EffectiveStrain Hydrostatic Direction Hoop Radial Axial "

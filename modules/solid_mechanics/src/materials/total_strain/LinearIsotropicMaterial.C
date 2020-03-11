@@ -17,11 +17,12 @@
 
 registerMooseObject("SolidMechanicsApp", LinearIsotropicMaterial);
 
-template <>
+defineLegacyParams(LinearIsotropicMaterial);
+
 InputParameters
-validParams<LinearIsotropicMaterial>()
+LinearIsotropicMaterial::validParams()
 {
-  InputParameters params = validParams<SolidMechanicsMaterial>();
+  InputParameters params = SolidMechanicsMaterial::validParams();
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
   params.addParam<Real>(

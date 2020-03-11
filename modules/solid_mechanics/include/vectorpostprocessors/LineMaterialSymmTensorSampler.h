@@ -32,6 +32,8 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
+  static InputParameters validParams();
+
   LineMaterialSymmTensorSampler(const InputParameters & parameters);
 
   virtual ~LineMaterialSymmTensorSampler() {}

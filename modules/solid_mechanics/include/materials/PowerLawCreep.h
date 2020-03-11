@@ -25,6 +25,8 @@ InputParameters validParams<PowerLawCreep>();
 class PowerLawCreep : public SolidModel
 {
 public:
+  static InputParameters validParams();
+
   PowerLawCreep(const InputParameters & parameters);
 
 protected:

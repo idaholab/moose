@@ -15,11 +15,12 @@
 
 registerMooseObject("SolidMechanicsApp", IsotropicTempDepHardening);
 
-template <>
+defineLegacyParams(IsotropicTempDepHardening);
+
 InputParameters
-validParams<IsotropicTempDepHardening>()
+IsotropicTempDepHardening::validParams()
 {
-  InputParameters params = validParams<IsotropicPlasticity>();
+  InputParameters params = IsotropicPlasticity::validParams();
 
   params.set<Real>("yield_stress") = 1.0;
   params.set<Real>("hardening_constant") = 1.0;

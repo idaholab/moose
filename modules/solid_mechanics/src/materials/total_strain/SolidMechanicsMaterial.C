@@ -12,11 +12,12 @@
 #include "VolumetricModel.h"
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(SolidMechanicsMaterial);
+
 InputParameters
-validParams<SolidMechanicsMaterial>()
+SolidMechanicsMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
   params.addRequiredCoupledVar("disp_x", "The x displacement");

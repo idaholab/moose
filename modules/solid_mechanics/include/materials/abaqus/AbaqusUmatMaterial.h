@@ -59,6 +59,8 @@ InputParameters validParams<AbaqusUmatMaterial>();
 class AbaqusUmatMaterial : public SolidModel
 {
 public:
+  static InputParameters validParams();
+
   AbaqusUmatMaterial(const InputParameters & parameters);
   virtual ~AbaqusUmatMaterial();
 

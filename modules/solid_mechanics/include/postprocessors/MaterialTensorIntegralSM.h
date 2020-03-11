@@ -26,6 +26,8 @@ InputParameters validParams<MaterialTensorIntegralSM>();
 class MaterialTensorIntegralSM : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   MaterialTensorIntegralSM(const InputParameters & parameters);
 
 protected:

@@ -22,6 +22,8 @@ InputParameters validParams<OutOfPlaneStress>();
 class OutOfPlaneStress : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   OutOfPlaneStress(const InputParameters & parameters);
 
 protected:
