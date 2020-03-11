@@ -133,6 +133,7 @@
 - /Controls/DelayControl
 - /Controls/GetFunctionValueControl
 - /Controls/PIDControl
+- /Controls/SetBoolValueControl
 - /Controls/SetRealValueControl
 - /Controls/THMControl
 - /Controls/TerminateControl
