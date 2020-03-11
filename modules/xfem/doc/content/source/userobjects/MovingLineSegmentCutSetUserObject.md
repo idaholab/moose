@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/MovingLineSegmentCutSetUserObject
 
-## Description
+## Overview
 
 The `MovingLineSegmentCutSetUserObject` is used to cut the mesh with a set of line segments. The points on those line segments move at a velocity that is given by `XFEMPhaseTransitionMovingInterfaceVelocity`.
 
@@ -15,5 +15,3 @@ The `MovingLineSegmentCutSetUserObject` is used to cut the mesh with a set of li
 !syntax inputs /UserObjects/MovingLineSegmentCutSetUserObject
 
 !syntax children /UserObjects/MovingLineSegmentCutSetUserObject
-
-!bibtex bibliography

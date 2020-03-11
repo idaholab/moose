@@ -7,17 +7,14 @@ shape ($\beta$) parameters.
 
 Probability Density Function:
 
-\begin{equation}
+!equation
 z(x) = \exp{-\frac{(x - \alpha)}{\beta}}
 f(x) = \frac{z(x)}{(\alpha * (1.0 + z)^2)}
-\end{equation}
 
 Cumulative Density Function:
 
-\begin{equation}
+!equation
 F(x) = \frac{1}{1+z(x)}
-\end{equation}
-
 
 !syntax description /Distributions/LogisticDistribution
 

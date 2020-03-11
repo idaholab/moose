@@ -2,6 +2,8 @@
 
 !syntax description /UserObjects/RectangleCutUserObject
 
+## Overview
+
 The `RectangleCutUserObject` defines the boundary of a rectangular cut for XFEM
 to make on a 3 dimensional mesh. The cut_data parameter is a vector of length
 twelve that defines the x, y , and z Real values of the four vertices that form
@@ -18,5 +20,3 @@ the cut plane.
 !syntax inputs /UserObjects/RectangleCutUserObject
 
 !syntax children /UserObjects/RectangleCutUserObject
-
-!bibtex bibliography

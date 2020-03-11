@@ -2,6 +2,8 @@
 
 !syntax description /UserObjects/LineSegmentCutUserObject
 
+## Overview
+
 The `LineSegmentCutUserObject` defines a line segment cut for XFEM to make on a
 2 dimensional mesh. The start and end points of the line segment are defined in
 cut_data as a vector of four Real values: start point x, start point y, end
@@ -24,5 +26,3 @@ to both start and end points.
 !syntax inputs /UserObjects/LineSegmentCutUserObject
 
 !syntax children /UserObjects/LineSegmentCutUserObject
-
-!bibtex bibliography

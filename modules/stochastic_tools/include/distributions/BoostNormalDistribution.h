@@ -26,4 +26,3 @@ public:
 
   BoostNormalDistribution(const InputParameters & parameters);
 };
-

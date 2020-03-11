@@ -2,6 +2,8 @@
 
 !syntax description /UserObjects/LineSegmentCutSetUserObject
 
+## Overview
+
 The `LineSegmentCutSetUserObject` defines a set of line segment cuts for XFEM
 to make on a 2 dimensional mesh. The cut_data parameter consists of $n$ entries
 each with a length of six Real values (the $n$ entries are not separate but
@@ -25,5 +27,3 @@ cut_data.
 !syntax inputs /UserObjects/LineSegmentCutSetUserObject
 
 !syntax children /UserObjects/LineSegmentCutSetUserObject
-
-!bibtex bibliography

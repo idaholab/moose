@@ -328,9 +328,37 @@ $(exodiff_APP): $(exodiff_objects)
 -include $(wildcard $(exodiff_DIR)/*.d)
 
 #
+# Install targets
+#
+lib_DIRS         := $(dir $(app_LIBS))
+install: install_libs install_bin
+
+install_libs: all | install_make_dir
+	@(ret_val=0; \
+	for lib in $(app_LIBS); \
+	do \
+		echo Installing Library $${lib}...; \
+		${libmesh_LIBTOOL} --mode=install --warning=none --quiet install $${lib} ${PREFIX} || ret_val=1; \
+	done; \
+	exit $$ret_val;)
+	@$(libmesh_LIBTOOL) --mode=finish --quiet $(lib_DIRS)
+
+install_bin: all | install_make_dir
+	@(ret_val=0; \
+	for exec in $(app_EXEC); \
+	do \
+		echo Installing Executable $${exec}...; \
+		${libmesh_LIBTOOL} --mode=install --warning=none --quiet install $${exec} ${PREFIX} || ret_val=1; \
+	done; \
+	exit $$ret_val;)
+install_make_dir:
+	@echo "Prefix Install Directory $(PREFIX)"
+	@$(shell mkdir -p $(PREFIX))
+
+#
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status hit
+.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)

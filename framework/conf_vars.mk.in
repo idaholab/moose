@@ -1,2 +1,3 @@
 libPNG_LIBS    := @LIBPNG_LIBS@
 libPNG_INCLUDE := @LIBPNG_INCLUDES@
+PREFIX         := @prefix@

@@ -15,14 +15,13 @@ distribution) and the scale parameter is equal to the standard deviation of the 
 distribution. The probability density function (PDF) of the lognormal distribution is given by the
 [eq:lognormal].
 
-\begin{equation}
-\label{eq:lognormal}
+!equation id=eq:lognormal
 f(x \; | \; m, s) =
 \begin{cases}
 \frac{1}{xs\sqrt{2\pi}}e^{\frac{-\left( {\ln} x-m \right)^2}{2s^2}} & x>0 ,\\
 0 & x\leq0,
 \end{cases}
-\end{equation}
+
 where $m$ is the location parameter and $s$ is the scale parameter ($s > 0$).
 
 ## Example Input Syntax
