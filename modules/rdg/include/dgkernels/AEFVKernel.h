@@ -43,6 +43,8 @@ InputParameters validParams<AEFVKernel>();
 class AEFVKernel : public DGKernel
 {
 public:
+  static InputParameters validParams();
+
   AEFVKernel(const InputParameters & parameters);
   virtual ~AEFVKernel();
 

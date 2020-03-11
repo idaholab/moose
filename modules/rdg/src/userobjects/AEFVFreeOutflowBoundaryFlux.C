@@ -11,11 +11,12 @@
 
 registerMooseObject("RdgApp", AEFVFreeOutflowBoundaryFlux);
 
-template <>
+defineLegacyParams(AEFVFreeOutflowBoundaryFlux);
+
 InputParameters
-validParams<AEFVFreeOutflowBoundaryFlux>()
+AEFVFreeOutflowBoundaryFlux::validParams()
 {
-  InputParameters params = validParams<BoundaryFluxBase>();
+  InputParameters params = BoundaryFluxBase::validParams();
   params.addParam<Real>("velocity", 1.0, "Advective velocity");
   params.addClassDescription("Free outflow BC based boundary flux user object for the advection "
                              "equation using a cell-centered finite volume method.");

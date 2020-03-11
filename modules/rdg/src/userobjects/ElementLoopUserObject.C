@@ -9,12 +9,13 @@
 
 #include "ElementLoopUserObject.h"
 
-template <>
+defineLegacyParams(ElementLoopUserObject);
+
 InputParameters
-validParams<ElementLoopUserObject>()
+ElementLoopUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  params += validParams<BlockRestrictable>();
+  InputParameters params = GeneralUserObject::validParams();
+  params += BlockRestrictable::validParams();
   return params;
 }
 

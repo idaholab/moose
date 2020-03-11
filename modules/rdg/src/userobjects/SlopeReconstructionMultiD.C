@@ -9,11 +9,12 @@
 
 #include "SlopeReconstructionMultiD.h"
 
-template <>
+defineLegacyParams(SlopeReconstructionMultiD);
+
 InputParameters
-validParams<SlopeReconstructionMultiD>()
+SlopeReconstructionMultiD::validParams()
 {
-  InputParameters params = validParams<SlopeReconstructionBase>();
+  InputParameters params = SlopeReconstructionBase::validParams();
 
   params.addRequiredParam<std::vector<BoundaryName>>("boundary_list", "List of boundary IDs");
 

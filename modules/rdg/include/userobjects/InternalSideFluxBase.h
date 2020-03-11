@@ -32,6 +32,8 @@ InputParameters validParams<InternalSideFluxBase>();
 class InternalSideFluxBase : public ThreadedGeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   InternalSideFluxBase(const InputParameters & parameters);
 
   virtual void execute() override;

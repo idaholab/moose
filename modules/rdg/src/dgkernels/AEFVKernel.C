@@ -11,11 +11,12 @@
 
 registerMooseObject("RdgApp", AEFVKernel);
 
-template <>
+defineLegacyParams(AEFVKernel);
+
 InputParameters
-validParams<AEFVKernel>()
+AEFVKernel::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
   params.addClassDescription(
       "A dgkernel for the advection equation using a cell-centered finite volume method.");
   MooseEnum component("concentration");

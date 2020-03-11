@@ -26,6 +26,8 @@ InputParameters validParams<RDGFluxBase>();
 class RDGFluxBase : public ThreadedGeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RDGFluxBase(const InputParameters & parameters);
 
   virtual void execute() override;

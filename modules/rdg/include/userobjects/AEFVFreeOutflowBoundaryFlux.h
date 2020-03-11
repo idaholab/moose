@@ -25,6 +25,8 @@ InputParameters validParams<AEFVFreeOutflowBoundaryFlux>();
 class AEFVFreeOutflowBoundaryFlux : public BoundaryFluxBase
 {
 public:
+  static InputParameters validParams();
+
   AEFVFreeOutflowBoundaryFlux(const InputParameters & parameters);
   virtual ~AEFVFreeOutflowBoundaryFlux();
 

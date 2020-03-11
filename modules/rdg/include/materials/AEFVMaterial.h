@@ -43,6 +43,8 @@ InputParameters validParams<AEFVMaterial>();
 class AEFVMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   AEFVMaterial(const InputParameters & parameters);
   virtual ~AEFVMaterial();
 
