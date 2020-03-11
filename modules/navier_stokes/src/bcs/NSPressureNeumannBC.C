@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSPressureNeumannBC);
 
-template <>
+defineLegacyParams(NSPressureNeumannBC);
+
 InputParameters
-validParams<NSPressureNeumannBC>()
+NSPressureNeumannBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
 
   params.addClassDescription("This kernel is appropriate for use with a 'zero normal flow' "
                              "boundary condition in the context of the Euler equations.");

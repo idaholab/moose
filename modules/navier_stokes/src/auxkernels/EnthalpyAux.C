@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", EnthalpyAux);
 
-template <>
+defineLegacyParams(EnthalpyAux);
+
 InputParameters
-validParams<EnthalpyAux>()
+EnthalpyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rho", "Density");
   params.addRequiredCoupledVar("rho_et", "Total energy");
   params.addCoupledVar("pressure", "Coupled value pressure");

@@ -24,6 +24,8 @@ InputParameters validParams<INSTemperature>();
 class INSTemperature : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSTemperature(const InputParameters & parameters);
 
   virtual ~INSTemperature() {}

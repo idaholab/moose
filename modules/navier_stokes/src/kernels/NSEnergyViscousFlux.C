@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyViscousFlux);
 
-template <>
+defineLegacyParams(NSEnergyViscousFlux);
+
 InputParameters
-validParams<NSEnergyViscousFlux>()
+NSEnergyViscousFlux::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription("Viscous flux terms in energy equation.");
   return params;
 }

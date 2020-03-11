@@ -23,6 +23,8 @@ InputParameters validParams<InternalEnergyAux>();
 class InternalEnergyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   InternalEnergyAux(const InputParameters & parameters);
 
 protected:

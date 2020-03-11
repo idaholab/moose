@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class INSADTemperatureAdvection : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADTemperatureAdvection(const InputParameters & parameters);
 
 protected:

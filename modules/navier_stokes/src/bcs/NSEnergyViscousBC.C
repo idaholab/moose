@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyViscousBC);
 
-template <>
+defineLegacyParams(NSEnergyViscousBC);
+
 InputParameters
-validParams<NSEnergyViscousBC>()
+NSEnergyViscousBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }

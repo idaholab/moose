@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSVelocityAux);
 
-template <>
+defineLegacyParams(NSVelocityAux);
+
 InputParameters
-validParams<NSVelocityAux>()
+NSVelocityAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Velocity auxiliary value.");
   params.addRequiredCoupledVar(NS::density, "Density (conserved form)");
   params.addRequiredCoupledVar("momentum", "Momentum (conserved form)");

@@ -25,6 +25,8 @@ InputParameters validParams<NSMachAux>();
 class NSMachAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NSMachAux(const InputParameters & parameters);
 
   virtual ~NSMachAux() {}

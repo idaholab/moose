@@ -17,12 +17,13 @@
 // Full specialization of the validParams function for this object
 registerMooseObject("NavierStokesApp", NSImposedVelocityDirectionBC);
 
-template <>
+defineLegacyParams(NSImposedVelocityDirectionBC);
+
 InputParameters
-validParams<NSImposedVelocityDirectionBC>()
+NSImposedVelocityDirectionBC::validParams()
 {
   // Initialize the params object from the base class
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
 
   params.addClassDescription("This class imposes a velocity direction component as a Dirichlet "
                              "condition on the appropriate momentum equation.");

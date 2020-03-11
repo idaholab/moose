@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSWeakStagnationInletBC);
 
-template <>
+defineLegacyParams(NSWeakStagnationInletBC);
+
 InputParameters
-validParams<NSWeakStagnationInletBC>()
+NSWeakStagnationInletBC::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addClassDescription("This class facilitates adding weak stagnation inlet BCs via an "
                              "Action by setting up the required parameters.");
   params.addRequiredParam<std::vector<BoundaryName>>(

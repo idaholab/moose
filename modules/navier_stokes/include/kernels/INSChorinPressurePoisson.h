@@ -25,6 +25,8 @@ InputParameters validParams<INSChorinPressurePoisson>();
 class INSChorinPressurePoisson : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSChorinPressurePoisson(const InputParameters & parameters);
 
   virtual ~INSChorinPressurePoisson() {}

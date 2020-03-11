@@ -27,6 +27,8 @@ InputParameters validParams<NSMassSpecifiedNormalFlowBC>();
 class NSMassSpecifiedNormalFlowBC : public NSMassBC
 {
 public:
+  static InputParameters validParams();
+
   NSMassSpecifiedNormalFlowBC(const InputParameters & parameters);
 
 protected:

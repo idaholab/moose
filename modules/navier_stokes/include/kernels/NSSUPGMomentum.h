@@ -24,6 +24,8 @@ InputParameters validParams<NSSUPGMomentum>();
 class NSSUPGMomentum : public NSSUPGBase
 {
 public:
+  static InputParameters validParams();
+
   NSSUPGMomentum(const InputParameters & parameters);
 
 protected:

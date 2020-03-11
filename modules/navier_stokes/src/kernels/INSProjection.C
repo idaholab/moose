@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSProjection);
 
-template <>
+defineLegacyParams(INSProjection);
+
 InputParameters
-validParams<INSProjection>()
+INSProjection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("This class computes the 'projection' part of the 'split' method for "
                              "solving incompressible Navier-Stokes.");

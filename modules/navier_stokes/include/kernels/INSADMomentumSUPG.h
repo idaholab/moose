@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class INSADMomentumSUPG : public ADVectorKernelSUPG<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMomentumSUPG(const InputParameters & parameters);
 
 protected:

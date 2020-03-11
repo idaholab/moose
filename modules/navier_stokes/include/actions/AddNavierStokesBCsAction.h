@@ -50,6 +50,8 @@ InputParameters validParams<AddNavierStokesBCsAction>();
 class AddNavierStokesBCsAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   AddNavierStokesBCsAction(InputParameters parameters);
   virtual ~AddNavierStokesBCsAction();
 

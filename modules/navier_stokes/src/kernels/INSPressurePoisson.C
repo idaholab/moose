@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSPressurePoisson);
 
-template <>
+defineLegacyParams(INSPressurePoisson);
+
 InputParameters
-validParams<INSPressurePoisson>()
+INSPressurePoisson::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("This class computes the pressure Poisson solve which is part of the "
                              "'split' scheme used for solving the incompressible Navier-Stokes "

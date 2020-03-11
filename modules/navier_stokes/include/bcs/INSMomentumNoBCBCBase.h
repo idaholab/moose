@@ -30,6 +30,8 @@ InputParameters validParams<INSMomentumNoBCBCBase>();
 class INSMomentumNoBCBCBase : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   INSMomentumNoBCBCBase(const InputParameters & parameters);
 
   virtual ~INSMomentumNoBCBCBase() {}

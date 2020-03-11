@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", SpecificVolumeAux);
 
-template <>
+defineLegacyParams(SpecificVolumeAux);
+
 InputParameters
-validParams<SpecificVolumeAux>()
+SpecificVolumeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rho", "Density of the phase");
   params.addCoupledVar("area", 1., "Cross-sectional area (if used)");
   params.addCoupledVar("alpha", 1., "Volume fraction (if used)");

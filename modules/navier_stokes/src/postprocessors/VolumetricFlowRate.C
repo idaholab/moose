@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
 
-template <>
+defineLegacyParams(VolumetricFlowRate);
+
 InputParameters
-validParams<VolumetricFlowRate>()
+VolumetricFlowRate::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription("Computes the volumetric flow rate through a boundary.");
   params.addRequiredCoupledVar("vel_x", "The x velocity");
   params.addCoupledVar("vel_y", 0, "The y velocity");

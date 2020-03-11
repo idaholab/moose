@@ -24,6 +24,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>();
 class NSEnergyInviscidSpecifiedDensityAndVelocityBC : public NSEnergyInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters);
 
   virtual ~NSEnergyInviscidSpecifiedDensityAndVelocityBC() {}

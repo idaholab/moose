@@ -24,6 +24,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>();
 class NSMomentumInviscidSpecifiedNormalFlowBC : public NSMomentumInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
 
 protected:

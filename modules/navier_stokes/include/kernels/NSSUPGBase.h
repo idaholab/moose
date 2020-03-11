@@ -25,6 +25,8 @@ InputParameters validParams<NSSUPGBase>();
 class NSSUPGBase : public NSKernel
 {
 public:
+  static InputParameters validParams();
+
   NSSUPGBase(const InputParameters & parameters);
 
 protected:

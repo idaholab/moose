@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(NavierStokesTestApp);
+
 InputParameters
-validParams<NavierStokesTestApp>()
+NavierStokesTestApp::validParams()
 {
-  InputParameters params = validParams<NavierStokesApp>();
+  InputParameters params = NavierStokesApp::validParams();
   return params;
 }
 

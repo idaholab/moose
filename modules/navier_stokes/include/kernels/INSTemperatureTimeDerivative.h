@@ -25,6 +25,8 @@ InputParameters validParams<INSTemperatureTimeDerivative>();
 class INSTemperatureTimeDerivative : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   INSTemperatureTimeDerivative(const InputParameters & parameters);
 
   virtual ~INSTemperatureTimeDerivative() {}

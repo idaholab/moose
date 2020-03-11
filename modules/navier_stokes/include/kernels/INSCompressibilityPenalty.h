@@ -23,6 +23,8 @@ InputParameters validParams<INSCompressibilityPenalty>();
 class INSCompressibilityPenalty : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSCompressibilityPenalty(const InputParameters & parameters);
 
   virtual ~INSCompressibilityPenalty() {}

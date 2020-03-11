@@ -23,6 +23,8 @@ InputParameters validParams<NSInternalEnergyAux>();
 class NSInternalEnergyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NSInternalEnergyAux(const InputParameters & parameters);
 
   virtual ~NSInternalEnergyAux() {}

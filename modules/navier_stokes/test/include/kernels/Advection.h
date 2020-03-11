@@ -24,6 +24,8 @@ InputParameters validParams<Advection>();
 class Advection : public INSBase
 {
 public:
+  static InputParameters validParams();
+
   Advection(const InputParameters & parameters);
 
   virtual ~Advection() {}

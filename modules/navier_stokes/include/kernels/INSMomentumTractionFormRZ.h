@@ -25,6 +25,8 @@ InputParameters validParams<INSMomentumTractionFormRZ>();
 class INSMomentumTractionFormRZ : public INSMomentumTractionForm
 {
 public:
+  static InputParameters validParams();
+
   INSMomentumTractionFormRZ(const InputParameters & parameters);
 
   virtual ~INSMomentumTractionFormRZ() {}

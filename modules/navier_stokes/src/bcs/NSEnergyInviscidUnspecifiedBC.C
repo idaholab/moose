@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyInviscidUnspecifiedBC);
 
-template <>
+defineLegacyParams(NSEnergyInviscidUnspecifiedBC);
+
 InputParameters
-validParams<NSEnergyInviscidUnspecifiedBC>()
+NSEnergyInviscidUnspecifiedBC::validParams()
 {
-  InputParameters params = validParams<NSEnergyInviscidBC>();
+  InputParameters params = NSEnergyInviscidBC::validParams();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   return params;
 }

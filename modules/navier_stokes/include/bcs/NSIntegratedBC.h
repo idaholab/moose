@@ -29,6 +29,8 @@ InputParameters validParams<NSIntegratedBC>();
 class NSIntegratedBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSIntegratedBC(const InputParameters & parameters);
 
 protected:

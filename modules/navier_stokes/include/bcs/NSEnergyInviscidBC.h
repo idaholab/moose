@@ -36,6 +36,8 @@ InputParameters validParams<NSEnergyInviscidBC>();
 class NSEnergyInviscidBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyInviscidBC(const InputParameters & parameters);
 
 protected:

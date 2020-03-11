@@ -25,6 +25,8 @@ InputParameters validParams<TotalEnergyConvectiveFlux>();
 class TotalEnergyConvectiveFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   TotalEnergyConvectiveFlux(const InputParameters & parameters);
 
 protected:

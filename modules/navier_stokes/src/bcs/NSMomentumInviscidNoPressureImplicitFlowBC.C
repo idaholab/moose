@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumInviscidNoPressureImplicitFlowBC);
 
-template <>
+defineLegacyParams(NSMomentumInviscidNoPressureImplicitFlowBC);
+
 InputParameters
-validParams<NSMomentumInviscidNoPressureImplicitFlowBC>()
+NSMomentumInviscidNoPressureImplicitFlowBC::validParams()
 {
-  InputParameters params = validParams<NSMomentumInviscidBC>();
+  InputParameters params = NSMomentumInviscidBC::validParams();
   params.addClassDescription(
       "Momentum equation boundary condition used when pressure *is not* integrated by parts.");
   return params;

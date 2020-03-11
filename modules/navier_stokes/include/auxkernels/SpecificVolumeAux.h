@@ -22,6 +22,8 @@ InputParameters validParams<SpecificVolumeAux>();
 class SpecificVolumeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   SpecificVolumeAux(const InputParameters & parameters);
 
 protected:

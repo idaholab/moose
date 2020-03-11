@@ -26,6 +26,8 @@ InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>();
 class NSMomentumInviscidNoPressureImplicitFlowBC : public NSMomentumInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumInviscidNoPressureImplicitFlowBC(const InputParameters & parameters);
 
 protected:

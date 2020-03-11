@@ -33,6 +33,8 @@ InputParameters validParams<NSEnergyViscousBC>();
 class NSEnergyViscousBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyViscousBC(const InputParameters & parameters);
 
 protected:

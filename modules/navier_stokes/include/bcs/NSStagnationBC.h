@@ -27,6 +27,8 @@ InputParameters validParams<NSStagnationBC>();
 class NSStagnationBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   NSStagnationBC(const InputParameters & parameters);
 
 protected:

@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", AdvectionBC);
 
-template <>
+defineLegacyParams(AdvectionBC);
+
 InputParameters
-validParams<AdvectionBC>()
+AdvectionBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Boundary conditions for outflow/outflow of advected quantities:"
                              "\n phi * velocity * normal, where phi is the advected quantitiy");
   params.addRequiredCoupledVar("velocity_vector",

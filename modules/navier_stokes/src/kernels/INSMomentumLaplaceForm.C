@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumLaplaceForm);
 
-template <>
+defineLegacyParams(INSMomentumLaplaceForm);
+
 InputParameters
-validParams<INSMomentumLaplaceForm>()
+INSMomentumLaplaceForm::validParams()
 {
-  InputParameters params = validParams<INSMomentumBase>();
+  InputParameters params = INSMomentumBase::validParams();
   params.addClassDescription("This class computes momentum equation residual and Jacobian viscous "
                              "contributions for the 'Laplacian' form of the governing equations.");
   return params;

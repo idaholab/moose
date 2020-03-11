@@ -24,6 +24,8 @@ InputParameters validParams<INSTemperatureNoBCBC>();
 class INSTemperatureNoBCBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   INSTemperatureNoBCBC(const InputParameters & parameters);
 
   virtual ~INSTemperatureNoBCBC() {}

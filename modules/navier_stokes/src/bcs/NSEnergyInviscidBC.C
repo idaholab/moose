@@ -14,11 +14,12 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-template <>
+defineLegacyParams(NSEnergyInviscidBC);
+
 InputParameters
-validParams<NSEnergyInviscidBC>()
+NSEnergyInviscidBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
   params.addClassDescription("This class corresponds to the inviscid part of the 'natural' "
                              "boundary condition for the energy equation.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");

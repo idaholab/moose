@@ -16,11 +16,12 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumInviscidFlux);
 
-template <>
+defineLegacyParams(NSMomentumInviscidFlux);
+
 InputParameters
-validParams<NSMomentumInviscidFlux>()
+NSMomentumInviscidFlux::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription(
       "The inviscid flux (convective + pressure terms) for the momentum conservation equations.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");

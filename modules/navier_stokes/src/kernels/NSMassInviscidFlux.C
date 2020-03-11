@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSMassInviscidFlux);
 
-template <>
+defineLegacyParams(NSMassInviscidFlux);
+
 InputParameters
-validParams<NSMassInviscidFlux>()
+NSMassInviscidFlux::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription("This class computes the inviscid flux in the mass equation.");
   return params;
 }

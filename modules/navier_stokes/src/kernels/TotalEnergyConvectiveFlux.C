@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", TotalEnergyConvectiveFlux);
 
-template <>
+defineLegacyParams(TotalEnergyConvectiveFlux);
+
 InputParameters
-validParams<TotalEnergyConvectiveFlux>()
+TotalEnergyConvectiveFlux::validParams()
 {
-  InputParameters pars = validParams<Kernel>();
+  InputParameters pars = Kernel::validParams();
 
   pars.addRequiredCoupledVar("rho", "density");
   pars.addRequiredCoupledVar("rho_u", "rho*u");

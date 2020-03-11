@@ -59,6 +59,8 @@ InputParameters validParams<NSMomentumInviscidBC>();
 class NSMomentumInviscidBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumInviscidBC(const InputParameters & parameters);
 
 protected:

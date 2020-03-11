@@ -25,6 +25,8 @@ InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>();
 class NSMomentumConvectiveWeakStagnationBC : public NSWeakStagnationBaseBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters);
 
 protected:

@@ -14,11 +14,12 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(NSAction);
+
 InputParameters
-validParams<NSAction>()
+NSAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addClassDescription("This is a base Action class for the Navier-Stokes module which is "
                              "responsible for building lists of names that other Actions can "

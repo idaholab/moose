@@ -22,6 +22,8 @@ InputParameters validParams<MomentumFreeSlipBC>();
 class MomentumFreeSlipBC : public NodalNormalBC
 {
 public:
+  static InputParameters validParams();
+
   MomentumFreeSlipBC(const InputParameters & parameters);
   virtual ~MomentumFreeSlipBC();
 

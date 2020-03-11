@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", INSTemperatureNoBCBC);
 
-template <>
+defineLegacyParams(INSTemperatureNoBCBC);
+
 InputParameters
-validParams<INSTemperatureNoBCBC>()
+INSTemperatureNoBCBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
 
   params.addClassDescription("This class implements the 'No BC' boundary condition discussed by "
                              "Griffiths, Papanastiou, and others.");

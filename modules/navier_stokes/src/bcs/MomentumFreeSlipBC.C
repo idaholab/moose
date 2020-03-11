@@ -16,11 +16,12 @@
 
 registerMooseObject("NavierStokesApp", MomentumFreeSlipBC);
 
-template <>
+defineLegacyParams(MomentumFreeSlipBC);
+
 InputParameters
-validParams<MomentumFreeSlipBC>()
+MomentumFreeSlipBC::validParams()
 {
-  InputParameters params = validParams<NodalNormalBC>();
+  InputParameters params = NodalNormalBC::validParams();
   params.addRequiredCoupledVar("rho_u", "x-component of velocity");
   params.addCoupledVar("rho_v", "y-component of velocity");
   params.addCoupledVar("rho_w", "z-component of velocity");

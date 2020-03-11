@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSPenalizedNormalFlowBC);
 
-template <>
+defineLegacyParams(NSPenalizedNormalFlowBC);
+
 InputParameters
-validParams<NSPenalizedNormalFlowBC>()
+NSPenalizedNormalFlowBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
   params.addClassDescription("This class penalizes the the value of u.n on the boundary so that it "
                              "matches some desired value.");
   params.addRequiredParam<Real>("penalty", "The penalty parameter, some (large) value.");

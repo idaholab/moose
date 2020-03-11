@@ -23,6 +23,8 @@ InputParameters validParams<NSNoPenetrationBC>();
 class NSNoPenetrationBC : public MooseObject
 {
 public:
+  static InputParameters validParams();
+
   NSNoPenetrationBC(const InputParameters & parameters);
   virtual ~NSNoPenetrationBC();
 

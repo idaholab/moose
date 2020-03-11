@@ -23,6 +23,8 @@ InputParameters validParams<NSStaticPressureOutletBC>();
 class NSStaticPressureOutletBC : public MooseObject
 {
 public:
+  static InputParameters validParams();
+
   NSStaticPressureOutletBC(const InputParameters & parameters);
   virtual ~NSStaticPressureOutletBC();
 

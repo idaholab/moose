@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", ImplicitNeumannBC);
 
-template <>
+defineLegacyParams(ImplicitNeumannBC);
+
 InputParameters
-validParams<ImplicitNeumannBC>()
+ImplicitNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("This class implements a form of the Neumann boundary condition in "
                              "which the boundary term is treated 'implicitly'.");
   return params;

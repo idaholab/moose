@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyInviscidSpecifiedNormalFlowBC);
 
-template <>
+defineLegacyParams(NSEnergyInviscidSpecifiedNormalFlowBC);
+
 InputParameters
-validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
+NSEnergyInviscidSpecifiedNormalFlowBC::validParams()
 {
-  InputParameters params = validParams<NSEnergyInviscidBC>();
+  InputParameters params = NSEnergyInviscidBC::validParams();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<Real>("un", "The specified value of u.n for this boundary");
   return params;

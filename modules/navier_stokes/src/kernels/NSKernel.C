@@ -17,11 +17,12 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(NSKernel);
+
 InputParameters
-validParams<NSKernel>()
+NSKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("This class couples together all the variables for the compressible "
                              "Navier-Stokes equations to allow them to be used in derived Kernel "
                              "classes.");

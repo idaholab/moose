@@ -11,14 +11,19 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumPressure);
 
-defineADValidParams(
-    INSADMomentumPressure,
-    ADVectorKernel,
-    params.addClassDescription("Adds the pressure term to the INS momentum equation");
-    params.addRequiredCoupledVar("p", "The pressure");
-    params.addParam<bool>("integrate_p_by_parts",
-                          true,
-                          "Whether to integrate the pressure term by parts"););
+defineADLegacyParams(INSADMomentumPressure);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMomentumPressure<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorKernel<compute_stage>::validParams();
+  params.addClassDescription("Adds the pressure term to the INS momentum equation");
+  params.addRequiredCoupledVar("p", "The pressure");
+  params.addParam<bool>(
+      "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMomentumPressure<compute_stage>::INSADMomentumPressure(const InputParameters & parameters)

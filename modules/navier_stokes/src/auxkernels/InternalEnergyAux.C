@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", InternalEnergyAux);
 
-template <>
+defineLegacyParams(InternalEnergyAux);
+
 InputParameters
-validParams<InternalEnergyAux>()
+InternalEnergyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("density", "Density (conserved form)");
   params.addRequiredCoupledVar("pressure", "Pressure");
   params.addRequiredParam<UserObjectName>("fp", "The name of the equation of state user object");

@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class INSADMomentumTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMomentumTimeDerivative(const InputParameters & parameters);
 
   virtual ~INSADMomentumTimeDerivative() {}

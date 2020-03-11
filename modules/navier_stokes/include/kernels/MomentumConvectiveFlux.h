@@ -23,6 +23,8 @@ InputParameters validParams<MomentumConvectiveFlux>();
 class MomentumConvectiveFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   MomentumConvectiveFlux(const InputParameters & parameters);
 
 protected:
