@@ -13,11 +13,12 @@
 
 registerMooseObject("StochasticToolsTestApp", MaterialReaction);
 
-template <>
+defineLegacyParams(MaterialReaction);
+
 InputParameters
-validParams<MaterialReaction>()
+MaterialReaction::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addParam<MaterialPropertyName>(
       "coefficient", 1.0, "Name of the material property acting as reaction coefficient.");
   return params;

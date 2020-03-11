@@ -19,6 +19,8 @@ InputParameters validParams<MaterialReaction>();
 class MaterialReaction : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   MaterialReaction(const InputParameters & parameters);
 
 protected:
