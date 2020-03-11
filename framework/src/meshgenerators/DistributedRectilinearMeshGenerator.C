@@ -37,8 +37,6 @@ DistributedRectilinearMeshGenerator::validParams()
   InputParameters params = PetscExternalPartitioner::validParams();
   params += MeshGenerator::validParams();
 
-  params.addParam<bool>("verbose", false, "Turn on verbose printing for the mesh generation");
-
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>(
       "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
@@ -89,7 +87,6 @@ DistributedRectilinearMeshGenerator::validParams()
 DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
-    _verbose(getParam<bool>("verbose")),
     _dim(getParam<MooseEnum>("dim")),
     _nx(declareMeshProperty("num_elements_x", getParam<dof_id_type>("nx"))),
     _ny(declareMeshProperty("num_elements_y", getParam<dof_id_type>("ny"))),
@@ -213,13 +210,9 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
                                                        const dof_id_type elem_id,
                                                        const processor_id_type pid,
                                                        const ElemType /*type*/,
-                                                       MeshBase & mesh,
-                                                       bool verbose)
+                                                       MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
-  if (verbose)
-    Moose::out << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
 
   auto node_offset = elem_id;
 
@@ -231,9 +224,6 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
       mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
   node1_ptr->set_unique_id() = node_offset + 1;
   node1_ptr->processor_id() = pid;
-
-  if (verbose)
-    Moose::out << "Adding elem: " << elem_id << std::endl;
 
   Elem * elem = new Edge2;
   elem->set_id(elem_id);
@@ -416,13 +406,9 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
                                                        const dof_id_type elem_id,
                                                        const processor_id_type pid,
                                                        const ElemType type,
-                                                       MeshBase & mesh,
-                                                       bool verbose)
+                                                       MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
-  if (verbose)
-    Moose::out << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
 
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
@@ -644,16 +630,9 @@ DistributedRectilinearMeshGenerator::addElement<Hex8>(const dof_id_type nx,
                                                       const dof_id_type elem_id,
                                                       const processor_id_type pid,
                                                       const ElemType type,
-                                                      MeshBase & mesh,
-                                                      bool verbose)
+                                                      MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
-  if (verbose)
-  {
-    Moose::out << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
-    Moose::out << "Type: " << type << " " << HEX8 << std::endl;
-  }
 
   // This ordering was picked to match the ordering in mesh_generation.C
   auto node0_ptr = addPoint<Hex8>(nx, ny, nz, i, j, k, type, mesh);
@@ -791,12 +770,8 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
                                                const Real ymax,
                                                const Real zmin,
                                                const Real zmax,
-                                               const ElemType type,
-                                               bool verbose)
+                                               const ElemType type)
 {
-  if (verbose)
-    Moose::out << "nx: " << nx << "\n ny: " << ny << "\n nz: " << nz << std::endl;
-
   /// 1. "Partition" the element linearly (i.e. break them up into n_procs contiguous chunks
   /// 2. Create a (dual) graph of the local elements
   /// 3. Partition the graph using PetscExternalPartitioner
@@ -809,9 +784,6 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   auto & comm = mesh.comm();
 
   dof_id_type num_elems = nx * ny * nz;
-
-  if (verbose)
-    Moose::out << "num elems: " << num_elems << std::endl;
 
   const auto num_procs = comm.size();
   // Current processor ID
@@ -826,9 +798,6 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   // Number of neighbors
   dof_id_type n_neighbors = canonical_elem->n_neighbors();
 
-  if (verbose)
-    Moose::out << "num neighbors: " << n_neighbors << std::endl;
-
   // "Partition" the elements linearly across the processors
   dof_id_type num_local_elems;
   dof_id_type local_elems_begin;
@@ -837,9 +806,6 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
       num_elems, num_procs, pid, num_local_elems, local_elems_begin, local_elems_end);
 
   std::vector<std::vector<dof_id_type>> graph;
-
-  if (verbose)
-    Moose::out << "num local elements: " << num_local_elems << std::endl;
 
   // Fill in xadj and adjncy
   // xadj is the offset into adjncy
@@ -855,20 +821,12 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
     getNeighbors<T>(nx, ny, nz, i, j, k, neighbors, false);
 
-    if (verbose)
-      Moose::out << "e_id: " << e_id << std::endl;
-
     std::vector<dof_id_type> & row = graph[num_local_elems++];
     row.reserve(n_neighbors);
 
     for (auto neighbor : neighbors)
-    {
-      if (verbose)
-        Moose::out << " neighbor: " << neighbor << std::endl;
-
       if (neighbor != Elem::invalid_id)
         row.push_back(neighbor);
-    }
   }
 
   // Partition the distributed graph
@@ -882,12 +840,7 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   std::map<processor_id_type, std::vector<dof_id_type>> pushed_elements_vecs;
 
   for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
-  {
     pushed_elements_vecs[partition_vec[e_id - local_elems_begin]].push_back(e_id);
-    if (verbose)
-      Moose::out << " partition: (" << e_id << ", " << partition_vec[e_id - local_elems_begin]
-                 << " )" << std::endl;
-  }
 
   // Collect new elements I should own
   std::vector<dof_id_type> my_new_elems;
@@ -906,29 +859,11 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
     getIndices<T>(nx, ny, e_id, i, j, k);
 
-    addElement<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh, verbose);
-
-    if (verbose)
-      Moose::out << " new element: " << e_id << std::endl;
+    addElement<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh);
   }
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-        Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Need to link up the local elements before we can know what's missing
   mesh.find_neighbors();
-
-  if (verbose)
-    Moose::out << "After first find_neighbors" << std::endl;
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-        Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
@@ -944,29 +879,20 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
     // Using side-effect insertion on purpose
     ghost_elems_to_request[proc_id].push_back(ghost_id);
-
-    if (verbose)
-      Moose::out << "ghost element " << ghost_id << " proc_id " << proc_id << std::endl;
   }
 
   // Next set ghost object ids from other processors
-  auto gather_functor = [local_elems_begin, verbose, partition_vec](
-                            processor_id_type /*pid*/,
-                            const std::vector<dof_id_type> & coming_ghost_elems,
-                            std::vector<dof_id_type> & pid_for_ghost_elems) {
+  auto gather_functor = [local_elems_begin,
+                         partition_vec](processor_id_type /*pid*/,
+                                        const std::vector<dof_id_type> & coming_ghost_elems,
+                                        std::vector<dof_id_type> & pid_for_ghost_elems) {
     auto num_ghost_elems = coming_ghost_elems.size();
     pid_for_ghost_elems.resize(num_ghost_elems);
 
     dof_id_type num_local_elems = 0;
 
     for (auto elem : coming_ghost_elems)
-    {
-      if (verbose)
-        Moose::out << "coming ghost element " << elem << " proc_id "
-                   << partition_vec[elem - local_elems_begin] << std::endl;
-
       pid_for_ghost_elems[num_local_elems++] = partition_vec[elem - local_elems_begin];
-    }
   };
 
   std::unordered_map<dof_id_type, processor_id_type> ghost_elem_to_pid;
@@ -995,28 +921,10 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
     getIndices<T>(nx, ny, ghost_id, i, j, k);
 
-    addElement<T>(nx, ny, nz, i, j, k, ghost_id, proc_id, type, mesh, verbose);
+    addElement<T>(nx, ny, nz, i, j, k, ghost_id, proc_id, type, mesh);
   }
 
-  if (verbose)
-    Moose::out << "After adding ghosts" << std::endl;
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-        Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
-
   mesh.find_neighbors(true);
-
-  if (verbose)
-    Moose::out << "After second find neighbors " << std::endl;
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-        Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Set RemoteElem neighbors
   for (auto & elem_ptr : mesh.element_ptr_range())
@@ -1024,55 +932,18 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
       if (!elem_ptr->neighbor_ptr(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
         elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
 
-  if (verbose)
-    Moose::out << "After adding remote elements" << std::endl;
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-        Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
-
   setBoundaryNames<T>(boundary_info);
 
   Partitioner::set_node_processor_ids(mesh);
 
-  if (verbose)
-    Moose::out << "mesh dim: " << mesh.mesh_dimension() << std::endl;
-
-  if (verbose)
-    for (auto & node_ptr : mesh.node_ptr_range())
-      Moose::out << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
-
   // Already partitioned!
   mesh.skip_partitioning(true);
 
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id()
-                 << " uid: " << elem_ptr->unique_id() << std::endl;
-
-  if (verbose)
-    Moose::out << "Getting ready to prepare for use" << std::endl;
-
-  mesh.prepare_for_use(true, true); // No need to renumber or find neighbors - done did it.
-
-  if (verbose)
-    for (auto & elem_ptr : mesh.element_ptr_range())
-      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
-
-  if (verbose)
-    for (auto & node_ptr : mesh.node_ptr_range())
-      Moose::out << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
-
-  if (verbose)
-    Moose::out << "mesh dim: " << mesh.mesh_dimension() << std::endl;
+  // No need to renumber or find neighbors - done did it.
+  mesh.prepare_for_use(true, true);
 
   // Scale the nodal positions
   scaleNodalPositions<T>(nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax, mesh);
-
-  if (verbose)
-    mesh.print_info();
 }
 
 std::unique_ptr<MeshBase>
@@ -1112,18 +983,8 @@ DistributedRectilinearMeshGenerator::generate()
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the dynamic_cast.
     case 1:
-      buildCube<Edge2>(dynamic_cast<UnstructuredMesh &>(*mesh),
-                       _nx,
-                       1,
-                       1,
-                       _xmin,
-                       _xmax,
-                       0,
-                       0,
-                       0,
-                       0,
-                       _elem_type,
-                       _verbose);
+      buildCube<Edge2>(
+          dynamic_cast<UnstructuredMesh &>(*mesh), _nx, 1, 1, _xmin, _xmax, 0, 0, 0, 0, _elem_type);
       break;
     case 2:
       buildCube<Quad4>(dynamic_cast<UnstructuredMesh &>(*mesh),
@@ -1136,8 +997,7 @@ DistributedRectilinearMeshGenerator::generate()
                        _ymax,
                        0,
                        0,
-                       _elem_type,
-                       _verbose);
+                       _elem_type);
       break;
     case 3:
       buildCube<Hex8>(dynamic_cast<UnstructuredMesh &>(*mesh),
@@ -1150,8 +1010,7 @@ DistributedRectilinearMeshGenerator::generate()
                       _ymax,
                       _zmin,
                       _zmax,
-                      _elem_type,
-                      _verbose);
+                      _elem_type);
       break;
     default:
       mooseError(

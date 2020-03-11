@@ -58,8 +58,7 @@ public:
                  const Real /*ymax*/,
                  const Real /*zmin*/,
                  const Real /*zmax*/,
-                 const ElemType /*type*/,
-                 bool /*verbose*/);
+                 const ElemType /*type*/);
 
   /**
    * Get the element ID for a given hex
@@ -322,7 +321,6 @@ public:
    * @param pid The processor ID to assign it to
    * @param type The type of element to add
    * @param mesh The mesh to add it to
-   * @param verbose Whether or not to print out verbose statements
    */
   template <typename T>
   void addElement(const dof_id_type /*nx*/,
@@ -334,8 +332,7 @@ public:
                   const dof_id_type /*elem_id*/,
                   const processor_id_type /*pid*/,
                   const ElemType /*type*/,
-                  MeshBase & /*mesh*/,
-                  bool /*verbose*/)
+                  MeshBase & /*mesh*/)
   {
     mooseError(
         "addElement not implemented for this element type in DistributedRectilinearMeshGenerator");
@@ -351,8 +348,7 @@ public:
                          const dof_id_type elem_id,
                          const processor_id_type pid,
                          const ElemType type,
-                         MeshBase & mesh,
-                         bool verbose);
+                         MeshBase & mesh);
 
   template <>
   void addElement<Quad4>(const dof_id_type nx,
@@ -364,8 +360,7 @@ public:
                          const dof_id_type elem_id,
                          const processor_id_type pid,
                          const ElemType type,
-                         MeshBase & mesh,
-                         bool verbose);
+                         MeshBase & mesh);
 
   template <>
   void addElement<Hex8>(const dof_id_type nx,
@@ -377,8 +372,7 @@ public:
                         const dof_id_type elem_id,
                         const processor_id_type pid,
                         const ElemType type,
-                        MeshBase & mesh,
-                        bool verbose);
+                        MeshBase & mesh);
 
   /**
    * Compute the i,j,k indices of a given element ID
@@ -555,9 +549,6 @@ public:
                                  MeshBase & mesh);
 
 protected:
-  /// If to print debug information
-  bool _verbose;
-
   /// The dimension of the mesh
   MooseEnum _dim;
 
