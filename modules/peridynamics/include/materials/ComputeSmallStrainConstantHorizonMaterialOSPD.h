@@ -23,6 +23,8 @@ InputParameters validParams<ComputeSmallStrainConstantHorizonMaterialOSPD>();
 class ComputeSmallStrainConstantHorizonMaterialOSPD : public ComputeSmallStrainMaterialBaseOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputeSmallStrainConstantHorizonMaterialOSPD(const InputParameters & parameters);
 
 protected:

@@ -14,11 +14,12 @@
 
 registerMooseObject("PeridynamicsApp", SmallStrainMechanicsNOSPD);
 
-template <>
+defineLegacyParams(SmallStrainMechanicsNOSPD);
+
 InputParameters
-validParams<SmallStrainMechanicsNOSPD>()
+SmallStrainMechanicsNOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBaseNOSPD>();
+  InputParameters params = MechanicsBaseNOSPD::validParams();
   params.addClassDescription(
       "Class for calculating residual and Jacobian for Self-stabilized Non-Ordinary "
       "State-based PeriDynamic (SNOSPD) formulation under small strain assumptions");

@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsTestApp", ComputePlaneStressIsotropicElasticityTensor);
 
-template <>
+defineLegacyParams(ComputePlaneStressIsotropicElasticityTensor);
+
 InputParameters
-validParams<ComputePlaneStressIsotropicElasticityTensor>()
+ComputePlaneStressIsotropicElasticityTensor::validParams()
 {
-  InputParameters params = validParams<ComputeIsotropicElasticityTensor>();
+  InputParameters params = ComputeIsotropicElasticityTensor::validParams();
   params.addClassDescription(
       "Class for computing a constant isotropic elasticity tensor for strong plane stress");
 

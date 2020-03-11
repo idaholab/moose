@@ -10,11 +10,12 @@
 #include "AuxKernelBasePD.h"
 #include "PeridynamicsMesh.h"
 
-template <>
+defineLegacyParams(AuxKernelBasePD);
+
 InputParameters
-validParams<AuxKernelBasePD>()
+AuxKernelBasePD::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Peridynamic AuxKernel base class");
 
   return params;

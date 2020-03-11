@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", MechanicsBPD);
 
-template <>
+defineLegacyParams(MechanicsBPD);
+
 InputParameters
-validParams<MechanicsBPD>()
+MechanicsBPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBasePD>();
+  InputParameters params = MechanicsBasePD::validParams();
   params.addClassDescription("Class for calculating residual and Jacobian for Bond-based "
                              "PeriDynamic mechanics formulation");
 

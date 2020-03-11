@@ -24,6 +24,8 @@ InputParameters validParams<ComputeStrainBaseNOSPD>();
 class ComputeStrainBaseNOSPD : public DerivativeMaterialInterface<MechanicsMaterialBasePD>
 {
 public:
+  static InputParameters validParams();
+
   ComputeStrainBaseNOSPD(const InputParameters & parameters);
   virtual void initQpStatefulProperties() override;
 

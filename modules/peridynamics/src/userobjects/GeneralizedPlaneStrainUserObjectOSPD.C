@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainUserObjectOSPD);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainUserObjectOSPD);
+
 InputParameters
-validParams<GeneralizedPlaneStrainUserObjectOSPD>()
+GeneralizedPlaneStrainUserObjectOSPD::validParams()
 {
-  InputParameters params = validParams<GeneralizedPlaneStrainUserObjectBasePD>();
+  InputParameters params = GeneralizedPlaneStrainUserObjectBasePD::validParams();
   params.addClassDescription("Class for calculating the scalar residual and diagonal Jacobian "
                              "entry of generalized plane strain in OSPD formulation");
 

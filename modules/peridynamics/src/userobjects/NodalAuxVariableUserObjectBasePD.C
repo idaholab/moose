@@ -12,11 +12,12 @@
 #include "PeridynamicsMesh.h"
 #include "MooseVariable.h"
 
-template <>
+defineLegacyParams(NodalAuxVariableUserObjectBasePD);
+
 InputParameters
-validParams<NodalAuxVariableUserObjectBasePD>()
+NodalAuxVariableUserObjectBasePD::validParams()
 {
-  InputParameters params = validParams<ElementUserObjectBasePD>();
+  InputParameters params = ElementUserObjectBasePD::validParams();
   params.addClassDescription("Base class for computing value for nodal AuxVariable from elemental "
                              "information in a peridynamic model");
 

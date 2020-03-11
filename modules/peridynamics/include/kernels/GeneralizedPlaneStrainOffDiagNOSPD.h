@@ -23,6 +23,8 @@ InputParameters validParams<GeneralizedPlaneStrainOffDiagNOSPD>();
 class GeneralizedPlaneStrainOffDiagNOSPD : public MechanicsBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainOffDiagNOSPD(const InputParameters & parameters);
 
 protected:

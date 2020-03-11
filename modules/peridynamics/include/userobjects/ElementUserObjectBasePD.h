@@ -23,6 +23,8 @@ InputParameters validParams<ElementUserObjectBasePD>();
 class ElementUserObjectBasePD : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   ElementUserObjectBasePD(const InputParameters & parameters);
 
 protected:

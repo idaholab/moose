@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", RankTwoBasedFailureCriteriaNOSPD);
 
-template <>
+defineLegacyParams(RankTwoBasedFailureCriteriaNOSPD);
+
 InputParameters
-validParams<RankTwoBasedFailureCriteriaNOSPD>()
+RankTwoBasedFailureCriteriaNOSPD::validParams()
 {
-  InputParameters params = validParams<BondStatusBasePD>();
+  InputParameters params = BondStatusBasePD::validParams();
   params.addClassDescription(
       "Class for rank two tensor based failure criteria in non-ordinary state-based model");
 

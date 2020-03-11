@@ -23,6 +23,8 @@ InputParameters validParams<NodalDisplacementDifferenceL2NormPD>();
 class NodalDisplacementDifferenceL2NormPD : public NodalIntegralPostprocessorBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalDisplacementDifferenceL2NormPD(const InputParameters & parameters);
 
   virtual Real getValue() override;

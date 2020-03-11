@@ -22,6 +22,8 @@ InputParameters validParams<NodalRankTwoComponentPD>();
 class NodalRankTwoComponentPD : public NodalRankTwoUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalRankTwoComponentPD(const InputParameters & parameters);
 
   virtual void gatherWeightedValue(unsigned int id, dof_id_type dof, Real dg_vol_frac) override;

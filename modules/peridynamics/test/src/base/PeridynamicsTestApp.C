@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(PeridynamicsTestApp);
+
 InputParameters
-validParams<PeridynamicsTestApp>()
+PeridynamicsTestApp::validParams()
 {
-  InputParameters params = validParams<PeridynamicsApp>();
+  InputParameters params = PeridynamicsApp::validParams();
 
   return params;
 }

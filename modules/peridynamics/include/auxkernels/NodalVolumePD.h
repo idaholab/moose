@@ -23,6 +23,8 @@ InputParameters validParams<NodalVolumePD>();
 class NodalVolumePD : public AuxKernelBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalVolumePD(const InputParameters & parameters);
 
 protected:

@@ -25,6 +25,8 @@ InputParameters validParams<PeridynamicsKernelBase>();
 class PeridynamicsKernelBase : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PeridynamicsKernelBase(const InputParameters & parameters);
 
   virtual void computeResidual() override;

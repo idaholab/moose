@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalVariableIntegralPD);
 
-template <>
+defineLegacyParams(NodalVariableIntegralPD);
+
 InputParameters
-validParams<NodalVariableIntegralPD>()
+NodalVariableIntegralPD::validParams()
 {
-  InputParameters params = validParams<NodalIntegralPostprocessorBasePD>();
+  InputParameters params = NodalIntegralPostprocessorBasePD::validParams();
   params.addClassDescription("Class for calculating the domain integral of nodal variables");
 
   params.addRequiredParam<VariableName>(

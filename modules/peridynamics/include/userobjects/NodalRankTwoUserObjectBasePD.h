@@ -22,6 +22,8 @@ InputParameters validParams<NodalRankTwoUserObjectBasePD>();
 class NodalRankTwoUserObjectBasePD : public NodalAuxVariableUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalRankTwoUserObjectBasePD(const InputParameters & parameters);
 
   virtual void computeValue(unsigned int id, dof_id_type dof) override;

@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", RBMPresetOldValuePD);
 
-template <>
+defineLegacyParams(RBMPresetOldValuePD);
+
 InputParameters
-validParams<RBMPresetOldValuePD>()
+RBMPresetOldValuePD::validParams()
 {
-  InputParameters params = validParams<DirichletBCBase>();
+  InputParameters params = DirichletBCBase::validParams();
   params.addClassDescription("Class to apply a preset BC to nodes with rigid body motion (RBM).");
 
   // Forcefully preset the BC

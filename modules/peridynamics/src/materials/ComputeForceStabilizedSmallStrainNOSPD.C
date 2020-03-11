@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", ComputeForceStabilizedSmallStrainNOSPD);
 
-template <>
+defineLegacyParams(ComputeForceStabilizedSmallStrainNOSPD);
+
 InputParameters
-validParams<ComputeForceStabilizedSmallStrainNOSPD>()
+ComputeForceStabilizedSmallStrainNOSPD::validParams()
 {
-  InputParameters params = validParams<ComputeSmallStrainNOSPD>();
+  InputParameters params = ComputeSmallStrainNOSPD::validParams();
   params.addClassDescription(
       "Class for computing bond interaction for force-stabilized peridynamic correspondence model");
 

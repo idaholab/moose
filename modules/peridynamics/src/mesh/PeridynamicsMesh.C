@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", PeridynamicsMesh);
 
-template <>
+defineLegacyParams(PeridynamicsMesh);
+
 InputParameters
-validParams<PeridynamicsMesh>()
+PeridynamicsMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addClassDescription("Mesh class to store and return peridynamics specific mesh data");
 
   params.addParam<Real>("horizon_radius", "Value of horizon size in terms of radius");

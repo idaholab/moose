@@ -10,11 +10,12 @@
 #include "PeridynamicsKernelBase.h"
 #include "PeridynamicsMesh.h"
 
-template <>
+defineLegacyParams(PeridynamicsKernelBase);
+
 InputParameters
-validParams<PeridynamicsKernelBase>()
+PeridynamicsKernelBase::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Base class for calculating residual and Jacobian for peridynamic kernels");
 

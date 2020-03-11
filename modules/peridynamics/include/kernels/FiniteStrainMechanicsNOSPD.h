@@ -22,6 +22,8 @@ InputParameters validParams<FiniteStrainMechanicsNOSPD>();
 class FiniteStrainMechanicsNOSPD : public MechanicsBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   FiniteStrainMechanicsNOSPD(const InputParameters & parameters);
 
 protected:

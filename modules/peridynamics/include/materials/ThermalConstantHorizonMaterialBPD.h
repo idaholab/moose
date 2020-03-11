@@ -23,6 +23,8 @@ InputParameters validParams<ThermalConstantHorizonMaterialBPD>();
 class ThermalConstantHorizonMaterialBPD : public ThermalMaterialBaseBPD
 {
 public:
+  static InputParameters validParams();
+
   ThermalConstantHorizonMaterialBPD(const InputParameters & parameters);
 
 protected:

@@ -12,11 +12,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ComputeStrainBaseNOSPD);
+
 InputParameters
-validParams<ComputeStrainBaseNOSPD>()
+ComputeStrainBaseNOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsMaterialBasePD>();
+  InputParameters params = MechanicsMaterialBasePD::validParams();
   params.addClassDescription(
       "Base class for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "
       "correspondence material model");

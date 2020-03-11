@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalDisplacementDifferenceL2NormPD);
 
-template <>
+defineLegacyParams(NodalDisplacementDifferenceL2NormPD);
+
 InputParameters
-validParams<NodalDisplacementDifferenceL2NormPD>()
+NodalDisplacementDifferenceL2NormPD::validParams()
 {
-  InputParameters params = validParams<NodalIntegralPostprocessorBasePD>();
+  InputParameters params = NodalIntegralPostprocessorBasePD::validParams();
   params.addClassDescription("Class for computing the L2 norm of the difference between "
                              "displacements and their analytic solutions");
 

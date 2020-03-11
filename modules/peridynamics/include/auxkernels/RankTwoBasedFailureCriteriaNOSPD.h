@@ -24,6 +24,8 @@ InputParameters validParams<RankTwoBasedFailureCriteriaNOSPD>();
 class RankTwoBasedFailureCriteriaNOSPD : public BondStatusBasePD
 {
 public:
+  static InputParameters validParams();
+
   RankTwoBasedFailureCriteriaNOSPD(const InputParameters & parameters);
 
 protected:

@@ -15,11 +15,12 @@
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainOffDiagOSPD);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainOffDiagOSPD);
+
 InputParameters
-validParams<GeneralizedPlaneStrainOffDiagOSPD>()
+GeneralizedPlaneStrainOffDiagOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBasePD>();
+  InputParameters params = MechanicsBasePD::validParams();
   params.addClassDescription(
       "Class for calculating off-diagonal Jacobian corresponding to "
       "coupling between displacements (or temperature) and scalar out-of-plane strain for "

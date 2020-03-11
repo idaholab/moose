@@ -23,6 +23,8 @@ InputParameters validParams<GeneralizedPlaneStrainActionPD>();
 class GeneralizedPlaneStrainActionPD : public Action
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainActionPD(const InputParameters & params);
 
   virtual void act() override;

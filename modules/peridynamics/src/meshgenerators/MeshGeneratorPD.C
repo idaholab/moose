@@ -17,11 +17,12 @@
 
 registerMooseObject("PeridynamicsApp", MeshGeneratorPD);
 
-template <>
+defineLegacyParams(MeshGeneratorPD);
+
 InputParameters
-validParams<MeshGeneratorPD>()
+MeshGeneratorPD::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Mesh generator class to convert FE mesh to Peridynamics mesh");
 
   params.addRequiredParam<MeshGeneratorName>("input",

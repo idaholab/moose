@@ -25,6 +25,8 @@ InputParameters validParams<PeridynamicsMesh>();
 class PeridynamicsMesh : public MooseMesh
 {
 public:
+  static InputParameters validParams();
+
   PeridynamicsMesh(const InputParameters & parameters);
   PeridynamicsMesh(const PeridynamicsMesh & /* other_mesh */) = default;
 

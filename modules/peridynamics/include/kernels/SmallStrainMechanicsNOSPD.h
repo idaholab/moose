@@ -22,6 +22,8 @@ InputParameters validParams<SmallStrainMechanicsNOSPD>();
 class SmallStrainMechanicsNOSPD : public MechanicsBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   SmallStrainMechanicsNOSPD(const InputParameters & parameters);
 
 protected:

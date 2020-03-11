@@ -24,6 +24,8 @@ InputParameters validParams<RBMPresetOldValuePD>();
 class RBMPresetOldValuePD : public DirichletBCBase
 {
 public:
+  static InputParameters validParams();
+
   RBMPresetOldValuePD(const InputParameters & parameters);
 
   virtual Real computeQpValue() override;

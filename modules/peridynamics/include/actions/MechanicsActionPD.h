@@ -22,6 +22,8 @@ InputParameters validParams<MechanicsActionPD>();
 class MechanicsActionPD : public Action
 {
 public:
+  static InputParameters validParams();
+
   MechanicsActionPD(const InputParameters & params);
 
   virtual void act() override;

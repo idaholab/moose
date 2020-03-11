@@ -11,11 +11,12 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-template <>
+defineLegacyParams(MechanicsBaseNOSPD);
+
 InputParameters
-validParams<MechanicsBaseNOSPD>()
+MechanicsBaseNOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBasePD>();
+  InputParameters params = MechanicsBasePD::validParams();
   params.addClassDescription("Base class for kernels using Self-stabilized Non-Ordinary "
                              "State-based PeriDynamic (SNOSPD) formulation");
 

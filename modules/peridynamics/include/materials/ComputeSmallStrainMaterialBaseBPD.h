@@ -22,6 +22,8 @@ InputParameters validParams<ComputeSmallStrainMaterialBaseBPD>();
 class ComputeSmallStrainMaterialBaseBPD : public ParametricMaterialBasePD
 {
 public:
+  static InputParameters validParams();
+
   ComputeSmallStrainMaterialBaseBPD(const InputParameters & parameters);
 
 protected:

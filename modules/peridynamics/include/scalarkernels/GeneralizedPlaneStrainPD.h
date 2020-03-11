@@ -23,6 +23,8 @@ InputParameters validParams<GeneralizedPlaneStrainPD>();
 class GeneralizedPlaneStrainPD : public ScalarKernel
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainPD(const InputParameters & parameters);
 
   virtual void reinit() override {}

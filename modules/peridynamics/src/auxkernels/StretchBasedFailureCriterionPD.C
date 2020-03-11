@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", StretchBasedFailureCriterionPD);
 
-template <>
+defineLegacyParams(StretchBasedFailureCriterionPD);
+
 InputParameters
-validParams<StretchBasedFailureCriterionPD>()
+StretchBasedFailureCriterionPD::validParams()
 {
-  InputParameters params = validParams<BondStatusBasePD>();
+  InputParameters params = BondStatusBasePD::validParams();
   params.addClassDescription("Class for bond stretch failure criterion in bond-based model and "
                              "ordinary state-based model");
 
