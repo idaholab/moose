@@ -11,11 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", MixedModeEquivalentK);
 
-template <>
+defineLegacyParams(MixedModeEquivalentK);
+
 InputParameters
-validParams<MixedModeEquivalentK>()
+MixedModeEquivalentK::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Computes the mixed-mode stress intensity factor "
                              "given the $K_I$, $K_{II}$, and $K_{III}$ stress "
                              "intensity factors");

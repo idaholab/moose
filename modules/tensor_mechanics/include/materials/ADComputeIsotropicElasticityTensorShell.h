@@ -28,6 +28,8 @@ template <ComputeStage compute_stage>
 class ADComputeIsotropicElasticityTensorShell : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeIsotropicElasticityTensorShell(const InputParameters & parameters);
 
 protected:

@@ -37,6 +37,8 @@ template <ComputeStage compute_stage>
 class ADComputeShellStress : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeShellStress(const InputParameters & parameters);
 
 protected:

@@ -21,12 +21,18 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeShellStress);
 
-defineADValidParams(
-    ADComputeShellStress,
-    ADMaterial,
-    params.addClassDescription("Compute in-plane stress using elasticity for shell");
-    params.addRequiredParam<std::string>("through_thickness_order",
-                                         "Quadrature order in out of plane direction"););
+defineADLegacyParams(ADComputeShellStress);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeShellStress<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("Compute in-plane stress using elasticity for shell");
+  params.addRequiredParam<std::string>("through_thickness_order",
+                                       "Quadrature order in out of plane direction");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeShellStress<compute_stage>::ADComputeShellStress(const InputParameters & parameters)

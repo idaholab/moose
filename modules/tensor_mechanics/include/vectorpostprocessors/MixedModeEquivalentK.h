@@ -20,6 +20,8 @@ InputParameters validParams<MixedModeEquivalentK>();
 class MixedModeEquivalentK : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   MixedModeEquivalentK(const InputParameters & parameters);
 
   virtual void initialize();

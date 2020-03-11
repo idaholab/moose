@@ -29,6 +29,8 @@ template <ComputeStage compute_stage>
 class ADComputeFiniteShellStrain : public ADComputeIncrementalShellStrain<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeFiniteShellStrain(const InputParameters & parameters);
 
 protected:
