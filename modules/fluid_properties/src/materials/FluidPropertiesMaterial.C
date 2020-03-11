@@ -12,11 +12,12 @@
 
 registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterial);
 
-template <>
+defineLegacyParams(FluidPropertiesMaterial);
+
 InputParameters
-validParams<FluidPropertiesMaterial>()
+FluidPropertiesMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");

@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", SodiumPropertiesMaterial);
 
-template <>
+defineLegacyParams(SodiumPropertiesMaterial);
+
 InputParameters
-validParams<SodiumPropertiesMaterial>()
+SodiumPropertiesMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Material properties for liquid sodium sampled from SodiumProperties.");
   params.addRequiredCoupledVar("temperature", "temperature (K)");

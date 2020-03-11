@@ -21,6 +21,8 @@ InputParameters validParams<SodiumPropertiesMaterial>();
 class SodiumPropertiesMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   SodiumPropertiesMaterial(const InputParameters & parameters);
 
 protected:

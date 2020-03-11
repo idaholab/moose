@@ -9,11 +9,12 @@
 
 #include "MultiComponentFluidProperties.h"
 
-template <>
+defineLegacyParams(MultiComponentFluidProperties);
+
 InputParameters
-validParams<MultiComponentFluidProperties>()
+MultiComponentFluidProperties::validParams()
 {
-  InputParameters params = validParams<FluidProperties>();
+  InputParameters params = FluidProperties::validParams();
   return params;
 }
 

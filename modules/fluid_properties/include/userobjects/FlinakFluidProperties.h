@@ -24,6 +24,8 @@ class FlinakFluidProperties : public SinglePhaseFluidProperties
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
+  static InputParameters validParams();
+
   FlinakFluidProperties(const InputParameters & parameters);
 
   /**

@@ -42,6 +42,8 @@ InputParameters validParams<Water97FluidProperties>();
 class Water97FluidProperties : public SinglePhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   Water97FluidProperties(const InputParameters & parameters);
   virtual ~Water97FluidProperties();
 

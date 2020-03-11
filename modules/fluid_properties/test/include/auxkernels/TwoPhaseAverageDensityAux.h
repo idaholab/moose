@@ -28,6 +28,8 @@ InputParameters validParams<TwoPhaseAverageDensityAux>();
 class TwoPhaseAverageDensityAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TwoPhaseAverageDensityAux(const InputParameters & parameters);
 
 protected:

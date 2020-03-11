@@ -26,6 +26,8 @@ InputParameters validParams<IdealRealGasMixtureFluidProperties>();
 class IdealRealGasMixtureFluidProperties : public VaporMixtureFluidProperties, public NaNInterface
 {
 public:
+  static InputParameters validParams();
+
   IdealRealGasMixtureFluidProperties(const InputParameters & parameters);
 
   /**

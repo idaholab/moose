@@ -16,11 +16,12 @@
 
 registerMooseObject("FluidPropertiesApp", FluidPropertiesInterrogator);
 
-template <>
+defineLegacyParams(FluidPropertiesInterrogator);
+
 InputParameters
-validParams<FluidPropertiesInterrogator>()
+FluidPropertiesInterrogator::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<UserObjectName>("fp",
                                           "The name of the fluid properties object to query.");
   params.addParam<bool>("json", false, "Output in JSON format");

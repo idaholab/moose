@@ -43,6 +43,8 @@ InputParameters validParams<NaClFluidProperties>();
 class NaClFluidProperties : public SinglePhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   NaClFluidProperties(const InputParameters & parameters);
   virtual ~NaClFluidProperties();
 

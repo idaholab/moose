@@ -42,6 +42,8 @@ InputParameters validParams<HydrogenFluidProperties>();
 class HydrogenFluidProperties : public HelmholtzFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   HydrogenFluidProperties(const InputParameters & parameters);
 
   virtual std::string fluidName() const override;

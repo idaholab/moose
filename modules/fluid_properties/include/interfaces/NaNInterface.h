@@ -12,11 +12,6 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 
-class NaNInterface;
-
-template <>
-InputParameters validParams<NaNInterface>();
-
 /**
  * Interface class for producing errors, warnings, or just quiet NaNs
  *
@@ -27,6 +22,8 @@ InputParameters validParams<NaNInterface>();
 class NaNInterface
 {
 public:
+  static InputParameters validParams();
+
   NaNInterface(const MooseObject * moose_object);
 
 protected:
@@ -65,4 +62,3 @@ protected:
     return std::nan("");
   }
 };
-

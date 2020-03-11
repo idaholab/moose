@@ -13,11 +13,12 @@
 
 registerMooseObject("FluidPropertiesApp", MethaneFluidProperties);
 
-template <>
+defineLegacyParams(MethaneFluidProperties);
+
 InputParameters
-validParams<MethaneFluidProperties>()
+MethaneFluidProperties::validParams()
 {
-  InputParameters params = validParams<HelmholtzFluidProperties>();
+  InputParameters params = HelmholtzFluidProperties::validParams();
   params.addClassDescription("Fluid properties for methane (CH4)");
   return params;
 }

@@ -26,6 +26,8 @@ InputParameters validParams<StiffenedGasFluidProperties>();
 class StiffenedGasFluidProperties : public SinglePhaseFluidProperties, public NaNInterface
 {
 public:
+  static InputParameters validParams();
+
   StiffenedGasFluidProperties(const InputParameters & parameters);
   virtual ~StiffenedGasFluidProperties();
 

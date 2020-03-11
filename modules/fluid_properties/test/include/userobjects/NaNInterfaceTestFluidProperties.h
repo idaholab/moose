@@ -12,11 +12,6 @@
 #include "SinglePhaseFluidProperties.h"
 #include "NaNInterface.h"
 
-class NaNInterfaceTestFluidProperties;
-
-template <>
-InputParameters validParams<NaNInterfaceTestFluidProperties>();
-
 /**
  * Fluid properties for testing NaNInterface
  */
@@ -25,6 +20,8 @@ class NaNInterfaceTestFluidProperties : public SinglePhaseFluidProperties, publi
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
+  static InputParameters validParams();
+
   NaNInterfaceTestFluidProperties(const InputParameters & parameters);
 
   virtual Real p_from_v_e(Real v, Real e) const override;

@@ -28,6 +28,8 @@ InputParameters validParams<FluidProperties>();
 class FluidProperties : public ThreadedGeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   FluidProperties(const InputParameters & parameters);
   virtual ~FluidProperties();
 

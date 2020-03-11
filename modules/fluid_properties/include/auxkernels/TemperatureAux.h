@@ -23,6 +23,8 @@ InputParameters validParams<TemperatureAux>();
 class TemperatureAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TemperatureAux(const InputParameters & parameters);
 
 protected:

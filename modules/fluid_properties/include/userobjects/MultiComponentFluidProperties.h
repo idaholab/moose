@@ -69,6 +69,8 @@ InputParameters validParams<MultiComponentFluidProperties>();
 class MultiComponentFluidProperties : public FluidProperties
 {
 public:
+  static InputParameters validParams();
+
   MultiComponentFluidProperties(const InputParameters & parameters);
   virtual ~MultiComponentFluidProperties();
 

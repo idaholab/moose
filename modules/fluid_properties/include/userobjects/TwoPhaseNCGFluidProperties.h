@@ -24,6 +24,8 @@ InputParameters validParams<TwoPhaseNCGFluidProperties>();
 class TwoPhaseNCGFluidProperties : public TwoPhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   TwoPhaseNCGFluidProperties(const InputParameters & parameters);
 
   const UserObjectName & getLiquidName() const override { return _fp_2phase->getLiquidName(); }

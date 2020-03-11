@@ -11,12 +11,13 @@
 
 registerMooseObject("FluidPropertiesTestApp", NaNInterfaceTestFluidProperties);
 
-template <>
+defineLegacyParams(NaNInterfaceTestFluidProperties);
+
 InputParameters
-validParams<NaNInterfaceTestFluidProperties>()
+NaNInterfaceTestFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
-  params += validParams<NaNInterface>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
+  params += NaNInterface::validParams();
 
   params.addClassDescription("Fluid properties for testing NaNInterface");
 

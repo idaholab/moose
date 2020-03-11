@@ -24,6 +24,8 @@ InputParameters validParams<TestTwoPhaseNCGFluidProperties>();
 class TestTwoPhaseNCGFluidProperties : public TwoPhaseNCGFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   TestTwoPhaseNCGFluidProperties(const InputParameters & parameters);
 };
 

@@ -26,6 +26,8 @@ InputParameters validParams<IdealGasFluidProperties>();
 class IdealGasFluidProperties : public SinglePhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   IdealGasFluidProperties(const InputParameters & parameters);
   virtual ~IdealGasFluidProperties();
 

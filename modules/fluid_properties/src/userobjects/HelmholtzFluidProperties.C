@@ -11,11 +11,12 @@
 #include "BrentsMethod.h"
 #include "libmesh/utility.h"
 
-template <>
+defineLegacyParams(HelmholtzFluidProperties);
+
 InputParameters
-validParams<HelmholtzFluidProperties>()
+HelmholtzFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Base class for Helmholtz free energy fluid EOS");
   return params;
 }

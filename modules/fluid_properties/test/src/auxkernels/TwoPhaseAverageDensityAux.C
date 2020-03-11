@@ -13,11 +13,12 @@
 
 registerMooseObject("FluidPropertiesTestApp", TwoPhaseAverageDensityAux);
 
-template <>
+defineLegacyParams(TwoPhaseAverageDensityAux);
+
 InputParameters
-validParams<TwoPhaseAverageDensityAux>()
+TwoPhaseAverageDensityAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Computes the average of the densities of the phases corresponding to "
                              "a 2-phase fluid properties object.");

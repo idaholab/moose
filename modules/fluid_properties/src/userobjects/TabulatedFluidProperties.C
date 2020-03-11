@@ -18,11 +18,12 @@
 
 registerMooseObject("FluidPropertiesApp", TabulatedFluidProperties);
 
-template <>
+defineLegacyParams(TabulatedFluidProperties);
+
 InputParameters
-validParams<TabulatedFluidProperties>()
+TabulatedFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addParam<FileName>(
       "fluid_property_file",
       "fluid_properties.csv",
