@@ -177,7 +177,7 @@ TEST_F(TheWarehouseTest, benchmark)
   int n_queries = 2000;
   int n_repeat_query = 20000;
   for (int i = 0; i < n_objs; i++)
-    w.add(obj(i % 1000, 1, 1, 1), "");
+    w.add(obj(i % 1000, 1, 1, 1));
 
   int cum_results = 0;
   for (int n = 0; n < n_repeat_query; n++)
@@ -238,7 +238,7 @@ TEST_F(TheWarehouseTest, test)
       for (auto val : vals)
         msg << val << ",";
       msg << "}\n";
-      w.add(obj(vals[0], vals[1], vals[2], vals[3]), "");
+      w.add(obj(vals[0], vals[1], vals[2], vals[3]));
     }
 
     for (size_t j = 0; j < test.queries.size(); j++)
