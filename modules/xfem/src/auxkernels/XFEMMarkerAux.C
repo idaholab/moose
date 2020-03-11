@@ -13,11 +13,12 @@
 
 registerMooseObject("XFEMApp", XFEMMarkerAux);
 
-template <>
+defineLegacyParams(XFEMMarkerAux);
+
 InputParameters
-validParams<XFEMMarkerAux>()
+XFEMMarkerAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   return params;
 }
 

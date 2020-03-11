@@ -20,6 +20,8 @@ InputParameters validParams<XFEMMaterialTensorMarkerUserObject>();
 class XFEMMaterialTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
+  static InputParameters validParams();
+
   XFEMMaterialTensorMarkerUserObject(const InputParameters & parameters);
   virtual ~XFEMMaterialTensorMarkerUserObject() {}
 

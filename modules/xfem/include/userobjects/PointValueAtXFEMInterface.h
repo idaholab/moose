@@ -26,6 +26,8 @@ InputParameters validParams<PointValueAtXFEMInterface>();
 class PointValueAtXFEMInterface : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PointValueAtXFEMInterface(const InputParameters & parameters);
 
   virtual ~PointValueAtXFEMInterface() {}

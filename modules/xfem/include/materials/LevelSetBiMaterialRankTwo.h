@@ -26,6 +26,8 @@ InputParameters validParams<LevelSetBiMaterialRankTwo>();
 class LevelSetBiMaterialRankTwo : public LevelSetBiMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   LevelSetBiMaterialRankTwo(const InputParameters & parameters);
 
 protected:

@@ -13,11 +13,12 @@
 
 registerMooseObject("XFEMApp", XFEMCutPlaneAux);
 
-template <>
+defineLegacyParams(XFEMCutPlaneAux);
+
 InputParameters
-validParams<XFEMCutPlaneAux>()
+XFEMCutPlaneAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   MooseEnum quantity("origin_x origin_y origin_z normal_x normal_y normal_z");
   params.addRequiredParam<MooseEnum>(
       "quantity", quantity, "The quantity to be extracted.  Choices: " + quantity.getRawNames());

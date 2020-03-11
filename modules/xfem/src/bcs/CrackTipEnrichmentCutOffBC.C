@@ -11,11 +11,12 @@
 
 registerMooseObject("XFEMApp", CrackTipEnrichmentCutOffBC);
 
-template <>
+defineLegacyParams(CrackTipEnrichmentCutOffBC);
+
 InputParameters
-validParams<CrackTipEnrichmentCutOffBC>()
+CrackTipEnrichmentCutOffBC::validParams()
 {
-  InputParameters p = validParams<DirichletBC>();
+  InputParameters p = DirichletBC::validParams();
   p.addRequiredParam<Real>("cut_off_radius",
                            "The cut off radius of crack tip enrichment functions");
   p.set<bool>("use_displaced_mesh") = false;

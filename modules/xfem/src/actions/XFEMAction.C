@@ -39,11 +39,12 @@ registerMooseAction("XFEMApp", XFEMAction, "add_kernel");
 
 registerMooseAction("XFEMApp", XFEMAction, "add_bc");
 
-template <>
+defineLegacyParams(XFEMAction);
+
 InputParameters
-validParams<XFEMAction>()
+XFEMAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addParam<std::vector<UserObjectName>>(
       "geometric_cut_userobjects",

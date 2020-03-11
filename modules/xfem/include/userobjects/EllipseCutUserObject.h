@@ -20,6 +20,8 @@ InputParameters validParams<EllipseCutUserObject>();
 class EllipseCutUserObject : public GeometricCut3DUserObject
 {
 public:
+  static InputParameters validParams();
+
   EllipseCutUserObject(const InputParameters & parameters);
 
   virtual const std::vector<Point>

@@ -30,6 +30,8 @@ class ComputeCrackTipEnrichmentSmallStrain : public ComputeStrainBase,
                                              public EnrichmentFunctionCalculation
 {
 public:
+  static InputParameters validParams();
+
   ComputeCrackTipEnrichmentSmallStrain(const InputParameters & parameters);
   virtual ~ComputeCrackTipEnrichmentSmallStrain() {}
 

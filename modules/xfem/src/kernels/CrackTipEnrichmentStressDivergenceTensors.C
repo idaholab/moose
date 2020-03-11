@@ -12,11 +12,12 @@
 
 registerMooseObject("XFEMApp", CrackTipEnrichmentStressDivergenceTensors);
 
-template <>
+defineLegacyParams(CrackTipEnrichmentStressDivergenceTensors);
+
 InputParameters
-validParams<CrackTipEnrichmentStressDivergenceTensors>()
+CrackTipEnrichmentStressDivergenceTensors::validParams()
 {
-  InputParameters params = validParams<ALEKernel>();
+  InputParameters params = ALEKernel::validParams();
   params.addClassDescription("Enrich stress divergence kernel for small-strain simulations");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction the variable "

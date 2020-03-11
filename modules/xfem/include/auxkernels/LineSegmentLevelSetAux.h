@@ -24,6 +24,8 @@ InputParameters validParams<LineSegmentLevelSetAux>();
 class LineSegmentLevelSetAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   LineSegmentLevelSetAux(const InputParameters & parameters);
 
 protected:

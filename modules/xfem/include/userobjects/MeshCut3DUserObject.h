@@ -28,6 +28,8 @@ InputParameters validParams<MeshCut3DUserObject>();
 class MeshCut3DUserObject : public GeometricCutUserObject
 {
 public:
+  static InputParameters validParams();
+
   MeshCut3DUserObject(const InputParameters & parameters);
 
   virtual void initialSetup() override;

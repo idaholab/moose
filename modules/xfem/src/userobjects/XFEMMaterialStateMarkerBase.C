@@ -15,11 +15,12 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel.h"
 
-template <>
+defineLegacyParams(XFEMMaterialStateMarkerBase);
+
 InputParameters
-validParams<XFEMMaterialStateMarkerBase>()
+XFEMMaterialStateMarkerBase::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "initiate_on_boundary",
       "Permit cracks to initiate in elements adjacent to specified boundaries");

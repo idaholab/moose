@@ -13,12 +13,13 @@
 
 registerMooseObject("XFEMApp", XFEMMaterialTensorMarkerUserObject);
 
-template <>
+defineLegacyParams(XFEMMaterialTensorMarkerUserObject);
+
 InputParameters
-validParams<XFEMMaterialTensorMarkerUserObject>()
+XFEMMaterialTensorMarkerUserObject::validParams()
 {
-  InputParameters params = validParams<XFEMMaterialStateMarkerBase>();
-  params += validParams<MaterialTensorCalculator>();
+  InputParameters params = XFEMMaterialStateMarkerBase::validParams();
+  params += MaterialTensorCalculator::validParams();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addRequiredParam<Real>("threshold", "The threshold for crack growth.");
   params.addRequiredParam<bool>(

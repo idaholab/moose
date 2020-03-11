@@ -20,6 +20,8 @@ InputParameters validParams<XFEMMovingInterfaceVelocityBase>();
 class XFEMMovingInterfaceVelocityBase : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   XFEMMovingInterfaceVelocityBase(const InputParameters & parameters);
   virtual ~XFEMMovingInterfaceVelocityBase() {}
 

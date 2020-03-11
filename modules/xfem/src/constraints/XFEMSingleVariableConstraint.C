@@ -21,11 +21,12 @@
 
 registerMooseObject("XFEMApp", XFEMSingleVariableConstraint);
 
-template <>
+defineLegacyParams(XFEMSingleVariableConstraint);
+
 InputParameters
-validParams<XFEMSingleVariableConstraint>()
+XFEMSingleVariableConstraint::validParams()
 {
-  InputParameters params = validParams<ElemElemConstraint>();
+  InputParameters params = ElemElemConstraint::validParams();
   params.addParam<Real>("alpha",
                         100,
                         "Stabilization parameter in Nitsche's formulation and penalty factor "

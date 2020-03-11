@@ -20,6 +20,8 @@ InputParameters validParams<XFEMAction>();
 class XFEMAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   XFEMAction(InputParameters params);
 
   virtual void act();

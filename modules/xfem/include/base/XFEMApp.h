@@ -19,6 +19,8 @@ InputParameters validParams<XFEMApp>();
 class XFEMApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   XFEMApp(const InputParameters & parameters);
   virtual ~XFEMApp();
 
