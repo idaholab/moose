@@ -211,7 +211,7 @@ NodalPatchRecovery::compute()
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.
-    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+    SwapBackSentinel sentinel(_fe_problem, &SubProblem::swapBackMaterials, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
     for (_qp = 0; _qp < _q_point.size(); _qp++)

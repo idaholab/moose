@@ -13,41 +13,41 @@
 #include "MooseTypes.h"
 
 // Forward declarations
-class FEProblemBase;
+class SubProblem;
 
 /**
  * The "SwapBackSentinel" class's destructor guarantees that
- * FEProblemBase::swapBackMaterials{Face,Neighbor}() is called even when
- * an exception is thrown from FEProblemBase::reinitMaterials{Face,Neighbor}.
+ * SubProblem::swapBackMaterials{Face,Neighbor}() is called even when
+ * an exception is thrown from SubProblem::reinitMaterials{Face,Neighbor}.
  * This is because stack unwinding (for caught exceptions) guarantees
  * that object destructors are called.  The typical way of using this
  * object is to construct it in the same scope where reinitMaterials
  * is called:
  *
  * {
- *   SwapBackSentinel sentinel(_fe_problem, &FEProblemBase::swapBackMaterials, _tid);
- *   _fe_problem.reinitMaterials(_subdomain, _tid);
+ *   SwapBackSentinel sentinel(_subproblem, &SubProblem::swapBackMaterials, _tid);
+ *   _subproblem.reinitMaterials(_subdomain, _tid);
  * }
  */
 class SwapBackSentinel
 {
 public:
   /**
-   * SwapBackFunction is a typedef for a pointer to an FEProblemBase
+   * SwapBackFunction is a typedef for a pointer to an SubProblem
    * member function taking a THREAD_ID and returning void.  All the
-   * FEProblemBase::swapBackMaterialXXX() members have this signature.
+   * SubProblem::swapBackMaterialXXX() members have this signature.
    */
-  using SwapBackFunction = void (FEProblemBase::*)(THREAD_ID);
+  using SwapBackFunction = void (SubProblem::*)(THREAD_ID);
 
   /**
-   * Constructor taking an FEProblemBase reference, a function to call,
+   * Constructor taking an SubProblem reference, a function to call,
    * and the THREAD_ID argument.
    */
-  SwapBackSentinel(FEProblemBase & fe_problem,
+  SwapBackSentinel(SubProblem & subproblem,
                    SwapBackFunction func,
                    THREAD_ID tid,
                    bool predicate = true)
-    : _fe_problem(fe_problem), _func(func), _thread_id(tid), _predicate(predicate)
+    : _subproblem(subproblem), _func(func), _thread_id(tid), _predicate(predicate)
   {
   }
 
@@ -57,13 +57,12 @@ public:
   ~SwapBackSentinel()
   {
     if (_predicate)
-      (_fe_problem.*_func)(_thread_id);
+      (_subproblem.*_func)(_thread_id);
   }
 
 private:
-  FEProblemBase & _fe_problem;
+  SubProblem & _subproblem;
   SwapBackFunction _func;
   THREAD_ID _thread_id;
   bool _predicate;
 };
-

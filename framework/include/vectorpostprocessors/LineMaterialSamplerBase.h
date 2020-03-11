@@ -177,7 +177,7 @@ LineMaterialSamplerBase<T>::execute()
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.
-    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+    SwapBackSentinel sentinel(_fe_problem, &SubProblem::swapBackMaterials, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
@@ -205,4 +205,3 @@ LineMaterialSamplerBase<T>::finalize()
 {
   SamplerBase::finalize();
 }
-
