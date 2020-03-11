@@ -1169,9 +1169,9 @@ MooseApp::registerRestartableData(const std::string & name,
     mooseError(
         "The meta data storage for '", metaname, "' is not threaded, so the tid must be zero.");
 
-  if (!metaname.empty())
-    mooseAssert(_restartable_meta_data.find(metaname) != _restartable_meta_data.end(),
-                "The desired meta data name does not exist: " + metaname);
+  mooseAssert(metaname.empty() ||
+                  _restartable_meta_data.find(metaname) != _restartable_meta_data.end(),
+              "The desired meta data name does not exist: " + metaname);
 
   // Select the data store for saving this piece of restartable data (mesh or everything else)
   auto & data_ref =
