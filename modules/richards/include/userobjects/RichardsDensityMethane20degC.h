@@ -30,6 +30,8 @@ InputParameters validParams<RichardsDensityMethane20degC>();
 class RichardsDensityMethane20degC : public RichardsDensity
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityMethane20degC(const InputParameters & parameters);
 
   /**

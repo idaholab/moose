@@ -25,6 +25,8 @@ InputParameters validParams<RichardsSeffPrimeAux>();
 class RichardsSeffPrimeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeffPrimeAux(const InputParameters & parameters);
 
 protected:

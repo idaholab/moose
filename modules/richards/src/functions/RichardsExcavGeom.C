@@ -11,11 +11,12 @@
 
 registerMooseObject("RichardsApp", RichardsExcavGeom);
 
-template <>
+defineLegacyParams(RichardsExcavGeom);
+
 InputParameters
-validParams<RichardsExcavGeom>()
+RichardsExcavGeom::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<RealVectorValue>(
       "start_posn",
       "Start point of the excavation.  This is an (x,y,z) point in the middle of the "

@@ -12,11 +12,12 @@
 
 registerMooseObject("RichardsApp", RichardsPlotQuantity);
 
-template <>
+defineLegacyParams(RichardsPlotQuantity);
+
 InputParameters
-validParams<RichardsPlotQuantity>()
+RichardsPlotQuantity::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("uo", "user object name that has the total mass value");
 
   return params;

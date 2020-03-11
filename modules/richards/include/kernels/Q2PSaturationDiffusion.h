@@ -28,6 +28,8 @@ InputParameters validParams<Q2PSaturationDiffusion>();
 class Q2PSaturationDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Q2PSaturationDiffusion(const InputParameters & parameters);
 
 protected:

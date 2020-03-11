@@ -14,11 +14,12 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2gasVG);
 
-template <>
+defineLegacyParams(RichardsSeff2gasVG);
+
 InputParameters
-validParams<RichardsSeff2gasVG>()
+RichardsSeff2gasVG::validParams()
 {
-  InputParameters params = validParams<RichardsSeff>();
+  InputParameters params = RichardsSeff::validParams();
   params.addRequiredRangeCheckedParam<Real>("al",
                                             "al > 0",
                                             "van-Genuchten alpha parameter.  Must "

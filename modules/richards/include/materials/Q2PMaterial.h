@@ -23,6 +23,8 @@ InputParameters validParams<Q2PMaterial>();
 class Q2PMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   Q2PMaterial(const InputParameters & parameters);
 
 protected:

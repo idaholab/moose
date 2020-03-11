@@ -16,11 +16,12 @@
 
 registerMooseObject("RichardsApp", RichardsMultiphaseProblem);
 
-template <>
+defineLegacyParams(RichardsMultiphaseProblem);
+
 InputParameters
-validParams<RichardsMultiphaseProblem>()
+RichardsMultiphaseProblem::validParams()
 {
-  InputParameters params = validParams<FEProblemBase>();
+  InputParameters params = FEProblemBase::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "bounded_var", "Variable whose value will be constrained to be greater than lower_var");
   params.addRequiredParam<NonlinearVariableName>(

@@ -23,6 +23,8 @@ InputParameters validParams<RichardsRelPerm>();
 class RichardsRelPerm : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsRelPerm(const InputParameters & parameters);
 
   void initialize();

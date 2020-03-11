@@ -26,6 +26,8 @@ InputParameters validParams<RichardsSumQuantity>();
 class RichardsSumQuantity : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsSumQuantity(const InputParameters & parameters);
   virtual ~RichardsSumQuantity();
 

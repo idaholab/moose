@@ -12,11 +12,12 @@
 
 #include <fstream>
 
-template <>
+defineLegacyParams(PeacemanBorehole);
+
 InputParameters
-validParams<PeacemanBorehole>()
+PeacemanBorehole::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<FunctionName>(
       "character",
       "If zero then borehole does nothing.  If positive the borehole acts as a sink "

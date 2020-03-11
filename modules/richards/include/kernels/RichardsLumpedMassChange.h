@@ -31,6 +31,8 @@ InputParameters validParams<RichardsLumpedMassChange>();
 class RichardsLumpedMassChange : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsLumpedMassChange(const InputParameters & parameters);
 
 protected:

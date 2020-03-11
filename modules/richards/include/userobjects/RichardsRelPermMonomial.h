@@ -25,6 +25,8 @@ InputParameters validParams<RichardsRelPermMonomial>();
 class RichardsRelPermMonomial : public RichardsRelPerm
 {
 public:
+  static InputParameters validParams();
+
   RichardsRelPermMonomial(const InputParameters & parameters);
 
   /**

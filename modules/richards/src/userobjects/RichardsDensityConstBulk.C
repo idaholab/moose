@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsDensityConstBulk);
 
-template <>
+defineLegacyParams(RichardsDensityConstBulk);
+
 InputParameters
-validParams<RichardsDensityConstBulk>()
+RichardsDensityConstBulk::validParams()
 {
-  InputParameters params = validParams<RichardsDensity>();
+  InputParameters params = RichardsDensity::validParams();
   params.addRequiredParam<Real>("dens0", "Reference density of fluid.  Eg 1000");
   params.addRequiredParam<Real>("bulk_mod", "Bulk modulus of fluid.  Eg 2E9");
   params.addClassDescription(

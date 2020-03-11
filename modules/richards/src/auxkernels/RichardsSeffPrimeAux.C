@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsSeffPrimeAux);
 
-template <>
+defineLegacyParams(RichardsSeffPrimeAux);
+
 InputParameters
-validParams<RichardsSeffPrimeAux>()
+RichardsSeffPrimeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("pressure_vars", "List of variables that represent the pressure");
   params.addRequiredParam<int>(
       "wrtnum",

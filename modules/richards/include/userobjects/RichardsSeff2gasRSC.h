@@ -30,6 +30,8 @@ InputParameters validParams<RichardsSeff2gasRSC>();
 class RichardsSeff2gasRSC : public RichardsSeff
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff2gasRSC(const InputParameters & parameters);
 
   /**

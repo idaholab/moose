@@ -18,11 +18,12 @@
 
 registerMooseObject("RichardsApp", RichardsFlux);
 
-template <>
+defineLegacyParams(RichardsFlux);
+
 InputParameters
-validParams<RichardsFlux>()
+RichardsFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<bool>(
       "linear_shape_fcns",
       true,

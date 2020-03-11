@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsPolyLineSink);
 
-template <>
+defineLegacyParams(RichardsPolyLineSink);
+
 InputParameters
-validParams<RichardsPolyLineSink>()
+RichardsPolyLineSink::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real>>(

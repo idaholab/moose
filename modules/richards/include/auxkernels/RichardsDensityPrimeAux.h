@@ -25,6 +25,8 @@ InputParameters validParams<RichardsDensityPrimeAux>();
 class RichardsDensityPrimeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityPrimeAux(const InputParameters & parameters);
 
 protected:

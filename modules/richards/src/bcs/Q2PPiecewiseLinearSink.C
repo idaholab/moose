@@ -17,11 +17,12 @@
 
 registerMooseObject("RichardsApp", Q2PPiecewiseLinearSink);
 
-template <>
+defineLegacyParams(Q2PPiecewiseLinearSink);
+
 InputParameters
-validParams<Q2PPiecewiseLinearSink>()
+Q2PPiecewiseLinearSink::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<bool>(
       "use_mobility",
       "If true, then fluxes are multiplied by (density*permeability_nn/viscosity), "

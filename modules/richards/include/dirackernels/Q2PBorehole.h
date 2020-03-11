@@ -35,6 +35,8 @@ public:
    * It also calculates segment-lengths and rotation matrices
    * needed for computing the borehole well constant
    */
+  static InputParameters validParams();
+
   Q2PBorehole(const InputParameters & parameters);
 
   /**

@@ -12,11 +12,12 @@
 
 registerMooseObject("RichardsApp", RichardsDensityVDW);
 
-template <>
+defineLegacyParams(RichardsDensityVDW);
+
 InputParameters
-validParams<RichardsDensityVDW>()
+RichardsDensityVDW::validParams()
 {
-  InputParameters params = validParams<RichardsDensity>();
+  InputParameters params = RichardsDensity::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "a",
       "a > 0",

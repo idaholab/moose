@@ -25,6 +25,8 @@ InputParameters validParams<RichardsFlux>();
 class RichardsFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsFlux(const InputParameters & parameters);
 
 protected:

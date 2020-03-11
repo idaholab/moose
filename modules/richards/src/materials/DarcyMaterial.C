@@ -11,11 +11,12 @@
 
 registerMooseObject("RichardsApp", DarcyMaterial);
 
-template <>
+defineLegacyParams(DarcyMaterial);
+
 InputParameters
-validParams<DarcyMaterial>()
+DarcyMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<RealTensorValue>("mat_permeability",
                                            "The permeability tensor (usually in m^2).");
   params.addClassDescription("Material that holds the permeability tensor used in Darcy flow");

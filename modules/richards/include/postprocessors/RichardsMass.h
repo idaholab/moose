@@ -25,6 +25,8 @@ InputParameters validParams<RichardsMass>();
 class RichardsMass : public ElementIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RichardsMass(const InputParameters & parameters);
 
 protected:

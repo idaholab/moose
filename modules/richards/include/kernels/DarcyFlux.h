@@ -24,6 +24,8 @@ InputParameters validParams<DarcyFlux>();
 class DarcyFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DarcyFlux(const InputParameters & parameters);
 
 protected:

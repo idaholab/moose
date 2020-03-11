@@ -46,6 +46,8 @@ InputParameters validParams<Q2PSaturationFlux>();
 class Q2PSaturationFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Q2PSaturationFlux(const InputParameters & parameters);
 
 protected:

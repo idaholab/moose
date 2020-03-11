@@ -12,11 +12,12 @@
 
 registerMooseObject("RichardsApp", Q2PMaterial);
 
-template <>
+defineLegacyParams(Q2PMaterial);
+
 InputParameters
-validParams<Q2PMaterial>()
+Q2PMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredRangeCheckedParam<Real>(
       "mat_porosity",

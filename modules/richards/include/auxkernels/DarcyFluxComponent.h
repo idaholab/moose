@@ -35,6 +35,8 @@ InputParameters validParams<DarcyFluxComponent>();
 class DarcyFluxComponent : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DarcyFluxComponent(const InputParameters & parameters);
 
 protected:

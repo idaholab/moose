@@ -26,6 +26,8 @@ InputParameters validParams<GradParsedFunction>();
 class GradParsedFunction : public MooseParsedFunction
 {
 public:
+  static InputParameters validParams();
+
   GradParsedFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & pt) const;

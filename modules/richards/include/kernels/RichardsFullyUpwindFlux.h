@@ -47,6 +47,8 @@ InputParameters validParams<RichardsFullyUpwindFlux>();
 class RichardsFullyUpwindFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsFullyUpwindFlux(const InputParameters & parameters);
 
 protected:
