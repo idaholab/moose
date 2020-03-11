@@ -31,11 +31,12 @@
 
 registerMooseObject("ExternalPetscSolverApp", PETScDMDAMesh);
 
-template <>
+defineLegacyParams(PETScDMDAMesh);
+
 InputParameters
-validParams<PETScDMDAMesh>()
+PETScDMDAMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
 
   MooseEnum elem_types("EDGE2  QUAD4  HEX8"); // no default
 
