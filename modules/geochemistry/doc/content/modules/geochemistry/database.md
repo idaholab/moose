@@ -2,7 +2,7 @@
 
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
-The `geochemistry` module works with chemical databases in the EQ3/6 format.  This page describes the EQ3/6 format, using a database file downloaded from the geochemist workbench site.  See the "Thermo Datasets" chapter of [!cite](gwb_reference) and [https://academy.gwb.com](https://academy.gwb.com)
+The `geochemistry` module works with chemical databases in a special MOOSE format, and the module contains a python file that translates between MOOSE format and other formats such as EQ3/6.  This page describes the GWB format, using a database file downloaded from the geochemist workbench site.  See the "Thermo Datasets" chapter of [!cite](gwb_reference) and [https://academy.gwb.com](https://academy.gwb.com)
 
 This page goes through the database file section-by-section.
 

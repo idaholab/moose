@@ -6,15 +6,31 @@
 
 Species are real things that exist in solution, for instance HCO$_{3}^{-}$, CO$_{2}$(aq), CaHCO$_{3}^{+}$.  They never have negative mass.
 
+### Phase
+
+A phase is a region of space that is physically distinct, mechanically separable, and homogeneous in its composition and properties.  In geochemical systems, the phases are:
+
+- a fluid phase composed of water and its dissolved constituents;
+- potentially, a separate phase corresponding to each of the minerals in contact with the fluid phase;
+- potentially, separate gas phases.  If different gases (CO$_{2}$, O$_{2}$, etc) are buffered separately with known fugacity, as is assumed in `geochemistry`, each gas counts as a distinct phase.
+
 ### Components
 
 Components are useful abstractions.  They might or might not be real things, so can even have negative mass.  For instance, consider an alkaline solution (more OH$^{-}$ than H$^{+}$).  Choose H$_{2}$O and H$^{+}$ to be the component basis set.  Each hydroxyl ion, $\mathrm{H}_{2}\mathrm{O} - \mathrm{H}^{+} \rightarrow \mathrm{OH}^{-}$, is made up of a water molecule less a hydrogen ion.  Since this is an alkaline solution, the overall composition has a positive amount of water and a negative amount of H$^{+}$.  The molality of the the H$^{+}$ speices is positive, however.
 
-A complete set of components forms a basis for the reaction system.
+A complete set of components forms a *basis* for the reaction system.
 
 ### Basis
 
-A linearly-independent complete set of components: every other chemical in the system is composed of these components, and none of these components can be composed from the others.
+The set of components used in a geochemical model is the calculation's basis.  There is no unique basis that describes a system, but the basis must satisfy these rules:
+
+1. each species and phase considered in the model must be a combination of the components in the basis;
+2. the number of components is minimal to satisfy (1)
+3. the components must be linearly independent of one another, that is, no reactions exist to form one component from the others.
+
+That is, the basis is a linearly-independent complete set of components: every other chemical in the system is composed of these components, and none of these components can be composed from the others.
+
+The number of components in the basis is $1 + N_{i} + N_{k} + N_{m} + N_{p}$ (the "1" comes from the water component), while the number of phases is $1 + N_{k} + N_{m} + N_{p}$.  The Gibbs phase rule, with fixed temperature and pressure, states that the number of degrees of freedom is the difference of these, or just $N_{i}$.  Hence, given a constraint on the concentration or activity of each basis species, the system's equilibrium state can be determined.  However, calculating the extent of the system --- the amounts of fluid, minerals, gases and sorption sites --- that are present, requires the extra $1 + N_{k} + N_{m} + N_{p}$ pieces of information.
 
 ### Moles
 
@@ -54,7 +70,7 @@ Defined in terms of the chemical potential,
 where
 
 - $\mu$ \[J.mol$^{-1}$\] is the chemical potential
-- $\mu^{0}$ \[J.mol$^{-1}$\] is the constant number, independent of temperature, pressure, other constituents, etc, but which depends on the reaction in question
+- $\mu^{0}$ \[J.mol$^{-1}$\] is the chemical potential in a standard state (it is independent of temperature, pressure, other constituents, etc)
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ (K) is temperature
 - $\log$ is the natural logarithm
@@ -64,15 +80,15 @@ For species equilibrium reactions, the activity is a dimensionless measure of ef
 \begin{equation}
 a = \gamma m/m_{\mathrm{ref}} \ ,
 \end{equation}
-where $\gamma$ is the activity coefficient, $m$ is the molality, and $m_{\mathrm{ref}}=1\,$mol.kg$^{-1}$.  Usually $\gamma$ is not too far from unity, so activity is numerically close to the numerical value of molality.
+where $\gamma$ is the activity coefficient, $m$ is the molality, and $m_{\mathrm{ref}}=1\,$mol.kg$^{-1}$.
 
-For minerals in mineralisation reactions, $a=1$.
+For minerals in $A_{k}$, $a=1$.
 
 For gases, the activity is proportional to the [fugacity](fugacity.md).
 
 ### Mass action
 
-This is an equation for the equilibrium constant of a reaction in terms of the activities of the reaction's components.
+This is an equation for the equilibrium constant of a reaction in terms of the activities of the reaction's species.
 
 ### Saturation index
 
@@ -80,15 +96,15 @@ $\mathrm{SI} = \log_{10}(Q/K)$, where $Q$ is the activity product and $K$ is the
 
 ### Redox reaction
 
-This involves the transfer of electrons.  For instance $\mathrm{Na} + \mathrm{Cl} \rightarrow \mathrm{Na}^{+} + \mathrm{Cl}^{-} \rightarrow \mathrm{NaCl}$, where an electron is transfered from Na to Cl.  The electron donor and electron receptor are called a *redox couple*.  Often these reactions are split into *half reactions* that show the release/gain of an electron, eg $\mathrm{Na}\rightarrow \mathrm{Na}^{+} + \mathrm{e}^{-}$.
+This involves the transfer of electrons.  For instance $\mathrm{Fe}^{2+} + 0.25\mathrm{O}_{2} + \mathrm{H}^{+} \rightleftharpoons \mathrm{Fe}^{3+} + 0.5\mathrm{H}_{2}\mathrm{O}$, where an electron is transfered between Fe$^{2+}$ and Fe$^{3+}$.  Fe$^{2+}$ has lost an electron: it is oxidised.  The electron donor and electron receptor are called a *redox couple*.  Often these reactions are split into *half reactions* that show the release/gain of an electron, eg $\mathrm{Fe}^{2+} \rightarrow \mathrm{Fe}^{3+} + \mathrm{e}^{-}$.
 
 ### Nernst potential
 
 Quantifies the redox potential for a redox half-reaction with activity product $Q$ and equilibrium constant $K$:
 \begin{equation}
-\mathrm{Eh} = -\frac{RT}{nF}\log(Q/K) \ .
+\mathrm{Eh} = -\frac{RT}{nF}\log(Q/K) = \mathrm{Eh}^{0} - \frac{RT}{nF}\log Q \ .
 \end{equation}
-Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Faraday constant, $n$ is the number of electrons consumed in the half reaction, and $\log$ has base e.
+Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Faraday constant, $n$ is the number of electrons consumed in the half reaction, Eh$^{0}$ is the standard potential, and $\log$ has base e.
 
 
 ## Notation
@@ -131,8 +147,8 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $N_{p}$ | - | Number of basis sorbing sites $A_{p}$ |
 | $\nu$ | - | Stoichiometric coefficient |
 | $Q_{l}$ | - | [Activity product](equilibrium.md) for mineral $l$.  This is used to construct the saturation index for the mineral |
-| $r_{\bar{k}}$ | mol.s$^{-1}$ | [Reaction rate](kinetics.md) for kinetic component $A_{\bar{k}}$ |
-| $R_{\bar{k}}$ | mol.s$^{-1}$.m$^{-3}$ | Reaction rate [per volume of aqueous solution](transport.md) for kinetic component $A_{\bar{k}}$ |
+| $r_{\bar{k}}$ | mol.s$^{-1}$ | [Reaction rate](kinetics.md) for kinetic species $A_{\bar{k}}$ |
+| $R_{\bar{k}}$ | mol.s$^{-1}$.m$^{-3}$ | Reaction rate [per volume of aqueous solution](transport.md) for kinetic species $A_{\bar{k}}$ |
 | SI$_{l}$ | - | [Saturation index](equilibrium.md) for mineral $l$.  The mineral is supersaturated if this is positive, and undersaturated if it is negative |
 | $z$ | - | Charge number of a substance |
 
