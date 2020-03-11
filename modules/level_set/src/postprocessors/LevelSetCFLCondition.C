@@ -11,14 +11,15 @@
 
 registerMooseObject("LevelSetApp", LevelSetCFLCondition);
 
-template <>
+defineLegacyParams(LevelSetCFLCondition);
+
 InputParameters
-validParams<LevelSetCFLCondition>()
+LevelSetCFLCondition::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription("Compute the minimum timestep from the Courant-Friedrichs-Lewy (CFL) "
                              "condition for the level-set equation.");
-  params += validParams<LevelSetVelocityInterface<>>();
+  params += LevelSetVelocityInterface<ElementPostprocessor>::validParams();
   return params;
 }
 

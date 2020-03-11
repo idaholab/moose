@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class LevelSetOlssonReinitialization : public ADKernelGrad<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetOlssonReinitialization(const InputParameters & parameters);
 
 protected:

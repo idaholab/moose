@@ -12,13 +12,19 @@
 
 registerADMooseObject("LevelSetApp", LevelSetAdvection);
 
-defineADValidParams(LevelSetAdvection,
-                    ADKernelValue,
-                    params.addClassDescription(
-                        "Implements the level set advection equation: $\\vec{v}\\cdot\\nabla "
-                        "u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = "
-                        "0$.");
-                    params += validParams<LevelSetVelocityInterface<>>(););
+defineADLegacyParams(LevelSetAdvection);
+
+template <ComputeStage compute_stage>
+InputParameters
+LevelSetAdvection<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla "
+                             "u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = "
+                             "0$.");
+  params += LevelSetVelocityInterface<ADKernelValue<compute_stage>>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 LevelSetAdvection<compute_stage>::LevelSetAdvection(const InputParameters & parameters)

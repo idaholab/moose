@@ -11,14 +11,15 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonVortex);
 
-template <>
+defineLegacyParams(LevelSetOlssonVortex);
+
 InputParameters
-validParams<LevelSetOlssonVortex>()
+LevelSetOlssonVortex::validParams()
 {
   MooseEnum rtype("instantaneous=0 cosine=1", "instantaneous");
   MooseEnum comp("x=0 y=1 z=2");
 
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "A function for creating vortex velocity fields for level set equation benchmark problems.");
   params.addParam<MooseEnum>(

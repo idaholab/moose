@@ -12,18 +12,14 @@
 // MOOSE includes
 #include "ElementVariablePostprocessor.h"
 
-// Forward declerations
-class LevelSetVolume;
-
-template <>
-InputParameters validParams<LevelSetVolume>();
-
 /**
  * Postprocessor to compute the area/volume inside and outside of a level set contour.
  */
 class LevelSetVolume : public ElementVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   LevelSetVolume(const InputParameters & parameters);
 
   virtual void initialize() override;

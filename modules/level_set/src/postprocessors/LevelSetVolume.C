@@ -11,11 +11,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetVolume);
 
-template <>
+defineLegacyParams(LevelSetVolume);
+
 InputParameters
-validParams<LevelSetVolume>()
+LevelSetVolume::validParams()
 {
-  InputParameters params = validParams<ElementVariablePostprocessor>();
+  InputParameters params = ElementVariablePostprocessor::validParams();
   params.addClassDescription(
       "Compute the area or volume of the region inside or outside of a level set contour.");
   params.addParam<Real>(
