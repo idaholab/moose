@@ -11,15 +11,11 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class Convection;
-
-template <>
-InputParameters validParams<Convection>();
-
 class Convection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Convection(const InputParameters & parameters);
 
 protected:

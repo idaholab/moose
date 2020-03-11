@@ -11,11 +11,12 @@
 
 registerMooseObject("MiscApp", ThermoDiffusion);
 
-template <>
+defineLegacyParams(ThermoDiffusion);
+
 InputParameters
-validParams<ThermoDiffusion>()
+ThermoDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("temp", "Coupled temperature");
   params.addParam<Real>("gas_constant", 8.3144621, "Gas constant");
   params.addParam<std::string>(

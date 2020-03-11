@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADThermoDiffusion : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADThermoDiffusion(const InputParameters & parameters);
 
 protected:

@@ -14,11 +14,12 @@
 
 registerMooseObject("MiscApp", InternalVolume);
 
-template <>
+defineLegacyParams(InternalVolume);
+
 InputParameters
-validParams<InternalVolume>()
+InternalVolume::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription("Computes the volume of an enclosed area by "
                              "performing an integral over a user-supplied boundary.");
   params.addRangeCheckedParam<unsigned int>(

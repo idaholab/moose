@@ -11,11 +11,12 @@
 
 registerMooseObject("MiscApp", CoefDiffusion);
 
-template <>
+defineLegacyParams(CoefDiffusion);
+
 InputParameters
-validParams<CoefDiffusion>()
+CoefDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<Real>("coef", 0.0, "Diffusion coefficient");
   params.addParam<FunctionName>("function",
                                 "If provided, the diffusion coefficient will be coef + "
