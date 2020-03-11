@@ -85,6 +85,16 @@
   [../]
 []
 
+[Materials]
+  [constant]
+    type = GenericConstantMaterial
+    prop_names = 'gap_conductance'
+    prop_values = '.03'
+    block = '1 2'
+  []
+[]
+
+
 [Preconditioning]
   [./smp]
     type = SMP
