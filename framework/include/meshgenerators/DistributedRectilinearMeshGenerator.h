@@ -11,8 +11,17 @@
 
 #include "MeshGenerator.h"
 
+#include "libmesh/face_quad4.h"
+#include "libmesh/cell_hex8.h"
+#include "libmesh/edge_edge2.h"
+
 /**
- * Mesh generated from parameters
+ * This class works by first creating a "distributed ual graph" of the element connectivity based
+ * on a linear partition of mesh before ever building an elements. It then uses
+ * PetscExternalPartitioner to partition that graph - assigning elements to processors. Then, each
+ * processor can read the partition map and build only the elements that need to be on that
+ * processor. Final steps include adding in "ghosted" elements and making sure that boundary
+ * conditions are right.
  */
 class DistributedRectilinearMeshGenerator : public MeshGenerator
 {
@@ -23,19 +32,34 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  /**
+   * Build a cube mesh
+   *
+   * @param mesh Distributed UnstructuredMesh
+   * @param nx The number of elements in the x direction
+   * @param ny The number of elements in the y direction
+   * @param nz The number of elements in the z direction
+   * @param xmin Lower X Coordinate of the generated mesh
+   * @param xmax Upper X Coordinate of the generated mesh
+   * @param ymin Lower Y Coordinate of the generated mesh
+   * @param ymax Upper Y Coordinate of the generated mesh
+   * @param zmin Lower Z Coordinate of the generated mesh
+   * @param zmax Upper Z Coordinate of the generated mesh
+   * @param type The element type
+   */
   template <typename T>
-  void buildCube(UnstructuredMesh & mesh,
-                  const unsigned int nx,
-                  unsigned int ny,
-                  unsigned int nz,
-                  const Real xmin,
-                  const Real xmax,
-                  const Real ymin,
-                  const Real ymax,
-                  const Real zmin,
-                  const Real zmax,
-                  const ElemType type,
-                  bool verbose);
+  void buildCube(UnstructuredMesh & /*mesh*/,
+                 const unsigned int /*nx*/,
+                 unsigned int /*ny*/,
+                 unsigned int /*nz*/,
+                 const Real /*xmin*/,
+                 const Real /*xmax*/,
+                 const Real /*ymin*/,
+                 const Real /*ymax*/,
+                 const Real /*zmin*/,
+                 const Real /*zmax*/,
+                 const ElemType /*type*/,
+                 bool /*verbose*/);
 
   /**
    * Get the element ID for a given hex
@@ -47,17 +71,37 @@ public:
    * @param k The z index of this element
    * @return The ID of the i,j element
    */
-
   template <typename T>
-  inline dof_id_type elemId(const dof_id_type /*nx*/,
-                             const dof_id_type /*ny*/,
-                             const dof_id_type /*i*/,
-                             const dof_id_type /*j*/,
-                             const dof_id_type /*k*/)
+  dof_id_type elemId(const dof_id_type /*nx*/,
+                     const dof_id_type /*ny*/,
+                     const dof_id_type /*i*/,
+                     const dof_id_type /*j*/,
+                     const dof_id_type /*k*/)
   {
     mooseError(
         "elemId not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  dof_id_type elemId<Edge2>(const dof_id_type nx,
+                            const dof_id_type ny,
+                            const dof_id_type i,
+                            const dof_id_type j,
+                            const dof_id_type k);
+
+  template <>
+  dof_id_type elemId<Quad4>(const dof_id_type nx,
+                            const dof_id_type ny,
+                            const dof_id_type i,
+                            const dof_id_type j,
+                            const dof_id_type k);
+
+  template <>
+  dof_id_type elemId<Hex8>(const dof_id_type nx,
+                           const dof_id_type ny,
+                           const dof_id_type i,
+                           const dof_id_type j,
+                           const dof_id_type k);
 
   /**
    * Get the number of neighbors this element will have
@@ -71,16 +115,40 @@ public:
    * @return The number of neighboring elements
    */
   template <typename T>
-  inline dof_id_type numNeighbors(const dof_id_type /*nx*/,
-                                   const dof_id_type /*ny*/,
-                                   const dof_id_type /*nz*/,
-                                   const dof_id_type /*i*/,
-                                   const dof_id_type /*j*/,
-                                   const dof_id_type /*k*/)
+  dof_id_type numNeighbors(const dof_id_type /*nx*/,
+                           const dof_id_type /*ny*/,
+                           const dof_id_type /*nz*/,
+                           const dof_id_type /*i*/,
+                           const dof_id_type /*j*/,
+                           const dof_id_type /*k*/)
   {
     mooseError("numNeighbors not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  dof_id_type numNeighbors<Edge2>(const dof_id_type nx,
+                                  const dof_id_type ny,
+                                  const dof_id_type nz,
+                                  const dof_id_type i,
+                                  const dof_id_type j,
+                                  const dof_id_type k);
+
+  template <>
+  dof_id_type numNeighbors<Quad4>(const dof_id_type nx,
+                                  const dof_id_type ny,
+                                  const dof_id_type nz,
+                                  const dof_id_type i,
+                                  const dof_id_type j,
+                                  const dof_id_type k);
+
+  template <>
+  dof_id_type numNeighbors<Hex8>(const dof_id_type nx,
+                                 const dof_id_type ny,
+                                 const dof_id_type nz,
+                                 const dof_id_type i,
+                                 const dof_id_type j,
+                                 const dof_id_type k);
 
   /**
    * Get the IDs of the neighbors of a given element
@@ -95,18 +163,48 @@ public:
    * there is no neighbor.  THIS MUST be of size 6 BEFORE calling this function
    */
   template <typename T>
-  inline void getNeighbors(const dof_id_type /*nx*/,
-                            const dof_id_type /*ny*/,
-                            const dof_id_type /*nz*/,
-                            const dof_id_type /*i*/,
-                            const dof_id_type /*j*/,
-                            const dof_id_type /*k*/,
-                            std::vector<dof_id_type> & /*neighbors*/,
-                            const bool corner = false)
-{
-  mooseError(
-      "getNeighbors not implemented for this element type in DistributedRectilinearMeshGenerator");
-}
+  void getNeighbors(const dof_id_type /*nx*/,
+                    const dof_id_type /*ny*/,
+                    const dof_id_type /*nz*/,
+                    const dof_id_type /*i*/,
+                    const dof_id_type /*j*/,
+                    const dof_id_type /*k*/,
+                    std::vector<dof_id_type> & /*neighbors*/,
+                    const bool /*corner = false*/)
+  {
+    mooseError("getNeighbors not implemented for this element type in "
+               "DistributedRectilinearMeshGenerator");
+  }
+
+  template <>
+  void getNeighbors<Edge2>(const dof_id_type nx,
+                           const dof_id_type ny,
+                           const dof_id_type nz,
+                           const dof_id_type i,
+                           const dof_id_type j,
+                           const dof_id_type k,
+                           std::vector<dof_id_type> & neighbors,
+                           const bool corner);
+
+  template <>
+  void getNeighbors<Quad4>(const dof_id_type nx,
+                           const dof_id_type ny,
+                           const dof_id_type nz,
+                           const dof_id_type i,
+                           const dof_id_type j,
+                           const dof_id_type k,
+                           std::vector<dof_id_type> & neighbors,
+                           const bool corner);
+
+  template <>
+  void getNeighbors<Hex8>(const dof_id_type nx,
+                          const dof_id_type ny,
+                          const dof_id_type nz,
+                          const dof_id_type i,
+                          const dof_id_type j,
+                          const dof_id_type k,
+                          std::vector<dof_id_type> & neighbors,
+                          const bool corner);
 
   /**
    * The ID of the i,j,k node
@@ -120,16 +218,40 @@ public:
    * @param k The z index of this node
    */
   template <typename T>
-  inline dof_id_type nodeId(const ElemType /*type*/,
-                             const dof_id_type /*nx*/,
-                             const dof_id_type /*ny*/,
-                             const dof_id_type /*i*/,
-                             const dof_id_type /*j*/,
-                             const dof_id_type /*k*/)
+  dof_id_type nodeId(const ElemType /*type*/,
+                     const dof_id_type /*nx*/,
+                     const dof_id_type /*ny*/,
+                     const dof_id_type /*i*/,
+                     const dof_id_type /*j*/,
+                     const dof_id_type /*k*/)
   {
     mooseError(
         "nodeId not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  dof_id_type nodeId<Edge2>(const ElemType type,
+                            const dof_id_type nx,
+                            const dof_id_type ny,
+                            const dof_id_type i,
+                            const dof_id_type j,
+                            const dof_id_type k);
+
+  template <>
+  dof_id_type nodeId<Quad4>(const ElemType type,
+                            const dof_id_type nx,
+                            const dof_id_type ny,
+                            const dof_id_type i,
+                            const dof_id_type j,
+                            const dof_id_type k);
+
+  template <>
+  dof_id_type nodeId<Hex8>(const ElemType type,
+                           const dof_id_type nx,
+                           const dof_id_type ny,
+                           const dof_id_type i,
+                           const dof_id_type j,
+                           const dof_id_type k);
 
   /**
    * Add a node to the mesh
@@ -145,17 +267,47 @@ public:
    */
   template <typename T>
   Node * addPoint(const dof_id_type /*nx*/,
-                   const dof_id_type /*ny*/,
-                   const dof_id_type /*nz*/,
-                   const dof_id_type /*i*/,
-                   const dof_id_type /*j*/,
-                   const dof_id_type /*k*/,
-                   const ElemType /*type*/,
-                   MeshBase & /*mesh*/)
+                  const dof_id_type /*ny*/,
+                  const dof_id_type /*nz*/,
+                  const dof_id_type /*i*/,
+                  const dof_id_type /*j*/,
+                  const dof_id_type /*k*/,
+                  const ElemType /*type*/,
+                  MeshBase & /*mesh*/)
   {
     mooseError(
         "addPoint not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  Node * addPoint<Edge2>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type nz,
+                         const dof_id_type i,
+                         const dof_id_type j,
+                         const dof_id_type k,
+                         const ElemType type,
+                         MeshBase & mesh);
+
+  template <>
+  Node * addPoint<Quad4>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type nz,
+                         const dof_id_type i,
+                         const dof_id_type j,
+                         const dof_id_type k,
+                         const ElemType type,
+                         MeshBase & mesh);
+
+  template <>
+  Node * addPoint<Hex8>(const dof_id_type nx,
+                        const dof_id_type ny,
+                        const dof_id_type nz,
+                        const dof_id_type i,
+                        const dof_id_type j,
+                        const dof_id_type k,
+                        const ElemType type,
+                        MeshBase & mesh);
 
   /**
    * Adds an element to the mesh
@@ -174,20 +326,59 @@ public:
    */
   template <typename T>
   void addElement(const dof_id_type /*nx*/,
-                   const dof_id_type /*ny*/,
-                   const dof_id_type /*nz*/,
-                   const dof_id_type /*i*/,
-                   const dof_id_type /*j*/,
-                   const dof_id_type /*k*/,
-                   const dof_id_type /*elem_id*/,
-                   const processor_id_type /*pid*/,
-                   const ElemType /*type*/,
-                   MeshBase & /*mesh*/,
-                   bool /*verbose*/)
+                  const dof_id_type /*ny*/,
+                  const dof_id_type /*nz*/,
+                  const dof_id_type /*i*/,
+                  const dof_id_type /*j*/,
+                  const dof_id_type /*k*/,
+                  const dof_id_type /*elem_id*/,
+                  const processor_id_type /*pid*/,
+                  const ElemType /*type*/,
+                  MeshBase & /*mesh*/,
+                  bool /*verbose*/)
   {
     mooseError(
         "addElement not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  void addElement<Edge2>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type nz,
+                         const dof_id_type i,
+                         const dof_id_type j,
+                         const dof_id_type k,
+                         const dof_id_type elem_id,
+                         const processor_id_type pid,
+                         const ElemType type,
+                         MeshBase & mesh,
+                         bool verbose);
+
+  template <>
+  void addElement<Quad4>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type nz,
+                         const dof_id_type i,
+                         const dof_id_type j,
+                         const dof_id_type k,
+                         const dof_id_type elem_id,
+                         const processor_id_type pid,
+                         const ElemType type,
+                         MeshBase & mesh,
+                         bool verbose);
+
+  template <>
+  void addElement<Hex8>(const dof_id_type nx,
+                        const dof_id_type ny,
+                        const dof_id_type nz,
+                        const dof_id_type i,
+                        const dof_id_type j,
+                        const dof_id_type k,
+                        const dof_id_type elem_id,
+                        const processor_id_type pid,
+                        const ElemType type,
+                        MeshBase & mesh,
+                        bool verbose);
 
   /**
    * Compute the i,j,k indices of a given element ID
@@ -200,16 +391,40 @@ public:
    * @param k Output: The index in the z direction
    */
   template <typename T>
-  inline void getIndices(const dof_id_type /*nx*/,
-                          const dof_id_type /*ny*/,
-                          const dof_id_type /*elem_id*/,
-                          dof_id_type & /*i*/,
-                          dof_id_type & /*j*/,
-                          dof_id_type & /*k*/)
+  void getIndices(const dof_id_type /*nx*/,
+                  const dof_id_type /*ny*/,
+                  const dof_id_type /*elem_id*/,
+                  dof_id_type & /*i*/,
+                  dof_id_type & /*j*/,
+                  dof_id_type & /*k*/)
   {
     mooseError(
         "getIndices not implemented for this element type in DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  void getIndices<Edge2>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type elem_id,
+                         dof_id_type & i,
+                         dof_id_type & j,
+                         dof_id_type & k);
+
+  template <>
+  void getIndices<Quad4>(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const dof_id_type elem_id,
+                         dof_id_type & i,
+                         dof_id_type & j,
+                         dof_id_type & k);
+
+  template <>
+  void getIndices<Hex8>(const dof_id_type nx,
+                        const dof_id_type ny,
+                        const dof_id_type elem_id,
+                        dof_id_type & i,
+                        dof_id_type & j,
+                        dof_id_type & k);
 
   /**
    * Find the elements and sides that need ghost elements
@@ -220,15 +435,36 @@ public:
    * @param ghost_elems The ghost elems that need to be added
    */
   template <typename T>
-  inline void getGhostNeighbors(const dof_id_type /*nx*/,
-                                  const dof_id_type /*ny*/,
-                                  const dof_id_type /*nz*/,
-                                  const MeshBase & /*mesh*/,
-                                  std::set<dof_id_type> & /*ghost_elems*/)
+  void getGhostNeighbors(const dof_id_type /*nx*/,
+                         const dof_id_type /*ny*/,
+                         const dof_id_type /*nz*/,
+                         const MeshBase & /*mesh*/,
+                         std::set<dof_id_type> & /*ghost_elems*/)
   {
     mooseError("getGhostNeighbors not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  void getGhostNeighbors<Edge2>(const dof_id_type nx,
+                                const dof_id_type ny,
+                                const dof_id_type nz,
+                                const MeshBase & mesh,
+                                std::set<dof_id_type> & ghost_elems);
+
+  template <>
+  void getGhostNeighbors<Quad4>(const dof_id_type nx,
+                                const dof_id_type ny,
+                                const dof_id_type nz,
+                                const MeshBase & mesh,
+                                std::set<dof_id_type> & ghost_elems);
+
+  template <>
+  void getGhostNeighbors<Hex8>(const dof_id_type nx,
+                               const dof_id_type ny,
+                               const dof_id_type nz,
+                               const MeshBase & mesh,
+                               std::set<dof_id_type> & ghost_elems);
 
   /**
    * Set the boundary names for any added boundary ideas
@@ -242,25 +478,81 @@ public:
                "DistributedRectilinearMeshGenerator");
   }
 
+  template <>
+  void setBoundaryNames<Edge2>(BoundaryInfo & boundary_info);
+
+  template <>
+  void setBoundaryNames<Quad4>(BoundaryInfo & boundary_info);
+
+  template <>
+  void setBoundaryNames<Hex8>(BoundaryInfo & boundary_info);
+
   /**
    * All meshes are generated on the unit square.  This function stretches the mesh
    * out to fill the correct area.
+   *
+   * @param nx The number of elements in the x direction
+   * @param ny The number of elements in the y direction
+   * @param nz The number of elements in the z direction
+   * @param xmin Lower X Coordinate of the generated mesh
+   * @param xmax Upper X Coordinate of the generated mesh
+   * @param ymin Lower Y Coordinate of the generated mesh
+   * @param ymax Upper Y Coordinate of the generated mesh
+   * @param zmin Lower Z Coordinate of the generated mesh
+   * @param zmax Upper Z Coordinate of the generated mesh
+   * @param mesh Distributed UnstructuredMesh
    */
   template <typename T>
   void scaleNodalPositions(dof_id_type /*nx*/,
-                             dof_id_type /*ny*/,
-                             dof_id_type /*nz*/,
-                             Real /*xmin*/,
-                             Real /*xmax*/,
-                             Real /*ymin*/,
-                             Real /*ymax*/,
-                             Real /*zmin*/,
-                             Real /*zmax*/,
-                             MeshBase & /*mesh*/)
+                           dof_id_type /*ny*/,
+                           dof_id_type /*nz*/,
+                           Real /*xmin*/,
+                           Real /*xmax*/,
+                           Real /*ymin*/,
+                           Real /*ymax*/,
+                           Real /*zmin*/,
+                           Real /*zmax*/,
+                           MeshBase & /*mesh*/)
   {
     mooseError("scaleNodalPositions not implemented for this element type in "
                "DistributedRectilinearMeshGenerator");
   }
+
+  template <>
+  void scaleNodalPositions<Edge2>(dof_id_type nx,
+                                  dof_id_type ny,
+                                  dof_id_type nz,
+                                  Real xmin,
+                                  Real xmax,
+                                  Real ymin,
+                                  Real ymax,
+                                  Real zmin,
+                                  Real zmax,
+                                  MeshBase & mesh);
+
+  template <>
+  void scaleNodalPositions<Quad4>(dof_id_type nx,
+                                  dof_id_type ny,
+                                  dof_id_type nz,
+                                  Real xmin,
+                                  Real xmax,
+                                  Real ymin,
+                                  Real ymax,
+                                  Real zmin,
+                                  Real zmax,
+                                  MeshBase & mesh);
+
+  template <>
+  void scaleNodalPositions<Hex8>(dof_id_type nx,
+                                 dof_id_type ny,
+                                 dof_id_type nz,
+                                 Real xmin,
+                                 Real xmax,
+                                 Real ymin,
+                                 Real ymax,
+                                 Real zmin,
+                                 Real zmax,
+                                 MeshBase & mesh);
 
 protected:
   /// If to print debug information
