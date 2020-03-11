@@ -1,7 +1,7 @@
 # MooseUnits
 
 `MooseUnits` is a physical units parsing and conversion helper class.
-A unit object can be constructed form a string (e.g. `N*m`, `eV/at`, `kg*(m/s)^2`).
+A unit object can be constructed form a string (e.g. `N*m`, `eV/at`, `kg*(m/s)^2`, `1/s`, `m^-3`).
 The unit parser supports the `*`,`/`, and `^` operators as well as parenthesis `(`, `)`.
 The argument of the `^` operator is expected to be a positive or negative integer.
 
@@ -11,7 +11,7 @@ Upon parsing all units are resolved to a combination of the
 canonical form is generated that permits unit comparisons to determine
 conformity (i.e. whether two units can be converted between).
 
-`Mooseunits` supports prefixing all units with a
+`MooseUnits` supports prefixing all units with a
 [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) ranging from `Y` (yotta)
 to `y` (yocto).
 

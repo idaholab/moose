@@ -10,6 +10,7 @@
 #include "Units.h"
 #include <stack>
 #include <algorithm>
+#include <sstream>
 
 const std::map<std::string, Real> MooseUnits::_si_prefix = {
     {"Y", 1e24}, {"Z", 1e21},  {"E", 1e18},  {"P", 1e15},  {"T", 1e12},  {"G", 1e9},  {"M", 1e6},
@@ -157,7 +158,7 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND, -2}}}},                          // bar (unit of pressure)
-    {"h", {60 * 60, {{MooseUnits::BaseUnit::SECOND, 1}}}},             // day
+    {"h", {60 * 60, {{MooseUnits::BaseUnit::SECOND, 1}}}},             // hour
     {"day", {60 * 60 * 24, {{MooseUnits::BaseUnit::SECOND, 1}}}},      // day
     {"l", {1e-3, {{MooseUnits::BaseUnit::METER, 3}}}},                 // liter
     {"u", {1.66053906660e-27, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
@@ -304,11 +305,25 @@ MooseUnits::parse(const std::string & unit_string)
     }
     else
     {
-      // consume unit symbol
       std::string unit;
-      while (it != end &&
-             ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z'))) // no unicode :(
+      while (it != end && ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z') ||
+                           (*it >= '0' && *it <= '9') || *it == '.' || *it == '-'))
         unit += *(it++);
+
+      // check if a number prefix is present
+      Real si_factor;
+      std::stringstream ss(unit);
+      if ((ss >> si_factor).fail() || !std::isfinite(si_factor))
+        si_factor = 1.0;
+      else
+      {
+        if (ss.eof())
+        {
+          out.push(MooseUnits(si_factor));
+          continue;
+        }
+        ss >> unit;
+      }
 
       // parse the unit and a potential SI prefix
       auto len = unit.length();
@@ -336,7 +351,6 @@ MooseUnits::parse(const std::string & unit_string)
       // get prefix
       const auto & s = _unit_table[i].first;
       const auto slen = s.length();
-      Real si_factor = 1.0;
       if (slen < len)
       {
         const auto prefix = unit.substr(0, len - slen);

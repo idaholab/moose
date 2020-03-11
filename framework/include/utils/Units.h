@@ -45,6 +45,7 @@ class MooseUnits
 public:
   MooseUnits();
   MooseUnits(const std::string & unit_string);
+  MooseUnits(Real f) : _factor(f), _base() {}
   MooseUnits(Real f, std::vector<std::pair<MooseUnits::BaseUnit, int>> b) : _factor(f), _base(b) {}
 
   /// checks if the units are dimensionally conforming (i.e. the describe the same physical quanitity)

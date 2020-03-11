@@ -13,6 +13,27 @@
 #include <cmath>
 #include <sstream>
 
+TEST(Units, numbers)
+{
+  // test every unit in a bunch of cases
+  std::string one_over = "1/";
+  std::string one_times = "1.0*";
+  for (const auto & u : MooseUnits::_unit_table)
+  {
+    EXPECT_DOUBLE_EQ(Real(MooseUnits(one_over + u.first) * MooseUnits(u.first)), 1.0);
+    EXPECT_DOUBLE_EQ(Real(MooseUnits(one_times + u.first) / MooseUnits(u.first)), 1.0);
+  }
+
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("1000.0m") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("1000.0*m") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("10^3*m") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("1e3*m") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("m/0.001") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("m/0.1^3") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("m/1e-3") / MooseUnits("km")), 1.0);
+  EXPECT_DOUBLE_EQ(Real(MooseUnits("1234.567")), 1234.567);
+}
+
 TEST(Units, si_prefixes)
 {
   // test every possible combination of units and si prefixes for correct parsing
