@@ -12,14 +12,17 @@
 #include "AutomaticMortarGeneration.h"
 #include "MooseHashing.h"
 
-#include <map>
+#include "libmesh/parallel_object.h"
+
+#include <unordered_map>
+#include <set>
 
 class SubProblem;
 
-class MortarData
+class MortarData : public libMesh::ParallelObject
 {
 public:
-  MortarData();
+  MortarData(const libMesh::ParallelObject & other);
 
   /**
    * Create mortar generation object
@@ -83,6 +86,12 @@ public:
    */
   bool hasObjects() const { return _mortar_interfaces.size(); }
 
+  /**
+   * Returns the higher dimensional subdomain ids of the interior parents of the given lower-d
+   * subdomain id
+   */
+  const std::set<SubdomainID> & getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const;
+
 private:
   /**
    * Builds mortar segment mesh from specific AutomaticMortarGeneration object
@@ -112,4 +121,8 @@ private:
 
   /// Map from displaced AMG key to whether the displaced AMG object is enforcing periodic constraints
   std::unordered_map<MortarKey, bool> _displaced_periodic_map;
+
+  /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
+  /// (e.g. the ids of the interior parents)
+  std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;
 };

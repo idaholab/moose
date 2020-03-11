@@ -238,7 +238,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
-    _mortar_data(),
+    _mortar_data(*this),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _input_file_saved(false),
