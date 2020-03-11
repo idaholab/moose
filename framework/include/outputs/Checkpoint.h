@@ -37,7 +37,7 @@ struct CheckpointFileNames
   std::string restart;
 
   /// Filename for restartable data filename
-  std::string restart_mesh_meta_data;
+  std::vector<std::string> restart_meta_data;
 };
 
 /**
@@ -97,9 +97,6 @@ private:
 
   /// Reference to the restartable data
   const RestartableDataMaps & _restartable_data;
-
-  /// Reference to the mesh meta data
-  const RestartableDataMap & _mesh_meta_data;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;

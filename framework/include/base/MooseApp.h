@@ -61,6 +61,8 @@ InputParameters validParams<MooseApp>();
 class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
+  static const RestartableDataMapName MESH_META_DATA;
+
   static InputParameters validParams();
 
   virtual ~MooseApp();
@@ -495,12 +497,14 @@ public:
    * @param name The full (unique) name.
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
+   * @param read_only Restrict the data for read-only
+   * @param metaname (optional) register the data to the meta data storage (tid must be 0)
    */
   RestartableDataValue & registerRestartableData(const std::string & name,
                                                  std::unique_ptr<RestartableDataValue> data,
                                                  THREAD_ID tid,
-                                                 bool mesh_meta_data,
-                                                 bool read_only);
+                                                 bool read_only,
+                                                 const RestartableDataMapName & metaname = "");
 
   /**
    * Return reference to the restartable data object
@@ -509,9 +513,20 @@ public:
   const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
 
   /**
-   * Return reference to the recoverable mesh meta data object.
+   * Return a reference to restartable data for the specific type flag.
    */
-  const RestartableDataMap & getMeshMetaData() const { return _mesh_meta_data_map; }
+  const RestartableDataMap & getRestartableDataMap(const RestartableDataMapName & name) const;
+
+  /**
+   * Reserve a location for storing custom RestartableDataMap objects.
+   *
+   * This should be called in the constructor of an application.
+   *
+   * @param name A key to use for accessing the data object
+   * @param suffix The suffix to use when appending to checkpoint output, if not supplied the
+   *               given name is used to generate the suffix (MyMetaData -> _mymetadata)
+   */
+  void registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix = "");
 
   /**
    * Return a reference to the recoverable data object
@@ -742,9 +757,30 @@ public:
   void meshReinitForRMs();
 
   /**
-   * Function to check the integrity of the MeshMetaData data structure
+   * Function to check the integrity of the restartable meta data structure
    */
-  void checkMeshMetaDataIntegrity() const;
+  void checkMetaDataIntegrity() const;
+
+  ///@{
+  /**
+   * Iterator based access to the extra RestartableDataMap objects; see Checkpoint.C for use case.
+   *
+   * These are MOOSE internal functions and should not be used otherwise.
+   */
+  std::unordered_map<RestartableDataMapName,
+                     std::pair<RestartableDataMap, std::string>>::const_iterator
+  getRestartableDataMapBegin() const
+  {
+    return _restartable_meta_data.begin();
+  }
+
+  std::unordered_map<RestartableDataMapName,
+                     std::pair<RestartableDataMap, std::string>>::const_iterator
+  getRestartableDataMapEnd() const
+  {
+    return _restartable_meta_data.end();
+  }
+  ///@}
 
 protected:
   /**
@@ -949,13 +985,9 @@ private:
   /// Where the restartable data is held (indexed on tid)
   RestartableDataMaps _restartable_data;
 
-  /**
-   * Data specifically associated with the mesh (meta-data) that will read from the restart
-   * file early during the simulation setup so that they are available to Actions and other objects
-   * that need them during the setup process. Most of the restartable data isn't made available
-   * until all objects have been created and all Actions have been executed (i.e. initialSetup).
-   */
-  RestartableDataMap _mesh_meta_data_map;
+  /// General storage for custom RestartableData that can be added to from outside applications
+  std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
+      _restartable_meta_data;
 
   /**
    * Data names that will only be read from the restart file during RECOVERY.

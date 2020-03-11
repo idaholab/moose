@@ -196,6 +196,7 @@ typedef unsigned int MooseObjectID;
 typedef unsigned int THREAD_ID;
 typedef unsigned int TagID;
 typedef unsigned int PerfID;
+using RestartableDataMapName = std::string; // see MooseApp.h
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
