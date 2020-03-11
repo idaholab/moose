@@ -58,6 +58,15 @@ public:
   /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
   Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 
+  /// Evaluates partial derivative of expansion: du(x)/dx_dim
+  Real computeDerivative(const unsigned int dim, const std::vector<Real> x) const;
+  /**
+   * Evaluates sum of partial derivative of expansion. Example:
+   * computeGradient({0, 2, 3}, x) = du(x)/dx_0dx_2dx_3
+   */
+  Real computePartialDerivative(const std::vector<unsigned int> dim,
+                                const std::vector<Real> x) const;
+
 protected:
   /**
    * Function computing for computing _tuple

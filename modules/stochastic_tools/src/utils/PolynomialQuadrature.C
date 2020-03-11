@@ -53,6 +53,15 @@ Polynomial::compute(const unsigned int /*order*/, const Real /*x*/, const bool /
 }
 
 Real
+Polynomial::computeDerivative(const unsigned int /*order*/,
+                              const Real /*x*/,
+                              const unsigned int /*n*/) const
+{
+  ::mooseError("Polynomial type has not been implemented.");
+  return 0;
+}
+
+Real
 Polynomial::productIntegral(const std::vector<unsigned int> order) const
 {
   const unsigned int nprod = order.size();
@@ -99,6 +108,33 @@ Legendre::compute(const unsigned int order, const Real x, const bool normalize) 
     val /= innerProduct(order);
 
   return val;
+}
+
+Real
+Legendre::computeDerivative(const unsigned int order, const Real x, const unsigned int m) const
+{
+  if ((x < _lower_bound) || (x > _upper_bound))
+    ::mooseError("The requested polynomial point is outside of distribution bounds.");
+
+  Real xref = 2.0 / (_upper_bound - _lower_bound) * (x - (_upper_bound + _lower_bound) / 2.0);
+  Real Jac = pow(2.0 / (_upper_bound - _lower_bound), m);
+  return Jac * computeDerivativeRef(order, xref, m);
+}
+
+Real
+Legendre::computeDerivativeRef(const unsigned int order,
+                               const Real xref,
+                               const unsigned int m) const
+{
+  if (m == 0)
+    return legendre(order, xref);
+  else if (m > order)
+    return 0.0;
+  else if (order == 1)
+    return 1.0;
+  else
+    return static_cast<Real>(order + m - 1) * computeDerivativeRef(order - 1, xref, m - 1) +
+           xref * computeDerivativeRef(order - 1, xref, m);
 }
 
 void
@@ -161,6 +197,20 @@ Hermite::compute(const unsigned int order, const Real x, const bool normalize) c
   Real val = hermite(order, x, _mu, _sig);
   if (normalize)
     val /= innerProduct(order);
+  return val;
+}
+
+Real
+Hermite::computeDerivative(const unsigned int order, const Real x, const unsigned int m) const
+{
+  if (m > order)
+    return 0.0;
+
+  Real xref = (x - _mu) / _sig;
+  Real val = hermite(order - m, xref);
+  for (unsigned int i = 0; i < m; ++i)
+    val *= static_cast<Real>(order - i) / _sig;
+
   return val;
 }
 
