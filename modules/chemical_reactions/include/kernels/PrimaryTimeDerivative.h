@@ -24,6 +24,8 @@ InputParameters validParams<PrimaryTimeDerivative>();
 class PrimaryTimeDerivative : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   PrimaryTimeDerivative(const InputParameters & parameters);
 
 protected:

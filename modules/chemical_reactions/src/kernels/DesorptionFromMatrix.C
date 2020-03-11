@@ -13,11 +13,12 @@
 
 registerMooseObject("ChemicalReactionsApp", DesorptionFromMatrix);
 
-template <>
+defineLegacyParams(DesorptionFromMatrix);
+
 InputParameters
-validParams<DesorptionFromMatrix>()
+DesorptionFromMatrix::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar(
       "pressure_var",
       "Variable representing the porepressure of the fluid adsorbed into the matrix");

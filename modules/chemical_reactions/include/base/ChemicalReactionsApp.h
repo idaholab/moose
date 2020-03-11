@@ -19,6 +19,8 @@ InputParameters validParams<ChemicalReactionsApp>();
 class ChemicalReactionsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   ChemicalReactionsApp(const InputParameters & parameters);
   virtual ~ChemicalReactionsApp();
 

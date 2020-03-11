@@ -24,6 +24,8 @@ InputParameters validParams<ChemicalOutFlowBC>();
 class ChemicalOutFlowBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ChemicalOutFlowBC(const InputParameters & parameters);
 
 protected:

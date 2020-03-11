@@ -19,6 +19,8 @@ InputParameters validParams<AddPrimarySpeciesAction>();
 class AddPrimarySpeciesAction : public AddVariableAction
 {
 public:
+  static InputParameters validParams();
+
   AddPrimarySpeciesAction(const InputParameters & params);
 
   virtual void act() override;

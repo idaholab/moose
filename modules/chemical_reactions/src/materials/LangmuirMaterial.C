@@ -12,11 +12,12 @@
 
 registerMooseObject("ChemicalReactionsApp", LangmuirMaterial);
 
-template <>
+defineLegacyParams(LangmuirMaterial);
+
 InputParameters
-validParams<LangmuirMaterial>()
+LangmuirMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredCoupledVar(
       "one_over_desorption_time_const",

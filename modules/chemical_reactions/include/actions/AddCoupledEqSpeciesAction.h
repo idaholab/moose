@@ -21,6 +21,8 @@ InputParameters validParams<AddCoupledEqSpeciesAction>();
 class AddCoupledEqSpeciesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddCoupledEqSpeciesAction(const InputParameters & params);
 
   virtual void act() override;

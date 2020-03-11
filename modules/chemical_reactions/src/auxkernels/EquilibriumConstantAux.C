@@ -11,11 +11,12 @@
 
 registerMooseObject("ChemicalReactionsApp", EquilibriumConstantAux);
 
-template <>
+defineLegacyParams(EquilibriumConstantAux);
+
 InputParameters
-validParams<EquilibriumConstantAux>()
+EquilibriumConstantAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addCoupledVar(
       "temperature", 298.15, "The temperature of the aqueous phase (K). Default is 298.15K");
   params.addRequiredParam<std::vector<Real>>(

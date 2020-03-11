@@ -11,11 +11,12 @@
 
 registerMooseObject("ChemicalReactionsApp", DarcyFluxPressure);
 
-template <>
+defineLegacyParams(DarcyFluxPressure);
+
 InputParameters
-validParams<DarcyFluxPressure>()
+DarcyFluxPressure::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   RealVectorValue g(0, 0, 0);
   params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
   params.addClassDescription("");

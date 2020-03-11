@@ -26,6 +26,8 @@ InputParameters validParams<DesorptionToPorespace>();
 class DesorptionToPorespace : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DesorptionToPorespace(const InputParameters & parameters);
 
 protected:

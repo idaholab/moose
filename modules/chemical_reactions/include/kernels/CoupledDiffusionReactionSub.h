@@ -22,6 +22,8 @@ InputParameters validParams<CoupledDiffusionReactionSub>();
 class CoupledDiffusionReactionSub : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledDiffusionReactionSub(const InputParameters & parameters);
 
 protected:

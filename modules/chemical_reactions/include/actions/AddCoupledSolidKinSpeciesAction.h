@@ -19,6 +19,8 @@ InputParameters validParams<AddCoupledSolidKinSpeciesAction>();
 class AddCoupledSolidKinSpeciesAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddCoupledSolidKinSpeciesAction(const InputParameters & params);
 
   virtual void act() override;
