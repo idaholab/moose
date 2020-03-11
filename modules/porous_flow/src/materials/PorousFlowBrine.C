@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowBrine);
 
-template <>
+defineLegacyParams(PorousFlowBrine);
+
 InputParameters
-validParams<PorousFlowBrine>()
+PorousFlowBrine::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
+  InputParameters params = PorousFlowFluidPropertiesBase::validParams();
   params.addParam<bool>(
       "compute_density_and_viscosity", true, "Compute the fluid density and viscosity");
   params.addParam<bool>("compute_internal_energy", true, "Compute the fluid internal energy");

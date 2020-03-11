@@ -37,6 +37,8 @@ class PorousFlowAddMaterialAction : public Action, public PorousFlowDependencies
 {
 
 public:
+  static InputParameters validParams();
+
   PorousFlowAddMaterialAction(const InputParameters & params);
 
   virtual void act() override;

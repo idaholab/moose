@@ -9,11 +9,12 @@
 
 #include "PorousFlowFluidStateMultiComponentBase.h"
 
-template <>
+defineLegacyParams(PorousFlowFluidStateMultiComponentBase);
+
 InputParameters
-validParams<PorousFlowFluidStateMultiComponentBase>()
+PorousFlowFluidStateMultiComponentBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidStateFlash>();
+  InputParameters params = PorousFlowFluidStateFlash::validParams();
   params.addClassDescription("Base class for multiple component fluid state classes");
   return params;
 }

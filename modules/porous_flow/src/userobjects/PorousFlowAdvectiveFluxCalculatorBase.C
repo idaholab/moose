@@ -12,11 +12,12 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/parallel_sync.h"
 
-template <>
+defineLegacyParams(PorousFlowAdvectiveFluxCalculatorBase);
+
 InputParameters
-validParams<PorousFlowAdvectiveFluxCalculatorBase>()
+PorousFlowAdvectiveFluxCalculatorBase::validParams()
 {
-  InputParameters params = validParams<AdvectiveFluxCalculatorBase>();
+  InputParameters params = AdvectiveFluxCalculatorBase::validParams();
   params.addClassDescription(
       "Base class to compute the advective flux of fluid in PorousFlow situations.  The velocity "
       "is U * (-permeability * (grad(P) - density * gravity)), while derived classes define U.  "

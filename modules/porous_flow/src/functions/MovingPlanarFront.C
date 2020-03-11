@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", MovingPlanarFront);
 
-template <>
+defineLegacyParams(MovingPlanarFront);
+
 InputParameters
-validParams<MovingPlanarFront>()
+MovingPlanarFront::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<RealVectorValue>("start_posn", "Initial position of the front");
   params.addRequiredParam<RealVectorValue>("end_posn", "Final position of the front");
   params.addRequiredParam<FunctionName>(

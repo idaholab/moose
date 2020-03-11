@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowFluidStateIC>();
 class PorousFlowFluidStateIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;

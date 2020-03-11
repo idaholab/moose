@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPreDis);
 
-template <>
+defineLegacyParams(PorousFlowPreDis);
+
 InputParameters
-validParams<PorousFlowPreDis>()
+PorousFlowPreDis::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "mineral_density",
       "Density (kg(precipitate)/m^3(precipitate)) of each secondary species in the "

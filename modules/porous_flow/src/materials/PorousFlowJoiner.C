@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowJoiner);
 
-template <>
+defineLegacyParams(PorousFlowJoiner);
+
 InputParameters
-validParams<PorousFlowJoiner>()
+PorousFlowJoiner::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredParam<std::string>("material_property",
                                        "The property that you want joined into a std::vector");
   params.set<std::string>("pf_material_type") = "joiner";

@@ -22,6 +22,8 @@ InputParameters validParams<PorousFlowDarcyVelocityMaterial>();
 class PorousFlowDarcyVelocityMaterial : public PorousFlowMaterial
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDarcyVelocityMaterial(const InputParameters & parameters);
 
 protected:

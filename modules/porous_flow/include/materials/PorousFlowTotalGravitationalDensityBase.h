@@ -22,6 +22,8 @@ InputParameters validParams<PorousFlowTotalGravitationalDensityBase>();
 class PorousFlowTotalGravitationalDensityBase : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowTotalGravitationalDensityBase(const InputParameters & parameters);
 
 protected:

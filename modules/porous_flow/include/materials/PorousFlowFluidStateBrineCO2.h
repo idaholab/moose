@@ -29,6 +29,8 @@ InputParameters validParams<PorousFlowFluidStateBrineCO2>();
 class PorousFlowFluidStateBrineCO2 : public PorousFlowFluidState
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateBrineCO2(const InputParameters & parameters);
 
 protected:

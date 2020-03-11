@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
 
-template <>
+defineLegacyParams(PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
+
 InputParameters
-validParams<PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity>()
+PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::validParams()
 {
-  InputParameters params = validParams<PorousFlowTotalGravitationalDensityBase>();
+  InputParameters params = PorousFlowTotalGravitationalDensityBase::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "rho_s", "rho_s >= 0", "The density of the solid matrix");
   params.addClassDescription(

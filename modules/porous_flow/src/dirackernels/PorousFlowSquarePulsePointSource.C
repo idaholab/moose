@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowSquarePulsePointSource);
 
-template <>
+defineLegacyParams(PorousFlowSquarePulsePointSource);
+
 InputParameters
-validParams<PorousFlowSquarePulsePointSource>()
+PorousFlowSquarePulsePointSource::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<Real>(
       "mass_flux",
       "The mass flux at this point in kg/s (positive is flux in, negative is flux out)");

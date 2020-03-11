@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowBasicAdvection);
 
-template <>
+defineLegacyParams(PorousFlowBasicAdvection);
+
 InputParameters
-validParams<PorousFlowBasicAdvection>()
+PorousFlowBasicAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<unsigned int>("phase", 0, "Use the Darcy velocity of this fluid phase");

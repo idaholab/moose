@@ -30,6 +30,8 @@ InputParameters validParams<PorousFlowHalfCubicSink>();
 class PorousFlowHalfCubicSink : public PorousFlowSinkPTDefiner
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowHalfCubicSink(const InputParameters & parameters);
 
 protected:

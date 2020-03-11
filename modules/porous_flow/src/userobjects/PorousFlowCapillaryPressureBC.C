@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureBC);
 
-template <>
+defineLegacyParams(PorousFlowCapillaryPressureBC);
+
 InputParameters
-validParams<PorousFlowCapillaryPressureBC>()
+PorousFlowCapillaryPressureBC::validParams()
 {
-  InputParameters params = validParams<PorousFlowCapillaryPressure>();
+  InputParameters params = PorousFlowCapillaryPressure::validParams();
   params.addRequiredParam<Real>("lambda", "Brooks-Corey exponent lambda");
   params.addRequiredRangeCheckedParam<Real>(
       "pe", "pe > 0", "Brooks-Corey entry pressure. Must be positive");

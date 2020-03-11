@@ -9,11 +9,12 @@
 
 #include "PorousFlowFluidPropertiesBase.h"
 
-template <>
+defineLegacyParams(PorousFlowFluidPropertiesBase);
+
 InputParameters
-validParams<PorousFlowFluidPropertiesBase>()
+PorousFlowFluidPropertiesBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialBase>();
+  InputParameters params = PorousFlowMaterialBase::validParams();
   MooseEnum unit_choice("Kelvin=0 Celsius=1", "Kelvin");
   params.addParam<MooseEnum>(
       "temperature_unit", unit_choice, "The unit of the temperature variable");

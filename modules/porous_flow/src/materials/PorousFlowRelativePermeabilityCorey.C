@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityCorey);
 
-template <>
+defineLegacyParams(PorousFlowRelativePermeabilityCorey);
+
 InputParameters
-validParams<PorousFlowRelativePermeabilityCorey>()
+PorousFlowRelativePermeabilityCorey::validParams()
 {
-  InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
+  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
   params.addRequiredParam<Real>("n", "The Corey exponent of the phase.");
   params.addClassDescription("This Material calculates relative permeability of the fluid phase, "
                              "using the simple Corey model ((S-S_res)/(1-sum(S_res)))^n");

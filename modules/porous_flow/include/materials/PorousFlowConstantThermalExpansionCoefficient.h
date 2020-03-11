@@ -29,6 +29,8 @@ InputParameters validParams<PorousFlowConstantThermalExpansionCoefficient>();
 class PorousFlowConstantThermalExpansionCoefficient : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowConstantThermalExpansionCoefficient(const InputParameters & parameters);
 
 protected:

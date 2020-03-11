@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowPreDis>();
 class PorousFlowPreDis : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPreDis(const InputParameters & parameters);
 
 protected:

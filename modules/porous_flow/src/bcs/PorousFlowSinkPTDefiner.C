@@ -9,11 +9,12 @@
 
 #include "PorousFlowSinkPTDefiner.h"
 
-template <>
+defineLegacyParams(PorousFlowSinkPTDefiner);
+
 InputParameters
-validParams<PorousFlowSinkPTDefiner>()
+PorousFlowSinkPTDefiner::validParams()
 {
-  InputParameters params = validParams<PorousFlowSink>();
+  InputParameters params = PorousFlowSink::validParams();
   params.addCoupledVar("PT_shift",
                        0.0,
                        "Whenever the sink is an explicit function of porepressure "

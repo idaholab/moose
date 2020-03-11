@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidStateSingleComponent);
 
-template <>
+defineLegacyParams(PorousFlowFluidStateSingleComponent);
+
 InputParameters
-validParams<PorousFlowFluidStateSingleComponent>()
+PorousFlowFluidStateSingleComponent::validParams()
 {
-  InputParameters params = validParams<PorousFlowVariableBase>();
+  InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("porepressure",
                                "Variable that is the porepressure of the liquid phase");
   params.addRequiredCoupledVar("enthalpy", "Enthalpy of the fluid");

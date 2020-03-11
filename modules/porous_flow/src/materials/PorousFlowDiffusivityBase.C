@@ -9,11 +9,12 @@
 
 #include "PorousFlowDiffusivityBase.h"
 
-template <>
+defineLegacyParams(PorousFlowDiffusivityBase);
+
 InputParameters
-validParams<PorousFlowDiffusivityBase>()
+PorousFlowDiffusivityBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "diffusion_coeff",
       "List of diffusion coefficients.  Order is i) component 0 in phase 0; ii) "

@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidState);
 
-template <>
+defineLegacyParams(PorousFlowFluidState);
+
 InputParameters
-validParams<PorousFlowFluidState>()
+PorousFlowFluidState::validParams()
 {
-  InputParameters params = validParams<PorousFlowVariableBase>();
+  InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("gas_porepressure",
                                "Variable that is the porepressure of the gas phase");
   params.addRequiredCoupledVar("z", "Total mass fraction of component i summed over all phases");

@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowRelativePermeabilityCorey>();
 class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowRelativePermeabilityCorey(const InputParameters & parameters);
 
 protected:

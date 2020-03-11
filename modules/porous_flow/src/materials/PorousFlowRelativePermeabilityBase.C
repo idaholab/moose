@@ -9,11 +9,12 @@
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
-template <>
+defineLegacyParams(PorousFlowRelativePermeabilityBase);
+
 InputParameters
-validParams<PorousFlowRelativePermeabilityBase>()
+PorousFlowRelativePermeabilityBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialBase>();
+  InputParameters params = PorousFlowMaterialBase::validParams();
   params.addRangeCheckedParam<Real>(
       "scaling", 1.0, "scaling>=0", "Relative permeability is multiplied by this factor");
   params.addRangeCheckedParam<Real>(

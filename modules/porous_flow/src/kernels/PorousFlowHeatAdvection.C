@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatAdvection);
 
-template <>
+defineLegacyParams(PorousFlowHeatAdvection);
+
 InputParameters
-validParams<PorousFlowHeatAdvection>()
+PorousFlowHeatAdvection::validParams()
 {
-  InputParameters params = validParams<PorousFlowDarcyBase>();
+  InputParameters params = PorousFlowDarcyBase::validParams();
   params.addClassDescription("Fully-upwinded heat flux, advected by the fluid");
   return params;
 }

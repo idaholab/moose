@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowHeatConduction>();
 class PorousFlowHeatConduction : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowHeatConduction(const InputParameters & parameters);
 
 protected:

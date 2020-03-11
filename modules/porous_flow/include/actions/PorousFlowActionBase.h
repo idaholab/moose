@@ -35,6 +35,8 @@ InputParameters validParams<PorousFlowActionBase>();
 class PorousFlowActionBase : public Action, public PorousFlowDependencies
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowActionBase(const InputParameters & params);
 
   virtual void act() override;

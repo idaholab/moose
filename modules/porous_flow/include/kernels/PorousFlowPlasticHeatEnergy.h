@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowPlasticHeatEnergy>();
 class PorousFlowPlasticHeatEnergy : public PlasticHeatEnergy
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPlasticHeatEnergy(const InputParameters & parameters);
 
 protected:

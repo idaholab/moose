@@ -9,11 +9,12 @@
 
 #include "PorousFlowPorosityBase.h"
 
-template <>
+defineLegacyParams(PorousFlowPorosityBase);
+
 InputParameters
-validParams<PorousFlowPorosityBase>()
+PorousFlowPorosityBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addPrivateParam<std::string>("pf_material_type", "porosity");
   params.addClassDescription("Base class Material for porosity");
   return params;

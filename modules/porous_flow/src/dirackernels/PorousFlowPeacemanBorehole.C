@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
 
-template <>
+defineLegacyParams(PorousFlowPeacemanBorehole);
+
 InputParameters
-validParams<PorousFlowPeacemanBorehole>()
+PorousFlowPeacemanBorehole::validParams()
 {
-  InputParameters params = validParams<PorousFlowLineSink>();
+  InputParameters params = PorousFlowLineSink::validParams();
   params.addRequiredParam<FunctionName>(
       "character",
       "If zero then borehole does nothing.  If positive the borehole acts as a sink "

@@ -13,11 +13,12 @@
 #include "Conversion.h"
 #include "libmesh/string_to_enum.h"
 
-template <>
+defineLegacyParams(PorousFlowSinglePhaseBase);
+
 InputParameters
-validParams<PorousFlowSinglePhaseBase>()
+PorousFlowSinglePhaseBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowActionBase>();
+  InputParameters params = PorousFlowActionBase::validParams();
   params.addParam<bool>("add_darcy_aux", true, "Add AuxVariables that record Darcy velocity");
   params.addParam<bool>("add_stress_aux", true, "Add AuxVariables that record effective stress");
   params.addParam<bool>("use_brine", false, "Use PorousFlowBrine material for the fluid phase");

@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosity);
 
-template <>
+defineLegacyParams(PorousFlowPorosity);
+
 InputParameters
-validParams<PorousFlowPorosity>()
+PorousFlowPorosity::validParams()
 {
-  InputParameters params = validParams<PorousFlowPorosityExponentialBase>();
+  InputParameters params = PorousFlowPorosityExponentialBase::validParams();
   params.addParam<bool>(
       "mechanical", false, "If true, porosity will be a function of total volumetric strain");
   params.addParam<bool>(

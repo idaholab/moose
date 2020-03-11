@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowHeatEnergy>();
 class PorousFlowHeatEnergy : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowHeatEnergy(const InputParameters & parameters);
 
 protected:

@@ -14,11 +14,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowWaterVapor);
 
-template <>
+defineLegacyParams(PorousFlowWaterVapor);
+
 InputParameters
-validParams<PorousFlowWaterVapor>()
+PorousFlowWaterVapor::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidStateSingleComponentBase>();
+  InputParameters params = PorousFlowFluidStateSingleComponentBase::validParams();
   params.addRequiredParam<UserObjectName>("water_fp", "The name of the user object for water");
   params.addClassDescription("Fluid state class for water and vapor");
   return params;

@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowDispersiveFlux>();
 class PorousFlowDispersiveFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDispersiveFlux(const InputParameters & parameters);
 
 protected:

@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDesorpedMassVolumetricExpansion);
 
-template <>
+defineLegacyParams(PorousFlowDesorpedMassVolumetricExpansion);
+
 InputParameters
-validParams<PorousFlowDesorpedMassVolumetricExpansion>()
+PorousFlowDesorpedMassVolumetricExpansion::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRequiredCoupledVar(

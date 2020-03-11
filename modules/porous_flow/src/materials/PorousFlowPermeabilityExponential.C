@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityExponential);
 
-template <>
+defineLegacyParams(PorousFlowPermeabilityExponential);
+
 InputParameters
-validParams<PorousFlowPermeabilityExponential>()
+PorousFlowPermeabilityExponential::validParams()
 {
-  InputParameters params = validParams<PorousFlowPermeabilityBase>();
+  InputParameters params = PorousFlowPermeabilityBase::validParams();
   MooseEnum poroperm_function("log_k ln_k exp_k", "exp_k");
   params.addParam<MooseEnum>("poroperm_function",
                              poroperm_function,

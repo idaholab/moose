@@ -10,11 +10,12 @@
 #include "PorousFlowMaterialBase.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(PorousFlowMaterialBase);
+
 InputParameters
-validParams<PorousFlowMaterialBase>()
+PorousFlowMaterialBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterial>();
+  InputParameters params = PorousFlowMaterial::validParams();
   params.addRequiredParam<unsigned int>("phase", "The phase number");
   params.addClassDescription("Base class for PorousFlow materials");
   return params;

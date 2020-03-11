@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFluxCalculatorSaturatedHeat);
 
-template <>
+defineLegacyParams(PorousFlowAdvectiveFluxCalculatorSaturatedHeat);
+
 InputParameters
-validParams<PorousFlowAdvectiveFluxCalculatorSaturatedHeat>()
+PorousFlowAdvectiveFluxCalculatorSaturatedHeat::validParams()
 {
-  InputParameters params = validParams<PorousFlowAdvectiveFluxCalculatorSaturated>();
+  InputParameters params = PorousFlowAdvectiveFluxCalculatorSaturated::validParams();
   params.addClassDescription(
       "Computes the advective flux of heat energy in the given phase, assuming fully-saturated "
       "conditions.  Hence this UserObject is only relevant to single-phase situations.  "

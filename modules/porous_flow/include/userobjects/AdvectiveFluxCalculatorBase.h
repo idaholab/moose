@@ -33,6 +33,8 @@ InputParameters validParams<AdvectiveFluxCalculatorBase>();
 class AdvectiveFluxCalculatorBase : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   AdvectiveFluxCalculatorBase(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

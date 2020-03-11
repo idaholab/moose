@@ -22,6 +22,8 @@ InputParameters validParams<PorousFlowExponentialDecay>();
 class PorousFlowExponentialDecay : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowExponentialDecay(const InputParameters & parameters);
 
 protected:

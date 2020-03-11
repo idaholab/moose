@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", AdvectiveFluxCalculatorConstantVelocity);
 
-template <>
+defineLegacyParams(AdvectiveFluxCalculatorConstantVelocity);
+
 InputParameters
-validParams<AdvectiveFluxCalculatorConstantVelocity>()
+AdvectiveFluxCalculatorConstantVelocity::validParams()
 {
-  InputParameters params = validParams<AdvectiveFluxCalculatorBase>();
+  InputParameters params = AdvectiveFluxCalculatorBase::validParams();
   params.addClassDescription(
       "Compute K_ij (a measure of advective flux from node i to node j) "
       "and R+ and R- (which quantify amount of antidiffusion to add) in the "

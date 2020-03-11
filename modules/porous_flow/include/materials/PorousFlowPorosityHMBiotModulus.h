@@ -28,6 +28,8 @@ InputParameters validParams<PorousFlowPorosityHMBiotModulus>();
 class PorousFlowPorosityHMBiotModulus : public PorousFlowPorosity
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPorosityHMBiotModulus(const InputParameters & parameters);
 
 protected:

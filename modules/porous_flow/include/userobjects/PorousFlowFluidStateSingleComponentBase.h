@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowFluidStateSingleComponentBase>();
 class PorousFlowFluidStateSingleComponentBase : public PorousFlowFluidStateBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateSingleComponentBase(const InputParameters & parameters);
 
   /**

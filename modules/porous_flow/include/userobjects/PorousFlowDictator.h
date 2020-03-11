@@ -71,6 +71,8 @@ InputParameters validParams<PorousFlowDictator>();
 class PorousFlowDictator : public GeneralUserObject, public Coupleable
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDictator(const InputParameters & parameters);
 
   virtual void initialize() override{};

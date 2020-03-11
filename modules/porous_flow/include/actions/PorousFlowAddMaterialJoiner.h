@@ -24,6 +24,8 @@ class PorousFlowAddMaterialJoiner : public Action
 {
 
 public:
+  static InputParameters validParams();
+
   PorousFlowAddMaterialJoiner(const InputParameters & params);
 
   virtual void act() override;

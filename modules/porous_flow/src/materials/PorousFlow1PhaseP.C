@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlow1PhaseP);
 
-template <>
+defineLegacyParams(PorousFlow1PhaseP);
+
 InputParameters
-validParams<PorousFlow1PhaseP>()
+PorousFlow1PhaseP::validParams()
 {
-  InputParameters params = validParams<PorousFlowVariableBase>();
+  InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("porepressure",
                                "Variable that represents the porepressure of the single phase");
   params.addRequiredParam<UserObjectName>("capillary_pressure",

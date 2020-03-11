@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowFluidStateMultiComponentBase>();
 class PorousFlowFluidStateMultiComponentBase : public PorousFlowFluidStateFlash
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateMultiComponentBase(const InputParameters & parameters);
 
   /**

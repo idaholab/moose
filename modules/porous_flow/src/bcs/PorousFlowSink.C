@@ -17,11 +17,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowSink);
 
-template <>
+defineLegacyParams(PorousFlowSink);
+
 InputParameters
-validParams<PorousFlowSink>()
+PorousFlowSink::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<unsigned int>("fluid_phase",

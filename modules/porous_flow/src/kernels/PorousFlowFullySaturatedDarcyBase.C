@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedDarcyBase);
 
-template <>
+defineLegacyParams(PorousFlowFullySaturatedDarcyBase);
+
 InputParameters
-validParams<PorousFlowFullySaturatedDarcyBase>()
+PorousFlowFullySaturatedDarcyBase::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
   params.addParam<bool>("multiply_by_density",

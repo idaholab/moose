@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityConst);
 
-template <>
+defineLegacyParams(PorousFlowRelativePermeabilityConst);
+
 InputParameters
-validParams<PorousFlowRelativePermeabilityConst>()
+PorousFlowRelativePermeabilityConst::validParams()
 {
-  InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
+  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
   params.addParam<Real>("kr", 1.0, "Relative permeability");
   params.addClassDescription(
       "This class sets the relative permeability to a constant value (default = 1)");

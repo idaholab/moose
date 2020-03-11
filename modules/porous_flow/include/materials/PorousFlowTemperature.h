@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowTemperature>();
 class PorousFlowTemperature : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowTemperature(const InputParameters & parameters);
 
 protected:

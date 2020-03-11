@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowSumQuantity);
 
-template <>
+defineLegacyParams(PorousFlowSumQuantity);
+
 InputParameters
-validParams<PorousFlowSumQuantity>()
+PorousFlowSumQuantity::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Records total mass flowing into a borehole");
   return params;
 }

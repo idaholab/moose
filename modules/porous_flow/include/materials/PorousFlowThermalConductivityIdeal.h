@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowThermalConductivityIdeal>();
 class PorousFlowThermalConductivityIdeal : public PorousFlowThermalConductivityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowThermalConductivityIdeal(const InputParameters & parameters);
 
 protected:

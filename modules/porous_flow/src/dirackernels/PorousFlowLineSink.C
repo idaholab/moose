@@ -10,11 +10,12 @@
 #include "PorousFlowLineSink.h"
 #include "libmesh/utility.h"
 
-template <>
+defineLegacyParams(PorousFlowLineSink);
+
 InputParameters
-validParams<PorousFlowLineSink>()
+PorousFlowLineSink::validParams()
 {
-  InputParameters params = validParams<PorousFlowLineGeometry>();
+  InputParameters params = PorousFlowLineGeometry::validParams();
   MooseEnum p_or_t_choice("pressure=0 temperature=1", "pressure");
   params.addParam<MooseEnum>("function_of",
                              p_or_t_choice,
