@@ -53,7 +53,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _binary(getParam<bool>("binary")),
     _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
-    _mesh_meta_data(_app.getMeshMetaData()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
 }
@@ -100,8 +99,6 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   curr_file_struct.checkpoint = current_file + getMeshFileSuffix(_binary);
   curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
   curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
-  curr_file_struct.restart_mesh_meta_data = current_file + MeshMetaDataInterface::FILE_SUFFIX +
-                                            _restartable_data_io.getRestartableDataExt();
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -116,9 +113,21 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
 
   // Write out the restartable mesh meta data if there is any (only on processor zero)
-  if (processor_id() == 0 && !_mesh_meta_data.empty())
-    _restartable_data_io.writeRestartableData(curr_file_struct.restart_mesh_meta_data,
-                                              _mesh_meta_data);
+  if (processor_id() == 0)
+  {
+    for (auto map_iter = _app.getRestartableDataMapBegin();
+         map_iter != _app.getRestartableDataMapEnd();
+         ++map_iter)
+    {
+      const RestartableDataMap & meta_data = map_iter->second.first;
+      const std::string & suffix = map_iter->second.second;
+      const std::string filename(current_file + suffix +
+                                 _restartable_data_io.getRestartableDataExt());
+
+      curr_file_struct.restart_meta_data.push_back(filename);
+      _restartable_data_io.writeRestartableData(filename, meta_data);
+    }
+  }
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -166,8 +175,8 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 
     if (proc_id == 0)
     {
-      const auto & file_name = delete_files.restart_mesh_meta_data;
-      remove(file_name.c_str());
+      for (const auto & file_name : delete_files.restart_meta_data)
+        remove(file_name.c_str());
       // This file may not exist so don't worry about checking for success
     }
 
