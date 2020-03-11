@@ -212,8 +212,8 @@ Notes:
 ### NCP-LM-Mortar vs Penalty-NodeFace
 
 The table below compares the timing and solver performance of
-[NCP-LM-Mortar](/frictional_lm.i) and
-[Penalty-NodeFace](/frictional_04_penalty.i) algorithms. NCP-LM refers to use of an
+[NCP-LM-Mortar](/in_and_out/constraint/frictional_lm.i) and
+[Penalty-NodeFace](/in_and_out/constraint/frictional_04_penalty.i) algorithms. NCP-LM refers to use of an
 NCP function for contact constraint enforcement on a lagrange multiplier. The
 "Mortar" designation denotes that a mortar discretization is used for enforcing
 the tangential Coulomb friction conditions and applying contact forces to the
