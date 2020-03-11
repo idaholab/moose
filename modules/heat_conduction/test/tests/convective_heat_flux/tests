@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#11631'
+  design = 'ConvectiveHeatFluxBC.md'
+  [./g]
+    requirement = 'The system shall provide a convective flux boundary condition which uses material properties as heat transfer coefficients and far-field temperature values'
+    [./flux]
+      type = 'CSVDiff'
+      input = 'flux.i'
+      csvdiff = 'flux_out.csv'
+      detail = 'and match hand calculations for flux through a boundary.'
+    [../]
+    [./equilibrium]
+      type = 'CSVDiff'
+      input = 'equilibrium.i'
+      csvdiff = 'equilibrium_out.csv'
+      detail = 'and approach a constant far-field temperature value over time as heat flux decreases.'
+    [../]
+    [./coupled]
+      type = 'CSVDiff'
+      input = 'coupled.i'
+      csvdiff = 'coupled_out.csv'
+      detail = 'and couple a temperature dependent far-field temperature and heat transfer coefficient.'
+    [../]
+  [../]
+[]

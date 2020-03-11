@@ -34,7 +34,7 @@ protected:
 
   /// The number of components
   unsigned int _n_components;
-  /// Far-field temperatue fields for each component
+  /// Far-field temperature fields for each component
   std::vector<const VariableValue *> _T_infinity;
   /// Convective heat transfer coefficient
   std::vector<const VariableValue *> _htc;
