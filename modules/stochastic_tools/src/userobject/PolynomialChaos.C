@@ -189,6 +189,44 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
   return val;
 }
 
+Real
+PolynomialChaos::computeDerivative(const unsigned int dim, const std::vector<Real> x) const
+{
+  return computePartialDerivative({dim}, x);
+}
+
+Real
+PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> dim,
+                                          const std::vector<Real> x) const
+{
+  mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
+
+  std::vector<unsigned int> grad(_ndim);
+  for (auto d : dim)
+  {
+    mooseAssert(d < _ndim, "Specified dimension is greater than total number of parameters.");
+    grad[d]++;
+  }
+
+  DenseMatrix<Real> poly_val(_ndim, _order);
+
+  // Evaluate polynomials to avoid duplication
+  for (unsigned int d = 0; d < _ndim; ++d)
+    for (unsigned int i = 0; i < _order; ++i)
+      poly_val(d, i) = _poly[d]->computeDerivative(i, x[d], grad[d]);
+
+  Real val = 0;
+  for (unsigned int i = 0; i < _ncoeff; ++i)
+  {
+    Real tmp = _coeff[i];
+    for (unsigned int d = 0; d < _ndim; ++d)
+      tmp *= poly_val(d, _tuple[i][d]);
+    val += tmp;
+  }
+
+  return val;
+}
+
 std::vector<std::vector<unsigned int>>
 PolynomialChaos::generateTuple(const unsigned int ndim, const unsigned int order)
 {
