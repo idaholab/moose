@@ -28,9 +28,6 @@ class MeshGenerator;
 class MeshMetaDataInterface
 {
 public:
-  /// The suffix appended when writing the restartable data file.
-  static constexpr auto FILE_SUFFIX = "_mesh";
-
   /// The system name used when initializing the Restartable interface
   static constexpr auto SYSTEM = "MeshMetaData";
 

@@ -46,7 +46,7 @@ public:
 protected:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
-  /// Vector postprocessor of the results from peturbing the model with _sampler
+  /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue & _values;
   /// Total number of parameters/dimensions
   unsigned int _ndim;

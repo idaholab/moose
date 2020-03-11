@@ -15,7 +15,7 @@
 #include "MooseObjectAction.h"
 
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
-registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_mesh_meta_data");
+registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_meta_data");
 
 defineLegacyParams(SetupRecoverFileBaseAction);
 
@@ -33,8 +33,8 @@ SetupRecoverFileBaseAction::act()
 {
   // Even during a normal run, we still need to check integrity of the data store to make
   // sure that all requested properties have been declared.
-  if (_current_task == "recover_mesh_meta_data")
-    _app.checkMeshMetaDataIntegrity();
+  if (_current_task == "recover_meta_data")
+    _app.checkMetaDataIntegrity();
 
   // Do nothing if the App is not recovering
   // Don't look for a checkpoint file unless we're the ultimate master app
@@ -49,14 +49,19 @@ SetupRecoverFileBaseAction::act()
     // Set the recover file base in the App
     mooseInfo("Using ", _app.getRestartRecoverFileBase(), " for recovery.");
   }
-  else // recover_mesh_meta_data
+  else // recover_meta_data
   {
     // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
     // generators have run.
-
     RestartableDataIO restartable(_app);
-
-    if (restartable.readRestartableDataHeader(false, MeshMetaDataInterface::FILE_SUFFIX))
-      restartable.readRestartableData(_app.getMeshMetaData(), DataNames());
+    for (auto map_iter = _app.getRestartableDataMapBegin();
+         map_iter != _app.getRestartableDataMapEnd();
+         ++map_iter)
+    {
+      const RestartableDataMap & meta_data = map_iter->second.first;
+      const std::string & suffix = map_iter->second.second;
+      if (restartable.readRestartableDataHeader(false, suffix))
+        restartable.readRestartableData(meta_data, DataNames());
+    }
   }
 }
