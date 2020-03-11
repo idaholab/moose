@@ -9,6 +9,7 @@
 
 #include "ExternalPETScProblem.h"
 #include "SystemBase.h"
+#include "libmesh/petsc_vector.h"
 
 registerMooseObject("ExternalPetscSolverApp", ExternalPETScProblem);
 
@@ -29,11 +30,9 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
     _petsc_app(static_cast<ExternalPetscSolverApp &>(_app))
 #if LIBMESH_HAVE_PETSC
     ,
-    _ts(_petsc_app.getExternalPETScTS())
+    _ts(_petsc_app.getExternalPETScTS()),
+    _petsc_sol(_petsc_app.getExternalPETScTSSolution())
 {
-  DM da;
-  TSGetDM(_ts, &da);
-  DMCreateGlobalVector(da, &_petsc_sol);
   FormInitialSolution(_ts, _petsc_sol, NULL);
 }
 #else
