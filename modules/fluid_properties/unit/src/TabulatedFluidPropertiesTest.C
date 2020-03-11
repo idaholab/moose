@@ -33,7 +33,7 @@ TEST_F(TabulatedFluidPropertiesTest, unorderedData)
   }
 }
 
-// Test data for different temperatues ranges in pressure data
+// Test data for different temperatures ranges in pressure data
 TEST_F(TabulatedFluidPropertiesTest, unequalTemperatures)
 {
   try
