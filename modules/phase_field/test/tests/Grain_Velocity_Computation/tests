@@ -1,0 +1,11 @@
+[Tests]
+  [./GrainBoundaryVelocityTest]
+    type = 'Exodiff'
+    input = 'GrainBoundaryVelocityTest.i'
+    exodiff = 'GrainBoundaryVelocityTest_out.e'
+
+    issues = '#14887'
+    design = 'GrainBoundaryVelocity.md'
+    requirement = 'We will be able to visualize the velocity in the simulation.'
+  [../]
+[]
