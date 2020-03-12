@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+/// Enum used to select contact model type
 enum class ContactModel
 {
   FRICTIONLESS,
@@ -20,6 +21,7 @@ enum class ContactModel
   COULOMB,
 };
 
+/// Enum used to select contact formulation
 enum class ContactFormulation
 {
   RANFS,
@@ -30,6 +32,11 @@ enum class ContactFormulation
   MORTAR
 };
 
+/**
+ * Action class for creating constraints, kernels, and user objects necessary for mechanical
+ * contact.
+ *
+ */
 class ContactAction;
 
 template <>
@@ -47,25 +54,34 @@ public:
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
-  static MooseEnum getModelEnum();
-  static MooseEnum getFormulationEnum();
-  static MooseEnum getSystemEnum();
-  static MooseEnum getSmoothingEnum();
+  static MooseEnum getModelEnum();       ///< Get contact model enum
+  static MooseEnum getFormulationEnum(); ///< Get contact formulation enum
+  static MooseEnum getSystemEnum();      ///< Get contact system enum
+  static MooseEnum getSmoothingEnum();   ///< Get smoothing type enum
 
   static InputParameters commonParameters();
 
 protected:
+  /// Master boundary name for mechanical contact
   const BoundaryName _master;
+  /// Slave boundary name for mechanical contact
   const BoundaryName _slave;
+  /// Contact model type enum
   const MooseEnum _model;
+  /// Contact formulation type enum
   const MooseEnum _formulation;
+  /// Contact system type enum
   const MooseEnum _system;
+  /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
 
 private:
+  /// Action core that generates mesh and other Moose objects for Mortar contact
   void addMortarContact();
+  /// Action core that generates constraints for node to face contact
   void addNodeFaceContact();
+  /// Action core that generates Dirac kernels for mechanical contact
   void addDiracContact();
-
+  /// Get displacement variable names
   std::vector<VariableName> getDisplacementVarNames();
 };
