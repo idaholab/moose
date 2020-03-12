@@ -11,12 +11,6 @@
 
 #include "ADAllenCahnBase.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADAllenCahn;
-
-declareADValidParams(ADAllenCahn);
-
 /**
  * ADAllenCahn uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to computer the
@@ -38,4 +32,3 @@ protected:
 
   usingAllenCahnBaseMembers(Real);
 };
-

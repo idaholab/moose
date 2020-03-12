@@ -15,7 +15,7 @@ template <ComputeStage compute_stage>
 InputParameters
 ADGrainGrowthBase<compute_stage>::validParams()
 {
-  InputParameters params = ADAllenCahnBase<compute_stage>::validParams();
+  InputParameters params = ADAllenCahnBase<compute_stage, Real>::validParams();
   params.addRequiredCoupledVar("v",
                                "Array of coupled order parameter names for other order parameters");
   return params;
