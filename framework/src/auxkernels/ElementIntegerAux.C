@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", ElementIntegerAux);
 
-template <>
+defineLegacyParams(ElementIntegerAux);
+
 InputParameters
-validParams<ElementIntegerAux>()
+ElementIntegerAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates a field showing the element integer.");
   params.addParam<std::vector<ExtraElementIDName>>("integer_names",
                                                    "Element integers to be retrieved");

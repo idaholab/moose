@@ -16,12 +16,6 @@
   using ADMatDiffusionBase<compute_stage, T>::_diffusivity;                                        \
   using ADMatDiffusionBase<compute_stage, T>::_grad_v
 
-// Forward declarations
-template <ComputeStage compute_stage, typename T = void>
-class ADMatDiffusionBase;
-
-declareADValidParams(ADMatDiffusionBase);
-
 /**
  * This class template implements a diffusion kernel with a mobility that can vary
  * spatially and can depend on variables in the simulation. Two classes are derived from
@@ -35,21 +29,9 @@ template <ComputeStage compute_stage, typename T>
 class ADMatDiffusionBase : public ADKernelGrad<compute_stage>
 {
 public:
-  ADMatDiffusionBase(const InputParameters & parameters);
+  static InputParameters validParams();
 
-  static InputParameters validParams()
-  {
-    InputParameters params = ADKernelGrad<compute_stage>::validParams();
-    params.addClassDescription("Diffusion kernel with a material property as diffusivity and "
-                               "automatic differentiation to provide perfect Jacobians");
-    params.addParam<MaterialPropertyName>(
-        "diffusivity", "D", "The diffusivity value or material property");
-    params.addCoupledVar("v",
-                         "Coupled concentration variable for kernel to operate on; if this "
-                         "is not specified, the kernel's nonlinear variable will be used as "
-                         "usual");
-    return params;
-  }
+  ADMatDiffusionBase(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
@@ -76,4 +58,20 @@ ADRealVectorValue
 ADMatDiffusionBase<compute_stage, T>::precomputeQpResidual()
 {
   return _diffusivity[_qp] * _grad_v[_qp];
+}
+
+template <ComputeStage compute_stage, typename T>
+InputParameters
+ADMatDiffusionBase<compute_stage, T>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription("Diffusion kernel with a material property as diffusivity and "
+                             "automatic differentiation to provide perfect Jacobians");
+  params.addParam<MaterialPropertyName>(
+      "diffusivity", "D", "The diffusivity value or material property");
+  params.addCoupledVar("v",
+                       "Coupled concentration variable for kernel to operate on; if this "
+                       "is not specified, the kernel's nonlinear variable will be used as "
+                       "usual");
+  return params;
 }

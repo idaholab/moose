@@ -24,6 +24,8 @@ InputParameters validParams<PiecewiseLinearBase>();
 class PiecewiseLinearBase : public PiecewiseBase
 {
 public:
+  static InputParameters validParams();
+
   PiecewiseLinearBase(const InputParameters & parameters);
 
   virtual void initialSetup() override;

@@ -18,9 +18,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineADBaseValidParams(ADNodalBC, NodalBCBase, );
-defineADBaseValidParams(ADVectorNodalBC, NodalBCBase, );
-
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADNodalBCTempl<T, compute_stage>::validParams()

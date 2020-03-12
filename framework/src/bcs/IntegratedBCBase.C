@@ -10,12 +10,7 @@
 #include "IntegratedBCBase.h"
 #include "Assembly.h"
 
-template <>
-InputParameters
-validParams<IntegratedBCBase>()
-{
-  return IntegratedBCBase::validParams();
-}
+defineLegacyParams(IntegratedBCBase);
 
 InputParameters
 IntegratedBCBase::validParams()

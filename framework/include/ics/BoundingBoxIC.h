@@ -14,9 +14,6 @@
 // Forward Declarations
 class BoundingBoxIC;
 
-template <typename T>
-InputParameters validParams();
-
 template <>
 InputParameters validParams<BoundingBoxIC>();
 

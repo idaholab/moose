@@ -25,5 +25,7 @@ InputParameters validParams<CoarsenedPiecewiseLinear>();
 class CoarsenedPiecewiseLinear : public PiecewiseLinearBase
 {
 public:
+  static InputParameters validParams();
+
   CoarsenedPiecewiseLinear(const InputParameters & parameters);
 };
