@@ -67,6 +67,10 @@ public:
   Real computePartialDerivative(const std::vector<unsigned int> dim,
                                 const std::vector<Real> x) const;
 
+  /// Computes Sobol sensitivities S_{i_1,i_2,...,i_s}, where ind = i_1,i_2,...,i_s
+  Real computeSobolIndex(const std::set<unsigned int> ind) const;
+  Real computeSobolTotal(const unsigned int dim) const;
+
 protected:
   /**
    * Function computing for computing _tuple
@@ -93,4 +97,11 @@ protected:
   std::vector<Real> _coeff;
   /// The distributions used for sampling
   std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> _poly;
+
+  /// Utility for looping over coefficients in parallel
+  ///@{
+  dof_id_type _n_local_coeff;
+  dof_id_type _st_local_coeff;
+  dof_id_type _end_local_coeff;
+  ///@}
 };
