@@ -153,4 +153,3 @@ private:
   /// Indicates whether the current evaluation is expansion or generation
   bool _is_generation;
 };
-

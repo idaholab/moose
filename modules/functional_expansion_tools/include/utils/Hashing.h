@@ -91,4 +91,3 @@ hashCombine(Real time, const libMesh::Point & point)
   return seed;
 }
 }
-
