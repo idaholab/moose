@@ -25,5 +25,14 @@ Most of the tests and examples are drawn from [!cite](bethke_2007)
 - [Langmuir sorption of selenate in loamy soil](selenate.md)
 - [A problem involving surface complexation](surface_complexation.md)
 
+## Tasks involving reaction balancing
+
+- [Reactions in terms of different components](reaction_balancing.md)
+- [Equilibrium activity ratios](activity_ratios.md)
+- [Equilibrium temperature or activity](eqm_temp_a.md)
+
+## Nonunique solutions
+
+- [Models that exhibit nonunique solutions](non_unique.md)
 
 !bibtex bibliography
