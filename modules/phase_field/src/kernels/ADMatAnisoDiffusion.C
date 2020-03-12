@@ -17,7 +17,7 @@ template <ComputeStage compute_stage>
 InputParameters
 ADMatAnisoDiffusion<compute_stage>::validParams()
 {
-  InputParameters params = ADMatDiffusionBase<compute_stage>::validParams();
+  InputParameters params = ADMatDiffusionBase<compute_stage, RealTensorValue>::validParams();
   params.addClassDescription("Diffusion equation kernel that takes an anisotropic diffusivity "
                              "from a material property");
   return params;

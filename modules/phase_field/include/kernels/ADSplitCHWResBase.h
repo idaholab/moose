@@ -59,3 +59,14 @@ ADSplitCHWResBase<compute_stage, T>::precomputeQpResidual()
 {
   return _mob[_qp] * _grad_u[_qp];
 }
+
+template <ComputeStage compute_stage, typename T>
+InputParameters
+ADSplitCHWResBase<compute_stage, T>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription(
+      "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
+  params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
+  return params;
+}
