@@ -22,7 +22,10 @@ SurrogateModel::validParams()
   params.addRequiredParam<SamplerName>("training_sampler",
                                        "Training set defined by a sampler object.");
   params.addRequiredParam<VectorPostprocessorName>(
-      "stochastic_results", "Vectorpostprocessor with results of samples created by trainer");
+      "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
+  params.addRequiredParam<std::string>(
+      "results_vector",
+      "Name of vector from vectorpostprocessor with results of samples created by trainer");
 
   params.registerBase("SurrogateModel");
   return params;
@@ -32,8 +35,7 @@ SurrogateModel::SurrogateModel(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     SamplerInterface(this),
     _sampler(nullptr),
-    _values(getVectorPostprocessorValue("stochastic_results",
-                                        getParam<SamplerName>("training_sampler")))
+    _values(getVectorPostprocessorValue("results_vpp", getParam<std::string>("results_vector")))
 {
 }
 

@@ -85,7 +85,8 @@
     order = 5
     distributions = 'D_dist S_dist'
     training_sampler = sample
-    stochastic_results = storage
+    results_vpp = storage
+    results_vector = sample
   []
 []
 
