@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseTestApp", SamplerTester);
 
-template <>
+defineLegacyParams(SamplerTester);
+
 InputParameters
-validParams<SamplerTester>()
+SamplerTester::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
   MooseEnum test_type(
