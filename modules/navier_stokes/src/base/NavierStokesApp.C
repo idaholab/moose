@@ -15,11 +15,12 @@
 #include "FluidPropertiesApp.h"
 #include "HeatConductionApp.h"
 
-template <>
+defineLegacyParams(NavierStokesApp);
+
 InputParameters
-validParams<NavierStokesApp>()
+NavierStokesApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
 
   params.set<bool>("automatic_automatic_scaling") = false;
 

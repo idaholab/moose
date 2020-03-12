@@ -24,6 +24,8 @@ InputParameters validParams<RichardsDensity>();
 class RichardsDensity : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensity(const InputParameters & parameters);
 
   void initialize();

@@ -17,6 +17,8 @@
 class Density : public Material
 {
 public:
+  static InputParameters validParams();
+
   Density(const InputParameters & params);
 
 protected:

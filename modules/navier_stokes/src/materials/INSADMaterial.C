@@ -12,30 +12,34 @@
 
 registerADMooseObject("NavierStokesApp", INSADMaterial);
 
-defineADValidParams(
-    INSADMaterial,
-    ADMaterial,
-    params.addClassDescription("This is the material class used to compute some of the strong "
-                               "residuals for the INS equations.");
-    params.addRequiredCoupledVar("velocity", "The velocity");
-    params.addRequiredCoupledVar("pressure", "The pressure");
-    params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
-    params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-    params.addParam<bool>("transient_term",
-                          true,
-                          "Whether there should be a transient term in the momentum residuals.");
-    params.addParam<bool>("integrate_p_by_parts",
-                          true,
-                          "Whether to integrate the pressure by parts");
-    params.addParam<bool>("include_viscous_term_in_strong_form",
-                          false,
-                          "Whether to include the strong form of the viscous term in the momentum "
-                          "equation strong residual. The method is more consistent if set to true, "
-                          "but it incurs quite a bit more computational expense");
-    params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-    params.addParam<FunctionName>("function_x", 0, "The x-velocity mms forcing function.");
-    params.addParam<FunctionName>("function_y", 0, "The y-velocity mms forcing function.");
-    params.addParam<FunctionName>("function_z", 0, "The z-velocity mms forcing function."););
+defineADLegacyParams(INSADMaterial);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMaterial<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("This is the material class used to compute some of the strong "
+                             "residuals for the INS equations.");
+  params.addRequiredCoupledVar("velocity", "The velocity");
+  params.addRequiredCoupledVar("pressure", "The pressure");
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addParam<bool>("transient_term",
+                        true,
+                        "Whether there should be a transient term in the momentum residuals.");
+  params.addParam<bool>("integrate_p_by_parts", true, "Whether to integrate the pressure by parts");
+  params.addParam<bool>("include_viscous_term_in_strong_form",
+                        false,
+                        "Whether to include the strong form of the viscous term in the momentum "
+                        "equation strong residual. The method is more consistent if set to true, "
+                        "but it incurs quite a bit more computational expense");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  params.addParam<FunctionName>("function_x", 0, "The x-velocity mms forcing function.");
+  params.addParam<FunctionName>("function_y", 0, "The y-velocity mms forcing function.");
+  params.addParam<FunctionName>("function_z", 0, "The z-velocity mms forcing function.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)

@@ -23,6 +23,8 @@ InputParameters validParams<MeshGeneratorPD>();
 class MeshGeneratorPD : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   MeshGeneratorPD(const InputParameters & parameters);
 
   /**

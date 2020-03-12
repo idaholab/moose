@@ -26,6 +26,8 @@ InputParameters validParams<EnthalpyAux>();
 class EnthalpyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   EnthalpyAux(const InputParameters & parameters);
 
 protected:

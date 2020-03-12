@@ -25,6 +25,8 @@ InputParameters validParams<RichardsSatPrimeAux>();
 class RichardsSatPrimeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsSatPrimeAux(const InputParameters & parameters);
 
 protected:

@@ -28,6 +28,8 @@ class AverageGrainVolume : public GeneralPostprocessor,
                            public MooseVariableDependencyInterface
 {
 public:
+  static InputParameters validParams();
+
   AverageGrainVolume(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void execute() override;

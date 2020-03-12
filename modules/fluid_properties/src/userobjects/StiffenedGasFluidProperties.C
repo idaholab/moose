@@ -11,12 +11,13 @@
 
 registerMooseObject("FluidPropertiesApp", StiffenedGasFluidProperties);
 
-template <>
+defineLegacyParams(StiffenedGasFluidProperties);
+
 InputParameters
-validParams<StiffenedGasFluidProperties>()
+StiffenedGasFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
-  params += validParams<NaNInterface>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
+  params += NaNInterface::validParams();
   params.addParam<bool>(
       "allow_nonphysical_states", true, "Allows for non-physical states, e.g., negative density.");
   params.addRequiredParam<Real>("gamma", "Heat capacity ratio");

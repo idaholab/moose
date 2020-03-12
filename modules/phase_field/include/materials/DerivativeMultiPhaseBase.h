@@ -26,6 +26,8 @@ InputParameters validParams<DerivativeMultiPhaseBase>();
 class DerivativeMultiPhaseBase : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   DerivativeMultiPhaseBase(const InputParameters & parameters);
 
   virtual void initialSetup();

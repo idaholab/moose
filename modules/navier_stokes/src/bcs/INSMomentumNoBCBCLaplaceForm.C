@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumNoBCBCLaplaceForm);
 
-template <>
+defineLegacyParams(INSMomentumNoBCBCLaplaceForm);
+
 InputParameters
-validParams<INSMomentumNoBCBCLaplaceForm>()
+INSMomentumNoBCBCLaplaceForm::validParams()
 {
-  InputParameters params = validParams<INSMomentumNoBCBCBase>();
+  InputParameters params = INSMomentumNoBCBCBase::validParams();
 
   params.addClassDescription("This class implements the 'No BC' boundary condition based on the "
                              "'Laplace' form of the viscous stress tensor.");

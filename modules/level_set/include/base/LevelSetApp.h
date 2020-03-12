@@ -11,14 +11,11 @@
 
 #include "MooseApp.h"
 
-class LevelSetApp;
-
-template <>
-InputParameters validParams<LevelSetApp>();
-
 class LevelSetApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   LevelSetApp(InputParameters parameters);
 
   static void registerApps();

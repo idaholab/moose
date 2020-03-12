@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowFluidPropertiesBase>();
 class PorousFlowFluidPropertiesBase : public PorousFlowMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidPropertiesBase(const InputParameters & parameters);
 
 protected:

@@ -18,6 +18,8 @@
 class XFEMCutPlaneAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   XFEMCutPlaneAux(const InputParameters & parameters);
 
   virtual ~XFEMCutPlaneAux() {}

@@ -17,11 +17,12 @@
 
 registerMooseObject("ContactApp", SparsityBasedContactConstraint);
 
-template <>
+defineLegacyParams(SparsityBasedContactConstraint);
+
 InputParameters
-validParams<SparsityBasedContactConstraint>()
+SparsityBasedContactConstraint::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   return params;
 }
 

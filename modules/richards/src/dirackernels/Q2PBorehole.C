@@ -12,11 +12,12 @@
 
 registerMooseObject("RichardsApp", Q2PBorehole);
 
-template <>
+defineLegacyParams(Q2PBorehole);
+
 InputParameters
-validParams<Q2PBorehole>()
+Q2PBorehole::validParams()
 {
-  InputParameters params = validParams<PeacemanBorehole>();
+  InputParameters params = PeacemanBorehole::validParams();
   params.addRequiredParam<UserObjectName>(
       "fluid_density",
       "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");

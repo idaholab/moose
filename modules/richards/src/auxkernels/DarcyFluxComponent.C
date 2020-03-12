@@ -11,12 +11,13 @@
 
 registerMooseObject("RichardsApp", DarcyFluxComponent);
 
-template <>
+defineLegacyParams(DarcyFluxComponent);
+
 InputParameters
-validParams<DarcyFluxComponent>()
+DarcyFluxComponent::validParams()
 {
   MooseEnum component("x=0 y=1 z=2");
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<RealVectorValue>(
       "fluid_weight",
       "Fluid weight (gravity*density) as a vector pointing downwards (usually "

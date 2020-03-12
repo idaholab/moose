@@ -25,6 +25,8 @@ InputParameters validParams<ForceDensityMaterial>();
 class ForceDensityMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ForceDensityMaterial(const InputParameters & parameters);
 
 protected:

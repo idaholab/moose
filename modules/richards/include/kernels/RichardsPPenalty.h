@@ -24,6 +24,8 @@ InputParameters validParams<RichardsPPenalty>();
 class RichardsPPenalty : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsPPenalty(const InputParameters & parameters);
 
 protected:

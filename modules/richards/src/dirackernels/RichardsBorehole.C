@@ -12,11 +12,12 @@
 
 registerMooseObject("RichardsApp", RichardsBorehole);
 
-template <>
+defineLegacyParams(RichardsBorehole);
+
 InputParameters
-validParams<RichardsBorehole>()
+RichardsBorehole::validParams()
 {
-  InputParameters params = validParams<PeacemanBorehole>();
+  InputParameters params = PeacemanBorehole::validParams();
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addParam<std::vector<UserObjectName>>("relperm_UO",

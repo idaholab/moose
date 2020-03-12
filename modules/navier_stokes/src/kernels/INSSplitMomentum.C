@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSSplitMomentum);
 
-template <>
+defineLegacyParams(INSSplitMomentum);
+
 InputParameters
-validParams<INSSplitMomentum>()
+INSSplitMomentum::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("This class computes the 'split' momentum equation residual.");
   // Coupled variables

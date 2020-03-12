@@ -27,6 +27,8 @@ InputParameters validParams<MultiDContactConstraint>();
 class MultiDContactConstraint : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   MultiDContactConstraint(const InputParameters & parameters);
   virtual ~MultiDContactConstraint() {}
 

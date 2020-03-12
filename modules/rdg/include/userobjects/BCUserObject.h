@@ -43,6 +43,8 @@ InputParameters validParams<BCUserObject>();
 class BCUserObject : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   BCUserObject(const InputParameters & parameters);
 
   virtual void initialize();

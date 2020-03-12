@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsDensityAux);
 
-template <>
+defineLegacyParams(RichardsDensityAux);
+
 InputParameters
-validParams<RichardsDensityAux>()
+RichardsDensityAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("pressure_var", "The variable that represents the pressure");
   params.addRequiredParam<UserObjectName>("density_UO",
                                           "Name of user object that defines the density.");

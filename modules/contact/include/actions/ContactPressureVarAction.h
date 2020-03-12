@@ -15,6 +15,8 @@
 class ContactPressureVarAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ContactPressureVarAction(const InputParameters & params);
 
   virtual void act();

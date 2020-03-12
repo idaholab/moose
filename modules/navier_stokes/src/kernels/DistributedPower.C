@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", DistributedPower);
 
-template <>
+defineLegacyParams(DistributedPower);
+
 InputParameters
-validParams<DistributedPower>()
+DistributedPower::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   // The acceleration vector.
   params.addParam<RealVectorValue>(

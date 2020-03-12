@@ -12,11 +12,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonBubble);
 
-template <>
+defineLegacyParams(LevelSetOlssonBubble);
+
 InputParameters
-validParams<LevelSetOlssonBubble>()
+LevelSetOlssonBubble::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Implementation of 'bubble' ranging from 0 to 1.");
   params.addParam<RealVectorValue>(
       "center", RealVectorValue(0.5, 0.5, 0), "The center of the bubble.");

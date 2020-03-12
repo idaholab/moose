@@ -24,6 +24,8 @@ class PolycrystalElasticDrivingForceAction : public Action,
                                              public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalElasticDrivingForceAction(const InputParameters & params);
 
   virtual void act();

@@ -23,6 +23,8 @@ InputParameters validParams<DiscreteNucleationData>();
 class DiscreteNucleationData : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationData(const InputParameters & parameters);
 
   void execute() override{};

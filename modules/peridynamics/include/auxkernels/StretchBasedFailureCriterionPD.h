@@ -22,6 +22,8 @@ InputParameters validParams<StretchBasedFailureCriterionPD>();
 class StretchBasedFailureCriterionPD : public BondStatusBasePD
 {
 public:
+  static InputParameters validParams();
+
   StretchBasedFailureCriterionPD(const InputParameters & parameters);
 
 protected:

@@ -13,18 +13,14 @@
 #include "ElementPostprocessor.h"
 #include "LevelSetVelocityInterface.h"
 
-// Forward declarations
-class LevelSetCFLCondition;
-
-template <>
-InputParameters validParams<LevelSetCFLCondition>();
-
 /**
  * Computes the maximum timestep based on the CFL condition.
  */
 class LevelSetCFLCondition : public LevelSetVelocityInterface<ElementPostprocessor>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetCFLCondition(const InputParameters & parameters);
   void initialize() override {}
   void execute() override;

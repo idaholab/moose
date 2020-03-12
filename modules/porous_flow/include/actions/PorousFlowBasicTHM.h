@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowBasicTHM>();
 class PorousFlowBasicTHM : public PorousFlowSinglePhaseBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowBasicTHM(const InputParameters & params);
 
 protected:

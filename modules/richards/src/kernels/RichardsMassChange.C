@@ -18,11 +18,12 @@
 
 registerMooseObject("RichardsApp", RichardsMassChange);
 
-template <>
+defineLegacyParams(RichardsMassChange);
+
 InputParameters
-validParams<RichardsMassChange>()
+RichardsMassChange::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addParam<bool>("use_supg",
                         false,
                         "True for using SUPG in this kernel, false otherwise.  "

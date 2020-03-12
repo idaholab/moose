@@ -25,6 +25,8 @@ InputParameters validParams<AEFVUpwindInternalSideFlux>();
 class AEFVUpwindInternalSideFlux : public InternalSideFluxBase
 {
 public:
+  static InputParameters validParams();
+
   AEFVUpwindInternalSideFlux(const InputParameters & parameters);
   virtual ~AEFVUpwindInternalSideFlux();
 

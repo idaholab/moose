@@ -9,11 +9,12 @@
 
 #include "XFEMMovingInterfaceVelocityBase.h"
 
-template <>
+defineLegacyParams(XFEMMovingInterfaceVelocityBase);
+
 InputParameters
-validParams<XFEMMovingInterfaceVelocityBase>()
+XFEMMovingInterfaceVelocityBase::validParams()
 {
-  InputParameters params = validParams<DiscreteElementUserObject>();
+  InputParameters params = DiscreteElementUserObject::validParams();
   params.addRequiredParam<UserObjectName>(
       "value_at_interface_uo",
       "The name of the userobject that obtains the value and gradient at the interface.");

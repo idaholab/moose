@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCRFFMaterial);
 
-template <>
+defineLegacyParams(PFCRFFMaterial);
+
 InputParameters
-validParams<PFCRFFMaterial>()
+PFCRFFMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   return params;

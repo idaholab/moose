@@ -27,6 +27,8 @@ InputParameters validParams<ACInterfaceKobayashi2>();
 class ACInterfaceKobayashi2 : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad>>
 {
 public:
+  static InputParameters validParams();
+
   ACInterfaceKobayashi2(const InputParameters & parameters);
 
 protected:

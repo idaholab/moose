@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", RndSmoothCircleIC);
 
-template <>
+defineLegacyParams(RndSmoothCircleIC);
+
 InputParameters
-validParams<RndSmoothCircleIC>()
+RndSmoothCircleIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleIC>();
+  InputParameters params = SmoothCircleIC::validParams();
   params.addClassDescription(
       "Random noise with different min/max inside/outside of a smooth circle");
   params.addRequiredParam<Real>("variation_invalue", "Plus or minus this amount on the invalue");

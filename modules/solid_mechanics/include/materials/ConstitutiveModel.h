@@ -22,6 +22,8 @@ InputParameters validParams<ConstitutiveModel>();
 class ConstitutiveModel : public Material
 {
 public:
+  static InputParameters validParams();
+
   ConstitutiveModel(const InputParameters & parameters);
 
   virtual ~ConstitutiveModel() {}

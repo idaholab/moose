@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", ComputePlaneFiniteStrainNOSPD);
 
-template <>
+defineLegacyParams(ComputePlaneFiniteStrainNOSPD);
+
 InputParameters
-validParams<ComputePlaneFiniteStrainNOSPD>()
+ComputePlaneFiniteStrainNOSPD::validParams()
 {
-  InputParameters params = validParams<ComputeFiniteStrainNOSPD>();
+  InputParameters params = ComputeFiniteStrainNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
       "for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "

@@ -27,6 +27,8 @@ InputParameters validParams<KKSMultiACBulkBase>();
 class KKSMultiACBulkBase : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   KKSMultiACBulkBase(const InputParameters & parameters);
 
   virtual void initialSetup();

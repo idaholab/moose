@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowMaterialVectorBase>();
 class PorousFlowMaterialVectorBase : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMaterialVectorBase(const InputParameters & parameters);
 
 protected:

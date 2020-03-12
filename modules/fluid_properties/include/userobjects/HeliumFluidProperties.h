@@ -24,6 +24,8 @@ class HeliumFluidProperties : public SinglePhaseFluidProperties
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
+  static InputParameters validParams();
+
   HeliumFluidProperties(const InputParameters & parameters);
 
   /**

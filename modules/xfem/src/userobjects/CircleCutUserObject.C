@@ -17,12 +17,13 @@
 
 registerMooseObject("XFEMApp", CircleCutUserObject);
 
-template <>
+defineLegacyParams(CircleCutUserObject);
+
 InputParameters
-validParams<CircleCutUserObject>()
+CircleCutUserObject::validParams()
 {
   // Get input parameters from parent class
-  InputParameters params = validParams<GeometricCut3DUserObject>();
+  InputParameters params = GeometricCut3DUserObject::validParams();
 
   // Add required parameters
   params.addRequiredParam<std::vector<Real>>("cut_data",

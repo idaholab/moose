@@ -22,6 +22,8 @@ InputParameters validParams<Air>();
 class Air : public NavierStokesMaterial
 {
 public:
+  static InputParameters validParams();
+
   Air(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionMaterial);
 
-template <>
+defineLegacyParams(SwitchingFunctionMaterial);
+
 InputParameters
-validParams<SwitchingFunctionMaterial>()
+SwitchingFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<OrderParameterFunctionMaterial>();
+  InputParameters params = OrderParameterFunctionMaterial::validParams();
   params.addClassDescription("Helper material to provide h(eta) and its derivative in one of two "
                              "polynomial forms.\nSIMPLE: 3*eta^2-2*eta^3\nHIGH: "
                              "eta^3*(6*eta^2-15*eta+10)");

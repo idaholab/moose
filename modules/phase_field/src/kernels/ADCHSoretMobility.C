@@ -11,14 +11,20 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSoretMobility);
 
-defineADValidParams(
-    ADCHSoretMobility,
-    ADKernel,
-    params.addClassDescription("Adds contribution due to thermo-migration to the Cahn-Hilliard "
-                               "equation using a concentration 'u', temperature 'T', and thermal "
-                               "mobility 'mobility' (in units of length squared per time).");
-    params.addRequiredCoupledVar("T", "The temperature variable");
-    params.addRequiredParam<MaterialPropertyName>("mobility", "The mobility property name"););
+defineADLegacyParams(ADCHSoretMobility);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCHSoretMobility<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Adds contribution due to thermo-migration to the Cahn-Hilliard "
+                             "equation using a concentration 'u', temperature 'T', and thermal "
+                             "mobility 'mobility' (in units of length squared per time).");
+  params.addRequiredCoupledVar("T", "The temperature variable");
+  params.addRequiredParam<MaterialPropertyName>("mobility", "The mobility property name");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCHSoretMobility<compute_stage>::ADCHSoretMobility(const InputParameters & parameters)

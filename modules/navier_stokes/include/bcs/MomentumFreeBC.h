@@ -22,6 +22,8 @@ InputParameters validParams<MomentumFreeBC>();
 class MomentumFreeBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   MomentumFreeBC(const InputParameters & parameters);
 
 protected:

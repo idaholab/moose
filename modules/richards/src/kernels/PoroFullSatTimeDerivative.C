@@ -11,11 +11,12 @@
 
 registerMooseObject("RichardsApp", PoroFullSatTimeDerivative);
 
-template <>
+defineLegacyParams(PoroFullSatTimeDerivative);
+
 InputParameters
-validParams<PoroFullSatTimeDerivative>()
+PoroFullSatTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");

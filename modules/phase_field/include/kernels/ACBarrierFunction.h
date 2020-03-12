@@ -24,6 +24,8 @@ InputParameters validParams<ACBarrierFunction>();
 class ACBarrierFunction : public ACGrGrBase
 {
 public:
+  static InputParameters validParams();
+
   ACBarrierFunction(const InputParameters & parameters);
 
 protected:

@@ -10,11 +10,12 @@
 #include "MechanicsMaterialBasePD.h"
 #include "MooseVariable.h"
 
-template <>
+defineLegacyParams(MechanicsMaterialBasePD);
+
 InputParameters
-validParams<MechanicsMaterialBasePD>()
+MechanicsMaterialBasePD::validParams()
 {
-  InputParameters params = validParams<PeridynamicsMaterialBase>();
+  InputParameters params = PeridynamicsMaterialBase::validParams();
   params.addClassDescription("Base class for Peridynamic mechanic materials");
 
   params.addRequiredCoupledVar("displacements", "Nonlinear variable name for the displacements");

@@ -34,6 +34,8 @@ InputParameters validParams<Q2PPiecewiseLinearSinkFlux>();
 class Q2PPiecewiseLinearSinkFlux : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   Q2PPiecewiseLinearSinkFlux(const InputParameters & parameters);
 
 protected:

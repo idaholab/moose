@@ -23,6 +23,8 @@ InputParameters validParams<BoundaryOffsetPD>();
 class BoundaryOffsetPD : public AuxKernelBasePD
 {
 public:
+  static InputParameters validParams();
+
   BoundaryOffsetPD(const InputParameters & parameters);
 
 protected:

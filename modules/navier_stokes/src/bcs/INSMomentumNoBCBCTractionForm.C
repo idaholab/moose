@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumNoBCBCTractionForm);
 
-template <>
+defineLegacyParams(INSMomentumNoBCBCTractionForm);
+
 InputParameters
-validParams<INSMomentumNoBCBCTractionForm>()
+INSMomentumNoBCBCTractionForm::validParams()
 {
-  InputParameters params = validParams<INSMomentumNoBCBCBase>();
+  InputParameters params = INSMomentumNoBCBCBase::validParams();
 
   params.addClassDescription("This class implements the 'No BC' boundary condition based on the "
                              "'traction' form of the viscous stress tensor.");

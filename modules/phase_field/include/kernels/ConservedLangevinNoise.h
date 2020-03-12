@@ -21,6 +21,8 @@ InputParameters validParams<ConservedLangevinNoise>();
 class ConservedLangevinNoise : public LangevinNoise
 {
 public:
+  static InputParameters validParams();
+
   ConservedLangevinNoise(const InputParameters & parameters);
 
 protected:

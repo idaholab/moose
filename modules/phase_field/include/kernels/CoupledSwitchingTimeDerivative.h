@@ -33,6 +33,8 @@ class CoupledSwitchingTimeDerivative
     : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>
 {
 public:
+  static InputParameters validParams();
+
   CoupledSwitchingTimeDerivative(const InputParameters & parameters);
   virtual void initialSetup();
 

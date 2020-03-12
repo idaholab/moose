@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CahnHilliard);
 
-template <>
+defineLegacyParams(CahnHilliard);
+
 InputParameters
-validParams<CahnHilliard>()
+CahnHilliard::validParams()
 {
   InputParameters params = CahnHilliardBase<Real>::validParams();
   params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and "

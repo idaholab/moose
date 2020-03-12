@@ -12,12 +12,13 @@
 
 registerMooseObject("SolidMechanicsApp", LinearAnisotropicMaterial);
 
-template <>
+defineLegacyParams(LinearAnisotropicMaterial);
+
 InputParameters
-validParams<LinearAnisotropicMaterial>()
+LinearAnisotropicMaterial::validParams()
 {
 
-  InputParameters params = validParams<LinearIsotropicMaterial>();
+  InputParameters params = LinearIsotropicMaterial::validParams();
   params.addRequiredParam<Real>("material_constant_c11", "Material modulus C11");
   params.addRequiredParam<Real>("material_constant_c12", "Material modulus C12");
   params.addRequiredParam<Real>("material_constant_c44", "Material modulus C44");

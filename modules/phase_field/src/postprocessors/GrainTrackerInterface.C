@@ -10,11 +10,12 @@
 #include "GrainTrackerInterface.h"
 #include "FeatureFloodCount.h"
 
-template <>
+defineLegacyParams(GrainTrackerInterface);
+
 InputParameters
-validParams<GrainTrackerInterface>()
+GrainTrackerInterface::validParams()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
+  InputParameters params = FeatureFloodCount::validParams();
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
   params.addParam<unsigned short>(
       "halo_level", 2, "The thickness of the halo surrounding each feature.");

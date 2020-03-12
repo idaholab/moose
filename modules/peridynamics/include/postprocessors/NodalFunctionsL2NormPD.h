@@ -23,6 +23,8 @@ InputParameters validParams<NodalFunctionsL2NormPD>();
 class NodalFunctionsL2NormPD : public NodalIntegralPostprocessorBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalFunctionsL2NormPD(const InputParameters & parameters);
 
   virtual Real getValue() override;

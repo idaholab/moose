@@ -26,6 +26,8 @@ InputParameters validParams<NodalRankTwoPD>();
 class NodalRankTwoPD : public AuxKernelBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalRankTwoPD(const InputParameters & parameters);
 
 protected:

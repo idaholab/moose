@@ -24,6 +24,8 @@ InputParameters validParams<IdealGasFreeEnergy>();
 class IdealGasFreeEnergy : public GasFreeEnergyBase
 {
 public:
+  static InputParameters validParams();
+
   IdealGasFreeEnergy(const InputParameters & parameters);
 };
 

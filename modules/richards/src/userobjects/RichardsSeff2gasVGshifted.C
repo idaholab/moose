@@ -14,11 +14,12 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2gasVGshifted);
 
-template <>
+defineLegacyParams(RichardsSeff2gasVGshifted);
+
 InputParameters
-validParams<RichardsSeff2gasVGshifted>()
+RichardsSeff2gasVGshifted::validParams()
 {
-  InputParameters params = validParams<RichardsSeff>();
+  InputParameters params = RichardsSeff::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "al",
       "al > 0",

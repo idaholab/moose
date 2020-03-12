@@ -23,6 +23,8 @@ InputParameters validParams<ContactSplit>();
 class ContactSplit : public Split
 {
 public:
+  static InputParameters validParams();
+
   ContactSplit(const InputParameters & params);
   virtual void setup(const std::string & prefix = "-") override;
 

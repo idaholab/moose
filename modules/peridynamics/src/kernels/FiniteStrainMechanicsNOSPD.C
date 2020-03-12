@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", FiniteStrainMechanicsNOSPD);
 
-template <>
+defineLegacyParams(FiniteStrainMechanicsNOSPD);
+
 InputParameters
-validParams<FiniteStrainMechanicsNOSPD>()
+FiniteStrainMechanicsNOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBaseNOSPD>();
+  InputParameters params = MechanicsBaseNOSPD::validParams();
   params.addClassDescription(
       "Class for calculating residual and Jacobian for the Self-stabilized "
       "Non-Ordinary State-based PeriDynamic (SNOSPD) formulation under finite "

@@ -12,18 +12,24 @@
 
 registerADMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
 
-defineADValidParams(
-    LevelSetOlssonReinitialization,
-    ADKernelGrad,
-    params.addClassDescription("The re-initialization equation defined by Olsson et. al. (2007).");
-    params.addRequiredCoupledVar(
-        "phi_0", "The level set variable to be reinitialized as signed distance function.");
-    params.addParam<bool>(
-        "use_modified_reinitilization_formulation",
-        false,
-        "Use the modified reinitilization formulation (Olsson et. al. (2007), section 2.2.1).");
-    params.addRequiredParam<PostprocessorName>(
-        "epsilon", "The epsilon coefficient to be used in the reinitialization calculation."););
+defineADLegacyParams(LevelSetOlssonReinitialization);
+
+template <ComputeStage compute_stage>
+InputParameters
+LevelSetOlssonReinitialization<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription("The re-initialization equation defined by Olsson et. al. (2007).");
+  params.addRequiredCoupledVar(
+      "phi_0", "The level set variable to be reinitialized as signed distance function.");
+  params.addParam<bool>(
+      "use_modified_reinitilization_formulation",
+      false,
+      "Use the modified reinitilization formulation (Olsson et. al. (2007), section 2.2.1).");
+  params.addRequiredParam<PostprocessorName>(
+      "epsilon", "The epsilon coefficient to be used in the reinitialization calculation.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 LevelSetOlssonReinitialization<compute_stage>::LevelSetOlssonReinitialization(

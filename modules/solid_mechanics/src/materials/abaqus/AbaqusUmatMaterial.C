@@ -16,11 +16,12 @@
 
 registerMooseObject("SolidMechanicsApp", AbaqusUmatMaterial);
 
-template <>
+defineLegacyParams(AbaqusUmatMaterial);
+
 InputParameters
-validParams<AbaqusUmatMaterial>()
+AbaqusUmatMaterial::validParams()
 {
-  InputParameters params = validParams<SolidModel>();
+  InputParameters params = SolidModel::validParams();
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
   params.addRequiredParam<std::vector<Real>>("mechanical_constants",

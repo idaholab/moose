@@ -17,11 +17,12 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalColoringIC);
 
-template <>
+defineLegacyParams(PolycrystalColoringIC);
+
 InputParameters
-validParams<PolycrystalColoringIC>()
+PolycrystalColoringIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiICAction)");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo",

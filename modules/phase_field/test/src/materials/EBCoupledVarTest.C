@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", EBCoupledVarTest);
 
-template <>
+defineLegacyParams(EBCoupledVarTest);
+
 InputParameters
-validParams<EBCoupledVarTest>()
+EBCoupledVarTest::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription(
       "Test to see if vector of coupled variables works with ExpressionBuilder");
   params.addRequiredCoupledVarWithAutoBuild(

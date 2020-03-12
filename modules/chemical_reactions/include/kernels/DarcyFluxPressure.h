@@ -25,6 +25,8 @@ InputParameters validParams<DarcyFluxPressure>();
 class DarcyFluxPressure : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   DarcyFluxPressure(const InputParameters & parameters);
 
 protected:

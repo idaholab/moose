@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", PFParamsPolyFreeEnergy);
 
-template <>
+defineLegacyParams(PFParamsPolyFreeEnergy);
+
 InputParameters
-validParams<PFParamsPolyFreeEnergy>()
+PFParamsPolyFreeEnergy::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Phase field parameters for polynomial free energy for single component systems");
   params.addCoupledVar("T", "Temperature variable in Kelvin");

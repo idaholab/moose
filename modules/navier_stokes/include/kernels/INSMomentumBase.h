@@ -25,6 +25,8 @@ InputParameters validParams<INSMomentumBase>();
 class INSMomentumBase : public INSBase
 {
 public:
+  static InputParameters validParams();
+
   INSMomentumBase(const InputParameters & parameters);
 
   virtual ~INSMomentumBase() {}

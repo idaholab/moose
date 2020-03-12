@@ -23,11 +23,12 @@ registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_variable");
 
 registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_kernel");
 
-template <>
+defineLegacyParams(PorousFlowBasicTHM);
+
 InputParameters
-validParams<PorousFlowBasicTHM>()
+PorousFlowBasicTHM::validParams()
 {
-  InputParameters params = validParams<PorousFlowSinglePhaseBase>();
+  InputParameters params = PorousFlowSinglePhaseBase::validParams();
   params.addParam<bool>("multiply_by_density",
                         false,
                         "If true, then the Kernels for fluid flow are multiplied by "

@@ -22,6 +22,8 @@ InputParameters validParams<StressDivergenceRZ>();
 class StressDivergenceRZ : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceRZ(const InputParameters & parameters);
 
 protected:

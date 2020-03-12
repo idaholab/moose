@@ -24,6 +24,8 @@ InputParameters validParams<PrimaryDiffusion>();
 class PrimaryDiffusion : public Diffusion
 {
 public:
+  static InputParameters validParams();
+
   PrimaryDiffusion(const InputParameters & parameters);
 
 protected:

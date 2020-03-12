@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationFromFile);
 
-template <>
+defineLegacyParams(DiscreteNucleationFromFile);
+
 InputParameters
-validParams<DiscreteNucleationFromFile>()
+DiscreteNucleationFromFile::validParams()
 {
-  InputParameters params = validParams<DiscreteNucleationInserterBase>();
+  InputParameters params = DiscreteNucleationInserterBase::validParams();
   params.addClassDescription(
       "Manages the list of currently active nucleation sites and adds new "
       "sites according to a predetermined list from a CSV file (use this with sync_times).");

@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedMassTimeDerivative);
 
-template <>
+defineLegacyParams(PorousFlowFullySaturatedMassTimeDerivative);
+
 InputParameters
-validParams<PorousFlowFullySaturatedMassTimeDerivative>()
+PorousFlowFullySaturatedMassTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   MooseEnum coupling_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
   params.addParam<MooseEnum>("coupling_type",
                              coupling_type,

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GBDependentAnisotropicTensor);
 
-template <>
+defineLegacyParams(GBDependentAnisotropicTensor);
+
 InputParameters
-validParams<GBDependentAnisotropicTensor>()
+GBDependentAnisotropicTensor::validParams()
 {
-  InputParameters params = validParams<GBDependentTensorBase>();
+  InputParameters params = GBDependentTensorBase::validParams();
   params.addClassDescription("Compute anisotropic rank two tensor based on GB phase variable");
   return params;
 }

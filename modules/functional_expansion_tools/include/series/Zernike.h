@@ -71,4 +71,3 @@ protected:
   /// Stores the recurrence evaluations for the positive rank azimuthal terms
   std::vector<Real> _positive_azimuthal_components;
 };
-

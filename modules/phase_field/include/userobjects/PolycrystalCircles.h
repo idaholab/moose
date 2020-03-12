@@ -30,6 +30,8 @@ InputParameters validParams<PolycrystalCircles>();
 class PolycrystalCircles : public PolycrystalUserObjectBase
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalCircles(const InputParameters & parameters);
 
   // Required functions from PolycrystalUserObjectBase

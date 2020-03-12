@@ -28,6 +28,8 @@ InputParameters validParams<GBWidthAnisotropy>();
 class GBWidthAnisotropy : public GBAnisotropyBase
 {
 public:
+  static InputParameters validParams();
+
   GBWidthAnisotropy(const InputParameters & parameters);
 
 private:

@@ -20,11 +20,12 @@ registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "add_variable")
 registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "copy_nodal_vars");
 registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "check_copy_nodal_vars");
 
-template <>
+defineLegacyParams(PolycrystalVariablesAction);
+
 InputParameters
-validParams<PolycrystalVariablesAction>()
+PolycrystalVariablesAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up order parameter variables for a polycrystal simulation");
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());

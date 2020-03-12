@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", SimpleFluidProperties);
 
-template <>
+defineLegacyParams(SimpleFluidProperties);
+
 InputParameters
-validParams<SimpleFluidProperties>()
+SimpleFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addParam<Real>("molar_mass", 1.8E-2, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>(
       "thermal_expansion", 2.14E-4, "Constant coefficient of thermal expansion (1/K)");

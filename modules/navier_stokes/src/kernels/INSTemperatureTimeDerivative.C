@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", INSTemperatureTimeDerivative);
 
-template <>
+defineLegacyParams(INSTemperatureTimeDerivative);
+
 InputParameters
-validParams<INSTemperatureTimeDerivative>()
+INSTemperatureTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addClassDescription("This class computes the time derivative for the incompressible "
                              "Navier-Stokes momentum equation.");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");

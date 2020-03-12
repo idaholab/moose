@@ -28,6 +28,8 @@ InputParameters validParams<SwitchingFunctionMultiPhaseMaterial>();
 class SwitchingFunctionMultiPhaseMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunctionMultiPhaseMaterial(const InputParameters & parameters);
 
 protected:

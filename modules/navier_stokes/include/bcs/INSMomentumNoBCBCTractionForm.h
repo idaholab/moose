@@ -24,6 +24,8 @@ InputParameters validParams<INSMomentumNoBCBCTractionForm>();
 class INSMomentumNoBCBCTractionForm : public INSMomentumNoBCBCBase
 {
 public:
+  static InputParameters validParams();
+
   INSMomentumNoBCBCTractionForm(const InputParameters & parameters);
 
   virtual ~INSMomentumNoBCBCTractionForm() {}

@@ -12,12 +12,13 @@
 
 registerMooseObject("RichardsApp", Grad2ParsedFunction);
 
-template <>
+defineLegacyParams(Grad2ParsedFunction);
+
 InputParameters
-validParams<Grad2ParsedFunction>()
+Grad2ParsedFunction::validParams()
 {
-  InputParameters params = validParams<MooseParsedFunction>();
-  params += validParams<MooseParsedFunction>();
+  InputParameters params = MooseParsedFunction::validParams();
+  params += MooseParsedFunction::validParams();
   params.addRequiredParam<RealVectorValue>(
       "direction",
       "The direction in which to take the derivative.  This must not be a zero-length "

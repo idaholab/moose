@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SmoothCircleFromFileIC);
 
-template <>
+defineLegacyParams(SmoothCircleFromFileIC);
+
 InputParameters
-validParams<SmoothCircleFromFileIC>()
+SmoothCircleFromFileIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleBaseIC>();
+  InputParameters params = SmoothCircleBaseIC::validParams();
   params.addClassDescription("Multiple smooth circles read from a text file");
   params.addRequiredParam<FileName>("file_name", "File containing circle centers and radii");
 

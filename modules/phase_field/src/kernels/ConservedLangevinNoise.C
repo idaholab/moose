@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ConservedLangevinNoise);
 
-template <>
+defineLegacyParams(ConservedLangevinNoise);
+
 InputParameters
-validParams<ConservedLangevinNoise>()
+ConservedLangevinNoise::validParams()
 {
-  InputParameters params = validParams<LangevinNoise>();
+  InputParameters params = LangevinNoise::validParams();
   params.addClassDescription("Source term for noise from a ConservedNoise userobject");
   params.addRequiredParam<UserObjectName>(
       "noise", "ConservedNoise userobject that produces the random numbers");

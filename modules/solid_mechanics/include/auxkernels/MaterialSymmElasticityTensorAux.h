@@ -32,6 +32,8 @@ InputParameters validParams<MaterialSymmElasticityTensorAux>();
 class MaterialSymmElasticityTensorAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   MaterialSymmElasticityTensorAux(const InputParameters & parameters);
 
 protected:

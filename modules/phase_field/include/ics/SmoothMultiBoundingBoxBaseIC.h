@@ -24,6 +24,8 @@ InputParameters validParams<SmoothMultiBoundingBoxBaseIC>();
 class SmoothMultiBoundingBoxBaseIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   SmoothMultiBoundingBoxBaseIC(const InputParameters & parameters);
 
   Real value(const Point & p);

@@ -36,6 +36,8 @@ InputParameters validParams<PorousFlowJoiner>();
 class PorousFlowJoiner : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowJoiner(const InputParameters & parameters);
 
 protected:

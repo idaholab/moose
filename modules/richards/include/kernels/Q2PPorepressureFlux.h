@@ -46,6 +46,8 @@ InputParameters validParams<Q2PPorepressureFlux>();
 class Q2PPorepressureFlux : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   Q2PPorepressureFlux(const InputParameters & parameters);
 
 protected:

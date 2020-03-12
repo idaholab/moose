@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalDamageIndexPD);
 
-template <>
+defineLegacyParams(NodalDamageIndexPD);
+
 InputParameters
-validParams<NodalDamageIndexPD>()
+NodalDamageIndexPD::validParams()
 {
-  InputParameters params = validParams<NodalAuxVariableUserObjectBasePD>();
+  InputParameters params = NodalAuxVariableUserObjectBasePD::validParams();
   params.addClassDescription("Class for computing damage index for each material point in "
                              "peridynamic fracture modeling and simulation");
 

@@ -19,6 +19,8 @@ InputParameters validParams<CombinedApp>();
 class CombinedApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   CombinedApp(const InputParameters & parameters);
   virtual ~CombinedApp();
 

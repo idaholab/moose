@@ -26,6 +26,8 @@ InputParameters validParams<SamplerTester>();
 class SamplerTester : public GeneralPostprocessor, public SamplerInterface
 {
 public:
+  static InputParameters validParams();
+
   SamplerTester(const InputParameters & parameters);
 
 protected:

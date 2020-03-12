@@ -14,11 +14,12 @@
 
 registerMooseObject("FluidPropertiesApp", HydrogenFluidProperties);
 
-template <>
+defineLegacyParams(HydrogenFluidProperties);
+
 InputParameters
-validParams<HydrogenFluidProperties>()
+HydrogenFluidProperties::validParams()
 {
-  InputParameters params = validParams<HelmholtzFluidProperties>();
+  InputParameters params = HelmholtzFluidProperties::validParams();
   params.addClassDescription("Fluid properties for Hydrogen (H2)");
   return params;
 }

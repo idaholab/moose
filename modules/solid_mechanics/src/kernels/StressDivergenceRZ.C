@@ -20,11 +20,12 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", StressDivergenceRZ, "07/30/2020 24:00");
 
-template <>
+defineLegacyParams(StressDivergenceRZ);
+
 InputParameters
-validParams<StressDivergenceRZ>()
+StressDivergenceRZ::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for r, "

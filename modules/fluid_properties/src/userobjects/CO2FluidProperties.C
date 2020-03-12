@@ -15,11 +15,12 @@
 
 registerMooseObject("FluidPropertiesApp", CO2FluidProperties);
 
-template <>
+defineLegacyParams(CO2FluidProperties);
+
 InputParameters
-validParams<CO2FluidProperties>()
+CO2FluidProperties::validParams()
 {
-  InputParameters params = validParams<HelmholtzFluidProperties>();
+  InputParameters params = HelmholtzFluidProperties::validParams();
   params.addClassDescription(
       "Fluid properties for carbon dioxide (CO2) using the Span & Wagner EOS");
   return params;

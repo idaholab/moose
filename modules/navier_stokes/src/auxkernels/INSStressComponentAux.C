@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSStressComponentAux);
 
-template <>
+defineLegacyParams(INSStressComponentAux);
+
 InputParameters
-validParams<INSStressComponentAux>()
+INSStressComponentAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("This class computes the stress component based on "
                              "pressure and velocity for incompressible Navier-Stokes");

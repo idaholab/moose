@@ -9,11 +9,12 @@
 
 #include "DoubleWellPotential.h"
 
-template <>
+defineLegacyParams(DoubleWellPotential);
+
 InputParameters
-validParams<DoubleWellPotential>()
+DoubleWellPotential::validParams()
 {
-  InputParameters params = validParams<KernelValue>();
+  InputParameters params = KernelValue::validParams();
   params.addClassDescription(
       "Simple demonstration Allen-Cahn Kernel using an algebraic double-well potential");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");

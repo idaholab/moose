@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDispersiveFlux);
 
-template <>
+defineLegacyParams(PorousFlowDispersiveFlux);
+
 InputParameters
-validParams<PorousFlowDispersiveFlux>()
+PorousFlowDispersiveFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
   params.addRequiredParam<UserObjectName>(

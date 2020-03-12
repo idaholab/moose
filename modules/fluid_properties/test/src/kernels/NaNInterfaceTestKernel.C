@@ -12,11 +12,12 @@
 
 registerMooseObject("FluidPropertiesTestApp", NaNInterfaceTestKernel);
 
-template <>
+defineLegacyParams(NaNInterfaceTestKernel);
+
 InputParameters
-validParams<NaNInterfaceTestKernel>()
+NaNInterfaceTestKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addRequiredParam<UserObjectName>("nan_interface_test_fp",
                                           "NaNInterfaceTestFluidProperties user object name");

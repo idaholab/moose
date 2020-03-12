@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", MechanicsOSPD);
 
-template <>
+defineLegacyParams(MechanicsOSPD);
+
 InputParameters
-validParams<MechanicsOSPD>()
+MechanicsOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBasePD>();
+  InputParameters params = MechanicsBasePD::validParams();
   params.addClassDescription("Class for calculating residual and Jacobian for Ordinary State-based "
                              "PeriDynamic mechanics formulation");
 

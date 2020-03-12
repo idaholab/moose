@@ -55,6 +55,8 @@ InputParameters validParams<PorousFlowFluidStateBase>();
 class PorousFlowFluidStateBase : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateBase(const InputParameters & parameters);
 
   void initialize() final{};

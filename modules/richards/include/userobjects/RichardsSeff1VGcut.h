@@ -31,6 +31,8 @@ InputParameters validParams<RichardsSeff1VGcut>();
 class RichardsSeff1VGcut : public RichardsSeff1VG
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff1VGcut(const InputParameters & parameters);
 
   /// just prints some (maybe) useful info to the console

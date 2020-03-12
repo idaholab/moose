@@ -14,11 +14,12 @@
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
 registerMooseObject("ContactApp", ContactSplit);
 
-template <>
+defineLegacyParams(ContactSplit);
+
 InputParameters
-validParams<ContactSplit>()
+ContactSplit::validParams()
 {
-  InputParameters params = validParams<Split>();
+  InputParameters params = Split::validParams();
   params.addParam<std::vector<std::string>>("contact_master",
                                             "Master surface list for included contacts");
   params.addParam<std::vector<std::string>>("contact_slave",

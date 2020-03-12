@@ -10,11 +10,12 @@
 #include "MechanicsBasePD.h"
 #include "RankTwoTensor.h"
 
-template <>
+defineLegacyParams(MechanicsBasePD);
+
 InputParameters
-validParams<MechanicsBasePD>()
+MechanicsBasePD::validParams()
 {
-  InputParameters params = validParams<PeridynamicsKernelBase>();
+  InputParameters params = PeridynamicsKernelBase::validParams();
   params.addClassDescription(
       "Base class for calculating residual and Jacobian for peridynamic mechanic kernels");
 

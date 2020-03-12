@@ -24,11 +24,12 @@ registerMooseAction("FluidPropertiesApp",
                     AddFluidPropertiesInterrogatorAction,
                     "add_output_aux_variables");
 
-template <>
+defineLegacyParams(AddFluidPropertiesInterrogatorAction);
+
 InputParameters
-validParams<AddFluidPropertiesInterrogatorAction>()
+AddFluidPropertiesInterrogatorAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<UserObjectName>("fp",
                                           "The name of the fluid properties object to query.");
   params.addParam<Real>("rho", "Density");

@@ -14,11 +14,12 @@
 
 registerMooseObject("RichardsApp", RichardsExcav);
 
-template <>
+defineLegacyParams(RichardsExcav);
+
 InputParameters
-validParams<RichardsExcav>()
+RichardsExcav::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredParam<Real>(
       "p_excav",
       "Value of the variable at the surface of the excavation.  Eg atmospheric pressure");

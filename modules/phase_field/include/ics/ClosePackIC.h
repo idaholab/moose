@@ -24,6 +24,8 @@ InputParameters validParams<ClosePackIC>();
 class ClosePackIC : public SmoothCircleBaseIC
 {
 public:
+  static InputParameters validParams();
+
   ClosePackIC(const InputParameters & parameters);
 
 protected:

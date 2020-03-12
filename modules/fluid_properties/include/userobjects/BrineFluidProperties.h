@@ -38,6 +38,8 @@ InputParameters validParams<BrineFluidProperties>();
 class BrineFluidProperties : public MultiComponentFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   BrineFluidProperties(const InputParameters & parameters);
   virtual ~BrineFluidProperties();
 

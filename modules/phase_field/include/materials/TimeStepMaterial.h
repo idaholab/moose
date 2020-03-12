@@ -22,6 +22,8 @@ InputParameters validParams<TimeStepMaterial>();
 class TimeStepMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   TimeStepMaterial(const InputParameters & parameters);
 
 protected:

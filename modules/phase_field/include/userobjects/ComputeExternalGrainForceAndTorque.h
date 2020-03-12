@@ -28,6 +28,8 @@ class ComputeExternalGrainForceAndTorque
       public GrainForceAndTorqueInterface
 {
 public:
+  static InputParameters validParams();
+
   ComputeExternalGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();

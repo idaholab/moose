@@ -25,6 +25,8 @@ InputParameters validParams<RichardsSUPG>();
 class RichardsSUPG : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsSUPG(const InputParameters & parameters);
 
   void initialize();

@@ -28,6 +28,8 @@ InputParameters validParams<MemoizedFunctionInterface>();
 class MemoizedFunctionInterface : public Function
 {
 public:
+  static InputParameters validParams();
+
   MemoizedFunctionInterface(const InputParameters & parameters);
 
   // Override from MeshChangedInterface

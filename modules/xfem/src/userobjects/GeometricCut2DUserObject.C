@@ -17,11 +17,12 @@
 // XFEM includes
 #include "XFEMFuncs.h"
 
-template <>
+defineLegacyParams(GeometricCut2DUserObject);
+
 InputParameters
-validParams<GeometricCut2DUserObject>()
+GeometricCut2DUserObject::validParams()
 {
-  InputParameters params = validParams<GeometricCutUserObject>();
+  InputParameters params = GeometricCutUserObject::validParams();
   params.addParam<Real>("time_start_cut", 0.0, "Start time of geometric cut propagation");
   params.addParam<Real>("time_end_cut", 0.0, "End time of geometric cut propagation");
   params.addClassDescription("Base class for 2D XFEM Geometric Cut UserObjects");

@@ -16,11 +16,12 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", MultiAppFXTransfer);
 
-template <>
+defineLegacyParams(MultiAppFXTransfer);
+
 InputParameters
-validParams<MultiAppFXTransfer>()
+MultiAppFXTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = MultiAppTransfer::validParams();
 
   params.addClassDescription("Transfers coefficient arrays between objects that are derived from "
                              "MutableCoefficientsInterface; currently includes the following "

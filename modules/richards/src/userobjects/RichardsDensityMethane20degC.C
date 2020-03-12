@@ -19,11 +19,12 @@
 
 registerMooseObject("RichardsApp", RichardsDensityMethane20degC);
 
-template <>
+defineLegacyParams(RichardsDensityMethane20degC);
+
 InputParameters
-validParams<RichardsDensityMethane20degC>()
+RichardsDensityMethane20degC::validParams()
 {
-  InputParameters params = validParams<RichardsDensity>();
+  InputParameters params = RichardsDensity::validParams();
   params.addParam<Real>(
       "p_unit",
       1,

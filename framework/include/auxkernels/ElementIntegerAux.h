@@ -19,6 +19,8 @@ InputParameters validParams<ElementIntegerAux>();
 class ElementIntegerAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   ElementIntegerAux(const InputParameters & parameters);
 
 protected:

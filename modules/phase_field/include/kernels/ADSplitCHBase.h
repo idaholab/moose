@@ -30,6 +30,8 @@ template <ComputeStage compute_stage>
 class ADSplitCHBase : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHBase(const InputParameters & parameters);
 
 protected:

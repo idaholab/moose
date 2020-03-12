@@ -13,11 +13,12 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-template <>
+defineLegacyParams(SmoothSuperellipsoidBaseIC);
+
 InputParameters
-validParams<SmoothSuperellipsoidBaseIC>()
+SmoothSuperellipsoidBaseIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>("invalue", "The variable value inside the superellipsoid");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the superellipsoid");
   params.addParam<Real>(

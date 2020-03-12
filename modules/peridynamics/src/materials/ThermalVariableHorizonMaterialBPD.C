@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", ThermalVariableHorizonMaterialBPD);
 
-template <>
+defineLegacyParams(ThermalVariableHorizonMaterialBPD);
+
 InputParameters
-validParams<ThermalVariableHorizonMaterialBPD>()
+ThermalVariableHorizonMaterialBPD::validParams()
 {
-  InputParameters params = validParams<ThermalMaterialBaseBPD>();
+  InputParameters params = ThermalMaterialBaseBPD::validParams();
   params.addClassDescription("Class for computing peridynamic micro conductivity for bond-based "
                              "model using irregular mesh");
 

@@ -19,13 +19,14 @@ static unsigned int cp_counter = 0;
 
 registerMooseAction("ContactApp", ContactPressureAuxAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(ContactPressureAuxAction);
+
 InputParameters
-validParams<ContactPressureAuxAction>()
+ContactPressureAuxAction::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());

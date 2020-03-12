@@ -24,6 +24,8 @@ InputParameters validParams<DiscreteNucleationForce>();
 class DiscreteNucleationForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationForce(const InputParameters & params);
 
   void precalculateResidual() override;

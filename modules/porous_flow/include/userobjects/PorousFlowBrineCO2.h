@@ -51,6 +51,8 @@ InputParameters validParams<PorousFlowBrineCO2>();
 class PorousFlowBrineCO2 : public PorousFlowFluidStateMultiComponentBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowBrineCO2(const InputParameters & parameters);
 
   virtual std::string fluidStateName() const override;

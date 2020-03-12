@@ -22,6 +22,8 @@ InputParameters validParams<SimpleSplitCHWRes>();
 class SimpleSplitCHWRes : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SimpleSplitCHWRes(const InputParameters & parameters);
 
 protected:

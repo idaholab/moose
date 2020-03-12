@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GradientComponent);
 
-template <>
+defineLegacyParams(GradientComponent);
+
 InputParameters
-validParams<GradientComponent>()
+GradientComponent::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Set the kernel variable to a specified component of the gradient of a coupled variable.");
   params.addRequiredCoupledVar("v", "Coupled variable to match gradient component of");

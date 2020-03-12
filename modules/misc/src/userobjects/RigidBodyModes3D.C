@@ -12,11 +12,12 @@
 
 registerMooseObject("MiscApp", RigidBodyModes3D);
 
-template <>
+defineLegacyParams(RigidBodyModes3D);
+
 InputParameters
-validParams<RigidBodyModes3D>()
+RigidBodyModes3D::validParams()
 {
-  InputParameters params = validParams<NodalUserObject>();
+  InputParameters params = NodalUserObject::validParams();
   params.addRequiredParam<std::string>("subspace_name",
                                        "FEProblemBase subspace containing rigid body mode vectors");
   params.addParam<std::vector<unsigned int>>(

@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", MaskedBodyForce);
 
-template <>
+defineLegacyParams(MaskedBodyForce);
+
 InputParameters
-validParams<MaskedBodyForce>()
+MaskedBodyForce::validParams()
 {
-  InputParameters params = validParams<BodyForce>();
+  InputParameters params = BodyForce::validParams();
   params.addClassDescription("Kernel that defines a body force modified by a material mask");
   params.addParam<MaterialPropertyName>("mask", "Material property defining the mask");
   params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");

@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", RampIC);
 
-template <>
+defineLegacyParams(RampIC);
+
 InputParameters
-validParams<RampIC>()
+RampIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
       "Linear ramp along the x-axis with given values at the left and right extreme points.");
   params.addRequiredParam<Real>("value_left", "The value on left (xmin) boundary.");

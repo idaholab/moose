@@ -20,6 +20,8 @@ InputParameters validParams<NSGravityForce>();
 class NSGravityForce : public NSKernel
 {
 public:
+  static InputParameters validParams();
+
   NSGravityForce(const InputParameters & parameters);
 
 protected:

@@ -23,6 +23,8 @@ InputParameters validParams<ComputePlaneFiniteStrainNOSPD>();
 class ComputePlaneFiniteStrainNOSPD : public ComputeFiniteStrainNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputePlaneFiniteStrainNOSPD(const InputParameters & parameters);
 
 protected:

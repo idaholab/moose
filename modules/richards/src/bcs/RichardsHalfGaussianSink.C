@@ -18,11 +18,12 @@
 
 registerMooseObject("RichardsApp", RichardsHalfGaussianSink);
 
-template <>
+defineLegacyParams(RichardsHalfGaussianSink);
+
 InputParameters
-validParams<RichardsHalfGaussianSink>()
+RichardsHalfGaussianSink::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<Real>("max",
                                 "Maximum of the flux (measured in kg.m^-2.s^-1).  Flux out "
                                 "= max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux "

@@ -23,6 +23,8 @@ InputParameters validParams<NaNInterfaceTestKernel>();
 class NaNInterfaceTestKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NaNInterfaceTestKernel(const InputParameters & parameters);
 
 protected:

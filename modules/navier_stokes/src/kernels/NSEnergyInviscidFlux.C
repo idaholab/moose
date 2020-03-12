@@ -16,11 +16,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyInviscidFlux);
 
-template <>
+defineLegacyParams(NSEnergyInviscidFlux);
+
 InputParameters
-validParams<NSEnergyInviscidFlux>()
+NSEnergyInviscidFlux::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription("This class computes the inviscid part of the energy flux.");
   params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
   return params;

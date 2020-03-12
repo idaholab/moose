@@ -21,6 +21,8 @@ InputParameters validParams<NormalNodalLMMechanicalContact>();
 class NormalNodalLMMechanicalContact : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   NormalNodalLMMechanicalContact(const InputParameters & parameters);
 
 protected:

@@ -20,6 +20,8 @@ InputParameters validParams<PFCRFFKernelAction>();
 class PFCRFFKernelAction : public HHPFCRFFSplitKernelAction
 {
 public:
+  static InputParameters validParams();
+
   PFCRFFKernelAction(const InputParameters & params);
 
   virtual void act();

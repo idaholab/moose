@@ -11,10 +11,16 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumAdvection);
 
-defineADValidParams(
-    INSADMomentumAdvection,
-    ADVectorKernelValue,
-    params.addClassDescription("Adds the convective term to the INS momentum equation"););
+defineADLegacyParams(INSADMomentumAdvection);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMomentumAdvection<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorKernelValue<compute_stage>::validParams();
+  params.addClassDescription("Adds the convective term to the INS momentum equation");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMomentumAdvection<compute_stage>::INSADMomentumAdvection(const InputParameters & parameters)

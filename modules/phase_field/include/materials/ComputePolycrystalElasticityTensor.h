@@ -25,6 +25,8 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>();
 class ComputePolycrystalElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   ComputePolycrystalElasticityTensor(const InputParameters & parameters);
 
 protected:

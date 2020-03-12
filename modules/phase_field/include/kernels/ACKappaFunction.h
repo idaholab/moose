@@ -26,6 +26,8 @@ InputParameters validParams<ACKappaFunction>();
 class ACKappaFunction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   ACKappaFunction(const InputParameters & parameters);
 
 protected:

@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(RdgTestApp);
+
 InputParameters
-validParams<RdgTestApp>()
+RdgTestApp::validParams()
 {
-  InputParameters params = validParams<RdgApp>();
+  InputParameters params = RdgApp::validParams();
   return params;
 }
 

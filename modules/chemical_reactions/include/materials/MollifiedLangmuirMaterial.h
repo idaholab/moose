@@ -24,6 +24,8 @@ InputParameters validParams<MollifiedLangmuirMaterial>();
 class MollifiedLangmuirMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   MollifiedLangmuirMaterial(const InputParameters & parameters);
 
 protected:

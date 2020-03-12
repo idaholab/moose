@@ -39,6 +39,8 @@ InputParameters validParams<PorousFlowCapillaryPressure>();
 class PorousFlowCapillaryPressure : public DiscreteElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowCapillaryPressure(const InputParameters & parameters);
 
   virtual void initialize() final{};

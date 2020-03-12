@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GrainForceAndTorqueSum);
 
-template <>
+defineLegacyParams(GrainForceAndTorqueSum);
+
 InputParameters
-validParams<GrainForceAndTorqueSum>()
+GrainForceAndTorqueSum::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Userobject for summing forces and torques acting on a grain");
   params.addParam<std::vector<UserObjectName>>(
       "grain_forces",

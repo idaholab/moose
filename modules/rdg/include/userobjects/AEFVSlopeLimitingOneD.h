@@ -26,6 +26,8 @@ InputParameters validParams<AEFVSlopeLimitingOneD>();
 class AEFVSlopeLimitingOneD : public SlopeLimitingBase
 {
 public:
+  static InputParameters validParams();
+
   AEFVSlopeLimitingOneD(const InputParameters & parameters);
 
   /// compute the limited slope of the cell

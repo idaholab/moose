@@ -25,6 +25,8 @@ InputParameters validParams<HomogenizedElasticConstants>();
 class HomogenizedElasticConstants : public ElementAverageValue
 {
 public:
+  static InputParameters validParams();
+
   HomogenizedElasticConstants(const InputParameters & parameters);
 
   virtual void initialize();

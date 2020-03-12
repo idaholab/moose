@@ -30,6 +30,8 @@ template <ComputeStage compute_stage>
 class LevelSetAdvection : public LevelSetVelocityInterface<ADKernelValue<compute_stage>>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetAdvection(const InputParameters & parameters);
 
 protected:

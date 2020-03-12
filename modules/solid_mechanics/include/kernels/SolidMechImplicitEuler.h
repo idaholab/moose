@@ -21,6 +21,8 @@ InputParameters validParams<SolidMechImplicitEuler>();
 class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {
 public:
+  static InputParameters validParams();
+
   SolidMechImplicitEuler(const InputParameters & parameters);
 
 protected:

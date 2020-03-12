@@ -11,14 +11,11 @@
 
 #include "MooseApp.h"
 
-class MiscApp;
-
-template <>
-InputParameters validParams<MiscApp>();
-
 class MiscApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   MiscApp(const InputParameters & parameters);
   virtual ~MiscApp();
 

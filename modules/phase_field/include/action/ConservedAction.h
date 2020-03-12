@@ -23,6 +23,8 @@ InputParameters validParams<ConservedAction>();
 class ConservedAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ConservedAction(const InputParameters & params);
 
   virtual void act() override;

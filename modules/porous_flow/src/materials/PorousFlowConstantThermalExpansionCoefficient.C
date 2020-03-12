@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowConstantThermalExpansionCoefficient);
 
-template <>
+defineLegacyParams(PorousFlowConstantThermalExpansionCoefficient);
+
 InputParameters
-validParams<PorousFlowConstantThermalExpansionCoefficient>()
+PorousFlowConstantThermalExpansionCoefficient::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1.0, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
   params.addRangeCheckedParam<Real>("fluid_coefficient",

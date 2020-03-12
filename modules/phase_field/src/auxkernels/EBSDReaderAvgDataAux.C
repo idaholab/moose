@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", EBSDReaderAvgDataAux);
 
-template <>
+defineLegacyParams(EBSDReaderAvgDataAux);
+
 InputParameters
-validParams<EBSDReaderAvgDataAux>()
+EBSDReaderAvgDataAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject");

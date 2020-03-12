@@ -14,11 +14,12 @@
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainPD);
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainPD);
+
 InputParameters
-validParams<GeneralizedPlaneStrainPD>()
+GeneralizedPlaneStrainPD::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
   params.addClassDescription("Class for claculating residual and diagonal Jacobian for"
                              "state-based peridynamic generalized plane strain formulation");
 

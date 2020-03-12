@@ -24,6 +24,8 @@ InputParameters validParams<LinearIsotropicMaterial>();
 class LinearIsotropicMaterial : public SolidMechanicsMaterial
 {
 public:
+  static InputParameters validParams();
+
   LinearIsotropicMaterial(const InputParameters & parameters);
 
   virtual ~LinearIsotropicMaterial();

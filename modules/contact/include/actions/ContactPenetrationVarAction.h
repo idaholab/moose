@@ -15,6 +15,8 @@
 class ContactPenetrationVarAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ContactPenetrationVarAction(const InputParameters & params);
 
   virtual void act();

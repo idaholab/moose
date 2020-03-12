@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCFreezingIC);
 
-template <>
+defineLegacyParams(PFCFreezingIC);
+
 InputParameters
-validParams<PFCFreezingIC>()
+PFCFreezingIC::validParams()
 {
-  InputParameters params = validParams<RandomICBase>();
+  InputParameters params = RandomICBase::validParams();
   params.addRequiredParam<Real>("x1",
                                 "The x coordinate of the lower left-hand corner of the frozen box");
   params.addRequiredParam<Real>("y1",

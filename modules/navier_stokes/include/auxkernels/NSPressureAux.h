@@ -24,6 +24,8 @@ InputParameters validParams<NSPressureAux>();
 class NSPressureAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NSPressureAux(const InputParameters & parameters);
 
   virtual ~NSPressureAux() {}

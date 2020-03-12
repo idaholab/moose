@@ -17,11 +17,12 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoi);
 
-template <>
+defineLegacyParams(PolycrystalVoronoi);
+
 InputParameters
-validParams<PolycrystalVoronoi>()
+PolycrystalVoronoi::validParams()
 {
-  InputParameters params = validParams<PolycrystalUserObjectBase>();
+  InputParameters params = PolycrystalUserObjectBase::validParams();
   params.addClassDescription(
       "Random Voronoi tessellation polycrystal (used by PolycrystalVoronoiAction)");
   params.addParam<unsigned int>(

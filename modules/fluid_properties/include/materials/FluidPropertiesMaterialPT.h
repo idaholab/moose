@@ -23,6 +23,8 @@ InputParameters validParams<FluidPropertiesMaterialPT>();
 class FluidPropertiesMaterialPT : public Material
 {
 public:
+  static InputParameters validParams();
+
   FluidPropertiesMaterialPT(const InputParameters & parameters);
   virtual ~FluidPropertiesMaterialPT();
 

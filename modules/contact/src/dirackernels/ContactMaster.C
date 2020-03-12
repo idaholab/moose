@@ -21,11 +21,12 @@
 
 registerMooseObject("ContactApp", ContactMaster);
 
-template <>
+defineLegacyParams(ContactMaster);
+
 InputParameters
-validParams<ContactMaster>()
+ContactMaster::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");

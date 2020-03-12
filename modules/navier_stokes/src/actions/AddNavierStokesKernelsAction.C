@@ -16,11 +16,12 @@
 
 registerMooseAction("NavierStokesApp", AddNavierStokesKernelsAction, "add_navier_stokes_kernels");
 
-template <>
+defineLegacyParams(AddNavierStokesKernelsAction);
+
 InputParameters
-validParams<AddNavierStokesKernelsAction>()
+AddNavierStokesKernelsAction::validParams()
 {
-  InputParameters params = validParams<NSAction>();
+  InputParameters params = NSAction::validParams();
   params.addClassDescription("This class allows us to have a section of the input file like the "
                              "following which automatically adds Kernels and AuxKernels for all "
                              "the required nonlinear and auxiliary variables.");

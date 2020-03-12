@@ -24,6 +24,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>();
 class NSMomentumInviscidSpecifiedPressureBC : public NSMomentumInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumInviscidSpecifiedPressureBC(const InputParameters & parameters);
 
   virtual ~NSMomentumInviscidSpecifiedPressureBC() {}

@@ -25,6 +25,8 @@ InputParameters validParams<DeformedGrainMaterial>();
 class DeformedGrainMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   DeformedGrainMaterial(const InputParameters & parameters);
 
 protected:

@@ -25,6 +25,8 @@ InputParameters validParams<GasFreeEnergyBase>();
 class GasFreeEnergyBase : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   GasFreeEnergyBase(const InputParameters & parameters);
 
 protected:

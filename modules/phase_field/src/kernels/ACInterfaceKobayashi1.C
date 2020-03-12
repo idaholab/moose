@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACInterfaceKobayashi1);
 
-template <>
+defineLegacyParams(ACInterfaceKobayashi1);
+
 InputParameters
-validParams<ACInterfaceKobayashi1>()
+ACInterfaceKobayashi1::validParams()
 {
-  InputParameters params = validParams<KernelGrad>();
+  InputParameters params = KernelGrad::validParams();
   params.addClassDescription("Anisotropic gradient energy Allen-Cahn Kernel Part 1");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("eps_name", "eps", "The anisotropic interface parameter");

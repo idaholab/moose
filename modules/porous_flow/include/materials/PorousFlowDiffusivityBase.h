@@ -20,6 +20,8 @@ InputParameters validParams<PorousFlowDiffusivityBase>();
 class PorousFlowDiffusivityBase : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDiffusivityBase(const InputParameters & parameters);
 
 protected:

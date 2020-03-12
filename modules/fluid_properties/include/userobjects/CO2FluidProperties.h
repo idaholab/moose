@@ -45,6 +45,8 @@ InputParameters validParams<CO2FluidProperties>();
 class CO2FluidProperties : public HelmholtzFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   CO2FluidProperties(const InputParameters & parameters);
   virtual ~CO2FluidProperties();
 

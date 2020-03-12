@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", HHPFCRFFSplitKernelAction, "add_kernel");
 
-template <>
+defineLegacyParams(HHPFCRFFSplitKernelAction);
+
 InputParameters
-validParams<HHPFCRFFSplitKernelAction>()
+HHPFCRFFSplitKernelAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Set up kernels for the rational function fit (RFF) phase field crystal model");
   params.addRequiredParam<unsigned int>(

@@ -24,6 +24,8 @@ InputParameters validParams<GrainTrackerElasticity>();
 class GrainTrackerElasticity : public GrainDataTracker<RankFourTensor>
 {
 public:
+  static InputParameters validParams();
+
   GrainTrackerElasticity(const InputParameters & parameters);
 
 protected:

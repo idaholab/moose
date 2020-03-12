@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowPolyLineSink>();
 class PorousFlowPolyLineSink : public PorousFlowLineSink
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPolyLineSink(const InputParameters & parameters);
 
 protected:

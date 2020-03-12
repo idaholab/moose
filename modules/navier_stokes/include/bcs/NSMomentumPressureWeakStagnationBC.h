@@ -25,6 +25,8 @@ InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
 class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBaseBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumPressureWeakStagnationBC(const InputParameters & parameters);
 
 protected:

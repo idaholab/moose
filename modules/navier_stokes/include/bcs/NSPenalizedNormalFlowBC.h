@@ -24,6 +24,8 @@ InputParameters validParams<NSPenalizedNormalFlowBC>();
 class NSPenalizedNormalFlowBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSPenalizedNormalFlowBC(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", PolynomialFreeEnergy);
 
-template <>
+defineLegacyParams(PolynomialFreeEnergy);
+
 InputParameters
-validParams<PolynomialFreeEnergy>()
+PolynomialFreeEnergy::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription("Polynomial free energy for single component systems");
   MooseEnum poly_order("4 6 8");
   params.addRequiredParam<MooseEnum>(

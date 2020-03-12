@@ -25,6 +25,8 @@ InputParameters validParams<NSTemperatureAux>();
 class NSTemperatureAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NSTemperatureAux(const InputParameters & parameters);
 
 protected:

@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsSeff1VGcut);
 
-template <>
+defineLegacyParams(RichardsSeff1VGcut);
+
 InputParameters
-validParams<RichardsSeff1VGcut>()
+RichardsSeff1VGcut::validParams()
 {
-  InputParameters params = validParams<RichardsSeff1VG>();
+  InputParameters params = RichardsSeff1VG::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "p_cut",
       "p_cut < 0",

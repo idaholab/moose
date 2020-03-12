@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSSplitCHCRes);
 
-template <>
+defineLegacyParams(KKSSplitCHCRes);
+
 InputParameters
-validParams<KKSSplitCHCRes>()
+KKSSplitCHCRes::validParams()
 {
-  InputParameters params = validParams<SplitCHBase>();
+  InputParameters params = SplitCHBase::validParams();
   params.addClassDescription(
       "KKS model kernel for the split Bulk Cahn-Hilliard term. This kernel operates on the "
       "physical concentration 'c' as the non-linear variable");

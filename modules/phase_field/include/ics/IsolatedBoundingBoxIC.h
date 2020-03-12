@@ -25,6 +25,8 @@ InputParameters validParams<IsolatedBoundingBoxIC>();
 class IsolatedBoundingBoxIC : public SmoothMultiBoundingBoxBaseIC
 {
 public:
+  static InputParameters validParams();
+
   IsolatedBoundingBoxIC(const InputParameters & parameters);
 
   Real value(const Point & p);

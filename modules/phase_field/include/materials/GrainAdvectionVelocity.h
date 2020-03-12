@@ -27,6 +27,8 @@ InputParameters validParams<GrainAdvectionVelocity>();
 class GrainAdvectionVelocity : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   GrainAdvectionVelocity(const InputParameters & parameters);
 
 protected:

@@ -23,6 +23,8 @@ InputParameters validParams<WeakPlaneStressNOSPD>();
 class WeakPlaneStressNOSPD : public MechanicsBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   WeakPlaneStressNOSPD(const InputParameters & parameters);
 
   virtual void computeLocalResidual() override;

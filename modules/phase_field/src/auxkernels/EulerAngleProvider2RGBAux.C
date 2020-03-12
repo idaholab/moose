@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", EulerAngleProvider2RGBAux);
 
-template <>
+defineLegacyParams(EulerAngleProvider2RGBAux);
+
 InputParameters
-validParams<EulerAngleProvider2RGBAux>()
+EulerAngleProvider2RGBAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Output RGB representation of crystal orientation from user object to "
                              "an AuxVariable. The entire domain must have the same crystal "
                              "structure.");

@@ -27,6 +27,8 @@ InputParameters validParams<GluedContactConstraint>();
 class GluedContactConstraint : public SparsityBasedContactConstraint
 {
 public:
+  static InputParameters validParams();
+
   GluedContactConstraint(const InputParameters & parameters);
   virtual ~GluedContactConstraint() {}
 

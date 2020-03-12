@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAqueousPreDisChemistry);
 
-template <>
+defineLegacyParams(PorousFlowAqueousPreDisChemistry);
+
 InputParameters
-validParams<PorousFlowAqueousPreDisChemistry>()
+PorousFlowAqueousPreDisChemistry::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredCoupledVar(
       "primary_concentrations",
       "List of MOOSE Variables that represent the concentrations of the primary species");

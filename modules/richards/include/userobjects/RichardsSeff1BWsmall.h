@@ -26,6 +26,8 @@ InputParameters validParams<RichardsSeff1BWsmall>();
 class RichardsSeff1BWsmall : public RichardsSeff
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff1BWsmall(const InputParameters & parameters);
 
   /**

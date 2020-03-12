@@ -36,6 +36,8 @@ InputParameters validParams<EBSDReader>();
 class EBSDReader : public EulerAngleProvider, public EBSDAccessFunctors
 {
 public:
+  static InputParameters validParams();
+
   EBSDReader(const InputParameters & params);
   virtual ~EBSDReader();
 

@@ -15,11 +15,12 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalVoronoiVoidICAction, "add_ic");
 
-template <>
+defineLegacyParams(PolycrystalVoronoiVoidICAction);
+
 InputParameters
-validParams<PolycrystalVoronoiVoidICAction>()
+PolycrystalVoronoiVoidICAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params += PolycrystalVoronoiVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");

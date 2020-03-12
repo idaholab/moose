@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedDarcyFlow);
 
-template <>
+defineLegacyParams(PorousFlowFullySaturatedDarcyFlow);
+
 InputParameters
-validParams<PorousFlowFullySaturatedDarcyFlow>()
+PorousFlowFullySaturatedDarcyFlow::validParams()
 {
-  InputParameters params = validParams<PorousFlowFullySaturatedDarcyBase>();
+  InputParameters params = PorousFlowFullySaturatedDarcyBase::validParams();
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
   params.addClassDescription("Darcy flux suitable for models involving a fully-saturated single "

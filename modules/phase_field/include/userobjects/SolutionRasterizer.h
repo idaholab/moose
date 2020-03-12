@@ -28,6 +28,8 @@ InputParameters validParams<SolutionRasterizer>();
 class SolutionRasterizer : public SolutionUserObject
 {
 public:
+  static InputParameters validParams();
+
   SolutionRasterizer(const InputParameters & parameters);
 
   virtual ~SolutionRasterizer() {}

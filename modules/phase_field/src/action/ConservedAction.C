@@ -22,11 +22,12 @@ registerMooseAction("PhaseFieldApp", ConservedAction, "add_variable");
 
 registerMooseAction("PhaseFieldApp", ConservedAction, "add_kernel");
 
-template <>
+defineLegacyParams(ConservedAction);
+
 InputParameters
-validParams<ConservedAction>()
+ConservedAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Set up the variable(s) and the kernels needed for a conserved phase field variable."
       " Note that for a direct solve, the element family and order are overwritten with hermite "

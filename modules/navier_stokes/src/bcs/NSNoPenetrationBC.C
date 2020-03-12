@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSNoPenetrationBC);
 
-template <>
+defineLegacyParams(NSNoPenetrationBC);
+
 InputParameters
-validParams<NSNoPenetrationBC>()
+NSNoPenetrationBC::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addClassDescription(
       "This class facilitates adding solid wall 'no penetration' BCs for the Euler equations.");
   params.addRequiredParam<std::vector<BoundaryName>>(

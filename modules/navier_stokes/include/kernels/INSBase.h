@@ -24,6 +24,8 @@ InputParameters validParams<INSBase>();
 class INSBase : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSBase(const InputParameters & parameters);
 
   virtual ~INSBase() {}

@@ -33,6 +33,8 @@ InputParameters validParams<SolidModel>();
 class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   SolidModel(const InputParameters & parameters);
   virtual ~SolidModel();
 

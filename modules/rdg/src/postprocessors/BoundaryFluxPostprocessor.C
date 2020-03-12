@@ -12,11 +12,12 @@
 
 registerMooseObject("RdgApp", BoundaryFluxPostprocessor);
 
-template <>
+defineLegacyParams(BoundaryFluxPostprocessor);
+
 InputParameters
-validParams<BoundaryFluxPostprocessor>()
+BoundaryFluxPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
 
   params.addRequiredParam<UserObjectName>("boundary_flux_uo", "Boundary flux user object name");
   params.addRequiredParam<unsigned int>("flux_index", "Index within flux vector to query");

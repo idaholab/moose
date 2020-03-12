@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class LevelSetAdvectionSUPG : public LevelSetVelocityInterface<ADKernelGrad<compute_stage>>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetAdvectionSUPG(const InputParameters & parameters);
 
 protected:

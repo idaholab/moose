@@ -22,6 +22,8 @@ InputParameters validParams<RichardsDensityConstBulk>();
 class RichardsDensityConstBulk : public RichardsDensity
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityConstBulk(const InputParameters & parameters);
 
   /**

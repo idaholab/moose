@@ -21,6 +21,8 @@ InputParameters validParams<VolumetricModel>();
 class VolumetricModel : public Material
 {
 public:
+  static InputParameters validParams();
+
   VolumetricModel(const InputParameters & parameters);
   virtual ~VolumetricModel();
 

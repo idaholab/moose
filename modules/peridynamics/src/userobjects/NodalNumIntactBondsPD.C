@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalNumIntactBondsPD);
 
-template <>
+defineLegacyParams(NodalNumIntactBondsPD);
+
 InputParameters
-validParams<NodalNumIntactBondsPD>()
+NodalNumIntactBondsPD::validParams()
 {
-  InputParameters params = validParams<NodalAuxVariableUserObjectBasePD>();
+  InputParameters params = NodalAuxVariableUserObjectBasePD::validParams();
   params.addClassDescription("Class for computing number of intact bonds for each material point "
                              "in peridynamic fracture modeling and simulation");
 

@@ -25,6 +25,8 @@ InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>();
 class MultiComponentFluidPropertiesMaterialPT : public Material
 {
 public:
+  static InputParameters validParams();
+
   MultiComponentFluidPropertiesMaterialPT(const InputParameters & parameters);
   virtual ~MultiComponentFluidPropertiesMaterialPT();
 

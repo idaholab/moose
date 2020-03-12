@@ -25,6 +25,8 @@ InputParameters validParams<CoupledMaterialDerivative>();
 class CoupledMaterialDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   CoupledMaterialDerivative(const InputParameters & parameters);
   virtual void initialSetup() override;
 

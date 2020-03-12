@@ -16,11 +16,12 @@
 
 registerMooseObjectAliased("ContactApp", ContactLineSearchBase, "ContactLineSearch");
 
-template <>
+defineLegacyParams(ContactLineSearchBase);
+
 InputParameters
-validParams<ContactLineSearchBase>()
+ContactLineSearchBase::validParams()
 {
-  InputParameters params = validParams<LineSearch>();
+  InputParameters params = LineSearch::validParams();
   params.addRequiredParam<unsigned>("allowed_lambda_cuts",
                                     "The number of times lambda is allowed to get cut");
   params.addRequiredParam<Real>("contact_ltol",

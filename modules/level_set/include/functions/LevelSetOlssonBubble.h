@@ -12,17 +12,14 @@
 // MOOSE includes
 #include "Function.h"
 
-class LevelSetOlssonBubble;
-
-template <>
-InputParameters validParams<LevelSetOlssonBubble>();
-
 /**
  * Implements the "bubble" function from Olsson and Kreiss (2005).
  */
 class LevelSetOlssonBubble : public Function
 {
 public:
+  static InputParameters validParams();
+
   LevelSetOlssonBubble(const InputParameters & parameters);
 
   virtual Real value(Real /*t*/, const Point & p) const override;

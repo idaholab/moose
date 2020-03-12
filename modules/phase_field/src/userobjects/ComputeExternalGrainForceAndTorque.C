@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", ComputeExternalGrainForceAndTorque);
 
-template <>
+defineLegacyParams(ComputeExternalGrainForceAndTorque);
+
 InputParameters
-validParams<ComputeExternalGrainForceAndTorque>()
+ComputeExternalGrainForceAndTorque::validParams()
 {
-  InputParameters params = validParams<ShapeElementUserObject>();
+  InputParameters params = ShapeElementUserObject::validParams();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
   params.addParam<MaterialPropertyName>("force_density", "force_density", "Force density material");
   params.addParam<UserObjectName>("grain_data", "center of mass of grains");

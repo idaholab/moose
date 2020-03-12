@@ -14,11 +14,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ThermalMaterialBaseBPD);
+
 InputParameters
-validParams<ThermalMaterialBaseBPD>()
+ThermalMaterialBaseBPD::validParams()
 {
-  InputParameters params = validParams<PeridynamicsMaterialBase>();
+  InputParameters params = PeridynamicsMaterialBase::validParams();
   params.addClassDescription("Base class for bond-based peridynamic thermal models");
 
   params.addRequiredCoupledVar("temperature", "Nonlinear variable name for the temperature");

@@ -23,6 +23,8 @@ InputParameters validParams<DoubleWellPotential>();
 class DoubleWellPotential : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   DoubleWellPotential(const InputParameters & parameters);
 
 protected:

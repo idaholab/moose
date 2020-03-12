@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", KKSCHBulk);
 
-template <>
+defineLegacyParams(KKSCHBulk);
+
 InputParameters
-validParams<KKSCHBulk>()
+KKSCHBulk::validParams()
 {
   InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription("KKS model kernel for the Bulk Cahn-Hilliard term. This operates on "

@@ -24,6 +24,8 @@ InputParameters validParams<RichardsMultiphaseProblem>();
 class RichardsMultiphaseProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   RichardsMultiphaseProblem(const InputParameters & params);
   virtual ~RichardsMultiphaseProblem();
 

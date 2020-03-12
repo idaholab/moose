@@ -22,6 +22,8 @@ InputParameters validParams<HomogenizationKernel>();
 class HomogenizationKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   HomogenizationKernel(const InputParameters & parameters);
 
 protected:

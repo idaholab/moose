@@ -61,6 +61,8 @@ class ElementLoopUserObject : public GeneralUserObject,
                               public MooseVariableDependencyInterface
 {
 public:
+  static InputParameters validParams();
+
   ElementLoopUserObject(const InputParameters & parameters);
   ElementLoopUserObject(ElementLoopUserObject & x, Threads::split split);
   virtual ~ElementLoopUserObject();

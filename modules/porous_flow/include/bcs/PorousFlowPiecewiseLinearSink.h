@@ -27,6 +27,8 @@ InputParameters validParams<PorousFlowPiecewiseLinearSink>();
 class PorousFlowPiecewiseLinearSink : public PorousFlowSinkPTDefiner
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:

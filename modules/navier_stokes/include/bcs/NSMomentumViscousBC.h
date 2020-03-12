@@ -32,6 +32,8 @@ InputParameters validParams<NSMomentumViscousBC>();
 class NSMomentumViscousBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumViscousBC(const InputParameters & parameters);
 
 protected:

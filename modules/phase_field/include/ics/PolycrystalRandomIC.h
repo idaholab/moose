@@ -23,6 +23,8 @@ InputParameters validParams<PolycrystalRandomIC>();
 class PolycrystalRandomIC : public RandomICBase
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalRandomIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

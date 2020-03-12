@@ -11,14 +11,19 @@
 
 registerADMooseObject("NavierStokesApp", INSADMassPSPG);
 
-defineADValidParams(INSADMassPSPG,
-                    ADKernelGrad,
-                    params.addClassDescription(
-                        "This class adds PSPG stabilization to the mass equation, enabling use of "
-                        "equal order shape functions for pressure and velocity variables");
-                    params.addParam<MaterialPropertyName>("rho_name",
-                                                          "rho",
-                                                          "The name of the density"););
+defineADLegacyParams(INSADMassPSPG);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMassPSPG<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription(
+      "This class adds PSPG stabilization to the mass equation, enabling use of "
+      "equal order shape functions for pressure and velocity variables");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMassPSPG<compute_stage>::INSADMassPSPG(const InputParameters & parameters)

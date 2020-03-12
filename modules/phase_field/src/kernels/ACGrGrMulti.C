@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACGrGrMulti);
 
-template <>
+defineLegacyParams(ACGrGrMulti);
+
 InputParameters
-validParams<ACGrGrMulti>()
+ACGrGrMulti::validParams()
 {
-  InputParameters params = validParams<ACGrGrBase>();
+  InputParameters params = ACGrGrBase::validParams();
   params.addClassDescription("Multi-phase poly-crystalline Allen-Cahn Kernel");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "gamma_names",

@@ -30,6 +30,8 @@ template <ComputeStage compute_stage>
 class ADSplitCHCRes : public ADSplitCHBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHCRes(const InputParameters & parameters);
 
 protected:

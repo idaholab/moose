@@ -32,6 +32,8 @@ InputParameters validParams<RateDepSmearCrackModel>();
 class RateDepSmearCrackModel : public ConstitutiveModel
 {
 public:
+  static InputParameters validParams();
+
   RateDepSmearCrackModel(const InputParameters & parameters);
 
   virtual ~RateDepSmearCrackModel();

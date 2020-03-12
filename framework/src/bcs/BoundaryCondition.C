@@ -12,12 +12,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 
-template <>
-InputParameters
-validParams<BoundaryCondition>()
-{
-  return BoundaryCondition::validParams();
-}
+defineLegacyParams(BoundaryCondition);
 
 InputParameters
 BoundaryCondition::validParams()

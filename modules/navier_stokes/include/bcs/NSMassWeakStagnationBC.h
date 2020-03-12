@@ -23,6 +23,8 @@ InputParameters validParams<NSMassWeakStagnationBC>();
 class NSMassWeakStagnationBC : public NSWeakStagnationBaseBC
 {
 public:
+  static InputParameters validParams();
+
   NSMassWeakStagnationBC(const InputParameters & parameters);
 
 protected:

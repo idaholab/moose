@@ -16,6 +16,8 @@
 class NodalAreaVarAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   NodalAreaVarAction(const InputParameters & params);
 
   virtual void act();

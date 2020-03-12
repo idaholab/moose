@@ -22,6 +22,8 @@ InputParameters validParams<MassFreeBC>();
 class MassFreeBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   MassFreeBC(const InputParameters & parameters);
 
 protected:

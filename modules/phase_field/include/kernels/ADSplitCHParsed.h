@@ -28,6 +28,8 @@ class ADSplitCHParsed : public ADSplitCHCRes<compute_stage>,
                         public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHParsed(const InputParameters & parameters);
 
 protected:

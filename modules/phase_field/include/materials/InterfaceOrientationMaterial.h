@@ -25,6 +25,8 @@ InputParameters validParams<InterfaceOrientationMaterial>();
 class InterfaceOrientationMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   InterfaceOrientationMaterial(const InputParameters & parameters);
 
 protected:

@@ -23,6 +23,8 @@ InputParameters validParams<GBDependentTensorBase>();
 class GBDependentTensorBase : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   GBDependentTensorBase(const InputParameters & parameters);
 
 protected:

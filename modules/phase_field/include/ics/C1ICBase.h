@@ -45,6 +45,8 @@ InputParameters validParams<C1ICBase>();
 class C1ICBase : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   C1ICBase(const InputParameters & parameters);
 
 protected:

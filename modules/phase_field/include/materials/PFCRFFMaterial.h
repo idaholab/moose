@@ -20,6 +20,8 @@ InputParameters validParams<PFCRFFMaterial>();
 class PFCRFFMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   PFCRFFMaterial(const InputParameters & parameters);
 
 protected:

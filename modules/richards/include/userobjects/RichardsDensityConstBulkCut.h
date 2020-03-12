@@ -25,6 +25,8 @@ InputParameters validParams<RichardsDensityConstBulkCut>();
 class RichardsDensityConstBulkCut : public RichardsDensity
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityConstBulkCut(const InputParameters & parameters);
 
   /**

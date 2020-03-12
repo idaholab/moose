@@ -25,6 +25,8 @@ InputParameters validParams<OneDContactConstraint>();
 class OneDContactConstraint : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   OneDContactConstraint(const InputParameters & parameters);
   virtual ~OneDContactConstraint() {}
 

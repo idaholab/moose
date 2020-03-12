@@ -36,6 +36,8 @@ InputParameters validParams<RichardsDensityVDW>();
 class RichardsDensityVDW : public RichardsDensity
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityVDW(const InputParameters & parameters);
 
   /**

@@ -23,6 +23,8 @@ InputParameters validParams<ForceStabilizedSmallStrainMechanicsNOSPD>();
 class ForceStabilizedSmallStrainMechanicsNOSPD : public MechanicsBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ForceStabilizedSmallStrainMechanicsNOSPD(const InputParameters & parameters);
 
 protected:

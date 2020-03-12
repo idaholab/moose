@@ -34,6 +34,8 @@ InputParameters validParams<HelmholtzFluidProperties>();
 class HelmholtzFluidProperties : public SinglePhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   HelmholtzFluidProperties(const InputParameters & parameters);
 
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;

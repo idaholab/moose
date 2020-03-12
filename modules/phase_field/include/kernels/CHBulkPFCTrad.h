@@ -20,6 +20,8 @@ InputParameters validParams<CHBulkPFCTrad>();
 class CHBulkPFCTrad : public CHBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   CHBulkPFCTrad(const InputParameters & parameters);
 
 protected:

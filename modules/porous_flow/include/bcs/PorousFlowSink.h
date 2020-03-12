@@ -34,6 +34,8 @@ InputParameters validParams<PorousFlowSink>();
 class PorousFlowSink : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowSink(const InputParameters & parameters);
 
 protected:

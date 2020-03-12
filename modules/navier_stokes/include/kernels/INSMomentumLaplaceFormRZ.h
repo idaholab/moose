@@ -26,6 +26,8 @@ InputParameters validParams<INSMomentumLaplaceFormRZ>();
 class INSMomentumLaplaceFormRZ : public INSMomentumLaplaceForm
 {
 public:
+  static InputParameters validParams();
+
   INSMomentumLaplaceFormRZ(const InputParameters & parameters);
 
   virtual ~INSMomentumLaplaceFormRZ() {}

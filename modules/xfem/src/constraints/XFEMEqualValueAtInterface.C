@@ -14,11 +14,12 @@
 
 registerMooseObject("XFEMApp", XFEMEqualValueAtInterface);
 
-template <>
+defineLegacyParams(XFEMEqualValueAtInterface);
+
 InputParameters
-validParams<XFEMEqualValueAtInterface>()
+XFEMEqualValueAtInterface::validParams()
 {
-  InputParameters params = validParams<ElemElemConstraint>();
+  InputParameters params = ElemElemConstraint::validParams();
   params.addRequiredParam<Real>("alpha", "Penalty parameter in penalty formulation.");
   params.addRequiredParam<Real>("value", "Prescribed value at the interface.");
   params.addParam<UserObjectName>(

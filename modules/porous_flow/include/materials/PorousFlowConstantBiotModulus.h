@@ -29,6 +29,8 @@ InputParameters validParams<PorousFlowConstantBiotModulus>();
 class PorousFlowConstantBiotModulus : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowConstantBiotModulus(const InputParameters & parameters);
 
 protected:

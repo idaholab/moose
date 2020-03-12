@@ -23,6 +23,8 @@ InputParameters validParams<PeridynamicsMaterialBase>();
 class PeridynamicsMaterialBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   PeridynamicsMaterialBase(const InputParameters & parameters);
 
 protected:

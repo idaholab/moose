@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosityConst);
 
-template <>
+defineLegacyParams(PorousFlowPorosityConst);
+
 InputParameters
-validParams<PorousFlowPorosityConst>()
+PorousFlowPorosityConst::validParams()
 {
-  InputParameters params = validParams<PorousFlowPorosityBase>();
+  InputParameters params = PorousFlowPorosityBase::validParams();
   params.addRequiredCoupledVar(
       "porosity",
       "The porosity (assumed indepenent of porepressure, temperature, "

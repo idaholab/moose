@@ -25,6 +25,8 @@ InputParameters validParams<RichardsRelPermPrimeAux>();
 class RichardsRelPermPrimeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsRelPermPrimeAux(const InputParameters & parameters);
 
 protected:

@@ -20,6 +20,8 @@ InputParameters validParams<MultiGrainRigidBodyMotion>();
 class MultiGrainRigidBodyMotion : public GrainRigidBodyMotionBase
 {
 public:
+  static InputParameters validParams();
+
   MultiGrainRigidBodyMotion(const InputParameters & parameters);
 
 protected:

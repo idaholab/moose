@@ -13,11 +13,6 @@
 #include "PETScDiffusionFDM.h"
 #include "ExternalPetscSolverApp.h"
 
-class ExternalPETScProblem;
-
-template <>
-InputParameters validParams<ExternalPETScProblem>();
-
 /**
  * This is an interface to call a pure PETSc solver.
  * We also sync the PETSc solution to moose variables,
@@ -27,6 +22,8 @@ InputParameters validParams<ExternalPETScProblem>();
 class ExternalPETScProblem : public ExternalProblem
 {
 public:
+  static InputParameters validParams();
+
   ExternalPETScProblem(const InputParameters & params);
 #if LIBMESH_HAVE_PETSC
   ~ExternalPETScProblem() { VecDestroy(&_petsc_sol); }

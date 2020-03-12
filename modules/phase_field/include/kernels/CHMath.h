@@ -27,6 +27,8 @@ InputParameters validParams<CHMath>();
 class CHMath : public CHBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   CHMath(const InputParameters & parameters);
 
 protected:

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", BarrierFunctionMaterial);
 
-template <>
+defineLegacyParams(BarrierFunctionMaterial);
+
 InputParameters
-validParams<BarrierFunctionMaterial>()
+BarrierFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<OrderParameterFunctionMaterial>();
+  InputParameters params = OrderParameterFunctionMaterial::validParams();
   params.addClassDescription("Helper material to provide g(eta) and its derivative in a "
                              "polynomial.\nSIMPLE: eta^2*(1-eta)^2\nLOW: eta*(1-eta)"
                              "\nHIGH: eta^2*(1-eta^2)^2");

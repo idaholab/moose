@@ -22,6 +22,7 @@ InputParameters validParams<FXValuePenaltyBC>();
 class FXValuePenaltyBC : public FunctionPenaltyDirichletBC
 {
 public:
+  static InputParameters validParams();
+
   FXValuePenaltyBC(const InputParameters & parameters);
 };
-

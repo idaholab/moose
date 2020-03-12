@@ -21,6 +21,8 @@ InputParameters validParams<IsotropicPlasticity>();
 class IsotropicPlasticity : public ReturnMappingModel
 {
 public:
+  static InputParameters validParams();
+
   IsotropicPlasticity(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;

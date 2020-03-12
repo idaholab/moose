@@ -9,11 +9,12 @@
 
 #include "PorousFlowFluidStateBase.h"
 
-template <>
+defineLegacyParams(PorousFlowFluidStateBase);
+
 InputParameters
-validParams<PorousFlowFluidStateBase>()
+PorousFlowFluidStateBase::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addParam<unsigned int>("liquid_phase_number", 0, "The phase number of the liquid phase");
   params.addParam<unsigned int>(
       "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");

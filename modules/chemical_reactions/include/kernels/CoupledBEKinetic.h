@@ -22,6 +22,8 @@ InputParameters validParams<CoupledBEKinetic>();
 class CoupledBEKinetic : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   CoupledBEKinetic(const InputParameters & parameters);
 
 protected:

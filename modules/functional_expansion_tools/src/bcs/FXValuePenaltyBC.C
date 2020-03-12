@@ -12,11 +12,12 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXValuePenaltyBC);
 
-template <>
+defineLegacyParams(FXValuePenaltyBC);
+
 InputParameters
-validParams<FXValuePenaltyBC>()
+FXValuePenaltyBC::validParams()
 {
-  InputParameters params = validParams<FunctionPenaltyDirichletBC>();
+  InputParameters params = FunctionPenaltyDirichletBC::validParams();
 
   params.addClassDescription(
       "Sets a value boundary condition, evaluated using a FunctionSeries instance. This does not "

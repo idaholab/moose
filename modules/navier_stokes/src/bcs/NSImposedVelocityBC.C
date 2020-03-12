@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSImposedVelocityBC);
 
-template <>
+defineLegacyParams(NSImposedVelocityBC);
+
 InputParameters
-validParams<NSImposedVelocityBC>()
+NSImposedVelocityBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addClassDescription("Impose Velocity BC.");
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredParam<Real>("desired_velocity", "");

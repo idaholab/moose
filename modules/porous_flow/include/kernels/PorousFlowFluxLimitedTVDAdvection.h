@@ -33,6 +33,8 @@ InputParameters validParams<PorousFlowFluxLimitedTVDAdvection>();
 class PorousFlowFluxLimitedTVDAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluxLimitedTVDAdvection(const InputParameters & parameters);
 
 protected:

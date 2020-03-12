@@ -28,6 +28,8 @@ InputParameters validParams<ReconPhaseVarIC>();
 class ReconPhaseVarIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ReconPhaseVarIC(const InputParameters & parameters);
 
   virtual Real value(const Point & /*p*/);

@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", StrainGradDispDerivatives);
 
-template <>
+defineLegacyParams(StrainGradDispDerivatives);
+
 InputParameters
-validParams<StrainGradDispDerivatives>()
+StrainGradDispDerivatives::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Provide the constant derivatives of strain w.r.t. the displacement gradient components.");
   params.addCoupledVar("displacement_gradients",

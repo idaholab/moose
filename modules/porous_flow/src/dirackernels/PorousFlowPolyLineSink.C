@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPolyLineSink);
 
-template <>
+defineLegacyParams(PorousFlowPolyLineSink);
+
 InputParameters
-validParams<PorousFlowPolyLineSink>()
+PorousFlowPolyLineSink::validParams()
 {
-  InputParameters params = validParams<PorousFlowLineSink>();
+  InputParameters params = PorousFlowLineSink::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "p_or_t_vals",
       "Tuple of pressure (or temperature) values.  Must be monotonically increasing.");

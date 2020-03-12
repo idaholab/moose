@@ -25,6 +25,8 @@ InputParameters validParams<GrainForceAndTorqueSum>();
 class GrainForceAndTorqueSum : public GrainForceAndTorqueInterface, public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GrainForceAndTorqueSum(const InputParameters & parameters);
 
   virtual void initialize();

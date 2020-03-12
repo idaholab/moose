@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", ACMultiInterface);
 
-template <>
+defineLegacyParams(ACMultiInterface);
+
 InputParameters
-validParams<ACMultiInterface>()
+ACMultiInterface::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel with cross terms");
   params.addRequiredCoupledVar("etas", "All eta_i order parameters of the multiphase problem");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("kappa_names",

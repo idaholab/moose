@@ -15,11 +15,12 @@
 
 registerMooseObject("SolidMechanicsApp", IsotropicPlasticity);
 
-template <>
+defineLegacyParams(IsotropicPlasticity);
+
 InputParameters
-validParams<IsotropicPlasticity>()
+IsotropicPlasticity::validParams()
 {
-  InputParameters params = validParams<ReturnMappingModel>();
+  InputParameters params = ReturnMappingModel::validParams();
   params.addClassDescription("Calculates the stress and plastic strain in the general isotropic "
                              "linear strain hardening plasticity model");
 

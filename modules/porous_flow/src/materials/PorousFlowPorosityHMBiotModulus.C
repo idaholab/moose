@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosityHMBiotModulus);
 
-template <>
+defineLegacyParams(PorousFlowPorosityHMBiotModulus);
+
 InputParameters
-validParams<PorousFlowPorosityHMBiotModulus>()
+PorousFlowPorosityHMBiotModulus::validParams()
 {
-  InputParameters params = validParams<PorousFlowPorosity>();
+  InputParameters params = PorousFlowPorosity::validParams();
   params.set<bool>("mechanical") = true;
   params.set<bool>("fluid") = true;
   params.addRequiredRangeCheckedParam<Real>("constant_biot_modulus",

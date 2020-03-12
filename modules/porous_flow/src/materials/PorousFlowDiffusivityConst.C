@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDiffusivityConst);
 
-template <>
+defineLegacyParams(PorousFlowDiffusivityConst);
+
 InputParameters
-validParams<PorousFlowDiffusivityConst>()
+PorousFlowDiffusivityConst::validParams()
 {
-  InputParameters params = validParams<PorousFlowDiffusivityBase>();
+  InputParameters params = PorousFlowDiffusivityBase::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "tortuosity", "List of tortuosities. Order is i) phase 0; ii) phase 1; etc");
   params.addClassDescription(

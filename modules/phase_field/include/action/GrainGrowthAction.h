@@ -23,6 +23,8 @@ InputParameters validParams<GrainGrowthAction>();
 class GrainGrowthAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   GrainGrowthAction(const InputParameters & params);
 
   virtual void act();

@@ -12,11 +12,12 @@
 
 registerMooseObject("FluidPropertiesApp", IdealGasFluidProperties);
 
-template <>
+defineLegacyParams(IdealGasFluidProperties);
+
 InputParameters
-validParams<IdealGasFluidProperties>()
+IdealGasFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRangeCheckedParam<Real>("gamma", 1.4, "gamma > 1", "gamma value (cp/cv)");
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>("mu", 18.23e-6, "Dynamic viscosity, Pa.s");

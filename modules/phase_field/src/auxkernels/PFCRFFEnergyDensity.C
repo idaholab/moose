@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCRFFEnergyDensity);
 
-template <>
+defineLegacyParams(PFCRFFEnergyDensity);
+
 InputParameters
-validParams<PFCRFFEnergyDensity>()
+PFCRFFEnergyDensity::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("v", "Array of coupled variables");
   params.addParam<Real>("a", 1.0, "Modified Coefficent in Taylor series expansion");
   params.addParam<Real>("b", 1.0, "Modified Coefficent in Taylor series expansion");

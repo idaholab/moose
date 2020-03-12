@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", ACInterfaceStress);
 
-template <>
+defineLegacyParams(ACInterfaceStress);
+
 InputParameters
-validParams<ACInterfaceStress>()
+ACInterfaceStress::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Interface stress driving force Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<std::string>("base_name", "Material property base name");

@@ -11,11 +11,12 @@
 
 registerMooseObject("XFEMApp", XFEMPhaseTransitionMovingInterfaceVelocity);
 
-template <>
+defineLegacyParams(XFEMPhaseTransitionMovingInterfaceVelocity);
+
 InputParameters
-validParams<XFEMPhaseTransitionMovingInterfaceVelocity>()
+XFEMPhaseTransitionMovingInterfaceVelocity::validParams()
 {
-  InputParameters params = validParams<XFEMMovingInterfaceVelocityBase>();
+  InputParameters params = XFEMMovingInterfaceVelocityBase::validParams();
   params.addRequiredParam<Real>("diffusivity_at_positive_level_set",
                                 "Diffusivity for level set positive region.");
   params.addRequiredParam<Real>("diffusivity_at_negative_level_set",

@@ -24,6 +24,8 @@ class SodiumProperties : public FluidProperties
 {
 
 public:
+  static InputParameters validParams();
+
   SodiumProperties(const InputParameters & parameters);
 
   /**

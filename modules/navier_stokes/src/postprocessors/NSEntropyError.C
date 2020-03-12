@@ -16,11 +16,12 @@
 
 registerMooseObject("NavierStokesApp", NSEntropyError);
 
-template <>
+defineLegacyParams(NSEntropyError);
+
 InputParameters
-validParams<NSEntropyError>()
+NSEntropyError::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Computes entropy error.");
   params.addRequiredParam<Real>("rho_infty", "Freestream density");
   params.addRequiredParam<Real>("p_infty", "Freestream pressure");

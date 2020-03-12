@@ -9,11 +9,12 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-template <>
+defineLegacyParams(PorousFlowMaterialVectorBase);
+
 InputParameters
-validParams<PorousFlowMaterialVectorBase>()
+PorousFlowMaterialVectorBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterial>();
+  InputParameters params = PorousFlowMaterial::validParams();
   params.addClassDescription("Base class for PorousFlow materials that combine phase-dependent "
                              "properties into vectors expected by the kernels");
   return params;

@@ -23,6 +23,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedPressureBC>();
 class NSEnergyInviscidSpecifiedPressureBC : public NSEnergyInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyInviscidSpecifiedPressureBC(const InputParameters & parameters);
 
 protected:

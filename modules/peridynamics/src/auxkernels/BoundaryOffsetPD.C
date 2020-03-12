@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", BoundaryOffsetPD);
 
-template <>
+defineLegacyParams(BoundaryOffsetPD);
+
 InputParameters
-validParams<BoundaryOffsetPD>()
+BoundaryOffsetPD::validParams()
 {
-  InputParameters params = validParams<AuxKernelBasePD>();
+  InputParameters params = AuxKernelBasePD::validParams();
   params.addClassDescription(
       "Class for output offset of PD boundary nodes compared to initial FE mesh");
 

@@ -22,6 +22,8 @@ InputParameters validParams<PorousFlowPermeabilityConst>();
 class PorousFlowPermeabilityConst : public PorousFlowPermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPermeabilityConst(const InputParameters & parameters);
 
 protected:

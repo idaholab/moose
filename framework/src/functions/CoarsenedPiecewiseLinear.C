@@ -13,11 +13,12 @@
 
 registerMooseObject("MooseApp", CoarsenedPiecewiseLinear);
 
-template <>
+defineLegacyParams(CoarsenedPiecewiseLinear);
+
 InputParameters
-validParams<CoarsenedPiecewiseLinear>()
+CoarsenedPiecewiseLinear::validParams()
 {
-  InputParameters params = validParams<PiecewiseLinearBase>();
+  InputParameters params = PiecewiseLinearBase::validParams();
   params.addClassDescription("Perform a point reduction of the tabulated data upon initialization, "
                              "then evaluate using a linear interpolation.");
   params.addRequiredParam<Real>(

@@ -25,6 +25,8 @@ InputParameters validParams<NSAction>();
 class NSAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   NSAction(InputParameters parameters);
   virtual ~NSAction();
 

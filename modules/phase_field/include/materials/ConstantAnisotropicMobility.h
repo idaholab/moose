@@ -23,6 +23,8 @@ InputParameters validParams<ConstantAnisotropicMobility>();
 class ConstantAnisotropicMobility : public Material
 {
 public:
+  static InputParameters validParams();
+
   ConstantAnisotropicMobility(const InputParameters & parameters);
 
 protected:

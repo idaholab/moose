@@ -25,6 +25,8 @@ InputParameters validParams<NestedBoundingBoxIC>();
 class NestedBoundingBoxIC : public SmoothMultiBoundingBoxBaseIC
 {
 public:
+  static InputParameters validParams();
+
   NestedBoundingBoxIC(const InputParameters & parameters);
 
   Real value(const Point & p);

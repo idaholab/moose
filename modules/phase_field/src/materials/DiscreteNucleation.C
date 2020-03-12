@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleation);
 
-template <>
+defineLegacyParams(DiscreteNucleation);
+
 InputParameters
-validParams<DiscreteNucleation>()
+DiscreteNucleation::validParams()
 {
-  InputParameters params = validParams<DerivativeFunctionMaterialBase>();
+  InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("Free energy contribution for nucleating discrete particles");
   params.addRequiredCoupledVar("op_names",
                                "List of variables to force to a target concentration value");

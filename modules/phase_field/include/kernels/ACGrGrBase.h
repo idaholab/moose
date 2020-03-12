@@ -25,6 +25,8 @@ InputParameters validParams<ACGrGrBase>();
 class ACGrGrBase : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   ACGrGrBase(const InputParameters & parameters);
 
 protected:

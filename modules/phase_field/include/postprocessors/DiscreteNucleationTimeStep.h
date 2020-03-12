@@ -25,6 +25,8 @@ InputParameters validParams<DiscreteNucleationTimeStep>();
 class DiscreteNucleationTimeStep : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationTimeStep(const InputParameters & parameters);
 
   virtual void initialize() override {}

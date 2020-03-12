@@ -25,6 +25,8 @@ InputParameters validParams<BondStatusBasePD>();
 class BondStatusBasePD : public AuxKernelBasePD
 {
 public:
+  static InputParameters validParams();
+
   BondStatusBasePD(const InputParameters & parameters);
 
 protected:

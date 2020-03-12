@@ -71,6 +71,8 @@ template <ComputeStage compute_stage>
 class ADComputeIncrementalShellStrain : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADComputeIncrementalShellStrain(const InputParameters & parameters);
 
 protected:

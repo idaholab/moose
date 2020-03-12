@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatConduction);
 
-template <>
+defineLegacyParams(PorousFlowHeatConduction);
+
 InputParameters
-validParams<PorousFlowHeatConduction>()
+PorousFlowHeatConduction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Heat conduction in the Porous Flow module");

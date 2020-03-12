@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", BrineFluidProperties);
 
-template <>
+defineLegacyParams(BrineFluidProperties);
+
 InputParameters
-validParams<BrineFluidProperties>()
+BrineFluidProperties::validParams()
 {
-  InputParameters params = validParams<MultiComponentFluidProperties>();
+  InputParameters params = MultiComponentFluidProperties::validParams();
   params.addParam<UserObjectName>("water_fp",
                                   "The name of the FluidProperties UserObject for water");
   params.addClassDescription("Fluid properties for brine");

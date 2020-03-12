@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", RandomEulerAngleProvider);
 
-template <>
+defineLegacyParams(RandomEulerAngleProvider);
+
 InputParameters
-validParams<RandomEulerAngleProvider>()
+RandomEulerAngleProvider::validParams()
 {
-  InputParameters params = validParams<EulerAngleProvider>();
+  InputParameters params = EulerAngleProvider::validParams();
   params.addClassDescription("Assign random Euler angles for each grain.");
   params.addRequiredParam<UserObjectName>("grain_tracker_object",
                                           "The FeatureFloodCount UserObject to get values from.");

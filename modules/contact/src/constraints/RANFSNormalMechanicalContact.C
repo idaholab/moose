@@ -20,11 +20,12 @@
 
 registerMooseObject("ContactApp", RANFSNormalMechanicalContact);
 
-template <>
+defineLegacyParams(RANFSNormalMechanicalContact);
+
 InputParameters
-validParams<RANFSNormalMechanicalContact>()
+RANFSNormalMechanicalContact::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
 
   MooseEnum component("x=0 y=1 z=2");

@@ -30,6 +30,8 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>();
 class RichardsHalfGaussianSinkFlux : public SideIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RichardsHalfGaussianSinkFlux(const InputParameters & parameters);
 
 protected:

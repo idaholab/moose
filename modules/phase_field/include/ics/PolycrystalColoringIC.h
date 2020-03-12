@@ -30,6 +30,8 @@ InputParameters validParams<PolycrystalColoringIC>();
 class PolycrystalColoringIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalColoringIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;

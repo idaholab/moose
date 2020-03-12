@@ -19,11 +19,12 @@
 
 registerMooseObject("NavierStokesApp", NSTemperatureAux);
 
-template <>
+defineLegacyParams(NSTemperatureAux);
+
 InputParameters
-validParams<NSTemperatureAux>()
+NSTemperatureAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Temperature is an auxiliary value computed from the total energy "
                              "based on the FluidProperties.");

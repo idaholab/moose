@@ -12,11 +12,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ParametricMaterialBasePD);
+
 InputParameters
-validParams<ParametricMaterialBasePD>()
+ParametricMaterialBasePD::validParams()
 {
-  InputParameters params = validParams<MechanicsMaterialBasePD>();
+  InputParameters params = MechanicsMaterialBasePD::validParams();
   params.addClassDescription("Base class for peridynamic models based on derived micro moduli");
 
   params.addParam<bool>("plane_stress", false, "Plane stress problem or not");

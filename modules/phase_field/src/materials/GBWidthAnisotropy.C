@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GBWidthAnisotropy);
 
-template <>
+defineLegacyParams(GBWidthAnisotropy);
+
 InputParameters
-validParams<GBWidthAnisotropy>()
+GBWidthAnisotropy::validParams()
 {
-  InputParameters params = validParams<GBAnisotropyBase>();
+  InputParameters params = GBAnisotropyBase::validParams();
   params.addRequiredParam<Real>("mu", "Prefactor of bulk free energy");
   params.addRequiredParam<Real>("kappa",
                                 "Prefactor of gradient free energies for all i-j interfaces");

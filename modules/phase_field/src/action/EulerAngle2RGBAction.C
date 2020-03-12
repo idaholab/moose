@@ -17,11 +17,12 @@ registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_kernel");
 
 registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_variable");
 
-template <>
+defineLegacyParams(EulerAngle2RGBAction);
+
 InputParameters
-validParams<EulerAngle2RGBAction>()
+EulerAngle2RGBAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::string>("auxvariable_name_base", "RGB", "Base name of the auxvariables");
   params.addClassDescription("Set up auxvariables and auxkernels to output Euler angles as RGB "
                              "values interpolated across inverse pole figure");

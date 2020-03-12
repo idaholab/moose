@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", IsolatedBoundingBoxIC);
 
-template <>
+defineLegacyParams(IsolatedBoundingBoxIC);
+
 InputParameters
-validParams<IsolatedBoundingBoxIC>()
+IsolatedBoundingBoxIC::validParams()
 {
-  InputParameters params = validParams<SmoothMultiBoundingBoxBaseIC>();
+  InputParameters params = SmoothMultiBoundingBoxBaseIC::validParams();
   params.addClassDescription(
       "Specify variable values inside and outside a list of isolated boxes shaped "
       "axis-aligned regions defined by pairs of opposing corners");

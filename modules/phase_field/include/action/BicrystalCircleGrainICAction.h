@@ -18,6 +18,8 @@
 class BicrystalCircleGrainICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   BicrystalCircleGrainICAction(const InputParameters & params);
 
   virtual void act();

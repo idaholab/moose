@@ -10,11 +10,12 @@
 #include "BondStatusBasePD.h"
 #include "PeridynamicsMesh.h"
 
-template <>
+defineLegacyParams(BondStatusBasePD);
+
 InputParameters
-validParams<BondStatusBasePD>()
+BondStatusBasePD::validParams()
 {
-  InputParameters params = validParams<AuxKernelBasePD>();
+  InputParameters params = AuxKernelBasePD::validParams();
   params.addClassDescription("Base class for different failure criteria to update the bond status");
 
   params.addRequiredCoupledVar("critical_variable", "Name of critical AuxVariable");

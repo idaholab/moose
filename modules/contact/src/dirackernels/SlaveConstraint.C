@@ -20,11 +20,12 @@
 
 registerMooseObject("ContactApp", SlaveConstraint);
 
-template <>
+defineLegacyParams(SlaveConstraint);
+
 InputParameters
-validParams<SlaveConstraint>()
+SlaveConstraint::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");

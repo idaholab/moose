@@ -19,6 +19,8 @@ InputParameters validParams<CombinedTestApp>();
 class CombinedTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   CombinedTestApp(const InputParameters & parameters);
   virtual ~CombinedTestApp();
 

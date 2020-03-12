@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(MiscTestApp);
+
 InputParameters
-validParams<MiscTestApp>()
+MiscTestApp::validParams()
 {
-  InputParameters params = validParams<MiscApp>();
+  InputParameters params = MiscApp::validParams();
   return params;
 }
 

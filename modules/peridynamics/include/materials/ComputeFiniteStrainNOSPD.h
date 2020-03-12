@@ -23,6 +23,8 @@ InputParameters validParams<ComputeFiniteStrainNOSPD>();
 class ComputeFiniteStrainNOSPD : public ComputeStrainBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputeFiniteStrainNOSPD(const InputParameters & parameters);
 
   static MooseEnum decompositionType();

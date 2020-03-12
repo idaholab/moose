@@ -15,11 +15,12 @@
 
 registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_kernel");
 
-template <>
+defineLegacyParams(SolidMechanicsAction);
+
 InputParameters
-validParams<SolidMechanicsAction>()
+SolidMechanicsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   MooseEnum elemType("truss undefined", "undefined");
   params.addParam<MooseEnum>("type", elemType, "The element type: " + elemType.getRawNames());
   params.addParam<VariableName>("disp_x", "", "The x displacement");

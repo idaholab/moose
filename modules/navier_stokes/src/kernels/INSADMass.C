@@ -11,13 +11,19 @@
 
 registerADMooseObject("NavierStokesApp", INSADMass);
 
-defineADValidParams(
-    INSADMass,
-    ADKernelValue,
-    params.addClassDescription("This class computes the mass equation residual and Jacobian "
-                               "contributions (the latter using automatic differentiation) for the "
-                               "incompressible Navier-Stokes "
-                               "equations."););
+defineADLegacyParams(INSADMass);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMass<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription("This class computes the mass equation residual and Jacobian "
+                             "contributions (the latter using automatic differentiation) for the "
+                             "incompressible Navier-Stokes "
+                             "equations.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMass<compute_stage>::INSADMass(const InputParameters & parameters)

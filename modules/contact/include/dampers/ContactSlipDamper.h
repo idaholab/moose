@@ -29,6 +29,8 @@ InputParameters validParams<ContactSlipDamper>();
 class ContactSlipDamper : public GeneralDamper
 {
 public:
+  static InputParameters validParams();
+
   ContactSlipDamper(const InputParameters & parameters);
 
   virtual void timestepSetup();

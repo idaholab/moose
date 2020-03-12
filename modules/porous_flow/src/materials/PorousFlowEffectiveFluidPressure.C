@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowEffectiveFluidPressure);
 
-template <>
+defineLegacyParams(PorousFlowEffectiveFluidPressure);
+
 InputParameters
-validParams<PorousFlowEffectiveFluidPressure>()
+PorousFlowEffectiveFluidPressure::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.set<std::string>("pf_material_type") = "effective_pressure";
   params.addClassDescription("This Material calculates an effective fluid pressure: "
                              "effective_stress = total_stress + "

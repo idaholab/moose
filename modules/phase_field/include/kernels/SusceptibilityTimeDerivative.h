@@ -24,6 +24,8 @@ class SusceptibilityTimeDerivative
     : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
+  static InputParameters validParams();
+
   SusceptibilityTimeDerivative(const InputParameters & parameters);
   virtual void initialSetup();
 

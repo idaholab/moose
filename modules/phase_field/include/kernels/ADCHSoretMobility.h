@@ -24,6 +24,8 @@ template <ComputeStage compute_stage>
 class ADCHSoretMobility : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCHSoretMobility(const InputParameters & parameters);
 
 protected:

@@ -11,12 +11,13 @@
 
 registerMooseObject("NavierStokesApp", NSSUPGMass);
 
-template <>
+defineLegacyParams(NSSUPGMass);
+
 InputParameters
-validParams<NSSUPGMass>()
+NSSUPGMass::validParams()
 {
   // Initialize the params object from the base class
-  InputParameters params = validParams<NSSUPGBase>();
+  InputParameters params = NSSUPGBase::validParams();
   params.addClassDescription(
       "Compute residual and Jacobian terms form the SUPG terms in the mass equation.");
   return params;

@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", SodiumProperties);
 
-template <>
+defineLegacyParams(SodiumProperties);
+
 InputParameters
-validParams<SodiumProperties>()
+SodiumProperties::validParams()
 {
-  InputParameters params = validParams<FluidProperties>();
+  InputParameters params = FluidProperties::validParams();
   params.addClassDescription("Fluid properties for sodium");
   return params;
 }

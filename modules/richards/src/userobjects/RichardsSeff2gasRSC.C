@@ -18,11 +18,12 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2gasRSC);
 
-template <>
+defineLegacyParams(RichardsSeff2gasRSC);
+
 InputParameters
-validParams<RichardsSeff2gasRSC>()
+RichardsSeff2gasRSC::validParams()
 {
-  InputParameters params = validParams<RichardsSeff>();
+  InputParameters params = RichardsSeff::validParams();
   params.addParam<Real>(
       "oil_viscosity",
       "Viscosity of oil (gas) phase.  It is assumed this is double the water-phase viscosity");

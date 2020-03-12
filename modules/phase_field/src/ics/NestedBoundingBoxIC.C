@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", NestedBoundingBoxIC);
 
-template <>
+defineLegacyParams(NestedBoundingBoxIC);
+
 InputParameters
-validParams<NestedBoundingBoxIC>()
+NestedBoundingBoxIC::validParams()
 {
-  InputParameters params = validParams<SmoothMultiBoundingBoxBaseIC>();
+  InputParameters params = SmoothMultiBoundingBoxBaseIC::validParams();
   params.addClassDescription("Specify variable values inside a list of nested boxes shaped "
                              "axis-aligned regions defined by pairs of opposing corners");
   params.addParam<Real>("outside", 0.0, "The value of the variable outside the largest boxes");

@@ -19,11 +19,12 @@
 
 registerMooseObject("ContactApp", PetscContactLineSearch);
 
-template <>
+defineLegacyParams(PetscContactLineSearch);
+
 InputParameters
-validParams<PetscContactLineSearch>()
+PetscContactLineSearch::validParams()
 {
-  return validParams<ContactLineSearchBase>();
+  return ContactLineSearchBase::validParams();
 }
 
 PetscContactLineSearch::PetscContactLineSearch(const InputParameters & parameters)

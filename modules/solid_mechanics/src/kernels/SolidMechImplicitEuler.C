@@ -12,11 +12,12 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", SolidMechImplicitEuler, "07/30/2020 24:00");
 
-template <>
+defineLegacyParams(SolidMechImplicitEuler);
+
 InputParameters
-validParams<SolidMechImplicitEuler>()
+SolidMechImplicitEuler::validParams()
 {
-  InputParameters params = validParams<SecondDerivativeImplicitEuler>();
+  InputParameters params = SecondDerivativeImplicitEuler::validParams();
   params.addParam<Real>("artificial_scaling", "Factor to replace rho/dt^2");
   params.set<bool>("use_displaced_mesh") = true;
   return params;

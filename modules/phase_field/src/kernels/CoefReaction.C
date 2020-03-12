@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CoefReaction);
 
-template <>
+defineLegacyParams(CoefReaction);
+
 InputParameters
-validParams<CoefReaction>()
+CoefReaction::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addClassDescription("Implements the residual term (p*u, test)");
   params.addRequiredParam<Real>("coefficient", "Coefficient of the term");
   return params;

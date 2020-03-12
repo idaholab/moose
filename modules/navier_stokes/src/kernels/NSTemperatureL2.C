@@ -16,11 +16,12 @@
 
 registerMooseObject("NavierStokesApp", NSTemperatureL2);
 
-template <>
+defineLegacyParams(NSTemperatureL2);
+
 InputParameters
-validParams<NSTemperatureL2>()
+NSTemperatureL2::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "This class was originally used to solve for the temperature using an L2-projection.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-direction velocity component");

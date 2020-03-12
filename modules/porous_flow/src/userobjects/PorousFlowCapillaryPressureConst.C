@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureConst);
 
-template <>
+defineLegacyParams(PorousFlowCapillaryPressureConst);
+
 InputParameters
-validParams<PorousFlowCapillaryPressureConst>()
+PorousFlowCapillaryPressureConst::validParams()
 {
-  InputParameters params = validParams<PorousFlowCapillaryPressure>();
+  InputParameters params = PorousFlowCapillaryPressure::validParams();
   params.addRangeCheckedParam<Real>(
       "pc", 0.0, "pc >= 0", "Constant capillary pressure (Pa). Default is 0");
   params.addClassDescription("Constant capillary pressure");

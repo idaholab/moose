@@ -25,7 +25,8 @@
  */
 class FXIntegralBaseUserObjectParameters
 {
-  // Empty class, used only for parameters
+public:
+  static InputParameters validParams();
 };
 
 template <>

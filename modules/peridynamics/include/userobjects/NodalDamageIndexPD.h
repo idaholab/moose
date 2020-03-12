@@ -23,6 +23,8 @@ InputParameters validParams<NodalDamageIndexPD>();
 class NodalDamageIndexPD : public NodalAuxVariableUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalDamageIndexPD(const InputParameters & parameters);
 
   virtual void computeValue(unsigned int id, dof_id_type dof) override;

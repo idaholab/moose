@@ -24,6 +24,8 @@ InputParameters validParams<NodalPostprocessorBasePD>();
 class NodalPostprocessorBasePD : public NodalPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NodalPostprocessorBasePD(const InputParameters & parameters);
 
 protected:

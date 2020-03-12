@@ -44,6 +44,8 @@ public:
     VOLUMETRICSTRAIN
   };
 
+  static InputParameters validParams();
+
   MaterialTensorCalculator(const InputParameters & parameters);
 
   ~MaterialTensorCalculator() {}

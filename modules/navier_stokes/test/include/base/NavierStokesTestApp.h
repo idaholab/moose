@@ -19,6 +19,8 @@ InputParameters validParams<NavierStokesTestApp>();
 class NavierStokesTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   NavierStokesTestApp(InputParameters parameters);
   virtual ~NavierStokesTestApp();
 

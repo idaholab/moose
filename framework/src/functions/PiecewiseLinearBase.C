@@ -9,11 +9,12 @@
 
 #include "PiecewiseLinearBase.h"
 
-template <>
+defineLegacyParams(PiecewiseLinearBase);
+
 InputParameters
-validParams<PiecewiseLinearBase>()
+PiecewiseLinearBase::validParams()
 {
-  InputParameters params = validParams<PiecewiseBase>();
+  InputParameters params = PiecewiseBase::validParams();
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }

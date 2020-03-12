@@ -23,6 +23,8 @@ InputParameters validParams<LaplacianSplit>();
 class LaplacianSplit : public KernelGrad
 {
 public:
+  static InputParameters validParams();
+
   LaplacianSplit(const InputParameters & parameters);
 
 protected:

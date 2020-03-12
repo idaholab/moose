@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", FlinakFluidProperties);
 
-template <>
+defineLegacyParams(FlinakFluidProperties);
+
 InputParameters
-validParams<FlinakFluidProperties>()
+FlinakFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRangeCheckedParam<Real>(
       "drho_dp",
       1.7324E-7,

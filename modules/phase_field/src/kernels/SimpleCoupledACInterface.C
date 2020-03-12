@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SimpleCoupledACInterface);
 
-template <>
+defineLegacyParams(SimpleCoupledACInterface);
+
 InputParameters
-validParams<SimpleCoupledACInterface>()
+SimpleCoupledACInterface::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy for Allen-Cahn Kernel with constant Mobility and "
                              "Interfacial parameter for a coupled order parameter variable.");
   params.addRequiredCoupledVar("v", "Coupled variable that the Laplacian is taken of");

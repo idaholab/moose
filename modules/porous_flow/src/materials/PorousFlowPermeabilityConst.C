@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityConst);
 
-template <>
+defineLegacyParams(PorousFlowPermeabilityConst);
+
 InputParameters
-validParams<PorousFlowPermeabilityConst>()
+PorousFlowPermeabilityConst::validParams()
 {
-  InputParameters params = validParams<PorousFlowPermeabilityBase>();
+  InputParameters params = PorousFlowPermeabilityBase::validParams();
   params.addRequiredParam<RealTensorValue>(
       "permeability",
       "The permeability tensor (usually in m^2), which is assumed constant for this material");

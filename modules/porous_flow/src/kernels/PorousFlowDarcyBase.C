@@ -16,11 +16,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(PorousFlowDarcyBase);
+
 InputParameters
-validParams<PorousFlowDarcyBase>()
+PorousFlowDarcyBase::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
   params.addRequiredParam<UserObjectName>(

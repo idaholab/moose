@@ -25,6 +25,8 @@ InputParameters validParams<ContactDOFSetSize>();
 class ContactDOFSetSize : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   ContactDOFSetSize(const InputParameters & parameters);
 
   void initialize() override;

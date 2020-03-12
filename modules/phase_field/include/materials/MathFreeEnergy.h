@@ -24,6 +24,8 @@ InputParameters validParams<MathFreeEnergy>();
 class MathFreeEnergy : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   MathFreeEnergy(const InputParameters & parameters);
 
 protected:

@@ -33,6 +33,8 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
 class RichardsPiecewiseLinearSinkFlux : public SideIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RichardsPiecewiseLinearSinkFlux(const InputParameters & parameters);
 
 protected:

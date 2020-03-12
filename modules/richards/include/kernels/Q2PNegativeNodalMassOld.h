@@ -26,6 +26,8 @@ InputParameters validParams<Q2PNegativeNodalMassOld>();
 class Q2PNegativeNodalMassOld : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   Q2PNegativeNodalMassOld(const InputParameters & parameters);
 
 protected:

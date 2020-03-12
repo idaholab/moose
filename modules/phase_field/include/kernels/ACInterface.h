@@ -25,6 +25,8 @@ InputParameters validParams<ACInterface>();
 class ACInterface : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   ACInterface(const InputParameters & parameters);
   virtual void initialSetup();
 

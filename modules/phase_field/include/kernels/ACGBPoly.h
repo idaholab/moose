@@ -20,6 +20,8 @@ InputParameters validParams<ACGBPoly>();
 class ACGBPoly : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   ACGBPoly(const InputParameters & parameters);
 
 protected:

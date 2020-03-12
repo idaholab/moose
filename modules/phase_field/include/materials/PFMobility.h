@@ -20,6 +20,8 @@ InputParameters validParams<PFMobility>();
 class PFMobility : public Material
 {
 public:
+  static InputParameters validParams();
+
   PFMobility(const InputParameters & parameters);
 
 protected:

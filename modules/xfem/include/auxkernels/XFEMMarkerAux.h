@@ -16,6 +16,8 @@ class XFEM;
 class XFEMMarkerAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   XFEMMarkerAux(const InputParameters & parameters);
 
   virtual ~XFEMMarkerAux() {}

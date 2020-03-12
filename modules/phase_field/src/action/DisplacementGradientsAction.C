@@ -19,11 +19,12 @@ registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_material"
 
 registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_variable");
 
-template <>
+defineLegacyParams(DisplacementGradientsAction);
+
 InputParameters
-validParams<DisplacementGradientsAction>()
+DisplacementGradientsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up variables, kernels, and materials for a the displacement "
                              "gradients and their elastic free energy derivatives for non-split "
                              "Cahn-Hilliard problems.");

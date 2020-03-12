@@ -25,6 +25,8 @@ InputParameters validParams<LevelSetBiMaterialReal>();
 class LevelSetBiMaterialReal : public LevelSetBiMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   LevelSetBiMaterialReal(const InputParameters & parameters);
 
 protected:

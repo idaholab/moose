@@ -40,6 +40,8 @@ InputParameters validParams<PorousFlowMaterial>();
 class PorousFlowMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMaterial(const InputParameters & parameters);
   virtual void initialSetup() override;
 

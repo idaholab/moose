@@ -23,6 +23,8 @@ InputParameters validParams<KineticDisPreConcAux>();
 class KineticDisPreConcAux : public KineticDisPreRateAux
 {
 public:
+  static InputParameters validParams();
+
   KineticDisPreConcAux(const InputParameters & parameters);
 
   virtual ~KineticDisPreConcAux() {}

@@ -24,6 +24,8 @@ InputParameters validParams<TotalFreeEnergy>();
 class TotalFreeEnergy : public TotalFreeEnergyBase
 {
 public:
+  static InputParameters validParams();
+
   TotalFreeEnergy(const InputParameters & parameters);
 
 protected:

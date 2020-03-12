@@ -29,11 +29,12 @@
 
 registerMooseObject("PhaseFieldApp", CrossIC);
 
-template <>
+defineLegacyParams(CrossIC);
+
 InputParameters
-validParams<CrossIC>()
+CrossIC::validParams()
 {
-  InputParameters params = validParams<C1ICBase>();
+  InputParameters params = C1ICBase::validParams();
   params.addClassDescription("Cross-shaped initial condition");
   params.addParam<Real>("x1", 0.0, "The x coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("y1", 0.0, "The y coordinate of the lower left-hand corner of the box");

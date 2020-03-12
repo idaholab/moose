@@ -24,6 +24,8 @@ InputParameters validParams<TotalConcentrationAux>();
 class TotalConcentrationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   TotalConcentrationAux(const InputParameters & parameters);
 
 protected:

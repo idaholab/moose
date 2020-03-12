@@ -27,6 +27,8 @@ InputParameters validParams<RichardsMaterial>();
 class RichardsMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   RichardsMaterial(const InputParameters & parameters);
 
 protected:

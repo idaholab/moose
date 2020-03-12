@@ -19,6 +19,8 @@ template <ComputeStage compute_stage>
 class ADSplitCHWResAniso : public ADSplitCHWResBase<compute_stage, RealTensorValue>
 {
 public:
+  static InputParameters validParams();
+
   ADSplitCHWResAniso(const InputParameters & parameters);
 };
 

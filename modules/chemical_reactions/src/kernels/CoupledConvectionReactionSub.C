@@ -11,11 +11,12 @@
 
 registerMooseObject("ChemicalReactionsApp", CoupledConvectionReactionSub);
 
-template <>
+defineLegacyParams(CoupledConvectionReactionSub);
+
 InputParameters
-validParams<CoupledConvectionReactionSub>()
+CoupledConvectionReactionSub::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<Real>("weight", 1.0, "Weight of the equilibrium species");
   params.addCoupledVar("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
   params.addParam<Real>("sto_u",

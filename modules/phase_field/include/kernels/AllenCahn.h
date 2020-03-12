@@ -25,6 +25,8 @@ InputParameters validParams<AllenCahn>();
 class AllenCahn : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   AllenCahn(const InputParameters & parameters);
 
   virtual void initialSetup();

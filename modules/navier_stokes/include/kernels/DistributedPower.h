@@ -26,6 +26,8 @@ InputParameters validParams<DistributedPower>();
 class DistributedPower : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DistributedPower(const InputParameters & parameters);
 
 protected:

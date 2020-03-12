@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalEBSD);
 
-template <>
+defineLegacyParams(PolycrystalEBSD);
+
 InputParameters
-validParams<PolycrystalEBSD>()
+PolycrystalEBSD::validParams()
 {
-  InputParameters params = validParams<PolycrystalUserObjectBase>();
+  InputParameters params = PolycrystalUserObjectBase::validParams();
   params.addClassDescription("Object for setting up a polycrystal structure from an EBSD Datafile");
   params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   params.addParam<UserObjectName>("ebsd_reader", "EBSD Reader for initial condition");

@@ -26,6 +26,8 @@ InputParameters validParams<ThirdPhaseSuppressionMaterial>();
 class ThirdPhaseSuppressionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ThirdPhaseSuppressionMaterial(const InputParameters & parameters);
 
 protected:

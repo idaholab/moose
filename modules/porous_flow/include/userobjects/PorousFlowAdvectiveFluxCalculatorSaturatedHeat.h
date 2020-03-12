@@ -26,6 +26,8 @@ class PorousFlowAdvectiveFluxCalculatorSaturatedHeat
   : public PorousFlowAdvectiveFluxCalculatorSaturated
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAdvectiveFluxCalculatorSaturatedHeat(const InputParameters & parameters);
 
 protected:

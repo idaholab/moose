@@ -27,6 +27,8 @@ InputParameters validParams<MultiSmoothCircleIC>();
 class MultiSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
+  static InputParameters validParams();
+
   MultiSmoothCircleIC(const InputParameters & parameters);
 
   virtual void initialSetup() override;

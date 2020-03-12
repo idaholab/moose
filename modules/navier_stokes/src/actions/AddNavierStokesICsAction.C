@@ -22,11 +22,12 @@
 
 registerMooseAction("NavierStokesApp", AddNavierStokesICsAction, "add_navier_stokes_ics");
 
-template <>
+defineLegacyParams(AddNavierStokesICsAction);
+
 InputParameters
-validParams<AddNavierStokesICsAction>()
+AddNavierStokesICsAction::validParams()
 {
-  InputParameters params = validParams<NSAction>();
+  InputParameters params = NSAction::validParams();
 
   params.addClassDescription("This class allows us to have a section of the input file like the "
                              "following which automatically adds initial conditions for all the "

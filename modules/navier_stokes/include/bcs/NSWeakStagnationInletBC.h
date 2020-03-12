@@ -24,6 +24,8 @@ InputParameters validParams<NSWeakStagnationInletBC>();
 class NSWeakStagnationInletBC : public MooseObject
 {
 public:
+  static InputParameters validParams();
+
   NSWeakStagnationInletBC(const InputParameters & parameters);
   virtual ~NSWeakStagnationInletBC();
 

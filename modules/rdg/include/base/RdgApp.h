@@ -19,6 +19,8 @@ InputParameters validParams<RdgApp>();
 class RdgApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   RdgApp(InputParameters parameters);
   virtual ~RdgApp();
 

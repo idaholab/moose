@@ -33,6 +33,8 @@ InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
 class PorousFlowPermeabilityKozenyCarman : public PorousFlowPermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPermeabilityKozenyCarman(const InputParameters & parameters);
 
 protected:

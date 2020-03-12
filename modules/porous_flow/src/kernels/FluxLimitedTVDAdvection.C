@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", FluxLimitedTVDAdvection);
 
-template <>
+defineLegacyParams(FluxLimitedTVDAdvection);
+
 InputParameters
-validParams<FluxLimitedTVDAdvection>()
+FluxLimitedTVDAdvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ (advection), using "
                              "the Flux Limited TVD scheme invented by Kuzmin and Turek");
   params.addRequiredParam<UserObjectName>("advective_flux_calculator",

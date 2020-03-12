@@ -11,12 +11,18 @@
 
 registerADMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
 
-defineADValidParams(
-    LevelSetAdvectionSUPG,
-    ADKernelGrad,
-    params.addClassDescription(
-        "SUPG stablization term for the advection portion of the level set equation.");
-    params += validParams<LevelSetVelocityInterface<>>(););
+defineADLegacyParams(LevelSetAdvectionSUPG);
+
+template <ComputeStage compute_stage>
+InputParameters
+LevelSetAdvectionSUPG<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription(
+      "SUPG stablization term for the advection portion of the level set equation.");
+  params += LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 LevelSetAdvectionSUPG<compute_stage>::LevelSetAdvectionSUPG(const InputParameters & parameters)

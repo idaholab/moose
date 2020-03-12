@@ -11,13 +11,19 @@
 
 registerADMooseObject("PhaseFieldApp", ADMathFreeEnergy);
 
-defineADValidParams(
-    ADMathFreeEnergy,
-    ADMaterial,
-    params.addClassDescription("Material that implements the math free energy and its derivatives: "
-                               "\nF = 1/4(1 + c)^2*(1 - c)^2");
-    params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
-    params.addRequiredCoupledVar("c", "Concentration variable"););
+defineADLegacyParams(ADMathFreeEnergy);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADMathFreeEnergy<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("Material that implements the math free energy and its derivatives: "
+                             "\nF = 1/4(1 + c)^2*(1 - c)^2");
+  params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
+  params.addRequiredCoupledVar("c", "Concentration variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADMathFreeEnergy<compute_stage>::ADMathFreeEnergy(const InputParameters & parameters)

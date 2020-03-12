@@ -12,11 +12,12 @@
 
 registerMooseAction("ChemicalReactionsApp", AddPrimarySpeciesAction, "add_variable");
 
-template <>
+defineLegacyParams(AddPrimarySpeciesAction);
+
 InputParameters
-validParams<AddPrimarySpeciesAction>()
+AddPrimarySpeciesAction::validParams()
 {
-  InputParameters params = validParams<AddVariableAction>();
+  InputParameters params = AddVariableAction::validParams();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "primary_species", "The list of primary variables to add");
   params.addClassDescription("Adds Variables for all primary species");

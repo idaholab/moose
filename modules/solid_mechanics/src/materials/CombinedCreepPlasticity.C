@@ -14,11 +14,12 @@
 
 registerMooseObject("SolidMechanicsApp", CombinedCreepPlasticity);
 
-template <>
+defineLegacyParams(CombinedCreepPlasticity);
+
 InputParameters
-validParams<CombinedCreepPlasticity>()
+CombinedCreepPlasticity::validParams()
 {
-  InputParameters params = validParams<ConstitutiveModel>();
+  InputParameters params = ConstitutiveModel::validParams();
 
   params.addRequiredParam<std::vector<std::string>>("submodels",
                                                     "List of submodel ConstitutiveModels");

@@ -9,11 +9,12 @@
 
 #include "ComputeSmallStrainMaterialBaseBPD.h"
 
-template <>
+defineLegacyParams(ComputeSmallStrainMaterialBaseBPD);
+
 InputParameters
-validParams<ComputeSmallStrainMaterialBaseBPD>()
+ComputeSmallStrainMaterialBaseBPD::validParams()
 {
-  InputParameters params = validParams<ParametricMaterialBasePD>();
+  InputParameters params = ParametricMaterialBasePD::validParams();
   params.addClassDescription("Base class for bond-based peridynamic mechanics models");
 
   return params;

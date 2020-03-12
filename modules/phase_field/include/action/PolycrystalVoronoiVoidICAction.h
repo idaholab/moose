@@ -19,6 +19,8 @@
 class PolycrystalVoronoiVoidICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalVoronoiVoidICAction(const InputParameters & params);
 
   virtual void act();

@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", BimodalSuperellipsoidsIC);
 
-template <>
+defineLegacyParams(BimodalSuperellipsoidsIC);
+
 InputParameters
-validParams<BimodalSuperellipsoidsIC>()
+BimodalSuperellipsoidsIC::validParams()
 {
-  InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
+  InputParameters params = SpecifiedSmoothSuperellipsoidIC::validParams();
   params.addClassDescription("Bimodal size distribution of large particles (specified in input "
                              "file) and small particles (placed randomly outside the larger "
                              "particles)");

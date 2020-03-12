@@ -21,11 +21,12 @@
 
 registerMooseObject("XFEMApp", MeshCut3DUserObject);
 
-template <>
+defineLegacyParams(MeshCut3DUserObject);
+
 InputParameters
-validParams<MeshCut3DUserObject>()
+MeshCut3DUserObject::validParams()
 {
-  InputParameters params = validParams<GeometricCutUserObject>();
+  InputParameters params = GeometricCutUserObject::validParams();
   params.addRequiredParam<MeshFileName>(
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the xda type is supported");

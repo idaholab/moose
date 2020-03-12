@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityComponent);
 
-template <>
+defineLegacyParams(PorousFlowDarcyVelocityComponent);
+
 InputParameters
-validParams<PorousFlowDarcyVelocityComponent>()
+PorousFlowDarcyVelocityComponent::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
   params.addRequiredParam<UserObjectName>(

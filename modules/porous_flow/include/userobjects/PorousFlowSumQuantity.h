@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowSumQuantity>();
 class PorousFlowSumQuantity : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowSumQuantity(const InputParameters & parameters);
   virtual ~PorousFlowSumQuantity();
 

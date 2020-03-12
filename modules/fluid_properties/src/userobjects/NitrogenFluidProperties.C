@@ -14,11 +14,12 @@
 
 registerMooseObject("FluidPropertiesApp", NitrogenFluidProperties);
 
-template <>
+defineLegacyParams(NitrogenFluidProperties);
+
 InputParameters
-validParams<NitrogenFluidProperties>()
+NitrogenFluidProperties::validParams()
 {
-  InputParameters params = validParams<HelmholtzFluidProperties>();
+  InputParameters params = HelmholtzFluidProperties::validParams();
   params.addClassDescription("Fluid properties for Nitrogen (N2)");
   return params;
 }

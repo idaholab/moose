@@ -23,6 +23,8 @@ InputParameters validParams<ComputeForceStabilizedSmallStrainNOSPD>();
 class ComputeForceStabilizedSmallStrainNOSPD : public ComputeSmallStrainNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputeForceStabilizedSmallStrainNOSPD(const InputParameters & parameters);
 
 protected:

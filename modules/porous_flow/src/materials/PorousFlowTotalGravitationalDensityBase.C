@@ -9,11 +9,12 @@
 
 #include "PorousFlowTotalGravitationalDensityBase.h"
 
-template <>
+defineLegacyParams(PorousFlowTotalGravitationalDensityBase);
+
 InputParameters
-validParams<PorousFlowTotalGravitationalDensityBase>()
+PorousFlowTotalGravitationalDensityBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.set<std::string>("pf_material_type") = "gravitational_density";
   params.addClassDescription("Base class Material for porous medium density");
   return params;

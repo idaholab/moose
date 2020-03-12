@@ -99,12 +99,13 @@ bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
 
 registerMooseObject("PhaseFieldApp", FeatureFloodCount);
 
-template <>
+defineLegacyParams(FeatureFloodCount);
+
 InputParameters
-validParams<FeatureFloodCount>()
+FeatureFloodCount::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
-  params += validParams<BoundaryRestrictable>();
+  InputParameters params = GeneralPostprocessor::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addRequiredCoupledVar(
       "variable",

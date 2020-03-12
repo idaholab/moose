@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalElasticDrivingForceAction, "add_kernel");
 
-template <>
+defineLegacyParams(PolycrystalElasticDrivingForceAction);
+
 InputParameters
-validParams<PolycrystalElasticDrivingForceAction>()
+PolycrystalElasticDrivingForceAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action that addes the elastic driving force for each order parameter");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");

@@ -26,6 +26,8 @@ InputParameters validParams<GrainAdvectionAux>();
 class GrainAdvectionAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   GrainAdvectionAux(const InputParameters & parameters);
 
 protected:

@@ -21,11 +21,12 @@ registerMooseAction("NavierStokesApp",
                     AddNavierStokesVariablesAction,
                     "add_navier_stokes_variables");
 
-template <>
+defineLegacyParams(AddNavierStokesVariablesAction);
+
 InputParameters
-validParams<AddNavierStokesVariablesAction>()
+AddNavierStokesVariablesAction::validParams()
 {
-  InputParameters params = validParams<NSAction>();
+  InputParameters params = NSAction::validParams();
 
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies(), "LAGRANGE");
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders(), "FIRST");

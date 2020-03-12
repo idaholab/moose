@@ -20,6 +20,8 @@ InputParameters validParams<PFCEnergyDensity>();
 class PFCEnergyDensity : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PFCEnergyDensity(const InputParameters & parameters);
 
 protected:

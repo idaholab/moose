@@ -14,11 +14,12 @@
 
 registerMooseObject("RichardsApp", RichardsMass);
 
-template <>
+defineLegacyParams(RichardsMass);
+
 InputParameters
-validParams<RichardsMass>()
+RichardsMass::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addClassDescription("Returns the mass in a region.");

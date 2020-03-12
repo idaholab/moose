@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", MultiBarrierFunctionMaterial);
 
-template <>
+defineLegacyParams(MultiBarrierFunctionMaterial);
+
 InputParameters
-validParams<MultiBarrierFunctionMaterial>()
+MultiBarrierFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Double well phase transformation barrier free energy contribution.");
   params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
   MooseEnum h_order("SIMPLE=0", "SIMPLE");

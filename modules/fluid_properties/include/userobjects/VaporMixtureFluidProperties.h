@@ -27,6 +27,8 @@ InputParameters validParams<VaporMixtureFluidProperties>();
 class VaporMixtureFluidProperties : public FluidProperties
 {
 public:
+  static InputParameters validParams();
+
   VaporMixtureFluidProperties(const InputParameters & parameters);
   virtual ~VaporMixtureFluidProperties();
 

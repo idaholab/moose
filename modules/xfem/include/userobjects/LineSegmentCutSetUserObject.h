@@ -20,6 +20,8 @@ InputParameters validParams<LineSegmentCutSetUserObject>();
 class LineSegmentCutSetUserObject : public GeometricCut2DUserObject
 {
 public:
+  static InputParameters validParams();
+
   LineSegmentCutSetUserObject(const InputParameters & parameters);
 
   virtual const std::vector<Point>

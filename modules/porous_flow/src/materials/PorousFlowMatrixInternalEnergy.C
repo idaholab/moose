@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMatrixInternalEnergy);
 
-template <>
+defineLegacyParams(PorousFlowMatrixInternalEnergy);
+
 InputParameters
-validParams<PorousFlowMatrixInternalEnergy>()
+PorousFlowMatrixInternalEnergy::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredParam<Real>("specific_heat_capacity",
                                 "Specific heat capacity of the rock grains (J/kg/K).");
   params.addRequiredParam<Real>("density", "Density of the rock grains");

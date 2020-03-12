@@ -23,6 +23,8 @@ InputParameters validParams<TwoPhaseFluidProperties>();
 class TwoPhaseFluidProperties : public FluidProperties
 {
 public:
+  static InputParameters validParams();
+
   TwoPhaseFluidProperties(const InputParameters & parameters);
 
   /**

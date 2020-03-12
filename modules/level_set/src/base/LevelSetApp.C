@@ -13,11 +13,12 @@
 #include "MooseSyntax.h"
 #include "LevelSetTypes.h"
 
-template <>
+defineLegacyParams(LevelSetApp);
+
 InputParameters
-validParams<LevelSetApp>()
+LevelSetApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
 
   params.addClassDescription(
       "Application containing object necessary to solve the level set equation.");

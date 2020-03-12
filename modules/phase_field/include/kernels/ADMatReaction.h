@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class ADMatReaction : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADMatReaction(const InputParameters & parameters);
 
 protected:

@@ -24,11 +24,12 @@
 
 registerMooseObject("ContactApp", PetscProjectSolutionOntoBounds);
 
-template <>
+defineLegacyParams(PetscProjectSolutionOntoBounds);
+
 InputParameters
-validParams<PetscProjectSolutionOntoBounds>()
+PetscProjectSolutionOntoBounds::validParams()
 {
-  return validParams<LineSearch>();
+  return LineSearch::validParams();
 }
 
 PetscProjectSolutionOntoBounds::PetscProjectSolutionOntoBounds(const InputParameters & parameters)

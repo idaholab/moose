@@ -24,6 +24,8 @@ InputParameters validParams<CHSplitConcentration>();
 class CHSplitConcentration : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   CHSplitConcentration(const InputParameters & parameters);
 
 protected:

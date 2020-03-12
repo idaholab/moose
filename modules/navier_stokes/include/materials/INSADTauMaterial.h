@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class INSADTauMaterial : public INSADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADTauMaterial(const InputParameters & parameters);
 
 protected:

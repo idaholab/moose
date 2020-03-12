@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCEnergyDensity);
 
-template <>
+defineLegacyParams(PFCEnergyDensity);
+
 InputParameters
-validParams<PFCEnergyDensity>()
+PFCEnergyDensity::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("v", "Array of coupled variables");
   return params;
 }

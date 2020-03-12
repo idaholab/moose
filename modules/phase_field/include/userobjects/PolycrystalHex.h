@@ -25,6 +25,8 @@ InputParameters validParams<PolycrystalHex>();
 class PolycrystalHex : public PolycrystalVoronoi
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalHex(const InputParameters & parameters);
 
   virtual void precomputeGrainStructure();

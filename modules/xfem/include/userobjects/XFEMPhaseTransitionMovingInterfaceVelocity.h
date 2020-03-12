@@ -19,6 +19,8 @@ InputParameters validParams<XFEMPhaseTransitionMovingInterfaceVelocity>();
 class XFEMPhaseTransitionMovingInterfaceVelocity : public XFEMMovingInterfaceVelocityBase
 {
 public:
+  static InputParameters validParams();
+
   XFEMPhaseTransitionMovingInterfaceVelocity(const InputParameters & parameters);
   virtual ~XFEMPhaseTransitionMovingInterfaceVelocity() {}
 

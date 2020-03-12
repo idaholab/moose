@@ -9,11 +9,12 @@
 
 #include "PorousFlowVariableBase.h"
 
-template <>
+defineLegacyParams(PorousFlowVariableBase);
+
 InputParameters
-validParams<PorousFlowVariableBase>()
+PorousFlowVariableBase::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterial>();
+  InputParameters params = PorousFlowMaterial::validParams();
   params.addPrivateParam<std::string>("pf_material_type", "pressure_saturation");
   params.addClassDescription("Base class for thermophysical variable materials. Provides pressure "
                              "and saturation material properties for all phases as required");

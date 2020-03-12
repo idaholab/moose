@@ -9,11 +9,12 @@
 
 #include "NSMassBC.h"
 
-template <>
+defineLegacyParams(NSMassBC);
+
 InputParameters
-validParams<NSMassBC>()
+NSMassBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
   params.addClassDescription(
       "This class corresponds to the 'natural' boundary condition for the mass equation.");
   return params;

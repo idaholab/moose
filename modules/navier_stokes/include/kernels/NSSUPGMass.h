@@ -24,6 +24,8 @@ InputParameters validParams<NSSUPGMass>();
 class NSSUPGMass : public NSSUPGBase
 {
 public:
+  static InputParameters validParams();
+
   NSSUPGMass(const InputParameters & parameters);
 
 protected:

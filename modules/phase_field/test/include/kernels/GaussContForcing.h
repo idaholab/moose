@@ -22,6 +22,8 @@ InputParameters validParams<GaussContForcing>();
 class GaussContForcing : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   GaussContForcing(const InputParameters & parameters);
 
 protected:

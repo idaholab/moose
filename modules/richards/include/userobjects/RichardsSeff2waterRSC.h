@@ -30,6 +30,8 @@ InputParameters validParams<RichardsSeff2waterRSC>();
 class RichardsSeff2waterRSC : public RichardsSeff
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff2waterRSC(const InputParameters & parameters);
 
   /**

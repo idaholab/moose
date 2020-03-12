@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationAux);
 
-template <>
+defineLegacyParams(DiscreteNucleationAux);
+
 InputParameters
-validParams<DiscreteNucleationAux>()
+DiscreteNucleationAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Project the DiscreteNucleationMap state onto an AuxVariable");
   params.addRequiredParam<UserObjectName>("map", "DiscreteNucleationMap user object");
   params.addParam<Real>("no_nucleus_value", 0.0, "Variable value indicating no nucleus is present");

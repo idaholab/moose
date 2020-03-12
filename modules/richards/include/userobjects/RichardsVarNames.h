@@ -25,6 +25,8 @@ InputParameters validParams<RichardsVarNames>();
 class RichardsVarNames : public GeneralUserObject, public Coupleable
 {
 public:
+  static InputParameters validParams();
+
   RichardsVarNames(const InputParameters & parameters);
 
   void initialize();

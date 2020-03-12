@@ -24,6 +24,8 @@ InputParameters validParams<LangmuirMaterial>();
 class LangmuirMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   LangmuirMaterial(const InputParameters & parameters);
 
 protected:

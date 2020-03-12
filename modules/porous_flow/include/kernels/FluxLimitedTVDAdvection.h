@@ -32,6 +32,8 @@ InputParameters validParams<FluxLimitedTVDAdvection>();
 class FluxLimitedTVDAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   FluxLimitedTVDAdvection(const InputParameters & parameters);
 
 protected:

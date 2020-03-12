@@ -10,11 +10,12 @@
 #include "TwoPhaseFluidProperties.h"
 #include "SinglePhaseFluidProperties.h"
 
-template <>
+defineLegacyParams(TwoPhaseFluidProperties);
+
 InputParameters
-validParams<TwoPhaseFluidProperties>()
+TwoPhaseFluidProperties::validParams()
 {
-  InputParameters params = validParams<FluidProperties>();
+  InputParameters params = FluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "two-phase-fp", "FPType", "Type of the fluid property object");
   params.addParam<UserObjectName>("fp_liquid",

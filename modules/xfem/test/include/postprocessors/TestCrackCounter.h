@@ -21,6 +21,8 @@ InputParameters validParams<TestCrackCounter>();
 class TestCrackCounter : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   TestCrackCounter(const InputParameters & parameters);
 
   /// Initialize the number of Cracks.

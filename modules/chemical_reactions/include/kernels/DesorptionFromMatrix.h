@@ -25,6 +25,8 @@ InputParameters validParams<DesorptionFromMatrix>();
 class DesorptionFromMatrix : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DesorptionFromMatrix(const InputParameters & parameters);
 
 protected:

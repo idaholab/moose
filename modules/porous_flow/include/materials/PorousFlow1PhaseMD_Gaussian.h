@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlow1PhaseMD_Gaussian>();
 class PorousFlow1PhaseMD_Gaussian : public PorousFlowVariableBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlow1PhaseMD_Gaussian(const InputParameters & parameters);
 
 protected:

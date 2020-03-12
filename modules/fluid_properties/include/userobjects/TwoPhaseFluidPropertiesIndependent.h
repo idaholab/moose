@@ -24,6 +24,8 @@ InputParameters validParams<TwoPhaseFluidPropertiesIndependent>();
 class TwoPhaseFluidPropertiesIndependent : public TwoPhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   TwoPhaseFluidPropertiesIndependent(const InputParameters & parameters);
 
   virtual Real p_critical() const override;

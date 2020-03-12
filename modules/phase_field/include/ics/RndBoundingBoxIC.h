@@ -33,6 +33,8 @@ InputParameters validParams<RndBoundingBoxIC>();
 class RndBoundingBoxIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   RndBoundingBoxIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

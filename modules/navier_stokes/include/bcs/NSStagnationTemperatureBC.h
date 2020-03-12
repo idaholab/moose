@@ -25,6 +25,8 @@ InputParameters validParams<NSStagnationTemperatureBC>();
 class NSStagnationTemperatureBC : public NSStagnationBC
 {
 public:
+  static InputParameters validParams();
+
   NSStagnationTemperatureBC(const InputParameters & parameters);
 
 protected:

@@ -26,6 +26,8 @@ InputParameters validParams<InteractionIntegralSM>();
 class InteractionIntegralSM : public ElementVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InteractionIntegralSM(const InputParameters & parameters);
 
   virtual void initialSetup() override;

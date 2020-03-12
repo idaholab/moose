@@ -11,10 +11,16 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumSUPG);
 
-defineADValidParams(
-    INSADMomentumSUPG,
-    ADVectorKernelSUPG,
-    params.addClassDescription("Adds the supg stabilization to the INS momentum equation"););
+defineADLegacyParams(INSADMomentumSUPG);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMomentumSUPG<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorKernelSUPG<compute_stage>::validParams();
+  params.addClassDescription("Adds the supg stabilization to the INS momentum equation");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMomentumSUPG<compute_stage>::INSADMomentumSUPG(const InputParameters & parameters)

@@ -29,4 +29,3 @@ public:
   // Overrides from FunctionalBasisInterface
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;
 };
-

@@ -19,6 +19,8 @@ InputParameters validParams<PeridynamicsApp>();
 class PeridynamicsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   PeridynamicsApp(const InputParameters & parameters);
   virtual ~PeridynamicsApp();
 

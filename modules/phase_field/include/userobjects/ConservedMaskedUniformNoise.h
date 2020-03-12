@@ -28,9 +28,10 @@ InputParameters validParams<ConservedMaskedUniformNoise>();
 class ConservedMaskedUniformNoise : public ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>
 {
 public:
+  static InputParameters validParams();
+
   ConservedMaskedUniformNoise(const InputParameters & parameters)
     : ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>(parameters)
   {
   }
 };
-

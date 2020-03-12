@@ -15,11 +15,12 @@
 
 registerMooseObject("ContactApp", NormalNodalMechanicalContact);
 
-template <>
+defineLegacyParams(NormalNodalMechanicalContact);
+
 InputParameters
-validParams<NormalNodalMechanicalContact>()
+NormalNodalMechanicalContact::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addRequiredCoupledVar("lambda", "The normal lagrange multiplier");

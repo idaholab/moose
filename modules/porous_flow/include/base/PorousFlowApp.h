@@ -19,6 +19,8 @@ InputParameters validParams<PorousFlowApp>();
 class PorousFlowApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowApp(const InputParameters & parameters);
   virtual ~PorousFlowApp();
 

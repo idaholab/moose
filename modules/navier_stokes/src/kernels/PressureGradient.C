@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", PressureGradient);
 
-template <>
+defineLegacyParams(PressureGradient);
+
 InputParameters
-validParams<PressureGradient>()
+PressureGradient::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("pressure", "pressure");
   params.addRequiredParam<unsigned int>("component", "number of component (0 = x, 1 = y, 2 = z)");
   return params;

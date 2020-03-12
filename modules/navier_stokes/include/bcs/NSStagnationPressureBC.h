@@ -26,6 +26,8 @@ InputParameters validParams<NSStagnationPressureBC>();
 class NSStagnationPressureBC : public NSStagnationBC
 {
 public:
+  static InputParameters validParams();
+
   NSStagnationPressureBC(const InputParameters & parameters);
 
 protected:

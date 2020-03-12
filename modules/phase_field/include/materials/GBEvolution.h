@@ -23,6 +23,8 @@ InputParameters validParams<GBEvolution>();
 class GBEvolution : public GBEvolutionBase
 {
 public:
+  static InputParameters validParams();
+
   GBEvolution(const InputParameters & parameters);
 
 protected:

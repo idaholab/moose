@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowPermeabilityTensorFromVar>();
 class PorousFlowPermeabilityTensorFromVar : public PorousFlowPermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPermeabilityTensorFromVar(const InputParameters & parameters);
 
 protected:

@@ -25,6 +25,8 @@ InputParameters validParams<SolidMechanicsMaterial>();
 class SolidMechanicsMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   SolidMechanicsMaterial(const InputParameters & parameters);
 
 protected:

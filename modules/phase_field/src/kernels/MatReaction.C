@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", MatReaction);
 
-template <>
+defineLegacyParams(MatReaction);
+
 InputParameters
-validParams<MatReaction>()
+MatReaction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("v",
                        "Set this to make v a coupled variable, otherwise it will use the "
                        "kernel's nonlinear variable for v");

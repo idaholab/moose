@@ -11,18 +11,14 @@
 
 #include "MooseApp.h"
 
-class ExternalPetscSolverTestApp;
-
-template <>
-InputParameters validParams<ExternalPetscSolverTestApp>();
-
 class ExternalPetscSolverTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   ExternalPetscSolverTestApp(InputParameters parameters);
   virtual ~ExternalPetscSolverTestApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
 };
-

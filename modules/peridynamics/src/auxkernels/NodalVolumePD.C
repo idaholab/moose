@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalVolumePD);
 
-template <>
+defineLegacyParams(NodalVolumePD);
+
 InputParameters
-validParams<NodalVolumePD>()
+NodalVolumePD::validParams()
 {
-  InputParameters params = validParams<AuxKernelBasePD>();
+  InputParameters params = AuxKernelBasePD::validParams();
   params.addClassDescription("Class for output nodal area(2D) or nodal volume(3D)");
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;

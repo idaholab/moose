@@ -24,6 +24,8 @@ InputParameters validParams<TricrystalTripleJunctionIC>();
 class TricrystalTripleJunctionIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   TricrystalTripleJunctionIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

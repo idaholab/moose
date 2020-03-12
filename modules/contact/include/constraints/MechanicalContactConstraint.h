@@ -29,6 +29,8 @@ InputParameters validParams<MechanicalContactConstraint>();
 class MechanicalContactConstraint : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   MechanicalContactConstraint(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

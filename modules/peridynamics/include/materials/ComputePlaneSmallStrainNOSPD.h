@@ -24,6 +24,8 @@ InputParameters validParams<ComputePlaneSmallStrainNOSPD>();
 class ComputePlaneSmallStrainNOSPD : public ComputeSmallStrainNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputePlaneSmallStrainNOSPD(const InputParameters & parameters);
 
 protected:

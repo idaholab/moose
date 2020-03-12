@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", PFCRFFKernelAction, "add_kernel");
 
-template <>
+defineLegacyParams(PFCRFFKernelAction);
+
 InputParameters
-validParams<PFCRFFKernelAction>()
+PFCRFFKernelAction::validParams()
 {
-  InputParameters params = validParams<HHPFCRFFSplitKernelAction>();
+  InputParameters params = HHPFCRFFSplitKernelAction::validParams();
   params.addParam<Real>("a", 1.0, "Parameter in the Taylor series expansion");
   params.addParam<Real>("b", 1.0, "Parameter in the Taylor series expansion");
   params.addParam<Real>("c", 1.0, "Parameter in the Taylor series expansion");

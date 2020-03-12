@@ -22,6 +22,8 @@ InputParameters validParams<CoupledBEEquilibriumSub>();
 class CoupledBEEquilibriumSub : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   CoupledBEEquilibriumSub(const InputParameters & parameters);
 
 protected:

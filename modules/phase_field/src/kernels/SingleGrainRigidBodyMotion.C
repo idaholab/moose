@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", SingleGrainRigidBodyMotion);
 
-template <>
+defineLegacyParams(SingleGrainRigidBodyMotion);
+
 InputParameters
-validParams<SingleGrainRigidBodyMotion>()
+SingleGrainRigidBodyMotion::validParams()
 {
-  InputParameters params = validParams<GrainRigidBodyMotionBase>();
+  InputParameters params = GrainRigidBodyMotionBase::validParams();
   params.addClassDescription("Adds rigid mody motion to a single grain");
   params.addParam<unsigned int>("op_index", 0, "Grain number for the kernel to be applied");
   return params;

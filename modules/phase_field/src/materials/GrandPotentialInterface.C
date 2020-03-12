@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", GrandPotentialInterface);
 
-template <>
+defineLegacyParams(GrandPotentialInterface);
+
 InputParameters
-validParams<GrandPotentialInterface>()
+GrandPotentialInterface::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Calculate Grand Potential interface parameters for a specified "
                              "interfacial free energy and width");
   params.addRequiredParam<std::vector<Real>>("sigma", "Interfacial free energies");

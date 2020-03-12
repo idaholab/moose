@@ -12,11 +12,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonTerminator);
 
-template <>
+defineLegacyParams(LevelSetOlssonTerminator);
+
 InputParameters
-validParams<LevelSetOlssonTerminator>()
+LevelSetOlssonTerminator::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Tool for terminating the reinitialization of the level set equation "
                              "based on the criteria defined by Olsson et. al. (2007).");
   params.addRequiredParam<Real>(

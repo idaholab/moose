@@ -14,11 +14,12 @@ using namespace MathUtils;
 
 registerMooseObject("PhaseFieldApp", KKSPhaseChemicalPotential);
 
-template <>
+defineLegacyParams(KKSPhaseChemicalPotential);
+
 InputParameters
-validParams<KKSPhaseChemicalPotential>()
+KKSPhaseChemicalPotential::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical "
                              "potentials  dFa/dca = dFb/dcb. The non-linear variable of this "
                              "kernel is ca.");

@@ -24,6 +24,8 @@ InputParameters validParams<ContactMaster>();
 class ContactMaster : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   ContactMaster(const InputParameters & parameters);
 
   virtual void timestepSetup() override;

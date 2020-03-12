@@ -27,6 +27,8 @@ InputParameters validParams<EulerAngleProvider2RGBAux>();
 class EulerAngleProvider2RGBAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   EulerAngleProvider2RGBAux(const InputParameters & parameters);
   virtual unsigned int getNumGrains() const;
 

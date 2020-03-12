@@ -22,6 +22,8 @@ InputParameters validParams<MortarPeriodicAction>();
 class MortarPeriodicAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   MortarPeriodicAction(const InputParameters & parameters);
 
   virtual void act();

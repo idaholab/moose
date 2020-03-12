@@ -25,6 +25,8 @@ template <ComputeStage compute_stage>
 class INSADMassPSPG : public ADKernelGrad<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMassPSPG(const InputParameters & parameters);
 
 protected:

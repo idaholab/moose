@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowAdvectiveFlux>();
 class PorousFlowAdvectiveFlux : public PorousFlowDarcyBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAdvectiveFlux(const InputParameters & parameters);
 
 protected:

@@ -9,11 +9,12 @@
 
 #include "OrderParameterFunctionMaterial.h"
 
-template <>
+defineLegacyParams(OrderParameterFunctionMaterial);
+
 InputParameters
-validParams<OrderParameterFunctionMaterial>()
+OrderParameterFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addCoupledVar("eta", "Order parameter variable");
   params.addParam<std::string>("function_name", "f", "actual name for f(eta), i.e. 'h' or 'g'");
   return params;

@@ -9,11 +9,12 @@
 
 #include "SplitCHCRes.h"
 
-template <>
+defineLegacyParams(SplitCHCRes);
+
 InputParameters
-validParams<SplitCHCRes>()
+SplitCHCRes::validParams()
 {
-  InputParameters params = validParams<SplitCHBase>();
+  InputParameters params = SplitCHBase::validParams();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("w", "Chemical potential");
   params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");

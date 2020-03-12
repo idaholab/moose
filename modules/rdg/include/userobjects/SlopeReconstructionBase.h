@@ -25,6 +25,8 @@ InputParameters validParams<SlopeReconstructionBase>();
 class SlopeReconstructionBase : public ElementLoopUserObject
 {
 public:
+  static InputParameters validParams();
+
   SlopeReconstructionBase(const InputParameters & parameters);
 
   virtual void initialize();

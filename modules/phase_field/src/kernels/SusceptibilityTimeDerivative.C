@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SusceptibilityTimeDerivative);
 
-template <>
+defineLegacyParams(SusceptibilityTimeDerivative);
+
 InputParameters
-validParams<SusceptibilityTimeDerivative>()
+SusceptibilityTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addClassDescription(
       "A modified time derivative Kernel that multiplies the time derivative "
       "of a variable by a generalized susceptibility");

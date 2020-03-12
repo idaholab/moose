@@ -12,11 +12,12 @@
 // Static mutex definition
 Threads::spin_mutex SlopeReconstructionBase::_mutex;
 
-template <>
+defineLegacyParams(SlopeReconstructionBase);
+
 InputParameters
-validParams<SlopeReconstructionBase>()
+SlopeReconstructionBase::validParams()
 {
-  InputParameters params = validParams<ElementLoopUserObject>();
+  InputParameters params = ElementLoopUserObject::validParams();
   params.addClassDescription("Base class for piecewise linear slope reconstruction to get the "
                              "slopes of element average variables.");
   return params;

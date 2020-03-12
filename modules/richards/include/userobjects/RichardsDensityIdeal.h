@@ -22,6 +22,8 @@ InputParameters validParams<RichardsDensityIdeal>();
 class RichardsDensityIdeal : public RichardsDensity
 {
 public:
+  static InputParameters validParams();
+
   RichardsDensityIdeal(const InputParameters & parameters);
 
   /**

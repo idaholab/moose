@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowNearestQp>();
 class PorousFlowNearestQp : public PorousFlowMaterial
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowNearestQp(const InputParameters & parameters);
 
 protected:

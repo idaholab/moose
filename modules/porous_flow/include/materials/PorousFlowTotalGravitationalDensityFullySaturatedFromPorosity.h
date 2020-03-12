@@ -28,6 +28,8 @@ class PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
   : public PorousFlowTotalGravitationalDensityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity(const InputParameters & parameters);
 
 protected:

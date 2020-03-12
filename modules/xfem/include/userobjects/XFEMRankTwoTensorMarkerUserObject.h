@@ -22,6 +22,8 @@ InputParameters validParams<XFEMRankTwoTensorMarkerUserObject>();
 class XFEMRankTwoTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
+  static InputParameters validParams();
+
   XFEMRankTwoTensorMarkerUserObject(const InputParameters & parameters);
   virtual ~XFEMRankTwoTensorMarkerUserObject() {}
 

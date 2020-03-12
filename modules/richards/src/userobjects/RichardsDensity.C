@@ -11,11 +11,12 @@
 //
 #include "RichardsDensity.h"
 
-template <>
+defineLegacyParams(RichardsDensity);
+
 InputParameters
-validParams<RichardsDensity>()
+RichardsDensity::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Fluid density base class.  Override density, ddensity and d2density in your class");
   return params;

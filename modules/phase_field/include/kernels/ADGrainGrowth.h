@@ -31,6 +31,8 @@ template <ComputeStage compute_stage>
 class ADGrainGrowth : public ADGrainGrowthBase<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADGrainGrowth(const InputParameters & parameters);
 
 protected:

@@ -11,15 +11,11 @@
 
 #include "NodalUserObject.h"
 
-// Forward Declarations
-class RigidBodyModes3D;
-
-template <>
-InputParameters validParams<RigidBodyModes3D>();
-
 class RigidBodyModes3D : public NodalUserObject
 {
 public:
+  static InputParameters validParams();
+
   RigidBodyModes3D(const InputParameters & parameters);
 
   /**

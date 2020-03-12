@@ -26,6 +26,8 @@ InputParameters validParams<SmoothCircleBaseIC>();
 class SmoothCircleBaseIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   SmoothCircleBaseIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

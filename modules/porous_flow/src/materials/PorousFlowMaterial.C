@@ -11,11 +11,12 @@
 #include "libmesh/quadrature.h"
 #include <limits>
 
-template <>
+defineLegacyParams(PorousFlowMaterial);
+
 InputParameters
-validParams<PorousFlowMaterial>()
+PorousFlowMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<bool>(

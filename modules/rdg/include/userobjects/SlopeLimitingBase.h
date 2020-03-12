@@ -24,6 +24,8 @@ InputParameters validParams<SlopeLimitingBase>();
 class SlopeLimitingBase : public ElementLoopUserObject
 {
 public:
+  static InputParameters validParams();
+
   SlopeLimitingBase(const InputParameters & parameters);
 
   virtual void initialize();

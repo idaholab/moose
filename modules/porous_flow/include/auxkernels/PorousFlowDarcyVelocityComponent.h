@@ -30,6 +30,8 @@ InputParameters validParams<PorousFlowDarcyVelocityComponent>();
 class PorousFlowDarcyVelocityComponent : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDarcyVelocityComponent(const InputParameters & parameters);
 
 protected:

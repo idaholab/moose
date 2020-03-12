@@ -14,11 +14,12 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(NSSUPGBase);
+
 InputParameters
-validParams<NSSUPGBase>()
+NSSUPGBase::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription("This class acts as a base class for stabilization kernels.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");

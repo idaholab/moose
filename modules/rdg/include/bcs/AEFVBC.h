@@ -44,6 +44,8 @@ InputParameters validParams<AEFVBC>();
 class AEFVBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   AEFVBC(const InputParameters & parameters);
   virtual ~AEFVBC() {}
 

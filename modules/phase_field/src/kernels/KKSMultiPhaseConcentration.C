@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSMultiPhaseConcentration);
 
-template <>
+defineLegacyParams(KKSMultiPhaseConcentration);
+
 InputParameters
-validParams<KKSMultiPhaseConcentration>()
+KKSMultiPhaseConcentration::validParams()
 {
-  InputParameters params = validParams<KernelValue>();
+  InputParameters params = KernelValue::validParams();
   params.addClassDescription(
       "KKS multi-phase model kernel to enforce $c = h_1c_1 + h_2c_2 + h_3c_3 + \\dots$"
       ". The non-linear variable of this kernel is $c_n$, the final phase "

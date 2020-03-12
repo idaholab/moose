@@ -20,6 +20,8 @@ InputParameters validParams<BndsCalcIC>();
 class BndsCalcIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   BndsCalcIC(const InputParameters & parameters);
 
   virtual Real value(const Point & /*p*/) override;

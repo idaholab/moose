@@ -11,13 +11,19 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSplitChemicalPotential);
 
-defineADValidParams(
-    ADCHSplitChemicalPotential,
-    ADKernel,
-    params.addClassDescription("Chemical potential kernel in Split Cahn-Hilliard that solves "
-                               "chemical potential in a weak form");
-    params.addRequiredParam<MaterialPropertyName>("chemical_potential",
-                                                  "Chemical potential property name"););
+defineADLegacyParams(ADCHSplitChemicalPotential);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADCHSplitChemicalPotential<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Chemical potential kernel in Split Cahn-Hilliard that solves "
+                             "chemical potential in a weak form");
+  params.addRequiredParam<MaterialPropertyName>("chemical_potential",
+                                                "Chemical potential property name");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADCHSplitChemicalPotential<compute_stage>::ADCHSplitChemicalPotential(

@@ -92,6 +92,8 @@ InputParameters validParams<TabulatedFluidProperties>();
 class TabulatedFluidProperties : public SinglePhaseFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   TabulatedFluidProperties(const InputParameters & parameters);
   virtual ~TabulatedFluidProperties();
 

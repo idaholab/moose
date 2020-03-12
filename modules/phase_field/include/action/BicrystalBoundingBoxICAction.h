@@ -18,6 +18,8 @@
 class BicrystalBoundingBoxICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   BicrystalBoundingBoxICAction(const InputParameters & params);
 
   virtual void act();

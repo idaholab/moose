@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldTestApp", GaussContForcing);
 
-template <>
+defineLegacyParams(GaussContForcing);
+
 InputParameters
-validParams<GaussContForcing>()
+GaussContForcing::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addParam<Real>("amplitude", 1.0, "Aplitude of the bell curve");
   params.addParam<Real>("x_center", 4.0, "Center of the hump in the X direction");
   params.addParam<Real>("y_center", 6.0, "Center of the hump in the Y direction");

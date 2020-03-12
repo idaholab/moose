@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CrossTermBarrierFunctionMaterial);
 
-template <>
+defineLegacyParams(CrossTermBarrierFunctionMaterial);
+
 InputParameters
-validParams<CrossTermBarrierFunctionMaterial>()
+CrossTermBarrierFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<CrossTermBarrierFunctionBase>();
+  InputParameters params = CrossTermBarrierFunctionBase::validParams();
   params.addClassDescription(
       "Free energy contribution symmetric across interfaces between arbitrary pairs of phases.");
   return params;

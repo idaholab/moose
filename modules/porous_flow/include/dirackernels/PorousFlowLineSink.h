@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowLineSink>();
 class PorousFlowLineSink : public PorousFlowLineGeometry
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowLineSink(const InputParameters & parameters);
 
 protected:

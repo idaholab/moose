@@ -13,17 +13,14 @@
 
 // Forward Declarations
 class LevelSetOlssonTerminator;
-class Transient;
-
-template <>
-InputParameters validParams<LevelSetOlssonTerminator>();
-
 /**
  * Terminates the solve based on the criteria defined in Olsson et. al. (2007).
  */
 class LevelSetOlssonTerminator : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   LevelSetOlssonTerminator(const InputParameters & parameters);
   virtual void execute() override;
   virtual void initialize() override {}

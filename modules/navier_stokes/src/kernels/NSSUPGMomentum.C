@@ -14,11 +14,12 @@
 
 registerMooseObject("NavierStokesApp", NSSUPGMomentum);
 
-template <>
+defineLegacyParams(NSSUPGMomentum);
+
 InputParameters
-validParams<NSSUPGMomentum>()
+NSSUPGMomentum::validParams()
 {
-  InputParameters params = validParams<NSSUPGBase>();
+  InputParameters params = NSSUPGBase::validParams();
   params.addClassDescription(
       "Compute residual and Jacobian terms form the SUPG terms in the momentum equation.");
   params.addRequiredParam<unsigned int>("component", "");

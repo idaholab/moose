@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", KKSPhaseConcentration);
 
-template <>
+defineLegacyParams(KKSPhaseConcentration);
+
 InputParameters
-validParams<KKSPhaseConcentration>()
+KKSPhaseConcentration::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("KKS model kernel to enforce the decomposition of concentration into "
                              "phase concentration  (1-h(eta))*ca + h(eta)*cb - c = 0. The "
                              "non-linear variable of this kernel is cb.");

@@ -11,9 +11,17 @@
 
 registerADMooseObject("MiscTestApp", ADSoretCoeffTest);
 
-defineADValidParams(
-    ADSoretCoeffTest, ADMaterial, params.addRequiredCoupledVar("coupled_var", "A coupled variable");
-    params.addRequiredCoupledVar("temperature", "The coupled temperature variable"););
+defineADLegacyParams(ADSoretCoeffTest);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADSoretCoeffTest<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addRequiredCoupledVar("coupled_var", "A coupled variable");
+  params.addRequiredCoupledVar("temperature", "The coupled temperature variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADSoretCoeffTest<compute_stage>::ADSoretCoeffTest(const InputParameters & parameters)

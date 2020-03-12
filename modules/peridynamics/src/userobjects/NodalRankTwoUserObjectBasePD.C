@@ -11,11 +11,12 @@
 #include "RankTwoTensor.h"
 #include "AuxiliarySystem.h"
 
-template <>
+defineLegacyParams(NodalRankTwoUserObjectBasePD);
+
 InputParameters
-validParams<NodalRankTwoUserObjectBasePD>()
+NodalRankTwoUserObjectBasePD::validParams()
 {
-  InputParameters params = validParams<NodalAuxVariableUserObjectBasePD>();
+  InputParameters params = NodalAuxVariableUserObjectBasePD::validParams();
   params.addClassDescription(
       "Base class for calculating components and scalar type quantities of nodal rank-two stress "
       "and strain tensors from material properties (stress and strain) for edge elements "

@@ -18,6 +18,8 @@
 class Tricrystal2CircleGrainsICAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   Tricrystal2CircleGrainsICAction(const InputParameters & params);
 
   virtual void act();

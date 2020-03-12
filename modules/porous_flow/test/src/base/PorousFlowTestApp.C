@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(PorousFlowTestApp);
+
 InputParameters
-validParams<PorousFlowTestApp>()
+PorousFlowTestApp::validParams()
 {
-  InputParameters params = validParams<PorousFlowApp>();
+  InputParameters params = PorousFlowApp::validParams();
   return params;
 }
 

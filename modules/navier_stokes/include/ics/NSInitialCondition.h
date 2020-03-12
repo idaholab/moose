@@ -30,6 +30,8 @@ InputParameters validParams<NSInitialCondition>();
 class NSInitialCondition : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   NSInitialCondition(const InputParameters & parameters);
 
   /**

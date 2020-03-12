@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowRelativePermeabilityBW>();
 class PorousFlowRelativePermeabilityBW : public PorousFlowRelativePermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowRelativePermeabilityBW(const InputParameters & parameters);
 
 protected:

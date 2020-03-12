@@ -13,11 +13,12 @@
 
 registerMooseObject("SolidMechanicsApp", PLC_LSH);
 
-template <>
+defineLegacyParams(PLC_LSH);
+
 InputParameters
-validParams<PLC_LSH>()
+PLC_LSH::validParams()
 {
-  InputParameters params = validParams<SolidModel>();
+  InputParameters params = SolidModel::validParams();
 
   // Power-law creep material parameters
   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");

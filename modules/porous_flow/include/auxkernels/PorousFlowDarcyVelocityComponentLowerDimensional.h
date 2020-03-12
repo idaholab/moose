@@ -30,6 +30,8 @@ InputParameters validParams<PorousFlowDarcyVelocityComponentLowerDimensional>();
 class PorousFlowDarcyVelocityComponentLowerDimensional : public PorousFlowDarcyVelocityComponent
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDarcyVelocityComponentLowerDimensional(const InputParameters & parameters);
 
 protected:

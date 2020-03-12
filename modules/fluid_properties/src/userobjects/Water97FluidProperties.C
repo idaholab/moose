@@ -13,11 +13,12 @@
 
 registerMooseObject("FluidPropertiesApp", Water97FluidProperties);
 
-template <>
+defineLegacyParams(Water97FluidProperties);
+
 InputParameters
-validParams<Water97FluidProperties>()
+Water97FluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Fluid properties for water and steam (H2O) using IAPWS-IF97");
   return params;
 }

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", DerivativeMultiPhaseMaterial);
 
-template <>
+defineLegacyParams(DerivativeMultiPhaseMaterial);
+
 InputParameters
-validParams<DerivativeMultiPhaseMaterial>()
+DerivativeMultiPhaseMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeMultiPhaseBase>();
+  InputParameters params = DerivativeMultiPhaseBase::validParams();
   params.addClassDescription("Two phase material that combines n phase materials using a switching "
                              "function with and n non-conserved order parameters (to be used with "
                              "SwitchingFunctionConstraint*).");

@@ -26,6 +26,8 @@ InputParameters validParams<NSTemperatureL2>();
 class NSTemperatureL2 : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NSTemperatureL2(const InputParameters & parameters);
 
 protected:

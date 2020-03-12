@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowDiffusivityMillingtonQuirk>();
 class PorousFlowDiffusivityMillingtonQuirk : public PorousFlowDiffusivityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDiffusivityMillingtonQuirk(const InputParameters & parameters);
 
 protected:

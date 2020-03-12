@@ -30,6 +30,8 @@ class CrackTipEnrichmentStressDivergenceTensors : public ALEKernel,
                                                   public EnrichmentFunctionCalculation
 {
 public:
+  static InputParameters validParams();
+
   CrackTipEnrichmentStressDivergenceTensors(const InputParameters & parameters);
 
 protected:

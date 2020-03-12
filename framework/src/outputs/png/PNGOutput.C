@@ -19,11 +19,12 @@
 
 registerMooseObject("MooseApp", PNGOutput);
 
-template <>
+defineLegacyParams(PNGOutput);
+
 InputParameters
-validParams<PNGOutput>()
+PNGOutput::validParams()
 {
-  InputParameters params = validParams<FileOutput>();
+  InputParameters params = FileOutput::validParams();
   params.addParam<bool>("transparent_background",
                         false,
                         "Determination of whether the background will be transparent.");

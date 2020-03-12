@@ -12,11 +12,12 @@
 #include "MooseVariable.h"
 #include "XFEM.h"
 
-template <>
+defineLegacyParams(LevelSetBiMaterialBase);
+
 InputParameters
-validParams<LevelSetBiMaterialBase>()
+LevelSetBiMaterialBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a material property for bi-materials (consisting of two "
                              "different materials) defined by a level set function.");
   params.addRequiredParam<VariableName>(

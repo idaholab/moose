@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class ADSoretCoeffTest : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADSoretCoeffTest(const InputParameters & parameters);
 
 protected:

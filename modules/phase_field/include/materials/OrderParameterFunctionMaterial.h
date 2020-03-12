@@ -26,6 +26,8 @@ InputParameters validParams<OrderParameterFunctionMaterial>();
 class OrderParameterFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   OrderParameterFunctionMaterial(const InputParameters & parameters);
 
 protected:

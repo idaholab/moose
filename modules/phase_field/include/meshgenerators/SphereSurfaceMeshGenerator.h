@@ -24,6 +24,8 @@ InputParameters validParams<SphereSurfaceMeshGenerator>();
 class SphereSurfaceMeshGenerator : public MeshGenerator
 {
 public:
+  static InputParameters validParams();
+
   SphereSurfaceMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;

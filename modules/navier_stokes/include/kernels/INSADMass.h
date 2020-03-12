@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class INSADMass : public ADKernelValue<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMass(const InputParameters & parameters);
 
 protected:

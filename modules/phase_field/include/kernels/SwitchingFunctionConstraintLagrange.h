@@ -29,6 +29,8 @@ class SwitchingFunctionConstraintLagrange
   : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunctionConstraintLagrange(const InputParameters & parameters);
 
 protected:

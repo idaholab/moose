@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", OutputEulerAngles);
 
-template <>
+defineLegacyParams(OutputEulerAngles);
+
 InputParameters
-validParams<OutputEulerAngles>()
+OutputEulerAngles::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Output Euler angles from user object to an AuxVariable.");
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
                                           "Name of Euler angle provider user object");

@@ -21,6 +21,8 @@ InputParameters validParams<GBEvolutionBase>();
 class GBEvolutionBase : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   GBEvolutionBase(const InputParameters & parameters);
 
 protected:

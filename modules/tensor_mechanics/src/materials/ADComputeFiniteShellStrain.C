@@ -19,9 +19,16 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeFiniteShellStrain);
 
-defineADValidParams(ADComputeFiniteShellStrain,
-                    ADComputeIncrementalShellStrain,
-                    params.addClassDescription("Compute a large strain increment for the shell."););
+defineADLegacyParams(ADComputeFiniteShellStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeFiniteShellStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADComputeIncrementalShellStrain<compute_stage>::validParams();
+  params.addClassDescription("Compute a large strain increment for the shell.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeFiniteShellStrain<compute_stage>::ADComputeFiniteShellStrain(

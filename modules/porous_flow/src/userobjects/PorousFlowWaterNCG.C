@@ -14,11 +14,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowWaterNCG);
 
-template <>
+defineLegacyParams(PorousFlowWaterNCG);
+
 InputParameters
-validParams<PorousFlowWaterNCG>()
+PorousFlowWaterNCG::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidStateMultiComponentBase>();
+  InputParameters params = PorousFlowFluidStateMultiComponentBase::validParams();
   params.addRequiredParam<UserObjectName>("water_fp", "The name of the user object for water");
   params.addRequiredParam<UserObjectName>(
       "gas_fp", "The name of the user object for the non-condensable gas");

@@ -11,13 +11,18 @@
 
 registerADMooseObject("PhaseFieldApp", ADAllenCahn);
 
-defineADValidParams(
-    ADAllenCahn,
-    ADAllenCahnBase,
-    params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
-    params.addRequiredParam<MaterialPropertyName>(
-        "f_name",
-        "Base name of the free energy function F defined in a DerivativeParsedMaterial"););
+defineADLegacyParams(ADAllenCahn);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADAllenCahn<compute_stage>::validParams()
+{
+  InputParameters params = ADAllenCahnBase<compute_stage, Real>::validParams();
+  params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
+  params.addRequiredParam<MaterialPropertyName>(
+      "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADAllenCahn<compute_stage>::ADAllenCahn(const InputParameters & parameters)

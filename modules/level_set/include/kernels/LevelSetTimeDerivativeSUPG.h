@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class LevelSetTimeDerivativeSUPG : public LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetTimeDerivativeSUPG(const InputParameters & parameters);
 
 protected:

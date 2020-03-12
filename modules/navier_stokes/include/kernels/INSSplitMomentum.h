@@ -30,6 +30,8 @@ InputParameters validParams<INSSplitMomentum>();
 class INSSplitMomentum : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSSplitMomentum(const InputParameters & parameters);
 
   virtual ~INSSplitMomentum() {}
