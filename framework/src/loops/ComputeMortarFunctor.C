@@ -56,6 +56,15 @@ template <ComputeStage compute_stage>
 void
 ComputeMortarFunctor<compute_stage>::operator()()
 {
+  // Set required material properties
+  std::set<unsigned int> needed_mat_props;
+  for (const auto & mc : _mortar_constraints)
+  {
+    const auto & mp_deps = mc->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+  _subproblem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
+
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
