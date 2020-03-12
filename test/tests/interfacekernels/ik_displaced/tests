@@ -1,0 +1,18 @@
+[Tests]
+  design = 'InterfaceKernels/index.md'
+  issues = '#14876'
+
+  [displaced]
+    type = 'Exodiff'
+    input = displaced.i
+    exodiff = displaced.e
+    requirement = 'When computing residuals and jacobians on an interface, the system shall be able to use element information from the displaced mesh when requested'
+  []
+  [undisplaced]
+    type = 'Exodiff'
+    input = displaced.i
+    exodiff = undisplaced.e
+    cli_args = 'InterfaceKernels/interface/use_displaced_mesh=false Outputs/file_base=undisplaced'
+    requirement = 'When computing residuals and jacobians on an interface, the system shall be able to use element information from the reference mesh'
+  []
+[]

@@ -1753,7 +1753,7 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
   _aux->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
 
   if (_displaced_problem && _reinit_displaced_face)
-    _displaced_problem->reinitNeighbor(elem, side, tid);
+    _displaced_problem->reinitNeighbor(_displaced_mesh->elemPtr(elem->id()), side, tid);
 }
 
 void
