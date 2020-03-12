@@ -30,12 +30,10 @@ SumPostprocessor::initialize()
 void
 SumPostprocessor::execute()
 {
-  _sum = _a + _b;
 }
 
 PostprocessorValue
 SumPostprocessor::getValue()
 {
-  gatherSum(_sum);
-  return _sum;
+  return _a + _b;
 }
