@@ -25,19 +25,19 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'd0 d1 d2'
     num_rows = 4
     seed = 2011
   []
   [resample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'd0 d1 d2'
     num_rows = 4
     seed = 2013
   []
   [sobol]
-    type = SobolSampler
+    type = Sobol
     sampler_a = sample
     sampler_b = resample
   []

@@ -5,27 +5,26 @@
 []
 
 [Distributions/uniform]
-  type = UniformDistribution
+  type = Uniform
   lower_bound = 0
   upper_bound = 1
 []
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'uniform uniform uniform uniform uniform uniform'
     num_rows = 4
     seed = 2011
   []
   [resample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'uniform uniform uniform uniform uniform uniform'
     num_rows = 4
     seed = 2013
   []
-
   [sobol]
-    type = SobolSampler
+    type = Sobol
     sampler_a = sample
     sampler_b = resample
   []

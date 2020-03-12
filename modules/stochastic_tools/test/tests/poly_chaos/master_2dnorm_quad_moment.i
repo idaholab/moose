@@ -25,7 +25,7 @@
 
 [Samplers]
   [quadrature]
-    type = QuadratureSampler
+    type = Quadrature
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5

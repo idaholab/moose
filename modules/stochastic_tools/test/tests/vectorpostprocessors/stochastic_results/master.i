@@ -25,19 +25,19 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'uniform_left uniform_right'
     num_rows = 3
     seed = 2011
   []
   [resample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     distributions = 'uniform_left uniform_right'
     num_rows = 3
     seed = 2013
   []
   [sobol]
-    type = SobolSampler
+    type = Sobol
     sampler_a = sample
     sampler_b = resample
   []

@@ -12,12 +12,12 @@
 
 [Distributions]
   [D_dist]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
   []
   [S_dist]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
   []
@@ -25,13 +25,13 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 100
     distributions = 'D_dist S_dist'
     execute_on = timestep_end
   []
   [quadrature]
-    type = QuadratureSampler
+    type = Quadrature
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5
