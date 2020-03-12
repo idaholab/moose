@@ -24,6 +24,8 @@ InputParameters validParams<MultiAppFXTransfer>();
 class MultiAppFXTransfer : public MultiAppTransfer
 {
 public:
+  static InputParameters validParams();
+
   MultiAppFXTransfer(const InputParameters & parameters);
 
   // Overrides from MultiAppTransfer
@@ -74,4 +76,3 @@ protected:
   /// Function pointer for grabbing the SubApp object
   GetProblemObject getSubAppObject;
 };
-

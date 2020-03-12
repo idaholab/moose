@@ -23,6 +23,7 @@ InputParameters validParams<FunctionSeriesToAux>();
 class FunctionSeriesToAux : public FunctionAux
 {
 public:
+  static InputParameters validParams();
+
   FunctionSeriesToAux(const InputParameters & parameters);
 };
-

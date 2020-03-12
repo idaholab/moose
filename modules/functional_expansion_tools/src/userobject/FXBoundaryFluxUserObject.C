@@ -11,11 +11,12 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXBoundaryFluxUserObject);
 
-template <>
+defineLegacyParams(FXBoundaryFluxUserObject);
+
 InputParameters
-validParams<FXBoundaryFluxUserObject>()
+FXBoundaryFluxUserObject::validParams()
 {
-  InputParameters params = validParams<FXBoundaryBaseUserObject>();
+  InputParameters params = FXBoundaryBaseUserObject::validParams();
 
   params.addClassDescription("Generates an Functional Expansion representation for a boundary flux "
                              "condition using a 'FunctionSeries'-type Function");

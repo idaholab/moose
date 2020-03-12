@@ -19,6 +19,7 @@ InputParameters validParams<FunctionalExpansionToolsApp>();
 class FunctionalExpansionToolsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
   FunctionalExpansionToolsApp(InputParameters parameters);
   virtual ~FunctionalExpansionToolsApp();
 
@@ -27,4 +28,3 @@ public:
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
-

@@ -26,6 +26,8 @@ InputParameters validParams<FXBoundaryBaseUserObject>();
 class FXBoundaryBaseUserObject : public FXIntegralBaseUserObject<SideIntegralVariableUserObject>
 {
 public:
+  static InputParameters validParams();
+
   FXBoundaryBaseUserObject(const InputParameters & parameters);
 
 protected:
@@ -33,4 +35,3 @@ protected:
   virtual Point getCentroid() const final;
   virtual Real getVolume() const final;
 };
-

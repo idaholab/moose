@@ -9,11 +9,12 @@
 
 #include "MemoizedFunctionInterface.h"
 
-template <>
+defineLegacyParams(MemoizedFunctionInterface);
+
 InputParameters
-validParams<MemoizedFunctionInterface>()
+MemoizedFunctionInterface::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   params.addClassDescription("The function uses a cache to potentially reduce the computational "
                              "burden of reusing a complex or costly function");
