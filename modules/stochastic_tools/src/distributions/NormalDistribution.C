@@ -11,7 +11,8 @@
 #include "math.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("StochasticToolsApp", NormalDistribution);
+registerMooseObjectAliased("StochasticToolsApp", NormalDistribution, "Normal");
+registerMooseObjectReplaced("StochasticToolsApp", NormalDistribution, "07/01/2020 00:00", Normal);
 
 defineLegacyParams(NormalDistribution);
 

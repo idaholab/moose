@@ -11,7 +11,11 @@
 
 #include "libmesh/auto_ptr.h"
 
-registerMooseObject("StochasticToolsApp", BoostLognormalDistribution);
+registerMooseObjectAliased("StochasticToolsApp", BoostLognormalDistribution, "BoostLognormal");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            BoostLognormalDistribution,
+                            "07/01/2020 00:00",
+                            BoostLognormal);
 
 defineLegacyParams(BoostLognormalDistribution);
 

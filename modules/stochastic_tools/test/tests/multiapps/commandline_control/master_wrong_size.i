@@ -23,7 +23,7 @@
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 5
     upper_bound = 10
   []
@@ -31,7 +31,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 10
     distributions = 'uniform'
     execute_on = PRE_MULTIAPP_SETUP

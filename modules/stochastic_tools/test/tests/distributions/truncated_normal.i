@@ -12,7 +12,7 @@
 
 [Distributions]
   [normal_test]
-    type = TruncatedNormalDistribution
+    type = TruncatedNormal
     mean = 100
     standard_deviation = 25
     lower_bound = 50

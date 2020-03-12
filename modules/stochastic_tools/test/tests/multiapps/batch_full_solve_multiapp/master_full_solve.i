@@ -10,7 +10,7 @@
 
 [Distributions]
   [uniform_0]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 0.1
     upper_bound = 0.3
   []
@@ -18,7 +18,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform_0'
   []

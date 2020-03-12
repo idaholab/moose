@@ -10,7 +10,7 @@
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2
     upper_bound = 4
   []
@@ -18,7 +18,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform uniform'
     execute_on = 'INITIAL TIMESTEP_BEGIN'

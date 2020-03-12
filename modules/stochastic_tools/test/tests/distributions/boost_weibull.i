@@ -12,7 +12,7 @@
 
 [Distributions]
   [weibull]
-    type = BoostWeibullDistribution
+    type = BoostWeibull
     shape = 5
     scale = 1
   []

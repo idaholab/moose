@@ -12,7 +12,7 @@
 
 [Distributions]
   [lognormal_test]
-    type = BoostLognormalDistribution
+    type = BoostLognormal
     location = -0.371
     scale = 0.52
   []

@@ -12,7 +12,7 @@
 
 [Distributions]
   [weibull]
-    type = BoostWeibullDistribution
+    type = BoostWeibull
     scale = 1
     shape = 5
   []
@@ -20,7 +20,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 10
     distributions = 'weibull'
     execute_on = 'initial timestep_end'

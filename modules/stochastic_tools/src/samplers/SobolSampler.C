@@ -10,7 +10,8 @@
 #include "SobolSampler.h"
 #include "Distribution.h"
 
-registerMooseObject("StochasticToolsApp", SobolSampler);
+registerMooseObjectAliased("StochasticToolsApp", SobolSampler, "Sobol");
+registerMooseObjectReplaced("StochasticToolsApp", SobolSampler, "07/01/2020 00:00", Sobol);
 
 defineLegacyParams(SobolSampler);
 

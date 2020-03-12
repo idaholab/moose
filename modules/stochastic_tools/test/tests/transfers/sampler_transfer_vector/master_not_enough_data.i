@@ -12,7 +12,7 @@
 
 [Distributions]
   [uniform_prop_a]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1980
     upper_bound = 1981
   []
@@ -20,7 +20,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 5
     distributions = 'uniform_prop_a'
     execute_on = 'initial timestep_end' # create new random numbers on initial and timestep_end

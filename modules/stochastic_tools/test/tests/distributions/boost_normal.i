@@ -12,7 +12,7 @@
 
 [Distributions]
   [normal_test]
-    type = BoostNormalDistribution
+    type = BoostNormal
     mean = 0
     standard_deviation = 1
   []

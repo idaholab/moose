@@ -12,7 +12,7 @@
 
 [Distributions]
   [logistic_test]
-    type = LogisticDistribution
+    type = Logistic
     location = 1
     shape = 1
   []

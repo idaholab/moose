@@ -137,7 +137,18 @@ protected:
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
-  double getRand(unsigned int index = 0);
+  Real getRand(unsigned int index = 0);
+
+  /**
+   * Get the next random integer from the generator within the specified range [lower, upper)
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
+   * @param lower Lower bounds
+   * @param upper Upper bounds
+   *
+   * @return A integer for the random number
+   */
+  uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
   // TODO: Restore this pure virtual after application are updated to new interface
   /**
@@ -264,10 +275,9 @@ private:
   const PerfID _perf_get_global_samples;
   const PerfID _perf_get_local_samples;
   const PerfID _perf_get_next_local_row;
-  const PerfID _perf_advance_generator;
-  const PerfID _perf_get_rand;
   const PerfID _perf_sample_row;
   const PerfID _perf_local_sample_matrix;
   const PerfID _perf_sample_matrix;
+  const PerfID _perf_advance_generator;
   ///@}
 };
