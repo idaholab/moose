@@ -36,7 +36,12 @@ public:
 
 protected:
 
-  virtual ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override { return 0.0;};
+  virtual ADReal computeADResidualNode();
+
+  virtual void  computeResidual() final;
+  virtual void  computeJacobian() final;
+  virtual void computeADOffDiagJacobian() final;
 
 private:
   /// Booleans for validity of params
