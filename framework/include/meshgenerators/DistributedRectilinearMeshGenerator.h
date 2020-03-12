@@ -16,7 +16,7 @@
 #include "libmesh/edge_edge2.h"
 
 /**
- * This class works by first creating a "distributed ual graph" of the element connectivity based
+ * This class works by first creating a "distributed dual graph" of the element connectivity based
  * on a linear partition of mesh before ever building an elements. It then uses
  * PetscExternalPartitioner to partition that graph - assigning elements to processors. Then, each
  * processor can read the partition map and build only the elements that need to be on that

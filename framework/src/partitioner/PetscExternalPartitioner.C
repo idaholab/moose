@@ -308,6 +308,8 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   CHKERRABORT(comm.get(), ierr);
   ierr = MatPartitioningDestroy(&part);
   CHKERRABORT(comm.get(), ierr);
+  ierr = MatDestroy(&dual);
+  CHKERRABORT(comm.get(), ierr);
   ierr = ISDestroy(&is);
   CHKERRABORT(comm.get(), ierr);
 
