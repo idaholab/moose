@@ -813,6 +813,11 @@ public:
    */
   bool isParallelTypeForced() const { return _parallel_type_overridden; }
 
+  /**
+   *  Allow to change parallel type
+   */
+  void setParallelType(ParallelType parallel_type) { _parallel_type = parallel_type; }
+
   /*
    * Set/Get the partitioner name
    */
