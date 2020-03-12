@@ -25,7 +25,7 @@
 template <typename T>
 class FunctionParserBase
 {
-};
+}
 #endif
 
 #include <tuple>
@@ -750,11 +750,14 @@ public:
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
+  ///@{
   /**
    * Get/set a string representing the location (i.e. filename,linenum) in the input text for the
    * block containing parameters for this object.
    */
-  std::string & blockLocation() { return _block_location; };
+  std::string & blockLocation() { return _block_location; }
+  const std::string & blockLocation() const { return _block_location; }
+  ///@}
 
   ///@{
   /**
@@ -773,8 +776,8 @@ public:
   const std::string & inputLocation(const std::string & param) const
   {
     return at(param)._input_location;
-  };
-  std::string & inputLocation(const std::string & param) { return at(param)._input_location; };
+  }
+  std::string & inputLocation(const std::string & param) { return at(param)._input_location; }
   ///@}
 
   ///@{
@@ -785,15 +788,15 @@ public:
   const std::string & paramFullpath(const std::string & param) const
   {
     return at(param)._param_fullpath;
-  };
-  std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; };
+  }
+  std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; }
   ///@}
 
   /**
    * Get/set a string representing the raw, unmodified token text for the given param.  This is
    * usually only set/useable for file-path type parameters.
    */
-  std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; };
+  std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; }
 
   /**
    * Informs this object that values for this parameter set from the input file or from the command
