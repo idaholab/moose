@@ -3588,8 +3588,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
   // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
-  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here then
-  // it is not in the correct state for other objects.
+  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here
+  // then it is not in the correct state for other objects.
   if (exec_type != EXEC_INITIAL)
     executeSamplers(exec_type);
 
@@ -3627,7 +3627,8 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
   query.queryInto(objs);
   if (!isgen)
   {
-    // join all threaded user objects (i.e. not regular general user objects) to the primary thread
+    // join all threaded user objects (i.e. not regular general user objects) to the primary
+    // thread
     for (auto obj : objs)
       if (obj->primaryThreadCopy())
         obj->primaryThreadCopy()->threadJoin(*obj);
@@ -5383,10 +5384,11 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _functions.jacobianSetup(tid);
     }
 
-    // When computing the initial Jacobian for automatic variable scaling we need to make sure that
-    // the time derivatives have been calculated. So we'll call down to the nonlinear system here.
-    // Note that if we are not doing this initial Jacobian calculation we will just exit in that
-    // class to avoid redundant calculation (the residual function also computes time derivatives)
+    // When computing the initial Jacobian for automatic variable scaling we need to make sure
+    // that the time derivatives have been calculated. So we'll call down to the nonlinear system
+    // here. Note that if we are not doing this initial Jacobian calculation we will just exit in
+    // that class to avoid redundant calculation (the residual function also computes time
+    // derivatives)
     _nl->computeTimeDerivatives(/*jacobian_calculation =*/true);
 
     _aux->compute(EXEC_NONLINEAR);
@@ -6698,8 +6700,8 @@ FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
 void
 FEProblemBase::uniformRefine()
 {
-  // ResetDisplacedMeshThread::onNode looks up the reference mesh by ID, so we need to make sure we
-  // undisplace before adapting the reference mesh
+  // ResetDisplacedMeshThread::onNode looks up the reference mesh by ID, so we need to make sure
+  // we undisplace before adapting the reference mesh
   if (_displaced_problem)
     _displaced_problem->undisplaceMesh();
 
