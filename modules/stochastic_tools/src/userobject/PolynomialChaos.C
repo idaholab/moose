@@ -37,6 +37,8 @@ PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
     _ncoeff(_tuple.size()),
     _coeff(_ncoeff)
 {
+  MooseUtils::linearPartitionItems(
+      _ncoeff, n_processors(), processor_id(), _n_local_coeff, _st_local_coeff, _end_local_coeff);
 }
 
 void
@@ -223,6 +225,54 @@ PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> dim,
       tmp *= poly_val(d, _tuple[i][d]);
     val += tmp;
   }
+
+  return val;
+}
+
+Real
+PolynomialChaos::computeSobolIndex(const std::set<unsigned int> ind) const
+{
+  // If set is empty, compute mean
+  if (ind.empty())
+    return computeMean();
+
+  // Do some sanity checks in debug
+  mooseAssert(ind.size() <= _ndim, "Number of indices is greater than number of parameters.");
+  mooseAssert(*ind.rbegin() < _ndim, "Maximum index provided exceeds number of parameters.");
+
+  Real val = 0.0;
+  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+  {
+    Real tmp = _coeff[i] * _coeff[i];
+    for (unsigned int d = 0; d < _ndim; ++d)
+    {
+      if ((ind.find(d) != ind.end() && _tuple[i][d] > 0) ||
+          (ind.find(d) == ind.end() && _tuple[i][d] == 0))
+      {
+        tmp *= _poly[d]->innerProduct(_tuple[i][d]);
+      }
+      else
+      {
+        tmp = 0.0;
+        break;
+      }
+    }
+    val += tmp;
+  }
+
+  return val;
+}
+
+Real
+PolynomialChaos::computeSobolTotal(const unsigned int dim) const
+{
+  // Do some sanity checks in debug
+  mooseAssert(dim < _ndim, "Requested dimesion is greater than number of parameters.");
+
+  Real val = 0.0;
+  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+    if (_tuple[i][dim] > 0)
+      val += _coeff[i] * _coeff[i] * _poly[dim]->innerProduct(_tuple[i][dim]);
 
   return val;
 }
