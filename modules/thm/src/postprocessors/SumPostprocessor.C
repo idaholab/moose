@@ -7,24 +7,36 @@ InputParameters
 validParams<SumPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<PostprocessorName>("a", "First postprocessor");
-  params.addRequiredParam<PostprocessorName>("b", "Second postprocessor");
+  params.addParam<std::vector<PostprocessorName>>("values", "List of postprocessors to add");
+  params.addDeprecatedParam<PostprocessorName>("a", "First postprocessor", "Use 'values' instead.");
+  params.addDeprecatedParam<PostprocessorName>(
+      "b", "Second postprocessor", "Use 'values' instead.");
 
   return params;
 }
 
 SumPostprocessor::SumPostprocessor(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters),
-    _sum(0.),
-    _a(getPostprocessorValue("a")),
-    _b(getPostprocessorValue("b"))
+  : GeneralPostprocessor(parameters)
 {
+  if (isParamValid("a") && isParamValid("b"))
+  {
+    _values.push_back(&getPostprocessorValue("a"));
+    _values.push_back(&getPostprocessorValue("b"));
+  }
+  else if (isParamValid("values"))
+  {
+    const std::vector<PostprocessorName> & pps_names =
+        getParam<std::vector<PostprocessorName>>("values");
+    for (auto & name : pps_names)
+      _values.push_back(&getPostprocessorValueByName(name));
+  }
+  else
+    mooseError("Use 'values' parameter to specify postprocessor names that will be added up.");
 }
 
 void
 SumPostprocessor::initialize()
 {
-  _sum = 0;
 }
 
 void
@@ -35,5 +47,8 @@ SumPostprocessor::execute()
 PostprocessorValue
 SumPostprocessor::getValue()
 {
-  return _a + _b;
+  Real sum = 0;
+  for (auto & v : _values)
+    sum += *v;
+  return sum;
 }

@@ -141,8 +141,7 @@ A_small = 0.5
   [../]
   [./mass_tot]
     type = SumPostprocessor
-    a = mass_pipes
-    b = mass_junction
+    values = 'mass_pipes mass_junction'
     execute_on = 'initial timestep_end'
   [../]
   [./mass_tot_change]
@@ -167,8 +166,7 @@ A_small = 0.5
   [../]
   [./E_tot]
     type = SumPostprocessor
-    a = E_pipes
-    b = E_junction
+    values = 'E_pipes E_junction'
     execute_on = 'initial timestep_end'
   [../]
   [./E_tot_change]

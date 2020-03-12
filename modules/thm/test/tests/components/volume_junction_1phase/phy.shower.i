@@ -130,8 +130,7 @@
   [../]
   [./energy_flux_inlet_sum]
     type = SumPostprocessor
-    a = energy_flux_hot
-    b = energy_flux_cold
+    values = 'energy_flux_hot energy_flux_cold'
   [../]
   [./test_rel_err]
     type = RelativeDifferencePostprocessor
