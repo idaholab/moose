@@ -20,9 +20,11 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
 
-static unsigned int counter = 0;
-static unsigned int cp_counter = 0;
-static unsigned int na_counter = 0;
+// Counter for naming auxiliary kernels
+static unsigned int contact_auxkernel_counter = 0;
+
+// Counter for naming nodal area user objects
+static unsigned int contact_userobject_counter = 0;
 
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
@@ -203,7 +205,7 @@ ContactAction::act()
       params.set<AuxVariableName>("variable") = "penetration";
 
       params.set<bool>("use_displaced_mesh") = true;
-      std::string name = _name + "_contact_" + Moose::stringify(counter++);
+      std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter);
 
       _problem->addAuxKernel("PenetrationAux", name, params);
     }
@@ -220,7 +222,8 @@ ContactAction::act()
 
       params.set<bool>("use_displaced_mesh") = true;
 
-      std::string name = _name + "_contact_pressure_" + Moose::stringify(cp_counter++);
+      std::string name =
+          _name + "_contact_pressure_" + Moose::stringify(contact_auxkernel_counter++);
 
       params.set<ExecFlagEnum>("execute_on",
                                true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
@@ -266,8 +269,9 @@ ContactAction::act()
     var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
     var_params.set<bool>("use_displaced_mesh") = true;
 
-    _problem->addUserObject(
-        "NodalArea", "nodal_area_object_" + Moose::stringify(na_counter++), var_params);
+    _problem->addUserObject("NodalArea",
+                            "nodal_area_object_" + Moose::stringify(contact_userobject_counter++),
+                            var_params);
   }
 }
 
