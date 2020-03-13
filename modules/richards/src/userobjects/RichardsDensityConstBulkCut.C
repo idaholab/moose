@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsDensityConstBulkCut);
 
-template <>
+defineLegacyParams(RichardsDensityConstBulkCut);
+
 InputParameters
-validParams<RichardsDensityConstBulkCut>()
+RichardsDensityConstBulkCut::validParams()
 {
-  InputParameters params = validParams<RichardsDensity>();
+  InputParameters params = RichardsDensity::validParams();
   params.addRequiredParam<Real>("dens0", "Reference density of fluid.  Eg 1000");
   params.addRequiredParam<Real>("bulk_mod", "Bulk modulus of fluid.  Eg 2E9");
   params.addParam<Real>("cut_limit",

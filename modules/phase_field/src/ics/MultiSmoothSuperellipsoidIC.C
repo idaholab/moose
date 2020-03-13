@@ -19,11 +19,12 @@
 
 registerMooseObject("PhaseFieldApp", MultiSmoothSuperellipsoidIC);
 
-template <>
+defineLegacyParams(MultiSmoothSuperellipsoidIC);
+
 InputParameters
-validParams<MultiSmoothSuperellipsoidIC>()
+MultiSmoothSuperellipsoidIC::validParams()
 {
-  InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
+  InputParameters params = SmoothSuperellipsoidBaseIC::validParams();
   params.addClassDescription("Random distribution of smooth ellipse with given minimum spacing");
   params.addRequiredParam<std::vector<unsigned int>>("numbub",
                                                      "Vector of the number of bubbles to place");

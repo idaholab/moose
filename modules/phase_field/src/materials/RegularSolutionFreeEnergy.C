@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", RegularSolutionFreeEnergy);
 
-template <>
+defineLegacyParams(RegularSolutionFreeEnergy);
+
 InputParameters
-validParams<RegularSolutionFreeEnergy>()
+RegularSolutionFreeEnergy::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription("Material that implements the free energy of a regular solution");
   params.addRequiredCoupledVar("c", "Concentration variable");
   params.addCoupledVar("T", 300, "Temperature variable");

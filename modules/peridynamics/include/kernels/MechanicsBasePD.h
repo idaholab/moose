@@ -23,6 +23,8 @@ InputParameters validParams<MechanicsBasePD>();
 class MechanicsBasePD : public DerivativeMaterialInterface<PeridynamicsKernelBase>
 {
 public:
+  static InputParameters validParams();
+
   MechanicsBasePD(const InputParameters & parameters);
 
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;

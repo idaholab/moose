@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CHMath);
 
-template <>
+defineLegacyParams(CHMath);
+
 InputParameters
-validParams<CHMath>()
+CHMath::validParams()
 {
   InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription(

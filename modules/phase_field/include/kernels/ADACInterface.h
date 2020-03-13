@@ -36,6 +36,8 @@ template <ComputeStage compute_stage>
 class ADACInterface : public ADKernel<compute_stage>, public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADACInterface(const InputParameters & parameters);
 
 protected:

@@ -21,6 +21,8 @@ InputParameters validParams<EBCoupledVarTest>();
 class EBCoupledVarTest : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   EBCoupledVarTest(const InputParameters & parameters);
 
 protected:

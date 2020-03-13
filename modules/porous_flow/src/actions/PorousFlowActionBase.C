@@ -17,11 +17,12 @@
 #include "AddPostprocessorAction.h"
 #include "AddBCAction.h"
 
-template <>
+defineLegacyParams(PorousFlowActionBase);
+
 InputParameters
-validParams<PorousFlowActionBase>()
+PorousFlowActionBase::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::string>(
       "dictator_name",
       "dictator",

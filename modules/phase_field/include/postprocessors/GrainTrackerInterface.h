@@ -24,6 +24,8 @@ InputParameters validParams<GrainTrackerInterface>();
 class GrainTrackerInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Accessor for retrieving either nodal or elemental information (unique grains or variable
    * indicies)
@@ -80,4 +82,3 @@ public:
    */
   virtual std::vector<unsigned int> getNewGrainIDs() const;
 };
-

@@ -24,6 +24,8 @@ InputParameters validParams<SlaveConstraint>();
 class SlaveConstraint : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   SlaveConstraint(const InputParameters & parameters);
 
   virtual void addPoints();

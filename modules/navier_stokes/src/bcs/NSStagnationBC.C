@@ -15,11 +15,12 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(NSStagnationBC);
+
 InputParameters
-validParams<NSStagnationBC>()
+NSStagnationBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addClassDescription(
       "This is the base class for the 'imposed stagnation' value boundary conditions.");
   params.addRequiredCoupledVar("mach", "Mach number");

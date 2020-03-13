@@ -9,11 +9,12 @@
 
 #include "GBDependentTensorBase.h"
 
-template <>
+defineLegacyParams(GBDependentTensorBase);
+
 InputParameters
-validParams<GBDependentTensorBase>()
+GBDependentTensorBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("gb", "GB variable");
   params.addParam<Real>("bulk_parameter", 0.0, "Parameter value of bulk material");
   params.addParam<Real>("gb_parameter", 0.0, "Parameter value at GB");

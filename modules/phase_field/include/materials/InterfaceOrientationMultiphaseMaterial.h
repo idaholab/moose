@@ -23,6 +23,8 @@ InputParameters validParams<InterfaceOrientationMultiphaseMaterial>();
 class InterfaceOrientationMultiphaseMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   InterfaceOrientationMultiphaseMaterial(const InputParameters & parameters);
 
 protected:

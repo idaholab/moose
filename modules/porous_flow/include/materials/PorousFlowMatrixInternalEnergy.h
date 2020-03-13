@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowMatrixInternalEnergy>();
 class PorousFlowMatrixInternalEnergy : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMatrixInternalEnergy(const InputParameters & parameters);
 
 protected:

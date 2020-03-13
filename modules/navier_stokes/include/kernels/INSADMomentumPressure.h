@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class INSADMomentumPressure : public ADVectorKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMomentumPressure(const InputParameters & parameters);
 
 protected:

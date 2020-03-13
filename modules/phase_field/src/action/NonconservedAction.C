@@ -22,11 +22,12 @@ registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
 
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_kernel");
 
-template <>
+defineLegacyParams(NonconservedAction);
+
 InputParameters
-validParams<NonconservedAction>()
+NonconservedAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Set up the variable and the kernels needed for a non-conserved phase field variable");
   // Get MooseEnums for the possible order/family options for this variable

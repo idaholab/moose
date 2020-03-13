@@ -17,11 +17,12 @@ registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_kern
 registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_user_object");
 registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_scalar_kernel");
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainActionPD);
+
 InputParameters
-validParams<GeneralizedPlaneStrainActionPD>()
+GeneralizedPlaneStrainActionPD::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Class for setting up the Kernel, ScalarKernel, and UserObject for "
                              "peridynamic generalized plane strain model");
 

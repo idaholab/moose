@@ -20,6 +20,8 @@ InputParameters validParams<GeneralUserObjectBasePD>();
 class GeneralUserObjectBasePD : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   GeneralUserObjectBasePD(const InputParameters & parameters);
 
 protected:

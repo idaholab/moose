@@ -24,6 +24,8 @@ InputParameters validParams<VanDerWaalsFreeEnergy>();
 class VanDerWaalsFreeEnergy : public GasFreeEnergyBase
 {
 public:
+  static InputParameters validParams();
+
   VanDerWaalsFreeEnergy(const InputParameters & parameters);
 
 protected:

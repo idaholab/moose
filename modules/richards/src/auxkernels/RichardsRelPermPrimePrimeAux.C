@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsRelPermPrimePrimeAux);
 
-template <>
+defineLegacyParams(RichardsRelPermPrimePrimeAux);
+
 InputParameters
-validParams<RichardsRelPermPrimePrimeAux>()
+RichardsRelPermPrimePrimeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("seff_var", "The variable that represents the effective saturation");
   params.addRequiredParam<UserObjectName>(
       "relperm_UO", "Name of user object that defines the relative permeability.");

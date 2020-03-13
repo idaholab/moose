@@ -23,6 +23,8 @@ InputParameters validParams<HHPFCRFF>();
 class HHPFCRFF : public KernelValue
 {
 public:
+  static InputParameters validParams();
+
   HHPFCRFF(const InputParameters & parameters);
 
 protected:

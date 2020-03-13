@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class LevelSetReinitializationProblem;
-
-template <>
-InputParameters validParams<LevelSetReinitializationProblem>();
-
 /**
  * A Problem object to perform level set equation reinitialization implementation, mainly
  * implementing
@@ -24,6 +19,8 @@ InputParameters validParams<LevelSetReinitializationProblem>();
 class LevelSetReinitializationProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   LevelSetReinitializationProblem(const InputParameters & parameters);
 
   /**

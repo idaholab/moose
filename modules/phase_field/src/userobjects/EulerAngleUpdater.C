@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", EulerAngleUpdater);
 
-template <>
+defineLegacyParams(EulerAngleUpdater);
+
 InputParameters
-validParams<EulerAngleUpdater>()
+EulerAngleUpdater::validParams()
 {
-  InputParameters params = validParams<EulerAngleProvider>();
+  InputParameters params = EulerAngleProvider::validParams();
   params.addClassDescription(
       "Provide updated euler angles after rigid body rotation of the grains.");
   params.addRequiredParam<UserObjectName>("grain_tracker_object",

@@ -17,11 +17,12 @@
 
 registerMooseObject("ContactApp", TangentialNodalLMMechanicalContact);
 
-template <>
+defineLegacyParams(TangentialNodalLMMechanicalContact);
+
 InputParameters
-validParams<TangentialNodalLMMechanicalContact>()
+TangentialNodalLMMechanicalContact::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addRequiredCoupledVar(

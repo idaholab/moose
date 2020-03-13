@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesTestApp", Advection);
 
-template <>
+defineLegacyParams(Advection);
+
 InputParameters
-validParams<Advection>()
+Advection::validParams()
 {
-  InputParameters params = validParams<INSBase>();
+  InputParameters params = INSBase::validParams();
 
   params.addClassDescription("This class solves the scalar advection equation, "
                              "$\\vec{a}\\cdot\\nabla u = f$ with SUPG stabilization.");

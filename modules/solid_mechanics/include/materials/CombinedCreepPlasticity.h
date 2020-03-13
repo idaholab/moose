@@ -25,6 +25,8 @@ InputParameters validParams<CombinedCreepPlasticity>();
 class CombinedCreepPlasticity : public ConstitutiveModel
 {
 public:
+  static InputParameters validParams();
+
   CombinedCreepPlasticity(const InputParameters & parameters);
   virtual ~CombinedCreepPlasticity() {}
 

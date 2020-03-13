@@ -24,6 +24,8 @@ InputParameters validParams<INSChorinCorrector>();
 class INSChorinCorrector : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSChorinCorrector(const InputParameters & parameters);
 
   virtual ~INSChorinCorrector() {}

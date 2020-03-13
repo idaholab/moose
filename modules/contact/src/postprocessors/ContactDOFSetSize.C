@@ -20,11 +20,12 @@
 
 registerMooseObject("ContactApp", ContactDOFSetSize);
 
-template <>
+defineLegacyParams(ContactDOFSetSize);
+
 InputParameters
-validParams<ContactDOFSetSize>()
+ContactDOFSetSize::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "The name of the variable to test for contact");
   params.addRequiredParam<SubdomainName>("subdomain", "The subdomain that the variable lives on");
   params.addParam<Real>(

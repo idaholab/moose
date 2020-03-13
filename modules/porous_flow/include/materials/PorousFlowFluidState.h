@@ -50,6 +50,8 @@ InputParameters validParams<PorousFlowFluidState>();
 class PorousFlowFluidState : public PorousFlowVariableBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidState(const InputParameters & parameters);
 
 protected:

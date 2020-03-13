@@ -38,6 +38,8 @@ InputParameters validParams<ContactLineSearchBase>();
 class ContactLineSearchBase : public LineSearch
 {
 public:
+  static InputParameters validParams();
+
   ContactLineSearchBase(const InputParameters & parameters);
 
   /**

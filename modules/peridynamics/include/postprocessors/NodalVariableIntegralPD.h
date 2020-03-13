@@ -22,6 +22,8 @@ InputParameters validParams<NodalVariableIntegralPD>();
 class NodalVariableIntegralPD : public NodalIntegralPostprocessorBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalVariableIntegralPD(const InputParameters & parameters);
 
 protected:

@@ -31,6 +31,8 @@ InputParameters validParams<ACSEDGPoly>();
 class ACSEDGPoly : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   ACSEDGPoly(const InputParameters & parameters);
 
 protected:

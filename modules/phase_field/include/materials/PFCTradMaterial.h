@@ -20,6 +20,8 @@ InputParameters validParams<PFCTradMaterial>();
 class PFCTradMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   PFCTradMaterial(const InputParameters & parameters);
 
 protected:

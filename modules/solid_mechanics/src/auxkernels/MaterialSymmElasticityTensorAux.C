@@ -21,11 +21,12 @@
 
 registerMooseObject("SolidMechanicsApp", MaterialSymmElasticityTensorAux);
 
-template <>
+defineLegacyParams(MaterialSymmElasticityTensorAux);
+
 InputParameters
-validParams<MaterialSymmElasticityTensorAux>()
+MaterialSymmElasticityTensorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   // name of the material property of symm elasticity tensor type (probably "elasticity_tensor")
   params.addRequiredParam<std::string>("tensor_matpro",
                                        "The SymmElasticityTensor material property name");

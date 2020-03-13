@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowRelativePermeabilityFLAC>();
 class PorousFlowRelativePermeabilityFLAC : public PorousFlowRelativePermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowRelativePermeabilityFLAC(const InputParameters & parameters);
 
 protected:

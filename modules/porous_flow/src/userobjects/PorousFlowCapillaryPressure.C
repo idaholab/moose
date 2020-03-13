@@ -9,11 +9,12 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-template <>
+defineLegacyParams(PorousFlowCapillaryPressure);
+
 InputParameters
-validParams<PorousFlowCapillaryPressure>()
+PorousFlowCapillaryPressure::validParams()
 {
-  InputParameters params = validParams<DiscreteElementUserObject>();
+  InputParameters params = DiscreteElementUserObject::validParams();
   params.addRangeCheckedParam<Real>(
       "sat_lr",
       0.0,

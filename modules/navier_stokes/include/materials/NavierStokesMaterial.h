@@ -36,6 +36,8 @@ InputParameters validParams<NavierStokesMaterial>();
 class NavierStokesMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   NavierStokesMaterial(const InputParameters & parameters);
 
 protected:

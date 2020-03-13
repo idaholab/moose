@@ -11,12 +11,20 @@
 
 registerADMooseObject("MiscApp", ADDensity);
 
-defineADValidParams(
-    ADDensity, ADMaterial, params.addClassDescription("Creates density AD material property");
-    params.addRequiredCoupledVar(
-        "displacements",
-        "The displacements appropriate for the simulation geometry and coordinate system");
-    params.addRequiredParam<Real>("density", "Initial density"););
+defineADLegacyParams(ADDensity);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADDensity<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("Creates density AD material property");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addRequiredParam<Real>("density", "Initial density");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)

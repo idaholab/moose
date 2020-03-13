@@ -18,6 +18,8 @@
 class PolycrystalKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalKernelAction(const InputParameters & params);
 
   virtual void act();

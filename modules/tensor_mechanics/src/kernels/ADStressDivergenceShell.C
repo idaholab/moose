@@ -24,22 +24,27 @@
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceShell);
 
-defineADValidParams(
-    ADStressDivergenceShell,
-    ADKernel,
-    params.addClassDescription("Quasi-static stress divergence kernel for Shell element");
-    params.addRequiredRangeCheckedParam<unsigned int>(
-        "component",
-        "component < 5",
-        "An integer corresponding to the degree of freedom "
-        "this kernel acts on. (0 for disp_x, "
-        "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y)");
-    params.addRequiredParam<std::string>("through_thickness_order",
-                                         "Quadrature order in out of plane direction");
-    params.addParam<bool>("large_strain",
-                          false,
-                          "Set to true to turn on finite strain calculations.");
-    params.set<bool>("use_displaced_mesh") = false;);
+defineADLegacyParams(ADStressDivergenceShell);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADStressDivergenceShell<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription("Quasi-static stress divergence kernel for Shell element");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component < 5",
+      "An integer corresponding to the degree of freedom "
+      "this kernel acts on. (0 for disp_x, "
+      "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y)");
+  params.addRequiredParam<std::string>("through_thickness_order",
+                                       "Quadrature order in out of plane direction");
+  params.addParam<bool>(
+      "large_strain", false, "Set to true to turn on finite strain calculations.");
+  params.set<bool>("use_displaced_mesh") = false;
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADStressDivergenceShell<compute_stage>::ADStressDivergenceShell(const InputParameters & parameters)

@@ -23,6 +23,8 @@ InputParameters validParams<PressureAux>();
 class PressureAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PressureAux(const InputParameters & parameters);
 
 protected:

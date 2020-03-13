@@ -41,6 +41,8 @@ InputParameters validParams<EquilibriumConstantAux>();
 class EquilibriumConstantAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   EquilibriumConstantAux(const InputParameters & parameters);
 
 protected:

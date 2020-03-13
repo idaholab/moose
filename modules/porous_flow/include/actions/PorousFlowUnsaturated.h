@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowUnsaturated>();
 class PorousFlowUnsaturated : public PorousFlowSinglePhaseBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowUnsaturated(const InputParameters & params);
 
 protected:

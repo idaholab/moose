@@ -25,6 +25,8 @@ InputParameters validParams<PLC_LSH>();
 class PLC_LSH : public SolidModel
 {
 public:
+  static InputParameters validParams();
+
   PLC_LSH(const InputParameters & parameters);
 
 protected:

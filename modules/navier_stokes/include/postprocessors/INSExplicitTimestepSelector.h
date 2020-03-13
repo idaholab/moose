@@ -23,6 +23,8 @@ InputParameters validParams<INSExplicitTimestepSelector>();
 class INSExplicitTimestepSelector : public ElementPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   INSExplicitTimestepSelector(const InputParameters & parameters);
   virtual ~INSExplicitTimestepSelector();
 

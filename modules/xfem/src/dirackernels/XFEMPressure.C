@@ -15,11 +15,12 @@
 
 registerMooseObject("XFEMApp", XFEMPressure);
 
-template <>
+defineLegacyParams(XFEMPressure);
+
 InputParameters
-validParams<XFEMPressure>()
+XFEMPressure::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<unsigned int>("component", "The component for the pressure");
   params.addParam<Real>("factor", 1.0, "The magnitude to use in computing the pressure");
   params.addParam<FunctionName>("function", "The function that describes the pressure");

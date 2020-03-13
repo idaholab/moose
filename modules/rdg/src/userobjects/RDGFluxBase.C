@@ -9,11 +9,12 @@
 
 #include "RDGFluxBase.h"
 
-template <>
+defineLegacyParams(RDGFluxBase);
+
 InputParameters
-validParams<RDGFluxBase>()
+RDGFluxBase::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Abstract base class for computing and caching internal or boundary fluxes for RDG");
   return params;

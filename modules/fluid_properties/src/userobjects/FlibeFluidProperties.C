@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", FlibeFluidProperties);
 
-template <>
+defineLegacyParams(FlibeFluidProperties);
+
 InputParameters
-validParams<FlibeFluidProperties>()
+FlibeFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRangeCheckedParam<Real>(
       "drho_dp",
       1.7324E-7,

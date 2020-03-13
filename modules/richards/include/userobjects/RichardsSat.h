@@ -24,6 +24,8 @@ InputParameters validParams<RichardsSat>();
 class RichardsSat : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsSat(const InputParameters & parameters);
 
   void initialize();

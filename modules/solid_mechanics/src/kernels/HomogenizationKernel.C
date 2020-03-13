@@ -13,11 +13,12 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", HomogenizationKernel, "07/30/2020 24:00");
 
-template <>
+defineLegacyParams(HomogenizationKernel);
+
 InputParameters
-validParams<HomogenizationKernel>()
+HomogenizationKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredRangeCheckedParam<unsigned int>("component",
                                                     "component >= 0 & component < 3",
                                                     "An integer corresponding to the direction "

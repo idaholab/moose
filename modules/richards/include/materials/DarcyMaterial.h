@@ -23,6 +23,8 @@ InputParameters validParams<DarcyMaterial>();
 class DarcyMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   DarcyMaterial(const InputParameters & parameters);
 
 protected:

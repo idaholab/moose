@@ -11,16 +11,22 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
 
-defineADValidParams(
-    INSADMomentumTimeDerivative,
-    ADTimeKernelValue,
-    params.addClassDescription("This class computes the time derivative for the incompressible "
-                               "Navier-Stokes momentum equation.");
-    params.addCoupledVar("temperature",
-                         "The temperature on which material properties may depend. If properties "
-                         "do depend on temperature, this variable must be coupled in in order to "
-                         "correctly resize the element matrix");
-    params.addParam<MaterialPropertyName>("rho_name", "rho", "density name"););
+defineADLegacyParams(INSADMomentumTimeDerivative);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMomentumTimeDerivative<compute_stage>::validParams()
+{
+  InputParameters params = ADTimeKernelValue<compute_stage>::validParams();
+  params.addClassDescription("This class computes the time derivative for the incompressible "
+                             "Navier-Stokes momentum equation.");
+  params.addCoupledVar("temperature",
+                       "The temperature on which material properties may depend. If properties "
+                       "do depend on temperature, this variable must be coupled in in order to "
+                       "correctly resize the element matrix");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMomentumTimeDerivative<compute_stage>::INSADMomentumTimeDerivative(

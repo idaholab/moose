@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowPropertyAux>();
 class PorousFlowPropertyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPropertyAux(const InputParameters & parameters);
 
 protected:

@@ -26,6 +26,8 @@ InputParameters validParams<SwitchingFunctionPenalty>();
 class SwitchingFunctionPenalty : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunctionPenalty(const InputParameters & parameters);
 
 protected:

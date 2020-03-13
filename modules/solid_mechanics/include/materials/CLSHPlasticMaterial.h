@@ -22,6 +22,8 @@ InputParameters validParams<CLSHPlasticMaterial>();
 class CLSHPlasticMaterial : public SolidModel
 {
 public:
+  static InputParameters validParams();
+
   CLSHPlasticMaterial(const InputParameters & parameters);
 
 protected:

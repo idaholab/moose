@@ -22,6 +22,8 @@ InputParameters validParams<PressureGradient>();
 class PressureGradient : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PressureGradient(const InputParameters & parameters);
 
 protected:

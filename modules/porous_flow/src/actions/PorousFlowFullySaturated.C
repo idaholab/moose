@@ -23,11 +23,12 @@ registerMooseAction("PorousFlowApp", PorousFlowFullySaturated, "add_aux_variable
 
 registerMooseAction("PorousFlowApp", PorousFlowFullySaturated, "add_aux_kernel");
 
-template <>
+defineLegacyParams(PorousFlowFullySaturated);
+
 InputParameters
-validParams<PorousFlowFullySaturated>()
+PorousFlowFullySaturated::validParams()
 {
-  InputParameters params = validParams<PorousFlowSinglePhaseBase>();
+  InputParameters params = PorousFlowSinglePhaseBase::validParams();
   params.addClassDescription(
       "Adds Kernels and fluid-property Materials necessary to simulate a "
       "single-phase fully-saturated flow problem.  Full-upwinding of fluid flow is not available "

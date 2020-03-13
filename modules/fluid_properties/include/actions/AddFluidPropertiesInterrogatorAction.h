@@ -22,6 +22,8 @@ InputParameters validParams<AddFluidPropertiesInterrogatorAction>();
 class AddFluidPropertiesInterrogatorAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   AddFluidPropertiesInterrogatorAction(InputParameters parameters);
 
   virtual void act() override;

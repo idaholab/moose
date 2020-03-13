@@ -27,6 +27,8 @@ InputParameters validParams<PoroFullSatMaterial>();
 class PoroFullSatMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   PoroFullSatMaterial(const InputParameters & parameters);
 
 protected:

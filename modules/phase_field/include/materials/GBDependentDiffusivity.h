@@ -21,6 +21,8 @@ InputParameters validParams<GBDependentDiffusivity>();
 class GBDependentDiffusivity : public GBDependentTensorBase
 {
 public:
+  static InputParameters validParams();
+
   GBDependentDiffusivity(const InputParameters & parameters);
 
 protected:

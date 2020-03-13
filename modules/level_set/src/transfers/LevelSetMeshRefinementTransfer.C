@@ -18,11 +18,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetMeshRefinementTransfer);
 
-template <>
+defineLegacyParams(LevelSetMeshRefinementTransfer);
+
 InputParameters
-validParams<LevelSetMeshRefinementTransfer>()
+LevelSetMeshRefinementTransfer::validParams()
 {
-  InputParameters params = validParams<MultiAppCopyTransfer>();
+  InputParameters params = MultiAppCopyTransfer::validParams();
   params.addClassDescription("Transfers the mesh from the master application to the sub "
                              "application for the purposes of level set reinitialization problems "
                              "with mesh adaptivity.");

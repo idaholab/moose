@@ -24,6 +24,8 @@ InputParameters validParams<GeneralizedPlaneStrainUserObjectNOSPD>();
 class GeneralizedPlaneStrainUserObjectNOSPD : public GeneralizedPlaneStrainUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   GeneralizedPlaneStrainUserObjectNOSPD(const InputParameters & parameters);
 
   virtual void execute() override;

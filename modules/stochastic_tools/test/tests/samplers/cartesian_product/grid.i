@@ -9,7 +9,7 @@
 []
 
 [Samplers/sample]
-  type = CartesianProductSampler
+  type = CartesianProduct
   linear_space_items = '10 1.5 3
                         20 1 4
                         130 10 2'

@@ -27,6 +27,8 @@ InputParameters validParams<EBSDReaderAvgDataAux>();
 class EBSDReaderAvgDataAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
+  static InputParameters validParams();
+
   EBSDReaderAvgDataAux(const InputParameters & parameters);
 
 protected:

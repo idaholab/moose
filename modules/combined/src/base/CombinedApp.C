@@ -32,11 +32,12 @@
 #include "XFEMApp.h"
 #include "ExternalPetscSolverApp.h"
 
-template <>
+defineLegacyParams(CombinedApp);
+
 InputParameters
-validParams<CombinedApp>()
+CombinedApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
 
   params.set<bool>("automatic_automatic_scaling") = false;
 

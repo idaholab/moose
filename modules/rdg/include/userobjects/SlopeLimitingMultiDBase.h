@@ -24,6 +24,8 @@ InputParameters validParams<SlopeLimitingMultiDBase>();
 class SlopeLimitingMultiDBase : public SlopeLimitingBase
 {
 public:
+  static InputParameters validParams();
+
   SlopeLimitingMultiDBase(const InputParameters & parameters);
 
 protected:

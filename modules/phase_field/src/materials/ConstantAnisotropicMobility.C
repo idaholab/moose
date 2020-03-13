@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ConstantAnisotropicMobility);
 
-template <>
+defineLegacyParams(ConstantAnisotropicMobility);
+
 InputParameters
-validParams<ConstantAnisotropicMobility>()
+ConstantAnisotropicMobility::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Provide a constant mobility tensor value");
   params.addRequiredParam<MaterialPropertyName>("M_name",
                                                 "Name of the mobility tensor property to generate");

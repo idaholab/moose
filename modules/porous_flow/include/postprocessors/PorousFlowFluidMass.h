@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowFluidMass>();
 class PorousFlowFluidMass : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidMass(const InputParameters & parameters);
 
 protected:

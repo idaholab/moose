@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesApp", HeliumFluidProperties);
 
-template <>
+defineLegacyParams(HeliumFluidProperties);
+
 InputParameters
-validParams<HeliumFluidProperties>()
+HeliumFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Fluid properties for helium");
   return params;
 }

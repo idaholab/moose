@@ -9,11 +9,12 @@
 
 #include "PorousFlowFluidStateFlash.h"
 
-template <>
+defineLegacyParams(PorousFlowFluidStateFlash);
+
 InputParameters
-validParams<PorousFlowFluidStateFlash>()
+PorousFlowFluidStateFlash::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidStateBase>();
+  InputParameters params = PorousFlowFluidStateBase::validParams();
   params.addClassDescription("Compositional flash calculations for use in fluid state classes");
   return params;
 }

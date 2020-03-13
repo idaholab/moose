@@ -24,6 +24,8 @@ InputParameters validParams<RndSmoothCircleIC>();
 class RndSmoothCircleIC : public SmoothCircleIC
 {
 public:
+  static InputParameters validParams();
+
   RndSmoothCircleIC(const InputParameters & parameters);
 
 private:

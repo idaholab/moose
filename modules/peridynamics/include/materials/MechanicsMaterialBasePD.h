@@ -22,6 +22,8 @@ InputParameters validParams<MechanicsMaterialBasePD>();
 class MechanicsMaterialBasePD : public PeridynamicsMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   MechanicsMaterialBasePD(const InputParameters & parameters);
 
 protected:

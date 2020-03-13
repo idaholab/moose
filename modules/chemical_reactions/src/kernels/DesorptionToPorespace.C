@@ -13,11 +13,12 @@
 
 registerMooseObject("ChemicalReactionsApp", DesorptionToPorespace);
 
-template <>
+defineLegacyParams(DesorptionToPorespace);
+
 InputParameters
-validParams<DesorptionToPorespace>()
+DesorptionToPorespace::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("conc_var",
                                "Variable representing the concentration (kg/m^3) of "
                                "fluid in the matrix that will be desorped to "

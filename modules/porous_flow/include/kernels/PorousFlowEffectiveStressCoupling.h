@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowEffectiveStressCoupling>();
 class PorousFlowEffectiveStressCoupling : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowEffectiveStressCoupling(const InputParameters & parameters);
 
 protected:

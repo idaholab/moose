@@ -30,6 +30,8 @@ public:
    * It also calculates segment-lengths and rotation matrices
    * needed for computing the borehole well constant
    */
+  static InputParameters validParams();
+
   PorousFlowPeacemanBorehole(const InputParameters & parameters);
 
 protected:

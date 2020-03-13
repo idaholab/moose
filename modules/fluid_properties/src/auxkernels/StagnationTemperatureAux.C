@@ -12,11 +12,12 @@
 
 registerMooseObject("FluidPropertiesApp", StagnationTemperatureAux);
 
-template <>
+defineLegacyParams(StagnationTemperatureAux);
+
 InputParameters
-validParams<StagnationTemperatureAux>()
+StagnationTemperatureAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("vel", "Velocity");

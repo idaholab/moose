@@ -14,11 +14,12 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_sync.h"
 
-template <>
+defineLegacyParams(AdvectiveFluxCalculatorBase);
+
 InputParameters
-validParams<AdvectiveFluxCalculatorBase>()
+AdvectiveFluxCalculatorBase::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription(
       "Base class to compute K_ij (a measure of advective flux from node i to node j) "
       "and R+ and R- (which quantify amount of antidiffusion to add) in the "

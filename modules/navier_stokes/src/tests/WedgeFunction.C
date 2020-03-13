@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", WedgeFunction);
 
-template <>
+defineLegacyParams(WedgeFunction);
+
 InputParameters
-validParams<WedgeFunction>()
+WedgeFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Function object for tests/ins/jeffery_hamel responsible for setting "
                              "the exact value of the velocity and pressure variables.");
   params.addRequiredParam<Real>(

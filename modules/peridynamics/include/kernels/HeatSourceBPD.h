@@ -22,6 +22,8 @@ InputParameters validParams<HeatSourceBPD>();
 class HeatSourceBPD : public PeridynamicsKernelBase
 {
 public:
+  static InputParameters validParams();
+
   HeatSourceBPD(const InputParameters & parameters);
 
 protected:

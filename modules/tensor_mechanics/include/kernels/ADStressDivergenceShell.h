@@ -41,6 +41,8 @@ template <ComputeStage compute_stage>
 class ADStressDivergenceShell : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADStressDivergenceShell(const InputParameters & parameters);
 
 protected:

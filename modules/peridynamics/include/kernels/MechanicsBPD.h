@@ -22,6 +22,8 @@ InputParameters validParams<MechanicsBPD>();
 class MechanicsBPD : public MechanicsBasePD
 {
 public:
+  static InputParameters validParams();
+
   MechanicsBPD(const InputParameters & parameters);
 
 protected:

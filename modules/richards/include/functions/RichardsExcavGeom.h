@@ -45,6 +45,8 @@ InputParameters validParams<RichardsExcavGeom>();
 class RichardsExcavGeom : public Function
 {
 public:
+  static InputParameters validParams();
+
   RichardsExcavGeom(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;

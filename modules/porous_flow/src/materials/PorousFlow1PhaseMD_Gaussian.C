@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlow1PhaseMD_Gaussian);
 
-template <>
+defineLegacyParams(PorousFlow1PhaseMD_Gaussian);
+
 InputParameters
-validParams<PorousFlow1PhaseMD_Gaussian>()
+PorousFlow1PhaseMD_Gaussian::validParams()
 {
-  InputParameters params = validParams<PorousFlowVariableBase>();
+  InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("mass_density",
                                "Variable that represents log(mass-density) of the single phase");
   params.addRequiredRangeCheckedParam<Real>(

@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", ComputePolycrystalElasticityTensor);
 
-template <>
+defineLegacyParams(ComputePolycrystalElasticityTensor);
+
 InputParameters
-validParams<ComputePolycrystalElasticityTensor>()
+ComputePolycrystalElasticityTensor::validParams()
 {
-  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription(
       "Compute an evolving elasticity tensor coupled to a grain growth phase field model.");
   params.addRequiredParam<UserObjectName>(

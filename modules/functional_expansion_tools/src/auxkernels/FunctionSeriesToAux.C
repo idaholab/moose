@@ -12,11 +12,12 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FunctionSeriesToAux);
 
-template <>
+defineLegacyParams(FunctionSeriesToAux);
+
 InputParameters
-validParams<FunctionSeriesToAux>()
+FunctionSeriesToAux::validParams()
 {
-  InputParameters params = validParams<FunctionAux>();
+  InputParameters params = FunctionAux::validParams();
 
   params.addClassDescription("AuxKernel to convert a functional expansion"
                              " (Functions object, type = FunctionSeries) to an AuxVariable");

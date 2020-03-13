@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFlux);
 
-template <>
+defineLegacyParams(PorousFlowAdvectiveFlux);
+
 InputParameters
-validParams<PorousFlowAdvectiveFlux>()
+PorousFlowAdvectiveFlux::validParams()
 {
-  InputParameters params = validParams<PorousFlowDarcyBase>();
+  InputParameters params = PorousFlowDarcyBase::validParams();
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
   params.addClassDescription(

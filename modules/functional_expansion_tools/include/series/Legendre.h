@@ -51,4 +51,3 @@ protected:
   virtual std::vector<Real>
   getStandardizedLocation(const std::vector<Real> & location) const override;
 };
-

@@ -13,11 +13,12 @@
 #include "IdealGasFluidProperties.h"
 
 // Full specialization of the validParams function for this object
-template <>
+defineLegacyParams(NSWeakStagnationBaseBC);
+
 InputParameters
-validParams<NSWeakStagnationBaseBC>()
+NSWeakStagnationBaseBC::validParams()
 {
-  InputParameters params = validParams<NSIntegratedBC>();
+  InputParameters params = NSIntegratedBC::validParams();
   params.addClassDescription(
       "This is the base class for 'weakly-imposed' stagnation boundary conditions.");
   params.addRequiredParam<Real>("stagnation_pressure", "The specifed stagnation pressure");

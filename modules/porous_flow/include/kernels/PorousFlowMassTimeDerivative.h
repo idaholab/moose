@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowMassTimeDerivative>();
 class PorousFlowMassTimeDerivative : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMassTimeDerivative(const InputParameters & parameters);
 
 protected:

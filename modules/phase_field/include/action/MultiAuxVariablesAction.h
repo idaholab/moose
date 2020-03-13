@@ -18,6 +18,8 @@
 class MultiAuxVariablesAction : public AddAuxVariableAction
 {
 public:
+  static InputParameters validParams();
+
   MultiAuxVariablesAction(InputParameters params);
 
   virtual void act();

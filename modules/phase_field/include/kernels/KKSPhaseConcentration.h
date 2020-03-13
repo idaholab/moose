@@ -34,6 +34,8 @@ InputParameters validParams<KKSPhaseConcentration>();
 class KKSPhaseConcentration : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   KKSPhaseConcentration(const InputParameters & parameters);
 
 protected:

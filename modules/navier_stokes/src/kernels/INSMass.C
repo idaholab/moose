@@ -12,11 +12,12 @@
 
 registerMooseObject("NavierStokesApp", INSMass);
 
-template <>
+defineLegacyParams(INSMass);
+
 InputParameters
-validParams<INSMass>()
+INSMass::validParams()
 {
-  InputParameters params = validParams<INSBase>();
+  InputParameters params = INSBase::validParams();
 
   params.addClassDescription("This class computes the mass equation residual and Jacobian "
                              "contributions for the incompressible Navier-Stokes momentum "

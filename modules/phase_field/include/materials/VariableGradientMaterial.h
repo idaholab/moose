@@ -22,6 +22,8 @@ InputParameters validParams<VariableGradientMaterial>();
 class VariableGradientMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   VariableGradientMaterial(const InputParameters & parameters);
 
 protected:

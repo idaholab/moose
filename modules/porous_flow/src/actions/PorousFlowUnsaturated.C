@@ -23,11 +23,12 @@ registerMooseAction("PorousFlowApp", PorousFlowUnsaturated, "add_aux_variable");
 
 registerMooseAction("PorousFlowApp", PorousFlowUnsaturated, "add_aux_kernel");
 
-template <>
+defineLegacyParams(PorousFlowUnsaturated);
+
 InputParameters
-validParams<PorousFlowUnsaturated>()
+PorousFlowUnsaturated::validParams()
 {
-  InputParameters params = validParams<PorousFlowSinglePhaseBase>();
+  InputParameters params = PorousFlowSinglePhaseBase::validParams();
   params.addParam<bool>("add_saturation_aux", true, "Add an AuxVariable that records saturation");
   params.addRangeCheckedParam<Real>(
       "van_genuchten_alpha",

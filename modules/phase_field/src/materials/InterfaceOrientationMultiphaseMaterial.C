@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", InterfaceOrientationMultiphaseMaterial);
 
-template <>
+defineLegacyParams(InterfaceOrientationMultiphaseMaterial);
+
 InputParameters
-validParams<InterfaceOrientationMultiphaseMaterial>()
+InterfaceOrientationMultiphaseMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "This Material accounts for the the orientation dependence "
       "of interfacial energy for multi-phase multi-order parameter phase-field model.");

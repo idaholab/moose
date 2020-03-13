@@ -29,6 +29,8 @@ InputParameters validParams<BimodalSuperellipsoidsIC>();
 class BimodalSuperellipsoidsIC : public SpecifiedSmoothSuperellipsoidIC
 {
 public:
+  static InputParameters validParams();
+
   BimodalSuperellipsoidsIC(const InputParameters & parameters);
 
   virtual void initialSetup();

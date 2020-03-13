@@ -9,11 +9,12 @@
 
 #include "GasFreeEnergyBase.h"
 
-template <>
+defineLegacyParams(GasFreeEnergyBase);
+
 InputParameters
-validParams<GasFreeEnergyBase>()
+GasFreeEnergyBase::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addRequiredCoupledVar("T", "Temperature");
   // MooseEnum molecule("MONOATOMIC DIATOMIC", "MONOATOMIC");
   // params.addParam<MooseEnum>("molecule", molecule, "Gas molecule size");

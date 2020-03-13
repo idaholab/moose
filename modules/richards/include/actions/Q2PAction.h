@@ -19,6 +19,8 @@ InputParameters validParams<Q2PAction>();
 class Q2PAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   Q2PAction(const InputParameters & params);
 
   virtual void act();

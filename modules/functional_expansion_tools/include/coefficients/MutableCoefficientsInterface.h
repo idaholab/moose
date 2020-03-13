@@ -30,6 +30,8 @@ InputParameters validParams<MutableCoefficientsInterface>();
 class MutableCoefficientsInterface : public Restartable
 {
 public:
+  static InputParameters validParams();
+
   MutableCoefficientsInterface(const MooseObject * moose_object,
                                const InputParameters & parameters);
 
@@ -122,4 +124,3 @@ private:
   /// MooseObject instance of `this` to provide access to `_console`
   const ConsoleStream & _console;
 };
-

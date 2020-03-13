@@ -27,6 +27,8 @@ InputParameters validParams<ACSwitching>();
 class ACSwitching : public ACBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   ACSwitching(const InputParameters & parameters);
 
   virtual void initialSetup();

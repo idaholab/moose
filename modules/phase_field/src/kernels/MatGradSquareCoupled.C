@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", MatGradSquareCoupled);
 
-template <>
+defineLegacyParams(MatGradSquareCoupled);
+
 InputParameters
-validParams<MatGradSquareCoupled>()
+MatGradSquareCoupled::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient square of a coupled variable.");
   params.addCoupledVar("elec_potential", "Electric potential");
   params.addCoupledVar("args", "Vector of arguments to prefactor");

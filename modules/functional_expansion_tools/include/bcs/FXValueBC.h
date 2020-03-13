@@ -22,6 +22,7 @@ InputParameters validParams<FXValueBC>();
 class FXValueBC : public FunctionDirichletBC
 {
 public:
+  static InputParameters validParams();
+
   FXValueBC(const InputParameters & parameters);
 };
-

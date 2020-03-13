@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<ADKernelGrad<compute_stage>>
 {
 public:
+  static InputParameters validParams();
+
   LevelSetForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:

@@ -26,6 +26,8 @@ InputParameters validParams<ReturnMappingModel>();
 class ReturnMappingModel : public ConstitutiveModel, public SingleVariableReturnMappingSolution
 {
 public:
+  static InputParameters validParams();
+
   ReturnMappingModel(const InputParameters & parameters,
                      const std::string inelastic_strain_name = "");
   virtual ~ReturnMappingModel() {}
@@ -100,4 +102,3 @@ protected:
   const bool _compute_matl_timestep_limit;
   MaterialProperty<Real> * _matl_timestep_limit;
 };
-

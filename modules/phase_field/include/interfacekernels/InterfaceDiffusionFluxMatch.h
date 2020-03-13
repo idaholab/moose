@@ -23,6 +23,8 @@ InputParameters validParams<InterfaceDiffusionFluxMatch>();
 class InterfaceDiffusionFluxMatch : public InterfaceDiffusionBase
 {
 public:
+  static InputParameters validParams();
+
   InterfaceDiffusionFluxMatch(const InputParameters & parameters);
 
 protected:

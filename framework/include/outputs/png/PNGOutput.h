@@ -30,6 +30,8 @@ class PNGOutput : public FileOutput
 {
 public:
   // Basic constructor.  Takes parameters passed in to create a PNGOutput object.
+  static InputParameters validParams();
+
   PNGOutput(const InputParameters & parameters);
 
 protected:

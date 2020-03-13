@@ -11,11 +11,12 @@
 
 registerMooseObject("FluidPropertiesTestApp", TestTwoPhaseNCGFluidProperties);
 
-template <>
+defineLegacyParams(TestTwoPhaseNCGFluidProperties);
+
 InputParameters
-validParams<TestTwoPhaseNCGFluidProperties>()
+TestTwoPhaseNCGFluidProperties::validParams()
 {
-  InputParameters params = validParams<TwoPhaseNCGFluidProperties>();
+  InputParameters params = TwoPhaseNCGFluidProperties::validParams();
 
   params.addClassDescription("Test 2-phase NCG fluid properties");
 

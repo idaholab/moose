@@ -11,12 +11,18 @@
 
 registerADMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
 
-defineADValidParams(
-    LevelSetTimeDerivativeSUPG,
-    ADTimeKernelGrad,
-    params.addClassDescription(
-        "SUPG stablization terms for the time derivative of the level set equation.");
-    params += validParams<LevelSetVelocityInterface<>>(););
+defineADLegacyParams(LevelSetTimeDerivativeSUPG);
+
+template <ComputeStage compute_stage>
+InputParameters
+LevelSetTimeDerivativeSUPG<compute_stage>::validParams()
+{
+  InputParameters params = ADTimeKernelGrad<compute_stage>::validParams();
+  params.addClassDescription(
+      "SUPG stablization terms for the time derivative of the level set equation.");
+  params += LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 LevelSetTimeDerivativeSUPG<compute_stage>::LevelSetTimeDerivativeSUPG(

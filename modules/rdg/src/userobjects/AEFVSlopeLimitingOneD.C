@@ -11,11 +11,12 @@
 
 registerMooseObject("RdgApp", AEFVSlopeLimitingOneD);
 
-template <>
+defineLegacyParams(AEFVSlopeLimitingOneD);
+
 InputParameters
-validParams<AEFVSlopeLimitingOneD>()
+AEFVSlopeLimitingOneD::validParams()
 {
-  InputParameters params = validParams<SlopeLimitingBase>();
+  InputParameters params = SlopeLimitingBase::validParams();
   params.addClassDescription("One-dimensional slope limiting to get the limited slope of cell "
                              "average variable for the advection equation using a cell-centered "
                              "finite volume method.");

@@ -12,11 +12,12 @@
 
 registerMooseObject("FluidPropertiesApp", SpecificEnthalpyAux);
 
-template <>
+defineLegacyParams(SpecificEnthalpyAux);
+
 InputParameters
-validParams<SpecificEnthalpyAux>()
+SpecificEnthalpyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("p", "Pressure");
   params.addRequiredCoupledVar("T", "Temperature");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");

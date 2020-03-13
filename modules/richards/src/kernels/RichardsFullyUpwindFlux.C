@@ -18,11 +18,12 @@
 
 registerMooseObject("RichardsApp", RichardsFullyUpwindFlux);
 
-template <>
+defineLegacyParams(RichardsFullyUpwindFlux);
+
 InputParameters
-validParams<RichardsFullyUpwindFlux>()
+RichardsFullyUpwindFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<std::vector<UserObjectName>>(
       "relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName>>(

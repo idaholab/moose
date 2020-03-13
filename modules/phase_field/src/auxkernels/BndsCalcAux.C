@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", BndsCalcAux);
 
-template <>
+defineLegacyParams(BndsCalcAux);
+
 InputParameters
-validParams<BndsCalcAux>()
+BndsCalcAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Calculate location of grain boundaries in a polycrystalline sample");
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");

@@ -27,6 +27,8 @@ InputParameters validParams<INSMassRZ>();
 class INSMassRZ : public INSMass
 {
 public:
+  static InputParameters validParams();
+
   INSMassRZ(const InputParameters & parameters);
   virtual ~INSMassRZ() {}
 

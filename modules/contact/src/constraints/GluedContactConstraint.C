@@ -18,11 +18,12 @@
 
 registerMooseObject("ContactApp", GluedContactConstraint);
 
-template <>
+defineLegacyParams(GluedContactConstraint);
+
 InputParameters
-validParams<GluedContactConstraint>()
+GluedContactConstraint::validParams()
 {
-  InputParameters params = validParams<SparsityBasedContactConstraint>();
+  InputParameters params = SparsityBasedContactConstraint::validParams();
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");

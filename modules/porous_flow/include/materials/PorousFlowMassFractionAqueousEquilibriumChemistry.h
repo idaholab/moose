@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()
 class PorousFlowMassFractionAqueousEquilibriumChemistry : public PorousFlowMassFraction
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMassFractionAqueousEquilibriumChemistry(const InputParameters & parameters);
 
 protected:

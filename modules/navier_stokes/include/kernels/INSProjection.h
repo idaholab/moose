@@ -27,6 +27,8 @@ InputParameters validParams<INSProjection>();
 class INSProjection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSProjection(const InputParameters & parameters);
 
   virtual ~INSProjection() {}

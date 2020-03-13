@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACInterface2DMultiPhase2);
 
-template <>
+defineLegacyParams(ACInterface2DMultiPhase2);
+
 InputParameters
-validParams<ACInterface2DMultiPhase2>()
+ACInterface2DMultiPhase2::validParams()
 {
-  InputParameters params = validParams<ACInterface>();
+  InputParameters params = ACInterface::validParams();
   params.addClassDescription(
       "Gradient energy Allen-Cahn Kernel where the interface parameter kappa is considered.");
   params.addParam<MaterialPropertyName>("dkappadgrad_etaa_name",

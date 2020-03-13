@@ -32,6 +32,8 @@ InputParameters validParams<PorousFlowAdvectiveFluxCalculatorBase>();
 class PorousFlowAdvectiveFluxCalculatorBase : public AdvectiveFluxCalculatorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAdvectiveFluxCalculatorBase(const InputParameters & parameters);
 
   /**

@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlow2PhasePP>();
 class PorousFlow2PhasePP : public PorousFlowVariableBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlow2PhasePP(const InputParameters & parameters);
 
 protected:

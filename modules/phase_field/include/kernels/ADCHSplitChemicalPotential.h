@@ -27,6 +27,8 @@ template <ComputeStage compute_stage>
 class ADCHSplitChemicalPotential : public ADKernel<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADCHSplitChemicalPotential(const InputParameters & parameters);
 
 protected:

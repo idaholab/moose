@@ -21,6 +21,8 @@ InputParameters validParams<NSEntropyError>();
 class NSEntropyError : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   NSEntropyError(const InputParameters & parameters);
   virtual Real getValue();
 

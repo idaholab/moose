@@ -9,11 +9,12 @@
 
 #include "InterfaceDiffusionBase.h"
 
-template <>
+defineLegacyParams(InterfaceDiffusionBase);
+
 InputParameters
-validParams<InterfaceDiffusionBase>()
+InterfaceDiffusionBase::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addParam<Real>("D", 1.0, "Diffusion coefficient");
   params.addParam<Real>("D_neighbor", 1.0, "Neighbor variable diffusion coefficient");
   return params;

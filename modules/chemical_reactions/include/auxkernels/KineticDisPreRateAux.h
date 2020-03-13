@@ -23,6 +23,8 @@ InputParameters validParams<KineticDisPreRateAux>();
 class KineticDisPreRateAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   KineticDisPreRateAux(const InputParameters & parameters);
 
   virtual ~KineticDisPreRateAux() {}

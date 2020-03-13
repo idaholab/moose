@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GBEvolution);
 
-template <>
+defineLegacyParams(GBEvolution);
+
 InputParameters
-validParams<GBEvolution>()
+GBEvolution::validParams()
 {
-  InputParameters params = validParams<GBEvolutionBase>();
+  InputParameters params = GBEvolutionBase::validParams();
   params.addRequiredParam<Real>("GBenergy", "Grain boundary energy in J/m^2");
   return params;
 }

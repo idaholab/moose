@@ -21,6 +21,8 @@ template <ComputeStage compute_stage>
 class ADDensity : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADDensity(const InputParameters & parameters);
 
 protected:

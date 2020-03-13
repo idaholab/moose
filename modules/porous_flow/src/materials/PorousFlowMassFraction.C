@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassFraction);
 
-template <>
+defineLegacyParams(PorousFlowMassFraction);
+
 InputParameters
-validParams<PorousFlowMassFraction>()
+PorousFlowMassFraction::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addCoupledVar("mass_fraction_vars",
                        "List of variables that represent the mass fractions.  Format is 'f_ph0^c0 "
                        "f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-1) f_ph1^c0 f_ph1^c1 fph1^c2 ... "

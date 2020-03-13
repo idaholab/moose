@@ -28,6 +28,8 @@ InputParameters validParams<PorousFlowHeatMassTransfer>();
 class PorousFlowHeatMassTransfer : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowHeatMassTransfer(const InputParameters & parameters);
 
 protected:

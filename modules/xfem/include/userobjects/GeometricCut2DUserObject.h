@@ -20,6 +20,8 @@ InputParameters validParams<GeometricCut2DUserObject>();
 class GeometricCut2DUserObject : public GeometricCutUserObject
 {
 public:
+  static InputParameters validParams();
+
   GeometricCut2DUserObject(const InputParameters & parameters);
 
   virtual bool cutElementByGeometry(const Elem * elem,

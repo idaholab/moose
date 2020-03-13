@@ -30,6 +30,8 @@ InputParameters validParams<BoundaryFluxBase>();
 class BoundaryFluxBase : public ThreadedGeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   BoundaryFluxBase(const InputParameters & parameters);
 
   virtual void execute() override;

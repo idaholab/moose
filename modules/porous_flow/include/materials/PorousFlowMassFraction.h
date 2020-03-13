@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowMassFraction>();
 class PorousFlowMassFraction : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMassFraction(const InputParameters & parameters);
 
 protected:

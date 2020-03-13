@@ -23,6 +23,8 @@ InputParameters validParams<INSCourant>();
 class INSCourant : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   INSCourant(const InputParameters & parameters);
 
 protected:

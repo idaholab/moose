@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", VanDerWaalsFreeEnergy);
 
-template <>
+defineLegacyParams(VanDerWaalsFreeEnergy);
+
 InputParameters
-validParams<VanDerWaalsFreeEnergy>()
+VanDerWaalsFreeEnergy::validParams()
 {
-  InputParameters params = validParams<GasFreeEnergyBase>();
+  InputParameters params = GasFreeEnergyBase::validParams();
   params.addClassDescription("Free energy of a Van der Waals gas.");
   params.addRequiredParam<Real>("a",
                                 "Van der Waals coefficient a (default mass_unit_conversion "

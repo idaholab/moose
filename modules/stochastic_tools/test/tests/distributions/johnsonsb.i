@@ -12,7 +12,7 @@
 
 [Distributions]
   [johnsonsb_test]
-    type = JohnsonSBDistribution
+    type = JohnsonSB
     a = 1
     b = 2
     alpha_1 = 1

@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowExponentialDecay);
 
-template <>
+defineLegacyParams(PorousFlowExponentialDecay);
+
 InputParameters
-validParams<PorousFlowExponentialDecay>()
+PorousFlowExponentialDecay::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("rate", 1.0, "Rate of exponential decay");
   params.addCoupledVar("reference", 0.0, "Reference value of the variable");
   params.addClassDescription("Residual = rate * (variable - reference).  Useful for modelling "

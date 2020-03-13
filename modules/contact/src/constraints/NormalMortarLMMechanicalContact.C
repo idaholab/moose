@@ -12,18 +12,24 @@
 
 registerADMooseObject("ContactApp", NormalMortarLMMechanicalContact);
 
-defineADValidParams(
-    NormalMortarLMMechanicalContact,
-    ADMortarConstraint,
-    params.addParam<NonlinearVariableName>("slave_disp_y",
-                                           "The y displacement variable on the slave face");
-    params.addParam<NonlinearVariableName>("master_disp_y",
-                                           "The y displacement variable on the master face");
-    MooseEnum ncp_type("min fb", "min");
-    params.addParam<MooseEnum>("ncp_function_type",
-                               ncp_type,
-                               "The type of the nonlinear complimentarity function; options are "
-                               "min or fb where fb stands for Fischer-Burmeister"););
+defineADLegacyParams(NormalMortarLMMechanicalContact);
+
+template <ComputeStage compute_stage>
+InputParameters
+NormalMortarLMMechanicalContact<compute_stage>::validParams()
+{
+  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  params.addParam<NonlinearVariableName>("slave_disp_y",
+                                         "The y displacement variable on the slave face");
+  params.addParam<NonlinearVariableName>("master_disp_y",
+                                         "The y displacement variable on the master face");
+  MooseEnum ncp_type("min fb", "min");
+  params.addParam<MooseEnum>("ncp_function_type",
+                             ncp_type,
+                             "The type of the nonlinear complimentarity function; options are "
+                             "min or fb where fb stands for Fischer-Burmeister");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(

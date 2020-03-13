@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ConstantGrainForceAndTorque);
 
-template <>
+defineLegacyParams(ConstantGrainForceAndTorque);
+
 InputParameters
-validParams<ConstantGrainForceAndTorque>()
+ConstantGrainForceAndTorque::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
   params.addParam<std::vector<Real>>("force", "force acting on grains");
   params.addParam<std::vector<Real>>("torque", "torque acting on grains");

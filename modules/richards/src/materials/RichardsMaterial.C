@@ -17,11 +17,12 @@
 
 registerMooseObject("RichardsApp", RichardsMaterial);
 
-template <>
+defineLegacyParams(RichardsMaterial);
+
 InputParameters
-validParams<RichardsMaterial>()
+RichardsMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredParam<Real>(
       "mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");

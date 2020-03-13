@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionPenalty);
 
-template <>
+defineLegacyParams(SwitchingFunctionPenalty);
+
 InputParameters
-validParams<SwitchingFunctionPenalty>()
+SwitchingFunctionPenalty::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Penalty kernel to constrain the sum of all switching functions in a multiphase system.");
   params.addParam<std::vector<MaterialPropertyName>>(

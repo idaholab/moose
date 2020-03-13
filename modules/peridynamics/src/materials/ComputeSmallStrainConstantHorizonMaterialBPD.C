@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", ComputeSmallStrainConstantHorizonMaterialBPD);
 
-template <>
+defineLegacyParams(ComputeSmallStrainConstantHorizonMaterialBPD);
+
 InputParameters
-validParams<ComputeSmallStrainConstantHorizonMaterialBPD>()
+ComputeSmallStrainConstantHorizonMaterialBPD::validParams()
 {
-  InputParameters params = validParams<ComputeSmallStrainMaterialBaseBPD>();
+  InputParameters params = ComputeSmallStrainMaterialBaseBPD::validParams();
   params.addClassDescription("Class for computing peridynamic micro elastic modulus for bond-based "
                              "model using regular uniform mesh");
 

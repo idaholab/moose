@@ -15,11 +15,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatEnergy);
 
-template <>
+defineLegacyParams(PorousFlowHeatEnergy);
+
 InputParameters
-validParams<PorousFlowHeatEnergy>()
+PorousFlowHeatEnergy::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<bool>(

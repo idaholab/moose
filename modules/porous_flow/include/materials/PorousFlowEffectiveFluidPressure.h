@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowEffectiveFluidPressure>();
 class PorousFlowEffectiveFluidPressure : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowEffectiveFluidPressure(const InputParameters & parameters);
 
 protected:

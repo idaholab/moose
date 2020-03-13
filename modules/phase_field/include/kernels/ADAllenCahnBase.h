@@ -17,12 +17,6 @@
   using ADAllenCahnBase<compute_stage, T>::_prop_L;                                                \
   using ADAllenCahnBase<compute_stage, T>::computeDFDOP
 
-// Forward declarations
-template <ComputeStage compute_stage, typename T = void>
-class ADAllenCahnBase;
-
-declareADValidParams(ADAllenCahnBase);
-
 /**
  * This is the Allen-Cahn equation base class that implements the bulk or
  * local energy term of the equation. It is templated on the type of the mobility,
@@ -50,6 +44,17 @@ protected:
 
   usingKernelValueMembers;
 };
+
+template <ComputeStage compute_stage, typename T>
+InputParameters
+ADAllenCahnBase<compute_stage, T>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription(
+      "Allen-Cahn bulk contribution Kernel with forward mode automatic differentiation");
+  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
+  return params;
+}
 
 template <ComputeStage compute_stage, typename T>
 ADAllenCahnBase<compute_stage, T>::ADAllenCahnBase(const InputParameters & parameters)

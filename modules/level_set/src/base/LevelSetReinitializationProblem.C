@@ -11,11 +11,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetReinitializationProblem);
 
-template <>
+defineLegacyParams(LevelSetReinitializationProblem);
+
 InputParameters
-validParams<LevelSetReinitializationProblem>()
+LevelSetReinitializationProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
   params.addClassDescription("A specialied problem that has a method for resetting time for level "
                              "set reinitialization execution.");
   return params;

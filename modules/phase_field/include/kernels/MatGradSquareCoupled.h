@@ -28,6 +28,8 @@ InputParameters validParams<MatGradSquareCoupled>();
 class MatGradSquareCoupled : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
+  static InputParameters validParams();
+
   MatGradSquareCoupled(const InputParameters & parameters);
   virtual void initialSetup();
 

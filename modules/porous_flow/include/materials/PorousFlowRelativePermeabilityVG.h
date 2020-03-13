@@ -32,6 +32,8 @@ InputParameters validParams<PorousFlowRelativePermeabilityVG>();
 class PorousFlowRelativePermeabilityVG : public PorousFlowRelativePermeabilityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowRelativePermeabilityVG(const InputParameters & parameters);
 
 protected:

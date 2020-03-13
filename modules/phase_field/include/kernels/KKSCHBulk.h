@@ -32,6 +32,8 @@ InputParameters validParams<KKSCHBulk>();
 class KKSCHBulk : public CHBulk<Real>
 {
 public:
+  static InputParameters validParams();
+
   KKSCHBulk(const InputParameters & parameters);
 
 protected:

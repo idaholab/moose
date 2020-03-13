@@ -12,12 +12,12 @@
 
 [Distributions]
   [uniform_left]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 0
     upper_bound = 0.5
   []
   [uniform_right]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1
     upper_bound = 2
   []
@@ -25,7 +25,7 @@
 
 [Samplers]
   [sample]
-    type = SobolSampler
+    type = Sobol
     num_rows = 3
     resample = false
     distributions = 'uniform_left uniform_right'

@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowFluidStateWaterNCG>();
 class PorousFlowFluidStateWaterNCG : public PorousFlowFluidState
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFluidStateWaterNCG(const InputParameters & parameters);
 
 protected:

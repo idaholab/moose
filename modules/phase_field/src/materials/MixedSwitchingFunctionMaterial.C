@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", MixedSwitchingFunctionMaterial);
 
-template <>
+defineLegacyParams(MixedSwitchingFunctionMaterial);
+
 InputParameters
-validParams<MixedSwitchingFunctionMaterial>()
+MixedSwitchingFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<OrderParameterFunctionMaterial>();
+  InputParameters params = OrderParameterFunctionMaterial::validParams();
   params.addClassDescription("Helper material to provide h(eta) and its derivative in one of two "
                              "polynomial forms. MIX234 and MIX246");
   MooseEnum h_order("MIX234=0 MIX246", "MIX234");

@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SmoothCircleIC);
 
-template <>
+defineLegacyParams(SmoothCircleIC);
+
 InputParameters
-validParams<SmoothCircleIC>()
+SmoothCircleIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleBaseIC>();
+  InputParameters params = SmoothCircleBaseIC::validParams();
   params.addClassDescription("Circle with a smooth interface");
   params.addRequiredParam<Real>("x1", "The x coordinate of the circle center");
   params.addRequiredParam<Real>("y1", "The y coordinate of the circle center");

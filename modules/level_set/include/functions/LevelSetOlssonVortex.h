@@ -11,18 +11,14 @@
 
 #include "Function.h"
 
-// Forward declarations
-class LevelSetOlssonVortex;
-
-template <>
-InputParameters validParams<LevelSetOlssonVortex>();
-
 /**
  * Defines a vortex velocity field in the x-y plane.
  */
 class LevelSetOlssonVortex : public Function
 {
 public:
+  static InputParameters validParams();
+
   LevelSetOlssonVortex(const InputParameters & parameters);
 
   Real value(Real t, const Point & p) const override;

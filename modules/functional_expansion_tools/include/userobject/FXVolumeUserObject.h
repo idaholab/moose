@@ -23,6 +23,8 @@ InputParameters validParams<FXVolumeUserObject>();
 class FXVolumeUserObject final : public FXIntegralBaseUserObject<ElementIntegralVariableUserObject>
 {
 public:
+  static InputParameters validParams();
+
   FXVolumeUserObject(const InputParameters & parameters);
 
 protected:
@@ -30,4 +32,3 @@ protected:
   virtual Point getCentroid() const;
   virtual Real getVolume() const;
 };
-

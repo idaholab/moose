@@ -24,6 +24,8 @@ InputParameters validParams<GhostElemPD>();
 class GhostElemPD : public GeneralUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   GhostElemPD(const InputParameters & parameters);
 
   virtual void meshChanged() override;

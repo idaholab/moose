@@ -20,6 +20,8 @@ InputParameters validParams<CircleCutUserObject>();
 class CircleCutUserObject : public GeometricCut3DUserObject
 {
 public:
+  static InputParameters validParams();
+
   CircleCutUserObject(const InputParameters & parameters);
 
   virtual const std::vector<Point>

@@ -39,6 +39,8 @@ InputParameters validParams<RichardsPiecewiseLinearSink>();
 class RichardsPiecewiseLinearSink : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   RichardsPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:

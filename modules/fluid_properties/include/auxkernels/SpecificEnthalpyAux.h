@@ -23,6 +23,8 @@ InputParameters validParams<SpecificEnthalpyAux>();
 class SpecificEnthalpyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   SpecificEnthalpyAux(const InputParameters & parameters);
 
 protected:

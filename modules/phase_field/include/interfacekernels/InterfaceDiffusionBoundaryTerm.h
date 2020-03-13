@@ -23,6 +23,8 @@ InputParameters validParams<InterfaceDiffusionBoundaryTerm>();
 class InterfaceDiffusionBoundaryTerm : public InterfaceDiffusionBase
 {
 public:
+  static InputParameters validParams();
+
   InterfaceDiffusionBoundaryTerm(const InputParameters & parameters);
 
 protected:

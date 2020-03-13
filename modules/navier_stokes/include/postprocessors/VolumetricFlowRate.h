@@ -24,6 +24,8 @@ InputParameters validParams<VolumetricFlowRate>();
 class VolumetricFlowRate : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   VolumetricFlowRate(const InputParameters & parameters);
 
 protected:

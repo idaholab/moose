@@ -27,6 +27,8 @@ InputParameters validParams<DistributedForce>();
 class DistributedForce : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   DistributedForce(const InputParameters & parameters);
 
 protected:

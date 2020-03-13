@@ -29,11 +29,12 @@ registerMooseAction("ContactApp",
                     "add_mortar_variable"); // for mortar lagrange multiplier
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 
-template <>
+defineLegacyParams(ContactAction);
+
 InputParameters
-validParams<ContactAction>()
+ContactAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("master", "The master surface");

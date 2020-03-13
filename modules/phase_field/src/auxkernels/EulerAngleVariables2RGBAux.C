@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", EulerAngleVariables2RGBAux);
 
-template <>
+defineLegacyParams(EulerAngleVariables2RGBAux);
+
 InputParameters
-validParams<EulerAngleVariables2RGBAux>()
+EulerAngleVariables2RGBAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   MooseEnum sd_enum = MooseEnum("100=1 010=2 001=3", "001");
   params.addParam<MooseEnum>("sd", sd_enum, "Reference sample direction");
   MooseEnum output_types = MooseEnum("red green blue scalar", "scalar");

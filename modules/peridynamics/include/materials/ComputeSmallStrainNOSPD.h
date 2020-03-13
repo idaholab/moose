@@ -23,6 +23,8 @@ InputParameters validParams<ComputeSmallStrainNOSPD>();
 class ComputeSmallStrainNOSPD : public ComputeStrainBaseNOSPD
 {
 public:
+  static InputParameters validParams();
+
   ComputeSmallStrainNOSPD(const InputParameters & parameters);
 
 protected:

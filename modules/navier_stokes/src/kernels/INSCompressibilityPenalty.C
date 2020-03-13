@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", INSCompressibilityPenalty);
 
-template <>
+defineLegacyParams(INSCompressibilityPenalty);
+
 InputParameters
-validParams<INSCompressibilityPenalty>()
+INSCompressibilityPenalty::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("The penalty term may be used when Dirichlet boundary condition is "
                              "applied to the entire boundary.");

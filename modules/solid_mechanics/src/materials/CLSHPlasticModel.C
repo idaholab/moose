@@ -14,11 +14,12 @@
 
 registerMooseObject("SolidMechanicsApp", CLSHPlasticModel);
 
-template <>
+defineLegacyParams(CLSHPlasticModel);
+
 InputParameters
-validParams<CLSHPlasticModel>()
+CLSHPlasticModel::validParams()
 {
-  InputParameters params = validParams<ReturnMappingModel>();
+  InputParameters params = ReturnMappingModel::validParams();
   params.addRequiredParam<Real>("yield_stress",
                                 "The point at which plastic strain begins accumulating");
   params.addRequiredParam<Real>("hardening_constant", "Hardening slope");

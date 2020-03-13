@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowAdvectiveFluxCalculatorSaturated>();
 class PorousFlowAdvectiveFluxCalculatorSaturated : public PorousFlowAdvectiveFluxCalculatorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAdvectiveFluxCalculatorSaturated(const InputParameters & parameters);
 
 protected:

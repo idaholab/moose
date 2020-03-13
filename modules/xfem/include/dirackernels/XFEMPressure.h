@@ -17,6 +17,8 @@ class Function;
 class XFEMPressure : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   XFEMPressure(const InputParameters & parameters);
 
   virtual void addPoints();

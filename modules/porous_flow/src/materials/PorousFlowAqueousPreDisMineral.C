@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAqueousPreDisMineral);
 
-template <>
+defineLegacyParams(PorousFlowAqueousPreDisMineral);
+
 InputParameters
-validParams<PorousFlowAqueousPreDisMineral>()
+PorousFlowAqueousPreDisMineral::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addCoupledVar("initial_concentrations",
                        "Initial concentrations for the mineral species "
                        "(m^{3}(precipitate)/m^{3}(porous material)).  Default = 0");

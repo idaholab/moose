@@ -27,11 +27,12 @@
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
 
-template <>
+defineLegacyParams(AugmentedLagrangianContactProblem);
+
 InputParameters
-validParams<AugmentedLagrangianContactProblem>()
+AugmentedLagrangianContactProblem::validParams()
 {
-  InputParameters params = validParams<ReferenceResidualProblem>();
+  InputParameters params = ReferenceResidualProblem::validParams();
   params.addParam<int>("maximum_lagrangian_update_iterations",
                        100,
                        "Maximum number of update Lagrangian Multiplier iterations per step");

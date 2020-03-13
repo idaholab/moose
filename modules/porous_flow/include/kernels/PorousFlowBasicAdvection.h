@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowBasicAdvection>();
 class PorousFlowBasicAdvection : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowBasicAdvection(const InputParameters & parameters);
 
 protected:

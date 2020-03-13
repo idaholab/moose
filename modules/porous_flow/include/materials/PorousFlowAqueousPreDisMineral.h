@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowAqueousPreDisMineral>();
 class PorousFlowAqueousPreDisMineral : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAqueousPreDisMineral(const InputParameters & parameters);
 
 protected:

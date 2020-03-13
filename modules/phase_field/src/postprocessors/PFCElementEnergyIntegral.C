@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCElementEnergyIntegral);
 
-template <>
+defineLegacyParams(PFCElementEnergyIntegral);
+
 InputParameters
-validParams<PFCElementEnergyIntegral>()
+PFCElementEnergyIntegral::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable that this object operates on");
   params.addParam<Real>("temp", 1833.0, "Temperature of simulation");

@@ -14,11 +14,12 @@
 
 registerMooseAction("PhaseFieldApp", BicrystalCircleGrainICAction, "add_ic");
 
-template <>
+defineLegacyParams(BicrystalCircleGrainICAction);
+
 InputParameters
-validParams<BicrystalCircleGrainICAction>()
+BicrystalCircleGrainICAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Bicrystal with a circular grain and an embedding outer grain");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<unsigned int>("op_num", "Number of grains, should be 2");

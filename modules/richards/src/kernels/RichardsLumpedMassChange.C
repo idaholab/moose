@@ -17,11 +17,12 @@
 
 registerMooseObject("RichardsApp", RichardsLumpedMassChange);
 
-template <>
+defineLegacyParams(RichardsLumpedMassChange);
+
 InputParameters
-validParams<RichardsLumpedMassChange>()
+RichardsLumpedMassChange::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variables.");
   params.addRequiredParam<std::vector<UserObjectName>>(

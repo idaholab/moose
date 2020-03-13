@@ -25,6 +25,8 @@ InputParameters validParams<GBAnisotropyBase>();
 class GBAnisotropyBase : public Material
 {
 public:
+  static InputParameters validParams();
+
   GBAnisotropyBase(const InputParameters & parameters);
 
 protected:

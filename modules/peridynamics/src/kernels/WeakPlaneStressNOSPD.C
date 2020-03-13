@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", WeakPlaneStressNOSPD);
 
-template <>
+defineLegacyParams(WeakPlaneStressNOSPD);
+
 InputParameters
-validParams<WeakPlaneStressNOSPD>()
+WeakPlaneStressNOSPD::validParams()
 {
-  InputParameters params = validParams<MechanicsBaseNOSPD>();
+  InputParameters params = MechanicsBaseNOSPD::validParams();
   params.addClassDescription("Class for calculating residual and Jacobian for peridynamic plane "
                              "stress model using weak formulation");
 

@@ -25,6 +25,8 @@ InputParameters validParams<DiscreteNucleationInserter>();
 class DiscreteNucleationInserter : public DiscreteNucleationInserterBase
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationInserter(const InputParameters & parameters);
 
   virtual void initialize();

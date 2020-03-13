@@ -25,6 +25,8 @@ InputParameters validParams<ACGrGrMulti>();
 class ACGrGrMulti : public ACGrGrBase
 {
 public:
+  static InputParameters validParams();
+
   ACGrGrMulti(const InputParameters & parameters);
 
 protected:

@@ -20,6 +20,8 @@ InputParameters validParams<NSGravityPower>();
 class NSGravityPower : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NSGravityPower(const InputParameters & parameters);
 
 protected:

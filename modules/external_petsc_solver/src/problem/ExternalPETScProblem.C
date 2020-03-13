@@ -13,11 +13,12 @@
 
 registerMooseObject("ExternalPetscSolverApp", ExternalPETScProblem);
 
-template <>
+defineLegacyParams(ExternalPETScProblem);
+
 InputParameters
-validParams<ExternalPETScProblem>()
+ExternalPETScProblem::validParams()
 {
-  InputParameters params = validParams<ExternalProblem>();
+  InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<VariableName>("sync_variable",
                                         "The variable PETSc external solution will be synced to");
   return params;

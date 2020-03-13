@@ -32,6 +32,8 @@ InputParameters validParams<LinearGeneralAnisotropicMaterial>();
 class LinearGeneralAnisotropicMaterial : public SolidMechanicsMaterial
 {
 public:
+  static InputParameters validParams();
+
   LinearGeneralAnisotropicMaterial(const InputParameters & parameters);
 
 protected:

@@ -9,11 +9,12 @@
 
 #include "InternalSideFluxBase.h"
 
-template <>
+defineLegacyParams(InternalSideFluxBase);
+
 InputParameters
-validParams<InternalSideFluxBase>()
+InternalSideFluxBase::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("A base class for computing and caching internal side flux.");
   return params;
 }

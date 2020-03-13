@@ -12,15 +12,11 @@
 // MOOSE includes
 #include "NodeFaceConstraint.h"
 
-// Forward Declarations
-class SparsityBasedContactConstraint;
-
-template <>
-InputParameters validParams<SparsityBasedContactConstraint>();
-
 class SparsityBasedContactConstraint : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   SparsityBasedContactConstraint(const InputParameters & parameters)
     : NodeFaceConstraint(parameters){};
   virtual ~SparsityBasedContactConstraint() {}

@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPiecewiseLinearSink);
 
-template <>
+defineLegacyParams(PorousFlowPiecewiseLinearSink);
+
 InputParameters
-validParams<PorousFlowPiecewiseLinearSink>()
+PorousFlowPiecewiseLinearSink::validParams()
 {
-  InputParameters params = validParams<PorousFlowSinkPTDefiner>();
+  InputParameters params = PorousFlowSinkPTDefiner::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "pt_vals",
       "Tuple of pressure values (for the fluid_phase specified).  Must be monotonically "

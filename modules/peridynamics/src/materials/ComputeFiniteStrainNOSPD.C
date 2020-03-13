@@ -19,11 +19,12 @@ ComputeFiniteStrainNOSPD::decompositionType()
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
 
-template <>
+defineLegacyParams(ComputeFiniteStrainNOSPD);
+
 InputParameters
-validParams<ComputeFiniteStrainNOSPD>()
+ComputeFiniteStrainNOSPD::validParams()
 {
-  InputParameters params = validParams<ComputeStrainBaseNOSPD>();
+  InputParameters params = ComputeStrainBaseNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
       "for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "

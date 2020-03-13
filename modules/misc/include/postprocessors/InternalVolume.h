@@ -11,11 +11,6 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class InternalVolume;
-
-template <>
-InputParameters validParams<InternalVolume>();
-
 /**
  * This class computes the volume of an interior space.
  *
@@ -30,6 +25,8 @@ InputParameters validParams<InternalVolume>();
 class InternalVolume : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   InternalVolume(const InputParameters & parameters);
 
   void initialSetup();

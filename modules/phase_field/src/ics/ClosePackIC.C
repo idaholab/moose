@@ -15,11 +15,12 @@
 
 registerMooseObject("PhaseFieldApp", ClosePackIC);
 
-template <>
+defineLegacyParams(ClosePackIC);
+
 InputParameters
-validParams<ClosePackIC>()
+ClosePackIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleBaseIC>();
+  InputParameters params = SmoothCircleBaseIC::validParams();
   params.addClassDescription("Close packed arrangement of smooth circles");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
   return params;

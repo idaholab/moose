@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", GrainForcesPostprocessor);
 
-template <>
+defineLegacyParams(GrainForcesPostprocessor);
+
 InputParameters
-validParams<GrainForcesPostprocessor>()
+GrainForcesPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Outputs the values from GrainForcesPostprocessor");
   params.addParam<UserObjectName>(
       "grain_force", "Specify userobject that gives center of mass and volume of grains");

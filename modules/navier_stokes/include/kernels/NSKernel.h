@@ -29,6 +29,8 @@ InputParameters validParams<NSKernel>();
 class NSKernel : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   NSKernel(const InputParameters & parameters);
 
 protected:

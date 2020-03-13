@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowVolumetricStrain>();
 class PorousFlowVolumetricStrain : public PorousFlowMaterialVectorBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowVolumetricStrain(const InputParameters & parameters);
 
 protected:

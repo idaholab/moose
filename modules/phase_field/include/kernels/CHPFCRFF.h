@@ -24,6 +24,8 @@ InputParameters validParams<CHPFCRFF>();
 class CHPFCRFF : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CHPFCRFF(const InputParameters & parameters);
 
 protected:

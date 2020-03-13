@@ -22,6 +22,8 @@ InputParameters validParams<CLSHPlasticModel>();
 class CLSHPlasticModel : public ReturnMappingModel
 {
 public:
+  static InputParameters validParams();
+
   CLSHPlasticModel(const InputParameters & parameters);
 
 protected:

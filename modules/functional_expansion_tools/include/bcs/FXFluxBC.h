@@ -22,6 +22,7 @@ InputParameters validParams<FXFluxBC>();
 class FXFluxBC : public FunctionNeumannBC
 {
 public:
+  static InputParameters validParams();
+
   FXFluxBC(const InputParameters & parameters);
 };
-

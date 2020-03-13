@@ -12,12 +12,13 @@
 
 registerMooseObject("SolidMechanicsApp", PowerLawCreep);
 
-template <>
+defineLegacyParams(PowerLawCreep);
+
 InputParameters
-validParams<PowerLawCreep>()
+PowerLawCreep::validParams()
 {
-  InputParameters params = validParams<SolidModel>();
-  params += validParams<PowerLawCreepModel>();
+  InputParameters params = SolidModel::validParams();
+  params += PowerLawCreepModel::validParams();
 
   return params;
 }

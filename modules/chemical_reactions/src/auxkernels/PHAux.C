@@ -11,11 +11,12 @@
 
 registerMooseObject("ChemicalReactionsApp", PHAux);
 
-template <>
+defineLegacyParams(PHAux);
+
 InputParameters
-validParams<PHAux>()
+PHAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("h_conc", "The molar concentration of free H+ ions in solution");
   params.addCoupledVar("activity_coeff", 1.0, "Activity coefficient of H+. Default is 1");
   params.addClassDescription("pH of solution");

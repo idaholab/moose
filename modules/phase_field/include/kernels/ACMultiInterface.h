@@ -29,6 +29,8 @@ InputParameters validParams<ACMultiInterface>();
 class ACMultiInterface : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ACMultiInterface(const InputParameters & parameters);
 
 protected:

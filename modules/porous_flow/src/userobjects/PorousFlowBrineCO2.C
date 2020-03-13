@@ -15,11 +15,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowBrineCO2);
 
-template <>
+defineLegacyParams(PorousFlowBrineCO2);
+
 InputParameters
-validParams<PorousFlowBrineCO2>()
+PorousFlowBrineCO2::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidStateMultiComponentBase>();
+  InputParameters params = PorousFlowFluidStateMultiComponentBase::validParams();
   params.addRequiredParam<UserObjectName>("brine_fp", "The name of the user object for brine");
   params.addRequiredParam<UserObjectName>("co2_fp", "The name of the user object for CO2");
   params.addParam<unsigned int>("salt_component", 2, "The component number of salt");

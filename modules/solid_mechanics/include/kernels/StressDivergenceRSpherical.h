@@ -18,6 +18,8 @@ class SymmTensor;
 class StressDivergenceRSpherical : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   StressDivergenceRSpherical(const InputParameters & parameters);
   virtual ~StressDivergenceRSpherical() {}
 

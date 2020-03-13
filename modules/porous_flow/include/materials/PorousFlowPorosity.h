@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowPorosity>();
 class PorousFlowPorosity : public PorousFlowPorosityExponentialBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPorosity(const InputParameters & parameters);
 
 protected:

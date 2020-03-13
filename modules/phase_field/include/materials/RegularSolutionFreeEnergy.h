@@ -26,6 +26,8 @@ InputParameters validParams<RegularSolutionFreeEnergy>();
 class RegularSolutionFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   RegularSolutionFreeEnergy(const InputParameters & parameters);
 
 protected:

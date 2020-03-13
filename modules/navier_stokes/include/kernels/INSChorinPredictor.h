@@ -24,6 +24,8 @@ InputParameters validParams<INSChorinPredictor>();
 class INSChorinPredictor : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   INSChorinPredictor(const InputParameters & parameters);
 
   virtual ~INSChorinPredictor() {}

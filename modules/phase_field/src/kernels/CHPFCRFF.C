@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", CHPFCRFF);
 
-template <>
+defineLegacyParams(CHPFCRFF);
+
 InputParameters
-validParams<CHPFCRFF>()
+CHPFCRFF::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Cahn-Hilliard residual for the RFF form of the phase field crystal model");
   params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");

@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowTemperature);
 
-template <>
+defineLegacyParams(PorousFlowTemperature);
+
 InputParameters
-validParams<PorousFlowTemperature>()
+PorousFlowTemperature::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterial>();
+  InputParameters params = PorousFlowMaterial::validParams();
   params.addCoupledVar("temperature", 20.0, "Fluid temperature variable");
   params.addPrivateParam<std::string>("pf_material_type", "temperature");
   params.addClassDescription("Material to provide temperature at the quadpoints or nodes and "

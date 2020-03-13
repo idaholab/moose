@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsSat);
 
-template <>
+defineLegacyParams(RichardsSat);
+
 InputParameters
-validParams<RichardsSat>()
+RichardsSat::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "s_res",
       "s_res >= 0 & s_res < 1",

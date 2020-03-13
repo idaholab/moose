@@ -29,6 +29,8 @@ public:
    * that defines the line geometry.
    * It also calculates segment-lengths between the points
    */
+  static InputParameters validParams();
+
   PorousFlowLineGeometry(const InputParameters & parameters);
 
 protected:

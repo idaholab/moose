@@ -9,11 +9,12 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-template <>
+defineLegacyParams(SinglePhaseFluidProperties);
+
 InputParameters
-validParams<SinglePhaseFluidProperties>()
+SinglePhaseFluidProperties::validParams()
 {
-  InputParameters params = validParams<FluidProperties>();
+  InputParameters params = FluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
   return params;

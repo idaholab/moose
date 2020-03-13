@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnthalpyAux);
 
-template <>
+defineLegacyParams(NSEnthalpyAux);
+
 InputParameters
-validParams<NSEnthalpyAux>()
+NSEnthalpyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Nodal auxiliary variable, for computing enthalpy at the nodes.");
   // Mark variables as required

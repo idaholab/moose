@@ -19,6 +19,8 @@ InputParameters validParams<PorousFlowTestApp>();
 class PorousFlowTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowTestApp(InputParameters parameters);
   virtual ~PorousFlowTestApp();
 

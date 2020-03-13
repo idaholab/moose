@@ -26,6 +26,8 @@ template <ComputeStage compute_stage>
 class INSADMomentumViscous : public ADVectorKernelGrad<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMomentumViscous(const InputParameters & parameters);
 
 protected:

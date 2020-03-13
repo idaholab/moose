@@ -25,6 +25,8 @@ InputParameters validParams<AsymmetricCrossTermBarrierFunctionMaterial>();
 class AsymmetricCrossTermBarrierFunctionMaterial : public CrossTermBarrierFunctionBase
 {
 public:
+  static InputParameters validParams();
+
   AsymmetricCrossTermBarrierFunctionMaterial(const InputParameters & parameters);
 
 protected:

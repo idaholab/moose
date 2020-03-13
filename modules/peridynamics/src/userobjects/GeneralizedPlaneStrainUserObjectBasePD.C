@@ -10,11 +10,12 @@
 #include "GeneralizedPlaneStrainUserObjectBasePD.h"
 #include "RankFourTensor.h"
 
-template <>
+defineLegacyParams(GeneralizedPlaneStrainUserObjectBasePD);
+
 InputParameters
-validParams<GeneralizedPlaneStrainUserObjectBasePD>()
+GeneralizedPlaneStrainUserObjectBasePD::validParams()
 {
-  InputParameters params = validParams<ElementUserObjectBasePD>();
+  InputParameters params = ElementUserObjectBasePD::validParams();
   params.addClassDescription("Base class for calculating the scalar residual and diagonal Jacobian "
                              "entry for generalized plane strain formulation");
 

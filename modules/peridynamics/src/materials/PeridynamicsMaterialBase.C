@@ -9,11 +9,12 @@
 
 #include "PeridynamicsMaterialBase.h"
 
-template <>
+defineLegacyParams(PeridynamicsMaterialBase);
+
 InputParameters
-validParams<PeridynamicsMaterialBase>()
+PeridynamicsMaterialBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Base class for peridynamics material models");
 
   return params;

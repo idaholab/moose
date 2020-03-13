@@ -27,6 +27,8 @@ class PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
   : public PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent(const InputParameters & parameters);
 
 protected:

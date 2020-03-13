@@ -25,6 +25,8 @@ InputParameters validParams<RichardsSeff2waterVG>();
 class RichardsSeff2waterVG : public RichardsSeff
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff2waterVG(const InputParameters & parameters);
 
   /**

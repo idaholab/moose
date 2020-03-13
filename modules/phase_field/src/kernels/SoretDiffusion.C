@@ -14,11 +14,12 @@
 
 registerMooseObject("PhaseFieldApp", SoretDiffusion);
 
-template <>
+defineLegacyParams(SoretDiffusion);
+
 InputParameters
-validParams<SoretDiffusion>()
+SoretDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Add Soret effect to Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("T", "Temperature");
   params.addCoupledVar("c", "Concentration");

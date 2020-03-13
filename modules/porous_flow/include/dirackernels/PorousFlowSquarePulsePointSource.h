@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowSquarePulsePointSource>();
 class PorousFlowSquarePulsePointSource : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowSquarePulsePointSource(const InputParameters & parameters);
 
   virtual void addPoints() override;

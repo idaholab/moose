@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ConservedUniformNoise);
 
-template <>
+defineLegacyParams(ConservedUniformNoise);
+
 InputParameters
-validParams<ConservedUniformNoise>()
+ConservedUniformNoise::validParams()
 {
-  auto params = validParams<ConservedNoiseBase>();
+  auto params = ConservedNoiseBase::validParams();
   params.addClassDescription(
       "Uniformly distributed random number noise provider for the ConservedLangevinNoise kernel.");
   return params;

@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPlotQuantity);
 
-template <>
+defineLegacyParams(PorousFlowPlotQuantity);
+
 InputParameters
-validParams<PorousFlowPlotQuantity>()
+PorousFlowPlotQuantity::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>(
       "uo", "PorousFlowSumQuantity user object name that holds the required information");
   params.addClassDescription("Extracts the value from the PorousFlowSumQuantity UserObject");

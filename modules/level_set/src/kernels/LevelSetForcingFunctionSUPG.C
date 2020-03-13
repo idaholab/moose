@@ -12,12 +12,18 @@
 
 registerADMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
 
-defineADValidParams(
-    LevelSetForcingFunctionSUPG,
-    ADKernelGrad,
-    params.addClassDescription("The SUPG stablization term for a forcing function.");
-    params.addParam<FunctionName>("function", "1", "A function that describes the body force");
-    params += validParams<LevelSetVelocityInterface<>>(););
+defineADLegacyParams(LevelSetForcingFunctionSUPG);
+
+template <ComputeStage compute_stage>
+InputParameters
+LevelSetForcingFunctionSUPG<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription("The SUPG stablization term for a forcing function.");
+  params.addParam<FunctionName>("function", "1", "A function that describes the body force");
+  params += LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::validParams();
+  return params;
+}
 
 template <ComputeStage compute_stage>
 LevelSetForcingFunctionSUPG<compute_stage>::LevelSetForcingFunctionSUPG(

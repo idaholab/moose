@@ -28,6 +28,8 @@ InputParameters validParams<FluidPropertiesInterrogator>();
 class FluidPropertiesInterrogator : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   FluidPropertiesInterrogator(const InputParameters & parameters);
 
   virtual void initialize() override;

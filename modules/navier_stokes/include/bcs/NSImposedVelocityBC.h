@@ -22,6 +22,8 @@ InputParameters validParams<NSImposedVelocityBC>();
 class NSImposedVelocityBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   NSImposedVelocityBC(const InputParameters & parameters);
 
 protected:

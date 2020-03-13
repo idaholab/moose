@@ -24,6 +24,8 @@ InputParameters validParams<RichardsRelPermPowerGas>();
 class RichardsRelPermPowerGas : public RichardsRelPerm
 {
 public:
+  static InputParameters validParams();
+
   RichardsRelPermPowerGas(const InputParameters & parameters);
 
   /**

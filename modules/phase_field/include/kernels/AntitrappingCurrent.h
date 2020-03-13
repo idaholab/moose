@@ -24,6 +24,8 @@ InputParameters validParams<AntitrappingCurrent>();
 class AntitrappingCurrent : public CoupledSusceptibilityTimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   AntitrappingCurrent(const InputParameters & parameters);
 
 protected:

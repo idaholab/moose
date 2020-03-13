@@ -31,6 +31,8 @@ InputParameters validParams<PHAux>();
 class PHAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   PHAux(const InputParameters & parameters);
 
 protected:

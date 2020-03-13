@@ -12,7 +12,7 @@
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1
     upper_bound = 2
   []
@@ -20,7 +20,7 @@
 
 [Samplers]
   [sample]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 3
     distributions = 'uniform'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep

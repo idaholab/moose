@@ -27,6 +27,8 @@ InputParameters validParams<OutputEulerAngles>();
 class OutputEulerAngles : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   OutputEulerAngles(const InputParameters & parameters);
 
 protected:

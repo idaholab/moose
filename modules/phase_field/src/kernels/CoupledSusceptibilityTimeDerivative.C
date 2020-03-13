@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CoupledSusceptibilityTimeDerivative);
 
-template <>
+defineLegacyParams(CoupledSusceptibilityTimeDerivative);
+
 InputParameters
-validParams<CoupledSusceptibilityTimeDerivative>()
+CoupledSusceptibilityTimeDerivative::validParams()
 {
-  InputParameters params = validParams<CoupledTimeDerivative>();
+  InputParameters params = CoupledTimeDerivative::validParams();
   params.addClassDescription("A modified coupled time derivative Kernel that multiplies the time "
                              "derivative of a coupled variable by a generalized susceptibility");
   params.addRequiredParam<MaterialPropertyName>(

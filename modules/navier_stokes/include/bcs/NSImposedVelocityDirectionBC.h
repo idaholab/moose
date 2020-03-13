@@ -41,6 +41,8 @@ InputParameters validParams<NSImposedVelocityDirectionBC>();
 class NSImposedVelocityDirectionBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   NSImposedVelocityDirectionBC(const InputParameters & parameters);
 
 protected:

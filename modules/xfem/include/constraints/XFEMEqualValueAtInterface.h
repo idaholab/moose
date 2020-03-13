@@ -21,6 +21,8 @@ InputParameters validParams<XFEMEqualValueAtInterface>();
 class XFEMEqualValueAtInterface : public ElemElemConstraint
 {
 public:
+  static InputParameters validParams();
+
   XFEMEqualValueAtInterface(const InputParameters & parameters);
   virtual ~XFEMEqualValueAtInterface();
 

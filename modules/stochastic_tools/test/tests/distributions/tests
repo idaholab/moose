@@ -107,7 +107,7 @@
     [weibull]
       type = RunException
       input = boost_weibull.i
-      expect_err = "The BoostWeibullDistribution distribution named 'weibull' requires that libMesh"
+      expect_err = "The BoostWeibull distribution named 'weibull' requires that libMesh"
       boost = false
       allow_test_objects = true
 
@@ -117,7 +117,7 @@
     [normal]
       type = RunException
       input = boost_normal.i
-      expect_err = "The BoostNormalDistribution distribution named 'normal_test' requires that "
+      expect_err = "The BoostNormal distribution named 'normal_test' requires that "
                    "libMesh"
       boost = false
       allow_test_objects = true
@@ -128,7 +128,7 @@
     [lognormal]
       type = RunException
       input = boost_lognormal.i
-      expect_err = "The BoostLognormalDistribution distribution named 'lognormal_test' requires that "
+      expect_err = "The BoostLognormal distribution named 'lognormal_test' requires that "
                    "libMesh"
       boost = false
       allow_test_objects = true

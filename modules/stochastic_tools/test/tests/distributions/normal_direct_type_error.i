@@ -12,7 +12,7 @@
 
 [Distributions]
   [this_is_the_wrong_type]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 0
     upper_bound = 1
   []

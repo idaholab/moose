@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyThermalFlux);
 
-template <>
+defineLegacyParams(NSEnergyThermalFlux);
+
 InputParameters
-validParams<NSEnergyThermalFlux>()
+NSEnergyThermalFlux::validParams()
 {
-  InputParameters params = validParams<NSKernel>();
+  InputParameters params = NSKernel::validParams();
   params.addClassDescription("This class is responsible for computing residuals and Jacobian terms "
                              "for the k * grad(T) * grad(phi) term in the Navier-Stokes energy "
                              "equation.");

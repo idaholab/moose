@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowDesorpedMassVolumetricExpansion>();
 class PorousFlowDesorpedMassVolumetricExpansion : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDesorpedMassVolumetricExpansion(const InputParameters & parameters);
 
 protected:

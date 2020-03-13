@@ -10,11 +10,12 @@
 #include "GeneralUserObjectBasePD.h"
 #include "PeridynamicsMesh.h"
 
-template <>
+defineLegacyParams(GeneralUserObjectBasePD);
+
 InputParameters
-validParams<GeneralUserObjectBasePD>()
+GeneralUserObjectBasePD::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Base class for peridynamics general userobjects");
 
   return params;

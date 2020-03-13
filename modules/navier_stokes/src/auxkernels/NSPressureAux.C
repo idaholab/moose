@@ -19,11 +19,12 @@
 
 registerMooseObject("NavierStokesApp", NSPressureAux);
 
-template <>
+defineLegacyParams(NSPressureAux);
+
 InputParameters
-validParams<NSPressureAux>()
+NSPressureAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Nodal auxiliary variable, for computing pressure at the nodes.");
   // Mark variables as required

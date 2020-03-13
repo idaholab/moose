@@ -22,6 +22,8 @@ InputParameters validParams<SpecificInternalEnergyAux>();
 class SpecificInternalEnergyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   SpecificInternalEnergyAux(const InputParameters & parameters);
 
 protected:

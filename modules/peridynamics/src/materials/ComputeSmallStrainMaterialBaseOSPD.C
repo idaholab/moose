@@ -9,11 +9,12 @@
 
 #include "ComputeSmallStrainMaterialBaseOSPD.h"
 
-template <>
+defineLegacyParams(ComputeSmallStrainMaterialBaseOSPD);
+
 InputParameters
-validParams<ComputeSmallStrainMaterialBaseOSPD>()
+ComputeSmallStrainMaterialBaseOSPD::validParams()
 {
-  InputParameters params = validParams<ParametricMaterialBasePD>();
+  InputParameters params = ParametricMaterialBasePD::validParams();
   params.addClassDescription("Base class for ordinary state-based peridynamic mechanics models");
 
   return params;

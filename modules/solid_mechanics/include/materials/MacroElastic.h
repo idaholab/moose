@@ -19,6 +19,8 @@ InputParameters validParams<MacroElastic>();
 class MacroElastic : public Elastic
 {
 public:
+  static InputParameters validParams();
+
   MacroElastic(const InputParameters & parameters);
   virtual ~MacroElastic();
 

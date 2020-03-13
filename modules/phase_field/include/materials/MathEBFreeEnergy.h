@@ -26,6 +26,8 @@ InputParameters validParams<MathEBFreeEnergy>();
 class MathEBFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
+  static InputParameters validParams();
+
   MathEBFreeEnergy(const InputParameters & parameters);
 
 protected:

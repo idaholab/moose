@@ -22,6 +22,8 @@ InputParameters validParams<PorousFlowCapillaryPressureRSC>();
 class PorousFlowCapillaryPressureRSC : public PorousFlowCapillaryPressure
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowCapillaryPressureRSC(const InputParameters & parameters);
 
   virtual Real capillaryPressureCurve(Real saturation, unsigned qp = 0) const override;

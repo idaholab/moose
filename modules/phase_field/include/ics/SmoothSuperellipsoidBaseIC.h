@@ -28,6 +28,8 @@ InputParameters validParams<SmoothSuperellipsoidBaseIC>();
 class SmoothSuperellipsoidBaseIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   SmoothSuperellipsoidBaseIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

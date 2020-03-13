@@ -16,6 +16,8 @@
 class NodalAreaAction : public MooseObjectAction
 {
 public:
+  static InputParameters validParams();
+
   NodalAreaAction(const InputParameters & params);
 
   virtual void act();

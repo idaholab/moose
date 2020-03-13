@@ -17,11 +17,12 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template <>
+defineLegacyParams(NSIntegratedBC);
+
 InputParameters
-validParams<NSIntegratedBC>()
+NSIntegratedBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
 
   params.addClassDescription("This class couples together all the variables for the compressible "
                              "Navier-Stokes equations to allow them to be used in derived "

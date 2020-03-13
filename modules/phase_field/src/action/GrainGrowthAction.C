@@ -27,11 +27,12 @@ registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_kernel");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "copy_nodal_vars");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "check_copy_nodal_vars");
 
-template <>
+defineLegacyParams(GrainGrowthAction);
+
 InputParameters
-validParams<GrainGrowthAction>()
+GrainGrowthAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Set up the variable and the kernels needed for a grain growth simulation");
   params.addRequiredParam<unsigned int>("op_num",

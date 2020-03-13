@@ -25,6 +25,8 @@ InputParameters validParams<EBSDReaderPointDataAux>();
 class EBSDReaderPointDataAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
+  static InputParameters validParams();
+
   EBSDReaderPointDataAux(const InputParameters & parameters);
 
 protected:

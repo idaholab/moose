@@ -28,6 +28,8 @@ InputParameters validParams<PorousFlowHalfGaussianSink>();
 class PorousFlowHalfGaussianSink : public PorousFlowSinkPTDefiner
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowHalfGaussianSink(const InputParameters & parameters);
 
 protected:

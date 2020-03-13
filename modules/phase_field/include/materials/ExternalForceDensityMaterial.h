@@ -26,6 +26,8 @@ InputParameters validParams<ExternalForceDensityMaterial>();
 class ExternalForceDensityMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   ExternalForceDensityMaterial(const InputParameters & parameters);
 
 protected:

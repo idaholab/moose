@@ -20,11 +20,12 @@
 
 registerMooseObject("PhaseFieldApp", SphereSurfaceMeshGenerator);
 
-template <>
+defineLegacyParams(SphereSurfaceMeshGenerator);
+
 InputParameters
-validParams<SphereSurfaceMeshGenerator>()
+SphereSurfaceMeshGenerator::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
       "Generated sphere mesh - a two dimensional manifold embedded in three dimensional space");
   params.addParam<Real>("radius", 1.0, "Sphere radius");

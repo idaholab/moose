@@ -25,6 +25,8 @@ InputParameters validParams<DiscreteNucleationMap>();
 class DiscreteNucleationMap : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationMap(const InputParameters & parameters);
 
   virtual void initialize();

@@ -12,11 +12,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidStateWaterNCG);
 
-template <>
+defineLegacyParams(PorousFlowFluidStateWaterNCG);
+
 InputParameters
-validParams<PorousFlowFluidStateWaterNCG>()
+PorousFlowFluidStateWaterNCG::validParams()
 {
-  InputParameters params = validParams<PorousFlowFluidState>();
+  InputParameters params = PorousFlowFluidState::validParams();
   params.addClassDescription("Fluid state class for water and non-condensable gas");
   return params;
 }

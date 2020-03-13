@@ -10,11 +10,12 @@
 #include "INSBase.h"
 #include "Assembly.h"
 
-template <>
+defineLegacyParams(INSBase);
+
 InputParameters
-validParams<INSBase>()
+INSBase::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("This class computes various strong and weak components of the "
                              "incompressible navier stokes equations which can then be assembled "

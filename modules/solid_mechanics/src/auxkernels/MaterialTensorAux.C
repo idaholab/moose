@@ -12,12 +12,13 @@
 
 registerMooseObject("SolidMechanicsApp", MaterialTensorAux);
 
-template <>
+defineLegacyParams(MaterialTensorAux);
+
 InputParameters
-validParams<MaterialTensorAux>()
+MaterialTensorAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
-  params += validParams<MaterialTensorCalculator>();
+  InputParameters params = AuxKernel::validParams();
+  params += MaterialTensorCalculator::validParams();
   params.addRequiredParam<MaterialPropertyName>("tensor", "The material tensor name.");
   params.addParam<unsigned int>("qp_select", "The quad point you want evaluated");
   params.addClassDescription(

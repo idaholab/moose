@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACInterface2DMultiPhase1);
 
-template <>
+defineLegacyParams(ACInterface2DMultiPhase1);
+
 InputParameters
-validParams<ACInterface2DMultiPhase1>()
+ACInterface2DMultiPhase1::validParams()
 {
-  InputParameters params = validParams<ACInterface>();
+  InputParameters params = ACInterface::validParams();
   params.addClassDescription(
       "Gradient energy Allen-Cahn Kernel where the derivative of interface parameter kappa "
       "wrt the gradient of order parameter is considered.");

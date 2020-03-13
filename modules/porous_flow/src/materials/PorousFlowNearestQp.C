@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowNearestQp);
 
-template <>
+defineLegacyParams(PorousFlowNearestQp);
+
 InputParameters
-validParams<PorousFlowNearestQp>()
+PorousFlowNearestQp::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterial>();
+  InputParameters params = PorousFlowMaterial::validParams();
   params.set<bool>("nodal_material") = true;
   params.addPrivateParam<std::string>("pf_material_type", "nearest_qp");
   params.addClassDescription("Provides the nearest quadpoint to a node in each element");

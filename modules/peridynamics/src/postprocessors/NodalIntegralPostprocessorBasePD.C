@@ -9,11 +9,12 @@
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
-template <>
+defineLegacyParams(NodalIntegralPostprocessorBasePD);
+
 InputParameters
-validParams<NodalIntegralPostprocessorBasePD>()
+NodalIntegralPostprocessorBasePD::validParams()
 {
-  InputParameters params = validParams<NodalPostprocessorBasePD>();
+  InputParameters params = NodalPostprocessorBasePD::validParams();
   params.addClassDescription("Base class for peridynamic nodal integral Postprocessors");
 
   return params;

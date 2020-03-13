@@ -13,11 +13,12 @@
 
 registerMooseObject("RichardsApp", RichardsSatPrimeAux);
 
-template <>
+defineLegacyParams(RichardsSatPrimeAux);
+
 InputParameters
-validParams<RichardsSatPrimeAux>()
+RichardsSatPrimeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("seff_var", "Variable that is the effective saturation");
   params.addRequiredParam<UserObjectName>("sat_UO", "Name of user object that defines saturation.");
   params.addClassDescription("auxillary variable which is saturation");

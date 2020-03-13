@@ -22,11 +22,12 @@ registerMooseAction("ChemicalReactionsApp", AddCoupledEqSpeciesAction, "add_kern
 
 registerMooseAction("ChemicalReactionsApp", AddCoupledEqSpeciesAction, "add_aux_kernel");
 
-template <>
+defineLegacyParams(AddCoupledEqSpeciesAction);
+
 InputParameters
-validParams<AddCoupledEqSpeciesAction>()
+AddCoupledEqSpeciesAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "primary_species", "The list of primary variables to add");
   params.addParam<std::vector<AuxVariableName>>(

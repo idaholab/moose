@@ -37,6 +37,8 @@
 class GrandPotentialKernelAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   GrandPotentialKernelAction(const InputParameters & parameters);
 
   virtual void act();

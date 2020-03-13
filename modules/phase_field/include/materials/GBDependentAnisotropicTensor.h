@@ -21,6 +21,8 @@ InputParameters validParams<GBDependentAnisotropicTensor>();
 class GBDependentAnisotropicTensor : public GBDependentTensorBase
 {
 public:
+  static InputParameters validParams();
+
   GBDependentAnisotropicTensor(const InputParameters & parameters);
 
 protected:

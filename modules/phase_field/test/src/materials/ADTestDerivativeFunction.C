@@ -11,19 +11,25 @@
 
 registerADMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
 
-defineADValidParams(
-    ADTestDerivativeFunction,
-    ADMaterial,
-    params.addClassDescription(
-        "Material that implements the a function of one variable and its first derivative.");
-    MooseEnum functionEnum("F1 F2 F3");
-    params.addRequiredParam<MooseEnum>("function",
-                                       functionEnum,
-                                       "F1 = 2 op[0]^2 (1 - op[0])^2 - 0.2 op[0]; "
-                                       "F2 = 0.1 op[0]^2 + op[1]^2; "
-                                       "F3 = op[0] * op[1]");
-    params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
-    params.addRequiredCoupledVar("op", "Order parameter variables"););
+defineADLegacyParams(ADTestDerivativeFunction);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADTestDerivativeFunction<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription(
+      "Material that implements the a function of one variable and its first derivative.");
+  MooseEnum functionEnum("F1 F2 F3");
+  params.addRequiredParam<MooseEnum>("function",
+                                     functionEnum,
+                                     "F1 = 2 op[0]^2 (1 - op[0])^2 - 0.2 op[0]; "
+                                     "F2 = 0.1 op[0]^2 + op[1]^2; "
+                                     "F3 = op[0] * op[1]");
+  params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
+  params.addRequiredCoupledVar("op", "Order parameter variables");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADTestDerivativeFunction<compute_stage>::ADTestDerivativeFunction(

@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", GhostElemPD);
 
-template <>
+defineLegacyParams(GhostElemPD);
+
 InputParameters
-validParams<GhostElemPD>()
+GhostElemPD::validParams()
 {
-  InputParameters params = validParams<GeneralUserObjectBasePD>();
+  InputParameters params = GeneralUserObjectBasePD::validParams();
   params.addClassDescription("Class for ghosting elements accross processors");
 
   return params;

@@ -11,9 +11,10 @@
 #include "Conversion.h"
 #include "MooseEnum.h"
 
-template <>
+defineLegacyParams(NaNInterface);
+
 InputParameters
-validParams<NaNInterface>()
+NaNInterface::validParams()
 {
 #ifdef NDEBUG
   // in opt mode, getNaN() emits neither a warning nor an error by default

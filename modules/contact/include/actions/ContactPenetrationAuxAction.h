@@ -21,6 +21,8 @@ InputParameters validParams<ContactPenetrationAuxAction>();
 class ContactPenetrationAuxAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   ContactPenetrationAuxAction(const InputParameters & params);
 
   virtual void act();

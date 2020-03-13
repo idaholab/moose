@@ -23,13 +23,14 @@ registerMooseAction("RichardsApp", Q2PAction, "add_function");
 
 registerMooseAction("RichardsApp", Q2PAction, "add_postprocessor");
 
-template <>
+defineLegacyParams(Q2PAction);
+
 InputParameters
-validParams<Q2PAction>()
+Q2PAction::validParams()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<NonlinearVariableName>("porepressure", "The porepressure variable");
   params.addRequiredParam<NonlinearVariableName>("saturation", "The water saturation variable");
   params.addRequiredParam<UserObjectName>(

@@ -22,6 +22,8 @@ InputParameters validParams<FXBoundaryFluxUserObject>();
 class FXBoundaryFluxUserObject final : public FXBoundaryBaseUserObject
 {
 public:
+  static InputParameters validParams();
+
   FXBoundaryFluxUserObject(const InputParameters & parameters);
 
 protected:
@@ -34,4 +36,3 @@ protected:
   /// Value of the diffusivity
   const MaterialProperty<Real> & _diffusivity;
 };
-

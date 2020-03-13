@@ -23,6 +23,8 @@ InputParameters validParams<ThermalMaterialBaseBPD>();
 class ThermalMaterialBaseBPD : public PeridynamicsMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   ThermalMaterialBaseBPD(const InputParameters & parameters);
 
 protected:

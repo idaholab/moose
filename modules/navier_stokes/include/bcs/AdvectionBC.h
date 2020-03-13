@@ -24,6 +24,8 @@ InputParameters validParams<AdvectionBC>();
 class AdvectionBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   AdvectionBC(const InputParameters & parameters);
 
 protected:

@@ -31,9 +31,10 @@ PolycrystalVoronoiVoidIC::actionParameters()
 
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoiVoidIC);
 
-template <>
+defineLegacyParams(PolycrystalVoronoiVoidIC);
+
 InputParameters
-validParams<PolycrystalVoronoiVoidIC>()
+PolycrystalVoronoiVoidIC::validParams()
 {
   InputParameters params = PolycrystalVoronoiVoidIC::actionParameters();
   MooseEnum structure_options("grains voids");

@@ -23,6 +23,8 @@ InputParameters validParams<CoupledConvectionReactionSub>();
 class CoupledConvectionReactionSub : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   CoupledConvectionReactionSub(const InputParameters & parameters);
 
 protected:

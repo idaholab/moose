@@ -26,6 +26,8 @@ InputParameters validParams<PoroFullSatTimeDerivative>();
 class PoroFullSatTimeDerivative : public DerivativeMaterialInterface<TimeDerivative>
 {
 public:
+  static InputParameters validParams();
+
   PoroFullSatTimeDerivative(const InputParameters & parameters);
 
 protected:

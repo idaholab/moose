@@ -14,12 +14,13 @@
 
 registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
 
-template <>
+defineLegacyParams(IdealRealGasMixtureFluidProperties);
+
 InputParameters
-validParams<IdealRealGasMixtureFluidProperties>()
+IdealRealGasMixtureFluidProperties::validParams()
 {
-  InputParameters params = validParams<VaporMixtureFluidProperties>();
-  params += validParams<NaNInterface>();
+  InputParameters params = VaporMixtureFluidProperties::validParams();
+  params += NaNInterface::validParams();
 
   params.addClassDescription("Class for fluid properties of an arbitrary vapor mixture");
 

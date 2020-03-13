@@ -11,11 +11,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassFractionAqueousEquilibriumChemistry);
 
-template <>
+defineLegacyParams(PorousFlowMassFractionAqueousEquilibriumChemistry);
+
 InputParameters
-validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()
+PorousFlowMassFractionAqueousEquilibriumChemistry::validParams()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredCoupledVar(
       "mass_fraction_vars",
       "List of variables that represent the mass fractions.  For the aqueous phase these are "

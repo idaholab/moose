@@ -20,6 +20,8 @@ template <ComputeStage compute_stage>
 class NormalMortarLMMechanicalContact : public ADMortarConstraint<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   NormalMortarLMMechanicalContact(const InputParameters & parameters);
 
 protected:

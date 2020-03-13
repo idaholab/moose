@@ -20,6 +20,8 @@ InputParameters validParams<SolidMechanicsAction>();
 class SolidMechanicsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   SolidMechanicsAction(const InputParameters & params);
 
   virtual void act();

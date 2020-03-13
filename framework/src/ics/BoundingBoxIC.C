@@ -17,7 +17,7 @@ defineLegacyParams(BoundingBoxIC);
 InputParameters
 BoundingBoxIC::validParams()
 {
-  InputParameters params = InitialCondition::validParams();
+  InputParameters params = InitialConditionTempl<Real>::validParams();
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
   params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");

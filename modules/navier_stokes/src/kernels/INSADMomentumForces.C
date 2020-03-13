@@ -11,9 +11,16 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumForces);
 
-defineADValidParams(INSADMomentumForces,
-                    ADVectorKernelValue,
-                    params.addClassDescription("Adds body forces to the INS momentum equation"););
+defineADLegacyParams(INSADMomentumForces);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADMomentumForces<compute_stage>::validParams()
+{
+  InputParameters params = ADVectorKernelValue<compute_stage>::validParams();
+  params.addClassDescription("Adds body forces to the INS momentum equation");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADMomentumForces<compute_stage>::INSADMomentumForces(const InputParameters & parameters)

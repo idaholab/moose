@@ -11,11 +11,12 @@
 //
 #include "RichardsRelPerm.h"
 
-template <>
+defineLegacyParams(RichardsRelPerm);
+
 InputParameters
-validParams<RichardsRelPerm>()
+RichardsRelPerm::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Relative permeability base class.  Override relperm, drelperm and d2relperm in your class");
   return params;

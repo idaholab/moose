@@ -36,6 +36,8 @@ InputParameters validParams<PetscContactLineSearch>();
 class PetscContactLineSearch : public ContactLineSearchBase
 {
 public:
+  static InputParameters validParams();
+
   PetscContactLineSearch(const InputParameters & parameters);
 
   virtual void lineSearch() override;

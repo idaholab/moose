@@ -28,11 +28,12 @@
 
 registerMooseObject("ContactApp", MechanicalContactConstraint);
 
-template <>
+defineLegacyParams(MechanicalContactConstraint);
+
 InputParameters
-validParams<MechanicalContactConstraint>()
+MechanicalContactConstraint::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");

@@ -89,4 +89,3 @@ private:
   using FunctionalBasisInterface::_is_cache_invalid;
   using FunctionalBasisInterface::clearBasisEvaluation;
 };
-

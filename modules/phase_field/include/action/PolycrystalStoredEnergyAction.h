@@ -18,6 +18,8 @@
 class PolycrystalStoredEnergyAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalStoredEnergyAction(const InputParameters & params);
 
   virtual void act();

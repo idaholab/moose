@@ -27,6 +27,8 @@ InputParameters validParams<RichardsMassChange>();
 class RichardsMassChange : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   RichardsMassChange(const InputParameters & parameters);
 
 protected:

@@ -20,6 +20,8 @@ InputParameters validParams<LevelSetCutUserObject>();
 class LevelSetCutUserObject : public GeometricCutUserObject
 {
 public:
+  static InputParameters validParams();
+
   LevelSetCutUserObject(const InputParameters & parameters);
 
   virtual bool cutElementByGeometry(const Elem * elem,

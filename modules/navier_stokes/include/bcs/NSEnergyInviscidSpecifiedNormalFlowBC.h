@@ -23,6 +23,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>();
 class NSEnergyInviscidSpecifiedNormalFlowBC : public NSEnergyInviscidBC
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
 
 protected:

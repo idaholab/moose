@@ -29,6 +29,8 @@ InputParameters validParams<MaskedBodyForce>();
 class MaskedBodyForce : public DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>
 {
 public:
+  static InputParameters validParams();
+
   MaskedBodyForce(const InputParameters & parameters);
   virtual void initialSetup();
 

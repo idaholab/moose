@@ -9,11 +9,12 @@
 
 #include "BCUserObject.h"
 
-template <>
+defineLegacyParams(BCUserObject);
+
 InputParameters
-validParams<BCUserObject>()
+BCUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

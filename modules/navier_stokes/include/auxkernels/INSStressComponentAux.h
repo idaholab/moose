@@ -23,6 +23,8 @@ InputParameters validParams<INSStressComponentAux>();
 class INSStressComponentAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   INSStressComponentAux(const InputParameters & parameters);
 
   virtual ~INSStressComponentAux() {}

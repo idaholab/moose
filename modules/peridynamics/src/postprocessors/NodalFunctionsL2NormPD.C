@@ -12,11 +12,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalFunctionsL2NormPD);
 
-template <>
+defineLegacyParams(NodalFunctionsL2NormPD);
+
 InputParameters
-validParams<NodalFunctionsL2NormPD>()
+NodalFunctionsL2NormPD::validParams()
 {
-  InputParameters params = validParams<NodalIntegralPostprocessorBasePD>();
+  InputParameters params = NodalIntegralPostprocessorBasePD::validParams();
   params.addClassDescription("Class for computing the L2 norm of functions");
 
   params.addRequiredParam<std::vector<FunctionName>>("functions", "The known functions");

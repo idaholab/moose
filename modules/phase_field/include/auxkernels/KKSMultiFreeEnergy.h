@@ -25,6 +25,8 @@ InputParameters validParams<KKSMultiFreeEnergy>();
 class KKSMultiFreeEnergy : public TotalFreeEnergyBase
 {
 public:
+  static InputParameters validParams();
+
   KKSMultiFreeEnergy(const InputParameters & parameters);
 
 protected:

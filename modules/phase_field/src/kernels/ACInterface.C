@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", ACInterface);
 
-template <>
+defineLegacyParams(ACInterface);
+
 InputParameters
-validParams<ACInterface>()
+ACInterface::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");

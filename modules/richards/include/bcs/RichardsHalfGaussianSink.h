@@ -29,6 +29,8 @@ InputParameters validParams<RichardsHalfGaussianSink>();
 class RichardsHalfGaussianSink : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   RichardsHalfGaussianSink(const InputParameters & parameters);
 
 protected:

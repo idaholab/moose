@@ -10,11 +10,12 @@
 
 registerMooseObject("MooseTestApp", TestSampler);
 
-template <>
+defineLegacyParams(TestSampler);
+
 InputParameters
-validParams<TestSampler>()
+TestSampler::validParams()
 {
-  InputParameters params = validParams<Sampler>();
+  InputParameters params = Sampler::validParams();
   params.addParam<bool>("use_rand", false, "Use rand method for computeSample method.");
   params.addParam<dof_id_type>("num_rows", 14, "Number of rows.");
   params.addParam<dof_id_type>("num_cols", 8, "Number of columns.");

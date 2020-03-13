@@ -24,6 +24,8 @@ InputParameters validParams<NSMomentumInviscidFlux>();
 class NSMomentumInviscidFlux : public NSKernel
 {
 public:
+  static InputParameters validParams();
+
   NSMomentumInviscidFlux(const InputParameters & parameters);
 
 protected:

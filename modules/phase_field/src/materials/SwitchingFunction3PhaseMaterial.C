@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunction3PhaseMaterial);
 
-template <>
+defineLegacyParams(SwitchingFunction3PhaseMaterial);
+
 InputParameters
-validParams<SwitchingFunction3PhaseMaterial>()
+SwitchingFunction3PhaseMaterial::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription("Material for switching function that prevents formation of a third "
                              "phase at a two-phase interface: h_i = eta_i^2/4 * [15 (1-eta_i) [1 + "
                              "eta_i - (eta_k - eta_j)^2] + eta_i * (9eta_i^2 - 5)]");

@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CompositeMobilityTensor);
 
-template <>
+defineLegacyParams(CompositeMobilityTensor);
+
 InputParameters
-validParams<CompositeMobilityTensor>()
+CompositeMobilityTensor::validParams()
 {
   InputParameters params = CompositeTensorBase<RealTensorValue, Material>::validParams();
   params.addClassDescription("Assemble a mobility tensor from multiple tensor contributions "

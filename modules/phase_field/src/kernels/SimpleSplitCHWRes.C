@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SimpleSplitCHWRes);
 
-template <>
+defineLegacyParams(SimpleSplitCHWRes);
+
 InputParameters
-validParams<SimpleSplitCHWRes>()
+SimpleSplitCHWRes::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy for split Cahn-Hilliard equation with constant "
                              "Mobility for a coupled order parameter variable.");
   params.addParam<MaterialPropertyName>(

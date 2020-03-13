@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", IdealGasFreeEnergy);
 
-template <>
+defineLegacyParams(IdealGasFreeEnergy);
+
 InputParameters
-validParams<IdealGasFreeEnergy>()
+IdealGasFreeEnergy::validParams()
 {
-  InputParameters params = validParams<GasFreeEnergyBase>();
+  InputParameters params = GasFreeEnergyBase::validParams();
   params.addClassDescription("Free energy of an ideal gas.");
   return params;
 }

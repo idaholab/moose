@@ -29,6 +29,8 @@ InputParameters validParams<BimodalInverseSuperellipsoidsIC>();
 class BimodalInverseSuperellipsoidsIC : public BimodalSuperellipsoidsIC
 {
 public:
+  static InputParameters validParams();
+
   BimodalInverseSuperellipsoidsIC(const InputParameters & parameters);
 
   /// Have to do things slightly different from SmoothSuperellipsoidBaseIC because of the inverse structure

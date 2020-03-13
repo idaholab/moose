@@ -10,12 +10,12 @@
 
 [Distributions]
   [uniform_0]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 100
     upper_bound = 200
   []
   [uniform_1]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1
     upper_bound = 2
   []
@@ -23,7 +23,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     num_rows = 15
     distributions = 'uniform_0 uniform_1'
     execute_on = INITIAL

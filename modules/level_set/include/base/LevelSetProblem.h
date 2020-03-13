@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class LevelSetProblem;
-
-template <>
-InputParameters validParams<LevelSetProblem>();
-
 /**
  * Problem that defines a custom call to MultiAppTransfers to allow for
  * adaptivity to be transferred from master to sub-application.
@@ -23,6 +18,8 @@ InputParameters validParams<LevelSetProblem>();
 class LevelSetProblem : public FEProblem
 {
 public:
+  static InputParameters validParams();
+
   LevelSetProblem(const InputParameters & parameters);
   virtual bool adaptMesh() override;
   virtual void computeMarkers() override;

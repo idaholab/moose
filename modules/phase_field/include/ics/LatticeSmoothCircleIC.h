@@ -24,6 +24,8 @@ InputParameters validParams<LatticeSmoothCircleIC>();
 class LatticeSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
+  static InputParameters validParams();
+
   LatticeSmoothCircleIC(const InputParameters & parameters);
 
   virtual void initialSetup();

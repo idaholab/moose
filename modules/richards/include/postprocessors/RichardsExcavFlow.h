@@ -26,6 +26,8 @@ InputParameters validParams<RichardsExcavFlow>();
 class RichardsExcavFlow : public SideIntegralVariablePostprocessor
 {
 public:
+  static InputParameters validParams();
+
   RichardsExcavFlow(const InputParameters & parameters);
 
 protected:

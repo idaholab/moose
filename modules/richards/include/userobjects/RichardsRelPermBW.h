@@ -24,6 +24,8 @@ InputParameters validParams<RichardsRelPermBW>();
 class RichardsRelPermBW : public RichardsRelPerm
 {
 public:
+  static InputParameters validParams();
+
   RichardsRelPermBW(const InputParameters & parameters);
 
   /**

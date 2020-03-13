@@ -33,6 +33,8 @@ InputParameters validParams<PorousFlowWaterNCG>();
 class PorousFlowWaterNCG : public PorousFlowFluidStateMultiComponentBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowWaterNCG(const InputParameters & parameters);
 
   virtual std::string fluidStateName() const override;

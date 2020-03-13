@@ -13,11 +13,12 @@
 
 registerMooseObject("PhaseFieldApp", AllenCahnElasticEnergyOffDiag);
 
-template <>
+defineLegacyParams(AllenCahnElasticEnergyOffDiag);
+
 InputParameters
-validParams<AllenCahnElasticEnergyOffDiag>()
+AllenCahnElasticEnergyOffDiag::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("This kernel calculates off-diagonal Jacobian of elastic energy in "
                              "AllenCahn with respect to displacements");
   params.addCoupledVar("displacements",

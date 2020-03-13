@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class CoupledDirectionalMeshHeightInterpolation;
-
-template <>
-InputParameters validParams<CoupledDirectionalMeshHeightInterpolation>();
-
 /**
  * Couples to some other value and modulates it by the mesh height in a direction.
  *
@@ -35,6 +29,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
+  static InputParameters validParams();
+
   CoupledDirectionalMeshHeightInterpolation(const InputParameters & parameters);
 
   virtual ~CoupledDirectionalMeshHeightInterpolation() {}

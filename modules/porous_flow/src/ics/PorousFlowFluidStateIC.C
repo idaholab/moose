@@ -13,11 +13,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidStateIC);
 
-template <>
+defineLegacyParams(PorousFlowFluidStateIC);
+
 InputParameters
-validParams<PorousFlowFluidStateIC>()
+PorousFlowFluidStateIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("gas_porepressure",
                                "Variable that is the porepressure of the gas phase");
   params.addRequiredCoupledVar("temperature", "Variable that is the fluid temperature");

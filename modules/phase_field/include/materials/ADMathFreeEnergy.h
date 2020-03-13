@@ -27,6 +27,8 @@ class ADMathFreeEnergy : public ADMaterial<compute_stage>,
                          public DerivativeMaterialPropertyNameInterface
 {
 public:
+  static InputParameters validParams();
+
   ADMathFreeEnergy(const InputParameters & parameters);
 
 protected:

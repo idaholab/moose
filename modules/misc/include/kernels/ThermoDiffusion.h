@@ -37,6 +37,8 @@
 class ThermoDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   ThermoDiffusion(const InputParameters & parameters);
 
 protected:

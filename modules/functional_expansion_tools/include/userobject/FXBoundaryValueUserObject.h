@@ -22,6 +22,7 @@ InputParameters validParams<FXBoundaryValueUserObject>();
 class FXBoundaryValueUserObject final : public FXBoundaryBaseUserObject
 {
 public:
+  static InputParameters validParams();
+
   FXBoundaryValueUserObject(const InputParameters & parameters);
 };
-

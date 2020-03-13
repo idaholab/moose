@@ -19,6 +19,8 @@ InputParameters validParams<FluidPropertiesApp>();
 class FluidPropertiesApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   FluidPropertiesApp(InputParameters parameters);
   virtual ~FluidPropertiesApp();
 

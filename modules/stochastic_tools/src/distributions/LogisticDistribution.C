@@ -11,7 +11,11 @@
 #include "math.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("StochasticToolsApp", LogisticDistribution);
+registerMooseObjectAliased("StochasticToolsApp", LogisticDistribution, "Logistic");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            LogisticDistribution,
+                            "07/01/2020 00:00",
+                            Logistic);
 
 defineLegacyParams(LogisticDistribution);
 

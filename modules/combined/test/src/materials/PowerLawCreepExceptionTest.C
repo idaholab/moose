@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsTestApp", PowerLawCreepExceptionTest);
 
-defineLegacyParams(PowerLawCreepExceptionTest);
-
 InputParameters
 PowerLawCreepExceptionTest::validParams()
 {

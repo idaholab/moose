@@ -1,0 +1,50 @@
+[Tests]
+   design = 'meshgenerators/DistributedRectilinearMeshGenerator.md'
+   issues = '#11485'
+
+  [./distributed_rectilinear_mesh_generator]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out.e'
+    cli_args = 'Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 2D Quad4 mesh in parallel'
+  [../]
+
+  [./distributed_rectilinear_mesh_generator_1D]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    cli_args = 'Mesh/gmg/dim=1 Outputs/file_base=distributed_rectilinear_mesh_generator_out_1d Outputs/hide="pid npid" '
+    exodiff = 'distributed_rectilinear_mesh_generator_out_1d.e'
+    requirement = 'MOOSE shall be able to generate 1D EDGE2 mesh in parallel.'
+  [../]
+
+  [./distributed_rectilinear_mesh_generator_3D]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d.e'
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel.'
+  [../]
+
+  [./distributed_rectilinear_mesh_generator_3D_ptscotch]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d_ptscotch.e'
+    ptscotch = true
+    petsc_version = '>=3.10.0'
+    valgrind = none
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Mesh/gmg/part_package=ptscotch Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d_ptscotch Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel using ptscotch partitioner'
+  [../]
+
+  [./distributed_rectilinear_mesh_generator_3D_hierarch]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d_hierarch.e'
+    min_parallel = 4
+    max_parallel = 4
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Mesh/gmg/part_package=hierarch Mesh/gmg/num_cores_per_compute_node=2 Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d_hierarch Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel using hierarch partitioner'
+  [../]
+
+[]

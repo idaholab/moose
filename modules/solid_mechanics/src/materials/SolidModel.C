@@ -26,15 +26,16 @@
 
 registerMooseObject("SolidMechanicsApp", SolidModel);
 
-template <>
+defineLegacyParams(SolidModel);
+
 InputParameters
-validParams<SolidModel>()
+SolidModel::validParams()
 {
   MooseEnum formulation(
       "Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain NonlinearPlaneStrain");
   MooseEnum compute_method("NoShearRetention ShearRetention");
 
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");

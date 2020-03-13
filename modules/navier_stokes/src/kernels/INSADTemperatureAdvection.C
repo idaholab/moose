@@ -11,16 +11,20 @@
 
 registerADMooseObject("NavierStokesApp", INSADTemperatureAdvection);
 
-defineADValidParams(
-    INSADTemperatureAdvection,
-    ADKernelValue,
-    params.addClassDescription("This class computes the residual and Jacobian contributions for "
-                               "temperature advection for a divergence free velocity field.");
-    params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-    params.addParam<MaterialPropertyName>("cp_name",
-                                          "cp",
-                                          "The name of the specific heat capacity");
-    params.addRequiredCoupledVar("velocity", "The velocity variable"););
+defineADLegacyParams(INSADTemperatureAdvection);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADTemperatureAdvection<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  params.addClassDescription("This class computes the residual and Jacobian contributions for "
+                             "temperature advection for a divergence free velocity field.");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
+  params.addRequiredCoupledVar("velocity", "The velocity variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADTemperatureAdvection<compute_stage>::INSADTemperatureAdvection(

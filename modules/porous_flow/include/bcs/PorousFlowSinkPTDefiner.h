@@ -24,6 +24,8 @@ InputParameters validParams<PorousFlowSinkPTDefiner>();
 class PorousFlowSinkPTDefiner : public PorousFlowSink
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowSinkPTDefiner(const InputParameters & parameters);
 
 protected:

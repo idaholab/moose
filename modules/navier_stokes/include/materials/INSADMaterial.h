@@ -27,6 +27,8 @@ template <ComputeStage compute_stage>
 class INSADMaterial : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADMaterial(const InputParameters & parameters);
 
 protected:

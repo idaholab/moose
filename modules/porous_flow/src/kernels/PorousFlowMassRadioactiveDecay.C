@@ -17,11 +17,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassRadioactiveDecay);
 
-template <>
+defineLegacyParams(PorousFlowMassRadioactiveDecay);
+
 InputParameters
-validParams<PorousFlowMassRadioactiveDecay>()
+PorousFlowMassRadioactiveDecay::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addParam<bool>("strain_at_nearest_qp",
                         false,
                         "When calculating nodal porosity that depends on strain, use the strain at "

@@ -12,11 +12,12 @@
 
 registerMooseObject("MooseApp", PiecewiseFunctionTabulate);
 
-template <>
+defineLegacyParams(PiecewiseFunctionTabulate);
+
 InputParameters
-validParams<PiecewiseFunctionTabulate>()
+PiecewiseFunctionTabulate::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Tabulate the function nodes of a piecewise function, such as "
                              "PiecewiseLinear or PiecewiseConstant");
   params.addRequiredParam<FunctionName>(

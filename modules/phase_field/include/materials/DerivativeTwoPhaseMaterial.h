@@ -26,6 +26,8 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>();
 class DerivativeTwoPhaseMaterial : public DerivativeFunctionMaterialBase
 {
 public:
+  static InputParameters validParams();
+
   DerivativeTwoPhaseMaterial(const InputParameters & parameters);
 
   virtual void initialSetup() override;

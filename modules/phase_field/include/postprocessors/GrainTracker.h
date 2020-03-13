@@ -24,6 +24,8 @@ InputParameters validParams<GrainTracker>();
 class GrainTracker : public FeatureFloodCount, public GrainTrackerInterface
 {
 public:
+  static InputParameters validParams();
+
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 

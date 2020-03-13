@@ -25,6 +25,8 @@ InputParameters validParams<MaskedGrainForceAndTorque>();
 class MaskedGrainForceAndTorque : public GrainForceAndTorqueInterface, public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   MaskedGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();

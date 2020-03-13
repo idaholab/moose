@@ -23,6 +23,8 @@ InputParameters validParams<INSDivergenceAux>();
 class INSDivergenceAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   INSDivergenceAux(const InputParameters & parameters);
 
   virtual ~INSDivergenceAux() {}

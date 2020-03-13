@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CHSplitFlux);
 
-template <>
+defineLegacyParams(CHSplitFlux);
+
 InputParameters
-validParams<CHSplitFlux>()
+CHSplitFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Computes flux $j$ as nodal variable $j = -M\\nabla\\mu$");
   params.addRequiredParam<unsigned int>("component", "Flux component");
   params.addRequiredParam<MaterialPropertyName>("mobility_name", "Mobility property name");

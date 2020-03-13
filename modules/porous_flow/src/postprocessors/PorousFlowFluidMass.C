@@ -15,11 +15,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidMass);
 
-template <>
+defineLegacyParams(PorousFlowFluidMass);
+
 InputParameters
-validParams<PorousFlowFluidMass>()
+PorousFlowFluidMass::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addParam<unsigned int>(
       "fluid_component",
       0,

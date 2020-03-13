@@ -24,6 +24,8 @@ InputParameters validParams<VoronoiICAux>();
 class VoronoiICAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   VoronoiICAux(const InputParameters & parameters);
 
 protected:

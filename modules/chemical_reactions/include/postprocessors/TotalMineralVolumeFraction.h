@@ -23,6 +23,8 @@ InputParameters validParams<TotalMineralVolumeFraction>();
 class TotalMineralVolumeFraction : public ElementAverageValue
 {
 public:
+  static InputParameters validParams();
+
   TotalMineralVolumeFraction(const InputParameters & parameters);
 
 protected:

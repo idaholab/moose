@@ -24,6 +24,8 @@ InputParameters validParams<NonconservedAction>();
 class NonconservedAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   NonconservedAction(const InputParameters & params);
 
   virtual void act();

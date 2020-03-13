@@ -12,11 +12,12 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
-template <>
+defineLegacyParams(KKSAction);
+
 InputParameters
-validParams<KKSAction>()
+KKSAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<std::string>("c_name_base", "c", "base name of the concentration variables");
   params.addParam<std::string>("eta_name", "eta", "name of the order parameter");
   params.addRequiredParam<std::vector<std::string>>("phase_names", "short names for the phases");

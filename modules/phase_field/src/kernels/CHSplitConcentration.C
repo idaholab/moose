@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CHSplitConcentration);
 
-template <>
+defineLegacyParams(CHSplitConcentration);
+
 InputParameters
-validParams<CHSplitConcentration>()
+CHSplitConcentration::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Concentration kernel in Split Cahn-Hilliard that solves chemical potential in a weak form");
   params.addRequiredParam<MaterialPropertyName>("mobility", "Mobility property name");

@@ -17,11 +17,12 @@
 
 registerMooseAction("NavierStokesApp", AddNavierStokesBCsAction, "add_navier_stokes_bcs");
 
-template <>
+defineLegacyParams(AddNavierStokesBCsAction);
+
 InputParameters
-validParams<AddNavierStokesBCsAction>()
+AddNavierStokesBCsAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("This class allows us to have a section of the input file like the "
                              "following which adds BC objects for each requested boundary "
                              "condition.");

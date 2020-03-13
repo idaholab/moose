@@ -23,6 +23,8 @@ InputParameters validParams<NodalAuxVariableUserObjectBasePD>();
 class NodalAuxVariableUserObjectBasePD : public ElementUserObjectBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalAuxVariableUserObjectBasePD(const InputParameters & parameters);
 
   virtual void initialize() override;

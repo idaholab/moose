@@ -12,11 +12,12 @@
 
 registerMooseAction("ChemicalReactionsApp", AddSecondarySpeciesAction, "add_aux_variable");
 
-template <>
+defineLegacyParams(AddSecondarySpeciesAction);
+
 InputParameters
-validParams<AddSecondarySpeciesAction>()
+AddSecondarySpeciesAction::validParams()
 {
-  InputParameters params = validParams<AddAuxVariableAction>();
+  InputParameters params = AddAuxVariableAction::validParams();
   params.addParam<std::vector<AuxVariableName>>("secondary_species",
                                                 "The list of secondary species to add");
   params.addClassDescription("Adds AuxVariables for all secondary species");

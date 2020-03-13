@@ -24,6 +24,8 @@ InputParameters validParams<SlopeReconstructionMultiD>();
 class SlopeReconstructionMultiD : public SlopeReconstructionBase
 {
 public:
+  static InputParameters validParams();
+
   SlopeReconstructionMultiD(const InputParameters & parameters);
 
 protected:

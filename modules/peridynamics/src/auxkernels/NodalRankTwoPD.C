@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", NodalRankTwoPD);
 
-template <>
+defineLegacyParams(NodalRankTwoPD);
+
 InputParameters
-validParams<NodalRankTwoPD>()
+NodalRankTwoPD::validParams()
 {
-  InputParameters params = validParams<AuxKernelBasePD>();
+  InputParameters params = AuxKernelBasePD::validParams();
   params.addClassDescription(
       "Class for computing and outputing components and scalar quantities "
       "of nodal rank two strain and stress tensors for bond-based and ordinary "

@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowCapillaryPressureBC>();
 class PorousFlowCapillaryPressureBC : public PorousFlowCapillaryPressure
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowCapillaryPressureBC(const InputParameters & parameters);
 
   virtual Real capillaryPressureCurve(Real saturation, unsigned qp = 0) const override;

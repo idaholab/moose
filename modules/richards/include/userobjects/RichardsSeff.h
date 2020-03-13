@@ -23,6 +23,8 @@ InputParameters validParams<RichardsSeff>();
 class RichardsSeff : public GeneralUserObject
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff(const InputParameters & parameters);
 
   void initialize();

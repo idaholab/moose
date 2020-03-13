@@ -19,6 +19,8 @@ InputParameters validParams<PhaseFieldApp>();
 class PhaseFieldApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   PhaseFieldApp(const InputParameters & parameters);
   virtual ~PhaseFieldApp();
 

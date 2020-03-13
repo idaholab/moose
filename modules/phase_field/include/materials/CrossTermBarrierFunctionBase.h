@@ -25,6 +25,8 @@ InputParameters validParams<CrossTermBarrierFunctionBase>();
 class CrossTermBarrierFunctionBase : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   CrossTermBarrierFunctionBase(const InputParameters & parameters);
 
 protected:

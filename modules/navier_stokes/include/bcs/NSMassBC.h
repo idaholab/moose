@@ -33,6 +33,8 @@ InputParameters validParams<NSMassBC>();
 class NSMassBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSMassBC(const InputParameters & parameters);
 
 protected:

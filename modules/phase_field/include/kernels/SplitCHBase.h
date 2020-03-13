@@ -21,6 +21,8 @@ InputParameters validParams<SplitCHBase>();
 class SplitCHBase : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SplitCHBase(const InputParameters & parameters);
 
 protected:

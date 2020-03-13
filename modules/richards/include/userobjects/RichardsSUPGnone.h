@@ -23,6 +23,8 @@ InputParameters validParams<RichardsSUPGnone>();
 class RichardsSUPGnone : public RichardsSUPG
 {
 public:
+  static InputParameters validParams();
+
   RichardsSUPGnone(const InputParameters & parameters);
 
   /// SUPG velocity = zero

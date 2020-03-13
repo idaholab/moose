@@ -24,6 +24,8 @@ InputParameters validParams<NodalIntegralPostprocessorBasePD>();
 class NodalIntegralPostprocessorBasePD : public NodalPostprocessorBasePD
 {
 public:
+  static InputParameters validParams();
+
   NodalIntegralPostprocessorBasePD(const InputParameters & parameters);
 
   virtual void initialize() override;

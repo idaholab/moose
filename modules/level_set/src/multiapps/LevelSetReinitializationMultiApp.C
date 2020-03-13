@@ -17,11 +17,12 @@
 
 registerMooseObject("LevelSetApp", LevelSetReinitializationMultiApp);
 
-template <>
+defineLegacyParams(LevelSetReinitializationMultiApp);
+
 InputParameters
-validParams<LevelSetReinitializationMultiApp>()
+LevelSetReinitializationMultiApp::validParams()
 {
-  InputParameters params = validParams<MultiApp>();
+  InputParameters params = MultiApp::validParams();
   params.addClassDescription(
       "MultiApp capable of performing repeated complete solves for level set reinitialization.");
   params.addParam<unsigned int>(

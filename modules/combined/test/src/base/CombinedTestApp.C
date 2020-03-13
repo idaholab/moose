@@ -32,11 +32,12 @@
 #include "LevelSetTestApp.h"
 #include "ExternalPetscSolverApp.h"
 
-template <>
+defineLegacyParams(CombinedTestApp);
+
 InputParameters
-validParams<CombinedTestApp>()
+CombinedTestApp::validParams()
 {
-  InputParameters params = validParams<CombinedApp>();
+  InputParameters params = CombinedApp::validParams();
   return params;
 }
 

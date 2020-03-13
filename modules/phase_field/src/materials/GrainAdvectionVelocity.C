@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", GrainAdvectionVelocity);
 
-template <>
+defineLegacyParams(GrainAdvectionVelocity);
+
 InputParameters
-validParams<GrainAdvectionVelocity>()
+GrainAdvectionVelocity::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Calculation the advection velocity of grain due to rigid body translation and rotation");
   params.addRequiredCoupledVarWithAutoBuild(

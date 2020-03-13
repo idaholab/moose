@@ -24,6 +24,8 @@ InputParameters validParams<SlopeReconstructionOneD>();
 class SlopeReconstructionOneD : public SlopeReconstructionBase
 {
 public:
+  static InputParameters validParams();
+
   SlopeReconstructionOneD(const InputParameters & parameters);
 };
 

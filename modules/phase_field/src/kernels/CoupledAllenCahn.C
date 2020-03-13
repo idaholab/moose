@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CoupledAllenCahn);
 
-template <>
+defineLegacyParams(CoupledAllenCahn);
+
 InputParameters
-validParams<CoupledAllenCahn>()
+CoupledAllenCahn::validParams()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription(

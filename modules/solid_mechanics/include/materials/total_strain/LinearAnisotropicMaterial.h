@@ -24,6 +24,8 @@ InputParameters validParams<LinearAnisotropicMaterial>();
 class LinearAnisotropicMaterial : public LinearIsotropicMaterial
 {
 public:
+  static InputParameters validParams();
+
   LinearAnisotropicMaterial(const InputParameters & parameters);
 
 protected:

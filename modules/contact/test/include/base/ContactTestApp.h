@@ -19,6 +19,8 @@ InputParameters validParams<ContactTestApp>();
 class ContactTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   ContactTestApp(InputParameters parameters);
   virtual ~ContactTestApp();
 

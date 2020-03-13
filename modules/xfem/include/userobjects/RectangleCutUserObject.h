@@ -20,6 +20,8 @@ InputParameters validParams<RectangleCutUserObject>();
 class RectangleCutUserObject : public GeometricCut3DUserObject
 {
 public:
+  static InputParameters validParams();
+
   RectangleCutUserObject(const InputParameters & parameters);
 
   virtual const std::vector<Point>

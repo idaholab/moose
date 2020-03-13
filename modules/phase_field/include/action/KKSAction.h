@@ -23,6 +23,8 @@ InputParameters validParams<KKSAction>();
 class KKSAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   KKSAction(const InputParameters & params);
   virtual void act();
 

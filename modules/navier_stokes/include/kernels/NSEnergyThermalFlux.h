@@ -26,6 +26,8 @@ InputParameters validParams<NSEnergyThermalFlux>();
 class NSEnergyThermalFlux : public NSKernel
 {
 public:
+  static InputParameters validParams();
+
   NSEnergyThermalFlux(const InputParameters & parameters);
 
 protected:

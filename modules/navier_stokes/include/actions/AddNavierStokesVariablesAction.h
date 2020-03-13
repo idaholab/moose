@@ -33,6 +33,8 @@ InputParameters validParams<AddNavierStokesVariablesAction>();
 class AddNavierStokesVariablesAction : public NSAction
 {
 public:
+  static InputParameters validParams();
+
   AddNavierStokesVariablesAction(InputParameters parameters);
   virtual ~AddNavierStokesVariablesAction();
 

@@ -9,11 +9,12 @@
 
 #include "FXIntegralBaseUserObject.h"
 
-template <>
+defineLegacyParams(FXIntegralBaseUserObjectParameters);
+
 InputParameters
-validParams<FXIntegralBaseUserObjectParameters>()
+FXIntegralBaseUserObjectParameters::validParams()
 {
-  InputParameters params = validParams<MutableCoefficientsInterface>();
+  InputParameters params = MutableCoefficientsInterface::validParams();
 
   params.addClassDescription(
       "This UserObject interacts with a MooseApp through functional expansions.");

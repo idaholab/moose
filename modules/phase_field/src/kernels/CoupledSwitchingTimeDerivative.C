@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", CoupledSwitchingTimeDerivative);
 
-template <>
+defineLegacyParams(CoupledSwitchingTimeDerivative);
+
 InputParameters
-validParams<CoupledSwitchingTimeDerivative>()
+CoupledSwitchingTimeDerivative::validParams()
 {
-  InputParameters params = validParams<CoupledTimeDerivative>();
+  InputParameters params = CoupledTimeDerivative::validParams();
   params.addClassDescription(
       "Coupled time derivative Kernel that multiplies the time derivative by "
       "$\\frac{dh_\\alpha}{d\\eta_i} F_\\alpha + \\frac{dh_\\beta}{d\\eta_i} F_\\beta + \\dots)");

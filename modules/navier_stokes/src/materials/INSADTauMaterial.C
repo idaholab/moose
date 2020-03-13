@@ -13,14 +13,18 @@
 
 registerADMooseObject("NavierStokesApp", INSADTauMaterial);
 
-defineADValidParams(
-    INSADTauMaterial,
-    INSADMaterial,
-    params.addClassDescription(
-        "This is the material class used to compute the stabilization parameter tau.");
-    params.addParam<Real>("alpha",
-                          1.,
-                          "Multiplicative factor on the stabilization parameter tau."););
+defineADLegacyParams(INSADTauMaterial);
+
+template <ComputeStage compute_stage>
+InputParameters
+INSADTauMaterial<compute_stage>::validParams()
+{
+  InputParameters params = INSADMaterial<compute_stage>::validParams();
+  params.addClassDescription(
+      "This is the material class used to compute the stabilization parameter tau.");
+  params.addParam<Real>("alpha", 1., "Multiplicative factor on the stabilization parameter tau.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADTauMaterial<compute_stage>::INSADTauMaterial(const InputParameters & parameters)

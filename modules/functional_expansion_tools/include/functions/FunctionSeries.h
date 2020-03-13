@@ -25,6 +25,8 @@ InputParameters validParams<FunctionSeries>();
 class FunctionSeries : public MutableCoefficientsFunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   FunctionSeries(const InputParameters & parameters);
 
   /**

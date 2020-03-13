@@ -14,11 +14,12 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDictator);
 
-template <>
+defineLegacyParams(PorousFlowDictator);
+
 InputParameters
-validParams<PorousFlowDictator>()
+PorousFlowDictator::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Holds information on the PorousFlow variable names");
   params.addRequiredCoupledVar("porous_flow_vars",
                                "List of primary variables that are used in the PorousFlow "

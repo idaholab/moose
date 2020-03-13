@@ -25,6 +25,8 @@ InputParameters validParams<MultiBarrierFunctionMaterial>();
 class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   MultiBarrierFunctionMaterial(const InputParameters & parameters);
 
 protected:

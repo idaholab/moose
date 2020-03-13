@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", SpecificInternalEnergyAux);
 
-template <>
+defineLegacyParams(SpecificInternalEnergyAux);
+
 InputParameters
-validParams<SpecificInternalEnergyAux>()
+SpecificInternalEnergyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rho", "Density");
   params.addRequiredCoupledVar("rho_u", "Momentum x-component");
   params.addCoupledVar("rho_v", 0, "Momentum y-component");

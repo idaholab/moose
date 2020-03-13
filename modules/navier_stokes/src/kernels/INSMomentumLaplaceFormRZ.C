@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumLaplaceFormRZ);
 
-template <>
+defineLegacyParams(INSMomentumLaplaceFormRZ);
+
 InputParameters
-validParams<INSMomentumLaplaceFormRZ>()
+INSMomentumLaplaceFormRZ::validParams()
 {
-  InputParameters params = validParams<INSMomentumLaplaceForm>();
+  InputParameters params = INSMomentumLaplaceForm::validParams();
   params.addClassDescription("This class computes additional momentum equation residual and "
                              "Jacobian contributions for the incompressible Navier-Stokes momentum "
                              "equation in RZ (axisymmetric cylindrical) coordinates, using the "

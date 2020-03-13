@@ -28,6 +28,8 @@ class NSWeakStagnationBaseBC : public NSIntegratedBC
 {
 public:
   // Constructor
+  static InputParameters validParams();
+
   NSWeakStagnationBaseBC(const InputParameters & parameters);
 
   // Destructor, better be virtual

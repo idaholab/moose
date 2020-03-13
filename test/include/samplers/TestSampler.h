@@ -17,6 +17,8 @@ InputParameters validParams<TestSampler>();
 class TestSampler : public Sampler
 {
 public:
+  static InputParameters validParams();
+
   TestSampler(const InputParameters & parameters);
 
 protected:

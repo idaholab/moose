@@ -25,6 +25,8 @@ InputParameters validParams<MultiBoundingBoxIC>();
 class MultiBoundingBoxIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   MultiBoundingBoxIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;

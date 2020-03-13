@@ -22,6 +22,8 @@ InputParameters validParams<MechanicsOSPD>();
 class MechanicsOSPD : public MechanicsBasePD
 {
 public:
+  static InputParameters validParams();
+
   MechanicsOSPD(const InputParameters & parameters);
 
 protected:

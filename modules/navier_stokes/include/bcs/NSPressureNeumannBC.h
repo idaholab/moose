@@ -32,6 +32,8 @@ InputParameters validParams<NSPressureNeumannBC>();
 class NSPressureNeumannBC : public NSIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   NSPressureNeumannBC(const InputParameters & parameters);
 
   virtual ~NSPressureNeumannBC() {}

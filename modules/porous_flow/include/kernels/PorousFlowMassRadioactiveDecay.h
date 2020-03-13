@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowMassRadioactiveDecay>();
 class PorousFlowMassRadioactiveDecay : public TimeKernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowMassRadioactiveDecay(const InputParameters & parameters);
 
 protected:

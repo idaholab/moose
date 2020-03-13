@@ -24,6 +24,8 @@ InputParameters validParams<NSSUPGEnergy>();
 class NSSUPGEnergy : public NSSUPGBase
 {
 public:
+  static InputParameters validParams();
+
   NSSUPGEnergy(const InputParameters & parameters);
 
 protected:

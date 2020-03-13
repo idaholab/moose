@@ -14,11 +14,12 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", OutOfPlaneStress, "07/30/2020 24:00");
 
-template <>
+defineLegacyParams(OutOfPlaneStress);
+
 InputParameters
-validParams<OutOfPlaneStress>()
+OutOfPlaneStress::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("temp", "The temperature");

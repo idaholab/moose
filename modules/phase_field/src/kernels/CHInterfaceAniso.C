@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", CHInterfaceAniso);
 
-template <>
+defineLegacyParams(CHInterfaceAniso);
+
 InputParameters
-validParams<CHInterfaceAniso>()
+CHInterfaceAniso::validParams()
 {
   InputParameters params = CHInterfaceBase<RealTensorValue>::validParams();
   params.addClassDescription(

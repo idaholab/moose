@@ -25,6 +25,8 @@ InputParameters validParams<RichardsSeff2gasVG>();
 class RichardsSeff2gasVG : public RichardsSeff
 {
 public:
+  static InputParameters validParams();
+
   RichardsSeff2gasVG(const InputParameters & parameters);
 
   /**

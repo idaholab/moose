@@ -26,6 +26,8 @@ InputParameters validParams<PorousFlowWaterVapor>();
 class PorousFlowWaterVapor : public PorousFlowFluidStateSingleComponentBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowWaterVapor(const InputParameters & parameters);
 
   virtual std::string fluidStateName() const override;

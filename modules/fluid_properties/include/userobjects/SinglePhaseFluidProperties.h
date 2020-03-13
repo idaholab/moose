@@ -89,6 +89,8 @@ InputParameters validParams<SinglePhaseFluidProperties>();
 class SinglePhaseFluidProperties : public FluidProperties
 {
 public:
+  static InputParameters validParams();
+
   SinglePhaseFluidProperties(const InputParameters & parameters);
   virtual ~SinglePhaseFluidProperties();
 

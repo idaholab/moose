@@ -17,11 +17,11 @@
 #include "libmesh/elem.h"
 
 // forward declarations
-template <typename>
-class InitialConditionTempl;
 class FEProblemBase;
 class Assembly;
 
+template <typename>
+class InitialConditionTempl;
 template <>
 InputParameters validParams<InitialConditionTempl<Real>>();
 template <>
@@ -193,6 +193,13 @@ protected:
   /// the mesh dimension
   unsigned int _dim;
 };
+
+template <typename T>
+InputParameters
+InitialConditionTempl<T>::validParams()
+{
+  return InitialConditionBase::validParams();
+}
 
 typedef InitialConditionTempl<Real> InitialCondition;
 typedef InitialConditionTempl<RealVectorValue> VectorInitialCondition;

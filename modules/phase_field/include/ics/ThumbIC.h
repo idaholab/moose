@@ -23,6 +23,8 @@ InputParameters validParams<ThumbIC>();
 class ThumbIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   ThumbIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

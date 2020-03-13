@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", PFCTradMaterial);
 
-template <>
+defineLegacyParams(PFCTradMaterial);
+
 InputParameters
-validParams<PFCTradMaterial>()
+PFCTradMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Polynomial coefficients for a phase field crystal correlation function");
   MooseEnum order("FOURTH=4 EIGHTH=8");

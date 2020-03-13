@@ -20,6 +20,8 @@ InputParameters validParams<LangevinNoise>();
 class LangevinNoise : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   LangevinNoise(const InputParameters & parameters);
 
 protected:

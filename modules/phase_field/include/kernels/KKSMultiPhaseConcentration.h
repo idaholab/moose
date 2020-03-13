@@ -36,6 +36,8 @@ class KKSMultiPhaseConcentration
   : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>
 {
 public:
+  static InputParameters validParams();
+
   KKSMultiPhaseConcentration(const InputParameters & parameters);
 
 protected:

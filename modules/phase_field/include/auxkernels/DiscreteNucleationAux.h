@@ -24,6 +24,8 @@ InputParameters validParams<DiscreteNucleationAux>();
 class DiscreteNucleationAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   DiscreteNucleationAux(const InputParameters & params);
 
 protected:

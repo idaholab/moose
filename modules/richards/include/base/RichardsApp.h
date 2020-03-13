@@ -24,6 +24,8 @@ InputParameters validParams<RichardsApp>();
 class RichardsApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   RichardsApp(const InputParameters & parameters);
   virtual ~RichardsApp();
 

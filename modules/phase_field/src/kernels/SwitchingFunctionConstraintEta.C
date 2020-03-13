@@ -11,11 +11,12 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintEta);
 
-template <>
+defineLegacyParams(SwitchingFunctionConstraintEta);
+
 InputParameters
-validParams<SwitchingFunctionConstraintEta>()
+SwitchingFunctionConstraintEta::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
                              "functions in a multiphase system. This kernel acts on a "
                              "non-conserved order parameter eta_i.");

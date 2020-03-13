@@ -11,11 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
+defineLegacyParams(ConservedMaskedNoiseBase);
+
 InputParameters
-validParams<ConservedMaskedNoiseBase>()
+ConservedMaskedNoiseBase::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   params.addParam<MaterialPropertyName>("mask",
                                         "Material property to multiply the random numbers with");

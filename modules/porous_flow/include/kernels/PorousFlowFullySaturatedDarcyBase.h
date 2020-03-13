@@ -25,6 +25,8 @@ InputParameters validParams<PorousFlowFullySaturatedDarcyBase>();
 class PorousFlowFullySaturatedDarcyBase : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowFullySaturatedDarcyBase(const InputParameters & parameters);
 
 protected:

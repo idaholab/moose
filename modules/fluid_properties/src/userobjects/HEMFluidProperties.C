@@ -10,11 +10,12 @@
 #include "HEMFluidProperties.h"
 #include "FluidProperties.h"
 
-template <>
+defineLegacyParams(HEMFluidProperties);
+
 InputParameters
-validParams<HEMFluidProperties>()
+HEMFluidProperties::validParams()
 {
-  InputParameters params = validParams<FluidProperties>();
+  InputParameters params = FluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "hem-fp", "FPType", "Type of the fluid property object");
   return params;

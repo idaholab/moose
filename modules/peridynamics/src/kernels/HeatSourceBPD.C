@@ -13,11 +13,12 @@
 
 registerMooseObject("PeridynamicsApp", HeatSourceBPD);
 
-template <>
+defineLegacyParams(HeatSourceBPD);
+
 InputParameters
-validParams<HeatSourceBPD>()
+HeatSourceBPD::validParams()
 {
-  InputParameters params = validParams<PeridynamicsKernelBase>();
+  InputParameters params = PeridynamicsKernelBase::validParams();
   params.addClassDescription("Class for calculating residual from heat source for bond-based "
                              "peridynamic heat conduction formulation");
 

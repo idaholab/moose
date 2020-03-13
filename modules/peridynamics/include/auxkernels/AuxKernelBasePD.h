@@ -23,6 +23,8 @@ InputParameters validParams<AuxKernelBasePD>();
 class AuxKernelBasePD : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   AuxKernelBasePD(const InputParameters & parameters);
 
 protected:

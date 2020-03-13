@@ -16,11 +16,12 @@
 
 registerMooseObject("ContactApp", ContactPressureAux);
 
-template <>
+defineLegacyParams(ContactPressureAux);
+
 InputParameters
-validParams<ContactPressureAux>()
+ContactPressureAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;

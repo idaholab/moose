@@ -16,11 +16,12 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalCircles);
 
-template <>
+defineLegacyParams(PolycrystalCircles);
+
 InputParameters
-validParams<PolycrystalCircles>()
+PolycrystalCircles::validParams()
 {
-  InputParameters params = validParams<PolycrystalUserObjectBase>();
+  InputParameters params = PolycrystalUserObjectBase::validParams();
   params.addClassDescription(
       "Polycrystal circles generated from a vector input or read from a file");
   params.addParam<bool>("read_from_file",

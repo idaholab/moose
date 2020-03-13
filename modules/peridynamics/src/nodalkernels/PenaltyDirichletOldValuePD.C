@@ -11,11 +11,12 @@
 
 registerMooseObject("PeridynamicsApp", PenaltyDirichletOldValuePD);
 
-template <>
+defineLegacyParams(PenaltyDirichletOldValuePD);
+
 InputParameters
-validParams<PenaltyDirichletOldValuePD>()
+PenaltyDirichletOldValuePD::validParams()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Enforces a Dirichlet boundary condition "
                              "in a weak sense by penalizing differences between the current "
                              "solution and the old solution for transient problems.");

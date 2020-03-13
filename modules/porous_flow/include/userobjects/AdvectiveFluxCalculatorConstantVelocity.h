@@ -22,6 +22,8 @@ InputParameters validParams<AdvectiveFluxCalculatorConstantVelocity>();
 class AdvectiveFluxCalculatorConstantVelocity : public AdvectiveFluxCalculatorBase
 {
 public:
+  static InputParameters validParams();
+
   AdvectiveFluxCalculatorConstantVelocity(const InputParameters & parameters);
 
 protected:

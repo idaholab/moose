@@ -23,6 +23,8 @@ InputParameters validParams<ComputeGrainCenterUserObject>();
 class ComputeGrainCenterUserObject : public ElementUserObject
 {
 public:
+  static InputParameters validParams();
+
   ComputeGrainCenterUserObject(const InputParameters & parameters);
 
   virtual void initialize();

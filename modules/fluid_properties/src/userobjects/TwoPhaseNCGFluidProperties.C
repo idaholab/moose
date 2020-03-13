@@ -9,11 +9,12 @@
 
 #include "TwoPhaseNCGFluidProperties.h"
 
-template <>
+defineLegacyParams(TwoPhaseNCGFluidProperties);
+
 InputParameters
-validParams<TwoPhaseNCGFluidProperties>()
+TwoPhaseNCGFluidProperties::validParams()
 {
-  InputParameters params = validParams<TwoPhaseFluidProperties>();
+  InputParameters params = TwoPhaseFluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "two-phase-ncg-fp", "FPType", "Type of the fluid property object");
   params.addParam<UserObjectName>("fp_2phase",

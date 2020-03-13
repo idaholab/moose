@@ -21,6 +21,8 @@ InputParameters validParams<TangentialNodalLMMechanicalContact>();
 class TangentialNodalLMMechanicalContact : public NodeFaceConstraint
 {
 public:
+  static InputParameters validParams();
+
   TangentialNodalLMMechanicalContact(const InputParameters & parameters);
 
 protected:

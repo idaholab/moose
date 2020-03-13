@@ -23,6 +23,8 @@ class MovingLineSegmentCutSetUserObject : public LineSegmentCutSetUserObject
 
 {
 public:
+  static InputParameters validParams();
+
   MovingLineSegmentCutSetUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;

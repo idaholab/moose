@@ -29,6 +29,8 @@ InputParameters validParams<AddNavierStokesKernelsAction>();
 class AddNavierStokesKernelsAction : public NSAction
 {
 public:
+  static InputParameters validParams();
+
   AddNavierStokesKernelsAction(InputParameters parameters);
   virtual ~AddNavierStokesKernelsAction();
 

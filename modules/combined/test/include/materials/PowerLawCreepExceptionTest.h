@@ -11,17 +11,12 @@
 
 #include "PowerLawCreepStressUpdate.h"
 
-class PowerLawCreepExceptionTest;
-
-template <>
-InputParameters validParams<PowerLawCreepExceptionTest>();
-
 class PowerLawCreepExceptionTest : public PowerLawCreepStressUpdate
 {
 public:
-  PowerLawCreepExceptionTest(const InputParameters & parameters);
-
   static InputParameters validParams();
+
+  PowerLawCreepExceptionTest(const InputParameters & parameters);
 
 protected:
   virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) override;

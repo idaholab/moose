@@ -27,6 +27,8 @@ InputParameters validParams<KKSACBulkF>();
 class KKSACBulkF : public KKSACBulkBase
 {
 public:
+  static InputParameters validParams();
+
   KKSACBulkF(const InputParameters & parameters);
 
 protected:

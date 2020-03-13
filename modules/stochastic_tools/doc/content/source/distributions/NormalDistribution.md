@@ -12,7 +12,8 @@ f(x \; | \; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2} } \; e^{ -\frac{(x-\mu
 
 where $\mu$ is the mean and $\sigma$ is the standard deviation ($\sigma > 0$) of the distribution.
 
-This implementation of a normal distribution uses a numerical approximation described in [!cite](Kennedy1980).
+This implementation of a normal distribution uses a numerical approximation described in
+[!cite](kennedy2018statistical).
 
 ## Example Input Syntax
 

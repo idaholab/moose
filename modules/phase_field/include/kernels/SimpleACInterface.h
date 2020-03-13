@@ -22,6 +22,8 @@ InputParameters validParams<SimpleACInterface>();
 class SimpleACInterface : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   SimpleACInterface(const InputParameters & parameters);
 
 protected:

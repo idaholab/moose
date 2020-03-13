@@ -19,6 +19,8 @@ InputParameters validParams<XFEMTestApp>();
 class XFEMTestApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
+
   XFEMTestApp(InputParameters parameters);
   virtual ~XFEMTestApp();
 

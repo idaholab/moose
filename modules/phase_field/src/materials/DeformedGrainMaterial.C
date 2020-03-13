@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", DeformedGrainMaterial);
 
-template <>
+defineLegacyParams(DeformedGrainMaterial);
+
 InputParameters
-validParams<DeformedGrainMaterial>()
+DeformedGrainMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");
   params.addRequiredParam<unsigned int>("deformed_grain_num",

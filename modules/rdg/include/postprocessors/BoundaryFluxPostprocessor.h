@@ -23,6 +23,8 @@ InputParameters validParams<BoundaryFluxPostprocessor>();
 class BoundaryFluxPostprocessor : public SideIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   BoundaryFluxPostprocessor(const InputParameters & parameters);
 
   virtual Real computeQpIntegral() override;

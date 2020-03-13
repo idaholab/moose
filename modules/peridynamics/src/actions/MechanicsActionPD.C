@@ -22,11 +22,12 @@ registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_user_object");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_ic");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_kernel");
 
-template <>
+defineLegacyParams(MechanicsActionPD);
+
 InputParameters
-validParams<MechanicsActionPD>()
+MechanicsActionPD::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Class for setting up peridynamic kernels");
 
   params.addRequiredParam<std::vector<VariableName>>(

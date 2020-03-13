@@ -9,12 +9,18 @@
 
 #include "ADSplitCHCRes.h"
 
-defineADValidParams(
-    ADSplitCHCRes,
-    ADSplitCHBase,
-    params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
-    params.addRequiredCoupledVar("w", "Chemical potential variable");
-    params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel"););
+defineADLegacyParams(ADSplitCHCRes);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADSplitCHCRes<compute_stage>::validParams()
+{
+  InputParameters params = ADSplitCHBase<compute_stage>::validParams();
+  params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
+  params.addRequiredCoupledVar("w", "Chemical potential variable");
+  params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADSplitCHCRes<compute_stage>::ADSplitCHCRes(const InputParameters & parameters)

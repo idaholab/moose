@@ -11,15 +11,21 @@
 
 registerADMooseObject("MiscApp", ADThermoDiffusion);
 
-defineADValidParams(
-    ADThermoDiffusion,
-    ADKernel,
-    params.addClassDescription(
-        "Calculates diffusion due to temperature gradient and Soret Coefficient");
-    params.addRequiredCoupledVar("temperature", "The coupled temperature variable.");
-    params.addParam<MaterialPropertyName>("soret_coefficient",
-                                          "soret_coefficient",
-                                          "The name of the Soret coefficient material property"););
+defineADLegacyParams(ADThermoDiffusion);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADThermoDiffusion<compute_stage>::validParams()
+{
+  InputParameters params = ADKernel<compute_stage>::validParams();
+  params.addClassDescription(
+      "Calculates diffusion due to temperature gradient and Soret Coefficient");
+  params.addRequiredCoupledVar("temperature", "The coupled temperature variable.");
+  params.addParam<MaterialPropertyName>("soret_coefficient",
+                                        "soret_coefficient",
+                                        "The name of the Soret coefficient material property");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADThermoDiffusion<compute_stage>::ADThermoDiffusion(const InputParameters & parameters)

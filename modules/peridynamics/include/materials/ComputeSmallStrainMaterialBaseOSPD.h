@@ -22,6 +22,8 @@ InputParameters validParams<ComputeSmallStrainMaterialBaseOSPD>();
 class ComputeSmallStrainMaterialBaseOSPD : public ParametricMaterialBasePD
 {
 public:
+  static InputParameters validParams();
+
   ComputeSmallStrainMaterialBaseOSPD(const InputParameters & parameters);
 
 protected:

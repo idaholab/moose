@@ -25,6 +25,8 @@ InputParameters validParams<RandomEulerAngleProvider>();
 class RandomEulerAngleProvider : public EulerAngleProvider
 {
 public:
+  static InputParameters validParams();
+
   RandomEulerAngleProvider(const InputParameters & parameters);
 
   virtual void initialize() override;

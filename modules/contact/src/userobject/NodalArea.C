@@ -18,11 +18,12 @@
 
 registerMooseObject("ContactApp", NodalArea);
 
-template <>
+defineLegacyParams(NodalArea);
+
 InputParameters
-validParams<NodalArea>()
+NodalArea::validParams()
 {
-  InputParameters params = validParams<SideIntegralVariableUserObject>();
+  InputParameters params = SideIntegralVariableUserObject::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
   return params;
 }

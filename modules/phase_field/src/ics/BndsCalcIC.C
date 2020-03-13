@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", BndsCalcIC);
 
-template <>
+defineLegacyParams(BndsCalcIC);
+
 InputParameters
-validParams<BndsCalcIC>()
+BndsCalcIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
       "Initialize the location of grain boundaries in a polycrystalline sample");
   params.addRequiredCoupledVarWithAutoBuild(

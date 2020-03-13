@@ -30,6 +30,8 @@ InputParameters validParams<WedgeFunction>();
 class WedgeFunction : public Function, protected FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   WedgeFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

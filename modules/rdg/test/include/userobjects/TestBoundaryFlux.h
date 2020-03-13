@@ -22,6 +22,8 @@ InputParameters validParams<TestBoundaryFlux>();
 class TestBoundaryFlux : public BoundaryFluxBase
 {
 public:
+  static InputParameters validParams();
+
   TestBoundaryFlux(const InputParameters & parameters);
 
   virtual void calcFlux(unsigned int iside,

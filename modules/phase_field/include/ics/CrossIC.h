@@ -43,6 +43,8 @@ InputParameters validParams<CrossIC>();
 class CrossIC : public C1ICBase
 {
 public:
+  static InputParameters validParams();
+
   CrossIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p);

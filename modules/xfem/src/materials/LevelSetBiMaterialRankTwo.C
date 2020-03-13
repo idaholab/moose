@@ -11,11 +11,12 @@
 
 registerMooseObject("XFEMApp", LevelSetBiMaterialRankTwo);
 
-template <>
+defineLegacyParams(LevelSetBiMaterialRankTwo);
+
 InputParameters
-validParams<LevelSetBiMaterialRankTwo>()
+LevelSetBiMaterialRankTwo::validParams()
 {
-  InputParameters params = validParams<LevelSetBiMaterialBase>();
+  InputParameters params = LevelSetBiMaterialBase::validParams();
   params.addClassDescription(
       "Compute a RankTwoTensor material property for bi-materials problem (consisting of two "
       "different materials) defined by a level set function.");

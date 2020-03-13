@@ -22,6 +22,8 @@ InputParameters validParams<AqueousEquilibriumRxnAux>();
 class AqueousEquilibriumRxnAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   AqueousEquilibriumRxnAux(const InputParameters & parameters);
 
 protected:

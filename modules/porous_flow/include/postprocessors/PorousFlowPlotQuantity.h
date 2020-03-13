@@ -23,6 +23,8 @@ InputParameters validParams<PorousFlowPlotQuantity>();
 class PorousFlowPlotQuantity : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowPlotQuantity(const InputParameters & parameters);
   virtual ~PorousFlowPlotQuantity();
 

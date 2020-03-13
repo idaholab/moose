@@ -11,9 +11,10 @@
 
 registerMooseObject("PhaseFieldApp", AllenCahn);
 
-template <>
+defineLegacyParams(AllenCahn);
+
 InputParameters
-validParams<AllenCahn>()
+AllenCahn::validParams()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");

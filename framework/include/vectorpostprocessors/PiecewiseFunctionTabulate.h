@@ -24,6 +24,8 @@ InputParameters validParams<PiecewiseFunctionTabulate>();
 class PiecewiseFunctionTabulate : public GeneralVectorPostprocessor
 {
 public:
+  static InputParameters validParams();
+
   PiecewiseFunctionTabulate(const InputParameters & parameters);
 
   virtual void initialize() override {}

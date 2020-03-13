@@ -24,6 +24,8 @@ InputParameters validParams<RampIC>();
 class RampIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
+
   RampIC(const InputParameters & parameters);
 
 protected:

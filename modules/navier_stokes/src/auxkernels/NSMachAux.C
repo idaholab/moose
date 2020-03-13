@@ -19,11 +19,12 @@
 
 registerMooseObject("NavierStokesApp", NSMachAux);
 
-template <>
+defineLegacyParams(NSMachAux);
+
 InputParameters
-validParams<NSMachAux>()
+NSMachAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription(
       "Auxiliary kernel for computing the Mach number assuming an ideal gas.");

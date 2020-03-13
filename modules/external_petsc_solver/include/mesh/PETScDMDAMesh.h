@@ -11,11 +11,6 @@
 
 #include "MooseMesh.h"
 
-class PETScDMDAMesh;
-
-template <>
-InputParameters validParams<PETScDMDAMesh>();
-
 /**
  * Generate a parallel (distributed) mesh from PETSc DMDA.
  * DMDA could be passed in from an application such as ExternalPetscSolverApp
@@ -27,6 +22,8 @@ InputParameters validParams<PETScDMDAMesh>();
 class PETScDMDAMesh : public MooseMesh
 {
 public:
+  static InputParameters validParams();
+
   PETScDMDAMesh(const InputParameters & parameters);
   PETScDMDAMesh(const PETScDMDAMesh & /* other_mesh */) = default;
 
@@ -66,4 +63,3 @@ protected:
   DM _dmda;
 #endif
 };
-

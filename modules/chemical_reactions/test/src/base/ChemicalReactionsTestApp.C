@@ -13,11 +13,12 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
+defineLegacyParams(ChemicalReactionsTestApp);
+
 InputParameters
-validParams<ChemicalReactionsTestApp>()
+ChemicalReactionsTestApp::validParams()
 {
-  InputParameters params = validParams<ChemicalReactionsApp>();
+  InputParameters params = ChemicalReactionsApp::validParams();
   return params;
 }
 

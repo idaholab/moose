@@ -28,6 +28,8 @@ InputParameters validParams<RichardsPolyLineSink>();
 class RichardsPolyLineSink : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   RichardsPolyLineSink(const InputParameters & parameters);
 
   virtual void addPoints();

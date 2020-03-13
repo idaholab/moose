@@ -26,6 +26,8 @@ InputParameters validParams<NSInflowThermalBC>();
 class NSInflowThermalBC : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   NSInflowThermalBC(const InputParameters & parameters);
 
 protected:

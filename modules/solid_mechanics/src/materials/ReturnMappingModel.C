@@ -12,12 +12,13 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "Conversion.h"
 
-template <>
+defineLegacyParams(ReturnMappingModel);
+
 InputParameters
-validParams<ReturnMappingModel>()
+ReturnMappingModel::validParams()
 {
-  InputParameters params = validParams<ConstitutiveModel>();
-  params += validParams<SingleVariableReturnMappingSolution>();
+  InputParameters params = ConstitutiveModel::validParams();
+  params += SingleVariableReturnMappingSolution::validParams();
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");

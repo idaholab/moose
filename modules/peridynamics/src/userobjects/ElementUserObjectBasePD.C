@@ -11,11 +11,12 @@
 #include "AuxiliarySystem.h"
 #include "PeridynamicsMesh.h"
 
-template <>
+defineLegacyParams(ElementUserObjectBasePD);
+
 InputParameters
-validParams<ElementUserObjectBasePD>()
+ElementUserObjectBasePD::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Base class for peridynamic elemental user objects");
 
   return params;

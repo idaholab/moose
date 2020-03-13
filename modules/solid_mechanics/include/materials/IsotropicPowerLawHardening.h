@@ -25,6 +25,8 @@ InputParameters validParams<IsotropicPowerLawHardening>();
 class IsotropicPowerLawHardening : public IsotropicPlasticity
 {
 public:
+  static InputParameters validParams();
+
   IsotropicPowerLawHardening(const InputParameters & parameters);
 
 protected:

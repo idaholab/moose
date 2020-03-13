@@ -20,6 +20,8 @@
 class DisplacementGradientsAction : public Action
 {
 public:
+  static InputParameters validParams();
+
   DisplacementGradientsAction(const InputParameters & params);
 
   virtual void act();

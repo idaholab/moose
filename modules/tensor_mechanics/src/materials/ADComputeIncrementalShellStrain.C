@@ -24,23 +24,28 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeIncrementalShellStrain);
 
-defineADValidParams(
-    ADComputeIncrementalShellStrain,
-    ADMaterial,
-    params.addClassDescription("Compute a small strain increment for the shell.");
-    params.addRequiredCoupledVar(
-        "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
-    params.addRequiredCoupledVar(
-        "displacements",
-        "The displacements appropriate for the simulation geometry and coordinate system");
-    params.addRequiredCoupledVar(
-        "thickness",
-        "Thickness of the shell. Can be supplied as either a number or a variable name.");
-    params.addRequiredParam<std::string>("through_thickness_order",
-                                         "Quadrature order in out of plane direction");
-    params.addParam<bool>("large_strain",
-                          false,
-                          "Set to true to turn on finite strain calculations."););
+defineADLegacyParams(ADComputeIncrementalShellStrain);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADComputeIncrementalShellStrain<compute_stage>::validParams()
+{
+  InputParameters params = ADMaterial<compute_stage>::validParams();
+  params.addClassDescription("Compute a small strain increment for the shell.");
+  params.addRequiredCoupledVar(
+      "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar(
+      "thickness",
+      "Thickness of the shell. Can be supplied as either a number or a variable name.");
+  params.addRequiredParam<std::string>("through_thickness_order",
+                                       "Quadrature order in out of plane direction");
+  params.addParam<bool>(
+      "large_strain", false, "Set to true to turn on finite strain calculations.");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(

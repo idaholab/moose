@@ -28,6 +28,8 @@ InputParameters validParams<MovingPlanarFront>();
 class MovingPlanarFront : public Function, protected FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   MovingPlanarFront(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

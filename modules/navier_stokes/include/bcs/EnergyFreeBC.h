@@ -22,6 +22,8 @@ InputParameters validParams<EnergyFreeBC>();
 class EnergyFreeBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   EnergyFreeBC(const InputParameters & parameters);
 
 protected:

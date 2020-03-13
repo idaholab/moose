@@ -24,6 +24,8 @@ InputParameters validParams<PrimaryConvection>();
 class PrimaryConvection : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   PrimaryConvection(const InputParameters & parameters);
 
 protected:

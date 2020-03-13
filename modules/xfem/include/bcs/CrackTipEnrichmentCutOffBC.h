@@ -24,6 +24,8 @@ InputParameters validParams<CrackTipEnrichmentCutOffBC>();
 class CrackTipEnrichmentCutOffBC : public DirichletBC
 {
 public:
+  static InputParameters validParams();
+
   CrackTipEnrichmentCutOffBC(const InputParameters & parameters);
 
 protected:

@@ -23,6 +23,8 @@ InputParameters validParams<RateDepSmearIsoCrackModel>();
 class RateDepSmearIsoCrackModel : public RateDepSmearCrackModel
 {
 public:
+  static InputParameters validParams();
+
   RateDepSmearIsoCrackModel(const InputParameters & parameters);
 
   virtual ~RateDepSmearIsoCrackModel();

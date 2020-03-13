@@ -23,11 +23,12 @@
 
 registerMooseAction("PorousFlowApp", PorousFlowAddMaterialAction, "meta_action");
 
-template <>
+defineLegacyParams(PorousFlowAddMaterialAction);
+
 InputParameters
-validParams<PorousFlowAddMaterialAction>()
+PorousFlowAddMaterialAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "Makes sure that the correct nodal and/or qp materials are added for each property");
   return params;

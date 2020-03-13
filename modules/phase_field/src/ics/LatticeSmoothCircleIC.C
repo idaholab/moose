@@ -12,11 +12,12 @@
 
 registerMooseObject("PhaseFieldApp", LatticeSmoothCircleIC);
 
-template <>
+defineLegacyParams(LatticeSmoothCircleIC);
+
 InputParameters
-validParams<LatticeSmoothCircleIC>()
+LatticeSmoothCircleIC::validParams()
 {
-  InputParameters params = validParams<SmoothCircleBaseIC>();
+  InputParameters params = SmoothCircleBaseIC::validParams();
   params.addClassDescription("Perturbed square lattice of smooth circles");
   params.addDeprecatedParam<Real>("Rnd_variation",
                                   "Variation from central lattice position",

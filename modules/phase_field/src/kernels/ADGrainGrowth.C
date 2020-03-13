@@ -11,10 +11,16 @@
 
 registerADMooseObject("PhaseFieldApp", ADGrainGrowth);
 
-defineADValidParams(ADGrainGrowth,
-                    ADGrainGrowthBase,
-                    params.addClassDescription(
-                        "Grain-Boundary model poly-crystalline interface Allen-Cahn Kernel"););
+defineADLegacyParams(ADGrainGrowth);
+
+template <ComputeStage compute_stage>
+InputParameters
+ADGrainGrowth<compute_stage>::validParams()
+{
+  InputParameters params = ADGrainGrowthBase<compute_stage>::validParams();
+  params.addClassDescription("Grain-Boundary model poly-crystalline interface Allen-Cahn Kernel");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADGrainGrowth<compute_stage>::ADGrainGrowth(const InputParameters & parameters)

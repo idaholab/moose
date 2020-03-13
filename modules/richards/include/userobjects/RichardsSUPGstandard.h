@@ -27,6 +27,8 @@ InputParameters validParams<RichardsSUPGstandard>();
 class RichardsSUPGstandard : public RichardsSUPG
 {
 public:
+  static InputParameters validParams();
+
   RichardsSUPGstandard(const InputParameters & parameters);
 
   /**

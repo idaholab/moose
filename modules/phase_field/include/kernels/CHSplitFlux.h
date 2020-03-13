@@ -26,6 +26,8 @@ InputParameters validParams<CHSplitFlux>();
 class CHSplitFlux : public DerivativeMaterialInterface<Kernel>
 {
 public:
+  static InputParameters validParams();
+
   CHSplitFlux(const InputParameters & parameters);
 
 protected:

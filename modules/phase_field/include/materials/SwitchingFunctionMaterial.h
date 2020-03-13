@@ -27,6 +27,8 @@ InputParameters validParams<SwitchingFunctionMaterial>();
 class SwitchingFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
+  static InputParameters validParams();
+
   SwitchingFunctionMaterial(const InputParameters & parameters);
 
 protected:

@@ -37,6 +37,8 @@ InputParameters validParams<MethaneFluidProperties>();
 class MethaneFluidProperties : public HelmholtzFluidProperties
 {
 public:
+  static InputParameters validParams();
+
   MethaneFluidProperties(const InputParameters & parameters);
   virtual ~MethaneFluidProperties();
 

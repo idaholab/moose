@@ -26,6 +26,8 @@ InputParameters validParams<XFEMSingleVariableConstraint>();
 class XFEMSingleVariableConstraint : public ElemElemConstraint
 {
 public:
+  static InputParameters validParams();
+
   XFEMSingleVariableConstraint(const InputParameters & parameters);
   virtual ~XFEMSingleVariableConstraint();
 

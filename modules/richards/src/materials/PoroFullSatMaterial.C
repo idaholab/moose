@@ -11,11 +11,12 @@
 
 registerMooseObject("RichardsApp", PoroFullSatMaterial);
 
-template <>
+defineLegacyParams(PoroFullSatMaterial);
+
 InputParameters
-validParams<PoroFullSatMaterial>()
+PoroFullSatMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredParam<Real>(
       "porosity0",

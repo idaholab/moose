@@ -27,6 +27,8 @@ InputParameters validParams<RichardsExcav>();
 class RichardsExcav : public NodalBC
 {
 public:
+  static InputParameters validParams();
+
   RichardsExcav(const InputParameters & parameters);
 
 protected:

@@ -19,13 +19,14 @@ static unsigned int na_counter = 0;
 
 registerMooseAction("ContactApp", NodalAreaAction, "add_user_object");
 
-template <>
+defineLegacyParams(NodalAreaAction);
+
 InputParameters
-validParams<NodalAreaAction>()
+NodalAreaAction::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<BoundaryName>("slave", "The slave surface");
 
   // Set this action to build "NodalArea"

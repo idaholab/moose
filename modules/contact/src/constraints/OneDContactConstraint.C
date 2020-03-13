@@ -19,11 +19,12 @@
 
 registerMooseObject("ContactApp", OneDContactConstraint);
 
-template <>
+defineLegacyParams(OneDContactConstraint);
+
 InputParameters
-validParams<OneDContactConstraint>()
+OneDContactConstraint::validParams()
 {
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<bool>("jacobian_update",
                         false,

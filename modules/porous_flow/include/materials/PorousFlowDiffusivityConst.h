@@ -20,6 +20,8 @@ InputParameters validParams<PorousFlowDiffusivityConst>();
 class PorousFlowDiffusivityConst : public PorousFlowDiffusivityBase
 {
 public:
+  static InputParameters validParams();
+
   PorousFlowDiffusivityConst(const InputParameters & parameters);
 
 protected:

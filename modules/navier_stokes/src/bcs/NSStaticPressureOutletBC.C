@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSStaticPressureOutletBC);
 
-template <>
+defineLegacyParams(NSStaticPressureOutletBC);
+
 InputParameters
-validParams<NSStaticPressureOutletBC>()
+NSStaticPressureOutletBC::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addClassDescription("This class facilitates adding specified static pressure outlet BCs "
                              "for the Euler equations.");
   params.addRequiredParam<std::vector<BoundaryName>>(

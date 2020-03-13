@@ -11,11 +11,12 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumPressureWeakStagnationBC);
 
-template <>
+defineLegacyParams(NSMomentumPressureWeakStagnationBC);
+
 InputParameters
-validParams<NSMomentumPressureWeakStagnationBC>()
+NSMomentumPressureWeakStagnationBC::validParams()
 {
-  InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  InputParameters params = NSWeakStagnationBaseBC::validParams();
   params.addClassDescription("This class implements the pressure term of the momentum equation "
                              "boundary integral for use in weak stagnation boundary conditions.");
   params.addRequiredParam<unsigned int>(

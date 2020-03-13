@@ -14,11 +14,12 @@
 
 registerMooseObject("MiscApp", CoupledDirectionalMeshHeightInterpolation);
 
-template <>
+defineLegacyParams(CoupledDirectionalMeshHeightInterpolation);
+
 InputParameters
-validParams<CoupledDirectionalMeshHeightInterpolation>()
+CoupledDirectionalMeshHeightInterpolation::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("coupled_var",
                                "The variable whose values are going to be interpolated.");
 

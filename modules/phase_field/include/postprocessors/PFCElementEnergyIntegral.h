@@ -28,6 +28,8 @@ class PFCElementEnergyIntegral : public ElementIntegralPostprocessor,
                                  public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   PFCElementEnergyIntegral(const InputParameters & parameters);
 
 protected:

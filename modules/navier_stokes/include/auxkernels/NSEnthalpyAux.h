@@ -31,6 +31,8 @@ InputParameters validParams<NSEnthalpyAux>();
 class NSEnthalpyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   NSEnthalpyAux(const InputParameters & parameters);
 
 protected:

@@ -17,11 +17,12 @@
 // Full specialization of the validParams function for this object
 registerMooseObject("NavierStokesApp", NSStagnationPressureBC);
 
-template <>
+defineLegacyParams(NSStagnationPressureBC);
+
 InputParameters
-validParams<NSStagnationPressureBC>()
+NSStagnationPressureBC::validParams()
 {
-  InputParameters params = validParams<NSStagnationBC>();
+  InputParameters params = NSStagnationBC::validParams();
   params.addClassDescription("This Dirichlet condition imposes the condition p_0 = p_0_desired.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<Real>("desired_stagnation_pressure", "");
