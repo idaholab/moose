@@ -35,4 +35,15 @@ Most of the tests and examples are drawn from [!cite](bethke_2007)
 
 - [Models that exhibit nonunique solutions](non_unique.md)
 
+## Simple time-dependent reaction paths
+
+- [Progressively adding chemicals](adding_feldspar.md)
+- [Progressively changing the temperature](cooling_feldspar.md)
+- [Progressively adding chemicals with fixed fugacity](adding_pyrite.md)
+- [Progressively changing fugacity](changing_fugacity_with_calcite.md)
+- [Progressively changing pH](changing_pH_iron.md)
+- [Dumping minerals then adding chemicals](calcite_buffer.md)
+- [Flow-through reactions that remove minerals](flow_through.md) TODO
+- [Flushing minerals](flush.md) TODO
+
 !bibtex bibliography
