@@ -42,16 +42,16 @@ Most of the tests and examples are drawn from [!cite](bethke_2007)
 - [Progressively adding chemicals with fixed fugacity](adding_pyrite.md)
 - [Progressively changing fugacity](changing_fugacity_with_calcite.md)
 - [Progressively changing pH](changing_pH_iron.md)
-- [Adding fluids of different temperatures](pickup.md) TODO
+- [Adding fluids of different temperatures](pickup.md)
 - [Dumping minerals then adding chemicals](calcite_buffer.md)
-- [Flow-through reactions that remove minerals](flow_through.md) TODO
-- [Flushing minerals](flush.md) TODO
+- [Flow-through reactions that remove minerals](flow_through.md)
+- [Flushing minerals](flush.md)
 
 ## Kinetics
 
 - [Gradual dissolution of quartz](kinetic_quartz.md)
 - [Dissolution of albite into an acidic solution](kinetic_albite.md)
-- [Quartz deposition in a fracture](kinetic_quartz_arrhenius.md) TODO
+- [Quartz deposition in a fracture](kinetic_quartz_arrhenius.md)
 
 
 !bibtex bibliography
