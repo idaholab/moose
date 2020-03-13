@@ -22,7 +22,7 @@ Explicitly, we apply a number of equality constraints equal to the mesh
 dimension tying together the locations of the slave node and the nearest master
 node (which we assert is a node that both master faces involved in the ping-pong
 share). This ping-ponging protection is necessary for solving step 19 of the
-[`full-bouncing-block-ranfs`](bouncing-block-ranfs.i) test. Without the
+[`full-bouncing-block-ranfs`](bouncing-block-contact/bouncing-block-ranfs.i) test. Without the
 protection the solve does not converge and the time-step gets cut.
 
 !syntax description /Constraints/RANFSNormalMechanicalContact

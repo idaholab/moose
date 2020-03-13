@@ -81,6 +81,9 @@ class TestShortcutLink(MooseDocsTestCase):
         self.assertToken(ast(0), 'Paragraph', size=1)
         self.assertToken(ast(0)(0), 'ShortcutLink', size=0, key='not_a_file')
 
+        with self.assertLogs(None, level='ERROR') as cm:
+            ast = self.tokenize('[Makefile]')
+        self.assertIn('Multiple files match the supplied filename Makefile', cm.output[0])
 
 class TestLink(MooseDocsTestCase):
     EXTENSIONS = [core, floats, heading, autolink]
