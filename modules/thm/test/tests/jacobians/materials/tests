@@ -268,6 +268,14 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+  [./reynolds_number]
+    type = 'PetscJacobianTester'
+    input = 'reynolds_number.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./temperature_3eqn_material]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
