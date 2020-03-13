@@ -146,7 +146,7 @@ dotProduct(const W<T> & a, const W2<T2> & b)
 
 template <typename T>
 T
-poly(std::vector<Real> c, const T x, const bool derivative)
+poly(std::vector<Real> c, const T x, const bool derivative = false)
 {
   const unsigned int size = c.size();
   if (size == 0)
