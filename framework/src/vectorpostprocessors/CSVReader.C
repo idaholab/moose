@@ -41,6 +41,7 @@ CSVReader::validParams()
                                "omitted it will read comma or space separated files.");
   params.addParam<bool>(
       "ignore_empty_lines", true, "When true new empty lines in the file are ignored.");
+  params.suppressParameter<bool>("contains_complete_history");
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
 
   // The value from this VPP is naturally already on every processor
@@ -65,10 +66,16 @@ CSVReader::CSVReader(const InputParameters & params)
 void
 CSVReader::initialize()
 {
-  _csv_reader.read();
-  for (auto & name : _csv_reader.getNames())
-    if (_column_data.find(name) == _column_data.end())
+  if (_column_data.empty())
+  {
+    _csv_reader.read();
+    for (auto & name : _csv_reader.getNames())
       _column_data[name] = &declareVector(name);
+  }
+  else if (!getParam<bool>("force_preic") ||
+           (getParam<bool>("force_preic") &&
+            (_fe_problem.getCurrentExecuteOnFlag() != EXEC_INITIAL)))
+    mooseError("Error in " + name() + ". CSVReader cannot execute more than once per file.");
 }
 
 void
