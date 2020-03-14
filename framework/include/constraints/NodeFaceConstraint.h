@@ -274,6 +274,9 @@ protected:
    */
   bool _overwrite_slave_residual;
 
+  /// JxW on the master face
+  const MooseArray<Real> & _master_JxW;
+
   /// Whether the slave residual has been computed
   bool _slave_residual_computed;
 
