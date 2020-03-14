@@ -15,6 +15,7 @@
 
 class MortarConstraintBase;
 class SubProblem;
+class FEProblemBase;
 class AutomaticMortarGeneration;
 class Assembly;
 class MooseMesh;
@@ -34,7 +35,9 @@ public:
   ComputeMortarFunctor(
       const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
       const AutomaticMortarGeneration & amg,
-      SubProblem & subproblem);
+      SubProblem & subproblem,
+      FEProblemBase & _fe_problem,
+      bool displaced);
 
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
@@ -51,8 +54,16 @@ private:
   /// Automatic mortar generation (amg) object providing the mortar mesh to loop over
   const AutomaticMortarGeneration & _amg;
 
-  /// A reference to the SubProblem object for reiniting
+  /// A reference to the SubProblem object for reiniting lower-dimensional element quantities
   SubProblem & _subproblem;
+
+  /// A reference to the FEProblemBase object for reiniting higher-dimensional element and neighbor
+  /// element quantities. We use the FEProblemBase object for reiniting these because we may be
+  /// using material properties from either undisplaced or displaced materials
+  FEProblemBase & _fe_problem;
+
+  /// Whether the mortar constraints are operating on the displaced mesh
+  const bool _displaced;
 
   /// A reference to the assembly object
   Assembly & _assembly;

@@ -6617,3 +6617,41 @@ FEProblemBase::automaticScaling(bool automatic_scaling)
 
   SubProblem::automaticScaling(automatic_scaling);
 }
+
+void
+FEProblemBase::reinitElemFaceRef(const Elem * elem,
+                                 unsigned int side,
+                                 BoundaryID bnd_id,
+                                 Real tolerance,
+                                 const std::vector<Point> * const pts,
+                                 const std::vector<Real> * const weights,
+                                 THREAD_ID tid)
+{
+  SubProblem::reinitElemFaceRef(elem, side, bnd_id, tolerance, pts, weights, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->reinitElemFaceRef(
+        _displaced_mesh->elemPtr(elem->id()), side, bnd_id, tolerance, pts, weights, tid);
+}
+
+void
+FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
+                                     unsigned int neighbor_side,
+                                     BoundaryID bnd_id,
+                                     Real tolerance,
+                                     const std::vector<Point> * const pts,
+                                     const std::vector<Real> * const weights,
+                                     THREAD_ID tid)
+{
+  SubProblem::reinitNeighborFaceRef(
+      neighbor_elem, neighbor_side, bnd_id, tolerance, pts, weights, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->reinitNeighborFaceRef(_displaced_mesh->elemPtr(neighbor_elem->id()),
+                                              neighbor_side,
+                                              bnd_id,
+                                              tolerance,
+                                              pts,
+                                              weights,
+                                              tid);
+}
