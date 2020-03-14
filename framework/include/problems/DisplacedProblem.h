@@ -302,18 +302,6 @@ public:
 
   const CouplingMatrix * couplingMatrix() const override;
 
-  /*
-   * Swap back underlying data storing stateful material properties
-   */
-  virtual void swapBackMaterials(THREAD_ID tid) override;
-  virtual void swapBackMaterialsFace(THREAD_ID tid) override;
-  virtual void swapBackMaterialsNeighbor(THREAD_ID tid) override;
-
-  virtual void
-  reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) override;
-  virtual void
-  reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true) override;
-
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

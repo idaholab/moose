@@ -197,7 +197,7 @@ ComputeJacobianThread::onElement(const Elem * elem)
 
   // Set up Sentinel class so that, even if reinitMaterials() throws, we
   // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &SubProblem::swapBackMaterials, _tid);
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
   if (_nl.getScalarVariables(_tid).size() > 0)
@@ -215,7 +215,7 @@ ComputeJacobianThread::onBoundary(const Elem * elem, unsigned int side, Boundary
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.
-    SwapBackSentinel sentinel(_fe_problem, &SubProblem::swapBackMaterialsFace, _tid);
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
@@ -242,10 +242,10 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
 
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
       // still remember to swap back during stack unwinding.
-      SwapBackSentinel face_sentinel(_fe_problem, &SubProblem::swapBackMaterialsFace, _tid);
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
 
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &SubProblem::swapBackMaterialsNeighbor, _tid);
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       computeInternalFaceJacobian(neighbor);
@@ -273,17 +273,17 @@ ComputeJacobianThread::onInterface(const Elem * elem, unsigned int side, Boundar
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
       // still remember to swap back during stack unwinding. Note that face, boundary, and interface
       // all operate with the same MaterialData object
-      SwapBackSentinel face_sentinel(_fe_problem, &SubProblem::swapBackMaterialsFace, _tid);
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &SubProblem::swapBackMaterialsNeighbor, _tid);
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       // Has to happen after face and neighbor properties have been computed. Note that we don't use
-      // a sentinel here because SubProblem::swapBackMaterialsFace is going to handle face
-      // materials, boundary materials, and interface materials (e.g. it queries the boundary
-      // material data with the current element and side
+      // a sentinel here because FEProblem::swapBackMaterialsFace is going to handle face materials,
+      // boundary materials, and interface materials (e.g. it queries the boundary material data
+      // with the current element and side
       _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
       computeInternalInterFaceJacobian(bnd_id);
