@@ -1767,6 +1767,34 @@ public:
   static void objectExecuteHelper(const std::vector<T *> & objects);
   ///@}
 
+  /**
+   * reinitialize FE objects on a given element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
+   */
+  virtual void reinitElemFaceRef(const Elem * elem,
+                                 unsigned int side,
+                                 BoundaryID bnd_id,
+                                 Real tolerance,
+                                 const std::vector<Point> * const pts,
+                                 const std::vector<Real> * const weights = nullptr,
+                                 THREAD_ID tid = 0) override;
+
+  /**
+   * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
+   */
+  virtual void reinitNeighborFaceRef(const Elem * neighbor_elem,
+                                     unsigned int neighbor_side,
+                                     BoundaryID bnd_id,
+                                     Real tolerance,
+                                     const std::vector<Point> * const pts,
+                                     const std::vector<Real> * const weights = nullptr,
+                                     THREAD_ID tid = 0) override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
