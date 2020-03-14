@@ -376,6 +376,8 @@ ContactAction::addMortarContact()
       params.set<bool>("use_displaced_mesh") = true;
       params.set<MooseEnum>("ncp_function_type") = "min";
       params.set<Real>("c") = getParam<Real>("c_normal");
+      if (_pars.isParamValid("tangential_tolerance"))
+        params.set<Real>("tangential_tolerance") = _pars.get<Real>("tangential_tolerance");
 
       params.set<std::vector<VariableName>>("master_variable") = {displacements[0]};
       if (ndisp > 1)
