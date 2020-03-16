@@ -18,6 +18,9 @@
 
 #include "libmesh/quadrature.h"
 
+defineADLegacyParams(ADIntegratedBC);
+defineADLegacyParams(ADVectorIntegratedBC);
+
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADIntegratedBCTempl<T, compute_stage>::validParams()
