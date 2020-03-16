@@ -25,7 +25,7 @@
 
 [Samplers]
   [sample]
-    type = Sobol
+    type = MonteCarlo
     num_rows = 3
     distributions = 'uniform_left uniform_right'
     execute_on = INITIAL # create random numbers on initial and use them for each timestep

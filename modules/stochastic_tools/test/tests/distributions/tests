@@ -111,7 +111,7 @@
       boost = false
       allow_test_objects = true
 
-      detail = 'for a Weibull distribion,'
+      detail = 'for a Weibull distribution,'
     []
 
     [normal]

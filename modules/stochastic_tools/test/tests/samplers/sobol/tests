@@ -15,10 +15,39 @@
     [no_resample]
       type = CSVDiff
       input = sobol.i
-      cli_args = 'Samplers/sample/resample=false Outputs/file_base=sobol_no_resample_out'
+      cli_args = 'Samplers/sobol/resample=false Outputs/file_base=sobol_no_resample_out'
       csvdiff = 'sobol_no_resample_out_data_0000.csv'
 
       detail = "without the re-sampling matrix."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error if the SOBOL sampling method is setup with input sampling matrices"
+
+    [row_mismatch]
+      type = RunException
+      input = sobol.i
+      cli_args = "Samplers/sample/num_rows=42"
+      expect_err = "The supplied Sampler objects must have the same number of rows"
+
+      detail = "with differing number of rows;"
+    []
+    [col_mismatch]
+      type = RunException
+      input = sobol.i
+      cli_args = "Samplers/sample/distributions='d0 d1'"
+      expect_err = "The supplied Sampler objects must have the same number of columns"
+
+      detail = "with differing number of columns; and"
+    []
+    [same_matrix]
+      type = RunException
+      input = sobol.i
+      cli_args = "Samplers/sobol/sampler_a=resample"
+      expect_err = "The supplied sampler matrices must not be the same"
+
+      detail = "if the matrices are the same."
     []
   []
 []

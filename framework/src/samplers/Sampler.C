@@ -28,6 +28,7 @@ Sampler::validParams()
 
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
+  params.registerSystemAttributeName("Sampler");
 
   params.addParam<bool>("legacy_support", true, "Disables errors for legacy API support.");
 
@@ -56,6 +57,7 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     PerfGraphInterface(this),
+    SamplerInterface(this),
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),

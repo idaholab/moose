@@ -32,9 +32,6 @@ public:
 
   SobolSampler(const InputParameters & parameters);
 
-  /// Number of inputs, see SobolStatistics
-  std::size_t numInputs() const { return _num_inputs; }
-
   /// Resampling flag, see SobolStatistics
   bool resample() const { return _resample; }
 
@@ -49,25 +46,25 @@ protected:
   DenseMatrix<Real> _m2_matrix;
   ///@}
 
-  /// Distribution names
-  const std::vector<DistributionName> & _distribution_names;
+  /// Sampler matrix
+  Sampler & _sampler_a;
+
+  /// Re-sample matrix
+  Sampler & _sampler_b;
 
   /// Flag for building the re-sampling matrix for computing second order sensitivity indices
   const bool & _resample;
-
-  /// Number of inputs
-  const std::size_t _num_inputs;
-
-  /// Number of matrices
-  const dof_id_type _num_matrices;
-
-  /// The number of rows per matrix
-  const dof_id_type _num_rows_per_matrix;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
 private:
+  /// The number of rows per matrix
+  dof_id_type _num_rows_per_matrix;
+
+  /// Number of matrices
+  dof_id_type _num_matrices;
+
   /// PerfGraph timer
   const PerfID _perf_sample_setup;
   const PerfID _perf_sample_teardown;

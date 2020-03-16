@@ -224,7 +224,8 @@ public:
 
   /// add adds a new object to the warehouse and stores attributes/metadata about it for running
   /// queries/filtering.  The warehouse will maintain a pointer to the object indefinitely.
-  void add(std::shared_ptr<MooseObject> obj, const std::string & system);
+  void add(std::shared_ptr<MooseObject> obj);
+
   /// update updates the metadata/attribute-info stored for the given object obj that must already
   /// exists in the warehouse.  Call this if an object's state has changed in such a way that its
   /// warehouse attributes have become stale/incorrect.
@@ -266,7 +267,8 @@ private:
     for (unsigned int i = 0; i < objs.size(); i++)
     {
       auto obj = objs[i];
-      mooseAssert(dynamic_cast<T *>(obj), "queried object has incompatible c++ type");
+      mooseAssert(dynamic_cast<T *>(obj),
+                  "queried object has incompatible c++ type for object named " + obj->name());
       if (show_all || obj->enabled())
         results.push_back(dynamic_cast<T *>(obj));
     }
@@ -281,7 +283,6 @@ private:
   const std::vector<MooseObject *> & query(int query_id);
 
   void readAttribs(const MooseObject * obj,
-                   const std::string & system,
                    std::vector<std::unique_ptr<Attribute>> & attribs);
 
   std::unique_ptr<Storage> _store;
@@ -303,4 +304,3 @@ private:
   std::mutex _query_cache_mutex;
   std::mutex _obj_cache_mutex;
 };
-

@@ -24,11 +24,22 @@
 []
 
 [Samplers]
+  [sample]
+    type = MonteCarlo
+    distributions = 'uniform_left uniform_right'
+    num_rows = 3
+    seed = 2011
+  []
+  [resample]
+    type = MonteCarlo
+    distributions = 'uniform_left uniform_right'
+    num_rows = 3
+    seed = 2013
+  []
   [sobol]
     type = Sobol
-    num_rows = 3
-    distributions = 'uniform_left uniform_right'
-    execute_on = INITIAL # create random numbers on initial and use them for each timestep
+    sampler_a = sample
+    sampler_b = resample
   []
   [mc]
     type = MonteCarlo

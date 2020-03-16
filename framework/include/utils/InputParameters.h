@@ -458,6 +458,19 @@ public:
   void registerBase(const std::string & value);
 
   /**
+   * This method is used to define the MOOSE system name that is used by the TheWarehouse object
+   * for storing objects to be retrieved for execution. The base class of every object class
+   * that will be called for execution (e.g., UserObject objects) should call this method.
+   *
+   * This is different from registerBase because the name supplied to registerBase is used to
+   * associate syntax, but the objects created often go to the same objects for execution, as is
+   * the case for Postprocessor object which are executed with UserObjects.
+   *
+   * See the AttribSystem object for use Attribute.h/C.
+   */
+  void registerSystemAttributeName(const std::string & value);
+
+  /**
    * This method is here to indicate which Moose types a particular Action may build. It takes a
    * space delimited list of registered MooseObjects.  TODO: For now we aren't actually checking
    * this list when we build objects. Since individual actions can do whatever they want it's not

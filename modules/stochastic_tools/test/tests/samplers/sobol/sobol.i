@@ -25,17 +25,28 @@
 
 [Samplers]
   [sample]
-    type = Sobol
-    num_rows = 4
+    type = MonteCarlo
     distributions = 'd0 d1 d2'
-    execute_on = 'initial'
+    num_rows = 4
+    seed = 2011
+  []
+  [resample]
+    type = MonteCarlo
+    distributions = 'd0 d1 d2'
+    num_rows = 4
+    seed = 2013
+  []
+  [sobol]
+    type = Sobol
+    sampler_a = sample
+    sampler_b = resample
   []
 []
 
 [VectorPostprocessors]
   [data]
     type = SamplerData
-    sampler = sample
+    sampler = sobol
     execute_on = 'initial'
   []
 []
