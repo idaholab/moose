@@ -61,6 +61,7 @@ public:
    * processors and threads.
    */
   bool readRestartableDataHeader(bool per_proc_id, const std::string & suffix = "");
+  bool readRestartableDataHeaderFromFile(const std::string & recover_file, bool per_proc_id);
 
   /**
    * Read the restartable data.

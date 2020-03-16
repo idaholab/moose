@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#14875'
+  design = 'Surrogates/index.md'
+
+  [train]
+    requirement = "The system, if setup for training a surrogate model, shall"
+
+    [warn]
+      type = RunException
+      input = train.i
+      expect_err = "order: The 'poly_chaos' model is setup for training"
+
+      detail = "provide a warning if a training parameter is not defined and"
+    []
+    [error]
+      type = RunException
+      input = train.i
+      allow_warnings = true
+      expect_err = "The 'poly_chaos' model is setup for training but one or more training"
+
+      detail = "provide an error after the warnings."
+    []
+  []
+
+  [evaluate]
+    requirement = "The system, if setup for evaluating a surrogate model, shall,"
+
+    [train]
+      type = RunApp
+      input = train.i
+      allow_test_objects = true
+      cli_args = Surrogates/poly_chaos/order=1
+
+      detail = "when using a trained model,"
+    []
+
+    [execute_warn]
+      type = RunException
+      input = evaluate.i
+      prereq = evaluate/train
+      cli_args = Surrogates/poly_chaos/execute_on=INITIAL
+      expect_err = "the 'execute_on' parameter has also been set"
+
+      detail = "provide a warning if the user has defined the execute flag for the object and"
+    []
+
+    [training_warn]
+      type = RunException
+      input = evaluate.i
+      prereq = evaluate/train
+      cli_args = Surrogates/poly_chaos/order=1
+      expect_err = "the training parameter 'order' is also defined"
+
+      detail = "provide a warning if the user has defined the a training parameter."
+    []
+  []
+[]

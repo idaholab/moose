@@ -47,12 +47,9 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
 void
 SurrogateTester::initialize()
 {
-  mooseAssert(_sampler.getNumberOfCols() == _model.getNumberOfParameters(),
-              "Number of sampler columns does not match number of parameters in PCE.");
-
   _value_vector.resize(_sampler.getNumberOfLocalRows(), 0);
   if (_output_samples)
-    for (unsigned int d = 0; d < _model.getNumberOfParameters(); ++d)
+    for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
 }
 
@@ -65,7 +62,7 @@ SurrogateTester::execute()
     std::vector<Real> data = _sampler.getNextLocalRow();
     _value_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data);
     if (_output_samples)
-      for (unsigned int d = 0; d < _model.getNumberOfParameters(); ++d)
+      for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       {
         (*_sample_vector[d])[p - _sampler.getLocalRowBegin()] = data[d];
       }
