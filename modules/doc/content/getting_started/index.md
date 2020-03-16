@@ -25,6 +25,7 @@ your operating system/platform and follow the instructions:
   - [getting_started/installation/hpc_install_moose.md]
   - [getting_started/installation/manual_installation_gcc.md]
   - [getting_started/installation/manual_installation_llvm.md]
+  - [getting_started/installation/manual_installation_linux_lldb.md]
 
 When installation is complete, return to this page to continue.
 
