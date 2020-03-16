@@ -104,8 +104,7 @@
   [../]
   [./E_tot]
     type = SumPostprocessor
-    a = E_pipe
-    b = E_heat_structure
+    values = 'E_pipe E_heat_structure'
     execute_on = 'initial timestep_end'
   [../]
   [./E_tot_change]

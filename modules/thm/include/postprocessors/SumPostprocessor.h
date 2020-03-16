@@ -22,8 +22,6 @@ public:
   virtual PostprocessorValue getValue();
 
 protected:
-  Real _sum;
-
-  const PostprocessorValue & _a;
-  const PostprocessorValue & _b;
+  /// Postprocessors to add up
+  std::vector<const PostprocessorValue *> _values;
 };
