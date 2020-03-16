@@ -17,12 +17,8 @@ InputParameters
 VectorPostprocessorFunction::validParams()
 {
   InputParameters params = Function::validParams();
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "component",
-      "component < 3",
-      "Component of the function evaluation point used to sample the VectorPostprocessor");
   params.addRequiredParam<VectorPostprocessorName>(
-      "vectorpostprocessor_name", "The name of the PointValueSampler that you want to use");
+      "vectorpostprocessor_name", "The name of the VectorPostprocessor that you want to use");
   params.addRequiredParam<std::string>(
       "argument_column",
       "VectorPostprocessor column tabulating the abscissa of the sampled function");
@@ -30,6 +26,10 @@ VectorPostprocessorFunction::validParams()
                                        "VectorPostprocessor column tabulating the "
                                        "ordinate (function values) of the sampled "
                                        "function");
+  params.addRangeCheckedParam<unsigned int>(
+      "component",
+      "component < 3",
+      "Component of the function evaluation point used to sample the VectorPostprocessor");
 
   params.addClassDescription(
       "Provides piecewise linear interpolation of from two columns of a VectorPostprocessor");
@@ -40,11 +40,11 @@ VectorPostprocessorFunction::validParams()
 VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters & parameters)
   : Function(parameters),
     VectorPostprocessorInterface(this),
-    _component(parameters.get<unsigned int>("component")),
     _argument_column(getVectorPostprocessorValue("vectorpostprocessor_name",
                                                  getParam<std::string>("argument_column"))),
     _value_column(getVectorPostprocessorValue("vectorpostprocessor_name",
-                                              getParam<std::string>("value_column")))
+                                              getParam<std::string>("value_column"))),
+    _component(isParamValid("component") ? getParam<unsigned int>("component") : NO_COMPONENT)
 {
   try
   {
@@ -57,7 +57,7 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
 }
 
 Real
-VectorPostprocessorFunction::value(Real /*t*/, const Point & p) const
+VectorPostprocessorFunction::value(Real t, const Point & p) const
 {
   if (_argument_column.empty())
   {
@@ -70,5 +70,9 @@ VectorPostprocessorFunction::value(Real /*t*/, const Point & p) const
     // iteration?
     _linear_interp->setData(_argument_column, _value_column);
   }
-  return _linear_interp->sample(p(_component));
+  const Real x = _component != NO_COMPONENT ? p(_component) : t;
+  return _linear_interp->sample(x);
 }
+
+const unsigned int VectorPostprocessorFunction::NO_COMPONENT =
+    std::numeric_limits<unsigned int>::max();
