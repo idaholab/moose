@@ -488,7 +488,9 @@ Parser::parse(const std::string & input_filename)
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
   {
     char abspath[PATH_MAX + 1];
-    realpath(input_filename.c_str(), abspath);
+    char * rval = realpath(input_filename.c_str(), abspath);
+    if (!rval)
+      mooseError("Failed to find realpath of ", input_filename.c_str());
     _input_filename = std::string(abspath);
   }
 
