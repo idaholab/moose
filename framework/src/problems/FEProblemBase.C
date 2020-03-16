@@ -217,8 +217,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _nl(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-    _distributions(/*threaded=*/false),
-    _samplers(_app.getExecuteOnEnum()),
     _material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(
@@ -1942,16 +1940,21 @@ FEProblemBase::addDistribution(std::string type,
 {
   parameters.set<std::string>("type") = type;
   std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
-  _distributions.addObject(dist);
+  theWarehouse().add(dist);
 }
 
 Distribution &
 FEProblemBase::getDistribution(const std::string & name)
 {
-  if (!_distributions.hasActiveObject(name))
-    mooseError("Unable to find distribution " + name);
-
-  return *(_distributions.getActiveObject(name));
+  std::vector<Distribution *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("Distribution")
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find Distribution with name '" + name + "'");
+  return *(objs[0]);
 }
 
 void
@@ -1961,17 +1964,26 @@ FEProblemBase::addSampler(std::string type, const std::string & name, InputParam
   {
     std::shared_ptr<Sampler> obj = _factory.create<Sampler>(type, name, parameters, tid);
     obj->init();
-    _samplers.addObject(obj, tid);
+    theWarehouse().add(obj);
   }
 }
 
 Sampler &
 FEProblemBase::getSampler(const std::string & name, THREAD_ID tid)
 {
-  if (!_samplers.hasActiveObject(name, tid))
-    mooseError("Unable to find Sampler " + name);
-
-  return *(_samplers.getActiveObject(name, tid));
+  std::vector<Sampler *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("Sampler")
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError(
+        "Unable to find Sampler with name '" + name +
+        "', if you are attempting to access this object in the constructor of another object then "
+        "the object being retrieved must occur prior to the caller within the input file.");
+  return *(objs[0]);
 }
 
 bool
@@ -3199,7 +3211,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // TODO: delete this line after apps have been updated to not call getUserObjects
     _all_user_objects.addObject(user_object, tid);
 
-    theWarehouse().add(user_object, "UserObject");
+    theWarehouse().add(user_object);
 
     // Attempt to create all the possible UserObject types
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
@@ -3229,7 +3241,12 @@ const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().query().condition<AttribThread>(0).condition<AttribName>(name).queryInto(objs);
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find user object with name '" + name + "'");
   return *(objs[0]);
@@ -3239,7 +3256,12 @@ bool
 FEProblemBase::hasUserObject(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().query().condition<AttribThread>(0).condition<AttribName>(name).queryInto(objs);
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(objs);
   return !objs.empty();
 }
 
@@ -3726,14 +3748,19 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
   // do a serial loop.
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    const auto & objects = _samplers[exec_type].getActiveObjects(tid);
+    std::vector<Sampler *> objects;
+    theWarehouse()
+        .query()
+        .condition<AttribSystem>("Sampler")
+        .condition<AttribThread>(tid)
+        .condition<AttribExecOns>(exec_type)
+        .queryInto(objects);
+
     if (!objects.empty())
     {
       TIME_SECTION(_execute_samplers_timer);
-
-      _samplers.setup(exec_type);
-      for (auto & sampler : objects)
-        sampler->execute();
+      FEProblemBase::objectSetupHelper<Sampler>(objects, exec_type);
+      FEProblemBase::objectExecuteHelper<Sampler>(objects);
     }
   }
 }
@@ -3754,7 +3781,6 @@ FEProblemBase::updateActiveObjects()
     _residual_materials.updateActive(tid);
     _jacobian_materials.updateActive(tid);
     _discrete_materials.updateActive(tid);
-    _samplers.updateActive(tid);
   }
 
   _control_warehouse.updateActive();

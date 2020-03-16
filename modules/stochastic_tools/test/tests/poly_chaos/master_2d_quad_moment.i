@@ -12,12 +12,12 @@
 
 [Distributions]
   [D_dist]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
   []
   [S_dist]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
   []
@@ -25,7 +25,7 @@
 
 [Samplers]
   [quadrature]
-    type = QuadratureSampler
+    type = Quadrature
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5

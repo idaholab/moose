@@ -10,8 +10,11 @@
 #include "QuadratureSampler.h"
 #include "Distribution.h"
 
-registerMooseObject("StochasticToolsApp", QuadratureSampler);
-
+registerMooseObjectAliased("StochasticToolsApp", QuadratureSampler, "Quadrature");
+registerMooseObjectReplaced("StochasticToolsApp",
+                            QuadratureSampler,
+                            "07/01/2020 00:00",
+                            Quadrature);
 defineLegacyParams(QuadratureSampler);
 
 InputParameters

@@ -18,7 +18,7 @@
 
 [Samplers]
   [mc]
-    type = MonteCarloSampler
+    type = MonteCarlo
     n_samples = 10
     distributions = 'uniform uniform'
   []

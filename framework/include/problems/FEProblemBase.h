@@ -1757,6 +1757,16 @@ public:
   using SubProblem::automaticScaling;
   void automaticScaling(bool automatic_scaling) override;
 
+  ///@{
+  /**
+   * Helpers for calling the necessary setup/execute functions for the supplied objects
+   */
+  template <typename T>
+  static void objectSetupHelper(const std::vector<T *> & objects, const ExecFlagType & exec_flag);
+  template <typename T>
+  static void objectExecuteHelper(const std::vector<T *> & objects);
+  ///@}
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1792,12 +1802,6 @@ protected:
 
   /// functions
   MooseObjectWarehouse<Function> _functions;
-
-  /// distributions
-  MooseObjectWarehouseBase<Distribution> _distributions;
-
-  /// Samplers
-  ExecuteMooseObjectWarehouse<Sampler> _samplers;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
@@ -2125,4 +2129,46 @@ void
 FEProblemBase::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
+}
+
+template <typename T>
+void
+FEProblemBase::objectSetupHelper(const std::vector<T *> & objects, const ExecFlagType & exec_flag)
+{
+  if (exec_flag == EXEC_INITIAL)
+  {
+    for (T * obj_ptr : objects)
+      obj_ptr->initialSetup();
+  }
+
+  else if (exec_flag == EXEC_TIMESTEP_BEGIN)
+  {
+    for (const auto obj_ptr : objects)
+      obj_ptr->timestepSetup();
+  }
+  else if (exec_flag == EXEC_SUBDOMAIN)
+  {
+    for (const auto obj_ptr : objects)
+      obj_ptr->subdomainSetup();
+  }
+
+  else if (exec_flag == EXEC_NONLINEAR)
+  {
+    for (const auto obj_ptr : objects)
+      obj_ptr->jacobianSetup();
+  }
+
+  else if (exec_flag == EXEC_LINEAR)
+  {
+    for (const auto obj_ptr : objects)
+      obj_ptr->residualSetup();
+  }
+}
+
+template <typename T>
+void
+FEProblemBase::objectExecuteHelper(const std::vector<T *> & objects)
+{
+  for (T * obj_ptr : objects)
+    obj_ptr->execute();
 }

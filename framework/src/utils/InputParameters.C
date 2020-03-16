@@ -334,6 +334,13 @@ InputParameters::registerBase(const std::string & value)
 }
 
 void
+InputParameters::registerSystemAttributeName(const std::string & value)
+{
+  InputParameters::set<std::string>("_moose_warehouse_system_name") = value;
+  _params["_moose_warehouse_system_name"]._is_private = true;
+}
+
+void
 InputParameters::registerBuildableTypes(const std::string & names)
 {
   _buildable_types.clear();

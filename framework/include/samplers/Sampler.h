@@ -15,6 +15,7 @@
 #include "SetupInterface.h"
 #include "DistributionInterface.h"
 #include "PerfGraphInterface.h"
+#include "SamplerInterface.h"
 
 template <>
 InputParameters validParams<Sampler>();
@@ -42,7 +43,8 @@ InputParameters validParams<Sampler>();
 class Sampler : public MooseObject,
                 public SetupInterface,
                 public DistributionInterface,
-                public PerfGraphInterface
+                public PerfGraphInterface,
+                public SamplerInterface
 {
 public:
   static InputParameters validParams();
@@ -226,7 +228,7 @@ private:
    * FEProblemBase::executeSamplers; it should not be called elsewhere.
    */
   void execute();
-  friend void FEProblemBase::executeSamplers(const ExecFlagType & exec_type);
+  friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;

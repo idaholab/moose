@@ -25,11 +25,21 @@
 
 [Samplers]
   [sample]
-    type = Sobol
-    num_rows = 3
-    resample = false
+    type = MonteCarlo
     distributions = 'uniform_left uniform_right'
-    execute_on = INITIAL # create random numbers on initial and use them for each timestep
+    num_rows = 3
+    seed = 2011
+  []
+  [resample]
+    type = MonteCarlo
+    distributions = 'uniform_left uniform_right'
+    num_rows = 3
+    seed = 2013
+  []
+  [sobol]
+    type = Sobol
+    sampler_a = sample
+    sampler_b = resample
   []
 []
 
@@ -37,7 +47,7 @@
   [sub]
     type = SamplerTransientMultiApp
     input_files = sub.i
-    sampler = sample
+    sampler = sobol
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
@@ -46,7 +56,7 @@
   [runner]
     type = SamplerParameterTransfer
     multi_app = sub
-    sampler = sample
+    sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
     execute_on = INITIAL
@@ -55,7 +65,7 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    sampler = sample
+    sampler = sobol
     to_vector_postprocessor = storage
     from_postprocessor = avg
     execute_on = TIMESTEP_BEGIN
@@ -66,7 +76,7 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = sample
+    samplers = sobol
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

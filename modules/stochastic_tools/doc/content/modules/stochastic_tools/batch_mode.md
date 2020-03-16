@@ -35,7 +35,7 @@ is given in [steady-sub].
          for steady-state diffusion problem.
 
 The master application does not preform a solve, it performs a stochastic analysis using the
-MonteCarloSampler to perturb the values of the two Dirichlet conditions on the sub-applications
+MonteCarlo object to perturb the values of the two Dirichlet conditions on the sub-applications
 to vary with a uniform distribution. The complete input file for the master application is given
 in [steady-sub].
 
