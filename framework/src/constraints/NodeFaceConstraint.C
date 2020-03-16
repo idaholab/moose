@@ -86,7 +86,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     _node_to_elem_map(_mesh.nodeToElemMap()),
 
     _overwrite_slave_residual(true),
-    _master_JxW(_assembly.JxWNeighbor({}))
+    _master_JxW(_assembly.JxWNeighbor())
 {
   addMooseVariableDependency(&_var);
 

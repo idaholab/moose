@@ -12,7 +12,6 @@
 #include "DenseMatrix.h"
 #include "MooseArray.h"
 #include "MooseTypes.h"
-#include "MoosePassKey.h"
 
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_quadrature_type.h"
@@ -404,10 +403,7 @@ public:
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor(Moose::PassKey<NodeFaceConstraint>) const
-  {
-    return _current_JxW_neighbor;
-  }
+  const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
 
   /**
    * Returns the reference to the current quadrature points being used on the neighbor face
