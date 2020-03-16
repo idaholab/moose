@@ -1740,7 +1740,8 @@ void
 Assembly::reinitElemAndNeighbor(const Elem * elem,
                                 unsigned int side,
                                 const Elem * neighbor,
-                                unsigned int neighbor_side)
+                                unsigned int neighbor_side,
+                                const std::vector<Point> * neighbor_reference_points)
 {
   _current_neighbor_side = neighbor_side;
 
@@ -1748,12 +1749,20 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   unsigned int neighbor_dim = neighbor->dim();
 
+  const std::vector<Point> * reference_points_ptr;
   std::vector<Point> reference_points;
-  FEInterface::inverse_map(
-      neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
 
-  reinitFEFaceNeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+  if (neighbor_reference_points)
+    reference_points_ptr = neighbor_reference_points;
+  else
+  {
+    FEInterface::inverse_map(
+        neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
+    reference_points_ptr = &reference_points;
+  }
+
+  reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
+  reinitNeighbor(neighbor, *reference_points_ptr);
 }
 
 void
