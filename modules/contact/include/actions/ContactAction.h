@@ -35,7 +35,6 @@ enum class ContactFormulation
 /**
  * Action class for creating constraints, kernels, and user objects necessary for mechanical
  * contact.
- *
  */
 class ContactAction;
 
@@ -53,11 +52,26 @@ public:
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-
-  static MooseEnum getModelEnum();       ///< Get contact model enum
-  static MooseEnum getFormulationEnum(); ///< Get contact formulation enum
-  static MooseEnum getSystemEnum();      ///< Get contact system enum
-  static MooseEnum getSmoothingEnum();   ///< Get smoothing type enum
+  /**
+   * Get contact model
+   * @return enum
+   */
+  static MooseEnum getModelEnum();
+  /**
+   * Get contact formulation
+   * @return enum
+   */
+  static MooseEnum getFormulationEnum();
+  /**
+   * Get contact system
+   * @return enum
+   */
+  static MooseEnum getSystemEnum();
+  /**
+   * Get smoothing type
+   * @return enum
+   */
+  static MooseEnum getSmoothingEnum();
 
   static InputParameters commonParameters();
 
@@ -76,12 +90,20 @@ protected:
   const MeshGeneratorName _mesh_gen_name;
 
 private:
-  /// Action core that generates mesh and other Moose objects for Mortar contact
+  /**
+   * Generate mesh and other Moose objects for Mortar contact
+   */
   void addMortarContact();
-  /// Action core that generates constraints for node to face contact
+  /**
+   * Generate constraints for node to face contact
+   */
   void addNodeFaceContact();
-  /// Action core that generates Dirac kernels for mechanical contact
+  /**
+   * Generate Dirac kernels for mechanical contact
+   */
   void addDiracContact();
-  /// Get displacement variable names
+  /**
+   * Get displacement variable names
+   */
   std::vector<VariableName> getDisplacementVarNames();
 };
