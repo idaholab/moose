@@ -62,7 +62,15 @@ MaxQpsThread::operator()(const ConstElemRange & range)
       // later on. If we used them, we'd call reinit on them, thus making the call to request second
       // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally
       // allocated object here.
+      //
+      // We'll use one for element interiors, which calculates nothing
       std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+      fe->get_nothing();
+
+      // And another for element sides, which calculates the minimum
+      // libMesh currently allows for that
+      std::unique_ptr<FEBase> side_fe(FEBase::build(dim, fe_type));
+      side_fe->get_xyz();
 
       // figure out the number of qps for volume
       std::unique_ptr<QBase> qrule(QBase::build(_qtype, dim, _order));
@@ -79,8 +87,8 @@ MaxQpsThread::operator()(const ConstElemRange & range)
       // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
       // than in the volume
       std::unique_ptr<QBase> qrule_face(QBase::build(_qtype, dim - 1, _face_order));
-      fe->attach_quadrature_rule(qrule_face.get());
-      fe->reinit(elem, side);
+      side_fe->attach_quadrature_rule(qrule_face.get());
+      side_fe->reinit(elem, side);
       if (qrule_face->n_points() > _max)
         _max = qrule_face->n_points();
 
