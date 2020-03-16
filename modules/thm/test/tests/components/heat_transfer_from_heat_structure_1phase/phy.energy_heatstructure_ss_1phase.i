@@ -148,8 +148,7 @@
 
   [./E_conservation]
     type = SumPostprocessor
-    a = E_diff
-    b = hf_pipe
+    values = 'E_diff hf_pipe'
   [../]
 []
 

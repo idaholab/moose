@@ -123,8 +123,7 @@
   [../]
   [./mass_conservation]
     type = SumPostprocessor
-    a = mass_change
-    b = massflux_integral
+    values = 'mass_change massflux_integral'
   [../]
 
   # MOMENTUM
@@ -167,8 +166,7 @@
   [../]
   [./momentum_conservation]
     type = SumPostprocessor
-    a = momentum_change
-    b = momentumflux_integral
+    values = 'momentum_change momentumflux_integral'
   [../]
 
   # ENERGY
@@ -207,8 +205,7 @@
   [../]
   [./energy_conservation]
     type = SumPostprocessor
-    a = energy_change
-    b = energyflux_integral
+    values = 'energy_change energyflux_integral'
   [../]
 []
 
