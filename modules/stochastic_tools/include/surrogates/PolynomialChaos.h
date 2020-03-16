@@ -19,36 +19,33 @@ class PolynomialChaos : public SurrogateModel
 {
 public:
   static InputParameters validParams();
-
   PolynomialChaos(const InputParameters & parameters);
-
   virtual void initialSetup() override;
+  virtual void train() override;
+  virtual void trainFinalize() override;
+  virtual Real evaluate(const std::vector<Real> & x) const override;
 
-  virtual void initialize() override {}
-  virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
+  /// Access number of dimensions/parameters
+  unsigned int getNumberOfParameters() const { return _ndim; }
 
   /// Number of terms in expansion
   unsigned int getNumberofCoefficients() const { return _ncoeff; }
+
   /// Access polynomial orders from tuple
   ////@{
-  std::vector<std::vector<unsigned int>> getPolynomialOrders() const { return _tuple; }
-  unsigned int getPolynomialOrder(const unsigned int dim, const unsigned int i) const
-  {
-    return _tuple[i][dim];
-  }
+  const std::vector<std::vector<unsigned int>> & getPolynomialOrders() const;
+  unsigned int getPolynomialOrder(const unsigned int dim, const unsigned int i) const;
   ///@}
-  /// Access computed expansion coefficients
-  const std::vector<Real> & getCoefficients() const { return _coeff; }
 
-  /// Evaluate expansion
-  virtual Real evaluate(const std::vector<Real> & x) const override;
+  /// Access computed expansion coefficients
+  const std::vector<Real> & getCoefficients() const;
 
   /// Evaluate mean: \mu = E[u]
-  virtual Real computeMean() const { return _coeff[0]; };
+  virtual Real computeMean() const;
+
   /// Evaluate standard deviation: \sigma = sqrt(E[(u-\mu)^2])
   virtual Real computeStandardDeviation() const;
+
   /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
   Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 
@@ -79,18 +76,35 @@ protected:
   static bool sortTuple(const std::vector<unsigned int> & first,
                         const std::vector<unsigned int> & second);
 
-  /// Maximum polynomial order. The sum of the one-dimensional polynomial orders does not go above this value.
-  const unsigned int _order;
+private:
+  /// Sampler from which the parameters were perturbed
+  Sampler * _sampler;
+
   /// QuadratureSampler pointer, necessary for applying quadrature weights
   QuadratureSampler * _quad_sampler;
+
+  /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
+  unsigned int _order;
+
+  /// Vector postprocessor of the results from perturbing the model with _sampler
+  const VectorPostprocessorValue * _values_ptr = nullptr;
+
+  // The following items are stored using declareModelData for use as a trained model.
+
+  /// Total number of parameters/dimensions
+  unsigned int & _ndim;
+
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
-  const std::vector<std::vector<unsigned int>> _tuple;
+  std::vector<std::vector<unsigned int>> & _tuple;
+
   /// Total number of coefficient (defined by size of _tuple)
-  const std::size_t _ncoeff;
+  std::size_t & _ncoeff;
+
   /// These are the coefficients we are after in the PC expansion
-  std::vector<Real> _coeff;
+  std::vector<Real> & _coeff;
+
   /// The distributions used for sampling
-  std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> _poly;
+  std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
 
   /// Utility for looping over coefficients in parallel
   ///@{

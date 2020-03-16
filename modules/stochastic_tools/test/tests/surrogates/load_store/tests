@@ -1,0 +1,24 @@
+[Tests]
+  design = 'Surrogates/index.md'
+  issues = '#14875'
+
+  [surrogate]
+    requirement = "The system shall support the creation of surrogate models that can be"
+    [train]
+      type = CheckFiles
+      input = train.i
+      check_files = 'train_out_poly_chaos.rd'
+      allow_test_objects = true
+
+      detail = "trained and"
+    []
+    [evaluate]
+      type = CSVDiff
+      input = evaluate.i
+      csvdiff = evaluate_out_pc_moments_0002.csv
+      prereq = surrogate/train # Creates data files that this test uses
+      allow_warnings = true
+      detail = "evaluated separately."
+    []
+  []
+[]

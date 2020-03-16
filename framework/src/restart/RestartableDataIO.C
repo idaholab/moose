@@ -221,6 +221,15 @@ RestartableDataIO::deserializeSystems(std::istream & stream)
 bool
 RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string & suffix)
 {
+  const std::string filename =
+      _moose_app.getRestartRecoverFileBase() + suffix + RESTARTABLE_DATA_EXT;
+  return readRestartableDataHeaderFromFile(filename, per_proc_id);
+}
+
+bool
+RestartableDataIO::readRestartableDataHeaderFromFile(const std::string & recover_file,
+                                                     bool per_proc_id)
+{
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_files = per_proc_id ? n_threads : 1;
 
@@ -229,11 +238,10 @@ RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string
 
   _in_file_handles.resize(n_files);
 
-  std::string recover_file_base = _moose_app.getRestartRecoverFileBase();
   for (unsigned int tid = 0; tid < n_files; tid++)
   {
     std::ostringstream file_name_stream;
-    file_name_stream << recover_file_base + suffix + RESTARTABLE_DATA_EXT;
+    file_name_stream << recover_file;
 
     if (per_proc_id)
     {

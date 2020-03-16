@@ -20,20 +20,28 @@ PolynomialChaos::validParams()
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates polynomial chaos surrogate model.");
 
-  params.addRequiredParam<unsigned int>("order", "Maximum polynomial order.");
-  params.addRequiredParam<std::vector<DistributionName>>(
+  // Training parameters
+  params.addParam<SamplerName>("training_sampler", "Training set defined by a sampler object.");
+  params.addParam<VectorPostprocessorName>(
+      "stochastic_results", "Vectorpostprocessor with results of samples created by trainer");
+
+  params.addParam<unsigned int>("order", "Maximum polynomial order.");
+  params.addParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
 
+  params.addParamNamesToGroup("training_sampler stochastic_results order distributions",
+                              "training");
   return params;
 }
 
 PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _order(getParam<unsigned int>("order")),
-    _quad_sampler(nullptr),
-    _tuple(generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order)),
-    _ncoeff(_tuple.size()),
-    _coeff(_ncoeff)
+    _ndim(declareModelData<unsigned int>("_ndim")),
+    _tuple(declareModelData<std::vector<std::vector<unsigned int>>>("_tuple")),
+    _ncoeff(declareModelData<unsigned int>("_ncoeff")),
+    _coeff(declareModelData<std::vector<Real>>("_coeff")),
+    _poly(declareModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>(
+        "_poly"))
 {
   MooseUtils::linearPartitionItems(
       _ncoeff, n_processors(), processor_id(), _n_local_coeff, _st_local_coeff, _end_local_coeff);
@@ -42,24 +50,37 @@ PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
 void
 PolynomialChaos::initialSetup()
 {
-  SurrogateModel::initialSetup();
+  if (isTraining())
+  {
+    // Setup data needed for training
+    _order = getParam<unsigned int>("order");
+    _tuple = generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order);
+    _ncoeff = _tuple.size();
+    _coeff.resize(_ncoeff, 0);
+    _values_ptr = &getVectorPostprocessorValue("stochastic_results",
+                                               getParam<SamplerName>("training_sampler"));
 
-  // Special circumstances if sampler is quadrature
-  _quad_sampler = dynamic_cast<QuadratureSampler *>(_sampler);
+    // Sampler
+    _sampler = &getSamplerByName(getParam<SamplerName>("training_sampler"));
+    _ndim = _sampler->getNumberOfCols();
 
-  std::vector<DistributionName> dname = getParam<std::vector<DistributionName>>("distributions");
-  // Check if sampler dimensionality matches number of distributions
-  if (dname.size() != _ndim)
-    mooseError("Sampler number of columns does not match number of inputted distributions.");
-  for (auto nm : dname)
-    _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
+    // Special circumstances if sampler is quadrature
+    _quad_sampler = dynamic_cast<QuadratureSampler *>(_sampler);
+
+    // Check if sampler dimensionality matches number of distributions
+    std::vector<DistributionName> dname = getParam<std::vector<DistributionName>>("distributions");
+    if (dname.size() != _ndim)
+      mooseError("Sampler number of columns does not match number of inputted distributions.");
+    for (auto nm : dname)
+      _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
+  }
 }
 
 void
-PolynomialChaos::execute()
+PolynomialChaos::train()
 {
   // Check if results of samples matches number of samples
-  mooseAssert(_sampler->getNumberOfRows() == _values.size(),
+  mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
               "Sampler number of rows does not match number of results from vector postprocessor.");
 
   std::fill(_coeff.begin(), _coeff.end(), 0.0);
@@ -78,7 +99,7 @@ PolynomialChaos::execute()
     // Loop over coefficients
     for (std::size_t i = 0; i < _ncoeff; ++i)
     {
-      Real val = _values[p - _sampler->getLocalRowBegin()];
+      Real val = (*_values_ptr)[p - _sampler->getLocalRowBegin()];
       // Loop over parameters
       for (std::size_t d = 0; d < _ndim; ++d)
         val *= poly_val(d, _tuple[i][d]);
@@ -91,21 +112,13 @@ PolynomialChaos::execute()
 }
 
 void
-PolynomialChaos::finalize()
+PolynomialChaos::trainFinalize()
 {
   gatherSum(_coeff);
 
   if (!_quad_sampler)
     for (std::size_t i = 0; i < _ncoeff; ++i)
       _coeff[i] /= _sampler->getNumberOfRows();
-}
-
-void
-PolynomialChaos::threadJoin(const UserObject & y)
-{
-  const PolynomialChaos & pps = static_cast<const PolynomialChaos &>(y);
-  for (std::size_t i = 0; i < _ncoeff; ++i)
-    _coeff[i] += pps._coeff[i];
 }
 
 Real
@@ -132,6 +145,30 @@ PolynomialChaos::evaluate(const std::vector<Real> & x) const
 
   return val;
 }
+
+const std::vector<std::vector<unsigned int>> &
+PolynomialChaos::getPolynomialOrders() const
+{
+  return _tuple;
+}
+
+unsigned int
+PolynomialChaos::getPolynomialOrder(const unsigned int dim, const unsigned int i) const
+{
+  return _tuple[i][dim];
+}
+
+const std::vector<Real> &
+PolynomialChaos::getCoefficients() const
+{
+  return _coeff;
+}
+
+Real
+PolynomialChaos::computeMean() const
+{
+  return _coeff[0];
+};
 
 Real
 PolynomialChaos::computeStandardDeviation() const
