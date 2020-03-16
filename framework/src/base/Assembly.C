@@ -1763,6 +1763,10 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
   reinitNeighbor(neighbor, *reference_points_ptr);
+
+  // compute JxW on the neighbor's face
+  _current_JxW_neighbor.shallowCopy(
+      const_cast<std::vector<Real> &>((*_holder_fe_face_neighbor_helper[neighbor_dim])->get_JxW()));
 }
 
 void
