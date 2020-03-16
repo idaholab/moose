@@ -15,5 +15,3 @@ be `NormalMortarMechanicalContact` instances for both x and y displacement compo
 !syntax inputs /Constraints/NormalMortarMechanicalContact
 
 !syntax children /Constraints/NormalMortarMechanicalContact
-
-!bibtex bibliography

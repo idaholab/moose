@@ -32,5 +32,3 @@ convergence in the non-linear solve.
 !syntax inputs /Constraints/NormalNodalLMMechanicalContact
 
 !syntax children /Constraints/NormalNodalLMMechanicalContact
-
-!bibtex bibliography
