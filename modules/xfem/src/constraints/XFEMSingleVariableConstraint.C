@@ -43,6 +43,9 @@ XFEMSingleVariableConstraint::validParams()
       "use_penalty",
       false,
       "Use the Penalty instead of Nitsche (Nitsche only works for simple diffusion problems).");
+  params.addClassDescription("Enforce user defined constraints upon the value and flux of a "
+                             "variable at an interface defined by the provided geometric cut "
+			     "userobject.");
   return params;
 }
 
