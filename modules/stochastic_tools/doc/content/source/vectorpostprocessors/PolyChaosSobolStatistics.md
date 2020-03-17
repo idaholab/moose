@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object computes Sobol sensitivity indices based on a trained [PolynomialChaos.md] surrogate model. The alogrithm is based on computations described in [!cite](Sudret_2008). The sensitivities to be computed are defined by the input parameter `sensitivity_order`: `first` computes first-order sensitivities, `second` computes second-order sensitivities, `all` computes all sensitivities (replacing `first` and `second`), and `total` comutes the total sensitivities.
+This object computes Sobol sensitivity indices based on a trained [PolynomialChaos.md] surrogate model. The alogrithm is based on computations described in [!cite](sudret2008global). The sensitivities to be computed are defined by the input parameter [!param](/VectorPostprocessors/PolyChaosSobolStatistics/sensitivity_order): `first` computes first-order sensitivities, `second` computes second-order sensitivities, `all` computes all sensitivities (replacing `first` and `second`), and `total` comutes the total sensitivities.
 
 ## Example Syntax
 
