@@ -36,7 +36,7 @@ protected:
   /// Sampler defining points to evaluate
   Sampler * _sampler;
   /// Specific points defined at input
-  const std::vector<Real> _points;
+  const std::vector<Real> & _points;
   /// Sensitivity dimension, i.e. parameters to take derivative with respect to
   std::vector<unsigned int> _sdim;
   /// Where or not to output all the points used

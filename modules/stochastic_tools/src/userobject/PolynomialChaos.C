@@ -192,14 +192,14 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
 }
 
 Real
-PolynomialChaos::computeDerivative(const unsigned int dim, const std::vector<Real> x) const
+PolynomialChaos::computeDerivative(const unsigned int dim, const std::vector<Real> & x) const
 {
   return computePartialDerivative({dim}, x);
 }
 
 Real
-PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> dim,
-                                          const std::vector<Real> x) const
+PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> & dim,
+                                          const std::vector<Real> & x) const
 {
   mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
 
@@ -230,7 +230,7 @@ PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> dim,
 }
 
 Real
-PolynomialChaos::computeSobolIndex(const std::set<unsigned int> ind) const
+PolynomialChaos::computeSobolIndex(const std::set<unsigned int> & ind) const
 {
   // If set is empty, compute mean
   if (ind.empty())
