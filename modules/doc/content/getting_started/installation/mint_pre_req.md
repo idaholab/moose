@@ -31,5 +31,5 @@ Download and install one of our redistributable packages according to your versi
 Once downloaded, the package can be installed via the dpkg utility:
 
 ```bash
-sudo dpkg -i moose-environment_ubuntu-*.rpm
+sudo dpkg -i moose-environment_ubuntu-*.deb
 ```
