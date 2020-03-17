@@ -6,6 +6,9 @@ if [ -f $PT_REPO ]; then
   sed -i 's|^enabled=0|enabled=1|g' $PT_REPO
 fi
 
+# Needed for subsequent yum installs to work
+touch /var/lib/rpm/*
+
 # Update package lists
 yum update -y
 
