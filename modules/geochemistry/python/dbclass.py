@@ -32,6 +32,8 @@ class ThermoDB(object):
         self._bdh = None
         self._bdot = None
         self._neutral_species = None
+        self._sorbing_minerals = None
+        self._surface_species = None
 
     # Original DB format
     @property
@@ -177,3 +179,22 @@ class ThermoDB(object):
     @neutral_species.setter
     def neutral_species(self, neutral_species):
         self._neutral_species = neutral_species
+
+    # Sorbing minerals
+    @property
+    def sorbing_minerals(self):
+        return self._sorbing_minerals
+
+    @sorbing_minerals.setter
+    def sorbing_minerals(self, sorbing_minerals):
+        self._sorbing_minerals = sorbing_minerals
+
+    # surface species
+    @property
+    def surface_species(self):
+        return self._surface_species
+
+    @surface_species.setter
+    def surface_species(self, surface_species):
+        self._surface_species = surface_species
+
