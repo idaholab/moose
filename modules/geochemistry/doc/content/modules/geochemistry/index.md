@@ -25,6 +25,11 @@ The `geochemistry` module consists of two broad parts: the reactions and the tra
 
 Although the MOOSE code is incomplete, some [documentation of future `geochemistry` tests](tests_and_examples/geochemistry_tests_and_examples.md) has been written.
 
+## Implementation
+
+- [Database reader](geochemistry_database_reader.md)
+
+
 
 
 
