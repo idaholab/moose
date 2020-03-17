@@ -1,0 +1,134 @@
+dataset of thermodynamic data for gwb programs
+dataset format: jan19
+activity model: debye-huckel
+fugacity model: tsonopoulos
+
+* Sample data for testing
+
+* temperatures
+         0.0000     25.0000     60.0000    100.0000
+       150.0000    200.0000    250.0000    300.0000
+* pressures
+         1.0134      1.0134      1.0134      1.0134
+         4.7600     15.5490     39.7760     85.9270
+* debye huckel a (adh)
+          .4913       .5092       .5450       .5998
+          .6898       .8099       .9785      1.2555
+* debye huckel b (bdh)
+          .3247       .3283       .3343       .3422
+          .3533       .3655       .3792       .3965
+* bdot
+          .0174       .0410       .0440       .0460
+          .0470       .0470       .0340      0.0000
+* c co2 1
+          .1224       .1127      .09341      .08018
+         .08427      .09892       .1371       .1967
+* c co2 2
+       -.004679     -.01049      -.0036    -.001503
+        -.01184      -.0104    -.007086     -.01809
+* c h2o 1
+       500.0000     1.45397    500.0000      1.5551
+         1.6225    500.0000    500.0000    500.0000
+
+   2 elements
+
+Silver          (Ag)          mole wt.=  107.8680 g
+Aluminum        (Al)          mole wt.=   26.9815 g
+
+-end-
+
+   2 basis species
+
+H2O
+     charge=  0      ion size=  0.0 A      mole wt.=   18.0152 g
+     2 elements in species
+        2.000 H               1.000 O
+
+Ag+
+     charge=  1      ion size=  2.5 A      mole wt.=  107.8680 g
+     1 elements in species
+        1.000 Ag
+
+-end-
+
+   2 redox couples
+
+(O-phth)--
+     charge= -2      ion size=  4.0 A      mole wt.=  164.1172 g
+     4 species in reaction
+       -5.000 H2O             8.000 HCO3-           6.000 H+
+       -7.500 O2(aq)
+       594.3211    542.8292    482.3612    425.9738
+       368.7004    321.8658    281.8216    246.4849
+
+Am++++
+     charge=  4      ion size= 11.0 A      mole wt.=  241.0600 g
+     4 species in reaction
+        -.500 H2O             1.000 H+              1.000 Am+++
+         .250 O2(aq)
+        18.7967     18.0815     17.2698     16.5278
+        15.8024     15.2312     14.7898     14.4250
+
+-end-
+
+   1 aqueous species
+
+AgSO4-
+     charge= -1      ion size=  4.0 A      mole wt.=  203.9256 g
+     2 species in reaction
+        1.000 Ag+             1.000 SO4--
+        -1.2200     -1.3000     -1.4400     -1.6200
+        -1.8900     -2.2300     -2.6900     -3.4400
+
+-end-
+
+   2 minerals
+
+Akermanite                         type=
+     formula= Ca2MgSi2O7
+     mole vol.=   92.8100 cc      mole wt.=  272.6318 g
+     5 species in reaction
+        3.000 H2O             2.000 Ca++            1.000 Mg++
+        2.000 SiO2(aq)       -6.000 H+
+        49.8221     45.1875     39.7039     34.7089
+        29.8686     26.0806     22.9032     19.7991
+
+Bieberite                          type= sulfate
+     formula= CoSO4:7H2O
+     mole vol.=  144.3000 cc      mole wt.=  281.0972 g
+     3 species in reaction
+        1.000 Co++            1.000 SO4--           7.000 H2O
+        -2.7087     -2.4973     -2.3236     -2.2232
+        -2.2194     -2.3543     -2.7021     -3.5004
+
+-end-
+
+   2 gases
+
+CH4(g)
+     mole wt.=   16.0426 g
+     chi=       -537.779     1.54946 -.000927827     1.20861  -.00370814  3.33804e-6
+     Pcrit=     46.0 bar      Tcrit=     190.4 K      omega=        .011
+     1 species in reaction
+        1.000 CH4(aq)
+        -2.6487     -2.8202     -2.9329     -2.9446
+        -2.9163     -2.7253     -2.4643     -2.1569
+
+N2(g)
+     mole wt.=   28.0134 g
+     Pcrit=     33.9 bar      Tcrit=     126.2 K      omega=        .039
+     1 species in reaction
+        1.000 N2(aq)
+        -2.9620     -3.1848     -3.3320     -3.2902
+        -3.1631     -2.9499     -2.7827     -2.3699
+
+-end-
+
+   1 oxides
+
+Cu2O
+     mole wt.=  143.0929 g
+     3 species in reaction
+       -2.000 H+              2.000 Cu+             1.000 H2O
+
+-end-
