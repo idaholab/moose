@@ -54,5 +54,5 @@ protected:
   std::vector<MooseVariable *> _disp_var;
 
   /// Length of current bond
-  Real _current_length;
+  Real _current_len;
 };

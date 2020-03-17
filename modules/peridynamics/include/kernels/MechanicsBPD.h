@@ -32,9 +32,9 @@ protected:
   virtual void computeLocalOffDiagJacobian(unsigned int jvar) override;
 
   ///@{ Bond based material properties
-  const MaterialProperty<Real> & _bond_force_ij;
-  const MaterialProperty<Real> & _bond_dfdU_ij;
-  const MaterialProperty<Real> & _bond_dfdT_ij;
+  const MaterialProperty<Real> & _bond_local_force;
+  const MaterialProperty<Real> & _bond_local_dfdU;
+  const MaterialProperty<Real> & _bond_local_dfdT;
   ///@}
 
   /// The index of displcement component

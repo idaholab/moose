@@ -31,20 +31,21 @@ ComputeSmallStrainMaterialBaseBPD::computeBondForce()
 {
   if (_scalar_out_of_plane_strain_coupled)
   {
-    _bond_force_ij[_qp] = _Cij *
-                          (_mechanical_stretch[_qp] +
-                           _poissons_ratio * (_scalar_out_of_plane_strain[0] -
-                                              _alpha * (0.5 * (_temp[0] + _temp[1]) - _temp_ref))) *
-                          _node_vol[0] * _node_vol[1];
-    _bond_dfdT_ij[_qp] =
+    _bond_local_force[_qp] =
+        _Cij *
+        (_mechanical_stretch[_qp] +
+         _poissons_ratio * (_scalar_out_of_plane_strain[0] -
+                            _alpha * (0.5 * (_temp[0] + _temp[1]) - _temp_ref))) *
+        _node_vol[0] * _node_vol[1];
+    _bond_local_dfdT[_qp] =
         -_Cij * (1.0 + _poissons_ratio) * 0.5 * _alpha * _node_vol[0] * _node_vol[1];
   }
   else
   {
-    _bond_force_ij[_qp] = _Cij * _mechanical_stretch[_qp] * _node_vol[0] * _node_vol[1];
-    _bond_dfdT_ij[_qp] = -_Cij * 0.5 * _alpha * _node_vol[0] * _node_vol[1];
+    _bond_local_force[_qp] = _Cij * _mechanical_stretch[_qp] * _node_vol[0] * _node_vol[1];
+    _bond_local_dfdT[_qp] = -_Cij * 0.5 * _alpha * _node_vol[0] * _node_vol[1];
   }
 
-  _bond_dfdU_ij[_qp] = _Cij / _origin_length * _node_vol[0] * _node_vol[1];
-  _bond_dfdE_ij[_qp] = _Cij * _poissons_ratio * _node_vol[0] * _node_vol[1];
+  _bond_local_dfdU[_qp] = _Cij / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
+  _bond_local_dfdE[_qp] = _Cij * _poissons_ratio * _node_vol[0] * _node_vol[1];
 }

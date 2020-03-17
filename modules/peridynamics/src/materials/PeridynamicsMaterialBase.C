@@ -34,14 +34,13 @@ PeridynamicsMaterialBase::PeridynamicsMaterialBase(const InputParameters & param
 void
 PeridynamicsMaterialBase::setupMeshRelatedData()
 {
-  for (unsigned int i = 0; i < _nnodes; ++i)
+  for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
-    _horiz_rad[i] = _pdmesh.getHorizon(_current_elem->node_id(i));
-    _node_vol[i] = _pdmesh.getPDNodeVolume(_current_elem->node_id(i));
-    _horiz_vol[i] = _pdmesh.getHorizVolume(_current_elem->node_id(i));
+    _horiz_rad[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));
+    _node_vol[nd] = _pdmesh.getPDNodeVolume(_current_elem->node_id(nd));
+    _horiz_vol[nd] = _pdmesh.getHorizVolume(_current_elem->node_id(nd));
   }
 
   _origin_vec = _pdmesh.getPDNodeCoord(_current_elem->node_id(1)) -
                 _pdmesh.getPDNodeCoord(_current_elem->node_id(0));
-  _origin_length = _origin_vec.norm();
 }

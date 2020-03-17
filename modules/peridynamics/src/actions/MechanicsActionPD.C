@@ -37,7 +37,7 @@ MechanicsActionPD::validParams()
                                      formulation_option,
                                      "Available peridynamic formulation options: " +
                                          formulation_option.getRawNames());
-  MooseEnum stabilization_option("FORCE SELF", "SELF");
+  MooseEnum stabilization_option("FORCE HORIZON", "HORIZON");
   params.addParam<MooseEnum>(
       "stabilization",
       stabilization_option,
@@ -52,7 +52,7 @@ MechanicsActionPD::validParams()
   params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
   params.addParam<VariableName>("out_of_plane_strain",
                                 "Nonlinear variable name for the out_of_plane strain for "
-                                "plane stress using SNOSPD formulation");
+                                "plane stress using NOSPD formulation");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "List of ids of the blocks (subdomains) that the "
                                               "peridynamic mechanics kernel will be applied to");
@@ -196,15 +196,15 @@ MechanicsActionPD::getKernelName()
   {
     if (_stabilization == "FORCE")
       name = "ForceStabilizedSmallStrainMechanicsNOSPD";
-    else if (_stabilization == "SELF")
+    else if (_stabilization == "HORIZON")
     {
       if (_strain == "FINITE")
-        name = "FiniteStrainMechanicsNOSPD";
+        name = "HorizonStabilizedFiniteStrainMechanicsNOSPD";
       else
-        name = "SmallStrainMechanicsNOSPD";
+        name = "HorizonStabilizedSmallStrainMechanicsNOSPD";
     }
     else
-      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: FORCE SELF");
+      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: FORCE HORIZON");
   }
   else
     paramError(

@@ -88,8 +88,8 @@ GeneralizedPlaneStrainActionPD::act()
     if (_formulation == "ORDINARY_STATE")
       k_type = "GeneralizedPlaneStrainOffDiagOSPD"; // Based on ordinary state-based model
     else if (_formulation == "NONORDINARY_STATE")
-      k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on bond-associated non-ordinary
-                                                     // state-based model
+      k_type = "GeneralizedPlaneStrainOffDiagHNOSPD"; // Based on bond-associated non-ordinary
+                                                      // state-based model
     else
       paramError(
           "formulation",
@@ -139,7 +139,7 @@ GeneralizedPlaneStrainActionPD::act()
     if (_formulation == "ORDINARY_STATE")
       uo_type = "GeneralizedPlaneStrainUserObjectOSPD";
     else if (_formulation == "NONORDINARY_STATE")
-      uo_type = "GeneralizedPlaneStrainUserObjectNOSPD";
+      uo_type = "GeneralizedPlaneStrainUserObjectHNOSPD";
     else
       paramError(
           "formulation",

@@ -11,8 +11,8 @@
   [../]
   [./conventional_planestress_NOSPD]
     type = 'Exodiff'
-    input = 'conventional_planestress_NOSPD.i'
-    exodiff = 'conventional_planestress_NOSPD.e'
+    input = 'conventional_planestress_HNOSPD.i'
+    exodiff = 'conventional_planestress_HNOSPD.e'
     map = false
     requirement = 'ComputePlaneStressIsotropicElasticityTensor shall provide elasticity
                    tensor for plane stress model based on non-ordinary state-based peridynamic model.'
@@ -22,12 +22,12 @@
   [../]
   [./weak_planestress_NOSPD]
     type = 'Exodiff'
-    input = 'weak_planestress_NOSPD.i'
-    exodiff = 'weak_planestress_NOSPD.e'
+    input = 'weak_planestress_HNOSPD.i'
+    exodiff = 'weak_planestress_HNOSPD.e'
     map = false
-    requirement = 'WeakPlaneStressNOSPD shall model plane stress problem using
+    requirement = 'WeakPlaneStressHNOSPD shall model plane stress problem using
                    non-ordinary state-based weak formulation.'
-    design = 'modules/peridynamics/WeakPlaneStressNOSPD.md'
+    design = 'modules/peridynamics/WeakPlaneStressHNOSPD.md'
     issues = '#11561'
   [../]
 []

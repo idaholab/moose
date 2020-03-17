@@ -20,7 +20,7 @@ NodalRankTwoUserObjectBasePD::validParams()
   params.addClassDescription(
       "Base class for calculating components and scalar type quantities of nodal rank-two stress "
       "and strain tensors from material properties (stress and strain) for edge elements "
-      "(i.e., bonds) connected at that node. NOTE: This UserObject only applies to SNOSPD model.");
+      "(i.e., bonds) connected at that node. NOTE: This UserObject only applies to NOSPD model.");
 
   params.addRequiredParam<MaterialPropertyName>(
       "rank_two_tensor", "Name of the nodal rank two tensors (stress/strains)");

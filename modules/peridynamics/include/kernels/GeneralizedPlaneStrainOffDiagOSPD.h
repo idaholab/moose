@@ -54,8 +54,8 @@ protected:
   void computeTempOffDiagJacobianScalar(unsigned int jvar_num);
 
   ///@{ Bond based material properties
-  const MaterialProperty<Real> & _bond_dfdE_ij;
-  const MaterialProperty<Real> & _bond_dfdE_i_j;
+  const MaterialProperty<Real> & _bond_local_dfdE;
+  const MaterialProperty<Real> & _bond_nonlocal_dfdE;
   const MaterialProperty<Real> & _alpha;
   ///@}
 

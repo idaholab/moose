@@ -22,7 +22,7 @@ MechanicsBasePD::validParams()
   params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
   params.addCoupledVar("out_of_plane_strain",
                        "Nonlinear variable name for the out_of_plane strain for "
-                       "plane stress analysis using SNOSPD formulation");
+                       "plane stress analysis using NOSPD formulation");
 
   return params;
 }
@@ -55,17 +55,16 @@ MechanicsBasePD::prepare()
 {
   PeridynamicsKernelBase::prepare();
 
-  _ivardofs_ij.resize(_nnodes);
+  _ivardofs.resize(_nnodes);
 
-  for (unsigned int i = 0; i < _nnodes; ++i)
-    _ivardofs_ij[i] = _current_elem->node_ptr(i)->dof_number(_sys.number(), _var.number(), 0);
+  for (unsigned int nd = 0; nd < _nnodes; ++nd)
+    _ivardofs[nd] = _current_elem->node_ptr(nd)->dof_number(_sys.number(), _var.number(), 0);
 
   for (unsigned int i = 0; i < _dim; ++i)
-    _cur_ori_ij(i) = _origin_vec_ij(i) + _disp_var[i]->getNodalValue(*_current_elem->node_ptr(1)) -
-                     _disp_var[i]->getNodalValue(*_current_elem->node_ptr(0));
+    _current_vec(i) = _origin_vec(i) + _disp_var[i]->getNodalValue(*_current_elem->node_ptr(1)) -
+                      _disp_var[i]->getNodalValue(*_current_elem->node_ptr(0));
 
-  _cur_len_ij = _cur_ori_ij.norm();
-  _cur_ori_ij /= _cur_len_ij;
+  _current_unit_vec = _current_vec / _current_vec.norm();
 }
 
 void

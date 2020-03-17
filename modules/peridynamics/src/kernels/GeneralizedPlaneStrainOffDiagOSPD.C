@@ -35,8 +35,8 @@ GeneralizedPlaneStrainOffDiagOSPD::validParams()
 GeneralizedPlaneStrainOffDiagOSPD::GeneralizedPlaneStrainOffDiagOSPD(
     const InputParameters & parameters)
   : MechanicsBasePD(parameters),
-    _bond_dfdE_ij(getMaterialProperty<Real>("bond_dfdE_ij")),
-    _bond_dfdE_i_j(getMaterialProperty<Real>("bond_dfdE_i_j")),
+    _bond_local_dfdE(getMaterialProperty<Real>("bond_local_dfdE")),
+    _bond_nonlocal_dfdE(getMaterialProperty<Real>("bond_nonlocal_dfdE")),
     _alpha(getMaterialProperty<Real>("thermal_expansion_coeff")),
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _scalar_out_of_plane_strain_var_num(coupledScalar("scalar_out_of_plane_strain"))
@@ -82,100 +82,93 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jvar.order(); _j++)
       ken(_i, _j) +=
-          (_i == _j ? -1 : 1) * _cur_ori_ij(component) * _bond_dfdE_ij[0] * _bond_status_ij;
+          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
 
   // NONLOCAL jacobian contribution
-  std::vector<dof_id_type> ivardofs(_nnodes), neighbors(_nnodes), bonds(_nnodes);
-  // for off-diagonal low components
-  RankTwoTensor delta(RankTwoTensor::initIdentity);
   std::vector<RankTwoTensor> shape(_nnodes), dgrad(_nnodes);
 
-  for (unsigned int cur_nd = 0; cur_nd < _nnodes; cur_nd++)
+  // for off-diagonal low components
+  RankTwoTensor delta(RankTwoTensor::initIdentity);
+
+  for (unsigned int nd = 0; nd < _nnodes; nd++)
   {
     if (_dim == 2)
-      shape[cur_nd](2, 2) = dgrad[cur_nd](2, 2) = 1.0;
-
+      shape[nd](2, 2) = dgrad[nd](2, 2) = 1.0;
     // calculation of jacobian contribution to current node's neighbors
-    ivardofs[cur_nd] = _ivardofs_ij[cur_nd];
-    neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
-    bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
-    for (unsigned int k = 0; k < neighbors.size(); k++)
-    {
-      Node * node_k = _pdmesh.nodePtr(neighbors[k]);
-      ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getPDNodeVolume(neighbors[k]);
+    std::vector<dof_id_type> ivardofs(_nnodes);
+    ivardofs[nd] = _ivardofs[nd];
+    std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(nd));
+    std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(nd));
 
-      // obtain bond k's origin length and current orientation
-      RealGradient origin_ori_k = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+    Real vol_nb, weight;
+    RealGradient origin_vec_nb, current_vec_nb;
 
-      RealGradient current_ori_k(_dim);
-      for (unsigned int j = 0; j < _dim; j++)
-        current_ori_k(j) = origin_ori_k(j) + _disp_var[j]->getNodalValue(*node_k) -
-                           _disp_var[j]->getNodalValue(*_current_elem->node_ptr(cur_nd));
+    for (unsigned int nb = 0; nb < neighbors.size(); nb++)
+      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
+      {
+        Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
+        ivardofs[1 - nd] = neighbor_nb->dof_number(_sys.number(), _var.number(), 0);
+        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
 
-      Real origin_len_k = origin_ori_k.norm();
-      Real current_len_k = current_ori_k.norm();
+        // obtain bond nb's origin length and current orientation
+        origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-      // bond status for bond k
-      Real bond_status_k = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[k]));
+        for (unsigned int k = 0; k < _dim; k++)
+          current_vec_nb(k) = origin_vec_nb(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
+                              _disp_var[k]->getNodalValue(*_current_elem->node_ptr(nd));
 
-      // prepare shape tensor and deformation gradient tensor for current node
-      for (unsigned int m = 0; m < _dim; m++)
-        for (unsigned int n = 0; n < _dim; n++)
-        {
-          shape[cur_nd](m, n) += vol_k * _horiz_rad[cur_nd] / origin_len_k * origin_ori_k(m) *
-                                 origin_ori_k(n) * bond_status_k;
-          dgrad[cur_nd](m, n) += vol_k * _horiz_rad[cur_nd] / origin_len_k * current_ori_k(m) *
-                                 origin_ori_k(n) * bond_status_k;
-        }
+        weight = _horiz_rad[nd] / origin_vec_nb.norm();
+        // prepare shape tensor and deformation gradient tensor for current node
+        for (unsigned int k = 0; k < _dim; k++)
+          for (unsigned int l = 0; l < _dim; l++)
+          {
+            shape[nd](k, l) += weight * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+            dgrad[nd](k, l) += weight * current_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+          }
 
-      // cache the nonlocal jacobian contribution
-      _local_ke.resize(ken.m(), ken.n());
-      _local_ke.zero();
-      _local_ke(0, 0) = (cur_nd == 0 ? -1 : 1) * current_ori_k(component) / current_len_k *
-                        _bond_dfdE_i_j[cur_nd] / origin_len_k * vol_k * bond_status_k *
-                        _bond_status_ij;
-      _local_ke(1, 0) = (cur_nd == 0 ? 1 : -1) * current_ori_k(component) / current_len_k *
-                        _bond_dfdE_i_j[cur_nd] / origin_len_k * vol_k * bond_status_k *
-                        _bond_status_ij;
+        // cache the nonlocal jacobian contribution
+        _local_ke.resize(ken.m(), ken.n());
+        _local_ke.zero();
+        _local_ke(0, 0) = (nd == 0 ? -1 : 1) * current_vec_nb(component) / current_vec_nb.norm() *
+                          _bond_nonlocal_dfdE[nd] / origin_vec_nb.norm() * vol_nb * _bond_status;
+        _local_ke(1, 0) = (nd == 0 ? 1 : -1) * current_vec_nb(component) / current_vec_nb.norm() *
+                          _bond_nonlocal_dfdE[nd] / origin_vec_nb.norm() * vol_nb * _bond_status;
 
-      _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvar.dofIndices(), _var.scalingFactor());
-    }
+        _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvar.dofIndices(), _var.scalingFactor());
+      }
 
     // finalize the shape tensor and deformation gradient tensor for node_i
-    if (MooseUtils::absoluteFuzzyEqual(shape[cur_nd].det(), 0.0))
+    if (MooseUtils::absoluteFuzzyEqual(shape[nd].det(), 0.0))
     {
-      shape[cur_nd] = delta;
-      dgrad[cur_nd] = delta;
+      shape[nd] = delta;
+      dgrad[nd] = delta;
     }
     else
     {
       // inverse the shape tensor at node i
-      shape[cur_nd] = shape[cur_nd].inverse();
+      shape[nd] = shape[nd].inverse();
       // calculate the deformation gradient tensor at node i
-      dgrad[cur_nd] = dgrad[cur_nd] * shape[cur_nd];
+      dgrad[nd] = dgrad[nd] * shape[nd];
     }
   }
 
   // off-diagonal jacobian entries on the row
-  Real dEidUi = -_vols_ij[1] * _horiz_rad[0] / _origin_vec_ij.norm() *
-                (_Cijkl[0](2, 2, 0, 0) *
-                     (_origin_vec_ij(0) * shape[0](0, 0) + _origin_vec_ij(1) * shape[0](1, 0)) *
-                     dgrad[0](component, 0) +
-                 _Cijkl[0](2, 2, 1, 1) *
-                     (_origin_vec_ij(0) * shape[0](0, 1) + _origin_vec_ij(1) * shape[0](1, 1)) *
-                     dgrad[0](component, 1));
-  Real dEjdUj = _vols_ij[0] * _horiz_rad[1] / _origin_vec_ij.norm() *
-                (_Cijkl[0](2, 2, 0, 0) *
-                     (_origin_vec_ij(0) * shape[1](0, 0) + _origin_vec_ij(1) * shape[1](1, 0)) *
-                     dgrad[1](component, 0) +
-                 _Cijkl[0](2, 2, 1, 1) *
-                     (_origin_vec_ij(0) * shape[1](0, 1) + _origin_vec_ij(1) * shape[1](1, 1)) *
-                     dgrad[1](component, 1));
+  Real dEidUi =
+      -_node_vol[1] * _horiz_rad[0] / _origin_vec.norm() *
+      (_Cijkl[0](2, 2, 0, 0) * (_origin_vec(0) * shape[0](0, 0) + _origin_vec(1) * shape[0](1, 0)) *
+           dgrad[0](component, 0) +
+       _Cijkl[0](2, 2, 1, 1) * (_origin_vec(0) * shape[0](0, 1) + _origin_vec(1) * shape[0](1, 1)) *
+           dgrad[0](component, 1));
+  Real dEjdUj =
+      _node_vol[0] * _horiz_rad[1] / _origin_vec.norm() *
+      (_Cijkl[0](2, 2, 0, 0) * (_origin_vec(0) * shape[1](0, 0) + _origin_vec(1) * shape[1](1, 0)) *
+           dgrad[1](component, 0) +
+       _Cijkl[0](2, 2, 1, 1) * (_origin_vec(0) * shape[1](0, 1) + _origin_vec(1) * shape[1](1, 1)) *
+           dgrad[1](component, 1));
 
   // fill in the row corresponding to the scalar variable
-  kne(0, 0) += (dEidUi * _vols_ij[0] - dEjdUj * _vols_ij[1]) * _bond_status_ij; // node i
-  kne(0, 1) += (dEjdUj * _vols_ij[1] - dEidUi * _vols_ij[0]) * _bond_status_ij; // node j
+  kne(0, 0) += (dEidUi * _node_vol[0] - dEjdUj * _node_vol[1]) * _bond_status; // node i
+  kne(0, 1) += (dEjdUj * _node_vol[1] - dEidUi * _node_vol[0]) * _bond_status; // node j
 }
 
 void
@@ -191,9 +184,9 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispPartialOffDiagJacobianScalar(unsig
     for (_j = 0; _j < jvar.order(); _j++)
     {
       ken(_i, _j) +=
-          (_i == _j ? -1 : 1) * _cur_ori_ij(component) * _bond_dfdE_ij[0] * _bond_status_ij;
+          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
       kne(_j, _i) +=
-          (_i == _j ? -1 : 1) * _cur_ori_ij(component) * _bond_dfdE_ij[0] * _bond_status_ij;
+          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
     }
 }
 
@@ -212,8 +205,8 @@ GeneralizedPlaneStrainOffDiagOSPD::computeTempOffDiagJacobianScalar(unsigned int
   //  scalar variable strain_zz
   kne(0, 0) += -_alpha[0] *
                (_Cijkl[0](2, 2, 0, 0) + _Cijkl[0](2, 2, 1, 1) + _Cijkl[0](2, 2, 2, 2)) *
-               _vols_ij[0] / nn_i; // node i
+               _node_vol[0] / nn_i; // node i
   kne(0, 1) += -_alpha[0] *
                (_Cijkl[0](2, 2, 0, 0) + _Cijkl[0](2, 2, 1, 1) + _Cijkl[0](2, 2, 2, 2)) *
-               _vols_ij[1] / nn_j; // node j
+               _node_vol[1] / nn_j; // node j
 }

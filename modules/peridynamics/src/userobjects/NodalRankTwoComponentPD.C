@@ -21,7 +21,7 @@ NodalRankTwoComponentPD::validParams()
   params.addClassDescription(
       "Class for calculating components of nodal rank-two stress and strain tensors "
       "from material properties (stress and strain) for edge elements (i.e., "
-      "bonds) connected at that node. NOTE: This UserObject only applies to SNOSPD model.");
+      "bonds) connected at that node. NOTE: This UserObject only applies to NOSPD model.");
 
   params.addRequiredRangeCheckedParam<unsigned int>(
       "index_i",

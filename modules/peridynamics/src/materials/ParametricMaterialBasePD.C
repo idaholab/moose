@@ -40,10 +40,10 @@ ParametricMaterialBasePD::ParametricMaterialBasePD(const InputParameters & param
     _temp(2),
     _temp_ref(_has_temp ? getParam<Real>("stress_free_temperature") : 0.0),
     _tec(_has_temp ? getParam<Real>("thermal_expansion_coeff") : 0.0),
-    _bond_force_ij(declareProperty<Real>("bond_force_ij")),
-    _bond_dfdU_ij(declareProperty<Real>("bond_dfdU_ij")),
-    _bond_dfdT_ij(declareProperty<Real>("bond_dfdT_ij")),
-    _bond_dfdE_ij(declareProperty<Real>("bond_dfdE_ij")),
+    _bond_local_force(declareProperty<Real>("bond_local_force")),
+    _bond_local_dfdU(declareProperty<Real>("bond_dfdU")),
+    _bond_local_dfdT(declareProperty<Real>("bond_dfdT")),
+    _bond_local_dfdE(declareProperty<Real>("bond_local_dfdE")),
     _thermal_expansion_coeff(declareProperty<Real>("thermal_expansion_coeff")),
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor"))
 {
@@ -98,7 +98,7 @@ ParametricMaterialBasePD::computeBondStretch()
 {
   _thermal_expansion_coeff[_qp] = _alpha;
 
-  _total_stretch[_qp] = _current_length / _origin_length - 1.0;
+  _total_stretch[_qp] = _current_len / _origin_vec.norm() - 1.0;
   _mechanical_stretch[_qp] =
       _total_stretch[_qp] - _alpha * (0.5 * (_temp[0] + _temp[1]) - _temp_ref);
 }

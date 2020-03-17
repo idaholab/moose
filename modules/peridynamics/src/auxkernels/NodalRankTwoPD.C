@@ -148,31 +148,29 @@ NodalRankTwoPD::computeNodalTotalStrain()
   if (_dim == 2)
     shape(2, 2) = dgrad(2, 2) = 1.0;
 
-  RealGradient origin_vector(3), current_vector(3);
-  origin_vector = 0.0;
-  current_vector = 0.0;
+  Real vol_nb, weight;
+  RealGradient origin_vec, current_vec;
 
-  for (unsigned int j = 0; j < neighbors.size(); ++j)
-  {
-    Node * node_j = _pdmesh.nodePtr(neighbors[j]);
-    Real vol_j = _pdmesh.getPDNodeVolume(neighbors[j]);
-    for (unsigned int k = 0; k < _dim; ++k)
+  for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
+    if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
     {
-      origin_vector(k) = (*node_j)(k) - (*_pdmesh.nodePtr(_current_node->id()))(k);
-      current_vector(k) = origin_vector(k) + _disp_var[k]->getNodalValue(*node_j) -
-                          _disp_var[k]->getNodalValue(*_current_node);
+      Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
+      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+      origin_vec = *neighbor_nb - *_pdmesh.nodePtr(_current_node->id());
+
+      for (unsigned int k = 0; k < _dim; ++k)
+        current_vec(k) = origin_vec(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
+                         _disp_var[k]->getNodalValue(*_current_node);
+
+      weight = horizon / origin_vec.norm();
+
+      for (unsigned int k = 0; k < _dim; ++k)
+        for (unsigned int l = 0; l < _dim; ++l)
+        {
+          shape(k, l) += weight * origin_vec(k) * origin_vec(l) * vol_nb;
+          dgrad(k, l) += weight * current_vec(k) * origin_vec(l) * vol_nb;
+        }
     }
-    Real origin_length = origin_vector.norm();
-    Real bond_status_ij = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[j]));
-    for (unsigned int k = 0; k < _dim; ++k)
-      for (unsigned int l = 0; l < _dim; ++l)
-      {
-        shape(k, l) +=
-            vol_j * horizon / origin_length * origin_vector(k) * origin_vector(l) * bond_status_ij;
-        dgrad(k, l) +=
-            vol_j * horizon / origin_length * current_vector(k) * origin_vector(l) * bond_status_ij;
-      }
-  }
 
   // finalize the deformation gradient tensor
   dgrad *= shape.inverse();

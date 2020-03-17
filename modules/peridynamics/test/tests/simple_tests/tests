@@ -59,20 +59,20 @@
     design = 'modules/peridynamics/ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
-  [./2D_small_strain_NOSPD]
+  [./2D_small_strain_HNOSPD]
     type = 'Exodiff'
-    input = '2D_small_strain_NOSPD.i'
-    exodiff = '2D_small_strain_NOSPD.e'
+    input = '2D_small_strain_HNOSPD.i'
+    exodiff = '2D_small_strain_HNOSPD.e'
     map = false
     requirement = 'ComputePlaneSmallStrainNOSPD shall provide the correct strain
                    for non-ordinary state-based mechanics model.'
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
-  [./2D_finite_strain_NOSPD]
+  [./2D_finite_strain_HNOSPD]
     type = 'Exodiff'
-    input = '2D_finite_strain_NOSPD.i'
-    exodiff = '2D_finite_strain_NOSPD.e'
+    input = '2D_finite_strain_HNOSPD.i'
+    exodiff = '2D_finite_strain_HNOSPD.e'
     map = false
     requirement = 'ComputePlaneFiniteStrainNOSPD shall provide the correct strain
                    increment and rotation increment for non-ordinary state-based mechanics model.'

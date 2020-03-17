@@ -9,10 +9,10 @@
     design = 'modules/peridynamics/NodalRankTwoPD.md'
     issues = '#11561'
   [../]
-  [./stretch_NOSPD]
+  [./stretch_HNOSPD]
     type = 'Exodiff'
-    input = 'planestrain_thermomechanics_stretch_NOSPD.i'
-    exodiff = 'planestrain_thermomechanics_stretch_NOSPD.e'
+    input = 'planestrain_thermomechanics_stretch_HNOSPD.i'
+    exodiff = 'planestrain_thermomechanics_stretch_HNOSPD.e'
     map = false
     requirement = 'ComputeStrainBaseNOSPD shall calculate the stretches of a bond.'
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
