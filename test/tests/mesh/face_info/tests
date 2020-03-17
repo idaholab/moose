@@ -9,4 +9,28 @@
     issues = '#'
     design = 'MooseMesh.md'
   [../]
+
+  [./face_info_tri]
+    type = 'CSVDiff'
+    input = 'face_info_tri.i'
+    csvdiff = 'face_info_tri_out_face_info_0001.csv'
+    recover = false
+
+    requirement = 'The system shall compute and store internal face data on request.'
+    issues = '#'
+    design = 'MooseMesh.md'
+  [../]
+
+  [./face_info_two_region_quads]
+    type = 'CSVDiff'
+    input = 'face_info_two_region_quads.i'
+    csvdiff = 'face_info_two_region_quads_out_face_info_1_0001.csv
+               face_info_two_region_quads_out_face_info_2_0001.csv
+               face_info_two_region_quads_out_face_info_3_0001.csv'
+    recover = false
+
+    requirement = 'The system shall compute and store internal face data on request.'
+    issues = '#'
+    design = 'MooseMesh.md'
+  [../]
 []

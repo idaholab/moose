@@ -54,4 +54,5 @@ protected:
   std::vector<VectorPostprocessorValue *> _var_right_dof;
   std::vector<VectorPostprocessorValue *> _var_left_dof_size;
   std::vector<VectorPostprocessorValue *> _var_right_dof_size;
+  std::vector<VectorPostprocessorValue *> _var_face_type;
 };

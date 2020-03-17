@@ -55,6 +55,7 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
       _var_right_dof.push_back(&declareVector(v + "_right"));
       _var_left_dof_size.push_back(&declareVector(v + "_size_left"));
       _var_right_dof_size.push_back(&declareVector(v + "_size_right"));
+      _var_face_type.push_back(&declareVector(v + "_face_type"));
     }
   }
 }
@@ -100,6 +101,24 @@ TestFaceInfo::execute()
       dofs = p.rightDofIndices(_vars[l]);
       _var_right_dof[l]->push_back(dofs[0]);
       _var_right_dof_size[l]->push_back(dofs.size());
+      FaceInfo::VarFaceNeighbors vfn = p.faceType(_vars[l]);
+      Real x = 0;
+      switch (vfn)
+      {
+        case FaceInfo::VarFaceNeighbors::BOTH:
+          x = 1;
+          break;
+        case FaceInfo::VarFaceNeighbors::LEFT:
+          x = 2;
+          break;
+        case FaceInfo::VarFaceNeighbors::RIGHT:
+          x = 3;
+          break;
+        case FaceInfo::VarFaceNeighbors::NEITHER:
+          x = 4;
+          break;
+      }
+      _var_face_type[l]->push_back(x);
     }
     ++j;
   }
