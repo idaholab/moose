@@ -1761,12 +1761,19 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
     reference_points_ptr = &reference_points;
   }
 
-  reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
-  reinitNeighbor(neighbor, *reference_points_ptr);
+  delete _current_neighbor_side_elem;
+  _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
+
+  // first do the side element. We need to do this to at a minimum get the correct JxW for the
+  // neighbor face.
+  reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
 
   // compute JxW on the neighbor's face
-  _current_JxW_neighbor.shallowCopy(
-      const_cast<std::vector<Real> &>((*_holder_fe_face_neighbor_helper[neighbor_dim])->get_JxW()));
+  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
+      (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+
+  reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
+  reinitNeighbor(neighbor, *reference_points_ptr);
 }
 
 void
