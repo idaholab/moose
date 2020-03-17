@@ -7,6 +7,7 @@
     exodiff = 'random_ic_out.e'
     requirement = 'The system shall provide a method for summing multiple DerivativeParsedMaterials'
                   'and compare exact to a single DerivativeParsedMaterial'
+    mesh_mode = REPLICATED
   [../]
   [./random_ic_no_validating]
     type = 'Exodiff'
@@ -16,5 +17,6 @@
     cli_args = 'Materials/free_energy/validate_coupling=false'
     requirement = 'The system shall provide a method for summing multiple DerivativeParsedMaterials'
                   'and compare exact to a single DerivativeParsedMaterial without validating coupling'
+    mesh_mode = REPLICATED
   [../]
 []

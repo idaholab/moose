@@ -39,7 +39,10 @@ DerivativeSumMaterial::validParams()
   params.addParam<std::vector<Real>>("prefactor", "Prefactor to multiply the sum term with.");
   params.addParam<Real>("constant", 0.0, "Constant to be added to the prefactor multiplied sum.");
 
-  params.addParam<bool>("validate_coupling", true, "Flag to validate coupling.");
+  params.addParam<bool>("validate_coupling",
+                        true,
+                        "Check if all variables the specified materials depend on are listed in "
+                        "the `args` parameter.");
   params.addParamNamesToGroup("prefactor constant", "Advanced");
 
   return params;
