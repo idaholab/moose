@@ -38,6 +38,8 @@ DerivativeSumMaterial::validParams()
   // Advanced arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
   params.addParam<std::vector<Real>>("prefactor", "Prefactor to multiply the sum term with.");
   params.addParam<Real>("constant", 0.0, "Constant to be added to the prefactor multiplied sum.");
+
+  params.addParam<bool>("validate_coupling", true, "Flag to validate coupling.");
   params.addParamNamesToGroup("prefactor constant", "Advanced");
 
   return params;
@@ -48,7 +50,8 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
     _sum_materials(getParam<std::vector<std::string>>("sum_materials")),
     _num_materials(_sum_materials.size()),
     _prefactor(_num_materials, 1.0),
-    _constant(getParam<Real>("constant"))
+    _constant(getParam<Real>("constant")),
+    _validate_coupling(getParam<bool>("validate_coupling"))
 {
   // we need at least one material in the sum
   if (_num_materials == 0)
@@ -105,8 +108,9 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
 void
 DerivativeSumMaterial::initialSetup()
 {
-  for (unsigned int n = 0; n < _num_materials; ++n)
-    validateCoupling<Real>(_sum_materials[n]);
+  if (_validate_coupling)
+    for (unsigned int n = 0; n < _num_materials; ++n)
+      validateCoupling<Real>(_sum_materials[n]);
 }
 
 void

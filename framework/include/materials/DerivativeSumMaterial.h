@@ -35,6 +35,9 @@ protected:
   std::vector<Real> _prefactor;
   Real _constant;
 
+  /// Flag to optionally turn on or off validateCoupling
+  const bool _validate_coupling;
+
   /// Function values of the summands.
   std::vector<const MaterialProperty<Real> *> _summand_F;
 
@@ -47,4 +50,3 @@ protected:
   /// Third derivatives of the summands.
   std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>>> _summand_d3F;
 };
-
