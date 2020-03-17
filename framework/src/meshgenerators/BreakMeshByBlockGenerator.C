@@ -98,7 +98,10 @@ BreakMeshByBlockGenerator::generate()
               {
                 // add new node
                 new_node = Node::build(*current_node, mesh->n_nodes()).release();
-                new_node->processor_id() = current_node->processor_id();
+
+                // We're duplicating nodes so that each subdomain elem has its own copy, so it seems
+                // natural to assign this new node the same proc id as corresponding subdomain elem
+                new_node->processor_id() = current_elem->processor_id();
                 mesh->add_node(new_node);
 
                 // Add boundary info to the new node
