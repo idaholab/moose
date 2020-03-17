@@ -363,8 +363,6 @@ GeochemicalDatabaseReader::getNeutralSpeciesActivity()
 
       GeochemistryNeutralSpeciesActivity nsa(coeffs);
 
-      std::cout << nsa.a.size() << std::endl;
-
       _neutral_species_activity[ns] = nsa;
     }
   }

@@ -1,0 +1,421 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+
+#include "GeochemicalDatabaseReader.h"
+
+TEST(GeochemicalDatabaseReaderTest, getActivityModel)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_EQ(database.getActivityModel(), "debye-huckel");
+}
+
+TEST(GeochemicalDatabaseReaderTest, getFugacityModel)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_EQ(database.getFugacityModel(), "tsonopoulos");
+}
+
+TEST(GeochemicalDatabaseReaderTest, getTemperatures)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Get the temperature points from the database and compare with the expected
+  // valules
+  auto temperature_points = database.getTemperatures();
+
+  std::vector<Real> temperature_points_gold{0.0, 25.0, 60.0, 100.0, 150.0, 200.0, 250.0, 300.0};
+  EXPECT_EQ(temperature_points, temperature_points_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getPressures)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Get the pressure points from the database and compare with the expected
+  // valules
+  auto pressure_points = database.getPressures();
+
+  std::vector<Real> pressure_points_gold{
+      1.0134, 1.0134, 1.0134, 1.0134, 4.7600, 15.5490, 39.7760, 85.9270};
+  EXPECT_EQ(pressure_points, pressure_points_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getDebyeHuckel)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Get the Debye-Huckel from the database and compare with the expected
+  // valules
+  auto dh = database.getDebyeHuckel();
+
+  std::vector<Real> adh_gold{.4913, .5092, .5450, .5998, .6898, .8099, .9785, 1.2555};
+  std::vector<Real> bdh_gold{.3247, .3283, .3343, .3422, .3533, .3655, .3792, .3965};
+  std::vector<Real> bdot_gold{.0174, .0410, .0440, .0460, .0470, .0470, .0340, 0.0000};
+
+  EXPECT_EQ(dh.adh, adh_gold);
+  EXPECT_EQ(dh.bdh, bdh_gold);
+  EXPECT_EQ(dh.bdot, bdot_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Get the neutral species activity coefficients from the database
+  // and compare with the expected valules
+  auto nsa = database.getNeutralSpeciesActivity();
+
+  auto ns = nsa["co2"];
+  std::vector<Real> a_gold{.1224, .1127, .09341, .08018, .08427, .09892, .1371, .1967};
+  std::vector<Real> b_gold{-.004679, -.01049, -.0036, -.001503, -.01184, -.0104, -.007086, -.01809};
+
+  EXPECT_EQ(ns.a, a_gold);
+  EXPECT_EQ(ns.b, b_gold);
+
+  ns = nsa["h2o"];
+  a_gold = {500.0000, 1.45397, 500.0000, 1.5551, 1.6225, 500.0000, 500.0000, 500.0000};
+
+  EXPECT_EQ(ns.a, a_gold);
+  EXPECT_TRUE(ns.b.empty());
+}
+
+TEST(GeochemicalDatabaseReaderTest, getElements)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Get the elements from the database and compare with the expected
+  // valules
+  auto els = database.getElements();
+  auto el = els["Ag"];
+
+  EXPECT_EQ(el.name, "Silver");
+  EXPECT_EQ(el.molecular_weight, 107.8680);
+
+  el = els["Al"];
+
+  EXPECT_EQ(el.name, "Aluminum");
+  EXPECT_EQ(el.molecular_weight, 26.9815);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getBasisSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of primary species
+  std::vector<std::string> bs_names{"Ca++", "HCO3-", "H+"};
+
+  // Check the basis species
+  auto bs = database.getBasisSpecies(bs_names);
+
+  // Check that only the species in bs_names are returned
+  std::vector<std::string> bs_names_returned;
+  for (auto b : bs)
+    bs_names_returned.push_back(b.first);
+
+  std::sort(bs_names_returned.begin(), bs_names_returned.end());
+  std::sort(bs_names.begin(), bs_names.end());
+  EXPECT_EQ(bs_names_returned, bs_names);
+
+  // Check each species
+  auto species = bs["Ca++"];
+
+  std::map<std::string, Real> els_gold = {{"Ca", 1}};
+  EXPECT_EQ(species.radius, 6);
+  EXPECT_EQ(species.charge, 2);
+  EXPECT_EQ(species.molecular_weight, 40.08);
+  EXPECT_EQ(species.elements, els_gold);
+
+  species = bs["HCO3-"];
+
+  els_gold = {{"C", 1}, {"H", 1}, {"O", 3}};
+  EXPECT_EQ(species.radius, 4.5);
+  EXPECT_EQ(species.charge, -1);
+  EXPECT_EQ(species.molecular_weight, 61.0171);
+  EXPECT_EQ(species.elements, els_gold);
+
+  species = bs["H+"];
+
+  els_gold = {{"H", 1}};
+  EXPECT_EQ(species.radius, 9);
+  EXPECT_EQ(species.charge, 1);
+  EXPECT_EQ(species.molecular_weight, 1.0079);
+  EXPECT_EQ(species.elements, els_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of secondary species
+  std::vector<std::string> ss_names{"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"};
+
+  // Check the secondary species
+  auto ss = database.getEquilibriumSpecies(ss_names);
+
+  // Check that only the species in ss_names are returned
+  std::vector<std::string> ss_names_returned;
+  for (auto s : ss)
+    ss_names_returned.push_back(s.first);
+
+  std::sort(ss_names_returned.begin(), ss_names_returned.end());
+  std::sort(ss_names.begin(), ss_names.end());
+  EXPECT_EQ(ss_names_returned, ss_names);
+
+  // Check each species
+  auto sspecies = ss["CO2(aq)"];
+  std::vector<Real> logk_gold{
+      -6.5570, -6.3660, -6.3325, -6.4330, -6.7420, -7.1880, -7.7630, -8.4650};
+  std::map<std::string, Real> bs_gold = {{"H2O", -1}, {"H+", 1}, {"HCO3-", 1}};
+
+  EXPECT_EQ(sspecies.radius, 4);
+  EXPECT_EQ(sspecies.charge, 0);
+  EXPECT_EQ(sspecies.molecular_weight, 44.0098);
+  EXPECT_EQ(sspecies.basis_species, bs_gold);
+  EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+
+  sspecies = ss["CO3--"];
+  logk_gold = {10.6169, 10.3439, 10.2092, 10.2793, 10.5131, 10.8637, 11.2860, 11.6319};
+  bs_gold = {{"H+", -1}, {"HCO3-", 1}};
+
+  EXPECT_EQ(sspecies.radius, 4.5);
+  EXPECT_EQ(sspecies.charge, -2);
+  EXPECT_EQ(sspecies.molecular_weight, 60.0092);
+  EXPECT_EQ(sspecies.basis_species, bs_gold);
+  EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+
+  sspecies = ss["CaCO3"];
+  logk_gold = {7.5520, 7.1280, 6.7340, 6.4350, 6.1810, 5.9320, 5.5640, 4.7890};
+  bs_gold = {{"Ca++", 1}, {"HCO3-", 1}, {"H+", -1}};
+
+  EXPECT_EQ(sspecies.radius, 4);
+  EXPECT_EQ(sspecies.charge, 0);
+  EXPECT_EQ(sspecies.molecular_weight, 100.0892);
+  EXPECT_EQ(sspecies.basis_species, bs_gold);
+  EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+
+  sspecies = ss["CaOH+"];
+  logk_gold = {13.7095, 12.6887, 11.5069, 10.4366, 9.3958, 8.5583, 7.8155, 7.0306};
+  bs_gold = {{"Ca++", 1}, {"H2O", 1}, {"H+", -1}};
+
+  EXPECT_EQ(sspecies.radius, 4);
+  EXPECT_EQ(sspecies.charge, 1);
+  EXPECT_EQ(sspecies.molecular_weight, 57.0873);
+  EXPECT_EQ(sspecies.basis_species, bs_gold);
+  EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+
+  sspecies = ss["OH-"];
+  logk_gold = {14.9325, 13.9868, 13.0199, 12.2403, 11.5940, 11.2191, 11.0880, 11.2844};
+  bs_gold = {{"H2O", 1}, {"H+", -1}};
+
+  EXPECT_EQ(sspecies.radius, 3.5);
+  EXPECT_EQ(sspecies.charge, -1);
+  EXPECT_EQ(sspecies.molecular_weight, 17.0073);
+  EXPECT_EQ(sspecies.basis_species, bs_gold);
+  EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of mineral species to be read
+  std::vector<std::string> ms_names{"Calcite"};
+
+  // Check the mineral species
+  auto ms = database.getMineralSpecies(ms_names);
+
+  // Check that only the species in ms_names are returned
+  std::vector<std::string> ms_names_returned;
+  for (auto s : ms)
+    ms_names_returned.push_back(s.first);
+
+  std::sort(ms_names_returned.begin(), ms_names_returned.end());
+  std::sort(ms_names.begin(), ms_names.end());
+  EXPECT_EQ(ms_names_returned, ms_names);
+
+  auto mspecies = ms["Calcite"];
+  std::vector<Real> logk_gold = {2.0683, 1.7130, 1.2133, .6871, .0762, -.5349, -1.2301, -2.2107};
+  std::map<std::string, Real> bs_gold = {{"Ca++", 1}, {"H+", -1}, {"HCO3-", 1}};
+
+  EXPECT_EQ(mspecies.molecular_volume, 36.934);
+  EXPECT_EQ(mspecies.molecular_weight, 100.0892);
+  EXPECT_EQ(mspecies.basis_species, bs_gold);
+  EXPECT_EQ(mspecies.equilibrium_const, logk_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of gas species to be read
+  std::vector<std::string> gs_names{"N2(g)", "CH4(g)"};
+
+  // Check the gas species
+  auto gs = database.getGasSpecies(gs_names);
+
+  // Check that only the species in gs_names are returned
+  std::vector<std::string> gs_names_returned;
+  for (auto s : gs)
+    gs_names_returned.push_back(s.first);
+
+  std::sort(gs_names_returned.begin(), gs_names_returned.end());
+  std::sort(gs_names.begin(), gs_names.end());
+  EXPECT_EQ(gs_names_returned, gs_names);
+
+  auto gspecies = gs["N2(g)"];
+  std::vector<Real> logk_gold = {
+      -2.9620, -3.1848, -3.3320, -3.2902, -3.1631, -2.9499, -2.7827, -2.3699};
+  std::map<std::string, Real> bs_gold = {{"N2(aq)", 1}};
+
+  EXPECT_EQ(gspecies.molecular_weight, 28.0134);
+  EXPECT_EQ(gspecies.basis_species, bs_gold);
+  EXPECT_EQ(gspecies.equilibrium_const, logk_gold);
+  EXPECT_TRUE(gspecies.chi.empty());
+  EXPECT_EQ(gspecies.Pcrit, 33.9);
+  EXPECT_EQ(gspecies.Tcrit, 126.2);
+  EXPECT_EQ(gspecies.omega, .039);
+
+  gspecies = gs["CH4(g)"];
+  logk_gold = {-2.6487, -2.8202, -2.9329, -2.9446, -2.9163, -2.7253, -2.4643, -2.1569};
+  bs_gold = {{"CH4(aq)", 1}};
+  std::vector<Real> chi_gold = {-537.779, 1.54946, -.000927827, 1.20861, -.00370814, 3.33804e-6};
+
+  EXPECT_EQ(gspecies.molecular_weight, 16.0426);
+  EXPECT_EQ(gspecies.basis_species, bs_gold);
+  EXPECT_EQ(gspecies.equilibrium_const, logk_gold);
+  EXPECT_EQ(gspecies.chi, chi_gold);
+  EXPECT_EQ(gspecies.Pcrit, 46.0);
+  EXPECT_EQ(gspecies.Tcrit, 190.4);
+  EXPECT_EQ(gspecies.omega, .011);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getRedoxSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of redox species
+  std::vector<std::string> rs_names{"Am++++"};
+
+  // Check the secondary species
+  auto rs = database.getRedoxSpecies(rs_names);
+
+  // Check that only the species in ss_names are returned
+  std::vector<std::string> rs_names_returned;
+  for (auto s : rs)
+    rs_names_returned.push_back(s.first);
+
+  std::sort(rs_names_returned.begin(), rs_names_returned.end());
+  std::sort(rs_names.begin(), rs_names.end());
+  EXPECT_EQ(rs_names_returned, rs_names);
+
+  auto rspecies = rs["Am++++"];
+  std::vector<Real> logk_gold = {
+      18.7967, 18.0815, 17.2698, 16.5278, 15.8024, 15.2312, 14.7898, 14.4250};
+  std::map<std::string, Real> bs_gold = {{"H2O", -0.5}, {"H+", 1}, {"Am+++", 1}, {"O2(aq)", 0.250}};
+
+  EXPECT_EQ(rspecies.radius, 11);
+  EXPECT_EQ(rspecies.charge, 4);
+  EXPECT_EQ(rspecies.molecular_weight, 241.0600);
+  EXPECT_EQ(rspecies.basis_species, bs_gold);
+  EXPECT_EQ(rspecies.equilibrium_const, logk_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Vector of gas species to be read
+  std::vector<std::string> os_names{"Cu2O"};
+
+  // Check the oxide species
+  auto os = database.getOxideSpecies(os_names);
+
+  // Check that only the species in gs_names are returned
+  std::vector<std::string> os_names_returned;
+  for (auto s : os)
+    os_names_returned.push_back(s.first);
+
+  EXPECT_EQ(os_names_returned, os_names);
+
+  auto ospecies = os["Cu2O"];
+  std::map<std::string, Real> bs_gold = {{"H+", -2}, {"Cu+", 2}, {"H2O", 1}};
+
+  EXPECT_EQ(ospecies.molecular_weight, 143.0929);
+  EXPECT_EQ(ospecies.basis_species, bs_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Secondary equilibrium species
+  std::vector<std::string> names{"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"};
+
+  auto reactions = database.equilibriumReactions(names);
+
+  EXPECT_EQ(reactions[0], "CO2(aq) = H+ - H2O + HCO3-");
+  EXPECT_EQ(reactions[1], "CO3-- = - H+ + HCO3-");
+  EXPECT_EQ(reactions[2], "CaCO3 = Ca++ - H+ + HCO3-");
+  EXPECT_EQ(reactions[3], "CaOH+ = Ca++ - H+ + H2O");
+  EXPECT_EQ(reactions[4], "OH- = - H+ + H2O");
+}
+
+TEST(GeochemicalDatabaseReaderTest, mineralReactions)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Secondary mineral species
+  std::vector<std::string> names{"Calcite"};
+
+  auto reactions = database.mineralReactions(names);
+
+  EXPECT_EQ(reactions[0], "Calcite = Ca++ - H+ + HCO3-");
+}
+
+TEST(GeochemicalDatabaseReaderTest, gasReactions)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Secondary gas species
+  std::vector<std::string> names{"CH4(g)", "N2(g)"};
+
+  auto reactions = database.gasReactions(names);
+
+  EXPECT_EQ(reactions[0], "CH4(g) = CH4(aq)");
+  EXPECT_EQ(reactions[1], "N2(g) = N2(aq)");
+}
+
+TEST(GeochemicalDatabaseReaderTest, redoxReactions)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Secondary redox couples
+  std::vector<std::string> names{"(O-phth)--", "Am++++"};
+
+  auto reactions = database.redoxReactions(names);
+
+  EXPECT_EQ(reactions[0], "(O-phth)-- = 6H+ -5H2O + 8HCO3- -7.5O2(aq)");
+  EXPECT_EQ(reactions[1], "Am++++ = Am+++ + H+ -0.5H2O + 0.25O2(aq)");
+}
+
+TEST(GeochemicalDatabaseReaderTest, oxideReactions)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  // Secondary oxide species
+  std::vector<std::string> names{"Cu2O"};
+
+  auto reactions = database.oxideReactions(names);
+
+  EXPECT_EQ(reactions[0], "Cu2O = 2Cu+ -2H+ + H2O");
+}
