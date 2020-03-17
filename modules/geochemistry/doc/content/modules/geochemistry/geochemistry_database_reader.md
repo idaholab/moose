@@ -92,7 +92,12 @@ The database contains info on the following
 The user specifies the filename and the `reader` parses the file checking for errors, recording the standard temperatures, interpolation type, the steam-saturation curve information and the coefficients required for computing activity.  The following lists are built.
 
 - A list of the elements
-- A list of all basis species, which includes the species called "basis species" in the database, as well as all sorbing sites (if any) and redox pairs (if any).  All information such as their name, charge, ion size, elemental decomposition and mole weight is recorded.
+- A list of all basis components, which includes:
+
+  - the species called "basis species" in the database, and
+  - all sorbing sites (if any) and
+  - all redox pairs (if any).
+  
 - A list of all secondary species, including the free electron.
 - A list of all minerals.
 - A list of all gases.
@@ -121,9 +126,18 @@ To eliminate useless information, the Reader expects the user to supply the foll
 
 5. A list of gases whose fugacity will be fixed, at least for some time at some spatial location.
 
-#### The elimination process
+#### Eliminating equilibrium redox species
 
-At this stage, the Reader computes what species may be eliminated from the database.  It retains species only if:
+All redox species that are in equilibrium with the aqueous solution may be eliminated from the database.  From the list of all redox components, the following are removed:
+
+- any redox components specified in the user's list of basis components (these are in disequilibrium), and
+- any redox species that are governed by kinetic rate laws.
+
+The remaining redox species are in equilibrium.  They may be eliminated by using their reactions that are specified in the database.  This must be performed from "top to bottom" in the database file, since redox species can occur in other redox species' reactions.
+
+#### Eliminating unimportant species
+
+Having eliminated all equilibrium redox species, the Reader can eliminate species that are unimportant in the simulation.  It retains species only if:
 
 1. they are in the list of basis components specified by the user, or
 2. their dynamics is governed by kinetic rates, or
