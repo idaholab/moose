@@ -7,8 +7,12 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import os
+import sys
 import unittest
+# so we can find our libraries, no matter how we're called
+findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.join(findbin, "../"))
 from readers import gwb_reader
 from dbclass import ThermoDB
 
@@ -26,6 +30,16 @@ class TestGWBReader(unittest.TestCase):
 
         # Parse the database
         self.db = gwb_reader.readDatabase(dblist)
+
+    def readSorptionDatabase(self):
+        """
+        Read the sorption database
+        """
+        with open('testdata/gwb_sorption_testdata.dat', 'r') as dbfile:
+            dblist = dbfile.readlines()
+
+        # Parse the database
+        self.sorption_db = gwb_reader.readDatabase(dblist)
 
     def testTemperature(self):
         """
@@ -80,11 +94,11 @@ class TestGWBReader(unittest.TestCase):
         Test that the neutral species coefficients are correctly parsed
         """
         self.readDatabase()
-        gold = {'co2': {'c co2 1': ['.1224', '.1127', '.09341', '.08018',
+        gold = {'co2': {'a': ['.1224', '.1127', '.09341', '.08018',
                                     '.08427', '.09892', '.1371', '.1967'],
-                        'c co2 2': ['-.004679', '-.01049', '-.0036', '-.001503',
+                        'b': ['-.004679', '-.01049', '-.0036', '-.001503',
                                     '-.01184', '-.0104', '-.007086', '-.01809']},
-                'h2o': {'c h2o 1': ['500.0000', '1.45397', '500.0000', '1.5551',
+                'h2o': {'a': ['500.0000', '1.45397', '500.0000', '1.5551',
                                     '1.6225', '500.0000', '500.0000', '500.0000']}}
 
         self.assertDictEqual(self.db.neutral_species, gold)
@@ -195,6 +209,39 @@ class TestGWBReader(unittest.TestCase):
                          'molecular weight': '143.0929'}}
 
         self.assertDictEqual(self.db.oxides, gold)
+
+    def testSorptionBasisSpecies(self):
+        """
+        Test that the sorption basis species are correctly parsed
+        """
+        self.readSorptionDatabase()
+        gold = {'>(s)FeOH': {'charge': '0', 'molecular weight': '72.8543',
+                         'elements': {'Fe': '1.000', 'H': '1.000', 'O': '1.000'}},
+                '>(w)FeOH': {'charge': '111', 'molecular weight': '-72.8543',
+                         'elements': {'Fe': '1.111', 'H': '-1.23', 'Rubbish': '77.0'}}}
+
+        self.assertDictEqual(self.sorption_db.basis_species, gold)
+
+    def testSorptionMinerals(self):
+        """
+        Test that the sorption minerals are correctly parsed
+        """
+        self.readSorptionDatabase()
+        gold = {'Fe(OH)3(ppd)': {'surface area': '600.0000', 'site density' : ['.0050', '.2000'], 'sorbing site' : ['>(s)FeOH', '>(w)FeOH']},
+                'Hematite': {'surface area': '123.0000', 'site density' : ['.0100', '.4000'], 'sorbing site' : ['>(sblah)FeOH', '>(wasdf)FeOH']}}
+
+        self.assertDictEqual(self.sorption_db.sorbing_minerals, gold)
+
+    def testSurfaceSpecies(self):
+        """
+        Test that the surface species are correctly parsed
+        """
+        self.readSorptionDatabase()
+        gold = {'>(s)FeO-': {'charge' : '-1', 'molecular weight' : '71.8464', 'log K' : '8.9300', 'dlogK/dT' : '0.0000', 'species' : {'>(s)FeOH' : '1.000', 'H+' : '-1.000'}},
+                '>(s)FeOAg': {'charge' : '0', 'molecular weight' : '179.7144', 'log K' : '1.7200', 'dlogK/dT' : '-1.234', 'species' : {'>(sas)FeOH' : '1.3', 'Ag+' : '-1.111', 'H+king': '0.000'}}}
+        print(self.sorption_db.surface_species)
+
+        self.assertDictEqual(self.sorption_db.surface_species, gold)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

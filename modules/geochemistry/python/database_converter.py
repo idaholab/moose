@@ -9,11 +9,13 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
 import argparse
-import numpy as np
 import datetime
 import json
-from dbclass import ThermoDB
+# so we can find our libraries, no matter how we're called
+findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(findbin)
 from readers import gwb_reader, eq36_reader
 
 def command_line_options():
@@ -23,7 +25,7 @@ def command_line_options():
     parser = argparse.ArgumentParser(description="Utility to read data from thermodynamic database and write to MOOSE thermodynamic database (in JSON format)")
     parser.add_argument('-i', '--input', type=str, help="The input database", required=True)
     parser.add_argument('--format', type=str, help="The database format", choices=['gwb', 'eq36'], required=True)
-    parser.add_argument('-o', '--output', type=str, default='moose_thermo.json', help="The name of the output file. Default filename is moose_thermo.json")
+    parser.add_argument('-o', '--output', type=str, default='moose_thermo.json', help="The output filename. Default: %(default)s")
     return parser.parse_args()
 
 
@@ -38,7 +40,6 @@ def main():
     """
     # Command-line options
     opt = command_line_options()
-    opt.output
 
     # Read the entire database file into a list
     with open(opt.input, 'r') as dbfile:
@@ -47,13 +48,8 @@ def main():
     # Parse data using appropriate reader
     if opt.format == 'gwb':
         db = gwb_reader.readDatabase(dblist)
-
     elif opt.format == 'eq36':
         db = eq36_reader.readDatabase(dblist)
-
-    else:
-        print('Error: format not supported')
-        exit()
 
     # Combine all of the database data into a single dictionary
     database = {}
@@ -94,12 +90,18 @@ def main():
         database['redox couples'] = db.redox_couples
     if db.oxides:
         database['oxides'] = db.oxides
+    if db.sorbing_minerals:
+        database['sorbing minerals'] = db.sorbing_minerals
+    if db.surface_species:
+        database['surface species'] = db.surface_species
+    
 
     # Write out the database to JSON format
     with open(opt.output, 'w') as output:
         json.dump(database, output, indent=2)
 
-    print("Finished parsing ", opt.input, "- output written to ", opt.output)
+    sys.stdout.write("Finished parsing " + opt.input + ".  Output written to " + opt.output + "\n")
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

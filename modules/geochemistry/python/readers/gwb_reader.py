@@ -31,6 +31,8 @@ def readDatabase(dblist):
     mineral_species = {}
     gas_species = {}
     oxides = {}
+    sorbing_minerals = {}
+    surface_species = {}
 
     line = 0
 
@@ -135,11 +137,24 @@ def readDatabase(dblist):
 
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
-                        data = dblist[line].replace('=', ' ').split()
-                        basis_species[species]['charge'] = data[1]
-                        basis_species[species]['radius'] = data[4]
-                        basis_species[species]['molecular weight'] = data[8]
-                        line = line+1
+                        data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
+                        basis_species[species]['charge'] = data.split()[0]
+                        if len(data.split()) <= 1:
+                            line = line+1
+                    if 'ion size' in dblist[line]:
+                        data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "A":
+                            raise ValueError("ion size must be measured in Angstroms")
+                        basis_species[species]['radius'] = data.split()[0]
+                        if len(data.split()) <= 2:
+                            line = line + 1
+                    if 'mole wt.' in dblist[line]:
+                        data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "g":
+                            raise ValueError("molecular weight must be measured in grams")
+                        basis_species[species]['molecular weight'] = data.split()[0]
+                        if len(data.split()) <= 2:
+                            line = line + 1
 
                     # Elements in basis species
                     if 'elements' in dblist[line]:
@@ -171,11 +186,24 @@ def readDatabase(dblist):
 
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
-                        data = dblist[line].replace('=', ' ').split()
-                        redox_couples[couple]['charge'] = data[1]
-                        redox_couples[couple]['radius'] = data[4]
-                        redox_couples[couple]['molecular weight'] = data[8]
-                        line = line+1
+                        data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
+                        redox_couples[couple]['charge'] = data.split()[0]
+                        if len(data.split()) <= 1:
+                            line = line+1
+                    if 'ion size' in dblist[line]:
+                        data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "A":
+                            raise ValueError("ion size must be measured in Angstroms")
+                        redox_couples[couple]['radius'] = data.split()[0]
+                        if len(data.split()) <= 2:
+                            line = line + 1
+                    if 'mole wt.' in dblist[line]:
+                        data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "g":
+                            raise ValueError("molecular weight must be measured in grams")
+                        redox_couples[couple]['molecular weight'] = data.split()[0]
+                        if len(data.split()) <= 2:
+                            line = line + 1
 
                     # Species in redox couples
                     if 'species' in dblist[line]:
@@ -289,7 +317,47 @@ def readDatabase(dblist):
                     reading_freeelectron = False
                     line = line-1
 
-        if 'minerals\n' in dblist[line]:
+        if 'sorbing minerals\n' in dblist[line]:
+            # Read sorbing minerals
+            line = line+1
+            reading_sorbing_mineral_species = True
+            while reading_sorbing_mineral_species:
+                if dblist[line].strip():
+                    # Mineral name
+                    species = dblist[line].strip().split()[0]
+                    sorbing_minerals[species] = {}
+                    sorbing_minerals[species]['site density'] = []
+                    sorbing_minerals[species]['sorbing site'] = []
+                    line = line+1
+
+                    # specific surface area
+                    if 'surface area' in dblist[line]:
+                        data = dblist[line].split("surface area")[1].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "m2/g":
+                            raise ValueError("sorbing mineral surface area must be specified in m2/g")
+                        sorbing_minerals[species]['surface area'] = data.split()[0]
+                        line = line+1
+
+                    if 'sorption sites' in dblist[line]:
+                        num_sites = int(dblist[line].split()[0])
+                        for ss in range(num_sites):
+                            line += 1
+                            data = dblist[line].split()
+                            if len(data) != 6 and data[1] != "site" and data[2] != "density=" and data[4] != "mol/mol" and data[5] != "mineral":
+                                raise ValueError("sorbing minerals must define site density in mol/mol mineral.  Erroneous line is: " + dblist[line])
+                            sorbing_minerals[species]['site density'].append(data[3])
+                            sorbing_minerals[species]['sorbing site'].append(data[0])
+
+                        line = line+1
+
+                line = line+1
+
+                if '-end-' in dblist[line]:
+                    reading_sorbing_mineral_species = False
+                    line = line-1
+
+            
+        if 'minerals\n' in dblist[line] and not ('sorbing minerals' in dblist[line]):
             # Read the minerals data
             line = line+1
             reading_mineral_species = True
@@ -426,6 +494,56 @@ def readDatabase(dblist):
                     reading_oxides = False
                     line = line-1
 
+        if 'surface species\n' in dblist[line]:
+            # Read the surface species (those that sorb to a surface)
+            line = line+1
+            reading_ss = True
+            while reading_ss:
+                if dblist[line].strip():
+                    # surface species name
+                    species = dblist[line].strip()
+                    surface_species[species] = {}
+                    surface_species[species]['species'] = {}
+                    line = line+1
+
+                    # Charge and molecular weight
+                    if 'charge' in dblist[line]:
+                        data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
+                        surface_species[species]['charge'] = data.split()[0]
+                        if len(data.split()) <= 1:
+                            line = line+1
+                    if 'mole wt.' in dblist[line]:
+                        data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
+                        if len(data.split()) <= 1 or data.split()[1] != "g":
+                            raise ValueError("molecular weight must be measured in grams.  Offending line is " + dblist[line])
+                        surface_species[species]['molecular weight'] = data.split()[0]
+                        if len(data.split()) <= 2:
+                            line = line + 1
+
+                    # Species in reactions
+                    if 'species' in dblist[line]:
+                        num_species = int(dblist[line].split()[0])
+                        while len(surface_species[species]['species']) < num_species:
+                            line = line+1
+                            data = dblist[line].split()
+                            for i in range(0, len(data), 2):
+                                surface_species[species]['species'][data[i+1]] = data[i]
+                        line = line+1
+
+                    # Equilibrium constant values
+                    if 'log K' in dblist[line]:
+                        data = dblist[line].split()
+                        if len(data) != 5 and data[0] != "log" and data[1] != "K=" and data[3] != "dlogK/dT=":
+                            raise ValueError("log K and dlogK/dT must be specified for surface species.  Erroneous line is " + dblist[line])
+                        surface_species[species]["log K"] = data[2]
+                        surface_species[species]["dlogK/dT"] = data[4]
+
+                line = line+1
+
+                if '-end-' in dblist[line]:
+                    reading_ss = False
+                    line = line-1
+
         line = line+1
 
     # After parsing all of the data, save it in a ThermodB class
@@ -444,8 +562,10 @@ def readDatabase(dblist):
     db.basis_species = basis_species
     db.secondary_species = secondary_species
     db.mineral_species = mineral_species
+    db.sorbing_minerals = sorbing_minerals
     db.gas_species = gas_species
     db.redox_couples = redox_couples
     db.oxides = oxides
+    db.surface_species = surface_species
 
     return db
