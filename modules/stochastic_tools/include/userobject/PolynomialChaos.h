@@ -59,16 +59,16 @@ public:
   Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 
   /// Evaluates partial derivative of expansion: du(x)/dx_dim
-  Real computeDerivative(const unsigned int dim, const std::vector<Real> x) const;
+  Real computeDerivative(const unsigned int dim, const std::vector<Real> & x) const;
   /**
    * Evaluates sum of partial derivative of expansion. Example:
    * computeGradient({0, 2, 3}, x) = du(x)/dx_0dx_2dx_3
    */
-  Real computePartialDerivative(const std::vector<unsigned int> dim,
-                                const std::vector<Real> x) const;
+  Real computePartialDerivative(const std::vector<unsigned int> & dim,
+                                const std::vector<Real> & x) const;
 
   /// Computes Sobol sensitivities S_{i_1,i_2,...,i_s}, where ind = i_1,i_2,...,i_s
-  Real computeSobolIndex(const std::set<unsigned int> ind) const;
+  Real computeSobolIndex(const std::set<unsigned int> & ind) const;
   Real computeSobolTotal(const unsigned int dim) const;
 
 protected:
