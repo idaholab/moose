@@ -19,11 +19,10 @@
 
 registerMooseObject("MarmotApp", GrandPotentialTensorMaterial);
 
-template <>
 InputParameters
-validParams<GrandPotentialTensorMaterial>()
+GrandPotentialTensorMaterial::validParams()
 {
-  InputParameters params = validParams<PolycrystalDiffusivityTensorBase>();
+  InputParameters params = PolycrystalDiffusivityTensorBase::validParams();
   params.addClassDescription("Diffusion and mobility parameters for grand potential model "
                              "governing equations. Uses a tensor diffusivity");
   params.addRequiredParam<Real>("int_width",

@@ -17,12 +17,6 @@
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-// Forward Declarations
-class GrandPotentialTensorMaterial;
-
-template <>
-InputParameters validParams<GrandPotentialTensorMaterial>();
-
 /**
  * Calculates mobilities for grand potential model. The potential mobility (\chi*D)
  * is a tensor, while the Allen Cahn mobilities for the solid and void phases are
@@ -31,6 +25,8 @@ InputParameters validParams<GrandPotentialTensorMaterial>();
 class GrandPotentialTensorMaterial : public PolycrystalDiffusivityTensorBase
 {
 public:
+  static InputParameters validParams();
+
   GrandPotentialTensorMaterial(const InputParameters & parameters);
 
   virtual void computeProperties() override;

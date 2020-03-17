@@ -17,11 +17,10 @@
 
 registerMooseObject("MarmotApp", PolycrystalDiffusivityTensorBase);
 
-template <>
 InputParameters
-validParams<PolycrystalDiffusivityTensorBase>()
+PolycrystalDiffusivityTensorBase::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Generates a diffusion tensor to distinguish between the bulk, grain "
                              "boundaries, and surfaces");
   params.addRequiredCoupledVarWithAutoBuild(

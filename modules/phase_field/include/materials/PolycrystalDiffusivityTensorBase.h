@@ -17,12 +17,6 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class PolycrystalDiffusivityTensorBase;
-
-template <>
-InputParameters validParams<PolycrystalDiffusivityTensorBase>();
-
 /**
  * Generates a diffusion tensor to distinguish between the bulk, grain boundary,
  * and surface diffusion rates.
@@ -30,6 +24,8 @@ InputParameters validParams<PolycrystalDiffusivityTensorBase>();
 class PolycrystalDiffusivityTensorBase : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   PolycrystalDiffusivityTensorBase(const InputParameters & parameters);
 
 protected:

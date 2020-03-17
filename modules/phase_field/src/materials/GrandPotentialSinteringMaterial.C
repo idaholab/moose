@@ -18,11 +18,10 @@
 
 registerMooseObject("MarmotApp", GrandPotentialSinteringMaterial);
 
-template <>
 InputParameters
-validParams<GrandPotentialSinteringMaterial>()
+GrandPotentialSinteringMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Includes switching and thermodynamic properties for the grand potential sintering model");
   params.addRequiredCoupledVarWithAutoBuild(

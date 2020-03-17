@@ -17,11 +17,6 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-class GrandPotentialSinteringMaterial;
-
-template <>
-InputParameters validParams<GrandPotentialSinteringMaterial>();
-
 /**
  * This material calculates necessary parameters for the grand potential sintering model.
  * Especially those related to switching functions and thermodynamics.
@@ -29,6 +24,8 @@ InputParameters validParams<GrandPotentialSinteringMaterial>();
 class GrandPotentialSinteringMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   GrandPotentialSinteringMaterial(const InputParameters & parameters);
 
 protected:
