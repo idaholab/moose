@@ -38,5 +38,3 @@ convergence in the non-linear solve.
 !syntax inputs /Constraints/TangentialMortarLMMechanicalContact
 
 !syntax children /Constraints/TangentialMortarLMMechanicalContact
-
-!bibtex bibliography

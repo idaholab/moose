@@ -130,12 +130,34 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
 
       if (vg_description.n_variables() > 1)
         oss << "{ ";
-      for (unsigned int vn = 0; vn < vg_description.n_variables(); vn++)
+      if (vg_description.n_variables() > 10)
       {
-        oss << "\"" << vg_description.name(vn) << "\" ";
+        // when the number of variables in this group is larger than 10, we only output the first
+        // and the last 5 variable names
+        for (unsigned int vn = 0; vn < 5; vn++)
+        {
+          oss << "\"" << vg_description.name(vn) << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
+        oss << "... ";
         curr_string_pos = oss.tellp();
         insertNewline(oss, begin_string_pos, curr_string_pos);
+        for (unsigned int vn = vg_description.n_variables() - 5; vn < vg_description.n_variables();
+             vn++)
+        {
+          oss << "\"" << vg_description.name(vn) << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
       }
+      else
+        for (unsigned int vn = 0; vn < vg_description.n_variables(); vn++)
+        {
+          oss << "\"" << vg_description.name(vn) << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
 
       if (vg_description.n_variables() > 1)
         oss << "} ";

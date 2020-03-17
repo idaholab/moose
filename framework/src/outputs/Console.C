@@ -116,7 +116,7 @@ Console::validParams()
 
   // System information controls
   MultiMooseEnum info("framework mesh aux nonlinear relationship execution output",
-                      "framework mesh aux nonlinear relationship execution");
+                      "framework mesh aux nonlinear execution");
   params.addParam<MultiMooseEnum>("system_info",
                                   info,
                                   "List of information types to display "

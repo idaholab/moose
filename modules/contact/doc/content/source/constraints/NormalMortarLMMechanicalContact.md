@@ -15,5 +15,3 @@ non-linear convergence than the pointwise method.
 !syntax inputs /Constraints/NormalMortarLMMechanicalContact
 
 !syntax children /Constraints/NormalMortarLMMechanicalContact
-
-!bibtex bibliography
