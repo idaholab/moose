@@ -35,6 +35,8 @@ public:
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  void computeElemNeighResidual(Moose::DGResidualType type) override;
+  void computeElemNeighJacobian(Moose::DGJacobianType type) override;
 
   /// Scale factor
   const Real & _scale;
@@ -44,4 +46,6 @@ protected:
 
   /// Optional Postprocessor value
   const PostprocessorValue & _postprocessor;
+
+  const MooseArray<Real> & _neighbor_JxW;
 };
