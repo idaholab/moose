@@ -174,6 +174,8 @@ FEProblemBase::validParams()
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>(
+      "material_dependency_check", true, "Set to false to disable material dependency check");
   params.addParam<bool>("parallel_barrier_messaging",
                         false,
                         "Displays messaging from parallel "
@@ -255,6 +257,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
+    _material_dependency_check(getParam<bool>("material_dependency_check")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
@@ -6008,7 +6011,8 @@ FEProblemBase::checkProblemIntegrity()
     // for (const auto & map_it : discrete_materials)
     //   for (const auto & container_element : map_it.second)
     //     mats_to_check[map_it.first].push_back(container_element);
-    checkDependMaterialsHelper(_all_materials.getActiveBlockObjects());
+    if (_material_dependency_check)
+      checkDependMaterialsHelper(_all_materials.getActiveBlockObjects());
   }
 
   // Check UserObjects and Postprocessors

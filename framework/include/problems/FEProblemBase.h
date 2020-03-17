@@ -1989,6 +1989,9 @@ protected:
   /// Determines whether a check to verify an active material on every subdomain
   bool _material_coverage_check;
 
+  /// Determines whether a check to verify material dependencies on every subdomain
+  bool _material_dependency_check;
+
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
 
