@@ -529,7 +529,7 @@ GeochemicalDatabaseReader::printReactions(
 
   for (unsigned int i = 0; i < names.size(); ++i)
   {
-    std::string reaction;
+    std::string reaction = "";
     for (auto & bs : basis_species[i])
     {
       if (bs.second < 0.0)
@@ -549,7 +549,7 @@ GeochemicalDatabaseReader::printReactions(
     }
 
     // Trim off leading +
-    if (reaction[1] == '+')
+    if (reaction.size() > 1 && reaction[1] == '+')
       reaction.erase(1, 2);
 
     reactions.push_back(names[i] + " =" + reaction);
