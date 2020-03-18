@@ -11,4 +11,14 @@
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#11640'
   [../]
+  [./extra_integer_test]
+    type = 'Exodiff'
+    input = 'exodus_file_mesh_with_id.i'
+    exodiff = 'exodus_file_mesh_with_id_out.e'
+    recover = false
+
+    requirement = 'The system shall have the ability to assign element extra integers with elemental variables in an Exodus mesh file.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#14916'
+  [../]
 []
