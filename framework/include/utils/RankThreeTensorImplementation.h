@@ -276,7 +276,7 @@ RankThreeTensorTempl<T>::fillFromPlaneNormal(const VectorValue<T> & input)
       {
         const T c = input(k);
         T sum = 0;
-        sum = -2 * a * b * c;
+        sum = -2.0 * a * b * c;
         if (i == j)
           sum += c;
         if (i == k)
