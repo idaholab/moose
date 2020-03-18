@@ -335,7 +335,7 @@ StressDivergenceBeam::computeGlobalResidual(const MaterialProperty<RealVectorVal
               _force_local_t[_qp](2) * 0.25 * _original_length[0];
         else
           _local_moment_res[_i](component - 3) +=
-              (_i == 0 ? -1 : 1) * -_moment_local_t[_qp](2) * 0.5 -
+              (_i == 0 ? -1 : 1) * _moment_local_t[_qp](2) * 0.5 -
               _force_local_t[_qp](1) * 0.25 * _original_length[0];
       }
     }
