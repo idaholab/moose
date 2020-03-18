@@ -163,6 +163,8 @@ public:
     typedef std::tuple<KeyType<Attribs>...> KeyTuple;
     typedef std::tuple<AttribType<Attribs>...> AttribTuple;
 
+    QueryCache() {}
+
     /// Creates a new query operating on the given warehouse w.  You should generally use
     /// TheWarehouse::query() instead.
     QueryCache(TheWarehouse & w) : _w(&w)
@@ -199,6 +201,23 @@ public:
         _attribs.push_back(other._attribs[i]->clone());
       return *this;
     }
+
+    /// Copy constructor from another Query
+    template <typename T>
+    QueryCache & operator=(const T & q)
+    {
+      _attribs.clear();
+      _w = &q.warehouse();
+
+      addAttribs<0, Attribs...>();
+      _attribs.reserve(5);
+
+      for (auto & attrib : q.attributes())
+        _attribs.push_back(attrib->clone());
+
+      return *this;
+    }
+
     QueryCache(const QueryCache & other) : _w(other._w), _key_tup(other._key_tup)
     {
       // do NOT copy the cache.
