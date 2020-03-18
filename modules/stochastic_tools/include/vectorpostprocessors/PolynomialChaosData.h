@@ -13,27 +13,26 @@
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosStatistics;
-
-class PolyChaosStatistics : public GeneralVectorPostprocessor
+class PolynomialChaosData : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  PolyChaosStatistics(const InputParameters & parameters);
+  PolynomialChaosData(const InputParameters & parameters);
 
-  virtual void initialize() override{};
+  virtual void initialize() override;
   virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override{};
 
 protected:
   /// Reference to PolynomialChaos
   const PolynomialChaos & _pc_uo;
-  /// The selected statistics to compute
-  const MultiMooseEnum & _type;
-  /// Vector containing types of statistical values
-  VectorPostprocessorValue & _stat_type;
-  /// Vector containing statistical values
-  VectorPostprocessorValue & _stats;
+  /// Reference to PC user object coefficient vector
+  const std::vector<Real> & _coeff;
+  /// Vector containing PCE coefficients
+  VectorPostprocessorValue & _coeff_vector;
+  /// Matrix of 1-D polynomial orders
+  std::vector<VectorPostprocessorValue *> _order_vector;
+  /// Whether we have been through initialize() yet
+  bool _initialized;
 };

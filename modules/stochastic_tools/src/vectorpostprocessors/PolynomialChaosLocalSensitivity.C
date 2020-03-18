@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "PolyChaosLocalSensitivity.h"
+#include "PolynomialChaosLocalSensitivity.h"
 
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", PolyChaosLocalSensitivity);
+registerMooseObject("StochasticToolsApp", PolynomialChaosLocalSensitivity);
 
 InputParameters
-PolyChaosLocalSensitivity::validParams()
+PolynomialChaosLocalSensitivity::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -39,7 +39,7 @@ PolyChaosLocalSensitivity::validParams()
   return params;
 }
 
-PolyChaosLocalSensitivity::PolyChaosLocalSensitivity(const InputParameters & parameters)
+PolynomialChaosLocalSensitivity::PolynomialChaosLocalSensitivity(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
     _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
@@ -56,7 +56,7 @@ PolyChaosLocalSensitivity::PolyChaosLocalSensitivity(const InputParameters & par
 }
 
 void
-PolyChaosLocalSensitivity::initialize()
+PolynomialChaosLocalSensitivity::initialize()
 {
   // This needs to be put in initialize since the user object doesn't know the
   // number of parameters until after initialSetup.
@@ -112,7 +112,7 @@ PolyChaosLocalSensitivity::initialize()
 }
 
 void
-PolyChaosLocalSensitivity::execute()
+PolynomialChaosLocalSensitivity::execute()
 {
   // Loop over samples
   if (_sampler)
@@ -158,7 +158,7 @@ PolyChaosLocalSensitivity::execute()
 }
 
 void
-PolyChaosLocalSensitivity::finalize()
+PolynomialChaosLocalSensitivity::finalize()
 {
   if (_output_points)
     for (auto & ppv_ptr : _points_vector)

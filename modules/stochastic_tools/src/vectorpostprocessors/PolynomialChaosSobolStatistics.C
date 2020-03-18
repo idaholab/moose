@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "PolyChaosSobolStatistics.h"
+#include "PolynomialChaosSobolStatistics.h"
 
 #include "libmesh/utility.h"
 
-registerMooseObject("StochasticToolsApp", PolyChaosSobolStatistics);
+registerMooseObject("StochasticToolsApp", PolynomialChaosSobolStatistics);
 
 InputParameters
-PolyChaosSobolStatistics::validParams()
+PolynomialChaosSobolStatistics::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -31,7 +31,7 @@ PolyChaosSobolStatistics::validParams()
   return params;
 }
 
-PolyChaosSobolStatistics::PolyChaosSobolStatistics(const InputParameters & parameters)
+PolynomialChaosSobolStatistics::PolynomialChaosSobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
     _order(getParam<MultiMooseEnum>("sensitivity_order")),
@@ -42,7 +42,7 @@ PolyChaosSobolStatistics::PolyChaosSobolStatistics(const InputParameters & param
 }
 
 void
-PolyChaosSobolStatistics::initialize()
+PolynomialChaosSobolStatistics::initialize()
 {
   // This needs to be put in initialize since the user object doesn't know the
   // number of parameters until after initialSetup.
@@ -106,7 +106,7 @@ PolyChaosSobolStatistics::initialize()
 }
 
 void
-PolyChaosSobolStatistics::execute()
+PolynomialChaosSobolStatistics::execute()
 {
   // Compute standard deviation
   Real sig = _pc_uo.computeStandardDeviation();
@@ -139,23 +139,24 @@ PolyChaosSobolStatistics::execute()
 }
 
 void
-PolyChaosSobolStatistics::finalize()
+PolynomialChaosSobolStatistics::finalize()
 {
   gatherSum(_stats);
 }
 
 void
-PolyChaosSobolStatistics::threadJoin(const UserObject & y)
+PolynomialChaosSobolStatistics::threadJoin(const UserObject & y)
 {
-  const PolyChaosSobolStatistics & pps = static_cast<const PolyChaosSobolStatistics &>(y);
+  const PolynomialChaosSobolStatistics & pps =
+      static_cast<const PolynomialChaosSobolStatistics &>(y);
   for (unsigned int i = 0; i < _stats.size(); ++i)
     _stats[i] += pps._stats[i];
 }
 
 std::set<std::set<unsigned int>>
-PolyChaosSobolStatistics::buildSobolIndices(const unsigned int nind,
-                                            const unsigned int ndim,
-                                            const unsigned int sdim)
+PolynomialChaosSobolStatistics::buildSobolIndices(const unsigned int nind,
+                                                  const unsigned int ndim,
+                                                  const unsigned int sdim)
 {
   std::set<std::set<unsigned int>> ind;
   if (nind == 1)
@@ -183,8 +184,8 @@ PolyChaosSobolStatistics::buildSobolIndices(const unsigned int nind,
 }
 
 bool
-PolyChaosSobolStatistics::orderSobolIndices(const std::set<unsigned int> & a,
-                                            const std::set<unsigned int> & b)
+PolynomialChaosSobolStatistics::orderSobolIndices(const std::set<unsigned int> & a,
+                                                  const std::set<unsigned int> & b)
 {
   if (a.size() != b.size())
     return a.size() < b.size();

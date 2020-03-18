@@ -69,7 +69,7 @@
     samplers = quadrature
   []
   [local_sense]
-    type = PolyChaosLocalSensitivity
+    type = PolynomialChaosLocalSensitivity
     pc_name = poly_chaos
     local_points_sampler = grid
     local_points = '3.14159 3.14159 2.7182 3.14159 3.14159 2.7182 2.7182 2.7182'

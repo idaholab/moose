@@ -8,12 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "PolyChaosStatistics.h"
+#include "PolynomialChaosStatistics.h"
 
-registerMooseObject("StochasticToolsApp", PolyChaosStatistics);
+registerMooseObject("StochasticToolsApp", PolynomialChaosStatistics);
 
 InputParameters
-PolyChaosStatistics::validParams()
+PolynomialChaosStatistics::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Tool for calculating statistics with polynomial chaos expansion.");
@@ -25,7 +25,7 @@ PolyChaosStatistics::validParams()
   return params;
 }
 
-PolyChaosStatistics::PolyChaosStatistics(const InputParameters & parameters)
+PolynomialChaosStatistics::PolynomialChaosStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
     _type(getParam<MultiMooseEnum>("compute")),
@@ -39,7 +39,7 @@ PolyChaosStatistics::PolyChaosStatistics(const InputParameters & parameters)
 }
 
 void
-PolyChaosStatistics::execute()
+PolynomialChaosStatistics::execute()
 {
   // Compute standard deviation
   Real sig = 0.0;
@@ -66,15 +66,15 @@ PolyChaosStatistics::execute()
 }
 
 void
-PolyChaosStatistics::finalize()
+PolynomialChaosStatistics::finalize()
 {
   gatherSum(_stats);
 }
 
 void
-PolyChaosStatistics::threadJoin(const UserObject & y)
+PolynomialChaosStatistics::threadJoin(const UserObject & y)
 {
-  const PolyChaosStatistics & pps = static_cast<const PolyChaosStatistics &>(y);
+  const PolynomialChaosStatistics & pps = static_cast<const PolynomialChaosStatistics &>(y);
   for (unsigned int i = 0; i < _stats.size(); ++i)
     _stats[i] += pps._stats[i];
 }

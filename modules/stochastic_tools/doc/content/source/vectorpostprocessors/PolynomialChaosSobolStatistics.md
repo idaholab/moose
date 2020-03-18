@@ -1,10 +1,10 @@
-# PolyChaosLocalSensitivity
+# PolynomialChaosLocalSensitivity
 
 !syntax description /VectorPostprocessors/SobolStatistics
 
 ## Overview
 
-This object computes Sobol sensitivity indices based on a trained [PolynomialChaos.md] surrogate model. The alogrithm is based on computations described in [!cite](sudret2008global). The sensitivities to be computed are defined by the input parameter [!param](/VectorPostprocessors/PolyChaosSobolStatistics/sensitivity_order): `first` computes first-order sensitivities, `second` computes second-order sensitivities, `all` computes all sensitivities (replacing `first` and `second`), and `total` comutes the total sensitivities.
+This object computes Sobol sensitivity indices based on a trained [PolynomialChaos.md] surrogate model. The alogrithm is based on computations described in [!cite](sudret2008global). The sensitivities to be computed are defined by the input parameter [!param](/VectorPostprocessors/PolynomialChaosSobolStatistics/sensitivity_order): `first` computes first-order sensitivities, `second` computes second-order sensitivities, `all` computes all sensitivities (replacing `first` and `second`), and `total` comutes the total sensitivities.
 
 ## Example Syntax
 
@@ -24,8 +24,8 @@ The resulting output contains a single column of all the sensitivities and colum
 
 !listing poly_chaos/gold/sobol_out_sobol_0002.csv
 
-!syntax parameters /VectorPostprocessors/PolyChaosSobolStatistics
+!syntax parameters /VectorPostprocessors/PolynomialChaosSobolStatistics
 
-!syntax inputs /VectorPostprocessors/PolyChaosSobolStatistics
+!syntax inputs /VectorPostprocessors/PolynomialChaosSobolStatistics
 
-!syntax children /VectorPostprocessors/PolyChaosSobolStatistics
+!syntax children /VectorPostprocessors/PolynomialChaosSobolStatistics
