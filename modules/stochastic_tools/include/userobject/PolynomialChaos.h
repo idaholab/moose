@@ -86,7 +86,7 @@ protected:
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
   const std::vector<std::vector<unsigned int>> _tuple;
   /// Total number of coefficient (defined by size of _tuple)
-  const unsigned int _ncoeff;
+  const std::size_t _ncoeff;
   /// These are the coefficients we are after in the PC expansion
   std::vector<Real> _coeff;
   /// The distributions used for sampling
