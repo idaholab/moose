@@ -167,6 +167,33 @@ private:
 };
 
 /**
+ * Smolyak sparse grid
+ */
+class SmolyakGrid : public Quadrature
+{
+public:
+  SmolyakGrid(const unsigned int max_order, std::vector<std::unique_ptr<const Polynomial>> & poly);
+
+  virtual unsigned int nPoints() const override { return _npoints.back(); }
+  virtual unsigned int nDim() const override { return _ndim; }
+
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const override;
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const override;
+  virtual Real quadratureWeight(const unsigned int n) const override;
+
+private:
+  /// Helper function to find which quadrature product to use
+  unsigned int gridIndex(const unsigned int n) const;
+  const unsigned int _ndim;
+  /// Cumulative number of points for each quadrature product
+  std::vector<std::size_t> _npoints;
+  /// Modification of quadrature weight based on polynomial order
+  std::vector<int> _coeff;
+  /// Container for all the combinations of quadrature products
+  std::vector<std::unique_ptr<const StochasticTools::WeightedCartesianProduct<Real, Real>>> _quad;
+};
+
+/**
  * Legendre polynomial of specified order. Uses boost if available
  */
 Real legendre(const unsigned int order,
