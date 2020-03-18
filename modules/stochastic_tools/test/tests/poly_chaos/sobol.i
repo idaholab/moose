@@ -26,7 +26,7 @@
     outputs = none
   []
   [sobol]
-    type = PolyChaosSobolStatistics
+    type = PolynomialChaosSobolStatistics
     pc_name = poly_chaos
     sensitivity_order = 'all total'
     execute_on = final

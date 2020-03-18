@@ -13,12 +13,12 @@
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosSobolStatistics : public GeneralVectorPostprocessor
+class PolynomialChaosSobolStatistics : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  PolyChaosSobolStatistics(const InputParameters & parameters);
+  PolynomialChaosSobolStatistics(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

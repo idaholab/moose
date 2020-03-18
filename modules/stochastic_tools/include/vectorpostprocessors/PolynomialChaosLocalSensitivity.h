@@ -14,12 +14,12 @@
 #include "SamplerInterface.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosLocalSensitivity : public GeneralVectorPostprocessor, SamplerInterface
+class PolynomialChaosLocalSensitivity : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
   static InputParameters validParams();
 
-  PolyChaosLocalSensitivity(const InputParameters & parameters);
+  PolynomialChaosLocalSensitivity(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

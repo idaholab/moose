@@ -71,7 +71,7 @@
     samplers = quadrature
   []
   [pc_coeff]
-    type = PolyChaosData
+    type = PolynomialChaosData
     pc_name = poly_chaos
     execute_on = final
   []

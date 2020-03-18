@@ -65,7 +65,7 @@
     samplers = quadrature
   []
   [pc_moments]
-    type = PolyChaosStatistics
+    type = PolynomialChaosStatistics
     pc_name = poly_chaos
     compute = 'mean stddev skewness kurtosis'
     execute_on = final
