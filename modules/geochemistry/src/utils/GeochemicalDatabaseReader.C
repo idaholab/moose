@@ -560,3 +560,21 @@ GeochemicalDatabaseReader::printReactions(
 
   return reactions;
 }
+
+const FileName &
+GeochemicalDatabaseReader::filename() const
+{
+  return _filename;
+}
+
+bool
+GeochemicalDatabaseReader::isBasisSpecies(const std::string & name) const
+{
+  return _root["basis species"].isMember(name);
+}
+
+bool
+GeochemicalDatabaseReader::isRedoxSpecies(const std::string & name) const
+{
+  return _root["redox couples"].isMember(name);
+}
