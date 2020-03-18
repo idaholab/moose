@@ -15,9 +15,6 @@
 
 class PolyChaosStatistics;
 
-template <>
-InputParameters validParams<PolyChaosStatistics>();
-
 class PolyChaosStatistics : public GeneralVectorPostprocessor
 {
 public:

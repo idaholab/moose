@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", PolynomialChaos);
 
-defineLegacyParams(PolynomialChaos);
-
 InputParameters
 PolynomialChaos::validParams()
 {

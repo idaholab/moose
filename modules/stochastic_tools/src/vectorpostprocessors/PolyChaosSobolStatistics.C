@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", PolyChaosSobolStatistics);
 
-defineLegacyParams(PolyChaosSobolStatistics);
-
 InputParameters
 PolyChaosSobolStatistics::validParams()
 {

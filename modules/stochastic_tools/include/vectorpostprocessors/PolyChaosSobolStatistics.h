@@ -13,11 +13,6 @@
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosSobolStatistics;
-
-template <>
-InputParameters validParams<PolyChaosSobolStatistics>();
-
 class PolyChaosSobolStatistics : public GeneralVectorPostprocessor
 {
 public:
