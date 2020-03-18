@@ -126,10 +126,10 @@ GeochemicalDatabaseReader::getElements()
 }
 
 std::map<std::string, GeochemistryBasisSpecies>
-GeochemicalDatabaseReader::getBasisSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getBasisSpecies(const std::vector<std::string> & names)
 {
   // Parse the basis species specified in names
-  for (auto & species : names)
+  for (const auto & species : names)
     if (_root["basis species"].isMember(species))
     {
       GeochemistryBasisSpecies dbs;
@@ -155,10 +155,10 @@ GeochemicalDatabaseReader::getBasisSpecies(std::vector<std::string> names)
 }
 
 std::map<std::string, GeochemistryEquilibriumSpecies>
-GeochemicalDatabaseReader::getEquilibriumSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getEquilibriumSpecies(const std::vector<std::string> & names)
 {
   // Parse the secondary species specified in names
-  for (auto & species : names)
+  for (const auto & species : names)
     if (_root["secondary species"].isMember(species))
     {
       GeochemistryEquilibriumSpecies dbs;
@@ -190,10 +190,10 @@ GeochemicalDatabaseReader::getEquilibriumSpecies(std::vector<std::string> names)
 }
 
 std::map<std::string, GeochemistryMineralSpecies>
-GeochemicalDatabaseReader::getMineralSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getMineralSpecies(const std::vector<std::string> & names)
 {
   // Parse the mineral species specified in names
-  for (auto & species : names)
+  for (const auto & species : names)
     if (_root["mineral species"].isMember(species))
     {
       GeochemistryMineralSpecies dbs;
@@ -224,10 +224,10 @@ GeochemicalDatabaseReader::getMineralSpecies(std::vector<std::string> names)
 }
 
 std::map<std::string, GeochemistryGasSpecies>
-GeochemicalDatabaseReader::getGasSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getGasSpecies(const std::vector<std::string> & names)
 {
   // Parse the gas species specified in names
-  for (auto & species : names)
+  for (const auto & species : names)
     if (_root["gas species"].isMember(species))
     {
       GeochemistryGasSpecies dbs;
@@ -276,10 +276,10 @@ GeochemicalDatabaseReader::getGasSpecies(std::vector<std::string> names)
 }
 
 std::map<std::string, GeochemistryRedoxSpecies>
-GeochemicalDatabaseReader::getRedoxSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getRedoxSpecies(const std::vector<std::string> & names)
 {
   // Parse the redox species specified in names
-  for (auto & species : names)
+  for (const auto & species : names)
     if (_root["redox couples"].isMember(species))
     {
       GeochemistryRedoxSpecies dbs;
@@ -311,7 +311,7 @@ GeochemicalDatabaseReader::getRedoxSpecies(std::vector<std::string> names)
 }
 
 std::map<std::string, GeochemistryOxideSpecies>
-GeochemicalDatabaseReader::getOxideSpecies(std::vector<std::string> names)
+GeochemicalDatabaseReader::getOxideSpecies(const std::vector<std::string> & names)
 {
   // Parse the oxide species specified in names
   for (auto & species : names)
@@ -373,7 +373,7 @@ GeochemicalDatabaseReader::getNeutralSpeciesActivity()
 }
 
 std::vector<std::string>
-GeochemicalDatabaseReader::equilibriumReactions(std::vector<std::string> names) const
+GeochemicalDatabaseReader::equilibriumReactions(const std::vector<std::string> & names) const
 {
   std::vector<std::map<std::string, Real>> basis_species(names.size());
 
@@ -402,13 +402,13 @@ GeochemicalDatabaseReader::equilibriumReactions(std::vector<std::string> names) 
 }
 
 std::vector<std::string>
-GeochemicalDatabaseReader::mineralReactions(std::vector<std::string> names) const
+GeochemicalDatabaseReader::mineralReactions(const std::vector<std::string> & names) const
 {
   std::vector<std::map<std::string, Real>> basis_species(names.size());
 
   for (unsigned int i = 0; i < names.size(); ++i)
   {
-    auto species = names[i];
+    const auto species = names[i];
 
     if (_root["mineral species"].isMember(species))
     {
@@ -431,13 +431,13 @@ GeochemicalDatabaseReader::mineralReactions(std::vector<std::string> names) cons
 }
 
 std::vector<std::string>
-GeochemicalDatabaseReader::gasReactions(std::vector<std::string> names) const
+GeochemicalDatabaseReader::gasReactions(const std::vector<std::string> & names) const
 {
   std::vector<std::map<std::string, Real>> basis_species(names.size());
 
   for (unsigned int i = 0; i < names.size(); ++i)
   {
-    auto species = names[i];
+    const auto species = names[i];
 
     if (_root["gas species"].isMember(species))
     {
@@ -460,13 +460,13 @@ GeochemicalDatabaseReader::gasReactions(std::vector<std::string> names) const
 }
 
 std::vector<std::string>
-GeochemicalDatabaseReader::redoxReactions(std::vector<std::string> names) const
+GeochemicalDatabaseReader::redoxReactions(const std::vector<std::string> & names) const
 {
   std::vector<std::map<std::string, Real>> basis_species(names.size());
 
   for (unsigned int i = 0; i < names.size(); ++i)
   {
-    auto species = names[i];
+    const auto species = names[i];
 
     if (_root["redox couples"].isMember(species))
     {
@@ -489,13 +489,13 @@ GeochemicalDatabaseReader::redoxReactions(std::vector<std::string> names) const
 }
 
 std::vector<std::string>
-GeochemicalDatabaseReader::oxideReactions(std::vector<std::string> names) const
+GeochemicalDatabaseReader::oxideReactions(const std::vector<std::string> & names) const
 {
   std::vector<std::map<std::string, Real>> basis_species(names.size());
 
   for (unsigned int i = 0; i < names.size(); ++i)
   {
-    auto species = names[i];
+    const auto species = names[i];
 
     if (_root["oxides"].isMember(species))
     {
