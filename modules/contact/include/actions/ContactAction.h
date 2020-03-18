@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+/// Enum used to select contact model type
 enum class ContactModel
 {
   FRICTIONLESS,
@@ -20,6 +21,7 @@ enum class ContactModel
   COULOMB,
 };
 
+/// Enum used to select contact formulation
 enum class ContactFormulation
 {
   RANFS,
@@ -30,6 +32,10 @@ enum class ContactFormulation
   MORTAR
 };
 
+/**
+ * Action class for creating constraints, kernels, and user objects necessary for mechanical
+ * contact.
+ */
 class ContactAction;
 
 template <>
@@ -46,27 +52,58 @@ public:
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-
+  /**
+   * Get contact model
+   * @return enum
+   */
   static MooseEnum getModelEnum();
+  /**
+   * Get contact formulation
+   * @return enum
+   */
   static MooseEnum getFormulationEnum();
+  /**
+   * Get contact system
+   * @return enum
+   */
   static MooseEnum getSystemEnum();
+  /**
+   * Get smoothing type
+   * @return enum
+   */
   static MooseEnum getSmoothingEnum();
 
   static InputParameters commonParameters();
 
 protected:
+  /// Master boundary name for mechanical contact
   const BoundaryName _master;
+  /// Slave boundary name for mechanical contact
   const BoundaryName _slave;
+  /// Contact model type enum
   const MooseEnum _model;
+  /// Contact formulation type enum
   const MooseEnum _formulation;
+  /// Contact system type enum
   const MooseEnum _system;
+  /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
-  const bool _ping_pong_protection;
 
 private:
+  /**
+   * Generate mesh and other Moose objects for Mortar contact
+   */
   void addMortarContact();
+  /**
+   * Generate constraints for node to face contact
+   */
   void addNodeFaceContact();
+  /**
+   * Generate Dirac kernels for mechanical contact
+   */
   void addDiracContact();
-
+  /**
+   * Get displacement variable names
+   */
   std::vector<VariableName> getDisplacementVarNames();
 };
