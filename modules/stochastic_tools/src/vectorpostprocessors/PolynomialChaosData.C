@@ -52,7 +52,7 @@ PolynomialChaosData::execute()
   for (unsigned int d = 0; d < _pc_uo.getNumberOfParameters(); ++d)
   {
     _order_vector[d]->resize(_pc_uo.getNumberofCoefficients());
-    for (unsigned int i = 0; i < _pc_uo.getNumberofCoefficients(); ++i)
+    for (std::size_t i = 0; i < _pc_uo.getNumberofCoefficients(); ++i)
       (*_order_vector[d])[i] = _pc_uo.getPolynomialOrder(d, i);
   }
 }

@@ -76,7 +76,7 @@ PolynomialChaos::execute()
         poly_val(d, i) = _poly[d]->compute(i, data[d]);
 
     // Loop over coefficients
-    for (unsigned int i = 0; i < _ncoeff; ++i)
+    for (std::size_t i = 0; i < _ncoeff; ++i)
     {
       Real val = _values[p - _sampler->getLocalRowBegin()];
       // Loop over parameters
@@ -96,7 +96,7 @@ PolynomialChaos::finalize()
   gatherSum(_coeff);
 
   if (!_quad_sampler)
-    for (unsigned int i = 0; i < _ncoeff; ++i)
+    for (std::size_t i = 0; i < _ncoeff; ++i)
       _coeff[i] /= _sampler->getNumberOfRows();
 }
 
@@ -104,7 +104,7 @@ void
 PolynomialChaos::threadJoin(const UserObject & y)
 {
   const PolynomialChaos & pps = static_cast<const PolynomialChaos &>(y);
-  for (unsigned int i = 0; i < _ncoeff; ++i)
+  for (std::size_t i = 0; i < _ncoeff; ++i)
     _coeff[i] += pps._coeff[i];
 }
 
@@ -122,7 +122,7 @@ PolynomialChaos::evaluate(const std::vector<Real> & x) const
       poly_val(d, i) = _poly[d]->compute(i, x[d], /*normalize =*/false);
 
   Real val = 0;
-  for (unsigned int i = 0; i < _ncoeff; ++i)
+  for (std::size_t i = 0; i < _ncoeff; ++i)
   {
     Real tmp = _coeff[i];
     for (unsigned int d = 0; d < _ndim; ++d)
@@ -137,7 +137,7 @@ Real
 PolynomialChaos::computeStandardDeviation() const
 {
   Real var = 0;
-  for (unsigned int i = 1; i < _ncoeff; ++i)
+  for (std::size_t i = 1; i < _ncoeff; ++i)
   {
     Real norm = 1.0;
     for (std::size_t d = 0; d < _ndim; ++d)
@@ -157,7 +157,7 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
   for (unsigned int d = 0; d < _ndim; ++d)
   {
     std::vector<std::vector<unsigned int>> order_1d(n, std::vector<unsigned int>(_ncoeff - 1));
-    for (unsigned int i = 1; i < _ncoeff; ++i)
+    for (std::size_t i = 1; i < _ncoeff; ++i)
       for (unsigned int m = 0; m < n; ++m)
         order_1d[m][i - 1] = _tuple[i][d];
     order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
@@ -216,7 +216,7 @@ PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> & dim,
       poly_val(d, i) = _poly[d]->computeDerivative(i, x[d], grad[d]);
 
   Real val = 0;
-  for (unsigned int i = 0; i < _ncoeff; ++i)
+  for (std::size_t i = 0; i < _ncoeff; ++i)
   {
     Real tmp = _coeff[i];
     for (unsigned int d = 0; d < _ndim; ++d)
