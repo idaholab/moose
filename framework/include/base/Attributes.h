@@ -319,4 +319,3 @@ private:
 
 #undef clonefunc
 #undef hashfunc
-
