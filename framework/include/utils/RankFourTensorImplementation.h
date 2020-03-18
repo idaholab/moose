@@ -72,7 +72,7 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const InitMethod init)
         for (unsigned int j = 0; j < N; ++j)
           for (unsigned int k = 0; k < N; ++k)
             for (unsigned int l = 0; l < N; ++l)
-              _vals[index++] = (i == k) && (j == l);
+              _vals[index++] = Real(i == k && j == l);
       break;
 
     case initIdentitySymmetricFour:
@@ -80,7 +80,7 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const InitMethod init)
         for (unsigned int j = 0; j < N; ++j)
           for (unsigned int k = 0; k < N; ++k)
             for (unsigned int l = 0; l < N; ++l)
-              _vals[index++] = 0.5 * ((i == k) && (j == l)) + 0.5 * ((i == l) && (j == k));
+              _vals[index++] = 0.5 * Real(i == k && j == l) + 0.5 * Real(i == l && j == k);
       break;
 
     default:
@@ -667,11 +667,11 @@ RankFourTensorTempl<T>::fillGeneralIsotropic(T i0, T i1, T i2)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
         {
-          (*this)(i, j, k, l) =
-              i0 * (i == j) * (k == l) + i1 * (i == k) * (j == l) + i1 * (i == l) * (j == k);
+          (*this)(i, j, k, l) = i0 * Real(i == j) * Real(k == l) +
+                                i1 * Real(i == k) * Real(j == l) + i1 * Real(i == l) * Real(j == k);
           for (unsigned int m = 0; m < N; ++m)
             (*this)(i, j, k, l) +=
-                i2 * PermutationTensor::eps(i, j, m) * PermutationTensor::eps(k, l, m);
+                i2 * Real(PermutationTensor::eps(i, j, m)) * Real(PermutationTensor::eps(k, l, m));
         }
 }
 

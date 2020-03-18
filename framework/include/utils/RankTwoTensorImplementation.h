@@ -605,7 +605,7 @@ RankTwoTensorTempl<T>::d2thirdInvariant() const
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
         {
-          d2._vals[index++] = (i == j) * s(k, l) / 3.0 + (k == l) * s(i, j) / 3.0;
+          d2._vals[index++] = Real(i == j) * s(k, l) / 3.0 + Real(k == l) * s(i, j) / 3.0;
           // for (unsigned int a = 0; a < N; ++a)
           //  for (unsigned int b = 0; b < N; ++b)
           //    d2(i, j, k, l) += 0.5*(PermutationTensor::eps(i, k, a)*PermutationTensor::eps(j, l,
