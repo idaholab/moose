@@ -50,7 +50,7 @@ private:
   buildSobolIndices(const unsigned int nind, const unsigned int ndim, const unsigned int sdim);
   /// Function to set ordering of sobol indices
   static bool orderSobolIndices(const std::set<unsigned int> & a, const std::set<unsigned int> & b);
-  struct sobolorder
+  struct SobolOrder
   {
     bool operator()(const std::set<unsigned int> & a, const std::set<unsigned int> & b) const
     {
@@ -66,5 +66,5 @@ private:
   /// Number of values to be computed
   unsigned int _nval;
   /// Set containing all sensitivities computed
-  std::set<std::set<unsigned int>, sobolorder> _ind;
+  std::set<std::set<unsigned int>, SobolOrder> _ind;
 };
