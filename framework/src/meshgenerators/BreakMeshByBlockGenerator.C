@@ -266,6 +266,14 @@ BreakMeshByBlockGenerator::generate()
   Moose::out << "OUT_ELEMENT_NODE_END\n\n";
 
   addInterfaceBoundary(*mesh);
+
+  // We need to prepare the mesh now to at a minimum update our parallel counts. We used our own
+  // numbering procedure so we don't need to renumber. Similarly we also handled our own
+  // partitioning so we can skip partitioning.
+  mesh->allow_renumbering(false);
+  mesh->skip_partitioning(true);
+  mesh->prepare_for_use();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
