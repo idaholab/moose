@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'fv_simple_diffusion.i'
+    exodiff = 'fv_simple_diffusion_out.e'
+
+    requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
+  [../]
+
+  [./fv_simple_diffusion_neumann]
+    type = 'Exodiff'
+    input = 'fv_simple_diffusion_neumann.i'
+    exodiff = 'fv_simple_diffusion_neumann_out.e'
+
+    requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Neumann and Dirichlet boundary conditions on a regular mesh.'
+  [../]
+[]
