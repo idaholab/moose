@@ -167,7 +167,6 @@ def readDatabase(dblist):
                             for i in range(0, len(data), 2):
                                 basis_species[species]['elements'][data[i+1]] = data[i]
 
-
                 line = line+1
 
                 if '-end-' in dblist[line]:
@@ -384,7 +383,6 @@ def readDatabase(dblist):
                     reading_sorbing_mineral_species = False
                     line = line-1
 
-            
         if 'minerals\n' in dblist[line] and not ('sorbing minerals' in dblist[line]) and len(dblist[line].split()) == 2:
             # Read the minerals data
             line = line+1
@@ -461,11 +459,18 @@ def readDatabase(dblist):
                     # Tsonopoulos fugacity model coefficients
                     if 'Pcrit' in dblist[line]:
                         data = dblist[line].replace('=', ' ').split()
-                        if len(data) != 8 or data[0] != "Pcrit" or data[2] != "bar" or data[3] != "Tcrit" or data[5] != "K" or data[6] != "omega":
+                        if not (len(data) == 8 or len(data) == 12) or data[0] != "Pcrit" or data[2] != "bar" or data[3] != "Tcrit" or data[5] != "K" or data[6] != "omega":
                             raise ValueError("Tsonopoulos parameters must be measured in bar and Kelvin.  Offending line is: " + dblist[line])
                         gas_species[species][data[0]] = data[1]
                         gas_species[species][data[3]] = data[4]
                         gas_species[species][data[6]] = data[7]
+                        if len(data) == 8:
+                            gas_species[species]["a"] = "0.0"
+                            gas_species[species]["b"] = "0.0"
+                        else:
+                            gas_species[species]["a"] = data[9]
+                            gas_species[species]["b"] = data[11]
+
 
                         line = line+1
 

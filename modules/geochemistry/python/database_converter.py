@@ -94,7 +94,6 @@ def main():
         database['sorbing minerals'] = db.sorbing_minerals
     if db.surface_species:
         database['surface species'] = db.surface_species
-    
 
     # Write out the database to JSON format
     with open(opt.output, 'w') as output:
