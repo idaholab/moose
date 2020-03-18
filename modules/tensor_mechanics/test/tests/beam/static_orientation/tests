@@ -1,0 +1,118 @@
+[Tests]
+  design = "C0TimoshenkoBeam.md"
+  issues = "#14772"
+  [./euler_small_strain_orientation_z]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_z.i'
+    csvdiff = 'euler_small_strain_orientation_z_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed along the global Z axis."
+  [../]
+
+  [./euler_small_strain_orientation_yz]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_yz.i'
+    csvdiff = 'euler_small_strain_orientation_yz_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the YZ plane at an angle."
+  [../]
+
+  [./euler_small_strain_orientation_yz_force_yz]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_yz_force_yz.i'
+    csvdiff = 'euler_small_strain_orientation_yz_force_yz_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the YZ plane at an angle and has in-plane"
+                  " loading."
+  [../]
+
+  [./euler_small_strain_orientation_yz_force_yz_cross_section]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_yz_force_yz_cross_section.i'
+    csvdiff = 'euler_small_strain_orientation_yz_force_yz_cross_section_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the YZ plane at an angle and has in-plane"
+                  " loading with non-symmetric cross section geometry."
+  [../]
+
+  [./euler_small_strain_orientation_yz_cross_section]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_yz_cross_section.i'
+    csvdiff = 'euler_small_strain_orientation_yz_cross_section_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the YZ plane at an angle and has in-plane"
+                  " loading and the cross section geometry is non-symmetric."
+  [../]
+
+  [./euler_small_strain_orientation_y]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_y.i'
+    csvdiff = 'euler_small_strain_orientation_y_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam axis"
+                  " is placed along the global Y axis."
+  [../]
+
+  [./euler_small_strain_orientation_xz]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_xz.i'
+    csvdiff = 'euler_small_strain_orientation_xz_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the XZ plane at a 45 deg. angle."
+  [../]
+
+  [./euler_small_strain_orientation_xz_force_xz]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_xz_force_xz.i'
+    csvdiff = 'euler_small_strain_orientation_xz_force_xz_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the XZ plane at a 45 deg. angle, and the external"
+                  " loading takes place on the same plane."
+  [../]
+
+  [./euler_small_strain_orientation_xy]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_xy.i'
+    csvdiff = 'euler_small_strain_orientation_xy_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the XY plane at a 45 deg. angle."
+  [../]
+
+  [./euler_small_strain_orientation_xy_force_xy]
+    type = 'CSVDiff'
+    input = 'euler_small_strain_orientation_xy_force_xy.i'
+    csvdiff = 'euler_small_strain_orientation_xy_force_xy_out.csv'
+#    verification = 'beam_vandv.md'
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformations when the beam is"
+                  " placed on the XY plane at a 45 deg. angle, and the external"
+                  " loading takes place on the same plane."
+  [../]
+[]
