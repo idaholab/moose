@@ -1,0 +1,57 @@
+CONDA_BUILD_SYSROOT:           # [osx]
+  - /opt/MacOSX10.9.sdk        # [osx]
+
+macos_min_version:             # [osx]
+  - 10.9                       # [osx]
+
+macos_machine:                 # [osx]
+  - x86_64-apple-darwin13.4.0  # [osx]
+
+MACOSX_DEPLOYMENT_TARGET:      # [osx]
+  - 10.9                       # [osx]
+
+libpng:
+  - 1.6.37 h2573ce8_0 # [osx]
+  - 1.6.37 hed695b0_0 # [linux]
+
+libllvm:
+  - 9.0.1 ha1b3eb9_0
+
+libclang:
+  - 9.0.1 default_hf57f61e_0
+
+compilerrt:
+  - 9.0.1 h6a512c6_0
+
+compilerrtosx:
+  - 9.0.1 h6a512c6_0
+
+clangxx:
+  - 9.0.1 default_hf57f61e_0
+
+clangosx:
+  - 9.0.1 h05bbb7f_0
+
+clangxxosx:
+  - 9.0.1 h05bbb7f_0
+
+clang:
+  - 9.0.1 default_hf57f61e_0
+
+llvmopenmp:
+  - 9.0.1 h28b9765_2
+
+osxfortran:
+  - 7.3.0 h22b1bf0_7
+
+gcc:
+  - 7.3.0 h553295d_16
+
+gxx:
+  - 7.3.0 h553295d_16
+
+fortran:
+  - 7.3.0 h553295d_16
+
+gccimpl:
+  - 7.3.0 hd420e75_5
