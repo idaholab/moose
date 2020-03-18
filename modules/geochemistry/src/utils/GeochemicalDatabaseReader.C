@@ -14,8 +14,7 @@
 #include "string"
 #include <fstream>
 
-GeochemicalDatabaseReader::GeochemicalDatabaseReader(const std::string filename)
-  : _filename(filename)
+GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename) : _filename(filename)
 {
   read(_filename);
 }
@@ -51,7 +50,7 @@ GeochemicalDatabaseReader::getTemperatures()
     auto temperatures = _root["Header"]["temperatures"];
     _temperature_points.resize(temperatures.size());
     for (unsigned int i = 0; i < temperatures.size(); ++i)
-      _temperature_points[i] = std::stod(temperatures[i].asString());
+      _temperature_points[i] = MooseUtils::convert<Real>(temperatures[i].asString());
   }
 
   return _temperature_points;
@@ -66,7 +65,7 @@ GeochemicalDatabaseReader::getPressures()
     auto pressures = _root["Header"]["pressures"];
     _pressure_points.resize(pressures.size());
     for (unsigned int i = 0; i < pressures.size(); ++i)
-      _pressure_points[i] = std::stod(pressures[i].asString());
+      _pressure_points[i] = MooseUtils::convert<Real>(pressures[i].asString());
   }
 
   return _pressure_points;
@@ -81,7 +80,7 @@ GeochemicalDatabaseReader::getDebyeHuckel()
     {
       std::vector<Real> adhvals(_root["Header"]["adh"].size());
       for (unsigned int i = 0; i < _root["Header"]["adh"].size(); ++i)
-        adhvals[i] = std::stod(_root["Header"]["adh"][i].asString());
+        adhvals[i] = MooseUtils::convert<Real>(_root["Header"]["adh"][i].asString());
       _debye_huckel.adh = adhvals;
     }
 
@@ -89,7 +88,7 @@ GeochemicalDatabaseReader::getDebyeHuckel()
     {
       std::vector<Real> bdhvals(_root["Header"]["bdh"].size());
       for (unsigned int i = 0; i < _root["Header"]["bdh"].size(); ++i)
-        bdhvals[i] = std::stod(_root["Header"]["bdh"][i].asString());
+        bdhvals[i] = MooseUtils::convert<Real>(_root["Header"]["bdh"][i].asString());
       _debye_huckel.bdh = bdhvals;
     }
 
@@ -97,7 +96,7 @@ GeochemicalDatabaseReader::getDebyeHuckel()
     {
       std::vector<Real> bdotvals(_root["Header"]["bdot"].size());
       for (unsigned int i = 0; i < _root["Header"]["bdot"].size(); ++i)
-        bdotvals[i] = std::stod(_root["Header"]["bdot"][i].asString());
+        bdotvals[i] = MooseUtils::convert<Real>(_root["Header"]["bdot"][i].asString());
       _debye_huckel.bdot = bdotvals;
     }
   }
@@ -118,7 +117,7 @@ GeochemicalDatabaseReader::getElements()
     {
       _elements[el].name = _root["elements"][el]["name"].asString();
       _elements[el].molecular_weight =
-          std::stod(_root["elements"][el]["molecular weight"].asString());
+          MooseUtils::convert<Real>(_root["elements"][el]["molecular weight"].asString());
     }
   }
 
@@ -136,13 +135,14 @@ GeochemicalDatabaseReader::getBasisSpecies(const std::vector<std::string> & name
 
       auto basis_species = _root["basis species"][species];
       dbs.name = species;
-      dbs.radius = std::stod(basis_species["radius"].asString());
-      dbs.charge = std::stod(basis_species["charge"].asString());
-      dbs.molecular_weight = std::stod(basis_species["molecular weight"].asString());
+      dbs.radius = MooseUtils::convert<Real>(basis_species["radius"].asString());
+      dbs.charge = MooseUtils::convert<Real>(basis_species["charge"].asString());
+      dbs.molecular_weight =
+          MooseUtils::convert<Real>(basis_species["molecular weight"].asString());
 
       std::map<std::string, Real> elements;
       for (auto & el : basis_species["elements"].getMemberNames())
-        elements[el] = std::stod(basis_species["elements"][el].asString());
+        elements[el] = MooseUtils::convert<Real>(basis_species["elements"][el].asString());
 
       dbs.elements = elements;
 
@@ -165,19 +165,19 @@ GeochemicalDatabaseReader::getEquilibriumSpecies(const std::vector<std::string> 
 
       auto sec_species = _root["secondary species"][species];
       dbs.name = species;
-      dbs.radius = std::stod(sec_species["radius"].asString());
-      dbs.charge = std::stod(sec_species["charge"].asString());
-      dbs.molecular_weight = std::stod(sec_species["molecular weight"].asString());
+      dbs.radius = MooseUtils::convert<Real>(sec_species["radius"].asString());
+      dbs.charge = MooseUtils::convert<Real>(sec_species["charge"].asString());
+      dbs.molecular_weight = MooseUtils::convert<Real>(sec_species["molecular weight"].asString());
 
       std::vector<Real> eq_const(sec_species["logk"].size());
       for (unsigned int i = 0; i < sec_species["logk"].size(); ++i)
-        eq_const[i] = std::stod(sec_species["logk"][i].asString());
+        eq_const[i] = MooseUtils::convert<Real>(sec_species["logk"][i].asString());
 
       dbs.equilibrium_const = eq_const;
 
       std::map<std::string, Real> basis_species;
       for (auto & bs : sec_species["species"].getMemberNames())
-        basis_species[bs] = std::stod(sec_species["species"][bs].asString());
+        basis_species[bs] = MooseUtils::convert<Real>(sec_species["species"][bs].asString());
 
       dbs.basis_species = basis_species;
 
@@ -200,18 +200,19 @@ GeochemicalDatabaseReader::getMineralSpecies(const std::vector<std::string> & na
 
       auto mineral_species = _root["mineral species"][species];
       dbs.name = species;
-      dbs.molecular_weight = std::stod(mineral_species["molecular weight"].asString());
-      dbs.molecular_volume = std::stod(mineral_species["molar volume"].asString());
+      dbs.molecular_weight =
+          MooseUtils::convert<Real>(mineral_species["molecular weight"].asString());
+      dbs.molecular_volume = MooseUtils::convert<Real>(mineral_species["molar volume"].asString());
 
       std::vector<Real> eq_const(mineral_species["logk"].size());
       for (unsigned int i = 0; i < mineral_species["logk"].size(); ++i)
-        eq_const[i] = std::stod(mineral_species["logk"][i].asString());
+        eq_const[i] = MooseUtils::convert<Real>(mineral_species["logk"][i].asString());
 
       dbs.equilibrium_const = eq_const;
 
       std::map<std::string, Real> basis_species;
       for (auto & bs : mineral_species["species"].getMemberNames())
-        basis_species[bs] = std::stod(mineral_species["species"][bs].asString());
+        basis_species[bs] = MooseUtils::convert<Real>(mineral_species["species"][bs].asString());
 
       dbs.basis_species = basis_species;
 
@@ -234,17 +235,17 @@ GeochemicalDatabaseReader::getGasSpecies(const std::vector<std::string> & names)
 
       auto gas_species = _root["gas species"][species];
       dbs.name = species;
-      dbs.molecular_weight = std::stod(gas_species["molecular weight"].asString());
+      dbs.molecular_weight = MooseUtils::convert<Real>(gas_species["molecular weight"].asString());
 
       std::vector<Real> eq_const(gas_species["logk"].size());
       for (unsigned int i = 0; i < gas_species["logk"].size(); ++i)
-        eq_const[i] = std::stod(gas_species["logk"][i].asString());
+        eq_const[i] = MooseUtils::convert<Real>(gas_species["logk"][i].asString());
 
       dbs.equilibrium_const = eq_const;
 
       std::map<std::string, Real> basis_species;
       for (auto & bs : gas_species["species"].getMemberNames())
-        basis_species[bs] = std::stod(gas_species["species"][bs].asString());
+        basis_species[bs] = MooseUtils::convert<Real>(gas_species["species"][bs].asString());
 
       dbs.basis_species = basis_species;
 
@@ -253,19 +254,19 @@ GeochemicalDatabaseReader::getGasSpecies(const std::vector<std::string> & names)
       {
         std::vector<Real> chi(gas_species["chi"].size());
         for (unsigned int i = 0; i < gas_species["chi"].size(); ++i)
-          chi[i] = std::stod(gas_species["chi"][i].asString());
+          chi[i] = MooseUtils::convert<Real>(gas_species["chi"][i].asString());
 
         dbs.chi = chi;
       }
 
       if (gas_species.isMember("Pcrit"))
-        dbs.Pcrit = std::stod(gas_species["Pcrit"].asString());
+        dbs.Pcrit = MooseUtils::convert<Real>(gas_species["Pcrit"].asString());
 
       if (gas_species.isMember("Tcrit"))
-        dbs.Tcrit = std::stod(gas_species["Tcrit"].asString());
+        dbs.Tcrit = MooseUtils::convert<Real>(gas_species["Tcrit"].asString());
 
       if (gas_species.isMember("omega"))
-        dbs.omega = std::stod(gas_species["omega"].asString());
+        dbs.omega = MooseUtils::convert<Real>(gas_species["omega"].asString());
 
       _gas_species[species] = dbs;
     }
@@ -286,19 +287,20 @@ GeochemicalDatabaseReader::getRedoxSpecies(const std::vector<std::string> & name
 
       auto redox_species = _root["redox couples"][species];
       dbs.name = species;
-      dbs.radius = std::stod(redox_species["radius"].asString());
-      dbs.charge = std::stod(redox_species["charge"].asString());
-      dbs.molecular_weight = std::stod(redox_species["molecular weight"].asString());
+      dbs.radius = MooseUtils::convert<Real>(redox_species["radius"].asString());
+      dbs.charge = MooseUtils::convert<Real>(redox_species["charge"].asString());
+      dbs.molecular_weight =
+          MooseUtils::convert<Real>(redox_species["molecular weight"].asString());
 
       std::vector<Real> eq_const(redox_species["logk"].size());
       for (unsigned int i = 0; i < redox_species["logk"].size(); ++i)
-        eq_const[i] = std::stod(redox_species["logk"][i].asString());
+        eq_const[i] = MooseUtils::convert<Real>(redox_species["logk"][i].asString());
 
       dbs.equilibrium_const = eq_const;
 
       std::map<std::string, Real> basis_species;
       for (auto & bs : redox_species["species"].getMemberNames())
-        basis_species[bs] = std::stod(redox_species["species"][bs].asString());
+        basis_species[bs] = MooseUtils::convert<Real>(redox_species["species"][bs].asString());
 
       dbs.basis_species = basis_species;
 
@@ -321,11 +323,12 @@ GeochemicalDatabaseReader::getOxideSpecies(const std::vector<std::string> & name
 
       auto oxide_species = _root["oxides"][species];
       dbs.name = species;
-      dbs.molecular_weight = std::stod(oxide_species["molecular weight"].asString());
+      dbs.molecular_weight =
+          MooseUtils::convert<Real>(oxide_species["molecular weight"].asString());
 
       std::map<std::string, Real> basis_species;
       for (auto & bs : oxide_species["species"].getMemberNames())
-        basis_species[bs] = std::stod(oxide_species["species"][bs].asString());
+        basis_species[bs] = MooseUtils::convert<Real>(oxide_species["species"][bs].asString());
 
       dbs.basis_species = basis_species;
 
@@ -352,7 +355,7 @@ GeochemicalDatabaseReader::getNeutralSpeciesActivity()
         std::vector<Real> coeffvec(neutral_species[ns][nsac].size());
 
         for (unsigned int i = 0; i < coeffvec.size(); ++i)
-          coeffvec[i] = std::stod(neutral_species[ns][nsac][i].asString());
+          coeffvec[i] = MooseUtils::convert<Real>(neutral_species[ns][nsac][i].asString());
 
         coeffs.push_back(coeffvec);
       }
@@ -388,7 +391,7 @@ GeochemicalDatabaseReader::equilibriumReactions(const std::vector<std::string> &
       // The basis species in this reaction
       std::map<std::string, Real> this_basis_species;
       for (auto & bs : sec_species["species"].getMemberNames())
-        this_basis_species[bs] = std::stod(sec_species["species"][bs].asString());
+        this_basis_species[bs] = MooseUtils::convert<Real>(sec_species["species"][bs].asString());
 
       basis_species[i] = this_basis_species;
     }
@@ -417,7 +420,7 @@ GeochemicalDatabaseReader::mineralReactions(const std::vector<std::string> & nam
       // The basis species in this reaction
       std::map<std::string, Real> this_basis_species;
       for (auto & bs : min_species["species"].getMemberNames())
-        this_basis_species[bs] = std::stod(min_species["species"][bs].asString());
+        this_basis_species[bs] = MooseUtils::convert<Real>(min_species["species"][bs].asString());
 
       basis_species[i] = this_basis_species;
     }
@@ -446,7 +449,7 @@ GeochemicalDatabaseReader::gasReactions(const std::vector<std::string> & names) 
       // The basis species in this reaction
       std::map<std::string, Real> this_basis_species;
       for (auto & bs : gas_species["species"].getMemberNames())
-        this_basis_species[bs] = std::stod(gas_species["species"][bs].asString());
+        this_basis_species[bs] = MooseUtils::convert<Real>(gas_species["species"][bs].asString());
 
       basis_species[i] = this_basis_species;
     }
@@ -475,7 +478,7 @@ GeochemicalDatabaseReader::redoxReactions(const std::vector<std::string> & names
       // The basis species in this reaction
       std::map<std::string, Real> this_basis_species;
       for (auto & bs : redox_species["species"].getMemberNames())
-        this_basis_species[bs] = std::stod(redox_species["species"][bs].asString());
+        this_basis_species[bs] = MooseUtils::convert<Real>(redox_species["species"][bs].asString());
 
       basis_species[i] = this_basis_species;
     }
@@ -504,7 +507,7 @@ GeochemicalDatabaseReader::oxideReactions(const std::vector<std::string> & names
       // The basis species in this reaction
       std::map<std::string, Real> this_basis_species;
       for (auto & bs : oxide_species["species"].getMemberNames())
-        this_basis_species[bs] = std::stod(oxide_species["species"][bs].asString());
+        this_basis_species[bs] = MooseUtils::convert<Real>(oxide_species["species"][bs].asString());
 
       basis_species[i] = this_basis_species;
     }

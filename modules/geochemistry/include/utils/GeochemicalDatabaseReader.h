@@ -191,7 +191,7 @@ struct GeochemistryNeutralSpeciesActivity
 class GeochemicalDatabaseReader
 {
 public:
-  GeochemicalDatabaseReader(const std::string filename);
+  GeochemicalDatabaseReader(const FileName filename);
 
   /**
    * Parse the thermodynamic database
