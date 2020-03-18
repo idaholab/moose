@@ -137,6 +137,26 @@ struct GeochemistryOxideSpecies
 };
 
 /**
+ * Data structure for sorbing surface species.
+ * * Species name
+ * * Basis species and stoichiometric coefficients present
+ * * log10(Equilibrium constant) and dlog10K/dT
+ * * charge
+ * * molecular weight (g)
+ */
+struct GeochemistrySurfaceSpecies
+{
+  GeochemistrySurfaceSpecies(){};
+
+  std::string name;
+  std::map<std::string, Real> basis_species;
+  Real charge;
+  Real molecular_weight;
+  Real log10K;
+  Real dlog10KdT;
+};
+
+/**
  * Data structure for Debye-Huckel activity coefficients.
  * Members are:
  * * adh: Debye-Huckel a parameter
@@ -301,6 +321,14 @@ public:
   getOxideSpecies(const std::vector<std::string> & names);
 
   /**
+   * Get the surface sorbing species information
+   * @param names list of surface sorbing species
+   * @return surface sorbing species structure
+   */
+  std::map<std::string, GeochemistrySurfaceSpecies>
+  getSurfaceSpecies(const std::vector<std::string> & names);
+
+  /**
    * Get the neutral species activity coefficients
    * @return neutral species activity coefficients
    */
@@ -389,6 +417,8 @@ protected:
   std::map<std::string, GeochemistryRedoxSpecies> _redox_species;
   /// Oxide species data read from the database
   std::map<std::string, GeochemistryOxideSpecies> _oxide_species;
+  /// Surface sorbing species data read from the database
+  std::map<std::string, GeochemistrySurfaceSpecies> _surface_species;
   /// Debye-Huckel activity coefficients
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients

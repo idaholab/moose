@@ -138,6 +138,24 @@
       "charge": "1",
       "radius": "9.0",
       "molecular weight": "1.0079"
+    },
+    ">(s)FeOH": {
+      "elements": {
+        "Fe": "1.000",
+        "H": "1.000",
+        "O": "1.000"
+      },
+      "charge": "0",
+      "molecular weight": "72.8543"
+    },
+    ">(w)FeOH": {
+      "elements": {
+        "Fe": "1.000",
+        "H": "1.000",
+        "O": "1.000"
+      },
+      "charge": "0",
+      "molecular weight": "1234.567"
     }
   },
   "secondary species": {
@@ -278,6 +296,68 @@
         "-2.2301",
         "-3.2107"
       ]
+    },
+    "Fe(OH)3(ppd)": {
+      "species": {
+        "H+": "-3.000",
+        "Fe+++": "1.000",
+        "H2O": "3.000"
+      },
+      "molar volume": "34.3200",
+      "molecular weight": "106.8689",
+      "logk": [
+        "6.1946",
+        "4.8890",
+        "3.4608",
+        "2.2392",
+        "1.1150",
+        ".2446",
+        "-.5504",
+        "-1.5398"
+      ]
+    },
+    "Goethite": {
+      "species": {
+        "H+": "-3.000",
+        "Fe+++": "1.000",
+        "H2O": "2.000"
+      },
+      "molar volume": "20.8200",
+      "molecular weight": "88.8537",
+      "logk": [
+        "1.5096",
+        ".4999",
+        "-.6071",
+        "-1.5556",
+        "-2.4347",
+        "-3.1327",
+        "-3.8051",
+        "-4.7065"
+      ]
+    }
+  },
+  "sorbing minerals": {
+    "Fe(OH)3(ppd)": {
+      "site density": [
+        ".0050",
+        ".2000"
+      ],
+      "sorbing site": [
+        ">(s)FeOH",
+        ">(w)FeOH"
+      ],
+      "surface area": "600.0000"
+    },
+    "Goethite": {
+      "site density": [
+        ".1234",
+        ".4321"
+      ],
+      "sorbing site": [
+        ">(s)FeOH",
+        ">(w)FeOH"
+      ],
+      "surface area": "666.6666"
     }
   },
   "gas species": {
@@ -380,6 +460,29 @@
         "H2O": "1.000"
       },
       "molecular weight": "143.0929"
+    }
+  },
+  "surface species": {
+    ">(s)FeO-": {
+      "species": {
+        ">(s)FeOH": "1.000",
+        "H+": "-1.000"
+      },
+      "charge": "-1",
+      "molecular weight": "71.8464",
+      "log K": "8.9300",
+      "dlogK/dT": "0.0000"
+    },
+    ">(s)FeOCa+": {
+      "species": {
+        ">(s)FeOH": "1.000",
+        "Ca++": "1.000",
+        "H+": "-1.000"
+      },
+      "charge": "-1",
+      "molecular weight": "279.7144",
+      "log K": "1.7200",
+      "dlogK/dT": "0.0000"
     }
   }
 }

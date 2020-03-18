@@ -340,6 +340,37 @@ GeochemicalDatabaseReader::getOxideSpecies(const std::vector<std::string> & name
   return _oxide_species;
 }
 
+std::map<std::string, GeochemistrySurfaceSpecies>
+GeochemicalDatabaseReader::getSurfaceSpecies(const std::vector<std::string> & names)
+{
+  // Parse the secondary species specified in names
+  for (const auto & species : names)
+    if (_root["surface species"].isMember(species))
+    {
+      GeochemistrySurfaceSpecies dbs;
+
+      auto surface_species = _root["surface species"][species];
+      dbs.name = species;
+      dbs.charge = MooseUtils::convert<Real>(surface_species["charge"].asString());
+      dbs.molecular_weight =
+          MooseUtils::convert<Real>(surface_species["molecular weight"].asString());
+      dbs.log10K = MooseUtils::convert<Real>(surface_species["log K"].asString());
+      dbs.dlog10KdT = MooseUtils::convert<Real>(surface_species["dlogK/dT"].asString());
+
+      std::map<std::string, Real> basis_species;
+      for (auto & bs : surface_species["species"].getMemberNames())
+        basis_species[bs] = MooseUtils::convert<Real>(surface_species["species"][bs].asString());
+
+      dbs.basis_species = basis_species;
+
+      _surface_species[species] = dbs;
+    }
+    else
+      mooseError(species + " does not exist in database " + _filename);
+
+  return _surface_species;
+}
+
 std::map<std::string, GeochemistryNeutralSpeciesActivity>
 GeochemicalDatabaseReader::getNeutralSpeciesActivity()
 {
