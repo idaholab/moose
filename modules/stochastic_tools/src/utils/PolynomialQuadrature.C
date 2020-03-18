@@ -334,4 +334,77 @@ TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
       qpoints_1D, qweights_1D);
 }
 
+SmolyakGrid::SmolyakGrid(const unsigned int max_order,
+                         std::vector<std::unique_ptr<const Polynomial>> & poly)
+  : _ndim(poly.size())
+{
+
+  // Compute full tensor tuple
+  std::vector<std::vector<unsigned int>> tuple_1d(_ndim);
+  for (unsigned int d = 0; d < _ndim; ++d)
+  {
+    tuple_1d[d].resize(max_order);
+    for (unsigned int i = 0; i < max_order; ++i)
+      tuple_1d[d][i] = i;
+  }
+  StochasticTools::CartesianProduct<unsigned int> tensor_tuple(tuple_1d);
+
+  _npoints.push_back(0);
+  unsigned int maxq = max_order - 1;
+  unsigned int minq = (max_order > _ndim ? max_order - _ndim : 0);
+  for (std::size_t p = 0; p < tensor_tuple.numRows(); ++p)
+  {
+    std::vector<unsigned int> dorder = tensor_tuple.computeRow(p);
+    unsigned int q = std::accumulate(dorder.begin(), dorder.end(), 0);
+    if (q <= maxq && q >= minq)
+    {
+      int sgn = ((max_order - q - 1) % 2 == 0 ? 1 : -1);
+      _coeff.push_back(sgn * Utility::binomial(_ndim - 1, _ndim + q - max_order));
+
+      std::vector<std::vector<Real>> qpoints_1D(_ndim);
+      std::vector<std::vector<Real>> qweights_1D(_ndim);
+      for (unsigned int d = 0; d < poly.size(); ++d)
+        poly[d]->quadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
+
+      _quad.push_back(
+          libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
+              qpoints_1D, qweights_1D));
+      _npoints.push_back(_npoints.back() + _quad.back()->numRows());
+    }
+  }
+}
+
+std::vector<Real>
+SmolyakGrid::quadraturePoint(const unsigned int n) const
+{
+  unsigned int ind = gridIndex(n);
+  return _quad[ind]->computeRow(n - _npoints[ind]);
+}
+
+Real
+SmolyakGrid::quadraturePoint(const unsigned int n, const unsigned int dim) const
+{
+  unsigned int ind = gridIndex(n);
+  return _quad[ind]->computeValue(n - _npoints[ind], dim);
+}
+
+Real
+SmolyakGrid::quadratureWeight(const unsigned int n) const
+{
+  unsigned int ind = gridIndex(n);
+  return static_cast<Real>(_coeff[ind]) * _quad[ind]->computeWeight(n - _npoints[ind]);
+}
+
+unsigned int
+SmolyakGrid::gridIndex(const unsigned int n) const
+{
+  for (unsigned int i = 0; i < _npoints.size() - 1; ++i)
+    if (_npoints[i + 1] > n)
+      return i;
+
+  ::mooseError("Point index requested is greater than number of points.");
+
+  return 0;
+}
+
 } // namespace PolynomialQuadrature
