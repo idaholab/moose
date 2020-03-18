@@ -310,7 +310,7 @@ ComputeIncrementalBeamStrain::computeQpStrain()
                                            _grad_disp_0_local_t(1) * _grad_rot_0_local_t(0)) *
                                           _Iz[_qp];
     _mech_rot_strain_increment[_qp](2) += -(_grad_disp_0_local_t(2) * _grad_rot_0_local_t(0) -
-                                           _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
+                                            _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
                                           _Iy[_qp];
   }
 
