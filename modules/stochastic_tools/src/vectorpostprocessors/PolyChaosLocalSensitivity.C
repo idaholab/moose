@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", PolyChaosLocalSensitivity);
 
-defineLegacyParams(PolyChaosLocalSensitivity);
-
 InputParameters
 PolyChaosLocalSensitivity::validParams()
 {

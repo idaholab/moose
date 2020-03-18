@@ -13,8 +13,6 @@
 
 registerMooseAction("StochasticToolsApp", AddSurrogateAction, "add_surrogate");
 
-defineLegacyParams(AddSurrogateAction);
-
 InputParameters
 AddSurrogateAction::validParams()
 {

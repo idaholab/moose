@@ -14,11 +14,6 @@
 #include "SamplerInterface.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosLocalSensitivity;
-
-template <>
-InputParameters validParams<PolyChaosLocalSensitivity>();
-
 class PolyChaosLocalSensitivity : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:

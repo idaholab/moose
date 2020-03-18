@@ -11,8 +11,6 @@
 
 #include "Sampler.h"
 
-defineLegacyParams(SurrogateModel);
-
 InputParameters
 SurrogateModel::validParams()
 {

@@ -15,12 +15,6 @@
 
 #include "Distribution.h"
 
-// Forward Declarations
-class PolynomialChaos;
-
-template <>
-InputParameters validParams<PolynomialChaos>();
-
 class PolynomialChaos : public SurrogateModel
 {
 public:
