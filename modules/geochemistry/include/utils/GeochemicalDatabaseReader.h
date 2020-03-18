@@ -342,6 +342,14 @@ public:
    */
   std::vector<std::string> oxideReactions(const std::vector<std::string> & names) const;
 
+  const FileName & filename() const;
+
+  /// returns True iff name is the name of a basis species
+  bool isBasisSpecies(const std::string & name) const;
+
+  /// returns True iff name is the name of a redox species
+  bool isRedoxSpecies(const std::string & name) const;
+
 protected:
   /**
    * Generates a formatted vector of strings representing all reactions
@@ -357,7 +365,7 @@ protected:
   const FileName _filename;
   /// JSON data
   moosecontrib::Json::Value _root;
-  /// List of basis (primary) species names to read from database
+  /// List of basis (primary) species names read from database
   std::vector<std::string> _bs_names;
   /// List of secondary equilibrium species to read from database
   std::vector<std::string> _es_names;
