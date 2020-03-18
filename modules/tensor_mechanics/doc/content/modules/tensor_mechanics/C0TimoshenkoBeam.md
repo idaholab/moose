@@ -78,15 +78,15 @@ It should be noted here that using a linear interpolation of the rotational vari
 
 The above translational strain increments are functions of x, y and z. However, since the beam cross-section does not deform, these strains can be integrated over the cross-section to obtain strain increments as a function of only x.
 \begin{equation}
-\epsilon_{1}(x) = \int_A \epsilon_{11}(x,y,z) = \frac{\partial u_1(x)}{\partial x} A - \frac{\partial \theta_3(x)}{\partial x} A_y + \frac{\partial \theta_2(x)}{\partial x} A_z
+\epsilon_{1}(x) = \int_A \epsilon_{11}(x,y,z) dA= \frac{\partial u_1(x)}{\partial x} A - \frac{\partial \theta_3(x)}{\partial x} A_y + \frac{\partial \theta_2(x)}{\partial x} A_z
 \end{equation}
 
 \begin{equation}
-\epsilon_{2}(x) = \int_A \epsilon_{12}(x,y,z) = -\theta_3 A + \frac{\partial u_2(x)}{\partial x} A - \frac{\partial \theta_1(x)}{\partial x} A_z
+\epsilon_{2}(x) = \int_A \epsilon_{12}(x,y,z) dA= -\theta_3 A + \frac{\partial u_2(x)}{\partial x} A - \frac{\partial \theta_1(x)}{\partial x} A_z
 \end{equation}
 
 \begin{equation}
-\epsilon_{3}(x) = \int_A \epsilon_{13}(x,y,z) = \theta_2 A + \frac{\partial u_3(x)}{\partial x} A + \frac{\partial \theta_1(x)}{\partial x} A_y
+\epsilon_{3}(x) = \int_A \epsilon_{13}(x,y,z) dA= \theta_2 A + \frac{\partial u_3(x)}{\partial x} A + \frac{\partial \theta_1(x)}{\partial x} A_y
 \end{equation}
 
 where $A$ is the cross-sectional area, $A_y = \int_A y dA$ and $A_z = \int_A z dA$. $\epsilon_{1}(x)$, $\epsilon_{2}(x)$ and $\epsilon_{3}(x)$ are the axial and shear increments.
@@ -102,7 +102,7 @@ Apart from the translational strain increments, rotational strain increments als
 \end{equation}
 
 \begin{equation}
-\kappa_3(x) = \int_A \epsilon_{11}(x,y,z) y dA = \frac{\partial u_1(x)}{\partial x} A_y - \frac{\partial \theta_3(x)}{\partial x} I_y + \frac{\partial \theta_2(x)}{\partial x} Iyz
+\kappa_3(x) = -\int_A \epsilon_{11}(x,y,z) y dA = -\frac{\partial u_1(x)}{\partial x} A_y + \frac{\partial \theta_3(x)}{\partial x} I_y - \frac{\partial \theta_2(x)}{\partial x} Iyz
 \end{equation}
 
 where $I_y = \int_A y^2 dA$, $I_z = \int_A z^2 dA$, $I_x = \int_A (y^2 + z^2) dA$ and $Iyz = \int_A yz dA$. Note that $Iyz$ is assumed to be zero for simplicity and this assumption is valid for symmetric cross-sections such as square, rectangular and circular. $I_x$ is automatically calculated from $I_y$ and $I_z$ unless $I_x$ is provided as input by the user.
