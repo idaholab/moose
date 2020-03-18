@@ -12,7 +12,6 @@
 #include "DenseMatrix.h"
 #include "MooseArray.h"
 #include "MooseTypes.h"
-#include "MoosePassKey.h"
 
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_quadrature_type.h"
@@ -404,10 +403,7 @@ public:
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor(Moose::PassKey<NodeFaceConstraint>) const
-  {
-    return _current_JxW_neighbor;
-  }
+  const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
 
   /**
    * Returns the reference to the current quadrature points being used on the neighbor face
@@ -545,11 +541,15 @@ public:
    * @param side Side of the element
    * @param neighbor Neighbor facing the element on the side 'side'
    * @param neighbor_side The side id on the neighboring element.
+   * @param neighbor_reference_points Optional argument specifying the neighbor reference points. If
+   * not passed, then neighbor reference points will be determined by doing an inverse map based on
+   * the physical location of the \p elem quadrature points
    */
   void reinitElemAndNeighbor(const Elem * elem,
                              unsigned int side,
                              const Elem * neighbor,
-                             unsigned int neighbor_side);
+                             unsigned int neighbor_side,
+                             const std::vector<Point> * neighbor_reference_points = nullptr);
 
   /**
    * Reinitializes the neighbor at the physical coordinates on neighbor side given.

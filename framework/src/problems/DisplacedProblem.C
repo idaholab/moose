@@ -626,12 +626,22 @@ DisplacedProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, TH
 void
 DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
+  reinitNeighbor(elem, side, tid, nullptr);
+}
+
+void
+DisplacedProblem::reinitNeighbor(const Elem * elem,
+                                 unsigned int side,
+                                 THREAD_ID tid,
+                                 const std::vector<Point> * neighbor_reference_points)
+{
   setNeighborSubdomainID(elem, side, tid);
 
   const Elem * neighbor = elem->neighbor_ptr(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _assembly[tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
+  _assembly[tid]->reinitElemAndNeighbor(
+      elem, side, neighbor, neighbor_side, neighbor_reference_points);
 
   _displaced_nl.prepareNeighbor(tid);
   _displaced_aux.prepareNeighbor(tid);
