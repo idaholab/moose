@@ -129,7 +129,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     }
   }
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
   auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
 
   bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
@@ -150,15 +150,15 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     std::set<Node *> nodes_to_ghost;
     if (found_elems)
     {
-      for (dof_id_type id : node_to_elem_pair->second)
+      for (const auto & const_elem : node_to_elem_pair->second)
       {
-        Elem * elem = _mesh.queryElemPtr(id);
-        if (elem)
+        if (const_elem)
         {
+          Elem * elem = _mesh.elemPtr(const_elem->id());
+
           master_elems_to_ghost.insert(elem);
 
-          const unsigned int n_nodes = elem->n_nodes();
-          for (unsigned int n = 0; n != n_nodes; ++n)
+          for (const auto n : elem->node_index_range())
             nodes_to_ghost.insert(elem->node_ptr(n));
         }
       }
@@ -178,7 +178,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     _mesh.update(); // Rebuild node_to_elem_map
 
     // Find elems again now that we know they're there
-    const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
+    const auto & new_node_to_elem_map = _mesh.nodeToElemPtrMap();
     node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
     found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
   }
@@ -186,11 +186,11 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   if (!found_elems)
     mooseError("Couldn't find any elements connected to master node");
 
-  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+  const std::vector<const Elem *> & elems = node_to_elem_pair->second;
 
   if (elems.size() == 0)
     mooseError("Couldn't find any elements connected to master node");
-  _subproblem.addGhostedElem(elems[0]);
+  _subproblem.addGhostedElem(elems[0]->id());
 }
 
 Real

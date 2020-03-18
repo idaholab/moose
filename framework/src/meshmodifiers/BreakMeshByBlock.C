@@ -45,8 +45,8 @@ BreakMeshByBlock::modify()
   // save reference to mesh
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  // initialize the node to elemen map
-  const auto & node_to_elem_map = _mesh_ptr->nodeToElemMap();
+  // initialize the node to element map
+  const auto & node_to_elem_map = _mesh_ptr->nodeToElemPtrMap();
 
   for (auto node_it = node_to_elem_map.begin(); node_it != node_to_elem_map.end(); ++node_it)
   {
@@ -63,7 +63,7 @@ BreakMeshByBlock::modify()
       if (node_multiplicity > 1)
       {
         // retrieve connected elements from the map
-        const std::vector<dof_id_type> & connected_elems = node_it->second;
+        const std::vector<const Elem *> & connected_elems = node_it->second;
 
         // find reference_subdomain_id (e.g. the subdomain with lower id)
         auto subdomain_it = connected_blocks.begin();
@@ -71,13 +71,13 @@ BreakMeshByBlock::modify()
 
         // multiplicity counter to keep track of how many nodes we added
         unsigned int multiplicity_counter = node_multiplicity;
-        for (auto elem_id : connected_elems)
+        for (const auto & const_current_elem : connected_elems)
         {
           // all the duplicate nodes are added and assigned
           if (multiplicity_counter == 0)
             break;
 
-          Elem * current_elem = mesh.elem_ptr(elem_id);
+          Elem * current_elem = mesh.elem_ptr(const_current_elem->id());
           if (current_elem->subdomain_id() != reference_subdomain_id)
           {
             // assign the newly added node to current_elem
@@ -105,9 +105,9 @@ BreakMeshByBlock::modify()
                        // loop
               }
 
-            for (auto connected_elem_id : connected_elems)
+            for (const auto & const_connected_elem : connected_elems)
             {
-              Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
+              Elem * connected_elem = mesh.elem_ptr(const_connected_elem->id());
 
               // Assign the newly added node to other connected elements with the same block_id
               if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
@@ -126,13 +126,10 @@ BreakMeshByBlock::modify()
         }
 
         // create blocks pair and assign element side to new interface boundary map
-        for (auto elem_id : connected_elems)
+        for (const auto & current_elem : connected_elems)
         {
-          for (auto connected_elem_id : connected_elems)
+          for (const auto & connected_elem : connected_elems)
           {
-            Elem * current_elem = mesh.elem_ptr(elem_id);
-            Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
-
             if (current_elem != connected_elem &&
                 current_elem->subdomain_id() < connected_elem->subdomain_id())
             {

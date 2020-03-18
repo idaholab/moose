@@ -1629,7 +1629,7 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators =
       geom_search_data._nearest_node_locators;
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
   for (const auto & it : nearest_node_locators)
   {
     std::vector<dof_id_type> & slave_nodes = it.second->_slave_nodes;
@@ -1642,13 +1642,13 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
       auto node_to_elem_pair = node_to_elem_map.find(slave_node);
       if (node_to_elem_pair != node_to_elem_map.end())
       {
-        const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+        const std::vector<const Elem *> & elems = node_to_elem_pair->second;
 
         // Get the dof indices from each elem connected to the node
         for (const auto & cur_elem : elems)
         {
           std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+          dofMap().dof_indices(cur_elem, dof_indices);
 
           for (const auto & dof : dof_indices)
             unique_slave_indices.insert(dof);
@@ -1662,13 +1662,13 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
         auto master_node_to_elem_pair = node_to_elem_map.find(master_node);
         mooseAssert(master_node_to_elem_pair != node_to_elem_map.end(),
                     "Missing entry in node to elem map");
-        const std::vector<dof_id_type> & master_node_elems = master_node_to_elem_pair->second;
+        const std::vector<const Elem *> & master_node_elems = master_node_to_elem_pair->second;
 
         // Get the dof indices from each elem connected to the node
         for (const auto & cur_elem : master_node_elems)
         {
           std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+          dofMap().dof_indices(cur_elem, dof_indices);
 
           for (const auto & dof : dof_indices)
             unique_master_indices.insert(dof);

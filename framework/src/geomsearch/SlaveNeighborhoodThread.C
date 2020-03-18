@@ -19,7 +19,7 @@
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(
     const MooseMesh & mesh,
     const std::vector<dof_id_type> & trial_master_nodes,
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+    const std::unordered_map<dof_id_type, std::vector<const Elem *>> & node_to_elem_map,
     const unsigned int patch_size,
     KDTree & kd_tree)
   : _kd_tree(kd_tree),
@@ -98,11 +98,11 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
         auto node_to_elem_pair = _node_to_elem_map.find(node_id);
         if (node_to_elem_pair != _node_to_elem_map.end())
         {
-          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+          const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
 
           // See if we own any of the elements connected to the slave node
-          for (const auto & dof : elems_connected_to_node)
-            if (_mesh.elemPtr(dof)->processor_id() == processor_id)
+          for (const auto & elem : elems_connected_to_node)
+            if (elem->processor_id() == processor_id)
             {
               need_to_track = true;
               break; // Break out of element loop
@@ -121,10 +121,10 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
             auto node_to_elem_pair = _node_to_elem_map.find(neighbor_node_id);
             mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
                         "Missing entry in node to elem map");
-            const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+            const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
 
-            for (const auto & dof : elems_connected_to_node)
-              if (_mesh.elemPtr(dof)->processor_id() == processor_id)
+            for (const auto & elem : elems_connected_to_node)
+              if (elem->processor_id() == processor_id)
               {
                 need_to_track = true;
                 break; // Break out of element loop
@@ -150,10 +150,10 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 
         if (node_to_elem_pair != _node_to_elem_map.end())
         {
-          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+          const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
 
-          for (const auto & dof : elems_connected_to_node)
-            _ghosted_elems.insert(dof);
+          for (const auto & elem : elems_connected_to_node)
+            _ghosted_elems.insert(elem->id());
         }
       }
       // Now add elements connected to the neighbor nodes to the ghosted list
@@ -162,10 +162,10 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
         auto node_to_elem_pair = _node_to_elem_map.find(neighbor_nodes[neighbor_it]);
         mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
                     "Missing entry in node to elem map");
-        const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+        const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
 
-        for (const auto & dof : elems_connected_to_node)
-          _ghosted_elems.insert(dof);
+        for (const auto & elem : elems_connected_to_node)
+          _ghosted_elems.insert(elem->id());
       }
     }
   }

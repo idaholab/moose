@@ -70,7 +70,7 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _grad_u_master(_master_var.gradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
-    _node_to_elem_map(_mesh.nodeToElemMap()),
+    _node_to_elem_map(_mesh.nodeToElemPtrMap()),
 
     _overwrite_slave_residual(false)
 {
@@ -221,14 +221,14 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
 
   auto node_to_elem_pair = _node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
-  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+  const std::vector<const Elem *> & elems = node_to_elem_pair->second;
 
   // Get the dof indices from each elem connected to the node
-  for (const auto & cur_elem : elems)
+  for (const auto & elem : elems)
   {
     std::vector<dof_id_type> dof_indices;
 
-    var.getDofIndices(_mesh.elemPtr(cur_elem), dof_indices);
+    var.getDofIndices(elem, dof_indices);
 
     for (const auto & dof : dof_indices)
       unique_dof_indices.insert(dof);

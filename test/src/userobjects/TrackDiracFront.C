@@ -40,7 +40,7 @@ TrackDiracFront::execute()
   // Is the value near 0.5?
   if (_var_value[_qp] > 0.4 && _var_value[_qp] < 0.6)
   {
-    Elem * elem = localElementConnectedToCurrentNode();
+    const Elem * elem = localElementConnectedToCurrentNode();
     _dirac_points.push_back(std::make_pair(elem, Point(*_current_node)));
   }
 }
@@ -61,25 +61,24 @@ TrackDiracFront::finalize()
   // communication is necessary
 }
 
-Elem *
+const Elem *
 TrackDiracFront::localElementConnectedToCurrentNode()
 {
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Node missing in node to elem map");
-  const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
+  const std::vector<const Elem *> & connected_elems = node_to_elem_pair->second;
 
   auto pid = processor_id(); // This processor id
 
   // Look through all of the elements connected to this node and find one owned by the local
   // processor
-  for (auto elem_id : connected_elems)
+  for (auto connected_elem : connected_elems)
   {
-    Elem * elem = _mesh.elemPtr(elem_id);
-    mooseAssert(elem, "Elem pointer is NULL");
+    mooseAssert(connected_elem, "Elem pointer is NULL");
 
-    if (elem->processor_id() == pid) // Is this element owned by the local processor?
-      return elem;
+    if (connected_elem->processor_id() == pid) // Is this element owned by the local processor?
+      return connected_elem;
   }
 
   mooseError("Unable to locate a local element connected to this node!");

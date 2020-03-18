@@ -233,7 +233,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
+  const std::unordered_map<dof_id_type, std::vector<const Elem *>> & _node_to_elem_map;
 
   /// maps slave node ids to master element ids
   std::map<dof_id_type, dof_id_type> _slave_to_master_map;
@@ -255,4 +255,3 @@ public:
   /// stiffness matrix holding slave-slave jacobian
   DenseMatrix<Number> _Kee;
 };
-

@@ -33,14 +33,9 @@ FrontSource::FrontSource(const InputParameters & parameters)
 void
 FrontSource::addPoints()
 {
-  const std::vector<std::pair<Elem *, Point>> & points = _front_tracker.getDiracPoints();
-
-  std::vector<std::pair<Elem *, Point>>::const_iterator i = points.begin();
-  std::vector<std::pair<Elem *, Point>>::const_iterator end = points.end();
-
-  // Add all of the points the front tracker found
-  for (; i != end; ++i)
-    addPoint(i->first, i->second);
+  const auto & points = _front_tracker.getDiracPoints();
+  for (const auto & pair : points)
+    addPoint(pair.first, pair.second);
 }
 
 Real

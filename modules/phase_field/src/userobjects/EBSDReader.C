@@ -464,8 +464,7 @@ EBSDReader::buildNodeWeightMaps()
   // Import nodeToElemMap from MooseMesh for current node
   // This map consists of the node index followed by a vector of element indices that are associated
   // with that node
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
-      _mesh.nodeToActiveSemilocalElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
   libMesh::MeshBase & mesh = _mesh.getMesh();
 
   // Loop through each node in mesh and calculate eta values for each grain associated with the node

@@ -106,8 +106,7 @@ RandomData::updateGenerators()
 
   if (_is_nodal)
   {
-    const auto & node_to_elem = _rd_mesh.nodeToElemMap();
-    auto & mesh = _rd_mesh.getMesh();
+    const auto & node_to_elem = _rd_mesh.nodeToElemPtrMap();
 
     for (const auto node_ptr :
          as_range(_rd_mesh.getMesh().active_nodes_begin(), _rd_mesh.getMesh().active_nodes_end()))
@@ -120,11 +119,9 @@ RandomData::updateGenerators()
 
       if (elem_id_it != node_to_elem.end())
       {
-        for (auto elem_id : elem_id_it->second)
+        for (auto elem : elem_id_it->second)
         {
-          const auto * elem_ptr = mesh.elem_ptr(elem_id);
-
-          if (elem_ptr && processor_id == elem_ptr->processor_id())
+          if (elem && processor_id == elem->processor_id())
           {
             _seeds[id] = rand_int;
 

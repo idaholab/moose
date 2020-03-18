@@ -607,7 +607,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       std::set<dof_id_type> unindices;
       std::set<dof_id_type> cached_indices;
       std::set<dof_id_type> cached_unindices;
-      const auto & node_to_elem_map = dmm->_nl->_fe_problem.mesh().nodeToElemMap();
+      const auto & node_to_elem_map = dmm->_nl->_fe_problem.mesh().nodeToElemPtrMap();
       for (const auto & vit : *(dmm->_var_ids))
       {
         unsigned int v = vit.second;
@@ -644,12 +644,11 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
                 auto node_to_elem_pair = node_to_elem_map.find(node->id());
                 is_on_current_block = false;
-                for (const auto & elem_num : node_to_elem_pair->second)
+                for (const auto & neighbor_elem : node_to_elem_pair->second)
                 {
                   // if one of incident elements belongs to a block, we consider
                   // the node lives in the block
-                  Elem & neighbor_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
-                  if (neighbor_elem.subdomain_id() == b)
+                  if (neighbor_elem->subdomain_id() == b)
                   {
                     is_on_current_block = true;
                     break;
@@ -804,13 +803,12 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
                 mooseAssert(node_to_elem_pair != node_to_elem_map.end(),
                             "Missing entry in node to elem map");
-                for (const auto & elem_num : node_to_elem_pair->second)
+                for (const auto & slave_elem : node_to_elem_pair->second)
                 {
-                  Elem & slave_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
                   // Get the degree of freedom indices for the given variable off the current
                   // element.
                   evindices.clear();
-                  dofmap.dof_indices(&slave_elem, evindices, v);
+                  dofmap.dof_indices(slave_elem, evindices, v);
                   // might want to use variable_first/last_local_dof instead
                   for (const auto & edof : evindices)
                     if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())

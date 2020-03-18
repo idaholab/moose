@@ -46,16 +46,19 @@ public:
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
-  const std::vector<std::pair<Elem *, Point>> & getDiracPoints() const { return _dirac_points; }
+  const std::vector<std::pair<const Elem *, Point>> & getDiracPoints() const
+  {
+    return _dirac_points;
+  }
 
 protected:
   /**
    * Returns an element local to this processor that is connected to
    * the current node.
    */
-  Elem * localElementConnectedToCurrentNode();
+  const Elem * localElementConnectedToCurrentNode();
 
-  std::vector<std::pair<Elem *, Point>> _dirac_points;
+  std::vector<std::pair<const Elem *, Point>> _dirac_points;
 
   const VariableValue & _var_value;
 };

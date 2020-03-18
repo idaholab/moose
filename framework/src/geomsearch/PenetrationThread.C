@@ -39,7 +39,7 @@ PenetrationThread::PenetrationThread(
     std::vector<std::vector<FEBase *>> & fes,
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+    const std::unordered_map<dof_id_type, std::vector<const Elem *>> & node_to_elem_map,
     const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples)
   : _subproblem(subproblem),
     _mesh(mesh),
@@ -198,12 +198,10 @@ PenetrationThread::operator()(const NodeIdRange & range)
       auto node_to_elem_pair = _node_to_elem_map.find(closest_node->id());
       mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
                   "Missing entry in node to elem map");
-      const std::vector<dof_id_type> & closest_elems = node_to_elem_pair->second;
+      const std::vector<const Elem *> & closest_elems = node_to_elem_pair->second;
 
-      for (const auto & elem_id : closest_elems)
+      for (const auto & elem : closest_elems)
       {
-        const Elem * elem = _mesh.elemPtr(elem_id);
-
         std::vector<PenetrationInfo *> thisElemInfo;
         std::vector<const Node *> nodesThatMustBeOnSide;
         nodesThatMustBeOnSide.push_back(closest_node);
@@ -1541,15 +1539,15 @@ PenetrationThread::getInfoForFacesWithCommonNodes(
   auto node_to_elem_pair = _node_to_elem_map.find(edge_nodes[0]->id()); // just need one of the
                                                                         // nodes
   mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
-  const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+  const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
 
   std::vector<const Elem *> elems_connected_to_edge;
 
   for (unsigned int ecni = 0; ecni < elems_connected_to_node.size(); ecni++)
   {
-    if (elems_to_exclude.find(elems_connected_to_node[ecni]) != elems_to_exclude.end())
+    if (elems_to_exclude.find(elems_connected_to_node[ecni]->id()) != elems_to_exclude.end())
       continue;
-    const Elem * elem = _mesh.elemPtr(elems_connected_to_node[ecni]);
+    const Elem * elem = elems_connected_to_node[ecni];
 
     std::vector<const Node *> nodevec;
     for (unsigned int ni = 0; ni < elem->n_nodes(); ++ni)

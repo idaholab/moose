@@ -37,7 +37,7 @@ public:
       std::vector<std::vector<FEBase *>> & fes,
       FEType & fe_type,
       NearestNodeLocator & nearest_node,
-      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      const std::unordered_map<dof_id_type, std::vector<const Elem *>> & node_to_elem_map,
       const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples);
 
   // Splitting Constructor
@@ -76,7 +76,7 @@ protected:
 
   NearestNodeLocator & _nearest_node;
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
+  const std::unordered_map<dof_id_type, std::vector<const Elem *>> & _node_to_elem_map;
 
   // Each boundary condition tuple has three entries, (0=elem-id, 1=side-id, 2=bc-id)
   const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & _bc_tuples;
@@ -193,4 +193,3 @@ protected:
     std::vector<RidgeData> _ridge_data_vec;
   };
 };
-

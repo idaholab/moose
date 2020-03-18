@@ -395,12 +395,11 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
       if (pps)
       {
         auto & blockids = pps->blockIDs();
-        auto & node_to_elem_map = moose_mesh.nodeToElemMap();
+        auto & node_to_elem_map = moose_mesh.nodeToElemPtrMap();
         auto neighbor_elements = node_to_elem_map.find(node->id());
-        for (auto element : neighbor_elements->second)
+        for (const auto & elem : neighbor_elements->second)
         {
-          auto & elem = to_mesh.elem_ref(element);
-          if (blockids.find(elem.subdomain_id()) != blockids.end() ||
+          if (blockids.find(elem->subdomain_id()) != blockids.end() ||
               blockids.find(Moose::ANY_BLOCK_ID) != blockids.end())
           {
             scale_current_node = true;

@@ -402,8 +402,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
     // set_intersection.
     // The original map contains vectors, and we can't sort them, so we create sets in the local
     // map.
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
-        _mesh.nodeToElemMap();
+    const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
     std::map<dof_id_type, std::set<dof_id_type>> crack_front_node_to_elem_map;
 
     for (const auto & node_id : nodes)
@@ -412,9 +411,9 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
       mooseAssert(node_to_elem_pair != node_to_elem_map.end(),
                   "Could not find crack front node " << node_id << " in the node to elem map");
 
-      const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
+      const std::vector<const Elem *> & connected_elems = node_to_elem_pair->second;
       for (std::size_t i = 0; i < connected_elems.size(); ++i)
-        crack_front_node_to_elem_map[node_id].insert(connected_elems[i]);
+        crack_front_node_to_elem_map[node_id].insert(connected_elems[i]->id());
     }
 
     // Determine which nodes are connected to each other via elements, and construct line elements

@@ -119,7 +119,7 @@ SlaveConstraint::addPoints()
       it = _penetration_locator._penetration_info.begin(),
       end = _penetration_locator._penetration_info.end();
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
   for (; it != end; ++it)
   {
     PenetrationInfo * pinfo = it->second;
@@ -136,16 +136,13 @@ SlaveConstraint::addPoints()
       // Find an element that is connected to this node that and that is also on this processor
       auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
       mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
-      const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
+      const std::vector<const Elem *> & connected_elems = node_to_elem_pair->second;
 
-      Elem * elem = NULL;
+      const Elem * elem = nullptr;
 
-      for (unsigned int i = 0; i < connected_elems.size() && !elem; ++i)
-      {
-        Elem * cur_elem = _mesh.elemPtr(connected_elems[i]);
-        if (cur_elem->processor_id() == processor_id())
-          elem = cur_elem;
-      }
+      for (const auto & connected_elem : connected_elems)
+        if (connected_elem->processor_id() == processor_id())
+          elem = connected_elem;
 
       mooseAssert(elem,
                   "Couldn't find an element on this processor that is attached to the slave node!");

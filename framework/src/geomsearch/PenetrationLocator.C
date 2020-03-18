@@ -113,7 +113,7 @@ PenetrationLocator::detectPenetration()
                        _fe,
                        _fe_type,
                        _nearest_node,
-                       _mesh.nodeToElemMap(),
+                       _mesh.nodeToElemPtrMap(),
                        bc_tuples);
 
   Threads::parallel_reduce(slave_node_range, pt);

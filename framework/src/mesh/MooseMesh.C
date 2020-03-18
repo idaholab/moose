@@ -172,6 +172,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _is_prepared(false),
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
+    _node_to_elem_ptr_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(getParam<unsigned int>("patch_size")),
     _ghosting_patch_size(isParamValid("ghosting_patch_size")
@@ -192,6 +193,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _build_node_list_timer(registerTimedSection("buildNodeList", 5)),
     _build_bnd_elem_list_timer(registerTimedSection("buildBndElemList", 5)),
     _node_to_elem_map_timer(registerTimedSection("nodeToElemMap", 5)),
+    _node_to_elem_ptr_map_timer(registerTimedSection("nodeToElemPtrMap", 5)),
     _node_to_active_semilocal_elem_map_timer(
         registerTimedSection("nodeToActiveSemilocalElemMap", 5)),
     _get_active_local_element_range_timer(registerTimedSection("getActiveLocalElementRange", 5)),
@@ -237,6 +239,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _is_prepared(false),
     _needs_prepare_for_use(other_mesh._needs_prepare_for_use),
     _node_to_elem_map_built(false),
+    _node_to_elem_ptr_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
@@ -253,6 +256,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _build_node_list_timer(registerTimedSection("buildNodeList", 5)),
     _build_bnd_elem_list_timer(registerTimedSection("buildBndElemList", 5)),
     _node_to_elem_map_timer(registerTimedSection("nodeToElemMap", 5)),
+    _node_to_elem_ptr_map_timer(registerTimedSection("nodeToElemPtrMap", 5)),
     _node_to_active_semilocal_elem_map_timer(
         registerTimedSection("nodeToActiveSemilocalElemMap", 5)),
     _get_active_local_element_range_timer(registerTimedSection("getActiveLocalElementRange", 5)),
@@ -427,6 +431,8 @@ MooseMesh::update()
   // Update the node to elem map
   _node_to_elem_map.clear();
   _node_to_elem_map_built = false;
+  _node_to_elem_ptr_map.clear();
+  _node_to_elem_ptr_map_built = false;
   _node_to_active_semilocal_elem_map.clear();
   _node_to_active_semilocal_elem_map_built = false;
 
@@ -708,6 +714,8 @@ MooseMesh::buildBndElemList()
 const std::map<dof_id_type, std::vector<dof_id_type>> &
 MooseMesh::nodeToElemMap()
 {
+  mooseDeprecated("nodeToElemMap() is deprecated, use nodeToElemPtrMap() instead");
+
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -718,7 +726,7 @@ MooseMesh::nodeToElemMap()
       CONSOLE_TIMED_PRINT("Building node to element map");
 
       for (const auto & elem : getMesh().active_element_ptr_range())
-        for (unsigned int n = 0; n < elem->n_nodes(); n++)
+        for (const auto n : elem->node_index_range())
           _node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
@@ -726,6 +734,30 @@ MooseMesh::nodeToElemMap()
   }
 
   return _node_to_elem_map;
+}
+
+const std::unordered_map<dof_id_type, std::vector<const Elem *>> &
+MooseMesh::nodeToElemPtrMap()
+{
+  if (!_node_to_elem_ptr_map_built) // Guard the creation with a double checked lock
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+    if (!_node_to_elem_ptr_map_built)
+    {
+      TIME_SECTION(_node_to_elem_ptr_map_timer);
+      CONSOLE_TIMED_PRINT("Building node to element pointer map");
+
+      for (const auto & elem : getMesh().active_element_ptr_range())
+        for (const auto n : elem->node_index_range())
+          _node_to_elem_ptr_map[elem->node_id(n)].push_back(elem);
+
+      _node_to_elem_ptr_map_built =
+          true; // MUST be set at the end for double-checked locking to work!
+    }
+  }
+
+  return _node_to_elem_ptr_map;
 }
 
 const std::map<dof_id_type, std::vector<dof_id_type>> &
@@ -987,6 +1019,7 @@ MooseMesh::addQuadratureNode(const Elem * elem,
     if (elem->active())
     {
       _node_to_elem_map[new_id].push_back(elem->id());
+      _node_to_elem_ptr_map[new_id].push_back(elem);
       _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
     }
   }

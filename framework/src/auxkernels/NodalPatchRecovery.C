@@ -175,34 +175,32 @@ NodalPatchRecovery::compute()
   reinitPatch();
 
   // get node-to-conneted-elem map
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
-  std::vector<dof_id_type> elem_ids = node_to_elem_pair->second;
+  std::vector<const Elem *> elems = node_to_elem_pair->second;
 
   // consider the case for corner node
-  if (elem_ids.size() == 1)
+  if (elems.size() == 1)
   {
-    dof_id_type elem_id = elem_ids[0];
-    for (auto & n : _mesh.elemPtr(elem_id)->node_ref_range())
+    const Elem * elem = elems[0];
+    for (auto & n : elem->node_ref_range())
     {
       node_to_elem_pair = node_to_elem_map.find(n.id());
-      std::vector<dof_id_type> elem_ids_candidate = node_to_elem_pair->second;
-      if (elem_ids_candidate.size() > elem_ids.size())
-        elem_ids = elem_ids_candidate;
+      std::vector<const Elem *> candidate_elems = node_to_elem_pair->second;
+      if (candidate_elems.size() > elems.size())
+        elems = candidate_elems;
     }
   }
 
   // before we go, check if we have enough sample points for solving the least square fitting
-  if (_q_point.size() * elem_ids.size() < _multi_index.size())
+  if (_q_point.size() * elems.size() < _multi_index.size())
     mooseError("There are not enough sample points to recover the nodal value, try reducing the "
                "polynomial order or using a higher-order quadrature scheme.");
 
   // general treatment for side nodes and internal nodes
-  for (auto elem_id : elem_ids)
+  for (auto elem : elems)
   {
-    const Elem * elem = _mesh.elemPtr(elem_id);
-
     if (!elem->is_semilocal(_mesh.processor_id()))
       mooseError("skipped non local elem!");
 

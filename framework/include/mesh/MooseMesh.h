@@ -175,8 +175,15 @@ public:
   /**
    * If not already created, creates a map from every node to all
    * elements to which they are connected.
+   *
+   * Deprecated! Use nodeToElemPtrMap() instead!
    */
   const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
+  /**
+   * If not already created, creates a map from every node to all
+   * elements to which they are connected.
+   */
+  const std::unordered_map<dof_id_type, std::vector<const Elem *>> & nodeToElemPtrMap();
 
   /**
    * If not already created, creates a map from every node to all
@@ -978,8 +985,12 @@ protected:
       _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
+  /// Deprecated! Use _node_to_elem_ptr_map and nodeToElemPtrMap() instead!
   std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
   bool _node_to_elem_map_built;
+  /// A map of all of the current nodes to the element pointers they are connected to
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> _node_to_elem_ptr_map;
+  bool _node_to_elem_ptr_map_built;
 
   /// A map of all of the current nodes to the active elements that they are connected to.
   std::map<dof_id_type, std::vector<dof_id_type>> _node_to_active_semilocal_elem_map;
@@ -1186,6 +1197,7 @@ private:
   PerfID _build_node_list_timer;
   PerfID _build_bnd_elem_list_timer;
   PerfID _node_to_elem_map_timer;
+  PerfID _node_to_elem_ptr_map_timer;
   PerfID _node_to_active_semilocal_elem_map_timer;
   PerfID _get_active_local_element_range_timer;
   PerfID _get_active_node_range_timer;

@@ -72,7 +72,7 @@ NearestNodeLocator::findNodes()
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the slave nodes.  This will speed searching later.
    */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
 
   if (_first)
   {
@@ -193,10 +193,10 @@ NearestNodeLocator::findNodes()
 
       if (node_to_elem_pair != node_to_elem_map.end())
       {
-        const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
-        for (const auto & dof : elems_connected_to_node)
-          if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
-              _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
+        const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
+        for (const auto & elem : elems_connected_to_node)
+          if (std::find(ghost.begin(), ghost.end(), elem->id()) == ghost.end() &&
+              elem->processor_id() != _mesh.processor_id())
             mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the "
                        "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
                        "mesh block and try again.");
@@ -286,7 +286,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
     master_points[i] = node;
   }
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemPtrMap();
 
   // Create object kd_tree of class KDTree using the coordinates of trial
   // master nodes.
@@ -339,10 +339,10 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
 
     if (node_to_elem_pair != node_to_elem_map.end())
     {
-      const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
-      for (const auto & dof : elems_connected_to_node)
-        if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
-            _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
+      const std::vector<const Elem *> & elems_connected_to_node = node_to_elem_pair->second;
+      for (const auto & elem : elems_connected_to_node)
+        if (std::find(ghost.begin(), ghost.end(), elem->id()) == ghost.end() &&
+            elem->processor_id() != _mesh.processor_id())
           mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted "
                      "set of elements. Increase the ghosting_patch_size parameter in the mesh "
                      "block and try again.");
