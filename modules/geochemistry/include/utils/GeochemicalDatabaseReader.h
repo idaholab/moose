@@ -251,7 +251,8 @@ public:
    * @param names list of basis species
    * @return basis species structure
    */
-  std::map<std::string, GeochemistryBasisSpecies> getBasisSpecies(std::vector<std::string> names);
+  std::map<std::string, GeochemistryBasisSpecies>
+  getBasisSpecies(const std::vector<std::string> & names);
 
   /**
    * Get the secondary equilibrium species information
@@ -259,7 +260,7 @@ public:
    * @return secondary species structure
    */
   std::map<std::string, GeochemistryEquilibriumSpecies>
-  getEquilibriumSpecies(std::vector<std::string> names);
+  getEquilibriumSpecies(const std::vector<std::string> & names);
 
   /**
    * Get the mineral species information
@@ -267,7 +268,7 @@ public:
    * @return mineral species structure
    */
   std::map<std::string, GeochemistryMineralSpecies>
-  getMineralSpecies(std::vector<std::string> names);
+  getMineralSpecies(const std::vector<std::string> & names);
 
   /**
    * Get all the elements
@@ -280,21 +281,24 @@ public:
    * @param names list of gs species
    * @return gas species structure
    */
-  std::map<std::string, GeochemistryGasSpecies> getGasSpecies(std::vector<std::string> names);
+  std::map<std::string, GeochemistryGasSpecies>
+  getGasSpecies(const std::vector<std::string> & names);
 
   /**
    * Get the redox species (couples) information
    * @param names list of gs species
    * @return redox species structure
    */
-  std::map<std::string, GeochemistryRedoxSpecies> getRedoxSpecies(std::vector<std::string> names);
+  std::map<std::string, GeochemistryRedoxSpecies>
+  getRedoxSpecies(const std::vector<std::string> & names);
 
   /**
    * Get the oxide species information
    * @param names list of gs species
    * @return oxide species structure
    */
-  std::map<std::string, GeochemistryOxideSpecies> getOxideSpecies(std::vector<std::string> names);
+  std::map<std::string, GeochemistryOxideSpecies>
+  getOxideSpecies(const std::vector<std::string> & names);
 
   /**
    * Get the neutral species activity coefficients
@@ -308,35 +312,35 @@ public:
    * @param names list of equilibrium species
    * return formatted equilibrium reactions
    */
-  std::vector<std::string> equilibriumReactions(std::vector<std::string> names) const;
+  std::vector<std::string> equilibriumReactions(const std::vector<std::string> & names) const;
 
   /**
    * Generates a formatted vector of strings representing all mineral reactions
    * @param names list of mineral species
    * @preturn formatted mineral reactions
    */
-  std::vector<std::string> mineralReactions(std::vector<std::string> names) const;
+  std::vector<std::string> mineralReactions(const std::vector<std::string> & names) const;
 
   /**
    * Generates a formatted vector of strings representing all gas reactions
    * @param names list of gas species
    * @preturn formatted gas reactions
    */
-  std::vector<std::string> gasReactions(std::vector<std::string> names) const;
+  std::vector<std::string> gasReactions(const std::vector<std::string> & names) const;
 
   /**
    * Generates a formatted vector of strings representing all redox reactions
    * @param names list of redox species
    * @preturn formatted redox reactions
    */
-  std::vector<std::string> redoxReactions(std::vector<std::string> names) const;
+  std::vector<std::string> redoxReactions(const std::vector<std::string> & names) const;
 
   /**
    * Generates a formatted vector of strings representing all oxide reactions
    * @param names list of oxide species
    * @preturn formatted oxide reactions
    */
-  std::vector<std::string> oxideReactions(std::vector<std::string> names) const;
+  std::vector<std::string> oxideReactions(const std::vector<std::string> & names) const;
 
 protected:
   /**
