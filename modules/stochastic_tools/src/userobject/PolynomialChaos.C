@@ -204,7 +204,7 @@ PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> & dim,
   mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
 
   std::vector<unsigned int> grad(_ndim);
-  for (auto d : dim)
+  for (const auto & d : dim)
   {
     mooseAssert(d < _ndim, "Specified dimension is greater than total number of parameters.");
     grad[d]++;
