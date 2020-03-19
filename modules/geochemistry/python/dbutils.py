@@ -46,6 +46,12 @@ def printSpeciesInfo(db, species):
                 type, result = 'gas species', db['gas species'][species]
                 break
 
+        # Check minerals
+        if db['mineral species']:
+            if species in db['mineral species']:
+                type, result = 'mineral species', db['mineral species'][species]
+                break
+
         # If we get here, species is not is database
         print(species, "not in database")
         return
