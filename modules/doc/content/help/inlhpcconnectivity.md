@@ -24,7 +24,7 @@ Host hpclogin
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
+Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
   ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
 ```
 
