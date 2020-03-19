@@ -24,4 +24,3 @@ public:
 
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };
-

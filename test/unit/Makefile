@@ -27,7 +27,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
-APPLICATION_DIR  := $(MOOSE_DIR)/unit
+APPLICATION_DIR  := $(MOOSE_DIR)/test/unit
 APPLICATION_NAME := moose-unit
 BUILD_EXEC       := yes
 app_BASE_DIR     :=      # Intentionally blank

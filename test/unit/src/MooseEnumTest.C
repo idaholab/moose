@@ -171,8 +171,8 @@ TEST(MooseEnum, testErrors)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Invalid option"), std::string::npos) << "failed with unexpected error: "
-                                                             << msg;
+    ASSERT_NE(msg.find("Invalid option"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   // Whitespace around equals sign

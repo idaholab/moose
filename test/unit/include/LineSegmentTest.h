@@ -41,4 +41,3 @@ protected:
   LineSegment _pos3diag;
   LineSegment _neg3diag;
 };
-

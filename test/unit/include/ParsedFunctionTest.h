@@ -54,4 +54,3 @@ protected:
   std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
 };
-

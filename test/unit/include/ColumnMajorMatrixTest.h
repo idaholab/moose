@@ -85,4 +85,3 @@ protected:
 
   ColumnMajorMatrix a, t, two_mat, add, add_solution, sub, sub_solution;
 };
-
