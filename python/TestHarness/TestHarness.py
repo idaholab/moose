@@ -11,6 +11,7 @@ import sys
 import itertools
 import os, re, inspect, errno, copy, json
 import shlex
+import subprocess
 from . import RaceChecker
 
 from socket import gethostname
@@ -46,10 +47,23 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
 class TestHarness:
 
     @staticmethod
-    def buildAndRun(argv, app_name, moose_dir):
+    def buildAndRun(argv, app_name, moose_dir, unit=None, unit_dir=None, unit_run_make=True):
         harness = TestHarness(argv, moose_dir, app_name=app_name)
         harness.findAndRunTests()
-        sys.exit(harness.error_code)
+        unit = bool(os.getenv('MOOSE_RUN_TESTS_WITH_UNIT', False)) if unit is None else unit
+        rcode = TestHarness.buildAndRunUnit(unit_dir, unit_run_make) if unit else 0
+        sys.exit(harness.error_code or rcode)
+
+    @staticmethod
+    def buildAndRunUnit(unit_dir=None, run_make=True):
+        """Execute unit tests."""
+        unit_dir = unit_dir or os.path.join(os.getcwd(), 'unit')
+        if run_make:
+            cmd = ['make', '-C', unit_dir, '-j', str(int(os.cpu_count()/2))]
+            print('Building unit test application:\n', ' '.join(cmd))
+            subprocess.run(cmd)
+        proc = subprocess.run(['./run_tests'], cwd=os.path.abspath(unit_dir))
+        return proc.returncode
 
     def __init__(self, argv, moose_dir, app_name=None):
         os.environ['MOOSE_DIR'] = moose_dir
