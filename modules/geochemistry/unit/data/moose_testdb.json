@@ -146,6 +146,7 @@
         "O": "1.000"
       },
       "charge": "0",
+      "radius": "0",
       "molecular weight": "72.8543"
     },
     ">(w)FeOH": {
@@ -155,6 +156,7 @@
         "O": "1.000"
       },
       "charge": "0",
+      "radius": "0",
       "molecular weight": "1234.567"
     },
     "Fe++": {
@@ -354,26 +356,18 @@
   },
   "sorbing minerals": {
     "Fe(OH)3(ppd)": {
-      "site density": [
-        ".0050",
-        ".2000"
-      ],
-      "sorbing site": [
-        ">(s)FeOH",
-        ">(w)FeOH"
-      ],
+      "sorbing sites": {
+        ">(s)FeOH": ".0050",
+        ">(w)FeOH": ".2000"
+      },
       "surface area": "600.0000"
     },
     "Goethite": {
-      "site density": [
-        ".1234",
-        ".4321"
-      ],
-      "sorbing site": [
-        ">(s)FeOH",
-        ">(w)FeOH"
-      ],
-      "surface area": "666.6666"
+      "sorbing sites": {
+        ">(s)FeOH": ".0050",
+        ">(w)FeOH": ".2000"
+      },
+      "surface area": "600.0000"
     }
   },
   "gas species": {

@@ -62,6 +62,8 @@ struct GeochemistryEquilibriumSpecies
  * * Basis species and stoichiometric coefficients present
  * * Equilibrium constant at given temperatures ()
  * * molecular weight (g)
+ * * specific surface area (m2/g) (only nonzero for sorbing minerals)
+ * * basis species (sorbing sites) and their site density (only populated for sorbing minerals)
  */
 struct GeochemistryMineralSpecies
 {
@@ -72,6 +74,8 @@ struct GeochemistryMineralSpecies
   std::map<std::string, Real> basis_species;
   std::vector<Real> equilibrium_const;
   Real molecular_weight;
+  Real surface_area;
+  std::map<std::string, Real> sorption_sites;
 };
 
 /**
@@ -154,21 +158,6 @@ struct GeochemistrySurfaceSpecies
   Real molecular_weight;
   Real log10K;
   Real dlog10KdT;
-};
-
-/**
- * Data structure for sorbing minerals
- * * Species name
- * * specific surface area
- * * basis species and site density
- */
-struct GeochemistrySorbingMinerals
-{
-  GeochemistrySorbingMinerals(){};
-
-  std::string name;
-  std::map<std::string, Real> basis_species;
-  Real surface_area;
 };
 
 /**
@@ -344,14 +333,6 @@ public:
   getSurfaceSpecies(const std::vector<std::string> & names);
 
   /**
-   * Get the sorbing minerals information
-   * @param names list of sorbing minerals
-   * @return surface sorbing minerals structure
-   */
-  std::map<std::string, GeochemistrySorbingMinerals>
-  getSorbingMinerals(const std::vector<std::string> & names);
-
-  /**
    * Get the neutral species activity coefficients
    * @return neutral species activity coefficients
    */
@@ -451,8 +432,6 @@ protected:
   std::map<std::string, GeochemistryOxideSpecies> _oxide_species;
   /// Surface sorbing species data read from the database
   std::map<std::string, GeochemistrySurfaceSpecies> _surface_species;
-  /// Sorbing minerals data read from the database
-  std::map<std::string, GeochemistrySorbingMinerals> _sorbing_minerals;
   /// Debye-Huckel activity coefficients
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients

@@ -216,6 +216,20 @@ GeochemicalDatabaseReader::getMineralSpecies(const std::vector<std::string> & na
 
       dbs.basis_species = basis_species;
 
+      // recover sorption information, if any
+      std::map<std::string, Real> species_and_sorbing_density;
+      dbs.surface_area = 0.0;
+      if (_root["sorbing minerals"].isMember(species))
+      {
+        auto sorbing_mineral = _root["sorbing minerals"][species];
+        dbs.surface_area = MooseUtils::convert<Real>(sorbing_mineral["surface area"].asString());
+
+        for (auto & site : sorbing_mineral["sorbing sites"].getMemberNames())
+          species_and_sorbing_density[site] =
+              MooseUtils::convert<Real>(sorbing_mineral["sorbing sites"][site].asString());
+      }
+      dbs.sorption_sites = species_and_sorbing_density;
+
       _mineral_species[species] = dbs;
     }
     else
@@ -369,38 +383,6 @@ GeochemicalDatabaseReader::getSurfaceSpecies(const std::vector<std::string> & na
       mooseError(species + " does not exist in database " + _filename);
 
   return _surface_species;
-}
-
-std::map<std::string, GeochemistrySorbingMinerals>
-GeochemicalDatabaseReader::getSorbingMinerals(const std::vector<std::string> & names)
-{
-  // Parse the sorbing minerals specified in names
-  for (const auto & species : names)
-    if (_root["sorbing minerals"].isMember(species))
-    {
-      GeochemistrySorbingMinerals sm;
-
-      auto sorbing_mineral = _root["sorbing minerals"][species];
-      sm.name = species;
-      sm.surface_area = MooseUtils::convert<Real>(sorbing_mineral["surface area"].asString());
-
-      std::map<std::string, Real> basis_species;
-      unsigned ind = 0;
-      for (auto & site : sorbing_mineral["sorbing site"])
-      {
-        basis_species[site.asString()] =
-            MooseUtils::convert<Real>(sorbing_mineral["site density"][ind].asString());
-        ind += 1;
-      }
-
-      sm.basis_species = basis_species;
-
-      _sorbing_minerals[species] = sm;
-    }
-    else
-      mooseError(species + " does not exist in database " + _filename);
-
-  return _sorbing_minerals;
 }
 
 std::map<std::string, GeochemistryNeutralSpeciesActivity>

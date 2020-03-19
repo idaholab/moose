@@ -219,10 +219,11 @@ class TestGWBReader(unittest.TestCase):
         Test that the sorption basis species are correctly parsed
         """
         self.readSorptionDatabase()
-        gold = {'>(s)FeOH': {'charge': '0', 'molecular weight': '72.8543',
+        gold = {'>(s)FeOH': {'charge': '0', 'radius': '0', 'molecular weight': '72.8543',
                          'elements': {'Fe': '1.000', 'H': '1.000', 'O': '1.000'}},
-                '>(w)FeOH': {'charge': '111', 'molecular weight': '-72.8543',
+                '>(w)FeOH': {'charge': '111', 'radius': '0', 'molecular weight': '-72.8543',
                          'elements': {'Fe': '1.111', 'H': '-1.23', 'Rubbish': '77.0'}}}
+        print(self.sorption_db.basis_species)
 
         self.assertDictEqual(self.sorption_db.basis_species, gold)
 
@@ -231,8 +232,8 @@ class TestGWBReader(unittest.TestCase):
         Test that the sorption minerals are correctly parsed
         """
         self.readSorptionDatabase()
-        gold = {'Fe(OH)3(ppd)': {'surface area': '600.0000', 'site density' : ['.0050', '.2000'], 'sorbing site' : ['>(s)FeOH', '>(w)FeOH']},
-                'Hematite': {'surface area': '123.0000', 'site density' : ['.0100', '.4000'], 'sorbing site' : ['>(sblah)FeOH', '>(wasdf)FeOH']}}
+        gold = {'Fe(OH)3(ppd)': {'surface area': '600.0000', 'sorbing sites': {'>(s)FeOH' : ".0050", '>(w)FeOH' : ".2000"}},
+                'Hematite': {'surface area': '123.0000', 'sorbing sites': {'>(sblah)FeOH': ".0100", '>(wasdf)FeOH': ".4000"}}}
 
         self.assertDictEqual(self.sorption_db.sorbing_minerals, gold)
 
