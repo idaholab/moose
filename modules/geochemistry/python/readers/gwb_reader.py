@@ -135,6 +135,7 @@ def readDatabase(dblist):
                     species = dblist[line].strip()
                     basis_species[species] = {}
                     basis_species[species]['elements'] = {}
+                    basis_species[species]['radius'] = "0" # default for sorption sites that are counted as basis species
                     line = line+1
 
                     # Charge, ionic radius and molecular weight
@@ -353,8 +354,7 @@ def readDatabase(dblist):
                     # Mineral name
                     species = dblist[line].strip().split()[0]
                     sorbing_minerals[species] = {}
-                    sorbing_minerals[species]['site density'] = []
-                    sorbing_minerals[species]['sorbing site'] = []
+                    sorbing_minerals[species]['sorbing sites'] = {}
                     line = line+1
 
                     # specific surface area
@@ -367,13 +367,12 @@ def readDatabase(dblist):
 
                     if 'sorption sites' in dblist[line] and len(dblist[line].split()) == 3:
                         num_sites = int(dblist[line].split()[0])
-                        for ss in range(num_sites):
+                        while len(sorbing_minerals[species]['sorbing sites']) < num_sites:
                             line += 1
                             data = dblist[line].split()
                             if len(data) != 6 and data[1] != "site" and data[2] != "density=" and data[4] != "mol/mol" and data[5] != "mineral":
                                 raise ValueError("sorbing minerals must define site density in mol/mol mineral.  Offending line is: " + dblist[line])
-                            sorbing_minerals[species]['site density'].append(data[3])
-                            sorbing_minerals[species]['sorbing site'].append(data[0])
+                            sorbing_minerals[species]['sorbing sites'][data[0]] = data[3];
 
                         line = line+1
 

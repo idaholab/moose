@@ -237,7 +237,7 @@ TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
   GeochemicalDatabaseReader database("data/moose_testdb.json");
 
   // Vector of mineral species to be read
-  std::vector<std::string> ms_names{"Calcite"};
+  std::vector<std::string> ms_names{"Calcite", "Fe(OH)3(ppd)"};
 
   // Check the mineral species
   auto ms = database.getMineralSpecies(ms_names);
@@ -259,6 +259,19 @@ TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
   EXPECT_EQ(mspecies.molecular_weight, 100.0892);
   EXPECT_EQ(mspecies.basis_species, bs_gold);
   EXPECT_EQ(mspecies.equilibrium_const, logk_gold);
+  EXPECT_EQ(mspecies.surface_area, 0.0);
+
+  mspecies = ms["Fe(OH)3(ppd)"];
+  logk_gold = {6.1946, 4.8890, 3.4608, 2.2392, 1.1150, .2446, -.5504, -1.5398};
+  bs_gold = {{"H+", -3}, {"Fe+++", 1}, {"H2O", 3}};
+
+  EXPECT_EQ(mspecies.molecular_volume, 34.32);
+  EXPECT_EQ(mspecies.molecular_weight, 106.8689);
+  EXPECT_EQ(mspecies.basis_species, bs_gold);
+  EXPECT_EQ(mspecies.equilibrium_const, logk_gold);
+  EXPECT_EQ(mspecies.surface_area, 600.0);
+  bs_gold = {{">(s)FeOH", 0.005}, {">(w)FeOH", 0.2}};
+  EXPECT_EQ(mspecies.sorption_sites, bs_gold);
 }
 
 TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
@@ -381,27 +394,6 @@ TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
   std::map<std::string, Real> ss_gold = {{">(s)FeOH", 1}, {"H+", -1}};
 
   EXPECT_EQ(sspecies.basis_species, ss_gold);
-}
-
-TEST(GeochemicalDatabaseReaderTest, getSorbingMinerals)
-{
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
-
-  std::vector<std::string> sm_names{"Fe(OH)3(ppd)"};
-
-  auto sm = database.getSorbingMinerals(sm_names);
-
-  // Check that only the species in sm_names are returned
-  std::vector<std::string> sm_names_returned;
-  for (auto s : sm)
-    sm_names_returned.push_back(s.first);
-
-  EXPECT_EQ(sm_names_returned, sm_names);
-
-  auto smspecies = sm["Fe(OH)3(ppd)"];
-  std::map<std::string, Real> sm_gold = {{">(s)FeOH", 0.005}, {">(w)FeOH", 0.2}};
-  EXPECT_EQ(smspecies.basis_species, sm_gold);
-  EXPECT_EQ(smspecies.surface_area, 600);
 }
 
 TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
