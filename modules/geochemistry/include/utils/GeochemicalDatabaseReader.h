@@ -391,6 +391,9 @@ public:
   /// Returns a list of all the names of the "redox couples" in the database
   std::vector<std::string> redoxCoupleNames() const;
 
+  /// Returns a list of all the names of the "surface species" in the database
+  std::vector<std::string> surfaceSpeciesNames() const;
+
 protected:
   /**
    * Generates a formatted vector of strings representing all reactions

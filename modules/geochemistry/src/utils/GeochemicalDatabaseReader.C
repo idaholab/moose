@@ -643,3 +643,10 @@ GeochemicalDatabaseReader::redoxCoupleNames() const
   std::vector<std::string> names(_root["redox couples"].getMemberNames());
   return names;
 }
+
+std::vector<std::string>
+GeochemicalDatabaseReader::surfaceSpeciesNames() const
+{
+  std::vector<std::string> names(_root["surface species"].getMemberNames());
+  return names;
+}

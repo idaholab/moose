@@ -535,3 +535,13 @@ TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
   EXPECT_EQ(names.size(), 4);
 }
+
+TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::vector<std::string> names = database.surfaceSpeciesNames();
+  for (const auto & n : {">(s)FeO-", ">(s)FeOCa+"})
+    EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
+  EXPECT_EQ(names.size(), 2);
+}
