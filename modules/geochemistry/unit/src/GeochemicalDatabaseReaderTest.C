@@ -545,3 +545,14 @@ TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
   EXPECT_EQ(names.size(), 2);
 }
+
+TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::string data = database.getSpeciesData("Ca++");
+  std::string gold = "Ca++:\n{\n   \"charge\" : \"2\",\n   \"elements\" : {\n      \"Ca\" : "
+                     "\"1.000\"\n   },\n   "
+                     "\"molecular weight\" : \"40.0800\",\n   \"radius\" : \"6.0\"\n}\n";
+  EXPECT_EQ(data, gold);
+}

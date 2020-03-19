@@ -606,6 +606,27 @@ GeochemicalDatabaseReader::printReactions(
   return reactions;
 }
 
+std::vector<std::string>
+GeochemicalDatabaseReader::secondarySpeciesNames() const
+{
+  std::vector<std::string> names(_root["secondary species"].getMemberNames());
+  return names;
+}
+
+std::vector<std::string>
+GeochemicalDatabaseReader::redoxCoupleNames() const
+{
+  std::vector<std::string> names(_root["redox couples"].getMemberNames());
+  return names;
+}
+
+std::vector<std::string>
+GeochemicalDatabaseReader::surfaceSpeciesNames() const
+{
+  std::vector<std::string> names(_root["surface species"].getMemberNames());
+  return names;
+}
+
 const FileName &
 GeochemicalDatabaseReader::filename() const
 {
@@ -630,23 +651,45 @@ GeochemicalDatabaseReader::isSorbingMineral(const std::string & name) const
   return _root["sorbing minerals"].isMember(name);
 }
 
-std::vector<std::string>
-GeochemicalDatabaseReader::secondarySpeciesNames() const
+GeochemicalDatabaseReader::isSecondarySpecies(const std::string & name) const
 {
-  std::vector<std::string> names(_root["secondary species"].getMemberNames());
-  return names;
+  return _root["secondary species"].isMember(name);
 }
 
-std::vector<std::string>
-GeochemicalDatabaseReader::redoxCoupleNames() const
+bool
+GeochemicalDatabaseReader::isGasSpecies(const std::string & name) const
 {
-  std::vector<std::string> names(_root["redox couples"].getMemberNames());
-  return names;
+  return _root["gas species"].isMember(name);
 }
 
-std::vector<std::string>
-GeochemicalDatabaseReader::surfaceSpeciesNames() const
+bool
+GeochemicalDatabaseReader::isMineralSpecies(const std::string & name) const
 {
-  std::vector<std::string> names(_root["surface species"].getMemberNames());
-  return names;
+  return _root["mineral species"].isMember(name);
 }
+
+bool
+GeochemicalDatabaseReader::isOxideSpecies(const std::string & name) const
+{
+  return _root["oxide species"].isMember(name);
+}
+
+bool
+GeochemicalDatabaseReader::isSurfaceSpecies(const std::string & name) const
+{
+  return _root["surface species"].isMember(name);
+}
+
+std::string
+GeochemicalDatabaseReader::getSpeciesData(const std::string name) const
+{
+  std::string output;
+
+  for (auto & key : _root.getMemberNames())
+    if (_root[key].isMember(name))
+      output = _root[key][name].toStyledString();
+
+  if (output.empty())
+    mooseError(name + " is not a species in the database");
+
+  return name + ":\n" + output;
