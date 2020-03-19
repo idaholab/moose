@@ -7,36 +7,26 @@ INL's internal network.
 
 ### SSH Config
 
-Edit your `~/.ssh/config` file and add the commands to proxy calls to internal INL sites.
-
-For MacOS add the following content:
-
-```bash
-Host hpcgitlab.hpc.inl.gov
- User <your hpc user id>
- ProxyCommand nc -x localhost:5555 %h %p
-Host hpcsc.inl.gov
- User <your hpc user id>
- ProxyCommand nc -x localhost:5555 %h %p
-Host moosebuild.inl.gov
- User <your hpc user id>
- ProxyCommand nc -x localhost:5555 %h %p
-```
-
-For Linux Systems use the following instead:
+Edit your `~/.ssh/config` file and add the commands to proxy calls to internal INL sites. You may
+add additional information such as a "User" to use if your local machine and HPC account have different
+IDs. This file just serves as a useful guide:
 
 ```bash
-Host hpcgitlab.hpc.inl.gov
- User <your hpc user id>
- ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
-Host hpcsc.inl.gov
- User <your hpc user id>
- ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
-Host moosebuild.inl.gov
- User <your hpc user id>
- ProxyCommand nc --proxy-type socks5 --proxy localhost:5555 %h %p
-```
+ServerAliveInterval 240
 
+Host *
+  ControlMaster auto
+  ControlPath ~/.ssh/master-%r@%h:%p
+
+## HPC Entry Point
+Host hpclogin
+  Hostname hpclogin.inl.gov
+  DynamicForward 5555
+
+## Forwarding
+Host sawtooth1 sawtooth2 falcon1 falcon2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
+  ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
+```
 
 ### SSH Tunnel
 
@@ -45,28 +35,25 @@ resouces (GitLab, MOOSE Build, etc). If you close this window, you will loose yo
 these resources.
 
 ```bash
-ssh -D 5555 <your hpc user id>@hpclogin.inl.gov
+ssh <your hpc user id>@hpclogin
 ```
 
 !alert note
-Connecting in this method requires an RSA PIN + Token.
+Connecting in this method requires an RSA PIN + Token. You shouldn't need a fully-qualified
+domain name in your command above because of the "Host" setting in your SSH config file.
 
 ### Socks Proxy
 
-Adjust the socks proxy settings for your +least+ favorite web browser to reflect the following
+Adjust the SOCKS proxy settings for your +least+ favorite web browser to reflect the following
 settings:
 
 ```bash
 localhost:5555
 ```
 
-We say +least+ favorite, because once you adjust this setting that web browser will be unable to
-browse anything when your SSH tunnel is inactive. Requiring you to change it constantly if its your
-favorite browser.
-
-!alert note
-If you do not know how to do that, look up how to change socks proxy settings for your web browser
-using a search engine.
+We say +least+ favorite, because once you adjust this setting, you will have to undo this setting
+once you disconnect for that browser to work again. There are other ways to switch back and forth
+by creating profiles. You may want to consult the Internet on how to set this up for your browser or OS.
 
 ### Log in to HPC Gitlab
 
