@@ -157,6 +157,21 @@ struct GeochemistrySurfaceSpecies
 };
 
 /**
+ * Data structure for sorbing minerals
+ * * Species name
+ * * specific surface area
+ * * basis species and site density
+ */
+struct GeochemistrySorbingMinerals
+{
+  GeochemistrySorbingMinerals(){};
+
+  std::string name;
+  std::map<std::string, Real> basis_species;
+  Real surface_area;
+};
+
+/**
  * Data structure for Debye-Huckel activity coefficients.
  * Members are:
  * * adh: Debye-Huckel a parameter
@@ -329,6 +344,14 @@ public:
   getSurfaceSpecies(const std::vector<std::string> & names);
 
   /**
+   * Get the sorbing minerals information
+   * @param names list of sorbing minerals
+   * @return surface sorbing minerals structure
+   */
+  std::map<std::string, GeochemistrySorbingMinerals>
+  getSorbingMinerals(const std::vector<std::string> & names);
+
+  /**
    * Get the neutral species activity coefficients
    * @return neutral species activity coefficients
    */
@@ -378,6 +401,15 @@ public:
   /// returns True iff name is the name of a redox species
   bool isRedoxSpecies(const std::string & name) const;
 
+  /// returns True iff name is the name of a sorbing mineral
+  bool isSorbingMineral(const std::string & name) const;
+
+  /// Returns a list of all the names of the "secondary species" in the database
+  std::vector<std::string> secondarySpeciesNames() const;
+
+  /// Returns a list of all the names of the "redox couples" in the database
+  std::vector<std::string> redoxCoupleNames() const;
+
 protected:
   /**
    * Generates a formatted vector of strings representing all reactions
@@ -419,6 +451,8 @@ protected:
   std::map<std::string, GeochemistryOxideSpecies> _oxide_species;
   /// Surface sorbing species data read from the database
   std::map<std::string, GeochemistrySurfaceSpecies> _surface_species;
+  /// Sorbing minerals data read from the database
+  std::map<std::string, GeochemistrySorbingMinerals> _sorbing_minerals;
   /// Debye-Huckel activity coefficients
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients

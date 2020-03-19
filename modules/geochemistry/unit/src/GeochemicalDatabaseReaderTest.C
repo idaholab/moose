@@ -8,8 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
+#include <algorithm>
 
 #include "GeochemicalDatabaseReader.h"
+
+TEST(GeochemicalDatabaseReaderTest, filename)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_EQ(database.filename(), "data/moose_testdb.json");
+}
 
 TEST(GeochemicalDatabaseReaderTest, getActivityModel)
 {
@@ -354,6 +362,48 @@ TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
   EXPECT_EQ(ospecies.basis_species, bs_gold);
 }
 
+TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::vector<std::string> ss_names{">(s)FeO-"};
+
+  auto ss = database.getSurfaceSpecies(ss_names);
+
+  // Check that only the species in ss_names are returned
+  std::vector<std::string> ss_names_returned;
+  for (auto s : ss)
+    ss_names_returned.push_back(s.first);
+
+  EXPECT_EQ(ss_names_returned, ss_names);
+
+  auto sspecies = ss[">(s)FeO-"];
+  std::map<std::string, Real> ss_gold = {{">(s)FeOH", 1}, {"H+", -1}};
+
+  EXPECT_EQ(sspecies.basis_species, ss_gold);
+}
+
+TEST(GeochemicalDatabaseReaderTest, getSorbingMinerals)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::vector<std::string> sm_names{"Fe(OH)3(ppd)"};
+
+  auto sm = database.getSorbingMinerals(sm_names);
+
+  // Check that only the species in sm_names are returned
+  std::vector<std::string> sm_names_returned;
+  for (auto s : sm)
+    sm_names_returned.push_back(s.first);
+
+  EXPECT_EQ(sm_names_returned, sm_names);
+
+  auto smspecies = sm["Fe(OH)3(ppd)"];
+  std::map<std::string, Real> sm_gold = {{">(s)FeOH", 0.005}, {">(w)FeOH", 0.2}};
+  EXPECT_EQ(smspecies.basis_species, sm_gold);
+  EXPECT_EQ(smspecies.surface_area, 600);
+}
+
 TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
 {
   GeochemicalDatabaseReader database("data/moose_testdb.json");
@@ -418,4 +468,78 @@ TEST(GeochemicalDatabaseReaderTest, oxideReactions)
   auto reactions = database.oxideReactions(names);
 
   EXPECT_EQ(reactions[0], "Cu2O = 2Cu+ -2H+ + H2O");
+}
+
+TEST(GeochemicalDatabaseReaderTest, isBasisSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_TRUE(database.isBasisSpecies("Ca++"));
+  EXPECT_TRUE(database.isBasisSpecies("H2O"));
+  EXPECT_FALSE(database.isBasisSpecies("Ag"));
+  EXPECT_FALSE(database.isBasisSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isBasisSpecies("CO3--"));
+  EXPECT_FALSE(database.isBasisSpecies("Calcite"));
+  EXPECT_FALSE(database.isBasisSpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isBasisSpecies("CH4(g)"));
+  EXPECT_FALSE(database.isBasisSpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isBasisSpecies("Fe+++"));
+  EXPECT_FALSE(database.isBasisSpecies("Cu2O"));
+  EXPECT_FALSE(database.isBasisSpecies(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, isRedoxSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isRedoxSpecies("Ca++"));
+  EXPECT_FALSE(database.isRedoxSpecies("H2O"));
+  EXPECT_FALSE(database.isRedoxSpecies("Ag"));
+  EXPECT_FALSE(database.isRedoxSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isRedoxSpecies("CO3--"));
+  EXPECT_FALSE(database.isRedoxSpecies("Calcite"));
+  EXPECT_FALSE(database.isRedoxSpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isRedoxSpecies("CH4(g)"));
+  EXPECT_TRUE(database.isRedoxSpecies("(O-phth)--"));
+  EXPECT_TRUE(database.isRedoxSpecies("Fe+++"));
+  EXPECT_FALSE(database.isRedoxSpecies("Cu2O"));
+  EXPECT_FALSE(database.isRedoxSpecies(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, isSorbingMineral)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isSorbingMineral("Ca++"));
+  EXPECT_FALSE(database.isSorbingMineral("H2O"));
+  EXPECT_FALSE(database.isSorbingMineral("Ag"));
+  EXPECT_FALSE(database.isSorbingMineral("CO2(aq)"));
+  EXPECT_FALSE(database.isSorbingMineral("CO3--"));
+  EXPECT_FALSE(database.isSorbingMineral("Calcite"));
+  EXPECT_TRUE(database.isSorbingMineral("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isSorbingMineral("CH4(g)"));
+  EXPECT_FALSE(database.isSorbingMineral("(O-phth)--"));
+  EXPECT_FALSE(database.isSorbingMineral("Fe+++"));
+  EXPECT_FALSE(database.isSorbingMineral("Cu2O"));
+  EXPECT_FALSE(database.isSorbingMineral(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::vector<std::string> names = database.secondarySpeciesNames();
+  for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"})
+    EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
+  EXPECT_EQ(names.size(), 5);
+}
+
+TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  std::vector<std::string> names = database.redoxCoupleNames();
+  for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++"})
+    EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
+  EXPECT_EQ(names.size(), 4);
 }
