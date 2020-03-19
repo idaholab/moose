@@ -15,7 +15,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             QuadratureSampler,
                             "07/01/2020 00:00",
                             Quadrature);
-defineLegacyParams(QuadratureSampler);
 
 InputParameters
 QuadratureSampler::validParams()

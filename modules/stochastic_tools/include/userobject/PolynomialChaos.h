@@ -15,12 +15,6 @@
 
 #include "Distribution.h"
 
-// Forward Declarations
-class PolynomialChaos;
-
-template <>
-InputParameters validParams<PolynomialChaos>();
-
 class PolynomialChaos : public SurrogateModel
 {
 public:
@@ -58,6 +52,19 @@ public:
   /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
   Real powerExpectation(const unsigned int n, const bool distributed = true) const;
 
+  /// Evaluates partial derivative of expansion: du(x)/dx_dim
+  Real computeDerivative(const unsigned int dim, const std::vector<Real> & x) const;
+  /**
+   * Evaluates sum of partial derivative of expansion. Example:
+   * computeGradient({0, 2, 3}, x) = du(x)/dx_0dx_2dx_3
+   */
+  Real computePartialDerivative(const std::vector<unsigned int> & dim,
+                                const std::vector<Real> & x) const;
+
+  /// Computes Sobol sensitivities S_{i_1,i_2,...,i_s}, where ind = i_1,i_2,...,i_s
+  Real computeSobolIndex(const std::set<unsigned int> & ind) const;
+  Real computeSobolTotal(const unsigned int dim) const;
+
 protected:
   /**
    * Function computing for computing _tuple
@@ -79,9 +86,16 @@ protected:
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
   const std::vector<std::vector<unsigned int>> _tuple;
   /// Total number of coefficient (defined by size of _tuple)
-  const unsigned int _ncoeff;
+  const std::size_t _ncoeff;
   /// These are the coefficients we are after in the PC expansion
   std::vector<Real> _coeff;
   /// The distributions used for sampling
   std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> _poly;
+
+  /// Utility for looping over coefficients in parallel
+  ///@{
+  dof_id_type _n_local_coeff;
+  dof_id_type _st_local_coeff;
+  dof_id_type _end_local_coeff;
+  ///@}
 };

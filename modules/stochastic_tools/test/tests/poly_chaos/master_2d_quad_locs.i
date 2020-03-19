@@ -12,20 +12,24 @@
 
 [Distributions]
   [D_dist]
-    type = NormalDistribution
-    mean = 5
-    standard_deviation = 0.5
+    type = UniformDistribution
+    lower_bound = 2.5
+    upper_bound = 7.5
   []
   [S_dist]
-    type = NormalDistribution
-    mean = 8
-    standard_deviation = 0.7
+    type = UniformDistribution
+    lower_bound = 2.5
+    upper_bound = 7.5
   []
 []
 
 [Samplers]
+  [grid]
+    type = CartesianProductSampler
+    linear_space_items = '2.5 0.5 10  2.5 0.5 10'
+  []
   [quadrature]
-    type = Quadrature
+    type = QuadratureSampler
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5
@@ -64,10 +68,13 @@
     parallel_type = REPLICATED
     samplers = quadrature
   []
-  [pc_moments]
-    type = PolynomialChaosStatistics
+  [local_sense]
+    type = PolynomialChaosLocalSensitivity
     pc_name = poly_chaos
-    compute = 'mean stddev skewness kurtosis'
+    local_points_sampler = grid
+    local_points = '3.14159 3.14159 2.7182 3.14159 3.14159 2.7182 2.7182 2.7182'
+    output_points = true
+    sensitivity_parameters = '0 1'
     execute_on = final
   []
 []

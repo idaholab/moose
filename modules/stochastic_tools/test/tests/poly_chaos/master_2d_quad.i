@@ -71,7 +71,7 @@
     samplers = quadrature
   []
   [pc_coeff]
-    type = PolyChaosData
+    type = PolynomialChaosData
     pc_name = poly_chaos
     execute_on = final
   []
@@ -91,7 +91,8 @@
     order = 5
     distributions = 'D_dist S_dist'
     training_sampler = quadrature
-    stochastic_results = storage
+    results_vpp = storage
+    results_vector = quadrature
   []
 []
 
