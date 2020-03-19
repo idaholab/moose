@@ -26,6 +26,38 @@
 #include "ShapeSideUserObject.h"
 #include "ShapeElementUserObject.h"
 
+std::ostream &
+operator<<(std::ostream & os, Interfaces & iface)
+{
+  os << "Interfaces(";
+  if (static_cast<bool>(iface & Interfaces::UserObject))
+    os << "|UserObject";
+  if (static_cast<bool>(iface & Interfaces::ElementUserObject))
+    os << "|ElementUserObject";
+  if (static_cast<bool>(iface & Interfaces::SideUserObject))
+    os << "|SideUserObject";
+  if (static_cast<bool>(iface & Interfaces::InternalSideUserObject))
+    os << "|InternalSideUserObject";
+  if (static_cast<bool>(iface & Interfaces::NodalUserObject))
+    os << "|NodalUserObject";
+  if (static_cast<bool>(iface & Interfaces::GeneralUserObject))
+    os << "|GeneralUserObject";
+  if (static_cast<bool>(iface & Interfaces::ThreadedGeneralUserObject))
+    os << "|ThreadedGeneralUserObject";
+  if (static_cast<bool>(iface & Interfaces::ShapeElementUserObject))
+    os << "|ShapeElementUserObject";
+  if (static_cast<bool>(iface & Interfaces::ShapeSideUserObject))
+    os << "|ShapeSideUserObject";
+  if (static_cast<bool>(iface & Interfaces::Postprocessor))
+    os << "|Postprocessor";
+  if (static_cast<bool>(iface & Interfaces::VectorPostprocessor))
+    os << "|VectorPostprocessor";
+  if (static_cast<bool>(iface & Interfaces::InterfaceUserObject))
+    os << "|InterfaceUserObject";
+  os << ")";
+  return os;
+}
+
 bool
 AttribTagBase::isMatch(const Attribute & other) const
 {
