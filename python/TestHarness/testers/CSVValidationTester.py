@@ -153,7 +153,7 @@ class CSVValidationTester(FileTester):
                     clr = 'GREEN'
                 computed += colorText("{:.2f}".format(std), clr, html=False, colored=options.colored, code=options.code)
 
-                requested = "{:.2f} \u00B1 {:.2f}".format(self.specs['mean_limit'], self.specs['std_limit'])
+                requested = u"{:.2f} \u00B1 {:.2f}".format(self.specs['mean_limit'], self.specs['std_limit'])
 
                 if options.colored:
                     # need to account for the color characters in the second column
