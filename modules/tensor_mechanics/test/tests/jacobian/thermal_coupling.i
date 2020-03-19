@@ -24,21 +24,21 @@
     type = StressDivergenceTensors
     variable = disp_x
     temperature = temperature
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     component = 0
   [../]
   [./cy_elastic]
     type = StressDivergenceTensors
     variable = disp_y
     temperature = temperature
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     component = 1
   [../]
   [./cz_elastic]
     type = StressDivergenceTensors
     variable = disp_z
     temperature = temperature
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     component = 2
   [../]
   [./temperature]
