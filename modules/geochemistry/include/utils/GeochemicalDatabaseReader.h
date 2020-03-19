@@ -374,13 +374,31 @@ public:
    */
   std::vector<std::string> oxideReactions(const std::vector<std::string> & names) const;
 
+  /**
+   * String representation of JSON species object contents
+   * @param name name of species
+   * @return styled string of species information
+   */
+  std::string getSpeciesData(const std::string name) const;
+
+  /**
+   * Filename of database
+   * @return filename
+   */
   const FileName & filename() const;
 
-  /// returns True iff name is the name of a basis species
+  /**
+   * Checks if species is of given type
+   * @param name species name
+   * @return true iff species is of given type
+   */
   bool isBasisSpecies(const std::string & name) const;
-
-  /// returns True iff name is the name of a redox species
+  bool isSecondarySpecies(const std::string & name) const;
   bool isRedoxSpecies(const std::string & name) const;
+  bool isGasSpecies(const std::string & name) const;
+  bool isMineralSpecies(const std::string & name) const;
+  bool isOxideSpecies(const std::string & name) const;
+  bool isSurfaceSpecies(const std::string & name) const;
 
   /// returns True iff name is the name of a sorbing mineral
   bool isSorbingMineral(const std::string & name) const;
@@ -399,7 +417,7 @@ protected:
    * Generates a formatted vector of strings representing all reactions
    * @param names list of reaction species
    * @param basis species list of basis species for each reaction species
-   * @preturn formatted reaction equations
+   * @return formatted reaction equations
    */
   std::vector<std::string>
   printReactions(std::vector<std::string> names,
