@@ -242,12 +242,15 @@ SolutionUserObject::readExodusII()
   if (dynamic_cast<DistributedMesh *>(_mesh.get()))
   {
     _mesh->allow_renumbering(true);
-    _mesh->prepare_for_use(/*false*/);
+    _mesh->prepare_for_use(false, false);
   }
   else
   {
     _mesh->allow_renumbering(false);
-    _mesh->prepare_for_use(/*true*/);
+    // Don't worry, calling prepare_for_use with skip_renumber_nodes_and_elements = false is a
+    // no-op. It doesn't do anything. However, if true is passed you'll get a deprecation warning.
+    // So we pass false even though it's now what we mean
+    _mesh->prepare_for_use(false, false);
   }
 
   // Create EquationSystems object for solution

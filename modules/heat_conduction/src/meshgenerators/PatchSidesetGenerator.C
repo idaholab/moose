@@ -176,7 +176,7 @@ PatchSidesetGenerator::generate()
   }
 
   // partition the boundary mesh
-  boundary_mesh->prepare_for_use();
+  boundary_mesh->prepare_for_use(false, false);
   MooseMesh::setPartitioner(*boundary_mesh, _partitioner_name, false, _pars, *this);
   boundary_mesh->partition(_n_patches);
 
