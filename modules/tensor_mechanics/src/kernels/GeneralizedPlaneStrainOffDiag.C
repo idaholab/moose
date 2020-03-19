@@ -31,7 +31,7 @@ GeneralizedPlaneStrainOffDiag::validParams()
                              "out-of-plane strain to other kernels");
   params.addRequiredParam<std::vector<VariableName>>("displacements",
                                                      "Variable for the displacements");
-  params.addParam<VariableName>("temperature", "Variable for the temperature");
+  params.addCoupledVar("temperature", "Variable for the temperature");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for generalized plane strain");
@@ -63,9 +63,7 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
                        : 0),
-    _temp_var(isParamValid("temperature")
-                  ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("temperature"))
-                  : NULL),
+    _temp_var(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _num_disp_var(getParam<std::vector<VariableName>>("displacements").size()),
     _scalar_out_of_plane_strain_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
@@ -88,8 +86,11 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
 
   if (isParamValid("scalar_variable_index_provider") &&
       !isParamValid("scalar_out_of_plane_strain_index"))
-    mooseError("scalar_out_of_plane_strain_index should be provided if more "
+    paramError("scalar_out_of_plane_index",
+               "scalar_out_of_plane_strain_index should be provided if more "
                "than one is available");
+  if (coupledComponents("temperature") > 1)
+    paramError("temperature", "Only one variable my be specified in 'temperature'");
 }
 
 void
@@ -107,7 +108,7 @@ GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
       computeDispOffDiagJacobianScalar(0, jvar);
     else if (_num_disp_var == 2 && _var.number() == _disp_var[1]->number())
       computeDispOffDiagJacobianScalar(1, jvar);
-    else if (isParamValid("temperature") ? _var.number() == _temp_var->number() : 0)
+    else if (_temp_var && _var.number() == _temp_var->number())
       computeTempOffDiagJacobianScalar(jvar);
   }
 }

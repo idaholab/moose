@@ -4,7 +4,6 @@
   displacements = 'disp_x disp_y'
   temperature = temp
   out_of_plane_strain = strain_zz
-  thermal_eigenstrain_name = thermal_eigenstrain
 []
 
 [Mesh]
@@ -28,17 +27,20 @@
   [./disp_x]
     type = StressDivergenceTensors
     variable = disp_x
+    eigenstrain_names = thermal_eigenstrain
     component = 0
   [../]
   [./disp_y]
     type = StressDivergenceTensors
     variable = disp_y
+    eigenstrain_names = thermal_eigenstrain
     component = 1
   [../]
 
   [./solid_z]
     type = WeakPlaneStress
     variable = strain_zz
+    eigenstrain_names = thermal_eigenstrain
   [../]
 
   [./heat]
