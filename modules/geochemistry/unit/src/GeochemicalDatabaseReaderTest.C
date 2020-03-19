@@ -480,6 +480,42 @@ TEST(GeochemicalDatabaseReaderTest, isBasisSpecies)
   EXPECT_FALSE(database.isBasisSpecies(">(s)FeO-"));
 }
 
+TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isSecondarySpecies("Ca++"));
+  EXPECT_FALSE(database.isSecondarySpecies("H2O"));
+  EXPECT_FALSE(database.isSecondarySpecies("Ag"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO2(aq)"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO3--"));
+  EXPECT_FALSE(database.isSecondarySpecies("Calcite"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isSecondarySpecies("CH4(g)"));
+  EXPECT_FALSE(database.isSecondarySpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe+++"));
+  EXPECT_FALSE(database.isSecondarySpecies("Cu2O"));
+  EXPECT_FALSE(database.isSecondarySpecies(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, isMineralSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isMineralSpecies("Ca++"));
+  EXPECT_FALSE(database.isMineralSpecies("H2O"));
+  EXPECT_FALSE(database.isMineralSpecies("Ag"));
+  EXPECT_FALSE(database.isMineralSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isMineralSpecies("CO3--"));
+  EXPECT_TRUE(database.isMineralSpecies("Calcite"));
+  EXPECT_TRUE(database.isMineralSpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isMineralSpecies("CH4(g)"));
+  EXPECT_FALSE(database.isMineralSpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isMineralSpecies("Fe+++"));
+  EXPECT_FALSE(database.isMineralSpecies("Cu2O"));
+  EXPECT_FALSE(database.isMineralSpecies(">(s)FeO-"));
+}
+
 TEST(GeochemicalDatabaseReaderTest, isRedoxSpecies)
 {
   GeochemicalDatabaseReader database("data/moose_testdb.json");
@@ -498,6 +534,24 @@ TEST(GeochemicalDatabaseReaderTest, isRedoxSpecies)
   EXPECT_FALSE(database.isRedoxSpecies(">(s)FeO-"));
 }
 
+TEST(GeochemicalDatabaseReaderTest, isGasSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isGasSpecies("Ca++"));
+  EXPECT_FALSE(database.isGasSpecies("H2O"));
+  EXPECT_FALSE(database.isGasSpecies("Ag"));
+  EXPECT_FALSE(database.isGasSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isGasSpecies("CO3--"));
+  EXPECT_FALSE(database.isGasSpecies("Calcite"));
+  EXPECT_FALSE(database.isGasSpecies("Fe(OH)3(ppd)"));
+  EXPECT_TRUE(database.isGasSpecies("CH4(g)"));
+  EXPECT_FALSE(database.isGasSpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isGasSpecies("Fe+++"));
+  EXPECT_FALSE(database.isGasSpecies("Cu2O"));
+  EXPECT_FALSE(database.isGasSpecies(">(s)FeO-"));
+}
+
 TEST(GeochemicalDatabaseReaderTest, isSorbingMineral)
 {
   GeochemicalDatabaseReader database("data/moose_testdb.json");
@@ -514,6 +568,42 @@ TEST(GeochemicalDatabaseReaderTest, isSorbingMineral)
   EXPECT_FALSE(database.isSorbingMineral("Fe+++"));
   EXPECT_FALSE(database.isSorbingMineral("Cu2O"));
   EXPECT_FALSE(database.isSorbingMineral(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, isOxideSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isOxideSpecies("Ca++"));
+  EXPECT_FALSE(database.isOxideSpecies("H2O"));
+  EXPECT_FALSE(database.isOxideSpecies("Ag"));
+  EXPECT_FALSE(database.isOxideSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isOxideSpecies("CO3--"));
+  EXPECT_FALSE(database.isOxideSpecies("Calcite"));
+  EXPECT_FALSE(database.isOxideSpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isOxideSpecies("CH4(g)"));
+  EXPECT_FALSE(database.isOxideSpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isOxideSpecies("Fe+++"));
+  EXPECT_TRUE(database.isOxideSpecies("Cu2O"));
+  EXPECT_FALSE(database.isOxideSpecies(">(s)FeO-"));
+}
+
+TEST(GeochemicalDatabaseReaderTest, isSurfaceSpecies)
+{
+  GeochemicalDatabaseReader database("data/moose_testdb.json");
+
+  EXPECT_FALSE(database.isSurfaceSpecies("Ca++"));
+  EXPECT_FALSE(database.isSurfaceSpecies("H2O"));
+  EXPECT_FALSE(database.isSurfaceSpecies("Ag"));
+  EXPECT_FALSE(database.isSurfaceSpecies("CO2(aq)"));
+  EXPECT_FALSE(database.isSurfaceSpecies("CO3--"));
+  EXPECT_FALSE(database.isSurfaceSpecies("Calcite"));
+  EXPECT_FALSE(database.isSurfaceSpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isSurfaceSpecies("CH4(g)"));
+  EXPECT_FALSE(database.isSurfaceSpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isSurfaceSpecies("Fe+++"));
+  EXPECT_FALSE(database.isSurfaceSpecies("Cu2O"));
+  EXPECT_TRUE(database.isSurfaceSpecies(">(s)FeO-"));
 }
 
 TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)

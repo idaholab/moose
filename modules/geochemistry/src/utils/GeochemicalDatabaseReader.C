@@ -651,6 +651,7 @@ GeochemicalDatabaseReader::isSorbingMineral(const std::string & name) const
   return _root["sorbing minerals"].isMember(name);
 }
 
+bool
 GeochemicalDatabaseReader::isSecondarySpecies(const std::string & name) const
 {
   return _root["secondary species"].isMember(name);
@@ -671,7 +672,7 @@ GeochemicalDatabaseReader::isMineralSpecies(const std::string & name) const
 bool
 GeochemicalDatabaseReader::isOxideSpecies(const std::string & name) const
 {
-  return _root["oxide species"].isMember(name);
+  return _root["oxides"].isMember(name);
 }
 
 bool
@@ -693,3 +694,4 @@ GeochemicalDatabaseReader::getSpeciesData(const std::string name) const
     mooseError(name + " is not a species in the database");
 
   return name + ":\n" + output;
+}
