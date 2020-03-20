@@ -68,6 +68,7 @@ public:
   virtual Real computeDerivative(const unsigned int order,
                                  const Real x,
                                  const unsigned int m = 1) const override;
+  Real computeDerivativeRef(const unsigned int order, const Real x, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const override;
 
   /// Gauss-Legendre quadrature: sum(weights) = 2

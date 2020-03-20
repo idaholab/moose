@@ -68,6 +68,6 @@
     input = sobol.i
     allow_test_objects = true
     csvdiff = 'sobol_out_sobol_0002.csv'
-    requirement = 'The system shall compute sensitivities sensitivities with computed Legendre polynomial chaos coefficients.'
+    requirement = 'The system shall compute sensitivities with computed Legendre polynomial chaos coefficients.'
   []
 []
