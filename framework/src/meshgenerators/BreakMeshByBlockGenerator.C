@@ -269,10 +269,13 @@ BreakMeshByBlockGenerator::generate()
 
   // We need to prepare the mesh now to at a minimum update our parallel counts. We used our own
   // numbering procedure so we don't need to renumber. Similarly we also handled our own
-  // partitioning so we can skip partitioning.
+  // partitioning so we can skip partitioning. Finally we absolutely have to skip_find_neighbors
+  // because once we've broken by block libmesh will not recognize former neighbors at the subdomain
+  // interface as neighbors. If we called find_neighbors, elements would lose those neighbor links
+  // and then in a distributed mode they very well might get deleted (the former neighbors that is)
   mesh->allow_renumbering(false);
   mesh->skip_partitioning(true);
-  mesh->prepare_for_use();
+  mesh->prepare_for_use(false, /*skip_find_neighbors=*/true);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
