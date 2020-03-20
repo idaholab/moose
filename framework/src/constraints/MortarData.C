@@ -12,7 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 
-MortarData::MortarData() {}
+MortarData::MortarData(const libMesh::ParallelObject & other) : libMesh::ParallelObject(other) {}
 
 void
 MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
@@ -27,6 +27,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
   _mortar_boundary_coverage.insert(boundary_key.first);
   _mortar_boundary_coverage.insert(boundary_key.second);
 
+  MeshBase & mesh = subproblem.mesh().getMesh();
+
   if (on_displaced)
   {
     auto && periodic_map_iterator = _displaced_periodic_map.find(boundary_key);
@@ -38,13 +40,10 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
       _displaced_periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
     if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
-      _displaced_mortar_interfaces.emplace(boundary_key,
-                                           AutomaticMortarGeneration(subproblem.getMooseApp(),
-                                                                     subproblem.mesh().getMesh(),
-                                                                     boundary_key,
-                                                                     subdomain_key,
-                                                                     on_displaced,
-                                                                     periodic));
+      _displaced_mortar_interfaces.emplace(
+          boundary_key,
+          AutomaticMortarGeneration(
+              subproblem.getMooseApp(), mesh, boundary_key, subdomain_key, on_displaced, periodic));
   }
   else
   {
@@ -56,13 +55,45 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
       _periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
     if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
-      _mortar_interfaces.emplace(boundary_key,
-                                 AutomaticMortarGeneration(subproblem.getMooseApp(),
-                                                           subproblem.mesh().getMesh(),
-                                                           boundary_key,
-                                                           subdomain_key,
-                                                           on_displaced,
-                                                           periodic));
+      _mortar_interfaces.emplace(
+          boundary_key,
+          AutomaticMortarGeneration(
+              subproblem.getMooseApp(), mesh, boundary_key, subdomain_key, on_displaced, periodic));
+  }
+
+  // See whether to query the mesh
+  SubdomainID key1 = subdomain_key.first;
+  SubdomainID key2 = subdomain_key.second;
+
+  // it(1,2) is a a pair consisting of an iterator to the inserted element (or to the element that
+  // prevented the insertion) and a bool denoting whether the insertion took place.
+  auto it1 = _lower_d_sub_to_higher_d_subs.insert(std::make_pair(key1, std::set<SubdomainID>{}));
+  auto it2 = _lower_d_sub_to_higher_d_subs.insert(std::make_pair(key2, std::set<SubdomainID>{}));
+
+  // Each entry in this vector will be a pair. The first member of the pair corresponds to
+  // the lower dimensional subomain ID. The second member of the pair corresponds to the higher
+  // dimensional subdomain ids of the lower dimeionsal interior parents
+  std::vector<std::pair<SubdomainID, std::set<SubdomainID> *>> subdomains_to_probe;
+
+  if (it1.second)
+    subdomains_to_probe.push_back(std::make_pair(key1, &it1.first->second));
+  if (it2.second)
+    subdomains_to_probe.push_back(std::make_pair(key2, &it2.first->second));
+
+  for (auto & pr : subdomains_to_probe)
+  {
+    for (const Elem * lower_d_elem : as_range(mesh.active_local_subdomain_elements_begin(pr.first),
+                                              mesh.active_local_subdomain_elements_end(pr.first)))
+    {
+      const Elem * ip = lower_d_elem->interior_parent();
+      mooseAssert(
+          ip,
+          "Lower dimensional elements should always have an interior parent set when using mortar");
+      pr.second->insert(ip->subdomain_id());
+    }
+
+    // Make sure that we get this right in parallel
+    _communicator.set_union(*pr.second);
   }
 }
 
@@ -121,4 +152,14 @@ MortarData::update(AutomaticMortarGeneration & amg)
 
   // Build the mortar segment mesh on the slave boundary.
   amg.buildMortarSegmentMesh();
+}
+
+const std::set<SubdomainID> &
+MortarData::getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const
+{
+  if (_lower_d_sub_to_higher_d_subs.find(lower_d_subdomain_id) ==
+      _lower_d_sub_to_higher_d_subs.end())
+    mooseError(
+        "The lower dimensional ID ", lower_d_subdomain_id, " has not been added to MortarData yet");
+  return _lower_d_sub_to_higher_d_subs.at(lower_d_subdomain_id);
 }

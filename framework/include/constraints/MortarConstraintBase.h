@@ -11,10 +11,11 @@
 
 // MOOSE includes
 #include "Constraint.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseMesh.h"
 #include "MooseVariableInterface.h"
-#include "TaggingInterface.h"
+#include "MortarInterface.h"
+#include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
 class MortarConstraintBase;
@@ -43,7 +44,9 @@ InputParameters validParams<MortarConstraintBase>();
  *
  */
 class MortarConstraintBase : public Constraint,
-                             public CoupleableMooseVariableDependencyIntermediateInterface,
+                             public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                             public MortarInterface,
+                             public TwoMaterialPropertyInterface,
                              public MooseVariableInterface<Real>
 {
 public:
@@ -74,11 +77,6 @@ public:
   virtual void computeJacobian(Moose::MortarType mortar_type) = 0;
 
   /**
-   * Returns the master lower dimensional subdomain id
-   */
-  SubdomainID masterSubdomain() const { return _master_subdomain_id; }
-
-  /**
    * The variable number that this object operates on.
    */
   const MooseVariable * variable() const { return _var; }
@@ -86,18 +84,6 @@ public:
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
-
-  /// Boundary ID for the slave surface
-  const BoundaryID _slave_id;
-
-  /// Boundary ID for the master surface
-  const BoundaryID _master_id;
-
-  /// Subdomain ID for the slave surface
-  const SubdomainID _slave_subdomain_id;
-
-  /// Subdomain ID for the master surface
-  const SubdomainID _master_subdomain_id;
 
 protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
