@@ -87,4 +87,37 @@ TEST(StochasticTools, PolynomialQuadrature)
       EXPECT_NEAR(wq[n], wq_ref[n], tol);
     }
   }
+
+  {
+    std::vector<Real> xq;
+    std::vector<Real> wq;
+    clenshaw_curtis(10, xq, wq);
+
+    EXPECT_EQ(11, xq.size());
+    EXPECT_EQ(11, wq.size());
+
+    EXPECT_NEAR(xq[0], -1.0000000000000000e+00, tol);
+    EXPECT_NEAR(xq[1], -9.5105651629515353e-01, tol);
+    EXPECT_NEAR(xq[2], -8.0901699437494745e-01, tol);
+    EXPECT_NEAR(xq[3], -5.8778525229247314e-01, tol);
+    EXPECT_NEAR(xq[4], -3.0901699437494745e-01, tol);
+    EXPECT_NEAR(xq[5], +0.0000000000000000e+00, tol);
+    EXPECT_NEAR(xq[6], +3.0901699437494745e-01, tol);
+    EXPECT_NEAR(xq[7], +5.8778525229247314e-01, tol);
+    EXPECT_NEAR(xq[8], +8.0901699437494745e-01, tol);
+    EXPECT_NEAR(xq[9], +9.5105651629515353e-01, tol);
+    EXPECT_NEAR(xq[10], +1.0000000000000000e+00, tol);
+
+    EXPECT_NEAR(wq[0], +5.0505050505050535e-03, tol);
+    EXPECT_NEAR(wq[1], +4.7289527441850783e-02, tol);
+    EXPECT_NEAR(wq[2], +9.2817607212123884e-02, tol);
+    EXPECT_NEAR(wq[3], +1.2679416664184331e-01, tol);
+    EXPECT_NEAR(wq[4], +1.4960663521211851e-01, tol);
+    EXPECT_NEAR(wq[5], +1.5688311688311693e-01, tol);
+    EXPECT_NEAR(wq[6], +1.4960663521211851e-01, tol);
+    EXPECT_NEAR(wq[7], +1.2679416664184331e-01, tol);
+    EXPECT_NEAR(wq[8], +9.2817607212123884e-02, tol);
+    EXPECT_NEAR(wq[9], +4.7289527441850783e-02, tol);
+    EXPECT_NEAR(wq[10], +5.0505050505050535e-03, tol);
+  }
 }
