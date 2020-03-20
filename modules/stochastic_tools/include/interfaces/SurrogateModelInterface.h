@@ -68,7 +68,7 @@ private:
   FEProblemBase & _smi_feproblem;
 
   /// Thread ID
-  THREAD_ID _smi_tid;
+  const THREAD_ID _smi_tid;
 };
 
 template <typename T>

@@ -23,13 +23,15 @@ PolynomialChaos::validParams()
   // Training parameters
   params.addParam<SamplerName>("training_sampler", "Training set defined by a sampler object.");
   params.addParam<VectorPostprocessorName>(
-      "stochastic_results", "Vectorpostprocessor with results of samples created by trainer");
-
+      "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
+  params.addParam<std::string>(
+      "results_vector",
+      "Name of vector from vectorpostprocessor with results of samples created by trainer");
   params.addParam<unsigned int>("order", "Maximum polynomial order.");
   params.addParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
 
-  params.addParamNamesToGroup("training_sampler stochastic_results order distributions",
+  params.addParamNamesToGroup("training_sampler results_vpp results_vector order distributions",
                               "training");
   return params;
 }
@@ -38,13 +40,11 @@ PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
   : SurrogateModel(parameters),
     _ndim(declareModelData<unsigned int>("_ndim")),
     _tuple(declareModelData<std::vector<std::vector<unsigned int>>>("_tuple")),
-    _ncoeff(declareModelData<unsigned int>("_ncoeff")),
+    _ncoeff(declareModelData<std::size_t>("_ncoeff")),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _poly(declareModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>(
         "_poly"))
 {
-  MooseUtils::linearPartitionItems(
-      _ncoeff, n_processors(), processor_id(), _n_local_coeff, _st_local_coeff, _end_local_coeff);
 }
 
 void
@@ -57,8 +57,8 @@ PolynomialChaos::initialSetup()
     _tuple = generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order);
     _ncoeff = _tuple.size();
     _coeff.resize(_ncoeff, 0);
-    _values_ptr = &getVectorPostprocessorValue("stochastic_results",
-                                               getParam<SamplerName>("training_sampler"));
+    _values_ptr =
+        &getVectorPostprocessorValue("results_vpp", getParam<std::string>("results_vector"));
 
     // Sampler
     _sampler = &getSamplerByName(getParam<SamplerName>("training_sampler"));
@@ -74,6 +74,18 @@ PolynomialChaos::initialSetup()
     for (auto nm : dname)
       _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
   }
+
+  // Setup parallel partitioning of coefficients
+  MooseUtils::linearPartitionItems(_ncoeff,
+                                   n_processors(),
+                                   processor_id(),
+                                   _n_local_coeff,
+                                   _local_coeff_begin,
+                                   _local_coeff_end);
+
+  // If training data is loaded, it is store in a single file so the data must be partitioned
+  if (!isTraining() && n_processors() > 1)
+    _coeff.assign(_coeff.begin() + _local_coeff_begin, _coeff.begin() + _local_coeff_end);
 }
 
 void
@@ -276,7 +288,7 @@ PolynomialChaos::computeSobolIndex(const std::set<unsigned int> & ind) const
   mooseAssert(*ind.rbegin() < _ndim, "Maximum index provided exceeds number of parameters.");
 
   Real val = 0.0;
-  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+  for (dof_id_type i = _local_coeff_begin; i < _local_coeff_end; ++i)
   {
     Real tmp = _coeff[i] * _coeff[i];
     for (unsigned int d = 0; d < _ndim; ++d)
@@ -305,7 +317,7 @@ PolynomialChaos::computeSobolTotal(const unsigned int dim) const
   mooseAssert(dim < _ndim, "Requested dimesion is greater than number of parameters.");
 
   Real val = 0.0;
-  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+  for (dof_id_type i = _local_coeff_begin; i < _local_coeff_end; ++i)
     if (_tuple[i][dim] > 0)
       val += _coeff[i] * _coeff[i] * _poly[dim]->innerProduct(_tuple[i][dim]);
 

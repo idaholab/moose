@@ -109,7 +109,7 @@ private:
   /// Utility for looping over coefficients in parallel
   ///@{
   dof_id_type _n_local_coeff;
-  dof_id_type _st_local_coeff;
-  dof_id_type _end_local_coeff;
+  dof_id_type _local_coeff_begin;
+  dof_id_type _local_coeff_end;
   ///@}
 };

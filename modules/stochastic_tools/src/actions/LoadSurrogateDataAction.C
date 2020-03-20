@@ -30,7 +30,7 @@ void
 LoadSurrogateDataAction::act()
 {
   std::vector<SurrogateModel *> models;
-  _app.theWarehouse().query().queryInto(models);
+  _app.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(models);
   for (auto model_ptr : models)
     if (model_ptr->isParamValid("filename"))
       load(*model_ptr);
