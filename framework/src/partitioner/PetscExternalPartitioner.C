@@ -250,6 +250,10 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
 
   ierr = MatPartitioningCreate(comm.get(), &part);
   CHKERRABORT(comm.get(), ierr);
+#if !PETSC_VERSION_LESS_THAN(3, 12, 3)
+  ierr = MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE);
+  CHKERRABORT(comm.get(), ierr);
+#endif
   ierr = MatPartitioningSetAdjacency(part, dual);
   CHKERRABORT(comm.get(), ierr);
 
