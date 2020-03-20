@@ -43,6 +43,9 @@ public:
   virtual void quadrature(const unsigned int order,
                           std::vector<Real> & points,
                           std::vector<Real> & weights) const = 0;
+  virtual void clenshawQuadrature(const unsigned int order,
+                                  std::vector<Real> & points,
+                                  std::vector<Real> & weights) const;
   Real productIntegral(const std::vector<unsigned int> order) const;
 };
 
@@ -75,6 +78,11 @@ public:
   virtual void quadrature(const unsigned int order,
                           std::vector<Real> & points,
                           std::vector<Real> & weights) const override;
+
+  /// Just normal Clenshaw Curtis with shifted points
+  virtual void clenshawQuadrature(const unsigned int order,
+                                  std::vector<Real> & points,
+                                  std::vector<Real> & weights) const;
 
 private:
   const Real & _lower_bound;
@@ -194,6 +202,36 @@ private:
 };
 
 /**
+ * Clenshaw-Curtis sparse grid
+ */
+class ClenshawCurtisGrid : public Quadrature
+{
+public:
+  ClenshawCurtisGrid(const unsigned int max_order,
+                     std::vector<std::unique_ptr<const Polynomial>> & poly);
+
+  virtual unsigned int nPoints() const override { return _quadrature.size(); }
+  virtual unsigned int nDim() const override { return _ndim; }
+
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const override
+  {
+    return _quadrature[n].first;
+  }
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const override
+  {
+    return _quadrature[n].first[dim];
+  }
+  virtual Real quadratureWeight(const unsigned int n) const override
+  {
+    return _quadrature[n].second;
+  }
+
+private:
+  const unsigned int _ndim;
+  std::vector<std::pair<std::vector<Real>, Real>> _quadrature;
+};
+
+/**
  * Legendre polynomial of specified order. Uses boost if available
  */
 Real legendre(const unsigned int order,
@@ -233,4 +271,7 @@ void gauss_hermite(const unsigned int order,
                    std::vector<Real> & weights,
                    const Real mu,
                    const Real sig);
+
+void
+clenshaw_curtis(const unsigned int order, std::vector<Real> & points, std::vector<Real> & weights);
 }

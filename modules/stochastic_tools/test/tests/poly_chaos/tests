@@ -78,4 +78,12 @@
     csvdiff = 'smolyak_sobol_0002.csv'
     requirement = 'The system shall use Smolyak sparse grid to integrate polynomials for polynomial chaos expansion.'
   []
+  [clenshaw_curtis_sobol]
+    type = CSVDiff
+    input = sobol.i
+    allow_test_objects = true
+    cli_args = 'Samplers/sample/sparse_grid=clenshaw-curtis Outputs/file_base=clenshaw_curtis'
+    csvdiff = 'clenshaw_curtis_sobol_0002.csv'
+    requirement = 'The system shall use Clenshaw-Curtis sparse grid to integrate polynomials for polynomial chaos expansion.'
+  []
 []
