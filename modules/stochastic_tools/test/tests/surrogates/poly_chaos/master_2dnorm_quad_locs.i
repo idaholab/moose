@@ -12,24 +12,24 @@
 
 [Distributions]
   [D_dist]
-    type = UniformDistribution
-    lower_bound = 2.5
-    upper_bound = 7.5
+    type = Normal
+    mean = 5
+    standard_deviation = 0.5
   []
   [S_dist]
-    type = UniformDistribution
-    lower_bound = 2.5
-    upper_bound = 7.5
+    type = Normal
+    mean = 8
+    standard_deviation = 0.7
   []
 []
 
 [Samplers]
   [grid]
     type = CartesianProductSampler
-    linear_space_items = '2.5 0.5 10  2.5 0.5 10'
+    linear_space_items = '2.5 0.5 10  3 1 10'
   []
   [quadrature]
-    type = QuadratureSampler
+    type = Quadrature
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5

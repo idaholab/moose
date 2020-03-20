@@ -12,12 +12,12 @@
 
 [Distributions]
   [D_dist]
-    type = NormalDistribution
+    type = Normal
     mean = 5
     standard_deviation = 0.5
   []
   [S_dist]
-    type = NormalDistribution
+    type = Normal
     mean = 8
     standard_deviation = 0.7
   []

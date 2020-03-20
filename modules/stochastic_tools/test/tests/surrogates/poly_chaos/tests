@@ -2,7 +2,7 @@
   [coefficients]
     issues = "#14710"
     design = "PolynomialChaos.md"
-    requirements = 'The system shall compute polynomial chaos coefficents using '
+    requirement = 'The system shall compute polynomial chaos coefficents using '
     [monte_carlo_integration]
       type = CSVDiff
       input = master_2d_mc.i

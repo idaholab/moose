@@ -27,6 +27,7 @@ public:
 protected:
   /// Reference to PolynomialChaos
   const PolynomialChaos & _pc_uo;
+
   /// Reference to PC user object coefficient vector
   const std::vector<Real> & _coeff;
   /// Vector containing PCE coefficients

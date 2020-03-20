@@ -58,7 +58,6 @@ class Legendre : public Polynomial
 {
 public:
   Legendre(const Real lower_bound, const Real upper_bound);
-  Legendre(const UniformDistribution * dist);
   virtual void store(std::ostream & stream, void * context) const override;
 
   /// Legendre polynomial using static function then scales by <P_n^2> = 1 / (2n+1)
@@ -71,6 +70,7 @@ public:
   virtual Real computeDerivative(const unsigned int order,
                                  const Real x,
                                  const unsigned int m = 1) const override;
+  Real computeDerivativeRef(const unsigned int order, const Real x, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const override;
 
   /// Gauss-Legendre quadrature: sum(weights) = 2
@@ -95,8 +95,6 @@ class Hermite : public Polynomial
 {
 public:
   Hermite(const Real mu, const Real sig);
-  Hermite(const NormalDistribution * dist);
-  Hermite(const BoostNormalDistribution * dist);
   virtual void store(std::ostream & stream, void * context) const override;
 
   /// Hermite polynomial using static function then scales by <P_n^2> = n!

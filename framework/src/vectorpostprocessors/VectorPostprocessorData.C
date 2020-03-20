@@ -166,7 +166,8 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   vec_storage._is_broadcast |= is_broadcast;
 
   // If the VPP is declaring a vector, see if it will be output in parallel.
-  vec_storage._is_distributed = is_distributed;
+  // Note: This parameter is constant and applies to _all_ declared vectors.
+  vec_storage._is_distributed |= is_distributed;
 
   // Keep track of whether an old vector is needed for copying back later.
   if (!get_current)
@@ -202,7 +203,7 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   vec_struct.needs_scatter |= needs_scatter;
 
   // Set distributed flag
-  vec_struct.is_distributed = is_distributed;
+  vec_struct.is_distributed |= is_distributed;
 
   return vec_struct;
 }

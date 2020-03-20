@@ -253,6 +253,14 @@ public:
    */
   bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
+  ///@{
+  /**
+   * Return true if the VectorPostprocessor is marked with parallel_type as DISTRIBUTED
+   */
+  bool isVectorPostprocessorDistributed(const std::string & name) const;
+  bool isVectorPostprocessorDistributedByName(const VectorPostprocessorName & name) const;
+  ///@}
+
 private:
   /// Whether or not to force broadcasting by default
   bool _broadcast_by_default;
@@ -266,4 +274,3 @@ private:
   /// Thread ID
   THREAD_ID _vpi_tid;
 };
-
