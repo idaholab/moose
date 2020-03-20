@@ -1,48 +1,63 @@
 # This is a reproduction of test number 2 of ANSYS apdl verification manual.
 
-# Reported results; TBC
+# This test checks for the deformation at the center of a beam with simply
+# supported boundary conditions and a uniform load w = 10,000 lb/ft.
+
+#    |||||||||      def.      ||||||||
+#    *---*---*---*---*---*---*---*---*
+#            /\              /\
+#           ///              oo
+#        a           l            a
+#     <-----> <--------------> <----->
+#
+
+# l = 240 in, a = 120 in, A = 50.65 in^2, Iz = 7892 in^2
+# E = 30e6 psi
+# Solution deflection: 0.182 in. (dispz_5: -1.824633e-01)
 
 [Mesh]
   [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 8
-    xmin = -540.0
-    xmax = -60.0
+    xmin = 0.0
+    xmax = 480.0
   []
   [cnode]
     type = ExtraNodesetGenerator
-    coord = '-540.0'
+    coord = '0.0'
     new_boundary = 'one'
     input = generated_mesh
   []
   [cnode1]
     type = ExtraNodesetGenerator
-    coord = '-480.0'
+    coord = '60.0'
     new_boundary = 'two'
     input = cnode
   []
   [cnode2]
     type = ExtraNodesetGenerator
-    coord = '-120.0'
+    coord = '420.0'
     new_boundary = 'eight'
     input = cnode1
   []
   [cnode3]
     type = ExtraNodesetGenerator
-    coord = '-60.0'
+    coord = '480.0'
     new_boundary = 'nine'
     input = cnode2
   []
+
   [cnode4]
     type = ExtraNodesetGenerator
-    coord = '-420.0'
+    coord = '120.0'
     new_boundary = 'BC1'
     input = cnode3
   []
+
   [cnode5]
     type = ExtraNodesetGenerator
-    coord = '-180.0'
+    coord = '360.0'
     new_boundary = 'BC2'
     input = cnode4
   []
@@ -53,7 +68,6 @@
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
-
     # Geometry parameters
     area = 50.65
     Ay = 0.0
@@ -68,8 +82,10 @@
   [./elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 30.0e6
-    poissons_ratio = -0.9998699638
-    shear_coefficient = 1.0
+    # poissons_ratio = -0.9998699638
+      poissons_ratio = 0.33
+    # poissons_ratio = 0.3
+    shear_coefficient = 0.85
     block = 0
   [../]
   [./stress]
@@ -113,15 +129,15 @@
 []
 
 [Functions]
-  [./force_5e4]
+  [./force_50e3]
     type = PiecewiseLinear
-    x = '0.0 10'
-    y = '0.0 50000'
+    x = '0.0 10.0'
+    y = '0.0 50000.0'
   [../]
   [./force_25e3]
     type = PiecewiseLinear
-    x = '0.0 10'
-    y = '0.0 25000'
+    x = '0.0 10.0'
+    y = '0.0 25000.0'
   [../]
 []
 
@@ -130,19 +146,20 @@
     type = UserForcingFunctionNodalKernel
     variable = disp_z
     boundary = 'two'
-    function = force_5e4
+    function = force_50e3
   [../]
   [./force_z8]
     type = UserForcingFunctionNodalKernel
     variable = disp_z
-    function = force_5e4
     boundary = 'eight'
+    function = force_50e3
   [../]
+
   [./force_z1]
     type = UserForcingFunctionNodalKernel
     variable = disp_z
-    function = force_25e3
     boundary = 'one'
+    function = force_25e3
   [../]
   [./force_z9]
     type =  UserForcingFunctionNodalKernel
@@ -158,72 +175,68 @@
     full = true
   [../]
 []
-
 [Executioner]
   type = Transient
   solve_type = JFNK
   line_search = 'none'
   nl_max_its = 15
-  nl_rel_tol = 1e-07
-  nl_abs_tol = 1e-07
+  nl_rel_tol = 1e-06
+  nl_abs_tol = 1e-06
 
   dt = 1.0
-  dtmin = 1.0
+  dtmin = 0.001
   end_time = 10
 []
 
 [Postprocessors]
   [./disp_z1]
     type = PointValue
-    point = '-540.0 0.0 0.0'
+    point = '0.0 0.0 0.0'
     variable = disp_z
   [../]
   [./disp_x1]
     type = PointValue
-    point = '-540.0 0.0 0.0'
+    point = '0.0 0.0 0.0'
     variable = disp_x
   [../]
   [./disp_z2]
     type = PointValue
-    point = '-480.0 0.0 0.0'
+    point = '60.0 0.0 0.0'
     variable = disp_z
   [../]
   [./disp_zBC1]
     type = PointValue
-    point = '-420.0 0.0 0.0'
+    point = '120.0 0.0 0.0'
     variable = disp_z
   [../]
   [./disp_z5]
     type = PointValue
-    point = '-300 0.0 0.0'
+    point = '240.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_z4]
-    type = PointValue
-    point = '-240.0 0.0 0.0'
-    variable = disp_z
-  [../]
-
   [./disp_zBC2]
     type = PointValue
-    point = '-180.0 0.0 0.0'
+    point = '360.0 0.0 0.0'
     variable = disp_z
   [../]
   [./disp_xBC2]
     type = PointValue
-    point = '-180.0 0.0 0.0'
+    point = '360.0 0.0 0.0'
     variable = disp_x
   [../]
   [./disp_z8]
     type = PointValue
-    point = '-120.0 0.0 0.0'
+    point = '420.0 0.0 0.0'
     variable = disp_z
   [../]
   [./disp_z9]
     type = PointValue
-    point = '-60.0 0.0 0.0'
+    point = '480.0 0.0 0.0'
     variable = disp_z
   [../]
+[]
+[Debug]
+ show_var_residual_norms = true
 []
 
 [Outputs]
