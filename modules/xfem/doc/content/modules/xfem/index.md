@@ -12,10 +12,14 @@ Tables provided in the [Objects, Actions, and Syntax](#objects-actions-and-synta
 objects contained within the XFEM module followed by a short explanation of the object's purpose.
 Links on the objects' names navigate to an individual detailed page for the object.
 
+!media xfem/image21.gif
+       id=crack
+       style=width:100%;float:right;padding-top:2.7%;
+
 !row!
 
 !media xfem/image79.gif
-       style=width:34%;float:right;padding-top:2.5%;
+       style=width:34%;float:right;padding-top:2.5%;margin-right:20%
        caption=Side view of the deformation of a cylinder containing a cut prescribed by XFEM.
 
 !media xfem/image78.gif
