@@ -5,8 +5,8 @@ be used in conjuction with any number of other physics modules to enrich the sol
 differential equations (PDEs) with some form of discontinuity. XFEM theory and algorithms employed
 throughout this module are detailed in the following links:
 
-- [Theory Manual](xfem/theory.md)
-- [Algorithms](xfem/algorithms.md)
+- [Theory Manual](xfem/theory/theory.md)
+- [Algorithms](xfem/theory/algorithms.md)
 
 Tables provided in the [Objects, Actions, and Syntax](#objects-actions-and-syntax) section list
 objects contained within the XFEM module followed by a short explanation of the object's purpose.
@@ -48,7 +48,7 @@ Examples of the types of problems XFEM can solve follow:
   - Phase transition (Stefan) problems
 
 To support interfaces that move based upon calculated growth rates rather than prescribed functions,
-coupling with the [Level Set Module](level_set/index.md) is recommended.
+coupling with the [level set module](level_set/index.md optional=True) is recommended.
 
 ## Software Quality
 
