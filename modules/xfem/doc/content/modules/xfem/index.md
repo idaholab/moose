@@ -1,6 +1,56 @@
 # XFEM Module
 
-!alert construction
-The XFEM module needs some documentation.
+The XFEM module implements the extended finite element method (XFEM) in the MOOSE framework. It can
+be used in conjuction with any number of other physics modules to enrich the solutions to partial
+differential equations (PDEs) with some form of discontinuity. XFEM theory and algorithms employed
+throughout this module are detailed in the following links:
 
-!syntax complete groups=XFEMApp
+- [Theory Manual](xfem/theory.md)
+- [Algorithms](xfem/algorithms.md)
+
+Tables provided in the [Objects, Actions, and Syntax](#objects-actions-and-syntax) section list
+objects contained within the XFEM module followed by a short explanation of the object's purpose.
+Links on the objects' names navigate to an individual detailed page for the object.
+
+!row!
+
+!media xfem/image79.gif
+       style=width:34%;float:right;padding-top:2.5%;
+       caption=Side view of the deformation of a cylinder containing a cut prescribed by XFEM.
+
+!media xfem/image78.gif
+       style=width:32%;float:right;margin-right:1%;
+       caption=Top view of the deformation of a cylinder containing a cut prescribed by XFEM.
+
+!row-end!
+
+## Applications
+
+XFEM is ideally suited to problems involving local discontinuities. Typically these types of
+problems fall into one of two categories: strong or weak discontinuities. An example of a strong
+discontinuity is a physical break in the domain of the problem (e.g. cracks), while a weak
+discontinuity deals with discontinuous properties or solutions (e.g. discrete material regions).
+Examples of the types of problems XFEM can solve follow:
+
+- Cracking
+
+  - Prescribed crack growth
+  - Cracks propagating based on solution values (stress, pressure, etc.)
+
+- Moving Interfaces
+
+  - Dynamic material interfaces
+  - Open (glued) or closed (inclusion) interfaces on the domain
+  - Phase transition (Stefan) problems
+
+To support interfaces that move based upon calculated growth rates rather than prescribed functions,
+coupling with the [Level Set Module](level_set/index.md) is recommended.
+
+## Software Quality
+
+The XFEM module follows strict software quality guidelines. Please refer to
+[XFEM Software Quality Assurance](xfem/sqa/index.md) for additional information.
+
+## Objects, Actions, and Syntax
+
+!syntax complete groups=XFEMApp level=3
