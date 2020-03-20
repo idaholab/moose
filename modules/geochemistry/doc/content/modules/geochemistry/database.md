@@ -395,6 +395,68 @@ The gases can optionally include fugacity model parameters such as
 - `chi`: the [Spycher-Reed](fugacity.md) fugacity coefficients
 - `Pcrit, Tcrit` and `omega`: Tsonopoulos and Peng-Robinson model coefficients
 
+### Surface species
+
+Surface species in the database are listed in the `surface species` field.
+
+```
+"surface species": {
+  ">(s)FeO-": {
+    "species": {
+      ">(s)FeOH": "1.000",
+      "H+": "-1.000"
+    },
+    "charge": "-1",
+    "molecular weight": "71.8464",
+    "log K": "8.9300",
+    "dlogK/dT": "0.0000"
+  }
+}
+```
+
+Each surface species has a number required fields:
+
+- `species`: the decomposition in a basis species-stoichiometry pair as usual
+- `charge`: the electrical charge of the secondary species
+- `molecular weight`: the molecular weight (g)
+- `log K` and `dlogK/dT`: the equilibrium constant and derivative wrt temperature
+
+In contrast to the other types of reaction species, where the equilibrium constant is provided at each of
+the temperature points listed in the `Header`, the surface species equilibrium constant is defined using
+the value at the first temperature point, `log K` above, and the derivative wrt temperature
+\begin{equation}
+\log(K) = \mathtt{log K} + \mathtt{dlogK/dT} (T - T_0),
+\end{equation}
+where $\log$ is the natural logarithm, $T$ is the temperature where $\log(K)$ is to be calculated, and $T_0$ is the
+first temperature specified in the `Header`.
+
+For example, the equilibrium constant for the surface species `>(s)FeO-` is simply
+\begin{equation}
+\log(K) = 8.93,
+\end{equation}
+as the derivative wrt temperature is zero.
+
+### Sorbing minerals
+
+Sorbing minerals listed in the database provide sites where sorbing can occur for each mineral
+
+```
+"sorbing minerals": {
+  "Goethite": {
+    "sorbing sites": {
+      ">(s)FeOH": ".0050",
+      ">(w)FeOH": ".2000"
+    },
+    "surface area": "600.0000"
+  }
+}
+```
+
+Each sorbing mineral has two required fields:
+
+- `sorbing sites`: list of sorbing sites as a basis species-site density pair
+- `surface area`: the surface area available (m$^2$/g)
+
 ### Oxides
 
 Oxides may be present in the database, for example
