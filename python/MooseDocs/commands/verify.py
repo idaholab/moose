@@ -70,7 +70,6 @@ def update_gold_helper(gold, out_content):
 
 def compare(out_fname, out_dir, gold_dir, update_gold=False):
     """Compare supplied file with gold counter part."""
-
     errno = 0
     gold_fname = out_fname.replace(out_dir, gold_dir)
 
@@ -92,9 +91,8 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
         pass
 
     else:
-        with open(gold_fname, 'r') as fid:
-            gold_content = fid.read()
-            gold_content = bs4.BeautifulSoup(gold_content, 'lxml').prettify()
+        gold_content = common.read(gold_fname)
+        gold_content = bs4.BeautifulSoup(gold_content, 'lxml').prettify()
 
         out_content = bs4.BeautifulSoup(out_content, 'lxml').prettify()
         diff = mooseutils.text_unidiff(out_content,
