@@ -17,13 +17,12 @@ Links on the objects' names navigate to an individual detailed page for the obje
        style=width:100%;float:right;padding-top:2.7%;
 
 !row!
-
+!col small=12 medium=6 large=6
 !media xfem/image79.gif
-       style=width:34%;float:right;padding-top:2.5%;margin-right:20%
        caption=Side view of the deformation of a cylinder containing a cut prescribed by XFEM.
 
+!col small=12 medium=6 large=6
 !media xfem/image78.gif
-       style=width:32%;float:right;margin-right:1%;
        caption=Top view of the deformation of a cylinder containing a cut prescribed by XFEM.
 
 !row-end!
