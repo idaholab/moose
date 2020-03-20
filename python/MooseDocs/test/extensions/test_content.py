@@ -99,7 +99,6 @@ class TestContentAtoZ(MooseDocsTestCase):
 
     def testHTML(self):
         _, res = self.execute('!content a-to-z location=extensions')
-        print(res)
         self.assertHTMLTag(res, 'body', size=6)
         self._assertHTML(res)
 
@@ -116,7 +115,6 @@ class TestContentAtoZ(MooseDocsTestCase):
                 self.assertHTMLTag(res(0)(i), 'a', class_='btn moose-a-to-z-button disabled', string=b[i])
 
         res(0).parent = None
-        print(res)
         self.assertHTMLTag(res, 'div', size=6)
         self._assertHTML(res)
 
