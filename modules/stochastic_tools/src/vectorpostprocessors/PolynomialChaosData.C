@@ -8,14 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "PolyChaosData.h"
+#include "PolynomialChaosData.h"
 
-registerMooseObject("StochasticToolsApp", PolyChaosData);
-
-defineLegacyParams(PolyChaosData);
+registerMooseObject("StochasticToolsApp", PolynomialChaosData);
 
 InputParameters
-PolyChaosData::validParams()
+PolynomialChaosData::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Tool for extracting data from polynomial chaos user object and "
@@ -24,7 +22,7 @@ PolyChaosData::validParams()
   return params;
 }
 
-PolyChaosData::PolyChaosData(const InputParameters & parameters)
+PolynomialChaosData::PolynomialChaosData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
     _coeff(_pc_uo.getCoefficients()),
@@ -34,7 +32,7 @@ PolyChaosData::PolyChaosData(const InputParameters & parameters)
 }
 
 void
-PolyChaosData::initialize()
+PolynomialChaosData::initialize()
 {
   // This needs to be put in initialize since the user object doesn't know the
   // number of parameters until after initialSetup.
@@ -46,7 +44,7 @@ PolyChaosData::initialize()
 }
 
 void
-PolyChaosData::execute()
+PolynomialChaosData::execute()
 {
   _coeff_vector.clear();
   _coeff_vector = _coeff;
@@ -54,7 +52,7 @@ PolyChaosData::execute()
   for (unsigned int d = 0; d < _pc_uo.getNumberOfParameters(); ++d)
   {
     _order_vector[d]->resize(_pc_uo.getNumberofCoefficients());
-    for (unsigned int i = 0; i < _pc_uo.getNumberofCoefficients(); ++i)
+    for (std::size_t i = 0; i < _pc_uo.getNumberofCoefficients(); ++i)
       (*_order_vector[d])[i] = _pc_uo.getPolynomialOrder(d, i);
   }
 }

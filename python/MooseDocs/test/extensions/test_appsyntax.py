@@ -133,7 +133,6 @@ class TestParameters(AppSyntaxTestCase):
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
-        print('\n',res)
         self.assertSize(res, 15)
         self.assertLatexCommand(res(0), 'chapter', size=4)
         self.assertLatexCommand(res(0,0), 'label', string=u'input-parameters')

@@ -28,6 +28,24 @@ class TheWarehouse;
 /// must be registered with the warehouse (i.e. via TheWarehouse::registerAttribute) where they will
 /// be used *before* objects are added to that warehouse.  Specific Attribute instances cannot (and
 /// should not) generally be created before the class is registered with a warehouse.
+///
+/// In order to work with QueryCache objects, attribute classes should include
+/// a public typedef for a Key type, as well as a setFromKey function that
+/// takes this type as an argument:
+///
+/// @begincode
+/// class FooAttribute : public Attribute
+/// {
+/// public:
+///   typedef [type-for-foo] Key;
+///
+///   void
+///   setFrom(Key k)
+///   {
+///     // code to mutate/reinitialize FooAttribute using k
+///   }
+/// }
+/// @endcode
 class Attribute
 {
 public:
@@ -119,68 +137,185 @@ public:
 class TheWarehouse
 {
 public:
-  /// Query is a convenient way to construct and pass around (possible partially constructed)
-  /// warehouse queries.  The warehouse's "query()" function should generally be used to create
-  /// new Query objects rather than constructing them directly.  A Query object holds a list of
-  /// conditions used to filter/select objects from the warehouse.  When the query is
-  /// executed/run, results are filtered by "and"ing each condition together - i.e. only objects
-  /// that match *all* conditions are returned.
-  class Query
+  template <typename T>
+  using KeyType = typename T::Key;
+  template <typename T>
+  using AttribType = T *;
+
+  /// QueryCache is a convenient way to construct and pass around (possible
+  /// partially constructed) warehouse queries.  The warehouse's "query()" or
+  /// "queryCache(...)" functions should generally be used to create new Query
+  /// objects rather than constructing them directly.  A Query object holds a
+  /// list of persistent conditions used to filter/select objects from the
+  /// warehouse.  When the query is executed/run, results are filtered by
+  /// "and"ing each condition together - i.e. only objects that match *all*
+  /// conditions are returned.
+  ///
+  ///
+  /// Template arguments (i.e. Attribs) are used to specify parametrized query
+  /// conditions.  The passed template parameters should be the Attribute
+  /// classes you want to use for parameterization (i.e. the values that will
+  /// change from query to query).
+  template <typename... Attribs>
+  class QueryCache
   {
   public:
+    typedef std::tuple<KeyType<Attribs>...> KeyTuple;
+    typedef std::tuple<AttribType<Attribs>...> AttribTuple;
+
+    QueryCache() {}
+
     /// Creates a new query operating on the given warehouse w.  You should generally use
     /// TheWarehouse::query() instead.
-    Query(TheWarehouse & w) : _w(&w) { _attribs.reserve(5); }
+    QueryCache(TheWarehouse & w) : _w(&w)
+    {
+      addAttribs<0, Attribs...>();
+      _attribs.reserve(5);
+    }
 
-    Query & operator=(const Query & other)
+    template <typename T>
+    QueryCache(const T & q) : _w(&q.warehouse())
+    {
+      addAttribs<0, Attribs...>();
+      _attribs.reserve(5);
+
+      for (auto & attrib : q.attributes())
+        _attribs.push_back(attrib->clone());
+    }
+
+    QueryCache & operator=(const QueryCache & other)
     {
       if (this == &other)
         return *this;
 
-      _w = other._w;
       _attribs.clear();
-      _attribs.reserve(other._attribs.size());
-      for (auto & attrib : other._attribs)
-        _attribs.push_back(attrib->clone());
+      _w = other._w;
+      // MUST have own pointers to attribs to avoid data races - don't copy _key_attribs.
+      // initialize parametrized attributes and tuple:
+      addAttribs<0, Attribs...>();
+      _key_tup = other._key_tup;
+      // do NOT copy the cache.
+
+      // only copy over non-parametrized attributes
+      for (size_t i = std::tuple_size<AttribTuple>::value; i < other._attribs.size(); i++)
+        _attribs.push_back(other._attribs[i]->clone());
       return *this;
     }
-    Query(const Query & other) : _w(other._w)
+
+    /// Copy constructor from another Query
+    template <typename T>
+    QueryCache & operator=(const T & q)
     {
-      _attribs.reserve(other._attribs.size());
-      for (auto & attrib : other._attribs)
+      _attribs.clear();
+      _w = &q.warehouse();
+
+      addAttribs<0, Attribs...>();
+      _attribs.reserve(5);
+
+      for (auto & attrib : q.attributes())
         _attribs.push_back(attrib->clone());
+
+      return *this;
+    }
+
+    QueryCache(const QueryCache & other) : _w(other._w), _key_tup(other._key_tup)
+    {
+      // do NOT copy the cache.
+
+      // initialize parametrized attributes and tuple:
+      addAttribs<0, Attribs...>(); // MUST have own pointers to attribs to avoid data races.
+      for (size_t i = std::tuple_size<AttribTuple>::value; i < other._attribs.size(); i++)
+        _attribs.push_back(other._attribs[i]->clone());
     }
 
     /// Adds a new condition to the query.  The template parameter T is the Attribute class of
     /// interest and args are forwarded to T's constructor to build+add the attribute in-situ.
+    /// Conditions represent persistent query conditions that do not change
+    /// from query to query for a particular QueryCache instance.
     template <typename T, typename... Args>
-    Query & condition(Args &&... args)
+    QueryCache & condition(Args &&... args)
     {
       _attribs.emplace_back(new T(*_w, std::forward<Args>(args)...));
+      _cache.clear(); // invalidate cache if base query changes.
       return *this;
     }
 
     /// clone creates and returns an independent copy of the query in its current state.
-    Query clone() const { return Query(*this); }
+    QueryCache clone() const { return Query(*this); }
     /// count returns the number of results that match the query (this requires actually running
     /// the query).
     size_t count() { return _w->count(_attribs); }
 
-    /// attribs returns a copy of the constructed Attribute list for the query in its current state.
-    std::vector<std::unique_ptr<Attribute>> attributes() { return clone()._attribs; }
+    TheWarehouse & warehouse() const { return *_w; }
 
-    /// queryInto executes the query and stores the results in the given vector.  All results must
-    /// be castable to the templated type T.
-    template <typename T>
-    std::vector<T *> & queryInto(std::vector<T *> & results)
+    /// attribs returns a copy of the constructed Attribute list for the query in its current state.
+    std::vector<std::unique_ptr<Attribute>> attributes() const { return clone()._attribs; }
+
+    /// queryInto executes the query and stores the results in the given
+    /// vector.  For parametrized queries (i.e. QueryCaches created with more
+    /// than zero template arguments) args must contain one value for each
+    /// parametrized query attribute - the types of args should be equal to the
+    /// ::Key typedef specified for each corresponding parametrized attribute.
+    /// All results must be castable to the templated type T.
+    template <typename T, typename... Args>
+    std::vector<T *> & queryInto(std::vector<T *> & results, Args &&... args)
     {
+      std::lock_guard<std::mutex> lock(_cache_mutex);
+      setKeysInner<0, KeyType<Attribs>...>(args...);
+      // if (_cache.count(_key_tup) == 0)
+      //{
+      setAttribsInner<0, KeyType<Attribs>...>(args...);
+      _cache[_key_tup] = _w->queryID(_attribs);
+      //}
+      // return _w->queryInto(_cache[_key_tup], results);
       return _w->queryInto(_attribs, results);
     }
 
   private:
+    template <int Index, typename A, typename... As>
+    void addAttribs()
+    {
+      std::get<Index>(_attrib_tup) = new A(*_w);
+      _attribs.emplace_back(std::get<Index>(_attrib_tup));
+      addAttribs<Index + 1, As...>();
+    }
+    template <int Index>
+    void addAttribs()
+    {
+    }
+
+    template <int Index, typename K, typename... Args>
+    void setKeysInner(K & k, Args &... args)
+    {
+      std::get<Index>(_key_tup) = k;
+      setKeysInner<Index + 1, Args...>(args...);
+    }
+    template <int Index>
+    void setKeysInner()
+    {
+    }
+
+    template <int Index, typename K, typename... Args>
+    void setAttribsInner(K k, Args &... args)
+    {
+      std::get<Index>(_attrib_tup)->setFrom(k);
+      setAttribsInner<Index + 1, Args...>(args...);
+    }
+    template <int Index>
+    void setAttribsInner()
+    {
+    }
+
     TheWarehouse * _w = nullptr;
     std::vector<std::unique_ptr<Attribute>> _attribs;
+
+    KeyTuple _key_tup;
+    AttribTuple _attrib_tup;
+    std::map<KeyTuple, size_t> _cache;
+    std::mutex _cache_mutex;
   };
+
+  using Query = QueryCache<>;
 
   TheWarehouse();
   ~TheWarehouse();
@@ -254,7 +389,6 @@ public:
     return queryInto(queryID(conds), results);
   }
 
-private:
   size_t queryID(const std::vector<std::unique_ptr<Attribute>> & conds);
 
   template <typename T>
@@ -275,6 +409,7 @@ private:
     return results;
   }
 
+private:
   /// prepares a query and returns an associated query_id (i.e. for use with the query function).
   int prepare(std::vector<std::unique_ptr<Attribute>> conds);
 

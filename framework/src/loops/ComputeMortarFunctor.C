@@ -8,12 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeMortarFunctor.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "ADMortarConstraint.h"
 #include "AutomaticMortarGeneration.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
+#include "SwapBackSentinel.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature.h"
@@ -25,9 +27,13 @@ template <ComputeStage compute_stage>
 ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,
-    SubProblem & subproblem)
+    SubProblem & subproblem,
+    FEProblemBase & fe_problem,
+    bool displaced)
   : _amg(amg),
     _subproblem(subproblem),
+    _fe_problem(fe_problem),
+    _displaced(displaced),
     _assembly(_subproblem.assembly(0)),
     _qrule_msm(_assembly.qRuleMortar())
 {
@@ -55,6 +61,15 @@ template <ComputeStage compute_stage>
 void
 ComputeMortarFunctor<compute_stage>::operator()()
 {
+  // Set required material properties
+  std::set<unsigned int> needed_mat_props;
+  for (const auto & mc : _mortar_constraints)
+  {
+    const auto & mp_deps = mc->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
+
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
@@ -128,9 +143,24 @@ ComputeMortarFunctor<compute_stage>::operator()()
       custom_xi1_pts[qp] = xi1_eta;
     }
 
+    const Elem * reinit_slave_elem = slave_ip;
+
+    // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
+    // calling _fe_problem.reinitElemFaceRef
+    if (_displaced)
+      reinit_slave_elem = _fe_problem.mesh().elemPtr(reinit_slave_elem->id());
+
     // reinit the variables/residuals/jacobians on the slave interior
-    _subproblem.reinitElemFaceRef(
-        slave_ip, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
+    _fe_problem.reinitElemFaceRef(
+        reinit_slave_elem, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
+
+    // reinit higher-dimensional element face materials
+    {
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, /*tid=*/0);
+      _fe_problem.reinitMaterialsFace(slave_ip->subdomain_id(), /*tid=*/0);
+    }
 
     if (_has_master)
     {
@@ -143,9 +173,23 @@ ComputeMortarFunctor<compute_stage>::operator()()
         custom_xi2_pts[qp] = xi2_eta;
       }
 
+      const Elem * reinit_master_elem = master_ip;
+
+      // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
+      // calling _fe_problem.reinitElemFaceRef
+      if (_displaced)
+        reinit_master_elem = _fe_problem.mesh().elemPtr(reinit_master_elem->id());
+
       // reinit the variables/residuals/jacobians on the master interior
-      _subproblem.reinitNeighborFaceRef(
-          master_ip, master_side_id, _master_boundary_id, TOLERANCE, &custom_xi2_pts);
+      _fe_problem.reinitNeighborFaceRef(
+          reinit_master_elem, master_side_id, _master_boundary_id, TOLERANCE, &custom_xi2_pts);
+
+      // reinit higher-dimensional neighbor face materials
+      {
+        SwapBackSentinel neighbor_sentinel(
+            _fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, /*tid=*/0);
+        _fe_problem.reinitMaterialsNeighbor(master_ip->subdomain_id(), /*tid=*/0);
+      }
     }
 
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to

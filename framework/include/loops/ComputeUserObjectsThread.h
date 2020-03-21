@@ -56,23 +56,17 @@ private:
   template <typename T>
   void querySubdomain(Interfaces iface, std::vector<T> & results)
   {
-    _query.clone()
-        .condition<AttribThread>(_tid)
-        .condition<AttribSubdomains>(_subdomain)
-        .condition<AttribInterfaces>(iface)
-        .queryInto(results);
+    _query_subdomain.queryInto(results, _tid, _subdomain, iface);
   }
   template <typename T>
   void queryBoundary(Interfaces iface, BoundaryID bnd, std::vector<T> & results)
   {
-    _query.clone()
-        .condition<AttribThread>(_tid)
-        .condition<AttribBoundaries>(bnd)
-        .condition<AttribInterfaces>(iface)
-        .queryInto(results);
+    _query_boundary.queryInto(results, _tid, std::make_tuple(bnd, false), iface);
   }
 
   const TheWarehouse::Query _query;
+  TheWarehouse::QueryCache<AttribThread, AttribSubdomains, AttribInterfaces> _query_subdomain;
+  TheWarehouse::QueryCache<AttribThread, AttribBoundaries, AttribInterfaces> _query_boundary;
   std::vector<InternalSideUserObject *> _internal_side_objs;
   std::vector<InterfaceUserObject *> _interface_user_objects;
   std::vector<ElementUserObject *> _element_objs;

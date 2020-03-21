@@ -35,6 +35,9 @@ public:
   Polynomial() {}
   virtual ~Polynomial() = default;
   virtual Real compute(const unsigned int order, const Real x, const bool normalize = true) const;
+  /// Computes the mth derivative of polynomial: d^mP_n/dx^m
+  virtual Real
+  computeDerivative(const unsigned int order, const Real x, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const = 0;
 
   virtual void quadrature(const unsigned int order,
@@ -53,6 +56,16 @@ public:
   /// Legendre polynomial using static function then scales by <P_n^2> = 1 / (2n+1)
   virtual Real
   compute(const unsigned int order, const Real x, const bool normalize = true) const override;
+  /**
+   * Compute derivative of Legendre polynomial
+   * Recursive algorithm: d^m/dx^m P_n = (n + m - 1)d^(m-1)/dx^(m-1) P_{n-1} + xd^m/dx^m P_{n-1}
+   */
+  virtual Real computeDerivative(const unsigned int order,
+                                 const Real x,
+                                 const unsigned int m = 1) const override;
+  /// Compute derivative on referene points
+  Real
+  computeDerivativeRef(const unsigned int order, const Real xref, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const override
   {
     return 1. / (2. * (Real)order + 1.);
@@ -79,6 +92,10 @@ public:
   /// Hermite polynomial using static function then scales by <P_n^2> = n!
   virtual Real
   compute(const unsigned int order, const Real x, const bool normalize = true) const override;
+  /// Compute derivative of Hermite polynomial P'_n = nP_{n-1}
+  virtual Real computeDerivative(const unsigned int order,
+                                 const Real x,
+                                 const unsigned int m = 1) const override;
   virtual Real innerProduct(const unsigned int order) const override
   {
     return (Real)Utility::factorial(order);

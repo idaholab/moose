@@ -13,17 +13,12 @@
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
 
-class PolyChaosData;
-
-template <>
-InputParameters validParams<PolyChaosData>();
-
-class PolyChaosData : public GeneralVectorPostprocessor
+class PolynomialChaosData : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  PolyChaosData(const InputParameters & parameters);
+  PolynomialChaosData(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

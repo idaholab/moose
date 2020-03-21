@@ -382,13 +382,13 @@ public:
    * been called beforehand, e.g. you don't have to call some prepare method before this one. This
    * is an all-in-one reinit
    */
-  void reinitElemFaceRef(const Elem * elem,
-                         unsigned int side,
-                         BoundaryID bnd_id,
-                         Real tolerance,
-                         const std::vector<Point> * const pts,
-                         const std::vector<Real> * const weights = nullptr,
-                         THREAD_ID tid = 0);
+  virtual void reinitElemFaceRef(const Elem * elem,
+                                 unsigned int side,
+                                 BoundaryID bnd_id,
+                                 Real tolerance,
+                                 const std::vector<Point> * const pts,
+                                 const std::vector<Real> * const weights = nullptr,
+                                 THREAD_ID tid = 0);
 
   /**
    * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
@@ -396,13 +396,13 @@ public:
    * been called beforehand, e.g. you don't have to call some prepare method before this one. This
    * is an all-in-one reinit
    */
-  void reinitNeighborFaceRef(const Elem * neighbor_elem,
-                             unsigned int neighbor_side,
-                             BoundaryID bnd_id,
-                             Real tolerance,
-                             const std::vector<Point> * const pts,
-                             const std::vector<Real> * const weights = nullptr,
-                             THREAD_ID tid = 0);
+  virtual void reinitNeighborFaceRef(const Elem * neighbor_elem,
+                                     unsigned int neighbor_side,
+                                     BoundaryID bnd_id,
+                                     Real tolerance,
+                                     const std::vector<Point> * const pts,
+                                     const std::vector<Real> * const weights = nullptr,
+                                     THREAD_ID tid = 0);
 
   /**
    * reinitialize a lower dimensional FE object at a given set of reference points and then compute

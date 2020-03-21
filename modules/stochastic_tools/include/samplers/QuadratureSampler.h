@@ -13,10 +13,6 @@
 
 #include "PolynomialQuadrature.h"
 
-class QuadratureSampler;
-
-template <>
-InputParameters validParams<QuadratureSampler>();
 /**
  * A class used to produce samples based on quadrature for Polynomial Chaos
  */

@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", PolynomialChaos);
 
-defineLegacyParams(PolynomialChaos);
-
 InputParameters
 PolynomialChaos::validParams()
 {
@@ -37,6 +35,8 @@ PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
     _ncoeff(_tuple.size()),
     _coeff(_ncoeff)
 {
+  MooseUtils::linearPartitionItems(
+      _ncoeff, n_processors(), processor_id(), _n_local_coeff, _st_local_coeff, _end_local_coeff);
 }
 
 void
@@ -76,7 +76,7 @@ PolynomialChaos::execute()
         poly_val(d, i) = _poly[d]->compute(i, data[d]);
 
     // Loop over coefficients
-    for (unsigned int i = 0; i < _ncoeff; ++i)
+    for (std::size_t i = 0; i < _ncoeff; ++i)
     {
       Real val = _values[p - _sampler->getLocalRowBegin()];
       // Loop over parameters
@@ -96,7 +96,7 @@ PolynomialChaos::finalize()
   gatherSum(_coeff);
 
   if (!_quad_sampler)
-    for (unsigned int i = 0; i < _ncoeff; ++i)
+    for (std::size_t i = 0; i < _ncoeff; ++i)
       _coeff[i] /= _sampler->getNumberOfRows();
 }
 
@@ -104,7 +104,7 @@ void
 PolynomialChaos::threadJoin(const UserObject & y)
 {
   const PolynomialChaos & pps = static_cast<const PolynomialChaos &>(y);
-  for (unsigned int i = 0; i < _ncoeff; ++i)
+  for (std::size_t i = 0; i < _ncoeff; ++i)
     _coeff[i] += pps._coeff[i];
 }
 
@@ -122,7 +122,7 @@ PolynomialChaos::evaluate(const std::vector<Real> & x) const
       poly_val(d, i) = _poly[d]->compute(i, x[d], /*normalize =*/false);
 
   Real val = 0;
-  for (unsigned int i = 0; i < _ncoeff; ++i)
+  for (std::size_t i = 0; i < _ncoeff; ++i)
   {
     Real tmp = _coeff[i];
     for (unsigned int d = 0; d < _ndim; ++d)
@@ -137,7 +137,7 @@ Real
 PolynomialChaos::computeStandardDeviation() const
 {
   Real var = 0;
-  for (unsigned int i = 1; i < _ncoeff; ++i)
+  for (std::size_t i = 1; i < _ncoeff; ++i)
   {
     Real norm = 1.0;
     for (std::size_t d = 0; d < _ndim; ++d)
@@ -157,7 +157,7 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
   for (unsigned int d = 0; d < _ndim; ++d)
   {
     std::vector<std::vector<unsigned int>> order_1d(n, std::vector<unsigned int>(_ncoeff - 1));
-    for (unsigned int i = 1; i < _ncoeff; ++i)
+    for (std::size_t i = 1; i < _ncoeff; ++i)
       for (unsigned int m = 0; m < n; ++m)
         order_1d[m][i - 1] = _tuple[i][d];
     order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
@@ -185,6 +185,92 @@ PolynomialChaos::powerExpectation(const unsigned int n, const bool distributed) 
     }
     val += tmp;
   }
+
+  return val;
+}
+
+Real
+PolynomialChaos::computeDerivative(const unsigned int dim, const std::vector<Real> & x) const
+{
+  return computePartialDerivative({dim}, x);
+}
+
+Real
+PolynomialChaos::computePartialDerivative(const std::vector<unsigned int> & dim,
+                                          const std::vector<Real> & x) const
+{
+  mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
+
+  std::vector<unsigned int> grad(_ndim);
+  for (const auto & d : dim)
+  {
+    mooseAssert(d < _ndim, "Specified dimension is greater than total number of parameters.");
+    grad[d]++;
+  }
+
+  DenseMatrix<Real> poly_val(_ndim, _order);
+
+  // Evaluate polynomials to avoid duplication
+  for (unsigned int d = 0; d < _ndim; ++d)
+    for (unsigned int i = 0; i < _order; ++i)
+      poly_val(d, i) = _poly[d]->computeDerivative(i, x[d], grad[d]);
+
+  Real val = 0;
+  for (std::size_t i = 0; i < _ncoeff; ++i)
+  {
+    Real tmp = _coeff[i];
+    for (unsigned int d = 0; d < _ndim; ++d)
+      tmp *= poly_val(d, _tuple[i][d]);
+    val += tmp;
+  }
+
+  return val;
+}
+
+Real
+PolynomialChaos::computeSobolIndex(const std::set<unsigned int> & ind) const
+{
+  // If set is empty, compute mean
+  if (ind.empty())
+    return computeMean();
+
+  // Do some sanity checks in debug
+  mooseAssert(ind.size() <= _ndim, "Number of indices is greater than number of parameters.");
+  mooseAssert(*ind.rbegin() < _ndim, "Maximum index provided exceeds number of parameters.");
+
+  Real val = 0.0;
+  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+  {
+    Real tmp = _coeff[i] * _coeff[i];
+    for (unsigned int d = 0; d < _ndim; ++d)
+    {
+      if ((ind.find(d) != ind.end() && _tuple[i][d] > 0) ||
+          (ind.find(d) == ind.end() && _tuple[i][d] == 0))
+      {
+        tmp *= _poly[d]->innerProduct(_tuple[i][d]);
+      }
+      else
+      {
+        tmp = 0.0;
+        break;
+      }
+    }
+    val += tmp;
+  }
+
+  return val;
+}
+
+Real
+PolynomialChaos::computeSobolTotal(const unsigned int dim) const
+{
+  // Do some sanity checks in debug
+  mooseAssert(dim < _ndim, "Requested dimesion is greater than number of parameters.");
+
+  Real val = 0.0;
+  for (dof_id_type i = _st_local_coeff; i < _end_local_coeff; ++i)
+    if (_tuple[i][dim] > 0)
+      val += _coeff[i] * _coeff[i] * _poly[dim]->innerProduct(_tuple[i][dim]);
 
   return val;
 }

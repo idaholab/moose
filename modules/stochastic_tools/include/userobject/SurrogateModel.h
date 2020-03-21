@@ -12,12 +12,6 @@
 #include "GeneralUserObject.h"
 #include "SamplerInterface.h"
 
-// Forward Declarations
-class SurrogateModel;
-
-template <>
-InputParameters validParams<SurrogateModel>();
-
 class SurrogateModel : public GeneralUserObject, public SamplerInterface
 {
 public:

@@ -19,13 +19,22 @@ GapHeatConductanceTest<compute_stage>::validParams()
   params.addParam<Real>("gap_conductance_constant",
                         0.03,
                         "The numerator in calculation of the heat transfer coefficient");
+  params.addParam<MaterialPropertyName>(
+      "slave_gap_conductance",
+      "gap_conductance",
+      "The material property name providing the gap conductance on the slave side");
+  params.addParam<MaterialPropertyName>(
+      "master_gap_conductance",
+      "gap_conductance",
+      "The material property name providing the gap conductance on the master side");
   return params;
 }
 
 template <ComputeStage compute_stage>
 GapHeatConductanceTest<compute_stage>::GapHeatConductanceTest(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
-    _gap_conductance_constant(getParam<Real>("gap_conductance_constant"))
+    _slave_gap_conductance(getADMaterialProperty<Real>("slave_gap_conductance")),
+    _master_gap_conductance(getNeighborADMaterialProperty<Real>("master_gap_conductance"))
 {
 }
 
@@ -43,11 +52,12 @@ GapHeatConductanceTest<compute_stage>::computeQpResidual(Moose::MortarType type)
 
     case Moose::MortarType::Lower:
     {
-      Real heat_transfer_coeff(0);
+      ADReal heat_transfer_coeff(0);
       if (_has_master)
       {
         auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
-        heat_transfer_coeff = _gap_conductance_constant / gap;
+        heat_transfer_coeff =
+            (0.5 * (_slave_gap_conductance[_qp] + _master_gap_conductance[_qp])) / gap;
       }
       return _test[_i][_qp] *
              (_lambda[_qp] -

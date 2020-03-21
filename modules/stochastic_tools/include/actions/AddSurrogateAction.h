@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddSurrogateAction;
-
-template <>
-InputParameters validParams<AddSurrogateAction>();
-
 class AddSurrogateAction : public MooseObjectAction
 {
 public:
