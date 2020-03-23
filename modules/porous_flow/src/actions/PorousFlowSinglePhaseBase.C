@@ -143,8 +143,18 @@ PorousFlowSinglePhaseBase::addKernels()
       if (_thermal)
       {
         params.set<std::vector<VariableName>>("temperature") = _temperature_var;
-        params.set<std::string>("thermal_eigenstrain_name") =
-            getParam<std::string>("thermal_eigenstrain_name");
+        if (parameters().isParamValid("eigenstrain_names"))
+        {
+          if (parameters().isParamSetByUser("thermal_eigenstrain_name"))
+            mooseError("Cannot specify both 'thermal_eigenstrain_name' and 'eigenstrain_names'");
+          params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
+              getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
+        }
+        else
+        {
+          params.set<MaterialPropertyName>("thermal_eigenstrain_name") =
+              getParam<MaterialPropertyName>("thermal_eigenstrain_name");
+        }
       }
       params.set<unsigned>("component") = i;
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");

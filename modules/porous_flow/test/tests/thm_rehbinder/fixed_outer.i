@@ -164,7 +164,7 @@
   add_stress_aux = true
   porepressure = porepressure
   temperature = temperature
-  thermal_eigenstrain_name = thermal_contribution
+  eigenstrain_names = thermal_contribution
   gravity = '0 0 0'
   fp = the_simple_fluid
 []

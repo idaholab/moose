@@ -76,7 +76,7 @@
   coupling_type = ThermoHydroMechanical
   gravity = '0 0 0'
   fp = the_simple_fluid
-  thermal_eigenstrain_name = thermal_contribution
+  eigenstrain_names = thermal_contribution
   use_displaced_mesh = false
 []
 
