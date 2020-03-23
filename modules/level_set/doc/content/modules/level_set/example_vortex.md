@@ -2,7 +2,7 @@
 
 A classic and challenging benchmark problem for the level set is the vortex problem. This problem is
 similar to the rotating bubble (see [Rotating Bubble Example](/example_rotate.md)). The
-problem involves initializing $u_h$ (see [Theory](/theory.md)) with a "bubble" of radius
+problem involves initializing $u_h$ (see [Theory](/level_set/theory.md)) with a "bubble" of radius
 0.15 at $(0.5, 0.75)$ for $\Omega = [0,1]^2$.  This bubble is then advected with the a vortex
 velocity field (see [LevelSetOlssonVortex](/LevelSetOlssonVortex.md)), so that, at $t=2$,
 the bubble should return to its original position.

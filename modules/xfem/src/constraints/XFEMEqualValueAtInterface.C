@@ -25,7 +25,8 @@ XFEMEqualValueAtInterface::validParams()
   params.addParam<UserObjectName>(
       "geometric_cut_userobject",
       "Name of GeometricCutUserObject associated with this constraint.");
-  params.addClassDescription("enforce a same value on both sides of the interface.");
+  params.addClassDescription("Enforce that the solution have the same value on opposing sides of "
+                             "an XFEM interface.");
   return params;
 }
 
