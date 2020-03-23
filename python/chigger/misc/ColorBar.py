@@ -33,14 +33,12 @@ class ColorBar(base.ChiggerResult):
         opt += base.ColorMap.getOptions()
 
         ax0 = AxisSource.getOptions()
-        ax0.setDefault('font_size', 24)
         ax0.setDefault('ticks_visible', False)
         ax0.setDefault('axis_visible', False)
         ax0.pop('color')
         opt.add('primary', ax0, "The primary axis options.")
 
         ax1 = AxisSource.getOptions()
-        ax1.setDefault('font_size', 24)
         ax1.setDefault('axis_visible', False)
         ax1.setDefault('ticks_visible', False)
         ax1.setDefault('visible', False)
