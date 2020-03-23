@@ -63,7 +63,14 @@ StochasticResults::finalize()
   if (!isDistributed())
   {
     for (auto & data : _sample_vectors)
+    {
       _communicator.gather(0, data.current);
+      std::size_t data_size = data.current.size();
+      _communicator.broadcast(data_size, 0);
+      if (processor_id() > 0)
+        data.current.resize(data_size);
+      _communicator.broadcast(data.current, 0);
+    }
   }
 
   for (auto & data : _sample_vectors)

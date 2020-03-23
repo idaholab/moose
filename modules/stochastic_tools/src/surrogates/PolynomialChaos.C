@@ -91,9 +91,12 @@ PolynomialChaos::initialSetup()
 void
 PolynomialChaos::train()
 {
+  std::cerr << _sampler->getNumberOfRows() << " " << _values_ptr->size() << std::endl;
+
   // Check if results of samples matches number of samples
-  mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
-              "Sampler number of rows does not match number of results from vector postprocessor.");
+  // mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
+  //            "Sampler number of rows does not match number of results from vector
+  //            postprocessor.");
 
   std::fill(_coeff.begin(), _coeff.end(), 0.0);
   DenseMatrix<Real> poly_val(_ndim, _order);

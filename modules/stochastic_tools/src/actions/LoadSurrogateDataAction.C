@@ -12,6 +12,10 @@
 #include "FEProblem.h"
 #include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
+#include "RestartableData.h"
+
+#include <chrono>
+#include <thread>
 
 registerMooseAction("StochasticToolsApp", LoadSurrogateDataAction, "load_surrogate_data");
 
@@ -70,4 +74,26 @@ LoadSurrogateDataAction::load(SurrogateModel & model)
   // Read the supplied file
   std::unordered_set<std::string> filter_names;
   data_io.readRestartableData(meta_data, filter_names);
+
+  auto coeff =
+      static_cast<RestartableData<std::vector<Real>> *>(meta_data.at("_coeff").value.get());
+
+  std::this_thread::sleep_for(std::chrono::seconds(2 * processor_id()));
+  std::cerr << processor_id() << ": coeff->size() = " << coeff->get().size() << std::endl;
+  std::cerr << "coeff = ";
+  for (auto & val : coeff->get())
+    std::cerr << val << " ";
+  std::cerr << std::endl;
+
+  std::this_thread::sleep_for(std::chrono::seconds(2 * processor_id()));
+  auto tuple = static_cast<RestartableData<std::vector<std::vector<unsigned int>>> *>(
+      meta_data.at("_tuple").value.get());
+  std::cerr << processor_id() << ": tuple->size() = " << tuple->get().size() << std::endl;
+  for (std::size_t i = 0; i < tuple->get().size(); ++i)
+  {
+    std::cerr << "tuple[" << i << "] = ";
+    for (auto & val : tuple->get()[i])
+      std::cerr << val << " ";
+    std::cerr << std::endl;
+  }
 }
