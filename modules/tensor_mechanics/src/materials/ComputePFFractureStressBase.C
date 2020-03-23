@@ -18,6 +18,10 @@ ComputePFFractureStressBase::validParams()
   params.addRequiredCoupledVar("c", "Name of damage variable");
   params.addParam<bool>(
       "use_current_history_variable", false, "Use the current value of the history variable.");
+  params.addParam<bool>("use_snes_vi_solver",
+                        false,
+                        "Use PETSc's SNES variational inequalities solver to enforce damage "
+                        "irreversibility condition and restrict damage value <= 1.");
   params.addParam<MaterialPropertyName>("barrier_energy",
                                         "Name of material property for fracture energy barrier.");
   params.addParam<MaterialPropertyName>(
@@ -42,6 +46,7 @@ ComputePFFractureStressBase::ComputePFFractureStressBase(const InputParameters &
     _gc(getMaterialProperty<Real>("gc_prop")),
     _pressure(getDefaultMaterialProperty<Real>("fracture_pressure")),
     _use_current_hist(getParam<bool>("use_current_history_variable")),
+    _use_snes_vi_solver(getParam<bool>("use_snes_vi_solver")),
     _H(declareProperty<Real>("hist")),
     _H_old(getMaterialPropertyOld<Real>("hist")),
     _barrier(getDefaultMaterialProperty<Real>("barrier_energy")),

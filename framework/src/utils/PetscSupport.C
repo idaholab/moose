@@ -812,6 +812,28 @@ getCommonPetscKeys()
                         true);
 }
 
+bool
+isSNESVI(FEProblemBase & fe_problem)
+{
+  PetscOptions & petsc = fe_problem.getPetscOptions();
+
+  int argc;
+  char ** args;
+  PetscGetArgs(&argc, &args);
+
+  std::vector<std::string> cml_arg;
+  for (int i = 0; i < argc; i++)
+    cml_arg.push_back(args[i]);
+
+  if (std::find(petsc.values.begin(), petsc.values.end(), "vinewtonssls") == petsc.values.end() &&
+      std::find(petsc.values.begin(), petsc.values.end(), "vinewtonrsls") == petsc.values.end() &&
+      std::find(cml_arg.begin(), cml_arg.end(), "vinewtonssls") == cml_arg.end() &&
+      std::find(cml_arg.begin(), cml_arg.end(), "vinewtonrsls") == cml_arg.end())
+    return false;
+
+  return true;
+}
+
 void
 setSinglePetscOption(const std::string & name, const std::string & value)
 {

@@ -131,12 +131,19 @@
 []
 
 [Bounds]
-  [./pwater_bounds]
-    type = BoundsAux
+  [./pwater_upper_bounds]
+    type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = pwater
-    upper = 1E7
-    lower = -110000
+    bound_type = upper
+    bound_value = 1E7
+  [../]
+  [./pwater_lower_bounds]
+    type = ConstantBoundsAux
+    variable = bounds_dummy
+    bounded_variable = pwater
+    bound_type = lower
+    bound_value = -110000
   [../]
 []
 

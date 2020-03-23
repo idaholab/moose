@@ -120,6 +120,9 @@ MultiMooseEnum getCommonPetscFlags();
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
 MultiMooseEnum getCommonPetscKeys();
 
+/// check if SNES type is variational inequalities (VI) solver
+bool isSNESVI(FEProblemBase & fe_problem);
+
 /**
  * A wrapper function for dealing with different versions of
  * PetscOptionsSetValue.  This is not generally called from
@@ -151,4 +154,3 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 }
 
 #endif // LIBMESH_HAVE_PETSC
-
