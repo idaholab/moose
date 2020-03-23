@@ -114,7 +114,7 @@ PeridynamicsMesh::buildMesh()
   if (!hasMeshBase())
     _mesh = _app.getMeshGeneratorMesh();
 
-  _mesh->prepare_for_use(/*skip_renumber =*/true);
+  _mesh->prepare_for_use(/*skip_renumber =*/true, /*skip_find_neighbors=*/false);
 }
 
 unsigned int

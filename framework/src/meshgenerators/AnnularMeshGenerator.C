@@ -242,7 +242,7 @@ AnnularMeshGenerator::generate()
     }
   }
 
-  mesh->prepare_for_use(false);
+  mesh->prepare_for_use(false, false);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
