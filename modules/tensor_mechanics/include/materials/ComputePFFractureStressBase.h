@@ -49,6 +49,9 @@ protected:
   /// Use current value of history variable
   bool _use_current_hist;
 
+  /// Use PETSc's VI (Reduced space active set solvers for variational inequalities based on Newton's method) solver
+  bool _use_snes_vi_solver;
+
   /// History variable that prevents crack healing, declared in this material
   MaterialProperty<Real> & _H;
 
