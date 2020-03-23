@@ -92,13 +92,13 @@ private:
   // The following items are stored using declareModelData for use as a trained model.
 
   /// Total number of parameters/dimensions
-  unsigned int & _ndim;
+  unsigned int _ndim;
 
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
   std::vector<std::vector<unsigned int>> & _tuple;
 
   /// Total number of coefficient (defined by size of _tuple)
-  std::size_t & _ncoeff;
+  std::size_t _ncoeff;
 
   /// These are the coefficients we are after in the PC expansion
   std::vector<Real> & _coeff;

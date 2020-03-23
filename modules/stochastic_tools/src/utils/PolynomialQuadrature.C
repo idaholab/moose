@@ -32,15 +32,18 @@ makePolynomial(const Distribution * dist)
 {
   const UniformDistribution * u_dist = dynamic_cast<const UniformDistribution *>(dist);
   if (u_dist)
-    return libmesh_make_unique<Legendre>(u_dist);
+    return libmesh_make_unique<const Legendre>(dist->getParamTempl<Real>("lower_bound"),
+                                               dist->getParamTempl<Real>("upper_bound"));
 
   const NormalDistribution * n_dist = dynamic_cast<const NormalDistribution *>(dist);
   if (n_dist)
-    return libmesh_make_unique<Hermite>(n_dist);
+    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
+                                              dist->getParamTempl<Real>("standard_deviation"));
 
   const BoostNormalDistribution * bn_dist = dynamic_cast<const BoostNormalDistribution *>(dist);
   if (bn_dist)
-    return libmesh_make_unique<Hermite>(bn_dist);
+    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
+                                              dist->getParamTempl<Real>("standard_deviation"));
 
   ::mooseError("Polynomials for '", dist->type(), "' distributions have not been implemented.");
   return nullptr;
@@ -108,11 +111,6 @@ Polynomial::productIntegral(const std::vector<unsigned int> order) const
 
 Legendre::Legendre(const Real lower_bound, const Real upper_bound)
   : Polynomial(), _lower_bound(lower_bound), _upper_bound(upper_bound)
-{
-}
-
-Legendre::Legendre(const UniformDistribution * dist)
-  : Legendre(dist->getParamTempl<Real>("lower_bound"), dist->getParamTempl<Real>("upper_bound"))
 {
 }
 
@@ -224,16 +222,6 @@ legendre(const unsigned int order, const Real x, const Real lower_bound, const R
 }
 
 Hermite::Hermite(const Real mu, const Real sig) : Polynomial(), _mu(mu), _sig(sig) {}
-
-Hermite::Hermite(const NormalDistribution * dist)
-  : Hermite(dist->getParamTempl<Real>("mean"), dist->getParamTempl<Real>("standard_deviation"))
-{
-}
-
-Hermite::Hermite(const BoostNormalDistribution * dist)
-  : Hermite(dist->getParamTempl<Real>("mean"), dist->getParamTempl<Real>("standard_deviation"))
-{
-}
 
 Real
 Hermite::innerProduct(const unsigned int order) const

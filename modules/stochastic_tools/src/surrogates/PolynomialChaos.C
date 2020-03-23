@@ -38,9 +38,7 @@ PolynomialChaos::validParams()
 
 PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _ndim(declareModelData<unsigned int>("_ndim")),
     _tuple(declareModelData<std::vector<std::vector<unsigned int>>>("_tuple")),
-    _ncoeff(declareModelData<std::size_t>("_ncoeff")),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _poly(declareModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>(
         "_poly"))
@@ -75,6 +73,12 @@ PolynomialChaos::initialSetup()
       _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
   }
 
+  else
+  {
+    _ncoeff = _tuple.size();
+    _ndim = _poly.size();
+  }
+
   // Setup parallel partitioning of coefficients
   MooseUtils::linearPartitionItems(_ncoeff,
                                    n_processors(),
@@ -82,10 +86,6 @@ PolynomialChaos::initialSetup()
                                    _n_local_coeff,
                                    _local_coeff_begin,
                                    _local_coeff_end);
-
-  // If training data is loaded, it is store in a single file so the data must be partitioned
-  if (!isTraining() && n_processors() > 1)
-    _coeff.assign(_coeff.begin() + _local_coeff_begin, _coeff.begin() + _local_coeff_end);
 }
 
 void
