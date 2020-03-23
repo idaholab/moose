@@ -43,6 +43,8 @@ XFEMSingleVariableConstraint::validParams()
       "use_penalty",
       false,
       "Use the Penalty instead of Nitsche (Nitsche only works for simple diffusion problems).");
+  params.addClassDescription("Enforce constraints on the value or flux associated with a variable "
+                             "at an XFEM interface.");
   return params;
 }
 
