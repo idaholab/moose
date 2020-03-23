@@ -15,7 +15,8 @@ sudo -E yum install gcc \
   libX11-devel \
   git \
   zlib-devel \
-  xz-devel
+  xz-devel \
+  libtirpc-devel
 ```
 
 Download and install one our redistributable packages according to your version of CentOS
