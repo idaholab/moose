@@ -147,7 +147,7 @@
     type = StressDivergenceTensors
     temperature = T
     variable = disp_x
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     use_displaced_mesh = false
     component = 0
   [../]
@@ -161,7 +161,7 @@
     type = StressDivergenceTensors
     temperature = T
     variable = disp_y
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     use_displaced_mesh = false
     component = 1
   [../]
