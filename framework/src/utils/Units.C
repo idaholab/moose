@@ -21,7 +21,8 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     // avoid matching meters
     {"Ohm",
      {
-         1,
+         1, // conversion factor
+         0, // additive shift (currently only used for Celsius and Fahrenheit)
          {{MooseUnits::BaseUnit::KILOGRAM, 1},
           {MooseUnits::BaseUnit::METER, 2},
           {MooseUnits::BaseUnit::SECOND, -3},
@@ -29,6 +30,7 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
      }},
     {"atm",
      {101.325e3,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // Standard atmosphere
@@ -36,6 +38,7 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     {"eV",
      {
          1.602176634e-19,
+         0,
          {{MooseUnits::BaseUnit::KILOGRAM, 1},
           {MooseUnits::BaseUnit::METER, 2},
           {MooseUnits::BaseUnit::SECOND, -2}},
@@ -44,76 +47,92 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     {"erg",
      {
          1e-7,
+         0,
          {{MooseUnits::BaseUnit::KILOGRAM, 1},
           {MooseUnits::BaseUnit::METER, 2},
           {MooseUnits::BaseUnit::SECOND, -2}},
-     }},                                                  // erg
-    {"Ang", {1e-10, {{MooseUnits::BaseUnit::METER, 1}}}}, // Angstrom
+     }}, // erg
+
+    // avoid matching Farad or Coulomb
+    {"degC", {1, 273.15, {{MooseUnits::BaseUnit::KELVIN, 1}}}},         // Celsius
+    {"degF", {5.0 / 9.0, 459.67, {{MooseUnits::BaseUnit::KELVIN, 1}}}}, // Fahrenheit
+    {"degR", {5.0 / 9.0, 0, {{MooseUnits::BaseUnit::KELVIN, 1}}}},      // Rankine
+
+    {"Ang", {1e-10, 0, {{MooseUnits::BaseUnit::METER, 1}}}}, // Angstrom
 
     // Base units
-    {"m", {1, {{MooseUnits::BaseUnit::METER, 1}}}},
-    {"g", {0.001, {{MooseUnits::BaseUnit::KILOGRAM, 1}}}},
-    {"s", {1, {{MooseUnits::BaseUnit::SECOND, 1}}}},
-    {"A", {1, {{MooseUnits::BaseUnit::AMPERE, 1}}}},
-    {"K", {1, {{MooseUnits::BaseUnit::KELVIN, 1}}}},
-    {"mol", {6.02214076e23, {{MooseUnits::BaseUnit::COUNT, 1}}}},
-    {"cd", {1, {{MooseUnits::BaseUnit::CANDELA, 1}}}},
+    {"m", {1, 0, {{MooseUnits::BaseUnit::METER, 1}}}},
+    {"g", {0.001, 0, {{MooseUnits::BaseUnit::KILOGRAM, 1}}}},
+    {"s", {1, 0, {{MooseUnits::BaseUnit::SECOND, 1}}}},
+    {"A", {1, 0, {{MooseUnits::BaseUnit::AMPERE, 1}}}},
+    {"K", {1, 0, {{MooseUnits::BaseUnit::KELVIN, 1}}}},
+    {"mol", {6.02214076e23, 0, {{MooseUnits::BaseUnit::COUNT, 1}}}},
+    {"cd", {1, 0, {{MooseUnits::BaseUnit::CANDELA, 1}}}},
 
     // Derived units
     {"N",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // Newton
     {"Pa",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // Pascal
     {"J",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // Joule
     {"W",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
-       {MooseUnits::BaseUnit::SECOND, -3}}}},                                           // Watt
-    {"C", {1, {{MooseUnits::BaseUnit::AMPERE, 1}, {MooseUnits::BaseUnit::SECOND, 1}}}}, // Coulomb
+       {MooseUnits::BaseUnit::SECOND, -3}}}}, // Watt
+    {"C",
+     {1, 0, {{MooseUnits::BaseUnit::AMPERE, 1}, {MooseUnits::BaseUnit::SECOND, 1}}}}, // Coulomb
     {"V",
-     {
-         1,
-         {{MooseUnits::BaseUnit::KILOGRAM, 1},
-          {MooseUnits::BaseUnit::METER, 2},
-          {MooseUnits::BaseUnit::SECOND, -3},
-          {MooseUnits::BaseUnit::AMPERE, -1}},
-     }},
+     {1,
+      0,
+      {{MooseUnits::BaseUnit::KILOGRAM, 1},
+       {MooseUnits::BaseUnit::METER, 2},
+       {MooseUnits::BaseUnit::SECOND, -3},
+       {MooseUnits::BaseUnit::AMPERE, -1}}}},
     {"F",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, -1},
        {MooseUnits::BaseUnit::METER, -2},
        {MooseUnits::BaseUnit::SECOND, 4},
        {MooseUnits::BaseUnit::AMPERE, 2}}}},
     {"S",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, -1},
        {MooseUnits::BaseUnit::METER, -2},
        {MooseUnits::BaseUnit::SECOND, 3},
        {MooseUnits::BaseUnit::AMPERE, 2}}}}, // Siemens = 1/Ohm (electrical conductance)
     {"Wb",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
        {MooseUnits::BaseUnit::SECOND, -2},
        {MooseUnits::BaseUnit::AMPERE, -1}}}}, // Weber (magnetic flux)
     {"T",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::SECOND, -2},
        {MooseUnits::BaseUnit::AMPERE, -1}}}}, // Tesla (magnetic flux density)
     {"H",
      {1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
        {MooseUnits::BaseUnit::SECOND, -2},
@@ -122,27 +141,31 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     // cgs units
     {"Ba",
      {0.1,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND,
         -2}}}}, // barye (unit of pressure - not to be confused with bar)
     {"dyn",
      {1e-5,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // dyne
 
     // Freedom units
-    {"ft", {0.3048, {{MooseUnits::BaseUnit::METER, 1}}}},        // foot
-    {"in", {25.4e-3, {{MooseUnits::BaseUnit::METER, 1}}}},       // inch
-    {"lb", {0.45359237, {{MooseUnits::BaseUnit::KILOGRAM, 1}}}}, // pound of mass
+    {"ft", {0.3048, 0, {{MooseUnits::BaseUnit::METER, 1}}}},        // foot
+    {"in", {25.4e-3, 0, {{MooseUnits::BaseUnit::METER, 1}}}},       // inch
+    {"lb", {0.45359237, 0, {{MooseUnits::BaseUnit::KILOGRAM, 1}}}}, // pound of mass
     {"lbf",
      {4.4482216152605,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // pound of force
     {"psi",
      {6.894757e3,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // pound-force per square inch
@@ -150,19 +173,22 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     // misc.
     {"BTU",
      {1055.06,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // ISO 31-4 British thermal unit
     {"bar",
      {1e5,
+      0,
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, -1},
-       {MooseUnits::BaseUnit::SECOND, -2}}}},                          // bar (unit of pressure)
-    {"h", {60 * 60, {{MooseUnits::BaseUnit::SECOND, 1}}}},             // hour
-    {"day", {60 * 60 * 24, {{MooseUnits::BaseUnit::SECOND, 1}}}},      // day
-    {"l", {1e-3, {{MooseUnits::BaseUnit::METER, 3}}}},                 // liter
-    {"u", {1.66053906660e-27, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
-    {"at", {1, {{MooseUnits::BaseUnit::COUNT, 1}}}}                    // 1 single count (atom)
+       {MooseUnits::BaseUnit::SECOND, -2}}}},                        // bar (unit of pressure)
+    {"h", {60 * 60, 0, {{MooseUnits::BaseUnit::SECOND, 1}}}},        // hour
+    {"day", {60 * 60 * 24, 0, {{MooseUnits::BaseUnit::SECOND, 1}}}}, // day
+    {"l", {1e-3, 0, {{MooseUnits::BaseUnit::METER, 3}}}},            // liter
+    {"u",
+     {1.66053906660e-27, 0, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
+    {"at", {1, 0, {{MooseUnits::BaseUnit::COUNT, 1}}}}               // 1 single count (atom)
 };
 
 MooseUnits::MooseUnits(const std::string & unit_string) : _factor(1.0), _base()
@@ -184,11 +210,11 @@ MooseUnits::conformsTo(const MooseUnits & u) const
 }
 
 Real
-MooseUnits::to(const MooseUnits & u) const
+MooseUnits::convert(Real from_value, const MooseUnits & from_unit) const
 {
-  if (!conformsTo(u))
-    mooseError("Cannot convert between non-conforming units '", *this, "' and '", u, "'.");
-  return _factor / u._factor;
+  if (!conformsTo(from_unit))
+    mooseError("Cannot convert between non-conforming units '", *this, "' and '", from_unit, "'.");
+  return ((from_value + from_unit._shift) * from_unit._factor) / _factor - _shift;
 }
 
 void
@@ -406,6 +432,7 @@ MooseUnits MooseUnits::operator*(Real f) const
 {
   MooseUnits u = *this;
   u._factor *= f;
+  u._shift *= f;
   return u;
 }
 
@@ -414,6 +441,7 @@ MooseUnits MooseUnits::operator*(const MooseUnits & rhs) const
   MooseUnits u = rhs;
   u._factor *= _factor;
   u._base.insert(u._base.end(), _base.begin(), _base.end());
+  u._shift = 0.0;
   u.simplify();
   return u;
 }
@@ -426,6 +454,7 @@ MooseUnits::operator/(const MooseUnits & rhs) const
   for (auto & b : u._base)
     b.second *= -1;
   u._base.insert(u._base.end(), _base.begin(), _base.end());
+  u._shift = 0.0;
   u.simplify();
   return u;
 }
@@ -433,7 +462,7 @@ MooseUnits::operator/(const MooseUnits & rhs) const
 bool
 MooseUnits::operator==(const MooseUnits & rhs) const
 {
-  if (_factor != rhs._factor)
+  if (_factor != rhs._factor || _shift != rhs._shift)
     return false;
   return conformsTo(rhs);
 }
@@ -441,7 +470,7 @@ MooseUnits::operator==(const MooseUnits & rhs) const
 bool
 MooseUnits::operator==(Real rhs) const
 {
-  return (_factor == rhs && _base.empty());
+  return (_factor == rhs && _shift == 0.0 && _base.empty());
 }
 
 MooseUnits::operator Real() const
@@ -493,6 +522,7 @@ pow(const MooseUnits & u, int e)
 {
   MooseUnits r = u;
   r._factor = std::pow(u._factor, e);
+  r._shift = 0.0;
   for (auto & b : r._base)
     b.second *= e;
   return r;

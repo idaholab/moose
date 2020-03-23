@@ -25,6 +25,10 @@ The following units are currently supported
 | `atm` | $101325\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Standard atmosphere | pressure |
 | `eV` | $1.60218\cdot10^{-19}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | electron Volt | energy |
 | `erg` | $10^{-7}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | Erg | energy |
+| `degC` | $\text{K}$ | Celsius | temperature - As long as this unit stands alone the additive shift in the scale is taken into account. In all other cases this unit behaves like Kelvin |
+| `degF` | $\frac59\,\text{K}$ | Fahrenheit | temperature - As long as this unit stands alone the additive shift in the scale is taken into account. In all other cases this unit behaves like Rankine |
+| `degR` | $\frac59\,\text{K}$ | Rankine | temperature |
+| `Ang` | $10^{-10}\, \text{m}$ | Angstrom | length |
 | `Ang` | $10^{-10}\, \text{m}$ | Angstrom | length |
 | `m` | $\text{m}$ | meter | length |
 | `g` | $0.001\, \text{kg}$ | gram | mass |

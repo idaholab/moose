@@ -64,7 +64,9 @@ TEST(Units, parse)
       {"(km/s)*(s/m)", "1000"},
       {"GPa", "1e+09 m^-1*kg*s^-2"},
       {"psi", "6894.76 m^-1*kg*s^-2"},
-      {"kbar", "1e+08 m^-1*kg*s^-2"}};
+      {"kbar", "1e+08 m^-1*kg*s^-2"},
+      {"9*degF/m", "5 m^-1*K"},
+      {"mdegC/m", "0.001 m^-1*K"}};
 
   for (auto & p : pairs)
   {
@@ -84,6 +86,36 @@ TEST(Units, conformsTo)
   for (auto & u : pairs)
     EXPECT_TRUE(MooseUnits(u.first).conformsTo(MooseUnits(u.second)))
         << "units " << u.first << " and " << u.second << " should conform!";
+}
+
+TEST(Units, convert)
+{
+  std::vector<std::pair<std::pair<Real, std::string>, std::pair<Real, std::string>>> pairs = {
+      // pure temperature units will convert with additive shifts
+      {{0.0, "degC"}, {273.15, "K"}},
+      {{0.0, "degC"}, {32.0, "degF"}},
+      {{100.0, "degC"}, {212.0, "degF"}},
+      {{100.0, "degC"}, {373.15, "K"}},
+      {{100.0, "degF"}, {37.77777778, "degC"}},
+      {{100.0, "degF"}, {310.927777778, "K"}},
+      {{100.0, "K"}, {-279.67, "degF"}},
+      // temperature units in complex unit expressions are treated as differential
+      {{1.0, "K/m"}, {1.0, "degC/m"}},
+      {{9.0, "degF/m"}, {5.0, "degC/m"}},
+      // other conversions
+      {{96.48533212, "kJ/mol"}, {1.0, "eV/at"}}};
+
+  for (const auto & p : pairs)
+  {
+    const auto v1 = p.first.first;
+    const auto v2 = p.second.first;
+    const auto u1 = MooseUnits(p.first.second);
+    const auto u2 = MooseUnits(p.second.second);
+
+    // verify convert in both directions
+    EXPECT_NEAR(u1.convert(v2, u2), v1, 1e-8);
+    EXPECT_NEAR(u2.convert(v1, u1), v2, 1e-8);
+  }
 }
 
 TEST(Units, isBase)
@@ -133,7 +165,8 @@ TEST(Units, isBase)
     EXPECT_FALSE(u.isTemperature()) << c << " = " << u << " should not be a temperature!";
   }
 
-  std::vector<std::string> temperatures = {"K", "mK", "K^3/K^2", "(K*K^4)/(K*K)^2"};
+  std::vector<std::string> temperatures = {
+      "K", "mK", "K^3/K^2", "(K*K^4)/(K*K)^2", "degC", "degF", "mdegC"};
   for (auto & T : temperatures)
   {
     auto u = MooseUnits(T);

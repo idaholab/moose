@@ -46,13 +46,16 @@ public:
   MooseUnits();
   MooseUnits(const std::string & unit_string);
   MooseUnits(Real f) : _factor(f), _base() {}
-  MooseUnits(Real f, std::vector<std::pair<MooseUnits::BaseUnit, int>> b) : _factor(f), _base(b) {}
+  MooseUnits(Real f, Real s, std::vector<std::pair<MooseUnits::BaseUnit, int>> b)
+    : _factor(f), _shift(s), _base(b)
+  {
+  }
 
   /// checks if the units are dimensionally conforming (i.e. the describe the same physical quanitity)
   bool conformsTo(const MooseUnits &) const;
 
-  /// return the conversion factor from the current unit to unit u
-  Real to(const MooseUnits &) const;
+  /// Converts `from_value` in units of `from_units` to value this units
+  Real convert(Real from_value, const MooseUnits & from_unit) const;
 
   /// parse a unit string into a MooseUnits object
   void parse(const std::string & unit_string);
@@ -73,11 +76,21 @@ public:
   bool isTemperature() const { return isBase(BaseUnit::KELVIN); }
   ///@}
 
+  /// Unit prefactor scaling
   MooseUnits operator*(Real f) const;
+
+  /**
+   * @{ Unit combination operators for unit pairs zero out the shift. e.g. temperatures
+   * are interpreted as temperature differentials
+   */
   MooseUnits operator*(const MooseUnits & rhs) const;
   MooseUnits operator/(const MooseUnits & rhs) const;
+  ///@}
+
   bool operator==(const MooseUnits & rhs) const;
   bool operator==(Real rhs) const;
+
+  /// cast of units representing pure numbers
   explicit operator Real() const;
 
   friend std::ostream & operator<<(std::ostream & os, const MooseUnits & dt);
@@ -95,6 +108,9 @@ protected:
 
   /// conversion factor w.r.t. the base SI units
   Real _factor;
+
+  /// additive shift (for Celsius and Fahrenheit)
+  Real _shift;
 
   /// check if the unit has a pure base
   bool isBase(MooseUnits::BaseUnit) const;

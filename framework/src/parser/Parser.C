@@ -154,7 +154,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
 
   // convert units
   std::stringstream ss;
-  ss << std::setprecision(17) << (num * from_unit.to(to_unit));
+  ss << std::setprecision(17) << to_unit.convert(num, from_unit);
 
   // change kind only (not val)
   n->setVal(n->val(), hit::Field::Kind::Float);
