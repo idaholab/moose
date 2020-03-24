@@ -56,6 +56,27 @@ TEST_F(ExpressionBuilderTooSimplificationTest, test)
   b.simplify();
   EXPECT_EQ(std::string(b), "a^3");
 
-  EBTensor z = {1, 2, 3};
-  std::cout << z(0) << std::endl;
+  b = 4 * (a + 3 * c) - (7 + 4 * c) + 2 * a;
+  b.simplify();
+  EXPECT_EQ(std::string(b), "c*8+a*6+-7");
+
+  b = ((3 - a) * (a + 2) + (-a + 4) * (7 * a + 2) - (a - c) * (2 * a - c)) - 3 * a;
+  b.simplify();
+  EXPECT_EQ(std::string(b), "c^2*-1+a*(c*3+24)+a^2*-10+14");
+
+  b = pow(pow(a, 3) * pow(c, 3) * pow(d, 3), 3) / (pow(a, 7) * pow(c, 2) * pow(d, 3));
+  b.simplify();
+  std::cout << std::string(b) << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
 }

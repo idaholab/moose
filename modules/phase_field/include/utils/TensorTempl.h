@@ -165,7 +165,6 @@ TensorTempl<T>::operator-(const TensorTempl<T> & rhs)
   result->_data.resize(this->_data.size());
   for (unsigned int i = 0; i < this->_data.size(); ++i)
     result->data[i] = this->_data[i] - rhs._data[i];
-  result->_data = new_data;
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
   return *result;
@@ -255,7 +254,7 @@ TensorTempl<T> & TensorTempl<T>::operator*(const T & rhs)
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
   result->_data.resize(this->_data.size());
-  for (unsigned int i = 0; i < new_data.size(); ++i)
+  for (unsigned int i = 0; i < result->_data.size(); ++i)
     result->data[i] = this->_data[i] * rhs;
   return *result;
 }
