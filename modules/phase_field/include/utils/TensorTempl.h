@@ -41,12 +41,10 @@ public:
   // template <int D> TensorTempl(NestedInitializerList<T, D> t) {}
 
   // operators
-  T operator()(unsigned int index, unsigned int index_rest...);
-  T operator()(std::vector<unsigned int> index_caught,
-               unsigned int index,
-               unsigned int index_rest...);
-  T operator()(std::vector<unsigned int> index_caught, unsigned int index);
   T operator()(unsigned int index);
+  template <typename... U>
+  T operator()(U... index);
+  T operator()(std::vector<unsigned int> index_caught);
 
   TensorTempl & operator+(const TensorTempl & rhs);
   TensorTempl & operator-(const TensorTempl & rhs);
@@ -119,27 +117,20 @@ private:
 
 // operators
 template <typename T>
+template <typename... U>
 T
-TensorTempl<T>::operator()(unsigned int index, unsigned int index_rest...)
+TensorTempl<T>::operator()(U... index)
 {
-  return (*this)(std::vector<unsigned int>(1, index), index_rest);
+  return (*this)({index...});
 }
 
 template <typename T>
 T
-TensorTempl<T>::
-operator()(std::vector<unsigned int> index_caught, unsigned int index, unsigned int index_rest...)
+TensorTempl<T>::operator()(std::vector<unsigned int> index_caught)
 {
-  index_caught.push_back(index);
-  return (*this)(index_caught, index_rest);
-}
-
-template <typename T>
-T
-TensorTempl<T>::operator()(std::vector<unsigned int> index_caught, unsigned int index)
-{
-  index_caught.push_back(index);
   unsigned int location = 0;
+  if (index_caught.size() != _shape.size())
+    mooseError("Incorrect number of indeces for accessing tensor.");
   for (unsigned int i = 0; i < _access_data.size(); ++i)
   {
     if (index_caught[i] >= _shape[i])
@@ -155,12 +146,13 @@ TensorTempl<T>::operator()(unsigned int index)
 {
   std::vector<unsigned int> index_caught(1, index);
   unsigned int location = 0;
-  for (unsigned int i = 0; i < _access_data.size(); ++i)
-  {
-    if (index_caught[i] >= _shape[i])
-      mooseError("Incorrect indices for accessing tensor.");
-    location += _access_data[i] * index_caught[i];
-  }
+  if (_shape.size() != 0)
+    mooseError("Incorrect number of indeces for accessing tensor.");
+
+  if (index_caught[0] >= _shape[0])
+    mooseError("Incorrect indices for accessing tensor.");
+  location += _access_data[0] * index_caught[0];
+
   return _data[location];
 }
 
@@ -171,7 +163,7 @@ TensorTempl<T>::operator+(const TensorTempl<T> & rhs)
   if (this->_shape != rhs._shape)
     mooseError("Improper shape for addition.");
   TensorTempl<T> * result = new TensorTempl<T>();
-  std::vector<T> new_data(this->_data.size());
+  auto & new_data = result->_data;
   for (unsigned int i = 0; i < this->_data.size(); ++i)
     new_data[i] = this->_data[i] + rhs._data[i];
   result->_data = new_data;
@@ -187,7 +179,7 @@ TensorTempl<T>::operator-(const TensorTempl<T> & rhs)
   if (this->_shape != rhs._shape)
     mooseError("Improper shape for addition.");
   TensorTempl<T> * result = new TensorTempl<T>();
-  std::vector<T> new_data(this->_data.size());
+  auto & new_data = result->_data;
   for (unsigned int i = 0; i < this->_data.size(); ++i)
     new_data[i] = this->_data[i] - rhs._data[i];
   result->_data = new_data;
@@ -279,7 +271,7 @@ TensorTempl<T> & TensorTempl<T>::operator*(const T & rhs)
   TensorTempl<T> * result = new TensorTempl<T>();
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
-  std::vector<T> new_data(this->_data.size());
+  auto & new_data = result->_data;
   for (unsigned int i = 0; i < new_data.size(); ++i)
     new_data[i] = this->_data[i] * rhs;
   result->_data = new_data;
