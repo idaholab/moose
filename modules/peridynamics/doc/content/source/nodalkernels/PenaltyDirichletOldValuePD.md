@@ -4,7 +4,7 @@
 
 ## Description
 
-The `PenaltyDirichletOldValuePD` object is to apply Dirichlet boundary conditions with value of old variable solution using the penalty method for nodesets. It is similar to imposing Dirichlet boundary condition using penalty method, but implemented using nodal kernel.
+The `PenaltyDirichletOldValuePD` NodalKernel is used to apply Dirichlet boundary conditions with value of old variable solution using the penalty method for nodesets. It is similar to imposing Dirichlet boundary condition using penalty method, but implemented using nodal kernel.
 
 ## Example Syntax
 

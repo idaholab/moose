@@ -33,16 +33,12 @@ MechanicsActionPD::validParams()
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "Nonlinear variable names for the displacements");
   MooseEnum formulation_option("BOND ORDINARY_STATE NONORDINARY_STATE");
-  params.addRequiredParam<MooseEnum>("formulation",
-                                     formulation_option,
-                                     "Available peridynamic formulation options: " +
-                                         formulation_option.getRawNames());
+  params.addRequiredParam<MooseEnum>(
+      "formulation", formulation_option, "Peridynamic formulation options");
   MooseEnum stabilization_option("FORCE HORIZON", "HORIZON");
-  params.addParam<MooseEnum>(
-      "stabilization",
-      stabilization_option,
-      "Available stabilization options for Non-Ordinary State Based Peridynamics: " +
-          stabilization_option.getRawNames());
+  params.addParam<MooseEnum>("stabilization",
+                             stabilization_option,
+                             "Stabilization techniques for the peridynamic correspondence model");
   params.addParam<bool>(
       "full_jacobian",
       false,
@@ -52,7 +48,7 @@ MechanicsActionPD::validParams()
   params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
   params.addParam<VariableName>("out_of_plane_strain",
                                 "Nonlinear variable name for the out_of_plane strain for "
-                                "plane stress using NOSPD formulation");
+                                "plane stress using the NOSPD formulation");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "List of ids of the blocks (subdomains) that the "
                                               "peridynamic mechanics kernel will be applied to");
@@ -204,12 +200,10 @@ MechanicsActionPD::getKernelName()
         name = "HorizonStabilizedSmallStrainMechanicsNOSPD";
     }
     else
-      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: FORCE HORIZON");
+      paramError("stabilization", "Unknown PD stabilization scheme");
   }
   else
-    paramError(
-        "formulation",
-        "Unsupported peridynamic formulation. Choose from: BOND ORDINARY_STATE NONORDINARY_STATE");
+    paramError("formulation", "Unsupported peridynamic formulation");
 
   return name;
 }

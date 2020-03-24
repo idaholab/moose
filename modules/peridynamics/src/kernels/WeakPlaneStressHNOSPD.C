@@ -18,8 +18,9 @@ InputParameters
 validParams<WeakPlaneStressHNOSPD>()
 {
   InputParameters params = MechanicsBaseNOSPD::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for peridynamic plane "
-                             "stress model using weak formulation");
+  params.addClassDescription(
+      "Class for calculating the residual and Jacobian for the peridynamic plane "
+      "stress model using weak formulation");
 
   return params;
 }

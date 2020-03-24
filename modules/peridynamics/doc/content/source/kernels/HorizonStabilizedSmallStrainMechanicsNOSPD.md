@@ -2,7 +2,7 @@
 
 ## Description
 
-Kernel `HorizonStabilizedSmallStrainMechanicsNOSPD` calculates the residual and jacobian entries of the force density integral for horizon-stabilized non-ordinary state-based models under infinitesimal strain assumptions.
+The `HorizonStabilizedSmallStrainMechanicsNOSPD` Kernel calculates the residual and Jacobian entries of the force density integral for horizon-stabilized non-ordinary state-based peridynamic models under infinitesimal strain assumptions.
 
 ## Force state
 

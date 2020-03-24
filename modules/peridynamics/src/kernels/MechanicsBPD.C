@@ -17,8 +17,8 @@ InputParameters
 MechanicsBPD::validParams()
 {
   InputParameters params = MechanicsBasePD::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for Bond-based "
-                             "PeriDynamic mechanics formulation");
+  params.addClassDescription("Class for calculating the residual and Jacobian for the bond-based "
+                             "peridynamic mechanics formulation");
 
   params.addRequiredParam<unsigned int>(
       "component",

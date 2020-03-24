@@ -17,7 +17,7 @@ MechanicsBasePD::validParams()
 {
   InputParameters params = PeridynamicsKernelBase::validParams();
   params.addClassDescription(
-      "Base class for calculating residual and Jacobian for peridynamic mechanic kernels");
+      "Base class for calculating the residual and Jacobian for the peridynamic mechanic kernels");
 
   params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
   params.addCoupledVar("out_of_plane_strain",

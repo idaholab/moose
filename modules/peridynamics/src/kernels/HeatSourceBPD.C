@@ -19,8 +19,9 @@ InputParameters
 HeatSourceBPD::validParams()
 {
   InputParameters params = PeridynamicsKernelBase::validParams();
-  params.addClassDescription("Class for calculating residual from heat source for bond-based "
-                             "peridynamic heat conduction formulation");
+  params.addClassDescription(
+      "Class for calculating the residual from heat source for the bond-based "
+      "peridynamic heat conduction formulation");
 
   params.addRequiredParam<FunctionName>("power_density", "Volumetric heat source density");
 

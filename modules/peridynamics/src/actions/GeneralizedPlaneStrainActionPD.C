@@ -32,10 +32,7 @@ GeneralizedPlaneStrainActionPD::validParams()
                                         "Scalar variable for strain in the out-of-plane direction");
   params.addParam<VariableName>("temperature", "Nonlinear variable for the temperature");
   MooseEnum formulation_option("ORDINARY_STATE NONORDINARY_STATE", "NONORDINARY_STATE");
-  params.addParam<MooseEnum>("formulation",
-                             formulation_option,
-                             "Available peridynamic formulation options: " +
-                                 formulation_option.getRawNames());
+  params.addParam<MooseEnum>("formulation", formulation_option, "Peridynamic formulation options");
   MooseEnum strain_type("SMALL FINITE", "SMALL");
   params.addParam<MooseEnum>("strain", strain_type, "Strain formulation");
   params.addParam<VariableName>("out_of_plane_stress_variable",
@@ -91,9 +88,7 @@ GeneralizedPlaneStrainActionPD::act()
       k_type = "GeneralizedPlaneStrainOffDiagHNOSPD"; // Based on bond-associated non-ordinary
                                                       // state-based model
     else
-      paramError(
-          "formulation",
-          "Unsupported peridynamic formulation. Choose from: ORDINARY_STATE or NONORDINARY_STATE");
+      paramError("formulation", "Unsupported peridynamic formulation");
 
     InputParameters params = _factory.getValidParams(k_type);
 
@@ -141,9 +136,7 @@ GeneralizedPlaneStrainActionPD::act()
     else if (_formulation == "NONORDINARY_STATE")
       uo_type = "GeneralizedPlaneStrainUserObjectHNOSPD";
     else
-      paramError(
-          "formulation",
-          "Unsupported peridynamic formulation. Choose from: ORDINARY_STATE or NONORDINARY_STATE");
+      paramError("formulation", "Unsupported peridynamic formulation");
 
     InputParameters params = _factory.getValidParams(uo_type);
 

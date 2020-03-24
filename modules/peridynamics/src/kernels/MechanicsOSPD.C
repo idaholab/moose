@@ -18,8 +18,9 @@ InputParameters
 MechanicsOSPD::validParams()
 {
   InputParameters params = MechanicsBasePD::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for ordinary state-based "
-                             "peridynamic mechanics formulation");
+  params.addClassDescription(
+      "Class for calculating the residual and Jacobian for the ordinary state-based "
+      "peridynamic mechanics formulation");
 
   params.addRequiredParam<unsigned int>(
       "component",

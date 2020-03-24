@@ -22,9 +22,9 @@ GeneralizedPlaneStrainOffDiagHNOSPD::validParams()
 {
   InputParameters params = MechanicsBaseNOSPD::validParams();
   params.addClassDescription(
-      "Class for calculating off-diagonal Jacobian corresponding to "
+      "Class for calculating the off-diagonal Jacobian corresponding to "
       "coupling between displacements (or temperature) with scalar out-of-plane strain for "
-      "generalized plane strain using HNOSPD formulation");
+      "the generalized plane strain using the HNOSPD formulation");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for strain in the out-of-plane direction");

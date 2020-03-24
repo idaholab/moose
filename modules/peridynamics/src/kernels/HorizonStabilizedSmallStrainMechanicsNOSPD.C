@@ -21,7 +21,7 @@ HorizonStabilizedSmallStrainMechanicsNOSPD::validParams()
 {
   InputParameters params = MechanicsBaseNOSPD::validParams();
   params.addClassDescription(
-      "Class for calculating residual and Jacobian for horizon-stabilized non-ordinary "
+      "Class for calculating the residual and Jacobian for the horizon-stabilized non-ordinary "
       "state-based peridynamic correspondence model under small strain assumptions");
 
   params.addRequiredParam<unsigned int>(

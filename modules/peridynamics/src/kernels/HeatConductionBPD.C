@@ -17,7 +17,7 @@ InputParameters
 HeatConductionBPD::validParams()
 {
   InputParameters params = PeridynamicsKernelBase::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for bond-based "
+  params.addClassDescription("Class for calculating the residual and Jacobian for the bond-based "
                              "peridynamic heat conduction formulation");
 
   return params;

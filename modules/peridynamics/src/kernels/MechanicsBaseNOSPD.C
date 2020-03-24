@@ -17,8 +17,8 @@ InputParameters
 MechanicsBaseNOSPD::validParams()
 {
   InputParameters params = MechanicsBasePD::validParams();
-  params.addClassDescription("Base class for kernels of stabilized non-ordinary "
-                             "state-based peridynamic correspondence model");
+  params.addClassDescription("Base class for kernels of the stabilized non-ordinary "
+                             "state-based peridynamic correspondence models");
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",

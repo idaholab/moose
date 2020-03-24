@@ -22,9 +22,9 @@ GeneralizedPlaneStrainOffDiagOSPD::validParams()
 {
   InputParameters params = MechanicsBasePD::validParams();
   params.addClassDescription(
-      "Class for calculating off-diagonal Jacobian corresponding to "
-      "coupling between displacements (or temperature) and scalar out-of-plane strain for "
-      "generalized plane strain using OSPD formulation");
+      "Class for calculating the off-diagonal Jacobian corresponding to "
+      "coupling between displacements (or temperature) and the scalar out-of-plane strain for "
+      "the generalized plane strain using the OSPD formulation");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for strain in the out-of-plane direction");

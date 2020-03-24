@@ -2,7 +2,7 @@
 
 ## Description
 
-Postprocessor `NodalDisplacementDifferenceL2NormPD` is used to calculate the L2 norm of difference between displacements and their analytic solutions using the discrete summation formulation.
+The `NodalDisplacementDifferenceL2NormPD` Postprocessor is used to calculate the L2 norm of difference between displacements and their analytic solutions using the discrete summation formulation.
 
 \begin{equation}
   \text{L2 difference} = \int_{\Omega} {\left| \mathbf{u}_{prediction} - \mathbf{u}_{analytical} \right|} d{\Omega} = \sum V_{\mathbf{X}} \cdot {\left| \mathbf{u}_{prediction}^{\mathbf{X}} - \mathbf{u}_{analytical}^{\mathbf{X}} \right|}

@@ -2,7 +2,7 @@
 
 ## Description
 
-Kernel `ForceStabilizedSmallStrainMechanicsNOSPD` calculates the residual and jacobian of the force density integral for fictitious bond force stabilized non-ordinary state-based model under infinitesimal strain assumptions.
+The `ForceStabilizedSmallStrainMechanicsNOSPD` Kernel calculates the residual and jacobian of the force density integral for fictitious bond force stabilized non-ordinary state-based model under infinitesimal strain assumptions.
 
 ## Force state
 

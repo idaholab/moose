@@ -17,7 +17,7 @@ PeridynamicsKernelBase::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
-      "Base class for calculating residual and Jacobian for peridynamic kernels");
+      "Base class for calculating the residual and Jacobian for the peridynamic kernels");
 
   params.addParam<bool>("full_jacobian",
                         false,

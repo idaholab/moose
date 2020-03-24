@@ -21,7 +21,7 @@ GeneralizedPlaneStrainUserObjectHNOSPD::validParams()
 {
   InputParameters params = GeneralizedPlaneStrainUserObjectBasePD::validParams();
   params.addClassDescription("Class for calculating the scalar residual and diagonal Jacobian "
-                             "entry of generalized plane strain in NOSPD formulation");
+                             "entry of generalized plane strain in the NOSPD formulation");
 
   return params;
 }

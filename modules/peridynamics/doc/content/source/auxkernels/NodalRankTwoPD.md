@@ -2,7 +2,7 @@
 
 ## Description
 
-AuxKernel `NodalRankTwoPD` is used to output the components of strain and stress tensors and their equivalent scalar quantities for bond-based and ordinary state-based models. And this is only applies to elastic materials. For correspondence models, the UserObjects `NodalRankTwoComponentPD` and `NodalRankTwoScalarPD` should be used.
+The `NodalRankTwoPD` AuxKernel is used to output the components of strain and stress tensors and their equivalent scalar quantities for bond-based and ordinary state-based models. And this is only applies to elastic materials. For correspondence models, the UserObjects `NodalRankTwoComponentPD` and `NodalRankTwoScalarPD` should be used.
 
 This is a stand-alone calculation based on the concept of deformation gradient in correspondence model for postprocessing. Given the deformation gradient at each material point, other rank two tensors (strain, stress) can be calculated using the relationships from continuum mechanics theory.
 

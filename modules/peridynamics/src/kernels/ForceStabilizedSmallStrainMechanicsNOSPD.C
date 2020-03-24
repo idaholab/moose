@@ -20,7 +20,7 @@ InputParameters
 ForceStabilizedSmallStrainMechanicsNOSPD::validParams()
 {
   InputParameters params = MechanicsBaseNOSPD::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for non-ordinary "
+  params.addClassDescription("Class for calculating residual and Jacobian for the non-ordinary "
                              "state-based peridynamic solid mechanics formulation using a "
                              "fictitious force method for stabilization.");
 

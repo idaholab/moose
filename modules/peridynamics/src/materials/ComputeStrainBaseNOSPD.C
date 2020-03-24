@@ -18,14 +18,13 @@ InputParameters
 ComputeStrainBaseNOSPD::validParams()
 {
   InputParameters params = MechanicsMaterialBasePD::validParams();
-  params.addClassDescription("Base material strain class for peridynamic correspondence model");
+  params.addClassDescription("Base material strain class for the peridynamic correspondence model");
 
   MooseEnum stabilization_option("FORCE HORIZON");
   params.addRequiredParam<MooseEnum>(
       "stabilization",
       stabilization_option,
-      "Available stabilization options for peridynamic correspondence model: " +
-          stabilization_option.getRawNames());
+      "Stabilization techniques used for the peridynamic correspondence model");
 
   params.addParam<bool>("plane_strain",
                         false,
@@ -95,8 +94,7 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
     computeBondHorizonQpDeformationGradient();
   else
     paramError("stabilization",
-               "Unknown stabilization scheme for peridynamic correspondence model. Choose from: "
-               "FORCE HORIZON");
+               "Unknown stabilization scheme for peridynamic correspondence model");
 }
 
 void

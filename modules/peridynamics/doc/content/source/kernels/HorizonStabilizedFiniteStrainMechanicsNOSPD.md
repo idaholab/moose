@@ -2,7 +2,7 @@
 
 ## Description
 
-Kernel `HorizonStabilizedFiniteStrainMechanicsNOSPD` calculates the residual and jacobian of the force density integral for self-stabilized non-ordinary state-based models under finite strain assumptions.
+The `HorizonStabilizedFiniteStrainMechanicsNOSPD` Kernel calculates the residual and Jacobian of the force density integral for self-stabilized non-ordinary state-based peridynamic models under finite strain assumptions.
 
 ## Force state
 
