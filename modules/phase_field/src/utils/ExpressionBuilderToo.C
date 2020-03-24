@@ -11,9 +11,9 @@
 #include "EBSimpleTrees.h"
 
 std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-    ExpressionBuilderToo::EBTerm::_prep_simplification_rules = EBSimpleTrees();
+    ExpressionBuilderToo::EBTerm::_prep_simplification_rules = getPrepRules();
 std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-    ExpressionBuilderToo::EBTerm::_simplification_rules = EBSimpleTrees(true);
+    ExpressionBuilderToo::EBTerm::_simplification_rules = getRules();
 
 /******************************************
  * The Beginning of the Node implementations

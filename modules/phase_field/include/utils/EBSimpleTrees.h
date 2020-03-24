@@ -22,18 +22,8 @@ struct SimplificationRules
       _simplification_trees;
 };
 
-class EBSimpleTrees
-{
-public:
-  EBSimpleTrees();
-  EBSimpleTrees(bool);
+std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
+getPrepRules();
 
-  operator std::vector<
-      std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>()
-  {
-    return _simplification_trees;
-  }
-
-  std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-      _simplification_trees;
-};
+std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
+getRules();
