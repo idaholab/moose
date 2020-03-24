@@ -1,9 +1,9 @@
 [Tests]
-  [./InputFileEditorWithMesh]
+  [InputFileEditorWithMesh]
     type = PythonUnitTest
     input = test_InputFileEditorWithMesh.py
     separate = True
-    display_required = True
-    platform = linux
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

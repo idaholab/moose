@@ -1,7 +1,8 @@
 [Tests]
-  [./InputFileEditor]
+  [InputFileEditor]
     type = PythonUnitTest
     input = test_InputFileEditor.py
-    display_required = True
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

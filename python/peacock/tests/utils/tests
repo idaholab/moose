@@ -1,37 +1,44 @@
 [Tests]
-  [./ExeLauncher]
+  [ExeLauncher]
     type = PythonUnitTest
     input = test_ExeLauncher.py
-    display_required = True
-  [../]
-  [./RecentlyUsedMenu]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [RecentlyUsedMenu]
     type = PythonUnitTest
     input = test_RecentlyUsedMenu.py
-    display_required = True
-  [../]
-  [./ExeFinder]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [ExeFinder]
     type = PythonUnitTest
     input = test_ExeFinder.py
-    display_required = True
-  [../]
-  [./FileCache]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [FileCache]
     type = PythonUnitTest
     input = test_FileCache.py
-    display_required = True
-  [../]
-  [./TerminalUtils]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [TerminalUtils]
     type = PythonUnitTest
     input = test_TerminalUtils.py
-    display_required = True
-  [../]
-  [./Widgetutils]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [Widgetutils]
     type = PythonUnitTest
     input = test_WidgetUtils.py
-    display_required = True
-  [../]
-  [./loadstore]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [loadstore]
     type = PythonUnitTest
     input = test_StoreLoadWidgetState.py
-    display_required = True
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

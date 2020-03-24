@@ -1,7 +1,8 @@
 [Tests]
-  [./BlockEditor]
+  [BlockEditor]
     type = PythonUnitTest
     input = test_BlockEditor.py
-    display_required = True
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []
