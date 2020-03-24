@@ -831,7 +831,6 @@ public:
       return *this;
     }
 
-    EBTerm & operator()(const EBTerm & term);
     template <typename... T>
     EBTerm & operator()(T... terms)
     {

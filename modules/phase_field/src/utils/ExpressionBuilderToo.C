@@ -1227,13 +1227,6 @@ ExpressionBuilderToo::EBTermList operator,(const ExpressionBuilderToo::EBTermLis
 }
 
 ExpressionBuilderToo::EBTerm &
-ExpressionBuilderToo::EBTerm::operator()(const EBTerm & term)
-{
-  _eval_arguments = EBTermList(1, term);
-  return *this;
-}
-
-ExpressionBuilderToo::EBTerm &
 ExpressionBuilderToo::EBTerm::operator()(EBTermList term_list)
 {
   _eval_arguments = term_list;

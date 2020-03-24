@@ -41,7 +41,6 @@ public:
   // template <int D> TensorTempl(NestedInitializerList<T, D> t) {}
 
   // operators
-  T operator()(unsigned int index);
   template <typename... U>
   T operator()(U... index);
   T operator()(std::vector<int> index_caught);
@@ -142,32 +141,15 @@ TensorTempl<T>::operator()(std::vector<int> index_caught)
 }
 
 template <typename T>
-T
-TensorTempl<T>::operator()(unsigned int index)
-{
-  std::vector<unsigned int> index_caught(1, index);
-  unsigned int location = 0;
-  if (_shape.size() != 0)
-    mooseError("Incorrect number of indeces for accessing tensor.");
-
-  if (index_caught[0] >= _shape[0])
-    mooseError("Incorrect indices for accessing tensor.");
-  location += _access_data[0] * index_caught[0];
-
-  return _data[location];
-}
-
-template <typename T>
 TensorTempl<T> &
 TensorTempl<T>::operator+(const TensorTempl<T> & rhs)
 {
   if (this->_shape != rhs._shape)
     mooseError("Improper shape for addition.");
   TensorTempl<T> * result = new TensorTempl<T>();
-  auto & new_data = result->_data;
+  result->_data.resize(this->_data.size());
   for (unsigned int i = 0; i < this->_data.size(); ++i)
-    new_data[i] = this->_data[i] + rhs._data[i];
-  result->_data = new_data;
+    result->data[i] = this->_data[i] + rhs._data[i];
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
   return *result;
@@ -180,9 +162,9 @@ TensorTempl<T>::operator-(const TensorTempl<T> & rhs)
   if (this->_shape != rhs._shape)
     mooseError("Improper shape for addition.");
   TensorTempl<T> * result = new TensorTempl<T>();
-  auto & new_data = result->_data;
+  result->_data.resize(this->_data.size());
   for (unsigned int i = 0; i < this->_data.size(); ++i)
-    new_data[i] = this->_data[i] - rhs._data[i];
+    result->data[i] = this->_data[i] - rhs._data[i];
   result->_data = new_data;
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
@@ -272,10 +254,9 @@ TensorTempl<T> & TensorTempl<T>::operator*(const T & rhs)
   TensorTempl<T> * result = new TensorTempl<T>();
   result->_shape = this->_shape;
   result->_access_data = this->_access_data;
-  auto & new_data = result->_data;
+  result->_data.resize(this->_data.size());
   for (unsigned int i = 0; i < new_data.size(); ++i)
-    new_data[i] = this->_data[i] * rhs;
-  result->_data = new_data;
+    result->data[i] = this->_data[i] * rhs;
   return *result;
 }
 

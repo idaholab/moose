@@ -56,6 +56,6 @@ TEST_F(ExpressionBuilderTooSimplificationTest, test)
   b.simplify();
   EXPECT_EQ(std::string(b), "a^3");
 
-  EBTensor z = {{{1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}}};
-  std::cout << z(0, 1, 2) << std::endl;
+  EBTensor z = {1, 2, 3};
+  std::cout << z(0) << std::endl;
 }
