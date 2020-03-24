@@ -27,6 +27,8 @@ class MooseVariableBase;
 class MooseVariableFieldBase;
 template <typename>
 class MooseVariableFE;
+template <typename>
+class MooseVariableField;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
@@ -94,6 +96,9 @@ public:
    * of either Real or RealVectorValue type
    * @param var_name The name of the variable to retrieve
    * @return The retrieved variable
+   *
+   * Note this should actually be named getFieldFEVariable, but that would
+   * require fixing a lot of code in a lot of apps
    */
   template <typename T>
   MooseVariableFE<T> * getFieldVariable(const std::string & var_name);
@@ -103,9 +108,26 @@ public:
    * of either Real or RealVectorValue type
    * @param var_number The number of the variable to retrieve
    * @return The retrieved variable
+   *
+   * Note this should actually be named getFieldFEVariable, but that would
+   * require fixing a lot of code in a lot of apps
    */
   template <typename T>
   MooseVariableFE<T> * getFieldVariable(unsigned int var_number);
+
+  /**
+   * This should be called getFieldVariable, but that name is already taken
+   * by a legacy function.
+   */
+  template <typename T>
+  MooseVariableField<T> * getActualFieldVariable(const std::string & var_name);
+
+  /**
+   * This should be called getFieldVariable, but that name is already taken
+   * by a legacy function.
+   */
+  template <typename T>
+  MooseVariableField<T> * getActualFieldVariable(unsigned int var_number);
 
   /**
    * Get the list of all variable names
@@ -191,3 +213,19 @@ VariableWarehouse::getFieldVariable<RealEigenVector>(const std::string & var_nam
 template <>
 MooseVariableFE<RealEigenVector> *
 VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number);
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getActualFieldVariable<RealVectorValue>(const std::string & var_name);
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getActualFieldVariable<RealVectorValue>(unsigned int var_number);
+
+template <>
+MooseVariableField<RealEigenVector> *
+VariableWarehouse::getActualFieldVariable<RealEigenVector>(const std::string & var_name);
+
+template <>
+MooseVariableField<RealEigenVector> *
+VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_number);

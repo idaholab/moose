@@ -567,7 +567,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
 
 template <typename OutputType>
 void
-MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
+MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
 

@@ -415,16 +415,14 @@ public:
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
 
-  /**
-   * Set nodal value
-   */
-  void setNodalValue(const OutputType & value, unsigned int idx = 0);
+  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+
+  virtual void setDofValue(const OutputData & value, unsigned int index) override;
+
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
   void setDofValues(const DenseVector<OutputData> & values);
-
-  void setDofValue(const OutputData & value, unsigned int index);
 
   /**
    * Write a nodal value to the passed-in solution vector

@@ -443,6 +443,8 @@ public:
   /**
    * Gets a reference to a variable of with specified name
    *
+   * This excludes and cannot return finite volume variables.
+   *
    * @param tid Thread id
    * @param var_name variable name
    * @return reference the variable (class)
@@ -451,7 +453,15 @@ public:
   MooseVariableFE<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
+   * Returns a field variable pointer - this includes finite volume variables.
+   */
+  template <typename T>
+  MooseVariableField<T> & getActualFieldVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
    * Gets a reference to a variable with specified number
+   *
+   * This excludes and cannot return finite volume variables.
    *
    * @param tid Thread id
    * @param var_number libMesh variable number
@@ -459,6 +469,12 @@ public:
    */
   template <typename T>
   MooseVariableFE<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
+
+  /**
+   * Returns a field variable pointer - this includes finite volume variables.
+   */
+  template <typename T>
+  MooseVariableField<T> & getActualFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a scalar variable with specified number

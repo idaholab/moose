@@ -80,4 +80,10 @@ public:
   MooseVariableField(const InputParameters & parameters);
 
   static InputParameters validParams();
+
+
+  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;
+
+  virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
+
 };

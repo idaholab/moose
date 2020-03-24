@@ -169,10 +169,9 @@ public:
 
   virtual bool isNodalDefined() const override final { return false; }
 
+  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
-
-
-
+  virtual void setDofValue(const OutputData & value, unsigned int index) override;
 
   void clearDofIndices() override;
 
@@ -280,8 +279,6 @@ public:
    * Set local DOF values and evaluate the values on quadrature points
    */
   void setDofValues(const DenseVector<OutputData> & values);
-
-  void setDofValue(const OutputData & value, unsigned int index);
 
   /**
    * Get the current value of this variable on an element

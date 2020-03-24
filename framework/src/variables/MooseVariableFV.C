@@ -321,6 +321,13 @@ MooseVariableFV<OutputType>::getGradient(const Elem * /*elem*/) const
 
 template <typename OutputType>
 void
+MooseVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+{
+  mooseError("FV variables do not support setNodalValue");
+}
+
+template <typename OutputType>
+void
 MooseVariableFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
 {
   _element_data->setDofValue(value, index);
