@@ -7,17 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseVariableFVBase.h"
+#include "MooseVariableField.h"
 
-defineLegacyParams(MooseVariableFVBase);
-
+template <typename OutputType>
 InputParameters
-MooseVariableFVBase::validParams()
+MooseVariableField<OutputType>::validParams()
 {
-  return MooseVariableBase::validParams();
+  return MooseVariableFieldBase::validParams();
 }
 
-MooseVariableFVBase::MooseVariableFVBase(const InputParameters & parameters)
-  : MooseVariableFEBase(parameters)
+template <typename OutputType>
+MooseVariableField<OutputType>::MooseVariableField(const InputParameters & parameters)
+  : MooseVariableFieldBase(parameters)
 {
 }
+

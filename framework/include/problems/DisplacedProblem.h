@@ -18,7 +18,7 @@
 #include "libmesh/enum_quadrature_type.h"
 
 // Forward declarations
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 class AssemblyData;
 class DisplacedProblem;
 class MooseMesh;

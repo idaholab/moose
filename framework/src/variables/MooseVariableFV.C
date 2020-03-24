@@ -13,7 +13,6 @@
 #include "NonlinearSystemBase.h"
 #include "DisplacedSystem.h"
 #include "Assembly.h"
-#include "MooseVariableData.h"
 
 registerMooseObject("MooseApp", MooseVariableFVReal);
 
@@ -21,12 +20,12 @@ template <typename OutputType>
 InputParameters
 MooseVariableFV<OutputType>::validParams()
 {
-  return MooseVariableFVBase::validParams();
+  return MooseVariableField<OutputType>::validParams();
 }
 
 template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
-  : MooseVariableFVBase(parameters)
+  : MooseVariableField<OutputType>(parameters)
 {
   _element_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, _assembly.elem());

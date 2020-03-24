@@ -121,7 +121,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
 template <typename... Args>
 [[noreturn]] void mooseError(Args &&... args);
 
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 
 namespace moose
 {
@@ -135,7 +135,7 @@ namespace internal
 ///
 /// This is a convenience function to be used when error messages (especially with paramError)
 /// need to report that variable types are incompatible (e.g. with residual save-in).
-std::string incompatVarMsg(MooseVariableFEBase & var1, MooseVariableFEBase & var2);
+std::string incompatVarMsg(MooseVariableFieldBase & var1, MooseVariableFieldBase & var2);
 
 std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color);

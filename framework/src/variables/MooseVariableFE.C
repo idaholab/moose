@@ -17,7 +17,7 @@
 
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
-  : MooseVariableFEBase(parameters)
+  : MooseVariableField<OutputType>(parameters)
 {
   _element_data = libmesh_make_unique<MooseVariableData<OutputType>>(*this,
                                                                      _sys,

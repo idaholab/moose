@@ -176,3 +176,21 @@ protected:
   /// Variable name
   std::string _var_name;
 };
+
+#define usingMooseVariableBaseMembers \
+  using MooseVariableBase::_sys; \
+  using MooseVariableBase::_fe_type; \
+  using MooseVariableBase::_var_num; \
+  using MooseVariableBase::_index; \
+  using MooseVariableBase::_var_kind; \
+  using MooseVariableBase::_subproblem; \
+  using MooseVariableBase::_variable; \
+  using MooseVariableBase::_assembly; \
+  using MooseVariableBase::_dof_map; \
+  using MooseVariableBase::_dof_indices; \
+  using MooseVariableBase::_mesh; \
+  using MooseVariableBase::_tid; \
+  using MooseVariableBase::_count; \
+  using MooseVariableBase::_scaling_factor; \
+  using MooseVariableBase::_var_name
+

@@ -28,7 +28,7 @@ class MooseMesh;
 class SubProblem;
 class Factory;
 class Assembly;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 class MooseVariableScalar;
 template <typename>
 class MooseVariableFE;
@@ -179,7 +179,7 @@ public:
    * in question is not in the expected System or of the expected
    * type.
    */
-  virtual MooseVariableFEBase &
+  virtual MooseVariableFieldBase &
   getVariable(THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
@@ -215,7 +215,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
                                                 THREAD_ID tid);
 
   /**
@@ -223,7 +223,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariableFEBase *> &
+  virtual const std::set<MooseVariableFieldBase *> &
   getActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
@@ -234,9 +234,9 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
-   * Clear the active elemental MooseVariableFEBase.  If there are no active variables then they
+   * Clear the active elemental MooseVariableFieldBase.  If there are no active variables then they
    * will all be reinited. Call this after finishing the computation that was using a restricted set
-   * of MooseVariableFEBases
+   * of MooseVariableFieldBase
    *
    * @param tid The thread id
    */
@@ -674,7 +674,7 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
-  MooseVariableFEBase & getVariableHelper(THREAD_ID tid,
+  MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
                                           const std::string & var_name,
                                           Moose::VarKindType expected_var_type,
                                           Moose::VarFieldType expected_var_field_type,
@@ -726,8 +726,8 @@ protected:
   std::map<BoundaryID, std::multimap<std::string, std::string>> _map_boundary_material_props_check;
   ///@}
 
-  /// This is the set of MooseVariableFEBases that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariableFEBase *>> _active_elemental_moose_variables;
+  /// This is the set of MooseVariableFieldBase that will actually get reinited by a call to reinit(elem)
+  std::vector<std::set<MooseVariableFieldBase *>> _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */

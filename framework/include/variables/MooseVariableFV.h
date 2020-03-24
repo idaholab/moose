@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "MooseVariableFVBase.h"
+#include "MooseVariableField.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataFV.h"
@@ -40,30 +40,139 @@ typedef MooseVariableFV<Real> MooseVariableFVReal;
  *
  */
 template <typename OutputType>
-class MooseVariableFV : public MooseVariableFVBase
+class MooseVariableFV : public MooseVariableField<OutputType>
 {
 public:
-  using OutputGradient = typename MooseVariableData<OutputType>::OutputGradient;
-  using OutputSecond = typename MooseVariableData<OutputType>::OutputSecond;
-  using OutputDivergence = typename MooseVariableData<OutputType>::OutputDivergence;
+  using OutputGradient = typename MooseVariableField<OutputType>::OutputGradient;
+  using OutputSecond = typename MooseVariableField<OutputType>::OutputSecond;
+  using OutputDivergence = typename MooseVariableField<OutputType>::OutputDivergence;
 
-  using FieldVariableValue = typename MooseVariableData<OutputType>::FieldVariableValue;
-  using FieldVariableGradient = typename MooseVariableData<OutputType>::FieldVariableGradient;
-  using FieldVariableSecond = typename MooseVariableData<OutputType>::FieldVariableSecond;
-  using FieldVariableCurl = typename MooseVariableData<OutputType>::FieldVariableCurl;
-  using FieldVariableDivergence = typename MooseVariableData<OutputType>::FieldVariableDivergence;
+  using FieldVariableValue = typename MooseVariableField<OutputType>::FieldVariableValue;
+  using FieldVariableGradient = typename MooseVariableField<OutputType>::FieldVariableGradient;
+  using FieldVariableSecond = typename MooseVariableField<OutputType>::FieldVariableSecond;
+  using FieldVariableCurl = typename MooseVariableField<OutputType>::FieldVariableCurl;
+  using FieldVariableDivergence = typename MooseVariableField<OutputType>::FieldVariableDivergence;
 
-  using OutputShape = typename MooseVariableData<OutputType>::OutputShape;
-  using OutputShapeGradient = typename MooseVariableData<OutputType>::OutputShapeGradient;
-  using OutputShapeSecond = typename MooseVariableData<OutputType>::OutputShapeSecond;
-  using OutputShapeDivergence = typename MooseVariableData<OutputType>::OutputShapeDivergence;
+  using OutputShape = typename MooseVariableField<OutputType>::OutputShape;
+  using OutputShapeGradient = typename MooseVariableField<OutputType>::OutputShapeGradient;
+  using OutputShapeSecond = typename MooseVariableField<OutputType>::OutputShapeSecond;
+  using OutputShapeDivergence = typename MooseVariableField<OutputType>::OutputShapeDivergence;
 
-  using OutputData = typename MooseVariableData<OutputType>::OutputData;
-  using DoFValue = typename MooseVariableData<OutputType>::DoFValue;
+  using OutputData = typename MooseVariableField<OutputType>::OutputData;
+  using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   static InputParameters validParams();
 
   MooseVariableFV(const InputParameters & parameters);
+
+  virtual bool isFV() const override { return true; }
+
+  virtual void prepare() override final
+  {
+    // mooseError("prepare not supported by MooseVariableFVBase");
+  }
+  virtual void prepareNeighbor() override final
+  {
+    // mooseError("prepareNeighbor not supported by MooseVariableFVBase");
+  }
+  virtual void prepareAux() override final
+  {
+    // mooseError("prepareAux not supported by MooseVariableFVBase");
+  }
+  virtual void reinitNode() override final
+  {
+    // mooseError("reinitNode not supported by MooseVariableFVBase");
+  }
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final
+  {
+    // mooseError("reinitNodes not supported by MooseVariableFVBase");
+  }
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final
+  {
+    // mooseError("reinitNodesNeighbor not supported by MooseVariableFVBase");
+  }
+  virtual void reinitAux() override final
+  {
+    // mooseError("reinitAux not supported by MooseVariableFVBase");
+  }
+  virtual void reinitAuxNeighbor() override final
+  {
+    // mooseError("reinitAuxNeighbor not supported by MooseVariableFVBase");
+  }
+  virtual void prepareLowerD() override final
+  {
+    // mooseError("prepareLowerD not supported by MooseVariableFVBase");
+  }
+  virtual const dof_id_type & nodalDofIndex() const override final
+  {
+    mooseError("nodalDofIndex not supported by MooseVariableFVBase");
+  }
+  virtual const dof_id_type & nodalDofIndexNeighbor() const override final
+  {
+    mooseError("nodalDofIndexNeighbor not supported by MooseVariableFVBase");
+  }
+  virtual size_t phiSize() const override final
+  {
+    mooseError("phiSize not supported by MooseVariableFVBase");
+  }
+  virtual size_t phiFaceSize() const override final
+  {
+    mooseError("phiFaceSize not supported by MooseVariableFVBase");
+  }
+  virtual size_t phiNeighborSize() const override final
+  {
+    mooseError("phiNeighborSize not supported by MooseVariableFVBase");
+  }
+  virtual size_t phiFaceNeighborSize() const override final
+  {
+    mooseError("phiFaceNeighborSize not supported by MooseVariableFVBase");
+  }
+  virtual size_t phiLowerSize() const override final
+  {
+    mooseError("phiLowerSize not supported by MooseVariableFVBase");
+  }
+
+  virtual void computeElemValuesFace() override final
+  {
+    // mooseError("computeElemValuesFace not supported by MooseVariableFVBase");
+  }
+  virtual void computeNeighborValuesFace() override final
+  {
+    // mooseError("computeNeighborValuesFace not supported by MooseVariableFVBase");
+  }
+  virtual void computeNeighborValues() override final
+  {
+    // mooseError("computeNeighborValues not supported by MooseVariableFVBase");
+  }
+  virtual void computeLowerDValues() override final
+  {
+    // mooseError("computeLowerDValues not supported by MooseVariableFVBase");
+  }
+  virtual void computeNodalNeighborValues() override final
+  {
+    // mooseError("computeNodalNeighborValues not supported by MooseVariableFVBase");
+  }
+  virtual void computeNodalValues() override final
+  {
+    // mooseError("computeNodalValues not supported by MooseVariableFVBase");
+  }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
+  {
+    mooseError("dofIndicesLower not supported by MooseVariableFVBase");
+  }
+  virtual unsigned int numberOfDofsNeighbor() override final
+  {
+    mooseError("numberOfDofsNeighbor not supported by MooseVariableFVBase");
+  }
+
+  virtual bool isNodal() const override final { return false; }
+
+  virtual bool isNodalDefined() const override final { return false; }
+
+
+
+
+
 
   void clearDofIndices() override;
 
@@ -76,10 +185,6 @@ public:
   bool isVector() const override;
 
   virtual const Elem * const & currentElem() const override { return _element_data->currentElem(); }
-  virtual const Elem * const & currentNeighbor() const override
-  {
-    return _neighbor_data->currentElem();
-  }
 
   virtual void getDofIndices(const Elem * elem,
                              std::vector<dof_id_type> & dof_indices) const override
@@ -258,6 +363,8 @@ public:
   typename OutputTools<OutputType>::OutputGradient getGradient(const Elem * elem) const;
 
 protected:
+  usingMooseVariableBaseMembers;
+
   /// Holder for all the data associated with the "main" element
   std::unique_ptr<MooseVariableDataFV<OutputType>> _element_data;
 

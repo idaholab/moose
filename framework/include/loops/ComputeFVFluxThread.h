@@ -13,7 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseException.h"
-#include "MooseVariableFVBase.h"
+#include "MooseVariableFieldBase.h"
 #include "FVKernel.h"
 #include "FVBoundaryCondition.h"
 #include "FEProblem.h"
@@ -219,7 +219,7 @@ public:
 private:
   OnScopeExit reinitVariables(const FaceInfo & fi);
 
-  std::set<MooseVariableFVBase *> _needed_fv_vars;
+  std::set<MooseVariableFieldBase *> _needed_fv_vars;
   const bool _do_jacobian;
   unsigned int _num_cached = 0;
 
@@ -455,13 +455,12 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
       .queryInto(kernels);
 
   std::set<MooseVariableFEBase *> needed_fe_vars;
-  MooseVariableFVBase * fvptr = nullptr;
   for (auto k : kernels)
   {
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
-      if ((fvptr = dynamic_cast<MooseVariableFVBase *>(var)))
-        _needed_fv_vars.insert(fvptr);
+      if (var->isFV())
+        _needed_fv_vars.insert(var);
       else
         needed_fe_vars.insert(var);
     const auto & mdeps = k->getMatPropDependencies();

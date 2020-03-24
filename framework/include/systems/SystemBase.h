@@ -28,7 +28,7 @@
 // Forward declarations
 class Factory;
 class MooseApp;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
