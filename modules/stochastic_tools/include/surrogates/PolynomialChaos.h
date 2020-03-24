@@ -77,6 +77,15 @@ protected:
                         const std::vector<unsigned int> & second);
 
 private:
+  /// Utility for looping over coefficients in parallel
+  ///@{
+  dof_id_type _n_local_coeff;
+  dof_id_type _local_coeff_begin;
+  dof_id_type _local_coeff_end;
+  ///@}
+
+  /// The following items are used tor training only
+
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
 
@@ -89,27 +98,23 @@ private:
   /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue * _values_ptr = nullptr;
 
-  // The following items are stored using declareModelData for use as a trained model.
-
   /// Total number of parameters/dimensions
   unsigned int _ndim;
 
-  /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
-  std::vector<std::vector<unsigned int>> & _tuple;
-
   /// Total number of coefficient (defined by size of _tuple)
   std::size_t _ncoeff;
+
+  /// True when _sampler data is distributed
+  bool _values_distributed;
+
+  // The following items are stored using declareModelData for use as a trained model.
+
+  /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
+  std::vector<std::vector<unsigned int>> & _tuple;
 
   /// These are the coefficients we are after in the PC expansion
   std::vector<Real> & _coeff;
 
   /// The distributions used for sampling
   std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
-
-  /// Utility for looping over coefficients in parallel
-  ///@{
-  dof_id_type _n_local_coeff;
-  dof_id_type _local_coeff_begin;
-  dof_id_type _local_coeff_end;
-  ///@}
 };

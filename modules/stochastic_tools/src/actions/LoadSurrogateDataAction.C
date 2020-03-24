@@ -44,6 +44,10 @@ LoadSurrogateDataAction::load(SurrogateModel & model)
 
   // Create the object that will load in data
   RestartableDataIO data_io(_app);
+  data_io.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+  data_io.setErrorOnLoadWithDifferentNumberOfThreads(false);
+
+  // Read header
   bool pass = data_io.readRestartableDataHeaderFromFile(filename, false);
   if (!pass)
     paramError("filename", "The supplied file '", filename, "' failed to load.");

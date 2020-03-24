@@ -286,10 +286,10 @@ RestartableDataIO::readRestartableDataHeaderFromFile(const std::string & recover
       mooseError("Trying to restart from an older file version - you need to checkout an older "
                  "version of MOOSE.");
 
-    if (this_n_procs != n_procs)
+    if (_error_on_different_number_of_processors && (this_n_procs != n_procs))
       mooseError("Cannot restart using a different number of processors!");
 
-    if (this_n_threads != n_threads)
+    if (_error_on_different_number_of_threads && (this_n_threads != n_threads))
       mooseError("Cannot restart using a different number of threads!");
   }
 
@@ -424,4 +424,16 @@ RestartableDataIO::restartEquationSystemsObject()
   _fe_problem_ptr->es().read(file_name, read_flags, renumber);
 
   _fe_problem_ptr->getNonlinearSystemBase().update();
+}
+
+void
+RestartableDataIO::setErrorOnLoadWithDifferentNumberOfProcessors(bool value)
+{
+  _error_on_different_number_of_processors = value;
+}
+
+void
+RestartableDataIO::setErrorOnLoadWithDifferentNumberOfThreads(bool value)
+{
+  _error_on_different_number_of_threads = value;
 }

@@ -36,14 +36,17 @@ SurrogateModelOutput::SurrogateModelOutput(const InputParameters & parameters)
 void
 SurrogateModelOutput::output(const ExecFlagType & /*type*/)
 {
-  RestartableDataIO restartable_data_io(_app);
-  for (const auto & surrogate_name : _surrogates)
+  if (processor_id() == 0)
   {
-    const SurrogateModel & model = getSurrogateModelByName(surrogate_name);
-    const std::string filename =
-        this->filename() + "_" + surrogate_name + restartable_data_io.getRestartableDataExt();
+    RestartableDataIO restartable_data_io(_app);
+    for (const auto & surrogate_name : _surrogates)
+    {
+      const SurrogateModel & model = getSurrogateModelByName(surrogate_name);
+      const std::string filename =
+          this->filename() + "_" + surrogate_name + restartable_data_io.getRestartableDataExt();
 
-    const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.name());
-    restartable_data_io.writeRestartableData(filename, meta_data);
+      const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.name());
+      restartable_data_io.writeRestartableData(filename, meta_data);
+    }
   }
 }

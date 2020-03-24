@@ -186,8 +186,8 @@ Legendre::clenshawQuadrature(const unsigned int order,
 Real
 Legendre::innerProduct(const unsigned int order) const
 {
-  return 1. / (2. * (Real)order + 1.);
-};
+  return 1. / (2. * static_cast<Real>(order) + 1.);
+}
 
 Real
 legendre(const unsigned int order, const Real x, const Real lower_bound, const Real upper_bound)
@@ -215,9 +215,12 @@ legendre(const unsigned int order, const Real x, const Real lower_bound, const R
     return val / pow(2.0, order);
   }
   else
-    return ((2.0 * (Real)order - 1.0) * xref * legendre(order - 1, xref) -
-            ((Real)order - 1.0) * legendre(order - 2, xref)) /
-           (Real)order;
+  {
+    Real ord = order;
+    return ((2.0 * ord - 1.0) * xref * legendre(order - 1, xref) -
+            (ord - 1.0) * legendre(order - 2, xref)) /
+           ord;
+  }
 #endif
 }
 
@@ -227,7 +230,7 @@ Real
 Hermite::innerProduct(const unsigned int order) const
 {
   return (Real)Utility::factorial(order);
-};
+}
 
 void
 Hermite::store(std::ostream & stream, void * context) const
@@ -300,7 +303,8 @@ hermite(const unsigned int order, const Real x, const Real mu, const Real sig)
     return val * Utility::factorial(order);
   }
   else
-    return xref * hermite(order - 1, xref) - ((Real)order - 1.0) * hermite(order - 2, xref);
+    return xref * hermite(order - 1, xref) -
+           (static_cast<Real>(order) - 1.0) * hermite(order - 2, xref);
 #endif
 }
 
@@ -321,7 +325,8 @@ gauss_legendre(const unsigned int order,
   DenseMatrix<Real> vec(n, n);
   for (unsigned int i = 1; i < n; ++i)
   {
-    mat(i, i - 1) = (Real)i / std::sqrt(((2. * (Real)i - 1.) * (2. * (Real)i + 1.)));
+    Real ri = i;
+    mat(i, i - 1) = ri / std::sqrt(((2. * ri - 1.) * (2. * ri + 1.)));
     mat(i - 1, i) = mat(i, i - 1);
   }
   mat.evd_right(lambda, lambdai, vec);
@@ -353,7 +358,7 @@ gauss_hermite(const unsigned int order,
   DenseMatrix<Real> vec(n, n);
   for (unsigned int i = 1; i < n; ++i)
   {
-    mat(i, i - 1) = std::sqrt((Real)i);
+    mat(i, i - 1) = std::sqrt(static_cast<Real>(i));
     mat(i - 1, i) = mat(i, i - 1);
   }
   mat.evd_right(lambda, lambdai, vec);

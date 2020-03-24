@@ -8,9 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PolynomialChaos.h"
-
 #include "Sampler.h"
 #include "CartesianProduct.h"
+
+#include "SerializerGuard.h"
 
 registerMooseObject("StochasticToolsApp", PolynomialChaos);
 
@@ -55,8 +56,11 @@ PolynomialChaos::initialSetup()
     _tuple = generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order);
     _ncoeff = _tuple.size();
     _coeff.resize(_ncoeff, 0);
-    _values_ptr =
-        &getVectorPostprocessorValue("results_vpp", getParam<std::string>("results_vector"));
+
+    // Results VPP
+    _values_distributed = isVectorPostprocessorDistributed("results_vpp");
+    _values_ptr = &getVectorPostprocessorValue(
+        "results_vpp", getParam<std::string>("results_vector"), !_values_distributed);
 
     // Sampler
     _sampler = &getSamplerByName(getParam<SamplerName>("training_sampler"));
@@ -73,6 +77,7 @@ PolynomialChaos::initialSetup()
       _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
   }
 
+  // evaluate
   else
   {
     _ncoeff = _tuple.size();
@@ -92,11 +97,16 @@ void
 PolynomialChaos::train()
 {
   // Check if results of samples matches number of samples
-  mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
+  __attribute__((unused)) dof_id_type num_rows =
+      _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
+  mooseAssert(num_rows == _values_ptr->size(),
               "Sampler number of rows does not match number of results from vector postprocessor.");
 
   std::fill(_coeff.begin(), _coeff.end(), 0.0);
   DenseMatrix<Real> poly_val(_ndim, _order);
+
+  // Offset for replicated/distributed result data
+  dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
 
   // Loop over samples
   for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
@@ -111,7 +121,7 @@ PolynomialChaos::train()
     // Loop over coefficients
     for (std::size_t i = 0; i < _ncoeff; ++i)
     {
-      Real val = (*_values_ptr)[p - _sampler->getLocalRowBegin()];
+      Real val = (*_values_ptr)[p - offset];
       // Loop over parameters
       for (std::size_t d = 0; d < _ndim; ++d)
         val *= poly_val(d, _tuple[i][d]);
@@ -180,7 +190,7 @@ Real
 PolynomialChaos::computeMean() const
 {
   return _coeff[0];
-};
+}
 
 Real
 PolynomialChaos::computeStandardDeviation() const
