@@ -42,7 +42,7 @@ A tensor grid is created created by taking a Cartesian product of the points and
 | 5 | 25 | 3,125 | 390,625 |
 | 7 | 49 | 16,807 | 5,764,801 |
 
-!media media/tensor_grid.svg id=tensor-grid
+!media tensor_grid.svg id=tensor-grid
 
 ### Smolyak Sparse Grid
 
@@ -56,7 +56,7 @@ A Smolyak sparse grid is a multidimensional quadrature meant to integrate a comp
 | 5 | 55 | 1,001 | 4,845 |
 | 7 | 140 | 7,997 | 74,613 |
 
-!media media/smolyak_grid.svg id=smolyak-grid
+!media smolyak_grid.svg id=smolyak-grid
 
 ### Clenshaw-Curtis Sparse Grid
 
@@ -70,7 +70,7 @@ A Clenshaw-Curtis (CC) grid is very similar to the Smolyak sparse, the only diff
 | 5 | 21 | 301 | 1,937 |
 | 7 | 49 | 1,113 | 11,937 |
 
-!media media/cc_grid.svg id=cc-grid
+!media cc_grid.svg id=cc-grid
 
 ## Implementation
 

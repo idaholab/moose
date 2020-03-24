@@ -50,12 +50,12 @@ number of Monte Carlo samples by setting the "n_samples" parameter of the MonteC
 simulation for each mode of operation with increasing sample numbers in serial and in parallel,
 respectively.
 
-!media media/full_solve_memory_serial.svg id=full-serial-memory
+!media full_solve_memory_serial.svg id=full-serial-memory
        caption=Total memory at the end of the simulation using a SamplerFullSolveMultiApp with
                increasing number of Monte Carlo samples for the three available modes of operation
                running on a single processor.
 
-!media media/full_solve_memory_mpi.svg id=full-mpi-memory
+!media full_solve_memory_mpi.svg id=full-mpi-memory
        caption=Total memory and maximum memory per processor at the end of the simulation using a
                SamplerFullSolveMultiApp with increasing number of Monte Carlo samples for the three
                available modes of operation running on 32 processors.
@@ -76,12 +76,12 @@ lowest run-time. For this example, the solve portion is minimal as such the sub-
 creation time plays a large role. As the solve time increases time gains can be expected to be
 minimal.
 
-!media media/full_solve_time_serial.svg id=full-serial-time
+!media full_solve_time_serial.svg id=full-serial-time
        caption=Total execution time of a simulation using SamplerFullSolveMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on a single
                processor.
 
-!media media/full_solve_time_mpi.svg id=full-mpi-time
+!media full_solve_time_mpi.svg id=full-mpi-time
        caption=Total execution time of a simulation using SamplerFullSolveMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on 32
                processors.
@@ -102,12 +102,12 @@ the end of the simulation (10 time steps) for each mode of operation within incr
 samples in serial and parallel. Recall, as mentioned above, that the "batch-reset" mode is not
 available in the SamplerTransientMultiApp.
 
-!media media/transient_memory_serial.svg id=transient-serial-memory
+!media transient_memory_serial.svg id=transient-serial-memory
        caption=Total memory at the end of the simulation using a SamplerTransientMultiApp with
                increasing number of Monte Carlo samples for the two available modes of operation
                running on a single processor.
 
-!media media/transient_memory_mpi.svg id=transient-mpi-memory
+!media transient_memory_mpi.svg id=transient-mpi-memory
        caption=Total memory and maximum memory per processor at the end of the simulation using a
                SamplerTransientMultiApp with increasing number of Monte Carlo samples for the two
                available modes of operation running on 32 processors.
@@ -118,12 +118,12 @@ solve portion of this example is significantly longer than the steady-state exam
 differences in execution time due to the instantiating of objects is diminished and both modes behave
 similarly.
 
-!media media/transient_serial_time.svg id=transient-serial-time
+!media transient_serial_time.svg id=transient-serial-time
        caption=Total execution time of a simulation using SamplerTransientMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on a single
                processor.
 
-!media media/transient_mpi_time.svg id=transient-mpi-time
+!media transient_mpi_time.svg id=transient-mpi-time
        caption=Total execution time of a simulation using SamplerTransientMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on 32
                processors.
