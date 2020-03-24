@@ -1,9 +1,9 @@
 [Tests]
-  [./test]
+  [test]
     type = PythonUnitTest
     input = test_exodus_state.py
-    platform = "LINUX"
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     separate = True
     display_required = true
-  [../]
+  []
 []

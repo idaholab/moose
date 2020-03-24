@@ -1,12 +1,14 @@
 [Tests]
-  [./PluginManager]
+  [PluginManager]
     type = RunApp
     command = test_PluginManager.py
-    display_required = True
-  [../]
-  [./collapsible]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [collapsible]
     type = RunApp
     command = test_PeacockCollapsibleWidget.py
-    display_required = True
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

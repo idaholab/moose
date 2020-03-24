@@ -3,6 +3,6 @@
     type = PythonUnitTest
     input = test_MeshViewerPlugin.py
     display_required = true
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []
