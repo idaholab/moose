@@ -294,6 +294,17 @@ def load(filename, root=None):
 
     return parse(content, root, filename)
 
+def write(filename, root):
+    """
+    Write the supplied tree to the file.
+
+    Inputs:
+        filename[str]: The filename to open and parse
+        root[Node]: The root node of the tree to write
+    """
+    with open(filename, 'w') as fid:
+        fid.write(root.render())
+
 def parse(content, root=None, filename=''):
     """
     Parse a hit tree from a string.
