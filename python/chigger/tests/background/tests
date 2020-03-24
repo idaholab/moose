@@ -1,14 +1,16 @@
 [Tests]
-  [./solid]
+  [solid]
     type = ImageDiff
     command = background.py
     imagediff = background.png
     display_required = true
-  [../]
-  [./gradient]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [gradient]
     type = ImageDiff
     command = gradient.py
     imagediff = gradient.png
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

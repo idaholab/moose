@@ -1,19 +1,21 @@
 [Tests]
-  [./wireframe]
+  [wireframe]
     type = ImageDiff
     command = wireframe.py
     imagediff = 'wireframe.png'
     allowed_linux = 0.895
     allowed_darwin = 0.93
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./points]
+  [points]
     type = ImageDiff
     command = points.py
     imagediff = 'points.png'
     allowed_linux = 0.965
     allowed_darwin = 0.94
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

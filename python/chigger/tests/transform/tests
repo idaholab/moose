@@ -1,64 +1,71 @@
 [Tests]
-  [./test]
+  [test]
     type = ImageDiff
     command = scale.py
     imagediff = 'scale.png'
     display_required = true
-  [../]
-  [./test_2d]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [test_2d]
     type = ImageDiff
     command = scale_2d.py
     imagediff = 'scale_2d.png'
     display_required = true
-  [../]
-  [./rotate_none]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [rotate_none]
     type = ImageDiff
     command = rotate.py
     imagediff = 'rotate.png'
     display_required = true
-  [../]
-  [./rotate_x]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [rotate_x]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 90 0 0 --name rotate_x.png'
     imagediff = 'rotate_x.png'
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
-  [./rotate_y]
+  []
+  [rotate_y]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 0 90 0 --name rotate_y.png'
     imagediff = 'rotate_y.png'
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
-  [./rotate_z]
+  []
+  [rotate_z]
     type = ImageDiff
     command = rotate.py
     cli_args = '--rotate 0 0 90 --name rotate_z.png'
     imagediff = 'rotate_z.png'
     display_required = true
-  [../]
-  [./translate_x]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [translate_x]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 2 0 0 --name translate_x.png'
     imagediff = 'translate_x.png'
     display_required = true
-  [../]
-  [./translate_y]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [translate_y]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 0 2 0 --name translate_y.png'
     imagediff = 'translate_y.png'
     display_required = true
-  [../]
-  [./translate_z_scale_and_rotate]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [translate_z_scale_and_rotate]
     type = ImageDiff
     command = translate.py
     cli_args = '--translate 0 0 2 --rotate 0 90 0 --scale 0.5 0.5 0.5 --name translate_z.png'
     imagediff = 'translate_z.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

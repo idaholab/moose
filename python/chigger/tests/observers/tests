@@ -1,8 +1,9 @@
 [Tests]
-  [./timer]
+  [timer]
     type = RunApp
     command = timer.py
     expect_out = "count = 3"
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

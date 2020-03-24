@@ -1,43 +1,43 @@
 [Tests]
-  [./matplotlib]
+  [matplotlib]
     # Tests that matplotlib colormaps are loaded
     type = ImageDiff
     command = colormap.py
     imagediff = colormap.png
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./number]
+  [number]
     # Test use of "number" for matplotlib colormaps
     type = ImageDiff
     command = colormap_number.py
     imagediff = colormap_number.png
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./reverse_matplotlib]
+  [reverse_matplotlib]
     type = ImageDiff
     command = reverse.py
     imagediff = reverse.png
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./reverse_xml]
+  [reverse_xml]
     type = ImageDiff
     command = reverse_xml.py
     imagediff = reverse_xml.png
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./reverse_default]
+  [reverse_default]
     type = ImageDiff
     command = reverse_default.py
     imagediff = reverse_default.png
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 []
