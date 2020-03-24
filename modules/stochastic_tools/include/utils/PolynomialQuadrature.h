@@ -82,7 +82,7 @@ public:
   /// Just normal Clenshaw Curtis with shifted points
   virtual void clenshawQuadrature(const unsigned int order,
                                   std::vector<Real> & points,
-                                  std::vector<Real> & weights) const;
+                                  std::vector<Real> & weights) const override;
 
 private:
   const Real & _lower_bound;
