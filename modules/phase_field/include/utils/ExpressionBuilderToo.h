@@ -831,14 +831,6 @@ public:
       return *this;
     }
 
-    EBTerm & operator()(const EBTerm & term) const;
-    template <typename... T>
-    EBTerm & operator()(T... terms) const
-    {
-      return (*this)({terms...});
-    };
-    EBTerm & operator()(EBTermList term_list) const;
-
     EBTerm & operator()(const EBTerm & term);
     template <typename... T>
     EBTerm & operator()(T... terms)
@@ -876,6 +868,11 @@ public:
 
     void simplify();
     void substitute(std::vector<std::vector<EBTerm>> subs);
+    void derivative(std::string & derivative_comp) { _root = _root->derivative(derivative_comp); }
+    EBTerm & getDerivative(std::string derivative_comp)
+    {
+      return *(new EBTerm(cloneRoot()->derivative(derivative_comp)));
+    }
 
     std::string args();
 
@@ -1031,7 +1028,24 @@ public:
       for (unsigned int i = 0; i < _data.size(); ++i)
         _data[i].substitute(subs);
     }
+    void derivative(std::string & derivative_comp)
+    {
+      for (unsigned int i = 0; i < _data.size(); ++i)
+        _data[i].derivative(derivative_comp);
+    }
   };
+
+  EBTensor & grad(EBTerm term)
+  {
+    return *(
+        new EBTensor({term.getDerivative("x"), term.getDerivative("y"), term.getDerivative("z")}));
+  }
+
+  EBTerm & divergence(EBTensor tens)
+  {
+    return *(new EBTerm(tens(0).getDerivative("x") + tens(1).getDerivative("y") +
+                        tens(2).getDerivative("z")));
+  }
 };
 
 // convenience function for numeric exponent

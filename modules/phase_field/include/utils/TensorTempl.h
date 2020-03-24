@@ -44,7 +44,7 @@ public:
   T operator()(unsigned int index);
   template <typename... U>
   T operator()(U... index);
-  T operator()(std::vector<unsigned int> index_caught);
+  T operator()(std::vector<int> index_caught);
 
   TensorTempl & operator+(const TensorTempl & rhs);
   TensorTempl & operator-(const TensorTempl & rhs);
@@ -121,21 +121,22 @@ template <typename... U>
 T
 TensorTempl<T>::operator()(U... index)
 {
-  return (*this)({index...});
+  std::vector<int> indices({index...});
+  return (*this)(indices);
 }
 
 template <typename T>
 T
-TensorTempl<T>::operator()(std::vector<unsigned int> index_caught)
+TensorTempl<T>::operator()(std::vector<int> index_caught)
 {
   unsigned int location = 0;
   if (index_caught.size() != _shape.size())
     mooseError("Incorrect number of indeces for accessing tensor.");
   for (unsigned int i = 0; i < _access_data.size(); ++i)
   {
-    if (index_caught[i] >= _shape[i])
+    if (unsigned(index_caught[i]) >= _shape[i])
       mooseError("Incorrect indices for accessing tensor.");
-    location += _access_data[i] * index_caught[i];
+    location += _access_data[i] * unsigned(index_caught[i]);
   }
   return _data[location];
 }
