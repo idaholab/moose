@@ -303,7 +303,7 @@ def write(filename, root):
         root[Node]: The root node of the tree to write
     """
     with open(filename, 'w') as fid:
-        fid.write(root.render())
+        fid.write(root.render() + "\n")
 
 def parse(content, root=None, filename=''):
     """
