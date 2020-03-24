@@ -84,7 +84,7 @@ Polynomial::productIntegral(const std::vector<unsigned int> order) const
 
   std::vector<Real> xq;
   std::vector<Real> wq;
-  quadrature(quad_order, xq, wq);
+  gaussQuadrature(quad_order, xq, wq);
 
   Real val = 0.0;
   for (unsigned int q = 0; q < xq.size(); ++q)
@@ -146,9 +146,9 @@ Legendre::computeDerivativeRef(const unsigned int order,
 }
 
 void
-Legendre::quadrature(const unsigned int order,
-                     std::vector<Real> & points,
-                     std::vector<Real> & weights) const
+Legendre::gaussQuadrature(const unsigned int order,
+                          std::vector<Real> & points,
+                          std::vector<Real> & weights) const
 {
   gauss_legendre(order, points, weights, _lower_bound, _upper_bound);
 }
@@ -235,9 +235,9 @@ Hermite::computeDerivative(const unsigned int order, const Real x, const unsigne
 }
 
 void
-Hermite::quadrature(const unsigned int order,
-                    std::vector<Real> & points,
-                    std::vector<Real> & weights) const
+Hermite::gaussQuadrature(const unsigned int order,
+                         std::vector<Real> & points,
+                         std::vector<Real> & weights) const
 {
   gauss_hermite(order, points, weights, _mu, _sig);
 }
@@ -387,7 +387,7 @@ TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
   std::vector<std::vector<Real>> qpoints_1D(poly.size());
   std::vector<std::vector<Real>> qweights_1D(poly.size());
   for (unsigned int d = 0; d < poly.size(); ++d)
-    poly[d]->quadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
+    poly[d]->gaussQuadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
 
   _quad = libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
       qpoints_1D, qweights_1D);
@@ -423,7 +423,7 @@ SmolyakGrid::SmolyakGrid(const unsigned int max_order,
       std::vector<std::vector<Real>> qpoints_1D(_ndim);
       std::vector<std::vector<Real>> qweights_1D(_ndim);
       for (unsigned int d = 0; d < poly.size(); ++d)
-        poly[d]->quadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
+        poly[d]->gaussQuadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
 
       _quad.push_back(
           libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(

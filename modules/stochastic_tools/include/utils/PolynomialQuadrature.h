@@ -40,9 +40,9 @@ public:
   computeDerivative(const unsigned int order, const Real x, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const = 0;
 
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const = 0;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const = 0;
   virtual void clenshawQuadrature(const unsigned int order,
                                   std::vector<Real> & points,
                                   std::vector<Real> & weights) const;
@@ -75,9 +75,9 @@ public:
   };
 
   /// Gauss-Legendre quadrature: sum(weights) = 2
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const override;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const override;
 
   /// Just normal Clenshaw Curtis with shifted points
   virtual void clenshawQuadrature(const unsigned int order,
@@ -110,9 +110,9 @@ public:
   };
 
   /// Gauss-Hermite quadrature: sum(weights) = sqrt(2\pi)
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const override;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const override;
 
 private:
   const Real & _mu;
