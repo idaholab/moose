@@ -1,22 +1,25 @@
 [Tests]
-  [./on]
+  [on]
     type = ImageDiff
     command = displacement.py
     imagediff = 'displacement_0.png displacement_1.png displacement_2.png displacement_3.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./off]
+  [off]
     type = ImageDiff
     command = displacement_off.py
     imagediff = 'displacement_off_3.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./magnitude]
+  [magnitude]
     type = ImageDiff
     command = displacement_mag.py
     imagediff = 'displacement_mag_0.png displacement_mag_1.png displacement_mag_2.png displacement_mag_3.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

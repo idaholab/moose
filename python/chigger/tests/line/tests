@@ -1,5 +1,5 @@
 [Tests]
-  [./default]
+  [default]
     type = ImageDiff
     command = line.py
     imagediff = 'line.png'
@@ -9,9 +9,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./single_point]
+  [single_point]
     type = ImageDiff
     command = single_point.py
     imagediff = 'single_point.png'
@@ -21,9 +22,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./empty]
+  [empty]
     type = ImageDiff
     command = empty.py
     imagediff = 'empty.png'
@@ -32,9 +34,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./color]
+  [color]
     type = ImageDiff
     command = color.py
     imagediff = 'color.png'
@@ -43,9 +46,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./legend]
+  [legend]
     type = ImageDiff
     command = legend.py
     imagediff = 'legend.png'
@@ -55,9 +59,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./legend_viewport]
+  [legend_viewport]
     type = ImageDiff
     command = legend_viewport.py
     imagediff = 'legend_viewport.png'
@@ -67,9 +72,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./update]
+  [update]
     type = ImageDiff
     command = update.py
     imagediff = 'update_0.png update_1.png update_2.png update_3.png update_4.png update_5.png'
@@ -78,9 +84,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./secondary]
+  [secondary]
     type = ImageDiff
     command = secondary.py
     imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
@@ -90,9 +97,10 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./tracer]
+  [tracer]
     type = ImageDiff
     command = tracer.py
     imagediff = 'tracer_1.png tracer_3.png tracer_5.png'
@@ -102,5 +110,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []
