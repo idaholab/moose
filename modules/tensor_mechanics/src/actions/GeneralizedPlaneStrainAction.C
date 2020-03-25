@@ -32,7 +32,7 @@ GeneralizedPlaneStrainAction::validParams()
                                         "Scalar variable for the out-of-plane strain (in "
                                         "y direction for 1D Axisymmetric or in z "
                                         "direction for 2D Cartesian problems)");
-  params.addParam<VariableName>("temperature", "The temperature variable");
+  params.addParam<std::vector<VariableName>>("temperature", "The temperature variable");
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
@@ -97,13 +97,13 @@ GeneralizedPlaneStrainAction::act()
     // add temperature kernel only if temperature is a nonlinear variable (and not an auxvariable)
     if (isParamValid("temperature"))
     {
-      VariableName temp = getParam<VariableName>("temperature");
-      if (_problem->getNonlinearSystemBase().hasVariable(temp))
+      auto temp = getParam<std::vector<VariableName>>("temperature");
+      if (temp.size() > 1)
+        mooseError("Only one variable may be specified in 'temperature'");
+      if (_problem->getNonlinearSystemBase().hasVariable(temp[0]))
       {
-        params.set<VariableName>("temperature") = temp;
-
         std::string k_name = _name + "_GeneralizedPlaneStrainOffDiag_temp";
-        params.set<NonlinearVariableName>("variable") = temp;
+        params.set<NonlinearVariableName>("variable") = temp[0];
 
         _problem->addKernel(k_type, k_name, params);
       }

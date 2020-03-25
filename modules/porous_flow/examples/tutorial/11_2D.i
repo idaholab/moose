@@ -135,7 +135,7 @@
     type = StressDivergenceRZTensors
     temperature = T
     variable = disp_r
-    thermal_eigenstrain_name = thermal_contribution
+    eigenstrain_names = thermal_contribution
     use_displaced_mesh = false
     component = 0
   [../]

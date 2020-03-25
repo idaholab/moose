@@ -60,11 +60,19 @@ PorousFlowActionBase::validParams()
       "displacements",
       "The name of the displacement variables (relevant only for "
       "mechanically-coupled simulations)");
-  params.addParam<std::string>("thermal_eigenstrain_name",
-                               "thermal_eigenstrain",
-                               "The eigenstrain_name used in the "
-                               "ComputeThermalExpansionEigenstrain.  Only needed for "
-                               "thermally-coupled simulations with thermal expansion.");
+  params.addDeprecatedParam<MaterialPropertyName>(
+      "thermal_eigenstrain_name",
+      "thermal_eigenstrain",
+      "The eigenstrain_name used in the "
+      "ComputeThermalExpansionEigenstrain.  Only needed for "
+      "thermally-coupled simulations with thermal expansion.",
+      "Please use 'eigenstrain_names' instead.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names",
+      "List of all eigenstrain models used in mechanics calculations. "
+      "Typically the eigenstrain_name used in "
+      "ComputeThermalExpansionEigenstrain.  Only needed for "
+      "thermally-coupled simulations with thermal expansion.");
   params.addParam<bool>(
       "use_displaced_mesh", false, "Use displaced mesh computations in mechanical kernels");
   MooseEnum flux_limiter_type("MinMod VanLeer MC superbee None", "VanLeer");
