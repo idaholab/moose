@@ -8,31 +8,31 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./image_func]
+  [image_func]
     type = ImageFunction
     file_base = stack/test
     file_suffix = png
     file_range = '0 5'
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = image_func
     variable = u
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Transient

@@ -6,31 +6,31 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./image_func]
+  [image_func]
     # ImageFunction gets its file range parameters from ImageMesh,
     # when it is present.  This prevents duplicating information in
     # input files.
     type = ImageFunction
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = image_func
     variable = u
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Transient
