@@ -44,7 +44,7 @@ public:
    * Retrieve the ADMaterialProperty named "name"
    */
   template <typename T>
-  const ADMaterialPropertyObject<T> & getNeighborADMaterialPropertyTempl(const std::string & name);
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyTempl(const std::string & name);
 
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
@@ -90,14 +90,14 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl(const std::
 }
 
 template <typename T>
-const ADMaterialPropertyObject<T> &
+const ADMaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborADMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
-  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
   else

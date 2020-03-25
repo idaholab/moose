@@ -40,7 +40,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  const ADMaterialPropertyObject<T> & getADMaterialPropertyTempl(const std::string & name);
+  const ADMaterialProperty<T> & getADMaterialPropertyTempl(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
@@ -54,7 +54,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByNameTempl(const std::string & prop_name);
   template <typename T>
-  const ADMaterialPropertyObject<T> &
+  const ADMaterialProperty<T> &
   getADMaterialPropertyByNameTempl(const std::string & prop_name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const std::string & prop_name);
@@ -120,14 +120,14 @@ Material::getMaterialPropertyTempl(const std::string & name)
 }
 
 template <typename T>
-const ADMaterialPropertyObject<T> &
+const ADMaterialProperty<T> &
 Material::getADMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
-  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
 
@@ -177,7 +177,7 @@ Material::getMaterialPropertyByNameTempl(const std::string & prop_name)
 }
 
 template <typename T>
-const ADMaterialPropertyObject<T> &
+const ADMaterialProperty<T> &
 Material::getADMaterialPropertyByNameTempl(const std::string & prop_name)
 {
   MaterialBase::checkExecutionStage();

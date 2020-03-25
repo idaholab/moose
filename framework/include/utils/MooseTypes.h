@@ -121,7 +121,7 @@ typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 template <typename>
 class MaterialProperty;
 template <typename>
-class ADMaterialPropertyObject;
+class ADMaterialProperty;
 class InputParameters;
 
 namespace libMesh
