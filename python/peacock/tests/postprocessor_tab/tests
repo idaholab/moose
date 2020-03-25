@@ -3,90 +3,77 @@
     type = PythonUnitTest
     input = test_FigurePlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [LineSettingsWidget]
     type = PythonUnitTest
     input = test_LineSettingsWidget.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [LineGroupWidget_Postprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetPostprocessor.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [LineGroupWidget_VectorPostprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetVectorPostprocessor.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [PostprocessorSelectPlugin_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorSelectPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [PostprocessorSelectPlugin_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorSelectPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [AxesSettingsPlugin]
     type = PythonUnitTest
     input = test_AxesSettingsPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [AxisTabsPlugin]
     type = PythonUnitTest
     input = test_AxisTabsPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [MediaControlPlugin]
     type = PythonUnitTest
     input = test_MediaControlPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [PostprocessorPluginManager]
     type = PythonUnitTest
     input = test_PostprocessorPluginManager.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [PostprocessorViewer_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorViewer.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [PostprocessorViewer_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorViewer.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [Output]
     type = PythonUnitTest
     input = test_OutputPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []
