@@ -44,6 +44,9 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         """
         Creates the GUI containing the ArtistGroupWidget and the matplotlib figure axes.
         """
+        import matplotlib
+        matplotlib.rcParams["figure.figsize"] = (5., 5.)
+        matplotlib.rcParams["figure.dpi"] = (100)
 
         data = [PostprocessorDataWidget(mooseutils.PostprocessorReader('../input/white_elephant_jan_2016.csv'))]
         self._widget, self._window = main()

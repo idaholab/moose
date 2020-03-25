@@ -168,6 +168,10 @@ def main(filenames):
     from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     import mooseutils
 
+    import matplotlib
+    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
+    matplotlib.rcParams["figure.dpi"] = (100)
+
     widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxesSettingsPlugin, PostprocessorSelectPlugin])
     widget.onSetFilenames(filenames)
     control = widget.currentWidget().AxesSettingsPlugin

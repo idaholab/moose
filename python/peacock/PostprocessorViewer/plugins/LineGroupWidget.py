@@ -338,6 +338,10 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     import numpy as np
     import itertools
 
+    import matplotlib
+    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
+    matplotlib.rcParams["figure.dpi"] = (100)
+
     # Create main widget
     widget = PostprocessorViewer(plugins=[FigurePlugin])
     widget.onSetFilenames(['empty_file'])
