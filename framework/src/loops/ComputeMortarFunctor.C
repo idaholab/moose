@@ -38,7 +38,11 @@ ComputeMortarFunctor::ComputeMortarFunctor(
 {
   // Construct the mortar constraints we will later loop over
   for (auto mc : mortar_constraints)
+  {
     _mortar_constraints.push_back(mc.get());
+    // Whether to use dual mortar. Same for all motrat constraints
+    _use_dual = mc->use_dual();
+  }
 
   _master_boundary_id = _amg.master_slave_boundary_id_pairs[0].first;
   _slave_boundary_id = _amg.master_slave_boundary_id_pairs[0].second;
@@ -181,7 +185,10 @@ ComputeMortarFunctor::operator()()
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
     // the slave face. This must be done last after the dof indices have been prepared for the
     // slave (element) and master (neighbor)
-    _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
+    if (_use_dual)
+      _subproblem.reinitLowerDElemDualRef(slave_face_elem, &custom_xi1_pts);
+    else
+      _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
 
     if (!_fe_problem.currentlyComputingJacobian())
     {

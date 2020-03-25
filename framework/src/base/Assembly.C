@@ -366,6 +366,28 @@ Assembly::buildLowerDFE(FEType type) const
 }
 
 void
+Assembly::buildLowerDDualFE(FEType type) const
+{
+  if (!_fe_shape_data_dual_lower[type])
+    _fe_shape_data_dual_lower[type] = new FEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_fe_lower[dim][type])
+      _const_fe_lower[dim][type] = _fe_lower[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
+
+    _fe_lower[dim][type]->get_dual_phi();
+    _fe_lower[dim][type]->get_dual_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_lower[dim][type]->get_dual_d2phi();
+  }
+}
+
+void
 Assembly::buildVectorLowerDFE(FEType type) const
 {
   if (!_vector_fe_shape_data_lower[type])
@@ -384,6 +406,28 @@ Assembly::buildVectorLowerDFE(FEType type) const
     _vector_fe_lower[dim][type]->get_dphi();
     if (_need_second_derivative.find(type) != _need_second_derivative.end())
       _vector_fe_lower[dim][type]->get_d2phi();
+  }
+}
+
+void
+Assembly::buildVectorDualLowerDFE(FEType type) const
+{
+  if (!_vector_fe_shape_data_dual_lower[type])
+    _vector_fe_shape_data_dual_lower[type] = new VectorFEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_vector_fe_lower[dim][type])
+      _const_vector_fe_lower[dim][type] = _vector_fe_lower[dim][type] =
+          FEVectorBase::build(dim, type).release();
+
+    _vector_fe_lower[dim][type]->get_dual_phi();
+    _vector_fe_lower[dim][type]->get_dual_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _vector_fe_lower[dim][type]->get_dual_d2phi();
   }
 }
 
@@ -2089,6 +2133,39 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
     if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
+  }
+}
+
+void
+Assembly::reinitLowerDElemDualRef(const Elem * elem,
+                                  const std::vector<Point> * const pts,
+                                  const std::vector<Real> * const weights)
+{
+  mooseAssert(pts->size(),
+              "Currently reinitialization of lower d elements is only supported with custom "
+              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
+              "you never try to use JxW coming from a fe_lower object unless you are also passing "
+              "a weights argument");
+
+  _current_lower_d_elem = elem;
+
+  unsigned int elem_dim = elem->dim();
+
+  for (const auto & it : _fe_lower[elem_dim])
+  {
+    FEBase * fe_lower = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type];
+
+    fe_lower->set_calculate_dual(true);
+    fe_lower->reinit(elem, pts, weights);
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_dual_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dual_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_dual_d2phi()));
   }
 }
 
@@ -4068,11 +4145,27 @@ Assembly::fePhiLower<VectorValue<Real>>(FEType type) const
 }
 
 template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
+Assembly::feDualPhiLower<VectorValue<Real>>(FEType type) const
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_dual_lower[type]->_phi;
+}
+
+template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data_lower[type]->_grad_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
+Assembly::feGradDualPhiLower<VectorValue<Real>>(FEType type) const
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_dual_lower[type]->_grad_phi;
 }
 
 template <>

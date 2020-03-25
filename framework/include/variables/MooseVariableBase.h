@@ -63,6 +63,11 @@ public:
   const std::string & name() const override { return _var_name; }
 
   /**
+   * Get dual mortar option
+   */
+  bool use_dual() const { return _use_dual; }
+
+  /**
    * Get all global dofindices for the variable
    */
   const std::vector<dof_id_type> & allDofIndices() const;
@@ -175,6 +180,9 @@ protected:
 
   /// Variable name
   std::string _var_name;
+
+  /// If dual mortar approach is used
+  bool _use_dual;
 };
 
 #define usingMooseVariableBaseMembers                                                              \

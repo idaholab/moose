@@ -81,6 +81,11 @@ public:
    */
   const MooseVariable * variable() const { return _var; }
 
+  /**
+   * Whether to use dual mortar
+   */
+  bool use_dual() const { return _use_dual; }
+
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
@@ -108,6 +113,9 @@ private:
 protected:
   /// Whether the current mortar segment projects onto a face on the master side
   bool _has_master;
+
+  /// Whether to use the dual motar approach
+  const bool _use_dual;
 
   /// the normals along the slave face
   const MooseArray<Point> & _normals;
@@ -151,6 +159,7 @@ protected:
   using ADMortarConstraint<compute_stage>::_phys_points_slave;                                     \
   using ADMortarConstraint<compute_stage>::_phys_points_master;                                    \
   using ADMortarConstraint<compute_stage>::_has_master;                                            \
+  using ADMortarConstraint<compute_stage>::_use_dual;                                              \
   using ADMortarConstraint<compute_stage>::_test;                                                  \
   using ADMortarConstraint<compute_stage>::_test_slave;                                            \
   using ADMortarConstraint<compute_stage>::_test_master;                                           \

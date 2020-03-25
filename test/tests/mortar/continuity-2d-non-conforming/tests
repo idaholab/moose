@@ -1,12 +1,19 @@
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080'
+  issues = '#13080 #15215'
   [soln-continuity]
     type = 'Exodiff'
     input = 'soln-continuity.i'
     exodiff = 'soln-continuity_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+  []
+  [dual-soln-continuity]
+    type = 'Exodiff'
+    input = 'dual-soln-continuity.i'
+    exodiff = 'dual-soln-continuity_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the dual mortar method.'
   []
   [soln-continuity-fine]
     type = 'Exodiff'
