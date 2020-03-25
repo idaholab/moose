@@ -20,7 +20,7 @@ ImageFunction::validParams()
   // Define the general parameters
   InputParameters params = Function::validParams();
   params += ImageSampler::validParams();
-  params.addClassDescription("Function with values sampled from a given image stack");
+  params.addClassDescription("Function with values sampled from an image or image stack.");
   return params;
 }
 
