@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'no_material_coverage_check.i'
+    exodiff = 'no_material_coverage_check_out.e'
+
+    requirement = 'The system shall support the ability to disable the check for'
+                  ' active materials in all parts of the domain.'
+    issues = '#5306'
+    design = 'Problem/index.md'
+  [../]
+[]

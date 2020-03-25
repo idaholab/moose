@@ -58,5 +58,5 @@ protected:
   const unsigned int _temp_var;
 
   /// d(strain)/d(temperature), if computed by ComputeThermalExpansionEigenstrain
-  const MaterialProperty<RankTwoTensor> * const _deigenstrain_dT;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 };
