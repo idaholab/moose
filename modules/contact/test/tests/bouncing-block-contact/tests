@@ -88,6 +88,7 @@
     max_parallel = 1
     method = 'OPT'
     allow_test_objects = true
+    abs_zero = 1e-8
   []
   [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp-coarse]
     type = 'Exodiff'
