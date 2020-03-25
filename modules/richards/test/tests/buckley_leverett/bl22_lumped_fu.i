@@ -135,24 +135,6 @@
   [../]
 []
 
-[Bounds]
-  [./pwater_upper_bounds]
-    type = ConstantBoundsAux
-    variable = bounds_dummy
-    bounded_variable = pwater
-    bound_type = upper
-    bound_value = 1E7
-  [../]
-  [./pwater_lower_bounds]
-    type = ConstantBoundsAux
-    variable = bounds_dummy
-    bounded_variable = pwater
-    bound_type = lower
-    bound_value = -110000
-  [../]
-[]
-
-
 [ICs]
   [./water_ic]
     type = FunctionIC
@@ -220,16 +202,6 @@
 
 
 [Preconditioning]
-  active = 'standard'
-
-  [./bounded]
-  # must use --use-petsc-dm command line argument
-    type = SMP
-    full = true
-    petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type -ksp_rtol -ksp_atol'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 50 vinewtonssls 1E-20 1E-20'
-  [../]
 
   [./standard]
     type = SMP
