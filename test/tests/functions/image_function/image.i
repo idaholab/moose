@@ -10,60 +10,60 @@
   max_h_level = 5
   initial_steps = 5
   initial_marker = marker
-  [./Indicators]
-    [./indicator]
+  [Indicators]
+    [indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       indicator = indicator
       refine = 0.9
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./image_func]
+  [image_func]
     type = ImageFunction
     file = stack/test_00.png
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = image_func
     variable = u
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Transient

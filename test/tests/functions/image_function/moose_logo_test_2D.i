@@ -10,53 +10,53 @@
 []
 
 [Variables]
-  [./original]
+  [original]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./scaled]
+  []
+  [scaled]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./shifted]
+  []
+  [shifted]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Functions]
-  [./image]
+  [image]
     type = ImageFunction
     file = moose_logo_small.png
-  [../]
-  [./image_scale]
+  []
+  [image_scale]
     type = ImageFunction
     file = moose_logo_small.png
     scale = 0.00392156862
-  [../]
-  [./image_shift]
+  []
+  [image_shift]
     type = ImageFunction
     file = moose_logo_small.png
     shift = -127.5
-  [../]
+  []
 []
 
 [ICs]
-  [./original_IC]
+  [original_IC]
     type = FunctionIC
     function = image
     variable = original
-  [../]
-  [./scaled_IC]
+  []
+  [scaled_IC]
     type = FunctionIC
     function = image_scale
     variable = scaled
-  [../]
-  [./shifted_IC]
+  []
+  [shifted_IC]
     type = FunctionIC
     function = image_shift
     variable = shifted
-  [../]
+  []
 []
 
 [Executioner]
