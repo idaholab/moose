@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MaterialPropertyInterface.h"
-#include "MemberTemplateMacros.h"
 
 // Forward Declarations
 class MaterialData;
@@ -32,19 +31,19 @@ public:
    * Retrieve the property deduced from the name \p name
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
 
   /**
    * Retrieve the property named "name" without any deduction
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyByNameTempl(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & name);
 
   /**
    * Retrieve the ADMaterialProperty named "name"
    */
   template <typename T>
-  const ADMaterialProperty<T> & getNeighborADMaterialPropertyTempl(const std::string & name);
+  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
 
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
@@ -58,7 +57,7 @@ protected:
 
 template <typename T>
 const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl(const std::string & name)
+TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -68,12 +67,12 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl(const std::string
   if (default_property)
     return *default_property;
 
-  return this->getNeighborMaterialPropertyByNameTempl<T>(prop_name);
+  return this->getNeighborMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl(const std::string & name)
+TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName(const std::string & name)
 {
   checkExecutionStage();
   checkMaterialProperty(name);
@@ -91,7 +90,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl(const std::
 
 template <typename T>
 const ADMaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborADMaterialPropertyTempl(const std::string & name)
+TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);

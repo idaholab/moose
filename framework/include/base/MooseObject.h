@@ -13,7 +13,6 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
-#include "MemberTemplateMacros.h"
 #include "MooseUtils.h"
 
 #include "libmesh/parallel_object.h"
@@ -81,7 +80,7 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParamTempl(const std::string & name) const;
+  const T & getParam(const std::string & name) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -205,7 +204,7 @@ private:
 
 template <typename T>
 const T &
-MooseObject::getParamTempl(const std::string & name) const
+MooseObject::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }

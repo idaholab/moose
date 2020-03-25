@@ -162,17 +162,17 @@ public:
   }
 
   template <typename T>
-  const T & getUserObjectTempl(const std::string & name)
+  const T & getUserObject(const std::string & name)
   {
     _depend_uo.insert(_pars.get<UserObjectName>(name));
-    return UserObjectInterface::getUserObjectTempl<T>(name);
+    return UserObjectInterface::getUserObject<T>(name);
   }
 
   template <typename T>
-  const T & getUserObjectByNameTempl(const UserObjectName & name)
+  const T & getUserObjectByName(const UserObjectName & name)
   {
     _depend_uo.insert(name);
-    return UserObjectInterface::getUserObjectByNameTempl<T>(name);
+    return UserObjectInterface::getUserObjectByName<T>(name);
   }
 
   const UserObject & getUserObjectBase(const UserObjectName & name)

@@ -53,7 +53,7 @@ MaterialStdVectorAuxBase<T>::validParams()
 template <typename T>
 MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const InputParameters & parameters)
   : MaterialAuxBase<std::vector<T>>(parameters),
-    _index(this->template getParamTempl<unsigned int>("index"))
+    _index(this->template getParam<unsigned int>("index"))
 {
 }
 

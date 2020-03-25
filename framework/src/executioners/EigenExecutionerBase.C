@@ -98,7 +98,7 @@ EigenExecutionerBase::init()
 
   // check when the postprocessors are evaluated
   const ExecFlagEnum & bx_exec =
-      _problem.getUserObjectTempl<UserObject>(getParam<PostprocessorName>("bx_norm"))
+      _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm"))
           .getExecuteOnEnum();
   if (!bx_exec.contains(EXEC_LINEAR))
     mooseError("Postprocessor " + getParam<PostprocessorName>("bx_norm") +
@@ -106,7 +106,7 @@ EigenExecutionerBase::init()
 
   if (isParamValid("normalization"))
     _norm_exec =
-        _problem.getUserObjectTempl<UserObject>(getParam<PostprocessorName>("normalization"))
+        _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization"))
             .getExecuteOnEnum();
   else
     _norm_exec = bx_exec;
@@ -185,7 +185,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   {
     solution_diff = &getPostprocessorValueByName(xdiff);
     const ExecFlagEnum & xdiff_exec =
-        _problem.getUserObjectTempl<UserObject>(xdiff).getExecuteOnEnum();
+        _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
     if (!xdiff_exec.contains(EXEC_LINEAR))
       mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");
   }

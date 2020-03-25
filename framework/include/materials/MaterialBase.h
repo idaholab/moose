@@ -101,11 +101,11 @@ public:
    * Declare the property named "name"
    */
   template <typename T>
-  MaterialProperty<T> & declarePropertyTempl(const std::string & prop_name);
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
   template <typename T>
-  MaterialProperty<T> & declarePropertyOldTempl(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
-  MaterialProperty<T> & declarePropertyOlderTempl(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
   ///@}
 
   /**
@@ -268,15 +268,15 @@ protected:
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyTempl(const std::string & prop_name)
+MaterialBase::declareProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, MaterialBase::CURRENT);
-  return materialData().declarePropertyTempl<T>(prop_name);
+  return materialData().declareProperty<T>(prop_name);
 }
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyOldTempl(const std::string & prop_name)
+MaterialBase::declarePropertyOld(const std::string & prop_name)
 {
   mooseDoOnce(
       mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
@@ -287,7 +287,7 @@ MaterialBase::declarePropertyOldTempl(const std::string & prop_name)
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyOlderTempl(const std::string & prop_name)
+MaterialBase::declarePropertyOlder(const std::string & prop_name)
 {
   mooseDoOnce(
       mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "

@@ -27,7 +27,6 @@
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "MooseVariableInterface.h"
-#include "MemberTemplateMacros.h"
 #include "ElementIDInterface.h"
 #include "UserObject.h"
 
@@ -107,16 +106,16 @@ public:
    * Override functions from MaterialPropertyInterface for error checking
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
   template <typename T>
-  const T & getUserObjectTempl(const UserObjectName & name);
+  const T & getUserObject(const UserObjectName & name);
   template <typename T>
-  const T & getUserObjectByNameTempl(const UserObjectName & name);
+  const T & getUserObjectByName(const UserObjectName & name);
 
   const UserObject & getUserObjectBase(const UserObjectName & name);
   const UserObject & getUserObjectBaseByName(const UserObjectName & name);
@@ -252,7 +251,7 @@ protected:
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialPropertyTempl(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -263,13 +262,13 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyTempl(const std::string & n
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialPropertyTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
 }
 
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialPropertyOldTempl(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOld(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -280,13 +279,13 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOldTempl(const std::string 
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialPropertyOldTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
 }
 
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlderTempl(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -297,16 +296,16 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlderTempl(const std::strin
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialPropertyOlderTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }
 
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectTempl(const UserObjectName & name)
+AuxKernelTempl<ComputeValueType>::getUserObject(const UserObjectName & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
-  auto & uo = UserObjectInterface::getUserObjectTempl<T>(name);
+  auto & uo = UserObjectInterface::getUserObject<T>(name);
   auto indirect_dependents = uo.getDependObjects();
   for (auto & indirect_dependent : indirect_dependents)
     _depend_uo.insert(indirect_dependent);
@@ -316,10 +315,10 @@ AuxKernelTempl<ComputeValueType>::getUserObjectTempl(const UserObjectName & name
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectByNameTempl(const UserObjectName & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & name)
 {
   _depend_uo.insert(name);
-  auto & uo = UserObjectInterface::getUserObjectByNameTempl<T>(name);
+  auto & uo = UserObjectInterface::getUserObjectByName<T>(name);
   auto indirect_dependents = uo.getDependObjects();
   for (auto & indirect_dependent : indirect_dependents)
     _depend_uo.insert(indirect_dependent);

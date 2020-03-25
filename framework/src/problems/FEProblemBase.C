@@ -2761,7 +2761,7 @@ FEProblemBase::getMaterial(std::string name,
   }
 
   std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParamTempl<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
                  "), but its compute flag is set to true. This indicates that MOOSE is "
@@ -2787,7 +2787,7 @@ FEProblemBase::getInterfaceMaterial(std::string name,
   }
 
   std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParamTempl<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
                  "), but its compute flag is set to true. This indicates that MOOSE is "
@@ -2866,7 +2866,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     std::shared_ptr<MaterialBase> material =
         _factory.create<MaterialBase>(mat_name, name, parameters, tid);
 
-    bool discrete = !material->getParamTempl<bool>("compute");
+    bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted do not create the neighbor and face objects
     if (material->boundaryRestricted())
@@ -3065,15 +3065,9 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    if (_jacobian_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        _currently_computing_jacobian)
+    if (_interface_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reinit(
-          _jacobian_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    if (_residual_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        !_currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _residual_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
+          _interface_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -4197,7 +4191,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   {
     ExecFlagEnum & exec_enum = parameters.set<ExecFlagEnum>("execute_on", true);
     std::shared_ptr<MultiApp> multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
-    exec_enum = multiapp->getParamTempl<ExecFlagEnum>("execute_on");
+    exec_enum = multiapp->getParam<ExecFlagEnum>("execute_on");
   }
 
   // Create the Transfer objects
@@ -6404,7 +6398,7 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
                  .condition<AttribBoundaries>(bnd_id)
                  .count() > 0)
       _interface_mat_side_cache[tid][bnd_id] = true;
-    else if (_residual_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
+    else if (_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
       _interface_mat_side_cache[tid][bnd_id] = true;
   }
   return _interface_mat_side_cache[tid][bnd_id];
@@ -6482,7 +6476,7 @@ FEProblemBase::addOutput(const std::string & object_type,
     exclude.push_back("execute_on");
 
     // --show-input should enable the display of the input file on the screen
-    if (_app.getParamTempl<bool>("show_input") && parameters.get<bool>("output_screen"))
+    if (_app.getParam<bool>("show_input") && parameters.get<bool>("output_screen"))
       parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
   }
 

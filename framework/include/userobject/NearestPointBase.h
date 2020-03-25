@@ -136,11 +136,11 @@ NearestPointBase<UserObjectType, BaseType>::fillPoints()
 
   if (isParamValid("points"))
   {
-    _points = this->template getParamTempl<std::vector<Point>>("points");
+    _points = this->template getParam<std::vector<Point>>("points");
   }
   else if (isParamValid("points_file"))
   {
-    const FileName & points_file = this->template getParamTempl<FileName>("points_file");
+    const FileName & points_file = this->template getParam<FileName>("points_file");
     std::vector<Real> points_vec;
 
     if (processor_id() == 0)

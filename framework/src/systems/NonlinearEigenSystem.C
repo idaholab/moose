@@ -284,7 +284,7 @@ NonlinearEigenSystem::checkIntegrity()
     {
       auto nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
       auto eigen_nbc = std::dynamic_pointer_cast<EigenDirichletBC>(nodal_bc);
-      if (nbc && nbc->getParamTempl<Real>("value"))
+      if (nbc && nbc->getParam<Real>("value"))
         mooseError(
             "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       else if (!nbc && !eigen_nbc)

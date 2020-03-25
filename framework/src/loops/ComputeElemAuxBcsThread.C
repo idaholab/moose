@@ -85,8 +85,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         // ghosting
         bool compute_interface =
             neighbor && neighbor->active() &&
-            _problem.getResidualInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id,
-                                                                                       _tid);
+            _problem.getInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id, _tid);
 
         if (_need_materials)
         {

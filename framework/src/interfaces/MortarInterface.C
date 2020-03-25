@@ -43,13 +43,13 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
   : _moi_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _moi_mesh(_moi_problem.mesh()),
     _mortar_data(_moi_problem.mortarData()),
-    _slave_id(_moi_mesh.getBoundaryID(moose_object->getParamTempl<BoundaryName>("slave_boundary"))),
+    _slave_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("slave_boundary"))),
     _master_id(
-        _moi_mesh.getBoundaryID(moose_object->getParamTempl<BoundaryName>("master_boundary"))),
+        _moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("master_boundary"))),
     _slave_subdomain_id(
-        _moi_mesh.getSubdomainID(moose_object->getParamTempl<SubdomainName>("slave_subdomain"))),
+        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("slave_subdomain"))),
     _master_subdomain_id(
-        _moi_mesh.getSubdomainID(moose_object->getParamTempl<SubdomainName>("master_subdomain")))
+        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("master_subdomain")))
 {
   if (_moi_mesh.dimension() == 3)
     mooseError("Mortar cannot currently be run in three dimensions. It's on the to-do list!");
@@ -58,9 +58,9 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
   _moi_problem.createMortarInterface(std::make_pair(_master_id, _slave_id),
                                      std::make_pair(_master_subdomain_id, _slave_subdomain_id),
                                      moose_object->isParamValid("use_displaced_mesh")
-                                         ? moose_object->getParamTempl<bool>("use_displaced_mesh")
+                                         ? moose_object->getParam<bool>("use_displaced_mesh")
                                          : false,
-                                     moose_object->getParamTempl<bool>("periodic"));
+                                     moose_object->getParam<bool>("periodic"));
 
   const auto & slave_set = _mortar_data.getHigherDimSubdomainIDs(_slave_subdomain_id);
   const auto & master_set = _mortar_data.getHigherDimSubdomainIDs(_master_subdomain_id);

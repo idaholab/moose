@@ -43,7 +43,7 @@ public:
    * element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties
@@ -53,7 +53,7 @@ public:
    * at all qps on the current element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties
@@ -63,7 +63,7 @@ public:
    * all qps on the current element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
 protected:
   /**
@@ -147,21 +147,21 @@ private:
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialPropertyTempl(const std::string & name)
+NodalPatchRecovery::getMaterialProperty(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialPropertyTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialPropertyOldTempl(const std::string & name)
+NodalPatchRecovery::getMaterialPropertyOld(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialPropertyOldTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialPropertyOlderTempl(const std::string & name)
+NodalPatchRecovery::getMaterialPropertyOlder(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialPropertyOlderTempl<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }

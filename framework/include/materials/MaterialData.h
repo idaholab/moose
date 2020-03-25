@@ -53,7 +53,7 @@ public:
    * will result in a single identical reference returned every time.
    */
   template <typename T>
-  MaterialProperty<T> & declarePropertyTempl(const std::string & prop_name);
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
   /**
    * Declare the Real valued property prop_name.
@@ -74,7 +74,7 @@ public:
    * will result in a single identical reference returned every time.
    */
   template <typename T>
-  ADMaterialProperty<T> & declareADPropertyTempl(const std::string & prop_name);
+  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
 
   /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
@@ -236,14 +236,14 @@ MaterialData::resizeProps(unsigned int size, bool declared_ad)
 
 template <typename T>
 MaterialProperty<T> &
-MaterialData::declarePropertyTempl(const std::string & prop_name)
+MaterialData::declareProperty(const std::string & prop_name)
 {
   return declareHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
 template <typename T>
 ADMaterialProperty<T> &
-MaterialData::declareADPropertyTempl(const std::string & prop_name)
+MaterialData::declareADProperty(const std::string & prop_name)
 {
   return declareADHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
