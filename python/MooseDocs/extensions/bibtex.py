@@ -91,7 +91,6 @@ class BibtexExtension(command.CommandExtension):
             if not has_bib:
                 core.Heading(ast, level=2, string='References')
                 BibtexBibliography(ast, bib_style='plain')
-                print('Adding Bibliography:', page.local)
 
     @property
     def database(self):

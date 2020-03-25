@@ -6,33 +6,33 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./tif]
+  [tif]
     type = ImageFunction
     file_base = ../stack/test
     file_suffix = png
     file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     threshold = 30000
     upper_value = 1
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = tif
     variable = u
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Transient
