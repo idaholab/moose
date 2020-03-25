@@ -65,6 +65,8 @@ MooseVariableBase::validParams()
   params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
+  params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
+
   params.registerBase("MooseVariableBase");
   params.addPrivateParam<SystemBase *>("_system_base");
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
@@ -94,7 +96,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
     _scaling_factor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
-                                            : std::vector<Real>(_count, 1.))
+                                            : std::vector<Real>(_count, 1.)),
+    _use_dual(getParam<bool>("use_dual"))
 {
   if (getParam<bool>("fv") && getParam<bool>("eigen"))
     paramError("eigen", "finite volume (fv=true) variables do not have eigen support");

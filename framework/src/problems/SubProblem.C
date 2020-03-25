@@ -887,6 +887,29 @@ SubProblem::reinitLowerDElemRef(const Elem * elem,
 }
 
 void
+SubProblem::reinitLowerDElemDualRef(const Elem * elem,
+                                    const std::vector<Point> * const pts,
+                                    const std::vector<Real> * const weights,
+                                    THREAD_ID tid)
+{
+  // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
+  // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
+  assembly(tid).reinitLowerDElemDualRef(elem, pts, weights);
+
+  // Actually get the dof indices in the moose variables
+  systemBaseNonlinear().prepareLowerD(tid);
+  systemBaseAuxiliary().prepareLowerD(tid);
+
+  // With the dof indices set in the moose variables, now let's properly size
+  // our local residuals/Jacobians
+  assembly(tid).prepareLowerD();
+
+  // Let's finally compute our variable values!
+  systemBaseNonlinear().reinitLowerD(tid);
+  systemBaseAuxiliary().reinitLowerD(tid);
+}
+
+void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
   assembly(tid).reinitMortarElem(elem);
