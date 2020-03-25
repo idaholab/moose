@@ -16,7 +16,7 @@
     input = gen
     type = ExtraNodesetGenerator
     new_boundary = central_nodes
-    coord = '0 0 0 0 0 10'
+    coord = '0 0 0; 0 0 10'
   [../]
 []
 

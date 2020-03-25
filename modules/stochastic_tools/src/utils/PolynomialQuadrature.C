@@ -61,6 +61,14 @@ Polynomial::computeDerivative(const unsigned int /*order*/,
   return 0;
 }
 
+void
+Polynomial::clenshawQuadrature(const unsigned int /*order*/,
+                               std::vector<Real> & /*points*/,
+                               std::vector<Real> & /*weights*/) const
+{
+  ::mooseError("Clenshaw quadrature has not been implemented for this polynomial type.");
+}
+
 Real
 Polynomial::productIntegral(const std::vector<unsigned int> order) const
 {
@@ -76,7 +84,7 @@ Polynomial::productIntegral(const std::vector<unsigned int> order) const
 
   std::vector<Real> xq;
   std::vector<Real> wq;
-  quadrature(quad_order, xq, wq);
+  gaussQuadrature(quad_order, xq, wq);
 
   Real val = 0.0;
   for (unsigned int q = 0; q < xq.size(); ++q)
@@ -138,11 +146,23 @@ Legendre::computeDerivativeRef(const unsigned int order,
 }
 
 void
-Legendre::quadrature(const unsigned int order,
-                     std::vector<Real> & points,
-                     std::vector<Real> & weights) const
+Legendre::gaussQuadrature(const unsigned int order,
+                          std::vector<Real> & points,
+                          std::vector<Real> & weights) const
 {
   gauss_legendre(order, points, weights, _lower_bound, _upper_bound);
+}
+
+void
+Legendre::clenshawQuadrature(const unsigned int order,
+                             std::vector<Real> & points,
+                             std::vector<Real> & weights) const
+{
+  clenshaw_curtis(order, points, weights);
+  Real dx = (_upper_bound - _lower_bound) / 2.0;
+  Real xav = (_upper_bound + _lower_bound) / 2.0;
+  for (unsigned int i = 0; i < points.size(); ++i)
+    points[i] = points[i] * dx + xav;
 }
 
 Real
@@ -215,9 +235,9 @@ Hermite::computeDerivative(const unsigned int order, const Real x, const unsigne
 }
 
 void
-Hermite::quadrature(const unsigned int order,
-                    std::vector<Real> & points,
-                    std::vector<Real> & weights) const
+Hermite::gaussQuadrature(const unsigned int order,
+                         std::vector<Real> & points,
+                         std::vector<Real> & weights) const
 {
   gauss_hermite(order, points, weights, _mu, _sig);
 }
@@ -318,6 +338,45 @@ gauss_hermite(const unsigned int order,
   }
 }
 
+void
+clenshaw_curtis(const unsigned int order, std::vector<Real> & points, std::vector<Real> & weights)
+{
+  // Number of points needed
+  unsigned int N = order + (order % 2);
+  points.resize(N + 1);
+  weights.resize(N + 1);
+
+  if (N == 0)
+  {
+    points[0] = 0;
+    weights[0] = 1;
+    return;
+  }
+
+  std::vector<Real> dk(N / 2 + 1);
+  for (unsigned int k = 0; k <= (N / 2); ++k)
+    dk[k] = ((k == 0 || k == (N / 2)) ? 1.0 : 2.0) / (1.0 - 4.0 * (Real)k * (Real)k);
+
+  for (unsigned int n = 0; n <= (N / 2); ++n)
+  {
+    Real theta = (Real)n * M_PI / ((Real)N);
+    points[n] = -std::cos(theta);
+    for (unsigned int k = 0; k <= (N / 2); ++k)
+    {
+      Real Dnk =
+          ((n == 0 || n == (N / 2)) ? 0.5 : 1.0) * std::cos((Real)k * theta * 2.0) / ((Real)N);
+      weights[n] += Dnk * dk[k];
+    }
+  }
+
+  for (unsigned int n = 0; n < (N / 2); ++n)
+  {
+    points[N - n] = -points[n];
+    weights[N - n] = weights[n];
+  }
+  weights[N / 2] *= 2.0;
+}
+
 TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
                        std::vector<std::unique_ptr<const Polynomial>> & poly)
 {
@@ -328,10 +387,128 @@ TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
   std::vector<std::vector<Real>> qpoints_1D(poly.size());
   std::vector<std::vector<Real>> qweights_1D(poly.size());
   for (unsigned int d = 0; d < poly.size(); ++d)
-    poly[d]->quadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
+    poly[d]->gaussQuadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
 
   _quad = libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
       qpoints_1D, qweights_1D);
+}
+
+SmolyakGrid::SmolyakGrid(const unsigned int max_order,
+                         std::vector<std::unique_ptr<const Polynomial>> & poly)
+  : _ndim(poly.size())
+{
+
+  // Compute full tensor tuple
+  std::vector<std::vector<unsigned int>> tuple_1d(_ndim);
+  for (unsigned int d = 0; d < _ndim; ++d)
+  {
+    tuple_1d[d].resize(max_order);
+    for (unsigned int i = 0; i < max_order; ++i)
+      tuple_1d[d][i] = i;
+  }
+  StochasticTools::CartesianProduct<unsigned int> tensor_tuple(tuple_1d);
+
+  _npoints.push_back(0);
+  unsigned int maxq = max_order - 1;
+  unsigned int minq = (max_order > _ndim ? max_order - _ndim : 0);
+  for (std::size_t p = 0; p < tensor_tuple.numRows(); ++p)
+  {
+    std::vector<unsigned int> dorder = tensor_tuple.computeRow(p);
+    unsigned int q = std::accumulate(dorder.begin(), dorder.end(), 0);
+    if (q <= maxq && q >= minq)
+    {
+      int sgn = ((max_order - q - 1) % 2 == 0 ? 1 : -1);
+      _coeff.push_back(sgn * Utility::binomial(_ndim - 1, _ndim + q - max_order));
+
+      std::vector<std::vector<Real>> qpoints_1D(_ndim);
+      std::vector<std::vector<Real>> qweights_1D(_ndim);
+      for (unsigned int d = 0; d < poly.size(); ++d)
+        poly[d]->gaussQuadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
+
+      _quad.push_back(
+          libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
+              qpoints_1D, qweights_1D));
+      _npoints.push_back(_npoints.back() + _quad.back()->numRows());
+    }
+  }
+}
+
+std::vector<Real>
+SmolyakGrid::quadraturePoint(const unsigned int n) const
+{
+  unsigned int ind = gridIndex(n);
+  return _quad[ind]->computeRow(n - _npoints[ind]);
+}
+
+Real
+SmolyakGrid::quadraturePoint(const unsigned int n, const unsigned int dim) const
+{
+  unsigned int ind = gridIndex(n);
+  return _quad[ind]->computeValue(n - _npoints[ind], dim);
+}
+
+Real
+SmolyakGrid::quadratureWeight(const unsigned int n) const
+{
+  unsigned int ind = gridIndex(n);
+  return static_cast<Real>(_coeff[ind]) * _quad[ind]->computeWeight(n - _npoints[ind]);
+}
+
+unsigned int
+SmolyakGrid::gridIndex(const unsigned int n) const
+{
+  for (unsigned int i = 0; i < _npoints.size() - 1; ++i)
+    if (_npoints[i + 1] > n)
+      return i;
+
+  ::mooseError("Point index requested is greater than number of points.");
+
+  return 0;
+}
+
+ClenshawCurtisGrid::ClenshawCurtisGrid(const unsigned int max_order,
+                                       std::vector<std::unique_ptr<const Polynomial>> & poly)
+  : _ndim(poly.size())
+{
+  // Compute full tensor tuple
+  std::vector<std::vector<unsigned int>> tuple_1d(_ndim);
+  for (unsigned int d = 0; d < _ndim; ++d)
+  {
+    tuple_1d[d].resize(max_order);
+    for (unsigned int i = 0; i < max_order; ++i)
+      tuple_1d[d][i] = i;
+  }
+  StochasticTools::CartesianProduct<unsigned int> tensor_tuple(tuple_1d);
+
+  // Curtis clenshaw has a lot of nested points,
+  // so it behooves us to avoid duplicate points
+  std::map<std::vector<Real>, Real> quad_map;
+  unsigned int maxq = max_order - 1;
+  unsigned int minq = (max_order > _ndim ? max_order - _ndim : 0);
+  for (std::size_t p = 0; p < tensor_tuple.numRows(); ++p)
+  {
+    std::vector<unsigned int> dorder = tensor_tuple.computeRow(p);
+    unsigned int q = std::accumulate(dorder.begin(), dorder.end(), 0);
+    if (q <= maxq && q >= minq)
+    {
+      int sgn = ((max_order - q - 1) % 2 == 0 ? 1 : -1);
+      Real coeff = static_cast<Real>(sgn * Utility::binomial(_ndim - 1, _ndim + q - max_order));
+
+      std::vector<std::vector<Real>> qpoints_1D(_ndim);
+      std::vector<std::vector<Real>> qweights_1D(_ndim);
+      for (unsigned int d = 0; d < poly.size(); ++d)
+        poly[d]->clenshawQuadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
+
+      StochasticTools::WeightedCartesianProduct<Real, Real> quad(qpoints_1D, qweights_1D);
+
+      for (unsigned int i = 0; i < quad.numRows(); ++i)
+        quad_map[quad.computeRow(i)] += coeff * quad.computeWeight(i);
+    }
+  }
+
+  _quadrature.reserve(quad_map.size());
+  for (const auto & it : quad_map)
+    _quadrature.push_back(it);
 }
 
 } // namespace PolynomialQuadrature

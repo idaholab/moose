@@ -5,13 +5,13 @@
 []
 
 [Distributions/uniform]
-  type = UniformDistribution
+  type = Uniform
   lower_bound = 0
   upper_bound = 1
 []
 
 [Samplers/sample]
-  type = QuadratureSampler
+  type = Quadrature
   order = 4
   distributions = 'uniform uniform uniform uniform uniform uniform'
   execute_on = 'initial'
