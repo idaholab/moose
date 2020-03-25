@@ -14,6 +14,7 @@
     rel_err = 1E-5
     use_old_floor = True
     max_parallel = 1
+    allow_warnings = true
   [../]
   [./bl22]
     type = 'Exodiff'
