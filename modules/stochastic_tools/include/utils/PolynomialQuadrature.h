@@ -40,9 +40,12 @@ public:
   computeDerivative(const unsigned int order, const Real x, const unsigned int m = 1) const;
   virtual Real innerProduct(const unsigned int order) const = 0;
 
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const = 0;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const = 0;
+  virtual void clenshawQuadrature(const unsigned int order,
+                                  std::vector<Real> & points,
+                                  std::vector<Real> & weights) const;
   Real productIntegral(const std::vector<unsigned int> order) const;
 };
 
@@ -72,9 +75,14 @@ public:
   };
 
   /// Gauss-Legendre quadrature: sum(weights) = 2
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const override;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const override;
+
+  /// Just normal Clenshaw Curtis with shifted points
+  virtual void clenshawQuadrature(const unsigned int order,
+                                  std::vector<Real> & points,
+                                  std::vector<Real> & weights) const override;
 
 private:
   const Real & _lower_bound;
@@ -102,9 +110,9 @@ public:
   };
 
   /// Gauss-Hermite quadrature: sum(weights) = sqrt(2\pi)
-  virtual void quadrature(const unsigned int order,
-                          std::vector<Real> & points,
-                          std::vector<Real> & weights) const override;
+  virtual void gaussQuadrature(const unsigned int order,
+                               std::vector<Real> & points,
+                               std::vector<Real> & weights) const override;
 
 private:
   const Real & _mu;
@@ -167,6 +175,63 @@ private:
 };
 
 /**
+ * Smolyak sparse grid
+ */
+class SmolyakGrid : public Quadrature
+{
+public:
+  SmolyakGrid(const unsigned int max_order, std::vector<std::unique_ptr<const Polynomial>> & poly);
+
+  virtual unsigned int nPoints() const override { return _npoints.back(); }
+  virtual unsigned int nDim() const override { return _ndim; }
+
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const override;
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const override;
+  virtual Real quadratureWeight(const unsigned int n) const override;
+
+private:
+  /// Helper function to find which quadrature product to use
+  unsigned int gridIndex(const unsigned int n) const;
+  const unsigned int _ndim;
+  /// Cumulative number of points for each quadrature product
+  std::vector<std::size_t> _npoints;
+  /// Modification of quadrature weight based on polynomial order
+  std::vector<int> _coeff;
+  /// Container for all the combinations of quadrature products
+  std::vector<std::unique_ptr<const StochasticTools::WeightedCartesianProduct<Real, Real>>> _quad;
+};
+
+/**
+ * Clenshaw-Curtis sparse grid
+ */
+class ClenshawCurtisGrid : public Quadrature
+{
+public:
+  ClenshawCurtisGrid(const unsigned int max_order,
+                     std::vector<std::unique_ptr<const Polynomial>> & poly);
+
+  virtual unsigned int nPoints() const override { return _quadrature.size(); }
+  virtual unsigned int nDim() const override { return _ndim; }
+
+  virtual std::vector<Real> quadraturePoint(const unsigned int n) const override
+  {
+    return _quadrature[n].first;
+  }
+  virtual Real quadraturePoint(const unsigned int n, const unsigned int dim) const override
+  {
+    return _quadrature[n].first[dim];
+  }
+  virtual Real quadratureWeight(const unsigned int n) const override
+  {
+    return _quadrature[n].second;
+  }
+
+private:
+  const unsigned int _ndim;
+  std::vector<std::pair<std::vector<Real>, Real>> _quadrature;
+};
+
+/**
  * Legendre polynomial of specified order. Uses boost if available
  */
 Real legendre(const unsigned int order,
@@ -206,4 +271,7 @@ void gauss_hermite(const unsigned int order,
                    std::vector<Real> & weights,
                    const Real mu,
                    const Real sig);
+
+void
+clenshaw_curtis(const unsigned int order, std::vector<Real> & points, std::vector<Real> & weights);
 }

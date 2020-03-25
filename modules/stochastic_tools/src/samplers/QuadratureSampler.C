@@ -23,7 +23,7 @@ QuadratureSampler::validParams()
   params.addClassDescription("Quadrature sampler for Polynomial Chaos.");
   params.addRequiredParam<unsigned int>(
       "order", "Specify the maximum order of the polynomials in the expansion.");
-  MooseEnum grid("none", "none");
+  MooseEnum grid("none smolyak clenshaw-curtis", "none");
   params.addParam<MooseEnum>(
       "sparse_grid", grid, "Type of sparse grid to use, if none, full tensor product is used.");
   params.addRequiredParam<std::vector<DistributionName>>(
@@ -47,6 +47,18 @@ QuadratureSampler::QuadratureSampler(const InputParameters & parameters) : Sampl
     {
       _grid = libmesh_make_unique<const PolynomialQuadrature::TensorGrid>(
           getParam<unsigned int>("order") + 1, poly_1d);
+      break;
+    }
+    case 1:
+    {
+      _grid = libmesh_make_unique<const PolynomialQuadrature::SmolyakGrid>(
+          getParam<unsigned int>("order"), poly_1d);
+      break;
+    }
+    case 2:
+    {
+      _grid = libmesh_make_unique<const PolynomialQuadrature::ClenshawCurtisGrid>(
+          getParam<unsigned int>("order"), poly_1d);
       break;
     }
       paramError("sparse_grid", "Unknown or unimplemented sparse grid type.");
