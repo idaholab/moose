@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerADMooseObject("MooseApp", ADFunctionNeumannBC);
+registerMooseObject("MooseApp", ADFunctionNeumannBC);
 
 InputParameters
 ADFunctionNeumannBC::validParams()

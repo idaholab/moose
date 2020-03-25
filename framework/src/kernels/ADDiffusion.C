@@ -9,7 +9,7 @@
 
 #include "ADDiffusion.h"
 
-registerADMooseObject("MooseApp", ADDiffusion);
+registerMooseObject("MooseApp", ADDiffusion);
 
 InputParameters
 ADDiffusion::validParams()

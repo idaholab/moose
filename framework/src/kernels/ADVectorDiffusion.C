@@ -9,7 +9,7 @@
 
 #include "ADVectorDiffusion.h"
 
-registerADMooseObject("MooseApp", ADVectorDiffusion);
+registerMooseObject("MooseApp", ADVectorDiffusion);
 
 InputParameters
 ADVectorDiffusion::validParams()

@@ -9,7 +9,7 @@
 
 #include "ADNeumannBC.h"
 
-registerADMooseObject("MooseApp", ADNeumannBC);
+registerMooseObject("MooseApp", ADNeumannBC);
 
 InputParameters
 ADNeumannBC::validParams()

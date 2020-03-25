@@ -9,7 +9,7 @@
 
 #include "ADCoupledTimeDerivative.h"
 
-registerADMooseObject("MooseApp", ADCoupledTimeDerivative);
+registerMooseObject("MooseApp", ADCoupledTimeDerivative);
 
 InputParameters
 ADCoupledTimeDerivative::validParams()

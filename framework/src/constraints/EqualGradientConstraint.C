@@ -11,7 +11,7 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
-registerADMooseObject("MooseApp", EqualGradientConstraint);
+registerMooseObject("MooseApp", EqualGradientConstraint);
 
 InputParameters
 EqualGradientConstraint::validParams()

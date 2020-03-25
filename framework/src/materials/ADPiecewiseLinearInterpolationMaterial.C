@@ -11,7 +11,7 @@
 
 #include "MooseVariableFE.h"
 
-registerADMooseObject("MooseApp", ADPiecewiseLinearInterpolationMaterial);
+registerMooseObject("MooseApp", ADPiecewiseLinearInterpolationMaterial);
 
 InputParameters
 ADPiecewiseLinearInterpolationMaterial::validParams()

@@ -10,7 +10,7 @@
 #include "ADVectorFunctionDirichletBC.h"
 #include "Function.h"
 
-registerADMooseObject("MooseApp", ADVectorFunctionDirichletBC);
+registerMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 
 InputParameters
 ADVectorFunctionDirichletBC::validParams()

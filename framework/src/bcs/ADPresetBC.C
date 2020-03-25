@@ -9,7 +9,7 @@
 
 #include "ADPresetBC.h"
 
-registerADMooseObjectDeprecated("MooseApp", ADPresetBC, "06/30/2020 24:00");
+registerMooseObjectDeprecated("MooseApp", ADPresetBC, "06/30/2020 24:00");
 
 InputParameters
 ADPresetBC::validParams()

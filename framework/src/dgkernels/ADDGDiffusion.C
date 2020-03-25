@@ -14,7 +14,7 @@
 
 #include "libmesh/utility.h"
 
-registerADMooseObject("MooseApp", ADDGDiffusion);
+registerMooseObject("MooseApp", ADDGDiffusion);
 
 InputParameters
 ADDGDiffusion::validParams()

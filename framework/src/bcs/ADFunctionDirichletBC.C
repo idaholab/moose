@@ -12,7 +12,7 @@
 
 #include "libmesh/node.h"
 
-registerADMooseObject("MooseApp", ADFunctionDirichletBC);
+registerMooseObject("MooseApp", ADFunctionDirichletBC);
 
 InputParameters
 ADFunctionDirichletBC::validParams()

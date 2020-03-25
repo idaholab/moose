@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerADMooseObject("MooseApp", ADBodyForce);
+registerMooseObject("MooseApp", ADBodyForce);
 
 InputParameters
 ADBodyForce::validParams()

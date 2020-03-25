@@ -9,7 +9,7 @@
 
 #include "ADPenaltyDirichletBC.h"
 
-registerADMooseObject("MooseApp", ADPenaltyDirichletBC);
+registerMooseObject("MooseApp", ADPenaltyDirichletBC);
 
 InputParameters
 ADPenaltyDirichletBC::validParams()

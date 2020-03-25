@@ -9,7 +9,7 @@
 
 #include "ADTimeDerivative.h"
 
-registerADMooseObject("MooseApp", ADTimeDerivative);
+registerMooseObject("MooseApp", ADTimeDerivative);
 
 InputParameters
 ADTimeDerivative::validParams()

@@ -9,7 +9,7 @@
 
 #include "ADDirichletBC.h"
 
-registerADMooseObject("MooseApp", ADDirichletBC);
+registerMooseObject("MooseApp", ADDirichletBC);
 
 InputParameters
 ADDirichletBC::validParams()

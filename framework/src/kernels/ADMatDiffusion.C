@@ -9,7 +9,7 @@
 
 #include "ADMatDiffusion.h"
 
-registerADMooseObject("MooseApp", ADMatDiffusion);
+registerMooseObject("MooseApp", ADMatDiffusion);
 
 InputParameters
 ADMatDiffusion::validParams()
