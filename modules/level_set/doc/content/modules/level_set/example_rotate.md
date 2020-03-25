@@ -1,7 +1,7 @@
 # Rotating Circle
 
 The second example is a typical benchmark problem for the level set equation: a rotating bubble. The
-problem involves initializing $u_h$ (see [Theory](/theory.md)) with a "bubble" of radius 0.15 at
+problem involves initializing $u_h$ (see [Theory](/level_set/theory.md)) with a "bubble" of radius 0.15 at
 $(0.0, 0.5)$ for $\Omega = [-1,1]^2$.  This bubble is then advected with the given velocity field
 $\vec{v}=(4y,-4x)$, so that, at $t=\pi/2$, the bubble should return to its original position.
 
@@ -27,7 +27,7 @@ cd ~/projects/moose/module/level_set/examples/rotating_circle
 
 ## Level Set Equation with SUPG
 
-Adding SUPG stabilization---set the [theory](/theory.md) for details---mitigates the oscillations
+Adding SUPG stabilization---set the [theory](/level_set/theory.md) for details---mitigates the oscillations
 present in the first step, as shown in [circle_rotate_supg_out]. Adding the SUPG stabilization is
 trivial simply add the time and advection SUPG kernels to the input file ([circle_rotate_supg.i])
 shown previously, the kernels block will then appear as:

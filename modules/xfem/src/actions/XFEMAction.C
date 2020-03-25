@@ -76,6 +76,8 @@ XFEMAction::validParams()
   params.addParam<Real>("cut_off_radius",
                         "The cut off radius of crack tip enrichment functions (only needed if "
                         "'use_crack_tip_enrichment=true')");
+  params.addClassDescription("Action to input general parameters and simulation options for use "
+                             "in XFEM.");
   return params;
 }
 
