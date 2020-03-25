@@ -11,6 +11,7 @@
       display_required = true
 
       detail = "default settings;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [blocks]
       type = ImageDiff
@@ -19,6 +20,7 @@
       display_required = true
 
       detail = "defined subdomains;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [all_boundary]
       type = ImageDiff
@@ -28,6 +30,7 @@
       display_required = true
 
       detail = "all boundaries;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [boundary]
       type = ImageDiff
@@ -36,6 +39,7 @@
       display_required = true
 
       detail = "defined boundaries by name;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [boundary_numeric]
       type = ImageDiff
@@ -44,13 +48,14 @@
       display_required = true
 
       detail = "defined boundaries by number;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [nodesets]
       type = ImageDiff
       command = nodesets.py
       imagediff = 'nodesets.png'
       allowed_linux = 0.97
-      platform = LINUX
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
       display_required = true
 
       detail = "defined nodesets;"
@@ -60,7 +65,7 @@
       command = all_nodesets.py
       imagediff = 'all_nodesets.png'
       allowed_linux = 0.90
-      platform = LINUX
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
       display_required = true
 
       detail = "all nodesets;"
@@ -72,13 +77,14 @@
       display_required = true
 
       detail = "no geometric entities selected;"
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     [combo]
       type = ImageDiff
       command = combo.py
       imagediff = 'combo.png'
       allowed_linux = 0.95
-      platform = LINUX
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
       display_required = true
 
       detail = "subdomains, boundaries, and nodesets specified; and"
@@ -90,6 +96,7 @@
       display_required = true
 
       detail = "data only defined on a subset of subdomains."
+      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
   []
 []

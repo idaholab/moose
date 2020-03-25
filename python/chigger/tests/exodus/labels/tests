@@ -1,27 +1,27 @@
 [Tests]
-  [./points]
+  [points]
     type = ImageDiff
     command = points.py
     imagediff = 'points.png'
     allowed_linux = 0.96
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./cells]
+  [cells]
     type = ImageDiff
     command = cells.py
     imagediff = 'cells.png'
     allowed_linux = 0.96
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 
-  [./variable]
+  [variable]
     type = ImageDiff
     command = variable.py
     imagediff = 'variable.png'
-    platform = LINUX
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
-  [../]
+  []
 []

@@ -1,14 +1,16 @@
 [Tests]
-  [./nemesis]
+  [nemesis]
     type = ImageDiff
     command = nemesis.py
     imagediff = 'nemesis.png'
     display_required = true
-  [../]
-  [./explode]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [explode]
     type = ImageDiff
     command = explode.py
     imagediff = 'explode.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

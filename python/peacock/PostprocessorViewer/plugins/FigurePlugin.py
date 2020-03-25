@@ -131,6 +131,10 @@ def main():
     from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
     import mooseutils
 
+    import matplotlib
+    matplotlib.rcParams["figure.figsize"] = (3.75, 3.75)
+    matplotlib.rcParams["figure.dpi"] = (100)
+
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin])
     widget.onSetFilenames([])
     widget.currentWidget().FigurePlugin.setFixedSize(QtCore.QSize(375, 375))

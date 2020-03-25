@@ -305,6 +305,10 @@ def main(*args):
     from ..PostprocessorViewer import PostprocessorViewer
     from .FigurePlugin import FigurePlugin
 
+    import matplotlib
+    matplotlib.rcParams["figure.figsize"] = (3.75, 3.75)
+    matplotlib.rcParams["figure.dpi"] = (100)
+
     # Load the viewer
     widget = PostprocessorViewer(plugins=[FigurePlugin])
     widget.onSetFilenames(['empty_file'])
