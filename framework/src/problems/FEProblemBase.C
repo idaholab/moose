@@ -608,7 +608,7 @@ FEProblemBase::initialSetup()
 
   // Execute this here in case we want to print out the required derivative size in
   // OutputWarehouse::initialSetup
-  if (haveADObjects())
+  if (haveADObjects() || (_displaced_problem && _displaced_problem->haveADObjects()))
   {
     CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 

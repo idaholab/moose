@@ -46,6 +46,8 @@ ADIntegratedBCTempl<T>::ADIntegratedBCTempl(const InputParameters & parameters)
     _ad_coord(_assembly.adCoordTransformation()),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
+  _subproblem.haveADObjects(true);
+
   addMooseVariableDependency(this->mooseVariable());
 
   _save_in.resize(_save_in_strings.size());

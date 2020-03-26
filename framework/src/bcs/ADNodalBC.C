@@ -39,6 +39,8 @@ ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
     _current_node(_var.node()),
     _u(_var.adNodalValue())
 {
+  _subproblem.haveADObjects(true);
+
   addMooseVariableDependency(this->mooseVariable());
 }
 

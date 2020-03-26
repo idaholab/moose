@@ -17,4 +17,7 @@ ADMaterial::validParams()
   return params;
 }
 
-ADMaterial::ADMaterial(const InputParameters & parameters) : Material(parameters) {}
+ADMaterial::ADMaterial(const InputParameters & parameters) : Material(parameters)
+{
+  _subproblem.haveADObjects(true);
+}

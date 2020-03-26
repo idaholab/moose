@@ -46,6 +46,8 @@ ADDGKernel::ADDGKernel(const InputParameters & parameters)
     _u_neighbor(_var.adSlnNeighbor()),
     _grad_u_neighbor(_var.adGradSlnNeighbor())
 {
+  _subproblem.haveADObjects(true);
+
   addMooseVariableDependency(mooseVariable());
 
   _save_in.resize(_save_in_strings.size());

@@ -30,6 +30,7 @@ ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
     _grad_u_slave(_slave_var.adGradSln()),
     _grad_u_master(_master_var.adGradSlnNeighbor())
 {
+  _subproblem.haveADObjects(true);
 }
 
 void

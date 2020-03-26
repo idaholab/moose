@@ -55,6 +55,8 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _my_elem(nullptr)
 {
+  _subproblem.haveADObjects(true);
+
   addMooseVariableDependency(this->mooseVariable());
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
