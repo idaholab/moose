@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurrogateModelInterface.h"
+#include "SurrogateTrainer.h"
 #include "SurrogateModel.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
@@ -29,14 +30,36 @@ SurrogateModelInterface::SurrogateModelInterface(const MooseObject * moose_objec
 
 template <>
 SurrogateModel &
-SurrogateModelInterface::getSurrogateModel(const std::string & name)
+SurrogateModelInterface::getSurrogateModelByName(const UserObjectName & name) const
 {
-  return _smi_feproblem.getUserObjectTempl<SurrogateModel>(_smi_params.get<UserObjectName>(name));
+  std::vector<SurrogateModel *> models;
+  _smi_feproblem.theWarehouse()
+      .query()
+      .condition<AttribName>(name)
+      .condition<AttribSystem>("SurrogateModel")
+      .queryInto(models);
+  if (models.empty())
+    mooseError("Unable to find a SurrogateModel object with the name '" + name + "'");
+  return *(models[0]);
 }
 
 template <>
 SurrogateModel &
-SurrogateModelInterface::getSurrogateModelByName(const UserObjectName & name)
+SurrogateModelInterface::getSurrogateModel(const std::string & name) const
 {
-  return _smi_feproblem.getUserObjectTempl<SurrogateModel>(name, _smi_tid);
+  return getSurrogateModelByName<SurrogateModel>(_smi_params.get<UserObjectName>(name));
+}
+
+template <>
+SurrogateTrainer &
+SurrogateModelInterface::getSurrogateTrainerByName(const UserObjectName & name) const
+{
+  return _smi_feproblem.getUserObjectTempl<SurrogateTrainer>(name);
+}
+
+template <>
+SurrogateTrainer &
+SurrogateModelInterface::getSurrogateTrainer(const std::string & name) const
+{
+  return getSurrogateTrainerByName<SurrogateTrainer>(_smi_params.get<UserObjectName>(name));
 }

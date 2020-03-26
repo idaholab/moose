@@ -20,6 +20,8 @@ InputParameters
 SurrogateTester::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SamplerInterface::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling surrogate model.");
   params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
   params += SamplerInterface::validParams();
@@ -34,9 +36,10 @@ SurrogateTester::validParams()
 SurrogateTester::SurrogateTester(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
+    SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples")),
-    _model(getUserObject<SurrogateModel>("model")),
+    _model(getSurrogateModel("model")),
     _value_vector(declareVector("value"))
 {
   if (_output_samples)

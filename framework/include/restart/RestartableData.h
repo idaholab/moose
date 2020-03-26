@@ -90,6 +90,7 @@ public:
    * @returns a read-only reference to the parameter value.
    */
   T & get() { return *_value_ptr; }
+  // const T & get() const { return *_value_ptr; } // TODO: This should be used; above deprecated
 
   /**
    * @returns a writable reference to the parameter value.

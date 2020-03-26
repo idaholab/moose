@@ -8,44 +8,45 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Moose includes
-#include "SurrogateModelOutput.h"
-#include "SurrogateModel.h"
+#include "SurrogateTrainerOutput.h"
+#include "SurrogateTrainer.h"
 #include "FEProblem.h"
 #include "RestartableDataIO.h"
 #include "RestartableData.h"
 
-registerMooseObject("StochasticToolsApp", SurrogateModelOutput);
+registerMooseObject("StochasticToolsApp", SurrogateTrainerOutput);
 
 InputParameters
-SurrogateModelOutput::validParams()
+SurrogateTrainerOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Output for trained SurrogateModel data.");
+  params.addClassDescription("Output for trained surrogate model data.");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "surrogates", "A list of SurrogateModel objects to output.");
+      "trainers", "A list of SurrogateTrainer objects to output.");
   return params;
 }
 
-SurrogateModelOutput::SurrogateModelOutput(const InputParameters & parameters)
+SurrogateTrainerOutput::SurrogateTrainerOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     SurrogateModelInterface(this),
-    _surrogates(getParam<std::vector<UserObjectName>>("surrogates"))
+    _trainers(getParam<std::vector<UserObjectName>>("trainers"))
 {
 }
 
 void
-SurrogateModelOutput::output(const ExecFlagType & /*type*/)
+SurrogateTrainerOutput::output(const ExecFlagType & /*type*/)
 {
   if (processor_id() == 0)
   {
     RestartableDataIO restartable_data_io(_app);
-    for (const auto & surrogate_name : _surrogates)
+    for (const auto & surrogate_name : _trainers)
     {
-      const SurrogateModel & model = getSurrogateModelByName(surrogate_name);
+      const SurrogateTrainer & trainer = getSurrogateTrainerByName(surrogate_name);
       const std::string filename =
           this->filename() + "_" + surrogate_name + restartable_data_io.getRestartableDataExt();
 
-      const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.name());
+      const RestartableDataMap & meta_data =
+          _app.getRestartableDataMap(trainer.modelMetaDataName());
       restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }

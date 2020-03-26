@@ -27,7 +27,8 @@ PolynomialChaosStatistics::validParams()
 
 PolynomialChaosStatistics::PolynomialChaosStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
+    SurrogateModelInterface(this),
+    _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
     _type(getParam<MultiMooseEnum>("compute")),
     _stat_type(declareVector("type")),
     _stats(declareVector("value"))
@@ -57,10 +58,10 @@ PolynomialChaosStatistics::execute()
       val = sig;
     // Skewness
     else if (item == "skewness")
-      val = _pc_uo.powerExpectation(3, true) / (sig * sig * sig);
+      val = _pc_uo.powerExpectation(3) / (sig * sig * sig);
     // Kurtosis
     else if (item == "kurtosis")
-      val = _pc_uo.powerExpectation(4, true) / (sig * sig * sig * sig);
+      val = _pc_uo.powerExpectation(4) / (sig * sig * sig * sig);
     _stats.push_back(val);
   }
 }
@@ -69,12 +70,4 @@ void
 PolynomialChaosStatistics::finalize()
 {
   gatherSum(_stats);
-}
-
-void
-PolynomialChaosStatistics::threadJoin(const UserObject & y)
-{
-  const PolynomialChaosStatistics & pps = static_cast<const PolynomialChaosStatistics &>(y);
-  for (unsigned int i = 0; i < _stats.size(); ++i)
-    _stats[i] += pps._stats[i];
 }

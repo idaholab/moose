@@ -40,10 +40,15 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   Registry::registerObjectsTo(f, {"StochasticToolsApp"});
   Registry::registerActionsTo(af, {"StochasticToolsApp"});
 
+  // Adds [Trainers] block
+  registerSyntaxTask("AddSurrogateAction", "Trainers/*", "add_trainer");
+  registerMooseObjectTask("add_trainer", SurrogateTrainer, false);
+  addTaskDependency("add_trainer", "add_user_object");
+
   // Adds [Surrogates] block
-  registerSyntax("AddSurrogateAction", "Surrogates/*");
+  registerSyntaxTask("AddSurrogateAction", "Surrogates/*", "add_surrogate");
   registerMooseObjectTask("add_surrogate", SurrogateModel, false);
-  addTaskDependency("add_surrogate", "add_user_object");
+  addTaskDependency("add_surrogate", "add_trainer");
 
   // Adds action for loading Surrogate data
   registerTask("load_surrogate_data", true);

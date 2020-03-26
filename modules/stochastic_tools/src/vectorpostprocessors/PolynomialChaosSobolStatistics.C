@@ -18,6 +18,7 @@ InputParameters
 PolynomialChaosSobolStatistics::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription(
       "Compute SOBOL statistics values of a trained PolynomialChaos surrogate.");
 
@@ -33,7 +34,8 @@ PolynomialChaosSobolStatistics::validParams()
 
 PolynomialChaosSobolStatistics::PolynomialChaosSobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
+    SurrogateModelInterface(this),
+    _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
     _order(getParam<MultiMooseEnum>("sensitivity_order")),
     _stats(declareVector("value")),
     _total_ind(_order.contains("total") ? &declareVector("i_T") : nullptr)
@@ -74,7 +76,7 @@ PolynomialChaosSobolStatistics::initialSetup()
     if (_order.contains("second"))
     {
       _nind = 2;
-      _nval += Utility::binomial(_pc_uo.getNumberOfParameters(), (unsigned int)2);
+      _nval += Utility::binomial(_pc_uo.getNumberOfParameters(), static_cast<std::size_t>(2));
       std::set<std::set<unsigned int>> indi =
           buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
       _ind.insert(indi.begin(), indi.end());

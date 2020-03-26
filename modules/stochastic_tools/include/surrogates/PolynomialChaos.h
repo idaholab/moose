@@ -20,16 +20,13 @@ class PolynomialChaos : public SurrogateModel
 public:
   static InputParameters validParams();
   PolynomialChaos(const InputParameters & parameters);
-  virtual void initialSetup() override;
-  virtual void train() override;
-  virtual void trainFinalize() override;
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
   /// Access number of dimensions/parameters
-  unsigned int getNumberOfParameters() const { return _ndim; }
+  std::size_t getNumberOfParameters() const { return _poly.size(); }
 
   /// Number of terms in expansion
-  unsigned int getNumberofCoefficients() const { return _ncoeff; }
+  std::size_t getNumberofCoefficients() const { return _tuple.size(); }
 
   /// Access polynomial orders from tuple
   ////@{
@@ -47,7 +44,7 @@ public:
   virtual Real computeStandardDeviation() const;
 
   /// Compute expectation of a certain power of the QoI: E[(u-\mu)^n]
-  Real powerExpectation(const unsigned int n, const bool distributed = true) const;
+  Real powerExpectation(const unsigned int n) const;
 
   /// Evaluates partial derivative of expansion: du(x)/dx_dim
   Real computeDerivative(const unsigned int dim, const std::vector<Real> & x) const;
@@ -62,59 +59,39 @@ public:
   Real computeSobolIndex(const std::set<unsigned int> & ind) const;
   Real computeSobolTotal(const unsigned int dim) const;
 
-protected:
-  /**
-   * Function computing for computing _tuple
-   * Example for ndim = 3, order = 4:
-   * | 0 | 1 0 0 | 2 1 1 0 0 0 | 3 2 2 1 1 1 0 0 0 0 |
-   * | 0 | 0 1 0 | 0 1 0 2 1 0 | 0 1 0 2 1 0 3 2 1 0 |
-   * | 0 | 0 0 1 | 0 0 1 0 1 2 | 0 0 1 0 1 2 0 1 2 3 |
-   */
-  static std::vector<std::vector<unsigned int>> generateTuple(const unsigned int ndim,
-                                                              const unsigned int order);
-  /// Tuple sorter function
-  static bool sortTuple(const std::vector<unsigned int> & first,
-                        const std::vector<unsigned int> & second);
-
 private:
-  /// Utility for looping over coefficients in parallel
+  /// Variables calculation and for looping over the computed coefficients in parallel
+  ///
+  /// The various utility methods in this class require the coefficients be partitioned in parallel,
+  /// but the data being partitioned is loaded from the trainer so it might not be available. Thus,
+  /// the partitioning is done on demand, if needed.
+  ///
+  /// The methods are marked const because they do not modify the loaded data, to keep this interface
+  /// the partitioning uses mutable variables.
   ///@{
-  dof_id_type _n_local_coeff;
-  dof_id_type _local_coeff_begin;
-  dof_id_type _local_coeff_end;
+  mutable dof_id_type _n_local_coeff = std::numeric_limits<dof_id_type>::max();
+  mutable dof_id_type _local_coeff_begin = 0;
+  mutable dof_id_type _local_coeff_end = 0;
+  void linearPartitionCoefficients() const;
   ///@}
 
-  /// The following items are used tor training only
-
-  /// Sampler from which the parameters were perturbed
-  Sampler * _sampler;
-
-  /// QuadratureSampler pointer, necessary for applying quadrature weights
-  QuadratureSampler * _quad_sampler;
+  // The following items are loaded from a SurrogateTrainer using getModelData
 
   /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
-  unsigned int _order;
-
-  /// Vector postprocessor of the results from perturbing the model with _sampler
-  const VectorPostprocessorValue * _values_ptr = nullptr;
+  const unsigned int & _order;
 
   /// Total number of parameters/dimensions
-  unsigned int _ndim;
+  const unsigned int & _ndim;
 
   /// Total number of coefficient (defined by size of _tuple)
-  std::size_t _ncoeff;
-
-  /// True when _sampler data is distributed
-  bool _values_distributed;
-
-  // The following items are stored using declareModelData for use as a trained model.
+  const std::size_t & _ncoeff;
 
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
-  std::vector<std::vector<unsigned int>> & _tuple;
+  const std::vector<std::vector<unsigned int>> & _tuple;
 
   /// These are the coefficients we are after in the PC expansion
-  std::vector<Real> & _coeff;
+  const std::vector<Real> & _coeff;
 
   /// The distributions used for sampling
-  std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
+  const std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
 };

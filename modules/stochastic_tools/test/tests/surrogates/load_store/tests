@@ -49,18 +49,24 @@
       allow_test_objects = true
       min_parallel = 3
 
-      detail = "trained with distributed stochastic data and"
+      detail = "trained with distributed stochastic data;"
     []
     [evaluate_two_ranks]
       type = CSVDiff
       input = evaluate.i
       csvdiff = evaluate_out_pc_moments_0002.csv
       prereq = surrogate/train_three_ranks # Creates data files that this test uses
-      allow_warnings = true
       max_parallel = 2
 
-      detail = "evaluated separately with a different number of processors."
+      detail = "evaluated separately with a different number of processors;"
     []
+    [evaluate_and_train]
+      type = CSVDiff
+      input = train_and_evaluate.i
+      csvdiff = train_and_evaluate_out_pc_moments_0002.csv
+      allow_test_objects = true
 
+      detail = "and be trained and evaluated in memory with a single input file."
+    []
   []
 []

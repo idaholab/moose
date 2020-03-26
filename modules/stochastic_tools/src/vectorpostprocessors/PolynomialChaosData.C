@@ -16,6 +16,7 @@ InputParameters
 PolynomialChaosData::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for extracting data from polynomial chaos user object and "
                              "storing in VectorPostprocessor vectors.");
   params.addRequiredParam<UserObjectName>("pc_name", "Name of PolynomialChaos.");
@@ -24,7 +25,8 @@ PolynomialChaosData::validParams()
 
 PolynomialChaosData::PolynomialChaosData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
+    SurrogateModelInterface(this),
+    _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
     _coeff(_pc_uo.getCoefficients()),
     _coeff_vector(declareVector("coefficients")),
     _initialized(false)

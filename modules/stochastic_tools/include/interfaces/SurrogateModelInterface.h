@@ -15,6 +15,7 @@
 
 // Forward declarations
 class SurrogateModel;
+class SurrogateTrainer;
 class SurrogateModelInterface;
 
 template <>
@@ -44,22 +45,30 @@ public:
    */
   SurrogateModelInterface(const MooseObject * moose_object);
 
+  ///@{
   /**
-   * Get a sampler with a given name
+   * Get a SurrogateModel/Trainer with a given name
    * @param name The name of the parameter key of the sampler to retrieve
    * @return The sampler with name associated with the parameter 'name'
    */
   template <typename T = SurrogateModel>
-  T & getSurrogateModel(const std::string & name);
+  T & getSurrogateModel(const std::string & name) const;
+  template <typename T = SurrogateTrainer>
+  T & getSurrogateTrainer(const std::string & name) const;
+  ///@}
 
+  ///@{
   /**
    * Get a sampler with a given name
    * @param name The name of the sampler to retrieve
    * @return The sampler with name 'name'
    */
   template <typename T = SurrogateModel>
-  T & getSurrogateModelByName(const UserObjectName & name);
+  T & getSurrogateModelByName(const UserObjectName & name) const;
+  template <typename T = SurrogateTrainer>
+  T & getSurrogateTrainerByName(const UserObjectName & name) const;
 
+  ///@}
 private:
   /// Parameters of the object with this interface
   const InputParameters & _smi_params;
@@ -73,19 +82,45 @@ private:
 
 template <typename T>
 T &
-SurrogateModelInterface::getSurrogateModel(const std::string & name)
+SurrogateModelInterface::getSurrogateModel(const std::string & name) const
 {
   return getSurrogateModelByName<T>(_smi_params.get<UserObjectName>(name));
 }
 
 template <typename T>
 T &
-SurrogateModelInterface::getSurrogateModelByName(const UserObjectName & name)
+SurrogateModelInterface::getSurrogateModelByName(const UserObjectName & name) const
 {
-  SurrogateModel * base_ptr = &_smi_feproblem.getUserObjectTempl<T>(name, _smi_tid);
+  std::vector<T *> models;
+  _smi_feproblem.theWarehouse()
+      .query()
+      .condition<AttribName>(name)
+      .condition<AttribSystem>("SurrogateModel")
+      .queryInto(models);
+  if (models.empty())
+    mooseError("Unable to find a SurrogateModel object of type " + std::string(typeid(T).name()) +
+               " with the name '" + name + "'");
+  return *(models[0]);
+}
+
+template <typename T>
+T &
+SurrogateModelInterface::getSurrogateTrainer(const std::string & name) const
+{
+  return getSurrogateTrainerByName<T>(_smi_params.get<UserObjectName>(name));
+}
+
+template <typename T>
+T &
+SurrogateModelInterface::getSurrogateTrainerByName(const UserObjectName & name) const
+{
+  SurrogateTrainer * base_ptr =
+      &_smi_feproblem.getUserObjectTempl<SurrogateTrainer>(name, _smi_tid);
   T * obj_ptr = dynamic_cast<T *>(base_ptr);
   if (!obj_ptr)
-    mooseError(
-        "Failed to find a SurrogateModel object with the name '", name, "' for the desired type.");
+    mooseError("Failed to find a SurrogateTrainer object of type " + std::string(typeid(T).name()) +
+                   " with the name '",
+               name,
+               "' for the desired type.");
   return *obj_ptr;
 }

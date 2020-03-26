@@ -64,17 +64,30 @@
     parallel_type = REPLICATED
     samplers = quadrature
   []
+  [pc_moments]
+    type = PolynomialChaosStatistics
+    pc_name = poly_chaos
+    compute = 'mean stddev skewness kurtosis'
+    execute_on = final
+  []
+[]
+
+[Trainers]
+  [poly_chaos]
+    type = PolynomialChaosTrainer
+    execute_on = timestep_end
+    order = 5
+    distributions = 'D_dist S_dist'
+    sampler = quadrature
+    results_vpp = storage
+    results_vector = quadrature
+  []
 []
 
 [Surrogates]
   [poly_chaos]
     type = PolynomialChaos
-    execute_on = timestep_end
-    #order = 5 # testing this warning
-    distributions = 'D_dist S_dist'
-    training_sampler = quadrature
-    results_vpp = storage
-    results_vector = quadrature
+    trainer = poly_chaos
   []
 []
 
@@ -88,9 +101,6 @@
 []
 
 [Outputs]
-  [out]
-    type = SurrogateModelOutput
-    surrogates = 'poly_chaos'
-    execute_on = FINAL
-  []
+  csv = true
+  execute_on = FINAL
 []

@@ -10,15 +10,14 @@
 #pragma once
 
 #include "StochasticToolsApp.h"
-#include "GeneralUserObject.h"
+#include "MooseObject.h"
 #include "SamplerInterface.h"
-#include "LoadSurrogateDataAction.h"
+#include "SurrogateModelInterface.h"
 
-class SurrogateModel : public GeneralUserObject, public SamplerInterface
+class SurrogateModel : public MooseObject, public SamplerInterface, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
-
   SurrogateModel(const InputParameters & parameters);
 
   /**
@@ -27,77 +26,45 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const = 0;
 
   /**
-   * Train the surrogate model.
+   * The name for training data stored within the MooseApp
    */
-  virtual void train() = 0;
-
-  ///@{
-  /**
-   * Initialize/Finalize that only execute when training.
-   */
-  virtual void trainInitialize() {}
-  virtual void trainFinalize() {}
-  ///@}
-
-  /**
-   * Return True if the object is performing training (i.e., filename is not set)
-   */
-  bool isTraining() const;
+  const std::string & modelMetaDataName() const { return _model_meta_data_name; }
 
   ///@{
   /**
    * Declare model data for loading from file as well as restart
    */
   template <typename T>
-  T & declareModelData(const std::string & data_name);
-
-  template <typename T>
-  T & declareModelData(const std::string & data_name, const T & value);
+  const T & getModelData(const std::string & data_name) const;
   ///@}
 
-  /**
-   * UserObject methods that are used to implement the training/evaluate interfaces.
-   */
-  virtual void initialize() final;
-  virtual void execute() final;
-  virtual void finalize() final;
-  virtual void threadJoin(const UserObject &) final {} // GeneralUserObjects are not threaded
-
 private:
+  /// Name used for model data. If a SurrogateTrainer object is supplied it's name is used. This
+  /// results in the SurrogateModel having a reference to the training data so it is always current
+  const std::string _model_meta_data_name;
+
   /**
    * Internal function used by public declareModelData methods.
    */
   template <typename T>
-  RestartableData<T> & declareModelDataHelper(const std::string & data_name);
-
-  /// see isTraining
-  const bool _is_training;
+  RestartableData<T> & getModelDataHelper(const std::string & data_name) const;
 };
 
 template <typename T>
-T &
-SurrogateModel::declareModelData(const std::string & data_name)
+const T &
+SurrogateModel::getModelData(const std::string & data_name) const
 {
-  RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
-  return data_ref.get();
-}
-
-template <typename T>
-T &
-SurrogateModel::declareModelData(const std::string & data_name, const T & value)
-{
-  RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
-  data_ref.set() = value;
+  RestartableData<T> & data_ref = getModelDataHelper<T>(data_name);
   return data_ref.get();
 }
 
 template <typename T>
 RestartableData<T> &
-SurrogateModel::declareModelDataHelper(const std::string & data_name)
+SurrogateModel::getModelDataHelper(const std::string & data_name) const
 {
   auto data_ptr = libmesh_make_unique<RestartableData<T>>(data_name, nullptr);
   RestartableDataValue & value =
-      _app.registerRestartableData(data_name, std::move(data_ptr), 0, false, name());
+      _app.registerRestartableData(data_name, std::move(data_ptr), 0, true, _model_meta_data_name);
   RestartableData<T> & data_ref = static_cast<RestartableData<T> &>(value);
   return data_ref;
 }

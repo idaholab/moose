@@ -12,8 +12,9 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
+#include "SurrogateModelInterface.h"
 
-class PolynomialChaosData : public GeneralVectorPostprocessor
+class PolynomialChaosData : public GeneralVectorPostprocessor, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();

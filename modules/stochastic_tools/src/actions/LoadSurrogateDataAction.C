@@ -29,11 +29,10 @@ LoadSurrogateDataAction::LoadSurrogateDataAction(InputParameters params) : Actio
 void
 LoadSurrogateDataAction::act()
 {
-  std::vector<UserObject *> u_objects;
-  _app.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(u_objects);
-  for (auto uo_ptr : u_objects)
+  std::vector<SurrogateModel *> objects;
+  _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
+  for (auto model_ptr : objects)
   {
-    SurrogateModel * model_ptr = dynamic_cast<SurrogateModel *>(uo_ptr);
     if (model_ptr && model_ptr->isParamValid("filename"))
       load(*model_ptr);
   }
@@ -56,23 +55,7 @@ LoadSurrogateDataAction::load(const SurrogateModel & model)
     paramError("filename", "The supplied file '", filename, "' failed to load.");
 
   // Get the data object that the loaded data will be applied
-  const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.name());
-
-  // Check the class name being loaded matches the class name doing the loading
-  auto data_ptr = static_cast<RestartableData<std::string> *>(meta_data.at("type").value.get());
-  const std::string & meta_name = data_ptr->get();
-  const std::string & class_name = model.getParamTempl<std::string>("_type");
-  if (meta_name != class_name)
-  {
-    model.paramError("filename",
-                     "The supplied file '",
-                     filename,
-                     "' contains model data for type '",
-                     meta_name,
-                     "' but the object is of type '",
-                     class_name,
-                     "'.");
-  }
+  const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.modelMetaDataName());
 
   // Read the supplied file
   std::unordered_set<std::string> filter_names;
