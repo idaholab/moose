@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "ExpressionBuilderToo.h"
@@ -9,8 +8,12 @@ struct SimplificationRules
   {
     for (auto rule : rules)
     {
-      _simplification_trees.emplace_back(
-          std::make_pair(rule[0].cloneRoot()->toNNary(), rule[1].cloneRoot()->toNNary()));
+      // std::vector<EBTermNode *> conditions(rule.size() - 2);
+      // for(unsigned int i = 0; i < rule.size() - 2; ++i)
+      //  conditions[i] = rule[i+2].cloneRoot();
+      _simplification_trees.emplace_back(std::make_pair(rule[0].cloneRoot(), rule[1].cloneRoot()));
+      // std::make_pair(rule[0].cloneRoot()->toNNary(), rule[1].cloneRoot()->toNNary()));
+      //_conditions.emplace_back(conditions)
     }
   }
   operator std::vector<
@@ -20,6 +23,7 @@ struct SimplificationRules
   }
   std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
       _simplification_trees;
+  // std::vector<ExpressionBuilderToo::EBTermNode> _conditions;
 };
 
 std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>

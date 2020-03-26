@@ -78,6 +78,7 @@ public:
 
     virtual bool isConstant() = 0;
     virtual EBTermNode * constantFolding() { return this; };
+    virtual void partialPowFolding(EBTermNode *&, EBTermNode *&){};
 
     virtual Real getRealValue() { mooseError("This has no real value right now"); };
 
@@ -393,7 +394,7 @@ public:
       return false;
     }
 
-    EBTermNode * constantFolding()
+    virtual EBTermNode * constantFolding()
     {
       if (_left->isConstant() && _right->isConstant())
         return new EBNumberNode<Real>(getRealValue());
@@ -483,6 +484,9 @@ public:
     virtual Real getRealValue();
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
+
+    virtual EBTermNode * constantFolding();
+    virtual void partialPowFolding(EBTermNode *& parent_left, EBTermNode *& parent_right);
   };
 
   /// Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -630,7 +634,9 @@ public:
     enum NodeType
     {
       MUL,
-      ADD
+      ADD,
+      EQ,
+      NOTEQ
     } _type;
 
     EBNNaryOpTermNode(std::vector<EBTermNode *> children, NodeType type)
@@ -658,6 +664,7 @@ public:
 
     virtual EBTermNode * constantFolding();
     virtual Real getRealValue();
+    virtual void partialPowFolding(EBTermNode *& parent_left, EBTermNode *& parent_right);
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
 
@@ -835,7 +842,7 @@ public:
     EBTerm & operator()(T... terms)
     {
       return (*this)({terms...});
-    };
+    }
     EBTerm & operator()(EBTermList term_list);
 
     const EBTermNode * getRoot() const { return _root; }
