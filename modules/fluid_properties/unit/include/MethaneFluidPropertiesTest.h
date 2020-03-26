@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("MethaneFluidProperties");
     _fe_problem->addUserObject("MethaneFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObjectTempl<MethaneFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<MethaneFluidProperties>("fp");
   }
 
   const MethaneFluidProperties * _fp;

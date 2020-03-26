@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputePlaneSmallStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputePlaneSmallStrain<compute_stage>::validParams()
+ADComputePlaneSmallStrain::validParams()
 {
-  InputParameters params = ADCompute2DSmallStrain<compute_stage>::validParams();
+  InputParameters params = ADCompute2DSmallStrain::validParams();
   params.addClassDescription("Compute a small strain under generalized plane strain assumptions "
                              "where the out of plane strain is generally nonzero.");
   params.addParam<UserObjectName>("subblock_index_provider",
@@ -27,10 +26,8 @@ ADComputePlaneSmallStrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputePlaneSmallStrain<compute_stage>::ADComputePlaneSmallStrain(
-    const InputParameters & parameters)
-  : ADCompute2DSmallStrain<compute_stage>(parameters),
+ADComputePlaneSmallStrain::ADComputePlaneSmallStrain(const InputParameters & parameters)
+  : ADCompute2DSmallStrain(parameters),
     _subblock_id_provider(isParamValid("subblock_index_provider")
                               ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
                               : nullptr),
@@ -51,9 +48,8 @@ ADComputePlaneSmallStrain<compute_stage>::ADComputePlaneSmallStrain(
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputePlaneSmallStrain<compute_stage>::computeOutOfPlaneStrain()
+ADComputePlaneSmallStrain::computeOutOfPlaneStrain()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return (*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0];

@@ -11,11 +11,10 @@
 
 registerMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
 
-template <ComputeStage compute_stage>
 InputParameters
-INSADMomentumTimeDerivative<compute_stage>::validParams()
+INSADMomentumTimeDerivative::validParams()
 {
-  InputParameters params = ADTimeKernelValue<compute_stage>::validParams();
+  InputParameters params = ADTimeKernelValue::validParams();
   params.addClassDescription("This class computes the time derivative for the incompressible "
                              "Navier-Stokes momentum equation.");
   params.addCoupledVar("temperature",
@@ -26,17 +25,13 @@ INSADMomentumTimeDerivative<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-INSADMomentumTimeDerivative<compute_stage>::INSADMomentumTimeDerivative(
-    const InputParameters & parameters)
-  : ADVectorTimeKernelValue<compute_stage>(parameters),
-    _rho(getADMaterialProperty<Real>("rho_name"))
+INSADMomentumTimeDerivative::INSADMomentumTimeDerivative(const InputParameters & parameters)
+  : ADVectorTimeKernelValue(parameters), _rho(getADMaterialProperty<Real>("rho_name"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-INSADMomentumTimeDerivative<compute_stage>::precomputeQpResidual()
+INSADMomentumTimeDerivative::precomputeQpResidual()
 {
   return _rho[_qp] * _u_dot[_qp];
 }

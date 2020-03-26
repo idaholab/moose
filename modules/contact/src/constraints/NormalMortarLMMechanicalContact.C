@@ -12,11 +12,10 @@
 
 registerMooseObject("ContactApp", NormalMortarLMMechanicalContact);
 
-template <ComputeStage compute_stage>
 InputParameters
-NormalMortarLMMechanicalContact<compute_stage>::validParams()
+NormalMortarLMMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
   params.addParam<NonlinearVariableName>("slave_disp_y",
                                          "The y displacement variable on the slave face");
   params.addParam<NonlinearVariableName>("master_disp_y",
@@ -29,10 +28,8 @@ NormalMortarLMMechanicalContact<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
-    const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters),
+NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputParameters & parameters)
+  : ADMortarConstraint(parameters),
     _slave_disp_y(isParamValid("slave_disp_y") ? &this->_subproblem.getStandardVariable(
                                                      _tid, parameters.getMooseType("slave_disp_y"))
                                                : nullptr),
@@ -54,14 +51,13 @@ NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
                 "It doesn't make any sense that we have a slave displacement variable and not a "
                 "master displacement variable");
     _computing_gap_dependence = true;
-    _slave_disp_y_sln = &_slave_disp_y->template adSln<compute_stage>();
-    _master_disp_y_sln = &_master_disp_y->template adSlnNeighbor<compute_stage>();
+    _slave_disp_y_sln = &_slave_disp_y->adSln();
+    _master_disp_y_sln = &_master_disp_y->adSlnNeighbor();
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-NormalMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+NormalMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

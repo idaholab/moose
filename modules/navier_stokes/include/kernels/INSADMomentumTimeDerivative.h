@@ -16,8 +16,7 @@
  * Navier-Stokes momentum equation.  Could instead use CoefTimeDerivative
  * for this.
  */
-template <ComputeStage compute_stage>
-class INSADMomentumTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
+class INSADMomentumTimeDerivative : public ADVectorTimeKernelValue
 {
 public:
   static InputParameters validParams();
@@ -29,7 +28,5 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _rho;
-
-  usingVectorTimeKernelValueMembers;
+  const ADMaterialProperty<Real> & _rho;
 };

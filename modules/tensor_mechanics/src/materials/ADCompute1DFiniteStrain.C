@@ -11,24 +11,21 @@
 
 #include "libmesh/quadrature.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCompute1DFiniteStrain<compute_stage>::validParams()
+ADCompute1DFiniteStrain::validParams()
 {
-  InputParameters params = ADComputeFiniteStrain<compute_stage>::validParams();
+  InputParameters params = ADComputeFiniteStrain::validParams();
   params.addClassDescription("Compute strain increment for finite strain in 1D problem");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCompute1DFiniteStrain<compute_stage>::ADCompute1DFiniteStrain(const InputParameters & parameters)
-  : ADComputeFiniteStrain<compute_stage>(parameters)
+ADCompute1DFiniteStrain::ADCompute1DFiniteStrain(const InputParameters & parameters)
+  : ADComputeFiniteStrain(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADCompute1DFiniteStrain<compute_stage>::computeProperties()
+ADCompute1DFiniteStrain::computeProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
@@ -58,6 +55,3 @@ ADCompute1DFiniteStrain<compute_stage>::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpStrain();
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADCompute1DFiniteStrain);

@@ -15,8 +15,7 @@
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.
  */
-template <ComputeStage compute_stage>
-class ADConvectiveHeatFluxBC : public ADIntegratedBC<compute_stage>
+class ADConvectiveHeatFluxBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -27,13 +26,11 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// Far-field temperature variable
-  const ADMaterialProperty(Real) & _T_infinity;
+  const ADMaterialProperty<Real> & _T_infinity;
 
   /// Convective heat transfer coefficient
-  const ADMaterialProperty(Real) & _htc;
+  const ADMaterialProperty<Real> & _htc;
 
   /// Derivative of convective heat transfer coefficient with respect to temperature
-  const ADMaterialProperty(Real) & _htc_dT;
-
-  usingIntegratedBCMembers;
+  const ADMaterialProperty<Real> & _htc_dT;
 };

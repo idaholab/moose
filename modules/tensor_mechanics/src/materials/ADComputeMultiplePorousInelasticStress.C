@@ -13,11 +13,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeMultiplePorousInelasticStress);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeMultiplePorousInelasticStress<compute_stage>::validParams()
+ADComputeMultiplePorousInelasticStress::validParams()
 {
-  InputParameters params = ADComputeMultipleInelasticStress<compute_stage>::validParams();
+  InputParameters params = ADComputeMultipleInelasticStress::validParams();
   params.addClassDescription(
       "Compute state (stress and internal parameters such as plastic "
       "strains and internal parameters) using an iterative process. A porosity material property "
@@ -30,30 +29,27 @@ ADComputeMultiplePorousInelasticStress<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeMultiplePorousInelasticStress<compute_stage>::ADComputeMultiplePorousInelasticStress(
+ADComputeMultiplePorousInelasticStress::ADComputeMultiplePorousInelasticStress(
     const InputParameters & parameters)
-  : ADComputeMultipleInelasticStress<compute_stage>(parameters),
+  : ADComputeMultipleInelasticStress(parameters),
     _porosity(declareADProperty<Real>(getParam<MaterialPropertyName>("porosity_name"))),
     _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
     _initial_porosity(getParam<Real>("initial_porosity"))
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeMultiplePorousInelasticStress<compute_stage>::initQpStatefulProperties()
+ADComputeMultiplePorousInelasticStress::initQpStatefulProperties()
 {
-  ADComputeStressBase<compute_stage>::initQpStatefulProperties();
+  ADComputeStressBase::initQpStatefulProperties();
 
   _porosity[_qp] = _initial_porosity;
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeMultiplePorousInelasticStress<compute_stage>::computeQpProperties()
+ADComputeMultiplePorousInelasticStress::computeQpProperties()
 {
-  ADComputeStressBase<compute_stage>::computeQpProperties();
+  ADComputeStressBase::computeQpProperties();
 
   _porosity[_qp] =
       (1.0 - _porosity_old[_qp]) * (_inelastic_strain[_qp] - _inelastic_strain_old[_qp]).trace() +

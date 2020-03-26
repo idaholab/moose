@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeStrainIncrementBasedStress);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeStrainIncrementBasedStress<compute_stage>::validParams()
+ADComputeStrainIncrementBasedStress::validParams()
 {
-  InputParameters params = ADComputeStressBase<compute_stage>::validParams();
+  InputParameters params = ADComputeStressBase::validParams();
   params.addClassDescription("Compute stress after subtracting inelastic strain increments");
   params.addParam<std::vector<MaterialPropertyName>>("inelastic_strain_names",
                                                      "Names of inelastic strain properties");
@@ -23,10 +22,9 @@ ADComputeStrainIncrementBasedStress<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeStrainIncrementBasedStress<compute_stage>::ADComputeStrainIncrementBasedStress(
+ADComputeStrainIncrementBasedStress::ADComputeStrainIncrementBasedStress(
     const InputParameters & parameters)
-  : ADComputeStressBase<compute_stage>(parameters),
+  : ADComputeStressBase(parameters),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
@@ -50,9 +48,8 @@ ADComputeStrainIncrementBasedStress<compute_stage>::ADComputeStrainIncrementBase
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeStrainIncrementBasedStress<compute_stage>::computeQpStress()
+ADComputeStrainIncrementBasedStress::computeQpStress()
 {
   ADRankTwoTensor elastic_strain_increment =
       (_mechanical_strain[_qp] - _mechanical_strain_old[_qp]);

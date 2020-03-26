@@ -13,13 +13,12 @@
 #include "RankTwoTensor.h"
 
 registerMooseObject("TensorMechanicsApp",
-                      ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
+                    ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::validParams()
+ADComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
 {
-  InputParameters params = ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the instantaneous thermal expansion as a function of "
                              "temperature");
@@ -29,10 +28,9 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::validP
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::
+ADComputeInstantaneousThermalExpansionFunctionEigenstrain::
     ADComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
-  : ADComputeThermalExpansionEigenstrainBase<compute_stage>(parameters),
+  : ADComputeThermalExpansionEigenstrainBase(parameters),
     _temperature_old(coupledValueOld("temperature")),
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
     _thermal_strain(
@@ -43,16 +41,14 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::initQpStatefulProperties()
+ADComputeInstantaneousThermalExpansionFunctionEigenstrain::initQpStatefulProperties()
 {
   _thermal_strain[_qp] = 0;
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeInstantaneousThermalExpansionFunctionEigenstrain<compute_stage>::computeThermalStrain(
+ADComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
     ADReal & thermal_strain)
 {
   if (_t_step > 1)

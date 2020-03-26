@@ -22,12 +22,12 @@ protected:
   {
     InputParameters uo_params = _factory.getValidParams("SimpleFluidProperties");
     _fe_problem->addUserObject("SimpleFluidProperties", "fp", uo_params);
-    _fp = &_fe_problem->getUserObjectTempl<SimpleFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<SimpleFluidProperties>("fp");
 
     InputParameters uo2_params = _factory.getValidParams("SimpleFluidProperties");
     uo2_params.set<Real>("porepressure_coefficient") = 0.0;
     _fe_problem->addUserObject("SimpleFluidProperties", "fp2", uo2_params);
-    _fp2 = &_fe_problem->getUserObjectTempl<SimpleFluidProperties>("fp2");
+    _fp2 = &_fe_problem->getUserObject<SimpleFluidProperties>("fp2");
   }
 
   const SimpleFluidProperties * _fp;

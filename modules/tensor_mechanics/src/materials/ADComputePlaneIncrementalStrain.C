@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputePlaneIncrementalStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputePlaneIncrementalStrain<compute_stage>::validParams()
+ADComputePlaneIncrementalStrain::validParams()
 {
-  InputParameters params = ADCompute2DIncrementalStrain<compute_stage>::validParams();
+  InputParameters params = ADCompute2DIncrementalStrain::validParams();
   params.addClassDescription(
       "Compute strain increment for small strain under 2D planar assumptions.");
   params.addParam<UserObjectName>("subblock_index_provider",
@@ -27,10 +26,8 @@ ADComputePlaneIncrementalStrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputePlaneIncrementalStrain<compute_stage>::ADComputePlaneIncrementalStrain(
-    const InputParameters & parameters)
-  : ADCompute2DIncrementalStrain<compute_stage>(parameters),
+ADComputePlaneIncrementalStrain::ADComputePlaneIncrementalStrain(const InputParameters & parameters)
+  : ADCompute2DIncrementalStrain(parameters),
     _subblock_id_provider(isParamValid("subblock_index_provider")
                               ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
                               : nullptr),
@@ -57,9 +54,8 @@ ADComputePlaneIncrementalStrain<compute_stage>::ADComputePlaneIncrementalStrain(
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputePlaneIncrementalStrain<compute_stage>::computeOutOfPlaneGradDisp()
+ADComputePlaneIncrementalStrain::computeOutOfPlaneGradDisp()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return (*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0];
@@ -67,9 +63,8 @@ ADComputePlaneIncrementalStrain<compute_stage>::computeOutOfPlaneGradDisp()
     return _out_of_plane_strain[_qp];
 }
 
-template <ComputeStage compute_stage>
 Real
-ADComputePlaneIncrementalStrain<compute_stage>::computeOutOfPlaneGradDispOld()
+ADComputePlaneIncrementalStrain::computeOutOfPlaneGradDispOld()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return (*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0];

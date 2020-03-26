@@ -11,8 +11,7 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage compute_stage>
-class NormalMortarMechanicalContact : public ADMortarConstraint<compute_stage>
+class NormalMortarMechanicalContact : public ADMortarConstraint
 {
 public:
   static InputParameters validParams();
@@ -23,6 +22,4 @@ protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 
   const MooseEnum _component;
-
-  usingMortarConstraintMembers;
 };

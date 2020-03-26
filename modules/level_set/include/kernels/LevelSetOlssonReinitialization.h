@@ -12,13 +12,10 @@
 // MOOSE includes
 #include "ADKernelGrad.h"
 
-// Forward declarations
-
 /**
  * Implements the re-initialization equation proposed by Olsson et. al. (2007).
  */
-template <ComputeStage compute_stage>
-class LevelSetOlssonReinitialization : public ADKernelGrad<compute_stage>
+class LevelSetOlssonReinitialization : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
@@ -37,6 +34,5 @@ protected:
   /// Use modified reinitilization formulation (see Olsson et. al. (2007), section 2.2.1)
   const bool _use_modified_reinitilization_formulation;
 
-  usingKernelGradMembers;
-  using ADKernelGrad<compute_stage>::getPostprocessorValue;
+  using ADKernelGrad::getPostprocessorValue;
 };

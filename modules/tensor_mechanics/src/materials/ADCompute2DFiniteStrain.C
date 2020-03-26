@@ -11,11 +11,10 @@
 
 #include "libmesh/quadrature.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCompute2DFiniteStrain<compute_stage>::validParams()
+ADCompute2DFiniteStrain::validParams()
 {
-  InputParameters params = ADComputeFiniteStrain<compute_stage>::validParams();
+  InputParameters params = ADComputeFiniteStrain::validParams();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains in 2D geometries.");
 
@@ -25,16 +24,14 @@ ADCompute2DFiniteStrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCompute2DFiniteStrain<compute_stage>::ADCompute2DFiniteStrain(const InputParameters & parameters)
-  : ADComputeFiniteStrain<compute_stage>(parameters),
+ADCompute2DFiniteStrain::ADCompute2DFiniteStrain(const InputParameters & parameters)
+  : ADComputeFiniteStrain(parameters),
     _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADCompute2DFiniteStrain<compute_stage>::initialSetup()
+ADCompute2DFiniteStrain::initialSetup()
 {
   for (unsigned int i = 0; i < 3; ++i)
   {
@@ -56,9 +53,8 @@ ADCompute2DFiniteStrain<compute_stage>::initialSetup()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADCompute2DFiniteStrain<compute_stage>::computeProperties()
+ADCompute2DFiniteStrain::computeProperties()
 {
   ADRankTwoTensor ave_Fhat;
 
@@ -103,9 +99,8 @@ ADCompute2DFiniteStrain<compute_stage>::computeProperties()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADCompute2DFiniteStrain<compute_stage>::displacementIntegrityCheck()
+ADCompute2DFiniteStrain::displacementIntegrityCheck()
 {
   if (_out_of_plane_direction != 2 && _ndisp != 3)
     mooseError("For 2D simulations where the out-of-plane direction is x or y the number of "
@@ -114,6 +109,3 @@ ADCompute2DFiniteStrain<compute_stage>::displacementIntegrityCheck()
     mooseError("For 2D simulations where the out-of-plane direction is z the number of supplied "
                "displacements must be two.");
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADCompute2DFiniteStrain);

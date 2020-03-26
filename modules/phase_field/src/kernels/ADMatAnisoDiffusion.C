@@ -11,19 +11,17 @@
 
 registerMooseObject("MooseApp", ADMatAnisoDiffusion);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADMatAnisoDiffusion<compute_stage>::validParams()
+ADMatAnisoDiffusion::validParams()
 {
-  InputParameters params = ADMatDiffusionBase<compute_stage, RealTensorValue>::validParams();
+  InputParameters params = ADMatDiffusionBase<RealTensorValue>::validParams();
   params.addClassDescription("Diffusion equation kernel that takes an anisotropic diffusivity "
                              "from a material property");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMatAnisoDiffusion<compute_stage>::ADMatAnisoDiffusion(const InputParameters & parameters)
-  : ADMatDiffusionBase<compute_stage, RealTensorValue>(parameters)
+ADMatAnisoDiffusion::ADMatAnisoDiffusion(const InputParameters & parameters)
+  : ADMatDiffusionBase<RealTensorValue>(parameters)
 {
 }
 

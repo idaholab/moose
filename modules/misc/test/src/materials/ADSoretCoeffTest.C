@@ -11,28 +11,25 @@
 
 registerMooseObject("MiscTestApp", ADSoretCoeffTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADSoretCoeffTest<compute_stage>::validParams()
+ADSoretCoeffTest::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addRequiredCoupledVar("coupled_var", "A coupled variable");
   params.addRequiredCoupledVar("temperature", "The coupled temperature variable");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADSoretCoeffTest<compute_stage>::ADSoretCoeffTest(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADSoretCoeffTest::ADSoretCoeffTest(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _coupled_var(adCoupledValue("coupled_var")),
     _temp(adCoupledValue("temperature")),
     _soret_coeff(declareADProperty<Real>("soret_coefficient"))
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADSoretCoeffTest<compute_stage>::computeQpProperties()
+ADSoretCoeffTest::computeQpProperties()
 {
   _soret_coeff[_qp] = _coupled_var[_qp] / _temp[_qp] / _temp[_qp];
 }

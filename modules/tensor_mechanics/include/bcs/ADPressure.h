@@ -16,8 +16,7 @@ class Function;
 /**
  * ADPressure applies a pressure on a given boundary in the direction defined by component
  */
-template <ComputeStage compute_stage>
-class ADPressure : public ADIntegratedBC<compute_stage>
+class ADPressure : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -38,6 +37,4 @@ protected:
 
   /// _alpha Parameter for HHT time integration scheme
   const Real _alpha;
-
-  usingIntegratedBCMembers;
 };

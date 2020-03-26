@@ -11,25 +11,22 @@
 
 registerMooseObject("NavierStokesApp", INSADMomentumSUPG);
 
-template <ComputeStage compute_stage>
 InputParameters
-INSADMomentumSUPG<compute_stage>::validParams()
+INSADMomentumSUPG::validParams()
 {
-  InputParameters params = ADVectorKernelSUPG<compute_stage>::validParams();
+  InputParameters params = ADVectorKernelSUPG::validParams();
   params.addClassDescription("Adds the supg stabilization to the INS momentum equation");
   return params;
 }
 
-template <ComputeStage compute_stage>
-INSADMomentumSUPG<compute_stage>::INSADMomentumSUPG(const InputParameters & parameters)
-  : ADVectorKernelSUPG<compute_stage>(parameters),
+INSADMomentumSUPG::INSADMomentumSUPG(const InputParameters & parameters)
+  : ADVectorKernelSUPG(parameters),
     _momentum_strong_residual(getADMaterialProperty<RealVectorValue>("momentum_strong_residual"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-INSADMomentumSUPG<compute_stage>::precomputeQpStrongResidual()
+INSADMomentumSUPG::precomputeQpStrongResidual()
 {
   return _momentum_strong_residual[_qp];
 }

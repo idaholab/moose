@@ -9,27 +9,21 @@
 
 #include "ADComputeDilatationThermalExpansionEigenstrainBase.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::validParams()
+ADComputeDilatationThermalExpansionEigenstrainBase::validParams()
 {
-  return ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  return ADComputeThermalExpansionEigenstrainBase::validParams();
 }
 
-template <ComputeStage compute_stage>
-ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::
+ADComputeDilatationThermalExpansionEigenstrainBase::
     ADComputeDilatationThermalExpansionEigenstrainBase(const InputParameters & parameters)
-  : ADComputeThermalExpansionEigenstrainBase<compute_stage>(parameters)
+  : ADComputeThermalExpansionEigenstrainBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
-    ADReal & thermal_strain)
+ADComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain)
 {
   thermal_strain =
       computeDilatation(_temperature[_qp]) - computeDilatation(_stress_free_temperature[_qp]);
 }
-
-adBaseClass(ADComputeDilatationThermalExpansionEigenstrainBase);

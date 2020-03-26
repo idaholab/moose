@@ -15,8 +15,7 @@
  * ADComputeStrainIncrementBasedStress computes stress considering list of inelastic strain
  * increments
  */
-template <ComputeStage compute_stage>
-class ADComputeStrainIncrementBasedStress : public ADComputeStressBase<compute_stage>
+class ADComputeStrainIncrementBasedStress : public ADComputeStressBase
 {
 public:
   static InputParameters validParams();
@@ -44,6 +43,4 @@ protected:
   std::vector<MaterialPropertyName> _inelastic_strain_names;
   /// Number of inelastic models
   unsigned int _num_inelastic_strain_models;
-
-  usingComputeStressBaseMembers;
 };

@@ -12,9 +12,8 @@
 
 registerMooseObject("MooseApp", TangentialMortarLMMechanicalContact);
 
-template <ComputeStage compute_stage>
 InputParameters
-TangentialMortarLMMechanicalContact<compute_stage>::validParams()
+TangentialMortarLMMechanicalContact::validParams()
 {
   auto params = MortarConstraintBase::validParams();
   params.addRequiredParam<NonlinearVariableName>("slave_disp_y",
@@ -40,10 +39,9 @@ TangentialMortarLMMechanicalContact<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanicalContact(
+TangentialMortarLMMechanicalContact::TangentialMortarLMMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters),
+  : ADMortarConstraint(parameters),
     _slave_disp_y(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _master_disp_y(
@@ -52,11 +50,11 @@ TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanical
             : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _contact_pressure_var(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
-    _contact_pressure(_contact_pressure_var.template adSlnLower<compute_stage>()),
-    _slave_x_dot(_slave_var.template adUDot<compute_stage>()),
-    _master_x_dot(_master_var.template adUDotNeighbor<compute_stage>()),
-    _slave_y_dot(_slave_disp_y.template adUDot<compute_stage>()),
-    _master_y_dot(_master_disp_y.template adUDotNeighbor<compute_stage>()),
+    _contact_pressure(_contact_pressure_var.adSlnLower()),
+    _slave_x_dot(_slave_var.adUDot()),
+    _master_x_dot(_master_var.adUDotNeighbor()),
+    _slave_y_dot(_slave_disp_y.adUDot()),
+    _master_y_dot(_master_disp_y.adUDotNeighbor()),
     _friction_coeff(getParam<Real>("friction_coefficient")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _ncp_type(getParam<MooseEnum>("ncp_function_type")),
@@ -64,9 +62,8 @@ TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanical
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-TangentialMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

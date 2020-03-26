@@ -167,8 +167,7 @@ MortarPeriodicAction::act()
             {
               for (unsigned short j = 0; j < dim; ++j)
               {
-                InputParameters params =
-                    _factory.getValidParams("EqualGradientConstraint<RESIDUAL>");
+                InputParameters params = _factory.getValidParams("EqualGradientConstraint");
                 params.set<NonlinearVariableName>("variable") =
                     lm_base + "_" + var + "_d" + axis[j];
                 params.set<VariableName>("master_variable") = var;
@@ -178,19 +177,15 @@ MortarPeriodicAction::act()
                 params.set<SubdomainName>("master_subdomain_name") = "master_" + axis[i];
                 params.set<unsigned int>("component") = j;
                 params.set<bool>("periodic") = true;
-                _problem->addConstraint("EqualGradientConstraint<RESIDUAL>",
-                                        ct_base + "_d" + axis[j] + "_residual",
-                                        params);
-                _problem->addConstraint("EqualGradientConstraint<JACOBIAN>",
-                                        ct_base + "_d" + axis[j] + "_jacobian",
-                                        params);
+                _problem->addConstraint(
+                    "EqualGradientConstraint", ct_base + "_d" + axis[j], params);
               }
               break;
             }
 
             case 1: // value
             {
-              InputParameters params = _factory.getValidParams("EqualValueConstraint<RESIDUAL>");
+              InputParameters params = _factory.getValidParams("EqualValueConstraint");
               params.set<NonlinearVariableName>("variable") = lm_base + "_" + var;
               params.set<VariableName>("master_variable") = var;
               params.set<BoundaryName>("slave_boundary_name") = boundary_names[i];
@@ -198,10 +193,7 @@ MortarPeriodicAction::act()
               params.set<SubdomainName>("slave_subdomain_name") = "slave_" + axis[i];
               params.set<SubdomainName>("master_subdomain_name") = "master_" + axis[i];
               params.set<bool>("periodic") = true;
-              _problem->addConstraint(
-                  "EqualValueConstraint<RESIDUAL>", ct_base + "_residual", params);
-              _problem->addConstraint(
-                  "EqualValueConstraint<JACOBIAN>", ct_base + "_jacobian", params);
+              _problem->addConstraint("EqualValueConstraint", ct_base, params);
 
               break;
             }

@@ -11,26 +11,21 @@
 
 #include "libmesh/quadrature.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCompute1DIncrementalStrain<compute_stage>::validParams()
+ADCompute1DIncrementalStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalSmallStrain<compute_stage>::validParams();
+  InputParameters params = ADComputeIncrementalSmallStrain::validParams();
   params.addClassDescription("Compute strain increment for small strains in 1D problems.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCompute1DIncrementalStrain<compute_stage>::ADCompute1DIncrementalStrain(
-    const InputParameters & parameters)
-  : ADComputeIncrementalSmallStrain<compute_stage>(parameters)
+ADCompute1DIncrementalStrain::ADCompute1DIncrementalStrain(const InputParameters & parameters)
+  : ADComputeIncrementalSmallStrain(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADCompute1DIncrementalStrain<compute_stage>::computeTotalStrainIncrement(
-    ADRankTwoTensor & total_strain_increment)
+ADCompute1DIncrementalStrain::computeTotalStrainIncrement(ADRankTwoTensor & total_strain_increment)
 {
   // Deformation gradient calculation for 1D problems
   ADRankTwoTensor A(
@@ -50,6 +45,3 @@ ADCompute1DIncrementalStrain<compute_stage>::computeTotalStrainIncrement(
 
   total_strain_increment = 0.5 * (A + A.transpose());
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADCompute1DIncrementalStrain);

@@ -21,20 +21,18 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeShellStress);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeShellStress<compute_stage>::validParams()
+ADComputeShellStress::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Compute in-plane stress using elasticity for shell");
   params.addRequiredParam<std::string>("through_thickness_order",
                                        "Quadrature order in out of plane direction");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeShellStress<compute_stage>::ADComputeShellStress(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters)
+ADComputeShellStress::ADComputeShellStress(const InputParameters & parameters)
+  : ADMaterial(parameters)
 {
   // get number of quadrature points along thickness based on order
   std::unique_ptr<QGauss> t_qrule = libmesh_make_unique<QGauss>(
@@ -63,18 +61,16 @@ ADComputeShellStress<compute_stage>::ADComputeShellStress(const InputParameters 
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeShellStress<compute_stage>::initQpStatefulProperties()
+ADComputeShellStress::initQpStatefulProperties()
 {
   // initialize stress tensor to zero
   for (unsigned int i = 0; i < _t_points.size(); ++i)
     (*_stress[i])[_qp].zero();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeShellStress<compute_stage>::computeQpProperties()
+ADComputeShellStress::computeQpProperties()
 {
   for (unsigned int i = 0; i < _t_points.size(); ++i)
   {

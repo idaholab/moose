@@ -11,11 +11,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputePlaneFiniteStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputePlaneFiniteStrain<compute_stage>::validParams()
+ADComputePlaneFiniteStrain::validParams()
 {
-  InputParameters params = ADCompute2DFiniteStrain<compute_stage>::validParams();
+  InputParameters params = ADCompute2DFiniteStrain::validParams();
   params.addClassDescription("Compute strain increment and rotation increment for finite strain "
                              "under 2D planar assumptions.");
   params.addParam<UserObjectName>("subblock_index_provider",
@@ -27,10 +26,8 @@ ADComputePlaneFiniteStrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputePlaneFiniteStrain<compute_stage>::ADComputePlaneFiniteStrain(
-    const InputParameters & parameters)
-  : ADCompute2DFiniteStrain<compute_stage>(parameters),
+ADComputePlaneFiniteStrain::ADComputePlaneFiniteStrain(const InputParameters & parameters)
+  : ADCompute2DFiniteStrain(parameters),
     _subblock_id_provider(isParamValid("subblock_index_provider")
                               ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
                               : nullptr),
@@ -57,9 +54,8 @@ ADComputePlaneFiniteStrain<compute_stage>::ADComputePlaneFiniteStrain(
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputePlaneFiniteStrain<compute_stage>::computeOutOfPlaneGradDisp()
+ADComputePlaneFiniteStrain::computeOutOfPlaneGradDisp()
 {
   /**
    * This is consistent with the approximation of stretch rate tensor
@@ -71,9 +67,8 @@ ADComputePlaneFiniteStrain<compute_stage>::computeOutOfPlaneGradDisp()
     return std::exp(_out_of_plane_strain[_qp]) - 1.0;
 }
 
-template <ComputeStage compute_stage>
 Real
-ADComputePlaneFiniteStrain<compute_stage>::computeOutOfPlaneGradDispOld()
+ADComputePlaneFiniteStrain::computeOutOfPlaneGradDispOld()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return std::exp((*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0]) - 1.0;

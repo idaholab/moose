@@ -21,13 +21,12 @@
  * creep based on stress, temperature, and time effects.  This class also
  * computes the creep strain as a stateful material property.
  */
-template <ComputeStage compute_stage>
-class ADPowerLawCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase<compute_stage>
+class ADPowerLawCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase
 {
 public:
   static InputParameters validParams();
 
-  ADPowerLawCreepStressUpdate<compute_stage>(const InputParameters & parameters);
+  ADPowerLawCreepStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void computeStressInitialize(const ADReal & effective_trial_stress,
@@ -63,6 +62,4 @@ protected:
 
   /// Exponential calculated from current time
   Real _exp_time;
-
-  usingRadialReturnCreepStressUpdateBaseMembers;
 };

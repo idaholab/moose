@@ -16,29 +16,25 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeRSphericalIncrementalStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeRSphericalIncrementalStrain<compute_stage>::validParams()
+ADComputeRSphericalIncrementalStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalSmallStrain<compute_stage>::validParams();
+  InputParameters params = ADComputeIncrementalSmallStrain::validParams();
   params.addClassDescription(
       "Compute a strain increment for incremental strains in 1D spherical symmetry problems.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeRSphericalIncrementalStrain<compute_stage>::ADComputeRSphericalIncrementalStrain(
+ADComputeRSphericalIncrementalStrain::ADComputeRSphericalIncrementalStrain(
     const InputParameters & parameters)
-  : ADComputeIncrementalSmallStrain<compute_stage>(parameters),
-    _disp_old_0(coupledValueOld("displacements", 0))
+  : ADComputeIncrementalSmallStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeRSphericalIncrementalStrain<compute_stage>::initialSetup()
+ADComputeRSphericalIncrementalStrain::initialSetup()
 {
-  ADComputeIncrementalStrainBase<compute_stage>::initialSetup();
+  ADComputeIncrementalStrainBase::initialSetup();
 
   const auto & subdomainIDs = _mesh.meshSubdomains();
   for (auto subdomainID : subdomainIDs)
@@ -46,9 +42,8 @@ ADComputeRSphericalIncrementalStrain<compute_stage>::initialSetup()
       mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeRSphericalIncrementalStrain<compute_stage>::computeTotalStrainIncrement(
+ADComputeRSphericalIncrementalStrain::computeTotalStrainIncrement(
     ADRankTwoTensor & total_strain_increment)
 {
   // Deformation gradient calculation in cylindrical coordinates

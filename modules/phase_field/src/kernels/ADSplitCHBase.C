@@ -9,34 +9,24 @@
 
 #include "ADSplitCHBase.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADSplitCHBase<compute_stage>::validParams()
+ADSplitCHBase::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Base class for split Cahn-Hilliard equation.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADSplitCHBase<compute_stage>::ADSplitCHBase(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters)
-{
-}
+ADSplitCHBase::ADSplitCHBase(const InputParameters & parameters) : ADKernel(parameters) {}
 
-template <ComputeStage compute_stage>
 ADReal
-ADSplitCHBase<compute_stage>::computeQpResidual()
+ADSplitCHBase::computeQpResidual()
 {
   return computeDFDC() * _test[_i][_qp];
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADSplitCHBase<compute_stage>::computeDFDC()
+ADSplitCHBase::computeDFDC()
 {
   return 0.0;
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADSplitCHBase);

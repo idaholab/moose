@@ -145,7 +145,7 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
     if (_tid == 0)
       _fe_problem.addUserObject(class_name, brine_name, params);
   }
-  _brine_fp = &_fe_problem.getUserObjectTempl<BrineFluidProperties>(brine_name);
+  _brine_fp = &_fe_problem.getUserObject<BrineFluidProperties>(brine_name);
 }
 
 void

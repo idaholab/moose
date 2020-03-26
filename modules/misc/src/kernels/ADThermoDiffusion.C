@@ -11,11 +11,10 @@
 
 registerMooseObject("MiscApp", ADThermoDiffusion);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADThermoDiffusion<compute_stage>::validParams()
+ADThermoDiffusion::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription(
       "Calculates diffusion due to temperature gradient and Soret Coefficient");
   params.addRequiredCoupledVar("temperature", "The coupled temperature variable.");
@@ -25,17 +24,15 @@ ADThermoDiffusion<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADThermoDiffusion<compute_stage>::ADThermoDiffusion(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADThermoDiffusion::ADThermoDiffusion(const InputParameters & parameters)
+  : ADKernel(parameters),
     _grad_temp(adCoupledGradient("temperature")),
     _soret_coeff(getADMaterialProperty<Real>("soret_coefficient"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADThermoDiffusion<compute_stage>::computeQpResidual()
+ADThermoDiffusion::computeQpResidual()
 {
   return _soret_coeff[_qp] * _grad_temp[_qp] * _grad_test[_i][_qp];
 }

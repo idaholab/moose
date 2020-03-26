@@ -12,9 +12,6 @@
 #include "ADKernel.h"
 #include "libmesh/quadrature_gauss.h"
 
-#define usingADStressDivergenceShellMembers usingKernelMembers
-
-// Forward Declarations
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -33,8 +30,7 @@ class QGauss;
  * ADStressDivergenceShell computes the stress divergence term for shell elements.
  **/
 
-template <ComputeStage compute_stage>
-class ADStressDivergenceShell : public ADKernel<compute_stage>
+class ADStressDivergenceShell : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -48,11 +44,11 @@ protected:
   const unsigned int _component;
   const bool _large_strain;
 
-  std::vector<const ADMaterialProperty(RankTwoTensor) *> _stress;
+  std::vector<const ADMaterialProperty<RankTwoTensor> *> _stress;
   std::vector<const MaterialProperty<RankTwoTensor> *> _stress_old;
-  std::vector<const ADMaterialProperty(DenseMatrix<Real>) *> _B_mat;
-  std::vector<const ADMaterialProperty(DenseMatrix<Real>) *> _B_nl;
-  std::vector<const ADMaterialProperty(Real) *> _J_map;
+  std::vector<const ADMaterialProperty<DenseMatrix<Real>> *> _B_mat;
+  std::vector<const ADMaterialProperty<DenseMatrix<Real>> *> _B_nl;
+  std::vector<const ADMaterialProperty<Real> *> _J_map;
 
   /// Quadrature rule in the out of plane direction
   std::unique_ptr<QGauss> _t_qrule;
@@ -65,6 +61,4 @@ protected:
 
   /// qp index in out of plane direction
   unsigned int _qp_z;
-
-  usingKernelMembers;
 };

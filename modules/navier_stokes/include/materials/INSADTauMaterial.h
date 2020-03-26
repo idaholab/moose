@@ -11,8 +11,7 @@
 
 #include "INSADMaterial.h"
 
-template <ComputeStage compute_stage>
-class INSADTauMaterial : public INSADMaterial<compute_stage>
+class INSADTauMaterial : public INSADMaterial
 {
 public:
   static InputParameters validParams();
@@ -25,9 +24,7 @@ protected:
   void computeHMax();
 
   const Real _alpha;
-  ADMaterialProperty(Real) & _tau;
+  ADMaterialProperty<Real> & _tau;
 
   ADReal _hmax;
-
-  usingINSMaterialMembers;
 };

@@ -11,11 +11,10 @@
 
 registerMooseObject("MooseApp", TangentialMortarMechanicalContact);
 
-template <ComputeStage compute_stage>
 InputParameters
-TangentialMortarMechanicalContact<compute_stage>::validParams()
+TangentialMortarMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -26,16 +25,14 @@ TangentialMortarMechanicalContact<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-TangentialMortarMechanicalContact<compute_stage>::TangentialMortarMechanicalContact(
+TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<MooseEnum>("component"))
+  : ADMortarConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-TangentialMortarMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType type)
+TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

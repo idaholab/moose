@@ -11,20 +11,12 @@
 
 #include "ADComputeFiniteStrain.h"
 
-#define usingCompute1DFiniteStrainMembers                                                          \
-  usingComputeFiniteStrainMembers;                                                                 \
-  using ADCompute1DFiniteStrain<compute_stage>::computeGradDispYY;                                 \
-  using ADCompute1DFiniteStrain<compute_stage>::computeGradDispYYOld;                              \
-  using ADCompute1DFiniteStrain<compute_stage>::computeGradDispZZ;                                 \
-  using ADCompute1DFiniteStrain<compute_stage>::computeGradDispZZOld
-
 /**
  * ADCompute1DFiniteStrain defines a strain increment for finite strains in 1D problems,
  * handling strains in other two directions. It contains virtual methods to define
  * the displacement gradients as a general nonzero value.
  */
-template <ComputeStage compute_stage>
-class ADCompute1DFiniteStrain : public ADComputeFiniteStrain<compute_stage>
+class ADCompute1DFiniteStrain : public ADComputeFiniteStrain
 {
 public:
   static InputParameters validParams();
@@ -49,6 +41,4 @@ protected:
   /// Computes the old dUz/dz; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZOld() = 0;
-
-  usingComputeFiniteStrainMembers;
 };

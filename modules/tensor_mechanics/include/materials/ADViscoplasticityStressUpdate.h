@@ -12,9 +12,8 @@
 #include "ADViscoplasticityStressUpdateBase.h"
 #include "ADSingleVariableReturnMappingSolution.h"
 
-template <ComputeStage compute_stage>
-class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<compute_stage>,
-                                      public ADSingleVariableReturnMappingSolution<compute_stage>
+class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase,
+                                      public ADSingleVariableReturnMappingSolution
 {
 public:
   static InputParameters validParams();
@@ -92,10 +91,10 @@ protected:
   const Real _power_factor;
 
   /// Leading coefficient
-  const ADMaterialProperty(Real) & _coefficient;
+  const ADMaterialProperty<Real> & _coefficient;
 
   /// Gauge stress
-  ADMaterialProperty(Real) & _gauge_stress;
+  ADMaterialProperty<Real> & _gauge_stress;
 
   /// Maximum ratio between the gauge stress and the equilvalent stress
   const Real _maximum_gauge_ratio;
@@ -117,7 +116,4 @@ protected:
 
   /// Container for _derivative
   ADReal _derivative;
-
-  usingViscoplasticityStressUpdateBaseMembers;
-  usingSingleVariableReturnMappingSolutionMembers;
 };

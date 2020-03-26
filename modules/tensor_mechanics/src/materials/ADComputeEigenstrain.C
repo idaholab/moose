@@ -13,11 +13,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeEigenstrain<compute_stage>::validParams()
+ADComputeEigenstrain::validParams()
 {
-  InputParameters params = ADComputeEigenstrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeEigenstrainBase::validParams();
   params.addClassDescription("Computes a constant Eigenstrain");
   params.addRequiredParam<std::vector<Real>>(
       "eigen_base", "Vector of values defining the constant base tensor for the Eigenstrain");
@@ -26,17 +25,14 @@ ADComputeEigenstrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeEigenstrain<compute_stage>::ADComputeEigenstrain(const InputParameters & parameters)
-  : ADComputeEigenstrainBase<compute_stage>(parameters),
-    _prefactor(getADMaterialProperty<Real>("prefactor"))
+ADComputeEigenstrain::ADComputeEigenstrain(const InputParameters & parameters)
+  : ADComputeEigenstrainBase(parameters), _prefactor(getADMaterialProperty<Real>("prefactor"))
 {
   _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real>>("eigen_base"));
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeEigenstrain<compute_stage>::computeQpEigenstrain()
+ADComputeEigenstrain::computeQpEigenstrain()
 {
   // Define Eigenstrain
   _eigenstrain[_qp] = _eigen_base_tensor * _prefactor[_qp];

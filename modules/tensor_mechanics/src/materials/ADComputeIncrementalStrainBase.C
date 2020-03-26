@@ -10,18 +10,15 @@
 #include "ADComputeIncrementalStrainBase.h"
 #include "MooseMesh.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeIncrementalStrainBase<compute_stage>::validParams()
+ADComputeIncrementalStrainBase::validParams()
 {
-  InputParameters params = ADComputeStrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeStrainBase::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeIncrementalStrainBase<compute_stage>::ADComputeIncrementalStrainBase(
-    const InputParameters & parameters)
-  : ADComputeStrainBase<compute_stage>(parameters),
+ADComputeIncrementalStrainBase::ADComputeIncrementalStrainBase(const InputParameters & parameters)
+  : ADComputeStrainBase(parameters),
     _grad_disp_old(3),
     _strain_rate(declareADProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareADProperty<RankTwoTensor>(_base_name + "strain_increment")),
@@ -34,11 +31,10 @@ ADComputeIncrementalStrainBase<compute_stage>::ADComputeIncrementalStrainBase(
     _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalStrainBase<compute_stage>::initialSetup()
+ADComputeIncrementalStrainBase::initialSetup()
 {
-  ADComputeStrainBase<compute_stage>::initialSetup();
+  ADComputeStrainBase::initialSetup();
   for (unsigned int i = 0; i < 3; ++i)
   {
     if (_fe_problem.isTransient() && i < _ndisp)
@@ -48,18 +44,15 @@ ADComputeIncrementalStrainBase<compute_stage>::initialSetup()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalStrainBase<compute_stage>::initQpStatefulProperties()
+ADComputeIncrementalStrainBase::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalStrainBase<compute_stage>::subtractEigenstrainIncrementFromStrain(
-    ADRankTwoTensor & strain)
+ADComputeIncrementalStrainBase::subtractEigenstrainIncrementFromStrain(ADRankTwoTensor & strain)
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
@@ -67,6 +60,3 @@ ADComputeIncrementalStrainBase<compute_stage>::subtractEigenstrainIncrementFromS
     strain += (*_eigenstrains_old[i])[_qp];
   }
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeIncrementalStrainBase);

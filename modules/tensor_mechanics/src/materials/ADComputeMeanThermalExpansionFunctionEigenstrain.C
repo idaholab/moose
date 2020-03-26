@@ -13,12 +13,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeMeanThermalExpansionFunctionEigenstrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::validParams()
+ADComputeMeanThermalExpansionFunctionEigenstrain::validParams()
 {
-  InputParameters params =
-      ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeMeanThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the mean thermal expansion as a function of temperature");
   params.addRequiredParam<FunctionName>(
@@ -31,25 +29,22 @@ ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::
-    ADComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
-  : ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>(parameters),
+ADComputeMeanThermalExpansionFunctionEigenstrain::ADComputeMeanThermalExpansionFunctionEigenstrain(
+    const InputParameters & parameters)
+  : ADComputeMeanThermalExpansionEigenstrainBase(parameters),
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
     _thexp_func_ref_temp(getParam<Real>("thermal_expansion_function_reference_temperature"))
 {
 }
 
-template <ComputeStage compute_stage>
 Real
-ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::referenceTemperature()
+ADComputeMeanThermalExpansionFunctionEigenstrain::referenceTemperature()
 {
   return _thexp_func_ref_temp;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::meanThermalExpansionCoefficient(
+ADComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
     const ADReal & temperature)
 {
   return _thermal_expansion_function.value(MetaPhysicL::raw_value(temperature), Point());

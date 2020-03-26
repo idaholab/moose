@@ -11,11 +11,6 @@
 
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 
-#define usingComputeMeanThermalExpansionEigenstrainBaseMembers                                     \
-  usingComputeThermalExpansionEigenstrainBaseMembers;                                              \
-  using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::referenceTemperature;         \
-  using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::meanThermalExpansionCoefficient
-
 /**
  * ADComputeMeanThermalExpansionEigenstrainBase is a base class for computing the
  * thermal expansion eigenstrain according to a temperature-dependent mean thermal
@@ -27,9 +22,7 @@
  * M. Niffenegger and K. Reichlin. The proper use of thermal expansion coefficients
  * in finite element calculations. Nuclear Engineering and Design, 243:356-359, Feb. 2012.
  */
-template <ComputeStage compute_stage>
-class ADComputeMeanThermalExpansionEigenstrainBase
-  : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
+class ADComputeMeanThermalExpansionEigenstrainBase : public ADComputeThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();
@@ -57,6 +50,4 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual ADReal meanThermalExpansionCoefficient(const ADReal & temperature) = 0;
-
-  usingComputeThermalExpansionEigenstrainBaseMembers;
 };

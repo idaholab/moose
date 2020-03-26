@@ -12,17 +12,12 @@
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-#define usingComputeDilatationThermalExpansionEigenstrainBaseMembers                               \
-  usingComputeThermalExpansionEigenstrainBaseMembers;                                              \
-  using ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeDilatation
-
 /**
  * ADComputeDilatationThermalExpansionEigenstrainBase computes an eigenstrain for thermal expansion
  * from an dilatation equation.
  */
-template <ComputeStage compute_stage>
 class ADComputeDilatationThermalExpansionEigenstrainBase
-  : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
+  : public ADComputeThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();
@@ -38,6 +33,4 @@ protected:
    * @return fractional linear dilatation due
    */
   virtual ADReal computeDilatation(const ADReal & temperature) = 0;
-
-  usingComputeThermalExpansionEigenstrainBaseMembers;
 };

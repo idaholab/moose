@@ -11,15 +11,12 @@
 
 #include "ADKernelGrad.h"
 
-// Forward Declarations
-
 /**
  * This class computes the momentum equation residual and Jacobian
  * contributions for the viscous term of the incompressible Navier-Stokes momentum
  * equation.
  */
-template <ComputeStage compute_stage>
-class INSADMomentumViscous : public ADVectorKernelGrad<compute_stage>
+class INSADMomentumViscous : public ADVectorKernelGrad
 {
 public:
   static InputParameters validParams();
@@ -29,7 +26,5 @@ public:
 protected:
   virtual ADRealTensorValue precomputeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _mu;
-
-  usingVectorKernelGradMembers;
+  const ADMaterialProperty<Real> & _mu;
 };

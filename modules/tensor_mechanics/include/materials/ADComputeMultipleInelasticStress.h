@@ -11,18 +11,6 @@
 
 #include "ADComputeFiniteStrainElasticStress.h"
 
-#define usingComputeMultipleInelasticStressMembers                                                 \
-  usingComputeFiniteStrainElasticStressMembers;                                                    \
-  using ADComputeMultipleInelasticStress<compute_stage>::computeQpStressIntermediateConfiguration; \
-  using ADComputeMultipleInelasticStress<compute_stage>::finiteStrainRotation;                     \
-  using ADComputeMultipleInelasticStress<compute_stage>::updateQpState;                            \
-  using ADComputeMultipleInelasticStress<compute_stage>::updateQpStateSingleModel;                 \
-  using ADComputeMultipleInelasticStress<compute_stage>::computeAdmissibleState;                   \
-  using ADComputeMultipleInelasticStress<compute_stage>::_inelastic_strain;                        \
-  using ADComputeMultipleInelasticStress<compute_stage>::_inelastic_strain_old
-
-// Forward Declarations
-template <ComputeStage>
 class ADStressUpdateBase;
 template <typename>
 class RankTwoTensorTempl;
@@ -48,8 +36,7 @@ typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
  * for the time increment.
  */
 
-template <ComputeStage compute_stage>
-class ADComputeMultipleInelasticStress : public ADComputeFiniteStrainElasticStress<compute_stage>
+class ADComputeMultipleInelasticStress : public ADComputeFiniteStrainElasticStress
 {
 public:
   static InputParameters validParams();
@@ -129,7 +116,7 @@ protected:
   const bool _perform_finite_strain_rotations;
 
   /// The sum of the inelastic strains that come from the plastic models
-  ADMaterialProperty(RankTwoTensor) & _inelastic_strain;
+  ADMaterialProperty<RankTwoTensor> & _inelastic_strain;
 
   /// old value of inelastic strain
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
@@ -152,10 +139,8 @@ protected:
    * models last to allow for the case when a creep model relaxes the stress state
    * inside of the yield surface in an iteration.
    */
-  std::vector<ADStressUpdateBase<compute_stage> *> _models;
+  std::vector<ADStressUpdateBase *> _models;
 
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
-
-  usingComputeFiniteStrainElasticStressMembers;
 };

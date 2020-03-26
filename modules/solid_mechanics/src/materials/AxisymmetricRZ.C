@@ -22,10 +22,10 @@ AxisymmetricRZ::AxisymmetricRZ(SolidModel & solid_model,
   : Element(solid_model, name, parameters),
     _disp_r(coupledValue("disp_r")),
     _disp_z(coupledValue("disp_z")),
-    _large_strain(solid_model.getParamTempl<bool>("large_strain")),
+    _large_strain(solid_model.getParam<bool>("large_strain")),
     _grad_disp_r(coupledGradient("disp_r")),
     _grad_disp_z(coupledGradient("disp_z")),
-    _volumetric_locking_correction(solid_model.getParamTempl<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(solid_model.getParam<bool>("volumetric_locking_correction"))
 {
 }
 

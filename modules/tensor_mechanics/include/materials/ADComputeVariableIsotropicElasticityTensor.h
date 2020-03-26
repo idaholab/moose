@@ -16,9 +16,7 @@
  * isotropic materials in which the elastic constants (Young's modulus and Poisson's ratio)
  * vary as defined by material properties.
  */
-template <ComputeStage compute_stage>
-class ADComputeVariableIsotropicElasticityTensor
-  : public ADComputeElasticityTensorBase<compute_stage>
+class ADComputeVariableIsotropicElasticityTensor : public ADComputeElasticityTensorBase
 {
 public:
   static InputParameters validParams();
@@ -29,10 +27,8 @@ protected:
   virtual void computeQpElasticityTensor() override;
 
   /// Material defining the Young's Modulus
-  const ADMaterialProperty(Real) & _youngs_modulus;
+  const ADMaterialProperty<Real> & _youngs_modulus;
 
   /// Material defining the Poisson's Ratio
-  const ADMaterialProperty(Real) & _poissons_ratio;
-
-  usingComputeElasticityTensorBaseMembers;
+  const ADMaterialProperty<Real> & _poissons_ratio;
 };

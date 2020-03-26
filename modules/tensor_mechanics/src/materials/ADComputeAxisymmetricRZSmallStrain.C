@@ -13,27 +13,24 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeAxisymmetricRZSmallStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeAxisymmetricRZSmallStrain<compute_stage>::validParams()
+ADComputeAxisymmetricRZSmallStrain::validParams()
 {
-  InputParameters params = ADCompute2DSmallStrain<compute_stage>::validParams();
+  InputParameters params = ADCompute2DSmallStrain::validParams();
   params.addClassDescription("Compute a small strain in an Axisymmetric geometry");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeAxisymmetricRZSmallStrain<compute_stage>::ADComputeAxisymmetricRZSmallStrain(
+ADComputeAxisymmetricRZSmallStrain::ADComputeAxisymmetricRZSmallStrain(
     const InputParameters & parameters)
-  : ADCompute2DSmallStrain<compute_stage>(parameters)
+  : ADCompute2DSmallStrain(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeAxisymmetricRZSmallStrain<compute_stage>::initialSetup()
+ADComputeAxisymmetricRZSmallStrain::initialSetup()
 {
-  ADCompute2DSmallStrain<compute_stage>::initialSetup();
+  ADCompute2DSmallStrain::initialSetup();
 
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
@@ -43,9 +40,8 @@ ADComputeAxisymmetricRZSmallStrain<compute_stage>::initialSetup()
                "The out-of-plane direction for axisymmetric systems is currently restricted to z");
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputeAxisymmetricRZSmallStrain<compute_stage>::computeOutOfPlaneStrain()
+ADComputeAxisymmetricRZSmallStrain::computeOutOfPlaneStrain()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);

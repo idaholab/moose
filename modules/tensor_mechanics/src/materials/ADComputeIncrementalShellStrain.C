@@ -24,11 +24,10 @@
 
 registerMooseObject("TensorMechanicsApp", ADComputeIncrementalShellStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeIncrementalShellStrain<compute_stage>::validParams()
+ADComputeIncrementalShellStrain::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Compute a small strain increment for the shell.");
   params.addRequiredCoupledVar(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
@@ -45,10 +44,8 @@ ADComputeIncrementalShellStrain<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
-    const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
     _rot_num(_nrot),
@@ -163,9 +160,8 @@ ADComputeIncrementalShellStrain<compute_stage>::ADComputeIncrementalShellStrain(
   _x3(2) = 1;
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalShellStrain<compute_stage>::initQpStatefulProperties()
+ADComputeIncrementalShellStrain::initQpStatefulProperties()
 {
   unsigned int dim = _current_elem->dim();
   if ((dim != 2))
@@ -177,9 +173,8 @@ ADComputeIncrementalShellStrain<compute_stage>::initQpStatefulProperties()
   computeBMatrix();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
+ADComputeIncrementalShellStrain::computeProperties()
 {
   // quadrature points in isoparametric space
   _2d_points = _qrule->get_points(); // would be in 2D
@@ -246,9 +241,8 @@ ADComputeIncrementalShellStrain<compute_stage>::computeProperties()
   copyDualNumbersToValues();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
+ADComputeIncrementalShellStrain::computeGMatrix()
 {
   // quadrature points in isoparametric space
   _2d_points = _qrule->get_points(); // would be in 2D
@@ -381,17 +375,15 @@ ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalShellStrain<compute_stage>::computeNodeNormal()
+ADComputeIncrementalShellStrain::computeNodeNormal()
 {
   for (unsigned int k = 0; k < _nodes.size(); ++k)
     _node_normal[k] = _node_normal_old[k];
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
+ADComputeIncrementalShellStrain::computeBMatrix()
 {
   // compute nodal local axis
   for (unsigned int k = 0; k < _nodes.size(); ++k)
@@ -506,36 +498,8 @@ ADComputeIncrementalShellStrain<compute_stage>::computeBMatrix()
   }
 }
 
-template <>
 void
-ADComputeIncrementalShellStrain<RESIDUAL>::computeSolnVector()
-{
-  _soln_vector.zero();
-
-  for (unsigned int j = 0; j < 4; ++j)
-  {
-    _soln_disp_index[j].resize(_ndisp);
-    _soln_rot_index[j].resize(_nrot);
-
-    for (unsigned int i = 0; i < _ndisp; ++i)
-    {
-      _soln_disp_index[j][i] = _nodes[j]->dof_number(_nonlinear_sys.number(), _disp_num[i], 0);
-      _soln_vector(j + i * _nodes.size()) =
-          (*_sol)(_soln_disp_index[j][i]) - _sol_old(_soln_disp_index[j][i]);
-    }
-
-    for (unsigned int i = 0; i < _nrot; ++i)
-    {
-      _soln_rot_index[j][i] = _nodes[j]->dof_number(_nonlinear_sys.number(), _rot_num[i], 0);
-      _soln_vector(j + 12 + i * _nodes.size()) =
-          (*_sol)(_soln_rot_index[j][i]) - _sol_old(_soln_rot_index[j][i]);
-    }
-  }
-}
-
-template <>
-void
-ADComputeIncrementalShellStrain<JACOBIAN>::computeSolnVector()
+ADComputeIncrementalShellStrain::computeSolnVector()
 {
   _soln_vector.zero();
 

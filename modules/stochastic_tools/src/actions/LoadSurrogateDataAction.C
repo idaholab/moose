@@ -42,7 +42,7 @@ void
 LoadSurrogateDataAction::load(const SurrogateModel & model)
 {
   // File to load
-  const FileName & filename = model.getParamTempl<FileName>("filename");
+  const FileName & filename = model.getParam<FileName>("filename");
 
   // Create the object that will load in data
   RestartableDataIO data_io(_app);
