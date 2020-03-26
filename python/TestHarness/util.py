@@ -379,17 +379,17 @@ def getCompilers(libmesh_dir):
     if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
         mpicxx_cmd = mpicxx_cmd.split()[-1]
 
-    # If mpi ic on the command, run -show to get the compiler
+    # If mpi is in the command, run -show to get the compiler
     if "mpi" in mpicxx_cmd:
         raw_compiler = runCommand(mpicxx_cmd + " -show")
     else:
         raw_compiler = mpicxx_cmd
 
-    if re.match('icpc', raw_compiler) != None:
+    if re.match('\S*icpc\s', raw_compiler) != None:
         compilers.add("INTEL")
-    elif re.match('[cg]\+\+', raw_compiler) != None:
+    elif re.match('\S*[cg]\+\+\s', raw_compiler) != None:
         compilers.add("GCC")
-    elif re.match('clang\+\+', raw_compiler) != None:
+    elif re.match('\S*clang\+\+\s', raw_compiler) != None:
         compilers.add("CLANG")
 
     return compilers
