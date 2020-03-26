@@ -306,8 +306,10 @@ EigenProblem::solve()
 void
 EigenProblem::init()
 {
+#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If matrix_free=true, this set Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
+#endif
 
   FEProblemBase::init();
 
