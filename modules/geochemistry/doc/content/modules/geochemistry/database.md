@@ -2,68 +2,128 @@
 
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
-The `geochemistry` module works with chemical databases in a special MOOSE format, and the module contains a python file that translates between MOOSE format and other formats such as EQ3/6.  This page describes the GWB format, using a database file downloaded from the geochemist workbench site.  See the "Thermo Datasets" chapter of [!cite](gwb_reference) and [https://academy.gwb.com](https://academy.gwb.com)
+The `geochemistry` module works with chemical databases in a simple [JSON](https://www.json.org) format,
+making it easy to parse in a variety of applications or languages.
 
-This page goes through the database file section-by-section.
+## Python database converter
 
-## Descriptive header
-
-The database file begins with a descriptive header:
-
-```
-dataset of thermodynamic data for gwb programs
-dataset format: jan19
-activity model: debye-huckel
-fugacity model: tsonopoulos
-```
-
-!alert note 
-Only the [Debye-Huckel activity model](activity_coefficients.md) model is currently supported.
-Only the [Spycher-Reed fugacity model](fugacity.md) model is currently supported.
-
-## Temperature definition
-
-All equilibrium coefficients, activity coefficients, etc, are evaluated at a set of temperatures.  These are assumed to be in $^{\circ}$C, and defined by the line(s)
+A python utility The module contains a python utility that translates between the MOOSE format and other formats such as EQ3/6 or [GWB](gwb_database.md). A database in either of these formats can be translated to a MOOSE JSON database using
 
 ```
-* temperatures
-         0.0000     25.0000     60.0000    100.0000
-       150.0000    200.0000    250.0000    300.0000
+geochemistry/python/database_converter.py -i gwb_database --format gwb -o moose_database.json
 ```
 
-If a numerical simulation is performed at a temperature that is not one of these 8 values, a fourth-order polynomial fit to the data is used.
+for example. Using the supplied python conversion utility ensures that the database produced adheres to the required
+format.
 
-## Steam saturation curve
-
-The pressures --- in bars (1 bar $= 10^{5}\,$Pa) --- along the steam saturation curve, at the temperatures defined above are given in the form
-
-```
-* pressures
-         1.0134      1.0134      1.0134      1.0134
-         4.7600     15.5490     39.7760     85.9270
-```
-
-## Debye-Huckel coefficients
-
-The [Debye-Huckel coefficients](activity_coefficients.md) are given next.  These are evaluated at the temperatures defined above
+A full list of the functionality can be obtained using the `--help` flag
 
 ```
-* debye huckel a (adh)
-          .4913       .5092       .5450       .5998
-          .6898       .8099       .9785      1.2555
-* debye huckel b (bdh)
-          .3247       .3283       .3343       .3422
-          .3533       .3655       .3792       .3965
-* bdot
-          .0174       .0410       .0440       .0460
-          .0470       .0470       .0340      0.0000
+geochemistry/python/database_converter.py --help
+usage: database_converter.py [-h] -i INPUT --format {gwb,eq36} [-o OUTPUT]
+
+Utility to read data from thermodynamic database and write to MOOSE
+thermodynamic database (in JSON format)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        The input database
+  --format {gwb,eq36}   The database format
+  -o OUTPUT, --output OUTPUT
+                        The output filename. Default: moose_thermo.json
 ```
 
-The units are
+## Database format
 
-- $A$ has units mol$^{-1/2}$.kg$^{1/2}$;
-- $B$ has units mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$;
-- $\dot{B}$ has units mol$^{-1}$.kg.
+The MOOSE thermodynamic database is a [JSON](https://www.json.org) file with key-value pairs for the various species and
+datatypes. The specific structure of the MOOSE database is outlined below.
+
+### Header information
+
+The required `Header` field contains several optional provenance fields (such as the original database format and filename), as well as some required fields (such as temperature points for equilibrium constant evaluation, activity coefficients, etc).
+
+An example of the optional header information is shown below:
+
+```
+"Header": {
+  "title": "MOOSE thermodynamic database",
+  "original": "{$MOOSE_DIR}/projects/moose/modules/geochemistry/python/original_dbs/gwb_llnl.dat",
+  "date": "22:00 15-03-2020",
+  "original format": "gwb"
+}
+```
+
+The `Header` field must include information about the temperatures and pressures that the equilibrium constant values or activity coefficients are defined at:
+
+```
+"Header": {
+  "temperatures": [
+    "0.0000",
+    "25.0000",
+    "60.0000",
+    "100.0000",
+    "150.0000",
+    "200.0000",
+    "250.0000",
+    "300.0000"
+  ],
+  "pressures": [
+    "1.0134",
+    "1.0134",
+    "1.0134",
+    "1.0134",
+    "4.7600",
+    "15.5490",
+    "39.7760",
+    "85.9270"
+  ]
+}
+```
+
+The temperatures are in $^{\circ}$C, and the pressures --- in bars (1 bar $= 10^{5}\,$Pa) --- lie along the steam saturation curve at the temperatures defined above.
+
+The [activity](activity_coefficients.md) and [fugactity](fugacity.md) models must be defined in the `Header`, along with the appropriate coefficients (at the temperatures specified above):
+
+```
+"Header": {
+  "activity model": "debye-huckel",
+  "fugacity model": "tsonopoulos",
+  "adh": [
+    ".4913",
+    ".5092",
+    ".5450",
+    ".5998",
+    ".6898",
+    ".8099",
+    ".9785",
+    "1.2555"
+  ],
+  "bdh": [
+    ".3247",
+    ".3283",
+    ".3343",
+    ".3422",
+    ".3533",
+    ".3655",
+    ".3792",
+    ".3965"
+  ],
+  "bdot": [
+    ".0174",
+    ".0410",
+    ".0440",
+    ".0460",
+    ".0470",
+    ".0470",
+    ".0340",
+    "0.0000"
+  ]
+}
+```
+
+In this case, the [Debye-Huckel](activity_coefficients.md) activity model is specified, along with the Debye-Huckel
+parameters $A$ (mol$^{-1/2}$.kg$^{1/2}$), $B$ (mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$), and $\dot{B}$ (mol$^{-1}$.kg).
 
 So, for instance, at 25$^{\circ}$C
 
@@ -72,237 +132,417 @@ So, for instance, at 25$^{\circ}$C
 - $\dot{B}=0.0410\,$mol$^{-1}$.kg.
 
 
-## Neutral species activity coefficients
-
-The temperature dependence of the parameters $a$, $b$, $c$ and $d$ that define the activity coefficients for the neutral species:
+The `Header` field also contains activity coefficients for neutral species, the formulae for which is given in the [activity coefficients](activity_coefficients.md) description.  Each neutral species has parameters $a$, $b$, $c$ and $d$ that define the activity coefficients for that species, eg:
 
 ```
-* c co2 1
-          .1224       .1127      .09341      .08018
-         .08427      .09892       .1371       .1967
-* c co2 2
-       -.004679     -.01049      -.0036    -.001503
-        -.01184      -.0104    -.007086     -.01809
-* c co2 3
-      -.0004114     .001545    9.609e-5    .0005009
-        .003118     .001386    -.002887    -.002497
-* c co2 4
-         0.0000      0.0000      0.0000      0.0000
-         0.0000      0.0000      0.0000      0.0000
+"Header": {
+  "neutral species": {
+    "h2o": {
+      "a": [
+        "500.0000",
+        "1.45397",
+        "500.0000",
+        "1.5551",
+        "1.6225",
+        "500.0000",
+        "500.0000",
+        "500.0000"
+      ],
+      "b": [
+        "500.0000",
+        ".022357",
+        "500.0000",
+        ".036478",
+        ".045891",
+        "500.0000",
+        "500.0000",
+        "500.0000"
+      ],
+      "c": [
+        "500.0000",
+        ".0093804",
+        "500.0000",
+        ".0064366",
+        ".0045221",
+        "500.0000",
+        "500.0000",
+        "500.0000"
+      ],
+      "d": [
+        "500.0000",
+        "-.0005362",
+        "500.0000",
+        "-.0007132",
+        "-.0008312",
+        "500.0000",
+        "500.0000",
+        "500.0000"
+      ]
+    }
+  }
+}
 ```
 
-The formulae for neutral species is given in the [activity coefficients](activity_coefficients.md) page, and the special keyword $\mathring{a}=-0.5$ acts as a flag to the solver to use this instead of the Debye-Hucke formula (for instance, see the basis species B(OH)3, below).  See Section 3.1.4 of [!cite](gwb_reference).
+Note that the special keyword $\mathring{a}=-0.5$ acts as a flag to the solver to use this activity model instead of the Debye-Huckel formula.
 
-## Water activity
+!alert note
+A value of `500` indicates "no value"
 
-The [activity of water](activity_coefficients.md) is defined by four coefficients, $\tilde{a}$, $\tilde{b}$, $\tilde{d}$ and $\tilde{d}$, whose temperature dependence is given by
+### Elements
 
-```
-* c h2o 1
-       500.0000     1.45397    500.0000      1.5551
-         1.6225    500.0000    500.0000    500.0000
-* c h2o 2
-       500.0000     .022357    500.0000     .036478
-        .045891    500.0000    500.0000    500.0000
-* c h2o 3
-       500.0000    .0093804    500.0000    .0064366
-       .0045221    500.0000    500.0000    500.0000
-* c h2o 4
-       500.0000   -.0005362    500.0000   -.0007132
-      -.0008312    500.0000    500.0000    500.0000
-```
-
-Note that only their values at 25$^{\circ}$C, 100$^{\circ}$C and 200$^{\circ}$C are given: the values of 500.0000 indicates "no value".
-
-## Element definitions
-
-The names, chemical abbreviations and mole weights are provided by the following lines:
+Molecular weights (in g) of all elements present in the database are provided in the `elements` field.
 
 ```
-   46 elements
-
-Silver          (Ag)          mole wt.=  107.8680 g
-Aluminum        (Al)          mole wt.=   26.9815 g
-Americium       (Am)          mole wt.=  241.0600 g
-...
--end-
+"elements": {
+  "Ag": {
+    "name": "Silver",
+    "molecular weight": "107.8680"
+  },
+  "Al": {
+    "name": "Aluminum",
+    "molecular weight": "26.9815"
+  },
+}
 ```
 
-## Basis species
+### Basis species
 
-A list of the basis species and their properties are given by:
-
-```
-   47 basis species
-
-H2O
-     charge=  0      ion size=  0.0 A      mole wt.=   18.0152 g
-     2 elements in species
-        2.000 H               1.000 O       
-
-Ag+
-     charge=  1      ion size=  2.5 A      mole wt.=  107.8680 g
-     1 elements in species
-        1.000 Ag      
-...
-B(OH)3
-     charge=  0      ion size=  -.5 A      mole wt.=   61.8329 g
-     3 elements in species
-        1.000 B               3.000 H               3.000 O       
-...
--end-
-```
-
-In these entries:
-
-- The first line defines the name (H2O, Ag+, etc)
-- The second line provides the charge, $z$, and ion size, $\mathring{a}$ (both used in computing the [activity](activity_coefficients.md)) and the molecular weight.  For neutral species, the [activity](activity_coefficients.md) is calculated (see Section 3.1.4 of [!cite](gwb_reference)):
-
-  - If `ion size=0` and the species is `H2O`, the formula for the activity of water is used
-  - If `ion size=0` and the species is not `H2O`, the activity is set to 1.
-  - If `ion size=-0.5A` the activity is calculated using the CO2 coefficients
-  - If `ion size<=-1A` the formula $a=\log_{10}\dot{B}I$ is used.
-- The remaining data provides the elemental decomposition.
-
-## Redox pairs
-
-The database also contains redox pair information in the form:
+The `basis species` field contains all information about the basis species, for example
 
 ```
-   48 redox couples
-
-(O-phth)--
-     charge= -2      ion size=  4.0 A      mole wt.=  164.1172 g
-     4 species in reaction
-       -5.000 H2O             8.000 HCO3-           6.000 H+      
-       -7.500 O2(aq)  
-       594.3211    542.8292    482.3612    425.9738
-       368.7004    321.8658    281.8216    246.4849
-
-Am++++
-     charge=  4      ion size= 11.0 A      mole wt.=  241.0600 g
-     4 species in reaction
-        -.500 H2O             1.000 H+              1.000 Am+++   
-         .250 O2(aq)  
-        18.7967     18.0815     17.2698     16.5278
-        15.8024     15.2312     14.7898     14.4250
-...
--end-
+"basis species": {
+  "H2O": {
+    "elements": {
+      "H": "2.000",
+      "O": "1.000"
+    },
+    "charge": "0",
+    "radius": "0.0",
+    "molecular weight": "18.0152"
+  },
+  "Ag+": {
+    "elements": {
+      "Ag": "1.000"
+    },
+    "charge": "1",
+    "radius": "2.5",
+    "molecular weight": "107.8680"
+  }
+}
 ```
 
-In these entries:
+Each basis species has a number of required fields:
 
-- The first line defines the name ((O-phth)--, Am++++, etc)
-- The second line provides the charge, $z$, and ion size, $\mathring{a}$ and the molecular weight.  The former two are used to compute the [activity](activity_coefficients.md) for ["decoupled" redox pairs](basis.md).
-- The remaining data provides the equilibrium reaction (in terms of the basis species, or any redox species that have been defined so far), along with its temperature-dependent equilibrium constant, which are used when the redox pair is ["coupled"](basis.md), for two purposes: (a) to eliminate the alternative oxidataion state ((O-phth)--, Am++++, etc) from all reactions in favour of the basis species; (b) to form another secondary-species reaction.
+- `elements`: the elemental decomposition in an element-weight pair (for example, the basis species H2O has 2 hydrogen (H) molecules and 1 oxygen (O) molecule)
+- `charge`: the electrical charge of the basis species
+- `radius`: the ionic radius (A) of the basis species
+- `molecular weight`: the molecular weight (g)
 
-## Aqueous species
+### Aqueous secondary species
 
-Much of the database concerns equilibrium reactions to produce secondary species:
-
-```
-   551 aqueous species
-
-(NpO2)2(OH)2++
-     charge=  2      ion size=  5.0 A      mole wt.=  572.1086 g
-     3 species in reaction
-       -2.000 H+              2.000 H2O             2.000 NpO2++  
-         7.0580      6.2979      5.5317      4.9568
-         4.5346      4.3362      4.2830      4.3258
-
-(NpO2)3(OH)5+
-     charge=  1      ion size=  4.0 A      mole wt.=  892.1775 g
-     3 species in reaction
-       -5.000 H+              5.000 H2O             3.000 NpO2++  
-        19.2691     17.3865     15.4529     13.9264
-        12.6876     11.9568     11.5491     11.3537
-...
--end-
-```
-
-In these entries:
-
-- The first line defines the name ((NpO2)2(OH)2$++$, etc)
-- The second line provides the charge, $z$, and ion size, $\mathring{a}$ and the molecular weight.  The first two are used to compute the activity coefficient for the species.
-- The remaining data provides the equilibrium reaction (in terms of basis species and redox couples) along with its temperature-dependent equilibrium constant.
-
-## Free electron
-
-The data base contains:
+The `secondary species` field contains all information about the aqueous equilibrium species
 
 ```
-   1 free electron
-
-e-
-     charge= -1      ion size=  0.0 A      mole wt.=    0.0000 g
-     3 species in reaction
-         .500 H2O             -.250 O2(g)          -1.000 H+      
-       22.76135     20.7757   18.513025     16.4658
-      14.473225    12.92125    11.68165    10.67105
-
--end-
+"basis species": {
+  "CaCO3": {
+    "species": {
+      "Ca++": "1.000",
+      "HCO3-": "1.000",
+      "H+": "-1.000"
+    },
+    "charge": "0",
+    "radius": "4.0",
+    "molecular weight": "100.0892",
+    "logk": [
+      "7.5520",
+      "7.1280",
+      "6.7340",
+      "6.4350",
+      "6.1810",
+      "5.9320",
+      "5.5640",
+      "4.7890"
+    ]
+  }
+}
 ```
 
-## Minerals
+Each secondary species has a number of required fields:
 
-Mineralisation reactions are defined in ths following block:
+- `species`: the basis species decomposition in a basis species-stoichiometry pair. In this example, `CaCO3` is  described by the reaction `CaCO3` $\rightleftharpoons$ `Ca++ + HCO3- - H+`
+- `charge`: the electrical charge of the secondary species
+- `radius`: the ionic radius (A) of the secondary species
+- `molecular weight`: the molecular weight (g)
+- `logk`: the equilibrium constant values at the temperature points specified in the `Header`
 
-```
-   624 minerals
+### Redox couples
 
-(BaO)2^(SiO2)3(c)                  type= 
-     formula= 
-     mole vol.=  122.8000 cc      mole wt.=  486.9117 g
-     4 species in reaction
-       -4.000 H+              2.000 Ba++            3.000 SiO2(aq)
-        2.000 H2O     
-        24.8965     23.3104     21.2301     19.2286
-        17.2446     15.6907     14.3849     13.0572
-
-...
-Acanthite                          type= sulfide
-     formula= Ag2S
-     mole vol.=   34.2000 cc      mole wt.=  247.7960 g
-     3 species in reaction
-        2.000 Ag+            -1.000 H+              1.000 HS-     
-       -39.7042    -36.0478    -31.9375    -28.2491
-       -24.6984    -22.0245    -20.0510    -18.7392
-...
--end-
-```
-
-In these entries:
-
-- The first line defines the name ((BaO)2^(SiO2)3(c), Acanthite, etc)
-- The "type" and "formula" are optional, and are not used in the `geochemistry` module
-- The mole volume and mole weight are quantified (the activity for each mineral is unity)
-- The remaining data provides the equilibrium reaction (in terms of basis species and redox couples) along with its temperature-dependent equilibrium constant.
-
-## Gases
-
-The thermodynamics of gases and reactions involving them are included in the database as:
+The `redox couples` field contains all information about the redox pairs
 
 ```
-
-   10 gases
-
-CH4(g)
-     mole wt.=   16.0426 g
-     chi=       -537.779     1.54946 -.000927827     1.20861  -.00370814  3.33804e-6
-     Pcrit=     46.0 bar      Tcrit=     190.4 K      omega=        .011
-     1 species in reaction
-        1.000 CH4(aq) 
-        -2.6487     -2.8202     -2.9329     -2.9446
-        -2.9163     -2.7253     -2.4643     -2.1569
-...
--end-
+"redox couples": {
+  "(O-phth)--": {
+    "species": {
+      "H2O": "-5.000",
+      "HCO3-": "8.000",
+      "H+": "6.000",
+      "O2(aq)": "-7.500"
+    },
+    "charge": "-2",
+    "radius": "4.0",
+    "molecular weight": "164.1172",
+    "logk": [
+      "594.3211",
+      "542.8292",
+      "482.3612",
+      "425.9738",
+      "368.7004",
+      "321.8658",
+      "281.8216",
+      "246.4849"
+    ]
+  }
+}
 ```
 
-In these blocks:
+Each redox couple has a number of required fields:
 
-- The first line defines the name (CH4(g), etc)
-- The "chi" line defines the [Spycher-Reed coefficients](fugacity.md)
-- The "Pcrit" line is used to evaluate Tsonopoulos and Peng-Robinson pressure models, and are not used in the `geochemistry` module
-- The remaining data define the equilibrium reaction and its constant.
+- `species`: the basis species decomposition in a basis species-stoichiometry pair. In this example, Phenolphthalein `(O-phth)--)` is described by the redox reaction `(O-phth)-- + 5H2O + 7.5O2(aq)` $\rightleftharpoons$ `8HCO3- + 6H+`
+- `charge`: the electrical charge of the redox species
+- `radius`: the ionic radius (A) of the redox species
+- `molecular weight`: the molecular weight (g)
+- `logk`: the equilibrium constant values at the temperature points specified in the `Header`
 
-!bibtex bibliography
+### Minerals
+
+The minerals are defined in the `mineral species` field
+
+```
+"mineral species": {
+  "Acanthite": {
+    "species": {
+      "Ag+": "2.000",
+      "H+": "-1.000",
+      "HS-": "1.000"
+    },
+    "molar volume": "34.2000",
+    "molecular weight": "247.7960",
+    "logk": [
+      "-39.7042",
+      "-36.0478",
+      "-31.9375",
+      "-28.2491",
+      "-24.6984",
+      "-22.0245",
+      "-20.0510",
+      "-18.7392"
+    ]
+  }
+}
+```
+
+Each mineral has a number of required fields:
+
+- `species`: the basis species decomposition in a basis species-stoichiometry pair. In this example, `Acanthite` is described by the mineral reaction `Acanthite` $\rightleftharpoons$ `2Ag+ + HS1 - H+`
+- `molecular weight`: the molecular weight (g)
+- `molar volume`: the mineral volume (cc)
+- `logk`: the equilibrium constant values at the temperature points specified in the `Header`
+
+### Gases
+
+The gases are defined in the `gas species` field
+
+```
+"gas species": {
+  "CH4(g)": {
+    "species": {
+      "CH4(aq)": "1.000"
+    },
+    "molecular weight": "16.0426",
+    "chi": [
+      "-537.779",
+      "1.54946",
+      "-.000927827",
+      "1.20861",
+      "-.00370814",
+      "3.33804e-6"
+    ],
+    "Pcrit": "46.0",
+    "Tcrit": "190.4",
+    "omega": ".011",
+    "logk": [
+      "-2.6487",
+      "-2.8202",
+      "-2.9329",
+      "-2.9446",
+      "-2.9163",
+      "-2.7253",
+      "-2.4643",
+      "-2.1569"
+    ]
+  }
+}
+```
+
+Each gas species has a number of required fields:
+
+- `species`: the basis species decomposition in a basis species-stoichiometry pair. In this example, `CH4(g)` is described by the gas reaction `CH4(g)` $\rightleftharpoons$ `CH4(aq)`
+- `molecular weight`: the molecular weight (g)
+- `logk`: the equilibrium constant values at the temperature points specified in the `Header`
+
+The gases can optionally include fugacity model parameters such as
+
+- `chi`: the [Spycher-Reed](fugacity.md) fugacity coefficients
+- `Pcrit, Tcrit` and `omega`: Tsonopoulos and Peng-Robinson model coefficients
+
+### Surface species
+
+Surface species in the database are listed in the `surface species` field.
+
+```
+"surface species": {
+  ">(s)FeO-": {
+    "species": {
+      ">(s)FeOH": "1.000",
+      "H+": "-1.000"
+    },
+    "charge": "-1",
+    "molecular weight": "71.8464",
+    "log K": "8.9300",
+    "dlogK/dT": "0.0000"
+  }
+}
+```
+
+Each surface species has a number required fields:
+
+- `species`: the decomposition in a basis species-stoichiometry pair as usual
+- `charge`: the electrical charge of the secondary species
+- `molecular weight`: the molecular weight (g)
+- `log K` and `dlogK/dT`: the equilibrium constant and derivative wrt temperature
+
+In contrast to the other types of reaction species, where the equilibrium constant is provided at each of
+the temperature points listed in the `Header`, the surface species equilibrium constant is defined using
+the value at the first temperature point, `log K` above, and the derivative wrt temperature
+\begin{equation}
+\log(K) = \mathtt{log K} + \mathtt{dlogK/dT} (T - T_0),
+\end{equation}
+where $\log$ is the natural logarithm, $T$ is the temperature where $\log(K)$ is to be calculated, and $T_0$ is the
+first temperature specified in the `Header`.
+
+For example, the equilibrium constant for the surface species `>(s)FeO-` is simply
+\begin{equation}
+\log(K) = 8.93,
+\end{equation}
+as the derivative wrt temperature is zero.
+
+### Sorbing minerals
+
+Sorbing minerals listed in the database provide sites where sorbing can occur for each mineral
+
+```
+"sorbing minerals": {
+  "Goethite": {
+    "sorbing sites": {
+      ">(s)FeOH": ".0050",
+      ">(w)FeOH": ".2000"
+    },
+    "surface area": "600.0000"
+  }
+}
+```
+
+Each sorbing mineral has two required fields:
+
+- `sorbing sites`: list of sorbing sites as a basis species-site density pair
+- `surface area`: the surface area available (m$^2$/g)
+
+### Oxides
+
+Oxides may be present in the database, for example
+
+```
+"oxides": {
+  "Ag2O": {
+    "species": {
+      "H+": "-2.000",
+      "Ag+": "2.000",
+      "H2O": "1.000"
+    },
+    "molecular weight": "231.7350"
+  }
+}
+```
+
+Each oxide has two required fields:
+
+- `species`: the basis species decomposition in a basis species-stoichiometry pair. In this example, silver oxide is described by the reaction `Ag2O + 2H+` $\rightleftharpoons$ `Ag+ + H2O`
+- `molecular weight`: the molecular weight (g)
+
+
+## Python utilities
+
+As the MOOSE thermodynamic database is a standard JSON file, it can be easily parsed using python, allowing users
+to readily access information from the database without needing a special reader. The `geochemistry` module provides some example python utilities in `python/dbutils.py` to illustrate how simple it is to examine the database using python.
+
+For example, to find all secondary species that contain a particular basis species, the user can query the
+database using the following python code
+
+```python
+import json
+import dbutils
+
+# Read the database
+with open('geochemistry/database/moose_thermo.json', 'r') as dbfile:
+    moosedb = json.load(dbfile)
+
+# Find all aqueous equilibrium (secondary) species containing Ca++
+dbutils.secondarySpeciesContainingBasis(moosedb, 'secondary species', ['Ca++'])
+```
+
+which returns
+
+```
+['Ca(H3SiO4)2',
+ 'Ca(O-phth)',
+ 'CaB(OH)4+',
+ 'CaCH3COO+',
+ 'CaCl+',
+ 'CaCO3',
+ 'CaF+',
+ 'CaH2SiO4',
+ 'CaH3SiO4+',
+ 'CaHCO3+',
+ 'CaHPO4',
+ 'CaNO3+',
+ 'CaOH+',
+ 'CaPO4-',
+ 'CaSO4']
+```
+
+Species information can be easily extracted
+
+```python
+import json
+import dbutils
+
+# Read the database
+with open('geochemistry/database/moose_thermo.json', 'r') as dbfile:
+    moosedb = json.load(dbfile)
+
+# Find all aqueous equilibrium (secondary) species containing Ca++
+dbutils.printSpeciesInfo(moosedb, 'Calcite')
+```
+
+giving
+
+```
+Calcite:
+  type: mineral species
+  species:  {'Ca++': '1.000', 'HCO3-': '1.000', 'H+': '-1.000'}
+  molar volume:  36.9340
+  molecular weight:  100.0892
+  logk:  ['2.0683', '1.7130', '1.2133', '.6871', '.0762', '-.5349', '-1.2301', '-2.2107']
+```
+
+Additional utility functions to print reactions as formatted strings are also provided, see `python/dbutils.py`.
