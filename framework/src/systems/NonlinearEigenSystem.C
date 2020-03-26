@@ -39,6 +39,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
+#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If we use shell matrices, we only need to form a preconditioning matrix
   if (eigen_system.use_shell_matrices())
   {
@@ -47,7 +48,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                           eigen_nl.nonEigenMatrixTag());
     return;
   }
-
+#endif
   // If it is a linear generalized eigenvalue problem,
   // we assemble A and B together
   if (!p->isNonlinearEigenvalueSolver() && eigen_system.generalized())

@@ -109,7 +109,8 @@
 
 [Executioner]
   type = Eigenvalue
-  solve_type = MF_MONOLITH_NEWTON
+  solve_type = NEWTON
+  matrix_free = true
   eigen_problem_type = GEN_NON_HERMITIAN
 
   # Postprocessor value to normalize
