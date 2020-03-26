@@ -11,8 +11,7 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
-class ADValueTest : public ADKernel<compute_stage>
+class ADValueTest : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -22,5 +21,4 @@ public:
 protected:
   virtual ADReal computeQpResidual();
 
-  usingKernelMembers;
 };

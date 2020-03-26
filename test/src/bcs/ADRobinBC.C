@@ -11,23 +11,20 @@
 
 registerADMooseObject("MooseTestApp", ADRobinBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADRobinBC<compute_stage>::validParams()
+ADRobinBC::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADRobinBC<compute_stage>::ADRobinBC(const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters)
+ADRobinBC::ADRobinBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADRobinBC<compute_stage>::computeQpResidual()
+ADRobinBC::computeQpResidual()
 {
   return _test[_i][_qp] * 2. * _u[_qp];
 }

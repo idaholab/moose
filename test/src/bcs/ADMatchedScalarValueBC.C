@@ -14,24 +14,21 @@
 
 registerADMooseObject("MooseTestApp", ADMatchedScalarValueBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADMatchedScalarValueBC<compute_stage>::validParams()
+ADMatchedScalarValueBC::validParams()
 {
-  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  InputParameters params = ADNodalBC::validParams();
   params.addRequiredCoupledVar("v", "The scalar variable to match");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMatchedScalarValueBC<compute_stage>::ADMatchedScalarValueBC(const InputParameters & parameters)
-  : ADNodalBC<compute_stage>(parameters), _v(adCoupledScalarValue("v"))
+ADMatchedScalarValueBC::ADMatchedScalarValueBC(const InputParameters & parameters)
+  : ADNodalBC(parameters), _v(adCoupledScalarValue("v"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADMatchedScalarValueBC<compute_stage>::computeQpResidual()
+ADMatchedScalarValueBC::computeQpResidual()
 {
   return _u - _v[0];
 }

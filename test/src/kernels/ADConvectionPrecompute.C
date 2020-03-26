@@ -15,24 +15,21 @@ registerADMooseObject("MooseTestApp", ADConvectionPrecompute);
  * This macro defines the valid parameters for
  * this Kernel and their default values
  */
-template <ComputeStage compute_stage>
 InputParameters
-ADConvectionPrecompute<compute_stage>::validParams()
+ADConvectionPrecompute::validParams()
 {
-  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  InputParameters params = ADKernelValue::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADConvectionPrecompute<compute_stage>::ADConvectionPrecompute(const InputParameters & parameters)
-  : ADKernelValue<compute_stage>(parameters), _velocity(getParam<RealVectorValue>("velocity"))
+ADConvectionPrecompute::ADConvectionPrecompute(const InputParameters & parameters)
+  : ADKernelValue(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADConvectionPrecompute<compute_stage>::precomputeQpResidual()
+ADConvectionPrecompute::precomputeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product
   return _velocity * _grad_u[_qp];

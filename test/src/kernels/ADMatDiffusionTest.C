@@ -11,11 +11,10 @@
 
 registerADMooseObject("MooseTestApp", ADMatDiffusionTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADMatDiffusionTest<compute_stage>::validParams()
+ADMatDiffusionTest::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addParam<MaterialPropertyName>(
       "ad_mat_prop", "ad_diffusivity", "the name of the AD material property we are going to use");
   params.addParam<MaterialPropertyName>("regular_mat_prop",
@@ -30,9 +29,8 @@ ADMatDiffusionTest<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMatDiffusionTest<compute_stage>::ADMatDiffusionTest(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADMatDiffusionTest::ADMatDiffusionTest(const InputParameters & parameters)
+  : ADKernel(parameters),
     _ad_diff_from_ad_prop(getADMaterialProperty<Real>("ad_mat_prop")),
     _regular_diff_from_ad_prop(getMaterialProperty<Real>("ad_mat_prop")),
     _ad_diff_from_regular_prop(getADMaterialProperty<Real>("regular_mat_prop")),
@@ -41,9 +39,8 @@ ADMatDiffusionTest<compute_stage>::ADMatDiffusionTest(const InputParameters & pa
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADMatDiffusionTest<compute_stage>::computeQpResidual()
+ADMatDiffusionTest::computeQpResidual()
 {
   if (_prop_to_use == "AdAd")
     return _ad_diff_from_ad_prop[_qp] * _grad_test[_i][_qp] * _grad_u[_qp];

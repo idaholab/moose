@@ -11,24 +11,21 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledValueTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCoupledValueTest<compute_stage>::validParams()
+ADCoupledValueTest::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addCoupledVar("v", 2.0, "The coupled variable.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCoupledValueTest<compute_stage>::ADCoupledValueTest(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters), _v(adCoupledValue("v"))
+ADCoupledValueTest::ADCoupledValueTest(const InputParameters & parameters)
+  : ADKernel(parameters), _v(adCoupledValue("v"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCoupledValueTest<compute_stage>::computeQpResidual()
+ADCoupledValueTest::computeQpResidual()
 {
   return _test[_i][_qp] * -_v[_qp];
 }

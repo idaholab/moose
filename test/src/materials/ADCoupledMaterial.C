@@ -11,11 +11,10 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledMaterial);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCoupledMaterial<compute_stage>::validParams()
+ADCoupledMaterial::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addRequiredCoupledVar("coupled_var", "A coupledvariable");
   params.addRequiredParam<MaterialPropertyName>("ad_mat_prop",
                                                 "Name of the ad property this material defines");
@@ -24,9 +23,8 @@ ADCoupledMaterial<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCoupledMaterial<compute_stage>::ADCoupledMaterial(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADCoupledMaterial::ADCoupledMaterial(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _ad_mat_prop(declareADProperty<Real>(getParam<MaterialPropertyName>("ad_mat_prop"))),
     _regular_mat_prop(declareProperty<Real>(getParam<MaterialPropertyName>("regular_mat_prop"))),
     _coupled_var(adCoupledValue("coupled_var"))
@@ -38,16 +36,14 @@ ADCoupledMaterial<compute_stage>::ADCoupledMaterial(const InputParameters & para
 // information from the coupled variable. A production version of this material would look like
 // this:
 //
-// template <ComputeStage compute_stage>
-// void
-// ADCoupledMaterial<compute_stage>::computeQpProperties()
+// // void
+// ADCoupledMaterial::computeQpProperties()
 // {
 //   _ad_mat_prop[_qp] = 4.0 * _coupled_var[_qp];
 // }
 
-template <ComputeStage compute_stage>
 void
-ADCoupledMaterial<compute_stage>::computeQpProperties()
+ADCoupledMaterial::computeQpProperties()
 {
   _regular_mat_prop[_qp] = 4.0 * MetaPhysicL::raw_value(_coupled_var[_qp]);
   _ad_mat_prop[_qp] = 4.0 * _coupled_var[_qp];

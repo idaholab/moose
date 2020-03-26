@@ -11,8 +11,7 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage compute_stage>
-class GapHeatConductanceTest : public ADMortarConstraint<compute_stage>
+class GapHeatConductanceTest : public ADMortarConstraint
 {
 public:
   static InputParameters validParams();
@@ -22,8 +21,7 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
-  const ADMaterialProperty(Real) & _slave_gap_conductance;
-  const ADMaterialProperty(Real) & _master_gap_conductance;
+  const ADMaterialProperty<Real> & _slave_gap_conductance;
+  const ADMaterialProperty<Real> & _master_gap_conductance;
 
-  usingMortarConstraintMembers;
 };

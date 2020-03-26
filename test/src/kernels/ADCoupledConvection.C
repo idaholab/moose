@@ -11,27 +11,24 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledConvection);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCoupledConvection<compute_stage>::validParams()
+ADCoupledConvection::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addParam<Real>("scale", 1, "Scaling coefficient");
   params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection ADKernel");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCoupledConvection<compute_stage>::ADCoupledConvection(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADCoupledConvection::ADCoupledConvection(const InputParameters & parameters)
+  : ADKernel(parameters),
     _velocity_vector(adCoupledGradient("velocity_vector")),
     _scale(getParam<Real>("scale"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCoupledConvection<compute_stage>::computeQpResidual()
+ADCoupledConvection::computeQpResidual()
 {
   return _scale * _test[_i][_qp] * _velocity_vector[_qp] * _grad_u[_qp];
 }

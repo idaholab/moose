@@ -11,29 +11,26 @@
 
 registerADMooseObject("MooseTestApp", ADCoupledVectorConvection);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCoupledVectorConvection<compute_stage>::validParams()
+ADCoupledVectorConvection::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addParam<bool>("use_grad_row", false, "Use first row of gradient.");
   params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection ADKernel");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCoupledVectorConvection<compute_stage>::ADCoupledVectorConvection(
+ADCoupledVectorConvection::ADCoupledVectorConvection(
     const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+  : ADKernel(parameters),
     _use_grad(getParam<bool>("use_grad_row")),
     _velocity_vector(adCoupledVectorValue("velocity_vector")),
     _grad_velocity_vector(adCoupledVectorGradient("velocity_vector"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCoupledVectorConvection<compute_stage>::computeQpResidual()
+ADCoupledVectorConvection::computeQpResidual()
 {
   if (_use_grad)
     return _test[_i][_qp] * _grad_velocity_vector[_qp].row(0) * _grad_u[_qp];

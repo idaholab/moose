@@ -11,25 +11,22 @@
 
 registerADMooseObject("MooseTestApp", ADDGConvection);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADDGConvection<compute_stage>::validParams()
+ADDGConvection::validParams()
 {
-  InputParameters params = ADDGKernel<compute_stage>::validParams();
+  InputParameters params = ADDGKernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
   params.addClassDescription("DG upwinding for the convection");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDGConvection<compute_stage>::ADDGConvection(const InputParameters & parameters)
-  : ADDGKernel<compute_stage>(parameters), _velocity(getParam<RealVectorValue>("velocity"))
+ADDGConvection::ADDGConvection(const InputParameters & parameters)
+  : ADDGKernel(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADDGConvection<compute_stage>::computeQpResidual(Moose::DGResidualType type)
+ADDGConvection::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = 0;
 

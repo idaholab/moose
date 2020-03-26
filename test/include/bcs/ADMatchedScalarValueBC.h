@@ -16,8 +16,7 @@
  *
  * Sets the values of a nodal variable at nodes to values specified by a function
  */
-template <ComputeStage compute_stage>
-class ADMatchedScalarValueBC : public ADNodalBC<compute_stage>
+class ADMatchedScalarValueBC : public ADNodalBC
 {
 public:
   static InputParameters validParams();
@@ -28,6 +27,4 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _v;
-
-  usingNodalBCMembers;
 };

@@ -11,23 +11,20 @@
 
 registerADMooseObject("MooseTestApp", ADValueTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADValueTest<compute_stage>::validParams()
+ADValueTest::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADValueTest<compute_stage>::ADValueTest(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters)
+ADValueTest::ADValueTest(const InputParameters & parameters)
+  : ADKernel(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADValueTest<compute_stage>::computeQpResidual()
+ADValueTest::computeQpResidual()
 {
   return -_u[_qp] * _test[_i][_qp];
 }

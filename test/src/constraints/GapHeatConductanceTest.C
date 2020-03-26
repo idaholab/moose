@@ -11,11 +11,10 @@
 
 registerADMooseObject("MooseTestApp", GapHeatConductanceTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-GapHeatConductanceTest<compute_stage>::validParams()
+GapHeatConductanceTest::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
   params.addParam<Real>("gap_conductance_constant",
                         0.03,
                         "The numerator in calculation of the heat transfer coefficient");
@@ -30,17 +29,15 @@ GapHeatConductanceTest<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-GapHeatConductanceTest<compute_stage>::GapHeatConductanceTest(const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters),
+GapHeatConductanceTest::GapHeatConductanceTest(const InputParameters & parameters)
+  : ADMortarConstraint(parameters),
     _slave_gap_conductance(getADMaterialProperty<Real>("slave_gap_conductance")),
     _master_gap_conductance(getNeighborADMaterialProperty<Real>("master_gap_conductance"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-GapHeatConductanceTest<compute_stage>::computeQpResidual(Moose::MortarType type)
+GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

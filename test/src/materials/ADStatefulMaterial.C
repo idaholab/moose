@@ -11,19 +11,17 @@
 
 registerADMooseObject("MooseTestApp", ADStatefulMaterial);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStatefulMaterial<compute_stage>::validParams()
+ADStatefulMaterial::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   params.addRequiredCoupledVar("u", "The coupled variable");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStatefulMaterial<compute_stage>::ADStatefulMaterial(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADStatefulMaterial::ADStatefulMaterial(const InputParameters & parameters)
+  : ADMaterial(parameters),
 
     // Get a parameter value for the diffusivity
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),
@@ -39,16 +37,14 @@ ADStatefulMaterial<compute_stage>::ADStatefulMaterial(const InputParameters & pa
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADStatefulMaterial<compute_stage>::initQpStatefulProperties()
+ADStatefulMaterial::initQpStatefulProperties()
 {
   _diffusivity[_qp] = _initial_diffusivity;
 }
 
-template <ComputeStage compute_stage>
 void
-ADStatefulMaterial<compute_stage>::computeQpProperties()
+ADStatefulMaterial::computeQpProperties()
 {
   _diffusivity[_qp] = _diffusivity_old[_qp] * 2.0 * _u[_qp];
 }

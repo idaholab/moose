@@ -11,8 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage compute_stage>
-class ADRobinBC : public ADIntegratedBC<compute_stage>
+class ADRobinBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -22,5 +21,4 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  usingIntegratedBCMembers;
 };
