@@ -52,6 +52,7 @@ public:
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
   /**
    * Get contact model
    * @return enum
@@ -72,7 +73,10 @@ public:
    * @return enum
    */
   static MooseEnum getSmoothingEnum();
-
+  /**
+   * Define parameters used by multiple contact objects
+   * @return InputParameters object populated with common parameters
+   */
   static InputParameters commonParameters();
 
 protected:

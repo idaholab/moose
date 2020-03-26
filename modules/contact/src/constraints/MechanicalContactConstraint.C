@@ -103,6 +103,12 @@ MechanicalContactConstraint::validParams()
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
+
+  params.addClassDescription("Apply non-penetration constraints on the mechanical deformation "
+                             "using a node on face, master/slave algorithm, and multiple options "
+                             "for the physical behavior on the interface and the mathematical "
+                             "formulation for constraint enforcement");
+
   return params;
 }
 

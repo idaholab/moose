@@ -14,6 +14,9 @@
 class NodalArea;
 class PenetrationLocator;
 
+/**
+ * Computes the contact pressure from the contact force and nodal area
+ */
 class ContactPressureAux : public AuxKernel
 {
 public:
@@ -24,9 +27,12 @@ public:
   virtual ~ContactPressureAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
+  /// AuxVariable containing the nodal area
   const VariableValue & _nodal_area;
+
+  /// Reference to the PenetrationLocator object
   const PenetrationLocator & _penetration_locator;
 };
 

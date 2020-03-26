@@ -27,6 +27,9 @@ ContactPressureAux::validParams()
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
+
+  params.addClassDescription("Computes the contact pressure from the contact force and nodal area");
+
   return params;
 }
 
