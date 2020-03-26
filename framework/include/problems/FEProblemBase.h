@@ -591,13 +591,6 @@ public:
                                  Real scale_factor = 1.,
                                  const std::set<SubdomainID> * const active_subdomains = nullptr);
 
-  virtual void addADKernel(const std::string & kernel_name,
-                           const std::string & name,
-                           InputParameters & parameters);
-  virtual void addADBoundaryCondition(const std::string & bc_name,
-                                      const std::string & name,
-                                      InputParameters & parameters);
-
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters);
@@ -676,12 +669,6 @@ public:
   virtual void addMaterial(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
-  virtual void addADResidualMaterial(const std::string & kernel_name,
-                                     const std::string & name,
-                                     InputParameters & parameters);
-  virtual void addADJacobianMaterial(const std::string & kernel_name,
-                                     const std::string & name,
-                                     InputParameters & parameters);
   virtual void addMaterialHelper(std::vector<MaterialWarehouse *> warehouse,
                                  const std::string & kernel_name,
                                  const std::string & name,
@@ -689,12 +676,6 @@ public:
   virtual void addInterfaceMaterial(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters);
-  virtual void addADResidualInterfaceMaterial(const std::string & kernel_name,
-                                              const std::string & name,
-                                              InputParameters & parameters);
-  virtual void addADJacobianInterfaceMaterial(const std::string & kernel_name,
-                                              const std::string & name,
-                                              InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -1460,13 +1441,9 @@ public:
   /*
    * Return a reference to the material warehouse of Material objects to be computed.
    */
-  const MaterialWarehouse & getResidualMaterialsWarehouse() const { return _residual_materials; }
-  const MaterialWarehouse & getJacobianMaterialsWarehouse() const { return _jacobian_materials; }
+  const MaterialWarehouse & getRegularMaterialsWarehouse() const { return _materials; }
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
-  const MaterialWarehouse & getResidualInterfaceMaterialsWarehouse() const
-  {
-    return _residual_interface_materials;
-  }
+  const MaterialWarehouse & getInterfaceMaterialsWarehouse() const { return _interface_materials; }
 
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
@@ -1854,17 +1831,9 @@ protected:
 
   ///@{
   // Material Warehouses
-  MaterialWarehouse _residual_materials; // Residual materials. This is the union of traditional
-                                         // materials and the residual copy of an ADMaterial
-  MaterialWarehouse _jacobian_materials; // Jacobian materials. This is the union of traditional
-                                         // materials and the Jacobian copy of an ADMaterial
-  MaterialWarehouse _residual_interface_materials; // Residual interface materials. This is the
-                                                   // union of traditional interface materials and
-                                                   // the residual copy of an ADInterfaceMaterial
-  MaterialWarehouse _jacobian_interface_materials; // Jacobian materials. This is the union of
-                                                   // traditional interface materials and the
-                                                   // Jacobian copy of an ADInterface Material
-  MaterialWarehouse _discrete_materials;           // Materials that the user must compute
+  MaterialWarehouse _materials;           // regular materials
+  MaterialWarehouse _interface_materials; // interface materials
+  MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 

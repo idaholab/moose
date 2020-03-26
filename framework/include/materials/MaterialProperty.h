@@ -269,10 +269,10 @@ MaterialProperty<T>::load(std::istream & stream)
 }
 
 template <typename T>
-class ADMaterialPropertyObject : public MaterialProperty<T>
+class ADMaterialProperty : public MaterialProperty<T>
 {
 public:
-  ADMaterialPropertyObject(bool use_ad = false) : MaterialProperty<T>(use_ad) {}
+  ADMaterialProperty(bool use_ad = false) : MaterialProperty<T>(use_ad) {}
 
   /**
    * Get element i out of the array as a writeable reference.
@@ -357,8 +357,7 @@ template <typename P>
 PropertyValue *
 _init_helper(int size, PropertyValue * /*prop*/, const P *, bool use_ad)
 {
-  ADMaterialPropertyObject<P> * copy = new ADMaterialPropertyObject<P>(use_ad);
+  ADMaterialProperty<P> * copy = new ADMaterialProperty<P>(use_ad);
   copy->resize(size);
   return copy;
 }
-

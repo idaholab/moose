@@ -259,7 +259,6 @@ NonlinearSystemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       _kernels.initialSetup(tid);
-      _ad_jacobian_kernels.initialSetup(tid);
       _nodal_kernels.initialSetup(tid);
       _dirac_kernels.initialSetup(tid);
       if (_doing_dg)
@@ -325,7 +324,6 @@ NonlinearSystemBase::timestepSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.timestepSetup(tid);
-    _ad_jacobian_kernels.timestepSetup(tid);
     _nodal_kernels.timestepSetup(tid);
     _dirac_kernels.timestepSetup(tid);
     if (_doing_dg)
@@ -388,11 +386,7 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
     // Create the kernel object via the factory and add to warehouse
     std::shared_ptr<KernelBase> kernel =
         _factory.create<KernelBase>(kernel_name, name, parameters, tid);
-    if (std::dynamic_pointer_cast<ADKernel<JACOBIAN>>(kernel) ||
-        std::dynamic_pointer_cast<ADVectorKernel<JACOBIAN>>(kernel))
-      _ad_jacobian_kernels.addObject(kernel, tid);
-    else
-      _kernels.addObject(kernel, tid);
+    _kernels.addObject(kernel, tid);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -473,8 +467,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
     if (dbc && dbc->preset())
       _preset_nodal_bcs.addObject(dbc);
 
-    std::shared_ptr<ADDirichletBCBase<RESIDUAL>> addbc =
-        std::dynamic_pointer_cast<ADDirichletBCBase<RESIDUAL>>(bc);
+    std::shared_ptr<ADDirichletBCBase> addbc = std::dynamic_pointer_cast<ADDirichletBCBase>(bc);
     if (addbc && addbc->preset())
       _ad_preset_nodal_bcs.addObject(addbc);
   }
@@ -798,7 +791,6 @@ void
 NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   _kernels.subdomainSetup(subdomain, tid);
-  _ad_jacobian_kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
@@ -1199,7 +1191,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  mortarResidualConstraints(displaced);
+  mortarConstraints(displaced);
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -2001,7 +1993,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
-  mortarJacobianConstraints(displaced);
+  mortarConstraints(displaced);
 
   THREAD_ID tid = 0;
   // go over element-element constraint interface
@@ -2293,7 +2285,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.jacobianSetup(tid);
-    _ad_jacobian_kernels.jacobianSetup(tid);
     _nodal_kernels.jacobianSetup(tid);
     _dirac_kernels.jacobianSetup(tid);
     if (_doing_dg)
@@ -2738,7 +2729,6 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
   _interface_kernels.updateActive(tid);
   _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
-  _ad_jacobian_kernels.updateActive(tid);
   _nodal_kernels.updateActive(tid);
   if (tid == 0)
   {
@@ -3166,57 +3156,24 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarResidualConstraints(bool displaced)
+NonlinearSystemBase::mortarConstraints(bool displaced)
 {
   // go over mortar constraints
   const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
 
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<RESIDUAL>>::iterator
-      it,
-      end_it;
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>::iterator it, end_it;
 
   for (const auto & mortar_interface : mortar_interfaces)
   {
     if (!displaced)
     {
-      it = _undisplaced_mortar_residual_functors.find(mortar_interface.first);
-      end_it = _undisplaced_mortar_residual_functors.end();
+      it = _undisplaced_mortar_functors.find(mortar_interface.first);
+      end_it = _undisplaced_mortar_functors.end();
     }
     else
     {
-      it = _displaced_mortar_residual_functors.find(mortar_interface.first);
-      end_it = _displaced_mortar_residual_functors.end();
-    }
-
-    mooseAssert(
-        it != end_it,
-        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
-            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
-    it->second();
-  }
-}
-
-void
-NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
-{
-  // go over mortar constraints
-  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
-
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<JACOBIAN>>::iterator
-      it,
-      end_it;
-
-  for (const auto & mortar_interface : mortar_interfaces)
-  {
-    if (!displaced)
-    {
-      it = _undisplaced_mortar_jacobian_functors.find(mortar_interface.first);
-      end_it = _undisplaced_mortar_jacobian_functors.end();
-    }
-    else
-    {
-      it = _displaced_mortar_jacobian_functors.find(mortar_interface.first);
-      end_it = _displaced_mortar_jacobian_functors.end();
+      it = _displaced_mortar_functors.find(mortar_interface.first);
+      end_it = _displaced_mortar_functors.end();
     }
 
     mooseAssert(

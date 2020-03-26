@@ -891,7 +891,7 @@ public:
   // Read-only references
   const VariablePhiValue & phi() const { return _phi; }
   template <typename T>
-  const ADTemplateVariableTestGradient<T> & adGradPhi(const MooseVariableFE<T> & v) const
+  const ADTemplateVariablePhiGradient<T> & adGradPhi(const MooseVariableFE<T> & v) const
   {
     return _ad_grad_phi_data.at(v.feType());
   }
@@ -1103,7 +1103,7 @@ public:
   }
 
   template <typename OutputType>
-  const ADTemplateVariableTestGradient<OutputType> & feADGradPhi(FEType type) const
+  const ADTemplateVariablePhiGradient<OutputType> & feADGradPhi(FEType type) const
   {
     return _ad_grad_phi_data[type];
   }
@@ -1137,7 +1137,7 @@ public:
   }
 
   template <typename OutputType>
-  const ADTemplateVariableTestGradient<OutputType> & feADGradPhiFace(FEType type) const
+  const ADTemplateVariablePhiGradient<OutputType> & feADGradPhiFace(FEType type) const
   {
     return _ad_grad_phi_data_face[type];
   }
@@ -1481,7 +1481,7 @@ protected:
   template <typename OutputType>
   void computeGradPhiAD(const Elem * elem,
                         unsigned int n_qp,
-                        ADTemplateVariableTestGradient<OutputType> & grad_phi,
+                        ADTemplateVariablePhiGradient<OutputType> & grad_phi,
                         FEGenericBase<OutputType> * fe);
   void resizeADMappingObjects(unsigned int n_qp, unsigned int dim);
   void computeAffineMapAD(const Elem * elem,
@@ -1915,11 +1915,10 @@ private:
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
 
-  mutable std::map<FEType, ADTemplateVariableTestGradient<Real>> _ad_grad_phi_data;
-  mutable std::map<FEType, ADTemplateVariableTestGradient<RealVectorValue>>
-      _ad_vector_grad_phi_data;
-  mutable std::map<FEType, ADTemplateVariableTestGradient<Real>> _ad_grad_phi_data_face;
-  mutable std::map<FEType, ADTemplateVariableTestGradient<RealVectorValue>>
+  mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data;
+  mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>> _ad_vector_grad_phi_data;
+  mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data_face;
+  mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>>
       _ad_vector_grad_phi_data_face;
 
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
@@ -2016,14 +2015,14 @@ Assembly::feGradPhiLower(FEType type) const
 }
 
 template <>
-inline const ADTemplateVariableTestGradient<RealVectorValue> &
+inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::feADGradPhi<RealVectorValue>(FEType type) const
 {
   return _ad_vector_grad_phi_data[type];
 }
 
 template <>
-inline const ADTemplateVariableTestGradient<RealVectorValue> &
+inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::feADGradPhiFace<RealVectorValue>(FEType type) const
 {
   return _ad_vector_grad_phi_data_face[type];
@@ -2102,7 +2101,7 @@ const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
 Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
-inline const ADTemplateVariableTestGradient<RealVectorValue> &
+inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v) const
 {
   return _ad_vector_grad_phi_data.at(v.feType());

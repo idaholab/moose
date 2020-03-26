@@ -563,10 +563,6 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  MooseObjectTagWarehouse<KernelBase> & getADJacobianKernelWarehouse()
-  {
-    return _ad_jacobian_kernels;
-  }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
@@ -718,14 +714,9 @@ protected:
   void enforceNodalConstraintsJacobian();
 
   /**
-   * Do mortar constraint residual computation
+   * Do mortar constraint residual/jacobian computations
    */
-  void mortarResidualConstraints(bool displaced);
-
-  /**
-   * Do mortar constraint jacobian computation
-   */
-  void mortarJacobianConstraints(bool displaced);
+  void mortarConstraints(bool displaced);
 
 protected:
   /// solution vector from nonlinear solver
@@ -786,7 +777,6 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectTagWarehouse<KernelBase> _ad_jacobian_kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;

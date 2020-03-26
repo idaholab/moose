@@ -28,8 +28,5 @@ AddBCAction::AddBCAction(InputParameters params) : MooseObjectAction(params) {}
 void
 AddBCAction::act()
 {
-  if (Registry::isADObj(_type + "<RESIDUAL>"))
-    _problem->addADBoundaryCondition(_type, _name, _moose_object_pars);
-  else
-    _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
+  _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
 }

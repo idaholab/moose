@@ -676,7 +676,7 @@ template <typename OutputType>
 void
 Assembly::computeGradPhiAD(const Elem * elem,
                            unsigned int n_qp,
-                           ADTemplateVariableTestGradient<OutputType> & grad_phi,
+                           ADTemplateVariablePhiGradient<OutputType> & grad_phi,
                            FEGenericBase<OutputType> * fe)
 {
   // This function relies on the fact that FE::reinit has already been called. FE::reinit will

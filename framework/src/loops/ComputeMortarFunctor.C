@@ -183,6 +183,7 @@ ComputeMortarFunctor::operator()()
     // slave (element) and master (neighbor)
     _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
 
+    if (!_fe_problem.currentlyComputingJacobian())
     {
       for (auto && mc : _mortar_constraints)
         mc->computeResidual(_has_master);
@@ -222,6 +223,8 @@ ComputeMortarFunctor::operator()()
   } // end for loop over elements
 
   // Make sure any remaining cached residuals/Jacobians get added
-  _assembly.addCachedResiduals();
-  else _assembly.addCachedJacobian();
+  if (!_fe_problem.currentlyComputingJacobian())
+    _assembly.addCachedResiduals();
+  else
+    _assembly.addCachedJacobian();
 }

@@ -27,14 +27,5 @@ void
 AddDGKernelAction::act()
 {
   if (_current_task == "add_dg_kernel")
-  {
-    if (Registry::isADObj(_type + "<RESIDUAL>"))
-    {
-      _problem->addDGKernel(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
-      _problem->addDGKernel(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
-      _problem->haveADObjects(true);
-    }
-    else
-      _problem->addDGKernel(_type, _name, _moose_object_pars);
-  }
+    _problem->addDGKernel(_type, _name, _moose_object_pars);
 }
