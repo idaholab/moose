@@ -13,45 +13,45 @@
   # 2=top_left
   # 3=bottom_left
   # 4=bottom_right
-  [./top_right_modifier]
+  [top_right_modifier]
     input = gen
     type = SubdomainBoundingBoxGenerator
     top_right = '2 2 0'
     bottom_left = '1 1 0'
     block_id = 1
-  [../]
-  [./top_left_modifier]
+  []
+  [top_left_modifier]
     input = top_right_modifier
     type = SubdomainBoundingBoxGenerator
     top_right = '1 2 0'
     bottom_left = '0 1 0'
     block_id = 2
-  [../]
-  [./bottom_left_modifier]
+  []
+  [bottom_left_modifier]
     input = top_left_modifier
     type = SubdomainBoundingBoxGenerator
     top_right = '1 1 0'
     bottom_left = '0 0 0'
     block_id = 3
-  [../]
-  [./bottom_right_modifier]
+  []
+  [bottom_right_modifier]
     input = bottom_left_modifier
     type = SubdomainBoundingBoxGenerator
     top_right = '2 1 0'
     bottom_left = '1 0 0'
     block_id = 4
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Functions]
-  [./bottom_left_func]
+  [bottom_left_func]
     type = ImageFunction
     file_base = stack/test
     flip_x = true
@@ -59,8 +59,8 @@
     file_suffix = png
     origin = '0 0 0'
     dimensions = '1 1 0'
-  [../]
-  [./top_left_func]
+  []
+  [top_left_func]
     type = ImageFunction
     file_base = stack/test
     file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
@@ -69,8 +69,8 @@
     dimensions = '1 1 0'
     flip_x = true
     flip_y = true
-  [../]
-  [./top_right_func]
+  []
+  [top_right_func]
     type = ImageFunction
     origin = '1 1 0'
     file_base = stack/test
@@ -78,43 +78,43 @@
     flip_y = true
     file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     dimensions = '1 1 0'
-  [../]
-  [./bottom_right_func]
+  []
+  [bottom_right_func]
     type = ImageFunction
     origin = '1 0 0'
     file_base = stack/test
     file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     file_suffix = png
     dimensions = '1 1 0'
-  [../]
+  []
 []
 
 [ICs]
   # Defined the same way as the MeshGenerators
-  [./top_right_ic]
+  [top_right_ic]
     function = top_right_func
     variable = u
     type = FunctionIC
     block = 1
-  [../]
-  [./top_left_ic]
+  []
+  [top_left_ic]
     function = top_left_func
     variable = u
     type = FunctionIC
     block = 2
-  [../]
-  [./bottom_left_ic]
+  []
+  [bottom_left_ic]
     function = bottom_left_func
     variable = u
     type = FunctionIC
     block = 3
-  [../]
-  [./bottom_right_ic]
+  []
+  [bottom_right_ic]
     function = bottom_right_func
     variable = u
     type = FunctionIC
     block = 4
-  [../]
+  []
 []
 
 [Problem]

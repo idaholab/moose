@@ -30,6 +30,10 @@ class TestVectorPostprocessorViewer(Testing.PeacockImageTestCase):
         """
         Creates the GUI containing the ArtistGroupWidget and the matplotlib figure axes.
         """
+        import matplotlib
+        matplotlib.rcParams["figure.figsize"] = (6.4, 4.8)
+        matplotlib.rcParams["figure.dpi"] = (100)
+
         self._filename = "{}_test_*.csv".format(self.__class__.__name__)
         self._widget = VectorPostprocessorViewer(timeout=None)
         self._widget.onSetFilenames([self._filename])

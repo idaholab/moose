@@ -1,25 +1,28 @@
 [Tests]
-  [./magnitude]
+  [magnitude]
     type = ImageDiff
     command = vector_magnitude.py
     imagediff = 'vector_magnitude.png'
     allowed_linux = 0.975
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./x_component]
+  [x_component]
     type = ImageDiff
     command = vector_x.py
     imagediff = 'vector_x.png'
     allowed_linux = 0.965
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 
-  [./y_component]
+  [y_component]
     type = ImageDiff
     command = vector_y.py
     imagediff = 'vector_y.png'
     allowed_linux = 0.965
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

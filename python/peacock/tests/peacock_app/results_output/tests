@@ -1,9 +1,9 @@
 [Tests]
-  [./CheckResultOutput]
+  [CheckResultOutput]
     type = PythonUnitTest
     input = test_results_output.py
     separate = True
-    display_required = True
-    platform = linux
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

@@ -1,22 +1,25 @@
 [Tests]
-  [./line]
+  [line]
     type = ImageDiff
     command = line_source.py
     imagediff = 'line_source.png'
     allowed_darwin = 0.96
     display_required = true
-  [../]
-  [./line_data]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [line_data]
     type = ImageDiff
     command = line_source_data.py
     imagediff = 'line_source_data.png'
     allowed_darwin = 0.974
     display_required = true
-  [../]
-  [./line_data_tube]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
+  [line_data_tube]
     type = ImageDiff
     command = line_source_data_tube.py
     imagediff = 'line_source_data_tube.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

@@ -1,8 +1,9 @@
 [Tests]
-  [./test]
+  [test]
     type = ImageDiff
     command = mesh_only.py
     imagediff = 'mesh_only.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

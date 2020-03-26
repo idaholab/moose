@@ -1,89 +1,79 @@
 [Tests]
-  [./FigurePlugin]
+  [FigurePlugin]
     type = PythonUnitTest
     input = test_FigurePlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./LineSettingsWidget]
+  [LineSettingsWidget]
     type = PythonUnitTest
     input = test_LineSettingsWidget.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./LineGroupWidget_Postprocessor]
+  [LineGroupWidget_Postprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetPostprocessor.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./LineGroupWidget_VectorPostprocessor]
+  [LineGroupWidget_VectorPostprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetVectorPostprocessor.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./PostprocessorSelectPlugin_Postprocessor]
+  [PostprocessorSelectPlugin_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorSelectPlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./PostprocessorSelectPlugin_VectorPostprocessor]
+  [PostprocessorSelectPlugin_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorSelectPlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./AxesSettingsPlugin]
+  [AxesSettingsPlugin]
     type = PythonUnitTest
     input = test_AxesSettingsPlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./AxisTabsPlugin]
+  [AxisTabsPlugin]
     type = PythonUnitTest
     input = test_AxisTabsPlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./MediaControlPlugin]
+  [MediaControlPlugin]
     type = PythonUnitTest
     input = test_MediaControlPlugin.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./PostprocessorPluginManager]
+  [PostprocessorPluginManager]
     type = PythonUnitTest
     input = test_PostprocessorPluginManager.py
-    display_required = True
-    platform = "DARWIN" # images are a different size on linux #11734
-  [../]
+    display_required = true
+  []
 
-  [./PostprocessorViewer_Postprocessor]
+  [PostprocessorViewer_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorViewer.py
-    display_required = True
-  [../]
+    display_required = true
+  []
 
-  [./PostprocessorViewer_VectorPostprocessor]
+  [PostprocessorViewer_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorViewer.py
-    display_required = True
-  [../]
+    display_required = true
+  []
 
-  [./Output]
+  [Output]
     type = PythonUnitTest
     input = test_OutputPlugin.py
-    display_required = True
-  [../]
+    display_required = true
+  []
 []

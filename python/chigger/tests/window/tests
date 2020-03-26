@@ -1,8 +1,9 @@
 [Tests]
-  [./clear]
+  [clear]
     type = ImageDiff
     command = window_clear.py
     imagediff = 'window_clear.png'
     display_required = true
-  [../]
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

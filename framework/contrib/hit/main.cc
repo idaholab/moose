@@ -281,7 +281,7 @@ format(int argc, char ** argv)
       if (flags.have("i"))
       {
         std::ofstream output(fname);
-        output << fmted;
+        output << fmted << "\n";
       }
       else
         std::cout << fmted;

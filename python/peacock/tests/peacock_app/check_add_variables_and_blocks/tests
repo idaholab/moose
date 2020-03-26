@@ -1,7 +1,8 @@
 [Tests]
-  [./add_variable_and_block]
+  [add_variable_and_block]
     type = PythonUnitTest
     input = test_AddVariableAndBlock.py
-    display_required = True
-  [../]
+    display_required = true
+    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+  []
 []

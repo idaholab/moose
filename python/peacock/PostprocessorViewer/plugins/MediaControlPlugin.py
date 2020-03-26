@@ -97,6 +97,11 @@ def main(filenames):
     from ..PostprocessorViewer import PostprocessorViewer
     from .FigurePlugin import FigurePlugin
     from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
+
+    import matplotlib
+    matplotlib.rcParams["figure.figsize"] = (4., 4.)
+    matplotlib.rcParams["figure.dpi"] = (100)
+
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin, PostprocessorSelectPlugin, MediaControlPlugin])
     widget.onSetFilenames(filenames)
     widget.show()

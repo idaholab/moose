@@ -33,11 +33,19 @@
 []
 
 [Kernels]
+  [./time_u]
+    type = TimeDerivative
+    variable = u
+  [../]
   [./diff_u]
     type = Diffusion
     variable = u
   [../]
 
+  [./time_v]
+    type = TimeDerivative
+    variable = v
+  [../]
   [./diff_v]
     type = Diffusion
     variable = v
@@ -75,30 +83,42 @@
 []
 
 [Bounds]
-  [./u_bounds]
-    type = BoundsAux
+  [./u_upper_bound]
+    type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = u
-    upper = 1
-    lower = 0
+    bound_type = upper
+    bound_value = 1
+  [../]
+  [./u_lower_bound]
+    type = VariableOldValueBoundsAux
+    variable = bounds_dummy
+    bounded_variable = u
+    bound_type = lower
   [../]
 
-  [./v_bounds]
-    type = BoundsAux
+  [./v_upper_bound]
+    type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = v
-    upper = 3
-    lower = -1
+    bound_type = upper
+    bound_value = 3
+  [../]
+  [./v_lower_bound]
+    type = VariableOldValueBoundsAux
+    variable = bounds_dummy
+    bounded_variable = v
+    bound_type = lower
   [../]
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 2
 
   solve_type = 'PJFNK'
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

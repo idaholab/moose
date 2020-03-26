@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./image_func]
+  [image_func]
     type = ImageFunction
     file_base = stack/test
     file_suffix = png
@@ -19,21 +19,21 @@
     threshold = 2.7e4
     upper_value = 1
     lower_value = -1
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = image_func
     variable = u
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Transient
