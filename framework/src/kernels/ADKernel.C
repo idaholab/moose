@@ -52,7 +52,8 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.template adGradPhi<T>(_var)),
     _regular_grad_phi(_assembly.gradPhi(_var)),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
+    _my_elem(nullptr)
 {
   addMooseVariableDependency(this->mooseVariable());
   _save_in.resize(_save_in_strings.size());
@@ -171,6 +172,24 @@ ADKernelTempl<T>::computeJacobian()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+  }
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::jacobianSetup()
+{
+  _my_elem = nullptr;
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
+{
+  if (_my_elem != _current_elem)
+  {
+    computeADOffDiagJacobian();
+    _my_elem = _current_elem;
   }
 }
 

@@ -28,10 +28,12 @@ public:
 
   ADKernelTempl(const InputParameters & parameters);
 
+  void jacobianSetup() override;
+
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase &) override final {}
+  virtual void computeOffDiagJacobian(MooseVariableFEBase &) override final;
   virtual void computeADOffDiagJacobian() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
@@ -93,4 +95,7 @@ protected:
 
   /// Whether this object is acting on the displaced mesh
   const bool _use_displaced_mesh;
+
+private:
+  const Elem * _my_elem;
 };
