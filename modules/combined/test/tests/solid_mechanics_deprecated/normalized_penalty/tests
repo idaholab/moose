@@ -14,7 +14,7 @@
     type = Exodiff
     input = 'normalized_penalty_Q8_sm.i'
     exodiff = 'normalized_penalty_Q8_sm_out.e'
-    abs_zero = 1e-7
+    abs_zero = 5e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact. Legacy Solid Mechanics. '
     no_error_deprecated = true
