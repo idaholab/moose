@@ -9,7 +9,7 @@
 
 #include "DarcyPressure.h"
 
-registerADMooseObject("DarcyThermoMechApp", DarcyPressure);
+registerMooseObject("DarcyThermoMechApp", DarcyPressure);
 
 template <ComputeStage compute_stage>
 InputParameters

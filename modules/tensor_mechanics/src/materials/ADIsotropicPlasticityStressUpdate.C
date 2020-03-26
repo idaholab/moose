@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
-registerADMooseObject("TensorMechanicsApp", ADIsotropicPlasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADIsotropicPlasticityStressUpdate);
 
 template <ComputeStage compute_stage>
 InputParameters

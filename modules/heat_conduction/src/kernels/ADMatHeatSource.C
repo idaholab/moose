@@ -9,7 +9,7 @@
 
 #include "ADMatHeatSource.h"
 
-registerADMooseObject("HeatConductionApp", ADMatHeatSource);
+registerMooseObject("HeatConductionApp", ADMatHeatSource);
 
 template <ComputeStage compute_stage>
 InputParameters

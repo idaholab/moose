@@ -9,7 +9,7 @@
 
 #include "ADDGConvection.h"
 
-registerADMooseObject("MooseTestApp", ADDGConvection);
+registerMooseObject("MooseTestApp", ADDGConvection);
 
 InputParameters
 ADDGConvection::validParams()

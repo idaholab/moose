@@ -12,7 +12,7 @@
 
 #include "libmesh/node.h"
 
-registerADMooseObject("MooseTestApp", ADMatchedScalarValueBC);
+registerMooseObject("MooseTestApp", ADMatchedScalarValueBC);
 
 InputParameters
 ADMatchedScalarValueBC::validParams()

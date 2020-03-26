@@ -9,7 +9,7 @@
 
 #include "ADCHSplitChemicalPotential.h"
 
-registerADMooseObject("PhaseFieldApp", ADCHSplitChemicalPotential);
+registerMooseObject("PhaseFieldApp", ADCHSplitChemicalPotential);
 
 template <ComputeStage compute_stage>
 InputParameters

@@ -10,7 +10,7 @@
 #include "NormalMortarLMMechanicalContact.h"
 #include "SubProblem.h"
 
-registerADMooseObject("ContactApp", NormalMortarLMMechanicalContact);
+registerMooseObject("ContactApp", NormalMortarLMMechanicalContact);
 
 template <ComputeStage compute_stage>
 InputParameters

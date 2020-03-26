@@ -9,7 +9,7 @@
 
 #include "ADVectorRobinBC.h"
 
-registerADMooseObject("MooseTestApp", ADVectorRobinBC);
+registerMooseObject("MooseTestApp", ADVectorRobinBC);
 
 InputParameters
 ADVectorRobinBC::validParams()

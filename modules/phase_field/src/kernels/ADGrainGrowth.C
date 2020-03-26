@@ -9,7 +9,7 @@
 
 #include "ADGrainGrowth.h"
 
-registerADMooseObject("PhaseFieldApp", ADGrainGrowth);
+registerMooseObject("PhaseFieldApp", ADGrainGrowth);
 
 template <ComputeStage compute_stage>
 InputParameters

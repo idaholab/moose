@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeMeanThermalExpansionFunctionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeMeanThermalExpansionFunctionEigenstrain);
 
 template <ComputeStage compute_stage>
 InputParameters

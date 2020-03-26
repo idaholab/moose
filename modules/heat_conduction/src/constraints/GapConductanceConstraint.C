@@ -9,7 +9,7 @@
 
 #include "GapConductanceConstraint.h"
 
-registerADMooseObject("HeatConductionApp", GapConductanceConstraint);
+registerMooseObject("HeatConductionApp", GapConductanceConstraint);
 
 template <ComputeStage compute_stage>
 InputParameters

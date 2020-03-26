@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "LevelSetAdvection.h"
 
-registerADMooseObject("LevelSetApp", LevelSetAdvection);
+registerMooseObject("LevelSetApp", LevelSetAdvection);
 
 template <ComputeStage compute_stage>
 InputParameters

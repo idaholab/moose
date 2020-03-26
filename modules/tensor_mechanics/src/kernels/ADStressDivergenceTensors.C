@@ -11,7 +11,7 @@
 #include "RankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
 
 template <ComputeStage compute_stage>
 InputParameters

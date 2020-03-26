@@ -17,7 +17,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteShellStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeFiniteShellStrain);
 
 template <ComputeStage compute_stage>
 InputParameters

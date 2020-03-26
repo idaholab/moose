@@ -9,7 +9,7 @@
 
 #include "ADGravity.h"
 
-registerADMooseObject("TensorMechanicsApp", ADGravity);
+registerMooseObject("TensorMechanicsApp", ADGravity);
 
 /**
  * This kernel defines the residual contribution from a gravitational body force

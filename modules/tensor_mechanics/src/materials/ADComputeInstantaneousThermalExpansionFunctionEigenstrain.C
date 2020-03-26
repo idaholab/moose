@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "RankTwoTensor.h"
 
-registerADMooseObject("TensorMechanicsApp",
+registerMooseObject("TensorMechanicsApp",
                       ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
 
 template <ComputeStage compute_stage>

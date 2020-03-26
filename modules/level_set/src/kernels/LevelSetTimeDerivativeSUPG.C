@@ -9,7 +9,7 @@
 
 #include "LevelSetTimeDerivativeSUPG.h"
 
-registerADMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
+registerMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
 
 template <ComputeStage compute_stage>
 InputParameters

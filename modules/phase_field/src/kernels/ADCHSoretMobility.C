@@ -9,7 +9,7 @@
 
 #include "ADCHSoretMobility.h"
 
-registerADMooseObject("PhaseFieldApp", ADCHSoretMobility);
+registerMooseObject("PhaseFieldApp", ADCHSoretMobility);
 
 template <ComputeStage compute_stage>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "INSADMomentumTimeDerivative.h"
 
-registerADMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
+registerMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
 
 template <ComputeStage compute_stage>
 InputParameters

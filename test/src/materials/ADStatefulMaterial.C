@@ -9,7 +9,7 @@
 
 #include "ADStatefulMaterial.h"
 
-registerADMooseObject("MooseTestApp", ADStatefulMaterial);
+registerMooseObject("MooseTestApp", ADStatefulMaterial);
 
 InputParameters
 ADStatefulMaterial::validParams()

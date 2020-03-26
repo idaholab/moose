@@ -9,7 +9,7 @@
 
 #include "INSADMomentumViscous.h"
 
-registerADMooseObject("NavierStokesApp", INSADMomentumViscous);
+registerMooseObject("NavierStokesApp", INSADMomentumViscous);
 
 template <ComputeStage compute_stage>
 InputParameters

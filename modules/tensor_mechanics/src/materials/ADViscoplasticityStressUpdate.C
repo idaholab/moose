@@ -11,7 +11,7 @@
 
 #include "libmesh/utility.h"
 
-registerADMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
 
 template <ComputeStage compute_stage>
 InputParameters

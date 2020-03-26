@@ -10,7 +10,7 @@
 #include "ADDynamicStressDivergenceTensors.h"
 #include "ElasticityTensorTools.h"
 
-registerADMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
 
 template <ComputeStage compute_stage>
 InputParameters

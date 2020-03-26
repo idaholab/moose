@@ -9,7 +9,7 @@
 
 #include "ADTestDerivativeFunction.h"
 
-registerADMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
+registerMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
 
 template <ComputeStage compute_stage>
 InputParameters

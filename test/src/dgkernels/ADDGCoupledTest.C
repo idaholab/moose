@@ -14,7 +14,7 @@
 
 #include "libmesh/utility.h"
 
-registerADMooseObject("MooseTestApp", ADDGCoupledTest);
+registerMooseObject("MooseTestApp", ADDGCoupledTest);
 
 InputParameters
 ADDGCoupledTest::validParams()

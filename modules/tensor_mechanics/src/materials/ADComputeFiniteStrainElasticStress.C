@@ -9,7 +9,7 @@
 
 #include "ADComputeFiniteStrainElasticStress.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
+registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
 
 template <ComputeStage compute_stage>
 InputParameters

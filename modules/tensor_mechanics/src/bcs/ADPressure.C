@@ -11,7 +11,7 @@
 #include "Function.h"
 #include "MooseError.h"
 
-registerADMooseObject("TensorMechanicsApp", ADPressure);
+registerMooseObject("TensorMechanicsApp", ADPressure);
 
 template <ComputeStage compute_stage>
 InputParameters

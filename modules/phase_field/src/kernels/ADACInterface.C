@@ -9,7 +9,7 @@
 
 #include "ADACInterface.h"
 
-registerADMooseObject("PhaseFieldApp", ADACInterface);
+registerMooseObject("PhaseFieldApp", ADACInterface);
 
 template <ComputeStage compute_stage>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "INSADTemperatureAdvection.h"
 
-registerADMooseObject("NavierStokesApp", INSADTemperatureAdvection);
+registerMooseObject("NavierStokesApp", INSADTemperatureAdvection);
 
 template <ComputeStage compute_stage>
 InputParameters
@@ -43,7 +43,7 @@ INSADTemperatureAdvection<compute_stage>::precomputeQpResidual()
 
 adBaseClass(INSADTemperatureAdvection);
 
-registerADMooseObject("NavierStokesApp", INSADTemperatureAdvectionSUPG);
+registerMooseObject("NavierStokesApp", INSADTemperatureAdvectionSUPG);
 
 template <ComputeStage compute_stage>
 InputParameters

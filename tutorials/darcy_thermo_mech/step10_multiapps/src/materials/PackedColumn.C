@@ -11,7 +11,7 @@
 #include "Function.h"
 #include "DelimitedFileReader.h"
 
-registerADMooseObject("DarcyThermoMechApp", PackedColumn);
+registerMooseObject("DarcyThermoMechApp", PackedColumn);
 
 template <ComputeStage compute_stage>
 InputParameters

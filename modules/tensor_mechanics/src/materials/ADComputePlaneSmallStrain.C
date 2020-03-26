@@ -9,7 +9,7 @@
 
 #include "ADComputePlaneSmallStrain.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputePlaneSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputePlaneSmallStrain);
 
 template <ComputeStage compute_stage>
 InputParameters

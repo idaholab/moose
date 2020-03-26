@@ -9,7 +9,7 @@
 
 #include "ADConvectiveHeatFluxBC.h"
 
-registerADMooseObject("HeatConductionApp", ADConvectiveHeatFluxBC);
+registerMooseObject("HeatConductionApp", ADConvectiveHeatFluxBC);
 
 template <ComputeStage compute_stage>
 InputParameters

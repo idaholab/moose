@@ -9,7 +9,7 @@
 
 #include "LevelSetAdvectionSUPG.h"
 
-registerADMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
+registerMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
 
 template <ComputeStage compute_stage>
 InputParameters

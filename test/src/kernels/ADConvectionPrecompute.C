@@ -9,7 +9,7 @@
 
 #include "ADConvectionPrecompute.h"
 
-registerADMooseObject("MooseTestApp", ADConvectionPrecompute);
+registerMooseObject("MooseTestApp", ADConvectionPrecompute);
 
 /**
  * This macro defines the valid parameters for

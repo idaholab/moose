@@ -9,7 +9,7 @@
 
 #include "ADCoupledVectorConvection.h"
 
-registerADMooseObject("MooseTestApp", ADCoupledVectorConvection);
+registerMooseObject("MooseTestApp", ADCoupledVectorConvection);
 
 InputParameters
 ADCoupledVectorConvection::validParams()

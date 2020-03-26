@@ -10,7 +10,7 @@
 #include "LevelSetForcingFunctionSUPG.h"
 #include "Function.h"
 
-registerADMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
+registerMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
 
 template <ComputeStage compute_stage>
 InputParameters

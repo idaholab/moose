@@ -9,7 +9,7 @@
 
 #include "ADMatReaction.h"
 
-registerADMooseObject("PhaseFieldApp", ADMatReaction);
+registerMooseObject("PhaseFieldApp", ADMatReaction);
 
 template <ComputeStage compute_stage>
 InputParameters

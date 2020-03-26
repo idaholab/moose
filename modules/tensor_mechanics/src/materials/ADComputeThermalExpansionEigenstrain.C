@@ -9,7 +9,7 @@
 
 #include "ADComputeThermalExpansionEigenstrain.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
 
 template <ComputeStage compute_stage>
 InputParameters

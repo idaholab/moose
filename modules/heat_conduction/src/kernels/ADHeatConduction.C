@@ -9,7 +9,7 @@
 
 #include "ADHeatConduction.h"
 
-registerADMooseObject("HeatConductionApp", ADHeatConduction);
+registerMooseObject("HeatConductionApp", ADHeatConduction);
 
 template <ComputeStage compute_stage>
 InputParameters

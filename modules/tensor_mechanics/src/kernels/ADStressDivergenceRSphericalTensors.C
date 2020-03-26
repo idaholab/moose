@@ -13,7 +13,7 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
 
 template <ComputeStage compute_stage>
 InputParameters

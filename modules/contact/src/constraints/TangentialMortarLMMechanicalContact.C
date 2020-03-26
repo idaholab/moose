@@ -10,7 +10,7 @@
 #include "TangentialMortarLMMechanicalContact.h"
 #include "SubProblem.h"
 
-registerADMooseObject("MooseApp", TangentialMortarLMMechanicalContact);
+registerMooseObject("MooseApp", TangentialMortarLMMechanicalContact);
 
 template <ComputeStage compute_stage>
 InputParameters

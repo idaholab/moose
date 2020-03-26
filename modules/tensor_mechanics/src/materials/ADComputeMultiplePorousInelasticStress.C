@@ -11,7 +11,7 @@
 
 #include "RankTwoTensor.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeMultiplePorousInelasticStress);
+registerMooseObject("TensorMechanicsApp", ADComputeMultiplePorousInelasticStress);
 
 template <ComputeStage compute_stage>
 InputParameters

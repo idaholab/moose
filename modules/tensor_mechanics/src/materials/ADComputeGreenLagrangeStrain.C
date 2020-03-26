@@ -10,7 +10,7 @@
 #include "ADComputeGreenLagrangeStrain.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeGreenLagrangeStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeGreenLagrangeStrain);
 
 template <ComputeStage compute_stage>
 InputParameters

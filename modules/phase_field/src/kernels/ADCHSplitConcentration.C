@@ -9,7 +9,7 @@
 
 #include "ADCHSplitConcentration.h"
 
-registerADMooseObject("PhaseFieldApp", ADCHSplitConcentration);
+registerMooseObject("PhaseFieldApp", ADCHSplitConcentration);
 
 template <ComputeStage compute_stage>
 InputParameters

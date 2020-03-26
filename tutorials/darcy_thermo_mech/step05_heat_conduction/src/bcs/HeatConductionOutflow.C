@@ -9,7 +9,7 @@
 
 #include "HeatConductionOutflow.h"
 
-registerADMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
+registerMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
 
 template <ComputeStage compute_stage>
 InputParameters

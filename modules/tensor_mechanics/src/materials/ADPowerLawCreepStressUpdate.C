@@ -9,7 +9,7 @@
 
 #include "ADPowerLawCreepStressUpdate.h"
 
-registerADMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
 template <ComputeStage compute_stage>
 InputParameters

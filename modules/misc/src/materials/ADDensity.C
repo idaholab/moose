@@ -9,7 +9,7 @@
 
 #include "ADDensity.h"
 
-registerADMooseObject("MiscApp", ADDensity);
+registerMooseObject("MiscApp", ADDensity);
 
 template <ComputeStage compute_stage>
 InputParameters

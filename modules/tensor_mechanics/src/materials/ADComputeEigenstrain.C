@@ -11,7 +11,7 @@
 
 #include "RankTwoTensor.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
 
 template <ComputeStage compute_stage>
 InputParameters

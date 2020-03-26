@@ -9,7 +9,7 @@
 
 #include "ADHeatConductionTimeDerivative.h"
 
-registerADMooseObject("HeatConductionApp", ADHeatConductionTimeDerivative);
+registerMooseObject("HeatConductionApp", ADHeatConductionTimeDerivative);
 
 template <ComputeStage compute_stage>
 InputParameters

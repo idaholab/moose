@@ -9,7 +9,7 @@
 
 #include "ADSplitCHWResAniso.h"
 
-registerADMooseObject("PhaseFieldApp", ADSplitCHWResAniso);
+registerMooseObject("PhaseFieldApp", ADSplitCHWResAniso);
 
 template <ComputeStage compute_stage>
 InputParameters

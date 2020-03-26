@@ -10,7 +10,7 @@
 #include "INSADMaterial.h"
 #include "Function.h"
 
-registerADMooseObject("NavierStokesApp", INSADMaterial);
+registerMooseObject("NavierStokesApp", INSADMaterial);
 
 template <ComputeStage compute_stage>
 InputParameters

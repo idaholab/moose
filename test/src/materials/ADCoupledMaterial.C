@@ -9,7 +9,7 @@
 
 #include "ADCoupledMaterial.h"
 
-registerADMooseObject("MooseTestApp", ADCoupledMaterial);
+registerMooseObject("MooseTestApp", ADCoupledMaterial);
 
 InputParameters
 ADCoupledMaterial::validParams()

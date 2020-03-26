@@ -9,7 +9,7 @@
 
 #include "ADRobinBC.h"
 
-registerADMooseObject("MooseTestApp", ADRobinBC);
+registerMooseObject("MooseTestApp", ADRobinBC);
 
 InputParameters
 ADRobinBC::validParams()

@@ -9,7 +9,7 @@
 
 #include "ADSplitCHParsed.h"
 
-registerADMooseObject("PhaseFieldApp", ADSplitCHParsed);
+registerMooseObject("PhaseFieldApp", ADSplitCHParsed);
 
 template <ComputeStage compute_stage>
 InputParameters

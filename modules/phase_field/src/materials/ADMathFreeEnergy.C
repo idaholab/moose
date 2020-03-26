@@ -9,7 +9,7 @@
 
 #include "ADMathFreeEnergy.h"
 
-registerADMooseObject("PhaseFieldApp", ADMathFreeEnergy);
+registerMooseObject("PhaseFieldApp", ADMathFreeEnergy);
 
 template <ComputeStage compute_stage>
 InputParameters

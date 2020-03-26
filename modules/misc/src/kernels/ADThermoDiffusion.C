@@ -9,7 +9,7 @@
 
 #include "ADThermoDiffusion.h"
 
-registerADMooseObject("MiscApp", ADThermoDiffusion);
+registerMooseObject("MiscApp", ADThermoDiffusion);
 
 template <ComputeStage compute_stage>
 InputParameters

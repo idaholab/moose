@@ -9,7 +9,7 @@
 
 #include "ADSoretCoeffTest.h"
 
-registerADMooseObject("MiscTestApp", ADSoretCoeffTest);
+registerMooseObject("MiscTestApp", ADSoretCoeffTest);
 
 template <ComputeStage compute_stage>
 InputParameters

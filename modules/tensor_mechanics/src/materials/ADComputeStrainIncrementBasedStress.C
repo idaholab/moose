@@ -9,7 +9,7 @@
 
 #include "ADComputeStrainIncrementBasedStress.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeStrainIncrementBasedStress);
+registerMooseObject("TensorMechanicsApp", ADComputeStrainIncrementBasedStress);
 
 template <ComputeStage compute_stage>
 InputParameters

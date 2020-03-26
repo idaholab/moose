@@ -9,7 +9,7 @@
 
 #include "INSADMass.h"
 
-registerADMooseObject("NavierStokesApp", INSADMass);
+registerMooseObject("NavierStokesApp", INSADMass);
 
 template <ComputeStage compute_stage>
 InputParameters

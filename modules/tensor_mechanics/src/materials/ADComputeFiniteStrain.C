@@ -12,7 +12,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
 
 template <ComputeStage compute_stage>
 MooseEnum

@@ -9,7 +9,7 @@
 
 #include "ADCoupledValueTest.h"
 
-registerADMooseObject("MooseTestApp", ADCoupledValueTest);
+registerMooseObject("MooseTestApp", ADCoupledValueTest);
 
 InputParameters
 ADCoupledValueTest::validParams()

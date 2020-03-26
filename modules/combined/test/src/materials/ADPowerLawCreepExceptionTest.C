@@ -11,7 +11,7 @@
 
 #include "NonlinearSystemBase.h"
 
-registerADMooseObject("TensorMechanicsTestApp", ADPowerLawCreepExceptionTest);
+registerMooseObject("TensorMechanicsTestApp", ADPowerLawCreepExceptionTest);
 
 template <ComputeStage compute_stage>
 InputParameters

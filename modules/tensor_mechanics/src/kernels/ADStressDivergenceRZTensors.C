@@ -13,7 +13,7 @@
 #include "ElasticityTensorTools.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
 
 template <ComputeStage compute_stage>
 InputParameters

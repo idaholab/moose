@@ -10,7 +10,7 @@
 #include "ADComputeSmallStrain.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
 
 template <ComputeStage compute_stage>
 InputParameters

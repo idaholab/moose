@@ -11,7 +11,7 @@
 #include "INSADTauMaterial.h"
 #include "NonlinearSystemBase.h"
 
-registerADMooseObject("NavierStokesApp", INSADTauMaterial);
+registerMooseObject("NavierStokesApp", INSADTauMaterial);
 
 template <ComputeStage compute_stage>
 InputParameters

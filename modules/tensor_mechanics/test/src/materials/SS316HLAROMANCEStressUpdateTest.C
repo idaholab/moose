@@ -9,7 +9,7 @@
 
 #include "SS316HLAROMANCEStressUpdateTest.h"
 
-registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
+registerMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
 template <ComputeStage compute_stage>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "GapHeatConductanceTest.h"
 
-registerADMooseObject("MooseTestApp", GapHeatConductanceTest);
+registerMooseObject("MooseTestApp", GapHeatConductanceTest);
 
 InputParameters
 GapHeatConductanceTest::validParams()
