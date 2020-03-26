@@ -1,30 +1,9 @@
 # Contact Action
 
+!syntax description /Contact/ContactAction
+
 ## Description
 
-`ContactAction` can be used to specify mechanical normal and tangential contact using several possible
-models:
-- frictionless
-- glued
-- coulomb (frictional)
-and formulations:
-- kinematic
-- penalty (normal and tangential)
-- augmented lagrange
-- mortar (normal with/without tangential)
-
-## Example Input syntax id=example
-
-For normal mortar contact:
-
-!listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
-
-For normal and tangential (frictional) mortar contact:
-
-!listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
-
-!syntax parameters /Contact/ContactAction
-
-!syntax inputs /Contact/ContactAction
-
-!syntax children /Contact/ContactAction
+ContactAction is a MOOSE action that constructs objects needed for mechanical contact enforcement. This
+is invoked by including the [Contact](syntax/Contact/index.md) block at the top level in a MOOSE input file.
+See the page documenting the syntax for that block for a description, example usage, and parameters.

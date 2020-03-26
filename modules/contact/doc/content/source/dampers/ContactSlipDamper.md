@@ -4,7 +4,7 @@
 
 ## Description
 
-This damper minimizes the oscillations that are inherent in the solution of frictional contact problems by limiting the change in contact state from one nonlinear iteration to the next. This is designed specifically to work with node/face mechanical contact enforced using [MechanicalContactConstraint](/Constraints/MechanicalContactConstraint.md).
+This damper minimizes the oscillations that are inherent in the solution of frictional contact problems by limiting the change in contact state from one nonlinear iteration to the next. This is designed specifically to work with node/face mechanical contact enforced using [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md).
 
 This damper specifically addresses reversals in the slip direction from one nonlinear iteration to the next. If a node that is in contact slips farther than it should during a given nonlinear iteration, the resulting residual will cause that node to slip back in the opposite direction in the next nonlinear iteration. If that slip in the opposite direction in this next nonlinear iteration is large enough that it causes the node to slip past the original contact point, it can be extremely difficult to obtain a converged solution because the node keeps slipping back and forth past that original contact point during each nonlinear iteration.
 

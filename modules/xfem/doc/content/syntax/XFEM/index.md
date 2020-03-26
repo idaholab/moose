@@ -1,11 +1,10 @@
-# XFEM Action System
+# XFEM
 
-!syntax description /XFEM/XFEMAction
+## Description
 
-## Overview
-
-The `XFEM` block must be supplied to run any MOOSE simulations using XFEM. It provides general
-solution parameters to XFEM. Including this block in the input file serves several functions:
+The `XFEM` block must be supplied to run any MOOSE simulations using XFEM. The [XFEMAction](/actions/XFEMAction.md)
+is associated with this block and performs the key model setup tasks.  The `XFEM` input syntax block provides an interface
+to specify parameters related to XFEM. Including this block in the input file serves several functions:
 
 - Causes an algorithm to be run at defined intervals to split the mesh based on a set of evolving defined interfaces.
 - Causes a modified quadrature rule to be used to correctly integrate elements split by these interfaces.
@@ -18,7 +17,7 @@ solution parameters to XFEM. Including this block in the input file serves sever
   - Optional: Setup of near tip enrichment parameters.
   - Optional: Allow users to control the amount of debugging information printed during a simulation.
 
-## Constructed MooseObjects
+## Constructed Objects
 
 Three of the above user-settable parameters pass parameters to the XFEM object for use in setting up
 relevant options: the `qrule` variable, incremental crack growth, and `debug_output_level`. The
