@@ -288,9 +288,8 @@ EigenProblem::solve()
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
-
-    _nl_eigen->solve();
-    _nl_eigen->update();
+    _nl->solve();
+    _nl->update();
   }
 
   // sync solutions in displaced problem
@@ -312,9 +311,10 @@ EigenProblem::init()
 #endif
 
   FEProblemBase::init();
-
+#if LIBMESH_HAVE_SLEPC
   // Set proper operations
   _nl_eigen->attachSLEPcCallbacks();
+#endif
 }
 
 bool
@@ -327,5 +327,6 @@ bool
 EigenProblem::isNonlinearEigenvalueSolver()
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_NEWTON;
+         solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
+         solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
 }

@@ -35,7 +35,7 @@ InputParameters
 getSlepcValidParams(InputParameters & params)
 {
   MooseEnum solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
-                       "NONLINEAR_POWER NEWTON");
+                       "NONLINEAR_POWER NEWTON MF_MONOLITH_NEWTON");
   params.set<MooseEnum>("solve_type") = solve_type;
 
   params.setDocString("solve_type",
@@ -44,7 +44,8 @@ getSlepcValidParams(InputParameters & params)
                       "KRYLOVSCHUR: Krylov-Schur "
                       "JACOBI_DAVIDSON: Jacobi-Davidson "
                       "NONLINEAR_POWER: Nonlinear Power "
-                      "NEWTON: Newton ");
+                      "NEWTON: Newton "
+                      "MF_MONOLITH_NEWTON: Matrix-free Newton ");
 
   // When the eigenvalue problems is reformed as a coupled nonlinear system,
   // we use part of Jacobian as the preconditioning matrix.
@@ -260,6 +261,8 @@ setSlepcOutputOptions(EigenProblem & eigen_problem)
       Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
       break;
 
+    case Moose::EST_MF_MONOLITH_NEWTON: // This should be removed once RattleSnake is updated
+      /* Falls through. */
     case Moose::EST_NEWTON:
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
@@ -371,6 +374,9 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
 #endif
       break;
 
+    case Moose::EST_MF_MONOLITH_NEWTON: // This block should be removed once RattleSnake is updated
+      solver_params._eigen_matrix_free = true;
+      /* Falls through. */
     case Moose::EST_NEWTON:
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
