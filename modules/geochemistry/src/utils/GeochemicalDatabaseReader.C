@@ -14,9 +14,13 @@
 #include "string"
 #include <fstream>
 
-GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename) : _filename(filename)
+GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename,
+                                                     const bool reexpress_free_electron)
+  : _filename(filename)
 {
   read(_filename);
+  if (reexpress_free_electron)
+    reexpressFreeElectron();
 }
 
 void
@@ -27,6 +31,44 @@ GeochemicalDatabaseReader::read(FileName filename)
   // Read the JSON database
   std::ifstream jsondata(filename);
   jsondata >> _root;
+}
+
+void
+GeochemicalDatabaseReader::reexpressFreeElectron()
+{
+  if (!_root.isMember("free electron"))
+    return;
+  if (!_root["free electron"].isMember("e-"))
+    return;
+  if (!_root["free electron"]["e-"]["species"].isMember("O2(g)"))
+    return;
+  if (!_root.isMember("basis species"))
+    return;
+  if (!_root["basis species"].isMember("O2(aq)"))
+    return;
+  if (!_root.isMember("gas species"))
+    return;
+  if (!_root["gas species"].isMember("O2(g)"))
+    return;
+
+  // remove O2(g) in the "e-" and replace with O2(aq)
+  const std::string stoi_o2g = _root["free electron"]["e-"]["species"]["O2(g)"].asString();
+  _root["free electron"]["e-"]["species"].removeMember("O2(g)");
+  _root["free electron"]["e-"]["species"]["O2(aq)"] = stoi_o2g;
+  const Real stoi = MooseUtils::convert<Real>(stoi_o2g);
+
+  // alter equilibrium constants
+  if (!_root["Header"].isMember("temperatures"))
+    return;
+  for (unsigned i = 0; i < _root["Header"]["temperatures"].size(); ++i)
+  {
+    const Real logk_e =
+        MooseUtils::convert<Real>(_root["free electron"]["e-"]["logk"][i].asString());
+    const Real logk_o2 =
+        MooseUtils::convert<Real>(_root["gas species"]["O2(g)"]["logk"][i].asString());
+    const Real newk = logk_e + stoi * logk_o2;
+    _root["free electron"]["e-"]["logk"][i] = std::to_string(newk);
+  }
 }
 
 std::string
@@ -159,11 +201,13 @@ GeochemicalDatabaseReader::getEquilibriumSpecies(const std::vector<std::string> 
 {
   // Parse the secondary species specified in names
   for (const auto & species : names)
-    if (_root["secondary species"].isMember(species))
+    if (_root["secondary species"].isMember(species) or _root["free electron"].isMember(species))
     {
       GeochemistryEquilibriumSpecies dbs;
 
-      auto sec_species = _root["secondary species"][species];
+      auto sec_species = _root["secondary species"].isMember(species)
+                             ? _root["secondary species"][species]
+                             : _root["free electron"][species];
       dbs.name = species;
       dbs.radius = MooseUtils::convert<Real>(sec_species["radius"].asString());
       dbs.charge = MooseUtils::convert<Real>(sec_species["charge"].asString());
@@ -610,6 +654,8 @@ std::vector<std::string>
 GeochemicalDatabaseReader::secondarySpeciesNames() const
 {
   std::vector<std::string> names(_root["secondary species"].getMemberNames());
+  for (const auto nm : _root["free electron"].getMemberNames())
+    names.push_back(nm);
   return names;
 }
 
@@ -654,7 +700,7 @@ GeochemicalDatabaseReader::isSorbingMineral(const std::string & name) const
 bool
 GeochemicalDatabaseReader::isSecondarySpecies(const std::string & name) const
 {
-  return _root["secondary species"].isMember(name);
+  return _root["secondary species"].isMember(name) || _root["free electron"].isMember(name);
 }
 
 bool

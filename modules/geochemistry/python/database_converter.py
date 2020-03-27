@@ -82,6 +82,8 @@ def main():
         database['basis species'] = db.basis_species
     if db.secondary_species:
         database['secondary species'] = db.secondary_species
+    if db.free_electron:
+        database['free electron'] = db.free_electron
     if db.mineral_species:
         database['mineral species'] = db.mineral_species
     if db.gas_species:

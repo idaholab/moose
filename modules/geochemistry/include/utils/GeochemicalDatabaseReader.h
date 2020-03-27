@@ -215,12 +215,27 @@ struct GeochemistryNeutralSpeciesActivity
 class GeochemicalDatabaseReader
 {
 public:
-  GeochemicalDatabaseReader(const FileName filename);
+  /**
+   * Parse the file
+   * @param filename Moose geochemical database file
+   * @param reexpress_free_electron If true, and if the free electron in the database file has an
+   * equilibrium reaction expressed in terms of O2(g), and O2(g) exists as a gas in the database
+   * file, and O2(aq) exists as a basis species in the database file, then reexpress the free
+   * electron's equilibrium reaction in terms of O2(aq)
+   */
+  GeochemicalDatabaseReader(const FileName filename, const bool reexpress_free_electron = true);
 
   /**
    * Parse the thermodynamic database
    */
   void read(FileName filename);
+
+  /**
+   * Sometimes the free electron's equilibrium reaction is defined in terms of O2(g) which is not a
+   * basis species.  If this is the case, re-express it in terms of O2(aq), if O2(g) is a gas and
+   * O2(aq) is a basis species.
+   */
+  void reexpressFreeElectron();
 
   /**
    * Get the activity model type
@@ -387,13 +402,15 @@ public:
    */
   const FileName & filename() const;
 
+  /// Returns true if name is a "secondary species" or "free electron" in the database
+  bool isSecondarySpecies(const std::string & name) const;
+
   /**
    * Checks if species is of given type
    * @param name species name
    * @return true iff species is of given type
    */
   bool isBasisSpecies(const std::string & name) const;
-  bool isSecondarySpecies(const std::string & name) const;
   bool isRedoxSpecies(const std::string & name) const;
   bool isGasSpecies(const std::string & name) const;
   bool isMineralSpecies(const std::string & name) const;
@@ -403,7 +420,7 @@ public:
   /// returns True iff name is the name of a sorbing mineral
   bool isSorbingMineral(const std::string & name) const;
 
-  /// Returns a list of all the names of the "secondary species" in the database
+  /// Returns a list of all the names of the "secondary species" and "free electron" in the database
   std::vector<std::string> secondarySpeciesNames() const;
 
   /// Returns a list of all the names of the "redox couples" in the database
@@ -441,7 +458,7 @@ protected:
   std::map<std::string, GeochemistryElements> _elements;
   /// Basis species data read from the database
   std::map<std::string, GeochemistryBasisSpecies> _basis_species;
-  /// Secondary equilibrium species data read from the database
+  /// Secondary equilibrium species and free electron data read from the database
   std::map<std::string, GeochemistryEquilibriumSpecies> _equilibrium_species;
   /// Mineral species data read from the database
   std::map<std::string, GeochemistryMineralSpecies> _mineral_species;
