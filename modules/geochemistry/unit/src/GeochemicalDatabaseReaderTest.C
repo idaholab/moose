@@ -629,9 +629,9 @@ TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
   GeochemicalDatabaseReader database("data/moose_testdb.json");
 
   std::vector<std::string> names = database.redoxCoupleNames();
-  for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++"})
+  for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++", "StoiCheckRedox"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 4);
+  EXPECT_EQ(names.size(), 5);
 }
 
 TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
