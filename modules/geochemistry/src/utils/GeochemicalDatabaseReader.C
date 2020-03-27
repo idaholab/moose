@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeochemicalDatabaseReader.h"
+#include "GeochemicalDatabaseValidator.h"
 
 #include "MooseUtils.h"
 #include "Conversion.h"
@@ -27,6 +28,11 @@ GeochemicalDatabaseReader::read(FileName filename)
   // Read the JSON database
   std::ifstream jsondata(filename);
   jsondata >> _root;
+
+  // Validate the JSON database so that we don't have to check array sizes,
+  // check for conversion issues, etc.
+  GeochemicalDatabaseValidator dbv(filename, _root);
+  dbv.validate();
 }
 
 std::string

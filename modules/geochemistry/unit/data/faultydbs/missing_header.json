@@ -1,0 +1,29 @@
+{
+  "elements": {
+    "Ag": {
+      "name": "Silver",
+      "molecular weight": "107.8680"
+    }
+  },
+  "basis species": {
+    "H2O": {
+      "elements": {
+        "H": "2.000",
+        "O": "1.000"
+      },
+      "charge": "0",
+      "radius": "0.0",
+      "molecular weight": "18.0152"
+    },
+    "HCO3-": {
+      "elements": {
+        "C": "1.000",
+        "H": "1.000",
+        "O": "3.000"
+      },
+      "charge": "-1",
+      "radius": "4.5",
+      "molecular weight": "61.0171"
+    }
+  }
+}
