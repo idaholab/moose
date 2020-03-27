@@ -34,9 +34,6 @@ RANFSNormalMechanicalContact::validParams()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addClassDescription("Applies the Reduced Active Nonlinear Function Set scheme in which "
-                             "the slave node's non-linear residual function is replaced by the "
-                             "zero penetration constraint equation when the constraint is active");
   params.addParam<bool>(
       "ping_pong_protection",
       false,
@@ -46,6 +43,9 @@ RANFSNormalMechanicalContact::validParams()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addClassDescription("Applies the Reduced Active Nonlinear Function Set scheme in which "
+                             "the slave node's non-linear residual function is replaced by the "
+                             "zero penetration constraint equation when the constraint is active");
   return params;
 }
 

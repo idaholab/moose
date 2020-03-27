@@ -1,4 +1,6 @@
-# Mechanical Contact Constraint
+# MechanicalContactConstraint
+
+!syntax description /Constraints/MechanicalContactConstraint
 
 ## Description
 

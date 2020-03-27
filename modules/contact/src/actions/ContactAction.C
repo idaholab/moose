@@ -107,6 +107,8 @@ ContactAction::validParams()
   params.addParam<Real>(
       "tangential_lm_scaling", 1., "Scaling factor to apply to the tangential LM variable");
 
+  params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
+
   return params;
 }
 

@@ -1,0 +1,29 @@
+title 'Patch Test for Beam Constraints'
+
+# Setup dimensions of problem
+#{beam_horz_len=10.0}  Length of horizontal beam
+#{beam_vert_len=60.0}  Length of vertical beam
+#
+
+# Create beams
+create vertex 0 {beam_vert_len} 0
+create vertex {beam_horz_len} {beam_vert_len} 0
+create vertex {beam_horz_len} 0 0
+create vertex {beam_horz_len} {beam_vert_len} 0
+create curve vertex 1 2
+create curve vertex 3 4
+
+block 1 curve 2
+block 2 curve 1
+block all elem bar2
+curve all interval 1
+
+nodeset 1001 vertex 1
+nodeset 1002 vertex 2
+nodeset 1003 vertex 3
+nodeset 1004 vertex 4
+nodeset 1005 vertex 1 2
+
+mesh curve all
+
+export mesh 'beam_cons_patch.e' overwrite

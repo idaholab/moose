@@ -1,31 +1,72 @@
-# Contact System
+# Contact
 
-The contact system detects proximity and overlaps between surfaces in the mesh,
-and enforces appropriate constraints on the mechanical and thermal behavior on
-that interface. The mechanical contact system prevents penetration between
-surfaces, and computes the contact forces on those surfaces required for the
-non-penetration condition. The thermal contact system transfers heat between
-surfaces.
+## Description
 
-## Mechanical Contact
+The `Contact` block can be used to specify parameters related to mechanical contact enforcement in
+MOOSE simulations. The [ContactAction](/actions/ContactAction.md) is associated with this
+input block, and is the class that performs the associated model setup tasks. Use of the ContactAction
+is not strictly required, but it greatly simplifies the setup of a simulation using contact enforcement.
+A high-level description of the contact problem is provided [here](modules/contact/index.md).
 
-Historically, there have been multiple approaches taken to enforce mechanical
-contact in MOOSE. The Constraint contact system is the most robust of these
-approaches, and is recommended for mechanical contact enforcement in both 2D and
-3D simulations. In the future, Constraint will be the only option.
+This block can be used to specify mechanical normal and tangential contact using several possible
+models for the physical behavior of the interaction:
 
-Currently, all mechanical contact enforcement algorithms in MOOSE are based on a
-master/slave algorithm, where contact is enforced at the nodes on the slave
-surface, which cannot penetrate faces on the master surface. As with all such
-approaches, for the best results, the master surface should be the coarser of
-the two surfaces.
+- frictionless
+- glued
+- coulomb (frictional)
+
+Contact enforcement using node/face master/slave algorithms is available using the following mathematical
+formulations:
+
+- kinematic
+- penalty
+- tangential penalty (kinematic normal constraint with penalty tangential constraint)
+- augmented lagrange
+- reduced active nonlinear function set (RANFS)
+
+In addition, face/face contact using a mortar method can also be specified using this block.
+
+## Constructed Objects
+
+The primary task performed by this action is creating the Constraint classes that perform the contact enforcement.
+The type of Constraint class(es) constructed depend on the formulation and physical interaction model specified
+using the `formulation` and `model` parameters. [contact_action_constraint_table] shows the Constraint classes
+that can be created for various types of contact enforcement.
+
+!table id=contact_action_constraint_table caption=Constraint objects constructed by ContactAction
+| Formulation        | Model   |  Constraint Object   |
+|--------------------|--------------------|--------------------|
+| kinematic          | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
+| penalty            | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
+| tangential_penalty | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
+| ranfs              | frictionless | [RANFSNormalMechanicalContact](/constraints/RANFSNormalMechanicalContact.md) |
+| mortar             | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
+| mortar             | all          | [NormalMortarMechanicalContact](/constraints/NormalMortarMechanicalContact.md) [NormalMortarLMMechanicalContact](/constraints/NormalMortarLMMechanicalContact.md) |
+| mortar             | coulomb      | [TangentialMortarMechanicalContact](/constraints/TangentialMortarMechanicalContact.md) [TangentialMortarLMMechanicalContact](/constraints/TangentialMortarLMMechanicalContact.md) |
+
+In addition to the Constraint class, several other objects are created, as shown in 
+
+!table id=contact_action_otherobj_table caption=Other objects constructed by ContactAction
+| Constructed Object | Purpose |
+|--------------------|--------------------|
+| [ContactPressureAux](/auxkernels/ContactPressureAux.md) | Compute contact pressure and store in an AuxVariable |
+| [Penetration](/auxkernels/PenetrationAux.md) | Compute contact penetration and store in an AuxVariable |
+| [NodalArea](/userobject/NodalArea.md) | Compute nodal area and store in an AuxVariable |
+
+## Notes on Node/Face Contact Enforcement
+
+The node/face contact enforcement is based on a master/slave algorithm, in
+which contact is enforced at the nodes on the slave surface, which cannot
+penetrate faces on the master surface. As with all such approaches, for the
+best results, the master surface should be the coarser of the two surfaces.
 
 The contact enforcement system relies on MOOSE's geometric search system to
 provide the candidate set of faces that can interact with a slave node at a
-given time. The set of candidate faces is controlled by the patch_size parameter
-and the patch_update_strategy options in the Mesh block. The patch size must be
-large enough to accommodate the sliding that occurs during a time step. It is
-generally recommended that the patch_update_strategy=auto be used.
+given time. The set of candidate faces is controlled by the `patch_size`
+parameter and the `patch_update_strategy` options in the
+[Mesh](/mesh/MooseMesh.md) block. The patch size must be large enough to
+accommodate the sliding that occurs during a time step. It is generally
+recommended that the `patch_update_strategy=auto` be used.
 
 The formulation parameter specifies the technique used to enforce contact. The
 DEFAULT option uses a kinematic enforcement algorithm that transfers the
@@ -43,15 +84,35 @@ there will be excessive penetrations with the penalty formulation, and
 convergence will suffer with the kinematic formulation. If the parameter is too
 large, the solver may struggle due to poor conditioning.
 
-## Thermal Contact
+## `System` Parameter
 
-Thermal contact also uses the master/slave algorithm, and, as in mechanical
-contact, the coarser meshed surface should be set as the master surface. In
-thermal contact heat is transferred between the two surfaces.
+Historically, contact enforcement based on multiple MOOSE systems has been available.
+The original system used the DiracKernel system, but more recenlty, the Constraint
+system has been used, and provides a more robust approach and is recommended. The
+`system` parameter is required, and specifies which of these systems to use.
+The DiracKernel system will be removed shortly, and when it is, this parameter
+will no longer be required.
+  
+## Example Input syntax id=example
 
+Node/face frictionless contact:
 
-!syntax list /Contact objects=True actions=False subsystems=False
+!listing test/tests/sliding_block/sliding/constraint/frictionless_kinematic.i block=Contact
 
-!syntax list /Contact objects=False actions=False subsystems=True
+Node/face frictional contact:
 
-!syntax list /Contact objects=False actions=True subsystems=False
+!listing test/tests/sliding_block/sliding/constraint/frictional_02_penalty.i block=Contact
+
+Normal (frictionless) mortar contact:
+
+!listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
+
+Normal and tangential (frictional) mortar contact:
+
+!listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+
+!syntax parameters /Contact/ContactAction
+
+!syntax inputs /Contact/ContactAction
+
+!syntax children /Contact/ContactAction
