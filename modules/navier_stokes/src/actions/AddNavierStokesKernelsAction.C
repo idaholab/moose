@@ -67,7 +67,7 @@ AddNavierStokesKernelsAction::act()
   // Add AuxKernels.
   addPressureOrTemperatureAux("PressureAux");
   addPressureOrTemperatureAux("TemperatureAux");
-  addNSEnthalpyAux();
+  addEnthalpyAux();
   addNSMachAux();
   addNSInternalEnergyAux();
   addSpecificVolumeComputation();
@@ -182,16 +182,16 @@ AddNavierStokesKernelsAction::addNSMachAux()
 }
 
 void
-AddNavierStokesKernelsAction::addNSEnthalpyAux()
+AddNavierStokesKernelsAction::addEnthalpyAux()
 {
-  const std::string kernel_type = "NSEnthalpyAux";
+  const std::string kernel_type = "EnthalpyAux";
 
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<AuxVariableName>("variable") = NS::enthalpy;
 
   // coupled variables
   params.set<CoupledName>(NS::density) = {NS::density};
-  params.set<CoupledName>(NS::total_energy) = {NS::total_energy};
+  params.set<CoupledName>("rho_et") = {NS::total_energy};
   params.set<CoupledName>(NS::pressure) = {NS::pressure};
 
   _problem->addAuxKernel(kernel_type, "enthalpy_auxkernel", params);

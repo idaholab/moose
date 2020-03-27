@@ -43,7 +43,7 @@ NSPressureAux::NSPressureAux(const InputParameters & parameters)
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
   mooseDeprecated("The NSPressureAux aux kernel has been replaced by the "
-    "PressureAux kernel in the fluid properties module.");
+                  "PressureAux kernel in the fluid properties module.");
 }
 
 Real
