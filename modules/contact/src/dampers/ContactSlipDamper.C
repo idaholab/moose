@@ -34,12 +34,13 @@ ContactSlipDamper::validParams()
                                     "Minimum permissible value for damping factor");
   params.addParam<Real>("damping_threshold_factor",
                         1.0e3,
-                        "If previous iterations's slip is below "
-                        "the slip tolerance, only damp a slip "
-                        "reversal if the slip magnitude is "
-                        "greater than than this factor times "
-                        "the old slip.");
+                        "If previous iterations's slip is below the slip tolerance, "
+                        "only damp a slip reversal if the slip magnitude is greater "
+                        "than than this factor times the old slip.");
   params.addParam<bool>("debug_output", false, "Output detailed debugging information");
+  params.addClassDescription(
+      "Damp the iterative solution to minimize oscillations in frictional contact "
+      "constriants between nonlinear iterations");
   return params;
 }
 

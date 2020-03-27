@@ -25,6 +25,7 @@ NodalArea::validParams()
 {
   InputParameters params = SideIntegralVariableUserObject::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
+  params.addClassDescription("Compute the tributary area for nodes on a surface");
   return params;
 }
 

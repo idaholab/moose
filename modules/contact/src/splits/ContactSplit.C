@@ -34,10 +34,11 @@ ContactSplit::validParams()
   params.addParam<std::vector<int>>(
       "uncontact_displaced",
       "List of indicators whether displaced mesh is used to define excluded contact");
-  // Right now, we consider this as a required parameter.
-  // After some tests from BISON, we will set a default value for this parameter.
   params.addRequiredParam<bool>("include_all_contact_nodes",
                                 "Whether to include all nodes on the contact surfaces");
+  params.addClassDescription("Split-based preconditioner that partitions the domain into DOFs "
+                             "directly involved in contact (on contact surfaces) and those "
+                             "that are not");
   return params;
 }
 

@@ -36,6 +36,7 @@ AugmentedLagrangianContactProblem::validParams()
   params.addParam<int>("maximum_lagrangian_update_iterations",
                        100,
                        "Maximum number of update Lagrangian Multiplier iterations per step");
+  params.addClassDescription("Manages nested solution for augmented Lagrange contact");
   return params;
 }
 

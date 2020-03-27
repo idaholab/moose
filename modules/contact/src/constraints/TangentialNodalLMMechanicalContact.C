@@ -35,11 +35,6 @@ TangentialNodalLMMechanicalContact::validParams()
   params.addParam<MooseEnum>(
       "ncp_function_type", ncp_function_type, "The type of NCP function to use");
 
-  params.addClassDescription("Implements the KKT conditions for frictional Coulomb contact using "
-                             "an NCP function. Requires that either the relative tangential "
-                             "velocity is zero or the tangential stress is equal to the friction "
-                             "coefficient times the normal contact pressure.");
-
   params.addRequiredParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
 
   params.addParam<Real>(
@@ -47,6 +42,11 @@ TangentialNodalLMMechanicalContact::validParams()
       10,
       "The smoothing parameter for the function used to approximate std::abs. The approximating "
       "function is courtesy of https://math.stackexchange.com/a/1115033/408963");
+
+  params.addClassDescription("Implements the KKT conditions for frictional Coulomb contact using "
+                             "an NCP function. Requires that either the relative tangential "
+                             "velocity is zero or the tangential stress is equal to the friction "
+                             "coefficient times the normal contact pressure.");
   return params;
 }
 
