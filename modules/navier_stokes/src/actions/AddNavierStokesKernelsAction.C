@@ -65,8 +65,8 @@ AddNavierStokesKernelsAction::act()
     addNSSUPGMomentum(component);
 
   // Add AuxKernels.
-  addPressureOrTemperatureAux("NSPressureAux");
-  addPressureOrTemperatureAux("NSTemperatureAux");
+  addPressureOrTemperatureAux("PressureAux");
+  addPressureOrTemperatureAux("TemperatureAux");
   addNSEnthalpyAux();
   addNSMachAux();
   addNSInternalEnergyAux();
@@ -219,13 +219,13 @@ void
 AddNavierStokesKernelsAction::addPressureOrTemperatureAux(const std::string & kernel_type)
 {
   InputParameters params = _factory.getValidParams(kernel_type);
-  std::string var_name = (kernel_type == "NSPressureAux" ? NS::pressure : NS::temperature);
+  std::string var_name = (kernel_type == "PressureAux" ? NS::pressure : NS::temperature);
   params.set<AuxVariableName>("variable") = var_name;
 
   // coupled variables
-  params.set<CoupledName>(NS::internal_energy) = {NS::internal_energy};
-  params.set<CoupledName>(NS::specific_volume) = {NS::specific_volume};
-  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  params.set<CoupledName>("e") = {NS::internal_energy};
+  params.set<CoupledName>("v") = {NS::specific_volume};
+  params.set<UserObjectName>("fp") = _fp_name;
 
   _problem->addAuxKernel(kernel_type, var_name + "_auxkernel", params);
 }
