@@ -22,13 +22,14 @@ GeochemistryApp::GeochemistryApp(InputParameters parameters) : MooseApp(paramete
 GeochemistryApp::~GeochemistryApp() {}
 
 void
-GeochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+GeochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   /* ModulesApp::registerAll(f, af, s); */
   Registry::registerObjectsTo(f, {"GeochemistryApp"});
   Registry::registerActionsTo(af, {"GeochemistryApp"});
 
   /* register custom execute flags, action syntax, etc. here */
+  s.registerActionSyntax("AddGeochemicalModelInterrogatorAction", "GeochemicalModelInterrogator");
 }
 
 void

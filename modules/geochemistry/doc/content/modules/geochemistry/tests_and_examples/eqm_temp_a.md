@@ -12,8 +12,35 @@ has the equilibrium equation
 \end{equation}
 Then:
 
-- If water activity is 1, the equilibrium temperature (where $K=1$) is found to be 43.7$^{\circ}$C.  MOOSE produces the result ????
-- If water activity is 0.7, the equilibrium temperature (where $K=1$) is found to be 11.8$^{\circ}$C.  MOOSE produces the result ????
-- If the temperature is 25$^{\circ}$C, the equilibrium is attained when water activity is 0.815.  MOOSE produces the result ????
+- If water activity is 1, the equilibrium temperature (where $K=1$) is found to be 43.7$^{\circ}$C.
+- If water activity is 0.7, the equilibrium temperature (where $K=1$) is found to be 11.8$^{\circ}$C.
+- If the temperature is 25$^{\circ}$C, the equilibrium is attained when water activity is 0.815.
+
+To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+
+!listing modules/geochemistry/test/tests/interrogate_reactions/gypsum.i block=UserObjects
+
+Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be created which specifies the desired swaps and the `interrogation = eqm_temperature` instruction:
+
+!listing modules/geochemistry/test/tests/interrogate_reactions/gypsum.i block=GeochemicalModelInterrogator
+
+The output yields the desired information:
+
+```
+Not enough activites known to compute equilibrium temperature for reaction
+  Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.443
+Gypsum.  T = 44.1212
+```
+
+The first lines state that equilibrium temperature for the reaction
+\begin{equation}
+\mathrm{gypsum} \rightleftharpoons = 2\mathrm{H}_{2}\mathrm{O} + \mathrm{Ca}^{2+} + \mathrm{SO}_{4}^{2-} \ ,
+\end{equation}
+cannot be found because the activities of Ca$^{2+}$ and SO$_{4}^{2-}$ are unknown.  However, when Anhydrite is put into the basis in place of Ca$^{2+}$, the equilibrium temperature can be found, and the result is found on the final line.
+
+Altering the activity value for H$_{2}$O using the `activity_values` input enables finding the equilibrium temperature for different $a_{\mathrm{H}_{2}\mathrm{O}}$.
+
+To find the activity of water given $T=25^{\circ}$C, simply use `interrogation = activity` as in the page on [equilibrium activity ratios](activity_ratios.md).
+
 
 !bibtex bibliography
