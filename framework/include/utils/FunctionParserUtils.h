@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Evaluate FParser object and check EvalError
-  Real evaluate(ADFunctionPtr &, std::string object_name = "");
+  Real evaluate(ADFunctionPtr &, const std::string & object_name = "");
 
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(ADFunctionPtr & parser,

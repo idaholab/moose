@@ -89,7 +89,7 @@ FunctionParserUtils::setParserFeatureFlags(ADFunctionPtr & parser)
 }
 
 Real
-FunctionParserUtils::evaluate(ADFunctionPtr & parser, std::string name)
+FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL)
