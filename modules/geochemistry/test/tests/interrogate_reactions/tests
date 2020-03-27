@@ -2,6 +2,11 @@
   [./invalid_swap]
     type = RunException
     input = invalid_swap.i
+    # only run in opt mode, otherwise the Outputs/perf_graph=true in the CIVET debug tests triggers:
+    #Assertion `common_actions.size() == 1' failed
+    #Should be only one common_output Action
+    #at moose/framework/src/base/MooseApp.C, line 819
+    method = 'OPT'
     expect_err = 'Matrix is not invertible, which signals an invalid basis swap'
     threading = '!pthreads'
     requirement = 'The geochemistry interrogator will throw an error for an invalid swap'
