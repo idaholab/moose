@@ -154,7 +154,6 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
-      std::cout << "-------- STARTING FACE LOOP ---------\n";
       typename RangeType::const_iterator faceinfo = range.begin();
       for (faceinfo = range.begin(); faceinfo != range.end(); ++faceinfo)
       {

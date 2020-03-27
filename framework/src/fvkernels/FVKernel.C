@@ -99,14 +99,6 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
-  //std::cout << "varname=" << _var.name() << ", elem=" << fi.leftElem().id();
-  //if (fi.rightElemPtr())
-  //  std::cout << ", right=" << fi.rightElem().id();
-  //std::cout << ":\n";
-
-  //for (auto i : _var.dofIndices())
-  //  std::cout << "    dofindices=" << i << "\n";
-
   // We might currently be running on a face for which this kernel's variable
   // is only defined on one side. If this is the case, we need to only
   // calculate+add the residual contribution if there is a dirichlet bc for
@@ -157,14 +149,6 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   _face_info = &fi;
   _normal = fi.normal();
   DualReal r = fi.faceArea() * computeQpResidual();
-
-  std::cout << "varname=" << _var.name() << ", elem=" << fi.leftElem().id();
-  if (fi.rightElemPtr())
-    std::cout << ", right=" << fi.rightElem().id();
-  std::cout << ":\n";
-
-  for (auto i : _var.dofIndices())
-    std::cout << "    dofindices=" << i << "\n";
 
   auto & sys = _subproblem.systemBaseNonlinear();
   unsigned int dofs_per_elem = sys.getMaxVarNDofsPerElem();
