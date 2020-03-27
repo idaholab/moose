@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Evaluate FParser object and check EvalError
-  Real evaluate(ADFunctionPtr &);
+  Real evaluate(ADFunctionPtr &, std::string object_name = "");
 
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(ADFunctionPtr & parser,
@@ -58,6 +58,9 @@ protected:
   bool _enable_auto_optimize;
   bool _fail_on_evalerror;
   //@}
+
+  /// Enum for failure method
+  const enum class FailureMethod { nan, nan_warning, error, exception } _evalerror_behavior;
 
   /// appropriate not a number value to return
   const Real _nan;
