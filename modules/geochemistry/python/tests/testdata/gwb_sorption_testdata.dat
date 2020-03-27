@@ -1,0 +1,85 @@
+Dataset of surface reactions for gwb programs
+Dataset format: apr18
+Surface type: HFO
+Model type: two-layer
+Surface potential: variable    (specify a value in mV to set a constant potential model)
+Surface capacitance: variable  (specify a value in F/m2 to set a constant capacitance model)
+Thermo dataset: thermo.tdat
+*  
+* 
+* Reaction dataset for sorption to hydrous ferric oxide.
+* 
+* Based on data of Dzombak and Morel (1990), entered by Amy Berger, November 1993.
+* 
+* Dataset "FeOH+.dat"
+* 
+* This dataset contains the D&M compilation, expanded to include
+*  surface complexation reactions for which binding constants have
+*  only been estimated (see D&M, 1990, Chapter 10, p. 299).
+* 
+* Dataset FeOH.dat contains the D&M compilation in the strict sense,
+*  not including the estimated values.
+* 
+* Reference: D.A. Dzombak, D.A. and F.F.M. Morel, 1990, Surface Complexation
+*   Modeling, Hydrous Ferric Oxide.  Wiley, New York, 393 p.
+* 
+* This dataset is formatted for use with the "thermo.tdat" database.  To use it with
+*  database "thermo.com.V8.R6+.dat", change species names as follows:
+*    Fe(OH)3(ppd)  ->  Fe(OH)3
+*    As(OH)3       ->  As(OH)3(aq)
+*    B(OH)3        ->  B(OH)3(aq)
+* 
+* GWB releases 14.0 and later support bidentate and polydentate reactions according to
+*  the stoichiometric, Davis-Leckie, Hiemstra-Van Reimsdijk, and Appelo-Postma conventions.
+*  Refer to section "Polydentate sorption" in the GWB Essentials Guide.
+* 
+* GWB releases 14.0 and later accept site density values in units of either "mol/mol mineral"
+*  or "sites/nm2".
+
+-end-
+
+   2 basis species
+
+>(s)FeOH
+     charge=    0       mole wt.=    72.8543 g
+     3 elements in species
+        1.000 Fe              1.000 H               1.000 O       
+
+>(w)FeOH
+     charge=    111       mole wt.=    -72.8543 g
+     3 elements in species
+        1.111 Fe              -1.23 H               77.0 Rubbish       
+
+-end-
+
+   2 sorbing minerals
+
+Fe(OH)3(ppd)
+     surface area= 600.0000 m2/g
+     2 sorption sites
+     >(s)FeOH      site density=      .0050 mol/mol mineral
+     >(w)FeOH      site density=      .2000 mol/mol mineral
+
+Hematite
+     surface area= 123.0000 m2/g
+     2 sorption sites
+     >(sblah)FeOH      site density=      .0100 mol/mol mineral
+     >(wasdf)FeOH      site density=      .4000 mol/mol mineral
+
+-end-
+
+   2 surface species
+
+>(s)FeO-
+     charge=   -1       mole wt.=    71.8464 g
+     2 species in reaction
+        1.000 >(s)FeOH       -1.000 H+      
+     log K= 8.9300      dlogK/dT= 0.0000
+
+>(s)FeOAg
+     charge=    0       mole wt.=   179.7144 g
+     3 species in reaction
+        1.3 >(sas)FeOH        -1.111 Ag+            0.000 H+king      
+     log K= 1.7200      dlogK/dT= -1.234
+
+-end-

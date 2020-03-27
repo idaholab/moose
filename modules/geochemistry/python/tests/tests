@@ -1,0 +1,23 @@
+[Tests]
+  [gwb_reader]
+    type = PythonUnitTest
+    input = test_gwbreader.py
+    requirement = "The geochemistry module shall provide a python utility to read thermodynamic databases in GWB format"
+    issues = "#14897"
+    design = "database.md"
+  []
+  [eq36_reader]
+    type = PythonUnitTest
+    input = test_eq36reader.py
+    requirement = "The geochemistry module shall provide a python utility to read thermodynamic databases in EQ3/6 format"
+    issues = "#14897"
+    design = "database.md"
+  []
+  [dbutils]
+    type = PythonUnitTest
+    input = test_dbutils.py
+    requirement = "The geochemistry module shall provide a python utility to extract information from a MOOSE thermodynamic database"
+    issues = "#14897"
+    design = "database.md"
+  []
+[]

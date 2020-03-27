@@ -1,0 +1,440 @@
+Dataset of surface reactions for gwb programs
+Dataset format: apr18
+Surface type: HFO
+Model type: two-layer
+Surface potential: variable    (specify a value in mV to set a constant potential model)
+Surface capacitance: variable  (specify a value in F/m2 to set a constant capacitance model)
+Thermo dataset: thermo.tdat
+*  
+* 
+* Reaction dataset for sorption to hydrous ferric oxide.
+* 
+* Based on data of Dzombak and Morel (1990), entered by Amy Berger, November 1993.
+* 
+* Dataset "FeOH+.dat"
+* 
+* This dataset contains the D&M compilation, expanded to include
+*  surface complexation reactions for which binding constants have
+*  only been estimated (see D&M, 1990, Chapter 10, p. 299).
+* 
+* Dataset FeOH.dat contains the D&M compilation in the strict sense,
+*  not including the estimated values.
+* 
+* Reference: D.A. Dzombak, D.A. and F.F.M. Morel, 1990, Surface Complexation
+*   Modeling, Hydrous Ferric Oxide.  Wiley, New York, 393 p.
+* 
+* This dataset is formatted for use with the "thermo.tdat" database.  To use it with
+*  database "thermo.com.V8.R6+.dat", change species names as follows:
+*    Fe(OH)3(ppd)  ->  Fe(OH)3
+*    As(OH)3       ->  As(OH)3(aq)
+*    B(OH)3        ->  B(OH)3(aq)
+* 
+* GWB releases 14.0 and later support bidentate and polydentate reactions according to
+*  the stoichiometric, Davis-Leckie, Hiemstra-Van Reimsdijk, and Appelo-Postma conventions.
+*  Refer to section "Polydentate sorption" in the GWB Essentials Guide.
+* 
+* GWB releases 14.0 and later accept site density values in units of either "mol/mol mineral"
+*  or "sites/nm2".
+
+-end-
+
+   2 basis species
+
+>(s)FeOH
+     charge=    0       mole wt.=    72.8543 g
+     3 elements in species
+        1.000 Fe              1.000 H               1.000 O       
+
+>(w)FeOH
+     charge=    0       mole wt.=    72.8543 g
+     3 elements in species
+        1.000 Fe              1.000 H               1.000 O       
+
+-end-
+
+   3 sorbing minerals
+
+Fe(OH)3(ppd)
+     surface area= 600.0000 m2/g
+     2 sorption sites
+     >(s)FeOH      site density=      .0050 mol/mol mineral
+     >(w)FeOH      site density=      .2000 mol/mol mineral
+
+Goethite
+     surface area= 600.0000 m2/g
+     2 sorption sites
+     >(s)FeOH      site density=      .0050 mol/mol mineral
+     >(w)FeOH      site density=      .2000 mol/mol mineral
+
+Hematite
+     surface area= 600.0000 m2/g
+     2 sorption sites
+     >(s)FeOH      site density=      .0100 mol/mol mineral
+     >(w)FeOH      site density=      .4000 mol/mol mineral
+
+-end-
+
+   58 surface species
+
+>(s)FeO-
+     charge=   -1       mole wt.=    71.8464 g
+     2 species in reaction
+        1.000 >(s)FeOH       -1.000 H+      
+     log K= 8.9300      dlogK/dT= 0.0000
+
+>(s)FeOAg
+     charge=    0       mole wt.=   179.7144 g
+     3 species in reaction
+        1.000 >(s)FeOH        1.000 Ag+            -1.000 H+      
+     log K= 1.7200      dlogK/dT= 0.0000
+
+>(s)FeOCo+
+     charge=    1       mole wt.=   130.7796 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Co++    
+     log K= .4600       dlogK/dT= 0.0000
+
+>(s)FeOCrOH+
+     charge=    1       mole wt.=   140.8497 g
+     4 species in reaction
+        1.000 >(s)FeOH       -2.000 H+              1.000 Cr+++   
+        1.000 H2O     
+     log K= -2.0600     dlogK/dT= 0.0000
+
+>(s)FeOCu+
+     charge=    1       mole wt.=   135.3924 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Cu++    
+     log K= -2.8900     dlogK/dT= 0.0000
+
+>(s)FeOH2+
+     charge=    1       mole wt.=    73.8622 g
+     2 species in reaction
+        1.000 >(s)FeOH        1.000 H+      
+     log K= -7.2900     dlogK/dT= 0.0000
+
+>(s)FeOHBa++
+     charge=    2       mole wt.=   210.1843 g
+     2 species in reaction
+        1.000 >(s)FeOH        1.000 Ba++    
+     log K= -5.4600     dlogK/dT= 0.0000
+
+>(s)FeOHCa++
+     charge=    2       mole wt.=   112.9343 g
+     2 species in reaction
+        1.000 >(s)FeOH        1.000 Ca++    
+     log K= -4.9700     dlogK/dT= 0.0000
+
+>(s)FeOHg+
+     charge=    1       mole wt.=   272.4364 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Hg++    
+     log K= -7.7600     dlogK/dT= 0.0000
+
+>(s)FeOHSr++
+     charge=    2       mole wt.=   160.4743 g
+     2 species in reaction
+        1.000 >(s)FeOH        1.000 Sr++    
+     log K= -5.0100     dlogK/dT= 0.0000
+
+>(s)FeOMn+
+     charge=    1       mole wt.=   126.7844 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Mn++    
+     log K= .4000       dlogK/dT= 0.0000
+
+>(s)FeONi+
+     charge=    1       mole wt.=   130.5564 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Ni++    
+     log K= -.3700      dlogK/dT= 0.0000
+
+>(s)FeONpO2+
+     charge=    1       mole wt.=   340.8934 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 NpO2++  
+     log K= -5.9000     dlogK/dT= 0.0000
+
+>(s)FeOPb+
+     charge=    1       mole wt.=   279.0464 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Pb++    
+     log K= -4.6500     dlogK/dT= 0.0000
+
+>(s)FeOPuO2+
+     charge=    1       mole wt.=   347.8452 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 PuO2++  
+     log K= -5.4000     dlogK/dT= 0.0000
+
+>(s)FeOSn+
+     charge=    1       mole wt.=   190.5364 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Sn++    
+     log K= -8.0000     dlogK/dT= 0.0000
+
+>(s)FeOUO2+
+     charge=    1       mole wt.=   341.8742 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 UO2++   
+     log K= -5.2000     dlogK/dT= 0.0000
+
+>(s)FeOZn+
+     charge=    1       mole wt.=   137.2264 g
+     3 species in reaction
+        1.000 >(s)FeOH       -1.000 H+              1.000 Zn++    
+     log K= -.9900      dlogK/dT= 0.0000
+
+>(w)FeCrO4-
+     charge=   -1       mole wt.=   171.8406 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 H+              1.000 CrO4--  
+       -1.000 H2O     
+     log K= -10.8500    dlogK/dT= 0.0000
+
+>(w)FeF
+     charge=    0       mole wt.=    74.8454 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 H+              1.000 F-      
+       -1.000 H2O     
+     log K= -8.7000     dlogK/dT= 0.0000
+
+>(w)FeH2AsO3
+     charge=    0       mole wt.=   180.7826 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 As(OH)3        -1.000 H2O     
+     log K= -5.4100     dlogK/dT= 0.0000
+
+>(w)FeH2AsO4
+     charge=    0       mole wt.=   196.7820 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 AsO4---        -1.000 H2O     
+        3.000 H+      
+     log K= -29.3100    dlogK/dT= 0.0000
+
+>(w)FeH2BO3
+     charge=    0       mole wt.=   116.6720 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 B(OH)3         -1.000 H2O     
+     log K= -.6200      dlogK/dT= 0.0000
+
+>(w)FeH2PO4
+     charge=    0       mole wt.=   152.8342 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 PO4---          3.000 H+      
+       -1.000 H2O     
+     log K= -31.2900    dlogK/dT= 0.0000
+
+>(w)FeHAsO4-
+     charge=   -1       mole wt.=   195.7741 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 AsO4---         2.000 H+      
+       -1.000 H2O     
+     log K= -23.5100    dlogK/dT= 0.0000
+
+>(w)FeHPO4-
+     charge=   -1       mole wt.=   151.8263 g
+     4 species in reaction
+        1.000 >(w)FeOH        2.000 H+              1.000 PO4---  
+       -1.000 H2O     
+     log K= -25.3900    dlogK/dT= 0.0000
+
+>(w)FeO-
+     charge=   -1       mole wt.=    71.8464 g
+     2 species in reaction
+        1.000 >(w)FeOH       -1.000 H+      
+     log K= 8.9300      dlogK/dT= 0.0000
+
+>(w)FeOAg
+     charge=    0       mole wt.=   179.7144 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 Ag+            -1.000 H+      
+     log K= 5.3000      dlogK/dT= 0.0000
+
+>(w)FeOBa+
+     charge=    1       mole wt.=   209.1764 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 Ba++           -1.000 H+      
+     log K= 7.2000      dlogK/dT= 0.0000
+
+>(w)FeOCa+
+     charge=    1       mole wt.=   111.9264 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Ca++    
+     log K= 5.8500      dlogK/dT= 0.0000
+
+>(w)FeOCo+
+     charge=    1       mole wt.=   130.7796 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Co++    
+     log K= 3.0100      dlogK/dT= 0.0000
+
+>(w)FeOCu+
+     charge=    1       mole wt.=   135.3924 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Cu++    
+     log K= -.6000      dlogK/dT= 0.0000
+
+>(w)FeOH2+
+     charge=    1       mole wt.=    73.8622 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 H+      
+     log K= -7.2900     dlogK/dT= 0.0000
+
+>(w)FeOHAsO4---
+     charge=   -3       mole wt.=   211.7740 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 AsO4--- 
+     log K= -10.5800    dlogK/dT= 0.0000
+
+>(w)FeOHCrO4--
+     charge=   -2       mole wt.=   188.8479 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 CrO4--  
+     log K= -3.9000     dlogK/dT= 0.0000
+
+>(w)FeOHF-
+     charge=   -1       mole wt.=    91.8527 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 F-      
+     log K= -1.6000     dlogK/dT= 0.0000
+
+>(w)FeOHg+
+     charge=    1       mole wt.=   272.4364 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Hg++    
+     log K= -6.4500     dlogK/dT= 0.0000
+
+>(w)FeOHSeO3--
+     charge=   -2       mole wt.=   199.8125 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 SeO3--  
+     log K= -5.1700     dlogK/dT= 0.0000
+
+>(w)FeOHSeO4--
+     charge=   -2       mole wt.=   215.8119 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 SeO4--  
+     log K= -.8000      dlogK/dT= 0.0000
+
+>(w)FeOHSiO3--
+     charge=   -2       mole wt.=   148.9380 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 H2SiO4--       -1.000 H2O     
+     log K= -8.3000     dlogK/dT= 0.0000
+
+>(w)FeOHSO4--
+     charge=   -2       mole wt.=   168.9119 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 SO4--   
+     log K= -.7900      dlogK/dT= 0.0000
+
+>(w)FeOHVO4---
+     charge=   -3       mole wt.=   187.7933 g
+     2 species in reaction
+        1.000 >(w)FeOH        1.000 VO4---  
+     log K= -13.5700    dlogK/dT= 0.0000
+
+>(w)FeOMg+
+     charge=    1       mole wt.=    96.1514 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Mg++    
+     log K= 4.6000      dlogK/dT= 0.0000
+
+>(w)FeOMn+
+     charge=    1       mole wt.=   126.7844 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Mn++    
+     log K= 3.5000      dlogK/dT= 0.0000
+
+>(w)FeONi+
+     charge=    1       mole wt.=   130.5564 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Ni++    
+     log K= 2.5000      dlogK/dT= 0.0000
+
+>(w)FeONpO2+
+     charge=    1       mole wt.=   340.8934 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 NpO2++  
+     log K= -3.6000     dlogK/dT= 0.0000
+
+>(w)FeOPb+
+     charge=    1       mole wt.=   279.0464 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Pb++    
+     log K= -.3000      dlogK/dT= 0.0000
+
+>(w)FeOPuO2+
+     charge=    1       mole wt.=   347.8452 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 PuO2++  
+     log K= -3.0000     dlogK/dT= 0.0000
+
+>(w)FeOSn+
+     charge=    1       mole wt.=   190.5364 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Sn++    
+     log K= -5.9000     dlogK/dT= 0.0000
+
+>(w)FeOSr+
+     charge=    1       mole wt.=   159.4664 g
+     3 species in reaction
+        1.000 >(w)FeOH        1.000 Sr++           -1.000 H+      
+     log K= 6.5800      dlogK/dT= 0.0000
+
+>(w)FeOSrOH
+     charge=    0       mole wt.=   176.4737 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 Sr++           -2.000 H+      
+        1.000 H2O     
+     log K= 17.6000     dlogK/dT= 0.0000
+
+>(w)FeOUO2+
+     charge=    1       mole wt.=   341.8742 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 UO2++   
+     log K= -2.8000     dlogK/dT= 0.0000
+
+>(w)FeOZn+
+     charge=    1       mole wt.=   137.2264 g
+     3 species in reaction
+        1.000 >(w)FeOH       -1.000 H+              1.000 Zn++    
+     log K= 1.9900      dlogK/dT= 0.0000
+
+>(w)FePO4--
+     charge=   -2       mole wt.=   150.8184 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 H+              1.000 PO4---  
+       -1.000 H2O     
+     log K= -17.7200    dlogK/dT= 0.0000
+
+>(w)FeSeO3-
+     charge=   -1       mole wt.=   182.8052 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 SeO3--         -1.000 H2O     
+        1.000 H+      
+     log K= -12.6900    dlogK/dT= 0.0000
+
+>(w)FeSeO4-
+     charge=   -1       mole wt.=   198.8046 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 SeO4--         -1.000 H2O     
+        1.000 H+      
+     log K= -7.7300     dlogK/dT= 0.0000
+
+>(w)FeSiO3-
+     charge=   -1       mole wt.=   131.9307 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 H+              1.000 H2SiO4--
+       -2.000 H2O     
+     log K= -15.9000    dlogK/dT= 0.0000
+
+>(w)FeSO4-
+     charge=   -1       mole wt.=   151.9046 g
+     4 species in reaction
+        1.000 >(w)FeOH        1.000 H+              1.000 SO4--   
+       -1.000 H2O     
+     log K= -7.7800     dlogK/dT= 0.0000
+
+-end-
