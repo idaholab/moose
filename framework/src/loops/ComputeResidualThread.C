@@ -18,6 +18,7 @@
 #include "Material.h"
 #include "TimeKernel.h"
 #include "SwapBackSentinel.h"
+#include "FVTimeKernel.h"
 
 #include "libmesh/threads.h"
 
@@ -119,6 +120,19 @@ ComputeResidualThread::onElement(const Elem * elem)
     for (const auto & kernel : kernels)
       kernel->computeResidual();
   }
+
+  std::vector<FVElementalKernel *> kernels;
+  _fe_problem.theWarehouse()
+             .query()
+             .template condition<AttribSystem>("FVElementalKernel")
+             .template condition<AttribSubdomains>(_subdomain)
+             .template condition<AttribThread>(_tid)
+             .template condition<AttribVectorTags>(_tags)
+             .template condition<AttribIsADJac>(false)
+             .queryInto(kernels);
+
+  for (auto kernel : kernels)
+    kernel->computeResidual();
 }
 
 void

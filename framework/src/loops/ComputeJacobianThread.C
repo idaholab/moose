@@ -19,6 +19,7 @@
 #include "NonlocalKernel.h"
 #include "SwapBackSentinel.h"
 #include "TimeDerivative.h"
+#include "FVTimeKernel.h"
 
 #include "libmesh/threads.h"
 
@@ -72,6 +73,19 @@ ComputeJacobianThread::computeJacobian()
         }
       }
   }
+
+  std::vector<FVElementalKernel *> kernels;
+  _fe_problem.theWarehouse()
+             .query()
+             .template condition<AttribSystem>("FVElementalKernel")
+             .template condition<AttribSubdomains>(_subdomain)
+             .template condition<AttribThread>(_tid)
+             .template condition<AttribVectorTags>(_tags)
+             .queryInto(kernels);
+
+  for (auto kernel : kernels)
+    if (kernel->isImplicit())
+      kernel->computeJacobian();
 }
 
 void

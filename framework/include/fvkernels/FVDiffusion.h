@@ -11,7 +11,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual ADReal computeQpJacobian() override;
 
   const ADMaterialProperty(Real) & _coeff_left;
   const ADMaterialProperty(Real) & _coeff_right;
@@ -28,7 +27,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual ADReal computeQpJacobian() override;
 
   const ADMaterialProperty(RealVectorValue) & _vel_left;
   const ADMaterialProperty(RealVectorValue) & _vel_right;

@@ -23,6 +23,9 @@ public:
 
 protected:
   SubProblem & _subproblem;
+  THREAD_ID _tid;
+  Assembly & _assembly;
+
 };
 
 #define usingFVFluxKernelMembers                                                                   \
@@ -72,11 +75,7 @@ protected:
   //
   virtual ADReal computeQpResidual() = 0;
 
-  virtual ADReal computeQpJacobian() = 0;
-
   MooseVariableFV<Real> & _var;
-  THREAD_ID _tid;
-  Assembly & _assembly;
 
   const unsigned int _qp = 0;
   const ADVariableValue & _u_left;

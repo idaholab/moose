@@ -46,7 +46,9 @@ FVKernel::FVKernel(const InputParameters & params)
     TaggingInterface(this),
     TransientInterface(this),
     BlockRestrictable(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem"))
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _tid(params.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid))
 {
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV kernels do not yet support displaced mesh");
@@ -81,8 +83,6 @@ template <ComputeStage compute_stage>
 FVFluxKernel<compute_stage>::FVFluxKernel(const InputParameters & params)
   : FVFluxKernelBase(params),
     _var(*mooseVariableFV()),
-    _tid(params.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _u_left(_var.adSln<compute_stage>()),
     _u_right(_var.adSlnNeighbor<compute_stage>()),
     _grad_u_left(_var.adGradSln<compute_stage>()),

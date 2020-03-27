@@ -44,13 +44,6 @@ FVDiffusion<compute_stage>::computeQpResidual()
   return r;
 }
 
-template <ComputeStage compute_stage>
-ADReal
-FVDiffusion<compute_stage>::computeQpJacobian()
-{
-  return 0;
-}
-
 registerADMooseObject("MooseApp", FVAdvection);
 
 template <ComputeStage compute_stage>
@@ -93,9 +86,3 @@ FVAdvection<compute_stage>::computeQpResidual()
   return r;
 }
 
-template <ComputeStage compute_stage>
-ADReal
-FVAdvection<compute_stage>::computeQpJacobian()
-{
-  return 0;
-}

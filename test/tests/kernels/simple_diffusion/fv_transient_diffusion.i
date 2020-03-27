@@ -10,6 +10,7 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
+    initial_condition = 3
   []
 []
 
