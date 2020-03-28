@@ -17,6 +17,8 @@ InputParameters
 ConstantBoundsAux::validParams()
 {
   InputParameters params = BoundsAuxBase::validParams();
+  params.addClassDescription(
+      "Provides constant bound of a variable for the PETSc's variational inequalities solver");
   params.addRequiredParam<Real>("bound_value", "The value of bound for the variable");
   return params;
 }

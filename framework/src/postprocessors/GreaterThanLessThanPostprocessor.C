@@ -26,6 +26,8 @@ InputParameters
 GreaterThanLessThanPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Count number of DOFs of a non-linear variable that are greater than "
+                             "or less than a given threshold");
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to conduct a comparison for");
   params.addParam<SubdomainName>("subdomain", "The subdomain that the variable lives on");
