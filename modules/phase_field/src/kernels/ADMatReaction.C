@@ -40,3 +40,5 @@ ADMatReaction<compute_stage>::computeQpResidual()
 {
   return -_mob[_qp] * _test[_i][_qp] * _v[_qp];
 }
+
+adBaseClass(ADMatReaction);

@@ -39,3 +39,5 @@ ADCHSplitChemicalPotential<compute_stage>::computeQpResidual()
 {
   return _test[_i][_qp] * (_u[_qp] - _chemical_potential[_qp]);
 }
+
+adBaseClass(ADCHSplitChemicalPotential);
