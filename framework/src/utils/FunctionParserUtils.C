@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "InputParameters.h"
+#include "MooseEnum.h"
 
 defineLegacyParams(FunctionParserUtils);
 
@@ -34,14 +35,22 @@ FunctionParserUtils::validParams()
       "enable_auto_optimize", true, "Enable automatic immediate optimization of derivatives");
   params.addParam<bool>(
       "disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "fail_on_evalerror",
       false,
-      "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
+      "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)",
+      "'evalerror_behavior' has replaced this parameter");
+  MooseEnum evalerror("nan nan_warning error exception", "nan");
+  params.addParam<MooseEnum>("evalerror_behavior",
+                             evalerror,
+                             "What to do if evaluation error occurs. Options are to pass a nan, "
+                             "pass a nan with a warning, throw a error, or throw an exception");
+
   params.addParamNamesToGroup("enable_ad_cache", "Advanced");
   params.addParamNamesToGroup("enable_auto_optimize", "Advanced");
   params.addParamNamesToGroup("disable_fpoptimizer", "Advanced");
   params.addParamNamesToGroup("fail_on_evalerror", "Advanced");
+  params.addParamNamesToGroup("evalerror_behavior", "Advanced");
 
   return params;
 }
@@ -60,6 +69,7 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
     _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
+    _evalerror_behavior(parameters.get<MooseEnum>("evalerror_behavior").getEnum<FailureMethod>()),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
 #ifndef LIBMESH_HAVE_FPARSER_JIT
@@ -79,7 +89,7 @@ FunctionParserUtils::setParserFeatureFlags(ADFunctionPtr & parser)
 }
 
 Real
-FunctionParserUtils::evaluate(ADFunctionPtr & parser)
+FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL)
@@ -97,8 +107,33 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser)
 
   // hard fail or return not a number
   if (_fail_on_evalerror)
-    mooseError("DerivativeParsedMaterial function evaluation encountered an error: ",
+    mooseError("In ",
+               name,
+               ": DerivativeParsedMaterial function evaluation encountered an error: ",
                _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+
+  switch (_evalerror_behavior)
+  {
+    case FailureMethod::nan:
+      return _nan;
+    case FailureMethod::nan_warning:
+      mooseWarning("In ",
+                   name,
+                   ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                   _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+      return _nan;
+    case FailureMethod::error:
+      mooseError("In ",
+                 name,
+                 ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                 _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+    case FailureMethod::exception:
+      mooseException("In ",
+                     name,
+                     ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                     _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code],
+                     "\n Cutting timestep");
+  }
 
   return _nan;
 }

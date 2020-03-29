@@ -249,9 +249,9 @@ DerivativeParsedMaterialHelper::computeQpProperties()
 
   // set function value
   if (_prop_F)
-    (*_prop_F)[_qp] = evaluate(_func_F);
+    (*_prop_F)[_qp] = evaluate(_func_F, _name);
 
   // set derivatives
   for (auto & D : _derivatives)
-    (*D._mat_prop)[_qp] = evaluate(D._F);
+    (*D._mat_prop)[_qp] = evaluate(D._F, _name);
 }

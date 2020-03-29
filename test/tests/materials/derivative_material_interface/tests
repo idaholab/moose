@@ -1,6 +1,6 @@
 [Tests]
   design = 'DerivativeMaterialInterface.md'
-  issues = '#4299 #6360 #5055 #6901 #5039'
+  issues = '#4299 #6360 #5055 #6901 #5039 #14975'
 
   [analytic_derivatives]
     requirement = 'The system shall be capable of producing analytic derivatives of material '
@@ -76,5 +76,40 @@
 
     requirement = 'The system shall issue an error when required derivative materials that are '
                   'retrieved are never declared.'
+  []
+
+  [bad_evaluation]
+    requirement = 'The system shall handle a bad evaluation by'
+    [nan]
+      type = 'RunApp'
+      input = 'bad_evaluation.i'
+      recover = false
+      detail = 'passing a silent nan.'
+    []
+    [warning]
+      type = 'RunApp'
+      input = 'bad_evaluation.i'
+      expect_out = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+      cli_args = 'Materials/F/evalerror_behavior=nan_warning'
+      recover = false
+      detail = 'throwing a warning and passing a silent nan.'
+      allow_warnings = true
+    []
+    [error]
+      type = 'RunException'
+      input = 'bad_evaluation.i'
+      expect_err = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+      cli_args = 'Materials/F/evalerror_behavior=error'
+      recover = false
+      detail = 'throwing an error.'
+    []
+    [exception]
+      type = 'RunApp'
+      input = 'bad_evaluation.i'
+      expect_out = 'Cutting timestep'
+      cli_args = 'Materials/F/evalerror_behavior=exception'
+      recover = false
+      detail = 'throwing an exception.'
+    []
   []
 []

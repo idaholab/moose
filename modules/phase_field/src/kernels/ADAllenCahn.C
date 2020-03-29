@@ -38,3 +38,5 @@ ADAllenCahn<compute_stage>::computeDFDOP()
 {
   return _dFdEta[_qp];
 }
+
+adBaseClass(ADAllenCahn);

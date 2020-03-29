@@ -28,3 +28,5 @@ ADSplitCHWResAniso<compute_stage>::ADSplitCHWResAniso(const InputParameters & pa
   : ADSplitCHWResBase<compute_stage, RealTensorValue>(parameters)
 {
 }
+
+adBaseClass(ADSplitCHWResAniso);

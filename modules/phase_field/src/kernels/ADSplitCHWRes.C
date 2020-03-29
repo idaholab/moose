@@ -28,3 +28,5 @@ ADSplitCHWRes<compute_stage>::ADSplitCHWRes(const InputParameters & parameters)
   : ADSplitCHWResBase<compute_stage, Real>(parameters)
 {
 }
+
+adBaseClass(ADSplitCHWRes);
