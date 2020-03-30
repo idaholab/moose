@@ -41,7 +41,8 @@
     poissons_ratio = 0.0
   [../]
   [./strain]
-    type = ComputeForceStabilizedSmallStrainNOSPD
+    type = ComputePlaneSmallStrainNOSPD
+    stabilization = HORIZON
   [../]
   [./stress]
     type = ComputeLinearElasticStress

@@ -17,7 +17,7 @@ PeridynamicsKernelBase::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
-      "Base class for calculating residual and Jacobian for peridynamic kernels");
+      "Base class for calculating the residual and Jacobian for the peridynamic kernels");
 
   params.addParam<bool>("full_jacobian",
                         false,
@@ -34,8 +34,8 @@ PeridynamicsKernelBase::PeridynamicsKernelBase(const InputParameters & parameter
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _dim(_pdmesh.dimension()),
     _nnodes(2),
-    _vols_ij(_nnodes),
-    _dg_vol_frac_ij(_nnodes),
+    _node_vol(_nnodes),
+    _dg_vol_frac(_nnodes),
     _horiz_rad(_nnodes)
 {
 }
@@ -45,16 +45,16 @@ PeridynamicsKernelBase::prepare()
 {
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
-    _vols_ij[nd] = _pdmesh.getPDNodeVolume(_current_elem->node_id(nd));
+    _node_vol[nd] = _pdmesh.getPDNodeVolume(_current_elem->node_id(nd));
     dof_id_type id_ji_in_ij =
         _pdmesh.getNeighborIndex(_current_elem->node_id(nd), _current_elem->node_id(1 - nd));
-    _dg_vol_frac_ij[nd] = _pdmesh.getDefGradVolFraction(_current_elem->node_id(nd), id_ji_in_ij);
+    _dg_vol_frac[nd] = _pdmesh.getDefGradVolFraction(_current_elem->node_id(nd), id_ji_in_ij);
     _horiz_rad[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));
   }
 
-  _origin_vec_ij = _pdmesh.getPDNodeCoord(_current_elem->node_id(1)) -
-                   _pdmesh.getPDNodeCoord(_current_elem->node_id(0));
-  _bond_status_ij = _bond_status_var->getElementalValue(_current_elem);
+  _origin_vec = _pdmesh.getPDNodeCoord(_current_elem->node_id(1)) -
+                _pdmesh.getPDNodeCoord(_current_elem->node_id(0));
+  _bond_status = _bond_status_var->getElementalValue(_current_elem);
 }
 
 void

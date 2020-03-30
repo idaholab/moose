@@ -47,6 +47,7 @@ ThermalMaterialBaseBPD::computeProperties()
   Real ave_thermal_conductivity = 0.0;
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     ave_thermal_conductivity += _thermal_conductivity[qp] * _JxW[qp] * _coord[qp];
+
   ave_thermal_conductivity /= _assembly.elemVolume();
 
   // nodal temperature
@@ -56,13 +57,13 @@ ThermalMaterialBaseBPD::computeProperties()
   // compute peridynamic micro-conductivity: _Kij
   computePeridynamicsParams(ave_thermal_conductivity);
 
-  for (_qp = 0; _qp < _nnodes; ++_qp)
+  for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
     // residual term
-    _bond_heat_flow[_qp] =
-        _Kij * (_temp[1] - _temp[0]) / _origin_length * _node_vol[0] * _node_vol[1];
+    _bond_heat_flow[nd] =
+        _Kij * (_temp[1] - _temp[0]) / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
 
     // derivative of the residual term
-    _bond_dQdT[_qp] = -_Kij / _origin_length * _node_vol[0] * _node_vol[1];
+    _bond_dQdT[nd] = -_Kij / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
   }
 }

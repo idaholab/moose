@@ -20,8 +20,8 @@ ComputePlaneFiniteStrainNOSPD::validParams()
   InputParameters params = ComputeFiniteStrainNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
-      "for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "
-      "correspondence model under planar finite strain assumptions");
+      "for peridynamic correspondence model under planar finite strain "
+      "assumptions");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar out-of-plane strain variable for generalized plane strain");

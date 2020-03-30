@@ -68,11 +68,11 @@ protected:
   const std::vector<RealGradient> * _orientation;
 
   /// Current variable dof numbers for nodes i and j
-  std::vector<dof_id_type> _ivardofs_ij;
+  std::vector<dof_id_type> _ivardofs;
 
   /// Vector of bond in current configuration
-  RealGradient _cur_ori_ij;
+  RealGradient _current_vec;
 
-  /// Current bond length
-  Real _cur_len_ij;
+  /// Unit vector of bond in current configuration
+  RealGradient _current_unit_vec;
 };

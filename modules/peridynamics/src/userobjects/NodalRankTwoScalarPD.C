@@ -22,7 +22,7 @@ NodalRankTwoScalarPD::validParams()
   params.addClassDescription(
       "Class for calculating scalar quantities of nodal rank-two stress and strain tensors "
       "from material properties (stress and strain) for edge elements (i.e., bonds) "
-      "connected at that node. NOTE: This UserObject only applies to SNOSPD model.");
+      "connected at that node. NOTE: This UserObject only applies to the NOSPD model.");
 
   params.addRequiredParam<MooseEnum>(
       "scalar_type", RankTwoScalarTools::scalarOptions(), "Type of scalar output");

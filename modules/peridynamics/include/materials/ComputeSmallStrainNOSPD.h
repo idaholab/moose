@@ -18,7 +18,7 @@ template <>
 InputParameters validParams<ComputeSmallStrainNOSPD>();
 
 /**
- * Material class for bond-associated correspondence material model for small strain
+ * Material class for horizon-stabilized peridynamic correspondence model for small strain
  */
 class ComputeSmallStrainNOSPD : public ComputeStrainBaseNOSPD
 {

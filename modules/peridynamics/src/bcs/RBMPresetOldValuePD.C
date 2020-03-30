@@ -51,22 +51,25 @@ RBMPresetOldValuePD::shouldApply()
   std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_node->id());
   std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_node->id());
 
-  RankTwoTensor shape_tensor;
+  RankTwoTensor shape;
   if (dim == 2)
-    shape_tensor(2, 2) = 1.0;
+    shape(2, 2) = 1.0;
 
-  RealGradient ori_vec(dim);
-  for (unsigned int i = 0; i < neighbors.size(); ++i)
-    if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[i])) > 0.5)
+  Real vol_nb;
+  RealGradient origin_vec;
+
+  for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
+    if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
     {
-      Real vol_i = _pdmesh.getPDNodeVolume(neighbors[i]);
-      ori_vec = *(_pdmesh.nodePtr(neighbors[i])) - *_current_node;
-      for (unsigned int j = 0; j < dim; ++j)
-        for (unsigned int k = 0; k < dim; ++k)
-          shape_tensor(j, k) += horiz_size / ori_vec.norm() * ori_vec(j) * ori_vec(k) * vol_i;
+      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+      origin_vec = *(_pdmesh.nodePtr(neighbors[nb])) - *_current_node;
+
+      for (unsigned int k = 0; k < dim; ++k)
+        for (unsigned int l = 0; l < dim; ++l)
+          shape(k, l) += horiz_size / origin_vec.norm() * origin_vec(k) * origin_vec(l) * vol_nb;
     }
 
-  if (!MooseUtils::absoluteFuzzyEqual(shape_tensor.det(), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
     should_apply = false;
 
   return should_apply;

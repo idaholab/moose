@@ -38,12 +38,12 @@ protected:
                                         unsigned int coupled_component) override;
 
   ///@{ Bond based material properties
-  const MaterialProperty<Real> & _bond_force_ij;
-  const MaterialProperty<Real> & _bond_force_i_j;
-  const MaterialProperty<Real> & _bond_dfdU_ij;
-  const MaterialProperty<Real> & _bond_dfdU_i_j;
-  const MaterialProperty<Real> & _bond_dfdT_ij;
-  const MaterialProperty<Real> & _bond_dfdT_i_j;
+  const MaterialProperty<Real> & _bond_local_force;
+  const MaterialProperty<Real> & _bond_nonlocal_force;
+  const MaterialProperty<Real> & _bond_local_dfdU;
+  const MaterialProperty<Real> & _bond_nonlocal_dfdU;
+  const MaterialProperty<Real> & _bond_local_dfdT;
+  const MaterialProperty<Real> & _bond_nonlocal_dfdT;
   ///@}
 
   /// The index of displacement component

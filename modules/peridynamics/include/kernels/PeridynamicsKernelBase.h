@@ -64,14 +64,14 @@ protected:
   PeridynamicsMesh & _pdmesh;
   const unsigned int _dim;
   const unsigned int _nnodes;
-  std::vector<Real> _vols_ij;
-  std::vector<Real> _dg_vol_frac_ij;
+  std::vector<Real> _node_vol;
+  std::vector<Real> _dg_vol_frac;
   std::vector<Real> _horiz_rad;
   ///@}
 
   ///Vector for current bond under undefored configuration
-  RealGradient _origin_vec_ij;
+  RealGradient _origin_vec;
 
   /// Bond status of current bond/edge2
-  Real _bond_status_ij;
+  Real _bond_status;
 };

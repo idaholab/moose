@@ -17,8 +17,8 @@ InputParameters
 MechanicsBPD::validParams()
 {
   InputParameters params = MechanicsBasePD::validParams();
-  params.addClassDescription("Class for calculating residual and Jacobian for Bond-based "
-                             "PeriDynamic mechanics formulation");
+  params.addClassDescription("Class for calculating the residual and Jacobian for the bond-based "
+                             "peridynamic mechanics formulation");
 
   params.addRequiredParam<unsigned int>(
       "component",
@@ -29,9 +29,9 @@ MechanicsBPD::validParams()
 
 MechanicsBPD::MechanicsBPD(const InputParameters & parameters)
   : MechanicsBasePD(parameters),
-    _bond_force_ij(getMaterialProperty<Real>("bond_force_ij")),
-    _bond_dfdU_ij(getMaterialProperty<Real>("bond_dfdU_ij")),
-    _bond_dfdT_ij(getMaterialProperty<Real>("bond_dfdT_ij")),
+    _bond_local_force(getMaterialProperty<Real>("bond_local_force")),
+    _bond_local_dfdU(getMaterialProperty<Real>("bond_dfdU")),
+    _bond_local_dfdT(getMaterialProperty<Real>("bond_dfdT")),
     _component(getParam<unsigned int>("component"))
 {
 }
@@ -39,20 +39,21 @@ MechanicsBPD::MechanicsBPD(const InputParameters & parameters)
 void
 MechanicsBPD::computeLocalResidual()
 {
-  _local_re(0) = -_bond_force_ij[0] * _cur_ori_ij(_component) * _bond_status_ij;
+  _local_re(0) = -_bond_local_force[0] * _current_unit_vec(_component) * _bond_status;
   _local_re(1) = -_local_re(0);
 }
 
 void
 MechanicsBPD::computeLocalJacobian()
 {
-  Real diag =
-      _cur_ori_ij(_component) * _cur_ori_ij(_component) * _bond_dfdU_ij[0] +
-      _bond_force_ij[0] * (1.0 - _cur_ori_ij(_component) * _cur_ori_ij(_component)) / _cur_len_ij;
+  Real diag = _current_unit_vec(_component) * _current_unit_vec(_component) * _bond_local_dfdU[0] +
+              _bond_local_force[0] *
+                  (1.0 - _current_unit_vec(_component) * _current_unit_vec(_component)) /
+                  _current_vec.norm();
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
-      _local_ke(_i, _j) += (_i == _j ? 1 : -1) * diag * _bond_status_ij;
+      _local_ke(_i, _j) += (_i == _j ? 1 : -1) * diag * _bond_status;
 }
 
 void
@@ -62,16 +63,17 @@ MechanicsBPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
   {
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-        _local_ke(_i, _j) +=
-            (_i == 1 ? 1 : -1) * _cur_ori_ij(_component) * _bond_dfdT_ij[_j] * _bond_status_ij;
+        _local_ke(_i, _j) += (_i == 1 ? 1 : -1) * _current_unit_vec(_component) *
+                             _bond_local_dfdT[_j] * _bond_status;
   }
   else
   {
     Real val =
-        _cur_ori_ij(_component) * _cur_ori_ij(coupled_component) * _bond_dfdU_ij[0] -
-        _bond_force_ij[0] * _cur_ori_ij(_component) * _cur_ori_ij(coupled_component) / _cur_len_ij;
+        _current_unit_vec(_component) * _current_unit_vec(coupled_component) * _bond_local_dfdU[0] -
+        _bond_local_force[0] * _current_unit_vec(_component) *
+            _current_unit_vec(coupled_component) / _current_vec.norm();
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-        _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status_ij;
+        _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
   }
 }

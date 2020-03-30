@@ -8,10 +8,10 @@
     design = 'modules/peridynamics/StretchBasedFailureCriterionPD.md'
     issues = '#11561'
   [../]
-  [./2D_stress_failure_NOSPD]
+  [./2D_stress_failure_HNOSPD]
     type = 'Exodiff'
-    input = '2D_stress_failure_NOSPD.i'
-    exodiff = '2D_stress_failure_NOSPD.e'
+    input = '2D_stress_failure_HNOSPD.i'
+    exodiff = '2D_stress_failure_HNOSPD.e'
     map = false
     requirement = 'RankTwoBasedFailureCriteriaNOSPD shall determine the bond status based on given critical stress.'
     design = 'modules/peridynamics/RankTwoBasedFailureCriteriaNOSPD.md'

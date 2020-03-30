@@ -18,9 +18,13 @@ InputParameters
 ComputeStrainBaseNOSPD::validParams()
 {
   InputParameters params = MechanicsMaterialBasePD::validParams();
-  params.addClassDescription(
-      "Base class for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "
-      "correspondence material model");
+  params.addClassDescription("Base material strain class for the peridynamic correspondence model");
+
+  MooseEnum stabilization_option("FORCE HORIZON");
+  params.addRequiredParam<MooseEnum>(
+      "stabilization",
+      stabilization_option,
+      "Stabilization techniques used for the peridynamic correspondence model");
 
   params.addParam<bool>("plane_strain",
                         false,
@@ -34,6 +38,7 @@ ComputeStrainBaseNOSPD::validParams()
 
 ComputeStrainBaseNOSPD::ComputeStrainBaseNOSPD(const InputParameters & parameters)
   : DerivativeMaterialInterface<MechanicsMaterialBasePD>(parameters),
+    _stabilization(getParam<MooseEnum>("stabilization")),
     _plane_strain(getParam<bool>("plane_strain")),
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
@@ -45,7 +50,8 @@ ComputeStrainBaseNOSPD::ComputeStrainBaseNOSPD(const InputParameters & parameter
     _ddgraddw(declareProperty<RankTwoTensor>("ddeformation_gradient_dw")),
     _total_strain(declareProperty<RankTwoTensor>("total_strain")),
     _mechanical_strain(declareProperty<RankTwoTensor>("mechanical_strain")),
-    _multi(declareProperty<Real>("multi"))
+    _multi(declareProperty<Real>("multi")),
+    _sf_coeff(declareProperty<Real>("stabilization_force_coeff"))
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
@@ -77,7 +83,74 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
   _ddgraddv[_qp].zero();
   _ddgraddw[_qp].zero();
   _multi[_qp] = 0.0;
+  _sf_coeff[_qp] = 0.0;
 
+  if (_dim == 2)
+    _shape2[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
+
+  if (_stabilization == "FORCE")
+    computeConventionalQpDeformationGradient();
+  else if (_stabilization == "HORIZON")
+    computeBondHorizonQpDeformationGradient();
+  else
+    paramError("stabilization",
+               "Unknown stabilization scheme for peridynamic correspondence model");
+}
+
+void
+ComputeStrainBaseNOSPD::computeConventionalQpDeformationGradient()
+{
+  const Node * cur_nd = _current_elem->node_ptr(_qp);
+  std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(cur_nd->id());
+  std::vector<dof_id_type> bonds = _pdmesh.getBonds(cur_nd->id());
+
+  // calculate the shape tensor and prepare the deformation gradient tensor
+  Real vol_nb, weight;
+  RealGradient origin_vec_nb, current_vec_nb;
+
+  for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
+    if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
+    {
+      Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
+      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+      origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(cur_nd->id());
+
+      for (unsigned int k = 0; k < _dim; ++k)
+        current_vec_nb(k) = origin_vec_nb(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
+                            _disp_var[k]->getNodalValue(*cur_nd);
+
+      weight = _horiz_rad[_qp] / origin_vec_nb.norm();
+      for (unsigned int k = 0; k < _dim; ++k)
+      {
+        for (unsigned int l = 0; l < _dim; ++l)
+        {
+          _shape2[_qp](k, l) += weight * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+          _deformation_gradient[_qp](k, l) +=
+              weight * current_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+        }
+        // calculate derivatives of deformation_gradient w.r.t displacements of node i
+        _ddgraddu[_qp](0, k) += -weight * origin_vec_nb(k) * vol_nb;
+        _ddgraddv[_qp](1, k) += -weight * origin_vec_nb(k) * vol_nb;
+        if (_dim == 3)
+          _ddgraddw[_qp](2, k) += -weight * origin_vec_nb(k) * vol_nb;
+      }
+    }
+
+  // finalize the deformation gradient tensor
+  _deformation_gradient[_qp] *= _shape2[_qp].inverse();
+  _ddgraddu[_qp] *= _shape2[_qp].inverse();
+  _ddgraddv[_qp] *= _shape2[_qp].inverse();
+  _ddgraddw[_qp] *= _shape2[_qp].inverse();
+
+  _sf_coeff[_qp] = ElasticityTensorTools::getIsotropicYoungsModulus(_Cijkl[_qp]) *
+                   _pdmesh.getNodeAvgSpacing(_current_elem->node_id(_qp)) * _horiz_rad[_qp] /
+                   _origin_vec.norm();
+  _multi[_qp] = _horiz_rad[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
+}
+
+void
+ComputeStrainBaseNOSPD::computeBondHorizonQpDeformationGradient()
+{
   // for cases when current bond was broken, assign shape tensor and deformation gradient to unity
   if (_bond_status_var->getElementalValue(_current_elem) < 0.5)
   {
@@ -86,48 +159,45 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
   }
   else
   {
-    if (_dim == 2)
-      _shape2[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
-
     const Node * cur_nd = _current_elem->node_ptr(_qp);
     const Node * end_nd = _current_elem->node_ptr(1 - _qp); // two nodes for edge2 element
     std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(cur_nd->id());
     std::vector<dof_id_type> bonds = _pdmesh.getBonds(cur_nd->id());
 
-    unsigned int nb =
+    unsigned int nb_index =
         std::find(neighbors.begin(), neighbors.end(), end_nd->id()) - neighbors.begin();
-    std::vector<dof_id_type> dg_neighbors = _pdmesh.getDefGradNeighbors(cur_nd->id(), nb);
+    std::vector<dof_id_type> dg_neighbors = _pdmesh.getDefGradNeighbors(cur_nd->id(), nb_index);
 
     // calculate the shape tensor and prepare the deformation gradient tensor
-    Real dgnodes_vsum = 0.0;
-    RealGradient ori_vec(_dim), cur_vec(_dim);
+    Real vol_nb, weight, dgnodes_vsum = 0.0;
+    RealGradient origin_vec_nb, current_vec_nb;
 
-    for (unsigned int j = 0; j < dg_neighbors.size(); ++j)
-      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[j]])) > 0.5)
+    for (unsigned int nb = 0; nb < dg_neighbors.size(); ++nb)
+      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[nb]])) > 0.5)
       {
-        Node * node_j = _pdmesh.nodePtr(neighbors[dg_neighbors[j]]);
-        Real vol_j = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[j]]);
-        dgnodes_vsum += vol_j;
-        ori_vec = *node_j - *_pdmesh.nodePtr(cur_nd->id());
+        Node * dgneighbor_nb = _pdmesh.nodePtr(neighbors[dg_neighbors[nb]]);
+        vol_nb = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[nb]]);
+        dgnodes_vsum += vol_nb;
+        origin_vec_nb = *dgneighbor_nb - *_pdmesh.nodePtr(cur_nd->id());
 
         for (unsigned int k = 0; k < _dim; ++k)
-          cur_vec(k) = ori_vec(k) + _disp_var[k]->getNodalValue(*node_j) -
-                       _disp_var[k]->getNodalValue(*cur_nd);
+          current_vec_nb(k) = origin_vec_nb(k) + _disp_var[k]->getNodalValue(*dgneighbor_nb) -
+                              _disp_var[k]->getNodalValue(*cur_nd);
 
-        Real ori_len = ori_vec.norm();
+        weight = _horiz_rad[_qp] / origin_vec_nb.norm();
         for (unsigned int k = 0; k < _dim; ++k)
         {
           for (unsigned int l = 0; l < _dim; ++l)
           {
-            _shape2[_qp](k, l) += _horiz_rad[_qp] / ori_len * ori_vec(k) * ori_vec(l) * vol_j;
+            _shape2[_qp](k, l) += weight * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
             _deformation_gradient[_qp](k, l) +=
-                _horiz_rad[_qp] / ori_len * cur_vec(k) * ori_vec(l) * vol_j;
+                weight * current_vec_nb(k) * origin_vec_nb(l) * vol_nb;
           }
           // calculate derivatives of deformation_gradient w.r.t displacements of node i
-          _ddgraddu[_qp](0, k) += -_horiz_rad[_qp] / ori_len * ori_vec(k) * vol_j;
-          _ddgraddv[_qp](1, k) += -_horiz_rad[_qp] / ori_len * ori_vec(k) * vol_j;
+          _ddgraddu[_qp](0, k) += -weight * origin_vec_nb(k) * vol_nb;
+          _ddgraddv[_qp](1, k) += -weight * origin_vec_nb(k) * vol_nb;
           if (_dim == 3)
-            _ddgraddw[_qp](2, k) += -_horiz_rad[_qp] / ori_len * ori_vec(k) * vol_j;
+            _ddgraddw[_qp](2, k) += -weight * origin_vec_nb(k) * vol_nb;
         }
       }
     // finalize the deformation gradient and its derivatives
@@ -137,8 +207,8 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
     _ddgraddw[_qp] *= _shape2[_qp].inverse();
 
     // force state multiplier
-    _multi[_qp] = _horiz_rad[_qp] / _origin_length * _node_vol[0] * _node_vol[1] * dgnodes_vsum /
-                  _horiz_vol[_qp];
+    _multi[_qp] = _horiz_rad[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1] *
+                  dgnodes_vsum / _horiz_vol[_qp];
   }
 }
 
@@ -156,7 +226,7 @@ ComputeStrainBaseNOSPD::computeProperties()
 void
 ComputeStrainBaseNOSPD::computeBondStretch()
 {
-  _total_stretch[0] = _current_length / _origin_length - 1.0;
+  _total_stretch[0] = _current_len / _origin_vec.norm() - 1.0;
   _total_stretch[1] = _total_stretch[0];
   _mechanical_stretch[0] = _total_stretch[0];
 

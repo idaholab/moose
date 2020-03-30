@@ -66,10 +66,10 @@ protected:
   Real _alpha;
 
   ///@{ Material properties to store
-  MaterialProperty<Real> & _bond_force_ij;
-  MaterialProperty<Real> & _bond_dfdU_ij;
-  MaterialProperty<Real> & _bond_dfdT_ij;
-  MaterialProperty<Real> & _bond_dfdE_ij;
+  MaterialProperty<Real> & _bond_local_force;
+  MaterialProperty<Real> & _bond_local_dfdU;
+  MaterialProperty<Real> & _bond_local_dfdT;
+  MaterialProperty<Real> & _bond_local_dfdE;
 
   MaterialProperty<Real> & _thermal_expansion_coeff;
   ///@}
