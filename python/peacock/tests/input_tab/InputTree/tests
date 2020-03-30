@@ -12,7 +12,6 @@
       test_case = Tests.testInputFileOnly
 
       detail = " the ability to read and display application input files;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testTransient]
@@ -22,7 +21,6 @@
       test_case = Tests.testTransient
 
       detail = "support for input files with transient solves;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testLCF]
@@ -33,7 +31,6 @@
       prereq = 'input/testTransient'
 
       detail = "support for input files with a linear combination function;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testFSP]
@@ -44,7 +41,6 @@
       prereq = 'input/testLCF'
 
       detail = "support for input files with a field split preconditioner;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testSimpleDiffusion]
@@ -55,7 +51,6 @@
       prereq = 'input/testFSP'
 
       detail = "the ability to read and write a complete input file;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testChangingInputFiles]
@@ -65,7 +60,6 @@
       test_case = Tests.testChangingInputFiles
 
       detail = "the ability to change input files;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testTreeWithOnlyApp]
@@ -75,7 +69,6 @@
       test_case = Tests.testTreeWithOnlyApp
 
       detail = "the ability to open without an input file;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testAddVectorPostprocessor]
@@ -85,7 +78,6 @@
       test_case = Tests.testAddVectorPostprocessor
 
       detail = "the capability to add input file blocks graphically;"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testBlocks]
@@ -95,7 +87,6 @@
       test_case = Tests.testBlocks
 
       detail = "supports the creation of input file blocks; and"
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
 
     [testIncompatible]
@@ -105,7 +96,6 @@
       test_case = Tests.testIncompatible
 
       detail = "handles incompatible parameter changes without failure."
-      platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     []
     platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
