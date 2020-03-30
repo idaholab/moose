@@ -29,15 +29,18 @@ LoadSurrogateDataAction::LoadSurrogateDataAction(InputParameters params) : Actio
 void
 LoadSurrogateDataAction::act()
 {
-  std::vector<SurrogateModel *> models;
-  _app.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(models);
-  for (auto model_ptr : models)
-    if (model_ptr->isParamValid("filename"))
+  std::vector<UserObject *> u_objects;
+  _app.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(u_objects);
+  for (auto uo_ptr : u_objects)
+  {
+    SurrogateModel * model_ptr = dynamic_cast<SurrogateModel *>(uo_ptr);
+    if (model_ptr && model_ptr->isParamValid("filename"))
       load(*model_ptr);
+  }
 }
 
 void
-LoadSurrogateDataAction::load(SurrogateModel & model)
+LoadSurrogateDataAction::load(const SurrogateModel & model)
 {
   // File to load
   const FileName & filename = model.getParamTempl<FileName>("filename");

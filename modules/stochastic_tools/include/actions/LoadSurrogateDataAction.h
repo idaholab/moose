@@ -20,5 +20,5 @@ public:
   virtual void act() override;
 
 private:
-  void load(SurrogateModel & model);
+  void load(const SurrogateModel & model);
 };
