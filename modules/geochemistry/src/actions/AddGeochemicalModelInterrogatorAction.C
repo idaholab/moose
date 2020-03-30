@@ -19,8 +19,8 @@ registerMooseAction(
     AddGeochemicalModelInterrogatorAction,
     "add_distribution"); // During add_distribution, the GeochemicalModelInterroagor UserObject is
                          // added.  Since add_distribution occurs after add_userobject (see Moose.C
-                         // addDependencySets) then the model_root UserObject will have been added,
-                         // so getParam<UserObjectName>("model_root") will work
+                         // addDependencySets) then the model_definition UserObject will have been
+                         // added, so getParam<UserObjectName>("model_definition") will work
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "setup_executioner");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "add_output");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "common_output");
@@ -34,18 +34,19 @@ InputParameters
 AddGeochemicalModelInterrogatorAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addRequiredParam<UserObjectName>("model_root",
-                                          "The name of the GeochemicalModelRoot user object");
+  params.addRequiredParam<UserObjectName>("model_definition",
+                                          "The name of the GeochemicalModelDefinition user object");
   params.addParam<std::vector<std::string>>(
       "swap_out_of_basis",
-      "Species that should be removed from the model_root's basis and be replaced with the "
+      "Species that should be removed from the model_definition's basis and be replaced with the "
       "swap_into_basis species.  There must be the same number of species in swap_out_of_basis and "
       "swap_into_basis.  If this list contains more than one species, the swapping is performed "
       "one-by-one, starting with the first pair (swap_out_of_basis[0] and swap_into_basis[0]), "
       "then the next pair, etc");
-  params.addParam<std::vector<std::string>>("swap_into_basis",
-                                            "Species that should be removed from the model_root's "
-                                            "equilibrium species list and added to the basis");
+  params.addParam<std::vector<std::string>>(
+      "swap_into_basis",
+      "Species that should be removed from the model_definition's "
+      "equilibrium species list and added to the basis");
   params.addParam<std::vector<std::string>>(
       "activity_species",
       "Species that are provided numerical values of activity (or fugacity for gases) in the "
@@ -73,6 +74,14 @@ AddGeochemicalModelInterrogatorAction::validParams()
                         25,
                         "Equilibrium constants will be computed at this temperature.  This is "
                         "ignored if interrogation=eqm_temperature.");
+  params.addRangeCheckedParam<Real>(
+      "stoichiometry_tolerance",
+      1E-6,
+      "stoichiometry_tolerance >= 0.0",
+      "Swapping involves inverting matrices via a singular value decomposition. During this "
+      "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
+      "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
+      "stoichiometric coefficient) < stoi_tol then it is set to zero.");
   params.addClassDescription("Action that sets up the geochemical model interrogator");
 
   return params;
@@ -119,7 +128,7 @@ AddGeochemicalModelInterrogatorAction::act()
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
     _problem->setKernelCoverageCheck(false);
   }
-  // Add the fluid properties interrogator user object
+  // Add the geochemical model interrogator user object
   else if (_current_task == "add_distribution")
   {
     addGeochemicalModelInterrogatorObject();
@@ -168,7 +177,7 @@ AddGeochemicalModelInterrogatorAction::addGeochemicalModelInterrogatorObject() c
 {
   const std::string class_name = "GeochemicalModelInterrogator";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<UserObjectName>("model_root") = getParam<UserObjectName>("model_root");
+  params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
   // Only pass parameters that were supplied to this action
   if (isParamValid("swap_out_of_basis"))
     params.set<std::vector<std::string>>("swap_out_of_basis") =
@@ -186,5 +195,6 @@ AddGeochemicalModelInterrogatorAction::addGeochemicalModelInterrogatorObject() c
   params.set<std::string>("equilibrium_species") = getParam<std::string>("equilibrium_species");
   params.set<MooseEnum>("interrogation") = getParam<MooseEnum>("interrogation");
   params.set<Real>("temperature") = getParam<Real>("temperature");
+  params.set<Real>("stoichiometry_tolerance") = getParam<Real>("stoichiometry_tolerance");
   _problem->addUserObject(class_name, "geochemical_model_interrogator", params);
 }

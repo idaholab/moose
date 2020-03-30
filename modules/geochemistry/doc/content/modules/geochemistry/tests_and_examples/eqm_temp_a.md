@@ -16,7 +16,7 @@ Then:
 - If water activity is 0.7, the equilibrium temperature (where $K=1$) is found to be 11.8$^{\circ}$C.
 - If the temperature is 25$^{\circ}$C, the equilibrium is attained when water activity is 0.815.
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/gypsum.i block=UserObjects
 

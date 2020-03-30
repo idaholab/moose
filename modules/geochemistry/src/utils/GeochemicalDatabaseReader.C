@@ -50,6 +50,10 @@ GeochemicalDatabaseReader::reexpressFreeElectron()
     return;
   if (!_root["gas species"].isMember("O2(g)"))
     return;
+  if (!_root["gas species"]["O2(g)"]["species"].isMember("O2(aq)"))
+    return;
+  if (_root["gas species"]["O2(g)"]["species"].getMemberNames().size() != 1)
+    return;
 
   // remove O2(g) in the "e-" and replace with O2(aq)
   const std::string stoi_o2g = _root["free electron"]["e-"]["species"]["O2(g)"].asString();

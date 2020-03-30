@@ -14,28 +14,28 @@
 
 TEST(GeochemicalDatabaseReaderTest, filename)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  EXPECT_EQ(database.filename(), "data/moose_testdb.json");
+  EXPECT_EQ(database.filename(), "database/moose_testdb.json");
 }
 
 TEST(GeochemicalDatabaseReaderTest, getActivityModel)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_EQ(database.getActivityModel(), "debye-huckel");
 }
 
 TEST(GeochemicalDatabaseReaderTest, getFugacityModel)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_EQ(database.getFugacityModel(), "tsonopoulos");
 }
 
 TEST(GeochemicalDatabaseReaderTest, getTemperatures)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the temperature points from the database and compare with the expected
   // valules
@@ -47,7 +47,7 @@ TEST(GeochemicalDatabaseReaderTest, getTemperatures)
 
 TEST(GeochemicalDatabaseReaderTest, getPressures)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the pressure points from the database and compare with the expected
   // valules
@@ -60,7 +60,7 @@ TEST(GeochemicalDatabaseReaderTest, getPressures)
 
 TEST(GeochemicalDatabaseReaderTest, getDebyeHuckel)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the Debye-Huckel from the database and compare with the expected
   // valules
@@ -77,7 +77,7 @@ TEST(GeochemicalDatabaseReaderTest, getDebyeHuckel)
 
 TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the neutral species activity coefficients from the database
   // and compare with the expected valules
@@ -99,7 +99,7 @@ TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
 
 TEST(GeochemicalDatabaseReaderTest, getElements)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the elements from the database and compare with the expected
   // valules
@@ -117,7 +117,7 @@ TEST(GeochemicalDatabaseReaderTest, getElements)
 
 TEST(GeochemicalDatabaseReaderTest, getBasisSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of primary species
   std::vector<std::string> bs_names{"Ca++", "HCO3-", "H+"};
@@ -162,7 +162,7 @@ TEST(GeochemicalDatabaseReaderTest, getBasisSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of secondary species
   std::vector<std::string> ss_names{"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"};
@@ -234,7 +234,7 @@ TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of mineral species to be read
   std::vector<std::string> ms_names{"Calcite", "Fe(OH)3(ppd)"};
@@ -276,7 +276,7 @@ TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of gas species to be read
   std::vector<std::string> gs_names{"N2(g)", "CH4(g)"};
@@ -322,7 +322,7 @@ TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getRedoxSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of redox species
   std::vector<std::string> rs_names{"Am++++"};
@@ -353,7 +353,7 @@ TEST(GeochemicalDatabaseReaderTest, getRedoxSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Vector of gas species to be read
   std::vector<std::string> os_names{"Cu2O"};
@@ -377,7 +377,7 @@ TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::vector<std::string> ss_names{">(s)FeO-"};
 
@@ -398,7 +398,7 @@ TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Secondary equilibrium species
   std::vector<std::string> names{"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"};
@@ -414,7 +414,7 @@ TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
 
 TEST(GeochemicalDatabaseReaderTest, mineralReactions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Secondary mineral species
   std::vector<std::string> names{"Calcite"};
@@ -426,7 +426,7 @@ TEST(GeochemicalDatabaseReaderTest, mineralReactions)
 
 TEST(GeochemicalDatabaseReaderTest, gasReactions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Secondary gas species
   std::vector<std::string> names{"CH4(g)", "N2(g)"};
@@ -439,7 +439,7 @@ TEST(GeochemicalDatabaseReaderTest, gasReactions)
 
 TEST(GeochemicalDatabaseReaderTest, redoxReactions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Secondary redox couples
   std::vector<std::string> names{"(O-phth)--", "Am++++"};
@@ -452,7 +452,7 @@ TEST(GeochemicalDatabaseReaderTest, redoxReactions)
 
 TEST(GeochemicalDatabaseReaderTest, oxideReactions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Secondary oxide species
   std::vector<std::string> names{"Cu2O"};
@@ -464,7 +464,7 @@ TEST(GeochemicalDatabaseReaderTest, oxideReactions)
 
 TEST(GeochemicalDatabaseReaderTest, isBasisSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_TRUE(database.isBasisSpecies("Ca++"));
   EXPECT_TRUE(database.isBasisSpecies("H2O"));
@@ -483,7 +483,7 @@ TEST(GeochemicalDatabaseReaderTest, isBasisSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isSecondarySpecies("Ca++"));
   EXPECT_FALSE(database.isSecondarySpecies("H2O"));
@@ -502,7 +502,7 @@ TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isMineralSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isMineralSpecies("Ca++"));
   EXPECT_FALSE(database.isMineralSpecies("H2O"));
@@ -521,7 +521,7 @@ TEST(GeochemicalDatabaseReaderTest, isMineralSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isRedoxSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isRedoxSpecies("Ca++"));
   EXPECT_FALSE(database.isRedoxSpecies("H2O"));
@@ -540,7 +540,7 @@ TEST(GeochemicalDatabaseReaderTest, isRedoxSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isGasSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isGasSpecies("Ca++"));
   EXPECT_FALSE(database.isGasSpecies("H2O"));
@@ -559,7 +559,7 @@ TEST(GeochemicalDatabaseReaderTest, isGasSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isSorbingMineral)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isSorbingMineral("Ca++"));
   EXPECT_FALSE(database.isSorbingMineral("H2O"));
@@ -578,7 +578,7 @@ TEST(GeochemicalDatabaseReaderTest, isSorbingMineral)
 
 TEST(GeochemicalDatabaseReaderTest, isOxideSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isOxideSpecies("Ca++"));
   EXPECT_FALSE(database.isOxideSpecies("H2O"));
@@ -597,7 +597,7 @@ TEST(GeochemicalDatabaseReaderTest, isOxideSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, isSurfaceSpecies)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_FALSE(database.isSurfaceSpecies("Ca++"));
   EXPECT_FALSE(database.isSurfaceSpecies("H2O"));
@@ -616,7 +616,7 @@ TEST(GeochemicalDatabaseReaderTest, isSurfaceSpecies)
 
 TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::vector<std::string> names = database.secondarySpeciesNames();
   for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "e-"})
@@ -626,7 +626,7 @@ TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
 
 TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::vector<std::string> names = database.redoxCoupleNames();
   for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++", "StoiCheckRedox"})
@@ -636,7 +636,7 @@ TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
 
 TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::vector<std::string> names = database.surfaceSpeciesNames();
   for (const auto & n : {">(s)FeO-", ">(s)FeOCa+"})
@@ -646,7 +646,7 @@ TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
 
 TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::string data = database.getSpeciesData("Ca++");
   std::string gold = "Ca++:\n{\n   \"charge\" : \"2\",\n   \"elements\" : {\n      \"Ca\" : "
@@ -658,13 +658,30 @@ TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
 /// Test the reexpression of the free electron in terms of O2(aq)
 TEST(GeochemicalDatabaseReaderTest, freeElectron)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   auto fe = database.getEquilibriumSpecies({"e-"})["e-"];
 
   std::vector<Real> logk_gold{
       23.4266, 21.50045, 19.277525, 17.24705, 15.238975, 13.64975, 12.34665, 11.27355};
   std::map<std::string, Real> bs_gold = {{"H2O", 0.5}, {"H+", -1}, {"O2(aq)", -0.25}};
+  EXPECT_EQ(fe.charge, -1.0);
+  EXPECT_EQ(fe.radius, 0.0);
+  EXPECT_EQ(fe.molecular_weight, 0.0);
+  EXPECT_EQ(fe.basis_species, bs_gold);
+  EXPECT_EQ(fe.equilibrium_const, logk_gold);
+}
+
+/// Test that the free electron can be determined in terms of O2(g)
+TEST(GeochemicalDatabaseReaderTest, freeElectronNoReexpress)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", false);
+
+  auto fe = database.getEquilibriumSpecies({"e-"})["e-"];
+
+  std::vector<Real> logk_gold{
+      22.76135, 20.7757, 18.513025, 16.4658, 14.473225, 12.92125, 11.68165, 10.67105};
+  std::map<std::string, Real> bs_gold = {{"H2O", 0.5}, {"H+", -1}, {"O2(g)", -0.25}};
   EXPECT_EQ(fe.charge, -1.0);
   EXPECT_EQ(fe.radius, 0.0);
   EXPECT_EQ(fe.molecular_weight, 0.0);

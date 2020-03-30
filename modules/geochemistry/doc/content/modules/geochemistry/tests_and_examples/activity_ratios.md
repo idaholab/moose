@@ -15,7 +15,7 @@ has an equilibrium constant $\log_{10}K = 3.42$ at 25$^{\circ}$C.  Assuming a wa
 \frac{a_{\mathrm{K}^{+}}}{a_{\mathrm{H}^{+}}} = 10^{3.42} \ .
 \end{equation}
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/muscovite.i block=UserObjects
 
@@ -49,7 +49,7 @@ The geochemical database can be manipulated to give the following reactions for 
 \end{aligned}
 \end{equation}
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/muscovite2.i block=UserObjects
 
@@ -80,7 +80,7 @@ has an equilibrium constant $\log_{10}K = -10.23$ at 200$^{\circ}$C.  Assuming a
 \frac{a_{\mathrm{Ca}^{2+}}}{a_{\mathrm{H}^{+}}^{2}} = 10^{-10.23} \ .
 \end{equation}
 
-To produce this result using the `geochemistry` module,  a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To produce this result using the `geochemistry` module,  a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/clinoptilolite2.i block=UserObjects
 

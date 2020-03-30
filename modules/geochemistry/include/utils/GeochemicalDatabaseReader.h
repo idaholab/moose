@@ -220,8 +220,8 @@ public:
    * @param filename Moose geochemical database file
    * @param reexpress_free_electron If true, and if the free electron in the database file has an
    * equilibrium reaction expressed in terms of O2(g), and O2(g) exists as a gas in the database
-   * file, and O2(aq) exists as a basis species in the database file, then reexpress the free
-   * electron's equilibrium reaction in terms of O2(aq)
+   * file, and O2(g)'s equilibrium reaction is O2(g)=O2(eq), and O2(aq) exists as a basis species in
+   * the database file, then reexpress the free electron's equilibrium reaction in terms of O2(aq)
    */
   GeochemicalDatabaseReader(const FileName filename, const bool reexpress_free_electron = true);
 

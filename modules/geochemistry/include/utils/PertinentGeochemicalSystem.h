@@ -32,9 +32,9 @@ struct SurfaceComplexationInfo
 /**
  * Data structure to hold all relevant information from the database file.
  * Generally, the database file contains information on a lot more species than any numerical model
- * considers.  The ModelGeochemicalDatabase only the minimal information required for the numerical
- * model.  It also holds the information as std::vector and DenseMatrix data structures for
- * numerical efficiency.  This makes the ModelGeochemicalDatabase a little more obscure compared
+ * considers.  The ModelGeochemicalDatabase only holds the minimal information required for the
+ * numerical model.  It also holds the information as std::vector and DenseMatrix data structures
+ * for numerical efficiency.  This makes the ModelGeochemicalDatabase a little more obscure compared
  * with the database file, but considering this information is used hundreds, maybe millions, of
  * times per node during a single timestep, numerical efficiency is paramount.
  */
@@ -63,7 +63,7 @@ struct ModelGeochemicalDatabase
   /// all quantities have a charge (mineral charge = 0, gas charge = 0, oxide charge = 0)
   std::vector<Real> basis_species_charge;
 
-  /// all quantities have a molecular weight (g) ()
+  /// all quantities have a molecular weight (g)
   std::vector<Real> basis_species_weight;
 
   /// all quantities have an ionic radius (Angstrom) for computing activity (mineral radius = 0, gas radius = 0, surface species radius = 0)
@@ -167,12 +167,12 @@ struct ModelGeochemicalDatabase
  * are eliminated from further consideration.  This reduces the amount of information considerably.
  * The final result is stored in a ModelGeochemicalDatabase structure.  This structure is designed
  * to be computationally efficient.  A "getter" that copies this structure is provided as a public
- * method.  It is intended that a MOOSE simulation will construct one MinimalGeochemicalSystem
+ * method.  It is intended that a MOOSE simulation will construct one PertinentGeochemicalSystem
  * object, and then copy the information to the nodes during the initial setup.  If different nodes
  * are allowed different swaps (likely to be the case) each node will need a different copy of the
  * ModelGeochemicalDatabase structure.
  */
-class MinimalGeochemicalSystem
+class PertinentGeochemicalSystem
 {
 public:
   /**
@@ -230,13 +230,13 @@ public:
    * non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
    * They can never be "swapped" into the basis.
    */
-  MinimalGeochemicalSystem(const GeochemicalDatabaseReader & db,
-                           const std::vector<std::string> & basis_species,
-                           const std::vector<std::string> & minerals,
-                           const std::vector<std::string> & gases,
-                           const std::vector<std::string> & kinetic_minerals,
-                           const std::vector<std::string> & kinetic_redox,
-                           const std::vector<std::string> & kinetic_surface_species);
+  PertinentGeochemicalSystem(const GeochemicalDatabaseReader & db,
+                             const std::vector<std::string> & basis_species,
+                             const std::vector<std::string> & minerals,
+                             const std::vector<std::string> & gases,
+                             const std::vector<std::string> & kinetic_minerals,
+                             const std::vector<std::string> & kinetic_redox,
+                             const std::vector<std::string> & kinetic_surface_species);
 
   /// Return a copy of the ModelGeochemicalDatabase structure
   ModelGeochemicalDatabase modelGeochemicalDatabaseCopy() const;

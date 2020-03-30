@@ -9,7 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include "MinimalGeochemicalSystem.h"
+#include "PertinentGeochemicalSystem.h"
 
 const Real eps = 1E-12; // accounts for precision loss when substituting reactions
 
@@ -20,13 +20,13 @@ const Real eps = 1E-12; // accounts for precision loss when substituting reactio
  * - no element appears more than once in the basis_species list
  * - H2O appears first in the basis_species list
  */
-TEST(MinimalGeochemicalSystemTest, basisExceptions)
+TEST(PertinentGeochemicalSystemTest, basisExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "Ca++", "(O-phth)--", "H2O", "Na+"}, {}, {}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -40,7 +40,7 @@ TEST(MinimalGeochemicalSystemTest, basisExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"Ca++", "H2O", "H+", "(O-phth)--", "Am++++"}, {}, {}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -53,20 +53,21 @@ TEST(MinimalGeochemicalSystemTest, basisExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "H+", "(O-phth)--", "Am++++", "does_not_exist"},
-                                   {},
-                                   {},
-                                   {},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(
+        database,
+        {"H2O", "Ca++", "H+", "(O-phth)--", "Am++++", "does_not_exist"},
+        {},
+        {},
+        {},
+        {},
+        {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
     ASSERT_TRUE(msg.find("does_not_exist does not exist in the basis species or redox species in "
-                         "data/moose_testdb.json") != std::string::npos)
+                         "database/moose_testdb.json") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -80,19 +81,19 @@ TEST(MinimalGeochemicalSystemTest, basisExceptions)
  * - if a mineral in this list is also a "sorbing mineral" in the database file, its sorbing
  * sites must be present in the basis_species list
  */
-TEST(MinimalGeochemicalSystemTest, mineralExceptions)
+TEST(PertinentGeochemicalSystemTest, mineralExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "H+", "(O-phth)--", "HCO3-"},
-                                   {"Calcite", "Calcite_asdf", "Calcite"},
-                                   {},
-                                   {},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "H+", "(O-phth)--", "HCO3-"},
+                                     {"Calcite", "Calcite_asdf", "Calcite"},
+                                     {},
+                                     {},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -104,26 +105,26 @@ TEST(MinimalGeochemicalSystemTest, mineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "H+", "Am++++", "HCO3-"},
-                                   {"Calcite", "Calcite_asdf", "does_not_exist"},
-                                   {},
-                                   {},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "H+", "Am++++", "HCO3-"},
+                                     {"Calcite", "Calcite_asdf", "does_not_exist"},
+                                     {},
+                                     {},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("does_not_exist does not exist in database data/moose_testdb.json") !=
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "H+", "(O-phth)--", "HCO3-"}, {"Calcite"}, {}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -137,7 +138,7 @@ TEST(MinimalGeochemicalSystemTest, mineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "H+", "O2(aq)"}, {"Fe(OH)3(ppd)"}, {}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -151,7 +152,7 @@ TEST(MinimalGeochemicalSystemTest, mineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"}, {"Fe(OH)3(ppd)"}, {}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -165,13 +166,13 @@ TEST(MinimalGeochemicalSystemTest, mineralExceptions)
 
   // This should pass since the basis species can make Fe+++, which then makes Fe(OH)3(ppd), and the
   // surface sites for Fe(OH)3(ppd) are included
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
-                                 {"Fe(OH)3(ppd)"},
-                                 {},
-                                 {},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
+                                   {"Fe(OH)3(ppd)"},
+                                   {},
+                                   {},
+                                   {},
+                                   {});
 }
 
 /**
@@ -181,19 +182,19 @@ TEST(MinimalGeochemicalSystemTest, mineralExceptions)
  * - the equilibrium reaction of each of these contains only species that are reducable to basis
  * species
  */
-TEST(MinimalGeochemicalSystemTest, gasExceptions)
+TEST(PertinentGeochemicalSystemTest, gasExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "H+", "HCO3-", "CH4(aq)"},
-                                   {"Calcite"},
-                                   {"CH4(g)", "CH4(g)"},
-                                   {},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "H+", "HCO3-", "CH4(aq)"},
+                                     {"Calcite"},
+                                     {"CH4(g)", "CH4(g)"},
+                                     {},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -205,26 +206,26 @@ TEST(MinimalGeochemicalSystemTest, gasExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "H+", "HCO3-", "CH4(aq)"},
-                                   {"Calcite"},
-                                   {"CH4(g)", "does_not_exist"},
-                                   {},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "H+", "HCO3-", "CH4(aq)"},
+                                     {"Calcite"},
+                                     {"CH4(g)", "does_not_exist"},
+                                     {},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("does_not_exist does not exist in database data/moose_testdb.json") !=
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "Ca++", "H+", "HCO3-"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -238,7 +239,7 @@ TEST(MinimalGeochemicalSystemTest, gasExceptions)
 
   // this should pass: CH4(g) depends on the redox couple CH4(aq) which in turn depends on the basis
   // species provided
-  MinimalGeochemicalSystem model(
+  PertinentGeochemicalSystem model(
       database, {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
 }
 
@@ -252,13 +253,13 @@ TEST(MinimalGeochemicalSystemTest, gasExceptions)
  * - if a mineral in this list is also a "sorbing mineral" in the database file, its sorbing sites
  * must be present in the basis_species list
  */
-TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
+TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O"}, {}, {}, {"Calcite", "Calcite_asdf", "Calcite"}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -272,13 +273,13 @@ TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "HCO3-", "H+"},
-                                   {"Calcite_asdf"},
-                                   {},
-                                   {"Calcite", "Calcite_asdf"},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "HCO3-", "H+"},
+                                     {"Calcite_asdf"},
+                                     {},
+                                     {"Calcite", "Calcite_asdf"},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -291,26 +292,26 @@ TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(database,
-                                   {"H2O", "Ca++", "HCO3-", "H+"},
-                                   {"Calcite_asdf"},
-                                   {},
-                                   {"Calcite", "does_not_exist"},
-                                   {},
-                                   {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "HCO3-", "H+"},
+                                     {"Calcite_asdf"},
+                                     {},
+                                     {"Calcite", "does_not_exist"},
+                                     {},
+                                     {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("does_not_exist does not exist in database data/moose_testdb.json") !=
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "O2(aq)", "H+"}, {}, {}, {"Fe(OH)3(ppd)"}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -324,7 +325,7 @@ TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"}, {}, {}, {"Fe(OH)3(ppd)"}, {}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -338,13 +339,13 @@ TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
 
   // This should pass since the basis species can make Fe+++, which then makes Fe(OH)3(ppd), and the
   // surface sites for Fe(OH)3(ppd) are included
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
-                                 {},
-                                 {},
-                                 {"Fe(OH)3(ppd)"},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
+                                   {},
+                                   {},
+                                   {"Fe(OH)3(ppd)"},
+                                   {},
+                                   {});
 }
 
 /**
@@ -355,13 +356,13 @@ TEST(MinimalGeochemicalSystemTest, kineticMineralExceptions)
  * - the equilibrium reaction of each of these contains only species that are reducable to basis
  * species
  */
-TEST(MinimalGeochemicalSystemTest, kineticRedoxExceptions)
+TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "Am++++", "(O-phth)--"}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -375,7 +376,7 @@ TEST(MinimalGeochemicalSystemTest, kineticRedoxExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "(O-phth)--"}, {}, {}, {}, {"Am++++", "(O-phth)--"}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -389,21 +390,21 @@ TEST(MinimalGeochemicalSystemTest, kineticRedoxExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "does_not_exist"}, {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("does_not_exist does not exist in database data/moose_testdb.json") !=
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O", "HCO3-", "H+"}, {}, {}, {}, {"(O-phth)--"}, {});
     FAIL() << "Missing expected exception.";
   }
@@ -416,7 +417,7 @@ TEST(MinimalGeochemicalSystemTest, kineticRedoxExceptions)
   }
 
   // this should pass
-  MinimalGeochemicalSystem model(
+  PertinentGeochemicalSystem model(
       database, {"H2O", "HCO3-", "H+", "O2(aq)"}, {}, {}, {}, {"(O-phth)--"}, {});
 }
 
@@ -427,13 +428,13 @@ TEST(MinimalGeochemicalSystemTest, kineticRedoxExceptions)
  * - the equilibrium reaction of each of these contains only species that are reducable to basis
  * species
  */
-TEST(MinimalGeochemicalSystemTest, kineticSurfaceExceptions)
+TEST(PertinentGeochemicalSystemTest, kineticSurfaceExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O"}, {}, {}, {}, {}, {">(s)FeO-", ">(s)FeOCa+", ">(s)FeO-"});
     FAIL() << "Missing expected exception.";
   }
@@ -447,21 +448,21 @@ TEST(MinimalGeochemicalSystemTest, kineticSurfaceExceptions)
 
   try
   {
-    MinimalGeochemicalSystem model(
+    PertinentGeochemicalSystem model(
         database, {"H2O"}, {}, {}, {}, {}, {">(s)FeO-", ">(s)FeOCa+", "does_not_exist"});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("does_not_exist does not exist in database data/moose_testdb.json") !=
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
   try
   {
-    MinimalGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {">(s)FeO-"});
+    PertinentGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {">(s)FeO-"});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -473,15 +474,16 @@ TEST(MinimalGeochemicalSystemTest, kineticSurfaceExceptions)
   }
 
   // this should pass
-  MinimalGeochemicalSystem model(database, {"H2O", "H+", ">(s)FeOH"}, {}, {}, {}, {}, {">(s)FeO-"});
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", ">(s)FeOH"}, {}, {}, {}, {}, {">(s)FeO-"});
 }
 
-/// Test that MinimalGeochemicalSystem correctly extracts temperatures from the GeochemicalDatabaseReader
-TEST(MinimalGeochemicalSystemTest, temperatures)
+/// Test that PertinentGeochemicalSystem correctly extracts temperatures from the GeochemicalDatabaseReader
+TEST(PertinentGeochemicalSystemTest, temperatures)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  MinimalGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {});
+  PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.temperatures, database.getTemperatures());
@@ -489,22 +491,22 @@ TEST(MinimalGeochemicalSystemTest, temperatures)
 
 /**
  * Test that the names of basis and equilibrium species are correctly recorded by
- * MinimalGeochemicalSystem This mostly tests that given a set of basis species, the set of
+ * PertinentGeochemicalSystem This mostly tests that given a set of basis species, the set of
  * equilibrium and kinetic species is correct
  */
-TEST(MinimalGeochemicalSystemTest, names1)
+TEST(PertinentGeochemicalSystemTest, names1)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {"O2(g)"},
-                                 {"Calcite_asdf"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeOCa+"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {"O2(g)"},
+                                   {"Calcite_asdf"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeOCa+"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
@@ -522,21 +524,21 @@ TEST(MinimalGeochemicalSystemTest, names1)
 
 /**
  * Another test that the names of basis and equilibrium species are correctly recorded by
- * MinimalGeochemicalSystem This mostly tests that given a set of basis species, the set of
+ * PertinentGeochemicalSystem This mostly tests that given a set of basis species, the set of
  * equilibrium and kinetic species is correct
  */
-TEST(MinimalGeochemicalSystemTest, names2)
+TEST(PertinentGeochemicalSystemTest, names2)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {},
-                                 {"O2(g)"},
-                                 {"Calcite_asdf", "Calcite"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeOCa+", ">(s)FeO-"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {},
+                                   {"O2(g)"},
+                                   {"Calcite_asdf", "Calcite"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeOCa+", ">(s)FeO-"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
@@ -553,19 +555,19 @@ TEST(MinimalGeochemicalSystemTest, names2)
 }
 
 /// Test that the charge of species is correctly recorded
-TEST(MinimalGeochemicalSystemTest, charge)
+TEST(PertinentGeochemicalSystemTest, charge)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {"Calcite_asdf"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeOCa+"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {"Calcite_asdf"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeOCa+"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   std::map<std::string, Real> charge_gold;
@@ -596,19 +598,19 @@ TEST(MinimalGeochemicalSystemTest, charge)
 }
 
 /// Test that the radius of each species is correctly recorded
-TEST(MinimalGeochemicalSystemTest, radius)
+TEST(PertinentGeochemicalSystemTest, radius)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {},
-                                 {"CH4(aq)"},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {},
+                                   {"CH4(aq)"},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   std::map<std::string, Real> radius_gold;
@@ -635,19 +637,19 @@ TEST(MinimalGeochemicalSystemTest, radius)
 }
 
 /// Test that the molecular weight of each species is correctly recorded
-TEST(MinimalGeochemicalSystemTest, molecular_weight)
+TEST(PertinentGeochemicalSystemTest, molecular_weight)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {"Calcite_asdf"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeOCa+"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {"Calcite_asdf"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeOCa+"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   std::map<std::string, Real> molecular_weight_gold;
@@ -679,19 +681,19 @@ TEST(MinimalGeochemicalSystemTest, molecular_weight)
 }
 
 /// Test that the molecular volume of each species is correctly recorded
-TEST(MinimalGeochemicalSystemTest, molecular_volume)
+TEST(PertinentGeochemicalSystemTest, molecular_volume)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {"Calcite_asdf"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeOCa+"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {"Calcite_asdf"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeOCa+"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   std::map<std::string, Real> molecular_volume_gold;
@@ -723,32 +725,32 @@ TEST(MinimalGeochemicalSystemTest, molecular_volume)
 }
 
 /// Test that the surface complexation information is correctly recorded
-TEST(MinimalGeochemicalSystemTest, surfaceComplexationInfo)
+TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model1(database,
-                                  {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                  {"Calcite"},
-                                  {},
-                                  {},
-                                  {"CH4(aq)"},
-                                  {});
+  PertinentGeochemicalSystem model1(database,
+                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                    {"Calcite"},
+                                    {},
+                                    {},
+                                    {"CH4(aq)"},
+                                    {});
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd1.surface_complexation_info.size(), 0);
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model2(database,
-                                  {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
-                                  {"Fe(OH)3(ppd)"},
-                                  {},
-                                  {},
-                                  {},
-                                  {});
+  PertinentGeochemicalSystem model2(database,
+                                    {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
+                                    {"Fe(OH)3(ppd)"},
+                                    {},
+                                    {},
+                                    {},
+                                    {});
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd2.surface_complexation_info.count("Fe(OH)3(ppd)"), 1);
@@ -758,13 +760,13 @@ TEST(MinimalGeochemicalSystemTest, surfaceComplexationInfo)
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model3(database,
-                                  {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
-                                  {},
-                                  {},
-                                  {"Goethite"},
-                                  {},
-                                  {});
+  PertinentGeochemicalSystem model3(database,
+                                    {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
+                                    {},
+                                    {},
+                                    {"Goethite"},
+                                    {},
+                                    {});
   ModelGeochemicalDatabase mgd3 = model3.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd3.surface_complexation_info.count("Goethite"), 1);
@@ -774,24 +776,24 @@ TEST(MinimalGeochemicalSystemTest, surfaceComplexationInfo)
 }
 
 /// Test that the fugacity coefficients are correctly recorded
-TEST(MinimalGeochemicalSystemTest, GasChi)
+TEST(PertinentGeochemicalSystemTest, GasChi)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model1(database,
-                                  {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                  {"Calcite"},
-                                  {},
-                                  {},
-                                  {"CH4(aq)"},
-                                  {});
+  PertinentGeochemicalSystem model1(database,
+                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                    {"Calcite"},
+                                    {},
+                                    {},
+                                    {"CH4(aq)"},
+                                    {});
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd1.gas_chi.size(), 0);
 
-  MinimalGeochemicalSystem model2(
+  PertinentGeochemicalSystem model2(
       database, {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
 
@@ -807,18 +809,18 @@ TEST(MinimalGeochemicalSystemTest, GasChi)
 /**
  * Test that the stoichiometric coefficients are correctly computed for all species in equilibrium
  */
-TEST(MinimalGeochemicalSystemTest, stoichiometry1)
+TEST(PertinentGeochemicalSystemTest, stoichiometry1)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {"Calcite_asdf"},
-                                 {"CH4(aq)"},
-                                 {">(s)FeO-", ">(s)FeOCa+"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {"Calcite_asdf"},
+                                   {"CH4(aq)"},
+                                   {">(s)FeO-", ">(s)FeOCa+"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 8);
@@ -892,19 +894,19 @@ TEST(MinimalGeochemicalSystemTest, stoichiometry1)
 }
 
 /// Test that the equilibrium constants are correctly computed and recorded
-TEST(MinimalGeochemicalSystemTest, log10K1)
+TEST(PertinentGeochemicalSystemTest, log10K1)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-                                 {"Calcite"},
-                                 {},
-                                 {},
-                                 {"CH4(aq)"},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                   {"Calcite"},
+                                   {},
+                                   {},
+                                   {"CH4(aq)"},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570);
@@ -931,19 +933,19 @@ TEST(MinimalGeochemicalSystemTest, log10K1)
  * where secondary speices or minerals depend on the basis species only through redox or other
  * secondary species
  */
-TEST(MinimalGeochemicalSystemTest, stoichiometry2)
+TEST(PertinentGeochemicalSystemTest, stoichiometry2)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {"Fe(OH)3(ppd)fake"},
-                                 {"CH4(g)fake"},
-                                 {"Fe(OH)3(ppd)"},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake"},
+                                   {"Fe(OH)3(ppd)"},
+                                   {},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 10);
@@ -1033,18 +1035,18 @@ TEST(MinimalGeochemicalSystemTest, stoichiometry2)
  * where secondary speices or minerals depend on the basis species only through redox or other
  * secondary species.  Concentrating on kinetic species
  */
-TEST(MinimalGeochemicalSystemTest, stoichiometry3)
+TEST(PertinentGeochemicalSystemTest, stoichiometry3)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {},
-                                 {"CH4(g)fake"},
-                                 {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
-                                 {"(O-phth)--"},
-                                 {">(s)FeO-"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {},
+                                   {"CH4(g)fake"},
+                                   {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
+                                   {"(O-phth)--"},
+                                   {">(s)FeO-"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 7);
@@ -1121,19 +1123,19 @@ TEST(MinimalGeochemicalSystemTest, stoichiometry3)
  * where secondary speices or minerals depend on the basis species only through redox or other
  * secondary species
  */
-TEST(MinimalGeochemicalSystemTest, log10K2)
+TEST(PertinentGeochemicalSystemTest, log10K2)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {"Fe(OH)3(ppd)fake"},
-                                 {"CH4(g)fake"},
-                                 {},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake"},
+                                   {},
+                                   {},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570, eps);
@@ -1197,19 +1199,20 @@ TEST(MinimalGeochemicalSystemTest, log10K2)
  * Test that equilibrium species ar correctly identified, including the case where there is
  * dependence through redox or other secondary species
  */
-TEST(MinimalGeochemicalSystemTest, secondarySpecies2)
+TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, >(s)FeO-,
   // >(s)FeOCa+, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH", "(O-phth)--"},
-                                 {"Calcite"},
-                                 {},
-                                 {},
-                                 {"CH4(aq)"},
-                                 {});
+  PertinentGeochemicalSystem model(
+      database,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH", "(O-phth)--"},
+      {"Calcite"},
+      {},
+      {},
+      {"CH4(aq)"},
+      {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 9);
@@ -1218,20 +1221,20 @@ TEST(MinimalGeochemicalSystemTest, secondarySpecies2)
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 }
 
-/// Test that MinimalGeochemicalSystem correctly identifies minerals
-TEST(MinimalGeochemicalSystemTest, isMineral)
+/// Test that PertinentGeochemicalSystem correctly identifies minerals
+TEST(PertinentGeochemicalSystemTest, isMineral)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {"Fe(OH)3(ppd)fake"},
-                                 {"CH4(g)fake"},
-                                 {},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake"},
+                                   {},
+                                   {},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   for (const auto & species : mgd.basis_species_index)
@@ -1242,13 +1245,14 @@ TEST(MinimalGeochemicalSystemTest, isMineral)
     else
       ASSERT_EQ(mgd.eqm_species_mineral[species.second], false);
 
-  MinimalGeochemicalSystem model2(database,
-                                  {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                  {},
-                                  {"CH4(g)fake"},
-                                  {"Fe(OH)3(ppd)fake"},
-                                  {"(O-phth)--"},
-                                  {">(s)FeO-"});
+  PertinentGeochemicalSystem model2(
+      database,
+      {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+      {},
+      {"CH4(g)fake"},
+      {"Fe(OH)3(ppd)fake"},
+      {"(O-phth)--"},
+      {">(s)FeO-"});
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
 
   for (const auto & species : mgd2.basis_species_index)
@@ -1262,20 +1266,20 @@ TEST(MinimalGeochemicalSystemTest, isMineral)
       ASSERT_EQ(mgd2.kin_species_mineral[species.second], false);
 }
 
-/// Test that MinimalGeochemicalSystem correctly identifies gases
-TEST(MinimalGeochemicalSystemTest, isGas)
+/// Test that PertinentGeochemicalSystem correctly identifies gases
+TEST(PertinentGeochemicalSystemTest, isGas)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
   // >(s)FeO-, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {"Fe(OH)3(ppd)fake"},
-                                 {"CH4(g)fake", "O2(g)"},
-                                 {},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake", "O2(g)"},
+                                   {},
+                                   {},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
 
   for (const auto & species : mgd.basis_species_index)

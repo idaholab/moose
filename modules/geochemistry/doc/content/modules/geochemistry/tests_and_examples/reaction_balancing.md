@@ -16,7 +16,7 @@ with an equilibrium constant of $\log_{10}K = -9.12$ at 25$^{\circ}$C.  Using [b
 \end{equation}
 with $\log_{10}K = -5.48$.
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/clinoptilolite.i block=UserObjects
 
@@ -54,7 +54,7 @@ Or in terms of H$_{2}$S(aq) and SO$_{4}^{-}$:
 \end{equation}
 
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/pyrite.i block=UserObjects
 

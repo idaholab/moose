@@ -7,17 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GeochemicalModelRoot.h"
+#include "GeochemicalModelDefinition.h"
 
-registerMooseObject("GeochemistryApp", GeochemicalModelRoot);
+registerMooseObject("GeochemistryApp", GeochemicalModelDefinition);
 
-defineLegacyParams(GeochemicalModelRoot);
+defineLegacyParams(GeochemicalModelDefinition);
 
 InputParameters
-GeochemicalModelRoot::validParams()
+GeochemicalModelDefinition::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<FileName>("database_file", "The name of the geochemical database file");
+  params.addParam<bool>(
+      "reexpress_free_electron",
+      true,
+      "If true then if: (1) the 'free electron' appears in the database file; and (2) its "
+      "equilibrium reaction includes O2(g); and (3) O2(g) is a gas; and (4) O2(g)'s equilibrium "
+      "reaction is O2(g)=O2(eq); and (5) O2(aq) exists as a basis species in the database file; "
+      "then reexpress the free electron's equilibrium reaction in terms of O2(aq).  Note that if "
+      "you choose 'reexpress_free_electron=false' and these other 5 conditions are true, then the "
+      "'free electron' will not be available as a secondary species");
   params.addRequiredParam<std::vector<std::string>>(
       "basis_species",
       "A list of basis components relevant to the aqueous-equilibrium problem. H2O must appear "
@@ -57,9 +66,10 @@ GeochemicalModelRoot::validParams()
   return params;
 }
 
-GeochemicalModelRoot::GeochemicalModelRoot(const InputParameters & parameters)
+GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _model(GeochemicalDatabaseReader(getParam<FileName>("database_file")),
+    _model(GeochemicalDatabaseReader(getParam<FileName>("database_file"),
+                                     getParam<bool>("reexpress_free_electron")),
            getParam<std::vector<std::string>>("basis_species"),
            getParam<std::vector<std::string>>("equilibrium_minerals"),
            getParam<std::vector<std::string>>("equilibrium_gases"),
@@ -70,22 +80,22 @@ GeochemicalModelRoot::GeochemicalModelRoot(const InputParameters & parameters)
 }
 
 void
-GeochemicalModelRoot::initialize()
+GeochemicalModelDefinition::initialize()
 {
 }
 
 void
-GeochemicalModelRoot::execute()
+GeochemicalModelDefinition::execute()
 {
 }
 
 void
-GeochemicalModelRoot::finalize()
+GeochemicalModelDefinition::finalize()
 {
 }
 
 ModelGeochemicalDatabase
-GeochemicalModelRoot::getDatabase() const
+GeochemicalModelDefinition::getDatabase() const
 {
   return _model.modelGeochemicalDatabaseCopy();
 }

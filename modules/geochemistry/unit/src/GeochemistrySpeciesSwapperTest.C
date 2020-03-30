@@ -17,20 +17,20 @@ const Real eps =
 /// Check all sorts of illegal swaps throw mooseError or mooseException
 TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-,
   // (O-phth)--, CH4(aq), Fe+++,
   // >(s)FeO-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {"Fe(OH)3(ppd)fake"},
-                                 {"CH4(g)fake"},
-                                 {},
-                                 {},
-                                 {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake"},
+                                   {},
+                                   {},
+                                   {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
-  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size());
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   try
   {
@@ -137,7 +137,7 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 
   try
   {
-    swapper = GeochemistrySpeciesSwapper(8);
+    swapper = GeochemistrySpeciesSwapper(8, 1E-6);
     swapper.checkSwap(mgd, "Fe++", "Fe+++");
     FAIL() << "Missing expected exception.";
   }
@@ -154,13 +154,13 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 /// Check a simple swap that does not involve redox or other complicated things
 TEST(GeochemistrySpeciesSwapperTest, swap1)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
-  MinimalGeochemicalSystem model(
+  PertinentGeochemicalSystem model(
       database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
-  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size());
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
   for (const auto & sp : mgd.basis_species_index)
@@ -434,13 +434,13 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
 /// Check a complicated swap involving redox and complicated stoichiometric coefficients
 TEST(GeochemistrySpeciesSwapperTest, swap2)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // eqm species are: OH-, CO2(aq), CO3--, StoiCheckRedox, StoiCheckGas
-  MinimalGeochemicalSystem model(
+  PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "H+", "HCO3-"}, {}, {"StoiCheckGas"}, {}, {}, {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
-  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size());
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
   for (const auto & sp : mgd.basis_species_index)
@@ -707,18 +707,18 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
 /// Test the swap works on kinetic species
 TEST(GeochemistrySpeciesSwapperTest, swap3)
 {
-  GeochemicalDatabaseReader database("data/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++, e-
-  MinimalGeochemicalSystem model(database,
-                                 {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                 {},
-                                 {"CH4(g)fake"},
-                                 {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
-                                 {"(O-phth)--"},
-                                 {">(s)FeO-"});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {},
+                                   {"CH4(g)fake"},
+                                   {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
+                                   {"(O-phth)--"},
+                                   {">(s)FeO-"});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
-  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size());
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 7);
   for (const auto & sp : mgd.basis_species_index)

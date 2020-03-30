@@ -18,18 +18,19 @@ InputParameters
 GeochemicalModelInterrogator::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredParam<UserObjectName>("model_root",
-                                          "The name of the GeochemicalModelRoot user object");
+  params.addRequiredParam<UserObjectName>("model_definition",
+                                          "The name of the GeochemicalModelDefinition user object");
   params.addParam<std::vector<std::string>>(
       "swap_out_of_basis",
-      "Species that should be removed from the model_root's basis and be replaced with the "
+      "Species that should be removed from the model_definition's basis and be replaced with the "
       "swap_into_basis species.  There must be the same number of species in swap_out_of_basis and "
       "swap_into_basis.  If this list contains more than one species, the swapping is performed "
       "one-by-one, starting with the first pair (swap_out_of_basis[0] and swap_into_basis[0]), "
       "then the next pair, etc");
-  params.addParam<std::vector<std::string>>("swap_into_basis",
-                                            "Species that should be removed from the model_root's "
-                                            "equilibrium species list and added to the basis");
+  params.addParam<std::vector<std::string>>(
+      "swap_into_basis",
+      "Species that should be removed from the model_definition's "
+      "equilibrium species list and added to the basis");
   params.addParam<std::vector<std::string>>(
       "activity_species",
       "Species that are provided numerical values of activity (or fugacity for gases) in the "
@@ -59,6 +60,14 @@ GeochemicalModelInterrogator::validParams()
       25,
       "Equilibrium constants will be computed at this temperature [degC].  This is "
       "ignored if interrogation=eqm_temperature.");
+  params.addRangeCheckedParam<Real>(
+      "stoichiometry_tolerance",
+      1E-6,
+      "stoichiometry_tolerance >= 0.0",
+      "Swapping involves inverting matrices via a singular value decomposition. During this "
+      "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
+      "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
+      "stoichiometric coefficient) < stoi_tol then it is set to zero.");
   params.addClassDescription("User object for performing simple manipulations of and querying a "
                              "geochemical model");
 
@@ -67,8 +76,8 @@ GeochemicalModelInterrogator::validParams()
 
 GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _mgd(getUserObject<GeochemicalModelRoot>("model_root").getDatabase()),
-    _swapper(_mgd.basis_species_index.size()),
+    _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
+    _swapper(_mgd.basis_species_index.size(), getParam<Real>("stoichiometry_tolerance")),
     _swap_out(getParam<std::vector<std::string>>("swap_out_of_basis")),
     _swap_in(getParam<std::vector<std::string>>("swap_into_basis")),
     _precision(getParam<unsigned int>("precision")),

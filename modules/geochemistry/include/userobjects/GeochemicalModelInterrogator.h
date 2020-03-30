@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeochemicalModelRoot.h"
+#include "GeochemicalModelDefinition.h"
 #include "GeochemistrySpeciesSwapper.h"
 
 class GeochemicalModelInterrogator;

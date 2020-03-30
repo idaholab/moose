@@ -1,11 +1,11 @@
-# GeochemicalModelRoot
+# GeochemicalModelDefinition
 
 Defines the geochemical system.  This extracts information from the geochemistry database and stores information pertinent to the model in computationally-efficient datastructures, eliminating all extraneous information.
 
 !alert note
-All `geochemistry` models must contain a `GeochemicalModelRoot` userobject
+All `geochemistry` models must contain a `GeochemicalModelDefinition` userobject
 
-This userobject extensively uses `utils/MinimalGeochemicalSystem`, and it is useful to fully discuss the input parameters of this class.
+This userobject extensively uses `utils/PertinentGeochemicalSystem`, and it is useful to fully discuss the input parameters of this class.
 
 ## basis_species
 
@@ -102,9 +102,9 @@ The complete list of [secondary species](equilibrium.md) is automatically comput
 
 The resulting list contains only species whose equilibrium reactions can ultimately be expressed in terms of basis species.  Once this list is created, the equilibrium reactions for the minerals, gases, kinetic_redox and kinetic_surface_species can also be checked that they can be ultimately expressed in terms of basis species as specified above in the conditions "the [equilibrium reaction](equilibrium.md) of each member must involve only the basis_species, or secondary species or non-kinetically-controlled redox couples that can be expressed in terms of the basis_species."
 
-## Creating the minimal model
+## Creating the pertinent model
 
-All the aforementioned species are included in the "minimal model" created by this class, including their names, charges, molecular weights, ionic radii, molecular volumes, stoichiometric coefficients and equilibrium constants.
+All the aforementioned species are included in the "pertinent model" created by this class, including their names, charges, molecular weights, ionic radii, molecular volumes, stoichiometric coefficients and equilibrium constants.
 
 ## Executing
 
@@ -120,8 +120,8 @@ An example that simply outputs equilibrium reactions involving the clinoptilolit
 
 
 
-!syntax parameters /UserObjects/GeochemicalModelRoot
+!syntax parameters /UserObjects/GeochemicalModelDefinition
 
-!syntax inputs /UserObjects/GeochemicalModelRoot
+!syntax inputs /UserObjects/GeochemicalModelDefinition
 
-!syntax children /UserObjects/GeochemicalModelRoot
+!syntax children /UserObjects/GeochemicalModelDefinition

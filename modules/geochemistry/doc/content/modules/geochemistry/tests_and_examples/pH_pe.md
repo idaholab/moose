@@ -8,7 +8,7 @@ The `geochemistry` module can be used to provide values for pH and pe assuming e
 \end{equation}
 and
 \begin{equation}
-\mathrm{pH} = -\log_{10}a_{\mathrm{e}^{-}} \ ,
+\mathrm{pe} = -\log_{10}a_{\mathrm{e}^{-}} \ ,
 \end{equation}
 where $a$ denotes activity.
 
@@ -27,7 +27,7 @@ Introducing e$^{-}$ into the basis in favour of O$_{2}$(aq) yields
 \mathrm{pe} = 23.03 - 3\mathrm{pH} \ .
 \end{equation}
 
-To perform this simulation using the `geochemistry` module, a [GeochemicalModelRoot](GeochemicalModelRoot.md) object just be created with the desired mineral species:
+To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
 
 !listing modules/geochemistry/test/tests/interrogate_reactions/hematite.i block=UserObjects
 

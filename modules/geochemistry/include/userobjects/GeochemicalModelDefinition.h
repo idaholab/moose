@@ -10,31 +10,31 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "MinimalGeochemicalSystem.h"
+#include "PertinentGeochemicalSystem.h"
 
-class GeochemicalModelRoot;
+class GeochemicalModelDefinition;
 
 template <>
-InputParameters validParams<GeochemicalModelRoot>();
+InputParameters validParams<GeochemicalModelDefinition>();
 
 /**
  * User object that parses a geochemical database file, and only retains information relevant to the
  * current geochemical model
  */
-class GeochemicalModelRoot : public GeneralUserObject
+class GeochemicalModelDefinition : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  GeochemicalModelRoot(const InputParameters & parameters);
+  GeochemicalModelDefinition(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+  virtual void initialize() override final;
+  virtual void execute() override final;
+  virtual void finalize() override final;
 
-  /// provides a copy of the minimal geochemical database held by this object
+  /// provides a copy of the pertinent geochemical database held by this object
   ModelGeochemicalDatabase getDatabase() const;
 
 private:
-  const MinimalGeochemicalSystem _model;
+  const PertinentGeochemicalSystem _model;
 };

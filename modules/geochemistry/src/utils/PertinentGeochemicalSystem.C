@@ -7,9 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MinimalGeochemicalSystem.h"
+#include "PertinentGeochemicalSystem.h"
 
-MinimalGeochemicalSystem::MinimalGeochemicalSystem(
+PertinentGeochemicalSystem::PertinentGeochemicalSystem(
     const GeochemicalDatabaseReader & db,
     const std::vector<std::string> & basis_species,
     const std::vector<std::string> & minerals,
@@ -59,7 +59,7 @@ MinimalGeochemicalSystem::MinimalGeochemicalSystem(
 }
 
 void
-MinimalGeochemicalSystem::buildBasis(const std::vector<std::string> & basis_species)
+PertinentGeochemicalSystem::buildBasis(const std::vector<std::string> & basis_species)
 {
   unsigned ind = 0;
   for (const auto & name : basis_species)
@@ -89,7 +89,7 @@ MinimalGeochemicalSystem::buildBasis(const std::vector<std::string> & basis_spec
 }
 
 void
-MinimalGeochemicalSystem::buildMinerals(const std::vector<std::string> & minerals)
+PertinentGeochemicalSystem::buildMinerals(const std::vector<std::string> & minerals)
 {
   unsigned ind = 0;
   for (const auto & name : minerals)
@@ -103,7 +103,7 @@ MinimalGeochemicalSystem::buildMinerals(const std::vector<std::string> & mineral
 }
 
 void
-MinimalGeochemicalSystem::buildGases(const std::vector<std::string> & gases)
+PertinentGeochemicalSystem::buildGases(const std::vector<std::string> & gases)
 {
   unsigned ind = 0;
   for (const auto & name : gases)
@@ -118,7 +118,7 @@ MinimalGeochemicalSystem::buildGases(const std::vector<std::string> & gases)
 }
 
 void
-MinimalGeochemicalSystem::buildKineticMinerals(const std::vector<std::string> & kinetic_minerals)
+PertinentGeochemicalSystem::buildKineticMinerals(const std::vector<std::string> & kinetic_minerals)
 {
   unsigned ind = 0;
   for (const auto & name : kinetic_minerals)
@@ -134,7 +134,7 @@ MinimalGeochemicalSystem::buildKineticMinerals(const std::vector<std::string> & 
 }
 
 void
-MinimalGeochemicalSystem::buildKineticRedox(const std::vector<std::string> & kinetic_redox)
+PertinentGeochemicalSystem::buildKineticRedox(const std::vector<std::string> & kinetic_redox)
 {
   unsigned ind = 0;
   for (const auto & name : kinetic_redox)
@@ -150,7 +150,7 @@ MinimalGeochemicalSystem::buildKineticRedox(const std::vector<std::string> & kin
 }
 
 void
-MinimalGeochemicalSystem::buildKineticSurface(
+PertinentGeochemicalSystem::buildKineticSurface(
     const std::vector<std::string> & kinetic_surface_species)
 {
   unsigned ind = 0;
@@ -165,7 +165,7 @@ MinimalGeochemicalSystem::buildKineticSurface(
 }
 
 void
-MinimalGeochemicalSystem::buildSecondarySpecies()
+PertinentGeochemicalSystem::buildSecondarySpecies()
 {
   // run through all redox couples, including them if:
   // - they are not part of the kinetic_redox list
@@ -259,7 +259,7 @@ MinimalGeochemicalSystem::buildSecondarySpecies()
 }
 
 void
-MinimalGeochemicalSystem::checkMinerals(
+PertinentGeochemicalSystem::checkMinerals(
     const std::vector<GeochemistryMineralSpecies> & mineral_info) const
 {
   for (const auto & mineral : mineral_info)
@@ -276,7 +276,7 @@ MinimalGeochemicalSystem::checkMinerals(
 }
 
 void
-MinimalGeochemicalSystem::checkGases() const
+PertinentGeochemicalSystem::checkGases() const
 {
   for (const auto & gas : _gas_info)
     for (const auto & element : gas.basis_species)
@@ -286,7 +286,7 @@ MinimalGeochemicalSystem::checkGases() const
 }
 
 void
-MinimalGeochemicalSystem::checkKineticRedox() const
+PertinentGeochemicalSystem::checkKineticRedox() const
 {
   for (const auto & kr : _kinetic_redox_info)
     for (const auto & element : kr.basis_species)
@@ -296,7 +296,7 @@ MinimalGeochemicalSystem::checkKineticRedox() const
 }
 
 void
-MinimalGeochemicalSystem::checkKineticSurfaceSpecies() const
+PertinentGeochemicalSystem::checkKineticSurfaceSpecies() const
 {
   for (const auto & kr : _kinetic_surface_info)
     for (const auto & element : kr.basis_species)
@@ -306,7 +306,7 @@ MinimalGeochemicalSystem::checkKineticSurfaceSpecies() const
 }
 
 void
-MinimalGeochemicalSystem::createModel()
+PertinentGeochemicalSystem::createModel()
 {
   const unsigned num_rows = _secondary_info.size() + _mineral_info.size() + _gas_info.size();
   const unsigned num_cols = _basis_info.size();
@@ -568,7 +568,7 @@ MinimalGeochemicalSystem::createModel()
 }
 
 ModelGeochemicalDatabase
-MinimalGeochemicalSystem::modelGeochemicalDatabaseCopy() const
+PertinentGeochemicalSystem::modelGeochemicalDatabaseCopy() const
 {
   ModelGeochemicalDatabase mgd = _model;
   return mgd;

@@ -9,8 +9,9 @@
 
 #include "GeochemistrySpeciesSwapper.h"
 
-GeochemistrySpeciesSwapper::GeochemistrySpeciesSwapper(unsigned basis_size)
-  : _swap_matrix(basis_size, basis_size),
+GeochemistrySpeciesSwapper::GeochemistrySpeciesSwapper(unsigned basis_size, Real stoi_tol)
+  : _stoi_tol(stoi_tol),
+    _swap_matrix(basis_size, basis_size),
     _inv_swap_matrix(basis_size, basis_size),
     _swap_sigma(basis_size),
     _swap_U(basis_size, basis_size),
@@ -56,7 +57,6 @@ GeochemistrySpeciesSwapper::constructInverseMatrix(const ModelGeochemicalDatabas
                                                    unsigned basis_index_to_replace,
                                                    unsigned eqm_index_to_insert)
 {
-  const Real tol_for_inverse = 1E-6; // maybe make this settable by user?
   const unsigned num_cols = mgd.basis_species_index.size();
 
   if (_swap_matrix.n() != num_cols)
@@ -89,7 +89,7 @@ GeochemistrySpeciesSwapper::constructInverseMatrix(const ModelGeochemicalDatabas
   }
   const Real l1norm = _swap_sigma.l1_norm();
   for (unsigned i = 0; i < num_cols; ++i)
-    if (std::abs(_swap_sigma(i) / l1norm) < tol_for_inverse)
+    if (std::abs(_swap_sigma(i) / l1norm) < _stoi_tol)
       mooseException("Matrix is not invertible, which signals an invalid basis swap");
 
   // Find the inverse, which is VT^-1 * D^-1 * U^-1 = V * D^-1 * UT
@@ -151,6 +151,10 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
   mgd.eqm_stoichiometry(eqm_index_to_insert, basis_index_to_replace) =
       1.0; // 1 * replace_this <-> 1 * replace_this
   mgd.eqm_stoichiometry.right_multiply(_inv_swap_matrix);
+  for (unsigned i = 0; i < num_rows; ++i)
+    for (unsigned j = 0; j < num_cols; ++j)
+      if (std::abs(mgd.eqm_stoichiometry(i, j)) < _stoi_tol)
+        mgd.eqm_stoichiometry(i, j) = 0.0;
 
   // alter equilibrium constants for each temperature point
   const unsigned num_temperatures = mgd.eqm_log10K.n();
@@ -201,4 +205,9 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
 
   // express kinetic stoichiometry in new basis
   mgd.kin_stoichiometry.right_multiply(_inv_swap_matrix);
+  const unsigned kin_rows = mgd.kin_stoichiometry.m();
+  for (unsigned i = 0; i < kin_rows; ++i)
+    for (unsigned j = 0; j < num_cols; ++j)
+      if (std::abs(mgd.kin_stoichiometry(i, j)) < _stoi_tol)
+        mgd.kin_stoichiometry(i, j) = 0.0;
 }
