@@ -2,7 +2,6 @@
   [reader]
     type = PythonUnitTest
     input = test_ExodusReader.py
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 []

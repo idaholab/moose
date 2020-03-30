@@ -6,7 +6,6 @@
     allowed_darwin = 0.94
     allowed_linux = 0.96
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
   [dualx]
     type = ImageDiff
@@ -15,6 +14,5 @@
     allowed_linux = 0.96
     allowed_darwin = 0.94
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []
