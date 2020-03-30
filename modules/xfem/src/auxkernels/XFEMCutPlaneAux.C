@@ -23,6 +23,8 @@ XFEMCutPlaneAux::validParams()
   params.addRequiredParam<MooseEnum>(
       "quantity", quantity, "The quantity to be extracted.  Choices: " + quantity.getRawNames());
   params.addParam<unsigned int>("plane_id", 0, "The index of the cut plane");
+  params.addClassDescription(
+      "Computes the normal and origin of a cutting plane for each partial element.");
   return params;
 }
 

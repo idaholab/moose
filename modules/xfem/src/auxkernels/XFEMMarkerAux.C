@@ -19,6 +19,7 @@ InputParameters
 XFEMMarkerAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Identify the crack tip elements.");
   return params;
 }
 

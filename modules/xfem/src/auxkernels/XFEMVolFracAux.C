@@ -19,6 +19,8 @@ InputParameters
 XFEMVolFracAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Computes the volume fraction of the physical material in each partial element.");
   return params;
 }
 
