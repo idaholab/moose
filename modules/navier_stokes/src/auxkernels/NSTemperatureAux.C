@@ -43,6 +43,8 @@ NSTemperatureAux::NSTemperatureAux(const InputParameters & parameters)
     _internal_energy(coupledValue(NS::internal_energy)),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
+  mooseDeprecated("The NSTemperatureAux aux kernel has been replaced by the "
+                  "TemperatureAux kernel in the fluid properties module.");
 }
 
 Real

@@ -35,6 +35,8 @@ NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters)
     _rhoE(coupledValue(NS::total_energy)),
     _pressure(coupledValue(NS::pressure))
 {
+  mooseDeprecated("The NSEnthalpyAux auxiliary kernel has been replaced by the EnthalpyAux "
+                  "auxiliary kernel");
 }
 
 Real
