@@ -17,6 +17,7 @@ InputParameters
 TimeStepMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Provide various time stepping quantities as material properties.");
   params.addParam<MaterialPropertyName>(
       "prop_dt", "dt", "Material property to store the current dt");
   params.addParam<MaterialPropertyName>(

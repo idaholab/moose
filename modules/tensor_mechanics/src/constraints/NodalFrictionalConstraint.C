@@ -29,6 +29,7 @@ InputParameters
 validParams<NodalFrictionalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
+  params.addClassDescription("Frictional nodal constraint for contact");
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<Real>("friction_coefficient",
