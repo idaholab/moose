@@ -24,7 +24,6 @@ public:
   virtual void meshChanged() override;
 
   virtual void computeResidual(NumericVector<Number> & residual) override;
-
   virtual void computeJacobian(SparseMatrix<Number> & jacobian) override;
 
 protected:
@@ -34,7 +33,6 @@ protected:
   void updateConstrainedNodes();
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
-
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   /// Holds the slave node set or side set

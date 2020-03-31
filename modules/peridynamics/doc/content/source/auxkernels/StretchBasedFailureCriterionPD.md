@@ -2,7 +2,7 @@
 
 ## Description
 
-AuxKernel `StretchBasedFailureCriterionPD` is to determine the status $\mu$ of each individual bond using critical stretch failure criterion. For critical stretch failure criterion, if the bond's mechanical stretch $s$ less than its critical value $s_{0}$ and intact in previous simulation step, the bond is considered as intact and a value of 1 is returned, otherwise, the bond is broken and a value of 0 is returned.
+The `StretchBasedFailureCriterionPD` AuxKernel is to determine the status $\mu$ of each individual bond using critical stretch failure criterion. For critical stretch failure criterion, if the bond's mechanical stretch $s$ less than its critical value $s_{0}$ and intact in previous simulation step, the bond is considered as intact and a value of 1 is returned, otherwise, the bond is broken and a value of 0 is returned.
 
 ### Critical stretch failure criterion
 

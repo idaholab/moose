@@ -52,8 +52,7 @@ protected:
   /// BOND, ORDINARY_STATE or NONORDINARY_STATE
   const MooseEnum _formulation;
 
-  /// Option of stabilization scheme for correspondence material model (non-ordinary state based):
-  /// FORCE or SELF
+  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or HORIZON
   const MooseEnum _stabilization;
 
   /// Option of strain formulation: SMALL or FINITE

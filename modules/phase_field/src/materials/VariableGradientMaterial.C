@@ -17,6 +17,7 @@ InputParameters
 VariableGradientMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Compute the norm of the gradient of a variable");
   params.addCoupledVar("variable", "Variable to compute the gradient magnitude of");
   params.addRequiredParam<MaterialPropertyName>(
       "prop", "Material property to store the gradient magnitude in");

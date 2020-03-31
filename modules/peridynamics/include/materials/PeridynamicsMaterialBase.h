@@ -42,6 +42,5 @@ protected:
   std::vector<Real> _horiz_vol;
 
   RealGradient _origin_vec;
-  Real _origin_length;
   ///@}
 };

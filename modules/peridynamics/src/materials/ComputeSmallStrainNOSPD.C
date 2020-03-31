@@ -18,9 +18,8 @@ ComputeSmallStrainNOSPD::validParams()
 {
   InputParameters params = ComputeStrainBaseNOSPD::validParams();
   params.addClassDescription(
-      "Class for computing nodal quantities for residual and Jacobian calculation "
-      "for Self-stabilized Non-Ordinary State-based PeriDynamic (SNOSPD) "
-      "correspondence model under small strain assumptions");
+      "Class for computing nodal quantities for the residual and Jacobian calculation "
+      "for the peridynamic correspondence model under small strain assumptions");
 
   return params;
 }

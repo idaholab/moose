@@ -2,7 +2,7 @@
 
 ## Description
 
-AuxKernel `BoundaryOffsetPD` is used to retrieve the offset of a material point compared to initial FE element from the PD mesh object.
+The `BoundaryOffsetPD` AuxKernel is used to retrieve the offset of a material point compared to initial FE element from the PD mesh object.
 
 !syntax parameters /AuxKernels/BoundaryOffsetPD
 

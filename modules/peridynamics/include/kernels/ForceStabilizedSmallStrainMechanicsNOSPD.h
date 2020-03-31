@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<ForceStabilizedSmallStrainMechanicsNOSPD>();
 
 /**
- * Kernel class for fictitious force stabilized conventional correspondence material model for small
+ * Kernel class for fictitious force stabilized peridynamic correspondence material model for small
  * strain
  */
 class ForceStabilizedSmallStrainMechanicsNOSPD : public MechanicsBaseNOSPD

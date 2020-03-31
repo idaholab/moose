@@ -18,7 +18,7 @@ template <>
 InputParameters validParams<ComputeFiniteStrainNOSPD>();
 
 /**
- * Material class for bond-associated correspondence material model for finite strain
+ * Material class for peridynamic correspondence model for finite strain
  */
 class ComputeFiniteStrainNOSPD : public ComputeStrainBaseNOSPD
 {

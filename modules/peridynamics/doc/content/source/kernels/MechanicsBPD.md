@@ -2,7 +2,7 @@
 
 ## Description
 
-Kernel `MechanicsBPD` computes the residual and jacobian of the force density integral for 2D, and 3D bond-based peridynamic models under infinitesimal strain assumptions.
+The `MechanicsBPD` Kernel computes the residual and jacobian of the force density integral for 2D, and 3D bond-based peridynamic models under infinitesimal strain assumptions.
 
 ## Force function
 

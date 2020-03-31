@@ -2,7 +2,7 @@
 
 ## Description
 
-UserObject `NodalNumIntactBondsPD` computes the value of an AuxVariable by calculating the number of intact/unbroken bonds associated with each material point.
+The `NodalNumIntactBondsPD` UserObject computes the value of an AuxVariable by calculating the number of intact/unbroken bonds associated with each material point.
 
 !syntax parameters /UserObjects/NodalNumIntactBondsPD
 

@@ -2,7 +2,7 @@
 
 ## Description
 
-Kernel `MechanicsOSPD` calculates the residual and jacobian of the force density integral for 2D, and 3D ordinary state-based peridynamic models under infinitesimal strain assumptions.
+The `MechanicsOSPD` Kernel calculates the residual and jacobian of the force density integral for 2D, and 3D ordinary state-based peridynamic models under infinitesimal strain assumptions.
 
 ## Force state
 

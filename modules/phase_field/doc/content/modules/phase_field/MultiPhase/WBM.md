@@ -46,9 +46,15 @@ a_i(\vec\eta,\vec c,v) + \underbrace{\int_\Omega\lambda\frac{\partial k}{\partia
 
 holds for every test function $v$ and $q$.
 
-The $L_1$ Lagrange residuals are provided by `SwitchingFunctionConstraintEta` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) kernels - one for each phase order parameter.
+The $L_1$ Lagrange residuals are provided by 
+[`SwitchingFunctionConstraintEta`](/SwitchingFunctionConstraintEta.md) 
+([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) 
+kernels - one for each phase order parameter.
 
-The $L_2$ Lagrange residual is provided by a `SwitchingFunctionConstraintLagrange` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html)) kernel.
+The $L_2$ Lagrange residual is provided by a 
+[`SwitchingFunctionConstraintLagrange`](/SwitchingFunctionConstraintLagrange.md)
+([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html))
+kernel.
 
 The *Jacobian fill* term introduces a small $\lambda$ dependence in the constraint
 through a small $\epsilon$ factor (defaults to $10^{-9}$), which results in an
@@ -60,15 +66,16 @@ violation can be made as small as the convergence limits.
 
 ## Penalty constraint
 
-As an alternative (softer) constraint enforcement we provide the `SwitchingFunctionPenalty`
+As an alternative (softer) constraint enforcement we provide the
+[`SwitchingFunctionPenalty`](/SwitchingFunctionPenalty.md)
 ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionPenalty.html))
-kernel, which effectively adds a free energy penalty of $\gamma k(\vec \eta)^2$ (with $\epsilon=0$),
-where $\gamma$ is the penalty prefactor (`penalty`). The constraint is enforced approximately to a
-tolerance of $\frac1\gamma$ (depending on the shape and units of the free energy).
+kernel, which effectively adds a free energy penalty of $\gamma k(\vec \eta)^2$
+(with $\epsilon=0$), where $\gamma$ is the penalty prefactor (`penalty`). The
+constraint is enforced approximately to a tolerance of $\frac1\gamma$ (depending
+on the shape and units of the free energy).
 
 The gradient interface energy term for multiphase models with $n>2$ is derived
 [here](ACMultiInterface.md) and provided by the [`ACMultiInterface`](ACMultiInterface.md) kernel.
-
 
 ## Example
 
@@ -92,7 +99,6 @@ An example material block looks like this (materials for phase field mobilities 
 
 [./free_energy_B]
   type = DerivativeParsedMaterial
-  block = 0
   f_name = Fb
   args = 'c'
   function = '(c-0.9)^2'
@@ -102,14 +108,12 @@ An example material block looks like this (materials for phase field mobilities 
 
 [./switching]
   type = SwitchingFunctionMaterial
-  block = 0
   eta = eta
   h_order = SIMPLE
 [../]
 
 [./barrier]
   type = BarrierFunctionMaterial
-  block = 0
   eta = eta
   g_order = SIMPLE
 [../]
@@ -118,7 +122,6 @@ An example material block looks like this (materials for phase field mobilities 
 
 [./free_energy]
   type = DerivativeTwoPhaseMaterial
-  block = 0
   f_name = F    # Name of the global free energy function (use this in the Parsed Function Kernels)
   fa_name = Fa  # f_name of the phase A free energy function
   fb_name = Fb  # f_name of the phase B free energy function

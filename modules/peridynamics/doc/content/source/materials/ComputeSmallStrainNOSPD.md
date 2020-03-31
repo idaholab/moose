@@ -2,7 +2,7 @@
 
 ## Description
 
-Material `ComputeSmallStrainNOSPD` calculates the [bond-associated deformation gradient](peridynamics/DeformationGradients.md) used in self-stabilized non-ordinary state-based peridynamic mechanics model under small strain assumptions.
+The `ComputeSmallStrainNOSPD` Material calculates the strain tensors based on [deformation gradient](peridynamics/DeformationGradients.md) for the peridynamic correspondence model under small strain assumptions.
 
 Given the bond-associated deformation gradient $\mathbf{F}_{\mathbf{\xi}}$, the bond-associated total strain tensor can be obtained as
 

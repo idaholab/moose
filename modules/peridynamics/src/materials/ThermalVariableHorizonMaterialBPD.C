@@ -33,5 +33,5 @@ void
 ThermalVariableHorizonMaterialBPD::computePeridynamicsParams(const Real ave_thermal_conductivity)
 {
   _Kij = _dim * ave_thermal_conductivity * (1.0 / _horiz_vol[0] + 1.0 / _horiz_vol[1]) /
-         _origin_length;
+         _origin_vec.norm();
 }

@@ -30,10 +30,10 @@ protected:
   virtual void computeBondForce() override;
 
   ///@{ Material properties to store
-  MaterialProperty<Real> & _bond_force_i_j;
-  MaterialProperty<Real> & _bond_dfdU_i_j;
-  MaterialProperty<Real> & _bond_dfdT_i_j;
-  MaterialProperty<Real> & _bond_dfdE_i_j;
+  MaterialProperty<Real> & _bond_nonlocal_force;
+  MaterialProperty<Real> & _bond_nonlocal_dfdU;
+  MaterialProperty<Real> & _bond_nonlocal_dfdT;
+  MaterialProperty<Real> & _bond_nonlocal_dfdE;
   ///@}
 
   ///@{ Model parameters

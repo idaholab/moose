@@ -34,14 +34,27 @@ protected:
   virtual void computeBondStretch() override;
 
   /**
-   * Function to compute bond-associated deformation gradient
+   * Function to compute deformation gradients
    */
   virtual void computeQpDeformationGradient();
+
+  /**
+   * Function to compute deformation gradient for force stabilized correspondence model
+   */
+  virtual void computeConventionalQpDeformationGradient();
+
+  /**
+   * Function to compute deformation gradient for horizon stabilized correspondence model
+   */
+  virtual void computeBondHorizonQpDeformationGradient();
 
   /**
    * Function to compute strain tensors
    */
   virtual void computeQpStrain() = 0;
+
+  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or HORIZON
+  const MooseEnum _stabilization;
 
   /// Plane strain problem or not, this is only used for mechanical stretch calculation
   const bool _plane_strain;
@@ -64,5 +77,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _mechanical_strain;
 
   MaterialProperty<Real> & _multi;
+
+  /// fictitious force coefficient for force stabilized model
+  MaterialProperty<Real> & _sf_coeff;
   ///@}
 };

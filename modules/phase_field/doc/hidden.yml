@@ -1,4 +1,3 @@
-- /AuxKernels/BndsCalcAux
 - /AuxKernels/CrossTermGradientFreeEnergy
 - /AuxKernels/EBSDReaderAvgDataAux
 - /AuxKernels/EBSDReaderPointDataAux
@@ -71,11 +70,6 @@
 - /Kernels/CoupledSwitchingTimeDerivative
 - /Kernels/MultiGrainRigidBodyMotion
 - /Kernels/SingleGrainRigidBodyMotion
-- /Kernels/SoretDiffusion
-- /Kernels/SplitCHMath
-- /Kernels/SwitchingFunctionConstraintEta
-- /Kernels/SwitchingFunctionConstraintLagrange
-- /Kernels/SwitchingFunctionPenalty
 - /Kernels/CHPFCRFFSplitKernel
 - /Kernels/CHPFCRFFSplitKernel/CHPFCRFFSplitKernelAction
 - /Kernels/HHPFCRFFSplitKernel
@@ -106,12 +100,10 @@
 - /Materials/GrainAdvectionVelocity
 - /Materials/InterfaceOrientationMaterial
 - /Materials/KKSXeVacSolidMaterial
-- /Materials/MathEBFreeEnergy
 - /Materials/PFCRFFMaterial
 - /Materials/PFCTradMaterial
 - /Materials/PFFracBulkRateMaterial
 - /Materials/PFParamsPolyFreeEnergy
-- /Materials/PhaseNormalTensor
 - /Materials/PolynomialFreeEnergy
 - /Materials/RegularSolutionFreeEnergy
 - /Materials/StrainGradDispDerivatives
@@ -119,8 +111,6 @@
 - /Materials/SwitchingFunctionMaterial
 - /Materials/SwitchingFunctionMultiPhaseMaterial
 - /Materials/ThirdPhaseSuppressionMaterial
-- /Materials/TimeStepMaterial
-- /Materials/VariableGradientMaterial
 - /Modules/PhaseField
 - /Modules/PhaseField/Conserved
 - /Modules/PhaseField/DisplacementGradients

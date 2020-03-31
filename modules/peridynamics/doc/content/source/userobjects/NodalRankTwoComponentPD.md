@@ -2,7 +2,7 @@
 
 ## Description
 
-UserObject `NodalRankTwoComponentPD` is used to compute the values of rank two tensor components at each material point for correspondence material model. The component variable should be defined as aux variable, but its value is computed using UserObject rather than AuxKernel.
+The `NodalRankTwoComponentPD` UserObject is used to compute the values of rank two tensor components at each material point for correspondence material model. The component variable should be defined as aux variable, but its value is computed using UserObject rather than AuxKernel.
 
 In self-stabilized correspondence material model, a rank two tensor (e.g., strain and stress) at a material point is the weighted average of bond-associated corresponding rank two tensors connected at that material point.
 
