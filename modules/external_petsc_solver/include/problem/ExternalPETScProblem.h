@@ -32,14 +32,15 @@ public:
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
-  virtual bool converged() override { return true; }
+  virtual bool converged() override { return _petsc_converged; }
 
 private:
   /// The name of the variable to transfer to
   const VariableName & _sync_to_var_name;
   ExternalPetscSolverApp & _petsc_app;
-
 #if LIBMESH_HAVE_PETSC
+  /// If PETSc solver converged
+  PetscBool _petsc_converged;
   /// PETSc solver
   TS & _ts;
   /// PETSc solver solution

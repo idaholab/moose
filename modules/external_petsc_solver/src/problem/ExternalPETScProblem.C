@@ -47,7 +47,7 @@ ExternalPETScProblem::externalSolve()
 {
 #if LIBMESH_HAVE_PETSC
   _console << "PETSc External Solve!" << std::endl;
-  externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time());
+  externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time(), &_petsc_converged);
 #endif
 }
 

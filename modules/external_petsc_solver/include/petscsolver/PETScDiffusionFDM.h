@@ -18,7 +18,8 @@
 #include <petscdmda.h>
 #include <petscts.h>
 
-PETSC_EXTERN PetscErrorCode externalPETScDiffusionFDMSolve(TS, Vec, PetscReal, PetscReal);
+PETSC_EXTERN PetscErrorCode
+externalPETScDiffusionFDMSolve(TS, Vec, PetscReal, PetscReal, PetscBool *);
 PETSC_EXTERN PetscErrorCode PETScExternalSolverCreate(MPI_Comm, TS *);
 PETSC_EXTERN PetscErrorCode PETScExternalSolverDestroy(TS);
 PETSC_EXTERN PetscErrorCode FormIFunction(TS, PetscReal, Vec, Vec, Vec, void *);

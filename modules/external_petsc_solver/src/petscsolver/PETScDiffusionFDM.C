@@ -96,9 +96,10 @@ PETScExternalSolverDestroy(TS ts)
  * to demonstrate how MOOSE interact with an external solver package
  */
 PetscErrorCode
-externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
+externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, PetscBool * converged)
 {
   PetscErrorCode ierr;
+  TSConvergedReason reason;
 #if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   PetscInt current_step;
 #endif
@@ -147,6 +148,12 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSolve(ts, u);
   CHKERRQ(ierr);
+  if (converged)
+  {
+    ierr = TSGetConvergedReason(ts, &reason);
+    CHKERRQ(ierr);
+    *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
+  }
   PetscFunctionReturn(0);
 }
 
