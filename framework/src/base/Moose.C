@@ -494,6 +494,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddDGKernelAction", "DGKernels/*");
   registerSyntax("AddFVKernelAction", "FVKernels/*");
   registerSyntax("AddFVBCAction", "FVBCs/*");
+  registerSyntax("CheckFVBCAction", "FVBCs");
 
   registerSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");
 
