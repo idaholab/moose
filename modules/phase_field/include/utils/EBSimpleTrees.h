@@ -8,12 +8,12 @@ struct SimplificationRules
   {
     for (auto rule : rules)
     {
-      // std::vector<EBTermNode *> conditions(rule.size() - 2);
-      // for(unsigned int i = 0; i < rule.size() - 2; ++i)
-      //  conditions[i] = rule[i+2].cloneRoot();
-      _simplification_trees.emplace_back(std::make_pair(rule[0].cloneRoot(), rule[1].cloneRoot()));
-      // std::make_pair(rule[0].cloneRoot()->toNNary(), rule[1].cloneRoot()->toNNary()));
-      //_conditions.emplace_back(conditions)
+      std::vector<ExpressionBuilderToo::EBTermNode *> conditions(rule.size() - 2);
+      for (unsigned int i = 0; i < rule.size() - 2; ++i)
+        conditions[i] = rule[i + 2].cloneRoot();
+      _simplification_trees.emplace_back(
+          std::make_pair(rule[0].cloneRoot()->toNNary(), rule[1].cloneRoot()->toNNary()));
+      _conditions.emplace_back(conditions);
     }
   }
   operator std::vector<
@@ -21,13 +21,16 @@ struct SimplificationRules
   {
     return _simplification_trees;
   }
+  operator ExpressionBuilderToo::SimpleRules()
+  {
+    return ExpressionBuilderToo::SimpleRules(_simplification_trees, _conditions);
+  }
+
   std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
       _simplification_trees;
-  // std::vector<ExpressionBuilderToo::EBTermNode> _conditions;
+  std::vector<std::vector<ExpressionBuilderToo::EBTermNode *>> _conditions;
 };
 
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-getPrepRules();
+ExpressionBuilderToo::SimpleRules getPrepRules();
 
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-getRules();
+ExpressionBuilderToo::SimpleRules getRules();

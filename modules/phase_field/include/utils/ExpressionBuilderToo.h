@@ -21,6 +21,8 @@
 
 using namespace libMesh;
 
+static unsigned int _star_index = 0;
+
 class ExpressionBuilderToo
 {
 public:
@@ -30,6 +32,7 @@ public:
   class EBTerm;
   class EBTermNode;
   struct Comparer;
+  struct SimpleRules;
   typedef std::vector<EBTerm> EBTermList;
   typedef std::vector<EBTermNode *> EBTermNodeList;
 
@@ -51,12 +54,15 @@ public:
 
     virtual bool
     compareRule(EBTermNode * rule,
+                std::vector<EBTermNode *> conditions,
                 std::vector<EBTermNode *> & stars,
                 std::vector<unsigned int> & current_index,
                 std::vector<unsigned int> changed_indeces = std::vector<unsigned int>(0),
                 bool checkNNaryLeaf = false);
 
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed);
+    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                  std::vector<EBTermNode *> conditions,
+                                  bool & changed);
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *>) { return this; }
 
@@ -71,6 +77,7 @@ public:
                     std::vector<unsigned int> changed_indeces,
                     int depth = 0,
                     std::vector<unsigned int> current_index = std::vector<unsigned int>(0));
+    bool checkConditions(std::vector<EBTermNode *> conditions, std::vector<EBTermNode *> stars);
 
     virtual EBTermNode * toNNary() { return this; }
 
@@ -126,6 +133,19 @@ public:
     {
       EBTermNode * deriv = new EBNumberNode<Real>(0);
       return deriv;
+    }
+  };
+
+  class EBBoolNode : public EBNumberNode<bool>
+  {
+  public:
+    EBBoolNode(bool value) : EBNumberNode<bool>(value){};
+    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool, int &)
+    {
+      EBBoolNode * c_to_bool = dynamic_cast<EBBoolNode *>(compare_to);
+      if (c_to_bool != NULL && getValue() == c_to_bool->getValue())
+        return true;
+      return false;
     }
   };
 
@@ -224,10 +244,12 @@ public:
       return std::vector<EBTermNode *>(1, _subnode);
     }
 
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
+    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                  std::vector<EBTermNode *> conditions,
+                                  bool & changed)
     {
-      _subnode = _subnode->simplify(rule, changed);
-      return EBTermNode::simplify(rule, changed);
+      _subnode = _subnode->simplify(rule, conditions, changed);
+      return EBTermNode::simplify(rule, conditions, changed);
     }
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
@@ -359,11 +381,13 @@ public:
       return children;
     }
 
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
+    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                  std::vector<EBTermNode *> conditions,
+                                  bool & changed)
     {
-      _left = _left->simplify(rule, changed);
-      _right = _right->simplify(rule, changed);
-      return EBTermNode::simplify(rule, changed);
+      _left = _left->simplify(rule, conditions, changed);
+      _right = _right->simplify(rule, conditions, changed);
+      return EBTermNode::simplify(rule, conditions, changed);
     }
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
@@ -505,10 +529,12 @@ public:
       children[2] = _left;
       return children;
     }
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed)
+    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                  std::vector<EBTermNode *> conditions,
+                                  bool & changed)
     {
-      _middle = _middle->simplify(rule, changed);
-      return EBBinaryTermNode::simplify(rule, changed);
+      _middle = _middle->simplify(rule, conditions, changed);
+      return EBBinaryTermNode::simplify(rule, conditions, changed);
     }
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
@@ -624,6 +650,32 @@ public:
       return false;
     }
 
+    bool hasNone()
+    {
+      EBNoneNode * checkNone;
+      for (unsigned int i = 0; i < _children.size(); ++i)
+      {
+        checkNone = dynamic_cast<EBNoneNode *>(_children[i]);
+        if (checkNone != NULL)
+          return true;
+      }
+      return false;
+    }
+
+    void removeNone()
+    {
+      EBNoneNode * checkNone;
+      unsigned int i = 0;
+      while (i < _children.size())
+      {
+        checkNone = dynamic_cast<EBNoneNode *>(_children[i]);
+        if (checkNone != NULL)
+          _children.erase(_children.begin() + i);
+        else
+          i++;
+      }
+    }
+
   protected:
     std::vector<EBTermNode *> _children;
   };
@@ -658,7 +710,9 @@ public:
     virtual bool
     compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool isHead, int & depth);
 
-    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule, bool & changed);
+    virtual EBTermNode * simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                  std::vector<EBTermNode *> conditions,
+                                  bool & changed);
     virtual EBTermNode * substitute(std::vector<std::pair<EBTermNode *, EBTermNode *>> subs);
     virtual EBTermNode * toNNary();
 
@@ -702,7 +756,8 @@ public:
       }
       std::vector<EBTermNode *> empty_vec(0);
       std::vector<unsigned int> empty_int_vec(0);
-      if (compare_to->compareRule(stars[_index], empty_vec, empty_int_vec, empty_int_vec, true))
+      if (compare_to->compareRule(
+              stars[_index], empty_vec, empty_vec, empty_int_vec, empty_int_vec, true))
         return true;
       return false;
     }
@@ -726,11 +781,11 @@ public:
   class EBRestNode : public EBTermNode
   {
   public:
-    EBRestNode() {}
+    EBRestNode(unsigned int index) : _index(index) {}
 
-    virtual EBRestNode * clone() const { return new EBRestNode(); }
+    virtual EBRestNode * clone() const { return new EBRestNode(_index); }
 
-    virtual std::string stringify() const { return std::to_string(26); }
+    virtual std::string stringify() const { return std::to_string(_index); }
     virtual int precedence() const { return 0; }
     virtual EBTermNode * derivative(const std::string &)
     {
@@ -738,24 +793,51 @@ public:
     }
     virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> & stars, bool, int &)
     {
-      if (stars[26] == NULL)
+      if (stars[_index] == NULL)
       {
-        stars[26] = compare_to->clone();
+        stars[_index] = compare_to->clone();
         return true;
       }
       std::vector<EBTermNode *> empty_vec(0);
       std::vector<unsigned int> empty_int_vec(0);
-      if (compare_to->compareRule(stars[26], empty_vec, empty_int_vec, empty_int_vec, true))
+      if (compare_to->compareRule(
+              stars[_index], empty_vec, empty_vec, empty_int_vec, empty_int_vec, true))
         return true;
       return false;
     }
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
     {
-      EBRestNode * checkRest = dynamic_cast<EBRestNode *>(stars[26]);
+      EBRestNode * checkRest = dynamic_cast<EBRestNode *>(stars[_index]);
       if (checkRest == NULL)
-        return stars[26]->clone();
+        return stars[_index]->clone();
       return NULL;
+    }
+
+    virtual bool isConstant() { return false; }
+
+  private:
+    unsigned int _index;
+  };
+
+  class EBNoneNode : public EBTermNode
+  {
+  public:
+    EBNoneNode() {}
+
+    virtual EBNoneNode * clone() const { return new EBNoneNode(); }
+
+    virtual std::string stringify() const { return std::string(); }
+    virtual int precedence() const { return 0; }
+    virtual EBTermNode * derivative(const std::string &)
+    {
+      mooseError("Star Node should not be present while a derivative is being taken.");
+    }
+    virtual bool compare(EBTermNode *, std::vector<EBTermNode *> &, bool, int &) { return false; }
+
+    virtual EBTermNode * replaceRule(std::vector<EBTermNode *>)
+    {
+      mooseError("None nodes should not be here to replace!");
     }
 
     virtual bool isConstant() { return false; }
@@ -788,13 +870,28 @@ public:
     EBTerm(int number) : _root(new EBNumberNode<int>(number)) {}
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
     EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
+    EBTerm(bool number) : _root(new EBBoolNode(number)) {}
 
     // These two should only be used by EBSimpleTrees!
     // They are for making EBStarNodes & EBRestNodes
-    // The dummy variable is just so people check before using them.
-    EBTerm(unsigned int index, bool) : _root(new EBStarNode(index)) {}
+    EBTerm(char type)
+    {
+      switch (type)
+      {
+        case 's':
+          _root = new EBStarNode(_star_index++);
+          break;
+        case 'r':
+          _root = new EBRestNode(_star_index++);
+          break;
+        case 'n':
+          _root = new EBNoneNode();
+          break;
+        default:
+          mooseError("Unknown type for EBTerm");
+      }
+    }
     EBTerm(EBNNaryOpTermNode root, bool) : _root(root.clone()) {}
-    EBTerm(bool) : _root(new EBRestNode()) {}
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilderToo::EBTerm & larg,
@@ -887,8 +984,8 @@ public:
     EBTermList _arguments;
     mutable EBTermList _eval_arguments;
 
-    static std::vector<std::pair<EBTermNode *, EBTermNode *>> _prep_simplification_rules;
-    static std::vector<std::pair<EBTermNode *, EBTermNode *>> _simplification_rules;
+    static SimpleRules _prep_simplification_rules;
+    static SimpleRules _simplification_rules;
 
   public:
 /**
@@ -1007,6 +1104,17 @@ public:
     std::stack<EBTermNode *> _rule_stack;
     std::vector<EBTermNode *> _stars;
     std::vector<unsigned int> _current_index;
+  };
+
+  struct SimpleRules
+  {
+    SimpleRules(std::vector<std::pair<EBTermNode *, EBTermNode *>> rules,
+                std::vector<std::vector<EBTermNode *>> conditions)
+      : _rules(rules), _conditions(conditions)
+    {
+    }
+    std::vector<std::pair<EBTermNode *, EBTermNode *>> _rules;
+    std::vector<std::vector<EBTermNode *>> _conditions;
   };
 
   class EBTensor : public TensorTempl<EBTerm>

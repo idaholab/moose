@@ -17,10 +17,10 @@ class ExpressionBuilderTooSimplificationTest : public ::testing::Test, public Ex
 
 TEST_F(ExpressionBuilderTooSimplificationTest, test)
 {
-
   EBTerm a("a");
 
   EBTerm b = a + a;
+
   b.simplify();
   EXPECT_EQ(std::string(b), "a*2");
 
@@ -62,14 +62,22 @@ TEST_F(ExpressionBuilderTooSimplificationTest, test)
 
   b = ((3 - a) * (a + 2) + (-a + 4) * (7 * a + 2) - (a - c) * (2 * a - c)) - 3 * a;
   b.simplify();
-  EXPECT_EQ(std::string(b), "c^2*-1+a*(c*3+24)+a^2*-10+14");
+  EXPECT_EQ(std::string(b), "c^2*-1+a*(c+(c+-1)*2+26)+a^2*-10+14");
 
   b = pow(pow(a, 3) * pow(c, 3) * pow(d, 3), 3) / (pow(a, 7) * pow(c, 2) * pow(d, 3));
   b.simplify();
   EXPECT_EQ(std::string(b), "c^7*a^2*d^6");
 
+  b = ((a == a) == c);
+  b.simplify();
+  std::cout << std::string(b) << std::endl;
+
   b = (pow(4, a) + pow(2, 2 * a)) / pow(2, a);
   b.simplify();
+
+  b = (a == a);
+  b.simplify();
+  EXPECT_EQ(std::string(b), "1");
 
   std::cout << std::string(b) << std::endl;
   std::cout << std::endl;

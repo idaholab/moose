@@ -10,10 +10,9 @@
 #include "ExpressionBuilderToo.h"
 #include "EBSimpleTrees.h"
 
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-    ExpressionBuilderToo::EBTerm::_prep_simplification_rules = getPrepRules();
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
-    ExpressionBuilderToo::EBTerm::_simplification_rules = getRules();
+ExpressionBuilderToo::SimpleRules ExpressionBuilderToo::EBTerm::_prep_simplification_rules =
+    getPrepRules();
+ExpressionBuilderToo::SimpleRules ExpressionBuilderToo::EBTerm::_simplification_rules = getRules();
 
 /******************************************
  * The Beginning of the Node implementations
@@ -21,6 +20,7 @@ std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::
  *******************************************/
 bool
 ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
+                                              std::vector<EBTermNode *> conditions,
                                               std::vector<EBTermNode *> & stars,
                                               std::vector<unsigned int> & current_index,
                                               std::vector<unsigned int> changed_indeces,
@@ -75,6 +75,19 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
     {
       EBNNaryOpTermNode * checkSelfNNary = dynamic_cast<EBNNaryOpTermNode *>(self_stack.top());
       EBNNaryOpTermNode * checkRuleNNary = dynamic_cast<EBNNaryOpTermNode *>(rule_stack.top());
+      if (checkRuleNNary != NULL && checkRuleNNary->hasNone())
+      {
+        if (self_children.size() == rule_children.size() - 1)
+        {
+          checkRuleNNary->removeNone();
+          rule_children = checkRuleNNary->getChildren();
+        }
+        else
+        {
+          next_permutation = true;
+          continue;
+        }
+      }
       std::vector<std::vector<EBTermNode *>> permutedChildren(0);
       std::vector<std::vector<unsigned int>> nnary_index(0);
       if (checkSelfNNary != NULL && isHead && checkRuleNNary == NULL && !checkNNaryLeaf)
@@ -86,7 +99,7 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
       {
         if (self_children.size() != rule_children.size())
         {
-          if (checkRuleNNary->hasRest())
+          if (checkRuleNNary != NULL && checkRuleNNary->hasRest())
           {
             rule_stack.pop();
             for (unsigned int i = 0; i < rule_children.size(); ++i)
@@ -137,6 +150,12 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
         rule_stack.emplace(rule_children[i]);
     }
     isHead = false;
+    if (rule_stack.size() == 0 && !checkConditions(conditions, star_vec))
+    {
+      rule_stack.emplace(new EBNumberNode<Real>(0));
+      self_stack.emplace(new EBNumberNode<Real>(0));
+      next_permutation = true;
+    }
   }
   stars = star_vec;
   return true;
@@ -144,11 +163,12 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
 
 ExpressionBuilderToo::EBTermNode *
 ExpressionBuilderToo::EBTermNode::simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                           std::vector<EBTermNode *> conditions,
                                            bool & changed)
 {
-  std::vector<EBTermNode *> stars(27, NULL);
+  std::vector<EBTermNode *> stars(_star_index, NULL);
   std::vector<unsigned int> current_index(0);
-  if (compareRule(rule.first->clone(), stars, current_index))
+  if (compareRule(rule.first->clone(), conditions, stars, current_index))
   {
     changed = true;
     EBTermNode * replacement = rule.second->clone();
@@ -234,6 +254,40 @@ ExpressionBuilderToo::EBTermNode::permuteChildren(
   return resulting;
 }
 
+bool
+ExpressionBuilderToo::EBTermNode::checkConditions(std::vector<EBTermNode *> conditions,
+                                                  std::vector<EBTermNode *> stars)
+{
+  for (auto & cond : conditions)
+  {
+    EBBinaryOpTermNode * check_bin = dynamic_cast<EBBinaryOpTermNode *>(cond);
+    if (check_bin == NULL)
+      mooseError("condition must be a binary node");
+    EBStarNode * left_star = dynamic_cast<EBStarNode *>(check_bin->getLeft());
+    EBStarNode * right_star = dynamic_cast<EBStarNode *>(check_bin->getRight());
+
+    EBTermNode * left_compare;
+    EBTermNode * right_compare;
+
+    if (left_star != NULL)
+      left_compare = stars[left_star->getIndex()];
+    else
+      left_compare = check_bin->getLeft();
+
+    if (right_star != NULL)
+      right_compare = stars[right_star->getIndex()];
+    else
+      right_compare = check_bin->getRight();
+
+    std::vector<EBTermNode *> empty_nodes(0);
+    std::vector<unsigned int> empty_ints(0);
+    if (!left_compare->compareRule(
+            right_compare, empty_nodes, empty_nodes, empty_ints, empty_ints, true))
+      return false;
+  }
+  return true;
+}
+
 ExpressionBuilderToo::EBTermNode *
 ExpressionBuilderToo::EBTermNode::substitute(
     std::vector<std::pair<EBTermNode *, EBTermNode *>> subs)
@@ -241,7 +295,7 @@ ExpressionBuilderToo::EBTermNode::substitute(
   std::vector<EBTermNode *> empty_nodes(0);
   std::vector<unsigned int> empty_ints(0);
   for (unsigned int i = 0; i < subs.size(); ++i)
-    if (this->compareRule(subs[i].first, empty_nodes, empty_ints))
+    if (this->compareRule(subs[i].first, empty_nodes, empty_nodes, empty_ints))
       return subs[i].second->clone();
   return this;
 }
@@ -279,7 +333,7 @@ ExpressionBuilderToo::EBUnaryTermNode::substitute(
   std::vector<EBTermNode *> empty_nodes(0);
   std::vector<unsigned int> empty_ints(0);
   for (unsigned int i = 0; i < subs.size(); ++i)
-    if (this->compareRule(subs[i].first, empty_nodes, empty_ints))
+    if (this->compareRule(subs[i].first, empty_nodes, empty_nodes, empty_ints))
       return subs[i].second->clone();
   _subnode = _subnode->substitute(subs);
   return this;
@@ -477,7 +531,7 @@ ExpressionBuilderToo::EBBinaryTermNode::substitute(
   std::vector<EBTermNode *> empty_nodes(0);
   std::vector<unsigned int> empty_ints(0);
   for (unsigned int i = 0; i < subs.size(); ++i)
-    if (this->compareRule(subs[i].first, empty_nodes, empty_ints))
+    if (this->compareRule(subs[i].first, empty_nodes, empty_nodes, empty_ints))
       return subs[i].second->clone();
   _left = _left->substitute(subs);
   _right = _right->substitute(subs);
@@ -809,7 +863,7 @@ ExpressionBuilderToo::EBTernaryTermNode::substitute(
   std::vector<EBTermNode *> empty_nodes(0);
   std::vector<unsigned int> empty_ints(0);
   for (unsigned int i = 0; i < subs.size(); ++i)
-    if (this->compareRule(subs[i].first, empty_nodes, empty_ints))
+    if (this->compareRule(subs[i].first, empty_nodes, empty_nodes, empty_ints))
       return subs[i].second->clone();
   _left = _left->substitute(subs);
   _middle = _middle->substitute(subs);
@@ -912,20 +966,29 @@ ExpressionBuilderToo::EBNNaryOpTermNode::compare(EBTermNode * compare_to,
   EBBinaryOpTermNode * c_to_bin = dynamic_cast<EBBinaryOpTermNode *>(compare_to);
   if (c_to_nnary != NULL && c_to_nnary->_type == _type)
   {
-    if (_children.size() < c_to_nnary->childrenSize() && isHead)
+    if (_children.size() < c_to_nnary->childrenSize() && isHead && !hasNone())
     {
       depth = _children.size();
       return true;
     }
 
-    if (_children.size() == c_to_nnary->childrenSize())
+    if (_children.size() == c_to_nnary->childrenSize() && !hasNone())
     {
       depth = _children.size();
       return true;
     }
 
-    if (_children.size() < c_to_nnary->childrenSize() && hasRest())
+    if (_children.size() <= c_to_nnary->childrenSize() && hasRest())
+    {
+      depth = _children.size();
       return true;
+    }
+
+    if (_children.size() == c_to_nnary->childrenSize() + 1 && hasNone())
+    {
+      depth = c_to_nnary->childrenSize();
+      return true;
+    }
   }
 
   if (c_to_bin != NULL &&
@@ -942,19 +1005,20 @@ ExpressionBuilderToo::EBNNaryOpTermNode::compare(EBTermNode * compare_to,
 
 ExpressionBuilderToo::EBTermNode *
 ExpressionBuilderToo::EBNNaryOpTermNode::simplify(std::pair<EBTermNode *, EBTermNode *> rule,
+                                                  std::vector<EBTermNode *> conditions,
                                                   bool & changed)
 {
   for (unsigned int i = 0; i < _children.size(); ++i)
-    _children[i] = _children[i]->simplify(rule, changed);
+    _children[i] = _children[i]->simplify(rule, conditions, changed);
   std::vector<EBTermNode *> stars;
   std::vector<unsigned int> current_index;
   bool nested_changed = true;
   while (nested_changed)
   {
     nested_changed = false;
-    stars = std::vector<EBTermNode *>(27, NULL);
+    stars = std::vector<EBTermNode *>(_star_index, NULL);
     current_index = std::vector<unsigned int>(0);
-    if (compareRule(rule.first->clone(), stars, current_index))
+    if (compareRule(rule.first->clone(), conditions, stars, current_index))
     {
       nested_changed = true;
       changed = true;
@@ -1011,7 +1075,8 @@ ExpressionBuilderToo::EBNNaryOpTermNode::substitute(
     while (changed)
     {
       changed = false;
-      if (compareRule(rule.first->clone(), empty_nodes, current_index, changed_indeces))
+      if (compareRule(
+              rule.first->clone(), empty_nodes, empty_nodes, current_index, changed_indeces))
       {
         changed = true;
         EBTermNode * replacement = rule.second->clone();
@@ -1281,13 +1346,14 @@ void
 ExpressionBuilderToo::EBTerm::simplify()
 {
   bool changed;
-  for (auto rule : _prep_simplification_rules)
+  for (unsigned int i = 0; i < _prep_simplification_rules._rules.size(); ++i)
   {
     changed = true;
     while (changed == true)
     {
       changed = false;
-      _root = _root->simplify(rule, changed);
+      _root = _root->simplify(
+          _prep_simplification_rules._rules[i], _prep_simplification_rules._conditions[i], changed);
     }
   }
 
@@ -1298,13 +1364,14 @@ ExpressionBuilderToo::EBTerm::simplify()
     _root = _root->toNNary();
     _root = _root->constantFolding();
 
-    for (auto rule : _simplification_rules)
+    for (unsigned int i = 0; i < _simplification_rules._rules.size(); ++i)
     {
       changed = true;
       while (changed == true)
       {
         changed = false;
-        _root = _root->simplify(rule, changed);
+        _root = _root->simplify(
+            _simplification_rules._rules[i], _simplification_rules._conditions[i], changed);
         if (changed)
           outer = true;
         _root = _root->toNNary();

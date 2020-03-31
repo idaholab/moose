@@ -1,44 +1,56 @@
 #include "EBSimpleTrees.h"
 
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
+ExpressionBuilderToo::SimpleRules
 getPrepRules()
 {
-  ExpressionBuilderToo::EBTerm a(0, true), b(1, true), c(2, true), d(3, true), e(4, true),
-      f(5, true), g(6, true), h(7, true), i(8, true), j(9, true), k(10, true), l(11, true),
-      m(12, true), n(13, true), o(14, true), p(15, true), q(16, true), r(17, true), s(18, true),
-      t(19, true), u(20, true), v(21, true), w(22, true), x(23, true), y(24, true), z(25, true);
+  unsigned int temp_index = _star_index;
+  _star_index = 0;
+  ExpressionBuilderToo::EBTerm a('s'), b('s'), c('s'), d('s'), e('s'), f('s'), g('s'), h('s'),
+      i('s'), j('s'), k('s'), l('s'), m('s'), n('s'), o('s'), p('s'), q('s'), r('s'), s('s'),
+      t('s'), u('s'), v('s'), w('s'), x('s'), y('s'), z('s');
 
-  ExpressionBuilderToo::EBTerm rest(true);
+  ExpressionBuilderToo::EBTerm rest('r');
 
+  if (_star_index > temp_index)
+    _star_index = _star_index;
+  else
+    _star_index = temp_index;
   return SimplificationRules(
-      {{a - b, a + (-1 * b)}, {a / b, a * pow(b, -1)}, {a * (b + rest), a * b + a * rest}});
+      {{a - b, a + (-1 * b)}, {a / b, a * pow(b, -1), b != 0}, {a * (b + rest), a * b + a * rest}});
 }
 
-std::vector<std::pair<ExpressionBuilderToo::EBTermNode *, ExpressionBuilderToo::EBTermNode *>>
+ExpressionBuilderToo::SimpleRules
 getRules()
 {
-  ExpressionBuilderToo::EBTerm a(0, true), b(1, true), c(2, true), d(3, true), e(4, true),
-      f(5, true), g(6, true), h(7, true), i(8, true), j(9, true), k(10, true), l(11, true),
-      m(12, true), n(13, true), o(14, true), p(15, true), q(16, true), r(17, true), s(18, true),
-      t(19, true), u(20, true), v(21, true), w(22, true), x(23, true), y(24, true), z(25, true);
+  unsigned int temp_index = _star_index;
+  _star_index = 0;
+  ExpressionBuilderToo::EBTerm a('s'), b('s'), c('s'), d('s'), e('s'), f('s'), g('s'), h('s'),
+      i('s'), j('s'), k('s'), l('s'), m('s'), n('s'), o('s'), p('s'), q('s'), r('s'), s('s'),
+      t('s'), u('s'), v('s'), w('s'), x('s'), y('s'), z('s');
 
-  ExpressionBuilderToo::EBTerm rest(true);
+  ExpressionBuilderToo::EBTerm rest('r');
+  ExpressionBuilderToo::EBTerm rest_two('r');
+  ExpressionBuilderToo::EBTerm none('n');
 
+  if (_star_index > temp_index)
+    _star_index = _star_index;
+  else
+    _star_index = temp_index;
   return SimplificationRules({{pow(cos(a), 2) + pow(sin(a), 2), 1},
+                              {-a, (-1) * a, a != 1},
                               {a + b * a, (b + 1) * a},
                               {a + a, 2 * a},
+                              {(a == a) == rest, a == rest},
+                              {(a == a) == none, true},
                               {0 + a, a},
                               {0 * a, 0},
                               {1 * a, a},
-                              {a * (-a), -1 * pow(a, 2)},
-                              {a * b + (-a) * c, (b - c) * a},
                               {a * a, pow(a, 2)},
                               {a * pow(a, b), pow(a, b + 1)},
                               {pow(pow(a, b), c), pow(a, b * c)},
                               {pow(a, b) * pow(a, c), pow(a, b + c)},
                               {pow(b, 0), 1},
                               {pow(a, 1), a},
-                              {pow(a, b) * pow(a, c), pow(a, b + c)},
                               {log10(a), log(a) / M_LN10},
                               {log2(a), log(a) / M_LN2},
                               {log(pow(x, y)), y * log(x)},
