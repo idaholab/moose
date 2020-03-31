@@ -10,24 +10,32 @@
 #include "MaterialRealAux.h"
 
 registerMooseObject("MooseApp", MaterialRealAux);
+registerMooseObject("MooseApp", ADMaterialRealAux);
 
 defineLegacyParams(MaterialRealAux);
 
+template <bool is_ad>
 InputParameters
-MaterialRealAux::validParams()
+MaterialRealAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<Real>::validParams();
+  InputParameters params = MaterialAuxGenericBase<Real, is_ad>::validParams();
   params.addClassDescription("Outputs element volume-averaged material properties");
   return params;
 }
 
-MaterialRealAux::MaterialRealAux(const InputParameters & parameters)
-  : MaterialAuxBase<Real>(parameters)
+template <bool is_ad>
+MaterialRealAuxTempl<is_ad>::MaterialRealAuxTempl(const InputParameters & parameters)
+  : MaterialAuxGenericBase<Real, is_ad>(parameters)
 {
 }
 
+template <bool is_ad>
 Real
-MaterialRealAux::getRealValue()
+MaterialRealAuxTempl<is_ad>::getRealValue()
 {
-  return _prop[_qp];
+  // _prop and _qp are members of a dependent template so they need to be qualified with this->
+  return MetaPhysicL::raw_value(this->_prop[this->_qp]);
 }
+
+template class MaterialRealAuxTempl<false>;
+template class MaterialRealAuxTempl<true>;

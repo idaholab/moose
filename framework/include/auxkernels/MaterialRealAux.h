@@ -13,7 +13,9 @@
 #include "MaterialAuxBase.h"
 
 // Forward Declarations
-class MaterialRealAux;
+template <bool>
+class MaterialRealAuxTempl;
+typedef MaterialRealAuxTempl<false> MaterialRealAux;
 
 template <>
 InputParameters validParams<MaterialRealAux>();
@@ -21,7 +23,8 @@ InputParameters validParams<MaterialRealAux>();
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable
  */
-class MaterialRealAux : public MaterialAuxBase<Real>
+template <bool is_ad>
+class MaterialRealAuxTempl : public MaterialAuxGenericBase<Real, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -30,10 +33,11 @@ public:
    * Class constructor.
    * @param parameters Input parameters for this object
    */
-  MaterialRealAux(const InputParameters & parameters);
+  MaterialRealAuxTempl(const InputParameters & parameters);
 
 protected:
   /// Returns the material property values at quadrature points
-  virtual Real getRealValue();
+  Real getRealValue() override;
 };
 
+typedef MaterialRealAuxTempl<true> ADMaterialRealAux;

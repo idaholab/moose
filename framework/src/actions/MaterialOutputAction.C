@@ -26,6 +26,10 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<Real>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADReal>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealVectorValue>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
@@ -155,6 +159,12 @@ MaterialOutputAction::act()
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
+          if (hasADProperty<Real>(name))
+          {
+            curr_material_names = materialOutputHelper<ADReal>(name, *mat, get_names_only);
+            material_names.insert(curr_material_names.begin(), curr_material_names.end());
+          }
+
           else if (hasProperty<RealVectorValue>(name))
           {
             curr_material_names = materialOutputHelper<RealVectorValue>(name, *mat, get_names_only);
@@ -260,6 +270,22 @@ MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_na
   {
     auto params = getParams("MaterialRealAux", property_name, property_name, material);
     _problem->addAuxKernel("MaterialRealAux", material.name() + property_name, params);
+  }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADReal>(const std::string & property_name,
+                                                   const MaterialBase & material,
+                                                   bool get_names_only)
+{
+  std::vector<std::string> names = {property_name};
+  if (!get_names_only)
+  {
+    auto params = getParams("ADMaterialRealAux", property_name, property_name, material);
+    _problem->addAuxKernel("ADMaterialRealAux", material.name() + property_name, params);
   }
 
   return names;

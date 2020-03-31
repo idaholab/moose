@@ -107,6 +107,8 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> & getGenericMaterialProperty(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -263,6 +265,23 @@ AuxKernelTempl<ComputeValueType>::getMaterialProperty(const std::string & name)
                "'.");
 
   return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
+
+template <typename ComputeValueType>
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+AuxKernelTempl<ComputeValueType>::getGenericMaterialProperty(const std::string & name)
+{
+  if (isNodal())
+    mooseError("Nodal AuxKernel '",
+               AuxKernelTempl::name(),
+               "' attempted to reference material property '",
+               name,
+               "'\nConsider using an elemental auxiliary variable for '",
+               _var.name(),
+               "'.");
+
+  return MaterialPropertyInterface::getGenericMaterialProperty<T, is_ad>(name);
 }
 
 template <typename ComputeValueType>
