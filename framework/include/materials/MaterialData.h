@@ -102,10 +102,13 @@ public:
   MaterialProperties & propsOlder() { return _props_older; }
   ///@}
 
-  /// Returns true if the property exists - defined by any material (i.e. not
-  /// necessarily just this one).
+  /// Returns true if the regular material property exists - defined by any material.
   template <typename T>
   bool haveProperty(const std::string & prop_name) const;
+
+  /// Returns true if the AD material property exists - defined by any material.
+  template <typename T>
+  bool haveADProperty(const std::string & prop_name) const;
 
   ///@{
   /**
@@ -176,7 +179,13 @@ protected:
    * Calls resizeProps helper function for regular material properties
    */
   template <typename T>
-  void resizeProps(unsigned int size, bool declared_ad = false);
+  void resizeProps(unsigned int size);
+
+  /**
+   * Calls resizeProps helper function for AD material properties
+   */
+  template <typename T>
+  void resizePropsAD(unsigned int size);
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
@@ -211,8 +220,23 @@ MaterialData::haveProperty(const std::string & prop_name) const
 }
 
 template <typename T>
+inline bool
+MaterialData::haveADProperty(const std::string & prop_name) const
+{
+  if (!_storage.hasProperty(prop_name))
+    return false;
+
+  unsigned int prop_id = getPropertyId(prop_name);
+  if (prop_id >= _props.size())
+    return false; // the property id exists, but the property was not created in this instance of
+                  // the material type
+
+  return dynamic_cast<const ADMaterialProperty<T> *>(_props[prop_id]) != nullptr;
+}
+
+template <typename T>
 void
-MaterialData::resizeProps(unsigned int size, bool declared_ad)
+MaterialData::resizeProps(unsigned int size)
 {
   auto n = size + 1;
   if (_props.size() < n)
@@ -223,15 +247,31 @@ MaterialData::resizeProps(unsigned int size, bool declared_ad)
     _props_older.resize(n, nullptr);
 
   if (_props[size] == nullptr)
-    _props[size] = new ADMaterialProperty<T>(declared_ad);
-  // This branch is necessary in case the frist call to resizeProps for this property id was
-  // initiated through a getMaterialProperty call, which will have declared_ad = false
-  else if (declared_ad)
-    _props[size]->markAD(true);
+    _props[size] = new MaterialProperty<T>;
   if (_props_old[size] == nullptr)
-    _props_old[size] = new ADMaterialProperty<T>;
+    _props_old[size] = new MaterialProperty<T>;
   if (_props_older[size] == nullptr)
-    _props_older[size] = new ADMaterialProperty<T>;
+    _props_older[size] = new MaterialProperty<T>;
+}
+
+template <typename T>
+void
+MaterialData::resizePropsAD(unsigned int size)
+{
+  auto n = size + 1;
+  if (_props.size() < n)
+    _props.resize(n, nullptr);
+  if (_props_old.size() < n)
+    _props_old.resize(n, nullptr);
+  if (_props_older.size() < n)
+    _props_older.resize(n, nullptr);
+
+  if (_props[size] == nullptr)
+    _props[size] = new ADMaterialProperty<T>;
+  if (_props_old[size] == nullptr)
+    _props_old[size] = new MaterialProperty<T>;
+  if (_props_older[size] == nullptr)
+    _props_older[size] = new MaterialProperty<T>;
 }
 
 template <typename T>
@@ -282,7 +322,7 @@ MaterialData::declareADHelper(MaterialProperties & props,
                               const std::string & libmesh_dbg_var(prop_name),
                               unsigned int prop_id)
 {
-  resizeProps<T>(prop_id, true);
+  resizePropsAD<T>(prop_id);
   auto prop = dynamic_cast<ADMaterialProperty<T> *>(props[prop_id]);
   mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
   return *prop;
@@ -296,7 +336,18 @@ MaterialData::getProperty(const std::string & name)
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
   if (!prop)
-    mooseError("Material has no property named: " + name);
+  {
+    // We didn't find a regular material property so we're going to error out. But we can check to
+    // see whether there is an AD property of the same name in the hope that we can give the user a
+    // more meaningful error message
+    auto ad_prop = dynamic_cast<ADMaterialProperty<T> *>(_props[prop_id]);
+    if (ad_prop)
+      mooseError("The requested regular material property " + name +
+                 " is declared as an AD property. Either retrieve it as an AD property with "
+                 "getADMaterialProperty or declare it as a regular property wtih declareProperty");
+    else
+      mooseError("Material has no property named: " + name);
+  }
   return *prop;
 }
 
@@ -305,10 +356,22 @@ ADMaterialProperty<T> &
 MaterialData::getADProperty(const std::string & name)
 {
   auto prop_id = getPropertyId(name);
-  resizeProps<T>(prop_id);
+  resizePropsAD<T>(prop_id);
   auto prop = dynamic_cast<ADMaterialProperty<T> *>(_props[prop_id]);
   if (!prop)
-    mooseError("Material has no property named: " + name);
+  {
+    // We didn't find an AD material property so we're going to error out. But we can check to
+    // see whether there is a regular property of the same name in the hope that we can give the
+    // user a more meaningful error message
+    auto regular_prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
+    if (regular_prop)
+      mooseError("The requested AD material property " + name +
+                 " is declared as a regular material property. Either retrieve it as a regular "
+                 "material property with getMaterialProperty or declare it as an AD property wtih "
+                 "declareADProperty");
+    else
+      mooseError("Material has no property named: " + name);
+  }
   return *prop;
 }
 

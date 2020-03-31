@@ -1641,7 +1641,12 @@ public:
    * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
    * requested an AD material property or whether any suppier has declared an AD material property
    */
-  void usingADMatProps(bool using_ad_mat_props) { _using_ad_mat_props = using_ad_mat_props; }
+  void usingADMatProps(bool using_ad_mat_props)
+  {
+    _using_ad_mat_props = using_ad_mat_props;
+    if (_using_ad_mat_props)
+      haveADObjects(true);
+  }
 
   /**
    * Whether any object has requested/supplied an AD material property

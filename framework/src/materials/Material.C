@@ -106,12 +106,8 @@ Material::computeProperties()
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)
         props[prop_id]->qpCopy(qp, props[prop_id], 0);
     }
-    copyDualNumbersToValues();
   }
   else
-  {
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
       computeQpProperties();
-    copyDualNumbersToValues();
-  }
 }

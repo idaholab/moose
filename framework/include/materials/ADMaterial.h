@@ -12,9 +12,6 @@
 #include "Material.h"
 #include "MooseTypes.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
-
 /**
  * ADMaterials compute ADMaterialProperties.
  */

@@ -154,8 +154,6 @@ public:
   virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
 
 protected:
-  void copyDualNumbersToValues();
-
   /**
    * Evaluate material properties on subdomain
    */

@@ -15,6 +15,8 @@
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
 
+#include "metaphysicl/raw_type.h"
+
 #include <petscsys.h>
 
 using libMesh::Real;
@@ -418,6 +420,27 @@ protected:
   template <typename T2>
   friend class RankThreeTensorTempl;
 };
+
+namespace MetaPhysicL
+{
+template <typename T>
+struct RawType<RankFourTensorTempl<T>>
+{
+  typedef RankFourTensorTempl<typename RawType<T>::value_type> value_type;
+
+  static value_type value(const RankFourTensorTempl<T> & in)
+  {
+    value_type ret;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+          for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+            ret(i, j, k, l) = raw_value(in(i, j, k, l));
+
+    return ret;
+  }
+};
+}
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;

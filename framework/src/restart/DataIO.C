@@ -9,10 +9,8 @@
 
 #include "DenseMatrix.h"
 #include "MooseConfig.h"
-#include "MooseADWrapper.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
-#include "ColumnMajorMatrix.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -38,18 +36,6 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
   // Write the string (Do not store the null byte)
   stream.write(v.c_str(), sizeof(char) * size);
-}
-
-template <>
-void
-dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      stream.write((char *)&r, sizeof(r));
-    }
 }
 
 template <>
@@ -328,19 +314,6 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
   // Read the string
   stream.read(&v[0], sizeof(char) * size);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *)&r, sizeof(r));
-      v(i, j) = r;
-    }
 }
 
 template <>
