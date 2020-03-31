@@ -27,6 +27,7 @@
 #include "ShapeElementUserObject.h"
 #include "FVKernel.h"
 #include "FVDirichletBC.h"
+#include "FVFluxBC.h"
 
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
@@ -396,7 +397,7 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::FVFluxKernel              * (dynamic_cast<const FVFluxKernelBase *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::FVDirichletBC             * (dynamic_cast<const FVDirichletBC *>(obj) != nullptr);
-  _val |= (unsigned int)Interfaces::FVFluxBC                  * (dynamic_cast<const FVFluxBC *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVFluxBC                  * (dynamic_cast<const FVFluxBCBase *>(obj) != nullptr);
   // clang-format on
 }
 

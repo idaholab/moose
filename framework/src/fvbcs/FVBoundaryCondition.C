@@ -10,6 +10,7 @@
 #include "FVBoundaryCondition.h"
 #include "Problem.h"
 #include "SystemBase.h"
+#include "MooseVariableFV.h"
 
 InputParameters
 FVBoundaryCondition::validParams()
@@ -64,4 +65,5 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
+  addMooseVariableDependency(&_var);
 }

@@ -24,6 +24,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 // Forward declerations
 template <typename>
@@ -52,7 +53,8 @@ class FVBoundaryCondition : public MooseObject,
                             public Restartable,
                             public MeshChangedInterface,
                             public TaggingInterface,
-                            public MooseVariableInterface<Real>
+                            public MooseVariableInterface<Real>,
+                            public MooseVariableDependencyInterface
 {
 public:
   /**
@@ -90,20 +92,4 @@ protected:
 
   /// Mesh this BC is defined on
   MooseMesh & _mesh;
-};
-
-class FVFluxBC : public FVBoundaryCondition
-{
-public:
-  FVFluxBC(const InputParameters & parameters) : FVBoundaryCondition(parameters){};
-
-  static InputParameters validParams() { return FVBoundaryCondition::validParams(); }
-
-  virtual void computeResidual(const FaceInfo & fi) { mooseError("unimplemented"); }
-
-  virtual void computeJacobian(const FaceInfo & fi) { mooseError("unimplemented"); }
-
-protected:
-  virtual Real computeQpResidual() = 0;
-  virtual Real computeQpJacobian() = 0;
 };

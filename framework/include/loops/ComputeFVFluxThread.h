@@ -16,6 +16,7 @@
 #include "MooseVariableFieldBase.h"
 #include "FVKernel.h"
 #include "FVBoundaryCondition.h"
+#include "FVFluxBC.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
 #include "libmesh/libmesh_exceptions.h"
@@ -174,11 +175,12 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
           neighborSubdomainChanged();
 
         onFace(*faceinfo);
-        postFace(*faceinfo);
 
-        std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(&elem, side);
-        for (auto it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-          onBoundary(*faceinfo, *it);
+        const std::set<BoundaryID> boundary_ids = faceinfo->boundaryIDs();
+        for (auto & it : boundary_ids)
+          onBoundary(*faceinfo, it);
+
+        postFace(*faceinfo);
 
       } // range
       post();
@@ -359,7 +361,7 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
-  std::vector<FVFluxBC *> bcs;
+  std::vector<FVFluxBCBase *> bcs;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVBoundaryCondition")
@@ -367,6 +369,7 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
       .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
+      .template condition<AttribIsADJac>(_do_jacobian)
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;

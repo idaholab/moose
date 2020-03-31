@@ -561,6 +561,24 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     _u[0] = u_ghost.value();
     // TODO: figure out how to set AD u_dot, and other values
   }
+  else
+  {
+    // in this case, we are on a boundary for this variable where a
+    // flux boundary condition may be applied; in the FVFluxBC class
+    // switching between _u and _u_neighbor is tedious so it's best
+    // to make the value on left and right the same
+    // TODO: make sure DirichletBC and FluxBC are _not_ defined on
+    // the same sideset
+    DualReal u_other;
+    if (_subproblem.currentlyComputingJacobian())
+      u_other = other_face.adSln<JACOBIAN>()[0];
+    else
+      u_other = other_face.sln(Moose::Current)[0];
+
+    if (_need_ad_u)
+      _ad_u[0] = u_other;
+    _u[0] = u_other.value();
+  }
 
   // TODO: what do we do for _grad_u?
 }
