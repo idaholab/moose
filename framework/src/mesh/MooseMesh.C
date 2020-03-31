@@ -851,6 +851,7 @@ MooseMesh::cacheInfo()
   CONSOLE_TIMED_PRINT("Caching mesh information");
 
   _subdomain_boundary_ids.clear();
+  _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
 
   // TODO: Thread this!
@@ -865,6 +866,11 @@ MooseMesh::cacheInfo()
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
       subdomain_set.insert(boundaryids.begin(), boundaryids.end());
+
+      Elem * neig = elem->neighbor_ptr(side);
+      if (neig)
+        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundaryids.begin(),
+                                                                      boundaryids.end());
     }
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
@@ -872,6 +878,12 @@ MooseMesh::cacheInfo()
       Node & node = *elem->node_ptr(nd);
       _block_node_list[node.id()].insert(elem->subdomain_id());
     }
+  }
+
+  for (const auto & blk_id : _mesh_subdomains)
+  {
+    _communicator.set_union(_subdomain_boundary_ids[blk_id]);
+    _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }
 
@@ -2659,6 +2671,41 @@ MooseMesh::getSubdomainBoundaryIds(SubdomainID subdomain_id) const
     mooseError("Unable to find subdomain ID: ", subdomain_id, '.');
 
   return it->second;
+}
+
+std::set<BoundaryID>
+MooseMesh::getSubdomainInterfaceBoundaryIds(SubdomainID subdomain_id) const
+{
+  const auto & bnd_ids = getSubdomainBoundaryIds(subdomain_id);
+  std::set<BoundaryID> boundary_ids(bnd_ids.begin(), bnd_ids.end());
+  std::map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
+      _neighbor_subdomain_boundary_ids.find(subdomain_id);
+
+  boundary_ids.insert(it->second.begin(), it->second.end());
+
+  return boundary_ids;
+}
+
+std::set<SubdomainID>
+MooseMesh::getBoundaryConnectedBlocks(const BoundaryID bid) const
+{
+  std::set<SubdomainID> subdomain_ids;
+  for (const auto & it : _subdomain_boundary_ids)
+    if (it.second.find(bid) != it.second.end())
+      subdomain_ids.insert(it.first);
+
+  return subdomain_ids;
+}
+
+std::set<SubdomainID>
+MooseMesh::getInterfaceConnectedBlocks(const BoundaryID bid) const
+{
+  std::set<SubdomainID> subdomain_ids = getBoundaryConnectedBlocks(bid);
+  for (const auto & it : _neighbor_subdomain_boundary_ids)
+    if (it.second.find(bid) != it.second.end())
+      subdomain_ids.insert(it.first);
+
+  return subdomain_ids;
 }
 
 bool

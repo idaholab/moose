@@ -773,6 +773,30 @@ public:
   const std::set<BoundaryID> & getSubdomainBoundaryIds(SubdomainID subdomain_id) const;
 
   /**
+   * Get the list of boundaries that contact the given subdomain.
+   *
+   * @param subdomain_id The subdomain ID you want to get the boundary ids for.
+   * @return All boundary IDs connected to elements in the given subdomain
+   */
+  std::set<BoundaryID> getSubdomainInterfaceBoundaryIds(const SubdomainID subdomain_id) const;
+
+  /**
+   * Get the list of subdomains associated with the given boundary.
+   *
+   * @param subdomain_id The boundary ID you want to get the subdomain IDs for.
+   * @return All subdomain IDs associated with given boundary ID
+   */
+  std::set<SubdomainID> getBoundaryConnectedBlocks(const BoundaryID bid) const;
+
+  /**
+   * Get the list of subdomains contacting the given boundary.
+   *
+   * @param subdomain_id The boundary ID you want to get the subdomain IDs for.
+   * @return All subdomain IDs contacting given boundary ID
+   */
+  std::set<SubdomainID> getInterfaceConnectedBlocks(const BoundaryID bid) const;
+
+  /**
    * Returns true if the requested node is in the list of boundary nodes, false otherwise.
    */
   bool isBoundaryNode(dof_id_type node_id) const;
@@ -1170,6 +1194,9 @@ private:
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
   std::map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
+
+  /// Holds a map from neighbor subomdain ids to the boundary ids that are attached to it
+  std::map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
