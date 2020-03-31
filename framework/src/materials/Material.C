@@ -94,13 +94,7 @@ Material::computeProperties()
     computeQpProperties();
 
     // Now copy the values computed at qp 0 to all the other qps.
-    for (const auto & prop_id : _supplied_regular_prop_ids)
-    {
-      auto nqp = _qrule->n_points();
-      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], 0);
-    }
-    for (const auto & prop_id : _supplied_ad_prop_ids)
+    for (const auto & prop_id : _supplied_prop_ids)
     {
       auto nqp = _qrule->n_points();
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)

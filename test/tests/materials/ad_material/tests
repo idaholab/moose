@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
-    prereq = 'test_regad'
+    prereq = 'test_adad'
     cli_args = "Kernels/diff/prop_to_use='regreg'"
     expect_out = '14 Nonlinear'
     allow_warnings = true

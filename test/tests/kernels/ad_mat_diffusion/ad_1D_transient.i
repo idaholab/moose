@@ -49,7 +49,7 @@
 
 [Materials]
   [./k]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '0.95'
   [../]

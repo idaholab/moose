@@ -413,3 +413,18 @@ _init_helper(int size, T * /*prop*/)
   copy->resize(size);
   return copy;
 }
+
+template <typename T, bool is_ad>
+struct GenericMaterialPropertyStruct
+{
+  typedef MaterialProperty<T> type;
+};
+
+template <typename T>
+struct GenericMaterialPropertyStruct<T, true>
+{
+  typedef ADMaterialProperty<T> type;
+};
+
+template <typename T, bool is_ad>
+using GenericMaterialProperty = typename GenericMaterialPropertyStruct<T, is_ad>::type;
