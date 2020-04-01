@@ -6,33 +6,18 @@
     input = 'evaluable.i'
     exodiff = 'evaluable_out.e'
     petsc_version = '>3.8'
-    mesh_mode = 'REPLICATED'
-    dof_id_bytes = 4 # Metis gives different partitions with 64-bit dof indices
-
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     min_parallel = 3
     max_parallel = 3
 
     requirement = "MOOSE shall ghost additional solution information when running in parallel with an active RelationshipManager"
   [../]
 
-  [./evaluable_neighbors_distributed]
-    type = 'Exodiff'
-    input = 'evaluable.i'
-    exodiff = 'evaluable_neighbors_dist_out.e'
-    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=evaluable_neighbors_dist_out'
-    petsc_version = '>3.8'
-    mesh_mode = 'DISTRIBUTED'
-
-    min_parallel = 3
-    max_parallel = 3
-
-    requirement = "MOOSE shall ghost additional solution information when running in parallel with an active RelationshipManager and using DistributedMesh"
-  [../]
-
   [./edge_neighbor]
     type = 'Exodiff'
     input = 'edge_neighbors.i'
     exodiff = 'edge_neighbors_out.e'
+    cli_args ='Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     petsc_version = '>3.8'
 
     min_parallel = 3
@@ -44,10 +29,9 @@
   [./edge_neighbor_3D]
     type = 'Exodiff'
     input = 'edge_neighbors.i'
-    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out'
+    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     exodiff = 'edge_neighbors_3D_out.e'
     petsc_version = '>3.8'
-    platform = 'DARWIN'
 
     min_parallel = 3
     max_parallel = 3
