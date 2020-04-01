@@ -2664,7 +2664,7 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 const std::set<BoundaryID> &
 MooseMesh::getSubdomainBoundaryIds(SubdomainID subdomain_id) const
 {
-  std::map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
+  std::unordered_map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
       _subdomain_boundary_ids.find(subdomain_id);
 
   if (it == _subdomain_boundary_ids.end())
@@ -2678,7 +2678,7 @@ MooseMesh::getSubdomainInterfaceBoundaryIds(SubdomainID subdomain_id) const
 {
   const auto & bnd_ids = getSubdomainBoundaryIds(subdomain_id);
   std::set<BoundaryID> boundary_ids(bnd_ids.begin(), bnd_ids.end());
-  std::map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
+  std::unordered_map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
       _neighbor_subdomain_boundary_ids.find(subdomain_id);
 
   boundary_ids.insert(it->second.begin(), it->second.end());

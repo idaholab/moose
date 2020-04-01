@@ -1193,10 +1193,10 @@ private:
       _elem_type_to_coarsening_map;
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
-  std::map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
+  std::unordered_map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
 
   /// Holds a map from neighbor subomdain ids to the boundary ids that are attached to it
-  std::map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
+  std::unordered_map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
