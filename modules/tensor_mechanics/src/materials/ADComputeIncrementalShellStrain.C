@@ -238,7 +238,6 @@ ADComputeIncrementalShellStrain::computeProperties()
                                       _unrotated_total_strain * (*_rotation_matrix[j])[i];
     }
   }
-  copyDualNumbersToValues();
 }
 
 void

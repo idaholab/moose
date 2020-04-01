@@ -80,8 +80,6 @@ ADComputeFiniteStrain::computeProperties()
 
     computeQpStrain();
   }
-
-  copyDualNumbersToValues();
 }
 
 void

@@ -33,5 +33,3 @@ ADAllenCahn::computeDFDOP()
 {
   return _dFdEta[_qp];
 }
-
-adBaseClass(ADAllenCahn);

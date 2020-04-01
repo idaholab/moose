@@ -36,5 +36,3 @@ ADCHSoretMobility::computeQpResidual()
 {
   return _mobility[_qp] * _grad_T[_qp] / _T[_qp] * _grad_test[_i][_qp];
 }
-
-adBaseClass(ADCHSoretMobility);
