@@ -24,30 +24,20 @@ In phase field, an application would be the definition of a mobility term
 M = \frac D{\frac{\partial^2 F}{\partial c^2}}
 \end{equation}
 
-containing the second derivative of a free energy $F$ as
+containing the second derivative of a free energy $F$, or a custom switching function derivative in a Grand potential model
 
-```yaml
-  [./mob]
-    type = DerivativeParsedMaterial
-    args = c
-    f_name = M
-    material_property_names = 'd2F:=D[F(c),c,c]'
-    constant_names = D
-    constant_expressions = 1e-3
-    function = D/d2F
-  [../]
-```
+!listing modules/phase_field/test/tests/GrandPotentialPFM/GrandPotentialPFM.i block=Materials/coupled_eta_function
 
-The mobility $M$ defined above would have accurately constructed automatic derivatives w.r.t. $c$, which contain third and higher derivatives of $F$ (make sure to set the `derivative_order` of F high enough!).
+The *ft* defined above would have accurately constructed automatic derivatives w.r.t. $\eta$ (`eta`), which contain second and higher derivatives of $h$ (make sure to set the `derivative_order` of $h$ high enough!).
 
 The `material_property_names` are parsed by the [`FunctionMaterialPropertyDescriptor` class](http://mooseframework.org/docs/doxygen/modules/classFunctionMaterialPropertyDescriptor.html), which understands the following syntax:
 
 | Expression | Description |
 | - | - |
-| `F` | A material property called _F_ with no declared variable dependencies (i.e. vanishing derivatives)|
-|`F(c,phi)` | A material property called _F_ with declared dependence on 'c' and 'phi' (uses `DerivativeFunctionMaterial` rules to look up the derivatives) using the round-bracket-notation|
-|`d3x:=D[x(a,b),a,a,b]` | The third derivative $$\frac{\partial^3x}{\partial^2a\partial b}$$ of the a,b-dependent material property _x_, which will be referred to as `d3x` in the function expression|
-|`dF:=D[F,c]` | Derivative of _F_ w.r.t. _c_. Although the c-dependence of _F_ is not explicitly declared using the round-bracket-notation it is implicitly assumed as a derivative w.r.t. _c_ is requested|
+| `F` | A material property called *F* with no declared variable dependencies (i.e. vanishing derivatives) |
+| `F(c,phi)` | A material property called *F* with declared dependence on 'c' and 'phi' (uses `DerivativeFunctionMaterial` rules to look up the derivatives) using the round-bracket-notation |
+| `d3x:=D[x(a,b),a,a,b]` | The third derivative $\frac{\partial^3x}{\partial^2a\partial b}$ of the a,b-dependent material property *x*, which will be referred to as `d3x` in the function expression |
+| `dF:=D[F,c]` | Derivative of *F* w.r.t. *c*. Although the c-dependence of *F* is not explicitly declared using the round-bracket-notation it is implicitly assumed as a derivative w.r.t. *c* is requested |
 
 Add `outputs=exodus` to the material block to automatically write all derivatives and the free energy to the exodus output.
 

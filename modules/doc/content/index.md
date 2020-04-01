@@ -134,6 +134,7 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
   - [Porous Flow](porous_flow/index.md)
   - [Phase Field](phase_field/index.md)
   - [Level Set](level_set/index.md)
+  - [XFEM](xfem/index.md)
 
 - Unstructured Mesh (Quads, Tris, Hexes, Tets, Pyramids, Wedges, etc.)
 - Curvilinear Geometry

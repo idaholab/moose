@@ -1,1 +1,7 @@
-!template load file=stubs/moose_object.md.template name=XFEMMarkerAux syntax=/AuxKernels/XFEMMarkerAux
+# XFEMMarkerAux
+
+!syntax description /AuxKernels/XFEMMarkerAux
+
+# Description
+
+The `XFEMMarkerAux` returns one for crack tip elements, zero otherwise.
