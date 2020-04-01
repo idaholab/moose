@@ -5,6 +5,24 @@
     buffer = True
     issues = '#9638'
     design = 'MooseDocs/generate.md'
-    requirement = "MOOSE shall include a utility for examining test specifications for SQA content."
+    requirement = "The system shall include a utility for examining test specifications for SQA content."
+  []
+  [git_commit_history]
+    design = 'python/index.md'
+    issues = '#5084'
+    requirement = "The system shall include a utility for generating graphs of git history that"
+
+    [contributors]
+      type = CheckFiles
+      command = '../git_commit_history.py --open-source --moose-dev --unique --output=contributors.pdf'
+      check_files = 'contributors.pdf'
+      detail = "show the number of contributors and"
+    []
+    [additions]
+      type = CheckFiles
+      command = '../git_commit_history.py --additions --moose-dev --days=7 --open-source --output=additions.pdf'
+      check_files = 'additions.pdf'
+      detail = "repository addition/deletion history."
+    []
   []
 []
