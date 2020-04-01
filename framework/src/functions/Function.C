@@ -69,7 +69,14 @@ Function::vectorCurl(Real /*t*/, const Point & /*p*/) const
 Real
 Function::integral() const
 {
-  mooseError("Integral method not defined for function ", name());
+  mooseError("Indefinite integral method not defined for function ", name());
+  return 0;
+}
+
+Real
+Function::integral(const Real /*start*/, const Real /*end*/) const
+{
+  mooseError("Definite integral method not defined for function ", name());
   return 0;
 }
 

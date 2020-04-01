@@ -108,5 +108,8 @@ public:
   virtual Real integral() const;
 
   // Not defined
+  virtual Real integral(const Real start, const Real end) const;
+
+  // Not defined
   virtual Real average() const;
 };
