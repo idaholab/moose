@@ -34,59 +34,14 @@ class FuncParseEvaler : public hit::Evaler
 {
 public:
   virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
-  {
-    std::string func_text;
-    for (auto & s : args)
-      func_text += s;
-    auto n_errs = exp.errors.size();
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+};
 
-    FunctionParser fp;
-    fp.AddConstant("pi", libMesh::pi);
-    fp.AddConstant("e", std::exp(Real(1)));
-    std::vector<std::string> var_names;
-    auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
-    if (ret != -1)
-    {
-      exp.errors.push_back(hit::errormsg(exp.fname, n, "fparse error: ", fp.ErrorMsg()));
-      return n->val();
-    }
-
-    std::string errors;
-    std::vector<double> var_vals;
-    for (auto & var : var_names)
-    {
-      // recursively check all parent scopes for the needed variables
-      hit::Node * curr = n;
-      while ((curr = curr->parent()))
-      {
-        auto src = curr->find(var);
-        if (src && src != n && src->type() == hit::NodeType::Field)
-        {
-          exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
-          var_vals.push_back(curr->param<double>(var));
-          break;
-        }
-      }
-
-      if (curr == nullptr)
-        exp.errors.push_back(hit::errormsg(exp.fname,
-                                           n,
-                                           "\n    no variable '",
-                                           var,
-                                           "' found for use in function parser expression"));
-    }
-
-    if (exp.errors.size() != n_errs)
-      return n->val();
-
-    std::stringstream ss;
-    ss << std::setprecision(17) << fp.Eval(var_vals.data());
-
-    // change kind only (not val)
-    n->setVal(n->val(), hit::Field::Kind::Float);
-    return ss.str();
-  }
+class UnitsConversionEvaler : public hit::Evaler
+{
+public:
+  virtual std::string
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
 };
 
 /**

@@ -33,6 +33,7 @@
 #include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
 #include "MooseUtils.h"
+#include "Units.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -47,6 +48,118 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+
+std::string
+FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+{
+  std::string func_text;
+  for (auto & s : args)
+    func_text += s;
+  auto n_errs = exp.errors.size();
+
+  FunctionParser fp;
+  fp.AddConstant("pi", libMesh::pi);
+  fp.AddConstant("e", std::exp(Real(1)));
+  std::vector<std::string> var_names;
+  auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
+  if (ret != -1)
+  {
+    exp.errors.push_back(hit::errormsg(exp.fname, n, "fparse error: ", fp.ErrorMsg()));
+    return n->val();
+  }
+
+  std::string errors;
+  std::vector<double> var_vals;
+  for (auto & var : var_names)
+  {
+    // recursively check all parent scopes for the needed variables
+    hit::Node * curr = n;
+    while ((curr = curr->parent()))
+    {
+      auto src = curr->find(var);
+      if (src && src != n && src->type() == hit::NodeType::Field)
+      {
+        exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
+        var_vals.push_back(curr->param<double>(var));
+        break;
+      }
+    }
+
+    if (curr == nullptr)
+      exp.errors.push_back(hit::errormsg(exp.fname,
+                                         n,
+                                         "\n    no variable '",
+                                         var,
+                                         "' found for use in function parser expression"));
+  }
+
+  if (exp.errors.size() != n_errs)
+    return n->val();
+
+  std::stringstream ss;
+  ss << std::setprecision(17) << fp.Eval(var_vals.data());
+
+  // change kind only (not val)
+  n->setVal(n->val(), hit::Field::Kind::Float);
+  return ss.str();
+}
+
+std::string
+UnitsConversionEvaler::eval(hit::Field * n,
+                            const std::list<std::string> & args,
+                            hit::BraceExpander & exp)
+{
+  std::vector<std::string> argv;
+  argv.insert(argv.begin(), args.begin(), args.end());
+
+  // no conversion, the expression currently only documents the units and passes through the value
+  if (argv.size() == 2)
+  {
+    n->setVal(n->val(), hit::Field::Kind::Float);
+    return argv[0];
+  }
+
+  // conversion
+  if (argv.size() != 4 || (argv.size() >= 3 && argv[2] != "->"))
+  {
+    exp.errors.push_back(
+        hit::errormsg(exp.fname,
+                      n,
+                      "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
+                      "2 arguments  ${units number unit}"));
+    return n->val();
+  }
+
+  // get and check units
+  auto from_unit = MooseUnits(argv[1]);
+  auto to_unit = MooseUnits(argv[3]);
+  if (!from_unit.conformsTo(to_unit))
+  {
+    exp.errors.push_back(hit::errormsg(exp.fname,
+                                       n,
+                                       "units error: ",
+                                       argv[1],
+                                       " (",
+                                       from_unit,
+                                       ") does not convert to ",
+                                       argv[3],
+                                       " (",
+                                       to_unit,
+                                       ")"));
+    return n->val();
+  }
+
+  // parse number
+  Real num = MooseUtils::convert<Real>(argv[0]);
+
+  // convert units
+  std::stringstream ss;
+  ss << std::setprecision(17) << to_unit.convert(num, from_unit);
+
+  // change kind only (not val)
+  n->setVal(n->val(), hit::Field::Kind::Float);
+  return ss.str();
+}
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
   : ConsoleStreamInterface(app),
@@ -488,7 +601,8 @@ Parser::parse(const std::string & input_filename)
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
   {
     char abspath[PATH_MAX + 1];
-    realpath(input_filename.c_str(), abspath);
+    if (!realpath(input_filename.c_str(), abspath))
+      mooseError("Failed to resolve input file path '", input_filename, "'.");
     _input_filename = std::string(abspath);
   }
 
@@ -521,11 +635,13 @@ Parser::parse(const std::string & input_filename)
   hit::EnvEvaler env;
   hit::ReplaceEvaler repl;
   FuncParseEvaler fparse_ev;
+  UnitsConversionEvaler units_ev;
   hit::BraceExpander exw(_input_filename);
   exw.registerEvaler("raw", raw);
   exw.registerEvaler("env", env);
   exw.registerEvaler("fparse", fparse_ev);
   exw.registerEvaler("replace", repl);
+  exw.registerEvaler("units", units_ev);
   _root->walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);
