@@ -16,7 +16,7 @@ defineLegacyParams(ACInterfaceKobayashi1);
 InputParameters
 ACInterfaceKobayashi1::validParams()
 {
-  InputParameters params = KernelGrad::validParams();
+  InputParameters params = JvarMapKernelInterface<KernelGrad>::validParams();
   params.addClassDescription("Anisotropic gradient energy Allen-Cahn Kernel Part 1");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("eps_name", "eps", "The anisotropic interface parameter");
@@ -30,7 +30,6 @@ ACInterfaceKobayashi1::validParams()
       "The derivative of the anisotropic interface parameter eps with respect to grad_op");
   params.addParam<MaterialPropertyName>(
       "ddepsdgrad_op_name", "ddepsdgrad_op", "The derivative of deps with respect to grad_op");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   return params;
 }
 
@@ -43,21 +42,17 @@ ACInterfaceKobayashi1::ACInterfaceKobayashi1(const InputParameters & parameters)
     _depsdgrad_op(getMaterialProperty<RealGradient>("depsdgrad_op_name")),
     _ddepsdgrad_op(getMaterialProperty<RealGradient>("ddepsdgrad_op_name"))
 {
-  // Get number of coupled variables
-  unsigned int nvar = _coupled_moose_vars.size();
-
   // reserve space for derivatives
-  _dLdarg.resize(nvar);
-  _depsdarg.resize(nvar);
-  _ddepsdarg.resize(nvar);
+  _dLdarg.resize(_n_args);
+  _depsdarg.resize(_n_args);
+  _ddepsdarg.resize(_n_args);
 
   // Iterate over all coupled variables
-  for (unsigned int i = 0; i < nvar; ++i)
+  for (unsigned int i = 0; i < _n_args; ++i)
   {
-    const VariableName iname = _coupled_moose_vars[i]->name();
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", iname);
-    _depsdarg[i] = &getMaterialPropertyDerivative<Real>("eps_name", iname);
-    _ddepsdarg[i] = &getMaterialPropertyDerivative<Real>("deps_name", iname);
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", i);
+    _depsdarg[i] = &getMaterialPropertyDerivative<Real>("eps_name", i);
+    _ddepsdarg[i] = &getMaterialPropertyDerivative<Real>("deps_name", i);
   }
 }
 

@@ -77,6 +77,20 @@ public:
                                                             const VariableName & c1,
                                                             const VariableName & c2 = "",
                                                             const VariableName & c3 = "");
+
+  template <typename U>
+  const MaterialProperty<U> &
+  getMaterialPropertyDerivative(const std::string & base,
+                                const VariableName & c1,
+                                unsigned int v2,
+                                unsigned int v3 = libMesh::invalid_uint);
+
+  template <typename U>
+  const MaterialProperty<U> &
+  getMaterialPropertyDerivative(const std::string & base,
+                                unsigned int v1,
+                                unsigned int v2 = libMesh::invalid_uint,
+                                unsigned int v3 = libMesh::invalid_uint);
   ///@}
 
   ///@{
@@ -283,6 +297,36 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 template <class T>
 template <typename U>
 const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
+                                                              const VariableName & c1,
+                                                              unsigned int v2,
+                                                              unsigned int v3)
+{
+  return getMaterialPropertyDerivative<U>(
+      base,
+      c1,
+      this->_coupled_standard_moose_vars[v2]->name(),
+      v3 == libMesh::invalid_uint ? "" : this->_coupled_standard_moose_vars[v3]->name());
+}
+
+template <class T>
+template <typename U>
+const MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
+                                                              unsigned int v1,
+                                                              unsigned int v2,
+                                                              unsigned int v3)
+{
+  return getMaterialPropertyDerivative<U>(
+      base,
+      this->_coupled_standard_moose_vars[v1]->name(),
+      v2 == libMesh::invalid_uint ? "" : this->_coupled_standard_moose_vars[v2]->name(),
+      v3 == libMesh::invalid_uint ? "" : this->_coupled_standard_moose_vars[v3]->name());
+}
+
+template <class T>
+template <typename U>
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
     const MaterialPropertyName & base, const std::vector<VariableName> & c)
 {
@@ -313,7 +357,7 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
                                                        const System & system,
                                                        std::vector<VariableName> & missing)
 {
-  unsigned int ncoupled = this->_coupled_moose_vars.size();
+  unsigned int ncoupled = this->_coupled_standard_moose_vars.size();
 
   // iterate over all variables in the current system (in groups)
   for (unsigned int i = 0; i < system.n_variable_groups(); ++i)
@@ -332,7 +376,7 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
         bool is_missing = isNotObjectVariable(jname);
 
         for (unsigned int k = 0; k < ncoupled; ++k)
-          if (this->_coupled_moose_vars[k]->name() == jname)
+          if (this->_coupled_standard_moose_vars[k]->name() == jname)
           {
             is_missing = false;
             break;

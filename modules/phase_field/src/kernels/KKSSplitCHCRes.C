@@ -34,21 +34,16 @@ KKSSplitCHCRes::validParams()
 
 KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase>>(parameters),
-    _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
     _ca_name(getVar("ca", 0)->name()),
     _dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
-    _d2Fadcadarg(_nvar),
+    _d2Fadcadarg(_n_args),
     _w_var(coupled("w")),
     _w(coupledValue("w"))
 {
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    // get the second derivative material property
-    const auto & var_name = this->_coupled_moose_vars[i]->name();
-    _d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, var_name);
-  }
+  // get the second derivative material property
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, i);
 }
 
 void

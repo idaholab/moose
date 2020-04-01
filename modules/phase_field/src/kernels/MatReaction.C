@@ -36,15 +36,11 @@ MatReaction::MatReaction(const InputParameters & parameters)
     _eta_name(_var.name()),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _eta_name)),
     _dLdv(getMaterialPropertyDerivative<Real>("mob_name", _v_name)),
-    _nvar(_coupled_moose_vars.size()),
-    _dLdarg(_nvar)
+    _dLdarg(_n_args)
 {
   // Get reaction rate derivatives
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    MooseVariableFEBase * ivar = _coupled_moose_vars[i];
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", ivar->name());
-  }
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", i);
 }
 
 void

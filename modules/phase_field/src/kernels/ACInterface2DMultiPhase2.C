@@ -43,7 +43,7 @@ ACInterface2DMultiPhase2::computeQpJacobian()
     RealGradient dgradL =
         _grad_phi[_j][_qp] * _dLdop[_qp] + _grad_u[_qp] * _phi[_j][_qp] * _d2Ldop2[_qp];
 
-    for (unsigned int i = 0; i < _nvar; ++i)
+    for (unsigned int i = 0; i < _n_args; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[i])[_qp];
 
     dsum += dgradL * _test[_i][_qp];
@@ -69,7 +69,7 @@ ACInterface2DMultiPhase2::computeQpOffDiagJacobian(unsigned int jvar)
     RealGradient dgradL = _grad_phi[_j][_qp] * (*_dLdarg[cvar])[_qp] +
                           _grad_u[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[cvar])[_qp];
 
-    for (unsigned int i = 0; i < _nvar; ++i)
+    for (unsigned int i = 0; i < _n_args; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldarg2[cvar][i])[_qp];
 
     dsum += dgradL * _test[_i][_qp];

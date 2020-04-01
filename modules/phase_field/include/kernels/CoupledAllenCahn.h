@@ -39,10 +39,8 @@ protected:
   // coupled variable name
   VariableName _v_name;
 
-  const unsigned int _nvar;
   const MaterialProperty<Real> & _dFdV;
   const MaterialProperty<Real> & _d2FdVdEta;
 
   std::vector<const MaterialProperty<Real> *> _d2FdVdarg;
 };
-

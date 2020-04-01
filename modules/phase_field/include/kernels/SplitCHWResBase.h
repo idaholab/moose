@@ -63,17 +63,12 @@ SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters)
     _mob(getMaterialProperty<T>("mob_name")),
     _is_coupled(isCoupled("w")),
     _w_var(_is_coupled ? coupled("w") : _var.number()),
-    _grad_w(_is_coupled ? coupledGradient("w") : _grad_u)
+    _grad_w(_is_coupled ? coupledGradient("w") : _grad_u),
+    _dmobdarg(_n_args)
 {
-  // Get number of coupled variables
-  unsigned int nvar = _coupled_moose_vars.size();
-
-  // reserve space for derivatives
-  _dmobdarg.resize(nvar);
-
   // Iterate over all coupled variables
-  for (unsigned int i = 0; i < nvar; ++i)
-    _dmobdarg[i] = &getMaterialPropertyDerivative<T>(_mob_name, _coupled_moose_vars[i]->name());
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _dmobdarg[i] = &getMaterialPropertyDerivative<T>(_mob_name, i);
 }
 
 template <typename T>

@@ -16,9 +16,8 @@ defineLegacyParams(JouleHeatingSource);
 InputParameters
 JouleHeatingSource::validParams()
 {
-  InputParameters params = HeatSource::validParams();
+  InputParameters params = JvarMapKernelInterface<HeatSource>::validParams();
   params.addCoupledVar("elec", "Electric potential for joule heating.");
-  params.addCoupledVar("args", "Vector of arguments of the diffusivity");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
       "electrical_conductivity",

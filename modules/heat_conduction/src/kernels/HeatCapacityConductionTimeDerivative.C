@@ -16,7 +16,7 @@ defineLegacyParams(HeatCapacityConductionTimeDerivative);
 InputParameters
 HeatCapacityConductionTimeDerivative::validParams()
 {
-  InputParameters params = TimeDerivative::validParams();
+  InputParameters params = JvarMapKernelInterface<TimeDerivative>::validParams();
   params.addClassDescription("Time derivative term $C_p \\frac{\\partial T}{\\partial t}$ of "
                              "the heat equation with the heat capacity $C_p$ as an argument.");
 
@@ -26,7 +26,6 @@ HeatCapacityConductionTimeDerivative::validParams()
 
   params.addParam<MaterialPropertyName>(
       "heat_capacity", "heat_capacity", "Property name of the heat capacity material property");
-  params.addCoupledVar("args", "Vector of additional arguments of the heat capacity");
   return params;
 }
 

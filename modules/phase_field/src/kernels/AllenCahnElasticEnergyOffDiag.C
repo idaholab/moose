@@ -32,26 +32,23 @@ AllenCahnElasticEnergyOffDiag::validParams()
 AllenCahnElasticEnergyOffDiag::AllenCahnElasticEnergyOffDiag(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
-    _ndisp(coupledComponents("displacements")),
-    _disp_var(_ndisp),
+    _disp_map(getParameterJvarMap("displacements")),
     _d2Fdcdstrain(getMaterialProperty<RankTwoTensor>("d2Fdcdstrain"))
 {
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
 }
 
 Real
 AllenCahnElasticEnergyOffDiag::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  for (unsigned int c_comp = 0; c_comp < _ndisp; ++c_comp)
-    if (jvar == _disp_var[c_comp])
-    {
-      const Real dxddFdc = _L[_qp] * _test[_i][_qp];
-      const Real d2Fdcdstrain_comp =
-          (_d2Fdcdstrain[_qp].column(c_comp) + _d2Fdcdstrain[_qp].row(c_comp)) / 2.0 *
-          _grad_phi[_j][_qp];
-      return dxddFdc * d2Fdcdstrain_comp;
-    }
+  auto dispvar = mapJvarToCvar(jvar, _disp_map);
+  if (dispvar >= 0)
+  {
+    const Real dxddFdc = _L[_qp] * _test[_i][_qp];
+    const Real d2Fdcdstrain_comp =
+        (_d2Fdcdstrain[_qp].column(dispvar) + _d2Fdcdstrain[_qp].row(dispvar)) / 2.0 *
+        _grad_phi[_j][_qp];
+    return dxddFdc * d2Fdcdstrain_comp;
+  }
 
   return 0.0;
 }

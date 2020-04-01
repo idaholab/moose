@@ -41,9 +41,6 @@ protected:
 
   const MaterialProperty<Real> & _mask;
 
-  /// number of coupled variables
-  const unsigned int _nvar;
-
   /// name of the nonlinear variable (needed to retrieve the derivative material properties)
   VariableName _v_name;
 
@@ -53,4 +50,3 @@ protected:
   ///  Reaction rate derivatives w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dmaskdarg;
 };
-

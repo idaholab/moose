@@ -34,15 +34,11 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters)
     _cb(coupledValue("cb")),
     _prop_dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
     _prop_d2Fadca2(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
-    _prop_d2Fadcadarg(_nvar)
+    _prop_d2Fadcadarg(_n_args)
 {
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    // get second partial derivatives wrt ca and other coupled variable
-    const auto & var_name = _coupled_moose_vars[i]->name();
-    _prop_d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, var_name);
-  }
+  // get second partial derivatives wrt ca and other coupled variable
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _prop_d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, i);
 }
 
 Real
