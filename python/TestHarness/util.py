@@ -387,10 +387,10 @@ def getCompilers(libmesh_dir):
 
     if re.match('\S*icpc\s', raw_compiler) != None:
         compilers.add("INTEL")
-    elif re.match('\S*[cg]\+\+\s', raw_compiler) != None:
-        compilers.add("GCC")
     elif re.match('\S*clang\+\+\s', raw_compiler) != None:
         compilers.add("CLANG")
+    elif re.match('\S*[cg]\+\+\s', raw_compiler) != None:
+        compilers.add("GCC")
 
     return compilers
 
