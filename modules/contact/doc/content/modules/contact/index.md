@@ -46,7 +46,7 @@ multiple types of MOOSE objects. Using the top-level
 setting up these objects, is highly recommended, and supports most available types of contact.
 The following input file example shows the basic usage of the `Contact` block:
 
-!listing test/tests/sliding_block/sliding/constraint/frictionless_kinematic.i block=Contact
+!listing test/tests/sliding_block/sliding/frictionless_kinematic.i block=Contact
 
 ## Objects, Actions, and Syntax
 

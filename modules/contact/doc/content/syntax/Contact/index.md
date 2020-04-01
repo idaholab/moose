@@ -97,11 +97,11 @@ will no longer be required.
 
 Node/face frictionless contact:
 
-!listing test/tests/sliding_block/sliding/constraint/frictionless_kinematic.i block=Contact
+!listing test/tests/sliding_block/sliding/frictionless_kinematic.i block=Contact
 
 Node/face frictional contact:
 
-!listing test/tests/sliding_block/sliding/constraint/frictional_02_penalty.i block=Contact
+!listing test/tests/sliding_block/sliding/frictional_02_penalty.i block=Contact
 
 Normal (frictionless) mortar contact:
 
