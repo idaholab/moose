@@ -31,30 +31,30 @@
 # Here we output all the connections as vectorpostprocessors
 [VectorPostprocessors]
   [interface]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     boundary = interface
     interface_boundary = true
   []
   [interface_master]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     boundary = interface
   []
   [block_0]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     block = 0
   []
   [block_1]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     block = 1
     interface_boundary = true
   []
   [block_2]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     block = 2
     interface_boundary = true
   []
   [block_2_master]
-    type = PrintBoundaryInfo
+    type = SubdomainBoundaryConnectivity
     block = 2
   []
 []

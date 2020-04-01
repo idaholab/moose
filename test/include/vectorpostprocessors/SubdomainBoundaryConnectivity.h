@@ -11,12 +11,12 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class PrintBoundaryInfo : public GeneralVectorPostprocessor
+class SubdomainBoundaryConnectivity : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  PrintBoundaryInfo(const InputParameters & parameters);
+  SubdomainBoundaryConnectivity(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void execute() override;
 

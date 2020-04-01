@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PrintBoundaryInfo.h"
+#include "SubdomainBoundaryConnectivity.h"
 
-registerMooseObject("MooseTestApp", PrintBoundaryInfo);
+registerMooseObject("MooseTestApp", SubdomainBoundaryConnectivity);
 
 InputParameters
-PrintBoundaryInfo::validParams()
+SubdomainBoundaryConnectivity::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
 
@@ -23,7 +23,7 @@ PrintBoundaryInfo::validParams()
   return params;
 }
 
-PrintBoundaryInfo::PrintBoundaryInfo(const InputParameters & parameters)
+SubdomainBoundaryConnectivity::SubdomainBoundaryConnectivity(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _connected_ids(isParamValid("block") ? declareVector("connected_boundary_ids")
@@ -36,7 +36,7 @@ PrintBoundaryInfo::PrintBoundaryInfo(const InputParameters & parameters)
 }
 
 void
-PrintBoundaryInfo::execute()
+SubdomainBoundaryConnectivity::execute()
 {
   if (isParamValid("boundary"))
   {
