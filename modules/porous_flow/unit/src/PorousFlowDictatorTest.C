@@ -158,7 +158,13 @@ TEST_F(PorousFlowDictatorTest, consistentFEType)
   ASSERT_TRUE(!_dictator_no_fetype->consistentFEType());
 }
 
-TEST_F(PorousFlowDictatorTest, feType) { ASSERT_EQ(_linear_lagrange, _dictator->feType()); }
+TEST_F(PorousFlowDictatorTest, feType)
+{
+  auto linear_lagrange = FEType(Utility::string_to_enum<Order>("FIRST"),
+                                Utility::string_to_enum<FEFamily>("LAGRANGE"));
+
+  ASSERT_EQ(_dictator->feType(), linear_lagrange);
+}
 
 TEST_F(PorousFlowDictatorTest, coupleAux)
 {

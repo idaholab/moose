@@ -18,27 +18,27 @@ class PorousFlowDictator;
 class PorousFlowDictatorTest : public MooseObjectUnitTest
 {
 public:
-  PorousFlowDictatorTest()
-    : MooseObjectUnitTest("PorousFlowApp"),
-      _linear_lagrange(FEType(Utility::string_to_enum<Order>("FIRST"),
-                              Utility::string_to_enum<FEFamily>("LAGRANGE"))),
-      _constant_monomial(FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                Utility::string_to_enum<FEFamily>("MONOMIAL")))
-  {
-    buildObjects();
-  }
+  PorousFlowDictatorTest() : MooseObjectUnitTest("PorousFlowApp") { buildObjects(); }
 
 protected:
   void buildObjects()
   {
-    _fe_problem->addVariable("var0", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var1", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var2", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var3", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var4", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var5", _linear_lagrange, 1.0);
-    _fe_problem->addVariable("var_different_fe_type", _constant_monomial, 1.0);
-    _fe_problem->addAuxVariable("aux_var", _linear_lagrange);
+    auto var_params_ll = _factory.getValidParams("MooseVariable");
+    var_params_ll.set<MooseEnum>("family") = "LAGRANGE";
+    var_params_ll.set<MooseEnum>("order") = "FIRST";
+
+    auto var_params_cm = _factory.getValidParams("MooseVariableConstMonomial");
+    var_params_cm.set<MooseEnum>("family") = "MONOMIAL";
+    var_params_cm.set<MooseEnum>("order") = "CONSTANT";
+
+    _fe_problem->addVariable("MooseVariable", "var0", var_params_ll);
+    _fe_problem->addVariable("MooseVariable", "var1", var_params_ll);
+    _fe_problem->addVariable("MooseVariable", "var2", var_params_ll);
+    _fe_problem->addVariable("MooseVariable", "var3", var_params_ll);
+    _fe_problem->addVariable("MooseVariable", "var4", var_params_ll);
+    _fe_problem->addVariable("MooseVariable", "var5", var_params_ll);
+    _fe_problem->addVariable("MooseVariableConstMonomial", "var_different_fe_type", var_params_cm);
+    _fe_problem->addAuxVariable("MooseVariable", "aux_var", var_params_ll);
 
     InputParameters params = _factory.getValidParams("PorousFlowDictator");
     params.set<std::vector<VariableName>>("porous_flow_vars") =
@@ -61,8 +61,6 @@ protected:
         &_fe_problem->getUserObjectTempl<PorousFlowDictator>("dictator_no_fetype");
   }
 
-  const FEType _linear_lagrange;
-  const FEType _constant_monomial;
   const PorousFlowDictator * _dictator;
   const PorousFlowDictator * _dictator_no_fetype;
 };
