@@ -33,9 +33,6 @@ public:
   virtual void initialSetup();
 
 protected:
-  /// Number of coupled variables
-  unsigned int _nvar;
-
   /// name of the order parameter (needed to retrieve the derivative material properties)
   VariableName _eta_name;
 

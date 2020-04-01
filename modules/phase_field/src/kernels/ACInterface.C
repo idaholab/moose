@@ -16,11 +16,10 @@ defineLegacyParams(ACInterface);
 InputParameters
 ACInterface::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = JvarMapKernelInterface<Kernel>::validParams();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   params.addParam<bool>("variable_L",
                         true,
                         "The mobility is a function of any MOOSE variable (if "
@@ -37,15 +36,14 @@ ACInterface::ACInterface(const InputParameters & parameters)
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _d2Ldop2(getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _var.name())),
     _dkappadop(getMaterialPropertyDerivative<Real>("kappa_name", _var.name())),
-    _nvar(_coupled_moose_vars.size()),
-    _dLdarg(_nvar),
-    _d2Ldargdop(_nvar),
-    _d2Ldarg2(_nvar),
-    _dkappadarg(_nvar),
-    _gradarg(_nvar)
+    _dLdarg(_n_args),
+    _d2Ldargdop(_n_args),
+    _d2Ldarg2(_n_args),
+    _dkappadarg(_n_args),
+    _gradarg(_n_args)
 {
   // Get mobility and kappa derivatives and coupled variable gradients
-  for (unsigned int i = 0; i < _nvar; ++i)
+  for (unsigned int i = 0; i < _n_args; ++i)
   {
     MooseVariable * ivar = _coupled_standard_moose_vars[i];
     const VariableName iname = ivar->name();
@@ -53,17 +51,15 @@ ACInterface::ACInterface(const InputParameters & parameters)
       paramError("args",
                  "The kernel variable should not be specified in the coupled `args` parameter.");
 
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", iname);
-    _dkappadarg[i] = &getMaterialPropertyDerivative<Real>("kappa_name", iname);
-
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", i);
+    _dkappadarg[i] = &getMaterialPropertyDerivative<Real>("kappa_name", i);
     _d2Ldargdop[i] = &getMaterialPropertyDerivative<Real>("mob_name", iname, _var.name());
 
     _gradarg[i] = &(ivar->gradSln());
 
-    _d2Ldarg2[i].resize(_nvar);
-    for (unsigned int j = 0; j < _nvar; ++j)
-      _d2Ldarg2[i][j] =
-          &getMaterialPropertyDerivative<Real>("mob_name", iname, _coupled_moose_vars[j]->name());
+    _d2Ldarg2[i].resize(_n_args);
+    for (unsigned int j = 0; j < _n_args; ++j)
+      _d2Ldarg2[i][j] = &getMaterialPropertyDerivative<Real>("mob_name", i, j);
   }
 }
 
@@ -78,7 +74,7 @@ RealGradient
 ACInterface::gradL()
 {
   RealGradient g = _grad_u[_qp] * _dLdop[_qp];
-  for (unsigned int i = 0; i < _nvar; ++i)
+  for (unsigned int i = 0; i < _n_args; ++i)
     g += (*_gradarg[i])[_qp] * (*_dLdarg[i])[_qp];
   return g;
 }
@@ -120,7 +116,7 @@ ACInterface::computeQpJacobian()
     RealGradient dgradL =
         _grad_phi[_j][_qp] * _dLdop[_qp] + _grad_u[_qp] * _phi[_j][_qp] * _d2Ldop2[_qp];
 
-    for (unsigned int i = 0; i < _nvar; ++i)
+    for (unsigned int i = 0; i < _n_args; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[i])[_qp];
 
     dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];
@@ -145,7 +141,7 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
     RealGradient dgradL = _grad_phi[_j][_qp] * (*_dLdarg[cvar])[_qp] +
                           _grad_u[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[cvar])[_qp];
 
-    for (unsigned int i = 0; i < _nvar; ++i)
+    for (unsigned int i = 0; i < _n_args; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldarg2[cvar][i])[_qp];
 
     dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];

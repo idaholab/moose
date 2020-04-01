@@ -64,6 +64,8 @@ class JvarMapInterfaceBase : public T
 public:
   typedef std::vector<int> JvarMap;
 
+  static InputParameters validParams();
+
   JvarMapInterfaceBase(const InputParameters & parameters);
 
   /// Return index into the _coupled_moose_vars array for a given jvar
@@ -89,6 +91,10 @@ public:
    */
   bool mapJvarToCvar(unsigned int jvar, unsigned int & cvar);
 
+protected:
+  /// number of coupled moose variables
+  const unsigned int _n_args;
+
 private:
   /// number of nonlinear variables in the system
   const std::size_t _jvar_max_size;
@@ -104,8 +110,18 @@ private:
 };
 
 template <class T>
+InputParameters
+JvarMapInterfaceBase<T>::validParams()
+{
+  auto params = T::validParams();
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
+  return params;
+}
+
+template <class T>
 JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters)
   : T(parameters),
+    _n_args(this->_coupled_standard_moose_vars.size()),
     _jvar_max_size(this->_fe_problem.getNonlinearSystemBase().nVariables()),
     _jvar_map(_jvar_max_size, -1)
 {

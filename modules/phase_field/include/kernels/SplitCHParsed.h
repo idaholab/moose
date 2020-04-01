@@ -39,10 +39,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const unsigned int _nvar;
   const MaterialProperty<Real> & _dFdc;
   const MaterialProperty<Real> & _d2Fdc2;
-
   std::vector<const MaterialProperty<Real> *> _d2Fdcdarg;
 };
-

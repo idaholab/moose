@@ -16,7 +16,7 @@ defineLegacyParams(CoupledMaterialDerivative);
 InputParameters
 CoupledMaterialDerivative::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = JvarMapKernelInterface<Kernel>::validParams();
   params.addClassDescription("Kernel that implements the first derivative of a function material "
                              "property with respect to a coupled variable.");
   params.addRequiredCoupledVar("v", "Variable to take the derivative with respect to");
@@ -25,9 +25,6 @@ CoupledMaterialDerivative::validParams()
                                         "Function material to take the derivative of (should "
                                         "provide derivative properties - such as a "
                                         "DerivativeParsedMaterial)");
-  params.addCoupledVar(
-      "args",
-      "Vector of other nonlinear variables F depends on (used for computing Jacobian entries)");
   return params;
 }
 
@@ -37,15 +34,11 @@ CoupledMaterialDerivative::CoupledMaterialDerivative(const InputParameters & par
     _v_var(coupled("v")),
     _dFdv(getMaterialPropertyDerivative<Real>("f_name", _v_name)),
     _d2Fdvdu(getMaterialPropertyDerivative<Real>("f_name", _v_name, _var.name())),
-    _nvar(_coupled_moose_vars.size()),
-    _d2Fdvdarg(_nvar)
+    _d2Fdvdarg(_n_args)
 {
   // Get material property derivatives for all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    MooseVariableFEBase * ivar = _coupled_moose_vars[i];
-    _d2Fdvdarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _v_name, ivar->name());
-  }
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _d2Fdvdarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _v_name, i);
 }
 
 void

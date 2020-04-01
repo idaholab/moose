@@ -32,7 +32,8 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
     _cjs_var(_num_j),
     _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0],
                                                      _c1_name)), // Use first Fj in list for dFj/dcj
-    _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name))
+    _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name)),
+    _prop_d2F1dc1darg(_n_args)
 {
   if (_num_j != coupledComponents("cj_names"))
     paramError("cj_names", "Need to pass in as many cj_names as Fj_names");
@@ -44,18 +45,9 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
     _cjs_var[i] = coupled("cj_names", i);
   }
 
-  // Resize to number of coupled variables (_nvar from KKSMultiACBulkBase constructor)
-  _prop_d2F1dc1darg.resize(_nvar);
-
-  // Iterate over all coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    MooseVariableFEBase * cvar = _coupled_moose_vars[i];
-
-    // get second partial derivatives wrt c1 and other coupled variable
-    _prop_d2F1dc1darg[i] =
-        &getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, cvar->name());
-  }
+  // get second partial derivatives wrt c1 and other coupled variable
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _prop_d2F1dc1darg[i] = &getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, i);
 }
 
 Real
