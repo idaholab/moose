@@ -218,27 +218,27 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
 
   Node * node0_ptr = mesh.query_node_ptr(node_offset);
   if (!node0_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
+  {
+    std::unique_ptr<Node> new_node =
+        Node::build(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
 
-      new_node->set_unique_id() = nx + node_offset;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx + node_offset;
+    new_node->processor_id() = pid;
 
-      node0_ptr = mesh.add_node(std::move(new_node));
-    }
+    node0_ptr = mesh.add_node(std::move(new_node));
+  }
 
   Node * node1_ptr = mesh.query_node_ptr(node_offset + 1);
   if (!node1_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
+  {
+    std::unique_ptr<Node> new_node =
+        Node::build(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
 
-      new_node->set_unique_id() = nx + node_offset + 1;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx + node_offset + 1;
+    new_node->processor_id() = pid;
 
-      node1_ptr = mesh.add_node(std::move(new_node));
-    }
+    node1_ptr = mesh.add_node(std::move(new_node));
+  }
 
   Elem * elem = new Edge2;
   elem->set_id(elem_id);
@@ -429,57 +429,57 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
   const dof_id_type node0_id = nodeId<Quad4>(type, nx, 0, i, j, 0);
   Node * node0_ptr = mesh.query_node_ptr(node0_id);
   if (!node0_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0), node0_id);
+  {
+    std::unique_ptr<Node> new_node =
+        Node::build(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0), node0_id);
 
-      new_node->set_unique_id() = nx * ny + node0_id;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx * ny + node0_id;
+    new_node->processor_id() = pid;
 
-      node0_ptr = mesh.add_node(std::move(new_node));
-    }
+    node0_ptr = mesh.add_node(std::move(new_node));
+  }
 
   // Bottom Right
   const dof_id_type node1_id = nodeId<Quad4>(type, nx, 0, i + 1, j, 0);
   Node * node1_ptr = mesh.query_node_ptr(node1_id);
   if (!node1_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0), node1_id);
+  {
+    std::unique_ptr<Node> new_node =
+        Node::build(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0), node1_id);
 
-      new_node->set_unique_id() = nx * ny + node1_id;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx * ny + node1_id;
+    new_node->processor_id() = pid;
 
-      node1_ptr = mesh.add_node(std::move(new_node));
-    }
+    node1_ptr = mesh.add_node(std::move(new_node));
+  }
 
   // Top Right
   const dof_id_type node2_id = nodeId<Quad4>(type, nx, 0, i + 1, j + 1, 0);
   Node * node2_ptr = mesh.query_node_ptr(node2_id);
   if (!node2_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0), node2_id);
+  {
+    std::unique_ptr<Node> new_node = Node::build(
+        Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0), node2_id);
 
-      new_node->set_unique_id() = nx * ny + node2_id;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx * ny + node2_id;
+    new_node->processor_id() = pid;
 
-      node2_ptr = mesh.add_node(std::move(new_node));
-    }
+    node2_ptr = mesh.add_node(std::move(new_node));
+  }
 
   // Top Left
   const dof_id_type node3_id = nodeId<Quad4>(type, nx, 0, i, j + 1, 0);
   Node * node3_ptr = mesh.query_node_ptr(node3_id);
   if (!node3_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0), node3_id);
+  {
+    std::unique_ptr<Node> new_node =
+        Node::build(Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0), node3_id);
 
-      new_node->set_unique_id() = nx * ny + node3_id;
-      new_node->processor_id() = pid;
+    new_node->set_unique_id() = nx * ny + node3_id;
+    new_node->processor_id() = pid;
 
-      node3_ptr = mesh.add_node(std::move(new_node));
-    }
+    node3_ptr = mesh.add_node(std::move(new_node));
+  }
 
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
@@ -658,14 +658,14 @@ DistributedRectilinearMeshGenerator::addPoint<Hex8>(const dof_id_type nx,
   auto id = nodeId<Hex8>(type, nx, ny, i, j, k);
   Node * node_ptr = mesh.query_node_ptr(id);
   if (!node_ptr)
-    {
-      std::unique_ptr<Node> new_node = Node::build
-        (Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, static_cast<Real>(k) / nz), id);
+  {
+    std::unique_ptr<Node> new_node = Node::build(
+        Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, static_cast<Real>(k) / nz), id);
 
-      new_node->set_unique_id() = nx * ny * nz + id;
+    new_node->set_unique_id() = nx * ny * nz + id;
 
-      node_ptr = mesh.add_node(std::move(new_node));
-    }
+    node_ptr = mesh.add_node(std::move(new_node));
+  }
 
   return node_ptr;
 }
