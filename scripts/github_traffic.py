@@ -13,7 +13,7 @@ import datetime
 try:
     import requests
 except ImportError:
-    print 'python-requests module not available.\n'
+    print('python-requests module not available.\n')
     sys.exit(1)
 
 
@@ -33,7 +33,7 @@ def getClones(args):
     for search_type, url in urls.iteritems():
         r = requests.get(url, params=params, headers=headers)
         if r.status_code != 200:
-            print 'There was an error while attempting to gather data:', r.status_code, '\n', r.text
+            print('There was an error while attempting to gather data:', r.status_code, '\n', r.text)
             sys.exit(1)
         else:
             results[search_type] = r.json()
@@ -80,9 +80,9 @@ def writeFile(args, stats):
             sys.exit(0)
 
         else:
-            print 'The file you attempted to write to contains stats for another repository (' + file_data.split('\n')[0] + \
+            print('The file you attempted to write to contains stats for another repository (' + file_data.split('\n')[0] + \
                   ')\nwhile you supplied arguments to gather stats for (' + args.repo + \
-                  ').\n\n... Or this is probably not the file you wanted to overwrite:\n\t', args.write, '\nExiting just to be safe...\n'
+                  ').\n\n... Or this is probably not the file you wanted to overwrite:\n\t', args.write, '\nExiting just to be safe...\n')
             sys.exit(1)
     else:
         with open(args.write, 'w') as log_file:
@@ -90,7 +90,7 @@ def writeFile(args, stats):
 
 def verifyArgs(parser, args):
     if args.token is None or args.repo is None:
-        print 'you must supply a repository and token to interface with\n'
+        print('you must supply a repository and token to interface with\n')
         parser.print_help()
         sys.exit(1)
     return args
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     if options.write:
         writeFile(options, formatted_results)
     else:
-        print formatted_results
+        print(formatted_results)
