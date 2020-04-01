@@ -56,7 +56,9 @@ fi
 
 # Set PETSc envir
 export PETSC_DIR=$SCRIPT_DIR/../petsc
-export PETSC_ARCH=arch-moose
+if [ -z "$PETSC_ARCH" ]; then
+    export PETSC_ARCH=arch-moose
+fi
 
 
 cd $SCRIPT_DIR/..
