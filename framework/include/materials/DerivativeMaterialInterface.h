@@ -77,7 +77,13 @@ public:
                                                             const VariableName & c1,
                                                             const VariableName & c2 = "",
                                                             const VariableName & c3 = "");
+  ///@}
 
+  /**
+   *@{ Convenience methods fro retrieving derivative material properties based
+   *   on a mix of variable names `c` and indices `v` into the
+   *   _coupled_standard_moose_vars vector.
+   */
   template <typename U>
   const MaterialProperty<U> &
   getMaterialPropertyDerivative(const std::string & base,
