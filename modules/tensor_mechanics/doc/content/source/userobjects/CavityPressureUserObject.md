@@ -21,6 +21,13 @@ original pressure, temperature, and volume) plus the amount in the cavity due to
 during the simulation.  The volume $V$ is provided by a single postprocessor value or a vector of
 postprocessor values that are summed together before being used in [eq:ideal_gas_law].
 
+There is an option to specify additional, unmeshed volumes with corresponding temperatures that communicate directly with the cavity. In this case the pressure becomes:
+\begin{equation}
+  P=\frac{nR}{\sum_{i=1}^N \frac{V_i}{T_i}}
+\end{equation}
+
+where $N$ is the number of additional volumes.  
+
 !syntax parameters /UserObjects/CavityPressureUserObject
 
 !syntax inputs /UserObjects/CavityPressureUserObject

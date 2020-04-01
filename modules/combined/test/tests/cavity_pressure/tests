@@ -51,6 +51,12 @@
       rel_err = 1e-5
       detail = 'when given a set of internal volumes to sum.'
     [../]
+    [./additional_volume]
+      type = 'Exodiff'
+      input = 'additional_volume.i'
+      exodiff = 'additional_volume_out.e'
+      detail = 'when including an additional volume that communicates with the cavity.'
+    [../]
   []
 
   [group]
