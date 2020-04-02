@@ -411,6 +411,7 @@ TensorMechanicsAction::actSubdomainChecks()
 void
 TensorMechanicsAction::actOutputGeneration()
 {
+  std::string ad_prepend = _use_ad ? "AD" : "";
   //
   // Add variables (optional)
   //
@@ -444,7 +445,7 @@ TensorMechanicsAction::actOutputGeneration()
           for (unsigned int b = 0; b < 3; ++b)
             if (r2a.first + '_' + _component_table[a] + _component_table[b] == out)
             {
-              type = "RankTwoAux";
+              type = ad_prepend + "RankTwoAux";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a.second;
               params.set<unsigned int>("index_i") = a;
@@ -459,7 +460,7 @@ TensorMechanicsAction::actOutputGeneration()
             const auto r2a = _ranktwoaux_table.find(t);
             if (r2a != _ranktwoaux_table.end())
             {
-              type = "RankTwoScalarAux";
+              type = ad_prepend + "RankTwoScalarAux";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a->second;
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;

@@ -75,7 +75,7 @@
 
 [Materials]
   [./Elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ADComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
   [../]
@@ -87,7 +87,7 @@
     type = ADComputeLinearElasticStress
   [../]
   [./density]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = density
     prop_values = 2.0387
   [../]

@@ -10,21 +10,26 @@
 #include "ComputeRotatedElasticityTensorBase.h"
 #include "RotationTensor.h"
 
+template <bool is_ad>
 InputParameters
-ComputeRotatedElasticityTensorBase::validParams()
+ComputeRotatedElasticityTensorBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeElasticityTensorBase::validParams();
+  InputParameters params = ComputeElasticityTensorBaseTempl<is_ad>::validParams();
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
   params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
   return params;
 }
 
-ComputeRotatedElasticityTensorBase::ComputeRotatedElasticityTensorBase(
+template <bool is_ad>
+ComputeRotatedElasticityTensorBaseTempl<is_ad>::ComputeRotatedElasticityTensorBaseTempl(
     const InputParameters & parameters)
-  : ComputeElasticityTensorBase(parameters),
-    _Euler_angles(getParam<Real>("euler_angle_1"),
-                  getParam<Real>("euler_angle_2"),
-                  getParam<Real>("euler_angle_3"))
+  : ComputeElasticityTensorBaseTempl<is_ad>(parameters),
+    _Euler_angles(this->template getParam<Real>("euler_angle_1"),
+                  this->template getParam<Real>("euler_angle_2"),
+                  this->template getParam<Real>("euler_angle_3"))
 {
 }
+
+template class ComputeRotatedElasticityTensorBaseTempl<false>;
+template class ComputeRotatedElasticityTensorBaseTempl<true>;

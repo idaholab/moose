@@ -18,18 +18,19 @@
  * supplied indices.
  */
 
-class RankTwoAux : public NodalPatchRecovery
+template <bool is_ad>
+class RankTwoAuxTempl : public NodalPatchRecovery
 {
 public:
   static InputParameters validParams();
 
-  RankTwoAux(const InputParameters & parameters);
+  RankTwoAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
 private:
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
 
@@ -39,3 +40,6 @@ private:
   /// The std::vector will be evaluated at this quadpoint only if defined
   const unsigned int _selected_qp;
 };
+
+typedef RankTwoAuxTempl<false> RankTwoAux;
+typedef RankTwoAuxTempl<true> ADRankTwoAux;

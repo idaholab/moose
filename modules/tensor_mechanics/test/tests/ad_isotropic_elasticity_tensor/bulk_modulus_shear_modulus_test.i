@@ -24,7 +24,7 @@
 
 [AuxKernels]
   [./stress_11]
-    type = RankTwoAux
+    type = ADRankTwoAux
     variable = stress_11
     rank_two_tensor = stress
     index_j = 1
@@ -64,7 +64,7 @@
     type = ADComputeLinearElasticStress
   [../]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     bulk_modulus = 416666
     shear_modulus = 454545
   [../]

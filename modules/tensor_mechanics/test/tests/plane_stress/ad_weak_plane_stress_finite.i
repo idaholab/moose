@@ -28,7 +28,7 @@
 
 [Postprocessors]
   [./react_z]
-    type = MaterialTensorIntegral
+    type = ADMaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -63,7 +63,7 @@
     use_displaced_mesh = false
   [../]
   [./strain_zz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = total_strain
     variable = nl_strain_zz
     index_i = 2
@@ -100,7 +100,7 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]

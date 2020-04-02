@@ -26,7 +26,7 @@ ADComputeStrainIncrementBasedStress::ADComputeStrainIncrementBasedStress(
     const InputParameters & parameters)
   : ADComputeStressBase(parameters),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
+    _elasticity_tensor(getADMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _mechanical_strain_old(
         getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "mechanical_strain")),

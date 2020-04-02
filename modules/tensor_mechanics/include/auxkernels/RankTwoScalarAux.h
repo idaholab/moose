@@ -16,17 +16,18 @@
  * RankTwoScalarAux uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-class RankTwoScalarAux : public NodalPatchRecovery
+template <bool is_ad>
+class RankTwoScalarAuxTempl : public NodalPatchRecovery
 {
 public:
   static InputParameters validParams();
 
-  RankTwoScalarAux(const InputParameters & parameters);
+  RankTwoScalarAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
   /**
    * Determines the information to be extracted from the tensor by using the
@@ -44,3 +45,6 @@ protected:
   const Point _point2;
   Point _input_direction;
 };
+
+typedef RankTwoScalarAuxTempl<false> RankTwoScalarAux;
+typedef RankTwoScalarAuxTempl<true> ADRankTwoScalarAux;

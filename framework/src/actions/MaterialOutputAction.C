@@ -42,6 +42,10 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankTwoTenso
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankFourTensor>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
@@ -159,7 +163,7 @@ MaterialOutputAction::act()
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
-          if (hasADProperty<Real>(name))
+          else if (hasADProperty<Real>(name))
           {
             curr_material_names = materialOutputHelper<ADReal>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
@@ -180,6 +184,12 @@ MaterialOutputAction::act()
           else if (hasProperty<RankTwoTensor>(name))
           {
             curr_material_names = materialOutputHelper<RankTwoTensor>(name, *mat, get_names_only);
+            material_names.insert(curr_material_names.begin(), curr_material_names.end());
+          }
+
+          else if (hasADProperty<RankTwoTensor>(name))
+          {
+            curr_material_names = materialOutputHelper<ADRankTwoTensor>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
@@ -364,6 +374,33 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
         params.set<unsigned int>("i") = i;
         params.set<unsigned int>("j") = j;
         _problem->addAuxKernel("MaterialRankTwoTensorAux", material.name() + oss.str(), params);
+      }
+    }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(const std::string & property_name,
+                                                            const MaterialBase & material,
+                                                            bool get_names_only)
+{
+  std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    {
+      std::ostringstream oss;
+      oss << property_name << "_" << i << j;
+      names[i * LIBMESH_DIM + j] = oss.str();
+
+      if (!get_names_only)
+      {
+        auto params = getParams("ADMaterialRankTwoTensorAux", property_name, oss.str(), material);
+        params.set<unsigned int>("i") = i;
+        params.set<unsigned int>("j") = j;
+        _problem->addAuxKernel("ADMaterialRankTwoTensorAux", material.name() + oss.str(), params);
       }
     }
 

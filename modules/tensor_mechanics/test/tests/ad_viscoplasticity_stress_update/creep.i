@@ -32,7 +32,7 @@
 [Materials]
   active='elasticity_tensor porous_stress creep'
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
     base_name = 'total'
@@ -51,7 +51,7 @@
     base_name = 'total'
   [../]
   [./porosity]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = porosity
     prop_values = 0.1
     outputs = all

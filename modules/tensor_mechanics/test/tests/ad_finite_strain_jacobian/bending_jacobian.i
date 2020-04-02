@@ -49,7 +49,7 @@
     type = ADComputeFiniteStrainElasticStress
   [../]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ADComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   [../]

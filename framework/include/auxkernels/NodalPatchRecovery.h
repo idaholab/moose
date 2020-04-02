@@ -44,6 +44,9 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> & getGenericMaterialProperty(const std::string & name);
+
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties
@@ -150,6 +153,13 @@ const MaterialProperty<T> &
 NodalPatchRecovery::getMaterialProperty(const std::string & name)
 {
   return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+NodalPatchRecovery::getGenericMaterialProperty(const std::string & name)
+{
+  return MaterialPropertyInterface::getGenericMaterialProperty<T, is_ad>(name);
 }
 
 template <typename T>

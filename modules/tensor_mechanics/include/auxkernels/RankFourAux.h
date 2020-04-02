@@ -17,23 +17,26 @@
  * property, for example stiffness, and output the value for the
  * supplied indices.
  */
-
-class RankFourAux : public AuxKernel
+template <bool is_ad>
+class RankFourAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  RankFourAux(const InputParameters & parameters);
+  RankFourAuxTempl(const InputParameters & parameters);
 
-  virtual ~RankFourAux() {}
+  virtual ~RankFourAuxTempl() {}
 
 protected:
   virtual Real computeValue();
 
 private:
-  const MaterialProperty<RankFourTensor> & _tensor;
+  const GenericMaterialProperty<RankFourTensor, is_ad> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
   const unsigned int _k;
   const unsigned int _l;
 };
+
+typedef RankFourAuxTempl<false> RankFourAux;
+typedef RankFourAuxTempl<true> ADRankFourAux;

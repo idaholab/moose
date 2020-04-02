@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeElasticityTensorBase.h"
+#include "ComputeElasticityTensorBase.h"
 
 /**
  * ADComputeVariableIsotropicElasticityTensor defines an elasticity tensor material for
@@ -31,4 +31,8 @@ protected:
 
   /// Material defining the Poisson's Ratio
   const ADMaterialProperty<Real> & _poissons_ratio;
+
+  using ADComputeElasticityTensorBase::_elasticity_tensor;
+  using ADComputeElasticityTensorBase::_qp;
+  using ADComputeElasticityTensorBase::issueGuarantee;
 };

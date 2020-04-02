@@ -9,14 +9,18 @@
 
 #include "MaterialRankTwoTensorAux.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("MooseApp", MaterialRankTwoTensorAux);
+registerMooseObject("MooseApp", ADMaterialRankTwoTensorAux);
 
 defineLegacyParams(MaterialRankTwoTensorAux);
 
+template <bool is_ad>
 InputParameters
-MaterialRankTwoTensorAux::validParams()
+MaterialRankTwoTensorAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<>::validParams();
+  InputParameters params = MaterialAuxGenericBase<RankTwoTensor, is_ad>::validParams();
   params.addClassDescription(
       "Access a component of a RankTwoTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ij for the tensor to output");
@@ -24,17 +28,20 @@ MaterialRankTwoTensorAux::validParams()
   return params;
 }
 
-MaterialRankTwoTensorAux::MaterialRankTwoTensorAux(const InputParameters & parameters)
-  : MaterialAuxBase<RankTwoTensor>(parameters),
-    _i(getParam<unsigned int>("i")),
-    _j(getParam<unsigned int>("j"))
+template <bool is_ad>
+MaterialRankTwoTensorAuxTempl<is_ad>::MaterialRankTwoTensorAuxTempl(
+    const InputParameters & parameters)
+  : MaterialAuxGenericBase<RankTwoTensor, is_ad>(parameters),
+    _i(this->template getParam<unsigned int>("i")),
+    _j(this->template getParam<unsigned int>("j"))
 {
   mooseAssert(_i < LIBMESH_DIM, "i component out of range for current LIBMESH_DIM");
   mooseAssert(_j < LIBMESH_DIM, "j component out of range for current LIBMESH_DIM");
 }
 
+template <bool is_ad>
 Real
-MaterialRankTwoTensorAux::getRealValue()
+MaterialRankTwoTensorAuxTempl<is_ad>::getRealValue()
 {
-  return _prop[_qp](_i, _j);
+  return MetaPhysicL::raw_value(this->_prop[this->_qp](_i, _j));
 }

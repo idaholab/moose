@@ -28,7 +28,7 @@ protected:
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const ADMaterialProperty<RankFourTensor> & _elasticity_tensor;
   /// Old state of the stress tensor material property
   const MaterialProperty<RankTwoTensor> & _stress_old;
   /// Old state of the mechanical strain material property

@@ -61,7 +61,7 @@
 
 [AuxKernels]
   [./vmstress]
-    type = RankTwoScalarAux
+    type = ADRankTwoScalarAux
     rank_two_tensor = total_strain
     variable = vmstress
     scalar_type = VonMisesStress
@@ -71,7 +71,7 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
   [../]
