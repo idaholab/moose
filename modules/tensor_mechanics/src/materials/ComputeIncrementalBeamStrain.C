@@ -272,7 +272,7 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   // rotational strains at each qp along the length of the beam
   // rot_strain_1 = integral(e_13 * y - e_12 * z) dA
   // rot_strain_2 = integral(e_11 * z) dA
-  // rot_strain_3 = integral(e_11 * y) dA
+  // rot_strain_3 = integral(e_11 * -y) dA
   // Iyz is the product moment of inertia which is zero for most cross-sections so it is assumed to
   // be zero for this analysis
   const Real Iyz = 0;
@@ -283,8 +283,8 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   _mech_rot_strain_increment[_qp](1) = _grad_disp_0_local_t(0) * _Az[_qp] -
                                        _grad_rot_0_local_t(2) * Iyz +
                                        _grad_rot_0_local_t(1) * _Iz[_qp];
-  _mech_rot_strain_increment[_qp](2) = _grad_disp_0_local_t(0) * _Ay[_qp] -
-                                       _grad_rot_0_local_t(2) * _Iy[_qp] +
+  _mech_rot_strain_increment[_qp](2) = -_grad_disp_0_local_t(0) * _Ay[_qp] +
+                                       _grad_rot_0_local_t(2) * _Iy[_qp] -
                                        _grad_rot_0_local_t(1) * Iyz;
 
   if (_large_strain)
@@ -309,8 +309,8 @@ ComputeIncrementalBeamStrain::computeQpStrain()
     _mech_rot_strain_increment[_qp](1) += (_grad_disp_0_local_t(0) * _grad_rot_0_local_t(1) -
                                            _grad_disp_0_local_t(1) * _grad_rot_0_local_t(0)) *
                                           _Iz[_qp];
-    _mech_rot_strain_increment[_qp](2) += (_grad_disp_0_local_t(2) * _grad_rot_0_local_t(0) -
-                                           _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
+    _mech_rot_strain_increment[_qp](2) += -(_grad_disp_0_local_t(2) * _grad_rot_0_local_t(0) -
+                                            _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
                                           _Iy[_qp];
   }
 

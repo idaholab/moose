@@ -1,0 +1,83 @@
+[Tests]
+  design = "C0TimoshenkoBeam.md"
+  issues = "#14772"
+  [euler_small_strain]
+    requirement = "The mechanics system shall accurately predict the"
+                  " static bending response of an Euler beam modeled using"
+                  " beam elements under small deformation when the beam is"
+    [./orientation_z]
+      input = 'euler_small_strain_orientation_z.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_z_out.csv'
+      detail = "oriented along the global Z axis."
+    [../]
+
+    [./orientation_yz]
+      input = 'euler_small_strain_orientation_yz.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_yz_out.csv'
+      detail = "oriented on the YZ plane at a 45 deg. angle."
+    [../]
+
+    [./orientation_yz_force_yz]
+      input = 'euler_small_strain_orientation_yz_force_yz.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_yz_force_yz_out.csv'
+      detail = "oriented on the YZ plane at a 45 deg. angle and has in-plane"
+                    " loading."
+    [../]
+
+    [./orientation_yz_force_yz_cross_section]
+      input = 'euler_small_strain_orientation_yz_force_yz_cross_section.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_yz_force_yz_cross_section_out.csv'
+      detail = "oriented on the YZ plane at a 45 deg. angle and has in-plane"
+                    " loading with non-symmetric cross section geometry."
+    [../]
+
+    [./orientation_yz_cross_section]
+      input = 'euler_small_strain_orientation_yz_cross_section.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_yz_cross_section_out.csv'
+      detail = "oriented on the YZ plane at a 45 deg. angle and has in-plane"
+                    " loading and the cross section geometry is non-symmetric."
+    [../]
+
+    [./orientation_y]
+      input = 'euler_small_strain_orientation_y.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_y_out.csv'
+      detail = "oriented along the global Y axis."
+    [../]
+
+    [./orientation_xz]
+      input = 'euler_small_strain_orientation_xz.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_xz_out.csv'
+      detail = "oriented on the XZ plane at a 45 deg. angle."
+    [../]
+
+    [./orientation_xz_force_xz]
+      input = 'euler_small_strain_orientation_xz_force_xz.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_xz_force_xz_out.csv'
+      detail = "oriented on the XZ plane at a 45 deg. angle, and the external"
+                    " loading takes place on the same plane."
+    [../]
+
+    [./orientation_xy]
+      input = 'euler_small_strain_orientation_xy.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_xy_out.csv'
+      detail = "oriented on the XY plane at a 45 deg. angle."
+    [../]
+
+    [./orientation_xy_force_xy]
+      input = 'euler_small_strain_orientation_xy_force_xy.i'
+      type = 'CSVDiff'
+      csvdiff = 'euler_small_strain_orientation_xy_force_xy_out.csv'
+      detail = "oriented on the XY plane at a 45 deg. angle, and the external"
+                    " loading takes place on the same plane."
+    [../]
+  []
+[]
