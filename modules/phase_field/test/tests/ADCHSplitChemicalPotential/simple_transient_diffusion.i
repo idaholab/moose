@@ -38,7 +38,7 @@
     y = '0 1'
   [../]
   [./mobility_prop]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = mobility_prop
     prop_values = 0.1
   [../]

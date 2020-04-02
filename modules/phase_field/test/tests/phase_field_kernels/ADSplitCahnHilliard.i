@@ -59,7 +59,7 @@
 
 [Materials]
   [./pfmobility]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '100 40'
   [../]

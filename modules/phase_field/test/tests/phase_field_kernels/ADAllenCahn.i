@@ -50,7 +50,7 @@
 
 [Materials]
   [./consts]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names  = 'L'
     prop_values = '1'
   [../]

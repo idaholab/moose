@@ -54,12 +54,12 @@
     y = '0 1'
   [../]
   [./chemical_mobility_prop]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = chemical_mobility_prop
     prop_values = 0.1
   [../]
   [./thermal_mobility_prop]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = thermal_mobility_prop
     prop_values = -20
   [../]
