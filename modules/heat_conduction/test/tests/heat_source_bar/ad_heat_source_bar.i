@@ -53,7 +53,7 @@
 
 [Materials]
   [./density]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'density  thermal_conductivity volumetric_heat  '
     prop_values = '10431.0 3.0                  3.8e7'
   [../]

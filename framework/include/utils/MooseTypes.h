@@ -187,6 +187,19 @@ typedef unsigned int TagID;
 typedef unsigned int PerfID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
+template <bool is_ad>
+struct GenericRealStruct
+{
+  typedef Real type;
+};
+template <>
+struct GenericRealStruct<true>
+{
+  typedef ADReal type;
+};
+template <bool is_ad>
+using GenericReal = typename GenericRealStruct<is_ad>::type;
+
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 

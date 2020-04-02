@@ -97,7 +97,7 @@
   [../]
 
   [./tfluid_mat]
-    type = ADPiecewiseLinearInterpolationMaterial
+    type = PiecewiseLinearInterpolationMaterial
     property = tfluid_mat
     variable = channel_T
     x = '400 500'

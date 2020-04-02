@@ -34,29 +34,15 @@
     boundary = 'right'
     T_infinity = T_inf
     heat_transfer_coefficient = htc
-    heat_transfer_coefficient_dT = dhtc_dT
   [../]
 []
 
 [Materials]
-  [./T_inf]
-    type = ParsedMaterial
-    f_name = T_inf
-    args = temp
-    function = 'temp + 1'
-  [../]
-  [./htc]
-    type = ParsedMaterial
-    f_name = htc
-    args = temp
-    function = 'temp / 100 + 1'
-  [../]
-  [./dhtc_dT]
-    type = ParsedMaterial
-    f_name = dhtc_dT
-    args = temp
-    function = '1 / 100'
-  [../]
+  [chf_mat]
+    type = ADConvectiveHeatFluxTest
+    temperature = temp
+    boundary = 'right'
+  []
 []
 
 [Postprocessors]

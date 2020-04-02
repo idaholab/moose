@@ -22,19 +22,13 @@ ADConvectiveHeatFluxBC::validParams()
                                                 "Material property for far-field temperature");
   params.addRequiredParam<MaterialPropertyName>("heat_transfer_coefficient",
                                                 "Material property for heat transfer coefficient");
-  params.addParam<MaterialPropertyName>(
-      "heat_transfer_coefficient_dT",
-      "0",
-      "Material property for derivative of heat transfer coefficient with respect to temperature");
-
   return params;
 }
 
 ADConvectiveHeatFluxBC::ADConvectiveHeatFluxBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
     _T_infinity(getADMaterialProperty<Real>("T_infinity")),
-    _htc(getADMaterialProperty<Real>("heat_transfer_coefficient")),
-    _htc_dT(getADMaterialProperty<Real>("heat_transfer_coefficient_dT"))
+    _htc(getADMaterialProperty<Real>("heat_transfer_coefficient"))
 {
 }
 

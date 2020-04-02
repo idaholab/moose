@@ -20,6 +20,7 @@
       input = 'coupled.i'
       csvdiff = 'coupled_out.csv'
       detail = 'and couple a temperature dependent far-field temperature and heat transfer coefficient.'
+      allow_test_objects = true
     [../]
   [../]
 []
