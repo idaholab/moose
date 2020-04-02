@@ -42,20 +42,40 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
   _fe_problem.reinitNode(node, _tid);
 
   std::set<MooseVariable *> damped_vars;
+  const auto & node_subdomains = _fe_problem.mesh().getNodeBlockIds(*node);
 
   const auto & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : ndampers)
-    damped_vars.insert(damper->getVariable());
-
-  _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
-
-  const auto & objects = _nodal_dampers.getActiveObjects(_tid);
-  for (const auto & obj : objects)
   {
-    Real cur_damping = obj->computeDamping();
-    obj->checkMinDamping(cur_damping);
-    if (cur_damping < _damping)
-      _damping = cur_damping;
+    auto damped_var = damper->getVariable();
+    auto damped_var_subdomains = damped_var->activeSubdomains();
+    if (damped_var_subdomains.empty())
+      damped_vars.insert(damped_var);
+    else
+    {
+      std::set<SubdomainID> intersect;
+      std::set_intersection(damped_var_subdomains.begin(),
+                            damped_var_subdomains.end(),
+                            node_subdomains.begin(),
+                            node_subdomains.end(),
+                            std::inserter(intersect, intersect.end()));
+      if (!intersect.empty())
+        damped_vars.insert(damped_var);
+    }
+  }
+
+  if (!damped_vars.empty())
+  {
+    _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
+
+    const auto & objects = _nodal_dampers.getActiveObjects(_tid);
+    for (const auto & obj : objects)
+    {
+      Real cur_damping = obj->computeDamping();
+      obj->checkMinDamping(cur_damping);
+      if (cur_damping < _damping)
+        _damping = cur_damping;
+    }
   }
 }
 

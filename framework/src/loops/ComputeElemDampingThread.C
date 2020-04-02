@@ -43,22 +43,32 @@ ComputeElemDampingThread::onElement(const Elem * elem)
   _fe_problem.reinitElem(elem, _tid);
 
   std::set<MooseVariable *> damped_vars;
+  const auto & elem_subdomain = elem->subdomain_id();
 
   const std::vector<std::shared_ptr<ElementDamper>> & edampers =
       _nl.getElementDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : edampers)
-    damped_vars.insert(damper->getVariable());
-
-  _nl.reinitIncrementAtQpsForDampers(_tid, damped_vars);
-
-  const std::vector<std::shared_ptr<ElementDamper>> & objects =
-      _element_dampers.getActiveObjects(_tid);
-  for (const auto & obj : objects)
   {
-    Real cur_damping = obj->computeDamping();
-    obj->checkMinDamping(cur_damping);
-    if (cur_damping < _damping)
-      _damping = cur_damping;
+    auto damped_var = damper->getVariable();
+    auto damped_var_subdomains = damped_var->activeSubdomains();
+    if (damped_var_subdomains.empty() ||
+        damped_var_subdomains.find(elem_subdomain) != damped_var_subdomains.end())
+      damped_vars.insert(damped_var);
+  }
+
+  if (!damped_vars.empty())
+  {
+    _nl.reinitIncrementAtQpsForDampers(_tid, damped_vars);
+
+    const std::vector<std::shared_ptr<ElementDamper>> & objects =
+        _element_dampers.getActiveObjects(_tid);
+    for (const auto & obj : objects)
+    {
+      Real cur_damping = obj->computeDamping();
+      obj->checkMinDamping(cur_damping);
+      if (cur_damping < _damping)
+        _damping = cur_damping;
+    }
   }
 }
 
