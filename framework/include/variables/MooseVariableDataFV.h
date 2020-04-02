@@ -262,6 +262,9 @@ public:
     return _matrix_tag_u[tag];
   }
 
+  /// checks if a Dirichlet BC exists on this face
+  bool hasDirichletBC() const { return _has_dirichlet_bc; }
+
 private:
   void initializeSolnVars();
 
@@ -469,6 +472,9 @@ private:
     }
     return _dof_indices;
   }
+
+  /// if this variable has a dirichlet bc defined on a particular face
+  bool _has_dirichlet_bc;
 
   /// Whether this variable is being calculated on a displaced system
   const bool _displaced;

@@ -359,6 +359,9 @@ public:
    */
   typename OutputTools<OutputType>::OutputGradient getGradient(const Elem * elem) const;
 
+  /// checks if a Dirichlet BC exists on this face
+  bool hasDirichletBC() const { return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC(); }
+
 protected:
   usingMooseVariableBaseMembers;
 
@@ -376,4 +379,3 @@ MooseVariableFV<OutputType>::adDofValues()
 {
   return _element_data->template adDofValues<compute_stage>();
 }
-

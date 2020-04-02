@@ -505,6 +505,7 @@ void
 MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face)
 {
+  _has_dirichlet_bc = false;
   initializeSolnVars();
 
   std::vector<FVDirichletBC *> bcs;
@@ -522,7 +523,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
-
+  _has_dirichlet_bc = bcs.size() > 0;
 
   // These need to be initialized but we can't use the regular computeAD
   // routine because that routine accesses the solution which doesn't exist
@@ -587,6 +588,7 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
 {
+  _has_dirichlet_bc = false;
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
 
   // TODO: compute reconstructed values somehow.  For now, just do the trivial

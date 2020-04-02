@@ -99,36 +99,14 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
-  // We might currently be running on a face for which this kernel's variable
-  // is only defined on one side. If this is the case, we need to only
-  // calculate+add the residual contribution if there is a dirichlet bc for
-  // the active face+variable.
-  //
-  // TODO: Running this query here is slow and redundant
-  // - since we run the same query inside the MooseVariableDataFV when
-  // computing the ghost cell values.  Perhaps we can mark a boolean on the
-  // FaceInfo object when we run the query there and just check it on the
-  // FaceInfo object here.
-  std::vector<FVDirichletBC *> bcs;
-  _subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVBoundaryCondition")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var.number())
-      .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
-      .queryInto(bcs);
-  bool have_dirichlet_bcs = bcs.size() > 0;
-
   auto ft = fi.faceType(_var.name());
-  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && have_dirichlet_bcs) || ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareVectorTag(_assembly, _var.number());
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && have_dirichlet_bcs) || ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareVectorTagNeighbor(_assembly, _var.number());
     _local_re(0) = -r;
@@ -155,30 +133,8 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   unsigned int var_num = _var.number();
   unsigned int nvars = sys.system().n_vars();
 
-  // We might currently be running on a face for which this kernel's variable
-  // is only defined on one side. If this is the case, we need to only
-  // calculate+add the residual contribution if there is a dirichlet bc for
-  // the active face+variable.
-  //
-  // TODO: Running this query here is slow and redundant
-  // - since we run the same query inside the MooseVariableDataFV when
-  // computing the ghost cell values.  Perhaps we can mark a boolean on the
-  // FaceInfo object when we run the query there and just check it on the
-  // FaceInfo object here.
-  std::vector<FVDirichletBC *> bcs;
-  _subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVBoundaryCondition")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var.number())
-      .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
-      .queryInto(bcs);
-  bool have_dirichlet_bcs = bcs.size() > 0;
-
   auto ft = fi.faceType(_var.name());
-  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && have_dirichlet_bcs) || ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
@@ -189,7 +145,7 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
     accumulateTaggedLocalMatrix();
   }
 
-  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && have_dirichlet_bcs) || ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
