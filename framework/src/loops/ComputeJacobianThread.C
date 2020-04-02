@@ -80,7 +80,7 @@ ComputeJacobianThread::computeJacobian()
              .template condition<AttribSystem>("FVElementalKernel")
              .template condition<AttribSubdomains>(_subdomain)
              .template condition<AttribThread>(_tid)
-             .template condition<AttribVectorTags>(_tags)
+             .template condition<AttribMatrixTags>(_tags)
              .queryInto(kernels);
 
   for (auto kernel : kernels)

@@ -99,6 +99,10 @@ public:
 
   AttribMatrixTags(TheWarehouse & w) : AttribTagBase(w, "matrix_tags") {}
   AttribMatrixTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "matrix_tags") {}
+  AttribMatrixTags(TheWarehouse & w, const std::set<unsigned int> & tags)
+    : AttribTagBase(w, tags, "matrix_tags")
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
   clonefunc(AttribMatrixTags);
 };
