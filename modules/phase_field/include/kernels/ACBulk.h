@@ -56,27 +56,21 @@ template <typename T>
 ACBulk<T>::ACBulk(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>(parameters),
     _L(getMaterialProperty<T>("mob_name")),
-    _dLdop(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
+    _dLdop(getMaterialPropertyDerivative<T>("mob_name", _var.name())),
+    _dLdarg(_n_args)
 {
-  // Get number of coupled variables
-  unsigned int nvar = _coupled_moose_vars.size();
-
-  // reserve space for derivatives
-  _dLdarg.resize(nvar);
-
   // Iterate over all coupled variables
-  for (unsigned int i = 0; i < nvar; ++i)
-    _dLdarg[i] = &getMaterialPropertyDerivative<T>("mob_name", _coupled_moose_vars[i]->name());
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _dLdarg[i] = &getMaterialPropertyDerivative<T>("mob_name", i);
 }
 
 template <typename T>
 InputParameters
 ACBulk<T>::validParams()
 {
-  InputParameters params = ::validParams<KernelValue>();
+  InputParameters params = JvarMapKernelInterface<KernelValue>::validParams();
   params.addClassDescription("Allen-Cahn base Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
 }
 
@@ -121,4 +115,3 @@ ACBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
   // Set off-diagonal Jacobian term from mobility derivatives
   return (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * computeDFDOP(Residual) * _test[_i][_qp];
 }
-

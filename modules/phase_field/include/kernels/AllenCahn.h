@@ -35,10 +35,8 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const unsigned int _nvar;
   const MaterialProperty<Real> & _dFdEta;
   const MaterialProperty<Real> & _d2FdEta2;
 
   std::vector<const MaterialProperty<Real> *> _d2FdEtadarg;
 };
-

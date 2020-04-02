@@ -60,31 +60,23 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     // second derivatives d2F/dx*dca for jacobian diagonal elements
     _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
     _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name())),
+    _d2fadcadarg(_n_args),
+    _d2fbdcbdarg(_n_args),
     // site fractions
     _ka(getParam<Real>("ka")),
     _kb(getParam<Real>("kb"))
 {
-  MooseVariableFEBase * arg;
-  unsigned int i;
-
 #ifdef DEBUG
   _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name
            << '\n';
 #endif
 
-  unsigned int nvar = _coupled_moose_vars.size();
-  _d2fadcadarg.resize(nvar);
-  _d2fbdcbdarg.resize(nvar);
-
-  for (i = 0; i < nvar; ++i)
+  // lookup table for the material properties representing the derivatives needed for the
+  // off-diagonal jacobian
+  for (std::size_t i = 0; i < _n_args; ++i)
   {
-    // get the moose variable
-    arg = _coupled_moose_vars[i];
-
-    // lookup table for the material properties representing the derivatives needed for the
-    // off-diagonal jacobian
-    _d2fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), arg->name());
-    _d2fbdcbdarg[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, arg->name());
+    _d2fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), i);
+    _d2fbdcbdarg[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, i);
   }
 }
 

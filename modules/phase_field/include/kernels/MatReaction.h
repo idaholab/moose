@@ -61,10 +61,6 @@ protected:
   ///  Reaction rate derivative w.r.t. the variable being added by this kernel
   const MaterialProperty<Real> & _dLdv;
 
-  /// number of coupled variables
-  const unsigned int _nvar;
-
   ///  Reaction rate derivatives w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
-

@@ -27,17 +27,13 @@ MaskedBodyForce::validParams()
 MaskedBodyForce::MaskedBodyForce(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>(parameters),
     _mask(getMaterialProperty<Real>("mask")),
-    _nvar(_coupled_moose_vars.size()),
     _v_name(_var.name()),
     _dmaskdv(getMaterialPropertyDerivative<Real>("mask", _v_name)),
-    _dmaskdarg(_nvar)
+    _dmaskdarg(_n_args)
 {
   // Get derivatives of mask wrt coupled variables
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    MooseVariableFEBase * cvar = _coupled_moose_vars[i];
-    _dmaskdarg[i] = &getMaterialPropertyDerivative<Real>("mask", cvar->name());
-  }
+  for (unsigned int i = 0; i < _n_args; ++i)
+    _dmaskdarg[i] = &getMaterialPropertyDerivative<Real>("mask", i);
 }
 
 void

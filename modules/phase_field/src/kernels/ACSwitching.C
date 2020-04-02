@@ -28,7 +28,6 @@ ACSwitching::validParams()
 
 ACSwitching::ACSwitching(const InputParameters & parameters)
   : ACBulk<Real>(parameters),
-    _nvar(_coupled_moose_vars.size()),
     _etai_name(_var.name()),
     _Fj_names(getParam<std::vector<MaterialPropertyName>>("Fj_names")),
     _num_j(_Fj_names.size()),
@@ -48,23 +47,21 @@ ACSwitching::ACSwitching(const InputParameters & parameters)
   {
     // get phase free energy
     _prop_Fj[n] = &getMaterialPropertyByName<Real>(_Fj_names[n]);
-    _prop_dFjdarg[n].resize(_nvar);
+    _prop_dFjdarg[n].resize(_n_args);
 
     // get switching derivatives wrt eta_i, the nonlinear variable
     _prop_dhjdetai[n] = &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name);
     _prop_d2hjdetai2[n] =
         &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name, _etai_name);
-    _prop_d2hjdetaidarg[n].resize(_nvar);
+    _prop_d2hjdetaidarg[n].resize(_n_args);
 
-    for (unsigned int i = 0; i < _nvar; ++i)
+    for (unsigned int i = 0; i < _n_args; ++i)
     {
-      MooseVariableFEBase * cvar = _coupled_moose_vars[i];
       // Get derivatives of all Fj wrt all coupled variables
-      _prop_dFjdarg[n][i] = &getMaterialPropertyDerivative<Real>(_Fj_names[n], cvar->name());
+      _prop_dFjdarg[n][i] = &getMaterialPropertyDerivative<Real>(_Fj_names[n], i);
 
       // Get second derivatives of all hj wrt eta_i and all coupled variables
-      _prop_d2hjdetaidarg[n][i] =
-          &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name, cvar->name());
+      _prop_d2hjdetaidarg[n][i] = &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name, i);
     }
   }
 }

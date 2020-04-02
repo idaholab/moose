@@ -879,7 +879,7 @@
   [./missing_input]
     type = 'RunException'
     input = 'missing_input_file.i'
-    expect_err = "Unable to open file"
+    expect_err = "Failed to resolve input file path"
 
     requirement = 'The system shall report an error when an input file cannot be opened and read.'
     issues = '#10909'

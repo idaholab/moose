@@ -42,10 +42,8 @@ protected:
   /// Mobility
   const MaterialProperty<Real> & _L;
 
-  ///@{ Displacement variables used for off-diagonal Jacobian
-  const unsigned int _ndisp;
-  std::vector<unsigned int> _disp_var;
-  ///@}
+  /// Displacement variables used for off-diagonal Jacobian
+  JvarMap _disp_map;
 
   /// Free energy material properties and derivatives
   const MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;

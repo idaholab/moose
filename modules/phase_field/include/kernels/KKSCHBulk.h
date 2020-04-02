@@ -41,9 +41,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  /// Number of coupled variables
-  unsigned int _nvar;
-
   ///@{
   /// Phase concnetration variables
   unsigned int _ca_var;
@@ -73,4 +70,3 @@ private:
   /// Second derivative \f$ d^2Fb/dcb^2 \f$
   const MaterialProperty<Real> & _second_derivative_Fb;
 };
-

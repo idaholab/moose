@@ -45,10 +45,6 @@ protected:
   /// 2nd order material property derivative w.r.t. v then u
   const MaterialProperty<Real> & _d2Fdvdu;
 
-  /// Number of coupled variables
-  const unsigned int _nvar;
-
   /// 2nd order material property derivatives w.r.t. v and then all other coupled variables
   std::vector<const MaterialProperty<Real> *> _d2Fdvdarg;
 };
-

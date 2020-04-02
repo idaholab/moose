@@ -45,9 +45,6 @@ protected:
   virtual void initialSetup();
 
 private:
-  /// Number of coupled variables
-  unsigned int _nvar;
-
   ///@{ Phase concnetration variable
   unsigned int _ca_var;
   VariableName _ca_name;
