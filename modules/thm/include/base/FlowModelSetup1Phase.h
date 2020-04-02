@@ -62,4 +62,6 @@ protected:
   const VariableName _e_name;
   /// Name of specific total enthalpy variable
   const VariableName _H_name;
+  /// Name of dynamic viscosity variable
+  const VariableName _mu_name;
 };

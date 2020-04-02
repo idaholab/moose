@@ -45,7 +45,8 @@ FlowModelSetup1Phase::FlowModelSetup1Phase(InputParameters params)
     _T_name("T"),
     _v_name("v"),
     _e_name("e"),
-    _H_name("H")
+    _H_name("H"),
+    _mu_name("mu")
 {
 }
 
@@ -367,6 +368,27 @@ FlowModelSetup1Phase::addMaterials()
     action->getObjectParams().set<std::vector<VariableName>>("rhoEA") = {_rhoEA_name};
 
     action->getObjectParams().set<UserObjectName>("fp") = _fp_1phase_name;
+
+    _this_action_warehouse.addActionBlock(action);
+  }
+
+  // dynamic viscosity
+  {
+    const std::string class_name = "AddMaterialAction";
+
+    InputParameters params = _this_action_factory.getValidParams(class_name);
+    params.set<std::string>("type") = "DynamicViscosityMaterial";
+
+    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+        _this_action_factory.create(class_name, "mu_material", params));
+
+    action->getObjectParams().set<std::vector<VariableName>>("arhoA") = {_rhoA_name};
+    action->getObjectParams().set<std::vector<VariableName>>("arhouA") = {_rhouA_name};
+    action->getObjectParams().set<std::vector<VariableName>>("arhoEA") = {_rhoEA_name};
+    action->getObjectParams().set<MaterialPropertyName>("mu") = {_mu_name};
+    action->getObjectParams().set<MaterialPropertyName>("v") = {_v_name};
+    action->getObjectParams().set<MaterialPropertyName>("e") = {_e_name};
+    action->getObjectParams().set<UserObjectName>("fp_1phase") = _fp_1phase_name;
 
     _this_action_warehouse.addActionBlock(action);
   }
