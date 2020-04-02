@@ -39,6 +39,7 @@ PolynomialChaos::validParams()
 
 PolynomialChaos::PolynomialChaos(const InputParameters & parameters)
   : SurrogateModel(parameters),
+    _order(declareModelData<unsigned int>("_order", getParam<unsigned int>("order")),
     _tuple(declareModelData<std::vector<std::vector<unsigned int>>>("_tuple")),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _poly(declareModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>(
@@ -52,7 +53,6 @@ PolynomialChaos::initialSetup()
   if (isTraining())
   {
     // Setup data needed for training
-    _order = getParam<unsigned int>("order");
     _tuple = generateTuple(getParam<std::vector<DistributionName>>("distributions").size(), _order);
     _ncoeff = _tuple.size();
     _coeff.resize(_ncoeff, 0);
@@ -146,7 +146,6 @@ PolynomialChaos::trainFinalize()
 Real
 PolynomialChaos::evaluate(const std::vector<Real> & x) const
 {
-
   mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
 
   DenseMatrix<Real> poly_val(_ndim, _order);

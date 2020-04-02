@@ -92,9 +92,6 @@ private:
   /// QuadratureSampler pointer, necessary for applying quadrature weights
   QuadratureSampler * _quad_sampler;
 
-  /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
-  unsigned int _order;
-
   /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue * _values_ptr = nullptr;
 
@@ -108,6 +105,9 @@ private:
   bool _values_distributed;
 
   // The following items are stored using declareModelData for use as a trained model.
+
+  /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
+  unsigned int & _order;
 
   /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
   std::vector<std::vector<unsigned int>> & _tuple;
