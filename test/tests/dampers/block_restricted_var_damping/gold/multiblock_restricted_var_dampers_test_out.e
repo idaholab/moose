@@ -1,0 +1,1 @@
+../../../variables/multiblock_restricted_var/gold/multiblock_restricted_var_test_out.e

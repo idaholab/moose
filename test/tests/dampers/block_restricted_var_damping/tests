@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'multiblock_restricted_var_dampers_test.i'
+    exodiff = 'multiblock_restricted_var_dampers_test_out.e'
+    issues = '#15028'
+    design = 'syntax/Variables/index.md syntax/Dampers/index.md'
+    requirement = 'The system shall support the ability to apply dampers to block-restricted variables'
+  [../]
+[]
