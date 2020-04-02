@@ -107,7 +107,7 @@
 
 [Materials]
   [./elastic_tensor1]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 1
@@ -121,7 +121,7 @@
     block = 1
   [../]
   [./elastic_tensor2]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 2

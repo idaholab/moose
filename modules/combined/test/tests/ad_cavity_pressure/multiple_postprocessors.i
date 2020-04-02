@@ -136,42 +136,42 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = stress_xx
   [../]
   [./stress_yy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = stress_yy
   [../]
   [./stress_zz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_zz
   [../]
   [./stress_xy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
     variable = stress_xy
   [../]
   [./stress_yz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
     variable = stress_yz
   [../]
   [./stress_zx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 0
@@ -270,7 +270,7 @@
 
 [Materials]
   [./elast_tensor1]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e1
     poissons_ratio = 0
     block = 1
@@ -284,7 +284,7 @@
     block = 1
   [../]
   [./elast_tensor2]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0
     block = 2
