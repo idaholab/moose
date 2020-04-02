@@ -119,7 +119,9 @@ if [ -z "$PETSC_DIR" ]; then
   echo "PETSc maint branch."
   echo "IMPORTANT: If you did not run the update_and_rebuild_petsc.sh script yet, please run it before building libMesh"
   export PETSC_DIR=$SCRIPT_DIR/../petsc
-  export PETSC_ARCH=arch-moose
+  if [ -z "$PETSC_ARCH" ]; then
+    export PETSC_ARCH=arch-moose
+  fi
 fi
 
 # If we're not going fast, remove the build directory and reconfigure
