@@ -114,7 +114,7 @@
 
 [Materials]
   [./const]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
   [../]
