@@ -45,8 +45,8 @@
     variable = c
     f_name = F
   [../]
-  [./ACInterfaceBetaPenalty]
-    type = ACInterfaceBetaPenalty
+  [./ACInterfaceCleavageFracture]
+    type = ACInterfaceCleavageFracture
     variable = c
     beta_penalty = 1
     cleavage_plane_normal = '-0.707 0.707 0.0'
