@@ -20,10 +20,10 @@ netcdf:
  - 4.6.2
 
 moose_petsc:
- - 3.11.4
+ - 3.12.5 build_0
 
 moose_libmesh_vtk:
- - 6.3.0
+ - 6.3.0 build_1
 
 pin_run_as_build:
   moose_petsc: x.x.x

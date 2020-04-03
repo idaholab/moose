@@ -1,0 +1,25 @@
+From 5d8ee35b4fddbdd644ae93d4ba6f3bc2e9fc5a39 Mon Sep 17 00:00:00 2001
+From: Min RK <benjaminrk@gmail.com>
+Date: Tue, 19 Nov 2019 12:24:18 +0100
+Subject: [PATCH] don't include cppflags in Cflags in pkg-config output
+
+---
+ config/PETSc/Configure.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/config/PETSc/Configure.py b/config/PETSc/Configure.py
+index 363c5d6550..0a65204344 100644
+--- a/config/PETSc/Configure.py
++++ b/config/PETSc/Configure.py
+@@ -178,7 +178,7 @@ class Configure(config.base.Configure):
+     fd.write('Name: PETSc\n')
+     fd.write('Description: Library to solve ODEs and algebraic equations\n')
+     fd.write('Version: %s\n' % self.petscdir.version)
+-    fd.write('Cflags: ' + ' '.join([self.setCompilers.CPPFLAGS] + cflags_inc) + '\n')
++    fd.write('Cflags: ' + ' '.join(cflags_inc) + '\n')
+     fd.write('Libs: '+self.libraries.toStringNoDupes(['-L${libdir}', self.petsclib], with_rpath=False)+'\n')
+     # Remove RPATH flags from library list.  User can add them using
+     # pkg-config --variable=ldflag_rpath and pkg-config --libs-only-L
+-- 
+2.23.0
+
