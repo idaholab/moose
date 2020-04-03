@@ -1,4 +1,8 @@
 [Tests]
+  # Needed because the default of false will cause the
+  # race condition checks to be skipped
+  parallel_scheduling = true
+
   # We have a chain of dependencies in this set (a-d)
   # a and d can run concurrently and output to the
   # same file
