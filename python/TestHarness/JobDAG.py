@@ -215,7 +215,9 @@ class JobDAG(object):
                 job_list[0].setStatus(job.error, 'DUPLICATE OUTFILES')
 
             # Multiple tests will clobber eachothers output file
-            elif len(job_list) > 1:
+            # Only check this with parallel_scheduling enabled because otherwise
+            # all of these jobs will be serialized
+            elif len(job_list) > 1 and self._setParallel():
                 for job in job_list:
                     job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')

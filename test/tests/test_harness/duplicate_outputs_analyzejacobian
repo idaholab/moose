@@ -1,4 +1,8 @@
 [Tests]
+  # Needed because the default of false will cause the
+  # race condition checks to be skipped
+  parallel_scheduling = true
+
   [./a]
     type = 'AnalyzeJacobian'
     input = 'good.i'

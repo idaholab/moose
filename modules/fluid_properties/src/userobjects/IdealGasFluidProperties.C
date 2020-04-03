@@ -166,6 +166,14 @@ Real IdealGasFluidProperties::gamma_from_p_T(Real, Real) const { return _gamma; 
 
 Real IdealGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
+void
+IdealGasFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  mu = this->mu_from_v_e(v, e);
+  dmu_dv = 0.0;
+  dmu_de = 0.0;
+}
+
 Real IdealGasFluidProperties::k_from_v_e(Real, Real) const { return _k; }
 
 Real
