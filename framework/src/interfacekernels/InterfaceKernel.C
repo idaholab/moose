@@ -197,6 +197,19 @@ template <typename T>
 void
 InterfaceKernelTempl<T>::computeResidual()
 {
+  // in the gmsh mesh format (at least in the version 2 format) the "sideset" physical entities are
+  // associated only with the lower-dimensional geometric entity that is the boundary between two
+  // higher-dimensional element faces. It does not have a sidedness to it like the exodus format
+  // does. Consequently we may naively try to execute an interface kernel twice, one time where _var
+  // has dofs on _current_elem *AND* _neighbor_var has dofs on _neighbor_elem, and the other time
+  // where _var has dofs on _neighbor_elem and _neighbor_var has dofs on _current_elem. We only want
+  // to execute in the former case. In the future we should remove this and add some kind of "block"
+  // awareness to interface kernels to avoid all the unnecessary reinit that happens before we hit
+  // this return
+  if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
+      !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
+    return;
+
   // Compute the residual for this element
   computeElemNeighResidual(Moose::Element);
 
@@ -273,6 +286,19 @@ template <typename T>
 void
 InterfaceKernelTempl<T>::computeJacobian()
 {
+  // in the gmsh mesh format (at least in the version 2 format) the "sideset" physical entities are
+  // associated only with the lower-dimensional geometric entity that is the boundary between two
+  // higher-dimensional element faces. It does not have a sidedness to it like the exodus format
+  // does. Consequently we may naively try to execute an interface kernel twice, one time where _var
+  // has dofs on _current_elem *AND* _neighbor_var has dofs on _neighbor_elem, and the other time
+  // where _var has dofs on _neighbor_elem and _neighbor_var has dofs on _current_elem. We only want
+  // to execute in the former case. In the future we should remove this and add some kind of "block"
+  // awareness to interface kernels to avoid all the unnecessary reinit that happens before we hit
+  // this return
+  if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
+      !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
+    return;
+
   computeElemNeighJacobian(Moose::ElementElement);
   computeElemNeighJacobian(Moose::NeighborNeighbor);
 }
@@ -313,6 +339,19 @@ template <typename T>
 void
 InterfaceKernelTempl<T>::computeElementOffDiagJacobian(unsigned int jvar)
 {
+  // in the gmsh mesh format (at least in the version 2 format) the "sideset" physical entities are
+  // associated only with the lower-dimensional geometric entity that is the boundary between two
+  // higher-dimensional element faces. It does not have a sidedness to it like the exodus format
+  // does. Consequently we may naively try to execute an interface kernel twice, one time where _var
+  // has dofs on _current_elem *AND* _neighbor_var has dofs on _neighbor_elem, and the other time
+  // where _var has dofs on _neighbor_elem and _neighbor_var has dofs on _current_elem. We only want
+  // to execute in the former case. In the future we should remove this and add some kind of "block"
+  // awareness to interface kernels to avoid all the unnecessary reinit that happens before we hit
+  // this return
+  if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
+      !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
+    return;
+
   bool is_jvar_not_interface_var = true;
   if (jvar == _var.number())
   {
@@ -336,6 +375,19 @@ template <typename T>
 void
 InterfaceKernelTempl<T>::computeNeighborOffDiagJacobian(unsigned int jvar)
 {
+  // in the gmsh mesh format (at least in the version 2 format) the "sideset" physical entities are
+  // associated only with the lower-dimensional geometric entity that is the boundary between two
+  // higher-dimensional element faces. It does not have a sidedness to it like the exodus format
+  // does. Consequently we may naively try to execute an interface kernel twice, one time where _var
+  // has dofs on _current_elem *AND* _neighbor_var has dofs on _neighbor_elem, and the other time
+  // where _var has dofs on _neighbor_elem and _neighbor_var has dofs on _current_elem. We only want
+  // to execute in the former case. In the future we should remove this and add some kind of "block"
+  // awareness to interface kernels to avoid all the unnecessary reinit that happens before we hit
+  // this return
+  if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
+      !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
+    return;
+
   bool is_jvar_not_interface_var = true;
   if (jvar == _var.number())
   {
