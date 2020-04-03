@@ -72,6 +72,8 @@ public:
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
+   * Important note: this copy operation loses AD derivative information if either this
+   * or the rhs is not an AD material property
    *
    * @param to_qp The quadrature point in _this_ Property that you want to copy to.
    * @param rhs The Property you want to copy _from_.
@@ -202,6 +204,41 @@ class ADMaterialProperty;
 // ------------------------------------------------------------
 // Material::Property<> class inline methods
 
+namespace moose
+{
+namespace internal
+{
+template <typename T1, typename T2>
+void
+rawValueEqualityHelper(T1 & out, const T2 & in)
+{
+  out = MetaPhysicL::raw_value(in);
+}
+
+template <typename T1, typename T2>
+void
+rawValueEqualityHelper(std::vector<T1> & out, const std::vector<T2> & in)
+{
+  out.resize(in.size());
+  for (MooseIndex(in) i = 0; i < in.size(); ++i)
+    out[i] = MetaPhysicL::raw_value(in[i]);
+}
+
+template <typename T1, typename T2>
+void
+rawValueEqualityHelper(std::vector<std::vector<T1>> & out, const std::vector<std::vector<T2>> & in)
+{
+  out.resize(in.size());
+  for (MooseIndex(in) i = 0; i < in.size(); ++i)
+  {
+    out[i].resize(in[i].size());
+    for (MooseIndex(in[i].size()) j = 0; j < in[i].size(); ++j)
+      out[i][j] = MetaPhysicL::raw_value(in[i][j]);
+  }
+}
+}
+}
+
 template <typename T, bool is_ad>
 PropertyValue *
 MaterialPropertyBase<T, is_ad>::makeRegularProperty()
@@ -211,7 +248,7 @@ MaterialPropertyBase<T, is_ad>::makeRegularProperty()
   new_prop->resize(this->size());
 
   for (MooseIndex(_value) i = 0; i < _value.size(); ++i)
-    (*new_prop)[i] = MetaPhysicL::raw_value(_value[i]);
+    moose::internal::rawValueEqualityHelper((*new_prop)[i], _value[i]);
 
   return new_prop;
 }
@@ -225,7 +262,7 @@ MaterialPropertyBase<T, is_ad>::makeADProperty()
   new_prop->resize(this->size());
 
   for (MooseIndex(_value) i = 0; i < _value.size(); ++i)
-    (*new_prop)[i] = MetaPhysicL::raw_value(_value[i]);
+    moose::internal::rawValueEqualityHelper((*new_prop)[i], _value[i]);
 
   return new_prop;
 }
@@ -269,17 +306,9 @@ MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
   if (rhs->isAD() == is_ad)
     _value[to_qp] = cast_ptr<const MaterialPropertyBase<T, is_ad> *>(rhs)->_value[from_qp];
 
-  // If RHS is AD but we're regular
-  else if (rhs->isAD())
-    _value[to_qp] =
-        MetaPhysicL::raw_value((*cast_ptr<const MaterialPropertyBase<T, true> *>(rhs))[from_qp]);
-
-  // If RHS is regular but we're AD
-  else if (!rhs->isAD())
-    _value[to_qp] = (*cast_ptr<const MaterialPropertyBase<T, false> *>(rhs))[from_qp];
-
   else
-    mooseError("Unhandled case in qpCopy");
+    moose::internal::rawValueEqualityHelper(
+        _value[to_qp], (*cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(rhs))[from_qp]);
 }
 
 template <typename T, bool is_ad>
