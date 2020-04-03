@@ -356,7 +356,6 @@
     master = 4
     tangential_tolerance = 1e-3
     formulation = augmented_lagrange
-    system = constraint
     normalize_penalty = true
     penalty = 1e8
     model = frictionless

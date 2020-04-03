@@ -111,7 +111,6 @@ name = 'finite'
     master = plank_right
     slave = block_left
     formulation = mortar
-    system = constraint
   [../]
 []
 

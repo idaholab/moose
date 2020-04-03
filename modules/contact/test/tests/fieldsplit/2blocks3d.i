@@ -103,7 +103,6 @@
     penalty = 1e+6
     normalize_penalty = true
     formulation = kinematic
-    system = constraint
     normal_smoothing_distance = 0.1
   [../]
 []

@@ -216,7 +216,6 @@
     master = 2
     slave = 3
     model = coulomb
-    system = constraint
     friction_coefficient = '0.25'
     formulation = tangential_penalty
     penalty = 1e10

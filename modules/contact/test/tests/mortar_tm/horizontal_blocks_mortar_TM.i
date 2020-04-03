@@ -149,7 +149,6 @@ offset = 0.01
 
     model = frictionless
     formulation = mortar
-    system = constraint
 
     friction_coefficient = 0.0
 

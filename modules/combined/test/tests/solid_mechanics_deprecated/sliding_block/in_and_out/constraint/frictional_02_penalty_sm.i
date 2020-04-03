@@ -203,7 +203,6 @@
     penalty = 1e+7
     friction_coefficient = 0.2
     formulation = penalty
-    system = constraint
     normal_smoothing_distance = 0.1
   [../]
 []

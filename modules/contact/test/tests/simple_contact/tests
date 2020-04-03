@@ -1,15 +1,6 @@
 [Tests]
   issues = '#3958'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./simple_contact_dirac_test]
-    type = Exodiff
-    input = 'simple_contact_dirac_test.i'
-    exodiff = 'simple_contact_dirac_test_out.e'
-    allow_warnings = true
-    no_error_deprecated = true
-    design = 'ContactMaster.md SlaveConstraint.md'
-    requirement = ''
-  [../]
   [./simple_contact_test]
     type = Exodiff
     input = 'simple_contact_test.i'
@@ -28,31 +19,10 @@
     scale_refine = 1
     max_parallel = 1
   [../]
-  [./simple_contact_rz_dirac_test]
-    type = Exodiff
-    input = 'simple_contact_rz_dirac_test.i'
-    exodiff = 'simple_contact_rz_dirac_test_out.e'
-    allow_warnings = true
-    no_error_deprecated = true
-    abs_zero = 1e-7
-    scale_refine = 1
-    max_parallel = 1
-    design = 'ContactMaster.md SlaveConstraint.md'
-  [../]
   [./simple_contact_rspherical]
     type = Exodiff
     input = 'simple_contact_rspherical.i'
     exodiff = 'simple_contact_rspherical_out.e'
     max_parallel = 1
   [../]
-  [./simple_contact_rspherical_dirac]
-    type = Exodiff
-    input = 'simple_contact_rspherical_dirac.i'
-    exodiff = 'simple_contact_rspherical_dirac_out.e'
-    allow_warnings = true
-    no_error_deprecated = true
-    max_parallel = 1
-    design = 'ContactMaster.md SlaveConstraint.md'
-  [../]
-
 []

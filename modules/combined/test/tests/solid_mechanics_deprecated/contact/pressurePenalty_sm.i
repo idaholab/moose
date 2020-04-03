@@ -40,7 +40,6 @@
     formulation = penalty
     tangential_tolerance = 1e-3
     tension_release = -1
-    system = Constraint
   [../]
 []
 

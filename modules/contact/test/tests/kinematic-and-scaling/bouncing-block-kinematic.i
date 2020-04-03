@@ -51,7 +51,6 @@ offset = 1e-2
     model = frictionless
     formulation = kinematic
     penalty = 1e3
-    system = constraint
     normal_smoothing_distance = 0.1
   []
 []

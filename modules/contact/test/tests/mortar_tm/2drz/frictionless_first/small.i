@@ -113,7 +113,6 @@ name = 'small'
     master = plank_right
     slave = block_left
     formulation = mortar
-    system = constraint
   [../]
 []
 

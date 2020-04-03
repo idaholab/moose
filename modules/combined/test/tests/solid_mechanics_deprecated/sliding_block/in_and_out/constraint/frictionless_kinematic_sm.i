@@ -202,7 +202,6 @@
     master = 2
     model = frictionless
     penalty = 1e+6
-    system = constraint
     normal_smoothing_distance = 0.1
   [../]
 []
