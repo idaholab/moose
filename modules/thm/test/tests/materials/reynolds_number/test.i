@@ -6,29 +6,11 @@
 []
 
 [Variables]
-  [./u]
+  [./arhoA]
   [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
+  [./arhouA]
   [../]
-[]
-
-[BCs]
-  [./left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
+  [./arhoEA]
   [../]
 []
 
@@ -43,24 +25,50 @@
   [./Re_ak]
     type = MaterialRealAux
     variable = Re
-    property = Re
+    property = my_Re
   [../]
 []
 
 [Materials]
-  [./props]
-    type = GenericConstantMaterial
-    prop_names = 'rho vel D_h mu'
-    prop_values = '1000 0.1 0.1 0.1'
+  [./rho_mat]
+    type = ConstantMaterial
+    property_name = rho
+    derivative_vars = 'arhoA'
+    value = 1000
+  [../]
+  [./vel_mat]
+    type = ConstantMaterial
+    property_name = vel
+    derivative_vars = 'arhoA arhouA'
+    value = 5
+  [../]
+  [./D_h_mat]
+    type = ConstantMaterial
+    property_name = D_h
+    value = 0.002
+  [../]
+  [./mu_mat]
+    type = ConstantMaterial
+    property_name = mu
+    derivative_vars = 'arhoA arhouA arhoEA'
+    value = 0.1
   [../]
 
   [./Re_material]
     type = ReynoldsNumberMaterial
+    arhoA = arhoA
+    arhouA = arhouA
+    arhoEA = arhoEA
+    Re = my_Re
     rho = rho
     vel = vel
     D_h = D_h
     mu = mu
   [../]
+[]
+
+[Problem]
+  solve = false
 []
 
 [Executioner]

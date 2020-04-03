@@ -185,6 +185,19 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     _sim.addMaterial(class_name, genName(_comp_name, "fp_mat"), params);
   }
+  {
+    const std::string class_name = "DynamicViscosityMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+    params.set<UserObjectName>("fp_1phase") = _fp_name;
+    params.set<MaterialPropertyName>("mu") = {DYNAMIC_VISCOSITY};
+    params.set<MaterialPropertyName>("v") = {SPECIFIC_VOLUME};
+    params.set<MaterialPropertyName>("e") = {SPECIFIC_INTERNAL_ENERGY};
+    params.set<std::vector<VariableName>>("arhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
+    _sim.addMaterial(class_name, genName(_comp_name, "mu_mat"), params);
+  }
 
   ////////////////////////////////////////////////////////
   // Adding kernels

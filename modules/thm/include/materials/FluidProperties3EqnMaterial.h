@@ -77,9 +77,6 @@ protected:
   /// Constant-volume specific heat
   MaterialProperty<Real> & _cv;
 
-  /// Dynamic viscosity
-  MaterialProperty<Real> & _mu;
-
   /// Thermal conductivity
   MaterialProperty<Real> & _k;
 

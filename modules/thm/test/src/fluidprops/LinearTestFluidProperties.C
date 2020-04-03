@@ -72,3 +72,18 @@ LinearTestFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Re
   dp_dv = 3.5;
   dp_de = 2.1;
 }
+
+Real
+LinearTestFluidProperties::mu_from_v_e(Real v, Real e) const
+{
+  return 0.6 * v + 1.3 * e;
+}
+
+void
+LinearTestFluidProperties::mu_from_v_e(
+    Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  mu = this->mu_from_v_e(v, e);
+  dmu_dv = 0.6;
+  dmu_de = 1.3;
+}
