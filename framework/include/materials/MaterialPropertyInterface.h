@@ -22,9 +22,6 @@ class InputParameters;
 class MaterialPropertyInterface;
 class MooseObject;
 
-template <>
-InputParameters validParams<MaterialPropertyInterface>();
-
 /**
  * \class MaterialPropertyInterface
  * \brief An interface for accessing Materials

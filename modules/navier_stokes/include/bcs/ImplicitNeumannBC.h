@@ -14,9 +14,6 @@
 // Forward Declarations
 class ImplicitNeumannBC;
 
-template <>
-InputParameters validParams<ImplicitNeumannBC>();
-
 /**
  * This class implements a form of the Neumann boundary condition in
  * which the boundary term is treated "implicitly".  This concept is
@@ -36,4 +33,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

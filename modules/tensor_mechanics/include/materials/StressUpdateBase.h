@@ -34,9 +34,6 @@ enum class TangentCalculationMethod
   PARTIAL
 };
 
-template <>
-InputParameters validParams<StressUpdateBase>();
-
 /**
  * StressUpdateBase is a material that is not called by MOOSE because
  * of the compute=false flag set in the parameter list.  This class is a base class

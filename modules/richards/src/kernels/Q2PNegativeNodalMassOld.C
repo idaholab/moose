@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", Q2PNegativeNodalMassOld);
 
-defineLegacyParams(Q2PNegativeNodalMassOld);
-
 InputParameters
 Q2PNegativeNodalMassOld::validParams()
 {

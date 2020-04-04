@@ -17,8 +17,6 @@
 // XFEM includes
 #include "XFEMFuncs.h"
 
-defineLegacyParams(GeometricCut3DUserObject);
-
 InputParameters
 GeometricCut3DUserObject::validParams()
 {

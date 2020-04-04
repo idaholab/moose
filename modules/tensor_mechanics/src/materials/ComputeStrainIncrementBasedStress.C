@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeStrainIncrementBasedStress);
 
-defineLegacyParams(ComputeStrainIncrementBasedStress);
-
 InputParameters
 ComputeStrainIncrementBasedStress::validParams()
 {

@@ -15,9 +15,6 @@
 // Forward declerations
 class MaterialRealTensorValueAux;
 
-template <>
-InputParameters validParams<MaterialRealTensorValueAux>();
-
 /**
  * AuxKernel for outputting a RealTensorValue material property component to an AuxVariable
  */
@@ -41,4 +38,3 @@ protected:
   /// The column index to output
   unsigned int _col;
 };
-

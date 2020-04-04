@@ -14,9 +14,6 @@
 // Forward Declarations
 class GBEvolution;
 
-template <>
-InputParameters validParams<GBEvolution>();
-
 /**
  * Grain boundary energy parameters for isotropic uniform grain boundary energies
  */
@@ -32,4 +29,3 @@ protected:
 
   Real _GBEnergy;
 };
-

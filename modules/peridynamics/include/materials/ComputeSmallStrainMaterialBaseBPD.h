@@ -13,9 +13,6 @@
 
 class ComputeSmallStrainMaterialBaseBPD;
 
-template <>
-InputParameters validParams<ComputeSmallStrainMaterialBaseBPD>();
-
 /**
  * Base material class for bond based peridynamic solid mechanics models
  */

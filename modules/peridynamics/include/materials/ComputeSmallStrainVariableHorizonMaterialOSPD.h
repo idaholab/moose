@@ -13,9 +13,6 @@
 
 class ComputeSmallStrainVariableHorizonMaterialOSPD;
 
-template <>
-InputParameters validParams<ComputeSmallStrainVariableHorizonMaterialOSPD>();
-
 /**
  * Material class for ordinary state based peridynamic solid mechanics model based on irregular
  * spatial discretization

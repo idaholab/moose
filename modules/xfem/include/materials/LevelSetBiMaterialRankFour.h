@@ -15,9 +15,6 @@
 // Forward Declarations
 class LevelSetBiMaterialRankFour;
 
-template <>
-InputParameters validParams<LevelSetBiMaterialRankFour>();
-
 /**
  * Compute a RankFourTensor material property for bi-materials problem (consisting of two different
  * materials) defined by a level set function
@@ -40,4 +37,3 @@ protected:
   /// Global RankFourTensor material property (switch bi-material diffusion coefficient based on level set values)
   MaterialProperty<RankFourTensor> & _material_prop;
 };
-

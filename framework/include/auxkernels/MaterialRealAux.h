@@ -15,9 +15,6 @@
 // Forward Declarations
 class MaterialRealAux;
 
-template <>
-InputParameters validParams<MaterialRealAux>();
-
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable
  */
@@ -36,4 +33,3 @@ protected:
   /// Returns the material property values at quadrature points
   virtual Real getRealValue();
 };
-

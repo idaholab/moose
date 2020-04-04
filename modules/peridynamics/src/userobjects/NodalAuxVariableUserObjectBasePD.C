@@ -12,8 +12,6 @@
 #include "PeridynamicsMesh.h"
 #include "MooseVariable.h"
 
-defineLegacyParams(NodalAuxVariableUserObjectBasePD);
-
 InputParameters
 NodalAuxVariableUserObjectBasePD::validParams()
 {

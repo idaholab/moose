@@ -14,9 +14,6 @@
 // Forward Declarations
 class PFMobility;
 
-template <>
-InputParameters validParams<PFMobility>();
-
 class PFMobility : public Material
 {
 public:
@@ -35,4 +32,3 @@ private:
   Real _mob;
   Real _kappa;
 };
-

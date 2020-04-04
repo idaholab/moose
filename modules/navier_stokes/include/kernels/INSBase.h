@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSBase;
 
-template <>
-InputParameters validParams<INSBase>();
-
 /**
  * This class computes strong and weak components of the INS governing
  * equations.  These terms can then be assembled in child classes
@@ -111,4 +108,3 @@ protected:
   bool _convective_term;
   bool _transient_term;
 };
-

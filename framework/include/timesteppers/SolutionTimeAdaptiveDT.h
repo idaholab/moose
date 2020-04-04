@@ -15,9 +15,6 @@
 
 class SolutionTimeAdaptiveDT;
 
-template <>
-InputParameters validParams<SolutionTimeAdaptiveDT>();
-
 /**
  *
  */
@@ -55,4 +52,3 @@ protected:
   /// The filehandle to hold the log
   std::ofstream _adaptive_log;
 };
-

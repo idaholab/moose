@@ -15,8 +15,6 @@
 
 registerMooseObject("PhaseFieldApp", ACGrGrElasticDrivingForce);
 
-defineLegacyParams(ACGrGrElasticDrivingForce);
-
 InputParameters
 ACGrGrElasticDrivingForce::validParams()
 {

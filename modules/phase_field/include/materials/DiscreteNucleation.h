@@ -15,9 +15,6 @@
 class DiscreteNucleation;
 class DiscreteNucleationMap;
 
-template <>
-InputParameters validParams<DiscreteNucleation>();
-
 /**
  * Free energy penalty contribution to force the nucleation of subresolution particles
  */
@@ -48,4 +45,3 @@ protected:
   /// UserObject providing a map of currently active nuclei
   const DiscreteNucleationMap & _map;
 };
-

@@ -20,8 +20,6 @@ registerMooseAction("TensorMechanicsApp",
 
 registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
 
-defineLegacyParams(DynamicTensorMechanicsAction);
-
 InputParameters
 DynamicTensorMechanicsAction::validParams()
 {

@@ -29,7 +29,3 @@ private:
   const MaterialProperty<Real> * _k_i[3];
   const MaterialProperty<Real> * _k_i_dT[3];
 };
-
-template <>
-InputParameters validParams<AnisoHeatConduction>();
-

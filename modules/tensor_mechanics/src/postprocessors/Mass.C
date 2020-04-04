@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", Mass);
 
-defineLegacyParams(Mass);
-
 InputParameters
 Mass::validParams()
 {

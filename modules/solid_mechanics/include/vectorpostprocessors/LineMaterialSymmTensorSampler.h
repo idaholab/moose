@@ -15,9 +15,6 @@
 // Forward Declarations
 class LineMaterialSymmTensorSampler;
 
-template <>
-InputParameters validParams<LineMaterialSymmTensorSampler>();
-
 /**
  * This class samples SymmTensor material properties for the integration points
  * in all elements that are intersected by a user-defined line.  It provides
@@ -48,4 +45,3 @@ public:
    */
   virtual Real getScalarFromProperty(const SymmTensor & property, const Point & curr_point);
 };
-

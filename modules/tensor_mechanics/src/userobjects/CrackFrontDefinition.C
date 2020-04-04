@@ -20,8 +20,6 @@
 
 registerMooseObject("TensorMechanicsApp", CrackFrontDefinition);
 
-defineLegacyParams(CrackFrontDefinition);
-
 InputParameters
 CrackFrontDefinition::validParams()
 {

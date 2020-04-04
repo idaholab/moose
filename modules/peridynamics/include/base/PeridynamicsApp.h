@@ -13,9 +13,6 @@
 
 class PeridynamicsApp;
 
-template <>
-InputParameters validParams<PeridynamicsApp>();
-
 class PeridynamicsApp : public MooseApp
 {
 public:

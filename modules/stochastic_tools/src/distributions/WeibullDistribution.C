@@ -14,8 +14,6 @@
 registerMooseObjectAliased("StochasticToolsApp", WeibullDistribution, "Weibull");
 registerMooseObjectReplaced("StochasticToolsApp", WeibullDistribution, "07/01/2020 00:00", Weibull);
 
-defineLegacyParams(WeibullDistribution);
-
 InputParameters
 WeibullDistribution::validParams()
 {

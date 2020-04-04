@@ -40,6 +40,3 @@ protected:
   SystemBase & _system;
   NumericVector<Number> & _aux_solution;
 };
-
-template <>
-InputParameters validParams<NodalArea>();

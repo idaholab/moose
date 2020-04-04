@@ -10,12 +10,8 @@
 #pragma once
 #include "Diffusion.h"
 
-
 // Forward Declarations
 class PrimaryDiffusion;
-
-template <>
-InputParameters validParams<PrimaryDiffusion>();
 
 /**
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
@@ -35,4 +31,3 @@ protected:
   /// Material property of dispersion-diffusion coefficient.
   const MaterialProperty<Real> & _diffusivity;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", NewmarkVelAux);
 
-defineLegacyParams(NewmarkVelAux);
-
 InputParameters
 NewmarkVelAux::validParams()
 {

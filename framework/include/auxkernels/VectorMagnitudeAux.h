@@ -13,9 +13,6 @@
 
 class VectorMagnitudeAux;
 
-template <>
-InputParameters validParams<VectorMagnitudeAux>();
-
 /**
  * Computes the magnitude of a vector whose components are given by up
  * to three coupled variables.
@@ -34,4 +31,3 @@ protected:
   const VariableValue & _y;
   const VariableValue & _z;
 };
-

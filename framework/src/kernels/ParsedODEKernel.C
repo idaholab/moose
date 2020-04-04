@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ParsedODEKernel);
 
-defineLegacyParams(ParsedODEKernel);
-
 InputParameters
 ParsedODEKernel::validParams()
 {

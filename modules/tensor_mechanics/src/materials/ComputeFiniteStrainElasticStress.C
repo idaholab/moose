@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeFiniteStrainElasticStress);
 
-defineLegacyParams(ComputeFiniteStrainElasticStress);
-
 InputParameters
 ComputeFiniteStrainElasticStress::validParams()
 {

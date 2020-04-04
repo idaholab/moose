@@ -14,9 +14,6 @@
 // Forward Declarations
 class SlopeLimitingBase;
 
-template <>
-InputParameters validParams<SlopeLimitingBase>();
-
 /**
  * Base class for slope limiting to limit
  * the slopes of cell average variables

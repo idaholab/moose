@@ -15,9 +15,6 @@
 // Forward Declarations
 class PFCRFFVariablesAction;
 
-template <>
-InputParameters validParams<PFCRFFVariablesAction>();
-
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
@@ -34,4 +31,3 @@ private:
   const unsigned int _num_L;
   const std::string _L_name_base;
 };
-

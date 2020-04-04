@@ -19,9 +19,6 @@ namespace libMesh
 class MeshBase;
 }
 
-template <>
-InputParameters validParams<GreaterThanLessThanPostprocessor>();
-
 class GreaterThanLessThanPostprocessor : public GeneralPostprocessor
 {
 public:

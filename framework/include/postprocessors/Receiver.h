@@ -14,9 +14,6 @@
 // Forward Declarations
 class Receiver;
 
-template <>
-InputParameters validParams<Receiver>();
-
 /**
  * A class for storing data, it allows the user to change the value of the
  * postprocessor by altering the _my_value reference
@@ -58,4 +55,3 @@ private:
   /// Reference to the value being stored in the associated PostprocessorData class
   const PostprocessorValue & _my_value;
 };
-

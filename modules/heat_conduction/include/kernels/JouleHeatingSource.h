@@ -16,9 +16,6 @@
 // Forward Declarations
 class JouleHeatingSource;
 
-template <>
-InputParameters validParams<JouleHeatingSource>();
-
 /**
  * This kernel calculates the heat source term corresponding to joule heating,
  * Q = J * E = elec_cond * grad_phi * grad_phi, where phi is the electrical potenstial.
@@ -44,4 +41,3 @@ private:
   const MaterialProperty<Real> & _delec_cond_dT;
   std::vector<const MaterialProperty<Real> *> _delec_cond_darg;
 };
-

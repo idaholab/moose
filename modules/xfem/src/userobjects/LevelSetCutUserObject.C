@@ -14,8 +14,6 @@
 
 registerMooseObject("XFEMApp", LevelSetCutUserObject);
 
-defineLegacyParams(LevelSetCutUserObject);
-
 InputParameters
 LevelSetCutUserObject::validParams()
 {

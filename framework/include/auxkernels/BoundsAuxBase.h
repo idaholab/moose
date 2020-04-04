@@ -14,9 +14,6 @@
 // Forward Declarations
 class BoundsAuxBase;
 
-template <>
-InputParameters validParams<BoundsAuxBase>();
-
 /**
  * This is a base class used to set an upper and/or lower bound of a variable
  * for the PETSc's variational inequalities solver

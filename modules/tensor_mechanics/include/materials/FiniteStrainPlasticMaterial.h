@@ -14,9 +14,6 @@
 
 class FiniteStrainPlasticMaterial;
 
-template <>
-InputParameters validParams<FiniteStrainPlasticMaterial>();
-
 /**
  * FiniteStrainPlasticMaterial implements rate-independent associative J2 plasticity
  * with isotropic hardening in the finite-strain framework.

@@ -13,9 +13,6 @@
 
 class CrackFrontPointsProvider;
 
-template <>
-InputParameters validParams<CrackFrontPointsProvider>();
-
 /**
  * Base class for crack front points provider
  */

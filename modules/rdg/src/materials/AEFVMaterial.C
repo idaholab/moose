@@ -14,8 +14,6 @@
 
 registerMooseObject("RdgApp", AEFVMaterial);
 
-defineLegacyParams(AEFVMaterial);
-
 InputParameters
 AEFVMaterial::validParams()
 {

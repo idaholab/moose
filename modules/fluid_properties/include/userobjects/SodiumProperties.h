@@ -13,9 +13,6 @@
 
 class SodiumProperties;
 
-template <>
-InputParameters validParams<SodiumProperties>();
-
 /**
  * Properties of liquid sodium from ANL/RE-95/2 report "Thermodynamic and Transport Properties of
  * Sodium Liquid and Vapor" from ANL Reactor Engineering Division.

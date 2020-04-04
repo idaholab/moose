@@ -16,9 +16,6 @@
 // Forward Declarations
 class NodalVariablePostprocessor;
 
-template <>
-InputParameters validParams<NodalVariablePostprocessor>();
-
 /**
  * This is a base class for other classes which compute post-processed
  * values based on nodal solution values of _u.
@@ -34,4 +31,3 @@ protected:
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
 };
-

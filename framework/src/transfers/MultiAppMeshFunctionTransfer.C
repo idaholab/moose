@@ -24,8 +24,6 @@
 
 registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
 
-defineLegacyParams(MultiAppMeshFunctionTransfer);
-
 InputParameters
 MultiAppMeshFunctionTransfer::validParams()
 {

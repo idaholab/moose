@@ -15,9 +15,6 @@
 // Forward Declarations
 class TangentialNodalLMMechanicalContact;
 
-template <>
-InputParameters validParams<TangentialNodalLMMechanicalContact>();
-
 class TangentialNodalLMMechanicalContact : public NodeFaceConstraint
 {
 public:

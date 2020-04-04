@@ -77,4 +77,3 @@ private:
 };
 
 } // namespace solid_mechanics
-

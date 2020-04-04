@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", CylindricalRankTwoAux);
 
-defineLegacyParams(CylindricalRankTwoAux);
-
 InputParameters
 CylindricalRankTwoAux::validParams()
 {

@@ -16,9 +16,6 @@
 // Forward declarations
 class OrientedBoxMarker;
 
-template <>
-InputParameters validParams<OrientedBoxMarker>();
-
 /**
  * Creates a box of specified width, length and height,
  * with its center at specified position,
@@ -39,4 +36,3 @@ protected:
   MarkerValue _inside;
   MarkerValue _outside;
 };
-

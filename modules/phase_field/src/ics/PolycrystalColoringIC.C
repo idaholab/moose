@@ -17,8 +17,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalColoringIC);
 
-defineLegacyParams(PolycrystalColoringIC);
-
 InputParameters
 PolycrystalColoringIC::validParams()
 {

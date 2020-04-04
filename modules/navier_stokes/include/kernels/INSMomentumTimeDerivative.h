@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumTimeDerivative;
 
-template <>
-InputParameters validParams<INSMomentumTimeDerivative>();
-
 /**
  * This class computes the time derivative for the incompressible
  * Navier-Stokes momentum equation.  Could instead use CoefTimeDerivative
@@ -39,4 +36,3 @@ protected:
   // Parameters
   const MaterialProperty<Real> & _rho;
 };
-

@@ -14,7 +14,6 @@
  * New GitHub Repo here: https://github.com/friedmud/unique_ptr_cast
  */
 
-
 #include <memory>
 
 template <typename T_DEST, typename T_SRC, typename T_DELETER>
@@ -52,4 +51,3 @@ dynamic_pointer_cast(std::unique_ptr<T_SRC> & src)
 
   return dest_temp;
 }
-

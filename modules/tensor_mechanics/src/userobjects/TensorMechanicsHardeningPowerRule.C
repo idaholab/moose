@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningPowerRule);
 
-defineLegacyParams(TensorMechanicsHardeningPowerRule);
-
 InputParameters
 TensorMechanicsHardeningPowerRule::validParams()
 {

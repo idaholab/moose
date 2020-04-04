@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", DashpotBC);
 
-defineLegacyParams(DashpotBC);
-
 InputParameters
 DashpotBC::validParams()
 {

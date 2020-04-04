@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSACBulkC;
 
-template <>
-InputParameters validParams<KKSACBulkC>();
-
 /**
  * KKSACBulkBase child class for the phase concentration difference term
  * \f$ \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \f$

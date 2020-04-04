@@ -24,8 +24,6 @@ registerMooseAction("FluidPropertiesApp",
                     AddFluidPropertiesInterrogatorAction,
                     "add_output_aux_variables");
 
-defineLegacyParams(AddFluidPropertiesInterrogatorAction);
-
 InputParameters
 AddFluidPropertiesInterrogatorAction::validParams()
 {

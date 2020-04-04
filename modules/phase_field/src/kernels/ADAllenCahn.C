@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADAllenCahn);
 
-defineADLegacyParams(ADAllenCahn);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADAllenCahn<compute_stage>::validParams()

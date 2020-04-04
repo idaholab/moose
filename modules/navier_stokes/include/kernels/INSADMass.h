@@ -38,4 +38,3 @@ protected:
 
   usingKernelValueMembers;
 };
-

@@ -23,7 +23,3 @@ public:
 
   SplitCHWRes(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<SplitCHWRes>();
-

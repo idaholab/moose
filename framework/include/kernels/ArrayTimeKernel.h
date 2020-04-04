@@ -14,9 +14,6 @@
 // Forward Declaration
 class ArrayTimeKernel;
 
-template <>
-InputParameters validParams<ArrayTimeKernel>();
-
 /**
  * All array time kernels should inherit from this class
  *

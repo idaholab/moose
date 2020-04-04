@@ -13,9 +13,6 @@
 
 class AddSecondarySpeciesAction;
 
-template <>
-InputParameters validParams<AddSecondarySpeciesAction>();
-
 class AddSecondarySpeciesAction : public AddAuxVariableAction
 {
 public:
@@ -29,4 +26,3 @@ private:
   /// Secondary species to add
   const std::vector<AuxVariableName> _secondary_species;
 };
-

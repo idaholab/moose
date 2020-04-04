@@ -14,9 +14,6 @@
 // Forward Declarations
 class ACMultiInterface;
 
-template <>
-InputParameters validParams<ACMultiInterface>();
-
 /**
  * Compute the gradient interface terms for a multiphase system. This includes
  * cross terms of the form \f$ \left( \eta_a\nabla\eta_b - \eta_b\nabla\eta_a \right)^2\f$.
@@ -56,4 +53,3 @@ protected:
   /// Mobility
   const MaterialProperty<Real> & _L;
 };
-

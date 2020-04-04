@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", CoupledPressureBC);
 
-defineLegacyParams(CoupledPressureBC);
-
 InputParameters
 CoupledPressureBC::validParams()
 {

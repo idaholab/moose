@@ -18,9 +18,6 @@ class OutputEulerAngles;
 class GrainTracker;
 class EulerAngleProvider;
 
-template <>
-InputParameters validParams<OutputEulerAngles>();
-
 /**
  * Output euler angles from user object to an AuxVariable.
  */
@@ -47,4 +44,3 @@ protected:
   /// precalculated element value
   Real _value;
 };
-

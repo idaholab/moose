@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDesorpedMassVolumetricExpansion);
 
-defineLegacyParams(PorousFlowDesorpedMassVolumetricExpansion);
-
 InputParameters
 PorousFlowDesorpedMassVolumetricExpansion::validParams()
 {

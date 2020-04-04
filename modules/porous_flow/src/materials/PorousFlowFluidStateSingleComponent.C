@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidStateSingleComponent);
 
-defineLegacyParams(PorousFlowFluidStateSingleComponent);
-
 InputParameters
 PorousFlowFluidStateSingleComponent::validParams()
 {

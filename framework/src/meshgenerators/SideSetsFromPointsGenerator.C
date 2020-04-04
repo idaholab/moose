@@ -27,8 +27,6 @@
 
 registerMooseObject("MooseApp", SideSetsFromPointsGenerator);
 
-defineLegacyParams(SideSetsFromPointsGenerator);
-
 InputParameters
 SideSetsFromPointsGenerator::validParams()
 {

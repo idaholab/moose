@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", AxisymmetricCenterlineAverageValue);
 
-defineLegacyParams(AxisymmetricCenterlineAverageValue);
-
 InputParameters
 AxisymmetricCenterlineAverageValue::validParams()
 {

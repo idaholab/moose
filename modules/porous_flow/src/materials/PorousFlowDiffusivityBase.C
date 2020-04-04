@@ -9,8 +9,6 @@
 
 #include "PorousFlowDiffusivityBase.h"
 
-defineLegacyParams(PorousFlowDiffusivityBase);
-
 InputParameters
 PorousFlowDiffusivityBase::validParams()
 {

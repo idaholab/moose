@@ -19,9 +19,6 @@ class FEProblemBase;
 class MooseMesh;
 class DisplacedProblem;
 
-template <>
-InputParameters validParams<ElementJacobianDamper>();
-
 /**
  * This class implements a damper that limits the change in the Jacobian of elements
  */

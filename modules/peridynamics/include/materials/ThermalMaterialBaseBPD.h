@@ -14,9 +14,6 @@
 class ThermalMaterialBaseBPD;
 class Function;
 
-template <>
-InputParameters validParams<ThermalMaterialBaseBPD>();
-
 /**
  * Base material class for bond based peridynamic heat conduction models
  */

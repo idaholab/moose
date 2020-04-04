@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSVelocityAux;
 
-template <>
-InputParameters validParams<NSVelocityAux>();
-
 /**
  * Velocity auxiliary value
  */
@@ -39,4 +36,3 @@ protected:
   const VariableValue & _rho;
   const VariableValue & _momentum;
 };
-

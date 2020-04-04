@@ -16,9 +16,6 @@
 class NumPicardIterations;
 class Transient;
 
-template <>
-InputParameters validParams<NumPicardIterations>();
-
 /**
  * Returns the number of Picard iterations taken by the underlying
  * Transient Executioner as a Postprocessor.
@@ -38,4 +35,3 @@ public:
 protected:
   Transient * _transient_executioner;
 };
-

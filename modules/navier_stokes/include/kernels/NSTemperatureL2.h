@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSTemperatureL2;
 
-template <>
-InputParameters validParams<NSTemperatureL2>();
-
 /**
  * This class was originally used to solve for the temperature
  * using an L2-projection.  I'm not sure if anything is still
@@ -52,4 +49,3 @@ protected:
 
   const MaterialProperty<Real> & _c_v;
 };
-

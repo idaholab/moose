@@ -18,8 +18,6 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(NonlocalIntegratedBC);
-
 InputParameters
 NonlocalIntegratedBC::validParams()
 {

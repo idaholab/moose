@@ -12,8 +12,6 @@
 
 registerMooseObject("SolidMechanicsApp", MaterialTensorAux);
 
-defineLegacyParams(MaterialTensorAux);
-
 InputParameters
 MaterialTensorAux::validParams()
 {

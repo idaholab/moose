@@ -13,9 +13,6 @@
 
 class ScalePostprocessor;
 
-template <>
-InputParameters validParams<ScalePostprocessor>();
-
 /**
  * Scale a postprocessor
  */
@@ -34,4 +31,3 @@ protected:
   const PostprocessorValue & _value;
   Real _scaling_factor;
 };
-

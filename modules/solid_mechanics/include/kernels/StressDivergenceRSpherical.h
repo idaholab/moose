@@ -39,7 +39,3 @@ private:
   const bool _temp_coupled;
   const unsigned int _temp_var;
 };
-
-template <>
-InputParameters validParams<StressDivergenceRSpherical>();
-

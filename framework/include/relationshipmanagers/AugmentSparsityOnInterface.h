@@ -24,9 +24,6 @@ using libMesh::processor_id_type;
 
 class AugmentSparsityOnInterface;
 
-template <>
-InputParameters validParams<AugmentSparsityOnInterface>();
-
 class AugmentSparsityOnInterface : public RelationshipManager
 {
 public:

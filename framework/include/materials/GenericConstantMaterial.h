@@ -14,9 +14,6 @@
 // Forward Declarations
 class GenericConstantMaterial;
 
-template <>
-InputParameters validParams<GenericConstantMaterial>();
-
 /**
  * This material automatically declares as material properties whatever is passed to it
  * through the parameters 'prop_names' and uses the values from 'prop_values' as the values
@@ -43,4 +40,3 @@ protected:
 
   std::vector<MaterialProperty<Real> *> _properties;
 };
-

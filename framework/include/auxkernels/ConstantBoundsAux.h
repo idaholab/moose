@@ -14,9 +14,6 @@
 // Forward Declarations
 class ConstantBoundsAux;
 
-template <>
-InputParameters validParams<ConstantBoundsAux>();
-
 /**
  * Provides constant bound of a variable
  * for the PETSc's variational inequalities solver

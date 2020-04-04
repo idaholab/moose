@@ -14,9 +14,6 @@
 // Forward Declarations
 class NodalVariableVectorPostprocessor;
 
-template <>
-InputParameters validParams<NodalVariableVectorPostprocessor>();
-
 /**
  * Base class VectorPostprocessors operating on nodal variables.
  */
@@ -27,4 +24,3 @@ public:
 
   NodalVariableVectorPostprocessor(const InputParameters & parameters);
 };
-

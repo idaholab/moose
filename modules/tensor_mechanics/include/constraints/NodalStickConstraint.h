@@ -13,9 +13,6 @@
 
 class NodalStickConstraint;
 
-template <>
-InputParameters validParams<NodalStickConstraint>();
-
 class NodalStickConstraint : public NodalConstraint
 {
 public:

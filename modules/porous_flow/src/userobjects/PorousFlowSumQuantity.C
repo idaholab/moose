@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowSumQuantity);
 
-defineLegacyParams(PorousFlowSumQuantity);
-
 InputParameters
 PorousFlowSumQuantity::validParams()
 {

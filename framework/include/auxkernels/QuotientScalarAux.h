@@ -13,9 +13,6 @@
 
 class QuotientScalarAux;
 
-template <>
-InputParameters validParams<QuotientScalarAux>();
-
 /**
  * This auxiliary kernel computes its value by dividing "numerator" by
  * "denominator.  For efficiency, it doesn't check the denominator for
@@ -34,4 +31,3 @@ protected:
   VariableValue & _a;
   VariableValue & _b;
 };
-

@@ -17,9 +17,6 @@
 // Forward declaration
 class ConservedAction;
 
-template <>
-InputParameters validParams<ConservedAction>();
-
 class ConservedAction : public Action
 {
 public:
@@ -48,4 +45,3 @@ protected:
   /// Scaling parameter
   const Real _scaling;
 };
-

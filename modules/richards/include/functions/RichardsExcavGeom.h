@@ -14,9 +14,6 @@
 // Forward Declarations
 class RichardsExcavGeom;
 
-template <>
-InputParameters validParams<RichardsExcavGeom>();
-
 /**
  * Defines excavation geometry.  It is used to enforce
  * pressures at the boundary of excavations (using RichardsExcav boundary condition)

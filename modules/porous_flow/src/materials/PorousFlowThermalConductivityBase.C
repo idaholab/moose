@@ -9,8 +9,6 @@
 
 #include "PorousFlowThermalConductivityBase.h"
 
-defineLegacyParams(PorousFlowThermalConductivityBase);
-
 InputParameters
 PorousFlowThermalConductivityBase::validParams()
 {

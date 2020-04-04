@@ -13,8 +13,6 @@
 
 registerMooseObject("PeridynamicsApp", PeridynamicsMesh);
 
-defineLegacyParams(PeridynamicsMesh);
-
 InputParameters
 PeridynamicsMesh::validParams()
 {

@@ -20,8 +20,6 @@
 
 registerMooseObject("ContactApp", SlaveConstraint);
 
-defineLegacyParams(SlaveConstraint);
-
 InputParameters
 SlaveConstraint::validParams()
 {

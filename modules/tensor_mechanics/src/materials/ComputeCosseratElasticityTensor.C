@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeCosseratElasticityTensor);
 
-defineLegacyParams(ComputeCosseratElasticityTensor);
-
 InputParameters
 ComputeCosseratElasticityTensor::validParams()
 {

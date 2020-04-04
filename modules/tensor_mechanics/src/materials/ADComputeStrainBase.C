@@ -12,8 +12,6 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-defineADLegacyParams(ADComputeStrainBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeStrainBase<compute_stage>::validParams()

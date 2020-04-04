@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", ComputePolycrystalElasticityTensor);
 
-defineLegacyParams(ComputePolycrystalElasticityTensor);
-
 InputParameters
 ComputePolycrystalElasticityTensor::validParams()
 {

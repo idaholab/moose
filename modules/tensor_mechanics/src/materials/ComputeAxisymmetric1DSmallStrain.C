@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DSmallStrain);
 
-defineLegacyParams(ComputeAxisymmetric1DSmallStrain);
-
 InputParameters
 ComputeAxisymmetric1DSmallStrain::validParams()
 {

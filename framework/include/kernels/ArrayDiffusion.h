@@ -13,9 +13,6 @@
 
 class ArrayDiffusion;
 
-template <>
-InputParameters validParams<ArrayDiffusion>();
-
 class ArrayDiffusion : public ArrayKernel
 {
 public:

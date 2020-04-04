@@ -17,8 +17,6 @@
 
 registerMooseAction("NavierStokesApp", AddNavierStokesBCsAction, "add_navier_stokes_bcs");
 
-defineLegacyParams(AddNavierStokesBCsAction);
-
 InputParameters
 AddNavierStokesBCsAction::validParams()
 {

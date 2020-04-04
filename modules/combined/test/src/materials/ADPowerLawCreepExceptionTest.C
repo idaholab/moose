@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsTestApp", ADPowerLawCreepExceptionTest);
 
-defineADLegacyParams(ADPowerLawCreepExceptionTest);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADPowerLawCreepExceptionTest<compute_stage>::validParams()

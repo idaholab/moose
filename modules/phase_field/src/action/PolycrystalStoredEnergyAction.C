@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalStoredEnergyAction, "add_kernel");
 
-defineLegacyParams(PolycrystalStoredEnergyAction);
-
 InputParameters
 PolycrystalStoredEnergyAction::validParams()
 {

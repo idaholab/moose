@@ -11,8 +11,6 @@
 
 registerADMooseObject("HeatConductionApp", GapConductanceConstraint);
 
-defineADLegacyParams(GapConductanceConstraint);
-
 template <ComputeStage compute_stage>
 InputParameters
 GapConductanceConstraint<compute_stage>::validParams()

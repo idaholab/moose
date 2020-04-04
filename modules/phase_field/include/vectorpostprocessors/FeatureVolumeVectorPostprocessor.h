@@ -17,9 +17,6 @@
 class FeatureVolumeVectorPostprocessor;
 class FeatureFloodCount;
 
-template <>
-InputParameters validParams<FeatureVolumeVectorPostprocessor>();
-
 /**
  * This VectorPostprocessor is intended to be used to calculate
  * accurate volumes from the FeatureFloodCount and/or GrainTracker

@@ -13,9 +13,6 @@
 
 class SphericalAverage;
 
-template <>
-InputParameters validParams<SphericalAverage>();
-
 /**
  * Compute a spherical average of a variable as a function of radius throughout the
  * simulation domain.

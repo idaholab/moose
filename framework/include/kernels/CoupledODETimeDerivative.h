@@ -14,9 +14,6 @@
 // Forward Declaration
 class CoupledODETimeDerivative;
 
-template <>
-InputParameters validParams<CoupledODETimeDerivative>();
-
 class CoupledODETimeDerivative : public ODETimeKernel
 {
 public:
@@ -31,4 +28,3 @@ protected:
   VariableValue & _v_dot;
   VariableValue & _dv_dot_dv;
 };
-

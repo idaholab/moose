@@ -12,8 +12,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-defineLegacyParams(FunctionInterface);
-
 InputParameters
 FunctionInterface::validParams()
 {

@@ -12,8 +12,6 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
-defineLegacyParams(KKSAction);
-
 InputParameters
 KKSAction::validParams()
 {

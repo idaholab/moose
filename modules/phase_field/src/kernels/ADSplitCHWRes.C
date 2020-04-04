@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADSplitCHWRes);
 
-defineADLegacyParams(ADSplitCHWRes);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADSplitCHWRes<compute_stage>::validParams()

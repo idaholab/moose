@@ -32,9 +32,6 @@ class DiracKernel;
 class SubProblem;
 class MooseMesh;
 
-template <>
-InputParameters validParams<DiracKernel>();
-
 /**
  * A DiracKernel is used when you need to add contributions to the residual by means of
  * multiplying some number by the shape functions on an element and adding the value into
@@ -241,4 +238,3 @@ private:
   /// id != invalid_uint.
   const Elem * addPointWithValidId(Point p, unsigned id);
 };
-

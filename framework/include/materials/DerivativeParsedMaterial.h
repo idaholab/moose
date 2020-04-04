@@ -15,9 +15,6 @@
 // Forward Declarations
 class DerivativeParsedMaterial;
 
-template <>
-InputParameters validParams<DerivativeParsedMaterial>();
-
 /**
  * DerivativeFunctionMaterialBase child class to evaluate a parsed function (for
  * example a free energy) and automatically provide all derivatives.
@@ -29,4 +26,3 @@ public:
 
   DerivativeParsedMaterial(const InputParameters & parameters);
 };
-

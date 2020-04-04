@@ -14,9 +14,6 @@
 class RichardsPlotQuantity;
 class RichardsSumQuantity;
 
-template <>
-InputParameters validParams<RichardsPlotQuantity>();
-
 /**
  * Extracts the value from RichardsSumQuantity userobject
  */
@@ -38,4 +35,3 @@ protected:
   /// the RichardsSumQuantity userobject
   const RichardsSumQuantity & _total_mass;
 };
-

@@ -13,9 +13,6 @@
 
 class AddBCAction;
 
-template <>
-InputParameters validParams<AddBCAction>();
-
 class AddBCAction : public MooseObjectAction
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

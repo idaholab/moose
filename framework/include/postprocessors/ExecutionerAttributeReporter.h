@@ -15,9 +15,6 @@
 // Forward declarations
 class ExecutionerAttributeReporter;
 
-template <>
-InputParameters validParams<ExecutionerAttributeReporter>();
-
 /**
  * A class to report class attributes value from Executioners
  *
@@ -54,4 +51,3 @@ private:
   /// Pointer to the attribute to report, this is assigned via the "value" parameter
   Real * _value;
 };
-

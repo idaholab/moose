@@ -11,8 +11,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXVolumeUserObject);
 
-defineLegacyParams(FXVolumeUserObject);
-
 InputParameters
 FXVolumeUserObject::validParams()
 {

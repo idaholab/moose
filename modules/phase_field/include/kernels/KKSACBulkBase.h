@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSACBulkBase;
 
-template <>
-InputParameters validParams<KKSACBulkBase>();
-
 /**
  * ACBulk child class that takes all the necessary data from a
  * KKSBaseMaterial and sets up the Allen-Cahn bulk term.

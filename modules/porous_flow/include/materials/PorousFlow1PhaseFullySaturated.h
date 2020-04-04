@@ -13,9 +13,6 @@
 
 class PorousFlow1PhaseFullySaturated;
 
-template <>
-InputParameters validParams<PorousFlow1PhaseFullySaturated>();
-
 /**
  * Base material designed to calculate fluid phase porepressure and saturation
  * for the single-phase situation assuming full saturation where porepressure
@@ -46,4 +43,3 @@ protected:
   /// The PorousFlow variable number of the porepressure
   const unsigned int _p_var_num;
 };
-

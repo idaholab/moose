@@ -18,9 +18,6 @@
 class MutableCoefficientsInterface;
 class ConsoleStream;
 
-template <>
-InputParameters validParams<MutableCoefficientsInterface>();
-
 /**
  * This class is designed to provide a uniform interface for any class that uses an array of
  * coefficients for any of its operations. In particular, the MultiAppFXTransfer mechanism transfers

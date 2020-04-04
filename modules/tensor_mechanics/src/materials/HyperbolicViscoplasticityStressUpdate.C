@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", HyperbolicViscoplasticityStressUpdate);
 
-defineLegacyParams(HyperbolicViscoplasticityStressUpdate);
-
 InputParameters
 HyperbolicViscoplasticityStressUpdate::validParams()
 {

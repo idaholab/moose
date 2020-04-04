@@ -11,8 +11,6 @@
 
 registerMooseObject("RdgApp", AEFVSlopeLimitingOneD);
 
-defineLegacyParams(AEFVSlopeLimitingOneD);
-
 InputParameters
 AEFVSlopeLimitingOneD::validParams()
 {

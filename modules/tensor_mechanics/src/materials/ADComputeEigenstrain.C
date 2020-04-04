@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
 
-defineADLegacyParams(ADComputeEigenstrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeEigenstrain<compute_stage>::validParams()

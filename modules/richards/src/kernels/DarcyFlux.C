@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", DarcyFlux);
 
-defineLegacyParams(DarcyFlux);
-
 InputParameters
 DarcyFlux::validParams()
 {

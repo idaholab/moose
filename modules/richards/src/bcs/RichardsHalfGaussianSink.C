@@ -18,8 +18,6 @@
 
 registerMooseObject("RichardsApp", RichardsHalfGaussianSink);
 
-defineLegacyParams(RichardsHalfGaussianSink);
-
 InputParameters
 RichardsHalfGaussianSink::validParams()
 {

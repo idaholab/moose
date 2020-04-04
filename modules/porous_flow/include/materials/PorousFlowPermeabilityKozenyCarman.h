@@ -13,9 +13,6 @@
 
 class PorousFlowPermeabilityKozenyCarman;
 
-template <>
-InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
-
 /**
  * Material designed to provide the permeability tensor which is calculated
  * from porosity using a form of the Kozeny-Carman equation (e.g. Oelkers
@@ -76,4 +73,3 @@ protected:
   /// Multiplying factor in k = k_ijk * A * phi^n / (1 - phi)^m
   Real _A;
 };
-

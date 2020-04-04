@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", MaskedBodyForce);
 
-defineLegacyParams(MaskedBodyForce);
-
 InputParameters
 MaskedBodyForce::validParams()
 {

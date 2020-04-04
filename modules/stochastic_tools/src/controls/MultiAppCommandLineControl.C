@@ -16,8 +16,6 @@
 
 registerMooseObject("StochasticToolsApp", MultiAppCommandLineControl);
 
-defineLegacyParams(MultiAppCommandLineControl);
-
 InputParameters
 MultiAppCommandLineControl::validParams()
 {

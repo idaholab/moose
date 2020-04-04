@@ -13,9 +13,6 @@
 
 class ScalarComponentIC;
 
-template <>
-InputParameters validParams<ScalarComponentIC>();
-
 /**
  * Initial condition to set different values on each component of scalar variable
  */

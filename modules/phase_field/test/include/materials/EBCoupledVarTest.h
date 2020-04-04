@@ -15,9 +15,6 @@
 // Forward Declarations
 class EBCoupledVarTest;
 
-template <>
-InputParameters validParams<EBCoupledVarTest>();
-
 class EBCoupledVarTest : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:

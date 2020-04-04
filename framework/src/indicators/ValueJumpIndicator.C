@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ValueJumpIndicator);
 
-defineLegacyParams(ValueJumpIndicator);
-
 InputParameters
 ValueJumpIndicator::validParams()
 {

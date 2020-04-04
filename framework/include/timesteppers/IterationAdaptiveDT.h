@@ -111,6 +111,3 @@ protected:
   /// Threshold used to detect whether we need to reject a step
   double _large_step_rejection_threshold;
 };
-
-template <>
-InputParameters validParams<IterationAdaptiveDT>();

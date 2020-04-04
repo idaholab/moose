@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMassBC;
 
-template <>
-InputParameters validParams<NSMassBC>();
-
 /**
  * This class corresponds to the "natural" boundary condition
  * for the mass equation, i.e. what you get if you integrate
@@ -52,4 +49,3 @@ protected:
    */
   Real qpJacobianHelper(unsigned var_number);
 };
-

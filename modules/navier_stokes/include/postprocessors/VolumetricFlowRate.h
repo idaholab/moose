@@ -15,9 +15,6 @@
 // Forward Declarations
 class VolumetricFlowRate;
 
-template <>
-InputParameters validParams<VolumetricFlowRate>();
-
 /**
  * This postprocessor computes the volumetric flow rate through a boundary.
  */
@@ -35,4 +32,3 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 };
-

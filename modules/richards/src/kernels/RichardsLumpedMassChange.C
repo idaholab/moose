@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", RichardsLumpedMassChange);
 
-defineLegacyParams(RichardsLumpedMassChange);
-
 InputParameters
 RichardsLumpedMassChange::validParams()
 {

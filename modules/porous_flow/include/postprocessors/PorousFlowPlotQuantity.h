@@ -14,9 +14,6 @@
 class PorousFlowPlotQuantity;
 class PorousFlowSumQuantity;
 
-template <>
-InputParameters validParams<PorousFlowPlotQuantity>();
-
 /**
  * Extracts the value from PorousFlowSumQuantity userobject
  */
@@ -38,4 +35,3 @@ protected:
   /// The PorousFlowSumQuantity userobject
   const PorousFlowSumQuantity & _total_mass;
 };
-

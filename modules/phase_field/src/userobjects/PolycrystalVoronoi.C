@@ -17,8 +17,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoi);
 
-defineLegacyParams(PolycrystalVoronoi);
-
 InputParameters
 PolycrystalVoronoi::validParams()
 {

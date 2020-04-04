@@ -13,9 +13,6 @@
 
 class VaporMixtureFluidProperties;
 
-template <>
-InputParameters validParams<VaporMixtureFluidProperties>();
-
 /**
  * Base class for fluid properties of vapor mixtures
  *

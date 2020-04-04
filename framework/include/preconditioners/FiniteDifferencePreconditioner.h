@@ -14,9 +14,6 @@
 
 class FiniteDifferencePreconditioner;
 
-template <>
-InputParameters validParams<FiniteDifferencePreconditioner>();
-
 /**
  * Finite difference preconditioner.
  */
@@ -31,4 +28,3 @@ public:
 private:
   MooseEnum _finite_difference_type;
 };
-

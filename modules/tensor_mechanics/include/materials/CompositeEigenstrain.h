@@ -15,9 +15,6 @@
 
 class CompositeEigenstrain;
 
-template <>
-InputParameters validParams<CompositeEigenstrain>();
-
 /**
  * CompositeEigenstrain provides a simple RankTwoTensor type
  * MaterialProperty that can be used as an Eigenstrain tensor in a mechanics simulation.

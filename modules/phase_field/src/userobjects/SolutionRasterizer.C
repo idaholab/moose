@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", SolutionRasterizer);
 
-defineLegacyParams(SolutionRasterizer);
-
 InputParameters
 SolutionRasterizer::validParams()
 {

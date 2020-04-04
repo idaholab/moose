@@ -19,8 +19,6 @@
 
 registerMooseObject("NavierStokesApp", NSMachAux);
 
-defineLegacyParams(NSMachAux);
-
 InputParameters
 NSMachAux::validParams()
 {

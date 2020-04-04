@@ -74,4 +74,3 @@ private:
 
   Point _p0, _p1;
 };
-

@@ -13,9 +13,6 @@
 
 class TensorMechanicsHardeningPowerRule;
 
-template <>
-InputParameters validParams<TensorMechanicsHardeningPowerRule>();
-
 /**
  * Power-Rule Hardening defined by:
  * assuming p = internal_parameter, then value = value_0 * (p / epsilon0 + 1)^{exponent})

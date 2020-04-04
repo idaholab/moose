@@ -13,9 +13,6 @@
 
 class BoundaryFluxBase;
 
-template <>
-InputParameters validParams<BoundaryFluxBase>();
-
 /**
  * A base class for computing/caching fluxes at boundaries
  *
@@ -108,4 +105,3 @@ protected:
   /// Cached flux Jacobian
   mutable DenseMatrix<Real> _jac1;
 };
-

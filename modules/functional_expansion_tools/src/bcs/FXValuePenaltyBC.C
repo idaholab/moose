@@ -12,8 +12,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXValuePenaltyBC);
 
-defineLegacyParams(FXValuePenaltyBC);
-
 InputParameters
 FXValuePenaltyBC::validParams()
 {

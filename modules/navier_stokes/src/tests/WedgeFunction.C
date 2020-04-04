@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", WedgeFunction);
 
-defineLegacyParams(WedgeFunction);
-
 InputParameters
 WedgeFunction::validParams()
 {

@@ -41,4 +41,3 @@ Real dRelativePermeability(Real seff, Real m);
  */
 Real d2RelativePermeability(Real seff, Real m);
 }
-

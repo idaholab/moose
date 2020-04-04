@@ -19,8 +19,6 @@ ComputeFiniteStrainNOSPD::decompositionType()
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
 
-defineLegacyParams(ComputeFiniteStrainNOSPD);
-
 InputParameters
 ComputeFiniteStrainNOSPD::validParams()
 {

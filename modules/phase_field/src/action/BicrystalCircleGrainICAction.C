@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", BicrystalCircleGrainICAction, "add_ic");
 
-defineLegacyParams(BicrystalCircleGrainICAction);
-
 InputParameters
 BicrystalCircleGrainICAction::validParams()
 {

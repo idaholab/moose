@@ -14,9 +14,6 @@
 // Forward Declarations
 class Advection;
 
-template <>
-InputParameters validParams<Advection>();
-
 /**
  * This class is responsible for solving the scalar advection
  * equation, possibly with a forcing function.

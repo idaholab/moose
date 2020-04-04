@@ -14,9 +14,6 @@
 // Forward Declarations
 class MatchedValueBC;
 
-template <>
-InputParameters validParams<MatchedValueBC>();
-
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
  */

@@ -16,9 +16,6 @@
 template <typename T = Real>
 class MaterialAuxBase;
 
-template <>
-InputParameters validParams<MaterialAuxBase<>>();
-
 /**
  * A base class for the various Material related AuxKernal objects
  */
@@ -79,4 +76,3 @@ MaterialAuxBase<T>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
-

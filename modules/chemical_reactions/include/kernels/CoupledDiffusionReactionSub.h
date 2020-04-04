@@ -13,9 +13,6 @@
 
 class CoupledDiffusionReactionSub;
 
-template <>
-InputParameters validParams<CoupledDiffusionReactionSub>();
-
 /**
  * Diffusion of primary species in given equilibrium species
  */
@@ -55,4 +52,3 @@ private:
   /// Activity coefficient of equilibrium species
   const VariableValue & _gamma_eq;
 };
-

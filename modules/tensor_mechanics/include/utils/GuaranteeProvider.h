@@ -36,4 +36,3 @@ protected:
 private:
   std::map<MaterialPropertyName, std::set<Guarantee>> _guarantees;
 };
-

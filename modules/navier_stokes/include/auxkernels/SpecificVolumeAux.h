@@ -13,9 +13,6 @@
 
 class SpecificVolumeAux;
 
-template <>
-InputParameters validParams<SpecificVolumeAux>();
-
 /**
  * Computes specific volume
  */
@@ -33,4 +30,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-

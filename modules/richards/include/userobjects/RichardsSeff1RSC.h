@@ -14,9 +14,6 @@
 
 class RichardsSeff1RSC;
 
-template <>
-InputParameters validParams<RichardsSeff1RSC>();
-
 /**
  * Rogers-Stallybrass-Clements version of effective saturation for single-phase simulations
  * as a function of porepressure, and its derivs wrt to that pressure.
@@ -75,4 +72,3 @@ protected:
   /// RSC scale
   Real _scale;
 };
-

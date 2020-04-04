@@ -9,8 +9,6 @@
 
 #include "SlopeLimitingMultiDBase.h"
 
-defineLegacyParams(SlopeLimitingMultiDBase);
-
 InputParameters
 SlopeLimitingMultiDBase::validParams()
 {

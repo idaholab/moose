@@ -14,9 +14,6 @@
 // Forward Declarations
 class MassEigenKernel;
 
-template <>
-InputParameters validParams<MassEigenKernel>();
-
 class MassEigenKernel : public EigenKernel
 {
 public:
@@ -28,4 +25,3 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 };
-

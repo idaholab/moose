@@ -45,4 +45,3 @@ protected:
   PointListAdaptor<Point> _point_list_adaptor;
   std::unique_ptr<KdTreeT> _kd_tree;
 };
-

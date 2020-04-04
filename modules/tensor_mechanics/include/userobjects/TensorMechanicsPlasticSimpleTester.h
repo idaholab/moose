@@ -13,9 +13,6 @@
 
 class TensorMechanicsPlasticSimpleTester;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
-
 /**
  * Class that can be used for testing multi-surface plasticity models.
  * Yield function = a*stress_yy + b*stress_zz + c*stress_xx + d*(stress_xy + stress_yx)/2 +

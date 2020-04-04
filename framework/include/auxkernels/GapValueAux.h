@@ -15,9 +15,6 @@
 class GapValueAux;
 class PenetrationLocator;
 
-template <>
-InputParameters validParams<GapValueAux>();
-
 class GapValueAux : public AuxKernel
 {
 public:
@@ -38,4 +35,3 @@ protected:
 
   const bool _warnings;
 };
-

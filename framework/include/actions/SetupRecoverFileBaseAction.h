@@ -15,9 +15,6 @@
 // Forward declerations
 class SetupRecoverFileBaseAction;
 
-template <>
-InputParameters validParams<SetupRecoverFileBaseAction>();
-
 /**
  *
  */
@@ -34,4 +31,3 @@ public:
 
   virtual void act() override;
 };
-

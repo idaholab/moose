@@ -15,9 +15,6 @@
 // Forward Declarations
 class SmoothSuperellipsoidBaseIC;
 
-template <>
-InputParameters validParams<SmoothSuperellipsoidBaseIC>();
-
 /**
  * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create
  * superellipsoids.
@@ -67,4 +64,3 @@ protected:
 
   MooseRandom _random;
 };
-

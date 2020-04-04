@@ -28,7 +28,3 @@ protected:
   MaterialProperty<Real> & _gap_conductance;
   MaterialProperty<Real> & _gap_conductance_dT;
 };
-
-template <>
-InputParameters validParams<GapConductanceConstant>();
-

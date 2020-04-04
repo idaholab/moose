@@ -14,9 +14,6 @@
 // Forward Declarations
 class NodalTranslationalInertia;
 
-template <>
-InputParameters validParams<NodalTranslationalInertia>();
-
 /**
  * Calculates the inertial force and mass proportional damping for a nodal mass
  */

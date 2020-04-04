@@ -14,9 +14,6 @@
 class PorousFlowBrineCO2;
 class PorousFlowFluidStateBrineCO2IC;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateBrineCO2IC>();
-
 /**
  * PorousFlowFluidStateBrineCO2IC calculates an initial value for
  * the total mass fraction of a component summed over all
@@ -29,4 +26,3 @@ public:
 
   PorousFlowFluidStateBrineCO2IC(const InputParameters & parameters);
 };
-

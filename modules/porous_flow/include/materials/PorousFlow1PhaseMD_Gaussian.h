@@ -13,9 +13,6 @@
 
 class PorousFlow1PhaseMD_Gaussian;
 
-template <>
-InputParameters validParams<PorousFlow1PhaseMD_Gaussian>();
-
 /**
  * Material designed to calculate fluid-phase porepressure and saturation
  * for the single-phase situation, assuming a Gaussian capillary suction
@@ -65,4 +62,3 @@ protected:
 
   virtual void buildPS();
 };
-

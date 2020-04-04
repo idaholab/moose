@@ -14,9 +14,6 @@
 class PorousFlowWaterNCG;
 class PorousFlowFluidStateWaterNCGIC;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateWaterNCGIC>();
-
 /**
  * PorousFlowFluidStateWaterNCGIC calculates an initial value for
  * the total mass fraction of a component summed over all
@@ -29,4 +26,3 @@ public:
 
   PorousFlowFluidStateWaterNCGIC(const InputParameters & parameters);
 };
-

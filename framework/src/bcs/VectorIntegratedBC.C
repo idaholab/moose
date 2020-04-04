@@ -16,8 +16,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(VectorIntegratedBC);
-
 InputParameters
 VectorIntegratedBC::validParams()
 {

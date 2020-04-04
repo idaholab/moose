@@ -24,9 +24,6 @@ class Point;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<RandomIC>();
-
 /**
  * RandomIC just returns a Random value.
  */

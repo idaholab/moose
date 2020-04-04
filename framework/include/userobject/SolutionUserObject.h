@@ -26,9 +26,6 @@ class NumericVector;
 // Forward declarations
 class SolutionUserObject;
 
-template <>
-InputParameters validParams<SolutionUserObject>();
-
 /**
  * User object that reads an existing solution from an input file and
  * uses it in the current simulation.

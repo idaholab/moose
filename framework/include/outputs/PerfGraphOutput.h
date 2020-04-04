@@ -15,9 +15,6 @@
 // Forward declarations
 class PerfGraphOutput;
 
-template <>
-InputParameters validParams<PerfGraphOutput>();
-
 /**
  * Class for output information regarding Controls to the screen
  */
@@ -39,4 +36,3 @@ protected:
 
   unsigned int _heaviest_sections;
 };
-

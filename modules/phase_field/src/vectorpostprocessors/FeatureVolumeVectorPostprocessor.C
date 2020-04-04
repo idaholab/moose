@@ -20,8 +20,6 @@
 
 registerMooseObject("PhaseFieldApp", FeatureVolumeVectorPostprocessor);
 
-defineLegacyParams(FeatureVolumeVectorPostprocessor);
-
 InputParameters
 FeatureVolumeVectorPostprocessor::validParams()
 {

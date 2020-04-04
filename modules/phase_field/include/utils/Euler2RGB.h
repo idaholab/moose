@@ -13,4 +13,3 @@
 
 Point
 euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym);
-

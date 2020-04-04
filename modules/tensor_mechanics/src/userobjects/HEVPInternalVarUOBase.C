@@ -9,8 +9,6 @@
 
 #include "HEVPInternalVarUOBase.h"
 
-defineLegacyParams(HEVPInternalVarUOBase);
-
 InputParameters
 HEVPInternalVarUOBase::validParams()
 {

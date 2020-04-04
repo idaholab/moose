@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", PrimaryConvection);
 
-defineLegacyParams(PrimaryConvection);
-
 InputParameters
 PrimaryConvection::validParams()
 {

@@ -13,9 +13,6 @@
 
 class RichardsDensityVDW;
 
-template <>
-InputParameters validParams<RichardsDensityVDW>();
-
 /**
  * Density of a gas according to the van der Waals expression
  * (P + n^2 a/V^2)(V - nb) = nRT
@@ -93,4 +90,3 @@ protected:
    */
   Real densityVDW(Real p) const;
 };
-

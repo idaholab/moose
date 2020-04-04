@@ -14,7 +14,7 @@
 // Forward Declaration
 class TestMatTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<TestMatTimeDerivative>();
 
 class TestMatTimeDerivative : public TimeDerivative
@@ -26,6 +26,4 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   const MaterialProperty<Real> & _mat_prop_value;
-
 };
-

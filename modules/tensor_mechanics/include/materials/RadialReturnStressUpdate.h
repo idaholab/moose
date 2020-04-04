@@ -15,9 +15,6 @@
 // Forward declaration
 class RadialReturnStressUpdate;
 
-template <>
-InputParameters validParams<RadialReturnStressUpdate>();
-
 /**
  * RadialReturnStressUpdate computes the radial return stress increment for
  * an isotropic elastic-viscoplasticity model after interating on the difference

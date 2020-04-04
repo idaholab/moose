@@ -30,7 +30,3 @@ protected:
   const std::string _var_name_base;
   const FileName _file_name;
 };
-
-template <>
-InputParameters validParams<PolycrystalVoronoiVoidICAction>();
-

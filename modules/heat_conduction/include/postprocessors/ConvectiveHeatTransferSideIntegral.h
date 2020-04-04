@@ -5,9 +5,6 @@
 // Forward Declarations
 class ConvectiveHeatTransferSideIntegral;
 
-template <>
-InputParameters validParams<ConvectiveHeatTransferSideIntegral>();
-
 /**
  * Computes the total convective heat transfer across a boundary
  */

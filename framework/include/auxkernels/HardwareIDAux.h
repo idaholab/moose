@@ -14,9 +14,6 @@
 // Forward Declarations
 class HardwareIDAux;
 
-template <>
-InputParameters validParams<HardwareIDAux>();
-
 /**
  * "Paints" the ID of of the physical "node" in the cluster the element
  * is located on.  Useful for examining partition schemes.

@@ -25,8 +25,6 @@
 
 registerMooseObject("MooseApp", DisplacedProblem);
 
-defineLegacyParams(DisplacedProblem);
-
 InputParameters
 DisplacedProblem::validParams()
 {

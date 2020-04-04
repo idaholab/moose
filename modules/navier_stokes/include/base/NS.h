@@ -29,4 +29,3 @@ const std::string mach_number = "Mach";
 const std::string internal_energy = "internal_energy";
 const std::string specific_volume = "specific_volume";
 }
-

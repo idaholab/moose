@@ -21,8 +21,6 @@ registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_mesh_modifier");
 
 registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_variable");
 
-defineLegacyParams(MortarPeriodicAction);
-
 InputParameters
 MortarPeriodicAction::validParams()
 {

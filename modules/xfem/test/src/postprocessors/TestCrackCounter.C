@@ -12,8 +12,6 @@
 
 registerMooseObject("XFEMTestApp", TestCrackCounter);
 
-defineLegacyParams(TestCrackCounter);
-
 InputParameters
 TestCrackCounter::validParams()
 {

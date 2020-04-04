@@ -46,9 +46,6 @@ struct FluidStateProperties
   std::vector<DualReal> mass_fraction;
 };
 
-template <>
-InputParameters validParams<PorousFlowFluidStateBase>();
-
 /**
  * Base class for fluid states for miscible multiphase flow in porous media.
  */

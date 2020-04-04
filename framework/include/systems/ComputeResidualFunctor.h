@@ -27,4 +27,3 @@ public:
                 NumericVector<Number> & residual,
                 NonlinearImplicitSystem & sys) override;
 };
-

@@ -15,9 +15,6 @@
 // Forward Declarations
 class NodalPostprocessorBasePD;
 
-template <>
-InputParameters validParams<NodalPostprocessorBasePD>();
-
 /**
  * Base postprocessor class for peridynamic calculation
  */

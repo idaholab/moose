@@ -14,9 +14,6 @@
 
 class DiscreteNucleationTimeStep;
 
-template <>
-InputParameters validParams<DiscreteNucleationTimeStep>();
-
 /**
  * Returns a user defined timestep limit for the simulation step right after the
  * introduction of a new nucleus and between nucleation events to control the probability
@@ -54,4 +51,3 @@ protected:
    */
   Real _max_lambda;
 };
-

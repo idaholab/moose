@@ -39,4 +39,3 @@
     for (unsigned int i = 0; i < x.size(); ++i)                                                    \
       REL_TEST(df_dx[i], df_dx_fd[i], tol);                                                        \
   }
-

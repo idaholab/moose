@@ -14,9 +14,6 @@
 
 class RichardsSeff2waterRSC;
 
-template <>
-InputParameters validParams<RichardsSeff2waterRSC>();
-
 /**
  * Rogers-Stallybrass-Clements version of effective saturation of water phase
  * as a function of (Pwater, Pgas), and its derivs wrt to those pressures.
@@ -76,4 +73,3 @@ protected:
   /// RSC scale
   Real _scale;
 };
-

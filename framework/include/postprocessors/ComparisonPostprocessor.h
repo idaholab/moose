@@ -13,9 +13,6 @@
 
 class ComparisonPostprocessor;
 
-template <>
-InputParameters validParams<ComparisonPostprocessor>();
-
 /**
  * Base class for comparing quantities and producing a boolean value
  *
@@ -64,4 +61,3 @@ protected:
   /// Absolute tolerance for "fuzzy" comparisons
   const Real _absolute_tolerance;
 };
-

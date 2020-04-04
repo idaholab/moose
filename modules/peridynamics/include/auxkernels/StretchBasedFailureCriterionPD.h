@@ -13,9 +13,6 @@
 
 class StretchBasedFailureCriterionPD;
 
-template <>
-InputParameters validParams<StretchBasedFailureCriterionPD>();
-
 /**
  * Bond stretch based failure ctriterion to update the bond status for fracture modeling
  */

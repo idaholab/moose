@@ -9,8 +9,6 @@
 
 #include "NSMassBC.h"
 
-defineLegacyParams(NSMassBC);
-
 InputParameters
 NSMassBC::validParams()
 {

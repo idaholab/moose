@@ -15,9 +15,6 @@
 class BodyForce;
 class Function;
 
-template <>
-InputParameters validParams<BodyForce>();
-
 /**
  * This kernel implements a generic functional
  * body force term:

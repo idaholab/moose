@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsDensityPrimePrimeAux);
 
-defineLegacyParams(RichardsDensityPrimePrimeAux);
-
 InputParameters
 RichardsDensityPrimePrimeAux::validParams()
 {

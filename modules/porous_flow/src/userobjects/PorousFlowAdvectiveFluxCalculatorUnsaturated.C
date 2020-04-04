@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFluxCalculatorUnsaturated);
 
-defineLegacyParams(PorousFlowAdvectiveFluxCalculatorUnsaturated);
-
 InputParameters
 PorousFlowAdvectiveFluxCalculatorUnsaturated::validParams()
 {

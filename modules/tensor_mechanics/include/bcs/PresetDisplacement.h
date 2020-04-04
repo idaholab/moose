@@ -36,6 +36,3 @@ protected:
   const VariableValue & _accel_old;
   const Real _beta;
 };
-
-template <>
-InputParameters validParams<PresetDisplacement>();

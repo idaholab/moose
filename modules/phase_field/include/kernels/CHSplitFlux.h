@@ -15,9 +15,6 @@
 
 class CHSplitFlux;
 
-template <>
-InputParameters validParams<CHSplitFlux>();
-
 /**
  * CHSplitFlux computes flux as non-linear variable via
  * residual = flux + mobility * gradient(chemical potential)
@@ -45,4 +42,3 @@ protected:
 
   const MaterialProperty<RealTensorValue> * _dmobility_dc;
 };
-

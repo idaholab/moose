@@ -14,9 +14,6 @@
 // Forward Declarations
 class DarcyFluxComponent;
 
-template <>
-InputParameters validParams<DarcyFluxComponent>();
-
 /**
  * Computes a component of the Darcy flux:
  * -k_ij/mu (nabla_j P - w_j)
@@ -60,4 +57,3 @@ protected:
   /// Desired component
   unsigned int _component;
 };
-

@@ -18,8 +18,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(ElementDamper);
-
 InputParameters
 ElementDamper::validParams()
 {

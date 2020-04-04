@@ -13,9 +13,6 @@
 
 class MultiPlasticityLinearSystem;
 
-template <>
-InputParameters validParams<MultiPlasticityLinearSystem>();
-
 /**
  * MultiPlasticityLinearSystem computes the linear system
  * and handles linear-dependence removal

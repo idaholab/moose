@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMomentumInviscidNoPressureImplicitFlowBC;
 
-template <>
-InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>();
-
 /**
  * Momentum equation boundary condition used when pressure *is not*
  * integrated by parts, i.e. when there is "no pressure" term on the boundary.
@@ -35,4 +32,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

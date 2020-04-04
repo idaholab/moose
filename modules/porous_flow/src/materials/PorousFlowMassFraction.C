@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassFraction);
 
-defineLegacyParams(PorousFlowMassFraction);
-
 InputParameters
 PorousFlowMassFraction::validParams()
 {

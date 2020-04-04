@@ -12,8 +12,6 @@
 #include "MooseApp.h"
 #include "MaterialBase.h"
 
-defineLegacyParams(MaterialPropertyInterface);
-
 InputParameters
 MaterialPropertyInterface::validParams()
 {

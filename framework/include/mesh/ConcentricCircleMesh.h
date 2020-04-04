@@ -14,9 +14,6 @@
 
 class ConcentricCircleMesh;
 
-template <>
-InputParameters validParams<ConcentricCircleMesh>();
-
 /**
  * Mesh generated from parameters
  */
@@ -54,4 +51,3 @@ protected:
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
 };
-

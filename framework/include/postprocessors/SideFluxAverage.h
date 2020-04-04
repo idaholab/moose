@@ -14,9 +14,6 @@
 // Forward Declarations
 class SideFluxAverage;
 
-template <>
-InputParameters validParams<SideFluxAverage>();
-
 class SideFluxAverage : public SideFluxIntegral
 {
 public:
@@ -32,4 +29,3 @@ public:
 protected:
   Real _volume;
 };
-

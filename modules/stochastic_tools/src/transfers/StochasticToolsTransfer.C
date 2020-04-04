@@ -12,8 +12,6 @@
 #include "SamplerTransientMultiApp.h"
 #include "SamplerFullSolveMultiApp.h"
 
-defineLegacyParams(StochasticToolsTransfer);
-
 InputParameters
 StochasticToolsTransfer::validParams()
 {

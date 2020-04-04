@@ -15,9 +15,6 @@ class PorousFlowDictator;
 class PorousFlowFluidStateIC;
 class PorousFlowFluidStateMultiComponentBase;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateIC>();
-
 /**
  * PorousFlowFluidStateIC calculates an initial value for
  * the total mass fraction of a component summed over all
@@ -48,4 +45,3 @@ protected:
   /// FluidState UserObject
   const PorousFlowFluidStateMultiComponentBase & _fs;
 };
-

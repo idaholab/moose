@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ErrorToleranceMarker);
 
-defineLegacyParams(ErrorToleranceMarker);
-
 InputParameters
 ErrorToleranceMarker::validParams()
 {

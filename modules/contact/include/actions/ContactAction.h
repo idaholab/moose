@@ -38,9 +38,6 @@ enum class ContactFormulation
  */
 class ContactAction;
 
-template <>
-InputParameters validParams<ContactAction>();
-
 class ContactAction : public Action
 {
 public:

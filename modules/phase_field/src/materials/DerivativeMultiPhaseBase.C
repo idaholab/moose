@@ -9,8 +9,6 @@
 
 #include "DerivativeMultiPhaseBase.h"
 
-defineLegacyParams(DerivativeMultiPhaseBase);
-
 InputParameters
 DerivativeMultiPhaseBase::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "MultiComponentFluidProperties.h"
 
-defineLegacyParams(MultiComponentFluidProperties);
-
 InputParameters
 MultiComponentFluidProperties::validParams()
 {

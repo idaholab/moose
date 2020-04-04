@@ -10,8 +10,6 @@
 #include "RelationshipManager.h"
 #include "MooseApp.h"
 
-defineLegacyParams(RelationshipManager);
-
 InputParameters
 RelationshipManager::validParams()
 {

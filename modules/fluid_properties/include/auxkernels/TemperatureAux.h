@@ -14,9 +14,6 @@
 class TemperatureAux;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<TemperatureAux>();
-
 /**
  * Compute temperature values from specific volume and internal energy
  */
@@ -35,4 +32,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-

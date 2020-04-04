@@ -13,9 +13,6 @@
 
 class PorousFlowHalfCubicSink;
 
-template <>
-InputParameters validParams<PorousFlowHalfCubicSink>();
-
 /**
  * Applies a flux sink to a boundary.  The base flux
  * defined by PorousFlowSink is multiplied by a cubic.

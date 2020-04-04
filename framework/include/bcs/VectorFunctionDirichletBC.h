@@ -13,9 +13,6 @@
 
 class VectorFunctionDirichletBC;
 
-template <>
-InputParameters validParams<VectorFunctionDirichletBC>();
-
 /**
  * Boundary condition of a Dirichlet type
  *

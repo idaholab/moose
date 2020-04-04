@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSPressurePoisson;
 
-template <>
-InputParameters validParams<INSPressurePoisson>();
-
 /**
  * This class computes the pressure Poisson solve which is part of
  * the "split" scheme used for solving the incompressible Navier-Stokes
@@ -51,4 +48,3 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _rho;
 };
-

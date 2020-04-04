@@ -14,9 +14,6 @@
 class BoundaryFluxPostprocessor;
 class BoundaryFluxBase;
 
-template <>
-InputParameters validParams<BoundaryFluxPostprocessor>();
-
 /**
  * Computes the side integral of a flux entry from a BoundaryFluxBase user object
  */
@@ -45,4 +42,3 @@ protected:
   /// Variables to pass to boundary flux user object, in the correct order
   std::vector<const VariableValue *> _U;
 };
-

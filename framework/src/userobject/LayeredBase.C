@@ -18,8 +18,6 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/point.h"
 
-defineLegacyParams(LayeredBase);
-
 InputParameters
 LayeredBase::validParams()
 {

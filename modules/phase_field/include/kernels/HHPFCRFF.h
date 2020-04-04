@@ -14,9 +14,6 @@
 // Forward Declarations
 class HHPFCRFF;
 
-template <>
-InputParameters validParams<HHPFCRFF>();
-
 /**
  * TODO: This Kernel needs Documentation!!!
  */
@@ -40,4 +37,3 @@ protected:
   const VariableValue * _coupled_var;
   const unsigned int _coupled_var_var;
 };
-

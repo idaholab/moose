@@ -23,9 +23,6 @@ class GriddedData;
  */
 class PiecewiseMultiInterpolation;
 
-template <>
-InputParameters validParams<PiecewiseMultiInterpolation>();
-
 class PiecewiseMultiInterpolation : public Function
 {
 public:

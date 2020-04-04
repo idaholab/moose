@@ -16,8 +16,6 @@
 
 registerMooseObject("PhaseFieldApp", FauxGrainTracker);
 
-defineLegacyParams(FauxGrainTracker);
-
 InputParameters
 FauxGrainTracker::validParams()
 {

@@ -15,9 +15,6 @@
 // Forward Declarations
 class HeatConductionKernel;
 
-template <>
-InputParameters validParams<HeatConductionKernel>();
-
 /**
  * Note: This class is named HeatConductionKernel instead of HeatConduction
  * to avoid a clash with the HeatConduction namespace.  It is registered
@@ -40,4 +37,3 @@ private:
   const MaterialProperty<Real> & _diffusion_coefficient;
   const MaterialProperty<Real> * const _diffusion_coefficient_dT;
 };
-

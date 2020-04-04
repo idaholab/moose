@@ -15,9 +15,6 @@
 class FunctionGradientNeumannBC;
 class Function;
 
-template <>
-InputParameters validParams<FunctionGradientNeumannBC>();
-
 /**
  * Boundary condition of a Neumann style whose value is computed by a user-defined function
  */

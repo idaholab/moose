@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", AccumulateAux);
 
-defineLegacyParams(AccumulateAux);
-
 InputParameters
 AccumulateAux::validParams()
 {

@@ -16,9 +16,6 @@ class SinglePhaseFluidProperties;
 class Water97FluidProperties;
 class PorousFlowBrineCO2;
 
-template <>
-InputParameters validParams<PorousFlowBrineCO2>();
-
 /**
  * Specialized class for brine and CO2 including calculation of mutual
  * solubility of the two fluids using a high-accuracy fugacity-based formulation.

@@ -13,9 +13,6 @@
 
 class InterfaceDiffusionBoundaryTerm;
 
-template <>
-InputParameters validParams<InterfaceDiffusionBoundaryTerm>();
-
 /**
  * Add weak form surface terms of the Diffusion equation for two different
  * variables across a subdomain boundary
@@ -31,4 +28,3 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 };
-

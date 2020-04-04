@@ -15,9 +15,6 @@
 // Forward Declarations
 class RichardsMassChange;
 
-template <>
-InputParameters validParams<RichardsMassChange>();
-
 /**
  * Kernel = (mass - mass_old)/dt
  * where mass = porosity*density*saturation

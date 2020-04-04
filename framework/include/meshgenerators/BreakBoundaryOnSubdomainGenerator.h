@@ -14,9 +14,6 @@
 // Forward declarations
 class BreakBoundaryOnSubdomainGenerator;
 
-template <>
-InputParameters validParams<BreakBoundaryOnSubdomainGenerator>();
-
 /**
  * MeshGenerator for
  */
@@ -32,4 +29,3 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 };
-

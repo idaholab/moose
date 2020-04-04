@@ -25,9 +25,6 @@ namespace libMesh
 class QBase;
 }
 
-template <>
-InputParameters validParams<MortarConstraintBase>();
-
 /**
  * User for mortar methods
  *

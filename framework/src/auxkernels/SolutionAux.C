@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", SolutionAux);
 
-defineLegacyParams(SolutionAux);
-
 InputParameters
 SolutionAux::validParams()
 {

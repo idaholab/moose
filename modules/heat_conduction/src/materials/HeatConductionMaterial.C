@@ -14,8 +14,6 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionMaterial);
 
-defineLegacyParams(HeatConductionMaterial);
-
 InputParameters
 HeatConductionMaterial::validParams()
 {

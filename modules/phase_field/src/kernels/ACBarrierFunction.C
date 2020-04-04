@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", ACBarrierFunction);
 
-defineLegacyParams(ACBarrierFunction);
-
 InputParameters
 ACBarrierFunction::validParams()
 {

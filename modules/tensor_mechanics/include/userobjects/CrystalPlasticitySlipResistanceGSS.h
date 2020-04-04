@@ -13,9 +13,6 @@
 
 class CrystalPlasticitySlipResistanceGSS;
 
-template <>
-InputParameters validParams<CrystalPlasticitySlipResistanceGSS>();
-
 /**
  * Phenomenological constitutive model slip resistance userobject class.
  */

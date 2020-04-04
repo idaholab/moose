@@ -34,7 +34,3 @@ protected:
   /// number of deformed grains
   const unsigned int _deformed_grain_num;
 };
-
-template <>
-InputParameters validParams<PolycrystalStoredEnergyAction>();
-

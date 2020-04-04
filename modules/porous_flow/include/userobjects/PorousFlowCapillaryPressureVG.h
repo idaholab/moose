@@ -13,9 +13,6 @@
 
 class PorousFlowCapillaryPressureVG;
 
-template <>
-InputParameters validParams<PorousFlowCapillaryPressureVG>();
-
 /**
  * van Genuchten form of capillary pressure.
  *
@@ -47,4 +44,3 @@ protected:
   /// pc_sscale = f(s_scale), where f is the van Genuchten function
   const Real _pc_sscale;
 };
-

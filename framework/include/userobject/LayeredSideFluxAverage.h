@@ -15,9 +15,6 @@
 // Forward Declarations
 class LayeredSideFluxAverage;
 
-template <>
-InputParameters validParams<LayeredSideFluxAverage>();
-
 /**
  * This UserObject computes side averages of a flux storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
@@ -35,4 +32,3 @@ protected:
   std::string _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;
 };
-

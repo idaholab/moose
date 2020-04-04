@@ -9,8 +9,6 @@
 
 #include "PorousFlowSinkPTDefiner.h"
 
-defineLegacyParams(PorousFlowSinkPTDefiner);
-
 InputParameters
 PorousFlowSinkPTDefiner::validParams()
 {

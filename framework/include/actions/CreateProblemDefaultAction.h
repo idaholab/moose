@@ -14,9 +14,6 @@
 
 class CreateProblemDefaultAction;
 
-template <>
-InputParameters validParams<CreateProblemDefaultAction>();
-
 class CreateProblemDefaultAction : public Action
 {
 public:
@@ -26,4 +23,3 @@ public:
 
   virtual void act() override;
 };
-

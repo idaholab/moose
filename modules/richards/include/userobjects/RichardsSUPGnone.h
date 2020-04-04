@@ -13,9 +13,6 @@
 
 class RichardsSUPGnone;
 
-template <>
-InputParameters validParams<RichardsSUPGnone>();
-
 /**
  * no Richards SUPG.
  * Use this class if you don't want any SUPG for the Richards equations in your simulation
@@ -81,4 +78,3 @@ public:
 
   bool SUPG_trivial() const;
 };
-

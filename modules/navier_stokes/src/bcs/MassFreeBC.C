@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", MassFreeBC);
 
-defineLegacyParams(MassFreeBC);
-
 InputParameters
 MassFreeBC::validParams()
 {

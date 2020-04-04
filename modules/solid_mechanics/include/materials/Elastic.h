@@ -13,9 +13,6 @@
 
 class Elastic;
 
-template <>
-InputParameters validParams<Elastic>();
-
 class Elastic : public SolidModel
 {
 public:
@@ -26,4 +23,3 @@ public:
 
 protected:
 };
-

@@ -15,8 +15,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowEffectiveStressCoupling);
 
-defineLegacyParams(PorousFlowEffectiveStressCoupling);
-
 InputParameters
 PorousFlowEffectiveStressCoupling::validParams()
 {

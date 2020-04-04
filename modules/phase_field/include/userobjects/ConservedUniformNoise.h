@@ -15,9 +15,6 @@
 // Forward delcarations
 class ConservedUniformNoise;
 
-template <>
-InputParameters validParams<ConservedUniformNoise>();
-
 /**
  * Userobject that generates a uniformly distributed random number in the interval [-1:1]
  * once per timestep for every quadrature point in a way that the integral

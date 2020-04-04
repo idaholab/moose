@@ -15,9 +15,6 @@
 
 class CappedDruckerPragerStressUpdate;
 
-template <>
-InputParameters validParams<CappedDruckerPragerStressUpdate>();
-
 /**
  * CappedDruckerPragerStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

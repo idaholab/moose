@@ -18,8 +18,6 @@
 
 registerMooseObject("MooseApp", FEProblem);
 
-defineLegacyParams(FEProblem);
-
 InputParameters
 FEProblem::validParams()
 {

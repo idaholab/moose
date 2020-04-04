@@ -14,8 +14,6 @@
 
 registerMooseObjectReplaced("MooseApp", PerformanceData, "02/01/2019 00:00", PerfGraphData);
 
-defineLegacyParams(PerformanceData);
-
 InputParameters
 PerformanceData::validParams()
 {

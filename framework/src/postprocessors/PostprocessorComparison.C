@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", PostprocessorComparison);
 
-defineLegacyParams(PostprocessorComparison);
-
 InputParameters
 PostprocessorComparison::validParams()
 {

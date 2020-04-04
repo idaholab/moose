@@ -18,9 +18,6 @@
 // Forward Declarations
 class PointSamplerBase;
 
-template <>
-InputParameters validParams<PointSamplerBase>();
-
 class PointSamplerBase : public GeneralVectorPostprocessor,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
                          public MooseVariableInterface<Real>,
@@ -73,4 +70,3 @@ protected:
   /// Postprocessor multiplying the variables
   const Real & _pp_value;
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("PeridynamicsApp", HeatSourceBPD);
 
-defineLegacyParams(HeatSourceBPD);
-
 InputParameters
 HeatSourceBPD::validParams()
 {

@@ -14,9 +14,6 @@
 // Forward declaration
 class PowerLawSoftening;
 
-template <>
-InputParameters validParams<PowerLawSoftening>();
-
 /**
  * PowerLawSoftening is a smeared crack softening model that
  * uses a power law equation to soften the tensile response.

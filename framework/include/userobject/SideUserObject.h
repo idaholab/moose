@@ -20,9 +20,6 @@
 // Forward Declarations
 class SideUserObject;
 
-template <>
-InputParameters validParams<SideUserObject>();
-
 class SideUserObject : public UserObject,
                        public BoundaryRestrictableRequired,
                        public MaterialPropertyInterface,

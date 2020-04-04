@@ -23,9 +23,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<NodalBCBase>();
-
 /**
  * Base class for deriving any boundary condition that works at nodes
  */

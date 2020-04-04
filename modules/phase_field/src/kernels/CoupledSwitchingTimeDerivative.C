@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CoupledSwitchingTimeDerivative);
 
-defineLegacyParams(CoupledSwitchingTimeDerivative);
-
 InputParameters
 CoupledSwitchingTimeDerivative::validParams()
 {

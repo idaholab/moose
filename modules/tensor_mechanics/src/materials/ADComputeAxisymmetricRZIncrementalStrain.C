@@ -14,8 +14,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeAxisymmetricRZIncrementalStrain);
 
-defineADLegacyParams(ADComputeAxisymmetricRZIncrementalStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeAxisymmetricRZIncrementalStrain<compute_stage>::validParams()

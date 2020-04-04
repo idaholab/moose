@@ -13,9 +13,6 @@
 
 class CappedWeakInclinedPlaneStressUpdate;
 
-template <>
-InputParameters validParams<CappedWeakInclinedPlaneStressUpdate>();
-
 /**
  * CappedWeakInclinedPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

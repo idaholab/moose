@@ -13,8 +13,6 @@
 
 registerMooseObject("StochasticToolsTestApp", MaterialReaction);
 
-defineLegacyParams(MaterialReaction);
-
 InputParameters
 MaterialReaction::validParams()
 {

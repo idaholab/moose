@@ -13,9 +13,6 @@
 
 class HeatSourceBPD;
 
-template <>
-InputParameters validParams<HeatSourceBPD>();
-
 /**
  * Kernel class to implement hear source term for peridynamic heat conduction models
  */

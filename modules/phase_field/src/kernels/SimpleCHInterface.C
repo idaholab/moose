@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SimpleCHInterface);
 
-defineLegacyParams(SimpleCHInterface);
-
 InputParameters
 SimpleCHInterface::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", ACInterfaceStress);
 
-defineLegacyParams(ACInterfaceStress);
-
 InputParameters
 ACInterfaceStress::validParams()
 {

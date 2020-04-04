@@ -13,9 +13,6 @@
 
 class NodalNormalBC;
 
-template <>
-InputParameters validParams<NodalNormalBC>();
-
 /**
  * This is a base class to enforce strong boundary condition with a normal defined at a node
  *

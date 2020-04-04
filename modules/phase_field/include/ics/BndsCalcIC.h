@@ -14,9 +14,6 @@
 // Forward Declarations
 class BndsCalcIC;
 
-template <>
-InputParameters validParams<BndsCalcIC>();
-
 class BndsCalcIC : public InitialCondition
 {
 public:

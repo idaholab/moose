@@ -14,9 +14,6 @@
 // Forward Declarations
 class HeatSource;
 
-template <>
-InputParameters validParams<HeatSource>();
-
 class HeatSource : public BodyForce
 {
 public:
@@ -24,4 +21,3 @@ public:
 
   HeatSource(const InputParameters & parameters);
 };
-

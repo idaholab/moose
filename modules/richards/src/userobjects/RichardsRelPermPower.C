@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsRelPermPower);
 
-defineLegacyParams(RichardsRelPermPower);
-
 InputParameters
 RichardsRelPermPower::validParams()
 {

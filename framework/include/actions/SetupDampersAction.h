@@ -13,9 +13,6 @@
 
 class SetupDampersAction;
 
-template <>
-InputParameters validParams<SetupDampersAction>();
-
 class SetupDampersAction : public Action
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

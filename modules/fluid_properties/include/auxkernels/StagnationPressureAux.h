@@ -14,9 +14,6 @@
 class StagnationPressureAux;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<StagnationPressureAux>();
-
 /**
  * Compute stagnation pressure from specific volume, specific internal energy, and velocity.
  */
@@ -36,4 +33,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-

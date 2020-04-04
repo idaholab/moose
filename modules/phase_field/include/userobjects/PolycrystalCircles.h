@@ -16,9 +16,6 @@
 // Forward Declarations
 class PolycrystalCircles;
 
-template <>
-InputParameters validParams<PolycrystalCircles>();
-
 /**
  * PolycrystalCircles creates a polycrystal made up of circles.
  * The locations and radii of the circles are given either

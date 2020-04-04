@@ -12,8 +12,6 @@
 
 registerMooseObject("MiscApp", RigidBodyModes3D);
 
-defineLegacyParams(RigidBodyModes3D);
-
 InputParameters
 RigidBodyModes3D::validParams()
 {

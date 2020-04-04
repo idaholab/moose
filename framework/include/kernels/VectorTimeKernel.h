@@ -14,9 +14,6 @@
 // Forward Declaration
 class VectorTimeKernel;
 
-template <>
-InputParameters validParams<VectorTimeKernel>();
-
 /**
  * All vector time kernels should inherit from this class
  *

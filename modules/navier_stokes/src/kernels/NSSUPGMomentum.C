@@ -14,8 +14,6 @@
 
 registerMooseObject("NavierStokesApp", NSSUPGMomentum);
 
-defineLegacyParams(NSSUPGMomentum);
-
 InputParameters
 NSSUPGMomentum::validParams()
 {

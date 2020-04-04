@@ -14,9 +14,6 @@
 
 class PorousFlowSingleComponentFluid;
 
-template <>
-InputParameters validParams<PorousFlowSingleComponentFluid>();
-
 /**
  * General single component fluid material. Provides quadpoint density, viscosity,
  * internal energy, enthalpy and derivatives wrt pressure and temperature

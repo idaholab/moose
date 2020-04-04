@@ -15,9 +15,6 @@
 // Forward Declarations
 class GBEvolutionBase;
 
-template <>
-InputParameters validParams<GBEvolutionBase>();
-
 class GBEvolutionBase : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -54,4 +51,3 @@ protected:
   const Real _kb;
   const Real _JtoeV;
 };
-

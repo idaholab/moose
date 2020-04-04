@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleation);
 
-defineLegacyParams(DiscreteNucleation);
-
 InputParameters
 DiscreteNucleation::validParams()
 {

@@ -17,9 +17,6 @@
 // Forward Declarations
 class RichardsPolyLineSink;
 
-template <>
-InputParameters validParams<RichardsPolyLineSink>();
-
 /**
  * Approximates a polyline by a sequence of Dirac Points
  * the mass flux from each Dirac Point is _sink_func as a
@@ -86,4 +83,3 @@ protected:
    */
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
-

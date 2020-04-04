@@ -14,9 +14,6 @@
 
 class HEVPInternalVarUOBase;
 
-template <>
-InputParameters validParams<HEVPInternalVarUOBase>();
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes integrate internal variables

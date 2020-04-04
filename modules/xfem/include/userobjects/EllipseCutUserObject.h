@@ -14,9 +14,6 @@
 // Forward declarations
 class EllipseCutUserObject;
 
-template <>
-InputParameters validParams<EllipseCutUserObject>();
-
 class EllipseCutUserObject : public GeometricCut3DUserObject
 {
 public:
@@ -39,4 +36,3 @@ private:
 
   virtual bool isInsideCutPlane(Point p) const override;
 };
-

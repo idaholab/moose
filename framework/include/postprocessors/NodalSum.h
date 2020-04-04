@@ -14,9 +14,6 @@
 // Forward Declarations
 class NodalSum;
 
-template <>
-InputParameters validParams<NodalSum>();
-
 /**
  * Computes a sum of the nodal values of the coupled variable.
  */
@@ -36,4 +33,3 @@ public:
 protected:
   Real _sum;
 };
-

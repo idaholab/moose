@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", MaterialVectorAuxKernelAction, "add_aux_kernel");
 
-defineLegacyParams(MaterialVectorAuxKernelAction);
-
 InputParameters
 MaterialVectorAuxKernelAction::validParams()
 {

@@ -15,9 +15,6 @@
 
 class PorousFlowMassVolumetricExpansion;
 
-template <>
-InputParameters validParams<PorousFlowMassVolumetricExpansion>();
-
 /**
  * Kernel = mass_component * d(volumetric_strain)/dt
  * where mass_component =
@@ -107,4 +104,3 @@ protected:
    */
   Real computedVolQpJac(unsigned int jvar) const;
 };
-

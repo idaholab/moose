@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
 
-defineLegacyParams(VolumetricFlowRate);
-
 InputParameters
 VolumetricFlowRate::validParams()
 {

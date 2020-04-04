@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", VolumeDeformGradCorrectedStress);
 
-defineLegacyParams(VolumeDeformGradCorrectedStress);
-
 InputParameters
 VolumeDeformGradCorrectedStress::validParams()
 {

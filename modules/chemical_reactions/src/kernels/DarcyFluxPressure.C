@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", DarcyFluxPressure);
 
-defineLegacyParams(DarcyFluxPressure);
-
 InputParameters
 DarcyFluxPressure::validParams()
 {

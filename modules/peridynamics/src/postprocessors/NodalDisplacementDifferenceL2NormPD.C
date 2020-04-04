@@ -13,8 +13,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalDisplacementDifferenceL2NormPD);
 
-defineLegacyParams(NodalDisplacementDifferenceL2NormPD);
-
 InputParameters
 NodalDisplacementDifferenceL2NormPD::validParams()
 {

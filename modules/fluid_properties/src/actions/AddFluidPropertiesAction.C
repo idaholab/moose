@@ -11,8 +11,6 @@
 
 registerMooseAction("FluidPropertiesApp", AddFluidPropertiesAction, "add_fluid_properties");
 
-defineLegacyParams(AddFluidPropertiesAction);
-
 InputParameters
 AddFluidPropertiesAction::validParams()
 {

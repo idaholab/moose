@@ -15,9 +15,6 @@
 // Forward Declarations
 class InertialTorque;
 
-template <>
-InputParameters validParams<InertialTorque>();
-
 /**
  * Computes the inertial torque, which is
  * density * displacement x acceleration

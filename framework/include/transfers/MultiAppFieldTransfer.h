@@ -19,9 +19,6 @@ namespace libMesh
 class DofObject;
 }
 
-template <>
-InputParameters validParams<MultiAppFieldTransfer>();
-
 /**
  *  intermediary class that allows variable names as inputs
  */

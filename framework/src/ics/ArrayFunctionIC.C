@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ArrayFunctionIC);
 
-defineLegacyParams(ArrayFunctionIC);
-
 InputParameters
 ArrayFunctionIC::validParams()
 {

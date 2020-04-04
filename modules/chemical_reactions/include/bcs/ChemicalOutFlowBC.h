@@ -14,9 +14,6 @@
 // Forward Declarations
 class ChemicalOutFlowBC;
 
-template <>
-InputParameters validParams<ChemicalOutFlowBC>();
-
 /**
  * Implements a simple constant VectorNeumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
@@ -38,4 +35,3 @@ private:
   /// Porosity
   const MaterialProperty<Real> & _porosity;
 };
-

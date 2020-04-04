@@ -15,9 +15,6 @@
 class PolycrystalEBSD;
 class EBSDReader;
 
-template <>
-InputParameters validParams<PolycrystalEBSD>();
-
 class PolycrystalEBSD : public PolycrystalUserObjectBase
 {
 public:
@@ -36,4 +33,3 @@ protected:
   const EBSDReader & _ebsd_reader;
   const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
-

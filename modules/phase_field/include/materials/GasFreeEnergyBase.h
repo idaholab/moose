@@ -15,9 +15,6 @@
 // Forward Declarations
 class GasFreeEnergyBase;
 
-template <>
-InputParameters validParams<GasFreeEnergyBase>();
-
 /**
  * Material class that provides the free energy of an ideal gas with the expression builder
  * and uses automatic differentiation to get the derivatives.
@@ -53,4 +50,3 @@ protected:
   /// quantum concentration
   const EBTerm _nq;
 };
-

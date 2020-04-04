@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesTestApp", Advection);
 
-defineLegacyParams(Advection);
-
 InputParameters
 Advection::validParams()
 {

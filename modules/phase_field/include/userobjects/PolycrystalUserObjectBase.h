@@ -15,9 +15,6 @@
 // Forward Declarations
 class PolycrystalUserObjectBase;
 
-template <>
-InputParameters validParams<PolycrystalUserObjectBase>();
-
 /**
  * This object provides the base capability for creating proper polycrystal ICs. It is
  * able to discover the grain structure to provide information about neighboring grains

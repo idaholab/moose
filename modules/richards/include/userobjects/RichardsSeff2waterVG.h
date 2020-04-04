@@ -14,9 +14,6 @@
 
 class RichardsSeff2waterVG;
 
-template <>
-InputParameters validParams<RichardsSeff2waterVG>();
-
 /**
  * van-Genuchten water effective saturation as a function of (Pwater, Pgas),
  * and its derivs wrt to those pressures.  Note that the water pressure appears
@@ -65,4 +62,3 @@ protected:
   /// van Genuchten m parameter
   Real _m;
 };
-

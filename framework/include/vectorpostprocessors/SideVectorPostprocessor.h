@@ -15,9 +15,6 @@
 // Forward Declarations
 class SideVectorPostprocessor;
 
-template <>
-InputParameters validParams<SideVectorPostprocessor>();
-
 class SideVectorPostprocessor : public SideUserObject, public VectorPostprocessor
 {
 public:
@@ -31,4 +28,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

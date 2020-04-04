@@ -17,9 +17,6 @@
 template <typename T = void>
 class SplitCHWResBase;
 
-template <>
-InputParameters validParams<SplitCHWResBase<>>();
-
 /**
  * SplitCHWresBase implements the residual for the chemical
  * potential in the split form of the Cahn-Hilliard

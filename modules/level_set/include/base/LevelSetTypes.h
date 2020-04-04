@@ -16,4 +16,3 @@ namespace LevelSet
 extern const ExecFlagType EXEC_ADAPT_MESH;
 extern const ExecFlagType EXEC_COMPUTE_MARKERS;
 }
-

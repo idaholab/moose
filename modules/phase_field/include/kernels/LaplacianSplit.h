@@ -14,9 +14,6 @@
 // Forward Declarations
 class LaplacianSplit;
 
-template <>
-InputParameters validParams<LaplacianSplit>();
-
 /**
  * Split with a variable that holds the Laplacian of the phase field.
  */
@@ -36,4 +33,3 @@ private:
   const unsigned int _var_c;
   const VariableGradient & _grad_c;
 };
-

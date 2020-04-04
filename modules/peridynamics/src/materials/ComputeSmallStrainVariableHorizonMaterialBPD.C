@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", ComputeSmallStrainVariableHorizonMaterialBPD);
 
-defineLegacyParams(ComputeSmallStrainVariableHorizonMaterialBPD);
-
 InputParameters
 ComputeSmallStrainVariableHorizonMaterialBPD::validParams()
 {

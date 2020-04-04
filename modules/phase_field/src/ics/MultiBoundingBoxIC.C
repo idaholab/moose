@@ -25,8 +25,6 @@ sizeVector(std::vector<Real> v, std::size_t size)
 }
 }
 
-defineLegacyParams(MultiBoundingBoxIC);
-
 InputParameters
 MultiBoundingBoxIC::validParams()
 {

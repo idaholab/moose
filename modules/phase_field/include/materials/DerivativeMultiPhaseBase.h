@@ -14,9 +14,6 @@
 // Forward Declarations
 class DerivativeMultiPhaseBase;
 
-template <>
-InputParameters validParams<DerivativeMultiPhaseBase>();
-
 /**
  * DerivativeMaterial child class to evaluate a parsed function for the
  * free energy and automatically provide all derivatives.
@@ -86,4 +83,3 @@ protected:
   /// Phase transformation energy barrier
   Real _W;
 };
-

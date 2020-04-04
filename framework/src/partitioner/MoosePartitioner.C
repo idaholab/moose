@@ -10,8 +10,6 @@
 #include "MoosePartitioner.h"
 #include "FEProblem.h"
 
-defineLegacyParams(MoosePartitioner);
-
 InputParameters
 MoosePartitioner::validParams()
 {

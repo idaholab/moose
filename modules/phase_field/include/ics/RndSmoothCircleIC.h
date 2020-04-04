@@ -14,9 +14,6 @@
 // Forward Declarations
 class RndSmoothCircleIC;
 
-template <>
-InputParameters validParams<RndSmoothCircleIC>();
-
 /**
  * RndSmoothcircleIC creates a smooth circle with a random distribution
  * of values inside and outside of the circle.
@@ -34,4 +31,3 @@ private:
   const Real _variation_invalue;
   const Real _variation_outvalue;
 };
-

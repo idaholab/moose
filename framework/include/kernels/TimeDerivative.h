@@ -14,9 +14,6 @@
 // Forward Declaration
 class TimeDerivative;
 
-template <>
-InputParameters validParams<TimeDerivative>();
-
 class TimeDerivative : public TimeKernel
 {
 public:
@@ -32,4 +29,3 @@ protected:
 
   bool _lumping;
 };
-

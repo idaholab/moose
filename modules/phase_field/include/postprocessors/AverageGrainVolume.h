@@ -17,8 +17,6 @@
 class FeatureFloodCount;
 class AverageGrainVolume;
 class MooseMesh;
-template <>
-InputParameters validParams<AverageGrainVolume>();
 
 /**
  * Compute the average grain area in a polycrystal

@@ -13,9 +13,6 @@
 
 class InternalSideFluxBase;
 
-template <>
-InputParameters validParams<InternalSideFluxBase>();
-
 /**
  * A base class for computing and caching internal side flux
  *
@@ -130,4 +127,3 @@ protected:
   /// Jacobian matrix contribution to the "right" cell
   mutable DenseMatrix<Real> _jac2;
 };
-

@@ -15,9 +15,6 @@
 class NearestNodeValueAux;
 class NearestNodeLocator;
 
-template <>
-InputParameters validParams<NearestNodeValueAux>();
-
 /**
  * Finds the closest node on a paired boundary to the current node or element and stores a
  * corresponding field value.
@@ -38,4 +35,3 @@ protected:
 
   unsigned int _paired_variable;
 };
-

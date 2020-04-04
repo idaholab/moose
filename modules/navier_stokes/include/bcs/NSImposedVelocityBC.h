@@ -16,8 +16,6 @@
 class NSImposedVelocityBC;
 
 // Specialization required of all user-level Moose objects
-template <>
-InputParameters validParams<NSImposedVelocityBC>();
 
 class NSImposedVelocityBC : public NodalBC
 {
@@ -39,4 +37,3 @@ protected:
   // The desired value for the velocity component
   Real _desired_velocity;
 };
-

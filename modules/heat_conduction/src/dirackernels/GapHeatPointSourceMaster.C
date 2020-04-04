@@ -16,8 +16,6 @@
 
 registerMooseObject("HeatConductionApp", GapHeatPointSourceMaster);
 
-defineLegacyParams(GapHeatPointSourceMaster);
-
 InputParameters
 GapHeatPointSourceMaster::validParams()
 {

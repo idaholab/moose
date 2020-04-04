@@ -38,9 +38,6 @@ class MaterialBase;
 class MooseMesh;
 class SubProblem;
 
-template <>
-InputParameters validParams<MaterialBase>();
-
 /**
  * MaterialBases compute MaterialProperties.
  */

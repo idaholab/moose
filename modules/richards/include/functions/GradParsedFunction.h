@@ -14,9 +14,6 @@
 // Forward declarations
 class GradParsedFunction;
 
-template <>
-InputParameters validParams<GradParsedFunction>();
-
 /**
  * returns the central difference approx to the derivative
  * of the function, ie

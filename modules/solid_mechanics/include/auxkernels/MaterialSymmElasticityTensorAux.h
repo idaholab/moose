@@ -9,15 +9,14 @@
 
 #pragma once
 /*************************************************************************
-*
-*  Welcome to HYRAX!
-*  Andrea M. Jokisaari
-*  CASL/MOOSE
-*
-*  18 April 2012
-*
-*************************************************************************/
-
+ *
+ *  Welcome to HYRAX!
+ *  Andrea M. Jokisaari
+ *  CASL/MOOSE
+ *
+ *  18 April 2012
+ *
+ *************************************************************************/
 
 #include "AuxKernel.h"
 #include "SymmElasticityTensor.h"
@@ -25,9 +24,6 @@
 // Forward declarations
 class MaterialSymmElasticityTensorAux;
 class SymmElasticityTensor;
-
-template <>
-InputParameters validParams<MaterialSymmElasticityTensorAux>();
 
 class MaterialSymmElasticityTensorAux : public AuxKernel
 {
@@ -44,4 +40,3 @@ protected:
 private:
   const MaterialProperty<SymmElasticityTensor> & _tensor_prop;
 };
-

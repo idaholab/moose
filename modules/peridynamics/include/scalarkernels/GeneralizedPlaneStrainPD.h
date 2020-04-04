@@ -14,9 +14,6 @@
 class GeneralizedPlaneStrainPD;
 class GeneralizedPlaneStrainUserObjectBasePD;
 
-template <>
-InputParameters validParams<GeneralizedPlaneStrainPD>();
-
 /**
  * ScalarKernel class to assemble residual and diagonal jacobian fetched from userobject
  */

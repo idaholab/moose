@@ -52,9 +52,6 @@ class NumericVector;
 class System;
 } // namespace libMesh
 
-template <>
-InputParameters validParams<SubProblem>();
-
 /**
  * Generic class for solving transient nonlinear problems
  *

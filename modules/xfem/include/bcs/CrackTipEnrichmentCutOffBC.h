@@ -14,9 +14,6 @@
 
 class CrackTipEnrichmentCutOffBC;
 
-template <>
-InputParameters validParams<CrackTipEnrichmentCutOffBC>();
-
 /**
  * CrackTipEnrichmentCutOffBC is used in XFEM Crack Tip Enrichment to fix DOFs to zero for those
  * nodes with basis function supports that are far away from any crack tip.

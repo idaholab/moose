@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", DerivativeParsedMaterial);
 
-defineLegacyParams(DerivativeParsedMaterial);
-
 InputParameters
 DerivativeParsedMaterial::validParams()
 {

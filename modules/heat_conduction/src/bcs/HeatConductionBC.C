@@ -11,8 +11,6 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionBC);
 
-defineLegacyParams(HeatConductionBC);
-
 InputParameters
 HeatConductionBC::validParams()
 {

@@ -14,9 +14,6 @@
 
 class PorousFlowFluidPropertiesBase;
 
-template <>
-InputParameters validParams<PorousFlowFluidPropertiesBase>();
-
 /**
  * Base class for fluid properties materials. All PorousFlow fluid
  * materials must override computeQpProperties()
@@ -43,4 +40,3 @@ protected:
   /// Universal gas constant
   const Real _R;
 };
-

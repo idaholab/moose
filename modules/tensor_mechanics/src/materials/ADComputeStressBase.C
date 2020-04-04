@@ -11,8 +11,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-defineADLegacyParams(ADComputeStressBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeStressBase<compute_stage>::validParams()

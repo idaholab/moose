@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", GenericConstantArray);
 
-defineLegacyParams(GenericConstantArray);
-
 InputParameters
 GenericConstantArray::validParams()
 {

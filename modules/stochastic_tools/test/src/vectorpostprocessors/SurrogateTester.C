@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsTestApp", SurrogateTester);
 
-defineLegacyParams(SurrogateTester);
-
 InputParameters
 SurrogateTester::validParams()
 {

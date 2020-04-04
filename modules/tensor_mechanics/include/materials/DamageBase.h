@@ -16,9 +16,6 @@
 // Forward declaration
 class DamageBase;
 
-template <>
-InputParameters validParams<DamageBase>();
-
 /**
  * DamageBase is a base class for damage models, which modify the stress tensor
  * computed by another model based on a damage mechanics formulation.

@@ -17,9 +17,6 @@
 #include "PerfGraphInterface.h"
 #include "SamplerInterface.h"
 
-template <>
-InputParameters validParams<Sampler>();
-
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
  *

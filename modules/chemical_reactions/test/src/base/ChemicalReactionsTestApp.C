@@ -13,8 +13,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(ChemicalReactionsTestApp);
-
 InputParameters
 ChemicalReactionsTestApp::validParams()
 {
@@ -35,9 +33,9 @@ ChemicalReactionsTestApp::~ChemicalReactionsTestApp() {}
 
 void
 ChemicalReactionsTestApp::registerAll(Factory & f,
-                                  ActionFactory & af,
-                                  Syntax & s,
-                                  bool use_test_objects)
+                                      ActionFactory & af,
+                                      Syntax & s,
+                                      bool use_test_objects)
 {
   ChemicalReactionsApp::registerAll(f, af, s);
   if (use_test_objects)

@@ -34,7 +34,3 @@ private:
 
   const bool _3D_sphere;
 };
-
-template <>
-InputParameters validParams<BicrystalCircleGrainICAction>();
-

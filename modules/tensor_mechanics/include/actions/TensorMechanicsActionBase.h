@@ -13,9 +13,6 @@
 
 class TensorMechanicsActionBase;
 
-template <>
-InputParameters validParams<TensorMechanicsActionBase>();
-
 class TensorMechanicsActionBase : public Action
 {
 public:

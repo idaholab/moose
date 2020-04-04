@@ -109,4 +109,3 @@ protected:
   std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
       _displaced_node_elem_constraints;
 };
-

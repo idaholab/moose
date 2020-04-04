@@ -14,9 +14,6 @@
 // Forward declarations
 class MultiAppCopyTransfer;
 
-template <>
-InputParameters validParams<MultiAppCopyTransfer>();
-
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */

@@ -15,9 +15,6 @@
 
 class ALEKernel;
 
-template <>
-InputParameters validParams<ALEKernel>();
-
 class ALEKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:

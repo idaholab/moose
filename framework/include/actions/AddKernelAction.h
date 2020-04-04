@@ -13,9 +13,6 @@
 
 class AddKernelAction;
 
-template <>
-InputParameters validParams<AddKernelAction>();
-
 class AddKernelAction : public MooseObjectAction
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

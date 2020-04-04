@@ -14,9 +14,6 @@
 // Forward declarations
 class TiledMeshGenerator;
 
-template <>
-InputParameters validParams<TiledMeshGenerator>();
-
 /**
  * Take an input mesh and repeat it in the x,y and z directions
  */
@@ -38,4 +35,3 @@ protected:
   Real _y_width;
   Real _z_width;
 };
-

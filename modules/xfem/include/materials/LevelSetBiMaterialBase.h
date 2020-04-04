@@ -15,9 +15,6 @@
 class LevelSetBiMaterialBase;
 class XFEM;
 
-template <>
-InputParameters validParams<LevelSetBiMaterialBase>();
-
 /**
  * Base class for switching between materials in a bi-material system where the interface is defined
  * by a level set function.
@@ -64,4 +61,3 @@ protected:
   /// use the positive level set region's material properties
   bool _use_positive_property;
 };
-

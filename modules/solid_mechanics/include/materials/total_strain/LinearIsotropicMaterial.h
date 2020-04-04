@@ -15,9 +15,6 @@
 class LinearIsotropicMaterial;
 class SymmElasticityTensor;
 
-template <>
-InputParameters validParams<LinearIsotropicMaterial>();
-
 /**
  * LinearIsotropic material for use in simple applications that don't need material properties.
  */
@@ -54,4 +51,3 @@ protected:
   Real _pi;
   Real _tol;
 };
-

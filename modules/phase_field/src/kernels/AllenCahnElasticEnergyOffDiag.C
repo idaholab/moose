@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", AllenCahnElasticEnergyOffDiag);
 
-defineLegacyParams(AllenCahnElasticEnergyOffDiag);
-
 InputParameters
 AllenCahnElasticEnergyOffDiag::validParams()
 {

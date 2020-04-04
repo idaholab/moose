@@ -13,9 +13,6 @@
 
 class ModulesApp;
 
-template <>
-InputParameters validParams<ModulesApp>();
-
 class ModulesApp : public MooseApp
 {
 public:
@@ -28,4 +25,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

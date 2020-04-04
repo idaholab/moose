@@ -14,9 +14,6 @@
 class Function;
 class Gravity;
 
-template <>
-InputParameters validParams<Gravity>();
-
 /**
  * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the
  * density

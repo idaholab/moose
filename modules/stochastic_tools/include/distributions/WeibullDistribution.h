@@ -13,9 +13,6 @@
 
 class WeibullDistribution;
 
-template <>
-InputParameters validParams<WeibullDistribution>();
-
 /**
  * A class used to generate a three-parameter Weibull distribution
  */

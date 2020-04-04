@@ -13,9 +13,6 @@
 
 class ElementIntegralMaterialProperty;
 
-template <>
-InputParameters validParams<ElementIntegralMaterialProperty>();
-
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:
@@ -28,4 +25,3 @@ protected:
 
   const MaterialProperty<Real> & _scalar;
 };
-

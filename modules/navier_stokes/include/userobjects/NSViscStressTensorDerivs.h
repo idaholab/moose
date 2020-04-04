@@ -93,8 +93,9 @@ NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
     case 0: // density
     {
       const Real term1 = 2.0 / rho2 * (U(k) * grad_rho(ell) + U(ell) * grad_rho(k)) * phij;
-      const Real term2 = -1.0 / rho * ((gradU[k](ell) + gradU[ell](k)) * phij +
-                                       (U(k) * grad_phij(ell) + U(ell) * grad_phij(k)));
+      const Real term2 = -1.0 / rho *
+                         ((gradU[k](ell) + gradU[ell](k)) * phij +
+                          (U(k) * grad_phij(ell) + U(ell) * grad_phij(k)));
 
       // Kronecker delta terms
       Real term3 = 0.0;
@@ -141,4 +142,3 @@ NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
 
   return 0.;
 }
-

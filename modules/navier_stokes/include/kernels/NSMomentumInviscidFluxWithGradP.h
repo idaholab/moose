@@ -15,9 +15,6 @@
 // ForwardDeclarations
 class NSMomentumInviscidFluxWithGradP;
 
-template <>
-InputParameters validParams<NSMomentumInviscidFluxWithGradP>();
-
 class NSMomentumInviscidFluxWithGradP : public NSKernel
 {
 public:
@@ -54,4 +51,3 @@ private:
   template <class U>
   friend class NSPressureDerivs;
 };
-

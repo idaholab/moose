@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSGravityForce;
 
-template <>
-InputParameters validParams<NSGravityForce>();
-
 class NSGravityForce : public NSKernel
 {
 public:
@@ -31,4 +28,3 @@ protected:
 
   const Real _acceleration;
 };
-

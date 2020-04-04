@@ -13,9 +13,6 @@
 
 class SpiralAnnularMesh;
 
-template <>
-InputParameters validParams<SpiralAnnularMesh>();
-
 /**
  * Mesh generated from parameters
  */
@@ -66,4 +63,3 @@ protected:
   // equilateral
   const Real _initial_delta_r;
 };
-

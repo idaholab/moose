@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", FunctionGradientNeumannBC);
 
-defineLegacyParams(FunctionGradientNeumannBC);
-
 InputParameters
 FunctionGradientNeumannBC::validParams()
 {

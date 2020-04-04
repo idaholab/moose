@@ -15,8 +15,6 @@
 
 registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_kernel");
 
-defineLegacyParams(SolidMechanicsAction);
-
 InputParameters
 SolidMechanicsAction::validParams()
 {

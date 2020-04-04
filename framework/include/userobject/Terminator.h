@@ -19,28 +19,25 @@
 // Forward Declarations
 class Terminator;
 
-template <>
-InputParameters validParams<Terminator>();
-
 /**
-  * This Userobject requests termination of the current solve based on
-  * the values of Postprocessors (and a logical expression testing them)
-  *
-  *                     <((((((\\\
-  *                     /      . }\
-  *                     ;--..--._|}
-  *  (\                 '--/\--'  )
-  *   \\                | '-'  :'|
-  *    \\               . -==- .-|
-  *     \\               \.__.'   \--._
-  *     [\\          __.--|       //  _/'--.
-  *     \ \\       .'-._ ('-----'/ __/      \
-  *      \ \\     /   __>|      | '--.       |
-  *       \ \\   |   \   |     /    /       /
-  *        \ '\ /     \  |     |  _/       /
-  *         \  \       \ |     | /        /
-  *          \  \      \        /
-  */
+ * This Userobject requests termination of the current solve based on
+ * the values of Postprocessors (and a logical expression testing them)
+ *
+ *                     <((((((\\\
+ *                     /      . }\
+ *                     ;--..--._|}
+ *  (\                 '--/\--'  )
+ *   \\                | '-'  :'|
+ *    \\               . -==- .-|
+ *     \\               \.__.'   \--._
+ *     [\\          __.--|       //  _/'--.
+ *     \ \\       .'-._ ('-----'/ __/      \
+ *      \ \\     /   __>|      | '--.       |
+ *       \ \\   |   \   |     /    /       /
+ *        \ '\ /     \  |     |  _/       /
+ *         \  \       \ |     | /        /
+ *          \  \      \        /
+ */
 class Terminator : public GeneralUserObject
 {
 public:
@@ -74,4 +71,3 @@ protected:
 };
 
 #endif // LIBMESH_HAVE_FPARSER
-

@@ -15,9 +15,6 @@ using namespace libMesh;
 
 class GeometricCut3DUserObject;
 
-template <>
-InputParameters validParams<GeometricCut3DUserObject>();
-
 class GeometricCut3DUserObject : public GeometricCutUserObject
 {
 public:
@@ -52,4 +49,3 @@ protected:
 
   Real getRelativePosition(const Point & p1, const Point & p2, const Point & p) const;
 };
-

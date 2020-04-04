@@ -59,9 +59,9 @@ Real hydrostatic(const SymmTensor & symm_tensor);
 Real volumetricStrain(const SymmTensor & symm_strain);
 
 /*
-* The first invariant of a tensor is the sum of the diagonal component; defined
-* in L. Malvern, Introduction to the Mechanics of a Continuous Mediam (1969) pg 89.
-*/
+ * The first invariant of a tensor is the sum of the diagonal component; defined
+ * in L. Malvern, Introduction to the Mechanics of a Continuous Mediam (1969) pg 89.
+ */
 Real firstInvariant(const SymmTensor & symm_tensor);
 
 /*
@@ -70,7 +70,7 @@ Real firstInvariant(const SymmTensor & symm_tensor);
  * Note that the Hjelmstad version of the second invariant is the negative of
  * the second invariant given in L. Malvern, Introduction to the Mechanics of a
  * Continuous Medium (1969) pg 89.
-*/
+ */
 Real secondInvariant(const SymmTensor & symm_tensor);
 
 /*
@@ -146,7 +146,7 @@ Real hoopStress(const SymmTensor & symm_stress,
  * @param point2 The end point of the rotation axis
  * @param curr_point The reference corresponding to the stress (pass in _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
-*/
+ */
 Real radialStress(const SymmTensor & symm_stress,
                   const Point & point1,
                   const Point & point2,
@@ -178,4 +178,3 @@ Real directionValueTensor(const SymmTensor & symm_tensor, const RealVectorValue 
  */
 Real triaxialityStress(const SymmTensor & symm_stress);
 }
-

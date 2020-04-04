@@ -16,9 +16,6 @@
 // Forward Declarations
 class RichardsSeffPrimePrimeAux;
 
-template <>
-InputParameters validParams<RichardsSeffPrimePrimeAux>();
-
 /**
  * Calculates derivative of effective saturation wrt specified porepressures
  */
@@ -61,4 +58,3 @@ protected:
   /// matrix of 2nd derivtives: This auxkernel returns _mat[_wrt1][_wrt2];
   std::vector<std::vector<Real>> _mat;
 };
-

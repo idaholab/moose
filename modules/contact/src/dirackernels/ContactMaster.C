@@ -21,8 +21,6 @@
 
 registerMooseObject("ContactApp", ContactMaster);
 
-defineLegacyParams(ContactMaster);
-
 InputParameters
 ContactMaster::validParams()
 {

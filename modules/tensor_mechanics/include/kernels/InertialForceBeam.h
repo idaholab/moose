@@ -16,9 +16,6 @@
 // Forward Declarations
 class InertialForceBeam;
 
-template <>
-InputParameters validParams<InertialForceBeam>();
-
 class InertialForceBeam : public TimeKernel
 {
 public:

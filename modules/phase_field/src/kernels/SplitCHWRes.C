@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SplitCHWRes);
 
-defineLegacyParams(SplitCHWRes);
-
 InputParameters
 SplitCHWRes::validParams()
 {

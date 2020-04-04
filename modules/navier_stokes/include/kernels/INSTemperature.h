@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSTemperature;
 
-template <>
-InputParameters validParams<INSTemperature>();
-
 /**
  * This class computes the residual and Jacobian contributions for the
  * incompressible Navier-Stokes temperature (energy) equation.
@@ -50,4 +47,3 @@ protected:
   const MaterialProperty<Real> & _k;
   const MaterialProperty<Real> & _cp;
 };
-

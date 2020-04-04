@@ -14,9 +14,6 @@
 // Forward Declarations
 class LowerBoundNodalKernel;
 
-template <>
-InputParameters validParams<LowerBoundNodalKernel>();
-
 /**
  * Class used to enforce a lower bound on a coupled variable
  */

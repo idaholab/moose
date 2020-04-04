@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityFLAC);
 
-defineLegacyParams(PorousFlowRelativePermeabilityFLAC);
-
 InputParameters
 PorousFlowRelativePermeabilityFLAC::validParams()
 {

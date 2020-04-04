@@ -48,4 +48,3 @@ protected:
 private:
   const std::pair<Point, Point> _cut_line_endpoints;
 };
-

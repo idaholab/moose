@@ -14,9 +14,6 @@
 // Forward Declarations
 class BimodalSuperellipsoidsIC;
 
-template <>
-InputParameters validParams<BimodalSuperellipsoidsIC>();
-
 /**
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
  * These are intended to be the larger particles. Then the IC creates a specified number
@@ -58,4 +55,3 @@ protected:
   Point _top_right;
   Point _range;
 };
-

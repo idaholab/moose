@@ -14,15 +14,12 @@
 
 class ComputeInstantaneousThermalExpansionFunctionEigenstrain;
 
-template <>
-InputParameters validParams<ComputeInstantaneousThermalExpansionFunctionEigenstrain>();
-
 /**
  * ComputeInstantaneousThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to an instantaneous thermal expansion function.
  */
 class ComputeInstantaneousThermalExpansionFunctionEigenstrain
-    : public ComputeThermalExpansionEigenstrainBase
+  : public ComputeThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();

@@ -10,8 +10,6 @@
 #include "PeridynamicsKernelBase.h"
 #include "PeridynamicsMesh.h"
 
-defineLegacyParams(PeridynamicsKernelBase);
-
 InputParameters
 PeridynamicsKernelBase::validParams()
 {

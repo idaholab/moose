@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeff1VGcut);
 
-defineLegacyParams(RichardsSeff1VGcut);
-
 InputParameters
 RichardsSeff1VGcut::validParams()
 {

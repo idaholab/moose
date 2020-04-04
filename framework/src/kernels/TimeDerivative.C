@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", TimeDerivative);
 
-defineLegacyParams(TimeDerivative);
-
 InputParameters
 TimeDerivative::validParams()
 {

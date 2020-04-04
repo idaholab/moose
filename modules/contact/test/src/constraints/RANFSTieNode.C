@@ -19,8 +19,6 @@
 
 registerMooseObject("ContactTestApp", RANFSTieNode);
 
-defineLegacyParams(RANFSTieNode);
-
 InputParameters
 RANFSTieNode::validParams()
 {

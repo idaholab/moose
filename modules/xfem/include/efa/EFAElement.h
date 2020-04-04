@@ -120,4 +120,3 @@ protected:
                   std::map<unsigned int, EFANode *> & PermanentNodes,
                   std::map<unsigned int, EFANode *> & TempNodes);
 };
-

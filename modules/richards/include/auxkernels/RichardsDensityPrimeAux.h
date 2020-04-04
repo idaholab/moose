@@ -16,9 +16,6 @@
 // Forward Declarations
 class RichardsDensityPrimeAux;
 
-template <>
-InputParameters validParams<RichardsDensityPrimeAux>();
-
 /**
  * Derivative of fluid density wrt porepressure
  */
@@ -38,4 +35,3 @@ protected:
   /// userobject that defines density as a fcn of porepressure
   const RichardsDensity & _density_UO;
 };
-

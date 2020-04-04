@@ -23,8 +23,6 @@
 
 registerMooseObject("MooseApp", StackGenerator);
 
-defineLegacyParams(StackGenerator);
-
 InputParameters
 StackGenerator::validParams()
 {

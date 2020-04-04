@@ -9,8 +9,6 @@
 
 #include "BCUserObject.h"
 
-defineLegacyParams(BCUserObject);
-
 InputParameters
 BCUserObject::validParams()
 {

@@ -14,9 +14,6 @@
 
 class ParametricMaterialBasePD;
 
-template <>
-InputParameters validParams<ParametricMaterialBasePD>();
-
 /**
  * Base material class for bond-based and ordinary state-based peridynamic models, i.e. parameteric
  * material models

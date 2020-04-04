@@ -17,8 +17,6 @@
 
 registerMooseObject("XFEMApp", XFEMRankTwoTensorMarkerUserObject);
 
-defineLegacyParams(XFEMRankTwoTensorMarkerUserObject);
-
 InputParameters
 XFEMRankTwoTensorMarkerUserObject::validParams()
 {

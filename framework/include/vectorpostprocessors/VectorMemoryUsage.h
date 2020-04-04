@@ -15,9 +15,6 @@
 
 class VectorMemoryUsage;
 
-template <>
-InputParameters validParams<VectorMemoryUsage>();
-
 /**
  * Generate a table of various memory metrics indexed by MPI rank. Visualize this using
  * VectorPostprocessorVisualizationAux.
@@ -63,4 +60,3 @@ protected:
   Real _peak_virtual_mem;
   ///@}
 };
-

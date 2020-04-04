@@ -14,9 +14,6 @@
 // Forward Declarations
 class PenaltyDirichletOldValuePD;
 
-template <>
-InputParameters validParams<PenaltyDirichletOldValuePD>();
-
 class PenaltyDirichletOldValuePD : public NodalKernel
 {
 public:

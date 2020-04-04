@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
-defineADLegacyParams(SS316HLAROMANCEStressUpdateTest);
-
 template <ComputeStage compute_stage>
 InputParameters
 SS316HLAROMANCEStressUpdateTest<compute_stage>::validParams()

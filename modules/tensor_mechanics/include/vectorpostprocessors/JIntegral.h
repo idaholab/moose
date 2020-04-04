@@ -15,9 +15,6 @@
 // Forward Declarations
 class JIntegral;
 
-template <>
-InputParameters validParams<JIntegral>();
-
 /**
  * This vectorpostprocessor computes the J-Integral, which is a measure of
  * the strain energy release rate at a crack tip, which can be used as a

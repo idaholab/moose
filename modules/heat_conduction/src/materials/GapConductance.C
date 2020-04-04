@@ -21,8 +21,6 @@
 
 registerMooseObject("HeatConductionApp", GapConductance);
 
-defineLegacyParams(GapConductance);
-
 InputParameters
 GapConductance::validParams()
 {

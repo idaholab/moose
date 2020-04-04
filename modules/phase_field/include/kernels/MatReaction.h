@@ -16,9 +16,6 @@
 // Forward Declaration
 class MatReaction;
 
-template <>
-InputParameters validParams<MatReaction>();
-
 /**
  * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
  * property and \f$ v \f$ is a variable (nonlinear or coupled).

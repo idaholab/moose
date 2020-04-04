@@ -17,8 +17,6 @@
 
 registerMooseObject("TensorMechanicsApp", ElementJacobianDamper);
 
-defineLegacyParams(ElementJacobianDamper);
-
 InputParameters
 ElementJacobianDamper::validParams()
 {

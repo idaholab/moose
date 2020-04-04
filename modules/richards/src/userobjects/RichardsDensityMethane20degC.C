@@ -19,8 +19,6 @@
 
 registerMooseObject("RichardsApp", RichardsDensityMethane20degC);
 
-defineLegacyParams(RichardsDensityMethane20degC);
-
 InputParameters
 RichardsDensityMethane20degC::validParams()
 {

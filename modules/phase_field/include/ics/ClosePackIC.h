@@ -15,9 +15,6 @@
 // Forward declarations
 class ClosePackIC;
 
-template <>
-InputParameters validParams<ClosePackIC>();
-
 /**
  * An InitialCondition for initializing phase variable in close packed circles/spheres pattern
  */
@@ -38,4 +35,3 @@ protected:
   /// User-supplied circle radius
   const Real _radius;
 };
-

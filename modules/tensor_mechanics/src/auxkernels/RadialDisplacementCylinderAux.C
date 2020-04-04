@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", RadialDisplacementCylinderAux);
 
-defineLegacyParams(RadialDisplacementCylinderAux);
-
 InputParameters
 RadialDisplacementCylinderAux::validParams()
 {

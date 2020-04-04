@@ -17,8 +17,6 @@ registerMooseAction("TensorMechanicsApp",
 
 registerMooseAction("TensorMechanicsApp", LegacyTensorMechanicsAction, "add_kernel");
 
-defineLegacyParams(LegacyTensorMechanicsAction);
-
 InputParameters
 LegacyTensorMechanicsAction::validParams()
 {

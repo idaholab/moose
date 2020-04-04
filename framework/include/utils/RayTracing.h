@@ -43,4 +43,3 @@ void elementsIntersectedByLine(const Point & p0,
                                std::vector<Elem *> & intersected_elems,
                                std::vector<LineSegment> & segments);
 }
-

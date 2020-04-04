@@ -20,9 +20,6 @@ template <typename>
 class RankThreeTensorTempl;
 typedef RankThreeTensorTempl<Real> RankThreeTensor;
 
-template <>
-InputParameters validParams<ACInterfaceStress>();
-
 /**
  * Compute the Allen-Cahn interface stress driving force contribution
  * \f$ -\frac12L\left(\nabla \frac{\partial \sigma_{int}}{\partial\nabla\eta_i}:\epsilon, \psi_m
@@ -56,4 +53,3 @@ protected:
   /// derivative of _dS w.r.t. the finite element coefficients for the Jacobian calculation
   RankThreeTensor _ddS;
 };
-

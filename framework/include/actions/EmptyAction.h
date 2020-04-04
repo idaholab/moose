@@ -13,9 +13,6 @@
 
 class EmptyAction;
 
-template <>
-InputParameters validParams<EmptyAction>();
-
 /**
  * Do nothing action.
  */
@@ -28,4 +25,3 @@ public:
 
   virtual void act() override;
 };
-

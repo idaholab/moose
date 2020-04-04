@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", PerfGraphData);
 
-defineLegacyParams(PerfGraphData);
-
 InputParameters
 PerfGraphData::validParams()
 {

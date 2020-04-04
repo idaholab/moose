@@ -23,9 +23,6 @@ template <typename T>
 class SparseMatrix;
 }
 
-template <>
-InputParameters validParams<NodeFaceConstraint>();
-
 /**
  * A NodeFaceConstraint is used when you need to create constraints between
  * two surfaces in a mesh.  It works by allowing you to modify the residual

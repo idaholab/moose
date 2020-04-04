@@ -16,9 +16,6 @@
 // Forward declerations
 class ParsedSubdomainMeshModifier;
 
-template <>
-InputParameters validParams<ParsedSubdomainMeshModifier>();
-
 /**
  * MeshModifier for defining a Subdomain inside or outside of combinatorial geometry
  */
@@ -46,4 +43,3 @@ private:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
-

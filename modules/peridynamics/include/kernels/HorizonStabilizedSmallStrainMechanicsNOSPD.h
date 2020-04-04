@@ -13,9 +13,6 @@
 
 class HorizonStabilizedSmallStrainMechanicsNOSPD;
 
-template <>
-InputParameters validParams<HorizonStabilizedSmallStrainMechanicsNOSPD>();
-
 /**
  * Kernel class for horizon-stabilized peridynamic correspondence model for small strain
  */

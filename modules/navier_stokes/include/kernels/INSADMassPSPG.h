@@ -41,4 +41,3 @@ protected:
 
   usingKernelGradMembers;
 };
-

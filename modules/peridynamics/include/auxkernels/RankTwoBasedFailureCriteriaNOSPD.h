@@ -14,9 +14,6 @@
 
 class RankTwoBasedFailureCriteriaNOSPD;
 
-template <>
-InputParameters validParams<RankTwoBasedFailureCriteriaNOSPD>();
-
 /**
  * Rank two tensor based failure ctriteria to update the bond status
  * for non-ordinary state-based model

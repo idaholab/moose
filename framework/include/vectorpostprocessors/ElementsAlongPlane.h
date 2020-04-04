@@ -14,9 +14,6 @@
 // Forward Declarations
 class ElementsAlongPlane;
 
-template <>
-InputParameters validParams<ElementsAlongPlane>();
-
 /**
  * Get all of the elements that are intersected by a plane
  */
@@ -44,4 +41,3 @@ protected:
   /// The elements that intersect the plane
   VectorPostprocessorValue & _elem_ids;
 };
-

@@ -68,4 +68,3 @@ private:
   /// Coupled vars whose values we provide
   std::map<std::string, std::unique_ptr<unsigned int>> _coupled_var_numbers;
 };
-

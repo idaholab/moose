@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", PFParamsPolyFreeEnergy);
 
-defineLegacyParams(PFParamsPolyFreeEnergy);
-
 InputParameters
 PFParamsPolyFreeEnergy::validParams()
 {

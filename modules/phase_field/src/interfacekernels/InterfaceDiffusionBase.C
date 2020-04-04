@@ -9,8 +9,6 @@
 
 #include "InterfaceDiffusionBase.h"
 
-defineLegacyParams(InterfaceDiffusionBase);
-
 InputParameters
 InterfaceDiffusionBase::validParams()
 {

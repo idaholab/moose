@@ -14,9 +14,6 @@
 // Forward Declarations
 class IsolatedBoundingBoxIC;
 
-template <>
-InputParameters validParams<IsolatedBoundingBoxIC>();
-
 /**
  * IsolatedBoundingBoxIC creates several isolated boxes defined by their coordinates in the domain.
  * If int_width > zero, the border of the boxes smoothly transitions from

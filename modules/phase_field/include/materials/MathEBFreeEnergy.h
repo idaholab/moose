@@ -15,9 +15,6 @@
 // Forward Declarations
 class MathEBFreeEnergy;
 
-template <>
-InputParameters validParams<MathEBFreeEnergy>();
-
 /**
  * Material class that creates the math free energy with the expression builder
  * and uses automatic differentiation to get the derivatives.
@@ -34,4 +31,3 @@ protected:
   /// Coupled variable value for the concentration \f$ c \f$.
   EBTerm _c;
 };
-

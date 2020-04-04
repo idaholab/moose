@@ -13,13 +13,10 @@
 
 class MaterialTimeStepPostprocessor;
 
-template <>
-InputParameters validParams<MaterialTimeStepPostprocessor>();
-
 /**
  * This postporocessor calculates an estimated timestep size that limits
  * an auxiliary variable to below a given threshold.
-*/
+ */
 class MaterialTimeStepPostprocessor : public ElementPostprocessor
 {
 public:

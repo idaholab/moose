@@ -18,9 +18,6 @@
 
 class ComputeElasticityBeam;
 
-template <>
-InputParameters validParams<ComputeElasticityBeam>();
-
 class ComputeElasticityBeam : public Material
 {
 public:

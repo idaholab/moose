@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", AbruptSoftening);
 
-defineLegacyParams(AbruptSoftening);
-
 InputParameters
 AbruptSoftening::validParams()
 {

@@ -13,9 +13,6 @@
 
 class LineElementAction;
 
-template <>
-InputParameters validParams<LineElementAction>();
-
 class LineElementAction : public Action
 {
 public:

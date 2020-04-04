@@ -9,8 +9,6 @@
 
 #include "XFEMMovingInterfaceVelocityBase.h"
 
-defineLegacyParams(XFEMMovingInterfaceVelocityBase);
-
 InputParameters
 XFEMMovingInterfaceVelocityBase::validParams()
 {

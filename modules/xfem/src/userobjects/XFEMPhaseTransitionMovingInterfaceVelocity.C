@@ -11,8 +11,6 @@
 
 registerMooseObject("XFEMApp", XFEMPhaseTransitionMovingInterfaceVelocity);
 
-defineLegacyParams(XFEMPhaseTransitionMovingInterfaceVelocity);
-
 InputParameters
 XFEMPhaseTransitionMovingInterfaceVelocity::validParams()
 {

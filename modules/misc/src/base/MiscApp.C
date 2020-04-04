@@ -12,8 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(MiscApp);
-
 InputParameters
 MiscApp::validParams()
 {

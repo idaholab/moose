@@ -21,9 +21,6 @@ class System;
 class EquationSystems;
 }
 
-template <>
-InputParameters validParams<NumDOFs>();
-
 class NumDOFs : public GeneralPostprocessor
 {
 public:
@@ -48,4 +45,3 @@ protected:
   const System * _system_pointer;
   const EquationSystems * _es_pointer;
 };
-

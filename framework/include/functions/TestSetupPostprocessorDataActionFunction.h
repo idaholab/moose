@@ -15,9 +15,6 @@
 // Forward declerations
 class TestSetupPostprocessorDataActionFunction;
 
-template <>
-InputParameters validParams<TestSetupPostprocessorDataActionFunction>();
-
 /**
  * A class for testing SetupPostprocessorDataAction. Function are created before Postprocessors but
  * hasPostprocessor should work. This tests that it does.
@@ -33,4 +30,3 @@ public:
 
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
 };
-

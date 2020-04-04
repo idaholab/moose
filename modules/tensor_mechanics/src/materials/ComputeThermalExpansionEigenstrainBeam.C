@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeThermalExpansionEigenstrainBeam);
 
-defineLegacyParams(ComputeThermalExpansionEigenstrainBeam);
-
 InputParameters
 ComputeThermalExpansionEigenstrainBeam::validParams()
 {

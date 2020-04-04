@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", KineticDisPreRateAux);
 
-defineLegacyParams(KineticDisPreRateAux);
-
 InputParameters
 KineticDisPreRateAux::validParams()
 {

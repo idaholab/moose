@@ -14,9 +14,6 @@
 // Forward declarations
 class Grad2ParsedFunction;
 
-template <>
-InputParameters validParams<Grad2ParsedFunction>();
-
 /**
  * returns the central difference approx to the derivative (direction.nabla)^2 function
  * viz

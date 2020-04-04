@@ -16,9 +16,6 @@
 class FunctionDT;
 class Function;
 
-template <>
-InputParameters validParams<FunctionDT>();
-
 class FunctionDT : public TimeStepper, public FunctionInterface
 {
 public:

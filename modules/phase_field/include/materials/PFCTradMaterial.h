@@ -14,9 +14,6 @@
 // Forward Declarations
 class PFCTradMaterial;
 
-template <>
-InputParameters validParams<PFCTradMaterial>();
-
 class PFCTradMaterial : public Material
 {
 public:
@@ -40,4 +37,3 @@ private:
   MaterialProperty<Real> & _C6;
   MaterialProperty<Real> & _C8;
 };
-

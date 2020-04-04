@@ -15,9 +15,6 @@
 class VectorFunctionAux;
 class Function;
 
-template <>
-InputParameters validParams<VectorFunctionAux>();
-
 /**
  * Function auxiliary value
  */

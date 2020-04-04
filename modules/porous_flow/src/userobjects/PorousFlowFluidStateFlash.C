@@ -9,8 +9,6 @@
 
 #include "PorousFlowFluidStateFlash.h"
 
-defineLegacyParams(PorousFlowFluidStateFlash);
-
 InputParameters
 PorousFlowFluidStateFlash::validParams()
 {

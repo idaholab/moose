@@ -17,9 +17,6 @@
 // Forward Declarations
 class GrainAdvectionVelocity;
 
-template <>
-InputParameters validParams<GrainAdvectionVelocity>();
-
 /**
  * This Material calculates the advection velocity, it's divergence and
  * derivatives acting on a particle/grain
@@ -60,4 +57,3 @@ private:
   /// Material storing advection velocities of grains
   MaterialProperty<std::vector<RealGradient>> & _velocity_advection;
 };
-

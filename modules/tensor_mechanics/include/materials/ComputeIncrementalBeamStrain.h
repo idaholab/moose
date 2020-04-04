@@ -21,9 +21,6 @@
 class ComputeIncrementalBeamStrain;
 class Function;
 
-template <>
-InputParameters validParams<ComputeIncrementalBeamStrain>();
-
 class ComputeIncrementalBeamStrain : public Material
 {
 public:

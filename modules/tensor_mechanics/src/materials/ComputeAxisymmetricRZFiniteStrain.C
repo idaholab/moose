@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetricRZFiniteStrain);
 
-defineLegacyParams(ComputeAxisymmetricRZFiniteStrain);
-
 InputParameters
 ComputeAxisymmetricRZFiniteStrain::validParams()
 {

@@ -14,9 +14,6 @@
 // Forward Declarations
 class StressDivergenceRZTensors;
 
-template <>
-InputParameters validParams<StressDivergenceRZTensors>();
-
 /**
  * StressDivergenceRZTensors is a modification of StressDivergenceTensors to
  * accommodate the Axisymmetric material models that use cylindrical coordinates.

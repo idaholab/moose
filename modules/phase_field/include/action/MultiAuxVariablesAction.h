@@ -40,7 +40,3 @@ protected:
   /// number of properties
   const unsigned int _data_size;
 };
-
-template <>
-InputParameters validParams<MultiAuxVariablesAction>();
-

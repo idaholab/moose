@@ -15,9 +15,6 @@
 // Forward Declarations
 class PointValueSampler;
 
-template <>
-InputParameters validParams<PointValueSampler>();
-
 class PointValueSampler : public PointSamplerBase
 {
 public:
@@ -27,4 +24,3 @@ public:
 
   virtual void initialize() override;
 };
-

@@ -15,9 +15,6 @@
 class NSEntropyError;
 class IdealGasFluidProperties;
 
-template <>
-InputParameters validParams<NSEntropyError>();
-
 class NSEntropyError : public ElementIntegralPostprocessor
 {
 public:
@@ -38,4 +35,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

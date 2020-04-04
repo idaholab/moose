@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSProjection;
 
-template <>
-InputParameters validParams<INSProjection>();
-
 /**
  * This class computes the "projection" part of the "split" method for
  * solving incompressible Navier-Stokes.  This is a time-varying equation
@@ -58,4 +55,3 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _rho;
 };
-

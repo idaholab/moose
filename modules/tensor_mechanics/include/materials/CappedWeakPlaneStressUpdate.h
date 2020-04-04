@@ -16,9 +16,6 @@
 
 class CappedWeakPlaneStressUpdate;
 
-template <>
-InputParameters validParams<CappedWeakPlaneStressUpdate>();
-
 /**
  * CappedWeakPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

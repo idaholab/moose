@@ -15,9 +15,6 @@
 
 class AddNavierStokesICsAction;
 
-template <>
-InputParameters validParams<AddNavierStokesICsAction>();
-
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds initial conditions for all the
@@ -51,4 +48,3 @@ protected:
   RealVectorValue _initial_velocity;
   UserObjectName _fp_name;
 };
-

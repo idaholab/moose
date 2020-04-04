@@ -31,7 +31,6 @@
  *  -ACGrGrMulti
  **/
 
-
 #include "Action.h"
 
 class GrandPotentialKernelAction : public Action
@@ -43,7 +42,3 @@ public:
 
   virtual void act();
 };
-
-template <>
-InputParameters validParams<GrandPotentialKernelAction>();
-

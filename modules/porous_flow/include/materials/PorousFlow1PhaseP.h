@@ -14,9 +14,6 @@
 class PorousFlowCapillaryPressure;
 class PorousFlow1PhaseP;
 
-template <>
-InputParameters validParams<PorousFlow1PhaseP>();
-
 /**
  * Base material designed to calculate fluid phase porepressure and saturation
  * for the single-phase situation assuming constant effective saturation and
@@ -49,4 +46,3 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
-

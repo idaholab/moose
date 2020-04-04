@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureVG);
 
-defineLegacyParams(PorousFlowCapillaryPressureVG);
-
 InputParameters
 PorousFlowCapillaryPressureVG::validParams()
 {

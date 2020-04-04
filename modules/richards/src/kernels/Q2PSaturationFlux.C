@@ -21,8 +21,6 @@
 
 registerMooseObject("RichardsApp", Q2PSaturationFlux);
 
-defineLegacyParams(Q2PSaturationFlux);
-
 InputParameters
 Q2PSaturationFlux::validParams()
 {

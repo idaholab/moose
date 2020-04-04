@@ -12,8 +12,6 @@
 
 registerMooseObjectAliased("StochasticToolsApp", LatinHypercubeSampler, "LatinHypercube");
 
-defineLegacyParams(LatinHypercubeSampler);
-
 InputParameters
 LatinHypercubeSampler::validParams()
 {

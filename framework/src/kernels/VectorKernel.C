@@ -17,8 +17,6 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(VectorKernel);
-
 InputParameters
 VectorKernel::validParams()
 {
