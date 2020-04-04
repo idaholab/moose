@@ -9,8 +9,6 @@
 
 #include "SubblockIndexProvider.h"
 
-defineLegacyParams(SubblockIndexProvider);
-
 InputParameters
 SubblockIndexProvider::validParams()
 {

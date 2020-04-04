@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CoefCoupledTimeDerivative);
 
-defineLegacyParams(CoefCoupledTimeDerivative);
-
 InputParameters
 CoefCoupledTimeDerivative::validParams()
 {

@@ -15,9 +15,6 @@
 // Forward declarations
 class MaterialRealVectorValueAux;
 
-template <>
-InputParameters validParams<MaterialRealVectorValueAux>();
-
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
  */
@@ -38,4 +35,3 @@ protected:
   /// The vector component to output
   unsigned int _component;
 };
-

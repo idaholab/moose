@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeReducedOrderEigenstrain);
 
-defineLegacyParams(ComputeReducedOrderEigenstrain);
-
 InputParameters
 ComputeReducedOrderEigenstrain::validParams()
 {

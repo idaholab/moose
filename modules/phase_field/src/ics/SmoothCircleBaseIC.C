@@ -13,8 +13,6 @@
 
 #include "libmesh/utility.h"
 
-defineLegacyParams(SmoothCircleBaseIC);
-
 InputParameters
 SmoothCircleBaseIC::validParams()
 {

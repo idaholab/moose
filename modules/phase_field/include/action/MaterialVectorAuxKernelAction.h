@@ -36,7 +36,3 @@ protected:
   /// number of properties
   const unsigned int _num_prop;
 };
-
-template <>
-InputParameters validParams<MaterialVectorAuxKernelAction>();
-

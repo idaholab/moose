@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMass;
 
-template <>
-InputParameters validParams<INSMass>();
-
 /**
  * This class computes the mass equation residual and Jacobian
  * contributions for the incompressible Navier-Stokes momentum

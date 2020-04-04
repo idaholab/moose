@@ -14,9 +14,6 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADLegacyParams(ADKernelSUPG);
-defineADLegacyParams(ADVectorKernelSUPG);
-
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADKernelSUPGTempl<T, compute_stage>::validParams()

@@ -14,9 +14,6 @@
 // Forward Declarations
 class AEFVFreeOutflowBoundaryFlux;
 
-template <>
-InputParameters validParams<AEFVFreeOutflowBoundaryFlux>();
-
 /**
  * Free outflow BC based boundary flux user object
  * for the advection equation
@@ -46,4 +43,3 @@ protected:
   /// advective velocity
   const Real _velocity;
 };
-

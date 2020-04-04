@@ -13,9 +13,6 @@
 
 class TensorMechanicsPlasticOrthotropic;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticOrthotropic>();
-
 /**
  * Orthotropic plasticity model from Yoon (2013)
  * the name of the paper is "Asymmetric yield function based on the

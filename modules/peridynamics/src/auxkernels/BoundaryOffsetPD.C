@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", BoundaryOffsetPD);
 
-defineLegacyParams(BoundaryOffsetPD);
-
 InputParameters
 BoundaryOffsetPD::validParams()
 {

@@ -16,9 +16,6 @@
 class PeridynamicsMesh;
 class PeridynamicsKernelBase;
 
-template <>
-InputParameters validParams<PeridynamicsKernelBase>();
-
 /**
  * Base kernel class for peridynamic models
  */

@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsSUPGnone);
 
-defineLegacyParams(RichardsSUPGnone);
-
 InputParameters
 RichardsSUPGnone::validParams()
 {

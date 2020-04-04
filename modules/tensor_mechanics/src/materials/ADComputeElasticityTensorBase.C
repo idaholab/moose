@@ -10,8 +10,6 @@
 #include "ADComputeElasticityTensorBase.h"
 #include "Function.h"
 
-defineADLegacyParams(ADComputeElasticityTensorBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeElasticityTensorBase<compute_stage>::validParams()

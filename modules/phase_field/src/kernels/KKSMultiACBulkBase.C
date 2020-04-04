@@ -9,8 +9,6 @@
 
 #include "KKSMultiACBulkBase.h"
 
-defineLegacyParams(KKSMultiACBulkBase);
-
 InputParameters
 KKSMultiACBulkBase::validParams()
 {

@@ -15,9 +15,6 @@
 class GrainForcesPostprocessor;
 class GrainForceAndTorqueInterface;
 
-template <>
-InputParameters validParams<GrainForcesPostprocessor>();
-
 /**
  *  GrainForcesPostprocessor is a type of VectorPostprocessor that outputs the
  *  force and torque values calculated in UserObjects.
@@ -46,4 +43,3 @@ protected:
   /// total no. of grains
   unsigned int _grain_num;
 };
-

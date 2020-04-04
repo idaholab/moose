@@ -26,8 +26,6 @@
 
 registerMooseObject("MooseApp", EigenProblem);
 
-defineLegacyParams(EigenProblem);
-
 InputParameters
 EigenProblem::validParams()
 {

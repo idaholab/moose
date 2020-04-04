@@ -13,8 +13,6 @@
 
 registerADMooseObject("MooseApp", EqualValueConstraint);
 
-defineADLegacyParams(EqualValueConstraint);
-
 template <ComputeStage compute_stage>
 InputParameters
 EqualValueConstraint<compute_stage>::validParams()

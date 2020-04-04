@@ -36,9 +36,6 @@
 // Forward Declarations
 class C1ICBase;
 
-template <>
-InputParameters validParams<C1ICBase>();
-
 /**
  * C1ICBase is used by the CrossIC.
  */
@@ -60,4 +57,3 @@ protected:
   Number interfaceValue(Real r);
   Number interfaceDerivative(Real r);
 };
-

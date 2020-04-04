@@ -13,9 +13,6 @@
 
 class BoostLognormalDistribution;
 
-template <>
-InputParameters validParams<BoostLognormalDistribution>();
-
 /**
  * A class used to generate Lognormal distribution via Boost
  */
@@ -27,4 +24,3 @@ public:
 
   BoostLognormalDistribution(const InputParameters & parameters);
 };
-

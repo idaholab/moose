@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", MultiAuxVariablesAction, "add_aux_variable");
 
-defineLegacyParams(MultiAuxVariablesAction);
-
 InputParameters
 MultiAuxVariablesAction::validParams()
 {

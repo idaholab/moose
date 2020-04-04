@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", CoupledDiffusionReactionSub);
 
-defineLegacyParams(CoupledDiffusionReactionSub);
-
 InputParameters
 CoupledDiffusionReactionSub::validParams()
 {

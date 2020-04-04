@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainHyperElasticViscoPlastic);
 
-defineLegacyParams(FiniteStrainHyperElasticViscoPlastic);
-
 InputParameters
 FiniteStrainHyperElasticViscoPlastic::validParams()
 {

@@ -16,9 +16,6 @@ class StressDivergence;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template <>
-InputParameters validParams<StressDivergence>();
-
 class StressDivergence : public Kernel
 {
 public:

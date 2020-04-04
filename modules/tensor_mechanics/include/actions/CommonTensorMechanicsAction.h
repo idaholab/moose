@@ -13,9 +13,6 @@
 
 class CommonTensorMechanicsAction;
 
-template <>
-InputParameters validParams<CommonTensorMechanicsAction>();
-
 /**
  * Store common tensor mechanics parameters
  */

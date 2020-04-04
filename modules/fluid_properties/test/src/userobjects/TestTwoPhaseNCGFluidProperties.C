@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesTestApp", TestTwoPhaseNCGFluidProperties);
 
-defineLegacyParams(TestTwoPhaseNCGFluidProperties);
-
 InputParameters
 TestTwoPhaseNCGFluidProperties::validParams()
 {

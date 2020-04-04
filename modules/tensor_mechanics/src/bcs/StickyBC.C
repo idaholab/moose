@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", StickyBC);
 
-defineLegacyParams(StickyBC);
-
 InputParameters
 StickyBC::validParams()
 {

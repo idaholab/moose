@@ -18,9 +18,6 @@
 // Forward declarations
 class MoosePartitioner;
 
-template <>
-InputParameters validParams<MoosePartitioner>();
-
 /**
  * Base class for MOOSE partitioner
  */

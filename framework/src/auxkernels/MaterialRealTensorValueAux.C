@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialRealTensorValueAux);
 
-defineLegacyParams(MaterialRealTensorValueAux);
-
 InputParameters
 MaterialRealTensorValueAux::validParams()
 {

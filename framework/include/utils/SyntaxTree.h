@@ -77,4 +77,3 @@ protected:
 private:
   std::set<std::string> _params_printed;
 };
-

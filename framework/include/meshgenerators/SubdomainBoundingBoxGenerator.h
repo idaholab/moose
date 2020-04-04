@@ -17,9 +17,6 @@
 // Forward declarations
 class SubdomainBoundingBoxGenerator;
 
-template <>
-InputParameters validParams<SubdomainBoundingBoxGenerator>();
-
 namespace libMesh
 {
 class BoundingBox;

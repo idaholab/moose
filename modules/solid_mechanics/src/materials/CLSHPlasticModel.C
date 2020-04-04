@@ -14,8 +14,6 @@
 
 registerMooseObject("SolidMechanicsApp", CLSHPlasticModel);
 
-defineLegacyParams(CLSHPlasticModel);
-
 InputParameters
 CLSHPlasticModel::validParams()
 {

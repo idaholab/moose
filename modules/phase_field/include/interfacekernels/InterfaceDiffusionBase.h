@@ -13,9 +13,6 @@
 
 class InterfaceDiffusionBase;
 
-template <>
-InputParameters validParams<InterfaceDiffusionBase>();
-
 /**
  * Base class for Diffusion equation terms coupling two different
  * variables across a subdomain boundary.
@@ -34,4 +31,3 @@ protected:
   /// neighbor diffusion coefficient
   const Real _D_neighbor;
 };
-

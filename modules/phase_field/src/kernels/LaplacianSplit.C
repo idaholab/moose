@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", LaplacianSplit);
 
-defineLegacyParams(LaplacianSplit);
-
 InputParameters
 LaplacianSplit::validParams()
 {

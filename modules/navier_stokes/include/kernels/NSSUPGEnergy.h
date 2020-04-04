@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSSUPGEnergy;
 
-template <>
-InputParameters validParams<NSSUPGEnergy>();
-
 /**
  * Compute residual and Jacobian terms form the SUPG
  * terms in the energy equation.
@@ -39,4 +36,3 @@ private:
   // variable numbering.
   Real computeJacobianHelper(unsigned var);
 };
-

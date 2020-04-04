@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", RandomPartitioner);
 
-defineLegacyParams(RandomPartitioner);
-
 InputParameters
 RandomPartitioner::validParams()
 {

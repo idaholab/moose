@@ -14,8 +14,6 @@
 
 registerMooseAction("MooseApp", AddICAction, "add_ic");
 
-defineLegacyParams(AddICAction);
-
 InputParameters
 AddICAction::validParams()
 {

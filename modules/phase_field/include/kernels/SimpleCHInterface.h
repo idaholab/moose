@@ -13,9 +13,6 @@
 
 class SimpleCHInterface;
 
-template <>
-InputParameters validParams<SimpleCHInterface>();
-
 /**
  * Compute the Cahn-Hilliard interface term with constant Mobility and Interfacial parameter
  */
@@ -41,4 +38,3 @@ protected:
   /// Interfacial parameter
   const MaterialProperty<Real> & _kappa_c;
 };
-

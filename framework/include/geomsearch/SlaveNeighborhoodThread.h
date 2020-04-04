@@ -59,4 +59,3 @@ protected:
   /// The number of nodes to keep
   unsigned int _patch_size;
 };
-

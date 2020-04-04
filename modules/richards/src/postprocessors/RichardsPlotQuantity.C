@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", RichardsPlotQuantity);
 
-defineLegacyParams(RichardsPlotQuantity);
-
 InputParameters
 RichardsPlotQuantity::validParams()
 {

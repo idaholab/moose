@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeDamageStress);
 
-defineLegacyParams(ComputeDamageStress);
-
 InputParameters
 ComputeDamageStress::validParams()
 {

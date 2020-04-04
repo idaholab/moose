@@ -13,9 +13,6 @@
 
 class NumRelationshipManagers;
 
-template <>
-InputParameters validParams<NumRelationshipManagers>();
-
 class NumRelationshipManagers : public GeneralPostprocessor
 {
 public:

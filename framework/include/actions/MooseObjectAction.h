@@ -15,9 +15,6 @@
 
 class MooseObjectAction;
 
-template <>
-InputParameters validParams<MooseObjectAction>();
-
 class MooseObjectAction : public Action
 {
 public:

@@ -13,9 +13,6 @@
 
 class PorousFlowRelativePermeabilityCorey;
 
-template <>
-InputParameters validParams<PorousFlowRelativePermeabilityCorey>();
-
 /**
  * Material to calculate Corey-type relative permeability of an arbitrary phase
  * given the effective saturation and Corey exponent of that phase.
@@ -37,4 +34,3 @@ protected:
   /// Corey exponent n for the specified phase
   const Real _n;
 };
-

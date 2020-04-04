@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", ElementVariablesDifferenceMax);
 
-defineLegacyParams(ElementVariablesDifferenceMax);
-
 InputParameters
 ElementVariablesDifferenceMax::validParams()
 {

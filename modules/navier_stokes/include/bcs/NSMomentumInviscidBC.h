@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSMomentumInviscidBC;
 
-template <>
-InputParameters validParams<NSMomentumInviscidBC>();
-
 /**
  * This class corresponds to the inviscid part of the "natural"
  * boundary condition for the momentum equations, i.e.
@@ -102,4 +99,3 @@ protected:
   // based on the passed-in variable number.
   Real convectiveQpJacobianHelper(unsigned var_number);
 };
-

@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineADLegacyParams(ADCompute2DIncrementalStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADCompute2DIncrementalStrain<compute_stage>::validParams()

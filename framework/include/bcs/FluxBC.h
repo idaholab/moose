@@ -13,9 +13,6 @@
 
 class FluxBC;
 
-template <>
-InputParameters validParams<FluxBC>();
-
 /**
  * Boundary condition of a flux type \f$ <\vec q * \vec n, v> \f$.
  *

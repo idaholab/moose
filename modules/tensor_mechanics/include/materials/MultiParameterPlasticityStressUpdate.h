@@ -15,9 +15,6 @@
 
 class MultiParameterPlasticityStressUpdate;
 
-template <>
-InputParameters validParams<MultiParameterPlasticityStressUpdate>();
-
 /**
  * MultiParameterPlasticityStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

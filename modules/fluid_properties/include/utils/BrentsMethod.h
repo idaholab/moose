@@ -38,4 +38,3 @@ void bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2);
  */
 Real root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol = 1.0e-12);
 }
-

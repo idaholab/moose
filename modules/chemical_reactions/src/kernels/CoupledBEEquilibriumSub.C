@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", CoupledBEEquilibriumSub);
 
-defineLegacyParams(CoupledBEEquilibriumSub);
-
 InputParameters
 CoupledBEEquilibriumSub::validParams()
 {

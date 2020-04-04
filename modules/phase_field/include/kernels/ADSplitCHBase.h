@@ -40,4 +40,3 @@ protected:
 
   usingKernelMembers;
 };
-

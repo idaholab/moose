@@ -12,8 +12,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonBubble);
 
-defineLegacyParams(LevelSetOlssonBubble);
-
 InputParameters
 LevelSetOlssonBubble::validParams()
 {

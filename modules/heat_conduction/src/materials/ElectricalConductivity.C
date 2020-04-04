@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", ElectricalConductivity);
 
-defineLegacyParams(ElectricalConductivity);
-
 InputParameters
 ElectricalConductivity::validParams()
 {

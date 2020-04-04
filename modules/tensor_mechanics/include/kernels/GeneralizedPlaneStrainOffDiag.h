@@ -22,9 +22,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 
-template <>
-InputParameters validParams<GeneralizedPlaneStrainOffDiag>();
-
 class GeneralizedPlaneStrainOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:

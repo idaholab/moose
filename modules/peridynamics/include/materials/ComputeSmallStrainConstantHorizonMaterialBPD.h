@@ -13,9 +13,6 @@
 
 class ComputeSmallStrainConstantHorizonMaterialBPD;
 
-template <>
-InputParameters validParams<ComputeSmallStrainConstantHorizonMaterialBPD>();
-
 /**
  * Material class for bond based peridynamic solid mechanics model based on regular spatial
  * discretization

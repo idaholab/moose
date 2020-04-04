@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", LineMaterialRankTwoScalarSampler);
 
-defineLegacyParams(LineMaterialRankTwoScalarSampler);
-
 InputParameters
 LineMaterialRankTwoScalarSampler::validParams()
 {

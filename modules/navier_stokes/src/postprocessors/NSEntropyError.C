@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", NSEntropyError);
 
-defineLegacyParams(NSEntropyError);
-
 InputParameters
 NSEntropyError::validParams()
 {

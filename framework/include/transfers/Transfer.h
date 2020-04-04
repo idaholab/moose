@@ -28,9 +28,6 @@ class System;
 class EquationSystems;
 }
 
-template <>
-InputParameters validParams<Transfer>();
-
 /**
  * Base class for all Transfer objects.
  *

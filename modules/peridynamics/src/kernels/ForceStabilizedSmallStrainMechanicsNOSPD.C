@@ -14,8 +14,6 @@
 
 registerMooseObject("PeridynamicsApp", ForceStabilizedSmallStrainMechanicsNOSPD);
 
-defineLegacyParams(ForceStabilizedSmallStrainMechanicsNOSPD);
-
 InputParameters
 ForceStabilizedSmallStrainMechanicsNOSPD::validParams()
 {

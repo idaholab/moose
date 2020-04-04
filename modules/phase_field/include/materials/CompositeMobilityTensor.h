@@ -33,7 +33,3 @@ protected:
   const std::string _M_name;
   MaterialProperty<RealTensorValue> & _M;
 };
-
-template <>
-InputParameters validParams<CompositeMobilityTensor>();
-

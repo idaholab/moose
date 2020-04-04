@@ -14,9 +14,6 @@
 
 class GeneralizedPlaneStrainActionPD;
 
-template <>
-InputParameters validParams<GeneralizedPlaneStrainActionPD>();
-
 /**
  * Action class to setup peridynamic generalized plane strain models
  */

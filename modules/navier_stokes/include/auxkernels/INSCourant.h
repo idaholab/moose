@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSCourant;
 
-template <>
-InputParameters validParams<INSCourant>();
-
 /**
  * Computes h_min / |u|
  */
@@ -35,4 +32,3 @@ protected:
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
 };
-

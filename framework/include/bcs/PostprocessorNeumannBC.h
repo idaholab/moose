@@ -13,9 +13,6 @@
 
 class PostprocessorNeumannBC;
 
-template <>
-InputParameters validParams<PostprocessorNeumannBC>();
-
 /**
  * Implements a constant Neumann BC where grad(u) is a equal to a postprocessor on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.

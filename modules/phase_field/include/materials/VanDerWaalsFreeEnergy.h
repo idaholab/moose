@@ -14,9 +14,6 @@
 // Forward Declarations
 class VanDerWaalsFreeEnergy;
 
-template <>
-InputParameters validParams<VanDerWaalsFreeEnergy>();
-
 /**
  * Material class that provides the free energy of a Van der Waals gas with the
  * expression builder and uses automatic differentiation to get the derivatives.
@@ -53,4 +50,3 @@ protected:
   /// Taylor expansion threshold for the logarithm in the free energy
   const Real _log_tol;
 };
-

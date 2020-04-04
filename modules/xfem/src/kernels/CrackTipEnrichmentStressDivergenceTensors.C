@@ -12,8 +12,6 @@
 
 registerMooseObject("XFEMApp", CrackTipEnrichmentStressDivergenceTensors);
 
-defineLegacyParams(CrackTipEnrichmentStressDivergenceTensors);
-
 InputParameters
 CrackTipEnrichmentStressDivergenceTensors::validParams()
 {

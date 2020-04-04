@@ -15,8 +15,6 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressureUOAction, "add_user_object");
 
-defineLegacyParams(CavityPressureUOAction);
-
 InputParameters
 CavityPressureUOAction::validParams()
 {

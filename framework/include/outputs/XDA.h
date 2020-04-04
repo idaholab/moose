@@ -15,9 +15,6 @@
 // Forward declearations
 class XDA;
 
-template <>
-InputParameters validParams<XDA>();
-
 /**
  * Class for output data to the XDAII format
  */
@@ -48,4 +45,3 @@ private:
   /// Flag for binary output
   bool _binary;
 };
-

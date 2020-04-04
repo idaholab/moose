@@ -13,9 +13,6 @@
 
 class PresetBC;
 
-template <>
-InputParameters validParams<PresetBC>();
-
 /**
  * Defines a boundary condition that (pre)sets the solution at the boundary
  * to be a user specified value.

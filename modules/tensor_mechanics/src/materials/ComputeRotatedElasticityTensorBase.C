@@ -10,8 +10,6 @@
 #include "ComputeRotatedElasticityTensorBase.h"
 #include "RotationTensor.h"
 
-defineLegacyParams(ComputeRotatedElasticityTensorBase);
-
 InputParameters
 ComputeRotatedElasticityTensorBase::validParams()
 {

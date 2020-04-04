@@ -17,9 +17,6 @@ class ColumnMajorMatrixTempl;
 typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 class BilinearInterpolation;
 
-template <>
-InputParameters validParams<PiecewiseBilinear>();
-
 /**
  * PiecewiseBilinear reads from a file the information necessary to build the vectors x and y and
  * the ColumnMajorMatrix z, and then sends those (along with a sample point) to

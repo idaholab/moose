@@ -13,8 +13,6 @@
 #include "GrainTrackerInterface.h"
 #include "MooseVariable.h"
 
-defineLegacyParams(GrainRigidBodyMotionBase);
-
 InputParameters
 GrainRigidBodyMotionBase::validParams()
 {

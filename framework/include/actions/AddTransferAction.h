@@ -13,9 +13,6 @@
 
 class AddTransferAction;
 
-template <>
-InputParameters validParams<AddTransferAction>();
-
 class AddTransferAction : public MooseObjectAction
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowEnergyTimeDerivative);
 
-defineLegacyParams(PorousFlowEnergyTimeDerivative);
-
 InputParameters
 PorousFlowEnergyTimeDerivative::validParams()
 {

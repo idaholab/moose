@@ -13,9 +13,6 @@
 
 class NodalEqualValueConstraint;
 
-template <>
-InputParameters validParams<NodalEqualValueConstraint>();
-
 /**
  * Constraint to enforce equal values (in 1D)
  *
@@ -38,4 +35,3 @@ protected:
   std::vector<unsigned int> _val_number;
   std::vector<const VariableValue *> _value;
 };
-

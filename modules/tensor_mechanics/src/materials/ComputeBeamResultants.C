@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeBeamResultants);
 
-defineLegacyParams(ComputeBeamResultants);
-
 InputParameters
 ComputeBeamResultants::validParams()
 {

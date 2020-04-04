@@ -18,9 +18,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 class ThermalFractureIntegral;
 
-template <>
-InputParameters validParams<ThermalFractureIntegral>();
-
 /**
  * ThermalFractureIntegral computes the summation of the derivative of the
  * eigenstrains with respect to temperature.

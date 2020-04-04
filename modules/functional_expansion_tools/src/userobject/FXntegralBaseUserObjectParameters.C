@@ -9,8 +9,6 @@
 
 #include "FXIntegralBaseUserObject.h"
 
-defineLegacyParams(FXIntegralBaseUserObjectParameters);
-
 InputParameters
 FXIntegralBaseUserObjectParameters::validParams()
 {

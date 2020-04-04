@@ -16,9 +16,6 @@
 // Forward Declarations
 class StressDivergenceTensors;
 
-template <>
-InputParameters validParams<StressDivergenceTensors>();
-
 /**
  * StressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
  * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done

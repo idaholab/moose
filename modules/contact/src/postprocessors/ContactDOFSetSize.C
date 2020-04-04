@@ -20,8 +20,6 @@
 
 registerMooseObject("ContactApp", ContactDOFSetSize);
 
-defineLegacyParams(ContactDOFSetSize);
-
 InputParameters
 ContactDOFSetSize::validParams()
 {

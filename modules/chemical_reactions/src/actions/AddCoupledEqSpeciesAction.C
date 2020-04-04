@@ -22,8 +22,6 @@ registerMooseAction("ChemicalReactionsApp", AddCoupledEqSpeciesAction, "add_kern
 
 registerMooseAction("ChemicalReactionsApp", AddCoupledEqSpeciesAction, "add_aux_kernel");
 
-defineLegacyParams(AddCoupledEqSpeciesAction);
-
 InputParameters
 AddCoupledEqSpeciesAction::validParams()
 {

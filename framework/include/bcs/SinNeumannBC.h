@@ -14,9 +14,6 @@
 // Forward Declarations
 class SinNeumannBC;
 
-template <>
-InputParameters validParams<SinNeumannBC>();
-
 /**
  * Implements a spatially-constant, time-varying flux boundary
  * condition grad(u).n = g(t), where

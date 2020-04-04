@@ -21,9 +21,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 
-template <>
-InputParameters validParams<GlobalStrain>();
-
 class GlobalStrain : public ScalarKernel
 {
 public:

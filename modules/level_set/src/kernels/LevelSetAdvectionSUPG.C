@@ -11,8 +11,6 @@
 
 registerADMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
 
-defineADLegacyParams(LevelSetAdvectionSUPG);
-
 template <ComputeStage compute_stage>
 InputParameters
 LevelSetAdvectionSUPG<compute_stage>::validParams()

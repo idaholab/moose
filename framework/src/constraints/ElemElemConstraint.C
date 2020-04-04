@@ -19,8 +19,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(ElemElemConstraint);
-
 InputParameters
 ElemElemConstraint::validParams()
 {

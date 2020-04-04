@@ -16,9 +16,6 @@
 // Forward Declarations
 class ReconPhaseVarIC;
 
-template <>
-InputParameters validParams<ReconPhaseVarIC>();
-
 /**
  * ReconPhaseVarIC initializes a single order parameter to represent a phase
  * obtained form an EBSDReader object. The op will be set to 1 for nodes that are
@@ -43,4 +40,3 @@ private:
 
   const std::map<dof_id_type, std::vector<Real>> & _node_to_phase_weight_map;
 };
-

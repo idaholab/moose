@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", EulerAngleUpdater);
 
-defineLegacyParams(EulerAngleUpdater);
-
 InputParameters
 EulerAngleUpdater::validParams()
 {

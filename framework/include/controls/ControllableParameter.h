@@ -132,6 +132,3 @@ ControllableParameter::check()
       _items.begin(), _items.end(), [](ControllableItem * item) { return item->check<T>(); });
   return type && !empty();
 }
-
-
-

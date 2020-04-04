@@ -14,9 +14,6 @@
 
 class AdvectiveFluxCalculatorBase;
 
-template <>
-InputParameters validParams<AdvectiveFluxCalculatorBase>();
-
 /**
  * Base class to compute Advective fluxes.  Specifically,
  * computes K_ij, D_ij, L_ij, R+, R-, f^a_ij detailed in

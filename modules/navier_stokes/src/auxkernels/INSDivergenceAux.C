@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSDivergenceAux);
 
-defineLegacyParams(INSDivergenceAux);
-
 InputParameters
 INSDivergenceAux::validParams()
 {

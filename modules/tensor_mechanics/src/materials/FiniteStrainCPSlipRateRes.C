@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainCPSlipRateRes);
 
-defineLegacyParams(FiniteStrainCPSlipRateRes);
-
 InputParameters
 FiniteStrainCPSlipRateRes::validParams()
 {

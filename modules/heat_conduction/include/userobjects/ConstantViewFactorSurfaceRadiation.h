@@ -15,9 +15,6 @@
 class ConstantViewFactorSurfaceRadiation;
 class Function;
 
-template <>
-InputParameters validParams<ConstantViewFactorSurfaceRadiation>();
-
 /**
  * ConstantViewFactorSurfaceRadiation computes radiative heat transfer between
  * side sets and the view factors are provided in the input file

@@ -18,9 +18,6 @@ class ElemElemConstraint;
 class ElementPairInfo;
 class FEProblemBase;
 
-template <>
-InputParameters validParams<ElemElemConstraint>();
-
 class ElemElemConstraint : public Constraint,
                            public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                            public NeighborMooseVariableInterface<Real>
@@ -133,4 +130,3 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
 };
-

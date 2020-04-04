@@ -24,9 +24,6 @@ namespace SolidMechanics
 class Element;
 }
 
-template <>
-InputParameters validParams<SolidModel>();
-
 /**
  * SolidModel is the base class for all this module's solid mechanics material models.
  */

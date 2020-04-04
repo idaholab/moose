@@ -19,9 +19,6 @@
 // Forward Declarations
 class RichardsLumpedMassChange;
 
-template <>
-InputParameters validParams<RichardsLumpedMassChange>();
-
 /**
  * d(fluid mass in porespace)/dt with the fluid mass
  * being lumped to the nodes.  Usually this is better

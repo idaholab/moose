@@ -14,9 +14,6 @@
 // Forward Declarations
 class StressDivergenceTensorsTruss;
 
-template <>
-InputParameters validParams<StressDivergenceTensorsTruss>();
-
 class StressDivergenceTensorsTruss : public Kernel
 {
 public:

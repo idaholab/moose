@@ -17,9 +17,6 @@
 class BoundaryRestrictable;
 class MooseMesh;
 
-template <>
-InputParameters validParams<BoundaryRestrictable>();
-
 /**
  * /class BoundaryRestrictable
  * /brief Provides functionality for limiting the object to certain boundary ids

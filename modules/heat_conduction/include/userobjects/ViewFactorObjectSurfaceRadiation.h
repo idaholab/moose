@@ -15,9 +15,6 @@
 class ViewFactorObjectSurfaceRadiation;
 class ViewFactorBase;
 
-template <>
-InputParameters validParams<ViewFactorObjectSurfaceRadiation>();
-
 /**
  * ViewFactorObjectSurfaceRadiation computes radiative heat transfer between
  * side sets and the view factors are computed by a ViewFactor object

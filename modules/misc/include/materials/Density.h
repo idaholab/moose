@@ -34,7 +34,3 @@ protected:
   const Real _orig_density;
   MaterialProperty<Real> & _density;
 };
-
-template <>
-InputParameters validParams<Density>();
-

@@ -15,9 +15,6 @@
 // Forward Declarations
 class RichardsMass;
 
-template <>
-InputParameters validParams<RichardsMass>();
-
 /**
  * This postprocessor computes the fluid mass by integrating the density over the volume
  *
@@ -41,4 +38,3 @@ protected:
   /// Mass, or vector of masses in multicomponent situation
   const MaterialProperty<std::vector<Real>> & _mass;
 };
-

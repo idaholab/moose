@@ -25,9 +25,6 @@ class TransientMultiApp;
 
 class AdvancedOutput;
 
-template <>
-InputParameters validParams<AdvancedOutput>();
-
 /**
  * Based class for output objects
  *
@@ -420,4 +417,3 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
     }
   }
 }
-

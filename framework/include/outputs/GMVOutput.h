@@ -15,9 +15,6 @@
 // Forward declarations
 class GMVOutput;
 
-template <>
-InputParameters validParams<GMVOutput>();
-
 /**
  * Class for output data to the GMVOutputII format
  */
@@ -48,4 +45,3 @@ private:
   /// Flag for binary output
   bool _binary;
 };
-

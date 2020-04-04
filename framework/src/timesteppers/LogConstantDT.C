@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", LogConstantDT);
 
-defineLegacyParams(LogConstantDT);
-
 InputParameters
 LogConstantDT::validParams()
 {

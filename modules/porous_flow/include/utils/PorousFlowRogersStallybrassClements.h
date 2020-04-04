@@ -48,4 +48,3 @@ Real dEffectiveSaturation(Real pc, Real shift, Real scale);
  */
 Real d2EffectiveSaturation(Real pc, Real shift, Real scale);
 }
-

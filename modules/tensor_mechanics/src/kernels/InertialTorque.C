@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", InertialTorque);
 
-defineLegacyParams(InertialTorque);
-
 InputParameters
 InertialTorque::validParams()
 {

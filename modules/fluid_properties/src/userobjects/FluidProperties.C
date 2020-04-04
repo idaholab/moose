@@ -11,8 +11,6 @@
 
 const Real FluidProperties::_R = 8.3144598;
 
-defineLegacyParams(FluidProperties);
-
 InputParameters
 FluidProperties::validParams()
 {

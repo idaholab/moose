@@ -13,9 +13,6 @@
 
 class PorousFlowPermeabilityConst;
 
-template <>
-InputParameters validParams<PorousFlowPermeabilityConst>();
-
 /**
  * Material designed to provide a constant permeability tensor
  */
@@ -32,4 +29,3 @@ protected:
   /// Constant value of permeability tensor
   const RealTensorValue _input_permeability;
 };
-

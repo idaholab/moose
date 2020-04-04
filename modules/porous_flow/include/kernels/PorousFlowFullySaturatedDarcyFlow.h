@@ -13,9 +13,6 @@
 
 class PorousFlowFullySaturatedDarcyFlow;
 
-template <>
-InputParameters validParams<PorousFlowFullySaturatedDarcyFlow>();
-
 /**
  * Darcy advective flux for a fully-saturated,
  * single-phase, multi-component fluid.
@@ -49,4 +46,3 @@ protected:
   /// The fluid component for this Kernel
   const unsigned int _fluid_component;
 };
-

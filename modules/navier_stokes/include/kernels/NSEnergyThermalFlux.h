@@ -15,9 +15,6 @@
 // ForwardDeclarations
 class NSEnergyThermalFlux;
 
-template <>
-InputParameters validParams<NSEnergyThermalFlux>();
-
 /**
  * This class is responsible for computing residuals and Jacobian
  * terms for the k * grad(T) * grad(phi) term in the Navier-Stokes
@@ -64,4 +61,3 @@ private:
   // the ctor.
   std::vector<const VariableGradient *> _gradU;
 };
-

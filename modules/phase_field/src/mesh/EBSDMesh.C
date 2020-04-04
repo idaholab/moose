@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", EBSDMesh);
 
-defineLegacyParams(EBSDMesh);
-
 InputParameters
 EBSDMesh::validParams()
 {

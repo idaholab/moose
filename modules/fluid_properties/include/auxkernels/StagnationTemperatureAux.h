@@ -14,9 +14,6 @@
 class StagnationTemperatureAux;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<StagnationTemperatureAux>();
-
 /**
  * Compute stagnation temperature from specific volume, specific internal energy, and velocity.
  */
@@ -36,4 +33,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-

@@ -37,8 +37,6 @@ registerMooseAction("ContactApp",
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 registerMooseAction("ContactApp", ContactAction, "add_user_object");
 
-defineLegacyParams(ContactAction);
-
 InputParameters
 ContactAction::validParams()
 {

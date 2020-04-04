@@ -15,9 +15,6 @@
 // Forward Declarations
 class GrainForceAndTorqueSum;
 
-template <>
-InputParameters validParams<GrainForceAndTorqueSum>();
-
 /**
  * This class is here to get the force and torque acting on a grain
  * from different userobjects and sum them all
@@ -54,4 +51,3 @@ protected:
   std::vector<std::vector<Real>> _eta_jacobians;
   ///@}
 };
-

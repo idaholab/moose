@@ -13,9 +13,6 @@
 
 class MacroElastic;
 
-template <>
-InputParameters validParams<MacroElastic>();
-
 class MacroElastic : public Elastic
 {
 public:
@@ -42,4 +39,3 @@ private:
   const PostprocessorValue & _C2323;
   const PostprocessorValue & _C3131;
 };
-

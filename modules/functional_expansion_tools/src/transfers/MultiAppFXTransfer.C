@@ -16,8 +16,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", MultiAppFXTransfer);
 
-defineLegacyParams(MultiAppFXTransfer);
-
 InputParameters
 MultiAppFXTransfer::validParams()
 {

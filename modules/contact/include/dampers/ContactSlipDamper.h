@@ -18,9 +18,6 @@ class AuxiliarySystem;
 class DisplacedProblem;
 class PenetrationLocator;
 
-template <>
-InputParameters validParams<ContactSlipDamper>();
-
 /**
  * Simple constant damper.
  *

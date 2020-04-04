@@ -22,9 +22,6 @@ class FluidProperties;
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPDualReal;
 
-template <>
-InputParameters validParams<FluidProperties>();
-
 class FluidProperties : public ThreadedGeneralUserObject
 {
 public:

@@ -13,9 +13,6 @@
 
 class ForceStabilizedSmallStrainMechanicsNOSPD;
 
-template <>
-InputParameters validParams<ForceStabilizedSmallStrainMechanicsNOSPD>();
-
 /**
  * Kernel class for fictitious force stabilized peridynamic correspondence material model for small
  * strain

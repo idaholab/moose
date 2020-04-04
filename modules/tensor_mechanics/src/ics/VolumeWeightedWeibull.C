@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", VolumeWeightedWeibull);
 
-defineLegacyParams(VolumeWeightedWeibull);
-
 InputParameters
 VolumeWeightedWeibull::validParams()
 {

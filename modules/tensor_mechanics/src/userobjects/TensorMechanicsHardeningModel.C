@@ -11,8 +11,6 @@
 //
 #include "TensorMechanicsHardeningModel.h"
 
-defineLegacyParams(TensorMechanicsHardeningModel);
-
 InputParameters
 TensorMechanicsHardeningModel::validParams()
 {

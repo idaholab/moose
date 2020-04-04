@@ -15,9 +15,6 @@
 
 class SodiumPropertiesMaterial;
 
-template <>
-InputParameters validParams<SodiumPropertiesMaterial>();
-
 class SodiumPropertiesMaterial : public Material
 {
 public:

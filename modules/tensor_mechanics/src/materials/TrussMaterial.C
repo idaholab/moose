@@ -17,8 +17,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(TrussMaterial);
-
 InputParameters
 TrussMaterial::validParams()
 {

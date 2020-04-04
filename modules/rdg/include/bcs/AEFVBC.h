@@ -15,9 +15,6 @@
 // Forward Declarations
 class AEFVBC;
 
-template <>
-InputParameters validParams<AEFVBC>();
-
 /**
  * A boundary condition object for the advection equation
  * using a cell-centered finite volume method
@@ -67,4 +64,3 @@ protected:
   /// bounadry flux object
   const BoundaryFluxBase & _flux;
 };
-

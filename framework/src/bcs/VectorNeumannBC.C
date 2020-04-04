@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VectorNeumannBC);
 
-defineLegacyParams(VectorNeumannBC);
-
 InputParameters
 VectorNeumannBC::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputePlaneFiniteStrain);
 
-defineADLegacyParams(ADComputePlaneFiniteStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputePlaneFiniteStrain<compute_stage>::validParams()

@@ -101,4 +101,3 @@ protected:
   std::map<std::string, std::pair<std::string, std::string>> _object_label_map;
   ///@}
 };
-

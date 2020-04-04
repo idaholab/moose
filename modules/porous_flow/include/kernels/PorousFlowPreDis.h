@@ -14,9 +14,6 @@
 
 class PorousFlowPreDis;
 
-template <>
-InputParameters validParams<PorousFlowPreDis>();
-
 /**
  * Kernel = sum (stoichiometry * density * porosity_old * saturation * reaction_rate)
  * where the sum is over secondary chemical species in
@@ -68,4 +65,3 @@ protected:
    */
   Real computeQpJac(unsigned int pvar);
 };
-

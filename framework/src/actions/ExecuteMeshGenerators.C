@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", ExecuteMeshGenerators, "execute_mesh_generators");
 
-defineLegacyParams(ExecuteMeshGenerators);
-
 InputParameters
 ExecuteMeshGenerators::validParams()
 {

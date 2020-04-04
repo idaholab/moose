@@ -15,9 +15,6 @@
 class SetupDebugAction;
 class MooseObjectAction;
 
-template <>
-InputParameters validParams<SetupDebugAction>();
-
 class SetupDebugAction : public Action
 {
 public:
@@ -27,4 +24,3 @@ public:
 
   virtual void act() override;
 };
-

@@ -15,8 +15,6 @@
 
 registerMooseObject("PhaseFieldApp", ACMultiInterface);
 
-defineLegacyParams(ACMultiInterface);
-
 InputParameters
 ACMultiInterface::validParams()
 {

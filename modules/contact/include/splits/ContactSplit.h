@@ -14,9 +14,6 @@
 
 class ContactSplit;
 
-template <>
-InputParameters validParams<ContactSplit>();
-
 /**
  * Split-based preconditioner for contact problems.
  */

@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticOrthotropic);
 
-defineLegacyParams(TensorMechanicsPlasticOrthotropic);
-
 InputParameters
 TensorMechanicsPlasticOrthotropic::validParams()
 {

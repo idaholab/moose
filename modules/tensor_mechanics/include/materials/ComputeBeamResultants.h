@@ -18,9 +18,6 @@
 
 class ComputeBeamResultants;
 
-template <>
-InputParameters validParams<ComputeBeamResultants>();
-
 class ComputeBeamResultants : public Material
 {
 public:

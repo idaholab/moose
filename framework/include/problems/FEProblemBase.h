@@ -86,9 +86,6 @@ class CouplingMatrix;
 class NonlinearImplicitSystem;
 } // namespace libMesh
 
-template <>
-InputParameters validParams<FEProblemBase>();
-
 /// Enumeration for nonlinear convergence reasons
 enum class MooseNonlinearConvergenceReason
 {

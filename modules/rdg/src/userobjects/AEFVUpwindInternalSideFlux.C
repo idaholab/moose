@@ -11,8 +11,6 @@
 
 registerMooseObject("RdgApp", AEFVUpwindInternalSideFlux);
 
-defineLegacyParams(AEFVUpwindInternalSideFlux);
-
 InputParameters
 AEFVUpwindInternalSideFlux::validParams()
 {

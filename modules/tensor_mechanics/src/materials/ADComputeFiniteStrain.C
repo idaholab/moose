@@ -14,8 +14,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
 
-defineADLegacyParams(ADComputeFiniteStrain);
-
 template <ComputeStage compute_stage>
 MooseEnum
 ADComputeFiniteStrain<compute_stage>::decompositionType()

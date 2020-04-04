@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", SpecificInternalEnergyAux);
 
-defineLegacyParams(SpecificInternalEnergyAux);
-
 InputParameters
 SpecificInternalEnergyAux::validParams()
 {

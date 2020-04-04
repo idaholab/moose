@@ -17,8 +17,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             "07/01/2020 00:00",
                             JohnsonSB);
 
-defineLegacyParams(JohnsonSBDistribution);
-
 InputParameters
 JohnsonSBDistribution::validParams()
 {

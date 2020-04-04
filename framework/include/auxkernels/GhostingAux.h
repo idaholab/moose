@@ -16,9 +16,6 @@
 class GhostingAux;
 class GhostingUserObject;
 
-template <>
-InputParameters validParams<GhostingAux>();
-
 class GhostingAux : public AuxKernel
 {
 public:
@@ -48,4 +45,3 @@ protected:
   /// Ghosted elems
   libMesh::GhostingFunctor::map_type _ghosted_elems;
 };
-

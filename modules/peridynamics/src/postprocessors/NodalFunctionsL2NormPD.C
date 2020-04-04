@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalFunctionsL2NormPD);
 
-defineLegacyParams(NodalFunctionsL2NormPD);
-
 InputParameters
 NodalFunctionsL2NormPD::validParams()
 {

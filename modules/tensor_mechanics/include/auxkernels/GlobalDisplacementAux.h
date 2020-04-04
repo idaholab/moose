@@ -18,9 +18,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-template <>
-InputParameters validParams<GlobalDisplacementAux>();
-
 class GlobalDisplacementAux : public AuxKernel
 {
 public:

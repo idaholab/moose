@@ -21,8 +21,6 @@ ComputeFiniteStrain::decompositionType()
 
 registerMooseObject("TensorMechanicsApp", ComputeFiniteStrain);
 
-defineLegacyParams(ComputeFiniteStrain);
-
 InputParameters
 ComputeFiniteStrain::validParams()
 {

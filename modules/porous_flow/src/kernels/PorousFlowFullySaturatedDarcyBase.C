@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedDarcyBase);
 
-defineLegacyParams(PorousFlowFullySaturatedDarcyBase);
-
 InputParameters
 PorousFlowFullySaturatedDarcyBase::validParams()
 {

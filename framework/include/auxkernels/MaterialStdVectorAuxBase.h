@@ -16,8 +16,6 @@
 template <typename T = Real>
 class MaterialStdVectorAuxBase;
 
-template <>
-InputParameters validParams<MaterialStdVectorAuxBase<>>();
 /**
  * A base class for the various Material related AuxKernal objects
  */

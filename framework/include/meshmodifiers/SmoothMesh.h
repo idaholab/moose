@@ -15,9 +15,6 @@
 // Forward declerations
 class SmoothMesh;
 
-template <>
-InputParameters validParams<SmoothMesh>();
-
 /**
  * MeshModifier for doing mesh smoothing
  */
@@ -32,4 +29,3 @@ private:
   /// The number of smoothing passes to do
   unsigned int _iterations;
 };
-

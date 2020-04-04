@@ -13,9 +13,6 @@
 
 class NSAction;
 
-template <>
-InputParameters validParams<NSAction>();
-
 /**
  * This is a base Action class for the Navier-Stokes module which is
  * responsible for building lists of names that other Actions can
@@ -43,4 +40,3 @@ protected:
   // Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 };
-

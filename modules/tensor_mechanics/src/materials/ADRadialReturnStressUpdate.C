@@ -12,8 +12,6 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 
-defineADLegacyParams(ADRadialReturnStressUpdate);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADRadialReturnStressUpdate<compute_stage>::validParams()

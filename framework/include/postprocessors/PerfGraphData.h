@@ -21,9 +21,6 @@ class System;
 class EquationSystems;
 }
 
-template <>
-InputParameters validParams<PerfGraphData>();
-
 class PerfGraphData : public GeneralPostprocessor
 {
 public:
@@ -40,4 +37,3 @@ protected:
 
   const std::string & _section_name;
 };
-

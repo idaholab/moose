@@ -23,7 +23,3 @@ public:
 
   MatDiffusion(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<MatDiffusion>();
-

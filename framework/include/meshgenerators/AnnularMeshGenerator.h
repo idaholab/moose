@@ -14,9 +14,6 @@
 // Forward declarations
 class AnnularMeshGenerator;
 
-template <>
-InputParameters validParams<AnnularMeshGenerator>();
-
 /**
  * Generates an annular mesh given all the parameters
  */

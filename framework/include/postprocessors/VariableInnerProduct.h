@@ -14,9 +14,6 @@
 // Forward Declarations
 class VariableInnerProduct;
 
-template <>
-InputParameters validParams<VariableInnerProduct>();
-
 class VariableInnerProduct : public ElementIntegralVariablePostprocessor
 {
 public:
@@ -30,4 +27,3 @@ protected:
   /// Holds the values of second_variable at current quadrature points
   const VariableValue & _v;
 };
-

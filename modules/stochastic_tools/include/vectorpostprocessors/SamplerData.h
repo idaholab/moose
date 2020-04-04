@@ -15,9 +15,6 @@
 
 class SamplerData;
 
-template <>
-InputParameters validParams<SamplerData>();
-
 /**
  * A tool for output Sampler data.
  */

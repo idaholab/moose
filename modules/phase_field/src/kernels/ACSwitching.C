@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ACSwitching);
 
-defineLegacyParams(ACSwitching);
-
 InputParameters
 ACSwitching::validParams()
 {

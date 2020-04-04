@@ -17,8 +17,6 @@
 
 registerMooseObject("ContactApp", TangentialNodalLMMechanicalContact);
 
-defineLegacyParams(TangentialNodalLMMechanicalContact);
-
 InputParameters
 TangentialNodalLMMechanicalContact::validParams()
 {

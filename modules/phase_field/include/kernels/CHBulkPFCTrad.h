@@ -14,9 +14,6 @@
 // Forward Declarations
 class CHBulkPFCTrad;
 
-template <>
-InputParameters validParams<CHBulkPFCTrad>();
-
 class CHBulkPFCTrad : public CHBulk<Real>
 {
 public:
@@ -32,4 +29,3 @@ private:
   const MaterialProperty<Real> & _a;
   const MaterialProperty<Real> & _b;
 };
-

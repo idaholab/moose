@@ -14,9 +14,6 @@
 // Forward Declarations
 class GenericFunctionMaterial;
 
-template <>
-InputParameters validParams<GenericFunctionMaterial>();
-
 /**
  * This material automatically declares as material properties whatever is passed to it
  * through the parameters 'prop_names' and uses the Functions from 'prop_values' as the values

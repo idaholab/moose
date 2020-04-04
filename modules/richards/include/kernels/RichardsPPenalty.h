@@ -14,9 +14,6 @@
 // Forward Declarations
 class RichardsPPenalty;
 
-template <>
-InputParameters validParams<RichardsPPenalty>();
-
 /**
  * Kernel = a*(lower - variable) for variable<lower, and zero otherwise
  * This is an attempt to enforce variable>=lower

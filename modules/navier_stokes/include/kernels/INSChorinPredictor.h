@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSChorinPredictor;
 
-template <>
-InputParameters validParams<INSChorinPredictor>();
-
 /**
  * This class computes the "Chorin" Predictor equation in fully-discrete
  * (both time and space) form.
@@ -98,4 +95,3 @@ protected:
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 };
-

@@ -14,8 +14,6 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-defineLegacyParams(ODETimeKernel);
-
 InputParameters
 ODETimeKernel::validParams()
 {

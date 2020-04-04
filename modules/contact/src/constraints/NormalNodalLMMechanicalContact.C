@@ -19,8 +19,6 @@ using MetaPhysicL::DualNumber;
 
 registerMooseObject("MooseApp", NormalNodalLMMechanicalContact);
 
-defineLegacyParams(NormalNodalLMMechanicalContact);
-
 InputParameters
 NormalNodalLMMechanicalContact::validParams()
 {

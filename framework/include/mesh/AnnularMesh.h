@@ -13,9 +13,6 @@
 
 class AnnularMesh;
 
-template <>
-InputParameters validParams<AnnularMesh>();
-
 /**
  * Mesh generated from parameters
  */

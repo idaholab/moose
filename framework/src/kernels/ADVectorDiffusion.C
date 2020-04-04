@@ -11,8 +11,6 @@
 
 registerADMooseObject("MooseApp", ADVectorDiffusion);
 
-defineADLegacyParams(ADVectorDiffusion);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADVectorDiffusion<compute_stage>::validParams()

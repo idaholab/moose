@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", PhaseFieldFractureMechanicsOffDiag);
 
-defineLegacyParams(PhaseFieldFractureMechanicsOffDiag);
-
 InputParameters
 PhaseFieldFractureMechanicsOffDiag::validParams()
 {

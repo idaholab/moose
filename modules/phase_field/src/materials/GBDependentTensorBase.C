@@ -9,8 +9,6 @@
 
 #include "GBDependentTensorBase.h"
 
-defineLegacyParams(GBDependentTensorBase);
-
 InputParameters
 GBDependentTensorBase::validParams()
 {

@@ -13,9 +13,6 @@
 
 class Diffusion;
 
-template <>
-InputParameters validParams<Diffusion>();
-
 /**
  * This kernel implements the Laplacian operator:
  * $\nabla u \cdot \nabla \phi_i$
@@ -32,4 +29,3 @@ protected:
 
   virtual Real computeQpJacobian() override;
 };
-

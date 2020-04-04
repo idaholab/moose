@@ -13,9 +13,6 @@
 
 class TensorMechanicsApp;
 
-template <>
-InputParameters validParams<TensorMechanicsApp>();
-
 class TensorMechanicsApp : public MooseApp
 {
 public:

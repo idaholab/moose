@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", MovingPlanarFront);
 
-defineLegacyParams(MovingPlanarFront);
-
 InputParameters
 MovingPlanarFront::validParams()
 {

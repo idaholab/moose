@@ -13,9 +13,6 @@
 
 class NullKernel;
 
-template <>
-InputParameters validParams<NullKernel>();
-
 /**
  *
  */
@@ -33,4 +30,3 @@ protected:
   /// filler value to put on the on-diagonal Jacobian
   const Real _jacobian_fill;
 };
-

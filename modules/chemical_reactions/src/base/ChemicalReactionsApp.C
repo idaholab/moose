@@ -12,8 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(ChemicalReactionsApp);
-
 InputParameters
 ChemicalReactionsApp::validParams()
 {

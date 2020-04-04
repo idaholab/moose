@@ -19,9 +19,6 @@
 
 class ComputeFiniteBeamStrain;
 
-template <>
-InputParameters validParams<ComputeFiniteBeamStrain>();
-
 class ComputeFiniteBeamStrain : public ComputeIncrementalBeamStrain
 {
 public:

@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", DebugResidualAux);
 
-defineLegacyParams(DebugResidualAux);
-
 InputParameters
 DebugResidualAux::validParams()
 {

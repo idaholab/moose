@@ -13,9 +13,6 @@
 
 class DebugResidualAux;
 
-template <>
-InputParameters validParams<DebugResidualAux>();
-
 /**
  * Auxiliary kernel for debugging convergence.
  */
@@ -32,4 +29,3 @@ protected:
   MooseVariableFEBase & _debug_var;
   NumericVector<Number> & _residual_copy;
 };
-

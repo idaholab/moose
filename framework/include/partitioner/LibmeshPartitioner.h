@@ -21,9 +21,6 @@ namespace libMesh
 class SubdomainPartitioner;
 }
 
-template <>
-InputParameters validParams<LibmeshPartitioner>();
-
 class LibmeshPartitioner : public MoosePartitioner
 {
 public:

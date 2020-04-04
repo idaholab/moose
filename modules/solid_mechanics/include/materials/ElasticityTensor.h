@@ -60,4 +60,3 @@ protected:
    */
   virtual void calculateEntries(unsigned int qp) = 0;
 };
-

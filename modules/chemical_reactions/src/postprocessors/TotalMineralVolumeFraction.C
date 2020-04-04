@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", TotalMineralVolumeFraction);
 
-defineLegacyParams(TotalMineralVolumeFraction);
-
 InputParameters
 TotalMineralVolumeFraction::validParams()
 {

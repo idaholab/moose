@@ -43,12 +43,6 @@ class AuxiliarySystem;
 class SystemBase;
 class MooseMesh;
 
-template <>
-InputParameters validParams<AuxKernel>();
-
-template <>
-InputParameters validParams<VectorAuxKernel>();
-
 /**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
  *

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticIsotropicSD);
 
-defineLegacyParams(TensorMechanicsPlasticIsotropicSD);
-
 InputParameters
 TensorMechanicsPlasticIsotropicSD::validParams()
 {

@@ -14,8 +14,6 @@
 
 #include "libmesh/dense_vector.h"
 
-defineLegacyParams(TaggingInterface);
-
 InputParameters
 TaggingInterface::validParams()
 {

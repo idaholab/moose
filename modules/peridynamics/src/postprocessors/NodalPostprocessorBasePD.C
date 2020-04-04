@@ -9,8 +9,6 @@
 
 #include "NodalPostprocessorBasePD.h"
 
-defineLegacyParams(NodalPostprocessorBasePD);
-
 InputParameters
 NodalPostprocessorBasePD::validParams()
 {

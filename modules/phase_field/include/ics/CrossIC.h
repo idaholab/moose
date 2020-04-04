@@ -33,9 +33,6 @@
 // Forward Declarations
 class CrossIC;
 
-template <>
-InputParameters validParams<CrossIC>();
-
 /**
  * CrossIC creates a C1 continuous initial condition that looks like a cross in
  * the middle of the domain.
@@ -55,4 +52,3 @@ public:
   const Real _x2;
   const Real _y2;
 };
-

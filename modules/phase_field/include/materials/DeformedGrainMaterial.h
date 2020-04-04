@@ -15,9 +15,6 @@
 class DeformedGrainMaterial;
 class GrainTrackerInterface;
 
-template <>
-InputParameters validParams<DeformedGrainMaterial>();
-
 /**
  * Calculates The Deformation Energy associated with a specific dislocation density.
  * The rest of parameters are the same as in the grain growth model
@@ -83,4 +80,3 @@ protected:
   const Real _kb;
   const Real _JtoeV;
 };
-

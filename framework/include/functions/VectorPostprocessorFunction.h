@@ -16,9 +16,6 @@
 // Forward declarations
 class VectorPostprocessorFunction;
 
-template <>
-InputParameters validParams<VectorPostprocessorFunction>();
-
 /**
  * Function which provides a piecewise continuous linear interpolation
  * of a data set provided as two columns of a VectorPostprocessor.

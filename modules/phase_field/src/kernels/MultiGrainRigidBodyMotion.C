@@ -15,8 +15,6 @@
 
 registerMooseObject("PhaseFieldApp", MultiGrainRigidBodyMotion);
 
-defineLegacyParams(MultiGrainRigidBodyMotion);
-
 InputParameters
 MultiGrainRigidBodyMotion::validParams()
 {

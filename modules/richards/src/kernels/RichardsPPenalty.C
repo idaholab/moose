@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsPPenalty);
 
-defineLegacyParams(RichardsPPenalty);
-
 InputParameters
 RichardsPPenalty::validParams()
 {

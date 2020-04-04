@@ -14,9 +14,6 @@
 
 class CrystalPlasticitySlipRateGSS;
 
-template <>
-InputParameters validParams<CrystalPlasticitySlipRateGSS>();
-
 /**
  * Phenomenological constitutive model slip rate userobject class.
  */

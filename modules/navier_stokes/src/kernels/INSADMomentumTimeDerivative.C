@@ -11,8 +11,6 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
 
-defineADLegacyParams(INSADMomentumTimeDerivative);
-
 template <ComputeStage compute_stage>
 InputParameters
 INSADMomentumTimeDerivative<compute_stage>::validParams()

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", StressBasedChemicalPotential);
 
-defineLegacyParams(StressBasedChemicalPotential);
-
 InputParameters
 StressBasedChemicalPotential::validParams()
 {

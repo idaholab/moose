@@ -17,9 +17,6 @@
 // Forward Declarations
 class SwitchingFunctionConstraintLagrange;
 
-template <>
-InputParameters validParams<SwitchingFunctionConstraintLagrange>();
-
 /**
  * SwitchingFunctionConstraintLagrange is a constraint kernel that acts on the
  * lambda lagrange multiplier non-linear variables to

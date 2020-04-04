@@ -14,9 +14,6 @@
 
 class AddAllSideSetsByNormals;
 
-template <>
-InputParameters validParams<AddAllSideSetsByNormals>();
-
 /**
  * This class will add sidesets to the entire mesh based on unique normals.  This
  * information will be made available through the MooseMesh interface.
@@ -39,4 +36,3 @@ protected:
    */
   std::set<BoundaryID> _mesh_boundary_ids;
 };
-

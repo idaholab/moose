@@ -13,9 +13,6 @@
 
 class RichardsDensity;
 
-template <>
-InputParameters validParams<RichardsDensity>();
-
 /**
  * Base class for fluid density as a function of porepressure
  * The functions density, ddensity and d2density must be
@@ -53,4 +50,3 @@ public:
    */
   virtual Real d2density(Real p) const = 0;
 };
-

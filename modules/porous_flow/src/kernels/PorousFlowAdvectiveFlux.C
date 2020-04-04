@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFlux);
 
-defineLegacyParams(PorousFlowAdvectiveFlux);
-
 InputParameters
 PorousFlowAdvectiveFlux::validParams()
 {

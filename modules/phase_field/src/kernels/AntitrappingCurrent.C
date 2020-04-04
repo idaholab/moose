@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", AntitrappingCurrent);
 
-defineLegacyParams(AntitrappingCurrent);
-
 InputParameters
 AntitrappingCurrent::validParams()
 {

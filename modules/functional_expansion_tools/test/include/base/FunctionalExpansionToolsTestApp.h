@@ -13,9 +13,6 @@
 
 class FunctionalExpansionToolsTestApp;
 
-template <>
-InputParameters validParams<FunctionalExpansionToolsTestApp>();
-
 class FunctionalExpansionToolsTestApp : public MooseApp
 {
 public:
@@ -27,4 +24,3 @@ public:
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
-

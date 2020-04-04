@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ACGrGrMulti);
 
-defineLegacyParams(ACGrGrMulti);
-
 InputParameters
 ACGrGrMulti::validParams()
 {

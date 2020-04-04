@@ -13,9 +13,6 @@
 
 class IndicatorMarker;
 
-template <>
-InputParameters validParams<IndicatorMarker>();
-
 class IndicatorMarker : public Marker
 {
 public:
@@ -26,4 +23,3 @@ public:
 protected:
   ErrorVector & _error_vector;
 };
-

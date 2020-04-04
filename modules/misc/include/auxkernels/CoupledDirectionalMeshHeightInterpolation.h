@@ -47,4 +47,3 @@ protected:
   Real _direction_min;
   Real _direction_max;
 };
-

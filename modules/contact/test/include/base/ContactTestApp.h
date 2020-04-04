@@ -13,9 +13,6 @@
 
 class ContactTestApp;
 
-template <>
-InputParameters validParams<ContactTestApp>();
-
 class ContactTestApp : public MooseApp
 {
 public:
@@ -30,4 +27,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

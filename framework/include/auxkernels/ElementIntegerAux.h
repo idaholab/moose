@@ -13,9 +13,6 @@
 
 class ElementIntegerAux;
 
-template <>
-InputParameters validParams<ElementIntegerAux>();
-
 class ElementIntegerAux : public AuxKernel
 {
 public:

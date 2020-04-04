@@ -14,9 +14,6 @@
 class SinglePhaseFluidProperties;
 class PorousFlowWaterVapor;
 
-template <>
-InputParameters validParams<PorousFlowWaterVapor>();
-
 /**
  * Specialized class for water and vapor mixture using pressure and enthalpy.
  * Note: It is important to note that this class must be used in a non-isothernal

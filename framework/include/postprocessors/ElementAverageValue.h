@@ -14,9 +14,6 @@
 // Forward Declarations
 class ElementAverageValue;
 
-template <>
-InputParameters validParams<ElementAverageValue>();
-
 /**
  * This postprocessor computes a volume integral of the specified variable.
  *
@@ -38,4 +35,3 @@ public:
 protected:
   Real _volume;
 };
-

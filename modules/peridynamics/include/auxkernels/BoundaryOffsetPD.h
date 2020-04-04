@@ -14,9 +14,6 @@
 class BoundaryOffsetPD;
 class PeridynamicsMesh;
 
-template <>
-InputParameters validParams<BoundaryOffsetPD>();
-
 /**
  * Aux Kernel class to output the offset of boundary nodes from initial FE mesh
  */

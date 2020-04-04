@@ -14,9 +14,6 @@
 // Forward Declarations
 class SlopeReconstructionOneD;
 
-template <>
-InputParameters validParams<SlopeReconstructionOneD>();
-
 /**
  * One-dimensional piecewise linear slope reconstruction
  * to get the slopes of cell average variables
@@ -28,4 +25,3 @@ public:
 
   SlopeReconstructionOneD(const InputParameters & parameters);
 };
-

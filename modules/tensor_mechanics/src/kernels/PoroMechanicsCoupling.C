@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", PoroMechanicsCoupling);
 
-defineLegacyParams(PoroMechanicsCoupling);
-
 InputParameters
 PoroMechanicsCoupling::validParams()
 {

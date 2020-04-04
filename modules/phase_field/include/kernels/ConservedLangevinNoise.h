@@ -15,9 +15,6 @@
 // Forward Declarations
 class ConservedLangevinNoise;
 
-template <>
-InputParameters validParams<ConservedLangevinNoise>();
-
 class ConservedLangevinNoise : public LangevinNoise
 {
 public:
@@ -32,4 +29,3 @@ protected:
 private:
   const ConservedNoiseInterface & _noise;
 };
-

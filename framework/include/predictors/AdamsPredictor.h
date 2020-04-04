@@ -21,9 +21,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<AdamsPredictor>();
-
 /**
  * Implements an explicit Adams predictor based on two old solution
  * vectors.
@@ -53,4 +50,3 @@ protected:
   Real & _dt_older;
   Real & _dtstorage;
 };
-

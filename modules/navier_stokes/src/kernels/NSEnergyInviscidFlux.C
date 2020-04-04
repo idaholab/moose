@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyInviscidFlux);
 
-defineLegacyParams(NSEnergyInviscidFlux);
-
 InputParameters
 NSEnergyInviscidFlux::validParams()
 {

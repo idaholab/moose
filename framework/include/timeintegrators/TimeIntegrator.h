@@ -26,9 +26,6 @@ class NumericVector;
 class NonlinearImplicitSystem;
 } // namespace libMesh
 
-template <>
-InputParameters validParams<TimeIntegrator>();
-
 /**
  * Base class for time integrators
  *

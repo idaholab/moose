@@ -13,9 +13,6 @@
 
 class JohnsonSBDistribution;
 
-template <>
-InputParameters validParams<JohnsonSBDistribution>();
-
 /**
  * A class used to generate a Johnson SB distribution
  */

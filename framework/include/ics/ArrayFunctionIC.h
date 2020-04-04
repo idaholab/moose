@@ -15,9 +15,6 @@
 class ArrayFunctionIC;
 class Function;
 
-template <>
-InputParameters validParams<ArrayFunctionIC>();
-
 class ArrayFunctionIC : public ArrayInitialCondition
 {
 public:

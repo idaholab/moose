@@ -45,4 +45,3 @@ protected:
 
   usingTemplKernelStabilizedMembers(T);
 };
-

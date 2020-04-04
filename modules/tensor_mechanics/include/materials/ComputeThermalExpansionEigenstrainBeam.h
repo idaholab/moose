@@ -14,9 +14,6 @@
 
 class ComputeThermalExpansionEigenstrainBeam;
 
-template <>
-InputParameters validParams<ComputeThermalExpansionEigenstrainBeam>();
-
 /**
  * ComputeThermalExpansionEigenstrainBeam computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.

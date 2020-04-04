@@ -27,8 +27,6 @@ registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_kernel");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "copy_nodal_vars");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "check_copy_nodal_vars");
 
-defineLegacyParams(GrainGrowthAction);
-
 InputParameters
 GrainGrowthAction::validParams()
 {

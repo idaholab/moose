@@ -18,8 +18,6 @@
 
 registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
 
-defineLegacyParams(CreateExecutionerAction);
-
 InputParameters
 CreateExecutionerAction::validParams()
 {

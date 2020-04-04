@@ -16,9 +16,6 @@
 
 class PeridynamicsMesh;
 
-template <>
-InputParameters validParams<PeridynamicsMesh>();
-
 /**
  * Peridynamics mesh class
  */

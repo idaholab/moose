@@ -23,9 +23,6 @@ class OrientedBoxInterface;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<OrientedBoxInterface>();
-
 /*
  * An interface class for testing if a point is within a bounding box with arbitrary orientation
  *
@@ -73,4 +70,3 @@ private:
   /// The bounding box used to test if the point is contained within
   std::unique_ptr<BoundingBox> _bounding_box;
 };
-

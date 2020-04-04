@@ -21,9 +21,6 @@ namespace libMesh
 class System;
 }
 
-template <>
-InputParameters validParams<ProxyRelationshipManager>();
-
 /**
  * Intermediate base class for RelationshipManagers that are simply built
  * using ghosting functors.  The functor should be built in internalInit()
@@ -52,4 +49,3 @@ protected:
 
   System * _other_system;
 };
-

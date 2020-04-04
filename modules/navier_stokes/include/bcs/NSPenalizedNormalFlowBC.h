@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSPenalizedNormalFlowBC;
 
-template <>
-InputParameters validParams<NSPenalizedNormalFlowBC>();
-
 /**
  * This class penalizes the the value of u.n on the boundary
  * so that it matches some desired value.
@@ -40,4 +37,3 @@ protected:
   const Real _penalty;
   const Real _specified_udotn;
 };
-

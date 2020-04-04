@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ACInterfaceKobayashi1);
 
-defineLegacyParams(ACInterfaceKobayashi1);
-
 InputParameters
 ACInterfaceKobayashi1::validParams()
 {

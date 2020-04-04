@@ -13,9 +13,6 @@
 
 class JouleHeatingHeatGeneratedAux;
 
-template <>
-InputParameters validParams<JouleHeatingHeatGeneratedAux>();
-
 /**
  * Auxiliary kernel for computing the heat generated from Joule heating
  */
@@ -32,4 +29,3 @@ protected:
   const VariableGradient & _grad_elec;
   const MaterialProperty<Real> & _elec_cond;
 };
-

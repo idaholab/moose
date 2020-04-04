@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", FlibeFluidProperties);
 
-defineLegacyParams(FlibeFluidProperties);
-
 InputParameters
 FlibeFluidProperties::validParams()
 {

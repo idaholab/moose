@@ -10,8 +10,6 @@
 #include "SmoothMultiBoundingBoxBaseIC.h"
 #include "MooseMesh.h"
 
-defineLegacyParams(SmoothMultiBoundingBoxBaseIC);
-
 InputParameters
 SmoothMultiBoundingBoxBaseIC::validParams()
 {

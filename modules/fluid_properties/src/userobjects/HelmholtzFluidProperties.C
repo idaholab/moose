@@ -11,8 +11,6 @@
 #include "BrentsMethod.h"
 #include "libmesh/utility.h"
 
-defineLegacyParams(HelmholtzFluidProperties);
-
 InputParameters
 HelmholtzFluidProperties::validParams()
 {

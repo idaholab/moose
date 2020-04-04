@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", NSInternalEnergyAux);
 
-defineLegacyParams(NSInternalEnergyAux);
-
 InputParameters
 NSInternalEnergyAux::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPlotQuantity);
 
-defineLegacyParams(PorousFlowPlotQuantity);
-
 InputParameters
 PorousFlowPlotQuantity::validParams()
 {

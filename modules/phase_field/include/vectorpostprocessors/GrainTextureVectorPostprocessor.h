@@ -16,9 +16,6 @@
 class EulerAngleProvider;
 class GrainTextureVectorPostprocessor;
 
-template <>
-InputParameters validParams<GrainTextureVectorPostprocessor>();
-
 /**
  *  GrainTextureVectorPostprocessor is a VectorPostprocessor that outputs the
  *  the coordinates, grain number, and Euler Angles associated with each element.

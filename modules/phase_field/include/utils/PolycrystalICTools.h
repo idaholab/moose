@@ -86,4 +86,3 @@ MooseEnum coloringAlgorithms();
 
 std::string coloringAlgorithmDescriptions();
 }
-

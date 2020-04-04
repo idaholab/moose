@@ -14,9 +14,6 @@
 class TestDistributionPostprocessor;
 class Distribution;
 
-template <>
-InputParameters validParams<TestDistributionPostprocessor>();
-
 /**
  * Test object for testing distribution capabilities.
  *
@@ -42,4 +39,3 @@ protected:
   /// The distribution method to call
   const MooseEnum & _distribution_method;
 };
-

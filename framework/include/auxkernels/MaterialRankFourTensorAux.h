@@ -20,9 +20,6 @@ class MaterialRankFourTensorAux;
  * supplied indices.
  */
 
-template <>
-InputParameters validParams<MaterialRankFourTensorAux>();
-
 class MaterialRankFourTensorAux : public MaterialAuxBase<RankFourTensor>
 {
 public:
@@ -40,4 +37,3 @@ protected:
   const unsigned int _l;
   ///@}
 };
-

@@ -18,8 +18,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2gasRSC);
 
-defineLegacyParams(RichardsSeff2gasRSC);
-
 InputParameters
 RichardsSeff2gasRSC::validParams()
 {

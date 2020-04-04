@@ -14,9 +14,6 @@
 
 class PorousFlowBasicAdvection;
 
-template <>
-InputParameters validParams<PorousFlowBasicAdvection>();
-
 /**
  * Kernel = grad(test) * darcy_velocity * u
  */
@@ -55,4 +52,3 @@ protected:
   const MaterialProperty<std::vector<std::vector<std::vector<RealVectorValue>>>> &
       _ddarcy_velocity_dgradvar;
 };
-

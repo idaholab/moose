@@ -13,9 +13,6 @@
 
 class NodalFrictionalConstraint;
 
-template <>
-InputParameters validParams<NodalFrictionalConstraint>();
-
 class NodalFrictionalConstraint : public NodalConstraint
 {
 public:

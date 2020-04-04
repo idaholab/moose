@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ConstantPointSource);
 
-defineLegacyParams(ConstantPointSource);
-
 InputParameters
 ConstantPointSource::validParams()
 {

@@ -14,9 +14,6 @@
 // Forward Declarations
 class BimodalInverseSuperellipsoidsIC;
 
-template <>
-InputParameters validParams<BimodalInverseSuperellipsoidsIC>();
-
 /**
  * BimodalInverseSuperellipsoidsIC takes a specified number of superellipsoids, each with given
  *parameters
@@ -39,4 +36,3 @@ public:
   virtual void initialSetup();
   virtual void computeSuperellipsoidCenters();
 };
-

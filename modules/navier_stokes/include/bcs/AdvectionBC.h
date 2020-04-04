@@ -14,9 +14,6 @@
 // Forward Declarations
 class AdvectionBC;
 
-template <>
-InputParameters validParams<AdvectionBC>();
-
 /**
  * Boundary terms for inflow/outflow of advected
  * quantities, e.g. u: u * velocity * normal

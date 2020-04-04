@@ -17,9 +17,6 @@ class RotationTensor;
 class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;
 
-template <>
-InputParameters validParams<EulerAngleUpdater>();
-
 /**
  * Update Euler angles of each grains after rigid body rotation
  * This class estimates the rotation of principal axes of the grains due to applied torques
@@ -60,4 +57,3 @@ protected:
   std::vector<EulerAngles> _angles;
   std::vector<EulerAngles> _angles_old;
 };
-

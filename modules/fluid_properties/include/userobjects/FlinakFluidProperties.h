@@ -13,9 +13,6 @@
 
 class FlinakFluidProperties;
 
-template <>
-InputParameters validParams<FlinakFluidProperties>();
-
 /**
  * Fluid properties for 0.465 LiF - 0.115 NaF - 0.42 KF (flinak) \cite richard.
  */

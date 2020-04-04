@@ -46,4 +46,3 @@ public:
    */
   static Real d2seff(Real pc, Real shift, Real scale);
 };
-

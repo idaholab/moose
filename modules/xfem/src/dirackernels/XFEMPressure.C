@@ -15,8 +15,6 @@
 
 registerMooseObject("XFEMApp", XFEMPressure);
 
-defineLegacyParams(XFEMPressure);
-
 InputParameters
 XFEMPressure::validParams()
 {

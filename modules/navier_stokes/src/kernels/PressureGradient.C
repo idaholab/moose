@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", PressureGradient);
 
-defineLegacyParams(PressureGradient);
-
 InputParameters
 PressureGradient::validParams()
 {

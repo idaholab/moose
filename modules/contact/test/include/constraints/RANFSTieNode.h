@@ -25,9 +25,6 @@ template <typename>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<RANFSTieNode>();
-
 class RANFSTieNode : public NodeFaceConstraint
 {
 public:

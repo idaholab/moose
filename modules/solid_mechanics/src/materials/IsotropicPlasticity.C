@@ -15,8 +15,6 @@
 
 registerMooseObject("SolidMechanicsApp", IsotropicPlasticity);
 
-defineLegacyParams(IsotropicPlasticity);
-
 InputParameters
 IsotropicPlasticity::validParams()
 {

@@ -14,9 +14,6 @@
 // Forward Declarations
 class LangevinNoise;
 
-template <>
-InputParameters validParams<LangevinNoise>();
-
 class LangevinNoise : public Kernel
 {
 public:
@@ -31,4 +28,3 @@ protected:
   const Real _amplitude;
   const MaterialProperty<Real> & _multiplier_prop;
 };
-

@@ -20,8 +20,6 @@ registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "add_variable")
 registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "copy_nodal_vars");
 registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "check_copy_nodal_vars");
 
-defineLegacyParams(PolycrystalVariablesAction);
-
 InputParameters
 PolycrystalVariablesAction::validParams()
 {

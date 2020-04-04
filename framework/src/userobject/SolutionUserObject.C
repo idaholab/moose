@@ -29,8 +29,6 @@
 
 registerMooseObject("MooseApp", SolutionUserObject);
 
-defineLegacyParams(SolutionUserObject);
-
 InputParameters
 SolutionUserObject::validParams()
 {

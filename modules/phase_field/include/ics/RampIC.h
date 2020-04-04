@@ -14,9 +14,6 @@
 // Forward Declarations
 class RampIC;
 
-template <>
-InputParameters validParams<RampIC>();
-
 /**
  * Makes initial condition which creates a linear ramp of the given variable
  * on the x-axis with specified side values
@@ -44,4 +41,3 @@ protected:
   const Real _value_left;
   const Real _value_right;
 };
-

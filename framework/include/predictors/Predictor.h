@@ -24,9 +24,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<Predictor>();
-
 /**
  * Base class for predictors.
  */
@@ -66,4 +63,3 @@ protected:
   /// Old times for which the predictor should not be applied
   std::vector<Real> _skip_times_old;
 };
-

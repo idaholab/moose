@@ -14,9 +14,6 @@
 class InternalEnergyAux;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<InternalEnergyAux>();
-
 /**
  * Compute internal energy given equation of state pressure and density
  */
@@ -35,4 +32,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-

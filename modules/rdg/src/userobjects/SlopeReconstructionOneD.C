@@ -9,8 +9,6 @@
 
 #include "SlopeReconstructionOneD.h"
 
-defineLegacyParams(SlopeReconstructionOneD);
-
 InputParameters
 SlopeReconstructionOneD::validParams()
 {

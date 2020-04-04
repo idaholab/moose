@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalRandomIC);
 
-defineLegacyParams(PolycrystalRandomIC);
-
 InputParameters
 PolycrystalRandomIC::validParams()
 {

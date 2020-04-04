@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSDivergenceAux;
 
-template <>
-InputParameters validParams<INSDivergenceAux>();
-
 /**
  * Computes h_min / |u|
  */
@@ -37,4 +34,3 @@ protected:
   const VariableGradient & _grad_v_vel;
   const VariableGradient & _grad_w_vel;
 };
-

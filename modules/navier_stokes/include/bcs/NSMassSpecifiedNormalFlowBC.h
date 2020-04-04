@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMassSpecifiedNormalFlowBC;
 
-template <>
-InputParameters validParams<NSMassSpecifiedNormalFlowBC>();
-
 /**
  * This class implements the mass equation boundary term with
  * a specified value of rho*(u.n) imposed weakly.
@@ -39,4 +36,3 @@ protected:
   // Required parameters
   const Real _rhoun;
 };
-

@@ -18,9 +18,6 @@ class GrainTracker;
 class PolycrystalUserObjectBase;
 struct GrainDistance;
 
-template <>
-InputParameters validParams<GrainTracker>();
-
 class GrainTracker : public FeatureFloodCount, public GrainTrackerInterface
 {
 public:

@@ -49,4 +49,3 @@ protected:
 
   usingTemplKernelMembers(T);
 };
-

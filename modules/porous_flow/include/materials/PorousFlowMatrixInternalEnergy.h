@@ -13,9 +13,6 @@
 
 class PorousFlowMatrixInternalEnergy;
 
-template <>
-InputParameters validParams<PorousFlowMatrixInternalEnergy>();
-
 /**
  * This material computes internal energy (J/m^3) for a rock matrix
  * assuming constant grain density, specific heat capacity, and
@@ -55,4 +52,3 @@ protected:
   /// d(matrix internal energy)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real>> & _den_nodal_dvar;
 };
-

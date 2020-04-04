@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMomentumConvectiveWeakStagnationBC;
 
-template <>
-InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>();
-
 /**
  * The convective part (sans pressure term) of the momentum equation
  * boundary integral evaluated at specified stagnation temperature,
@@ -37,4 +34,3 @@ protected:
   // Required parameters
   const unsigned int _component;
 };
-

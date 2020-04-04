@@ -17,7 +17,10 @@
 class IdealRealGasMixtureFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  IdealRealGasMixtureFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
+  IdealRealGasMixtureFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp")
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()

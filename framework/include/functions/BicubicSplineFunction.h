@@ -15,9 +15,6 @@
 
 class BicubicSplineFunction;
 
-template <>
-InputParameters validParams<BicubicSplineFunction>();
-
 /**
  * Function that uses spline interpolation
  */

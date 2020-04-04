@@ -15,9 +15,6 @@
 // Forward Declarations
 class ForceDensityMaterial;
 
-template <>
-InputParameters validParams<ForceDensityMaterial>();
-
 /**
  * This Material calculates the force density acting on a particle/grain
  * due to interaction between particles
@@ -61,4 +58,3 @@ private:
   /// first order derivative of force density material w.r.t etas
   std::vector<MaterialProperty<std::vector<Real>> *> _dFdgradeta;
 };
-

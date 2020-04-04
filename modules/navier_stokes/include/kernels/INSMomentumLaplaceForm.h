@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumLaplaceForm;
 
-template <>
-InputParameters validParams<INSMomentumLaplaceForm>();
-
 /**
  * This class computes momentum equation residual and Jacobian viscous
  * contributions for the "Laplacian" form of the governing equations.
@@ -35,4 +32,3 @@ protected:
   virtual Real computeQpJacobianViscousPart() override;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
-

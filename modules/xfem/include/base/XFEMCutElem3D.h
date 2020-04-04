@@ -58,4 +58,3 @@ public:
                                    std::vector<Point> & intersectionPoints,
                                    MeshBase * displaced_mesh = NULL) const;
 };
-

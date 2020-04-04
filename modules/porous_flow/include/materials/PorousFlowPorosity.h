@@ -13,9 +13,6 @@
 
 class PorousFlowPorosity;
 
-template <>
-InputParameters validParams<PorousFlowPorosity>();
-
 /**
  * Material designed to provide the porosity in PorousFlow simulations
  * chemistry + biot + (phi0 - reference_chemistry - biot) * exp(-vol_strain

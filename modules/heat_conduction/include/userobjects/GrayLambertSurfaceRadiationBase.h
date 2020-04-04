@@ -15,9 +15,6 @@
 class GrayLambertSurfaceRadiationBase;
 class Function;
 
-template <>
-InputParameters validParams<GrayLambertSurfaceRadiationBase>();
-
 /**
  * GrayLambertSurfaceRadiationBase computes the heat flux on a set of surfaces
  * in radiative heat transfer with each other.

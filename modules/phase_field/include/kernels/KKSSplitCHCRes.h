@@ -16,9 +16,6 @@
 // Forward Declarations
 class KKSSplitCHCRes;
 
-template <>
-InputParameters validParams<KKSSplitCHCRes>();
-
 /**
  * SplitCHBulk child class that takes all the necessary data from a
  * KKSBaseMaterial.

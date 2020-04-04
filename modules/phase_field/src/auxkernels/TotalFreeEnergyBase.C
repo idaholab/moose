@@ -9,8 +9,6 @@
 
 #include "TotalFreeEnergyBase.h"
 
-defineLegacyParams(TotalFreeEnergyBase);
-
 InputParameters
 TotalFreeEnergyBase::validParams()
 {

@@ -13,9 +13,6 @@
 
 class GeneralizedPlaneStrainUserObjectOSPD;
 
-template <>
-InputParameters validParams<GeneralizedPlaneStrainUserObjectOSPD>();
-
 /**
  * UserObject class to compute the residual and diagonal Jacobian components for scalar out-of-plane
  * strain variable of generalized plane strain model based on ordinary state-based peridynamic

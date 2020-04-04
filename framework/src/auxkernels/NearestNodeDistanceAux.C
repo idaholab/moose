@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NearestNodeDistanceAux);
 
-defineLegacyParams(NearestNodeDistanceAux);
-
 InputParameters
 NearestNodeDistanceAux::validParams()
 {

@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMassUnspecifiedNormalFlowBC;
 
-template <>
-InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
-
 /**
  * This class implements the mass equation boundary term with
  * the rho*(u.n) boundary integral computed implicitly.
@@ -33,4 +30,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

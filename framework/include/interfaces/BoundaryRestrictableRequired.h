@@ -15,9 +15,6 @@
 // Forward declarations
 class BoundaryRestrictableRequired;
 
-template <>
-InputParameters validParams<BoundaryRestrictableRequired>();
-
 /**
  * A class for requiring an object to be boundary restricted.
  * This class acts as a wrapper for BoundaryRestrictable, it allows

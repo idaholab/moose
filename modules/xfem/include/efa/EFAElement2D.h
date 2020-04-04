@@ -135,4 +135,3 @@ private:
                                     std::vector<double> & para_coor) const;
   void setLocalCoordinates();
 };
-

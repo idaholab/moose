@@ -14,9 +14,6 @@
 // Forward declarations
 class RectangleCutUserObject;
 
-template <>
-InputParameters validParams<RectangleCutUserObject>();
-
 class RectangleCutUserObject : public GeometricCut3DUserObject
 {
 public:
@@ -35,4 +32,3 @@ private:
 
   bool isInsideCutPlane(Point p) const override;
 };
-

@@ -14,9 +14,6 @@
 // Forward Declarations
 class CoupledAllenCahn;
 
-template <>
-InputParameters validParams<CoupledAllenCahn>();
-
 /**
  * CoupledAllenCahn uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to compute the residual

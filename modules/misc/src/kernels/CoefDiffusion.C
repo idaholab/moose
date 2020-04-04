@@ -11,8 +11,6 @@
 
 registerMooseObject("MiscApp", CoefDiffusion);
 
-defineLegacyParams(CoefDiffusion);
-
 InputParameters
 CoefDiffusion::validParams()
 {

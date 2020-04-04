@@ -16,9 +16,6 @@
 // Forward Declarations
 class KKSMultiPhaseConcentration;
 
-template <>
-InputParameters validParams<KKSMultiPhaseConcentration>();
-
 /**
  * Enforce sum of phase concentrations to be the real concentration.
  *

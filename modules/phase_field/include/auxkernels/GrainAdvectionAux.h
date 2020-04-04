@@ -16,9 +16,6 @@
 // Forward Declarations
 class GrainAdvectionAux;
 
-template <>
-InputParameters validParams<GrainAdvectionAux>();
-
 /**
  * Calculates the advection velocity of grain due to rigid body motion
  * Reports the components of the velocity on each element
@@ -57,4 +54,3 @@ private:
   RealGradient _velocity_advection;
   MooseEnum _component;
 };
-

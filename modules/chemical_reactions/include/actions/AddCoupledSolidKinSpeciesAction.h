@@ -13,9 +13,6 @@
 
 class AddCoupledSolidKinSpeciesAction;
 
-template <>
-InputParameters validParams<AddCoupledSolidKinSpeciesAction>();
-
 class AddCoupledSolidKinSpeciesAction : public Action
 {
 public:
@@ -61,4 +58,3 @@ private:
   /// Actual system temperature
   const std::vector<VariableName> _sys_temp;
 };
-

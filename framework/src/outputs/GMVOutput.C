@@ -15,8 +15,6 @@
 
 registerMooseObjectAliased("MooseApp", GMVOutput, "GMV");
 
-defineLegacyParams(GMVOutput);
-
 InputParameters
 GMVOutput::validParams()
 {

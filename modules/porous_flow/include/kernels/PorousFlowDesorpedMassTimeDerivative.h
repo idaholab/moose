@@ -14,9 +14,6 @@
 
 class PorousFlowDesorpedMassTimeDerivative;
 
-template <>
-InputParameters validParams<PorousFlowDesorpedMassTimeDerivative>();
-
 /**
  * Kernel = (desorped_mass - desorped_mass_old)/dt
  * It is NOT lumped to the nodes
@@ -64,4 +61,3 @@ protected:
    */
   Real computeQpJac(unsigned int jvar) const;
 };
-

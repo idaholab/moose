@@ -30,9 +30,6 @@ class Communicator;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<SamplerBase>();
-
 /**
  * Base class for VectorPostprocessors that need to do "sampling" of
  * values in the domain.
@@ -121,4 +118,3 @@ protected:
 
   std::vector<VectorPostprocessorValue *> _values;
 };
-

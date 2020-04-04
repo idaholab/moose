@@ -14,9 +14,6 @@
 // Forward Declarations
 class AEFVUpwindInternalSideFlux;
 
-template <>
-InputParameters validParams<AEFVUpwindInternalSideFlux>();
-
 /**
  * Upwind numerical flux scheme
  * for the advection equation
@@ -51,4 +48,3 @@ protected:
   /// advective velocity
   const Real _velocity;
 };
-

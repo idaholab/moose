@@ -11,8 +11,6 @@
 
 registerMooseObject("RichardsApp", PoroFullSatTimeDerivative);
 
-defineLegacyParams(PoroFullSatTimeDerivative);
-
 InputParameters
 PoroFullSatTimeDerivative::validParams()
 {

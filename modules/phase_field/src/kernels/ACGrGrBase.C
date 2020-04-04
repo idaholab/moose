@@ -9,8 +9,6 @@
 
 #include "ACGrGrBase.h"
 
-defineLegacyParams(ACGrGrBase);
-
 InputParameters
 ACGrGrBase::validParams()
 {

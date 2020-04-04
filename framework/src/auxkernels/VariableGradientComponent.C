@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VariableGradientComponent);
 
-defineLegacyParams(VariableGradientComponent);
-
 InputParameters
 VariableGradientComponent::validParams()
 {

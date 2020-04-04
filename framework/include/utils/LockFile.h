@@ -30,4 +30,3 @@ protected:
   int _fd;
   const std::string _filename;
 };
-

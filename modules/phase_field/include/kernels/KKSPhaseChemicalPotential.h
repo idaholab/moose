@@ -16,9 +16,6 @@
 // Forward Declarations
 class KKSPhaseChemicalPotential;
 
-template <>
-InputParameters validParams<KKSPhaseChemicalPotential>();
-
 /**
  * Enforce the equality of the chemical potentials in the two phases.
  * Eq. (21) in the original KKS paper.

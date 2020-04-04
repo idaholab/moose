@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainCrystalPlasticity);
 
-defineLegacyParams(FiniteStrainCrystalPlasticity);
-
 InputParameters
 FiniteStrainCrystalPlasticity::validParams()
 {

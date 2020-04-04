@@ -13,9 +13,6 @@
 
 class AddElementalFieldAction;
 
-template <>
-InputParameters validParams<AddElementalFieldAction>();
-
 class AddElementalFieldAction : public AddVariableAction
 {
 public:

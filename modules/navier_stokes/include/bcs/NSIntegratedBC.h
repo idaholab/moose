@@ -15,9 +15,6 @@
 class NSIntegratedBC;
 class IdealGasFluidProperties;
 
-template <>
-InputParameters validParams<NSIntegratedBC>();
-
 /**
  * This class couples together all the variables
  * for the compressible Navier-Stokes equations to
@@ -68,4 +65,3 @@ protected:
   bool isNSVariable(unsigned var);
   unsigned mapVarNumber(unsigned var);
 };
-

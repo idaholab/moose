@@ -15,9 +15,6 @@
 // Forward Declarations
 class SmoothCircleBaseIC;
 
-template <>
-InputParameters validParams<SmoothCircleBaseIC>();
-
 /**
  * SmoothcircleBaseIC is the base class for all initial conditions that create circles. The circles
  * can have sharp interfaces or a finite interface width. Note that all children must resize _radii
@@ -64,4 +61,3 @@ protected:
 
   MooseRandom _random;
 };
-

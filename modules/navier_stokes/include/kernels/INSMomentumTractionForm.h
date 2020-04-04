@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumTractionForm;
 
-template <>
-InputParameters validParams<INSMomentumTractionForm>();
-
 /**
  * This class computes momentum equation residual and Jacobian viscous
  * contributions for the "traction" form of the governing equations.
@@ -35,4 +32,3 @@ protected:
   virtual Real computeQpJacobianViscousPart() override;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
-

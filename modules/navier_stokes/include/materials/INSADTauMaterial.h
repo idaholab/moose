@@ -36,4 +36,3 @@ protected:
 
   usingINSMaterialMembers;
 };
-

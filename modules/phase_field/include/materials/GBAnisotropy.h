@@ -14,9 +14,6 @@
 // Forward Declarations
 class GBAnisotropy;
 
-template <>
-InputParameters validParams<GBAnisotropy>();
-
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)
  * Parameter determination method is elaborated in Phys. Rev. B, 78(2), 024113, 2008, by N. Moelans
@@ -32,4 +29,3 @@ public:
 private:
   const Real _wGB;
 };
-

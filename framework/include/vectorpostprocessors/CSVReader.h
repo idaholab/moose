@@ -16,9 +16,6 @@
 // Forward declarations
 class CSVReader;
 
-template <>
-InputParameters validParams<CSVReader>();
-
 class CSVReader : public GeneralVectorPostprocessor
 {
 public:

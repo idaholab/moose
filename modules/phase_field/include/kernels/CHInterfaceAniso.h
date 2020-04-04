@@ -22,7 +22,3 @@ public:
 
   CHInterfaceAniso(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<CHInterfaceAniso>();
-

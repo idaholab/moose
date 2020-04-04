@@ -19,8 +19,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-template <>
-InputParameters validParams<MomentBalancing>();
 
 /**
  * This Kernel computes

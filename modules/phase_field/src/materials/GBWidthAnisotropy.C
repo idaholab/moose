@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GBWidthAnisotropy);
 
-defineLegacyParams(GBWidthAnisotropy);
-
 InputParameters
 GBWidthAnisotropy::validParams()
 {

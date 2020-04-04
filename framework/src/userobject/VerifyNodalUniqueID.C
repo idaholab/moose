@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", VerifyNodalUniqueID);
 
-defineLegacyParams(VerifyNodalUniqueID);
-
 InputParameters
 VerifyNodalUniqueID::validParams()
 {

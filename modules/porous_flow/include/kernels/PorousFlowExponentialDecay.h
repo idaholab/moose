@@ -13,9 +13,6 @@
 
 class PorousFlowExponentialDecay;
 
-template <>
-InputParameters validParams<PorousFlowExponentialDecay>();
-
 /**
  * Kernel = _rate * (variable - reference)
  */
@@ -36,4 +33,3 @@ protected:
   /// The reference
   const VariableValue & _reference;
 };
-

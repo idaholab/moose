@@ -10,8 +10,6 @@
 #include "INSMomentumNoBCBCBase.h"
 #include "MooseMesh.h"
 
-defineLegacyParams(INSMomentumNoBCBCBase);
-
 InputParameters
 INSMomentumNoBCBCBase::validParams()
 {

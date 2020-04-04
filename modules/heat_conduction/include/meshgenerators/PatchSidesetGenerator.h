@@ -15,9 +15,6 @@
 // Forward declarations
 class PatchSidesetGenerator;
 
-template <>
-InputParameters validParams<PatchSidesetGenerator>();
-
 /**
  * Subdivides a sidesets into smaller patches each of which is going
  * to be a new patch

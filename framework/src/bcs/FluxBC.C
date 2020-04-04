@@ -9,8 +9,6 @@
 
 #include "FluxBC.h"
 
-defineLegacyParams(FluxBC);
-
 InputParameters
 FluxBC::validParams()
 {

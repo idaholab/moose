@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", GrainBoundaryArea);
 
-defineLegacyParams(GrainBoundaryArea);
-
 InputParameters
 GrainBoundaryArea::validParams()
 {

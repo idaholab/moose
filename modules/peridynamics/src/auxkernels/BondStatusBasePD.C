@@ -10,8 +10,6 @@
 #include "BondStatusBasePD.h"
 #include "PeridynamicsMesh.h"
 
-defineLegacyParams(BondStatusBasePD);
-
 InputParameters
 BondStatusBasePD::validParams()
 {

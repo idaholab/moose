@@ -14,9 +14,6 @@
 // Forward Declarations
 class PerformanceData;
 
-template <>
-InputParameters validParams<PerformanceData>();
-
 class PerformanceData : public GeneralPostprocessor
 {
 public:
@@ -49,4 +46,3 @@ protected:
   MooseEnum _category;
   MooseEnum _event;
 };
-

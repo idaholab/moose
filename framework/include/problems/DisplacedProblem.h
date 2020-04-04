@@ -33,9 +33,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<DisplacedProblem>();
-
 class DisplacedProblem : public SubProblem
 {
 public:

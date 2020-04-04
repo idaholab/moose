@@ -14,8 +14,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalSmallStrain);
 
-defineADLegacyParams(ADComputeRSphericalSmallStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeRSphericalSmallStrain<compute_stage>::validParams()

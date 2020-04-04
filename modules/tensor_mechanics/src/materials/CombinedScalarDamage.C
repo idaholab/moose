@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", CombinedScalarDamage);
 
-defineLegacyParams(CombinedScalarDamage);
-
 InputParameters
 CombinedScalarDamage::validParams()
 {

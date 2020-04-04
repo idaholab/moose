@@ -26,8 +26,6 @@
 
 registerMooseObject("SolidMechanicsApp", SolidModel);
 
-defineLegacyParams(SolidModel);
-
 InputParameters
 SolidModel::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "ComputeEigenstrainBeamBase.h"
 
-defineLegacyParams(ComputeEigenstrainBeamBase);
-
 InputParameters
 ComputeEigenstrainBeamBase::validParams()
 {

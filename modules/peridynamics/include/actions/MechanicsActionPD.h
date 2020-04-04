@@ -13,9 +13,6 @@
 
 class MechanicsActionPD;
 
-template <>
-InputParameters validParams<MechanicsActionPD>();
-
 /**
  * Action class to setup peridynamic models for solid mechanics problems
  */

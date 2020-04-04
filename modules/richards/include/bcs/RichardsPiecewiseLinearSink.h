@@ -20,9 +20,6 @@
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
 
-template <>
-InputParameters validParams<RichardsPiecewiseLinearSink>();
-
 /**
  * Applies a flux sink to a boundary
  * The sink is a piecewise linear function of

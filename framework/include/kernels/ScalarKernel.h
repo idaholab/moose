@@ -29,9 +29,6 @@ class Assembly;
 class MooseVariableScalar;
 class SubProblem;
 
-template <>
-InputParameters validParams<ScalarKernel>();
-
 class ScalarKernel : public MooseObject,
                      public ScalarCoupleable,
                      public SetupInterface,
@@ -85,4 +82,3 @@ protected:
   /// Old value(s) of the scalar variable
   VariableValue & _u_old;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CrossTermGradientFreeEnergy);
 
-defineLegacyParams(CrossTermGradientFreeEnergy);
-
 InputParameters
 CrossTermGradientFreeEnergy::validParams()
 {

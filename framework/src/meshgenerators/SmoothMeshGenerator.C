@@ -18,8 +18,6 @@
 
 registerMooseObject("MooseApp", SmoothMeshGenerator);
 
-defineLegacyParams(SmoothMeshGenerator);
-
 InputParameters
 SmoothMeshGenerator::validParams()
 {

@@ -18,9 +18,6 @@ class ContactMaster;
 enum class ContactModel;
 enum class ContactFormulation;
 
-template <>
-InputParameters validParams<ContactMaster>();
-
 class ContactMaster : public DiracKernel
 {
 public:

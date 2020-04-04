@@ -17,8 +17,6 @@
 // Full specialization of the validParams function for this object
 registerMooseObject("NavierStokesApp", NSImposedVelocityDirectionBC);
 
-defineLegacyParams(NSImposedVelocityDirectionBC);
-
 InputParameters
 NSImposedVelocityDirectionBC::validParams()
 {

@@ -14,8 +14,6 @@
 
 registerMooseAction("MooseApp", DynamicObjectRegistrationAction, "dynamic_object_registration");
 
-defineLegacyParams(DynamicObjectRegistrationAction);
-
 InputParameters
 DynamicObjectRegistrationAction::validParams()
 {

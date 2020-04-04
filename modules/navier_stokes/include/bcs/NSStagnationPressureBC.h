@@ -15,8 +15,6 @@
 class NSStagnationPressureBC;
 
 // Specialization required of all user-level Moose objects
-template <>
-InputParameters validParams<NSStagnationPressureBC>();
 
 /**
  * This Dirichlet condition imposes the condition p_0 = p_0_desired,
@@ -42,4 +40,3 @@ protected:
   // Required paramters
   const Real _desired_stagnation_pressure;
 };
-

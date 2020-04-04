@@ -115,4 +115,3 @@ applyIndices(T & container, const std::vector<size_t> & indices)
 }
 
 } // namespace Moose
-

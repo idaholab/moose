@@ -14,9 +14,6 @@
 
 class RandomPartitioner;
 
-template <>
-InputParameters validParams<RandomPartitioner>();
-
 /**
  * Partitions a mesh randomly using element ids as the seed for the generator.
  */

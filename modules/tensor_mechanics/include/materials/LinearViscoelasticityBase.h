@@ -15,9 +15,6 @@
 
 class LinearViscoelasticityBase;
 
-template <>
-InputParameters validParams<LinearViscoelasticityBase>();
-
 /**
  * This class is a base class for materials consisting of an assembly of linear springs and
  * dashpots. It represents the arrangement of the system (typically, in parallel or in series),

@@ -13,9 +13,6 @@
 
 class MechanicsBPD;
 
-template <>
-InputParameters validParams<MechanicsBPD>();
-
 /**
  * Kernel class for bond based peridynamic solid mechanics models
  */

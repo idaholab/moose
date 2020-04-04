@@ -16,9 +16,6 @@
 // Forward declarations
 class ParsedGenerateSideset;
 
-template <>
-InputParameters validParams<ParsedGenerateSideset>();
-
 /**
  * MeshGenerator for defining a Sideset by a parsed expression and
  * optionally by looking at the subdomain a side's element belongs to
@@ -57,4 +54,3 @@ protected:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
-

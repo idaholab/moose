@@ -14,8 +14,6 @@
 
 #include <cmath>
 
-defineLegacyParams(GrayLambertSurfaceRadiationBase);
-
 InputParameters
 GrayLambertSurfaceRadiationBase::validParams()
 {

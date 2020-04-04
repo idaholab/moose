@@ -14,9 +14,6 @@
 
 class DiscreteNucleationFromFile;
 
-template <>
-InputParameters validParams<DiscreteNucleationFromFile>();
-
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
  * domain it manages a list of nuclei with their insertion times and their center
@@ -56,4 +53,3 @@ protected:
   /// total nucleation rate
   const Real _nucleation_rate;
 };
-

@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", ViewFactorObjectSurfaceRadiation);
 
-defineLegacyParams(ViewFactorObjectSurfaceRadiation);
-
 InputParameters
 ViewFactorObjectSurfaceRadiation::validParams()
 {

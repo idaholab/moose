@@ -19,8 +19,6 @@
 
 registerMooseObject("TensorMechanicsApp", MomentBalancing);
 
-defineLegacyParams(MomentBalancing);
-
 InputParameters
 MomentBalancing::validParams()
 {

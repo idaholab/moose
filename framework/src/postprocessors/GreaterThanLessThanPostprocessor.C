@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", GreaterThanLessThanPostprocessor);
 
-defineLegacyParams(GreaterThanLessThanPostprocessor);
-
 InputParameters
 GreaterThanLessThanPostprocessor::validParams()
 {

@@ -16,9 +16,6 @@ class OutOfPlaneStress;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template <>
-InputParameters validParams<OutOfPlaneStress>();
-
 class OutOfPlaneStress : public Kernel
 {
 public:

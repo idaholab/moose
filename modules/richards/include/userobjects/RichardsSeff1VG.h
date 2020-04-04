@@ -14,9 +14,6 @@
 
 class RichardsSeff1VG;
 
-template <>
-InputParameters validParams<RichardsSeff1VG>();
-
 /**
  * Effective saturation as a function of porepressure
  * using the van Genuchten formula.  Note this is not a function
@@ -66,4 +63,3 @@ protected:
   /// van Genuchten m parameter
   Real _m;
 };
-

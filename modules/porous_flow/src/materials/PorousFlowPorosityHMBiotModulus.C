@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosityHMBiotModulus);
 
-defineLegacyParams(PorousFlowPorosityHMBiotModulus);
-
 InputParameters
 PorousFlowPorosityHMBiotModulus::validParams()
 {

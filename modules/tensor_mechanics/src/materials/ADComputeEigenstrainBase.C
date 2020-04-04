@@ -11,8 +11,6 @@
 
 #include "RankTwoTensor.h"
 
-defineADLegacyParams(ADComputeEigenstrainBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeEigenstrainBase<compute_stage>::validParams()

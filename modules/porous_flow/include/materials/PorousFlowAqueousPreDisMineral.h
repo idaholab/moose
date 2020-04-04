@@ -13,9 +13,6 @@
 
 class PorousFlowAqueousPreDisMineral;
 
-template <>
-InputParameters validParams<PorousFlowAqueousPreDisMineral>();
-
 /**
  * Material designed to form a std::vector
  * of mass fractions of mineral concentrations from reaction rates
@@ -63,4 +60,3 @@ protected:
   /// Initial values of the secondary species concentrations
   std::vector<const VariableValue *> _initial_conc;
 };
-

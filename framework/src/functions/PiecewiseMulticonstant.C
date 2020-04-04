@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", PiecewiseMulticonstant);
 
-defineLegacyParams(PiecewiseMulticonstant);
-
 InputParameters
 PiecewiseMulticonstant::validParams()
 {

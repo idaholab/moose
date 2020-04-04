@@ -9,8 +9,6 @@
 
 #include "TwoPhaseNCGFluidProperties.h"
 
-defineLegacyParams(TwoPhaseNCGFluidProperties);
-
 InputParameters
 TwoPhaseNCGFluidProperties::validParams()
 {

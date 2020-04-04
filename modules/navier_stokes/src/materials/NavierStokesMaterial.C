@@ -20,8 +20,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(NavierStokesMaterial);
-
 InputParameters
 NavierStokesMaterial::validParams()
 {

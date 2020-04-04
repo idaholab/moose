@@ -10,8 +10,6 @@
 #include "INSMomentumBase.h"
 #include "Function.h"
 
-defineLegacyParams(INSMomentumBase);
-
 InputParameters
 INSMomentumBase::validParams()
 {

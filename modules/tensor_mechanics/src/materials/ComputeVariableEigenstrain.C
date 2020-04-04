@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVariableEigenstrain);
 
-defineLegacyParams(ComputeVariableEigenstrain);
-
 InputParameters
 ComputeVariableEigenstrain::validParams()
 {

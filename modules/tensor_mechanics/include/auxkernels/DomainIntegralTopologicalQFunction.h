@@ -39,6 +39,3 @@ private:
   const unsigned int _crack_front_point_index;
   bool _treat_as_2d;
 };
-
-template <>
-InputParameters validParams<DomainIntegralTopologicalQFunction>();

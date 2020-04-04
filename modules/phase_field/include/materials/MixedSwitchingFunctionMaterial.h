@@ -14,9 +14,6 @@
 // Forward Declarations
 class MixedSwitchingFunctionMaterial;
 
-template <>
-InputParameters validParams<MixedSwitchingFunctionMaterial>();
-
 /**
  * Material class to provide the switching function \f$ h(\eta) \f$ for
  * the KKS system.
@@ -40,4 +37,3 @@ protected:
   /// Weight parameter of mixed-type h(eta)
   Real _weight;
 };
-

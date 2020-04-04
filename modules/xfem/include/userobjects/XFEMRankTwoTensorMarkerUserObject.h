@@ -16,9 +16,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-template <>
-InputParameters validParams<XFEMRankTwoTensorMarkerUserObject>();
-
 class XFEMRankTwoTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
@@ -50,4 +47,3 @@ protected:
 
   virtual bool doesElementCrack(RealVectorValue & direction) override;
 };
-

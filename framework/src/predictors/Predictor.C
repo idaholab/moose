@@ -14,8 +14,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-defineLegacyParams(Predictor);
-
 InputParameters
 Predictor::validParams()
 {

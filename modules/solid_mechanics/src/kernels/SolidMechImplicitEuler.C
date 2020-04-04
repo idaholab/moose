@@ -12,8 +12,6 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", SolidMechImplicitEuler, "07/30/2020 24:00");
 
-defineLegacyParams(SolidMechImplicitEuler);
-
 InputParameters
 SolidMechImplicitEuler::validParams()
 {

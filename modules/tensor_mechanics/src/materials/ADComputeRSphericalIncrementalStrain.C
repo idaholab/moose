@@ -16,8 +16,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalIncrementalStrain);
 
-defineADLegacyParams(ADComputeRSphericalIncrementalStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeRSphericalIncrementalStrain<compute_stage>::validParams()

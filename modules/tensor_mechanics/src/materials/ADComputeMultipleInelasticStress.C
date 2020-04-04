@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeMultipleInelasticStress);
 
-defineADLegacyParams(ADComputeMultipleInelasticStress);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeMultipleInelasticStress<compute_stage>::validParams()

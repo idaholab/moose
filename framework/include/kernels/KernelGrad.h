@@ -15,9 +15,6 @@
 // Forward Declarations
 class KernelGrad;
 
-template <>
-InputParameters validParams<KernelGrad>();
-
 /**
  * The KernelGrad class is responsible for calculating the residuals in form:
  *
@@ -58,4 +55,3 @@ protected:
 
   virtual Real computeQpResidual() override;
 };
-

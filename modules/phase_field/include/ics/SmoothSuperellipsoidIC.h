@@ -14,9 +14,6 @@
 // Forward Declarations
 class SmoothSuperellipsoidIC;
 
-template <>
-InputParameters validParams<SmoothSuperellipsoidIC>();
-
 /**
  * SmoothSuperellipsoidIC creates a Superellipsoid of given semiaxes a,b,c and exponent n
  * centered at a given point in the domain.
@@ -44,4 +41,3 @@ protected:
   const Real _n;
   const Point _center;
 };
-

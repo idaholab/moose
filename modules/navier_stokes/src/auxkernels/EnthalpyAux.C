@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", EnthalpyAux);
 
-defineLegacyParams(EnthalpyAux);
-
 InputParameters
 EnthalpyAux::validParams()
 {

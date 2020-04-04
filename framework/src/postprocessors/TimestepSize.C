@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", TimestepSize);
 
-defineLegacyParams(TimestepSize);
-
 InputParameters
 TimestepSize::validParams()
 {

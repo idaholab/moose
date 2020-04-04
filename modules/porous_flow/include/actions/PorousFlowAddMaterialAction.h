@@ -15,9 +15,6 @@
 class PorousFlowAddMaterialAction;
 class AddMaterialAction;
 
-template <>
-InputParameters validParams<PorousFlowAddMaterialAction>();
-
 /**
  * Action to automatically ensure that PorousFlowMaterials are correctly evaluated
  * at either the qps, nodes, or both
@@ -80,4 +77,3 @@ protected:
   /// List of all materials added in the input file by AddMaterialAction
   std::vector<AddMaterialAction *> _ama_materials;
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsRelPermPrimePrimeAux);
 
-defineLegacyParams(RichardsRelPermPrimePrimeAux);
-
 InputParameters
 RichardsRelPermPrimePrimeAux::validParams()
 {

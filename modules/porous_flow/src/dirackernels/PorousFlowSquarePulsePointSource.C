@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowSquarePulsePointSource);
 
-defineLegacyParams(PorousFlowSquarePulsePointSource);
-
 InputParameters
 PorousFlowSquarePulsePointSource::validParams()
 {

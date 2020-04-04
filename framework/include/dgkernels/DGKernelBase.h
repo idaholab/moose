@@ -38,9 +38,6 @@ class DGKernelBase;
   usingBlockRestrictableMembers;                                                                   \
   usingTransientInterfaceMembers
 
-template <>
-InputParameters validParams<DGKernelBase>();
-
 /**
  * Serves as a base class for DGKernel and ADDGKernel
  */

@@ -32,7 +32,3 @@ private:
   std::shared_ptr<XFEM> _xfem;
   unsigned int _plane_id;
 };
-
-template <>
-InputParameters validParams<XFEMCutPlaneAux>();
-

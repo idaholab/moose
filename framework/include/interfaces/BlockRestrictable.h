@@ -23,9 +23,6 @@ class FEProblemBase;
 class MooseMesh;
 class MooseVariableFEBase;
 
-template <>
-InputParameters validParams<BlockRestrictable>();
-
 /**
  * \class BlockRestrictable BlockRestrictable.h
  * \brief An interface that restricts an object to subdomains via the 'blocks' input parameter

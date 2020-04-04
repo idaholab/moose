@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalEBSD);
 
-defineLegacyParams(PolycrystalEBSD);
-
 InputParameters
 PolycrystalEBSD::validParams()
 {

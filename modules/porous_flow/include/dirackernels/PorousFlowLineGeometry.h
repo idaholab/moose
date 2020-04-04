@@ -13,9 +13,6 @@
 
 class PorousFlowLineGeometry;
 
-template <>
-InputParameters validParams<PorousFlowLineGeometry>();
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */
@@ -71,4 +68,3 @@ protected:
   /// Reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
-

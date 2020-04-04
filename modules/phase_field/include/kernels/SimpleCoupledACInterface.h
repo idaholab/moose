@@ -13,9 +13,6 @@
 
 class SimpleCoupledACInterface;
 
-template <>
-InputParameters validParams<SimpleCoupledACInterface>();
-
 /**
  * Compute the Allen-Cahn interface term with constant Mobility and Interfacial parameter
  */
@@ -39,4 +36,3 @@ protected:
   /// Index of the coupled variable
   unsigned int _v_var;
 };
-

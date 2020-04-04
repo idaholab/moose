@@ -17,8 +17,6 @@
 
 registerMooseObject("SolidMechanicsApp", LinearIsotropicMaterial);
 
-defineLegacyParams(LinearIsotropicMaterial);
-
 InputParameters
 LinearIsotropicMaterial::validParams()
 {

@@ -15,9 +15,6 @@
 // ForwardDeclarations
 class NSMomentumViscousFlux;
 
-template <>
-InputParameters validParams<NSMomentumViscousFlux>();
-
 /**
  * Derived instance of the NSViscousFluxBase class
  * for the momentum equations.
@@ -45,4 +42,3 @@ protected:
   template <class U>
   friend class NSViscStressTensorDerivs;
 };
-

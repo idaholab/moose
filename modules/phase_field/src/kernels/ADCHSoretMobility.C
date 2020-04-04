@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSoretMobility);
 
-defineADLegacyParams(ADCHSoretMobility);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADCHSoretMobility<compute_stage>::validParams()

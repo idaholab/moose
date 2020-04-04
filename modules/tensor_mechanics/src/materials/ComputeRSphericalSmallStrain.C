@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeRSphericalSmallStrain);
 
-defineLegacyParams(ComputeRSphericalSmallStrain);
-
 InputParameters
 ComputeRSphericalSmallStrain::validParams()
 {

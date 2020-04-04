@@ -14,9 +14,6 @@
 // Forward Declarations
 class CrossTermBarrierFunctionMaterial;
 
-template <>
-InputParameters validParams<CrossTermBarrierFunctionMaterial>();
-
 /**
  * CrossTermBarrierFunctionMaterial adds free energy contribution on the interfaces
  * between arbitrary pairs of phases in a symmetric way.
@@ -31,4 +28,3 @@ public:
 protected:
   virtual void computeQpProperties();
 };
-

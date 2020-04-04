@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", InfiniteCylinderRadiativeBC);
 
-defineLegacyParams(InfiniteCylinderRadiativeBC);
-
 InputParameters
 InfiniteCylinderRadiativeBC::validParams()
 {

@@ -13,9 +13,6 @@
 
 class ArrayVariableComponent;
 
-template <>
-InputParameters validParams<ArrayVariableComponent>();
-
 class ArrayVariableComponent : public AuxKernel
 {
 public:

@@ -16,9 +16,6 @@
 // Forward declarations
 class MooseParsedFunction;
 
-template <>
-InputParameters validParams<MooseParsedFunction>();
-
 /**
  * This class is used to evaluate symbolic equations passed in to Moose through
  * the input file. It supports symbolic variables that you can change by putting

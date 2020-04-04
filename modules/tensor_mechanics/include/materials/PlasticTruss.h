@@ -13,9 +13,6 @@
 
 class PlasticTruss;
 
-template <>
-InputParameters validParams<PlasticTruss>();
-
 class PlasticTruss : public LinearElasticTruss
 {
 public:

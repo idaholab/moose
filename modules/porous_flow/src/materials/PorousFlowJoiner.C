@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowJoiner);
 
-defineLegacyParams(PorousFlowJoiner);
-
 InputParameters
 PorousFlowJoiner::validParams()
 {

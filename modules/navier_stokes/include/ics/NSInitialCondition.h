@@ -16,9 +16,6 @@
 class NSInitialCondition;
 class IdealGasFluidProperties;
 
-template <>
-InputParameters validParams<NSInitialCondition>();
-
 /**
  * NSInitialCondition sets intial constant values for all variables
  * given the:
@@ -47,4 +44,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

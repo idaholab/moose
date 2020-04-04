@@ -15,9 +15,6 @@
 // Forward Declarations
 class LineValueSampler;
 
-template <>
-InputParameters validParams<LineValueSampler>();
-
 class LineValueSampler : public PointSamplerBase
 {
 public:
@@ -67,4 +64,3 @@ protected:
   /// Length of line segment
   const Real _line_vector_norm;
 };
-

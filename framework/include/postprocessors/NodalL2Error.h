@@ -13,9 +13,6 @@
 
 class NodalL2Error;
 
-template <>
-InputParameters validParams<NodalL2Error>();
-
 /**
  *
  */

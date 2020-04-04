@@ -22,8 +22,6 @@ registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_user_object");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_ic");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_kernel");
 
-defineLegacyParams(MechanicsActionPD);
-
 InputParameters
 MechanicsActionPD::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", StrainGradDispDerivatives);
 
-defineLegacyParams(StrainGradDispDerivatives);
-
 InputParameters
 StrainGradDispDerivatives::validParams()
 {

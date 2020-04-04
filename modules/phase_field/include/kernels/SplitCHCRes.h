@@ -14,9 +14,6 @@
 // Forward Declarations
 class SplitCHCRes;
 
-template <>
-InputParameters validParams<SplitCHCRes>();
-
 /// The couple, SplitCHCRes and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
 class SplitCHCRes : public SplitCHBase
 {
@@ -34,4 +31,3 @@ protected:
   unsigned int _w_var;
   const VariableValue & _w;
 };
-

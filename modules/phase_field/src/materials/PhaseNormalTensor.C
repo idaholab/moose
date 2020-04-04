@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", PhaseNormalTensor);
 
-defineLegacyParams(PhaseNormalTensor);
-
 InputParameters
 PhaseNormalTensor::validParams()
 {

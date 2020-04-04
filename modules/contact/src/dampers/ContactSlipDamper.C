@@ -16,8 +16,6 @@
 
 registerMooseObject("ContactApp", ContactSlipDamper);
 
-defineLegacyParams(ContactSlipDamper);
-
 InputParameters
 ContactSlipDamper::validParams()
 {

@@ -15,9 +15,6 @@
 
 class LinearViscoelasticityManager;
 
-template <>
-InputParameters validParams<LinearViscoelasticityManager>();
-
 /**
  * This class manages a LinearViscoelasticityBase object. Its primary purpose
  * is to initialize the internal MaterialProperties contained in the viscoelastic

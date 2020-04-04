@@ -14,8 +14,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyWeakStagnationBC);
 
-defineLegacyParams(NSEnergyWeakStagnationBC);
-
 InputParameters
 NSEnergyWeakStagnationBC::validParams()
 {

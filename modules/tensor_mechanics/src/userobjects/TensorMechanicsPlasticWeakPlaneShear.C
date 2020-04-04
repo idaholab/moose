@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneShear);
 
-defineLegacyParams(TensorMechanicsPlasticWeakPlaneShear);
-
 InputParameters
 TensorMechanicsPlasticWeakPlaneShear::validParams()
 {

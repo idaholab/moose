@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSACBulkF;
 
-template <>
-InputParameters validParams<KKSACBulkF>();
-
 /**
  * KKSACBulkBase child class for the free energy difference term
  * \f$ -\frac{dh}{d\eta}(F_a-F_b)+w\frac{dg}{d\eta} \f$

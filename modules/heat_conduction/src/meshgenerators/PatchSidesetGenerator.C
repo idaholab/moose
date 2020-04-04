@@ -38,8 +38,6 @@
 
 registerMooseObject("HeatConductionApp", PatchSidesetGenerator);
 
-defineLegacyParams(PatchSidesetGenerator);
-
 InputParameters
 PatchSidesetGenerator::validParams()
 {

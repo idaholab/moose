@@ -15,9 +15,6 @@
 // Forward Declarations
 class LevelSetBiMaterialRankTwo;
 
-template <>
-InputParameters validParams<LevelSetBiMaterialRankTwo>();
-
 /**
  * Compute a RankTwoTensor material property for bi-materials problem (consisting of two different
  * materials) defined by a level set function
@@ -40,4 +37,3 @@ protected:
   /// Global RankTwoTensor material property (switch bi-material diffusion coefficient based on level set values)
   MaterialProperty<RankTwoTensor> & _material_prop;
 };
-

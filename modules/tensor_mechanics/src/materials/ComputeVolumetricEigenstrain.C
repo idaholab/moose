@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVolumetricEigenstrain);
 
-defineLegacyParams(ComputeVolumetricEigenstrain);
-
 InputParameters
 ComputeVolumetricEigenstrain::validParams()
 {

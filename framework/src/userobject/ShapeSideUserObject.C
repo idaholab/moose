@@ -9,8 +9,6 @@
 
 #include "ShapeSideUserObject.h"
 
-defineLegacyParams(ShapeSideUserObject);
-
 InputParameters
 ShapeSideUserObject::validParams()
 {

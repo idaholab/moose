@@ -13,9 +13,6 @@
 
 class GeneralizedMaxwellModel;
 
-template <>
-InputParameters validParams<GeneralizedMaxwellModel>();
-
 /**
  * This class is an implementation of a generalized Maxwell model
  * with constant mechanical properties. It consists of an arbitrary number

@@ -12,8 +12,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonTerminator);
 
-defineLegacyParams(LevelSetOlssonTerminator);
-
 InputParameters
 LevelSetOlssonTerminator::validParams()
 {

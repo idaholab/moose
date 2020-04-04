@@ -14,9 +14,6 @@
 // Forward Declarations
 class LatticeSmoothCircleIC;
 
-template <>
-InputParameters validParams<LatticeSmoothCircleIC>();
-
 /**
  * LatticeSmoothcircleIC creates a lattice of smoothcircles as an initial condition.
  * They are either directly on the lattice or randomly perturbed from the lattice.
@@ -48,4 +45,3 @@ protected:
   Point _top_right;
   Point _range;
 };
-

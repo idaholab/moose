@@ -11,8 +11,6 @@
 #include "RankTwoTensor.h"
 #include "AuxiliarySystem.h"
 
-defineLegacyParams(NodalRankTwoUserObjectBasePD);
-
 InputParameters
 NodalRankTwoUserObjectBasePD::validParams()
 {

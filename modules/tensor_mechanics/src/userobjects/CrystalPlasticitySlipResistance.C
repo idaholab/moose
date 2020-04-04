@@ -9,8 +9,6 @@
 
 #include "CrystalPlasticitySlipResistance.h"
 
-defineLegacyParams(CrystalPlasticitySlipResistance);
-
 InputParameters
 CrystalPlasticitySlipResistance::validParams()
 {

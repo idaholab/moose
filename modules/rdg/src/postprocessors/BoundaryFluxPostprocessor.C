@@ -12,8 +12,6 @@
 
 registerMooseObject("RdgApp", BoundaryFluxPostprocessor);
 
-defineLegacyParams(BoundaryFluxPostprocessor);
-
 InputParameters
 BoundaryFluxPostprocessor::validParams()
 {

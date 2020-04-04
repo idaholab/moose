@@ -49,4 +49,3 @@ public:
   /// reforms the rotation matrix according to the Euler angles.
   void update(const RealVectorValue & euler_angles);
 };
-

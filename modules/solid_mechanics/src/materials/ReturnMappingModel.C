@@ -12,8 +12,6 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "Conversion.h"
 
-defineLegacyParams(ReturnMappingModel);
-
 InputParameters
 ReturnMappingModel::validParams()
 {

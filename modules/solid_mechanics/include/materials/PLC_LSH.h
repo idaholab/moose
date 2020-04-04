@@ -14,9 +14,6 @@
 // Forward declarations
 class PLC_LSH;
 
-template <>
-InputParameters validParams<PLC_LSH>();
-
 /**
  * Combined power-law creep and linear strain hardening material
  * Power law creep is specified by the time-hardening form
@@ -71,4 +68,3 @@ protected:
 
 private:
 };
-

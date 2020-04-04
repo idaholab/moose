@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSMultiACBulkF;
 
-template <>
-InputParameters validParams<KKSMultiACBulkF>();
-
 /**
  * KKSMultiACBulkBase child class for the free energy term
  * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg}{d\eta_i} \f$
@@ -44,4 +41,3 @@ protected:
   /// Second derivative of the double well function \f$ \frac {d^2}{d\eta^2} g(\eta) \f$
   const MaterialProperty<Real> & _prop_d2gi;
 };
-

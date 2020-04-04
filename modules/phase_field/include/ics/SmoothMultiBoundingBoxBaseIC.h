@@ -14,9 +14,6 @@
 // Forward Declarations
 class SmoothMultiBoundingBoxBaseIC;
 
-template <>
-InputParameters validParams<SmoothMultiBoundingBoxBaseIC>();
-
 /**
  * SmoothMultiBoundingBoxBaseIC is the base class for IsolatedBoundingBoxIC and NestedBoundingBoxIC.
  * The boxes can finite interface width.

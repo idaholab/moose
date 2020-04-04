@@ -35,9 +35,6 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 
-template <>
-InputParameters validParams<KernelBase>();
-
 /**
  * This is the common base class for the three main
  * kernel types implemented in MOOSE, Kernel, VectorKernel and ArrayKernel.

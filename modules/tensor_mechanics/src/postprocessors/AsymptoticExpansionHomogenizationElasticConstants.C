@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", AsymptoticExpansionHomogenizationElasticConstants);
 
-defineLegacyParams(AsymptoticExpansionHomogenizationElasticConstants);
-
 InputParameters
 AsymptoticExpansionHomogenizationElasticConstants::validParams()
 {

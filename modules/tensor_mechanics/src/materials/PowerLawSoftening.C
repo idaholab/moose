@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", PowerLawSoftening);
 
-defineLegacyParams(PowerLawSoftening);
-
 InputParameters
 PowerLawSoftening::validParams()
 {

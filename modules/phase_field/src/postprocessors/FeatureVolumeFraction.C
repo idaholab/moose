@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", FeatureVolumeFraction);
 
-defineLegacyParams(FeatureVolumeFraction);
-
 InputParameters
 FeatureVolumeFraction::validParams()
 {

@@ -13,9 +13,6 @@
 
 class NSNoPenetrationBC;
 
-template <>
-InputParameters validParams<NSNoPenetrationBC>();
-
 /**
  * This class facilitates adding solid wall "no penetration" BCs for
  * the Euler equations.
@@ -30,4 +27,3 @@ public:
 
 protected:
 };
-

@@ -25,9 +25,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<MoosePreconditioner>();
-
 /**
  * Base class for MOOSE preconditioners.
  */

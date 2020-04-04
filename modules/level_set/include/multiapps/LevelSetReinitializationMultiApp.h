@@ -39,4 +39,3 @@ protected:
   /// The solve interval for reinitialization.
   const unsigned int & _interval;
 };
-

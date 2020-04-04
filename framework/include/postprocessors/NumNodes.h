@@ -14,9 +14,6 @@
 // Forward Declarations
 class NumNodes;
 
-template <>
-InputParameters validParams<NumNodes>();
-
 class NumNodes : public GeneralPostprocessor
 {
 public:
@@ -35,4 +32,3 @@ public:
 private:
   const MeshBase & _mesh;
 };
-

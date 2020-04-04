@@ -17,9 +17,6 @@ class Function;
 class ScalarL2Error;
 class MooseVariableScalar;
 
-template <>
-InputParameters validParams<ScalarL2Error>();
-
 /**
  * Postprocessor for computing the error in a scalar value relative to
  * a known Function's value.

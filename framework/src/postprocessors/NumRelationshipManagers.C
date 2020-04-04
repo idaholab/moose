@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NumRelationshipManagers);
 
-defineLegacyParams(NumRelationshipManagers);
-
 InputParameters
 NumRelationshipManagers::validParams()
 {

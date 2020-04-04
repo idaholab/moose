@@ -17,9 +17,6 @@ class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 class StrainGradDispDerivatives;
 
-template <>
-InputParameters validParams<StrainGradDispDerivatives>();
-
 class StrainGradDispDerivatives : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -35,4 +32,3 @@ protected:
 
   std::vector<MaterialProperty<RankTwoTensor> *> _dstrain;
 };
-

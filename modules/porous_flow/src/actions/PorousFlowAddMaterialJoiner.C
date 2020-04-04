@@ -17,8 +17,6 @@
 
 registerMooseAction("PorousFlowApp", PorousFlowAddMaterialJoiner, "add_joiners");
 
-defineLegacyParams(PorousFlowAddMaterialJoiner);
-
 InputParameters
 PorousFlowAddMaterialJoiner::validParams()
 {

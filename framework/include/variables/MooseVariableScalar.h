@@ -21,9 +21,6 @@ class NumericVector;
 
 class MooseVariableScalar;
 
-template <>
-InputParameters validParams<MooseVariableScalar>();
-
 /**
  * Class for scalar variables (they are different).
  */

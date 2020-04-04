@@ -49,4 +49,3 @@ protected:
 
   std::set<SubdomainID> _block_ids;
 };
-

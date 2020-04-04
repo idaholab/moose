@@ -23,8 +23,6 @@
 
 registerMooseObject("MooseApp", GeneratedMeshGenerator);
 
-defineLegacyParams(GeneratedMeshGenerator);
-
 InputParameters
 GeneratedMeshGenerator::validParams()
 {

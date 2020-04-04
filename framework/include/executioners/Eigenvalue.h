@@ -18,9 +18,6 @@ class EigenProblem;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<Eigenvalue>();
-
 class Eigenvalue : public Steady
 {
 public:

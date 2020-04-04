@@ -14,9 +14,6 @@
 // Forward Declarations
 class PFCFreezingIC;
 
-template <>
-InputParameters validParams<PFCFreezingIC>();
-
 /**
  * PFCFreezingIC creates an initial density for a PFC model that has one area of a set
  * crystal structure (initialized using sinusoids) and all the rest with a random structure.

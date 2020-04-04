@@ -17,9 +17,6 @@
 class Distribution;
 class DistributionInterface;
 
-template <>
-InputParameters validParams<DistributionInterface>();
-
 /**
  * Interface for objects that need to use distributions
  *
@@ -28,7 +25,6 @@ InputParameters validParams<DistributionInterface>();
 class DistributionInterface
 {
 public:
-
   static InputParameters validParams();
 
   DistributionInterface(const MooseObject * moose_object);

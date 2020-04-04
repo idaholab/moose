@@ -13,9 +13,6 @@
 
 class SimpleACInterface;
 
-template <>
-InputParameters validParams<SimpleACInterface>();
-
 /**
  * Compute the Allen-Cahn interface term with constant Mobility and Interfacial parameter
  */
@@ -35,4 +32,3 @@ protected:
   /// Interfacial parameter
   const MaterialProperty<Real> & _kappa;
 };
-

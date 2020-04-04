@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ScalarVariable);
 
-defineLegacyParams(ScalarVariable);
-
 InputParameters
 ScalarVariable::validParams()
 {

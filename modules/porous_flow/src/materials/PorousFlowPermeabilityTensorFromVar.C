@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityTensorFromVar);
 
-defineLegacyParams(PorousFlowPermeabilityTensorFromVar);
-
 InputParameters
 PorousFlowPermeabilityTensorFromVar::validParams()
 {

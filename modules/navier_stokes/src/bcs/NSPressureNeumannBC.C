@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSPressureNeumannBC);
 
-defineLegacyParams(NSPressureNeumannBC);
-
 InputParameters
 NSPressureNeumannBC::validParams()
 {

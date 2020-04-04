@@ -24,4 +24,3 @@ public:
   virtual void initialSetup() override;
   virtual void execute() override;
 };
-

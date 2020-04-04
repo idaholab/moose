@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSMomentumInviscidSpecifiedNormalFlowBC;
 
-template <>
-InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>();
-
 /**
  * Momentum equation boundary condition in which pressure is specified (given)
  * and the value of the convective part is allowed to vary (is computed implicitly).
@@ -36,4 +33,3 @@ protected:
   const VariableValue & _pressure;
   const Real _rhou_udotn;
 };
-

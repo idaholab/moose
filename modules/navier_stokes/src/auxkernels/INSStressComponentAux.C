@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSStressComponentAux);
 
-defineLegacyParams(INSStressComponentAux);
-
 InputParameters
 INSStressComponentAux::validParams()
 {

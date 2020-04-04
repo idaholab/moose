@@ -15,9 +15,6 @@
 // Forward Declarations
 class ConstantPointSource;
 
-template <>
-InputParameters validParams<ConstantPointSource>();
-
 /**
  * TOOD
  */
@@ -37,4 +34,3 @@ protected:
   std::vector<Real> _point_param;
   Point _p;
 };
-

@@ -37,9 +37,6 @@ template <typename T>
 class NumericVector;
 } // namespace libMesh
 
-template <>
-InputParameters validParams<MultiApp>();
-
 /**
  * Helper class for holding Sub-app backups
  */

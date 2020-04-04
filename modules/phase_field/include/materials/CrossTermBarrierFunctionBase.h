@@ -15,9 +15,6 @@
 // Forward Declarations
 class CrossTermBarrierFunctionBase;
 
-template <>
-InputParameters validParams<CrossTermBarrierFunctionBase>();
-
 /**
  * CrossTermBarrierFunctionBase is the base to a set of free energy penalties that
  * set the phase interface barriers for arbitrary pairs of phases.
@@ -57,4 +54,3 @@ protected:
   std::vector<std::vector<const MaterialProperty<Real> *>> _dh;
   ///@}
 };
-

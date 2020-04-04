@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", RankTwoScalarAux);
 
-defineLegacyParams(RankTwoScalarAux);
-
 InputParameters
 RankTwoScalarAux::validParams()
 {

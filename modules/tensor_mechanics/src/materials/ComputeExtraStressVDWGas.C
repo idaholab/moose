@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeExtraStressVDWGas);
 
-defineLegacyParams(ComputeExtraStressVDWGas);
-
 InputParameters
 ComputeExtraStressVDWGas::validParams()
 {

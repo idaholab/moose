@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GBDependentDiffusivity);
 
-defineLegacyParams(GBDependentDiffusivity);
-
 InputParameters
 GBDependentDiffusivity::validParams()
 {

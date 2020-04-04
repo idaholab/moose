@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowExponentialDecay);
 
-defineLegacyParams(PorousFlowExponentialDecay);
-
 InputParameters
 PorousFlowExponentialDecay::validParams()
 {

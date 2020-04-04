@@ -17,8 +17,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             "07/01/2020 00:00",
                             BoostLognormal);
 
-defineLegacyParams(BoostLognormalDistribution);
-
 InputParameters
 BoostLognormalDistribution::validParams()
 {

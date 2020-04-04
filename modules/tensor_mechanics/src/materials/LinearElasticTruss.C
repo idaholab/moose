@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", LinearElasticTruss);
 
-defineLegacyParams(LinearElasticTruss);
-
 InputParameters
 LinearElasticTruss::validParams()
 {

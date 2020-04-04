@@ -17,8 +17,6 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-defineLegacyParams(NSIntegratedBC);
-
 InputParameters
 NSIntegratedBC::validParams()
 {

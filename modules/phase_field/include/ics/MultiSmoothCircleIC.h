@@ -14,9 +14,6 @@
 // Forward Declarations
 class MultiSmoothCircleIC;
 
-template <>
-InputParameters validParams<MultiSmoothCircleIC>();
-
 /**
  * MultismoothCircleIC creates multiple SmoothCircles (number = numbub) that are randomly
  * positioned around the domain with a minimum spacing equal to bubspac. The system attempts to
@@ -50,4 +47,3 @@ protected:
   Point _top_right;
   Point _range;
 };
-

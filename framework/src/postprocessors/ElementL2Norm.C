@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ElementL2Norm);
 
-defineLegacyParams(ElementL2Norm);
-
 InputParameters
 ElementL2Norm::validParams()
 {

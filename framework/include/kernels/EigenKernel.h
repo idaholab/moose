@@ -15,9 +15,6 @@
 class EigenKernel;
 class MooseEigenSystem;
 
-template <>
-InputParameters validParams<EigenKernel>();
-
 /**
  * The behavior of this kernel is controlled by one problem-wise global parameter
  *    eigen_on_current - bool, to indicate if this kernel is operating on the current solution or
@@ -53,4 +50,3 @@ protected:
    */
   const Real * _eigenvalue;
 };
-

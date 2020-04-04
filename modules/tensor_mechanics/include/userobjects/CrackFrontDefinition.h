@@ -26,8 +26,6 @@ namespace libMesh
 class QBase;
 }
 
-template <>
-InputParameters validParams<CrackFrontDefinition>();
 void addCrackFrontDefinitionParams(InputParameters & params);
 
 /**

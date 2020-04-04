@@ -23,8 +23,6 @@
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
 
-defineLegacyParams(EqualValueEmbeddedConstraint);
-
 InputParameters
 EqualValueEmbeddedConstraint::validParams()
 {

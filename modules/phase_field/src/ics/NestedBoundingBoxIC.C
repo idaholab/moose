@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", NestedBoundingBoxIC);
 
-defineLegacyParams(NestedBoundingBoxIC);
-
 InputParameters
 NestedBoundingBoxIC::validParams()
 {

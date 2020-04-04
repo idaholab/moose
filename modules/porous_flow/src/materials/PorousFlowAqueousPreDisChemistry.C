@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowAqueousPreDisChemistry);
 
-defineLegacyParams(PorousFlowAqueousPreDisChemistry);
-
 InputParameters
 PorousFlowAqueousPreDisChemistry::validParams()
 {

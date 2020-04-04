@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", FourierNoise);
 
-defineLegacyParams(FourierNoise);
-
 InputParameters
 FourierNoise::validParams()
 {

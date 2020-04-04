@@ -11,8 +11,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetVolume);
 
-defineLegacyParams(LevelSetVolume);
-
 InputParameters
 LevelSetVolume::validParams()
 {

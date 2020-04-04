@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSImposedVelocityBC);
 
-defineLegacyParams(NSImposedVelocityBC);
-
 InputParameters
 NSImposedVelocityBC::validParams()
 {

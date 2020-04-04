@@ -16,9 +16,6 @@
 class MeshCut3DUserObject;
 class Function;
 
-template <>
-InputParameters validParams<MeshCut3DUserObject>();
-
 /**
  * MeshCut3DUserObject: (1) reads in a mesh describing the crack surface,
  * (2) uses the mesh to do initial cutting of 3D elements, and

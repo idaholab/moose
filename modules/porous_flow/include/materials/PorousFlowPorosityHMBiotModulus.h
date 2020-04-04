@@ -13,9 +13,6 @@
 
 class PorousFlowPorosityHMBiotModulus;
 
-template <>
-InputParameters validParams<PorousFlowPorosityHMBiotModulus>();
-
 /**
  * This Matrial evolves porosity so that the PorousFlow equations match
  * the standard equations of poroelasticity theory with a constant BiotModulus.
@@ -56,4 +53,3 @@ protected:
   /// d(volumetric strain rate)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 };
-

@@ -9,8 +9,6 @@
 
 #include "KKSACBulkBase.h"
 
-defineLegacyParams(KKSACBulkBase);
-
 InputParameters
 KKSACBulkBase::validParams()
 {

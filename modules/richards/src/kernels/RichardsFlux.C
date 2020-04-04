@@ -18,8 +18,6 @@
 
 registerMooseObject("RichardsApp", RichardsFlux);
 
-defineLegacyParams(RichardsFlux);
-
 InputParameters
 RichardsFlux::validParams()
 {

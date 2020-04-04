@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticMohrCoulombMulti;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticMohrCoulombMulti>();
-
 /**
  * FiniteStrainMohrCoulombMulti implements rate-independent non-associative mohr-coulomb
  * with hardening/softening in the finite-strain framework, using planar (non-smoothed) surfaces
