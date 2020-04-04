@@ -29,7 +29,6 @@
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01
-    system = Constraint
   [../]
 []
 

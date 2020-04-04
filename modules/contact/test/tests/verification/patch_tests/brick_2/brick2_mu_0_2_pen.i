@@ -364,7 +364,6 @@
   [./leftright]
     slave = 3
     master = 4
-    system = constraint
     model = coulomb
     formulation = penalty
     normalize_penalty = true

@@ -86,22 +86,17 @@ large, the solver may struggle due to poor conditioning.
 
 ## `System` Parameter
 
-Historically, contact enforcement based on multiple MOOSE systems has been available.
-The original system used the DiracKernel system, but more recenlty, the Constraint
-system has been used, and provides a more robust approach and is recommended. The
-`system` parameter is required, and specifies which of these systems to use.
-The DiracKernel system will be removed shortly, and when it is, this parameter
-will no longer be required.
+The `system` parameter is deprecated and currently defaults to `Constraint`.
   
 ## Example Input syntax id=example
 
 Node/face frictionless contact:
 
-!listing test/tests/sliding_block/sliding/constraint/frictionless_kinematic.i block=Contact
+!listing test/tests/sliding_block/sliding/frictionless_kinematic.i block=Contact
 
 Node/face frictional contact:
 
-!listing test/tests/sliding_block/sliding/constraint/frictional_02_penalty.i block=Contact
+!listing test/tests/sliding_block/sliding/frictional_02_penalty.i block=Contact
 
 Normal (frictionless) mortar contact:
 

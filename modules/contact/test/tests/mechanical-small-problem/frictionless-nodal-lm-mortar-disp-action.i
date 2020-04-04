@@ -72,7 +72,6 @@
     master = 2
     slave = 1
     formulation = mortar
-    system = constraint
   []
 []
 

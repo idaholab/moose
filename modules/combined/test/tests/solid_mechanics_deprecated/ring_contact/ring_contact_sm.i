@@ -49,7 +49,6 @@
     disp_z = disp_z
     penalty = 1e3
     tension_release = -1
-    system = Constraint
   [../]
 []
 

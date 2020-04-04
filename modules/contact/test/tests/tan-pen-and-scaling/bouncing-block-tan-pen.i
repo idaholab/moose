@@ -51,7 +51,6 @@ offset = 1e-2
     model = coulomb
     formulation = tangential_penalty
     penalty = 1e3
-    system = constraint
     friction_coefficient = 0.4
     normal_smoothing_distance = 0.2
   []

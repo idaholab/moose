@@ -204,7 +204,6 @@
     disp_y = disp_y
     disp_x = disp_x
     master = 3
-    system = constraint
     model = frictionless
     formulation = penalty
     normalize_penalty = true

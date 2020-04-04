@@ -54,7 +54,6 @@ offset = 1e-2
     master = 20
     model = frictionless
     formulation = mortar
-    system = constraint
   []
 []
 

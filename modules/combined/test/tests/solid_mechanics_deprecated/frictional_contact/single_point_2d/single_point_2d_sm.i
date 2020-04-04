@@ -217,7 +217,6 @@
     master = 2
     slave = 3
     model = coulomb
-    system = constraint
     friction_coefficient = '0.25'
   [../]
 []

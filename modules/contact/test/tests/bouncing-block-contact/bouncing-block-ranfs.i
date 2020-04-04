@@ -46,7 +46,6 @@ offset = 1e-2
 
     model = frictionless
     formulation = ranfs
-    system = Constraint
   [../]
 []
 

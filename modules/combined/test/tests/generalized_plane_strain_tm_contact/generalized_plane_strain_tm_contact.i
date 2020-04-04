@@ -196,7 +196,6 @@
     slave = 2
     penalty = 1e+10
     normalize_penalty = true
-    system = Constraint
     tangential_tolerance = .1
     normal_smoothing_distance = .1
     model = frictionless

@@ -45,7 +45,6 @@
     master = 1
     slave = 2
     displacements = 'disp_x disp_y disp_z'
-    system = Constraint
   [../]
 []
 

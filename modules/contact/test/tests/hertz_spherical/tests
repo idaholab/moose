@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md' 
+
+  [./hertz_contact_rz]
+    input = 'hertz_contact_rz.i'
+    type = 'RunApp'
+    requirement = 'The Contact system shall simulate Hertz contact between sphere and plane as a 2D axisymmetric problem with Quad4 elements.'
+  [../]
+
+  [./hertz_contact_rz_quad8]
+    input = 'hertz_contact_rz_quad8.i'
+    type = 'RunApp'
+    requirement = 'The Contact system shall simulate Hertz contact between sphere and plane as a 2D axisymmetric problem with Quad8 elements.'
+  [../]
+
+  [./hertz_contact]
+    input = 'hertz_contact.i'
+    type = 'RunApp'
+    heavy = true
+    requirement = 'The Contact system shall simulate Hertz contact between sphere and plane as a 3D problem with Hex8 elements.'
+  [../]
+
+  [./hertz_contact_hex27]
+    input = 'hertz_contact_hex27.i'
+    type = 'RunApp'
+    heavy = true
+    requirement = 'The Contact system shall simulate Hertz contact between sphere and plane as a 3D problem with Hex27 elements.'
+  [../]
+[]

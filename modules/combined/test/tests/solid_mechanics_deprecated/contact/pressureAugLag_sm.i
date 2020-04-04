@@ -46,7 +46,6 @@
     formulation = augmented_lagrange
     al_penetration_tolerance = 1e-8
     tangential_tolerance = 1e-3
-    system = Constraint
   [../]
 []
 

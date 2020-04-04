@@ -222,7 +222,6 @@
     penalty = 1e+7
     friction_coefficient = 0.2
     formulation = augmented_lagrange
-    system = constraint
     normalize_penalty = true
     al_penetration_tolerance = 1e-6
     al_incremental_slip_tolerance = 1.0e-2

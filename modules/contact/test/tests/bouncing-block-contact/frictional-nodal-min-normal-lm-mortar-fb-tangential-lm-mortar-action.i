@@ -48,7 +48,6 @@ offset = 1e-2
     master = 20
     slave = 10
     formulation = mortar
-    system = constraint
     model = coulomb
     friction_coefficient = 0.1
   []

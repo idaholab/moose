@@ -343,7 +343,6 @@
   [./leftright]
     slave = 3
     master = 4
-    system = constraint
     tangential_tolerance = 1e-3
     penalty = 1e+11
     al_penetration_tolerance = 1e-8
