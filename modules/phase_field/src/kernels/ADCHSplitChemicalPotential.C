@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSplitChemicalPotential);
 
-defineADLegacyParams(ADCHSplitChemicalPotential);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADCHSplitChemicalPotential<compute_stage>::validParams()

@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", RinglebMesh);
 
-defineLegacyParams(RinglebMesh);
-
 InputParameters
 RinglebMesh::validParams()
 {

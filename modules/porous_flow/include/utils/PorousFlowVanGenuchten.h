@@ -138,4 +138,3 @@ Real dRelativePermeabilityNW(Real seff, Real m);
  */
 Real d2RelativePermeabilityNW(Real seff, Real m);
 }
-

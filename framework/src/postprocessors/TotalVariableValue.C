@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", TotalVariableValue);
 
-defineLegacyParams(TotalVariableValue);
-
 InputParameters
 TotalVariableValue::validParams()
 {

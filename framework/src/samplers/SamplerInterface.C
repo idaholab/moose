@@ -12,8 +12,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-defineLegacyParams(SamplerInterface);
-
 InputParameters
 SamplerInterface::validParams()
 {

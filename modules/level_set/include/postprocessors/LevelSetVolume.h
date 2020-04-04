@@ -39,4 +39,3 @@ protected:
   /// Flag for triggering the internal volume calculation
   const bool _inside;
 };
-

@@ -13,9 +13,6 @@
 
 class PorousFlowFluidStateBrineCO2;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateBrineCO2>();
-
 /**
  * Fluid state class for brine and CO2. Includes mutual solubility of CO2 and
  * brine using model of Spycher, Pruess and Ennis-King, CO2-H2O mixtures in the
@@ -35,4 +32,3 @@ public:
 
 protected:
 };
-

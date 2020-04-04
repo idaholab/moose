@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", EBSDReaderAvgDataAux);
 
-defineLegacyParams(EBSDReaderAvgDataAux);
-
 InputParameters
 EBSDReaderAvgDataAux::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "GeneralizedKelvinVoigtBase.h"
 
-defineLegacyParams(GeneralizedKelvinVoigtBase);
-
 InputParameters
 GeneralizedKelvinVoigtBase::validParams()
 {

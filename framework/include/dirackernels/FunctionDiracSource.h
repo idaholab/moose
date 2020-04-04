@@ -16,9 +16,6 @@
 class FunctionDiracSource;
 class Function;
 
-template <>
-InputParameters validParams<FunctionDiracSource>();
-
 class FunctionDiracSource : public DiracKernel
 {
 public:

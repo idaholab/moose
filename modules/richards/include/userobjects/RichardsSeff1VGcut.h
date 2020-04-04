@@ -16,9 +16,6 @@
 
 class RichardsSeff1VGcut;
 
-template <>
-InputParameters validParams<RichardsSeff1VGcut>();
-
 /**
  * Effective saturation as a function of porepressure
  * using the van Genuchten formula, but when p<p_cut use a
@@ -83,4 +80,3 @@ protected:
   /// derivative of effective saturation wrt p at p=_p_cut
   Real _ds_cut;
 };
-

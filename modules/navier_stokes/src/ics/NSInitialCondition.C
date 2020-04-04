@@ -19,8 +19,6 @@
 
 registerMooseObject("NavierStokesApp", NSInitialCondition);
 
-defineLegacyParams(NSInitialCondition);
-
 InputParameters
 NSInitialCondition::validParams()
 {

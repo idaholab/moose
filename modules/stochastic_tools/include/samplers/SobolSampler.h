@@ -13,9 +13,6 @@
 
 class SobolSampler;
 
-template <>
-InputParameters validParams<SobolSampler>();
-
 /**
  * A class used to perform Monte Carlo sampling for performing Sobol sensitivity analysis.
  *

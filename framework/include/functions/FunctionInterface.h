@@ -26,9 +26,6 @@ class MooseObject;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<FunctionInterface>();
-
 /**
  * Interface for objects that need to use functions
  *

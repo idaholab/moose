@@ -10,8 +10,6 @@
 #include "LineSearch.h"
 #include "MooseApp.h"
 
-defineLegacyParams(LineSearch);
-
 InputParameters
 LineSearch::validParams()
 {

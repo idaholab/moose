@@ -11,8 +11,6 @@
 //
 #include "RichardsRelPerm.h"
 
-defineLegacyParams(RichardsRelPerm);
-
 InputParameters
 RichardsRelPerm::validParams()
 {

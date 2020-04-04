@@ -11,8 +11,6 @@
 
 registerMooseObject("RdgApp", AEFVBC);
 
-defineLegacyParams(AEFVBC);
-
 InputParameters
 AEFVBC::validParams()
 {

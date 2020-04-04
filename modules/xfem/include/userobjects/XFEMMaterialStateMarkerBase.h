@@ -49,7 +49,3 @@ private:
   std::set<unsigned int> _marked_frags;
   std::map<unsigned int, unsigned int> _marked_elem_sides;
 };
-
-template <>
-InputParameters validParams<XFEMMaterialStateMarkerBase>();
-

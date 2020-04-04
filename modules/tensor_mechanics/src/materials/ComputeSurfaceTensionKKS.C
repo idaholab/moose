@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeSurfaceTensionKKS);
 
-defineLegacyParams(ComputeSurfaceTensionKKS);
-
 InputParameters
 ComputeSurfaceTensionKKS::validParams()
 {

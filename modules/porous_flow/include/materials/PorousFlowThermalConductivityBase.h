@@ -13,9 +13,6 @@
 
 class PorousFlowThermalConductivityBase;
 
-template <>
-InputParameters validParams<PorousFlowThermalConductivityBase>();
-
 /**
  * Base class for materials that provide thermal conducitivity
  */
@@ -33,4 +30,3 @@ protected:
   /// d(thermal conductivity at the qps)/d(PorousFlow variable)
   MaterialProperty<std::vector<RealTensorValue>> & _dla_qp_dvar;
 };
-

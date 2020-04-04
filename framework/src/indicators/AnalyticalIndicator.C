@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", AnalyticalIndicator);
 
-defineLegacyParams(AnalyticalIndicator);
-
 InputParameters
 AnalyticalIndicator::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityComponentLowerDimensional);
 
-defineLegacyParams(PorousFlowDarcyVelocityComponentLowerDimensional);
-
 InputParameters
 PorousFlowDarcyVelocityComponentLowerDimensional::validParams()
 {

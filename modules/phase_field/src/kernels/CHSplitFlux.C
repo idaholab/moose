@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CHSplitFlux);
 
-defineLegacyParams(CHSplitFlux);
-
 InputParameters
 CHSplitFlux::validParams()
 {
@@ -33,10 +31,9 @@ CHSplitFlux::CHSplitFlux(const InputParameters & parameters)
     _mobility(getMaterialProperty<RealTensorValue>("mobility_name")),
     _has_coupled_c(isCoupled("c")),
     _c_var(_has_coupled_c ? coupled("c") : 0),
-    _dmobility_dc(_has_coupled_c
-                      ? &getMaterialPropertyDerivative<RealTensorValue>("mobility_name",
-                                                                        getVar("c", 0)->name())
-                      : NULL)
+    _dmobility_dc(_has_coupled_c ? &getMaterialPropertyDerivative<RealTensorValue>(
+                                       "mobility_name", getVar("c", 0)->name())
+                                 : NULL)
 {
 }
 

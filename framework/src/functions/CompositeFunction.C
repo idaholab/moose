@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", CompositeFunction);
 
-defineLegacyParams(CompositeFunction);
-
 InputParameters
 CompositeFunction::validParams()
 {

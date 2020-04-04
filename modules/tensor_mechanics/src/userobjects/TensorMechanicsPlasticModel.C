@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "RankFourTensor.h"
 
-defineLegacyParams(TensorMechanicsPlasticModel);
-
 InputParameters
 TensorMechanicsPlasticModel::validParams()
 {

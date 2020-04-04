@@ -13,9 +13,6 @@
 
 class TensorMechanicsHardeningGaussian;
 
-template <>
-InputParameters validParams<TensorMechanicsHardeningGaussian>();
-
 /**
  * Gaussian hardening
  * The value = _val_res + (val_0 - val_res)*exp(-0.5*rate*(p - intnl_0)^2) for p>intnl_0.  Here p =

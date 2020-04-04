@@ -13,9 +13,6 @@
 
 class AddNodalNormalsAction;
 
-template <>
-InputParameters validParams<AddNodalNormalsAction>();
-
 /**
  * Action to setup computation of nodal normals.
  *
@@ -48,4 +45,3 @@ protected:
   /// The supplied boundary name for the corner boundary
   BoundaryName _corner_boundary;
 };
-

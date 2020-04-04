@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeStrainIncrementBasedStress);
 
-defineADLegacyParams(ADComputeStrainIncrementBasedStress);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeStrainIncrementBasedStress<compute_stage>::validParams()

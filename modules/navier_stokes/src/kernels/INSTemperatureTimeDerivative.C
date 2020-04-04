@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", INSTemperatureTimeDerivative);
 
-defineLegacyParams(INSTemperatureTimeDerivative);
-
 InputParameters
 INSTemperatureTimeDerivative::validParams()
 {

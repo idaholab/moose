@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSCHBulk);
 
-defineLegacyParams(KKSCHBulk);
-
 InputParameters
 KKSCHBulk::validParams()
 {

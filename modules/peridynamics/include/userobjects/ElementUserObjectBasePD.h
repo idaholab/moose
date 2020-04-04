@@ -14,9 +14,6 @@
 
 class ElementUserObjectBasePD;
 
-template <>
-InputParameters validParams<ElementUserObjectBasePD>();
-
 /**
  * Base element userobject class for peridynamics
  */

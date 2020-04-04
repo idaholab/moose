@@ -14,9 +14,6 @@
 class FEProblem;
 class NonlinearSystem;
 
-template <>
-InputParameters validParams<FEProblem>();
-
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -41,4 +38,3 @@ protected:
   bool _use_nonlinear;
   std::shared_ptr<NonlinearSystem> _nl_sys;
 };
-

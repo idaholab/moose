@@ -37,4 +37,3 @@ protected:
   const bool _volumetric_locking_correction;
 };
 }
-

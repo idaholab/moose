@@ -19,9 +19,6 @@ class MeshChangedInterface;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<MeshChangedInterface>();
-
 /**
  * Interface for notifications that the mesh has changed.
  */

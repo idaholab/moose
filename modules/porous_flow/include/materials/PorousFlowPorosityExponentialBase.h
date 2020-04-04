@@ -13,9 +13,6 @@
 
 class PorousFlowPorosityExponentialBase;
 
-template <>
-InputParameters validParams<PorousFlowPorosityExponentialBase>();
-
 /**
  * Base class Material designed to provide the porosity.
  * In this class
@@ -77,4 +74,3 @@ protected:
    */
   const bool _ensure_positive;
 };
-

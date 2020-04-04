@@ -16,8 +16,6 @@
 
 registerMooseObject("PhaseFieldApp", FeatureFloodCountAux);
 
-defineLegacyParams(FeatureFloodCountAux);
-
 InputParameters
 FeatureFloodCountAux::validParams()
 {

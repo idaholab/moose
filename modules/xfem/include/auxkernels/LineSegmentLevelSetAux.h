@@ -15,9 +15,6 @@
 class LineSegmentLevelSetAux;
 class LineSegmentCutSetUserObject;
 
-template <>
-InputParameters validParams<LineSegmentLevelSetAux>();
-
 /**
  * Calculate level set values for an interface that is defined by a set of line segments
  */
@@ -45,4 +42,3 @@ protected:
   /// Store the cut locations
   std::vector<Real> _cut_data;
 };
-

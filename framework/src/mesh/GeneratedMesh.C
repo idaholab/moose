@@ -22,8 +22,6 @@
 
 registerMooseObject("MooseApp", GeneratedMesh);
 
-defineLegacyParams(GeneratedMesh);
-
 InputParameters
 GeneratedMesh::validParams()
 {

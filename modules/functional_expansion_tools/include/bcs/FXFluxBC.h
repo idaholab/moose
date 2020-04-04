@@ -13,9 +13,6 @@
 
 class FXFluxBC;
 
-template <>
-InputParameters validParams<FXFluxBC>();
-
 /**
  * Defines an FX-based BC that strongly encourages the gradients to match
  */

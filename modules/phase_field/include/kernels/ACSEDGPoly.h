@@ -25,9 +25,6 @@
 class ACSEDGPoly;
 class GrainTrackerInterface;
 
-template <>
-InputParameters validParams<ACSEDGPoly>();
-
 class ACSEDGPoly : public ACBulk<Real>
 {
 public:
@@ -61,4 +58,3 @@ protected:
   /// index of the OP the kernel is currently acting on
   unsigned int _op_index;
 };
-

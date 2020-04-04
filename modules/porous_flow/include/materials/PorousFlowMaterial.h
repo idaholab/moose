@@ -15,9 +15,6 @@
 
 class PorousFlowMaterial;
 
-template <>
-InputParameters validParams<PorousFlowMaterial>();
-
 /**
  * PorousFlowMaterial is the base class for all PorousFlow Materials
  * It allows users to specify that the Material should be a "nodal"

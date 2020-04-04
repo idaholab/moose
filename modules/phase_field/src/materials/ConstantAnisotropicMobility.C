@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ConstantAnisotropicMobility);
 
-defineLegacyParams(ConstantAnisotropicMobility);
-
 InputParameters
 ConstantAnisotropicMobility::validParams()
 {

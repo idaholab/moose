@@ -13,9 +13,6 @@
 
 class CrankNicolson;
 
-template <>
-InputParameters validParams<CrankNicolson>();
-
 /**
  * Crank-Nicolson time integrator.
  *
@@ -55,4 +52,3 @@ CrankNicolson::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 2. / _dt;
 }
-

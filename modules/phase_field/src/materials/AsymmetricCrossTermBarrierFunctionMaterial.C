@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", AsymmetricCrossTermBarrierFunctionMaterial);
 
-defineLegacyParams(AsymmetricCrossTermBarrierFunctionMaterial);
-
 InputParameters
 AsymmetricCrossTermBarrierFunctionMaterial::validParams()
 {

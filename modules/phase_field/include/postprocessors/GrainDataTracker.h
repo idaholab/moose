@@ -56,4 +56,3 @@ GrainDataTracker<T>::newGrainCreated(unsigned int new_grain_id)
 
   _grain_data[new_grain_id] = newGrain(new_grain_id);
 }
-

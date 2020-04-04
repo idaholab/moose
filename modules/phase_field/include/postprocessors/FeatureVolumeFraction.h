@@ -14,9 +14,6 @@
 // Forward Declarations
 class FeatureVolumeFraction;
 
-template <>
-InputParameters validParams<FeatureVolumeFraction>();
-
 class FeatureVolumeFraction : public GeneralPostprocessor
 {
 public:
@@ -45,4 +42,3 @@ protected:
   Real _equil_fraction;
   Real _avrami_value;
 };
-

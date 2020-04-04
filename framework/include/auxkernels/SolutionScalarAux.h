@@ -14,9 +14,6 @@
 class SolutionScalarAux;
 class SolutionUserObject;
 
-template <>
-InputParameters validParams<SolutionScalarAux>();
-
 /**
  * AuxScalarKernel for reading a solution from file.
  * Creates a function that extracts values from a solution read from a file,

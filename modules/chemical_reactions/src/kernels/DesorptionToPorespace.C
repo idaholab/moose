@@ -13,8 +13,6 @@
 
 registerMooseObject("ChemicalReactionsApp", DesorptionToPorespace);
 
-defineLegacyParams(DesorptionToPorespace);
-
 InputParameters
 DesorptionToPorespace::validParams()
 {

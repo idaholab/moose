@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CappedDruckerPragerStressUpdate);
 
-defineLegacyParams(CappedDruckerPragerStressUpdate);
-
 InputParameters
 CappedDruckerPragerStressUpdate::validParams()
 {

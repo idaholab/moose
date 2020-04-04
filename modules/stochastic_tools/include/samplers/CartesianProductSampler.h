@@ -13,8 +13,6 @@
 #include "CartesianProduct.h"
 
 class CartesianProductSampler;
-template <>
-InputParameters validParams<CartesianProductSampler>();
 
 /**
  * Creates samples based on the Cartesian product, see CartesianProduct in utils.

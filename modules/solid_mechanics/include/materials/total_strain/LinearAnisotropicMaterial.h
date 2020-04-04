@@ -15,9 +15,6 @@
 class LinearAnisotropicMaterial;
 class ElasticityTensor;
 
-template <>
-InputParameters validParams<LinearAnisotropicMaterial>();
-
 /**
  * LinearIsotropic material for use in simple applications that don't need material properties.
  */
@@ -36,4 +33,3 @@ protected:
   Real _euler_angle_2;
   Real _euler_angle_3;
 };
-

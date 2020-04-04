@@ -14,9 +14,6 @@
 // Forward Declarations
 class AverageNodalVariableValue;
 
-template <>
-InputParameters validParams<AverageNodalVariableValue>();
-
 class AverageNodalVariableValue : public NodalVariablePostprocessor
 {
 public:
@@ -34,4 +31,3 @@ protected:
   Real _sum;
   unsigned int _n;
 };
-

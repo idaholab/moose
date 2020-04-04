@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", FlinakFluidProperties);
 
-defineLegacyParams(FlinakFluidProperties);
-
 InputParameters
 FlinakFluidProperties::validParams()
 {

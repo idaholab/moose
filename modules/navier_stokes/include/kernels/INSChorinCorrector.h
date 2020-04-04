@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSChorinCorrector;
 
-template <>
-InputParameters validParams<INSChorinCorrector>();
-
 /**
  * This class computes the "Chorin" Corrector equation in fully-discrete
  * (both time and space) form.
@@ -55,4 +52,3 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _rho;
 };
-

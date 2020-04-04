@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VariableInnerProduct);
 
-defineLegacyParams(VariableInnerProduct);
-
 InputParameters
 VariableInnerProduct::validParams()
 {

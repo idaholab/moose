@@ -18,9 +18,6 @@ namespace libMesh
 class PeriodicBoundaryBase;
 }
 
-template <>
-InputParameters validParams<AddPeriodicBCAction>();
-
 /**
  * This Action adds a periodic boundary to the problem. Note that Periodic Boundaries
  * are not MooseObjects so you need not specify a type for these boundaries.  If you
@@ -47,4 +44,3 @@ protected:
 
   MooseMesh * _mesh;
 };
-

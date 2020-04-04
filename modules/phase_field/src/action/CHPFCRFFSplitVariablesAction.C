@@ -17,8 +17,6 @@
 
 registerMooseAction("PhaseFieldApp", CHPFCRFFSplitVariablesAction, "add_variable");
 
-defineLegacyParams(CHPFCRFFSplitVariablesAction);
-
 InputParameters
 CHPFCRFFSplitVariablesAction::validParams()
 {

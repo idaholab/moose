@@ -29,9 +29,6 @@ class Point;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<LayeredBase>();
-
 /**
  * This base class computes volume integrals of a variable storing
  * partial sums for the specified number of intervals in a direction

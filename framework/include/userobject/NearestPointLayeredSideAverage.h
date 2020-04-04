@@ -17,9 +17,6 @@
 // Forward Declarations
 class NearestPointLayeredSideAverage;
 
-template <>
-InputParameters validParams<NearestPointLayeredSideAverage>();
-
 /**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).

@@ -9,8 +9,6 @@
 
 #include "VolumetricModel.h"
 
-defineLegacyParams(VolumetricModel);
-
 InputParameters
 VolumetricModel::validParams()
 {

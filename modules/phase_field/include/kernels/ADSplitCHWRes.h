@@ -25,4 +25,3 @@ public:
 };
 
 declareADValidParams(ADSplitCHWRes);
-

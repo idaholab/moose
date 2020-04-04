@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", SinDirichletBC);
 
-defineLegacyParams(SinDirichletBC);
-
 InputParameters
 SinDirichletBC::validParams()
 {

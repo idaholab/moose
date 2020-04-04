@@ -15,9 +15,6 @@
 
 class BoxMarker;
 
-template <>
-InputParameters validParams<BoxMarker>();
-
 class BoxMarker : public Marker
 {
 public:
@@ -33,4 +30,3 @@ protected:
 
   BoundingBox _bounding_box;
 };
-

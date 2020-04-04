@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumBase;
 
-template <>
-InputParameters validParams<INSMomentumBase>();
-
 /**
  * This class computes the momentum equation residual and Jacobian
  * contributions for the incompressible Navier-Stokes momentum

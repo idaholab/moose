@@ -15,9 +15,6 @@
 class Axisymmetric2D3DSolutionFunction;
 class SolutionUserObject;
 
-template <>
-InputParameters validParams<Axisymmetric2D3DSolutionFunction>();
-
 /**
  * Function for reading a 2D axisymmetric solution from file and mapping it to a
  * 3D Cartesian system. This function extracts values from a solution read from a

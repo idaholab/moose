@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", SolutionTimeAdaptiveDT);
 
-defineLegacyParams(SolutionTimeAdaptiveDT);
-
 InputParameters
 SolutionTimeAdaptiveDT::validParams()
 {

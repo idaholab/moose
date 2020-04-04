@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddExternalAuxVariableAction, "add_external_aux_variables");
 
-defineLegacyParams(AddExternalAuxVariableAction);
-
 InputParameters
 AddExternalAuxVariableAction::validParams()
 {

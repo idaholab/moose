@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", ACSEDGPoly);
 
-defineLegacyParams(ACSEDGPoly);
-
 InputParameters
 ACSEDGPoly::validParams()
 {

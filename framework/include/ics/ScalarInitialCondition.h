@@ -28,9 +28,6 @@ template <typename T>
 class DenseVector;
 }
 
-template <>
-InputParameters validParams<ScalarInitialCondition>();
-
 /**
  * InitialConditions are objects that set the initial value of variables.
  */

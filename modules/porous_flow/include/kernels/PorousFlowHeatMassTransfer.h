@@ -14,9 +14,6 @@
 // Forward Declaration
 class PorousFlowHeatMassTransfer;
 
-template <>
-InputParameters validParams<PorousFlowHeatMassTransfer>();
-
 /**
  * Calculate heat or mass transfer from a coupled variable to u.
  * This can be used to transfer from a variable specified in a highly conductive domain to a low

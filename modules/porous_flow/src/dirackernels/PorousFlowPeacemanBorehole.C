@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
 
-defineLegacyParams(PorousFlowPeacemanBorehole);
-
 InputParameters
 PorousFlowPeacemanBorehole::validParams()
 {
@@ -193,8 +191,9 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
   else if (eig_val2 <= 0.0)
     r0 = _re_constant * ll2;
   else
-    r0 = _re_constant * std::sqrt(std::sqrt(eig_val1 / eig_val2) * std::pow(ll2, 2) +
-                                  std::sqrt(eig_val2 / eig_val1) * std::pow(ll1, 2)) /
+    r0 = _re_constant *
+         std::sqrt(std::sqrt(eig_val1 / eig_val2) * std::pow(ll2, 2) +
+                   std::sqrt(eig_val2 / eig_val1) * std::pow(ll1, 2)) /
          (std::pow(eig_val1 / eig_val2, 0.25) + std::pow(eig_val2 / eig_val1, 0.25));
 
   const Real effective_perm = (det2D >= 0.0 ? std::sqrt(det2D) : 0.0);

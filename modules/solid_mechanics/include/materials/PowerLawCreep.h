@@ -14,9 +14,6 @@
 // Forward declarations
 class PowerLawCreep;
 
-template <>
-InputParameters validParams<PowerLawCreep>();
-
 /**
  * Power-law creep material
  * edot = A(sigma)**n * exp(-Q/(RT))
@@ -31,4 +28,3 @@ public:
 
 protected:
 };
-

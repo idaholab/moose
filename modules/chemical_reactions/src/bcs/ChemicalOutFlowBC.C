@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", ChemicalOutFlowBC);
 
-defineLegacyParams(ChemicalOutFlowBC);
-
 InputParameters
 ChemicalOutFlowBC::validParams()
 {

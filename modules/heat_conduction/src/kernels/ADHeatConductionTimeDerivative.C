@@ -11,8 +11,6 @@
 
 registerADMooseObject("HeatConductionApp", ADHeatConductionTimeDerivative);
 
-defineADLegacyParams(ADHeatConductionTimeDerivative);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADHeatConductionTimeDerivative<compute_stage>::validParams()

@@ -21,8 +21,6 @@ registerMooseObject("MooseApp", PetscExternalPartitioner);
 
 #include <memory>
 
-defineLegacyParams(PetscExternalPartitioner);
-
 InputParameters
 PetscExternalPartitioner::validParams()
 {

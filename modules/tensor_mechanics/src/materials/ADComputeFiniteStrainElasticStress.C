@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
 
-defineADLegacyParams(ADComputeFiniteStrainElasticStress);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeFiniteStrainElasticStress<compute_stage>::validParams()

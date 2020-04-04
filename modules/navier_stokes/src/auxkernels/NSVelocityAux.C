@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSVelocityAux);
 
-defineLegacyParams(NSVelocityAux);
-
 InputParameters
 NSVelocityAux::validParams()
 {

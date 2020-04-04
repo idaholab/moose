@@ -14,9 +14,6 @@
 
 class PorousFlowDictator;
 
-template <>
-InputParameters validParams<PorousFlowDictator>();
-
 /**
  * This holds maps between the nonlinear variables
  * used in a PorousFlow simulation and the

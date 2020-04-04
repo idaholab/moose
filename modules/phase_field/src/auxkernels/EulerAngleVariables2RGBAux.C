@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", EulerAngleVariables2RGBAux);
 
-defineLegacyParams(EulerAngleVariables2RGBAux);
-
 InputParameters
 EulerAngleVariables2RGBAux::validParams()
 {

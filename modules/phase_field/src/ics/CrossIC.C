@@ -29,8 +29,6 @@
 
 registerMooseObject("PhaseFieldApp", CrossIC);
 
-defineLegacyParams(CrossIC);
-
 InputParameters
 CrossIC::validParams()
 {

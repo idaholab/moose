@@ -13,9 +13,6 @@
 
 class PorousFlowFluidStateWaterNCG;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateWaterNCG>();
-
 /**
  * Fluid state class for water and a non-condensable gas. Calculates the solubility
  * of the gas phase in the water using Henry's law, and provides density, viscosity
@@ -30,4 +27,3 @@ public:
 
 protected:
 };
-

@@ -13,9 +13,6 @@
 
 class ComputeSmallStrain;
 
-template <>
-InputParameters validParams<ComputeSmallStrain>();
-
 /**
  * ComputeSmallStrain defines a strain tensor, assuming small strains.
  */

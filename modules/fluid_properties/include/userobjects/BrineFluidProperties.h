@@ -14,9 +14,6 @@
 
 class BrineFluidProperties;
 
-template <>
-InputParameters validParams<BrineFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

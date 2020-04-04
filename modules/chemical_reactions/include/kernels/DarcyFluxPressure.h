@@ -14,9 +14,6 @@
 
 class DarcyFluxPressure;
 
-template <>
-InputParameters validParams<DarcyFluxPressure>();
-
 /**
  * Darcy flux: - cond * (Grad P - rho * g)
  * where cond is the hydraulic conductivity, P is fluid pressure,
@@ -42,4 +39,3 @@ protected:
   /// Fluid density
   const MaterialProperty<Real> & _density;
 };
-

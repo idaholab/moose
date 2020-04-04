@@ -14,9 +14,6 @@
 
 class PorousFlowMaterialBase;
 
-template <>
-InputParameters validParams<PorousFlowMaterialBase>();
-
 /**
  * Base class for all PorousFlow materials that provide phase-dependent properties.
  * These include: fluid properties, relative permeabilities and capillary pressures.
@@ -38,4 +35,3 @@ protected:
   /// Stringified fluid phase number
   const std::string _phase;
 };
-

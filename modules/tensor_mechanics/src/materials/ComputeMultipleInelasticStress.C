@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
 
-defineLegacyParams(ComputeMultipleInelasticStress);
-
 InputParameters
 ComputeMultipleInelasticStress::validParams()
 {

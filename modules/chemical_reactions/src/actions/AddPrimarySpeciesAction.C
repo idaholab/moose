@@ -12,8 +12,6 @@
 
 registerMooseAction("ChemicalReactionsApp", AddPrimarySpeciesAction, "add_variable");
 
-defineLegacyParams(AddPrimarySpeciesAction);
-
 InputParameters
 AddPrimarySpeciesAction::validParams()
 {

@@ -15,8 +15,6 @@
 
 registerMooseAction("PhaseFieldApp", GrandPotentialKernelAction, "add_kernel");
 
-defineLegacyParams(GrandPotentialKernelAction);
-
 InputParameters
 GrandPotentialKernelAction::validParams()
 {

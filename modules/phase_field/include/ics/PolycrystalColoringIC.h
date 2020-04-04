@@ -17,9 +17,6 @@ class PolycrystalColoringIC;
 class GrainTrackerInterface;
 class PolycrystalUserObjectBase;
 
-template <>
-InputParameters validParams<PolycrystalColoringIC>();
-
 /**
  * PolycrystalColoringIC creates a polycrystal initial condition.
  * With 2 Grains, _typ = 0 results in a circular inclusion grain and _type = 1 gives a bicrystal.
@@ -41,4 +38,3 @@ protected:
   unsigned int _phase;
   const PolycrystalUserObjectBase & _poly_ic_uo;
 };
-

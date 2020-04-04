@@ -10,8 +10,6 @@
 #include "GrainCentersPostprocessor.h"
 #include "ComputeGrainCenterUserObject.h"
 
-defineLegacyParams(GrainCentersPostprocessor);
-
 InputParameters
 GrainCentersPostprocessor::validParams()
 {

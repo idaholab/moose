@@ -14,9 +14,6 @@
 // Forward Declarations
 class LevelSetBiMaterialReal;
 
-template <>
-InputParameters validParams<LevelSetBiMaterialReal>();
-
 /**
  * Compute a Real material property for bi-materials problem (consisting of two different materials)
  * defined by a level set function
@@ -39,4 +36,3 @@ protected:
   /// Global Real material property (switch bi-material diffusion coefficient based on level set values)
   MaterialProperty<Real> & _material_prop;
 };
-

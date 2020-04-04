@@ -22,8 +22,6 @@ registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
 
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_kernel");
 
-defineLegacyParams(NonconservedAction);
-
 InputParameters
 NonconservedAction::validParams()
 {

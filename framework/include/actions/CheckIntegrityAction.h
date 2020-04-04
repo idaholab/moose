@@ -13,9 +13,6 @@
 
 class CheckIntegrityAction;
 
-template <>
-InputParameters validParams<CheckIntegrityAction>();
-
 class CheckIntegrityAction : public Action
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

@@ -20,9 +20,6 @@ class GhostingUserObject;
 class MooseMesh;
 class NonlinearSystemBase;
 
-template <>
-InputParameters validParams<GhostingUserObject>();
-
 /**
  * This object loops over all of the underlying ghosting functors added by libMesh or MOOSE through
  * RelationshipManagers to display the effective ghosting for a particular simulation. Normally this
@@ -60,4 +57,3 @@ private:
   MooseMesh & _mesh;
   NonlinearSystemBase & _nl;
 };
-

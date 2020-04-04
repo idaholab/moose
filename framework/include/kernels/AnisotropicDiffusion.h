@@ -13,9 +13,6 @@
 
 class AnisotropicDiffusion;
 
-template <>
-InputParameters validParams<AnisotropicDiffusion>();
-
 /**
  * This kernel implements the Laplacian operator
  * multiplied by a 2nd order tensor giving
@@ -36,4 +33,3 @@ protected:
 
   RealTensorValue _k;
 };
-

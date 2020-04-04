@@ -14,9 +14,6 @@
 // Forward Declarations
 class AsymmetricCrossTermBarrierFunctionMaterial;
 
-template <>
-InputParameters validParams<AsymmetricCrossTermBarrierFunctionMaterial>();
-
 /**
  * AsymmetricCrossTermBarrierFunctionMaterial adds a free energy contribution on the
  * interfaces between arbitrary pairs of phases in an asymmetric way, allowing to tune the
@@ -38,4 +35,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d2h;
   ///@}
 };
-

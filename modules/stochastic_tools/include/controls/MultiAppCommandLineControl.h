@@ -20,9 +20,6 @@ class Function;
 class Sampler;
 class MultiApp;
 
-template <>
-InputParameters validParams<MultiAppCommandLineControl>();
-
 /**
  * A Control object for receiving data from a master application Sampler object.
  */
@@ -52,4 +49,3 @@ protected:
   /// Storage for the parameter names to be applied
   const std::vector<std::string> & _param_names;
 };
-

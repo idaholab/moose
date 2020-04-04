@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ExtraNodesetGenerator);
 
-defineLegacyParams(ExtraNodesetGenerator);
-
 InputParameters
 ExtraNodesetGenerator::validParams()
 {

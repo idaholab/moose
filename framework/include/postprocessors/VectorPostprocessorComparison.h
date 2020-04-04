@@ -13,9 +13,6 @@
 
 class VectorPostprocessorComparison;
 
-template <>
-InputParameters validParams<VectorPostprocessorComparison>();
-
 /**
  * Compares two vector post-processors of equal size and produces a boolean value
  *
@@ -53,4 +50,3 @@ protected:
   /// The comparison value; 1 for all true and 0 for at least one false
   PostprocessorValue _comparison_value;
 };
-

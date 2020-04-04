@@ -14,9 +14,6 @@
 // Forward Declarations
 class DashpotBC;
 
-template <>
-InputParameters validParams<DashpotBC>();
-
 /**
  * Implements a simple constant Dashpot BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.

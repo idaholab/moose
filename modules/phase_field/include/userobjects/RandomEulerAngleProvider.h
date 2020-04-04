@@ -16,9 +16,6 @@
 class RandomEulerAngleProvider;
 class GrainTrackerInterface;
 
-template <>
-InputParameters validParams<RandomEulerAngleProvider>();
-
 /**
  * Assign random Euler angles to each grains
  */
@@ -42,4 +39,3 @@ protected:
 
   MooseRandom _random;
 };
-

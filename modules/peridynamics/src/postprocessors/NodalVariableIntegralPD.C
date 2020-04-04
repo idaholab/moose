@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalVariableIntegralPD);
 
-defineLegacyParams(NodalVariableIntegralPD);
-
 InputParameters
 NodalVariableIntegralPD::validParams()
 {

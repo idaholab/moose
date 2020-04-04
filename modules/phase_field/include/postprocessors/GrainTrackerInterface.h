@@ -15,9 +15,6 @@
 // Forward declarations
 class GrainTrackerInterface;
 
-template <>
-InputParameters validParams<GrainTrackerInterface>();
-
 /**
  * This class defines the interface for the GrainTracking objects.
  */

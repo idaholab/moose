@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPLinearHardening);
 
-defineLegacyParams(HEVPLinearHardening);
-
 InputParameters
 HEVPLinearHardening::validParams()
 {

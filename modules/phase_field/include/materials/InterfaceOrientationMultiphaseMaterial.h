@@ -14,9 +14,6 @@
 // Forward Declarations
 class InterfaceOrientationMultiphaseMaterial;
 
-template <>
-InputParameters validParams<InterfaceOrientationMultiphaseMaterial>();
-
 /**
  * Material to compute the angular orientation of order parameter interfaces.
  */
@@ -49,4 +46,3 @@ private:
   const VariableValue & _etab;
   const VariableGradient & _grad_etab;
 };
-

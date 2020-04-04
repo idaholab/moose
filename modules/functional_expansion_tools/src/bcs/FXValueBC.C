@@ -12,8 +12,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXValueBC);
 
-defineLegacyParams(FXValueBC);
-
 InputParameters
 FXValueBC::validParams()
 {

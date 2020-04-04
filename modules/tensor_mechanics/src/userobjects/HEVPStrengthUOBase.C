@@ -9,8 +9,6 @@
 
 #include "HEVPStrengthUOBase.h"
 
-defineLegacyParams(HEVPStrengthUOBase);
-
 InputParameters
 HEVPStrengthUOBase::validParams()
 {

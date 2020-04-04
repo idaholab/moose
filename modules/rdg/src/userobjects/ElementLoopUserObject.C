@@ -9,8 +9,6 @@
 
 #include "ElementLoopUserObject.h"
 
-defineLegacyParams(ElementLoopUserObject);
-
 InputParameters
 ElementLoopUserObject::validParams()
 {

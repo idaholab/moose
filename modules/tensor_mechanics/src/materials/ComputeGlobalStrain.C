@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeGlobalStrain);
 
-defineLegacyParams(ComputeGlobalStrain);
-
 InputParameters
 ComputeGlobalStrain::validParams()
 {

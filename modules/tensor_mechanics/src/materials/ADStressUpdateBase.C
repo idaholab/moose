@@ -12,8 +12,6 @@
 #include "InputParameters.h"
 #include "Conversion.h"
 
-defineADLegacyParams(ADStressUpdateBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADStressUpdateBase<compute_stage>::validParams()

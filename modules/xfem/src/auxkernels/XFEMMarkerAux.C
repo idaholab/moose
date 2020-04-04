@@ -13,8 +13,6 @@
 
 registerMooseObject("XFEMApp", XFEMMarkerAux);
 
-defineLegacyParams(XFEMMarkerAux);
-
 InputParameters
 XFEMMarkerAux::validParams()
 {

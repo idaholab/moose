@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", InterfaceDiffusionFluxMatch);
 
-defineLegacyParams(InterfaceDiffusionFluxMatch);
-
 InputParameters
 InterfaceDiffusionFluxMatch::validParams()
 {

@@ -13,9 +13,6 @@
 
 class TotalVariableValue;
 
-template <>
-InputParameters validParams<TotalVariableValue>();
-
 /**
  * Integrate a post-processor value over time using trapezoidal rule
  */
@@ -43,4 +40,3 @@ protected:
   /// The old post-processor value
   const PostprocessorValue & _pps_value_old;
 };
-

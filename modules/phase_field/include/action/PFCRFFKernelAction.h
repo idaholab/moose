@@ -14,9 +14,6 @@
 // Forward Declarations
 class PFCRFFKernelAction;
 
-template <>
-InputParameters validParams<PFCRFFKernelAction>();
-
 class PFCRFFKernelAction : public HHPFCRFFSplitKernelAction
 {
 public:
@@ -26,4 +23,3 @@ public:
 
   virtual void act();
 };
-

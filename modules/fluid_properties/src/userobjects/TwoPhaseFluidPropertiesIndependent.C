@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesApp", TwoPhaseFluidPropertiesIndependent);
 
-defineLegacyParams(TwoPhaseFluidPropertiesIndependent);
-
 InputParameters
 TwoPhaseFluidPropertiesIndependent::validParams()
 {

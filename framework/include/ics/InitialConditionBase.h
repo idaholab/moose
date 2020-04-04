@@ -30,9 +30,6 @@ namespace libMesh
 class Point;
 }
 
-template <>
-InputParameters validParams<InitialConditionBase>();
-
 /**
  * InitialConditionBase serves as the abstract base class for InitialConditions and
  * VectorInitialConditions. Implements methods for getting user objects and dependent objects. The

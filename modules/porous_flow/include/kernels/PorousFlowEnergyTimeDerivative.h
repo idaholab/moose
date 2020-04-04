@@ -14,9 +14,6 @@
 
 class PorousFlowEnergyTimeDerivative;
 
-template <>
-InputParameters validParams<PorousFlowEnergyTimeDerivative>();
-
 /**
  * Kernel = (heat_energy - heat_energy_old)/dt
  * It is lumped to the nodes
@@ -106,4 +103,3 @@ protected:
    */
   Real computeQpJac(unsigned int pvar) const;
 };
-

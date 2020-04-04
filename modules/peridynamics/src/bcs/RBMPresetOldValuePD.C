@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", RBMPresetOldValuePD);
 
-defineLegacyParams(RBMPresetOldValuePD);
-
 InputParameters
 RBMPresetOldValuePD::validParams()
 {

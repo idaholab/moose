@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", Pressure);
 
-defineLegacyParams(Pressure);
-
 InputParameters
 Pressure::validParams()
 {

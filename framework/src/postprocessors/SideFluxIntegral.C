@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", SideFluxIntegral);
 
-defineLegacyParams(SideFluxIntegral);
-
 InputParameters
 SideFluxIntegral::validParams()
 {

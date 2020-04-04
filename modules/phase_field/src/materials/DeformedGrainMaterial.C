@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", DeformedGrainMaterial);
 
-defineLegacyParams(DeformedGrainMaterial);
-
 InputParameters
 DeformedGrainMaterial::validParams()
 {

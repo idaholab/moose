@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowHalfGaussianSink);
 
-defineLegacyParams(PorousFlowHalfGaussianSink);
-
 InputParameters
 PorousFlowHalfGaussianSink::validParams()
 {

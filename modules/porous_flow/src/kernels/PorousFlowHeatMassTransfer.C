@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatMassTransfer);
 
-defineLegacyParams(PorousFlowHeatMassTransfer);
-
 InputParameters
 PorousFlowHeatMassTransfer::validParams()
 {

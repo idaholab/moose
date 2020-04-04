@@ -17,9 +17,6 @@
 // Forward declaration
 class GrainGrowthAction;
 
-template <>
-InputParameters validParams<GrainGrowthAction>();
-
 class GrainGrowthAction : public Action
 {
 public:

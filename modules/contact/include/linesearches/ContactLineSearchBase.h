@@ -14,9 +14,6 @@
 class FEProblem;
 class ContactLineSearchBase;
 
-template <>
-InputParameters validParams<ContactLineSearchBase>();
-
 /**
  * This class implements a custom line search for use with
  * mechanical contact. The line search is not fancy. It takes two parameters, set in the MOOSE

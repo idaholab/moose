@@ -16,9 +16,6 @@
 // Forward declerations
 class MooseParsedGradFunction;
 
-template <>
-InputParameters validParams<MooseParsedGradFunction>();
-
 /**
  * This class is similar to ParsedFunction except it also supports returning the
  * gradient of the function.

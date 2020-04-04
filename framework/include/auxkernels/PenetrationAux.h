@@ -15,9 +15,6 @@
 class PenetrationAux;
 class PenetrationLocator;
 
-template <>
-InputParameters validParams<PenetrationAux>();
-
 class PenetrationAux : public AuxKernel
 {
 public:
@@ -68,4 +65,3 @@ protected:
 public:
   static const Real NotPenetrated;
 };
-

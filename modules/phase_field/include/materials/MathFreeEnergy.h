@@ -14,9 +14,6 @@
 // Forward Declarations
 class MathFreeEnergy;
 
-template <>
-InputParameters validParams<MathFreeEnergy>();
-
 /**
  * Material class that creates the math free energy and its derivatives
  * for use with CHParsed and SplitCHParsed. \f$ F = \frac14(1 + c)^2(1 - c)^2 \f$.
@@ -39,4 +36,3 @@ private:
   const VariableValue & _c;
   unsigned int _c_var;
 };
-

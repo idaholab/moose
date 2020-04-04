@@ -16,9 +16,6 @@
 // Forward declaration
 class SmearedCrackSofteningBase;
 
-template <>
-InputParameters validParams<SmearedCrackSofteningBase>();
-
 /**
  * SmearedCrackSofteningBase is the base class for a set of models that define the
  * softening behavior of a crack under loading in a given direction.

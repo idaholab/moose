@@ -11,8 +11,6 @@
 
 registerADMooseObject("MiscTestApp", ADSoretCoeffTest);
 
-defineADLegacyParams(ADSoretCoeffTest);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADSoretCoeffTest<compute_stage>::validParams()

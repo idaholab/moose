@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", ImplicitNeumannBC);
 
-defineLegacyParams(ImplicitNeumannBC);
-
 InputParameters
 ImplicitNeumannBC::validParams()
 {

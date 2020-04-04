@@ -15,9 +15,6 @@
 
 class HEVPFlowRateUOBase;
 
-template <>
-InputParameters validParams<HEVPFlowRateUOBase>();
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes computes flow rate, direction and derivatives

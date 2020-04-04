@@ -27,9 +27,6 @@ template <typename>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<RANFSNormalMechanicalContact>();
-
 class RANFSNormalMechanicalContact : public NodeFaceConstraint
 {
 public:

@@ -17,9 +17,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-template <>
-InputParameters validParams<StressDivergenceBeam>();
-
 class StressDivergenceBeam : public Kernel
 {
 public:

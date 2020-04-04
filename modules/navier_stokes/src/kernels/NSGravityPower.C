@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSGravityPower);
 
-defineLegacyParams(NSGravityPower);
-
 InputParameters
 NSGravityPower::validParams()
 {

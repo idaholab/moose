@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", MatReaction);
 
-defineLegacyParams(MatReaction);
-
 InputParameters
 MatReaction::validParams()
 {

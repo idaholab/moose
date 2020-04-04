@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", JIntegral);
 
-defineLegacyParams(JIntegral);
-
 InputParameters
 JIntegral::validParams()
 {

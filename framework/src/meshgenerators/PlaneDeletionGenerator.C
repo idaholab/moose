@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", PlaneDeletionGenerator);
 
-defineLegacyParams(PlaneDeletionGenerator);
-
 InputParameters
 PlaneDeletionGenerator::validParams()
 {

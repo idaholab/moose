@@ -15,8 +15,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(XFEMApp);
-
 InputParameters
 XFEMApp::validParams()
 {

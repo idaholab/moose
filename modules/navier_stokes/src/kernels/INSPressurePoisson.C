@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSPressurePoisson);
 
-defineLegacyParams(INSPressurePoisson);
-
 InputParameters
 INSPressurePoisson::validParams()
 {

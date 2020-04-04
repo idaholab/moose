@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", Q2PPiecewiseLinearSink);
 
-defineLegacyParams(Q2PPiecewiseLinearSink);
-
 InputParameters
 Q2PPiecewiseLinearSink::validParams()
 {

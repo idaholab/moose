@@ -14,9 +14,6 @@
 // Forward declarations
 class MultiAppConservativeTransfer;
 
-template <>
-InputParameters validParams<MultiAppConservativeTransfer>();
-
 /**
  *  Transfers variables on possibly differne meshes while conserving a user
  *  defined property of each variable

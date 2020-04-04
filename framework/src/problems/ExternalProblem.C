@@ -12,8 +12,6 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 
-defineLegacyParams(ExternalProblem);
-
 InputParameters
 ExternalProblem::validParams()
 {

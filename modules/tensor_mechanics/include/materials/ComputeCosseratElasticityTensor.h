@@ -13,9 +13,6 @@
 
 class ComputeCosseratElasticityTensor;
 
-template <>
-InputParameters validParams<ComputeCosseratElasticityTensor>();
-
 /**
  * ComputeElasticityTensor defines an elasticity tensor material for isi.
  */

@@ -16,9 +16,6 @@ class SinglePhaseFluidPropertiesPT;
 class BicubicInterpolation;
 class TabulatedFluidProperties;
 
-template <>
-InputParameters validParams<TabulatedFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
@@ -243,4 +240,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-

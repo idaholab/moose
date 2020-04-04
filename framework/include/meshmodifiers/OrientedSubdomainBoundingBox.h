@@ -17,9 +17,6 @@
 // Forward declerations
 class OrientedSubdomainBoundingBox;
 
-template <>
-InputParameters validParams<OrientedSubdomainBoundingBox>();
-
 /**
  * MeshModifier for defining a Subdomain inside or outside of a bounding box with arbitrary
  * orientation
@@ -42,4 +39,3 @@ private:
   /// Block ID to assign to the region
   const SubdomainID _block_id;
 };
-

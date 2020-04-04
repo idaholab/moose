@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", EnergyFreeBC);
 
-defineLegacyParams(EnergyFreeBC);
-
 InputParameters
 EnergyFreeBC::validParams()
 {

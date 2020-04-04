@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSMultiACBulkBase;
 
-template <>
-InputParameters validParams<KKSMultiACBulkBase>();
-
 /**
  * ACBulk child class that sets up necessary variables and materials for
  * calculation of residual contribution \f$ \frac{\partial f}{\partial \eta_i} \f$

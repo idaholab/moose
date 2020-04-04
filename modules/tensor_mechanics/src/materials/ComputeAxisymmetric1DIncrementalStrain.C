@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DIncrementalStrain);
 
-defineLegacyParams(ComputeAxisymmetric1DIncrementalStrain);
-
 InputParameters
 ComputeAxisymmetric1DIncrementalStrain::validParams()
 {

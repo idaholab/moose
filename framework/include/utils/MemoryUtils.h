@@ -49,4 +49,3 @@ void getMemoryStats(Stats & stats);
 std::size_t convertBytes(std::size_t bytes, MemUnits unit);
 
 } // namespace MemoryUtils
-

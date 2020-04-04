@@ -21,9 +21,6 @@ template <typename T>
 class NumericVector;
 }
 
-template <>
-InputParameters validParams<DT2>();
-
 /**
  * An adaptive timestepper that compares the solution obtained from a
  * single step of size dt with two steps of size dt/2 and adjusts the
@@ -61,4 +58,3 @@ protected:
   /// maximum increase ratio
   Real _max_increase;
 };
-

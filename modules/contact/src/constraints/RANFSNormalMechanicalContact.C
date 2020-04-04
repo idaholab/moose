@@ -20,8 +20,6 @@
 
 registerMooseObject("ContactApp", RANFSNormalMechanicalContact);
 
-defineLegacyParams(RANFSNormalMechanicalContact);
-
 InputParameters
 RANFSNormalMechanicalContact::validParams()
 {

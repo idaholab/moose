@@ -13,9 +13,6 @@
 
 class CoarsenedPiecewiseLinear;
 
-template <>
-InputParameters validParams<CoarsenedPiecewiseLinear>();
-
 /**
  * Function class that reads in a list of (x,y) value pairs representing a pointwise defined
  * function sililar to PiecewiseLinear. In addition this Function object performs a point reduction

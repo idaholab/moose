@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", CoupledBEKinetic);
 
-defineLegacyParams(CoupledBEKinetic);
-
 InputParameters
 CoupledBEKinetic::validParams()
 {

@@ -20,9 +20,6 @@ class RankTwoAux;
  * supplied indices.
  */
 
-template <>
-InputParameters validParams<RankTwoAux>();
-
 class RankTwoAux : public NodalPatchRecovery
 {
 public:

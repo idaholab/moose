@@ -16,8 +16,6 @@
 
 registerMooseObject("XFEMApp", ComputeCrackTipEnrichmentSmallStrain);
 
-defineLegacyParams(ComputeCrackTipEnrichmentSmallStrain);
-
 InputParameters
 ComputeCrackTipEnrichmentSmallStrain::validParams()
 {

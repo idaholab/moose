@@ -10,8 +10,6 @@
 #include "PiecewiseMultiInterpolation.h"
 #include "GriddedData.h"
 
-defineLegacyParams(PiecewiseMultiInterpolation);
-
 InputParameters
 PiecewiseMultiInterpolation::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVariable);
 
-defineLegacyParams(CrystalPlasticityStateVariable);
-
 InputParameters
 CrystalPlasticityStateVariable::validParams()
 {

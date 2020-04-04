@@ -193,4 +193,3 @@ protected:
     std::vector<RidgeData> _ridge_data_vec;
   };
 };
-

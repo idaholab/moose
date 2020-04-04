@@ -13,9 +13,6 @@
 
 class MaterialReaction;
 
-template <>
-InputParameters validParams<MaterialReaction>();
-
 class MaterialReaction : public Reaction
 {
 public:

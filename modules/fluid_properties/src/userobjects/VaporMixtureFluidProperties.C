@@ -9,8 +9,6 @@
 
 #include "VaporMixtureFluidProperties.h"
 
-defineLegacyParams(VaporMixtureFluidProperties);
-
 InputParameters
 VaporMixtureFluidProperties::validParams()
 {

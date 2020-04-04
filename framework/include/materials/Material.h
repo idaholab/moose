@@ -17,9 +17,6 @@
 // forward declarations
 class Material;
 
-template <>
-InputParameters validParams<Material>();
-
 /**
  * Materials compute MaterialProperties.
  */

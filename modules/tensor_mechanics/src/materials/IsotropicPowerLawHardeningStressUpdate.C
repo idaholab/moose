@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", IsotropicPowerLawHardeningStressUpdate);
 
-defineLegacyParams(IsotropicPowerLawHardeningStressUpdate);
-
 InputParameters
 IsotropicPowerLawHardeningStressUpdate::validParams()
 {

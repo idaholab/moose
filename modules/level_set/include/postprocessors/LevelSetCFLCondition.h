@@ -35,4 +35,3 @@ private:
   /// The minimum timestep computed using CFL condition.
   Real _cfl_timestep;
 };
-

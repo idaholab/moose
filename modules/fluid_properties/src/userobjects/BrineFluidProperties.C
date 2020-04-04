@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", BrineFluidProperties);
 
-defineLegacyParams(BrineFluidProperties);
-
 InputParameters
 BrineFluidProperties::validParams()
 {

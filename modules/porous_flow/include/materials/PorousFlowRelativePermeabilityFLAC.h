@@ -14,9 +14,6 @@
 
 class PorousFlowRelativePermeabilityFLAC;
 
-template <>
-InputParameters validParams<PorousFlowRelativePermeabilityFLAC>();
-
 /**
  * Material to calculate relative permeability inspired by the
  * formula used in FLAC:
@@ -36,4 +33,3 @@ protected:
   /// Exponent m for the specified phase
   const Real _m;
 };
-

@@ -14,9 +14,6 @@
 
 class PorousFlowPropertyAux;
 
-template <>
-InputParameters validParams<PorousFlowPropertyAux>();
-
 /**
  * Provides a simple interface to PorousFlow material properties.
  * Note that as all properties are in materials, only elemental
@@ -120,4 +117,3 @@ private:
   const unsigned int _k_row;
   const unsigned int _k_col;
 };
-

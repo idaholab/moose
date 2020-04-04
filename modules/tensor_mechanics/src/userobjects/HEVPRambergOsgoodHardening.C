@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPRambergOsgoodHardening);
 
-defineLegacyParams(HEVPRambergOsgoodHardening);
-
 InputParameters
 HEVPRambergOsgoodHardening::validParams()
 {

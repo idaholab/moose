@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", AdvectiveFluxCalculatorConstantVelocity);
 
-defineLegacyParams(AdvectiveFluxCalculatorConstantVelocity);
-
 InputParameters
 AdvectiveFluxCalculatorConstantVelocity::validParams()
 {

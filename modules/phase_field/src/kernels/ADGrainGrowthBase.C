@@ -9,8 +9,6 @@
 
 #include "ADGrainGrowthBase.h"
 
-defineADLegacyParams(ADGrainGrowthBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADGrainGrowthBase<compute_stage>::validParams()

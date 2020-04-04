@@ -16,8 +16,6 @@
 
 registerMooseAction("NavierStokesApp", AddNavierStokesKernelsAction, "add_navier_stokes_kernels");
 
-defineLegacyParams(AddNavierStokesKernelsAction);
-
 InputParameters
 AddNavierStokesKernelsAction::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("StochasticToolsTestApp", TestDistributionDirectPostprocessor);
 
-defineLegacyParams(TestDistributionDirectPostprocessor);
-
 InputParameters
 TestDistributionDirectPostprocessor::validParams()
 {

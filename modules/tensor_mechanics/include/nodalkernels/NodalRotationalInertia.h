@@ -15,9 +15,6 @@
 // Forward Declarations
 class NodalRotationalInertia;
 
-template <>
-InputParameters validParams<NodalRotationalInertia>();
-
 /**
  * Calculates the inertial torque and inertia proportional damping
  * for nodal rotational inertia

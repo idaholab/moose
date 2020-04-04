@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADWeakPlaneStress);
 
-defineADLegacyParams(ADWeakPlaneStress);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADWeakPlaneStress<compute_stage>::validParams()

@@ -13,9 +13,6 @@
 
 class NodalVariableIntegralPD;
 
-template <>
-InputParameters validParams<NodalVariableIntegralPD>();
-
 /**
  * Postprocessor class to compute nodal variable integral in peridynamic discretization
  */

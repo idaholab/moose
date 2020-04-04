@@ -11,8 +11,6 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-defineLegacyParams(ComputeStrainBase);
-
 InputParameters
 ComputeStrainBase::validParams()
 {

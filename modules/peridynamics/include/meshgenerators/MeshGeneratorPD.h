@@ -14,9 +14,6 @@
 // Forward declarations
 class MeshGeneratorPD;
 
-template <>
-InputParameters validParams<MeshGeneratorPD>();
-
 /**
  * Generate peridynamics mesh based on finite element mesh
  */

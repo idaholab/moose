@@ -14,9 +14,6 @@
 // Forward declarations
 class ElementDeletionGeneratorBase;
 
-template <>
-InputParameters validParams<ElementDeletionGeneratorBase>();
-
 /**
  * This class deletes elements from the mesh data structure
  * after it has been generated or read but before any FEM
@@ -48,4 +45,3 @@ protected:
   /// Name of the boundary name to assign to the cut surface
   const BoundaryName _boundary_name;
 };
-

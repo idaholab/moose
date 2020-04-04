@@ -15,9 +15,6 @@
 // Forward Declarations
 class InteractionIntegral;
 
-template <>
-InputParameters validParams<InteractionIntegral>();
-
 /**
  * This vectorpostprocessor computes the Interaction Integral, which is
  * used to compute various fracture mechanics parameters at a crack tip,

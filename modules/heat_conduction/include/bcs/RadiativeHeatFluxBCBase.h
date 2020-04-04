@@ -13,9 +13,6 @@
 
 class RadiativeHeatFluxBCBase;
 
-template <>
-InputParameters validParams<RadiativeHeatFluxBCBase>();
-
 /**
  * Boundary condition for radiative heat flux where temperature and the
  * temperature of a body in radiative heat transfer are specified.

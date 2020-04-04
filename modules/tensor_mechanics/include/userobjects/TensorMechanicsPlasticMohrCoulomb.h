@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticMohrCoulomb;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
-
 /**
  * Mohr-Coulomb plasticity, nonassociative with hardening/softening.
  *

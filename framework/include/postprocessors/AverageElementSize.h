@@ -14,9 +14,6 @@
 // Forward Declarations
 class AverageElementSize;
 
-template <>
-InputParameters validParams<AverageElementSize>();
-
 /**
  * This postprocessor computes an average element size (h) for the whole domain.
  */

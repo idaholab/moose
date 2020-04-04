@@ -13,9 +13,6 @@
 
 class VariableGradientMaterial;
 
-template <>
-InputParameters validParams<VariableGradientMaterial>();
-
 /**
  * Set a material property to the norm of the gradient of a non-linear variable
  */
@@ -32,4 +29,3 @@ protected:
   const VariableGradient & _grad;
   MaterialProperty<Real> & _prop;
 };
-

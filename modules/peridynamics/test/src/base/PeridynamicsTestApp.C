@@ -13,8 +13,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(PeridynamicsTestApp);
-
 InputParameters
 PeridynamicsTestApp::validParams()
 {

@@ -14,8 +14,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2waterVG);
 
-defineLegacyParams(RichardsSeff2waterVG);
-
 InputParameters
 RichardsSeff2waterVG::validParams()
 {

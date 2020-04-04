@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", ExponentialSoftening);
 
-defineLegacyParams(ExponentialSoftening);
-
 InputParameters
 ExponentialSoftening::validParams()
 {

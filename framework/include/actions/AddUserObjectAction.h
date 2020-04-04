@@ -13,9 +13,6 @@
 
 class AddUserObjectAction;
 
-template <>
-InputParameters validParams<AddUserObjectAction>();
-
 class AddUserObjectAction : public MooseObjectAction
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

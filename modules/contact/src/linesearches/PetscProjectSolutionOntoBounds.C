@@ -24,8 +24,6 @@
 
 registerMooseObject("ContactApp", PetscProjectSolutionOntoBounds);
 
-defineLegacyParams(PetscProjectSolutionOntoBounds);
-
 InputParameters
 PetscProjectSolutionOntoBounds::validParams()
 {

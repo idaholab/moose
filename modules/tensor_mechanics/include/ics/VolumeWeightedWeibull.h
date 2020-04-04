@@ -18,9 +18,6 @@ class VolumeWeightedWeibull;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<VolumeWeightedWeibull>();
-
 /**
  * VolumeWeightedWeibull generates a spatially randomized field that follows
  * a Weibull distribution weighted by the factor (V_ref/V_el)^1/m, where

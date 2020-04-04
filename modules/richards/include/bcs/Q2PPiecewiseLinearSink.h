@@ -18,9 +18,6 @@
 // Forward Declarations
 class Q2PPiecewiseLinearSink;
 
-template <>
-InputParameters validParams<Q2PPiecewiseLinearSink>();
-
 /**
  * Applies a fully-upwinded flux sink to a boundary
  * The sink is a piecewise linear function of

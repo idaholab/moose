@@ -35,4 +35,3 @@
 
 // Macro for computing absolute error
 #define ABS_TEST(value, ref_value, tol) EXPECT_LE(std::abs(((value) - (ref_value))), (tol))
-

@@ -13,9 +13,6 @@
 
 class MassFreeBC;
 
-template <>
-InputParameters validParams<MassFreeBC>();
-
 /**
  *
  */
@@ -33,4 +30,3 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 };
-

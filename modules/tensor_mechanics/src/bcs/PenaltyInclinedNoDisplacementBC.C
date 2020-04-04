@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", PenaltyInclinedNoDisplacementBC);
 
-defineLegacyParams(PenaltyInclinedNoDisplacementBC);
-
 InputParameters
 PenaltyInclinedNoDisplacementBC::validParams()
 {

@@ -14,9 +14,6 @@
 
 class MultiComponentFluidPropertiesMaterialPT;
 
-template <>
-InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>();
-
 /**
  * Material for calculating fluid properties for a fluid comprised of two components:
  * the solute (eg, NaCl), and the solution (eg, water). This material uses the
@@ -51,4 +48,3 @@ protected:
   // Multicomponent fluid properties UserObject
   const MultiComponentFluidProperties & _fp;
 };
-

@@ -14,9 +14,6 @@
 
 class ComputeFiniteStrainNOSPD;
 
-template <>
-InputParameters validParams<ComputeFiniteStrainNOSPD>();
-
 /**
  * Material class for peridynamic correspondence model for finite strain
  */

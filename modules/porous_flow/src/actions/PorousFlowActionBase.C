@@ -17,8 +17,6 @@
 #include "AddPostprocessorAction.h"
 #include "AddBCAction.h"
 
-defineLegacyParams(PorousFlowActionBase);
-
 InputParameters
 PorousFlowActionBase::validParams()
 {

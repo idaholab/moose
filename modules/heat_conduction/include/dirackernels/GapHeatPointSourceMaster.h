@@ -16,9 +16,6 @@
 // Forward Declarations
 class GapHeatPointSourceMaster;
 
-template <>
-InputParameters validParams<GapHeatPointSourceMaster>();
-
 class GapHeatPointSourceMaster : public DiracKernel
 {
 public:
@@ -37,4 +34,3 @@ protected:
 
   //  std::vector<Real> _localized_slave_flux;
 };
-

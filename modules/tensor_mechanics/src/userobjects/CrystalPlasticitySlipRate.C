@@ -12,8 +12,6 @@
 
 #include <fstream>
 
-defineLegacyParams(CrystalPlasticitySlipRate);
-
 InputParameters
 CrystalPlasticitySlipRate::validParams()
 {

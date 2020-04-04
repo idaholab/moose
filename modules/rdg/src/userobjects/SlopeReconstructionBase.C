@@ -12,8 +12,6 @@
 // Static mutex definition
 Threads::spin_mutex SlopeReconstructionBase::_mutex;
 
-defineLegacyParams(SlopeReconstructionBase);
-
 InputParameters
 SlopeReconstructionBase::validParams()
 {

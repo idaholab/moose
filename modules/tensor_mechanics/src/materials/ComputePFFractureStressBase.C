@@ -9,8 +9,6 @@
 
 #include "ComputePFFractureStressBase.h"
 
-defineLegacyParams(ComputePFFractureStressBase);
-
 InputParameters
 ComputePFFractureStressBase::validParams()
 {

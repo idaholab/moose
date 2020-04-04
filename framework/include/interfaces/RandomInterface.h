@@ -23,9 +23,6 @@ class RandomInterface;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<RandomInterface>();
-
 /**
  * Interface for objects that need parallel consistent random numbers without patterns over
  * the course of multiple runs.

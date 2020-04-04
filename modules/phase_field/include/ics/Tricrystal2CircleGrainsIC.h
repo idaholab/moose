@@ -14,12 +14,9 @@
 // Forward Declarations
 class Tricrystal2CircleGrainsIC;
 
-template <>
-InputParameters validParams<Tricrystal2CircleGrainsIC>();
-
 /**
  * Tricrystal2CircleGrainsIC creates a 3 grain structure with 2 circle grains and one matrix grain
-*/
+ */
 class Tricrystal2CircleGrainsIC : public InitialCondition
 {
 public:
@@ -39,4 +36,3 @@ protected:
   Point _top_right;
   Point _range;
 };
-

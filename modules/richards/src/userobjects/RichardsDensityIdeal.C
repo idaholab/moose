@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsDensityIdeal);
 
-defineLegacyParams(RichardsDensityIdeal);
-
 InputParameters
 RichardsDensityIdeal::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("SolidMechanicsApp", RateDepSmearCrackModel);
 
-defineLegacyParams(RateDepSmearCrackModel);
-
 InputParameters
 RateDepSmearCrackModel::validParams()
 {

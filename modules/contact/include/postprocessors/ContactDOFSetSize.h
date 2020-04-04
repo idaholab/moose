@@ -19,9 +19,6 @@ namespace libMesh
 class MeshBase;
 }
 
-template <>
-InputParameters validParams<ContactDOFSetSize>();
-
 class ContactDOFSetSize : public GeneralPostprocessor
 {
 public:

@@ -44,4 +44,3 @@ protected:
   std::vector<unsigned int> _var_numbers;
   THREAD_ID _tid;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassFractionAqueousEquilibriumChemistry);
 
-defineLegacyParams(PorousFlowMassFractionAqueousEquilibriumChemistry);
-
 InputParameters
 PorousFlowMassFractionAqueousEquilibriumChemistry::validParams()
 {

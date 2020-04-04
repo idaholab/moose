@@ -15,9 +15,6 @@ class SinglePhaseFluidProperties;
 class Water97FluidProperties;
 class PorousFlowWaterNCG;
 
-template <>
-InputParameters validParams<PorousFlowWaterNCG>();
-
 /**
  * Specialized class for water and a non-condensable gas (NCG)
  * Includes dissolution of gas in liquid water phase using Henry's law

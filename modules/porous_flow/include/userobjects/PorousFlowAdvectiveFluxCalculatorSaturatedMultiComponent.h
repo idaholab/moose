@@ -13,9 +13,6 @@
 
 class PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent;
 
-template <>
-InputParameters validParams<PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent>();
-
 /**
  * Computes the advective flux of fluid of given phase and fluid component.
  * Explicitly, the UserObject computes
@@ -43,4 +40,3 @@ protected:
   /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_fractions_dvar;
 };
-

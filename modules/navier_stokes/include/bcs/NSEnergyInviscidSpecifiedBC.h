@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSEnergyInviscidSpecifiedBC;
 
-template <>
-InputParameters validParams<NSEnergyInviscidSpecifiedBC>();
-
 /**
  * The inviscid energy BC term with specified pressure.
  */
@@ -40,4 +37,3 @@ private:
   // Helper Jacobian function
   Real computeJacobianHelper(unsigned var_number);
 };
-

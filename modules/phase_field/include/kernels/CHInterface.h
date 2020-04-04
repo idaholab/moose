@@ -22,7 +22,3 @@ public:
 
   CHInterface(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<CHInterface>();
-

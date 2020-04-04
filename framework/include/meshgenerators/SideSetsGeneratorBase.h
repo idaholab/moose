@@ -24,9 +24,6 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-template <>
-InputParameters validParams<SideSetsGeneratorBase>();
-
 class SideSetsGeneratorBase : public MeshGenerator
 {
 public:

@@ -10,8 +10,6 @@
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
-defineLegacyParams(ComputeThermalExpansionEigenstrainBase);
-
 InputParameters
 ComputeThermalExpansionEigenstrainBase::validParams()
 {

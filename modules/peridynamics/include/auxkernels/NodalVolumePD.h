@@ -14,9 +14,6 @@
 class NodalVolumePD;
 class PeridynamicsMesh;
 
-template <>
-InputParameters validParams<NodalVolumePD>();
-
 /**
  * Aux Kernel class to output the area/volume of material points
  */

@@ -91,4 +91,3 @@ protected:
    */
   Real isotropicEntry(const unsigned int i, const unsigned j, const unsigned k, const unsigned l);
 };
-

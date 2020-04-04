@@ -16,9 +16,6 @@ class HomogenizedElasticConstants;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template <>
-InputParameters validParams<HomogenizedElasticConstants>();
-
 /**
  * This postprocessor computes the average grain area in a polycrystal
  */
@@ -70,4 +67,3 @@ private:
   Real _volume;
   Real _integral_value;
 };
-

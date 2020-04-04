@@ -14,9 +14,6 @@
 // Forward declaration
 class ExponentialSoftening;
 
-template <>
-InputParameters validParams<ExponentialSoftening>();
-
 /**
  * ExponentialSoftening is a smeared crack softening model that
  * uses an exponential softening curve. It is for use with

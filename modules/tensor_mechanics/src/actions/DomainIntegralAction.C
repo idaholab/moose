@@ -28,8 +28,6 @@ registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_postprocess
 
 registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_material");
 
-defineLegacyParams(DomainIntegralAction);
-
 InputParameters
 DomainIntegralAction::validParams()
 {

@@ -14,9 +14,6 @@
 
 class TwoPhaseNCGFluidProperties;
 
-template <>
-InputParameters validParams<TwoPhaseNCGFluidProperties>();
-
 /**
  * Base class for fluid properties used with 2-phase flow with non-condensable
  * gases (NCGs) present.
@@ -88,4 +85,3 @@ protected:
   /// Vapor mixture fluid properties user object
   const VaporMixtureFluidProperties * _fp_vapor_mixture;
 };
-

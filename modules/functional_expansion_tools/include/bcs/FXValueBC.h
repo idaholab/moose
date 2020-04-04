@@ -13,9 +13,6 @@
 
 class FXValueBC;
 
-template <>
-InputParameters validParams<FXValueBC>();
-
 /**
  * Defines an FX-based boundary condition that forces the values to match
  */

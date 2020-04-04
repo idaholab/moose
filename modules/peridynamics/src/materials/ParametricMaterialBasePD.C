@@ -12,8 +12,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(ParametricMaterialBasePD);
-
 InputParameters
 ParametricMaterialBasePD::validParams()
 {

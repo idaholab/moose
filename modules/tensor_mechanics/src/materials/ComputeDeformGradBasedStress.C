@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeDeformGradBasedStress);
 
-defineLegacyParams(ComputeDeformGradBasedStress);
-
 InputParameters
 ComputeDeformGradBasedStress::validParams()
 {

@@ -16,8 +16,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             "07/01/2020 00:00",
                             MonteCarlo);
 
-defineLegacyParams(MonteCarloSampler);
-
 InputParameters
 MonteCarloSampler::validParams()
 {

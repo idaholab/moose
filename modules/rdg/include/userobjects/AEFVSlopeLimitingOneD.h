@@ -14,9 +14,6 @@
 // Forward Declarations
 class AEFVSlopeLimitingOneD;
 
-template <>
-InputParameters validParams<AEFVSlopeLimitingOneD>();
-
 /**
  * One-dimensional slope limiting to get
  * the limited slope of cell average variable
@@ -40,4 +37,3 @@ protected:
   /// One-D slope limiting scheme
   MooseEnum _scheme;
 };
-

@@ -15,9 +15,6 @@
 class SobolStatistics;
 class SobolSampler;
 
-template <>
-InputParameters validParams<SobolStatistics>();
-
 /**
  * Computes Sobol sensitivity indices, see SobolCalculators
  */

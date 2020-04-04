@@ -18,8 +18,6 @@
 class DisplacementAboutAxis;
 class Function;
 
-template <>
-InputParameters validParams<DisplacementAboutAxis>();
 void addDisplacementAboutAxisParams(InputParameters & params);
 
 /**

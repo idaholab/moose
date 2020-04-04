@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", RichardsSUPGstandard);
 
-defineLegacyParams(RichardsSUPGstandard);
-
 InputParameters
 RichardsSUPGstandard::validParams()
 {

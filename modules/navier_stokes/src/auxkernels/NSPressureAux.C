@@ -19,8 +19,6 @@
 
 registerMooseObject("NavierStokesApp", NSPressureAux);
 
-defineLegacyParams(NSPressureAux);
-
 InputParameters
 NSPressureAux::validParams()
 {

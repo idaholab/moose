@@ -13,8 +13,6 @@
 
 registerADMooseObject("NavierStokesApp", INSADTauMaterial);
 
-defineADLegacyParams(INSADTauMaterial);
-
 template <ComputeStage compute_stage>
 InputParameters
 INSADTauMaterial<compute_stage>::validParams()

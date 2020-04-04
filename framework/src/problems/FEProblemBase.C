@@ -113,8 +113,6 @@ sortMooseVariables(MooseVariableFEBase * a, MooseVariableFEBase * b)
 
 Threads::spin_mutex get_function_mutex;
 
-defineLegacyParams(FEProblemBase);
-
 InputParameters
 FEProblemBase::validParams()
 {

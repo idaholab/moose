@@ -15,9 +15,6 @@
 // Forward Declarations
 class ParsedAux;
 
-template <>
-InputParameters validParams<ParsedAux>();
-
 /**
  * AuxKernel that evaluates a parsed function expression
  */
@@ -41,4 +38,3 @@ protected:
   /// function parser object for the resudual and on-diagonal Jacobian
   ADFunctionPtr _func_F;
 };
-

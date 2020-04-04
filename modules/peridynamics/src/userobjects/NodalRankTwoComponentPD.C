@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalRankTwoComponentPD);
 
-defineLegacyParams(NodalRankTwoComponentPD);
-
 InputParameters
 NodalRankTwoComponentPD::validParams()
 {

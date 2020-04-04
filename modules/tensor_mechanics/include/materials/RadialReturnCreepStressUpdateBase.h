@@ -13,9 +13,6 @@
 
 class RadialReturnCreepStressUpdateBase;
 
-template <>
-InputParameters validParams<RadialReturnCreepStressUpdateBase>();
-
 /**
  * This class provides baseline functionallity for creep models based on the stress update material
  * in a radial return isotropic creep calculations.

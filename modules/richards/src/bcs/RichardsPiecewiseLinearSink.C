@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", RichardsPiecewiseLinearSink);
 
-defineLegacyParams(RichardsPiecewiseLinearSink);
-
 InputParameters
 RichardsPiecewiseLinearSink::validParams()
 {

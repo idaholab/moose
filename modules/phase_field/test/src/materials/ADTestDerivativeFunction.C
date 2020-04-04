@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
 
-defineADLegacyParams(ADTestDerivativeFunction);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADTestDerivativeFunction<compute_stage>::validParams()

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ConservedMaskedNormalNoise);
 
-defineLegacyParams(ConservedMaskedNormalNoise);
-
 InputParameters
 ConservedMaskedNormalNoise::validParams()
 {

@@ -13,9 +13,6 @@
 
 class PorousFlowAdvectiveFluxCalculatorSaturated;
 
-template <>
-InputParameters validParams<PorousFlowAdvectiveFluxCalculatorSaturated>();
-
 /**
  * Computes the advective flux of fluid of given phase, assuming fully-saturated conditions.
  * Hence this UserObject is only relevant to single-phase situations.
@@ -48,4 +45,3 @@ protected:
   /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
 };
-

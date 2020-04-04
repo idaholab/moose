@@ -16,8 +16,6 @@ registerMooseObjectRenamed("MooseApp",
                            "05/01/2019 00:01",
                            VectorFunctionDirichletBC);
 
-defineLegacyParams(VectorFunctionDirichletBC);
-
 InputParameters
 VectorFunctionDirichletBC::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXBoundaryFluxUserObject);
 
-defineLegacyParams(FXBoundaryFluxUserObject);
-
 InputParameters
 FXBoundaryFluxUserObject::validParams()
 {

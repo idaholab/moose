@@ -13,9 +13,6 @@
 
 class ArrayDGDiffusion;
 
-template <>
-InputParameters validParams<ArrayDGDiffusion>();
-
 /**
  * Array version of DGDiffusion
  */

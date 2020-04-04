@@ -14,9 +14,6 @@
 // Forward Declarations
 class VolumePostprocessor;
 
-template <>
-InputParameters validParams<VolumePostprocessor>();
-
 /**
  * This postprocessor computes the volume of a specified block.
  */
@@ -32,4 +29,3 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 };
-

@@ -20,9 +20,6 @@
 
 class ComputeCrackTipEnrichmentSmallStrain;
 
-template <>
-InputParameters validParams<ComputeCrackTipEnrichmentSmallStrain>();
-
 /**
  * ComputeCrackTipEnrichmentSmallStrain calculates the sum of standard strain and enrichement strain
  */
@@ -71,4 +68,3 @@ private:
   NonlinearSystem * _nl;
   const NumericVector<Number> * _sln;
 };
-

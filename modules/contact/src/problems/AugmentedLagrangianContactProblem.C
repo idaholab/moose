@@ -27,8 +27,6 @@
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
 
-defineLegacyParams(AugmentedLagrangianContactProblem);
-
 InputParameters
 AugmentedLagrangianContactProblem::validParams()
 {

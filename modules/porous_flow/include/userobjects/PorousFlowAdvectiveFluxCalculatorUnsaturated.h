@@ -13,9 +13,6 @@
 
 class PorousFlowAdvectiveFluxCalculatorUnsaturated;
 
-template <>
-InputParameters validParams<PorousFlowAdvectiveFluxCalculatorUnsaturated>();
-
 /**
  * Computes the advective flux of fluid of given phase, assuming unsaturated conditions.
  * Hence this UserObject is only relevant to single-phase situations, or multi-phase
@@ -42,4 +39,3 @@ protected:
   /// Derivative of relative permeability of each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 };
-

@@ -14,9 +14,6 @@
 // Forward Declarations
 class ACGrGrMulti;
 
-template <>
-InputParameters validParams<ACGrGrMulti>();
-
 /**
  * This kernel calculates the residual for grain growth for a multi-phase,
  * poly-crystal system. A list of material properties needs to be supplied for the gammas
@@ -48,4 +45,3 @@ protected:
 private:
   Real computedF0du();
 };
-

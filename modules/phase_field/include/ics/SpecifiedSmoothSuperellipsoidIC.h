@@ -14,9 +14,6 @@
 // Forward Declarations
 class SpecifiedSmoothSuperellipsoidIC;
 
-template <>
-InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>();
-
 /**
  * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of
  * x_positions) that are positioned in the
@@ -42,4 +39,3 @@ protected:
   std::vector<Real> _input_cs;
   std::vector<Real> _input_ns;
 };
-

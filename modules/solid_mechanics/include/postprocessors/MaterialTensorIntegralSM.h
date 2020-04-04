@@ -16,9 +16,6 @@
 class MaterialTensorIntegralSM;
 class SymmTensor;
 
-template <>
-InputParameters validParams<MaterialTensorIntegralSM>();
-
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor
@@ -36,4 +33,3 @@ protected:
   MaterialTensorCalculator _material_tensor_calculator;
   const MaterialProperty<SymmTensor> & _tensor;
 };
-

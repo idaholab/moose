@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", PFCRFFKernelAction, "add_kernel");
 
-defineLegacyParams(PFCRFFKernelAction);
-
 InputParameters
 PFCRFFKernelAction::validParams()
 {

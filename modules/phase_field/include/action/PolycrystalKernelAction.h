@@ -31,7 +31,3 @@ protected:
   /// base name for the order parameter variables
   const std::string _var_name_base;
 };
-
-template <>
-InputParameters validParams<PolycrystalKernelAction>();
-

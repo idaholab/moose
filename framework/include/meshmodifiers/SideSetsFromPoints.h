@@ -13,9 +13,6 @@
 
 class SideSetsFromPoints;
 
-template <>
-InputParameters validParams<SideSetsFromPoints>();
-
 class SideSetsFromPoints : public AddSideSetsBase
 {
 public:
@@ -28,4 +25,3 @@ protected:
 
   std::vector<Point> _points;
 };
-

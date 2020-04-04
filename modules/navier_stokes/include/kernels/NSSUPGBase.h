@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSSUPGBase;
 
-template <>
-InputParameters validParams<NSSUPGBase>();
-
 /**
  * This class acts as a base class for stabilization kernels.
  * This is useful because the stabilization kernels for different
@@ -72,4 +69,3 @@ protected:
   // Enthalpy aux variable
   const VariableValue & _enthalpy;
 };
-

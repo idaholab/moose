@@ -22,8 +22,6 @@ registerMooseAction("ChemicalReactionsApp", AddCoupledSolidKinSpeciesAction, "ad
 
 registerMooseAction("ChemicalReactionsApp", AddCoupledSolidKinSpeciesAction, "add_aux_kernel");
 
-defineLegacyParams(AddCoupledSolidKinSpeciesAction);
-
 InputParameters
 AddCoupledSolidKinSpeciesAction::validParams()
 {

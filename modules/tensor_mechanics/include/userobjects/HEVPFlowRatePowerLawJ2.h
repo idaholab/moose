@@ -13,9 +13,6 @@
 
 class HEVPFlowRatePowerLawJ2;
 
-template <>
-InputParameters validParams<HEVPFlowRatePowerLawJ2>();
-
 /**
  * This user object classs
  * Computes flow rate based on power law and

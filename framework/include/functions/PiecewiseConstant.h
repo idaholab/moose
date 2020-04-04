@@ -14,9 +14,6 @@
 // Forward declarations
 class PiecewiseConstant;
 
-template <>
-InputParameters validParams<PiecewiseConstant>();
-
 /**
  * Function which provides a piecewise continuous constant interpolation
  * of a provided (x,y) point data set.

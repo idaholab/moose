@@ -14,8 +14,6 @@
 
 registerMooseObject("XFEMApp", XFEMEqualValueAtInterface);
 
-defineLegacyParams(XFEMEqualValueAtInterface);
-
 InputParameters
 XFEMEqualValueAtInterface::validParams()
 {

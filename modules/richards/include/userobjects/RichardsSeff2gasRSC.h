@@ -24,9 +24,6 @@
  */
 class RichardsSeff2gasRSC;
 
-template <>
-InputParameters validParams<RichardsSeff2gasRSC>();
-
 class RichardsSeff2gasRSC : public RichardsSeff
 {
 public:
@@ -76,4 +73,3 @@ protected:
   /// RSC scale
   Real _scale;
 };
-

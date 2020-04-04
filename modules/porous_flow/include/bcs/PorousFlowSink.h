@@ -15,9 +15,6 @@
 
 class PorousFlowSink;
 
-template <>
-InputParameters validParams<PorousFlowSink>();
-
 /**
  * Applies a flux sink to a boundary.
  * The strength of the flux is specified by flux_function.

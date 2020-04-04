@@ -15,9 +15,6 @@
 // Forward Declarations
 class PlasticHeatEnergy;
 
-template <>
-InputParameters validParams<PlasticHeatEnergy>();
-
 /**
  * Provides a heat source from plastic deformation:
  * coeff * stress * plastic_strain_rate

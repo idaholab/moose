@@ -16,9 +16,6 @@
 class BlockWeightedPartitioner;
 class MooseMesh;
 
-template <>
-InputParameters validParams<BlockWeightedPartitioner>();
-
 /**
  * Partition a mesh by weighting blocks. The motivation is that differenct
  * blocks may have different physics. The work load per element is different

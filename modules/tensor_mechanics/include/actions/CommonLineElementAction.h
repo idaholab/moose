@@ -13,9 +13,6 @@
 
 class CommonLineElementAction;
 
-template <>
-InputParameters validParams<CommonLineElementAction>();
-
 /**
  * Store common line element action parameters
  */

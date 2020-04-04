@@ -13,9 +13,6 @@
 
 class ComputeEigenstrainBeamFromVariable;
 
-template <>
-InputParameters validParams<ComputeEigenstrainBeamFromVariable>();
-
 /**
  * ComputeEigenstrainBeamFromVariable computes an eigenstrain from displacement and rotational
  * eigenstrain variables

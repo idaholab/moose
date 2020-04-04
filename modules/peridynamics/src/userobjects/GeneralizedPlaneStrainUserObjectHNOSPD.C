@@ -14,8 +14,6 @@
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainUserObjectHNOSPD);
 
-defineLegacyParams(GeneralizedPlaneStrainUserObjectHNOSPD);
-
 InputParameters
 GeneralizedPlaneStrainUserObjectHNOSPD::validParams()
 {

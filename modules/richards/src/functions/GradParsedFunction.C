@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", GradParsedFunction);
 
-defineLegacyParams(GradParsedFunction);
-
 InputParameters
 GradParsedFunction::validParams()
 {

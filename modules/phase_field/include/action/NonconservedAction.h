@@ -18,9 +18,6 @@
 // Forward declaration
 class NonconservedAction;
 
-template <>
-InputParameters validParams<NonconservedAction>();
-
 class NonconservedAction : public Action
 {
 public:
@@ -36,4 +33,3 @@ protected:
   /// FEType for the variable being created
   const FEType _fe_type;
 };
-

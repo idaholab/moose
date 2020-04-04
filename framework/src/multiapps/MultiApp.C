@@ -38,8 +38,6 @@
 // Call to "uname"
 #include <sys/utsname.h>
 
-defineLegacyParams(MultiApp);
-
 InputParameters
 MultiApp::validParams()
 {

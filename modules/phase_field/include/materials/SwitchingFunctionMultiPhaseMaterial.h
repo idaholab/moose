@@ -15,9 +15,6 @@
 // Forward Declarations
 class SwitchingFunctionMultiPhaseMaterial;
 
-template <>
-InputParameters validParams<SwitchingFunctionMultiPhaseMaterial>();
-
 /**
  * SwitchingFunctionMultiPhaseMaterial is a switching function for a multi-phase,
  * multi-order parameter system. Defined by Moelans, Acta Mat., v 59, p.1077-1086 (2011).
@@ -56,4 +53,3 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dh;
   std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2h;
 };
-

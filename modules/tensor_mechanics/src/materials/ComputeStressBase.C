@@ -11,8 +11,6 @@
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
 
-defineLegacyParams(ComputeStressBase);
-
 InputParameters
 ComputeStressBase::validParams()
 {

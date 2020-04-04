@@ -15,9 +15,6 @@
 // Forward Declarations
 class DesorptionFromMatrix;
 
-template <>
-InputParameters validParams<DesorptionFromMatrix>();
-
 /**
  * Mass flow rate of adsorbed fluid from matrix
  * Add this to TimeDerivative to form the entire DE for desorption of fluid-in-the-matrix

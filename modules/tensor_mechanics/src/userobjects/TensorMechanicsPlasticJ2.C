@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticJ2);
 
-defineLegacyParams(TensorMechanicsPlasticJ2);
-
 InputParameters
 TensorMechanicsPlasticJ2::validParams()
 {

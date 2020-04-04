@@ -20,9 +20,6 @@ class RankFourAux;
  * supplied indices.
  */
 
-template <>
-InputParameters validParams<RankFourAux>();
-
 class RankFourAux : public AuxKernel
 {
 public:

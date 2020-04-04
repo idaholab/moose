@@ -14,8 +14,6 @@
 
 registerMooseObject("RichardsApp", RichardsMass);
 
-defineLegacyParams(RichardsMass);
-
 InputParameters
 RichardsMass::validParams()
 {

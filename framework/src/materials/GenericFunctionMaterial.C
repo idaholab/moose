@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", GenericFunctionMaterial);
 
-defineLegacyParams(GenericFunctionMaterial);
-
 InputParameters
 GenericFunctionMaterial::validParams()
 {

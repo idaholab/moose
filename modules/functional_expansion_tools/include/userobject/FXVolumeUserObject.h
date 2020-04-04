@@ -14,9 +14,6 @@
 
 class FXVolumeUserObject;
 
-template <>
-InputParameters validParams<FXVolumeUserObject>();
-
 /**
  * This volumetric FX calculates the value
  */

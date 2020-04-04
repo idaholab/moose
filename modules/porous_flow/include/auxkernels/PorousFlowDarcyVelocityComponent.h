@@ -14,9 +14,6 @@
 
 class PorousFlowDarcyVelocityComponent;
 
-template <>
-InputParameters validParams<PorousFlowDarcyVelocityComponent>();
-
 /**
  * Computes a component of the Darcy velocity:
  * -k_ij * krel /mu (nabla_j P - w_j)
@@ -64,4 +61,3 @@ protected:
   /// Gravitational acceleration
   const RealVectorValue _gravity;
 };
-

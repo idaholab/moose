@@ -15,9 +15,6 @@
 // Forward Declarations
 class CHPFCRFFSplitVariablesAction;
 
-template <>
-InputParameters validParams<CHPFCRFFSplitVariablesAction>();
-
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
@@ -36,4 +33,3 @@ private:
   const std::vector<FileName> _sub_filenames;
   const AuxVariableName _n_name;
 };
-

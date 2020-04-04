@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", PFCTradMaterial);
 
-defineLegacyParams(PFCTradMaterial);
-
 InputParameters
 PFCTradMaterial::validParams()
 {

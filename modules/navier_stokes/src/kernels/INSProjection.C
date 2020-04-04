@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSProjection);
 
-defineLegacyParams(INSProjection);
-
 InputParameters
 INSProjection::validParams()
 {

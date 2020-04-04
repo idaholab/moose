@@ -13,9 +13,6 @@
 
 class LogisticDistribution;
 
-template <>
-InputParameters validParams<LogisticDistribution>();
-
 /**
  * A class used to generate a logistic distribution
  */

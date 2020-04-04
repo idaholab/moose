@@ -15,9 +15,6 @@
 // Forward Declarations
 class SideValueSampler;
 
-template <>
-InputParameters validParams<SideValueSampler>();
-
 class SideValueSampler : public SideVectorPostprocessor, protected SamplerBase
 {
 public:
@@ -42,4 +39,3 @@ protected:
 
   unsigned int _qp;
 };
-

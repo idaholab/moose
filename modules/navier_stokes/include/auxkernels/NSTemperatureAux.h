@@ -15,9 +15,6 @@
 class NSTemperatureAux;
 class IdealGasFluidProperties;
 
-template <>
-InputParameters validParams<NSTemperatureAux>();
-
 /**
  * Temperature is an auxiliary value computed from the total energy
  * based on the FluidProperties.
@@ -38,4 +35,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

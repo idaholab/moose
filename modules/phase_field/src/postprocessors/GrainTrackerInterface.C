@@ -10,8 +10,6 @@
 #include "GrainTrackerInterface.h"
 #include "FeatureFloodCount.h"
 
-defineLegacyParams(GrainTrackerInterface);
-
 InputParameters
 GrainTrackerInterface::validParams()
 {

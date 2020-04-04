@@ -21,9 +21,6 @@ class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 class Function;
 
-template <>
-InputParameters validParams<GeneralizedPlaneStrainUserObject>();
-
 class GeneralizedPlaneStrainUserObject : public ElementUserObject
 {
 public:

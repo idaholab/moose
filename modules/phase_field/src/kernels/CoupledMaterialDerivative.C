@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CoupledMaterialDerivative);
 
-defineLegacyParams(CoupledMaterialDerivative);
-
 InputParameters
 CoupledMaterialDerivative::validParams()
 {

@@ -22,8 +22,6 @@
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
 
-defineLegacyParams(SubProblem);
-
 InputParameters
 SubProblem::validParams()
 {

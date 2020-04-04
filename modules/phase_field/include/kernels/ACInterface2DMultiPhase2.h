@@ -16,9 +16,6 @@
 
 class ACInterface2DMultiPhase2;
 
-template <>
-InputParameters validParams<ACInterface2DMultiPhase2>();
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa \nabla \eta_{\alpha i}, \nabla (L \psi) \right) \f$
@@ -39,4 +36,3 @@ protected:
   /// Interfacial parameter
   const MaterialProperty<RealGradient> & _dkappadgrad_etaa;
 };
-

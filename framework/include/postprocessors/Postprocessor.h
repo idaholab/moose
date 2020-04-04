@@ -18,9 +18,6 @@
 // Forward declarations
 class Postprocessor;
 
-template <>
-InputParameters validParams<Postprocessor>();
-
 /**
  * Base class for all Postprocessors.  Defines a name and sets up the
  * virtual getValue() interface which must be overridden by derived
@@ -46,4 +43,3 @@ public:
 protected:
   std::string _pp_name;
 };
-

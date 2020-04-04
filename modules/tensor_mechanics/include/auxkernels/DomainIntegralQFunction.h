@@ -42,6 +42,3 @@ private:
   bool _treat_as_2d;
   bool _is_point_on_intersecting_boundary;
 };
-
-template <>
-InputParameters validParams<DomainIntegralQFunction>();

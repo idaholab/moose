@@ -13,9 +13,6 @@
 
 class PorousFlowEffectiveFluidPressure;
 
-template <>
-InputParameters validParams<PorousFlowEffectiveFluidPressure>();
-
 /**
  * Material designed to calculate the effective fluid pressure
  * that can be used in the mechanical effective-stress calculations

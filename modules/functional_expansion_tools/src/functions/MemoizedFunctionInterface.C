@@ -9,8 +9,6 @@
 
 #include "MemoizedFunctionInterface.h"
 
-defineLegacyParams(MemoizedFunctionInterface);
-
 InputParameters
 MemoizedFunctionInterface::validParams()
 {

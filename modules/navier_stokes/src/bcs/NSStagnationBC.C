@@ -15,8 +15,6 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-defineLegacyParams(NSStagnationBC);
-
 InputParameters
 NSStagnationBC::validParams()
 {

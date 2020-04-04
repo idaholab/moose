@@ -14,9 +14,6 @@
 // Forward Declarations
 class SmoothCircleIC;
 
-template <>
-InputParameters validParams<SmoothCircleIC>();
-
 /**
  * SmoothcircleIC creates a circle of a given radius centered at a given point in the domain.
  * If int_width > zero, the border of the circle with smoothly transition from
@@ -39,4 +36,3 @@ protected:
   Real _radius;
   Point _center;
 };
-

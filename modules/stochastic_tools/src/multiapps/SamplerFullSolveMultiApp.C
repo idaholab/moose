@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 
-defineLegacyParams(SamplerFullSolveMultiApp);
-
 InputParameters
 SamplerFullSolveMultiApp::validParams()
 {

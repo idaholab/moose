@@ -66,4 +66,3 @@ protected:
   std::map<std::string, std::vector<std::string>> _assoc_types_map;
   JsonVal _global_params;
 };
-

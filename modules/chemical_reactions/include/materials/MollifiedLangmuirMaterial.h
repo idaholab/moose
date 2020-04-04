@@ -14,9 +14,6 @@
 // Forward Declarations
 class MollifiedLangmuirMaterial;
 
-template <>
-InputParameters validParams<MollifiedLangmuirMaterial>();
-
 /**
  * Holds Langmuir parameters associated with desorption
  * Calculates mass-flow rates and derivatives thereof for use by kernels
@@ -67,4 +64,3 @@ private:
   /// derivative of mass flow rate wrt pressure
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
-

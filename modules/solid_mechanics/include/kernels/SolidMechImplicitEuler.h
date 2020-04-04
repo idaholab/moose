@@ -15,9 +15,6 @@
 // Forward Declarations
 class SolidMechImplicitEuler;
 
-template <>
-InputParameters validParams<SolidMechImplicitEuler>();
-
 class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {
 public:

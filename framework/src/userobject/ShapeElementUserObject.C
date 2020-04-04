@@ -9,8 +9,6 @@
 
 #include "ShapeElementUserObject.h"
 
-defineLegacyParams(ShapeElementUserObject);
-
 InputParameters
 ShapeElementUserObject::validParams()
 {

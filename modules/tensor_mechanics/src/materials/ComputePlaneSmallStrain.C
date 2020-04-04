@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneSmallStrain);
 
-defineLegacyParams(ComputePlaneSmallStrain);
-
 InputParameters
 ComputePlaneSmallStrain::validParams()
 {

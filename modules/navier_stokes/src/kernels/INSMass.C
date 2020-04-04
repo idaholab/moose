@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSMass);
 
-defineLegacyParams(INSMass);
-
 InputParameters
 INSMass::validParams()
 {
@@ -140,7 +138,8 @@ INSMass::computeQpPGOffDiagJacobian(unsigned comp)
              (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp) -
          1. / _rho[_qp] * dTauDUComp(comp) * _grad_test[_i][_qp] *
              (convective_term + viscous_term + transient_term + strongPressureTerm() +
-              gravityTerm() - RealVectorValue(_x_ffn.value(_t, _q_point[_qp]),
-                                              _y_ffn.value(_t, _q_point[_qp]),
-                                              _z_ffn.value(_t, _q_point[_qp])));
+              gravityTerm() -
+              RealVectorValue(_x_ffn.value(_t, _q_point[_qp]),
+                              _y_ffn.value(_t, _q_point[_qp]),
+                              _z_ffn.value(_t, _q_point[_qp])));
 }

@@ -14,9 +14,6 @@
 
 class ReturnMappingModel;
 
-template <>
-InputParameters validParams<ReturnMappingModel>();
-
 /**
  * Base class for models that perform return mapping iterations to compute stress.  This
  * is for a single model to compute inelastic behavior.  This class can be used directly

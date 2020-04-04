@@ -13,9 +13,6 @@
 
 class CoupledPressureBC;
 
-template <>
-InputParameters validParams<CoupledPressureBC>();
-
 /**
  * Pressure boundary condition using coupled variable to apply pressure in a given direction
  */

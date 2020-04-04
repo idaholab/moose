@@ -12,8 +12,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlow2PhasePP);
 
-defineLegacyParams(PorousFlow2PhasePP);
-
 InputParameters
 PorousFlow2PhasePP::validParams()
 {

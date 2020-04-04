@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCutExponential);
 
-defineLegacyParams(TensorMechanicsHardeningCutExponential);
-
 InputParameters
 TensorMechanicsHardeningCutExponential::validParams()
 {

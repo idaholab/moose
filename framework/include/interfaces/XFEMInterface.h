@@ -144,4 +144,3 @@ protected:
   MeshBase * _mesh;
   MeshBase * _displaced_mesh;
 };
-

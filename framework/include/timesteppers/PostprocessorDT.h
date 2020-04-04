@@ -14,9 +14,6 @@
 
 class PostprocessorDT;
 
-template <>
-InputParameters validParams<PostprocessorDT>();
-
 /**
  * Computes the value of dt based on a postprocessor value
  */
@@ -41,4 +38,3 @@ protected:
   /// Factor added to the postprocessor value
   const Real & _factor;
 };
-

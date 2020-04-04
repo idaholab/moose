@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
 
-defineLegacyParams(PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
-
 InputParameters
 PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::validParams()
 {

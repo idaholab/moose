@@ -16,9 +16,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-template <>
-InputParameters validParams<ComputeInterfaceStress>();
-
 /**
  * Calculates an Extra-Stress tensor that lies in the plane of an interface
  * defined by the gradient of an order parameter.

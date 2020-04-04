@@ -17,8 +17,6 @@ registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_kernel");
 
 registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_variable");
 
-defineLegacyParams(EulerAngle2RGBAction);
-
 InputParameters
 EulerAngle2RGBAction::validParams()
 {

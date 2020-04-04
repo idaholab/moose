@@ -14,9 +14,6 @@
 // Forward Declarations
 class DerivativeTwoPhaseMaterial;
 
-template <>
-InputParameters validParams<DerivativeTwoPhaseMaterial>();
-
 /**
  * DerivativeMaterial child class to evaluate a parsed function for the
  * free energy and automatically provide all derivatives.
@@ -78,4 +75,3 @@ protected:
   /// Third derivatives of Fa and Fb.
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _prop_d3Fa, _prop_d3Fb;
 };
-

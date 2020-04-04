@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", BoundingBoxNodeSetGenerator);
 
-defineLegacyParams(BoundingBoxNodeSetGenerator);
-
 InputParameters
 BoundingBoxNodeSetGenerator::validParams()
 {

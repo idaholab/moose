@@ -25,6 +25,3 @@ protected:
   const Real _velocity;
   const Function & _function;
 };
-
-template <>
-InputParameters validParams<PresetVelocity>();

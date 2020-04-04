@@ -15,9 +15,6 @@
 // Forward Declarations
 class MultiBarrierFunctionMaterial;
 
-template <>
-InputParameters validParams<MultiBarrierFunctionMaterial>();
-
 /**
  * Double well phase transformation barrier free energy contribution.
  *\f$ g(\vec\eta) = \sum_i \eta_i^2(1-\eta_i)^2 \f$
@@ -49,4 +46,3 @@ protected:
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
-

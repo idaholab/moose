@@ -11,8 +11,6 @@
 
 registerMooseObject("MiscTestApp", Convection);
 
-defineLegacyParams(Convection);
-
 InputParameters
 Convection::validParams()
 {

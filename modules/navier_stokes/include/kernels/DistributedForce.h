@@ -14,8 +14,6 @@
 // Forward Declarations
 class DistributedForce;
 
-template <>
-InputParameters validParams<DistributedForce>();
 /**
  * The DistributedForce kernel computes the body force due to the acceleration of mass in
  * an element. Following F=ma, the density must be integrated over the volume to yield the mass
@@ -41,4 +39,3 @@ protected:
   unsigned int _rho_var_number;
   const VariableValue & _rho;
 };
-

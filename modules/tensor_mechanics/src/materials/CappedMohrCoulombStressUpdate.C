@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CappedMohrCoulombStressUpdate);
 
-defineLegacyParams(CappedMohrCoulombStressUpdate);
-
 InputParameters
 CappedMohrCoulombStressUpdate::validParams()
 {
@@ -821,9 +819,10 @@ CappedMohrCoulombStressUpdate::consistentTangentOperatorV(
           {
             if (trial_stress_params[a] == trial_stress_params[j])
               continue;
-            drot_dstress(i, j, k, l) += 0.5 * _eigvecs(i, a) * (_eigvecs(k, a) * _eigvecs(l, j) +
-                                                                _eigvecs(l, a) * _eigvecs(k, j)) /
-                                        (trial_stress_params[j] - trial_stress_params[a]);
+            drot_dstress(i, j, k, l) +=
+                0.5 * _eigvecs(i, a) *
+                (_eigvecs(k, a) * _eigvecs(l, j) + _eigvecs(l, a) * _eigvecs(k, j)) /
+                (trial_stress_params[j] - trial_stress_params[a]);
           }
 
   const RankTwoTensor eT = _eigvecs.transpose();

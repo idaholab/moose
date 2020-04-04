@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", RadialDisplacementSphereAux);
 
-defineLegacyParams(RadialDisplacementSphereAux);
-
 InputParameters
 RadialDisplacementSphereAux::validParams()
 {

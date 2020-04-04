@@ -17,8 +17,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMassRadioactiveDecay);
 
-defineLegacyParams(PorousFlowMassRadioactiveDecay);
-
 InputParameters
 PorousFlowMassRadioactiveDecay::validParams()
 {

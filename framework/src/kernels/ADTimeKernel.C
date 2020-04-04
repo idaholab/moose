@@ -16,9 +16,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineADLegacyParams(ADTimeKernel);
-defineADLegacyParams(ADVectorTimeKernel);
-
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADTimeKernelTempl<T, compute_stage>::validParams()

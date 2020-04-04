@@ -24,9 +24,6 @@
  */
 class NodalPatchRecovery;
 
-template <>
-InputParameters validParams<NodalPatchRecovery>();
-
 class NodalPatchRecovery : public AuxKernel
 {
 public:

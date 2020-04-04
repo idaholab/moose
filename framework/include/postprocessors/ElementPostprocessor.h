@@ -15,9 +15,6 @@
 // Forward Declarations
 class ElementPostprocessor;
 
-template <>
-InputParameters validParams<ElementPostprocessor>();
-
 class ElementPostprocessor : public ElementUserObject, public Postprocessor
 {
 public:
@@ -33,4 +30,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

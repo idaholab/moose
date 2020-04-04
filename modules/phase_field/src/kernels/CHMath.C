@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CHMath);
 
-defineLegacyParams(CHMath);
-
 InputParameters
 CHMath::validParams()
 {
@@ -25,7 +23,7 @@ CHMath::validParams()
 CHMath::CHMath(const InputParameters & parameters) : CHBulk<Real>(parameters) {}
 
 RealGradient // Use This an example of the the function should look like
-    CHMath::computeGradDFDCons(PFFunctionType type)
+CHMath::computeGradDFDCons(PFFunctionType type)
 {
   switch (type)
   {

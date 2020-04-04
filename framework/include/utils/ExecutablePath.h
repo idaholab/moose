@@ -22,4 +22,3 @@ namespace Moose
  */
 std::string getExecutablePath();
 }
-

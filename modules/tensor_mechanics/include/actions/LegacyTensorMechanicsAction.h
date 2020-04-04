@@ -13,9 +13,6 @@
 
 class LegacyTensorMechanicsAction;
 
-template <>
-InputParameters validParams<LegacyTensorMechanicsAction>();
-
 class LegacyTensorMechanicsAction : public TensorMechanicsAction
 {
 public:

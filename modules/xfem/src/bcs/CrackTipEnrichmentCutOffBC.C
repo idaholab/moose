@@ -11,8 +11,6 @@
 
 registerMooseObject("XFEMApp", CrackTipEnrichmentCutOffBC);
 
-defineLegacyParams(CrackTipEnrichmentCutOffBC);
-
 InputParameters
 CrackTipEnrichmentCutOffBC::validParams()
 {

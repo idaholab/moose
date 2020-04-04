@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSPressureNeumannBC;
 
-template <>
-InputParameters validParams<NSPressureNeumannBC>();
-
 /**
  * This kernel is appropriate for use with a "zero normal flow"
  * boundary condition in the context of the Euler equations.
@@ -62,4 +59,3 @@ private:
   // in the canonical ordering.
   Real computeJacobianHelper(unsigned m);
 };
-

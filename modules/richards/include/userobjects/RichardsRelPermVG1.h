@@ -13,9 +13,6 @@
 
 class RichardsRelPermVG1;
 
-template <>
-InputParameters validParams<RichardsRelPermVG1>();
-
 /**
  * Van-Genuchten form of relative permeability when seff <= _scut
  * cubic relative permeability for seff >= _scut
@@ -72,4 +69,3 @@ protected:
   /// coefficient of cubic term in cubic relperm relation
   Real _vg1_cub;
 };
-

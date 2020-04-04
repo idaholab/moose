@@ -15,9 +15,6 @@
 // Forward Declarations
 class SideFluxIntegral;
 
-template <>
-InputParameters validParams<SideFluxIntegral>();
-
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
@@ -34,4 +31,3 @@ protected:
   MaterialPropertyName _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;
 };
-

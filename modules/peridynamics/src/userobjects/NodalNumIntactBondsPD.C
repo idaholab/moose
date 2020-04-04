@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalNumIntactBondsPD);
 
-defineLegacyParams(NodalNumIntactBondsPD);
-
 InputParameters
 NodalNumIntactBondsPD::validParams()
 {

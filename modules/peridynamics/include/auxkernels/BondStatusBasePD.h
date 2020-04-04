@@ -13,9 +13,6 @@
 
 class BondStatusBasePD;
 
-template <>
-InputParameters validParams<BondStatusBasePD>();
-
 /**
  * Base AuxKernel class for different failure criteria to update the bond status
  * A bond is broken and the bond_status variable has value of 0, if it meets the given failure

@@ -15,9 +15,6 @@
 // Forward Declarations
 class PoroFullSatTimeDerivative;
 
-template <>
-InputParameters validParams<PoroFullSatTimeDerivative>();
-
 /**
  * Kernel = biot_coefficient*d(volumetric_strain)/dt + (1/biot_modulus)*d(porepressure)/dt
  * this is the time-derivative for poromechanics for a single-phase,
@@ -65,4 +62,3 @@ private:
   /// d(1/M)/d(volumetric strain)
   const MaterialProperty<Real> & _done_over_biot_modulus_dep;
 };
-

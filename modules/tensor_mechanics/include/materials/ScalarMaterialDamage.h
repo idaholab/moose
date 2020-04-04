@@ -14,9 +14,6 @@
 // Forward declaration
 class ScalarMaterialDamage;
 
-template <>
-InputParameters validParams<ScalarMaterialDamage>();
-
 /**
  * Scalar damage model for which the damage is prescribed by another material
  */

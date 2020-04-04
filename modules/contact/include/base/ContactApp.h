@@ -13,9 +13,6 @@
 
 class ContactApp;
 
-template <>
-InputParameters validParams<ContactApp>();
-
 class ContactApp : public MooseApp
 {
 public:

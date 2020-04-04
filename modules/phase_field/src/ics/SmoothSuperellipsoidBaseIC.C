@@ -13,8 +13,6 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-defineLegacyParams(SmoothSuperellipsoidBaseIC);
-
 InputParameters
 SmoothSuperellipsoidBaseIC::validParams()
 {

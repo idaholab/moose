@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", CHPFCRFF);
 
-defineLegacyParams(CHPFCRFF);
-
 InputParameters
 CHPFCRFF::validParams()
 {

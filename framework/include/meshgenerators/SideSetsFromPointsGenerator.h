@@ -14,9 +14,6 @@
 // Forward declarations
 class SideSetsFromPointsGenerator;
 
-template <>
-InputParameters validParams<SideSetsFromPointsGenerator>();
-
 /**
  *
  */
@@ -36,4 +33,3 @@ protected:
 
   std::vector<Point> _points;
 };
-

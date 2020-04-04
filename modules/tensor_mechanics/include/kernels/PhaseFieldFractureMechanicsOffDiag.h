@@ -21,9 +21,6 @@
 
 class PhaseFieldFractureMechanicsOffDiag;
 
-template <>
-InputParameters validParams<PhaseFieldFractureMechanicsOffDiag>();
-
 class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:

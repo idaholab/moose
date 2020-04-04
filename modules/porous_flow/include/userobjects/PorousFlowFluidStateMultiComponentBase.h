@@ -13,9 +13,6 @@
 
 class PorousFlowFluidStateMultiComponentBase;
 
-template <>
-InputParameters validParams<PorousFlowFluidStateMultiComponentBase>();
-
 /**
  * Compositional flash routines for miscible multiphase flow classes with multiple
  * fluid components

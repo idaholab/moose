@@ -13,9 +13,6 @@
 
 class GaussContForcing;
 
-template <>
-InputParameters validParams<GaussContForcing>();
-
 /**
  * Note: This class is duplicated from moose_test.  It is useful for testing
  */
@@ -45,4 +42,3 @@ protected:
   const Real _z_min;
   const Real _z_max;
 };
-

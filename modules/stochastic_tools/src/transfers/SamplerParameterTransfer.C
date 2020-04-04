@@ -20,8 +20,6 @@ registerMooseObjectRenamed("StochasticToolsApp",
                            SamplerParameterTransfer);
 registerMooseObject("StochasticToolsApp", SamplerParameterTransfer);
 
-defineLegacyParams(SamplerParameterTransfer);
-
 InputParameters
 SamplerParameterTransfer::validParams()
 {

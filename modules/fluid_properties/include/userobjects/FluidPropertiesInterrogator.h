@@ -19,9 +19,6 @@ class VaporMixtureFluidProperties;
 class TwoPhaseFluidProperties;
 class TwoPhaseNCGFluidProperties;
 
-template <>
-InputParameters validParams<FluidPropertiesInterrogator>();
-
 /**
  * User object for querying a single-phase or two-phase fluid properties object
  */

@@ -56,4 +56,3 @@ public:
   Point _elem1_normal;
   Point _elem2_normal;
 };
-

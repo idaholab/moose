@@ -31,8 +31,6 @@
 
 registerMooseObject("ExternalPetscSolverApp", PETScDMDAMesh);
 
-defineLegacyParams(PETScDMDAMesh);
-
 InputParameters
 PETScDMDAMesh::validParams()
 {

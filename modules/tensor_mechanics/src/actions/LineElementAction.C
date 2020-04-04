@@ -32,8 +32,6 @@ registerMooseAction("TensorMechanicsApp", LineElementAction, "add_nodal_kernel")
 
 registerMooseAction("TensorMechanicsApp", LineElementAction, "add_material");
 
-defineLegacyParams(LineElementAction);
-
 InputParameters
 LineElementAction::validParams()
 {

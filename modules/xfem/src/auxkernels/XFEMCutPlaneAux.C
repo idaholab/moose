@@ -13,8 +13,6 @@
 
 registerMooseObject("XFEMApp", XFEMCutPlaneAux);
 
-defineLegacyParams(XFEMCutPlaneAux);
-
 InputParameters
 XFEMCutPlaneAux::validParams()
 {

@@ -196,4 +196,3 @@ public:
 private:
   MooseObjectParameterName _name;
 };
-

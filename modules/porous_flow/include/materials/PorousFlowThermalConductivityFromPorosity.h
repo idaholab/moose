@@ -13,9 +13,6 @@
 
 class PorousFlowThermalConductivityFromPorosity;
 
-template <>
-InputParameters validParams<PorousFlowThermalConductivityFromPorosity>();
-
 /**
  * This Material calculates rock-fluid combined thermal conductivity
  * for the single phase, fully saturated case by using a linear
@@ -46,4 +43,3 @@ protected:
   /// d(quadpoint porosity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 };
-

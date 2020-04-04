@@ -9,8 +9,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-defineLegacyParams(PorousFlowMaterialVectorBase);
-
 InputParameters
 PorousFlowMaterialVectorBase::validParams()
 {

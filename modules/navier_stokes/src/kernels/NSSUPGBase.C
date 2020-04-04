@@ -14,8 +14,6 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-defineLegacyParams(NSSUPGBase);
-
 InputParameters
 NSSUPGBase::validParams()
 {

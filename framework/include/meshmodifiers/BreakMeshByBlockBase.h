@@ -14,9 +14,6 @@
 // forward declaration
 class BreakMeshByBlockBase;
 
-template <>
-InputParameters validParams<BreakMeshByBlockBase>();
-
 class BreakMeshByBlockBase : public MeshModifier
 {
 public:
@@ -61,4 +58,3 @@ private:
   void mapBoundaryIdAndBoundaryName(BoundaryID & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };
-

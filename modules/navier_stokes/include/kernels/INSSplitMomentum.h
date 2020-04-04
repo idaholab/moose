@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSSplitMomentum;
 
-template <>
-InputParameters validParams<INSSplitMomentum>();
-
 /**
  * This class computes the "split" momentum equation residual.  In the
  * split method, this is a time-independent vector equation for "a",
@@ -73,4 +70,3 @@ protected:
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 };
-

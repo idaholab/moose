@@ -17,9 +17,6 @@ class Function;
 // Forward Declarations
 class RichardsHalfGaussianSinkFlux;
 
-template <>
-InputParameters validParams<RichardsHalfGaussianSinkFlux>();
-
 /**
  * Postprocessor that records the mass flux from porespace to
  * a half-gaussian sink.  (Positive if fluid is being removed from porespace.)

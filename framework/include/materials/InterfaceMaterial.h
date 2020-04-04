@@ -17,9 +17,6 @@
 // forward declarations
 class InterfaceMaterial;
 
-template <>
-InputParameters validParams<InterfaceMaterial>();
-
 /**
  * Interface materials compute MaterialProperties.
  */

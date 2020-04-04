@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADPressure);
 
-defineADLegacyParams(ADPressure);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADPressure<compute_stage>::validParams()

@@ -16,9 +16,6 @@
 
 class TableOutput;
 
-template <>
-InputParameters validParams<TableOutput>();
-
 /**
  * Base class for scalar variables and postprocessors output objects
  *
@@ -88,4 +85,3 @@ protected:
   /// Enable/disable output of time column for Postprocessors
   const bool _time_column;
 };
-

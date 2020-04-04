@@ -417,8 +417,7 @@ private:
   /// vector is being used.
   const std::vector<MooseObject *> & query(int query_id);
 
-  void readAttribs(const MooseObject * obj,
-                   std::vector<std::unique_ptr<Attribute>> & attribs);
+  void readAttribs(const MooseObject * obj, std::vector<std::unique_ptr<Attribute>> & attribs);
 
   std::unique_ptr<Storage> _store;
   std::vector<std::shared_ptr<MooseObject>> _objects;

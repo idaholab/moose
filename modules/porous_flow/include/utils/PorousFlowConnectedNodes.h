@@ -144,4 +144,3 @@ private:
   std::vector<std::vector<dof_id_type>> _sequential_neighbors;
   std::vector<std::vector<dof_id_type>> _global_neighbors;
 };
-

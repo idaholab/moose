@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumNoBCBCLaplaceForm);
 
-defineLegacyParams(INSMomentumNoBCBCLaplaceForm);
-
 InputParameters
 INSMomentumNoBCBCLaplaceForm::validParams()
 {

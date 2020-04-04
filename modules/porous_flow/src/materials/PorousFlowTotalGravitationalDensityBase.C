@@ -9,8 +9,6 @@
 
 #include "PorousFlowTotalGravitationalDensityBase.h"
 
-defineLegacyParams(PorousFlowTotalGravitationalDensityBase);
-
 InputParameters
 PorousFlowTotalGravitationalDensityBase::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "ComputeThermalExpansionEigenstrainBeamBase.h"
 
-defineLegacyParams(ComputeThermalExpansionEigenstrainBeamBase);
-
 InputParameters
 ComputeThermalExpansionEigenstrainBeamBase::validParams()
 {

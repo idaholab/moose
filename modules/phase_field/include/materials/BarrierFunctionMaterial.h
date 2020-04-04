@@ -14,9 +14,6 @@
 // Forward Declarations
 class BarrierFunctionMaterial;
 
-template <>
-InputParameters validParams<BarrierFunctionMaterial>();
-
 /**
  * Material class to provide the double well function \f$ g(\eta) \f$ for
  * the KKS system.
@@ -40,4 +37,3 @@ protected:
   /// zero out g contribution in the eta interval [0:1]
   bool _well_only;
 };
-

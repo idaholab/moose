@@ -14,9 +14,6 @@
 // Forward Declarations
 class CoefReaction;
 
-template <>
-InputParameters validParams<CoefReaction>();
-
 class CoefReaction : public Reaction
 {
 public:
@@ -31,4 +28,3 @@ protected:
   /// input parameter multiplied by the reaction kernel
   const Real _coef;
 };
-

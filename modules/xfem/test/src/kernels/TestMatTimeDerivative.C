@@ -11,28 +11,31 @@
 
 registerMooseObject("XFEMTestApp", TestMatTimeDerivative);
 
-template<>
+template <>
 InputParameters
 validParams<TestMatTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addRequiredParam<MaterialPropertyName>("mat_prop_value", "Material "
+  params.addRequiredParam<MaterialPropertyName>("mat_prop_value",
+                                                "Material "
                                                 "property to multiply by time "
                                                 "derivative");
   return params;
 }
 
 TestMatTimeDerivative::TestMatTimeDerivative(const InputParameters & parameters)
-  : TimeDerivative(parameters),
-    _mat_prop_value(getMaterialProperty<Real>("mat_prop_value"))
-{}
+  : TimeDerivative(parameters), _mat_prop_value(getMaterialProperty<Real>("mat_prop_value"))
+{
+}
 
-Real TestMatTimeDerivative::computeQpResidual()
+Real
+TestMatTimeDerivative::computeQpResidual()
 {
   return _mat_prop_value[_qp] * TimeDerivative::computeQpResidual();
 }
 
-Real TestMatTimeDerivative::computeQpJacobian()
+Real
+TestMatTimeDerivative::computeQpJacobian()
 {
   return _mat_prop_value[_qp] * TimeDerivative::computeQpJacobian();
 }

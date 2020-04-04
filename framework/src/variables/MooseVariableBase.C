@@ -23,8 +23,6 @@
 // Users should never actually create this object
 registerMooseObject("MooseApp", MooseVariableBase);
 
-defineLegacyParams(MooseVariableBase);
-
 InputParameters
 MooseVariableBase::validParams()
 {

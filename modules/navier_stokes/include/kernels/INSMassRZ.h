@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMassRZ;
 
-template <>
-InputParameters validParams<INSMassRZ>();
-
 /**
  * This class computes the mass equation residual and Jacobian
  * contributions for the incompressible Navier-Stokes momentum
@@ -40,4 +37,3 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
-

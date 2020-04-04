@@ -14,8 +14,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyInviscidSpecifiedDensityAndVelocityBC);
 
-defineLegacyParams(NSEnergyInviscidSpecifiedDensityAndVelocityBC);
-
 InputParameters
 NSEnergyInviscidSpecifiedDensityAndVelocityBC::validParams()
 {

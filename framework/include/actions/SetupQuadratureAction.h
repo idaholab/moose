@@ -16,9 +16,6 @@
 
 class SetupQuadratureAction;
 
-template <>
-InputParameters validParams<SetupQuadratureAction>();
-
 /**
  * Sets the quadrature
  */
@@ -37,4 +34,3 @@ protected:
   Order _element_order;
   Order _side_order;
 };
-

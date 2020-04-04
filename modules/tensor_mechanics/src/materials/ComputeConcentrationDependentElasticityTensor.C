@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeConcentrationDependentElasticityTensor);
 
-defineLegacyParams(ComputeConcentrationDependentElasticityTensor);
-
 InputParameters
 ComputeConcentrationDependentElasticityTensor::validParams()
 {

@@ -12,8 +12,6 @@
 #include "MooseVariable.h"
 #include "XFEM.h"
 
-defineLegacyParams(LevelSetBiMaterialBase);
-
 InputParameters
 LevelSetBiMaterialBase::validParams()
 {

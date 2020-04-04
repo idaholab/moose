@@ -11,8 +11,6 @@
 
 registerMooseObject("XFEMApp", LevelSetBiMaterialRankTwo);
 
-defineLegacyParams(LevelSetBiMaterialRankTwo);
-
 InputParameters
 LevelSetBiMaterialRankTwo::validParams()
 {

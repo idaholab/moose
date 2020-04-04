@@ -22,9 +22,6 @@ class SubProblem;
 
 class ComputeReducedOrderEigenstrain;
 
-template <>
-InputParameters validParams<ComputeReducedOrderEigenstrain>();
-
 class ComputeReducedOrderEigenstrain : public ComputeEigenstrainBase
 {
 public:
@@ -71,6 +68,3 @@ private:
   /// Filled with _vals and subracted from strain
   RankTwoTensor _adjusted_eigenstrain;
 };
-
-template <>
-InputParameters validParams<ComputeReducedOrderEigenstrain>();

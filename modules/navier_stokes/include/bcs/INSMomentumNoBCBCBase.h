@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumNoBCBCBase;
 
-template <>
-InputParameters validParams<INSMomentumNoBCBCBase>();
-
 /**
  * Base class for the "No BC" boundary condition.  Subclasses will
  * implement the computeQpXYZ() functions differently based on whether the
@@ -61,4 +58,3 @@ protected:
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 };
-

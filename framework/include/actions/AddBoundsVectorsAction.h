@@ -13,9 +13,6 @@
 
 class AddBoundsVectorsAction;
 
-template <>
-InputParameters validParams<AddBoundsVectorsAction>();
-
 class AddBoundsVectorsAction : public Action
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

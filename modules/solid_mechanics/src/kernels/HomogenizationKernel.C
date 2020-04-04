@@ -13,8 +13,6 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", HomogenizationKernel, "07/30/2020 24:00");
 
-defineLegacyParams(HomogenizationKernel);
-
 InputParameters
 HomogenizationKernel::validParams()
 {

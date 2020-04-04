@@ -13,9 +13,6 @@
 
 class PorousFlowDiffusivityMillingtonQuirk;
 
-template <>
-InputParameters validParams<PorousFlowDiffusivityMillingtonQuirk>();
-
 /**
  * Material to provide saturation dependent diffusivity using the model of
  * Millington and Quirk, from
@@ -41,4 +38,3 @@ protected:
   /// Derivative of saturation of each phase wrt PorousFlow variables (at the qps)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_qp_dvar;
 };
-

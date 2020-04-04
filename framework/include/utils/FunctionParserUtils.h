@@ -23,9 +23,6 @@ class InputParameters;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<FunctionParserUtils>();
-
 class FunctionParserUtils
 {
 public:

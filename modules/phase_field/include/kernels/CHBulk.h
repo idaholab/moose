@@ -114,4 +114,3 @@ CHBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
 
   return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
 }
-

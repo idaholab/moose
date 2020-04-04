@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowThermalConductivityIdeal);
 
-defineLegacyParams(PorousFlowThermalConductivityIdeal);
-
 InputParameters
 PorousFlowThermalConductivityIdeal::validParams()
 {

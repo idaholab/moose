@@ -10,8 +10,6 @@
 #include "ADRadialReturnCreepStressUpdateBase.h"
 #include "RankTwoTensor.h"
 
-defineADLegacyParams(ADRadialReturnCreepStressUpdateBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADRadialReturnCreepStressUpdateBase<compute_stage>::validParams()

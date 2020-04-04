@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", GBRelaxationStrainIncrement);
 
-defineLegacyParams(GBRelaxationStrainIncrement);
-
 InputParameters
 GBRelaxationStrainIncrement::validParams()
 {

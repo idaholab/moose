@@ -11,8 +11,6 @@
 
 registerADMooseObject("MooseApp", ADVectorTimeDerivative);
 
-defineADLegacyParams(ADVectorTimeDerivative);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADVectorTimeDerivative<compute_stage>::validParams()

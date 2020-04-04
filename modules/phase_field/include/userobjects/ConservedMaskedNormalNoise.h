@@ -15,9 +15,6 @@
 // Forward delcarations
 class ConservedMaskedNormalNoise;
 
-template <>
-InputParameters validParams<ConservedMaskedNormalNoise>();
-
 /**
  * Userobject that generates a normaly distributed random number
  * once per timestep for every quadrature point in a way that the integral

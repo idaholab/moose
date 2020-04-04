@@ -18,8 +18,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2waterRSC);
 
-defineLegacyParams(RichardsSeff2waterRSC);
-
 InputParameters
 RichardsSeff2waterRSC::validParams()
 {

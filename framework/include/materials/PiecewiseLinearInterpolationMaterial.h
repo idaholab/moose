@@ -16,9 +16,6 @@
 // Forward Declarations
 class PiecewiseLinearInterpolationMaterial;
 
-template <>
-InputParameters validParams<PiecewiseLinearInterpolationMaterial>();
-
 /**
  * This material uses a LinearInterpolation object to define the dependence
  * of the material's value on a variable.
@@ -50,4 +47,3 @@ protected:
   /// LinearInterpolation object
   std::unique_ptr<LinearInterpolation> _linear_interp;
 };
-

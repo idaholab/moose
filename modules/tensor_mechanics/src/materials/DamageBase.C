@@ -9,8 +9,6 @@
 
 #include "DamageBase.h"
 
-defineLegacyParams(DamageBase);
-
 InputParameters
 DamageBase::validParams()
 {

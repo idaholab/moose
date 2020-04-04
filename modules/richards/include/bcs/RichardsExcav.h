@@ -15,9 +15,6 @@
 class RichardsExcav;
 class Function;
 
-template <>
-InputParameters validParams<RichardsExcav>();
-
 /**
  * Allows specification of Dirichlet BCs on an evolving boundary
  * RichardsExcav is applied on a sideset, and the function

@@ -14,9 +14,6 @@
 // Forward declarations
 class SideSetsFromNormalsGenerator;
 
-template <>
-InputParameters validParams<SideSetsFromNormalsGenerator>();
-
 /**
  *
  */
@@ -36,4 +33,3 @@ protected:
 
   std::vector<Point> _normals;
 };
-

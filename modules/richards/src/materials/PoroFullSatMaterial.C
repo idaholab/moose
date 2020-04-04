@@ -11,8 +11,6 @@
 
 registerMooseObject("RichardsApp", PoroFullSatMaterial);
 
-defineLegacyParams(PoroFullSatMaterial);
-
 InputParameters
 PoroFullSatMaterial::validParams()
 {
@@ -104,9 +102,9 @@ PoroFullSatMaterial::computeQpProperties()
   }
   else
   {
-    _porosity[_qp] = _alpha +
-                     (_phi0 - _alpha) * std::exp(-(1 - _alpha) * _one_over_K * _porepressure[_qp] -
-                                                 _vol_strain[_qp]);
+    _porosity[_qp] =
+        _alpha + (_phi0 - _alpha) *
+                     std::exp(-(1 - _alpha) * _one_over_K * _porepressure[_qp] - _vol_strain[_qp]);
     _dporosity_dP[_qp] =
         (_phi0 - _alpha) * (_alpha - 1) * _one_over_K *
         std::exp(-(1 - _alpha) * _one_over_K * _porepressure[_qp] - _vol_strain[_qp]);

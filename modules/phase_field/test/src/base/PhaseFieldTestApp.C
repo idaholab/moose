@@ -15,8 +15,6 @@
 
 #include "GaussContForcing.h"
 
-defineLegacyParams(PhaseFieldTestApp);
-
 InputParameters
 PhaseFieldTestApp::validParams()
 {

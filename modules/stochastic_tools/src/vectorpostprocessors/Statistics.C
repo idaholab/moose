@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", Statistics);
 
-defineLegacyParams(Statistics);
-
 InputParameters
 Statistics::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", MollifiedLangmuirMaterial);
 
-defineLegacyParams(MollifiedLangmuirMaterial);
-
 InputParameters
 MollifiedLangmuirMaterial::validParams()
 {

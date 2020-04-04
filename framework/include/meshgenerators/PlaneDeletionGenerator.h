@@ -19,9 +19,6 @@ namespace libmesh
 class Point;
 }
 
-template <>
-InputParameters validParams<PlaneDeletionGenerator>();
-
 /**
  * Deletes elements lying above a plane
  */

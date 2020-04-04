@@ -14,9 +14,6 @@
 class FourierNoise;
 class FEProblemBase;
 
-template <>
-InputParameters validParams<FourierNoise>();
-
 /**
  * Generate noise using random fourier series coefficients
  */

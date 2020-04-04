@@ -15,9 +15,6 @@
 // Forward declarations
 class VectorVariableComponentAux;
 
-template <>
-InputParameters validParams<VectorVariableComponentAux>();
-
 /**
  * Extract a component from a vector variable
  */

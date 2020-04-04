@@ -14,9 +14,6 @@
 
 class PorousFlowBrine;
 
-template <>
-InputParameters validParams<PorousFlowBrine>();
-
 /**
  * Fluid properties of Brine.
  * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints or nodes

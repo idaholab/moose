@@ -15,8 +15,6 @@
 
 registerMooseObject("StochasticToolsApp", SamplerData);
 
-defineLegacyParams(SamplerData);
-
 InputParameters
 SamplerData::validParams()
 {

@@ -20,9 +20,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 
-template <>
-InputParameters validParams<WeakPlaneStress>();
-
 class WeakPlaneStress : public DerivativeMaterialInterface<Kernel>
 {
 public:

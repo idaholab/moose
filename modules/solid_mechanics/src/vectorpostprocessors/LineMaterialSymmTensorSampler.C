@@ -11,8 +11,6 @@
 
 registerMooseObject("SolidMechanicsApp", LineMaterialSymmTensorSampler);
 
-defineLegacyParams(LineMaterialSymmTensorSampler);
-
 InputParameters
 LineMaterialSymmTensorSampler::validParams()
 {

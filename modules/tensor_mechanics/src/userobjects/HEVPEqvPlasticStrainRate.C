@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPEqvPlasticStrainRate);
 
-defineLegacyParams(HEVPEqvPlasticStrainRate);
-
 InputParameters
 HEVPEqvPlasticStrainRate::validParams()
 {

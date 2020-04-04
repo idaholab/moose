@@ -15,9 +15,6 @@
 
 class SplitMeshAction;
 
-template <>
-InputParameters validParams<SplitMeshAction>();
-
 class SplitMeshAction : public Action
 {
 public:
@@ -27,4 +24,3 @@ public:
 
   virtual void act() override;
 };
-

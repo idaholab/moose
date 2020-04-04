@@ -15,9 +15,6 @@
 
 class PorousFlowDispersiveFlux;
 
-template <>
-InputParameters validParams<PorousFlowDispersiveFlux>();
-
 /**
  * Dispersive flux of component k in fluid phase alpha. Includes the effects
  * of both molecular diffusion and hydrodynamic dispersion.

@@ -361,4 +361,3 @@ _init_helper(int size, PropertyValue * /*prop*/, const P *, bool use_ad)
   copy->resize(size);
   return copy;
 }
-

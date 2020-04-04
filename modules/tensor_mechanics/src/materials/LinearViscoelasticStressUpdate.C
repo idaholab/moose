@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", LinearViscoelasticStressUpdate);
 
-defineLegacyParams(LinearViscoelasticStressUpdate);
-
 InputParameters
 LinearViscoelasticStressUpdate::validParams()
 {

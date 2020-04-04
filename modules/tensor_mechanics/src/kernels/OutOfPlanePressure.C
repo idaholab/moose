@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", OutOfPlanePressure);
 
-defineLegacyParams(OutOfPlanePressure);
-
 InputParameters
 OutOfPlanePressure::validParams()
 {

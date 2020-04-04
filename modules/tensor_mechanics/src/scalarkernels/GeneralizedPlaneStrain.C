@@ -21,8 +21,6 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrain);
 
-defineLegacyParams(GeneralizedPlaneStrain);
-
 InputParameters
 GeneralizedPlaneStrain::validParams()
 {

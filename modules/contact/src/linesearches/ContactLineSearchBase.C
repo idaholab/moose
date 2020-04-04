@@ -16,8 +16,6 @@
 
 registerMooseObjectAliased("ContactApp", ContactLineSearchBase, "ContactLineSearch");
 
-defineLegacyParams(ContactLineSearchBase);
-
 InputParameters
 ContactLineSearchBase::validParams()
 {

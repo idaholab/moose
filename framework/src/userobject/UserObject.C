@@ -13,8 +13,6 @@
 
 #include "libmesh/sparse_matrix.h"
 
-defineLegacyParams(UserObject);
-
 InputParameters
 UserObject::validParams()
 {

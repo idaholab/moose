@@ -14,9 +14,6 @@
 
 class PatchMeshGenerator;
 
-template <>
-InputParameters validParams<PatchMeshGenerator>();
-
 class PatchMeshGenerator : public MeshGenerator
 {
 public:

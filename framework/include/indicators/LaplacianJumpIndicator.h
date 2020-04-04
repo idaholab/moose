@@ -13,9 +13,6 @@
 
 class LaplacianJumpIndicator;
 
-template <>
-InputParameters validParams<LaplacianJumpIndicator>();
-
 class LaplacianJumpIndicator : public InternalSideIndicator
 {
 public:

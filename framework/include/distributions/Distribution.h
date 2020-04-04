@@ -14,9 +14,6 @@
 
 class Distribution;
 
-template <>
-InputParameters validParams<Distribution>();
-
 /**
  * All Distributions should inherit from this class
  */

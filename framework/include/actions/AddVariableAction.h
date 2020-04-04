@@ -16,9 +16,6 @@
 // Forward declerations
 class AddVariableAction;
 
-template <>
-InputParameters validParams<AddVariableAction>();
-
 /**
  * Adds nonlinear variable
  */

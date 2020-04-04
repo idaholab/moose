@@ -15,9 +15,6 @@
 // Forward Declarations
 class SwitchingFunction3PhaseMaterial;
 
-template <>
-InputParameters validParams<SwitchingFunction3PhaseMaterial>();
-
 /**
  * Material class to provide switching functions that prevent formation of a
  * third phase at a two-phase interface. See Folch and Plapp, Phys. Rev. E, v. 72,
@@ -37,4 +34,3 @@ protected:
   EBTerm _eta_j;
   EBTerm _eta_k;
 };
-
